@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.collection;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.Notification.FLAG_NO_CLEAR;
 import static android.app.Notification.FLAG_ONGOING_EVENT;
+import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
@@ -53,6 +54,8 @@ import static java.util.Objects.requireNonNull;
 
 import android.annotation.Nullable;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.service.notification.NotificationListenerService.Ranking;
@@ -333,6 +336,37 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         assertEquals(notif.sbn, entry.getSbn());
         assertEquals(notif.ranking, entry.getRanking());
+    }
+
+    @Test
+    public void testEventDispatchedWhenChannelChanged() {
+        // GIVEN a collection with one notif that has a channel
+        NotificationEntryBuilder neb = buildNotif(TEST_PACKAGE, 48);
+        NotificationChannel channel = new NotificationChannel(
+                "channelId",
+                "channelName",
+                NotificationManager.IMPORTANCE_DEFAULT);
+        neb.setChannel(channel);
+
+        NotifEvent notif = mNoMan.postNotif(neb);
+        NotificationEntry entry = mCollectionListener.getEntry(notif.key);
+        clearInvocations(mCollectionListener);
+
+
+        // WHEN a notif channel is modified
+        channel.setAllowBubbles(true);
+        mNoMan.issueChannelModification(
+                TEST_PACKAGE,
+                entry.getSbn().getUser(),
+                channel,
+                NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
+
+        // THEN the listener is notified
+        mListenerInOrder.verify(mCollectionListener).onNotificationChannelModified(
+                TEST_PACKAGE,
+                entry.getSbn().getUser(),
+                channel,
+                NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
     }
 
     @Test

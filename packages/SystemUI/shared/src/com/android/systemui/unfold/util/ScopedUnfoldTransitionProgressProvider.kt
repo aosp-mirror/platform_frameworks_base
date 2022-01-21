@@ -20,16 +20,18 @@ import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionPr
 
 /**
  * Manages progress listeners that can have smaller lifespan than the unfold animation.
- * Allows to limit getting transition updates to only when
- * [ScopedUnfoldTransitionProgressProvider.setReadyToHandleTransition] is called
- * with readyToHandleTransition = true
  *
- * If the transition has already started by the moment when the clients are ready to play
- * the transition then it will report transition started callback and current animation progress.
+ * Allows to limit getting transition updates to only when
+ * [ScopedUnfoldTransitionProgressProvider.setReadyToHandleTransition] is called with
+ * readyToHandleTransition = true
+ *
+ * If the transition has already started by the moment when the clients are ready to play the
+ * transition then it will report transition started callback and current animation progress.
  */
-class ScopedUnfoldTransitionProgressProvider @JvmOverloads constructor(
-    source: UnfoldTransitionProgressProvider? = null
-) : UnfoldTransitionProgressProvider, TransitionProgressListener {
+class ScopedUnfoldTransitionProgressProvider
+@JvmOverloads
+constructor(source: UnfoldTransitionProgressProvider? = null) :
+    UnfoldTransitionProgressProvider, TransitionProgressListener {
 
     private var source: UnfoldTransitionProgressProvider? = null
 
@@ -43,8 +45,8 @@ class ScopedUnfoldTransitionProgressProvider @JvmOverloads constructor(
         setSourceProvider(source)
     }
     /**
-     * Sets the source for the unfold transition progress updates,
-     * it replaces current provider if it is already set
+     * Sets the source for the unfold transition progress updates. Replaces current provider if it
+     * is already set
      * @param provider transition provider that emits transition progress updates
      */
     fun setSourceProvider(provider: UnfoldTransitionProgressProvider?) {
@@ -60,8 +62,10 @@ class ScopedUnfoldTransitionProgressProvider @JvmOverloads constructor(
 
     /**
      * Allows to notify this provide whether the listeners can play the transition or not.
-     * Call this method with readyToHandleTransition = true when all listeners
-     * are ready to consume the transition progress events.
+     *
+     * Call this method with readyToHandleTransition = true when all listeners are ready to consume
+     * the transition progress events.
+     *
      * Call it with readyToHandleTransition = false when listeners can't process the events.
      */
     fun setReadyToHandleTransition(isReadyToHandleTransition: Boolean) {

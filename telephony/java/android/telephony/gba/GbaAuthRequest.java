@@ -120,7 +120,7 @@ public final class GbaAuthRequest implements Parcelable {
                     int token = in.readInt();
                     int subId = in.readInt();
                     int appType = in.readInt();
-                    Uri nafUrl = in.readParcelable(GbaAuthRequest.class.getClassLoader());
+                    Uri nafUrl = in.readParcelable(GbaAuthRequest.class.getClassLoader(), android.net.Uri.class);
                     int len = in.readInt();
                     byte[] protocol = new byte[len];
                     in.readByteArray(protocol);

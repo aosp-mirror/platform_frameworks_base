@@ -231,9 +231,9 @@ public final class PrintJobInfo implements Parcelable {
     }
 
     private PrintJobInfo(@NonNull Parcel parcel) {
-        mId = parcel.readParcelable(null);
+        mId = parcel.readParcelable(null, android.print.PrintJobId.class);
         mLabel = parcel.readString();
-        mPrinterId = parcel.readParcelable(null);
+        mPrinterId = parcel.readParcelable(null, android.print.PrinterId.class);
         mPrinterName = parcel.readString();
         mState = parcel.readInt();
         mAppId = parcel.readInt();
@@ -247,8 +247,8 @@ public final class PrintJobInfo implements Parcelable {
                 mPageRanges[i] = (PageRange) parcelables[i];
             }
         }
-        mAttributes = (PrintAttributes) parcel.readParcelable(null);
-        mDocumentInfo = (PrintDocumentInfo) parcel.readParcelable(null);
+        mAttributes = (PrintAttributes) parcel.readParcelable(null, android.print.PrintAttributes.class);
+        mDocumentInfo = (PrintDocumentInfo) parcel.readParcelable(null, android.print.PrintDocumentInfo.class);
         mProgress = parcel.readFloat();
         mStatus = parcel.readCharSequence();
         mStatusRes = parcel.readInt();

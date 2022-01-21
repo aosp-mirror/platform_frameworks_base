@@ -86,9 +86,11 @@
     <item msgid="5715725170633593906">"Vyp"</item>
     <item msgid="2075645297847971154">"Zap"</item>
   </string-array>
-    <!-- no translation found for tile_states_color_correction:0 (2840507878437297682) -->
-    <!-- no translation found for tile_states_color_correction:1 (1909756493418256167) -->
-    <!-- no translation found for tile_states_color_correction:2 (4531508423703413340) -->
+  <string-array name="tile_states_color_correction">
+    <item msgid="2840507878437297682">"Nedostupné"</item>
+    <item msgid="1909756493418256167">"Vyp"</item>
+    <item msgid="4531508423703413340">"Zap"</item>
+  </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"Nedostupné"</item>
     <item msgid="9103697205127645916">"Vyp"</item>

@@ -192,6 +192,7 @@ import android.view.contentcapture.MainContentCaptureSession;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
 import android.window.ClientWindowFrames;
+import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -308,6 +309,12 @@ public final class ViewRootImpl implements ViewParent,
             new ArrayList<>();
     private @SurfaceControl.BufferTransform
             int mPreviousTransformHint = SurfaceControl.BUFFER_TRANSFORM_IDENTITY;
+    /**
+     * The fallback {@link OnBackInvokedDispatcher} when the window doesn't have a decor view.
+     */
+    private WindowOnBackInvokedDispatcher mFallbackOnBackInvokedDispatcher =
+            new WindowOnBackInvokedDispatcher();
+
     /**
      * Callback for notifying about global configuration changes.
      */
@@ -871,6 +878,7 @@ public final class ViewRootImpl implements ViewParent,
         mFastScrollSoundEffectsEnabled = audioManager.areNavigationRepeatSoundEffectsEnabled();
 
         mScrollCaptureRequestTimeout = SCROLL_CAPTURE_REQUEST_TIMEOUT_MILLIS;
+        mFallbackOnBackInvokedDispatcher.attachToWindow(mWindowSession, mWindow);
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -1120,6 +1128,9 @@ public final class ViewRootImpl implements ViewParent,
                     if (pendingInsetsController != null) {
                         pendingInsetsController.replayAndAttach(mInsetsController);
                     }
+                    ((RootViewSurfaceTaker) mView)
+                            .provideWindowOnBackInvokedDispatcher()
+                            .attachToWindow(mWindowSession, mWindow);
                 }
 
                 try {
@@ -10634,7 +10645,7 @@ public final class ViewRootImpl implements ViewParent,
        }
        mBLASTDrawConsumer = consume;
        return true;
-   }
+    }
 
     boolean wasRelayoutRequested() {
         return mRelayoutRequested;
@@ -10643,5 +10654,17 @@ public final class ViewRootImpl implements ViewParent,
     void forceWmRelayout() {
        mForceNextWindowRelayout = true;
        scheduleTraversals();
+    }
+
+    /**
+     * Returns the {@link OnBackInvokedDispatcher} on the decor view if one exists, or the
+     * fallback {@link OnBackInvokedDispatcher} instance.
+     */
+    @Nullable
+    public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
+        if (mView instanceof RootViewSurfaceTaker) {
+            return ((RootViewSurfaceTaker) mView).provideWindowOnBackInvokedDispatcher();
+        }
+        return mFallbackOnBackInvokedDispatcher;
     }
 }

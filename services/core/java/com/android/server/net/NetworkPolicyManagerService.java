@@ -3452,7 +3452,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * {@link NetworkStatsProvider#onSetWarningAndLimit(String, long, long)}.
      */
     @Override
-    public void onStatsProviderWarningOrLimitReached() {
+    public void notifyStatsProviderWarningOrLimitReached() {
         enforceAnyPermissionOf(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
         // This API may be called before the system is ready.
         synchronized (mNetworkPoliciesSecondLock) {
@@ -5078,7 +5078,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     // make sure stats are recorded frequently enough; we aim
                     // for 2MB threshold for 2GB/month rules.
                     final long persistThreshold = lowestRule / 1000;
-                    mNetworkStats.advisePersistThreshold(persistThreshold);
+                    // TODO: Sync internal naming with the API surface.
+                    mNetworkStats.setDefaultGlobalAlert(persistThreshold);
                     return true;
                 }
                 case MSG_UPDATE_INTERFACE_QUOTAS: {

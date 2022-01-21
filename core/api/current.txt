@@ -3995,7 +3995,7 @@ package android.app {
     method @Deprecated public void onTabUnselected(android.app.ActionBar.Tab, android.app.FragmentTransaction);
   }
 
-  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     ctor public Activity();
     method public void addContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public void closeContextMenu();
@@ -4038,6 +4038,7 @@ package android.app {
     method public int getMaxNumPictureInPictureActions();
     method public final android.media.session.MediaController getMediaController();
     method @NonNull public android.view.MenuInflater getMenuInflater();
+    method @Nullable public android.view.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
     method public final android.app.Activity getParent();
     method @Nullable public android.content.Intent getParentActivityIntent();
     method public android.content.SharedPreferences getPreferences(int);
@@ -4916,7 +4917,7 @@ package android.app {
     method public void onDateSet(android.widget.DatePicker, int, int, int);
   }
 
-  public class Dialog implements android.content.DialogInterface android.view.KeyEvent.Callback android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+  public class Dialog implements android.content.DialogInterface android.view.KeyEvent.Callback android.view.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     ctor public Dialog(@NonNull @UiContext android.content.Context);
     ctor public Dialog(@NonNull @UiContext android.content.Context, @StyleRes int);
     ctor protected Dialog(@NonNull @UiContext android.content.Context, boolean, @Nullable android.content.DialogInterface.OnCancelListener);
@@ -4936,6 +4937,7 @@ package android.app {
     method @NonNull @UiContext public final android.content.Context getContext();
     method @Nullable public android.view.View getCurrentFocus();
     method @NonNull public android.view.LayoutInflater getLayoutInflater();
+    method @Nullable public android.view.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
     method @Nullable public final android.app.Activity getOwnerActivity();
     method @Nullable public final android.view.SearchEvent getSearchEvent();
     method public final int getVolumeControlStream();
@@ -9261,6 +9263,7 @@ package android.bluetooth {
     field public static final int SOURCE_CODEC_TYPE_APTX = 2; // 0x2
     field public static final int SOURCE_CODEC_TYPE_APTX_HD = 3; // 0x3
     field public static final int SOURCE_CODEC_TYPE_INVALID = 1000000; // 0xf4240
+    field public static final int SOURCE_CODEC_TYPE_LC3 = 5; // 0x5
     field public static final int SOURCE_CODEC_TYPE_LDAC = 4; // 0x4
     field public static final int SOURCE_CODEC_TYPE_SBC = 0; // 0x0
   }
@@ -32037,6 +32040,7 @@ package android.os {
     method @IntRange(from=0xffffffff) public int indexOf(java.util.Locale);
     method public boolean isEmpty();
     method public static boolean isPseudoLocale(@Nullable android.icu.util.ULocale);
+    method public static boolean matchesLanguageAndScript(@NonNull java.util.Locale, @NonNull java.util.Locale);
     method public static void setDefault(@NonNull @Size(min=1) android.os.LocaleList);
     method @IntRange(from=0) public int size();
     method @NonNull public String toLanguageTags();
@@ -48163,13 +48167,31 @@ package android.view {
 
   public final class Choreographer {
     method public static android.view.Choreographer getInstance();
+    method public void postExtendedFrameCallback(@NonNull android.view.Choreographer.ExtendedFrameCallback);
     method public void postFrameCallback(android.view.Choreographer.FrameCallback);
     method public void postFrameCallbackDelayed(android.view.Choreographer.FrameCallback, long);
+    method public void removeExtendedFrameCallback(@Nullable android.view.Choreographer.ExtendedFrameCallback);
     method public void removeFrameCallback(android.view.Choreographer.FrameCallback);
+  }
+
+  public static interface Choreographer.ExtendedFrameCallback {
+    method public void onVsync(@NonNull android.view.Choreographer.FrameData);
   }
 
   public static interface Choreographer.FrameCallback {
     method public void doFrame(long);
+  }
+
+  public static class Choreographer.FrameData {
+    method public long getFrameTimeNanos();
+    method @NonNull public android.view.Choreographer.FrameTimeline[] getFrameTimelines();
+    method @NonNull public android.view.Choreographer.FrameTimeline getPreferredFrameTimeline();
+  }
+
+  public static class Choreographer.FrameTimeline {
+    method public long getDeadlineNanos();
+    method public long getExpectedPresentTimeNanos();
+    method public long getVsyncId();
   }
 
   public interface CollapsibleActionView {
@@ -49459,6 +49481,22 @@ package android.view {
     field public int toolType;
   }
 
+  public interface OnBackInvokedCallback {
+    method public default void onBackInvoked();
+  }
+
+  public abstract class OnBackInvokedDispatcher {
+    ctor public OnBackInvokedDispatcher();
+    method public abstract void registerOnBackInvokedCallback(@NonNull android.view.OnBackInvokedCallback, int);
+    method public abstract void unregisterOnBackInvokedCallback(@NonNull android.view.OnBackInvokedCallback);
+    field public static final int PRIORITY_DEFAULT = 0; // 0x0
+    field public static final int PRIORITY_OVERLAY = 1000000; // 0xf4240
+  }
+
+  public interface OnBackInvokedDispatcherOwner {
+    method @Nullable public android.view.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
+  }
+
   public interface OnReceiveContentListener {
     method @Nullable public android.view.ContentInfo onReceiveContent(@NonNull android.view.View, @NonNull android.view.ContentInfo);
   }
@@ -49882,7 +49920,7 @@ package android.view {
     field @NonNull public static final android.os.Parcelable.Creator<android.view.VerifiedMotionEvent> CREATOR;
   }
 
-  @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
+  @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback android.view.OnBackInvokedDispatcherOwner {
     ctor public View(android.content.Context);
     ctor public View(android.content.Context, @Nullable android.util.AttributeSet);
     ctor public View(android.content.Context, @Nullable android.util.AttributeSet, int);
@@ -50086,6 +50124,7 @@ package android.view {
     method @IdRes public int getNextFocusLeftId();
     method @IdRes public int getNextFocusRightId();
     method @IdRes public int getNextFocusUpId();
+    method @Nullable public android.view.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
     method public android.view.View.OnFocusChangeListener getOnFocusChangeListener();
     method @ColorInt public int getOutlineAmbientShadowColor();
     method public android.view.ViewOutlineProvider getOutlineProvider();

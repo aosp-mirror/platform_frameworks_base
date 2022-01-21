@@ -3168,16 +3168,29 @@ public class StatusBar extends CoreStartable implements
      * Switches theme from light to dark and vice-versa.
      */
     protected void updateTheme() {
+        // Set additional scrim only if the lock and system wallpaper are different to prevent
+        // applying the dimming effect twice.
+        mUiBgExecutor.execute(() -> {
+            float dimAmount = 0f;
+            if (mWallpaperManager.lockScreenWallpaperExists()) {
+                dimAmount = mWallpaperManager.getWallpaperDimAmount();
+            }
+            final float scrimDimAmount = dimAmount;
+            mMainExecutor.execute(() -> {
+                mScrimController.setAdditionalScrimBehindAlphaKeyguard(scrimDimAmount);
+                mScrimController.applyCompositeAlphaOnScrimBehindKeyguard();
+            });
+        });
+
         // Lock wallpaper defines the color of the majority of the views, hence we'll use it
         // to set our default theme.
         final boolean lockDarkText = mColorExtractor.getNeutralColors().supportsDarkText();
         final int themeResId = lockDarkText ? R.style.Theme_SystemUI_LightWallpaper
                 : R.style.Theme_SystemUI;
-        if (mContext.getThemeResId() == themeResId) {
-            return;
+        if (mContext.getThemeResId() != themeResId) {
+            mContext.setTheme(themeResId);
+            mConfigurationController.notifyThemeChanged();
         }
-        mContext.setTheme(themeResId);
-        mConfigurationController.notifyThemeChanged();
     }
 
     private void updateDozingState() {

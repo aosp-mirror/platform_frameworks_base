@@ -153,6 +153,9 @@ public class WallpaperManagerServiceTests {
         sContext.getTestablePermissions().setPermission(
                 android.Manifest.permission.SET_WALLPAPER,
                 PackageManager.PERMISSION_GRANTED);
+        sContext.getTestablePermissions().setPermission(
+                android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT,
+                PackageManager.PERMISSION_GRANTED);
         doNothing().when(sContext).sendBroadcastAsUser(any(), any());
 
         //Wallpaper components
@@ -431,6 +434,15 @@ public class WallpaperManagerServiceTests {
 
         // ACTION_WALLPAPER_CHANGED should be invoked before onWallpaperColorsChanged.
         assertTrue(timestamps[1] > timestamps[0]);
+    }
+
+    @Test
+    public void testSetWallpaperDimAmount() throws RemoteException {
+        mService.switchUser(USER_SYSTEM, null);
+        float dimAmount = 0.7f;
+        mService.setWallpaperDimAmount(dimAmount);
+        assertEquals("Getting dim amount should match after setting the dim amount",
+                mService.getWallpaperDimAmount(), dimAmount, 0.0);
     }
 
     // Verify that after continue switch user from userId 0 to lastUserId, the wallpaper data for

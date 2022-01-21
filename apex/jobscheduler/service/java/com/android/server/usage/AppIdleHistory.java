@@ -42,6 +42,7 @@ import android.util.AtomicFile;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseLongArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
@@ -49,6 +50,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
 
@@ -80,7 +82,7 @@ public class AppIdleHistory {
     private SparseArray<ArrayMap<String,AppUsageHistory>> mIdleHistory = new SparseArray<>();
     private static final long ONE_MINUTE = 60 * 1000;
 
-    private static final int STANDBY_BUCKET_UNKNOWN = -1;
+    static final int STANDBY_BUCKET_UNKNOWN = -1;
 
     /**
      * The bucket beyond which apps are considered idle. Any apps in this bucket or lower are
@@ -88,10 +90,35 @@ public class AppIdleHistory {
      */
     static final int IDLE_BUCKET_CUTOFF = STANDBY_BUCKET_RARE;
 
+    /** Initial version of the xml containing the app idle stats ({@link #APP_IDLE_FILENAME}). */
+    private static final int XML_VERSION_INITIAL = 0;
+    /**
+     * Allowed writing expiry times for any standby bucket instead of only active and working set.
+     * In previous version, we used to specify expiry times for active and working set as
+     * attributes:
+     * <pre>
+     *     <package activeTimeoutTime="..." workingSetTimeoutTime="..." />
+     * </pre>
+     * In this version, it is changed to:
+     * <pre>
+     *     <package>
+     *         <expiryTimes>
+     *             <item bucket="..." expiry="..." />
+     *             <item bucket="..." expiry="..." />
+     *         </expiryTimes>
+     *     </package>
+     * </pre>
+     */
+    private static final int XML_VERSION_ADD_BUCKET_EXPIRY_TIMES = 1;
+    /** Current version */
+    private static final int XML_VERSION_CURRENT = XML_VERSION_ADD_BUCKET_EXPIRY_TIMES;
+
     @VisibleForTesting
     static final String APP_IDLE_FILENAME = "app_idle_stats.xml";
     private static final String TAG_PACKAGES = "packages";
     private static final String TAG_PACKAGE = "package";
+    private static final String TAG_BUCKET_EXPIRY_TIMES = "expiryTimes";
+    private static final String TAG_ITEM = "item";
     private static final String ATTR_NAME = "name";
     // Screen on timebase time when app was last used
     private static final String ATTR_SCREEN_IDLE = "screenIdleTime";
@@ -111,6 +138,10 @@ public class AppIdleHistory {
     private static final String ATTR_BUCKET_ACTIVE_TIMEOUT_TIME = "activeTimeoutTime";
     // The time when the forced working_set state can be overridden.
     private static final String ATTR_BUCKET_WORKING_SET_TIMEOUT_TIME = "workingSetTimeoutTime";
+    // The standby bucket value
+    private static final String ATTR_BUCKET = "bucket";
+    // The time when the forced bucket state can be overridde.
+    private static final String ATTR_EXPIRY_TIME = "expiry";
     // Elapsed timebase time when the app was last marked for restriction.
     private static final String ATTR_LAST_RESTRICTION_ATTEMPT_ELAPSED =
             "lastRestrictionAttemptElapsedTime";
@@ -119,6 +150,8 @@ public class AppIdleHistory {
             "lastRestrictionAttemptReason";
     // The next estimated launch time of the app, in ms since epoch.
     private static final String ATTR_NEXT_ESTIMATED_APP_LAUNCH_TIME = "nextEstimatedAppLaunchTime";
+    // Version of the xml file.
+    private static final String ATTR_VERSION = "version";
 
     // device on time = mElapsedDuration + (timeNow - mElapsedSnapshot)
     private long mElapsedSnapshot; // Elapsed time snapshot when last write of mDeviceOnDuration
@@ -158,15 +191,10 @@ public class AppIdleHistory {
         // The estimated time the app will be launched next, in milliseconds since epoch.
         @CurrentTimeMillisLong
         long nextEstimatedLaunchTime;
-        // When should the bucket active state timeout, in elapsed timebase, if greater than
-        // lastUsedElapsedTime.
-        // This is used to keep the app in a high bucket regardless of other timeouts and
-        // predictions.
-        long bucketActiveTimeoutTime;
-        // If there's a forced working_set state, this is when it times out. This can be sitting
-        // under any active state timeout, so that it becomes applicable after the active state
-        // timeout expires.
-        long bucketWorkingSetTimeoutTime;
+        // Contains standby buckets that apps were forced into and the corresponding expiry times
+        // (in elapsed timebase) for each bucket state. App will stay in the highest bucket until
+        // it's expiry time is elapsed and will be moved to the next highest bucket.
+        SparseLongArray bucketExpiryTimesMs;
         // The last time an agent attempted to put the app into the RESTRICTED bucket.
         long lastRestrictAttemptElapsedTime;
         // The last reason the app was marked to be put into the RESTRICTED bucket.
@@ -249,21 +277,24 @@ public class AppIdleHistory {
     }
 
     /**
-     * Mark the app as used and update the bucket if necessary. If there is a timeout specified
+     * Mark the app as used and update the bucket if necessary. If there is a expiry time specified
      * that's in the future, then the usage event is temporary and keeps the app in the specified
-     * bucket at least until the timeout is reached. This can be used to keep the app in an
+     * bucket at least until the expiry time is reached. This can be used to keep the app in an
      * elevated bucket for a while until some important task gets to run.
+     *
      * @param appUsageHistory the usage record for the app being updated
      * @param packageName name of the app being updated, for logging purposes
      * @param newBucket the bucket to set the app to
      * @param usageReason the sub-reason for usage, one of REASON_SUB_USAGE_*
-     * @param elapsedRealtime mark as used time if non-zero
-     * @param timeout set the timeout of the specified bucket, if non-zero. Can only be used
-     *                with bucket values of ACTIVE and WORKING_SET.
+     * @param nowElapsedRealtimeMs mark as used time if non-zero (in
+     *                          {@link SystemClock#elapsedRealtime()} time base)
+     * @param expiryElapsedRealtimeMs the expiry time for the specified bucket (in
+     *                         {@link SystemClock#elapsedRealtime()} time base)
      * @return {@code appUsageHistory}
      */
     AppUsageHistory reportUsage(AppUsageHistory appUsageHistory, String packageName, int userId,
-            int newBucket, int usageReason, long elapsedRealtime, long timeout) {
+            int newBucket, int usageReason,
+            long nowElapsedRealtimeMs, long expiryElapsedRealtimeMs) {
         int bucketingReason = REASON_MAIN_USAGE | usageReason;
         final boolean isUserUsage = isUserUsage(bucketingReason);
 
@@ -274,30 +305,27 @@ public class AppIdleHistory {
             newBucket = STANDBY_BUCKET_RESTRICTED;
             bucketingReason = appUsageHistory.bucketingReason;
         } else {
-            // Set the timeout if applicable
-            if (timeout > elapsedRealtime) {
+            // Set the expiry time if applicable
+            if (expiryElapsedRealtimeMs > nowElapsedRealtimeMs) {
                 // Convert to elapsed timebase
-                final long timeoutTime = mElapsedDuration + (timeout - mElapsedSnapshot);
-                if (newBucket == STANDBY_BUCKET_ACTIVE) {
-                    appUsageHistory.bucketActiveTimeoutTime = Math.max(timeoutTime,
-                            appUsageHistory.bucketActiveTimeoutTime);
-                } else if (newBucket == STANDBY_BUCKET_WORKING_SET) {
-                    appUsageHistory.bucketWorkingSetTimeoutTime = Math.max(timeoutTime,
-                            appUsageHistory.bucketWorkingSetTimeoutTime);
-                } else {
-                    throw new IllegalArgumentException("Cannot set a timeout on bucket="
-                            + newBucket);
+                final long expiryTimeMs = getElapsedTime(expiryElapsedRealtimeMs);
+                if (appUsageHistory.bucketExpiryTimesMs == null) {
+                    appUsageHistory.bucketExpiryTimesMs = new SparseLongArray();
                 }
+                final long currentExpiryTimeMs = appUsageHistory.bucketExpiryTimesMs.get(newBucket);
+                appUsageHistory.bucketExpiryTimesMs.put(newBucket,
+                        Math.max(expiryTimeMs, currentExpiryTimeMs));
+                removeElapsedExpiryTimes(appUsageHistory, getElapsedTime(nowElapsedRealtimeMs));
             }
         }
 
-        if (elapsedRealtime != 0) {
+        if (nowElapsedRealtimeMs != 0) {
             appUsageHistory.lastUsedElapsedTime = mElapsedDuration
-                    + (elapsedRealtime - mElapsedSnapshot);
+                    + (nowElapsedRealtimeMs - mElapsedSnapshot);
             if (isUserUsage) {
                 appUsageHistory.lastUsedByUserElapsedTime = appUsageHistory.lastUsedElapsedTime;
             }
-            appUsageHistory.lastUsedScreenTime = getScreenOnTime(elapsedRealtime);
+            appUsageHistory.lastUsedScreenTime = getScreenOnTime(nowElapsedRealtimeMs);
         }
 
         if (appUsageHistory.currentBucket > newBucket) {
@@ -309,26 +337,41 @@ public class AppIdleHistory {
         return appUsageHistory;
     }
 
+    private void removeElapsedExpiryTimes(AppUsageHistory appUsageHistory, long elapsedTimeMs) {
+        if (appUsageHistory.bucketExpiryTimesMs == null) {
+            return;
+        }
+        for (int i = appUsageHistory.bucketExpiryTimesMs.size() - 1; i >= 0; --i) {
+            if (appUsageHistory.bucketExpiryTimesMs.valueAt(i) < elapsedTimeMs) {
+                appUsageHistory.bucketExpiryTimesMs.removeAt(i);
+            }
+        }
+    }
+
     /**
-     * Mark the app as used and update the bucket if necessary. If there is a timeout specified
+     * Mark the app as used and update the bucket if necessary. If there is a expiry time specified
      * that's in the future, then the usage event is temporary and keeps the app in the specified
-     * bucket at least until the timeout is reached. This can be used to keep the app in an
+     * bucket at least until the expiry time is reached. This can be used to keep the app in an
      * elevated bucket for a while until some important task gets to run.
-     * @param packageName
-     * @param userId
+     *
+     * @param packageName package name of the app the usage is reported for
+     * @param userId user that the app is running in
      * @param newBucket the bucket to set the app to
      * @param usageReason sub reason for usage
-     * @param nowElapsed mark as used time if non-zero
-     * @param timeout set the timeout of the specified bucket, if non-zero. Can only be used
-     *                with bucket values of ACTIVE and WORKING_SET.
-     * @return
+     * @param nowElapsedRealtimeMs mark as used time if non-zero (in
+     *                             {@link SystemClock#elapsedRealtime()} time base).
+     * @param expiryElapsedRealtimeMs the expiry time for the specified bucket (in
+     *                         {@link SystemClock#elapsedRealtime()} time base).
+     * @return the {@link AppUsageHistory} corresponding to the {@code packageName}
+     *         and {@code userId}.
      */
     public AppUsageHistory reportUsage(String packageName, int userId, int newBucket,
-            int usageReason, long nowElapsed, long timeout) {
+            int usageReason, long nowElapsedRealtimeMs, long expiryElapsedRealtimeMs) {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
-        AppUsageHistory history = getPackageHistory(userHistory, packageName, nowElapsed, true);
-        return reportUsage(history, packageName, userId, newBucket, usageReason, nowElapsed,
-                timeout);
+        AppUsageHistory history = getPackageHistory(userHistory, packageName,
+                nowElapsedRealtimeMs, true);
+        return reportUsage(history, packageName, userId, newBucket, usageReason,
+                nowElapsedRealtimeMs, expiryElapsedRealtimeMs);
     }
 
     private ArrayMap<String, AppUsageHistory> getUserHistory(int userId) {
@@ -383,7 +426,7 @@ public class AppIdleHistory {
     }
 
     public void setAppStandbyBucket(String packageName, int userId, long elapsedRealtime,
-            int bucket, int reason, boolean resetTimeout) {
+            int bucket, int reason, boolean resetExpiryTimes) {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         AppUsageHistory appUsageHistory =
                 getPackageHistory(userHistory, packageName, elapsedRealtime, true);
@@ -397,9 +440,8 @@ public class AppIdleHistory {
             appUsageHistory.lastPredictedTime = elapsed;
             appUsageHistory.lastPredictedBucket = bucket;
         }
-        if (resetTimeout) {
-            appUsageHistory.bucketActiveTimeoutTime = elapsed;
-            appUsageHistory.bucketWorkingSetTimeoutTime = elapsed;
+        if (resetExpiryTimes && appUsageHistory.bucketExpiryTimesMs != null) {
+            appUsageHistory.bucketExpiryTimesMs.clear();
         }
         if (changed) {
             logAppStandbyBucketChanged(packageName, userId, bucket, reason);
@@ -622,6 +664,17 @@ public class AppIdleHistory {
     }
 
     @VisibleForTesting
+    long getBucketExpiryTimeMs(String packageName, int userId, int bucket, long elapsedRealtimeMs) {
+        ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
+        AppUsageHistory appUsageHistory = getPackageHistory(userHistory, packageName,
+                elapsedRealtimeMs, true);
+        if (appUsageHistory.bucketExpiryTimesMs == null) {
+            return 0;
+        }
+        return appUsageHistory.bucketExpiryTimesMs.get(bucket, 0);
+    }
+
+    @VisibleForTesting
     File getUserFile(int userId) {
         return new File(new File(new File(mStorageDir, "users"),
                 Integer.toString(userId)), APP_IDLE_FILENAME);
@@ -657,6 +710,7 @@ public class AppIdleHistory {
             if (!parser.getName().equals(TAG_PACKAGES)) {
                 return;
             }
+            final int version = getIntValue(parser, ATTR_VERSION, XML_VERSION_INITIAL);
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                 if (type == XmlPullParser.START_TAG) {
                     final String name = parser.getName();
@@ -681,10 +735,6 @@ public class AppIdleHistory {
                                 parser.getAttributeValue(null, ATTR_BUCKETING_REASON);
                         appUsageHistory.lastJobRunTime = getLongValue(parser,
                                 ATTR_LAST_RUN_JOB_TIME, Long.MIN_VALUE);
-                        appUsageHistory.bucketActiveTimeoutTime = getLongValue(parser,
-                                ATTR_BUCKET_ACTIVE_TIMEOUT_TIME, 0L);
-                        appUsageHistory.bucketWorkingSetTimeoutTime = getLongValue(parser,
-                                ATTR_BUCKET_WORKING_SET_TIMEOUT_TIME, 0L);
                         appUsageHistory.bucketingReason = REASON_MAIN_DEFAULT;
                         if (bucketingReason != null) {
                             try {
@@ -710,6 +760,26 @@ public class AppIdleHistory {
                                 ATTR_NEXT_ESTIMATED_APP_LAUNCH_TIME, 0);
                         appUsageHistory.lastInformedBucket = -1;
                         userHistory.put(packageName, appUsageHistory);
+
+                        if (version >= XML_VERSION_ADD_BUCKET_EXPIRY_TIMES) {
+                            final int outerDepth = parser.getDepth();
+                            while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+                                if (TAG_BUCKET_EXPIRY_TIMES.equals(parser.getName())) {
+                                    readBucketExpiryTimes(parser, appUsageHistory);
+                                }
+                            }
+                        } else {
+                            final long bucketActiveTimeoutTime = getLongValue(parser,
+                                    ATTR_BUCKET_ACTIVE_TIMEOUT_TIME, 0L);
+                            final long bucketWorkingSetTimeoutTime = getLongValue(parser,
+                                    ATTR_BUCKET_WORKING_SET_TIMEOUT_TIME, 0L);
+                            if (bucketActiveTimeoutTime != 0 || bucketWorkingSetTimeoutTime != 0) {
+                                insertBucketExpiryTime(appUsageHistory,
+                                        STANDBY_BUCKET_ACTIVE, bucketActiveTimeoutTime);
+                                insertBucketExpiryTime(appUsageHistory,
+                                        STANDBY_BUCKET_WORKING_SET, bucketWorkingSetTimeoutTime);
+                            }
+                        }
                     }
                 }
             }
@@ -720,21 +790,53 @@ public class AppIdleHistory {
         }
     }
 
+    private void readBucketExpiryTimes(XmlPullParser parser, AppUsageHistory appUsageHistory)
+            throws IOException, XmlPullParserException {
+        final int depth = parser.getDepth();
+        while (XmlUtils.nextElementWithin(parser, depth)) {
+            if (TAG_ITEM.equals(parser.getName())) {
+                final int bucket = getIntValue(parser, ATTR_BUCKET, STANDBY_BUCKET_UNKNOWN);
+                if (bucket == STANDBY_BUCKET_UNKNOWN) {
+                    Slog.e(TAG, "Error reading the buckets expiry times");
+                    continue;
+                }
+                final long expiryTimeMs = getLongValue(parser, ATTR_EXPIRY_TIME, 0 /* default */);
+                insertBucketExpiryTime(appUsageHistory, bucket, expiryTimeMs);
+            }
+        }
+    }
+
+    private void insertBucketExpiryTime(AppUsageHistory appUsageHistory,
+            int bucket, long expiryTimeMs) {
+        if (expiryTimeMs == 0) {
+            return;
+        }
+        if (appUsageHistory.bucketExpiryTimesMs == null) {
+            appUsageHistory.bucketExpiryTimesMs = new SparseLongArray();
+        }
+        appUsageHistory.bucketExpiryTimesMs.put(bucket, expiryTimeMs);
+    }
+
     private long getLongValue(XmlPullParser parser, String attrName, long defValue) {
         String value = parser.getAttributeValue(null, attrName);
         if (value == null) return defValue;
         return Long.parseLong(value);
     }
 
+    private int getIntValue(XmlPullParser parser, String attrName, int defValue) {
+        String value = parser.getAttributeValue(null, attrName);
+        if (value == null) return defValue;
+        return Integer.parseInt(value);
+    }
 
-    public void writeAppIdleTimes() {
+    public void writeAppIdleTimes(long elapsedRealtimeMs) {
         final int size = mIdleHistory.size();
         for (int i = 0; i < size; i++) {
-            writeAppIdleTimes(mIdleHistory.keyAt(i));
+            writeAppIdleTimes(mIdleHistory.keyAt(i), elapsedRealtimeMs);
         }
     }
 
-    public void writeAppIdleTimes(int userId) {
+    public void writeAppIdleTimes(int userId, long elapsedRealtimeMs) {
         FileOutputStream fos = null;
         AtomicFile appIdleFile = new AtomicFile(getUserFile(userId));
         try {
@@ -747,7 +849,9 @@ public class AppIdleHistory {
             xml.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
 
             xml.startTag(null, TAG_PACKAGES);
+            xml.attribute(null, ATTR_VERSION, String.valueOf(XML_VERSION_CURRENT));
 
+            final long elapsedTimeMs = getElapsedTime(elapsedRealtimeMs);
             ArrayMap<String,AppUsageHistory> userHistory = getUserHistory(userId);
             final int N = userHistory.size();
             for (int i = 0; i < N; i++) {
@@ -772,14 +876,6 @@ public class AppIdleHistory {
                         Integer.toString(history.currentBucket));
                 xml.attribute(null, ATTR_BUCKETING_REASON,
                         Integer.toHexString(history.bucketingReason));
-                if (history.bucketActiveTimeoutTime > 0) {
-                    xml.attribute(null, ATTR_BUCKET_ACTIVE_TIMEOUT_TIME, Long.toString(history
-                            .bucketActiveTimeoutTime));
-                }
-                if (history.bucketWorkingSetTimeoutTime > 0) {
-                    xml.attribute(null, ATTR_BUCKET_WORKING_SET_TIMEOUT_TIME, Long.toString(history
-                            .bucketWorkingSetTimeoutTime));
-                }
                 if (history.lastJobRunTime != Long.MIN_VALUE) {
                     xml.attribute(null, ATTR_LAST_RUN_JOB_TIME, Long.toString(history
                             .lastJobRunTime));
@@ -793,6 +889,22 @@ public class AppIdleHistory {
                 if (history.nextEstimatedLaunchTime > 0) {
                     xml.attribute(null, ATTR_NEXT_ESTIMATED_APP_LAUNCH_TIME,
                             Long.toString(history.nextEstimatedLaunchTime));
+                }
+                if (history.bucketExpiryTimesMs != null) {
+                    xml.startTag(null, TAG_BUCKET_EXPIRY_TIMES);
+                    for (int j = 0; j < history.bucketExpiryTimesMs.size(); ++j) {
+                        final long expiryTimeMs = history.bucketExpiryTimesMs.valueAt(j);
+                        // Skip writing to disk if the expiry time already elapsed.
+                        if (expiryTimeMs < elapsedTimeMs) {
+                            continue;
+                        }
+                        final int bucket = history.bucketExpiryTimesMs.keyAt(j);
+                        xml.startTag(null, TAG_ITEM);
+                        xml.attribute(null, ATTR_BUCKET, String.valueOf(bucket));
+                        xml.attribute(null, ATTR_EXPIRY_TIME, String.valueOf(expiryTimeMs));
+                        xml.endTag(null, TAG_ITEM);
+                    }
+                    xml.endTag(null, TAG_BUCKET_EXPIRY_TIMES);
                 }
                 xml.endTag(null, TAG_PACKAGE);
             }
@@ -846,12 +958,7 @@ public class AppIdleHistory {
             TimeUtils.formatDuration(screenOnTime - appUsageHistory.lastUsedScreenTime, idpw);
             idpw.print(" lastPred=");
             TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastPredictedTime, idpw);
-            idpw.print(" activeLeft=");
-            TimeUtils.formatDuration(appUsageHistory.bucketActiveTimeoutTime - totalElapsedTime,
-                    idpw);
-            idpw.print(" wsLeft=");
-            TimeUtils.formatDuration(appUsageHistory.bucketWorkingSetTimeoutTime - totalElapsedTime,
-                    idpw);
+            dumpBucketExpiryTimes(idpw, appUsageHistory, totalElapsedTime);
             idpw.print(" lastJob=");
             TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastJobRunTime, idpw);
             if (appUsageHistory.lastRestrictAttemptElapsedTime > 0) {
@@ -876,5 +983,26 @@ public class AppIdleHistory {
         TimeUtils.formatDuration(getScreenOnTime(elapsedRealtime), idpw);
         idpw.println();
         idpw.decreaseIndent();
+    }
+
+    private void dumpBucketExpiryTimes(IndentingPrintWriter idpw, AppUsageHistory appUsageHistory,
+            long totalElapsedTimeMs) {
+        idpw.print(" expiryTimes=");
+        if (appUsageHistory.bucketExpiryTimesMs == null
+                || appUsageHistory.bucketExpiryTimesMs.size() == 0) {
+            idpw.print("<none>");
+            return;
+        }
+        idpw.print("(");
+        for (int i = 0; i < appUsageHistory.bucketExpiryTimesMs.size(); ++i) {
+            final int bucket = appUsageHistory.bucketExpiryTimesMs.keyAt(i);
+            final long expiryTimeMs = appUsageHistory.bucketExpiryTimesMs.valueAt(i);
+            if (i != 0) {
+                idpw.print(",");
+            }
+            idpw.print(bucket + ":");
+            TimeUtils.formatDuration(totalElapsedTimeMs - expiryTimeMs, idpw);
+        }
+        idpw.print(")");
     }
 }

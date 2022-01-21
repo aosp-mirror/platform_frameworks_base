@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -71,6 +72,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.MathUtils;
 import android.util.Pair;
 import android.view.Display;
 import android.view.WindowManagerGlobal;
@@ -1489,27 +1491,18 @@ public class WallpaperManager {
                     mContext.getUserId());
             if (fd != null) {
                 FileOutputStream fos = null;
-                final Bitmap tmp = BitmapFactory.decodeStream(resources.openRawResource(resid));
+                boolean ok = false;
                 try {
-                    // If the stream can't be decoded, treat it as an invalid input.
-                    if (tmp != null) {
-                        fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
-                        tmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                        // The 'close()' is the trigger for any server-side image manipulation,
-                        // so we must do that before waiting for completion.
-                        fos.close();
-                        completion.waitForCompletion();
-                    } else {
-                        throw new IllegalArgumentException(
-                                "Resource 0x" + Integer.toHexString(resid) + " is invalid");
-                    }
+                    fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
+                    copyStreamToWallpaperFile(resources.openRawResource(resid), fos);
+                    // The 'close()' is the trigger for any server-side image manipulation,
+                    // so we must do that before waiting for completion.
+                    fos.close();
+                    completion.waitForCompletion();
                 } finally {
                     // Might be redundant but completion shouldn't wait unless the write
                     // succeeded; this is a fallback if it threw past the close+wait.
                     IoUtils.closeQuietly(fos);
-                    if (tmp != null) {
-                        tmp.recycle();
-                    }
                 }
             }
         } catch (RemoteException e) {
@@ -1751,22 +1744,13 @@ public class WallpaperManager {
                     result, which, completion, mContext.getUserId());
             if (fd != null) {
                 FileOutputStream fos = null;
-                final Bitmap tmp = BitmapFactory.decodeStream(bitmapData);
                 try {
-                    // If the stream can't be decoded, treat it as an invalid input.
-                    if (tmp != null) {
-                        fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
-                        tmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                        fos.close();
-                        completion.waitForCompletion();
-                    } else {
-                        throw new IllegalArgumentException("InputStream is invalid");
-                    }
+                    fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
+                    copyStreamToWallpaperFile(bitmapData, fos);
+                    fos.close();
+                    completion.waitForCompletion();
                 } finally {
                     IoUtils.closeQuietly(fos);
-                    if (tmp != null) {
-                        tmp.recycle();
-                    }
                 }
             }
         } catch (RemoteException e) {
@@ -2009,6 +1993,63 @@ public class WallpaperManager {
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT)
     public boolean setWallpaperComponent(ComponentName name) {
         return setWallpaperComponent(name, mContext.getUserId());
+    }
+
+    /**
+     * Sets the wallpaper dim amount between [0f, 1f] which would be blended with the system default
+     * dimming. 0f doesn't add any additional dimming and 1f makes the wallpaper fully black.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT)
+    public void setWallpaperDimAmount(@FloatRange (from = 0f, to = 1f) float dimAmount) {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            throw new RuntimeException(new DeadSystemException());
+        }
+        try {
+            sGlobals.mService.setWallpaperDimAmount(MathUtils.saturate(dimAmount));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the current additional dim amount set on the wallpaper. 0f means no application has
+     * added any dimming on top of the system default dim amount.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT)
+    public float getWallpaperDimAmount() {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            throw new RuntimeException(new DeadSystemException());
+        }
+        try {
+            return sGlobals.mService.getWallpaperDimAmount();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Whether the lock screen wallpaper is different from the system wallpaper.
+     *
+     * @hide
+     */
+    public boolean lockScreenWallpaperExists() {
+        if (sGlobals.mService == null) {
+            Log.w(TAG, "WallpaperService not running");
+            throw new RuntimeException(new DeadSystemException());
+        }
+        try {
+            return sGlobals.mService.lockScreenWallpaperExists();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

@@ -1746,7 +1746,7 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private void triggerOnStatsProviderWarningOrLimitReached() throws InterruptedException {
-        mService.onStatsProviderWarningOrLimitReached();
+        mService.notifyStatsProviderWarningOrLimitReached();
         // Wait for processing of MSG_STATS_PROVIDER_WARNING_OR_LIMIT_REACHED.
         postMsgAndWaitForCompletion();
         verify(mStatsManager).forceUpdate();
@@ -2092,7 +2092,7 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     private void verifyAdvisePersistThreshold() throws Exception {
-        verify(mStatsManager).advisePersistThreshold(anyLong());
+        verify(mStatsManager).setDefaultGlobalAlert(anyLong());
     }
 
     private static class TestAbstractFuture<T> extends AbstractFuture<T> {

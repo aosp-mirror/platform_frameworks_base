@@ -1763,7 +1763,7 @@ public abstract class NotificationListenerService extends Service {
             mImportanceExplanation = in.readCharSequence(); // may be null
             mRankingScore = in.readFloat();
             mOverrideGroupKey = in.readString(); // may be null
-            mChannel = in.readParcelable(cl); // may be null
+            mChannel = in.readParcelable(cl, android.app.NotificationChannel.class); // may be null
             mOverridePeople = in.createStringArrayList();
             mSnoozeCriteria = in.createTypedArrayList(SnoozeCriterion.CREATOR);
             mShowBadge = in.readBoolean();
@@ -1776,7 +1776,7 @@ public abstract class NotificationListenerService extends Service {
             mCanBubble = in.readBoolean();
             mIsTextChanged = in.readBoolean();
             mIsConversation = in.readBoolean();
-            mShortcutInfo = in.readParcelable(cl);
+            mShortcutInfo = in.readParcelable(cl, android.content.pm.ShortcutInfo.class);
             mRankingAdjustment = in.readInt();
             mIsBubble = in.readBoolean();
         }

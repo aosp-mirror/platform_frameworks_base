@@ -111,7 +111,7 @@ public final class DateValueSanitizer extends InternalSanitizer implements Sanit
             new Parcelable.Creator<DateValueSanitizer>() {
         @Override
         public DateValueSanitizer createFromParcel(Parcel parcel) {
-            return new DateValueSanitizer((DateFormat) parcel.readSerializable());
+            return new DateValueSanitizer((DateFormat) parcel.readSerializable(android.icu.text.DateFormat.class.getClassLoader(), android.icu.text.DateFormat.class));
         }
 
         @Override

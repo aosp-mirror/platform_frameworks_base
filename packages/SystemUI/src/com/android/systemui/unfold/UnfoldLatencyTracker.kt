@@ -29,12 +29,16 @@ import javax.inject.Inject
  * Logs performance metrics regarding time to turn the inner screen on.
  *
  * This class assumes that [onFoldEvent] is always called before [onScreenTurnedOn].
+ *
  * This should be used from only one process.
+ *
  * For now, the focus is on the time the inner display is visible, but in the future, it is easily
  * possible to monitor the time to go from the inner screen to the outer.
  */
 @SysUISingleton
-class UnfoldLatencyTracker @Inject constructor(
+class UnfoldLatencyTracker
+@Inject
+constructor(
     private val latencyTracker: LatencyTracker,
     private val deviceStateManager: DeviceStateManager,
     @UiBackground private val uiBgExecutor: Executor,
@@ -45,8 +49,11 @@ class UnfoldLatencyTracker @Inject constructor(
     private var folded: Boolean? = null
     private val foldStateListener = FoldStateListener(context)
     private val isFoldable: Boolean
-        get() = context.resources.getIntArray(
-            com.android.internal.R.array.config_foldedDeviceStates).isNotEmpty()
+        get() =
+            context
+                .resources
+                .getIntArray(com.android.internal.R.array.config_foldedDeviceStates)
+                .isNotEmpty()
 
     /** Registers for relevant events only if the device is foldable. */
     fun init() {

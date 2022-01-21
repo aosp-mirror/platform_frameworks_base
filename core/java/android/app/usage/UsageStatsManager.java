@@ -1277,6 +1277,28 @@ public final class UsageStatsManager {
         }
     }
 
+    /** @hide */
+    public static String standbyBucketToString(int standbyBucket) {
+        switch (standbyBucket) {
+            case STANDBY_BUCKET_EXEMPTED:
+                return "EXEMPTED";
+            case STANDBY_BUCKET_ACTIVE:
+                return "ACTIVE";
+            case STANDBY_BUCKET_WORKING_SET:
+                return "WORKING_SET";
+            case STANDBY_BUCKET_FREQUENT:
+                return "FREQUENT";
+            case STANDBY_BUCKET_RARE:
+                return "RARE";
+            case STANDBY_BUCKET_RESTRICTED:
+                return "RESTRICTED";
+            case STANDBY_BUCKET_NEVER:
+                return "NEVER";
+            default:
+                return String.valueOf(standbyBucket);
+        }
+    }
+
     /**
      * {@hide}
      * Temporarily allowlist the specified app for a short duration. This is to allow an app

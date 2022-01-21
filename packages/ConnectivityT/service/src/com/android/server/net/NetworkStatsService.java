@@ -156,7 +156,6 @@ import com.android.net.module.util.BinderUtils;
 import com.android.net.module.util.CollectionUtils;
 import com.android.net.module.util.NetworkStatsUtils;
 import com.android.net.module.util.PermissionUtils;
-import com.android.server.LocalServices;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -708,12 +707,25 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         return now - lastCallTime < POLL_RATE_LIMIT_MS;
     }
 
-    private INetworkStatsSession openSessionInternal(final int flags, final String callingPackage) {
+    private int restrictFlagsForCaller(int flags) {
+        // All non-privileged callers are not allowed to turn off POLL_ON_OPEN.
+        final boolean isPrivileged = PermissionUtils.checkAnyPermissionOf(mContext,
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+                android.Manifest.permission.NETWORK_STACK);
+        if (!isPrivileged) {
+            flags |= NetworkStatsManager.FLAG_POLL_ON_OPEN;
+        }
+        // Non-system uids are rate limited for POLL_ON_OPEN.
         final int callingUid = Binder.getCallingUid();
-        final int usedFlags = isRateLimitedForPoll(callingUid)
+        flags = isRateLimitedForPoll(callingUid)
                 ? flags & (~NetworkStatsManager.FLAG_POLL_ON_OPEN)
                 : flags;
-        if ((usedFlags & (NetworkStatsManager.FLAG_POLL_ON_OPEN
+        return flags;
+    }
+
+    private INetworkStatsSession openSessionInternal(final int flags, final String callingPackage) {
+        final int restrictedFlags = restrictFlagsForCaller(flags);
+        if ((restrictedFlags & (NetworkStatsManager.FLAG_POLL_ON_OPEN
                 | NetworkStatsManager.FLAG_POLL_FORCE)) != 0) {
             final long ident = Binder.clearCallingIdentity();
             try {
@@ -727,7 +739,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // for its lifetime; when caller closes only weak references remain.
 
         return new INetworkStatsSession.Stub() {
-            private final int mCallingUid = callingUid;
+            private final int mCallingUid = Binder.getCallingUid();
             private final String mCallingPackage = callingPackage;
             private final @NetworkStatsAccess.Level int mAccessLevel = checkAccessLevel(
                     callingPackage);
@@ -761,21 +773,21 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             @Override
             public NetworkStats getDeviceSummaryForNetwork(
                     NetworkTemplate template, long start, long end) {
-                return internalGetSummaryForNetwork(template, usedFlags, start, end, mAccessLevel,
-                        mCallingUid);
+                return internalGetSummaryForNetwork(template, restrictedFlags, start, end,
+                        mAccessLevel, mCallingUid);
             }
 
             @Override
             public NetworkStats getSummaryForNetwork(
                     NetworkTemplate template, long start, long end) {
-                return internalGetSummaryForNetwork(template, usedFlags, start, end, mAccessLevel,
-                        mCallingUid);
+                return internalGetSummaryForNetwork(template, restrictedFlags, start, end,
+                        mAccessLevel, mCallingUid);
             }
 
             @Override
             public NetworkStatsHistory getHistoryForNetwork(NetworkTemplate template, int fields) {
-                return internalGetHistoryForNetwork(template, usedFlags, fields, mAccessLevel,
-                        mCallingUid);
+                return internalGetHistoryForNetwork(template, restrictedFlags, fields,
+                        mAccessLevel, mCallingUid);
             }
 
             @Override
@@ -2120,7 +2132,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         public void notifyWarningOrLimitReached() {
             Log.d(TAG, mTag + ": notifyWarningOrLimitReached");
             BinderUtils.withCleanCallingIdentity(() ->
-                    mNetworkPolicyManager.onStatsProviderWarningOrLimitReached());
+                    mNetworkPolicyManager.notifyStatsProviderWarningOrLimitReached());
         }
 
         @Override
