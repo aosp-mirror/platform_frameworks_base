@@ -328,6 +328,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
         fout.println("  VirtualDevice: ");
         fout.println("    mAssociationId: " + mAssociationInfo.getId());
+        fout.println("    mParams: " + mParams);
         fout.println("    mVirtualDisplayIds: ");
         synchronized (mVirtualDeviceLock) {
             for (int id : mVirtualDisplayIds) {
@@ -345,7 +346,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         mVirtualDisplayIds.add(displayId);
         final GenericWindowPolicyController dwpc =
                 new GenericWindowPolicyController(FLAG_SECURE,
-                        SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS, getAllowedUserHandles());
+                        SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS, getAllowedUserHandles(),
+                        mParams.getAllowedActivities(),
+                        mParams.getBlockedActivities());
         mWindowPolicyControllers.put(displayId, dwpc);
         return dwpc;
     }

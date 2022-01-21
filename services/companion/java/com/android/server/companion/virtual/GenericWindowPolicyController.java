@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
@@ -33,6 +34,7 @@ import android.util.Slog;
 import android.window.DisplayWindowPolicyController;
 
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -49,13 +51,23 @@ class GenericWindowPolicyController extends DisplayWindowPolicyController {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public static final long ALLOW_SECURE_ACTIVITY_DISPLAY_ON_REMOTE_DEVICE = 201712607L;
-    @NonNull private final ArraySet<UserHandle> mAllowedUsers;
+    @NonNull
+    private final ArraySet<UserHandle> mAllowedUsers;
+    @Nullable
+    private final ArraySet<ComponentName> mAllowedActivities;
+    @Nullable
+    private final ArraySet<ComponentName> mBlockedActivities;
 
-    @NonNull final ArraySet<Integer> mRunningUids = new ArraySet<>();
+    @NonNull
+    final ArraySet<Integer> mRunningUids = new ArraySet<>();
 
     GenericWindowPolicyController(int windowFlags, int systemWindowFlags,
-            @NonNull ArraySet<UserHandle> allowedUsers) {
+            @NonNull ArraySet<UserHandle> allowedUsers,
+            @Nullable Set<ComponentName> allowedActivities,
+            @Nullable Set<ComponentName> blockedActivities) {
         mAllowedUsers = allowedUsers;
+        mAllowedActivities = allowedActivities == null ? null : new ArraySet<>(allowedActivities);
+        mBlockedActivities = blockedActivities == null ? null : new ArraySet<>(blockedActivities);
         setInterestedWindowFlags(windowFlags, systemWindowFlags);
     }
 
@@ -106,6 +118,18 @@ class GenericWindowPolicyController extends DisplayWindowPolicyController {
                 UserHandle.getUserHandleForUid(activityInfo.applicationInfo.uid);
         if (!mAllowedUsers.contains(activityUser)) {
             Slog.d(TAG, "Virtual device activity not allowed from user " + activityUser);
+            return false;
+        }
+        if (mBlockedActivities != null
+                && mBlockedActivities.contains(activityInfo.getComponentName())) {
+            Slog.d(TAG,
+                    "Virtual device blocking launch of " + activityInfo.getComponentName());
+            return false;
+        }
+        if (mAllowedActivities != null
+                && !mAllowedActivities.contains(activityInfo.getComponentName())) {
+            Slog.d(TAG,
+                    activityInfo.getComponentName() + " is not in the allowed list.");
             return false;
         }
         if (!CompatChanges.isChangeEnabled(ALLOW_SECURE_ACTIVITY_DISPLAY_ON_REMOTE_DEVICE,
