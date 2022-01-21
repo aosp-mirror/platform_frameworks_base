@@ -1021,19 +1021,21 @@ public final class SystemServiceRegistry {
             }});
 
         registerService(Context.PERSISTENT_DATA_BLOCK_SERVICE, PersistentDataBlockManager.class,
-                new StaticServiceFetcher<PersistentDataBlockManager>() {
+                new CachedServiceFetcher<PersistentDataBlockManager>() {
             @Override
-            public PersistentDataBlockManager createService() throws ServiceNotFoundException {
+            public PersistentDataBlockManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
                 IBinder b = ServiceManager.getServiceOrThrow(Context.PERSISTENT_DATA_BLOCK_SERVICE);
                 IPersistentDataBlockService persistentDataBlockService =
                         IPersistentDataBlockService.Stub.asInterface(b);
                 if (persistentDataBlockService != null) {
-                    return new PersistentDataBlockManager(persistentDataBlockService);
+                    return new PersistentDataBlockManager(ctx, persistentDataBlockService);
                 } else {
                     // not supported
                     return null;
                 }
-            }});
+            }
+         });
 
         registerService(Context.OEM_LOCK_SERVICE, OemLockManager.class,
                 new StaticServiceFetcher<OemLockManager>() {
