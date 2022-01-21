@@ -1002,7 +1002,7 @@ public class Tuner implements AutoCloseable  {
     private native String nativeGetFrontendHardwareInfo();
     private native int nativeSetMaxNumberOfFrontends(int frontendType, int maxNumber);
     private native int nativeGetMaxNumberOfFrontends(int frontendType);
-
+    private native int nativeRemoveOutputPid(int pid);
     private native Lnb nativeOpenLnbByHandle(int handle);
     private native Lnb nativeOpenLnbByName(String name);
 
@@ -1561,6 +1561,36 @@ public class Tuner implements AutoCloseable  {
                 mFrontendCiCamLock.unlock();
             }
             releaseTRMSLock();
+        }
+    }
+
+    /**
+     * Filter out unnecessary PID (packet identifier) from frontend output.
+     *
+     * <p>It is used by the client to remove some video or audio PIDs of other program to reduce the
+     * total amount of recorded TS.
+     *
+     * <p>This API is only supported by Tuner HAL 2.0 or higher. Unsupported version would cause
+     * no-op. Use {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     *
+     * @return result status of the operation. Unsupported version or if current active frontend
+     *         doesn’t support PID filtering out would return {@link #RESULT_UNAVAILABLE}.
+     * @throws IllegalStateException if there is no active frontend currently.
+     */
+    @Result
+    public int removeOutputPid(@IntRange(from = 0) int pid) {
+        mFrontendLock.lock();
+        try {
+            if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
+                        TunerVersionChecker.TUNER_VERSION_2_0, "Remove output PID")) {
+                return RESULT_UNAVAILABLE;
+            }
+            if (mFrontend == null) {
+                throw new IllegalStateException("frontend is not initialized");
+            }
+            return nativeRemoveOutputPid(pid);
+        } finally {
+            mFrontendLock.unlock();
         }
     }
 
