@@ -92,7 +92,10 @@ public class WifiPowerCalculatorTest {
         final BatteryStatsImpl batteryStats = setupTestNetworkNumbers();
         final WifiActivityEnergyInfo energyInfo = setupPowerControllerBasedModelEnergyNumbersInfo();
 
-        batteryStats.updateWifiState(energyInfo, POWER_DATA_UNAVAILABLE, 1000, 1000,
+        batteryStats.noteWifiScanStartedLocked(APP_UID, 500, 500);
+        batteryStats.noteWifiScanStoppedLocked(APP_UID, 1500, 1500);
+
+        batteryStats.updateWifiState(energyInfo, POWER_DATA_UNAVAILABLE, 2000, 2000,
                 mNetworkStatsManager);
 
         WifiPowerCalculator calculator = new WifiPowerCalculator(mStatsRule.getPowerProfile());
@@ -100,15 +103,15 @@ public class WifiPowerCalculatorTest {
 
         UidBatteryConsumer uidConsumer = mStatsRule.getUidBatteryConsumer(APP_UID);
         assertThat(uidConsumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WIFI))
-                .isEqualTo(1423);
+                .isEqualTo(2473);
         assertThat(uidConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
-                .isWithin(PRECISION).of(0.2214666);
+                .isWithin(PRECISION).of(0.3964);
         assertThat(uidConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_WIFI))
                 .isEqualTo(BatteryConsumer.POWER_MODEL_POWER_PROFILE);
 
         BatteryConsumer deviceConsumer = mStatsRule.getDeviceBatteryConsumer();
         assertThat(deviceConsumer.getUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_WIFI))
-                .isEqualTo(4002);
+                .isEqualTo(4001);
         assertThat(deviceConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI))
                 .isWithin(PRECISION).of(0.86666);
         assertThat(deviceConsumer.getPowerModel(BatteryConsumer.POWER_COMPONENT_WIFI))
