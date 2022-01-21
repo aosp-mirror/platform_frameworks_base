@@ -51,7 +51,8 @@ public class BatteryChargeCalculator extends PowerCalculator {
         builder.setDischargePercentage(
                 batteryStats.getDischargeAmount(BatteryStats.STATS_SINCE_CHARGED))
                 .setDischargedPowerRange(dischargedPowerLowerBoundMah,
-                        dischargedPowerUpperBoundMah);
+                        dischargedPowerUpperBoundMah)
+                .setDischargeDurationMs(batteryStats.getBatteryRealtime(rawRealtimeUs) / 1000);
 
         final long batteryTimeRemainingMs = batteryStats.computeBatteryTimeRemaining(rawRealtimeUs);
         if (batteryTimeRemainingMs != -1) {

@@ -212,8 +212,8 @@ public class BatteryUsageStatsRule implements TestRule {
         }
 
         for (PowerCalculator calculator : calculators) {
-            calculator.calculate(builder, mBatteryStats, mMockClock.realtime, mMockClock.uptime,
-                    query);
+            calculator.calculate(builder, mBatteryStats, mMockClock.realtime * 1000,
+                    mMockClock.uptime * 1000, query);
         }
 
         mBatteryUsageStats = builder.build();

@@ -44,6 +44,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 @RunWith(AndroidJUnit4.class)
+@SuppressWarnings("GuardedBy")
 public class BatteryUsageStatsStoreTest {
     private static final long MAX_BATTERY_STATS_SNAPSHOT_STORAGE_BYTES = 2 * 1024;
 
@@ -76,8 +77,13 @@ public class BatteryUsageStatsStoreTest {
     @Test
     public void testStoreSnapshot() {
         mMockClock.currentTime = 1_600_000;
+        mMockClock.realtime = 1000;
+        mMockClock.uptime = 1000;
 
         prepareBatteryStats();
+
+        mMockClock.realtime = 1_000_000;
+        mMockClock.uptime = 1_000_000;
         mBatteryStats.resetAllStatsCmdLocked();
 
         final long[] timestamps = mBatteryUsageStatsStore.listBatteryUsageStatsTimestamps();
@@ -90,6 +96,7 @@ public class BatteryUsageStatsStoreTest {
         assertThat(batteryUsageStats.getStatsEndTimestamp()).isEqualTo(1_600_000);
         assertThat(batteryUsageStats.getBatteryCapacity()).isEqualTo(4000);
         assertThat(batteryUsageStats.getDischargePercentage()).isEqualTo(5);
+        assertThat(batteryUsageStats.getDischargeDurationMs()).isEqualTo(1_000_000 - 1_000);
         assertThat(batteryUsageStats.getAggregateBatteryConsumer(
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE).getConsumedPower())
                 .isEqualTo(600);  // (3_600_000 - 3_000_000) / 1000
