@@ -16202,6 +16202,18 @@ public class BatteryStatsImpl extends BatteryStats {
         iPw.decreaseIndent();
     }
 
+    /**
+     * Dump Power Profile
+     */
+    @GuardedBy("this")
+    public void dumpPowerProfileLocked(PrintWriter pw) {
+        final IndentingPrintWriter iPw = new IndentingPrintWriter(pw, "    ");
+        iPw.printf("Power Profile: \n");
+        iPw.increaseIndent();
+        mPowerProfile.dump(iPw);
+        iPw.decreaseIndent();
+    }
+
     final ReentrantLock mWriteLock = new ReentrantLock();
 
     @GuardedBy("this")
