@@ -32,6 +32,7 @@ import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager
 import com.android.systemui.statusbar.notification.collection.TargetSdkResolver
+import com.android.systemui.statusbar.notification.collection.inflation.BindEventManagerImpl
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl
 import com.android.systemui.statusbar.notification.collection.init.NotifPipelineInitializer
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy
@@ -76,6 +77,7 @@ class NotificationsControllerImpl @Inject constructor(
     private val notifBindPipelineInitializer: NotifBindPipelineInitializer,
     private val deviceProvisionedController: DeviceProvisionedController,
     private val notificationRowBinder: NotificationRowBinderImpl,
+    private val bindEventManagerImpl: BindEventManagerImpl,
     private val remoteInputUriController: RemoteInputUriController,
     private val groupManagerLegacy: Lazy<NotificationGroupManagerLegacy>,
     private val groupAlertTransferHelper: NotificationGroupAlertTransferHelper,
@@ -131,6 +133,7 @@ class NotificationsControllerImpl @Inject constructor(
             targetSdkResolver.initialize(entryManager)
             remoteInputUriController.attach(entryManager)
             groupAlertTransferHelper.bind(entryManager, groupManagerLegacy.get())
+            bindEventManagerImpl.attachToLegacyPipeline(entryManager)
             headsUpManager.addListener(groupManagerLegacy.get())
             headsUpManager.addListener(groupAlertTransferHelper)
             headsUpController.attach(entryManager, headsUpManager)
