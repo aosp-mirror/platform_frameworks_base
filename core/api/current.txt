@@ -18053,6 +18053,7 @@ package android.hardware {
     field public static final long USAGE_CPU_READ_RARELY = 2L; // 0x2L
     field public static final long USAGE_CPU_WRITE_OFTEN = 48L; // 0x30L
     field public static final long USAGE_CPU_WRITE_RARELY = 32L; // 0x20L
+    field public static final long USAGE_FRONT_BUFFER = 1L; // 0x1L
     field public static final long USAGE_GPU_COLOR_OUTPUT = 512L; // 0x200L
     field public static final long USAGE_GPU_CUBE_MAP = 33554432L; // 0x2000000L
     field public static final long USAGE_GPU_DATA_BUFFER = 16777216L; // 0x1000000L
