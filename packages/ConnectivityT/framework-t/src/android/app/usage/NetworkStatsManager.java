@@ -125,6 +125,19 @@ public class NetworkStatsManager {
     private final Context mContext;
     private final INetworkStatsService mService;
 
+    /**
+     * Type constants for reading different types of Data Usage.
+     * @hide
+     */
+    // @SystemApi(client = MODULE_LIBRARIES)
+    public static final String PREFIX_DEV = "dev";
+    /** @hide */
+    public static final String PREFIX_XT = "xt";
+    /** @hide */
+    public static final String PREFIX_UID = "uid";
+    /** @hide */
+    public static final String PREFIX_UID_TAG = "uid_tag";
+
     /** @hide */
     public static final int FLAG_POLL_ON_OPEN = 1 << 0;
     /** @hide */
@@ -211,9 +224,10 @@ public class NetworkStatsManager {
      */
     @NonNull
     @WorkerThread
-    // @SystemApi(client = MODULE_LIBRARIES)
+    @SystemApi(client = MODULE_LIBRARIES)
     public Bucket querySummaryForDevice(@NonNull NetworkTemplate template,
             long startTime, long endTime) {
+        Objects.requireNonNull(template);
         try {
             NetworkStats stats =
                     new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
@@ -385,10 +399,11 @@ public class NetworkStatsManager {
      * @hide
      */
     @NonNull
-    // @SystemApi(client = MODULE_LIBRARIES)
+    @SystemApi(client = MODULE_LIBRARIES)
     @WorkerThread
     public NetworkStats querySummary(@NonNull NetworkTemplate template, long startTime,
             long endTime) throws SecurityException {
+        Objects.requireNonNull(template);
         try {
             NetworkStats result =
                     new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
@@ -418,10 +433,11 @@ public class NetworkStatsManager {
      * @hide
      */
     @NonNull
-    // @SystemApi(client = MODULE_LIBRARIES)
+    @SystemApi(client = MODULE_LIBRARIES)
     @WorkerThread
     public NetworkStats queryTaggedSummary(@NonNull NetworkTemplate template, long startTime,
             long endTime) throws SecurityException {
+        Objects.requireNonNull(template);
         try {
             NetworkStats result =
                     new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
@@ -453,10 +469,11 @@ public class NetworkStatsManager {
      * @hide
      */
     @NonNull
-    // @SystemApi(client = MODULE_LIBRARIES)
+    @SystemApi(client = MODULE_LIBRARIES)
     @WorkerThread
     public NetworkStats queryDetailsForDevice(@NonNull NetworkTemplate template,
             long startTime, long endTime) {
+        Objects.requireNonNull(template);
         try {
             final NetworkStats result =
                     new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
@@ -580,10 +597,11 @@ public class NetworkStatsManager {
      * @hide
      */
     @NonNull
-    // @SystemApi(client = MODULE_LIBRARIES)
+    @SystemApi(client = MODULE_LIBRARIES)
     @WorkerThread
     public NetworkStats queryDetailsForUidTagState(@NonNull NetworkTemplate template,
             long startTime, long endTime, int uid, int tag, int state) throws SecurityException {
+        Objects.requireNonNull(template);
         try {
             final NetworkStats result = new NetworkStats(
                     mContext, template, mFlags, startTime, endTime, mService);

@@ -17,12 +17,15 @@
 package android.net;
 
 import static android.net.ConnectivityManager.TYPE_WIFI;
+import static android.net.NetworkTemplate.NETWORK_TYPE_ALL;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.service.NetworkIdentityProto;
-import android.telephony.Annotation.NetworkType;
+import android.telephony.Annotation;
+import android.telephony.TelephonyManager;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.net.module.util.NetworkCapabilitiesUtils;
@@ -37,9 +40,13 @@ import java.util.Objects;
  *
  * @hide
  */
+// @SystemApi(client = MODULE_LIBRARIES)
 public class NetworkIdentity implements Comparable<NetworkIdentity> {
     private static final String TAG = "NetworkIdentity";
 
+    /** @hide */
+    // TODO: Remove this after migrating all callers to use
+    //  {@link NetworkTemplate#NETWORK_TYPE_ALL} instead.
     public static final int SUBTYPE_COMBINED = -1;
 
     /**
@@ -59,21 +66,22 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
     public static final int OEM_PRIVATE = 0x2;
 
     final int mType;
-    final int mSubType;
+    final int mRatType;
     final String mSubscriberId;
-    final String mNetworkId;
+    final String mWifiNetworkKey;
     final boolean mRoaming;
     final boolean mMetered;
     final boolean mDefaultNetwork;
     final int mOemManaged;
 
+    /** @hide */
     public NetworkIdentity(
-            int type, int subType, String subscriberId, String networkId, boolean roaming,
-            boolean metered, boolean defaultNetwork, int oemManaged) {
+            int type, int ratType, @Nullable String subscriberId, @Nullable String wifiNetworkKey,
+            boolean roaming, boolean metered, boolean defaultNetwork, int oemManaged) {
         mType = type;
-        mSubType = subType;
+        mRatType = ratType;
         mSubscriberId = subscriberId;
-        mNetworkId = networkId;
+        mWifiNetworkKey = wifiNetworkKey;
         mRoaming = roaming;
         mMetered = metered;
         mDefaultNetwork = defaultNetwork;
@@ -82,7 +90,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mType, mSubType, mSubscriberId, mNetworkId, mRoaming, mMetered,
+        return Objects.hash(mType, mRatType, mSubscriberId, mWifiNetworkKey, mRoaming, mMetered,
                 mDefaultNetwork, mOemManaged);
     }
 
@@ -90,9 +98,9 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
     public boolean equals(@Nullable Object obj) {
         if (obj instanceof NetworkIdentity) {
             final NetworkIdentity ident = (NetworkIdentity) obj;
-            return mType == ident.mType && mSubType == ident.mSubType && mRoaming == ident.mRoaming
+            return mType == ident.mType && mRatType == ident.mRatType && mRoaming == ident.mRoaming
                     && Objects.equals(mSubscriberId, ident.mSubscriberId)
-                    && Objects.equals(mNetworkId, ident.mNetworkId)
+                    && Objects.equals(mWifiNetworkKey, ident.mWifiNetworkKey)
                     && mMetered == ident.mMetered
                     && mDefaultNetwork == ident.mDefaultNetwork
                     && mOemManaged == ident.mOemManaged;
@@ -104,18 +112,18 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
     public String toString() {
         final StringBuilder builder = new StringBuilder("{");
         builder.append("type=").append(mType);
-        builder.append(", subType=");
-        if (mSubType == SUBTYPE_COMBINED) {
+        builder.append(", ratType=");
+        if (mRatType == NETWORK_TYPE_ALL) {
             builder.append("COMBINED");
         } else {
-            builder.append(mSubType);
+            builder.append(mRatType);
         }
         if (mSubscriberId != null) {
             builder.append(", subscriberId=")
                     .append(NetworkIdentityUtils.scrubSubscriberId(mSubscriberId));
         }
-        if (mNetworkId != null) {
-            builder.append(", networkId=").append(mNetworkId);
+        if (mWifiNetworkKey != null) {
+            builder.append(", wifiNetworkKey=").append(mWifiNetworkKey);
         }
         if (mRoaming) {
             builder.append(", ROAMING");
@@ -153,12 +161,13 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         }
     }
 
+    /** @hide */
     public void dumpDebug(ProtoOutputStream proto, long tag) {
         final long start = proto.start(tag);
 
         proto.write(NetworkIdentityProto.TYPE, mType);
 
-        // Not dumping mSubType, subtypes are no longer supported.
+        // TODO: dump mRatType as well.
 
         proto.write(NetworkIdentityProto.ROAMING, mRoaming);
         proto.write(NetworkIdentityProto.METERED, mMetered);
@@ -168,50 +177,68 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         proto.end(start);
     }
 
+    /** @hide */
     public int getType() {
         return mType;
     }
 
-    public int getSubType() {
-        return mSubType;
+    /** @hide */
+    public int getRatType() {
+        return mRatType;
     }
 
+    /** @hide */
     public String getSubscriberId() {
         return mSubscriberId;
     }
 
-    public String getNetworkId() {
-        return mNetworkId;
+    /** @hide */
+    public String getWifiNetworkKey() {
+        return mWifiNetworkKey;
     }
 
+    /** @hide */
     public boolean getRoaming() {
         return mRoaming;
     }
 
+    /** @hide */
     public boolean getMetered() {
         return mMetered;
     }
 
+    /** @hide */
     public boolean getDefaultNetwork() {
         return mDefaultNetwork;
     }
 
+    /** @hide */
     public int getOemManaged() {
         return mOemManaged;
     }
 
     /**
-     * Build a {@link NetworkIdentity} from the given {@link NetworkStateSnapshot} and
-     * {@code subType}, assuming that any mobile networks are using the current IMSI.
-     * The subType if applicable, should be set as one of the TelephonyManager.NETWORK_TYPE_*
-     * constants, or {@link android.telephony.TelephonyManager#NETWORK_TYPE_UNKNOWN} if not.
+     * Assemble a {@link NetworkIdentity} from the passed arguments.
+     *
+     * This methods builds an identity based on the capabilities of the network in the
+     * snapshot and other passed arguments. The identity is used as a key to record data usage.
+     *
+     * @param snapshot the snapshot of network state. See {@link NetworkStateSnapshot}.
+     * @param defaultNetwork whether the network is a default network.
+     * @param ratType the Radio Access Technology(RAT) type of the network. Or
+     *                {@link TelephonyManager#NETWORK_TYPE_UNKNOWN} if not applicable.
+     *                See {@code TelephonyManager.NETWORK_TYPE_*}.
+     * @hide
      */
+    // TODO: Remove this after all callers are migrated to use new Api.
+    @NonNull
     public static NetworkIdentity buildNetworkIdentity(Context context,
-            NetworkStateSnapshot snapshot, boolean defaultNetwork, @NetworkType int subType) {
+            @NonNull NetworkStateSnapshot snapshot,
+            boolean defaultNetwork, @Annotation.NetworkType int ratType) {
         final int legacyType = snapshot.getLegacyType();
 
         final String subscriberId = snapshot.getSubscriberId();
-        String networkId = null;
+        String wifiNetworkKey = null;
         boolean roaming = !snapshot.getNetworkCapabilities().hasCapability(
                 NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING);
         boolean metered = !(snapshot.getNetworkCapabilities().hasCapability(
@@ -226,19 +253,19 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
                     .getTransportInfo();
             if (transportInfo instanceof WifiInfo) {
                 final WifiInfo info = (WifiInfo) transportInfo;
-                networkId = info != null ? info.getCurrentNetworkKey() : null;
+                wifiNetworkKey = info != null ? info.getCurrentNetworkKey() : null;
             }
         }
 
-        return new NetworkIdentity(legacyType, subType, subscriberId, networkId, roaming, metered,
-                defaultNetwork, oemManaged);
+        return new NetworkIdentity(legacyType, ratType, subscriberId, wifiNetworkKey, roaming,
+                metered, defaultNetwork, oemManaged);
     }
 
     /**
      * Builds a bitfield of {@code NetworkIdentity.OEM_*} based on {@link NetworkCapabilities}.
      * @hide
      */
-    public static int getOemBitfield(NetworkCapabilities nc) {
+    public static int getOemBitfield(@NonNull NetworkCapabilities nc) {
         int oemManaged = OEM_NONE;
 
         if (nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_OEM_PAID)) {
@@ -252,16 +279,17 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
     }
 
     @Override
-    public int compareTo(NetworkIdentity another) {
+    public int compareTo(@NonNull NetworkIdentity another) {
+        Objects.requireNonNull(another);
         int res = Integer.compare(mType, another.mType);
         if (res == 0) {
-            res = Integer.compare(mSubType, another.mSubType);
+            res = Integer.compare(mRatType, another.mRatType);
         }
         if (res == 0 && mSubscriberId != null && another.mSubscriberId != null) {
             res = mSubscriberId.compareTo(another.mSubscriberId);
         }
-        if (res == 0 && mNetworkId != null && another.mNetworkId != null) {
-            res = mNetworkId.compareTo(another.mNetworkId);
+        if (res == 0 && mWifiNetworkKey != null && another.mWifiNetworkKey != null) {
+            res = mWifiNetworkKey.compareTo(another.mWifiNetworkKey);
         }
         if (res == 0) {
             res = Boolean.compare(mRoaming, another.mRoaming);
