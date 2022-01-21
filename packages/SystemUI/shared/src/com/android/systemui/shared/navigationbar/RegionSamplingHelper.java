@@ -275,23 +275,27 @@ public class RegionSamplingHelper implements View.OnAttachStateChangeListener,
     }
 
     public void dump(PrintWriter pw) {
-        pw.println("RegionSamplingHelper:");
-        pw.println("  sampleView isAttached: " + mSampledView.isAttachedToWindow());
-        pw.println("  sampleView isScValid: " + (mSampledView.isAttachedToWindow()
+        dump("", pw);
+    }
+
+    public void dump(String prefix, PrintWriter pw) {
+        pw.println(prefix + "RegionSamplingHelper:");
+        pw.println(prefix + "\tsampleView isAttached: " + mSampledView.isAttachedToWindow());
+        pw.println(prefix + "\tsampleView isScValid: " + (mSampledView.isAttachedToWindow()
                 ? mSampledView.getViewRootImpl().getSurfaceControl().isValid()
                 : "notAttached"));
-        pw.println("  mSamplingEnabled: " + mSamplingEnabled);
-        pw.println("  mSamplingListenerRegistered: " + mSamplingListenerRegistered);
-        pw.println("  mSamplingRequestBounds: " + mSamplingRequestBounds);
-        pw.println("  mRegisteredSamplingBounds: " + mRegisteredSamplingBounds);
-        pw.println("  mLastMedianLuma: " + mLastMedianLuma);
-        pw.println("  mCurrentMedianLuma: " + mCurrentMedianLuma);
-        pw.println("  mWindowVisible: " + mWindowVisible);
-        pw.println("  mWindowHasBlurs: " + mWindowHasBlurs);
-        pw.println("  mWaitingOnDraw: " + mWaitingOnDraw);
-        pw.println("  mRegisteredStopLayer: " + mRegisteredStopLayer);
-        pw.println("  mWrappedStopLayer: " + mWrappedStopLayer);
-        pw.println("  mIsDestroyed: " + mIsDestroyed);
+        pw.println(prefix + "\tmSamplingEnabled: " + mSamplingEnabled);
+        pw.println(prefix + "\tmSamplingListenerRegistered: " + mSamplingListenerRegistered);
+        pw.println(prefix + "\tmSamplingRequestBounds: " + mSamplingRequestBounds);
+        pw.println(prefix + "\tmRegisteredSamplingBounds: " + mRegisteredSamplingBounds);
+        pw.println(prefix + "\tmLastMedianLuma: " + mLastMedianLuma);
+        pw.println(prefix + "\tmCurrentMedianLuma: " + mCurrentMedianLuma);
+        pw.println(prefix + "\tmWindowVisible: " + mWindowVisible);
+        pw.println(prefix + "\tmWindowHasBlurs: " + mWindowHasBlurs);
+        pw.println(prefix + "\tmWaitingOnDraw: " + mWaitingOnDraw);
+        pw.println(prefix + "\tmRegisteredStopLayer: " + mRegisteredStopLayer);
+        pw.println(prefix + "\tmWrappedStopLayer: " + mWrappedStopLayer);
+        pw.println(prefix + "\tmIsDestroyed: " + mIsDestroyed);
     }
 
     public interface SamplingCallback {
