@@ -71,11 +71,11 @@ public class ScreenshotHelper {
 
             if (in.readInt() == 1) {
                 mBitmapBundle = in.readBundle(getClass().getClassLoader());
-                mBoundsInScreen = in.readParcelable(Rect.class.getClassLoader());
-                mInsets = in.readParcelable(Insets.class.getClassLoader());
+                mBoundsInScreen = in.readParcelable(Rect.class.getClassLoader(), android.graphics.Rect.class);
+                mInsets = in.readParcelable(Insets.class.getClassLoader(), android.graphics.Insets.class);
                 mTaskId = in.readInt();
                 mUserId = in.readInt();
-                mTopComponent = in.readParcelable(ComponentName.class.getClassLoader());
+                mTopComponent = in.readParcelable(ComponentName.class.getClassLoader(), android.content.ComponentName.class);
             }
         }
 

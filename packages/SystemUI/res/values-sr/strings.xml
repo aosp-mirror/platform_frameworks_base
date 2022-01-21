@@ -234,8 +234,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"WiFi није повезан"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Осветљеност"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Инверзија боја"</string>
-    <!-- no translation found for quick_settings_color_correction_label (5636617913560474664) -->
-    <skip />
+    <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Корекција боја"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Још подешавања"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"Корисничка подешавања"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Готово"</string>
@@ -453,8 +452,8 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Откључај ради коришћења"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Дошло је до проблема при преузимању картица. Пробајте поново касније"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Подешавања закључаног екрана"</string>
-    <string name="qr_code_scanner_title" msgid="1598912458255252498">"Скенирај QR кôд"</string>
-    <string name="qr_code_scanner_description" msgid="7452098243938659945">"Кликните да бисте скенирали QR кôд"</string>
+    <string name="qr_code_scanner_title" msgid="5660820608548306581">"QR кôд"</string>
+    <string name="qr_code_scanner_description" msgid="7937603775306661863">"Додирните да бисте скенирали"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Пословни профил"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Режим рада у авиону"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Нећете чути следећи аларм у <xliff:g id="WHEN">%1$s</xliff:g>"</string>
@@ -798,7 +797,8 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Пустите <xliff:g id="SONG_NAME">%1$s</xliff:g> извођача <xliff:g id="ARTIST_NAME">%2$s</xliff:g> из апликације <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Пустите <xliff:g id="SONG_NAME">%1$s</xliff:g> из апликације <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Опозови"</string>
-    <string name="media_move_closer_to_transfer" msgid="1628426856415585141">"Приближите да бисте пуштали музику на: <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for media_move_closer_to_start_cast (2673104707465013176) -->
+    <skip />
     <string name="media_transfer_playing" msgid="3760048096352107789">"Пушта се на: <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактивно. Видите апликацију"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Није пронађено"</string>
@@ -886,4 +886,8 @@
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Изаберите корисника"</string>
     <string name="fgs_manager_dialog_title" msgid="656091833603337197">"Апликације покренуте у позадини"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Заустави"</string>
+    <!-- no translation found for clipboard_edit_text_copy (770856373439969178) -->
+    <skip />
+    <!-- no translation found for clipboard_overlay_text_copied (1872624400464891363) -->
+    <skip />
 </resources>

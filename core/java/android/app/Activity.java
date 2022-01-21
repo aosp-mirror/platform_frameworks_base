@@ -111,6 +111,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.OnBackInvokedDispatcher;
+import android.view.OnBackInvokedDispatcherOwner;
 import android.view.RemoteAnimationDefinition;
 import android.view.SearchEvent;
 import android.view.View;
@@ -736,7 +738,8 @@ public class Activity extends ContextThemeWrapper
         Window.Callback, KeyEvent.Callback,
         OnCreateContextMenuListener, ComponentCallbacks2,
         Window.OnWindowDismissedCallback,
-        ContentCaptureManager.ContentCaptureClient {
+        ContentCaptureManager.ContentCaptureClient,
+        OnBackInvokedDispatcherOwner {
     private static final String TAG = "Activity";
     private static final boolean DEBUG_LIFECYCLE = false;
 
@@ -8671,5 +8674,23 @@ public class Activity extends ContextThemeWrapper
             final Window w = getWindow();
             return (w != null && w.peekDecorView() != null);
         }
+    }
+
+    /**
+     * Returns the {@link OnBackInvokedDispatcher} instance associated with the window that this
+     * activity is attached to.
+     *
+     * Returns null if the activity is not attached to a window with a decor.
+     */
+    @Nullable
+    @Override
+    public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
+        if (mWindow != null) {
+            View decorView = mWindow.getDecorView();
+            if (decorView != null) {
+                return decorView.getOnBackInvokedDispatcher();
+            }
+        }
+        return null;
     }
 }

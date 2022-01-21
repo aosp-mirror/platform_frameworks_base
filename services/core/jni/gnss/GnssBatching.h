@@ -38,7 +38,8 @@ public:
     virtual ~GnssBatchingInterface() {}
     virtual jboolean init(const std::unique_ptr<GnssBatchingCallback>& callback) = 0;
     virtual jint getBatchSize() = 0;
-    virtual jboolean start(long periodNanos, bool wakeupOnFifoFull) = 0;
+    virtual jboolean start(long periodNanos, float minUpdateDistanceMeters,
+                           bool wakeupOnFifoFull) = 0;
     virtual jboolean stop() = 0;
     virtual jboolean flush() = 0;
     virtual jboolean cleanup() = 0;
@@ -49,7 +50,7 @@ public:
     GnssBatching(const sp<android::hardware::gnss::IGnssBatching>& iGnssBatching);
     jboolean init(const std::unique_ptr<GnssBatchingCallback>& callback) override;
     jint getBatchSize() override;
-    jboolean start(long periodNanos, bool wakeupOnFifoFull) override;
+    jboolean start(long periodNanos, float minUpdateDistanceMeters, bool wakeupOnFifoFull) override;
     jboolean stop() override;
     jboolean flush() override;
     jboolean cleanup() override;
@@ -63,7 +64,7 @@ public:
     GnssBatching_V1_0(const sp<android::hardware::gnss::V1_0::IGnssBatching>& iGnssBatching);
     jboolean init(const std::unique_ptr<GnssBatchingCallback>& callback) override;
     jint getBatchSize() override;
-    jboolean start(long periodNanos, bool wakeupOnFifoFull) override;
+    jboolean start(long periodNanos, float minUpdateDistanceMeters, bool wakeupOnFifoFull) override;
     jboolean stop() override;
     jboolean flush() override;
     jboolean cleanup() override;

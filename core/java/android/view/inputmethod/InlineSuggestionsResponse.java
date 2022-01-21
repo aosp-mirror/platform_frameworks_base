@@ -170,7 +170,7 @@ public final class InlineSuggestionsResponse implements Parcelable {
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
         List<InlineSuggestion> inlineSuggestions = new ArrayList<>();
-        in.readParcelableList(inlineSuggestions, InlineSuggestion.class.getClassLoader());
+        in.readParcelableList(inlineSuggestions, InlineSuggestion.class.getClassLoader(), android.view.inputmethod.InlineSuggestion.class);
 
         this.mInlineSuggestions = inlineSuggestions;
         com.android.internal.util.AnnotationValidations.validate(

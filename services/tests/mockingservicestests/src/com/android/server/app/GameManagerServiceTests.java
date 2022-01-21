@@ -190,7 +190,7 @@ public class GameManagerServiceTests {
     }
 
     private void mockDeviceConfigPerformance() {
-        String configString = "mode=2,downscaleFactor=0.5,useAngle=false";
+        String configString = "mode=2,downscaleFactor=0.5,useAngle=false,fps=90";
         when(DeviceConfig.getProperty(anyString(), anyString()))
                 .thenReturn(configString);
     }
@@ -203,13 +203,13 @@ public class GameManagerServiceTests {
     }
 
     private void mockDeviceConfigBattery() {
-        String configString = "mode=3,downscaleFactor=0.7";
+        String configString = "mode=3,downscaleFactor=0.7,fps=30";
         when(DeviceConfig.getProperty(anyString(), anyString()))
                 .thenReturn(configString);
     }
 
     private void mockDeviceConfigAll() {
-        String configString = "mode=3,downscaleFactor=0.7:mode=2,downscaleFactor=0.5";
+        String configString = "mode=3,downscaleFactor=0.7,fps=30:mode=2,downscaleFactor=0.5,fps=90";
         when(DeviceConfig.getProperty(anyString(), anyString()))
                 .thenReturn(configString);
     }
@@ -454,12 +454,12 @@ public class GameManagerServiceTests {
                 gameManagerService.getGameMode(mPackageName, USER_ID_2));
     }
 
-    private void checkReportedModes(int ...requiredModes) {
-        GameManagerService gameManagerService =
-                new GameManagerService(mMockContext, mTestLooper.getLooper());
-
-        startUser(gameManagerService, USER_ID_1);
-        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+    private void checkReportedModes(GameManagerService gameManagerService, int ...requiredModes) {
+        if (gameManagerService == null) {
+            gameManagerService = new GameManagerService(mMockContext, mTestLooper.getLooper());
+            startUser(gameManagerService, USER_ID_1);
+            gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+        }
         ArraySet<Integer> reportedModes = new ArraySet<>();
         int[] modes = gameManagerService.getAvailableGameModes(mPackageName);
         for (int mode : modes) {
@@ -472,12 +472,13 @@ public class GameManagerServiceTests {
         }
     }
 
-    private void checkDownscaling(int gameMode, String scaling) {
-        GameManagerService gameManagerService =
-                new GameManagerService(mMockContext, mTestLooper.getLooper());
-
-        startUser(gameManagerService, USER_ID_1);
-        gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+    private void checkDownscaling(GameManagerService gameManagerService,
+                int gameMode, String scaling) {
+        if (gameManagerService == null) {
+            gameManagerService = new GameManagerService(mMockContext, mTestLooper.getLooper());
+            startUser(gameManagerService, USER_ID_1);
+            gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+        }
         GameManagerService.GamePackageConfiguration config =
                 gameManagerService.getConfig(mPackageName);
         assertEquals(config.getGameModeConfiguration(gameMode).getScaling(), scaling);
@@ -496,6 +497,17 @@ public class GameManagerServiceTests {
         assertEquals(gameManagerService.getAngleEnabled(mPackageName, USER_ID_1), angleEnabled);
     }
 
+    private void checkFps(GameManagerService gameManagerService, int gameMode, int fps) {
+        if (gameManagerService == null) {
+            gameManagerService = new GameManagerService(mMockContext, mTestLooper.getLooper());
+            startUser(gameManagerService, USER_ID_1);
+            gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
+        }
+        GameManagerService.GamePackageConfiguration config =
+                gameManagerService.getConfig(mPackageName);
+        assertEquals(config.getGameModeConfiguration(gameMode).getFps(), fps);
+    }
+
     /**
      * Phenotype device config exists, but is only propagating the default value.
      */
@@ -503,7 +515,7 @@ public class GameManagerServiceTests {
     public void testDeviceConfigDefault() {
         mockDeviceConfigDefault();
         mockModifyGameModeGranted();
-        checkReportedModes(GameManager.GAME_MODE_UNSUPPORTED);
+        checkReportedModes(null, GameManager.GAME_MODE_UNSUPPORTED);
     }
 
     /**
@@ -513,7 +525,7 @@ public class GameManagerServiceTests {
     public void testDeviceConfigNone() {
         mockDeviceConfigNone();
         mockModifyGameModeGranted();
-        checkReportedModes(GameManager.GAME_MODE_UNSUPPORTED);
+        checkReportedModes(null, GameManager.GAME_MODE_UNSUPPORTED);
     }
 
     /**
@@ -523,7 +535,7 @@ public class GameManagerServiceTests {
     public void testDeviceConfigPerformance() {
         mockDeviceConfigPerformance();
         mockModifyGameModeGranted();
-        checkReportedModes(GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_STANDARD);
+        checkReportedModes(null, GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_STANDARD);
     }
 
     /**
@@ -533,7 +545,7 @@ public class GameManagerServiceTests {
     public void testDeviceConfigBattery() {
         mockDeviceConfigBattery();
         mockModifyGameModeGranted();
-        checkReportedModes(GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
+        checkReportedModes(null, GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
     }
 
     /**
@@ -543,7 +555,7 @@ public class GameManagerServiceTests {
     public void testDeviceConfigAll() {
         mockDeviceConfigAll();
         mockModifyGameModeGranted();
-        checkReportedModes(GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
+        checkReportedModes(null, GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
                 GameManager.GAME_MODE_STANDARD);
     }
 
@@ -554,7 +566,7 @@ public class GameManagerServiceTests {
     public void testDeviceConfigInvalid() {
         mockDeviceConfigInvalid();
         mockModifyGameModeGranted();
-        checkReportedModes(GameManager.GAME_MODE_UNSUPPORTED);
+        checkReportedModes(null, GameManager.GAME_MODE_UNSUPPORTED);
     }
 
     /**
@@ -564,7 +576,171 @@ public class GameManagerServiceTests {
     public void testDeviceConfigMalformed() {
         mockDeviceConfigMalformed();
         mockModifyGameModeGranted();
-        checkReportedModes(GameManager.GAME_MODE_UNSUPPORTED);
+        checkReportedModes(null, GameManager.GAME_MODE_UNSUPPORTED);
+    }
+
+    /**
+     * Override device config for performance mode exists and is valid.
+     */
+    @Test
+    public void testSetDeviceConfigOverridePerformance() {
+        mockDeviceConfigPerformance();
+        mockModifyGameModeGranted();
+
+        GameManagerService gameManagerService = new GameManagerService(
+                mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_1);
+        gameManagerService.setGameModeConfigOverride(mPackageName, USER_ID_1,
+                GameManager.GAME_MODE_PERFORMANCE, "120", "0.3");
+
+        checkReportedModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
+                GameManager.GAME_MODE_STANDARD);
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, "0.3");
+        checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 120);
+    }
+
+    /**
+     * Override device config for battery mode exists and is valid.
+     */
+    @Test
+    public void testSetDeviceConfigOverrideBattery() {
+        mockDeviceConfigBattery();
+        mockModifyGameModeGranted();
+
+        GameManagerService gameManagerService = new GameManagerService(
+                mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_1);
+        gameManagerService.setGameModeConfigOverride(mPackageName, USER_ID_1,
+                GameManager.GAME_MODE_BATTERY, "60", "0.5");
+
+        checkReportedModes(gameManagerService, GameManager.GAME_MODE_BATTERY,
+                GameManager.GAME_MODE_STANDARD);
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, "0.5");
+        checkFps(gameManagerService, GameManager.GAME_MODE_BATTERY, 60);
+    }
+
+    /**
+     * Override device configs for both battery and performance modes exists and are valid.
+     */
+    @Test
+    public void testSetDeviceOverrideConfigAll() {
+        mockDeviceConfigAll();
+        mockModifyGameModeGranted();
+
+        GameManagerService gameManagerService = new GameManagerService(
+                mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_1);
+        gameManagerService.setGameModeConfigOverride(mPackageName, USER_ID_1,
+                GameManager.GAME_MODE_PERFORMANCE, "120", "0.3");
+        gameManagerService.setGameModeConfigOverride(mPackageName, USER_ID_1,
+                GameManager.GAME_MODE_BATTERY, "60", "0.5");
+
+        checkReportedModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
+                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, "0.3");
+        checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 120);
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, "0.5");
+        checkFps(gameManagerService, GameManager.GAME_MODE_BATTERY, 60);
+    }
+
+    /**
+     * Override device config for performance mode exists and is valid.
+     */
+    @Test
+    public void testResetDeviceConfigOverridePerformance() {
+        mockDeviceConfigPerformance();
+        mockModifyGameModeGranted();
+
+        GameManagerService gameManagerService = new GameManagerService(
+                mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_1);
+        gameManagerService.setGameModeConfigOverride(mPackageName, USER_ID_1,
+                GameManager.GAME_MODE_PERFORMANCE, "120", "0.3");
+
+        gameManagerService.resetGameModeConfigOverride(mPackageName, USER_ID_1,
+                GameManager.GAME_MODE_PERFORMANCE);
+
+        checkReportedModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
+                GameManager.GAME_MODE_STANDARD);
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, "0.5");
+        checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 90);
+    }
+
+    /**
+     * Override device config for battery mode exists and is valid.
+     */
+    @Test
+    public void testResetDeviceConfigOverrideBattery() {
+        mockDeviceConfigBattery();
+        mockModifyGameModeGranted();
+
+        GameManagerService gameManagerService = new GameManagerService(
+                mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_1);
+        gameManagerService.setGameModeConfigOverride(mPackageName, USER_ID_1,
+                GameManager.GAME_MODE_BATTERY, "60", "0.5");
+
+        gameManagerService.resetGameModeConfigOverride(mPackageName, USER_ID_1,
+                GameManager.GAME_MODE_BATTERY);
+
+        checkReportedModes(gameManagerService, GameManager.GAME_MODE_BATTERY,
+                GameManager.GAME_MODE_STANDARD);
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, "0.7");
+        checkFps(gameManagerService, GameManager.GAME_MODE_BATTERY, 30);
+    }
+
+    /**
+     * Override device configs for both battery and performance modes exists and are valid.
+     */
+    @Test
+    public void testResetDeviceOverrideConfigAll() {
+        mockDeviceConfigAll();
+        mockModifyGameModeGranted();
+
+        GameManagerService gameManagerService = new GameManagerService(
+                mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_1);
+        gameManagerService.setGameModeConfigOverride(mPackageName, USER_ID_1,
+                GameManager.GAME_MODE_PERFORMANCE, "120", "0.3");
+        gameManagerService.setGameModeConfigOverride(mPackageName, USER_ID_1,
+                GameManager.GAME_MODE_BATTERY, "60", "0.5");
+
+        gameManagerService.resetGameModeConfigOverride(mPackageName, USER_ID_1, -1);
+
+        checkReportedModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
+                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, "0.5");
+        checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 90);
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, "0.7");
+        checkFps(gameManagerService, GameManager.GAME_MODE_BATTERY, 30);
+    }
+
+    /**
+     * Override device configs for both battery and performance modes exists and are valid.
+     * Only one mode is reset, and the other mode still has overridden config
+     */
+    @Test
+    public void testResetDeviceOverrideConfigPartial() {
+        mockDeviceConfigAll();
+        mockModifyGameModeGranted();
+
+        GameManagerService gameManagerService = new GameManagerService(
+                mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_1);
+        gameManagerService.setGameModeConfigOverride(mPackageName, USER_ID_1,
+                GameManager.GAME_MODE_PERFORMANCE, "120", "0.3");
+        gameManagerService.setGameModeConfigOverride(mPackageName, USER_ID_1,
+                GameManager.GAME_MODE_BATTERY, "60", "0.5");
+
+        gameManagerService.resetGameModeConfigOverride(mPackageName, USER_ID_1,
+                GameManager.GAME_MODE_BATTERY);
+
+        checkReportedModes(gameManagerService, GameManager.GAME_MODE_PERFORMANCE,
+                GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, "0.3");
+        checkFps(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, 120);
+        checkDownscaling(gameManagerService, GameManager.GAME_MODE_BATTERY, "0.7");
+        checkFps(gameManagerService, GameManager.GAME_MODE_BATTERY, 30);
     }
 
     /**
@@ -575,9 +751,11 @@ public class GameManagerServiceTests {
         mockGameModeOptInAll();
         mockDeviceConfigNone();
         mockModifyGameModeGranted();
-        checkReportedModes(GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
+        checkReportedModes(null, GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
                 GameManager.GAME_MODE_STANDARD);
     }
+
+
 
     /**
      * BATTERY game mode is available through the app manifest opt-in.
@@ -587,7 +765,7 @@ public class GameManagerServiceTests {
         mockGameModeOptInBattery();
         mockDeviceConfigNone();
         mockModifyGameModeGranted();
-        checkReportedModes(GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
+        checkReportedModes(null, GameManager.GAME_MODE_BATTERY, GameManager.GAME_MODE_STANDARD);
     }
 
     /**
@@ -598,7 +776,7 @@ public class GameManagerServiceTests {
         mockGameModeOptInPerformance();
         mockDeviceConfigNone();
         mockModifyGameModeGranted();
-        checkReportedModes(GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_STANDARD);
+        checkReportedModes(null, GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_STANDARD);
     }
 
     /**
@@ -610,7 +788,7 @@ public class GameManagerServiceTests {
         mockGameModeOptInBattery();
         mockDeviceConfigPerformance();
         mockModifyGameModeGranted();
-        checkReportedModes(GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
+        checkReportedModes(null, GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
                 GameManager.GAME_MODE_STANDARD);
     }
 
@@ -623,7 +801,7 @@ public class GameManagerServiceTests {
         mockGameModeOptInPerformance();
         mockDeviceConfigBattery();
         mockModifyGameModeGranted();
-        checkReportedModes(GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
+        checkReportedModes(null, GameManager.GAME_MODE_PERFORMANCE, GameManager.GAME_MODE_BATTERY,
                 GameManager.GAME_MODE_STANDARD);
     }
 
@@ -634,7 +812,7 @@ public class GameManagerServiceTests {
     public void testInterventionAllowScalingDefault() throws Exception {
         mockDeviceConfigPerformance();
         mockModifyGameModeGranted();
-        checkDownscaling(GameManager.GAME_MODE_PERFORMANCE, "0.5");
+        checkDownscaling(null, GameManager.GAME_MODE_PERFORMANCE, "0.5");
     }
 
     /**
@@ -645,7 +823,7 @@ public class GameManagerServiceTests {
         mockDeviceConfigPerformance();
         mockInterventionAllowDownscaleFalse();
         mockModifyGameModeGranted();
-        checkDownscaling(GameManager.GAME_MODE_PERFORMANCE, "1.0");
+        checkDownscaling(null, GameManager.GAME_MODE_PERFORMANCE, "1.0");
     }
 
     /**
@@ -657,7 +835,7 @@ public class GameManagerServiceTests {
         mockDeviceConfigPerformance();
         mockInterventionAllowDownscaleTrue();
         mockModifyGameModeGranted();
-        checkDownscaling(GameManager.GAME_MODE_PERFORMANCE, "0.5");
+        checkDownscaling(null, GameManager.GAME_MODE_PERFORMANCE, "0.5");
     }
 
     /**
@@ -706,6 +884,14 @@ public class GameManagerServiceTests {
                 gameManagerService.getGameMode(mPackageName, USER_ID_1));
 
         checkAngleEnabled(gameManagerService, GameManager.GAME_MODE_PERFORMANCE, true);
+    }
+
+    @Test
+    public void testInterventionFps() throws Exception {
+        mockDeviceConfigAll();
+        mockModifyGameModeGranted();
+        checkFps(null, GameManager.GAME_MODE_PERFORMANCE, 90);
+        checkFps(null, GameManager.GAME_MODE_BATTERY, 30);
     }
 
     /**
@@ -775,5 +961,9 @@ public class GameManagerServiceTests {
         gameManagerService.updateConfigsForUser(USER_ID_1, mPackageName);
         assertEquals(GameManager.GAME_MODE_STANDARD,
                 gameManagerService.getGameMode(mPackageName, USER_ID_1));
+    }
+
+    static {
+        System.loadLibrary("mockingservicestestjni");
     }
 }

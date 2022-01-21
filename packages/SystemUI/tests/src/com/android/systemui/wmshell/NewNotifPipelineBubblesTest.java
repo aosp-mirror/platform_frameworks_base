@@ -17,6 +17,8 @@
 package com.android.systemui.wmshell;
 
 import static android.app.Notification.FLAG_BUBBLE;
+import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_DELETED;
+import static android.service.notification.NotificationListenerService.NOTIFICATION_CHANNEL_OR_GROUP_UPDATED;
 import static android.service.notification.NotificationListenerService.REASON_APP_CANCEL;
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
 
@@ -1102,6 +1104,58 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         mBubbleData.setExpanded(false);
 
         assertSysuiStates(false /* stackExpanded */, false /* mangeMenuExpanded */);
+    }
+
+    @Test
+    public void testNotificationChannelModified_channelUpdated_removesOverflowBubble()
+            throws Exception {
+        // Setup
+        ExpandableNotificationRow row = mNotificationTestHelper.createShortcutBubble("shortcutId");
+        NotificationEntry entry = row.getEntry();
+        entry.getChannel().setConversationId(
+                row.getEntry().getChannel().getParentChannelId(),
+                "shortcutId");
+        mBubbleController.updateBubble(BubblesManager.notifToBubbleEntry(row.getEntry()));
+        assertTrue(mBubbleController.hasBubbles());
+
+        // Overflow it
+        mBubbleData.dismissBubbleWithKey(entry.getKey(),
+                Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.hasOverflowBubbleWithKey(entry.getKey())).isTrue();
+
+        // Test
+        entry.getChannel().setDeleted(true);
+        mBubbleController.onNotificationChannelModified(entry.getSbn().getPackageName(),
+                entry.getSbn().getUser(),
+                entry.getChannel(),
+                NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
+        assertThat(mBubbleData.hasOverflowBubbleWithKey(entry.getKey())).isFalse();
+    }
+
+    @Test
+    public void testNotificationChannelModified_channelDeleted_removesOverflowBubble()
+            throws Exception {
+        // Setup
+        ExpandableNotificationRow row = mNotificationTestHelper.createShortcutBubble("shortcutId");
+        NotificationEntry entry = row.getEntry();
+        entry.getChannel().setConversationId(
+                row.getEntry().getChannel().getParentChannelId(),
+                "shortcutId");
+        mBubbleController.updateBubble(BubblesManager.notifToBubbleEntry(row.getEntry()));
+        assertTrue(mBubbleController.hasBubbles());
+
+        // Overflow it
+        mBubbleData.dismissBubbleWithKey(entry.getKey(),
+                Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.hasOverflowBubbleWithKey(entry.getKey())).isTrue();
+
+        // Test
+        entry.getChannel().setDeleted(true);
+        mBubbleController.onNotificationChannelModified(entry.getSbn().getPackageName(),
+                entry.getSbn().getUser(),
+                entry.getChannel(),
+                NOTIFICATION_CHANNEL_OR_GROUP_DELETED);
+        assertThat(mBubbleData.hasOverflowBubbleWithKey(entry.getKey())).isFalse();
     }
 
     /**

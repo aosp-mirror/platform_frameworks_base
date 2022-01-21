@@ -160,7 +160,7 @@ public final class GnssMeasurementsEvent implements Parcelable {
             new Creator<GnssMeasurementsEvent>() {
         @Override
         public GnssMeasurementsEvent createFromParcel(Parcel in) {
-            GnssClock clock = in.readParcelable(getClass().getClassLoader());
+            GnssClock clock = in.readParcelable(getClass().getClassLoader(), android.location.GnssClock.class);
             List<GnssMeasurement> measurements = in.createTypedArrayList(GnssMeasurement.CREATOR);
             List<GnssAutomaticGainControl> agcs = in.createTypedArrayList(
                     GnssAutomaticGainControl.CREATOR);

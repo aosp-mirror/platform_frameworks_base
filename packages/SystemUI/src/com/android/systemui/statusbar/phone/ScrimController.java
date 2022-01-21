@@ -182,6 +182,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private GradientColors mColors;
     private boolean mNeedsDrawableColorUpdate;
 
+    private float mAdditionalScrimBehindAlphaKeyguard = 0f;
+    // Combined scrim behind keyguard alpha of default scrim + additional scrim
+    // (if wallpaper dimming is applied).
     private float mScrimBehindAlphaKeyguard = KEYGUARD_SCRIM_ALPHA;
     private final float mDefaultScrimAlpha;
 
@@ -437,7 +440,35 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         return mState;
     }
 
-    protected void setScrimBehindValues(float scrimBehindAlphaKeyguard) {
+    /**
+     * Sets the additional scrim behind alpha keyguard that would be blended with the default scrim
+     * by applying alpha composition on both values.
+     *
+     * @param additionalScrimAlpha alpha value of additional scrim behind alpha keyguard.
+     */
+    protected void setAdditionalScrimBehindAlphaKeyguard(float additionalScrimAlpha) {
+        mAdditionalScrimBehindAlphaKeyguard = additionalScrimAlpha;
+    }
+
+    /**
+     * Applies alpha composition to the default scrim behind alpha keyguard and the additional
+     * scrim alpha, and sets this value to the scrim behind alpha keyguard.
+     * This is used to apply additional keyguard dimming on top of the default scrim alpha value.
+     */
+    protected void applyCompositeAlphaOnScrimBehindKeyguard() {
+        int compositeAlpha = ColorUtils.compositeAlpha(
+                (int) (255 * mAdditionalScrimBehindAlphaKeyguard),
+                (int) (255 * KEYGUARD_SCRIM_ALPHA));
+        float keyguardScrimAlpha = (float) compositeAlpha / 255;
+        setScrimBehindValues(keyguardScrimAlpha);
+    }
+
+    /**
+     * Sets the scrim behind alpha keyguard values. This is how much the keyguard will be dimmed.
+     *
+     * @param scrimBehindAlphaKeyguard alpha value of the scrim behind
+     */
+    private void setScrimBehindValues(float scrimBehindAlphaKeyguard) {
         mScrimBehindAlphaKeyguard = scrimBehindAlphaKeyguard;
         ScrimState[] states = ScrimState.values();
         for (int i = 0; i < states.length; i++) {
@@ -732,7 +763,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             }
             if (mUnOcclusionAnimationRunning && mState == ScrimState.KEYGUARD) {
                 // We're unoccluding the keyguard and don't want to have a bright flash.
-                mNotificationsAlpha = KEYGUARD_SCRIM_ALPHA;
+                mNotificationsAlpha = mScrimBehindAlphaKeyguard;
                 mNotificationsTint = ScrimState.KEYGUARD.getNotifTint();
             }
         }

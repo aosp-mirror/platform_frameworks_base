@@ -73,9 +73,9 @@ public final class NetworkStateSnapshot implements Parcelable {
 
     /** @hide */
     public NetworkStateSnapshot(@NonNull Parcel in) {
-        mNetwork = in.readParcelable(null);
-        mNetworkCapabilities = in.readParcelable(null);
-        mLinkProperties = in.readParcelable(null);
+        mNetwork = in.readParcelable(null, android.net.Network.class);
+        mNetworkCapabilities = in.readParcelable(null, android.net.NetworkCapabilities.class);
+        mLinkProperties = in.readParcelable(null, android.net.LinkProperties.class);
         mSubscriberId = in.readString();
         mLegacyType = in.readInt();
     }

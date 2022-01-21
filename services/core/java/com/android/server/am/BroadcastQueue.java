@@ -781,6 +781,54 @@ public final class BroadcastQueue {
                 skip = true;
             }
         }
+        // Check that the receiver does *not* have any excluded permissions
+        if (!skip && r.excludedPermissions != null && r.excludedPermissions.length > 0) {
+            for (int i = 0; i < r.excludedPermissions.length; i++) {
+                String excludedPermission = r.excludedPermissions[i];
+                final int perm = mService.checkComponentPermission(excludedPermission,
+                        filter.receiverList.pid, filter.receiverList.uid, -1, true);
+
+                int appOp = AppOpsManager.permissionToOpCode(excludedPermission);
+                if (appOp != AppOpsManager.OP_NONE) {
+                    // When there is an app op associated with the permission,
+                    // skip when both the permission and the app op are
+                    // granted.
+                    if ((perm == PackageManager.PERMISSION_GRANTED) && (
+                            mService.getAppOpsManager().checkOpNoThrow(appOp,
+                                    filter.receiverList.uid,
+                                    filter.packageName)
+                                    == AppOpsManager.MODE_ALLOWED)) {
+                        Slog.w(TAG, "Appop Denial: receiving "
+                                + r.intent.toString()
+                                + " to " + filter.receiverList.app
+                                + " (pid=" + filter.receiverList.pid
+                                + ", uid=" + filter.receiverList.uid + ")"
+                                + " excludes appop " + AppOpsManager.permissionToOp(
+                                excludedPermission)
+                                + " due to sender " + r.callerPackage
+                                + " (uid " + r.callingUid + ")");
+                        skip = true;
+                        break;
+                    }
+                } else {
+                    // When there is no app op associated with the permission,
+                    // skip when permission is granted.
+                    if (perm == PackageManager.PERMISSION_GRANTED) {
+                        Slog.w(TAG, "Permission Denial: receiving "
+                                + r.intent.toString()
+                                + " to " + filter.receiverList.app
+                                + " (pid=" + filter.receiverList.pid
+                                + ", uid=" + filter.receiverList.uid + ")"
+                                + " excludes " + excludedPermission
+                                + " due to sender " + r.callerPackage
+                                + " (uid " + r.callingUid + ")");
+                        skip = true;
+                        break;
+                    }
+                }
+            }
+        }
+
         // If the broadcast also requires an app op check that as well.
         if (!skip && r.appOp != AppOpsManager.OP_NONE
                 && mService.getAppOpsManager().noteOpNoThrow(r.appOp,

@@ -49,10 +49,12 @@ import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_NEVER;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RESTRICTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
+import static android.app.usage.UsageStatsManager.standbyBucketToString;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.android.server.SystemService.PHASE_BOOT_COMPLETED;
 import static com.android.server.SystemService.PHASE_SYSTEM_SERVICES_READY;
+import static com.android.server.usage.AppIdleHistory.STANDBY_BUCKET_UNKNOWN;
 
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
@@ -298,6 +300,11 @@ public class AppStandbyController
     long mStrongUsageTimeoutMillis = ConstantsObserver.DEFAULT_STRONG_USAGE_TIMEOUT;
     /** Minimum time a notification seen event should keep the bucket elevated. */
     long mNotificationSeenTimeoutMillis = ConstantsObserver.DEFAULT_NOTIFICATION_TIMEOUT;
+    /** Minimum time a slice pinned event should keep the bucket elevated. */
+    long mSlicePinnedTimeoutMillis = ConstantsObserver.DEFAULT_SLICE_PINNED_TIMEOUT;
+    /** The standby bucket that an app will be promoted on a notification-seen event */
+    int mNotificationSeenPromotedBucket =
+            ConstantsObserver.DEFAULT_NOTIFICATION_SEEN_PROMOTED_BUCKET;
     /** Minimum time a system update event should keep the buckets elevated. */
     long mSystemUpdateUsageTimeoutMillis = ConstantsObserver.DEFAULT_SYSTEM_UPDATE_TIMEOUT;
     /** Maximum time to wait for a prediction before using simple timeouts to downgrade buckets. */
@@ -773,7 +780,7 @@ public class AppStandbyController
                 userId);
         if (DEBUG) {
             Slog.d(TAG, "   Checking idle state for " + packageName
-                    + " minBucket=" + minBucket);
+                    + " minBucket=" + standbyBucketToString(minBucket));
         }
         if (minBucket <= STANDBY_BUCKET_ACTIVE) {
             // No extra processing needed for ACTIVE or higher since apps can't drop into lower
@@ -815,36 +822,34 @@ public class AppStandbyController
                         newBucket = app.lastPredictedBucket;
                         reason = REASON_MAIN_PREDICTED | REASON_SUB_PREDICTED_RESTORED;
                         if (DEBUG) {
-                            Slog.d(TAG, "Restored predicted newBucket = " + newBucket);
+                            Slog.d(TAG, "Restored predicted newBucket = "
+                                    + standbyBucketToString(newBucket));
                         }
                     } else {
                         newBucket = getBucketForLocked(packageName, userId,
                                 elapsedRealtime);
                         if (DEBUG) {
-                            Slog.d(TAG, "Evaluated AOSP newBucket = " + newBucket);
+                            Slog.d(TAG, "Evaluated AOSP newBucket = "
+                                    + standbyBucketToString(newBucket));
                         }
                         reason = REASON_MAIN_TIMEOUT;
                     }
                 }
 
-                // Check if the app is within one of the timeouts for forced bucket elevation
+                // Check if the app is within one of the expiry times for forced bucket elevation
                 final long elapsedTimeAdjusted = mAppIdleHistory.getElapsedTime(elapsedRealtime);
-                if (newBucket >= STANDBY_BUCKET_ACTIVE
-                        && app.bucketActiveTimeoutTime > elapsedTimeAdjusted) {
-                    newBucket = STANDBY_BUCKET_ACTIVE;
-                    reason = app.bucketingReason;
-                    if (DEBUG) {
-                        Slog.d(TAG, "    Keeping at ACTIVE due to min timeout");
+                final int bucketWithValidExpiryTime = getMinBucketWithValidExpiryTime(app,
+                        newBucket, elapsedTimeAdjusted);
+                if (bucketWithValidExpiryTime != STANDBY_BUCKET_UNKNOWN) {
+                    newBucket = bucketWithValidExpiryTime;
+                    if (newBucket == STANDBY_BUCKET_ACTIVE || app.currentBucket == newBucket) {
+                        reason = app.bucketingReason;
+                    } else {
+                        reason = REASON_MAIN_USAGE | REASON_SUB_USAGE_ACTIVE_TIMEOUT;
                     }
-                } else if (newBucket >= STANDBY_BUCKET_WORKING_SET
-                        && app.bucketWorkingSetTimeoutTime > elapsedTimeAdjusted) {
-                    newBucket = STANDBY_BUCKET_WORKING_SET;
-                    // If it was already there, keep the reason, else assume timeout to WS
-                    reason = (newBucket == oldBucket)
-                            ? app.bucketingReason
-                            : REASON_MAIN_USAGE | REASON_SUB_USAGE_ACTIVE_TIMEOUT;
                     if (DEBUG) {
-                        Slog.d(TAG, "    Keeping at WORKING_SET due to min timeout");
+                        Slog.d(TAG, "    Keeping at " + standbyBucketToString(newBucket)
+                                + " due to min timeout");
                     }
                 }
 
@@ -868,13 +873,14 @@ public class AppStandbyController
                     newBucket = minBucket;
                     // Leave the reason alone.
                     if (DEBUG) {
-                        Slog.d(TAG, "Bringing up from " + newBucket + " to " + minBucket
+                        Slog.d(TAG, "Bringing up from " + standbyBucketToString(newBucket)
+                                + " to " + standbyBucketToString(minBucket)
                                 + " due to min bucketing");
                     }
                 }
                 if (DEBUG) {
-                    Slog.d(TAG, "     Old bucket=" + oldBucket
-                            + ", newBucket=" + newBucket);
+                    Slog.d(TAG, "     Old bucket=" + standbyBucketToString(oldBucket)
+                            + ", newBucket=" + standbyBucketToString(newBucket));
                 }
                 if (oldBucket != newBucket || predictionLate) {
                     mAppIdleHistory.setAppStandbyBucket(packageName, userId,
@@ -967,6 +973,7 @@ public class AppStandbyController
         }
     }
 
+    @GuardedBy("mAppIdleLock")
     private void reportEventLocked(String pkg, int eventType, long elapsedRealtime, int userId) {
         // TODO: Ideally this should call isAppIdleFiltered() to avoid calling back
         // about apps that are on some kind of whitelist anyway.
@@ -980,13 +987,20 @@ public class AppStandbyController
         final long nextCheckDelay;
         final int subReason = usageEventToSubReason(eventType);
         final int reason = REASON_MAIN_USAGE | subReason;
-        if (eventType == UsageEvents.Event.NOTIFICATION_SEEN
-                || eventType == UsageEvents.Event.SLICE_PINNED) {
+        if (eventType == UsageEvents.Event.NOTIFICATION_SEEN) {
+            // Notification-seen elevates to a higher bucket (depending on
+            // {@link ConstantsObserver#KEY_NOTIFICATION_SEEN_PROMOTED_BUCKET}) but doesn't
+            // change usage time.
+            mAppIdleHistory.reportUsage(appHistory, pkg, userId,
+                    mNotificationSeenPromotedBucket, subReason,
+                    0, elapsedRealtime + mNotificationSeenTimeoutMillis);
+            nextCheckDelay = mNotificationSeenTimeoutMillis;
+        } else if (eventType == UsageEvents.Event.SLICE_PINNED) {
             // Mild usage elevates to WORKING_SET but doesn't change usage time.
             mAppIdleHistory.reportUsage(appHistory, pkg, userId,
                     STANDBY_BUCKET_WORKING_SET, subReason,
-                    0, elapsedRealtime + mNotificationSeenTimeoutMillis);
-            nextCheckDelay = mNotificationSeenTimeoutMillis;
+                    0, elapsedRealtime + mSlicePinnedTimeoutMillis);
+            nextCheckDelay = mSlicePinnedTimeoutMillis;
         } else if (eventType == UsageEvents.Event.SYSTEM_INTERACTION) {
             mAppIdleHistory.reportUsage(appHistory, pkg, userId,
                     STANDBY_BUCKET_ACTIVE, subReason,
@@ -1019,6 +1033,29 @@ public class AppStandbyController
         if (previouslyIdle) {
             notifyBatteryStats(pkg, userId, false);
         }
+    }
+
+    /**
+     * Returns the lowest standby bucket that is better than {@code targetBucket} and has an
+     * valid expiry time (i.e. the expiry time is not yet elapsed).
+     */
+    private int getMinBucketWithValidExpiryTime(AppUsageHistory usageHistory,
+            int targetBucket, long elapsedTimeMs) {
+        if (usageHistory.bucketExpiryTimesMs == null) {
+            return STANDBY_BUCKET_UNKNOWN;
+        }
+        final int size = usageHistory.bucketExpiryTimesMs.size();
+        for (int i = 0; i < size; ++i) {
+            final int bucket = usageHistory.bucketExpiryTimesMs.keyAt(i);
+            if (targetBucket <= bucket) {
+                break;
+            }
+            final long expiryTimeMs = usageHistory.bucketExpiryTimesMs.valueAt(i);
+            if (expiryTimeMs > elapsedTimeMs) {
+                return bucket;
+            }
+        }
+        return STANDBY_BUCKET_UNKNOWN;
     }
 
     /**
@@ -1564,23 +1601,18 @@ public class AppStandbyController
                 // ACTIVE or WORKING_SET timeout.
                 mAppIdleHistory.updateLastPrediction(app, elapsedTimeAdjusted, newBucket);
 
-                if (newBucket > STANDBY_BUCKET_ACTIVE
-                        && app.bucketActiveTimeoutTime > elapsedTimeAdjusted) {
-                    newBucket = STANDBY_BUCKET_ACTIVE;
-                    reason = app.bucketingReason;
-                    if (DEBUG) {
-                        Slog.d(TAG, "    Keeping at ACTIVE due to min timeout");
-                    }
-                } else if (newBucket > STANDBY_BUCKET_WORKING_SET
-                        && app.bucketWorkingSetTimeoutTime > elapsedTimeAdjusted) {
-                    newBucket = STANDBY_BUCKET_WORKING_SET;
-                    if (app.currentBucket != newBucket) {
-                        reason = REASON_MAIN_USAGE | REASON_SUB_USAGE_ACTIVE_TIMEOUT;
-                    } else {
+                final int bucketWithValidExpiryTime = getMinBucketWithValidExpiryTime(app,
+                        newBucket, elapsedTimeAdjusted);
+                if (bucketWithValidExpiryTime != STANDBY_BUCKET_UNKNOWN) {
+                    newBucket = bucketWithValidExpiryTime;
+                    if (newBucket == STANDBY_BUCKET_ACTIVE || app.currentBucket == newBucket) {
                         reason = app.bucketingReason;
+                    } else {
+                        reason = REASON_MAIN_USAGE | REASON_SUB_USAGE_ACTIVE_TIMEOUT;
                     }
                     if (DEBUG) {
-                        Slog.d(TAG, "    Keeping at WORKING_SET due to min timeout");
+                        Slog.d(TAG, "    Keeping at " + standbyBucketToString(newBucket)
+                                + " due to min timeout");
                     }
                 } else if (newBucket == STANDBY_BUCKET_RARE
                         && mAllowRestrictedBucket
@@ -1746,7 +1778,7 @@ public class AppStandbyController
     @Override
     public void flushToDisk() {
         synchronized (mAppIdleLock) {
-            mAppIdleHistory.writeAppIdleTimes();
+            mAppIdleHistory.writeAppIdleTimes(mInjector.elapsedRealtime());
             mAppIdleHistory.writeAppIdleDurations();
         }
     }
@@ -1897,7 +1929,7 @@ public class AppStandbyController
                 }
             }
             // Immediately persist defaults to disk
-            mAppIdleHistory.writeAppIdleTimes(userId);
+            mAppIdleHistory.writeAppIdleTimes(userId, elapsedRealtime);
         }
     }
 
@@ -1963,6 +1995,12 @@ public class AppStandbyController
         pw.println();
         pw.print("  mNotificationSeenTimeoutMillis=");
         TimeUtils.formatDuration(mNotificationSeenTimeoutMillis, pw);
+        pw.println();
+        pw.print("  mNotificationSeenPromotedBucket=");
+        pw.print(standbyBucketToString(mNotificationSeenPromotedBucket));
+        pw.println();
+        pw.print("  mSlicePinnedTimeoutMillis=");
+        TimeUtils.formatDuration(mSlicePinnedTimeoutMillis, pw);
         pw.println();
         pw.print("  mSyncAdapterTimeoutMillis=");
         TimeUtils.formatDuration(mSyncAdapterTimeoutMillis, pw);
@@ -2386,6 +2424,10 @@ public class AppStandbyController
         private static final String KEY_STRONG_USAGE_HOLD_DURATION = "strong_usage_duration";
         private static final String KEY_NOTIFICATION_SEEN_HOLD_DURATION =
                 "notification_seen_duration";
+        private static final String KEY_NOTIFICATION_SEEN_PROMOTED_BUCKET =
+                "notification_seen_promoted_bucket";
+        private static final String KEY_SLICE_PINNED_HOLD_DURATION =
+                "slice_pinned_duration";
         private static final String KEY_SYSTEM_UPDATE_HOLD_DURATION =
                 "system_update_usage_duration";
         private static final String KEY_PREDICTION_TIMEOUT = "prediction_timeout";
@@ -2428,6 +2470,10 @@ public class AppStandbyController
                 COMPRESS_TIME ? ONE_MINUTE : 1 * ONE_HOUR;
         public static final long DEFAULT_NOTIFICATION_TIMEOUT =
                 COMPRESS_TIME ? 12 * ONE_MINUTE : 12 * ONE_HOUR;
+        public static final long DEFAULT_SLICE_PINNED_TIMEOUT =
+                COMPRESS_TIME ? 12 * ONE_MINUTE : 12 * ONE_HOUR;
+        public static final int DEFAULT_NOTIFICATION_SEEN_PROMOTED_BUCKET =
+                STANDBY_BUCKET_WORKING_SET;
         public static final long DEFAULT_SYSTEM_UPDATE_TIMEOUT =
                 COMPRESS_TIME ? 2 * ONE_MINUTE : 2 * ONE_HOUR;
         public static final long DEFAULT_SYSTEM_INTERACTION_TIMEOUT =
@@ -2512,6 +2558,16 @@ public class AppStandbyController
                             mNotificationSeenTimeoutMillis = properties.getLong(
                                     KEY_NOTIFICATION_SEEN_HOLD_DURATION,
                                     DEFAULT_NOTIFICATION_TIMEOUT);
+                            break;
+                        case KEY_NOTIFICATION_SEEN_PROMOTED_BUCKET:
+                            mNotificationSeenPromotedBucket = properties.getInt(
+                                    KEY_NOTIFICATION_SEEN_PROMOTED_BUCKET,
+                                    DEFAULT_NOTIFICATION_SEEN_PROMOTED_BUCKET);
+                            break;
+                        case KEY_SLICE_PINNED_HOLD_DURATION:
+                            mSlicePinnedTimeoutMillis = properties.getLong(
+                                    KEY_SLICE_PINNED_HOLD_DURATION,
+                                    DEFAULT_SLICE_PINNED_TIMEOUT);
                             break;
                         case KEY_STRONG_USAGE_HOLD_DURATION:
                             mStrongUsageTimeoutMillis = properties.getLong(

@@ -10,9 +10,8 @@ import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionPr
 
 /**
  * [UnfoldTransitionProgressProvider] that emits transition progress only when the display has
- * default rotation or 180 degrees opposite rotation (ROTATION_0 or ROTATION_180).
- * It could be helpful to run the animation only when the display's rotation is perpendicular
- * to the fold.
+ * default rotation or 180 degrees opposite rotation (ROTATION_0 or ROTATION_180). It could be
+ * helpful to run the animation only when the display's rotation is perpendicular to the fold.
  */
 class NaturalRotationUnfoldProgressProvider(
     private val context: Context,
@@ -21,7 +20,7 @@ class NaturalRotationUnfoldProgressProvider(
 ) : UnfoldTransitionProgressProvider {
 
     private val scopedUnfoldTransitionProgressProvider =
-            ScopedUnfoldTransitionProgressProvider(unfoldTransitionProgressProvider)
+        ScopedUnfoldTransitionProgressProvider(unfoldTransitionProgressProvider)
     private val rotationWatcher = RotationWatcher()
 
     private var isNaturalRotation: Boolean = false
@@ -37,8 +36,8 @@ class NaturalRotationUnfoldProgressProvider(
     }
 
     private fun onRotationChanged(rotation: Int) {
-        val isNewRotationNatural = rotation == Surface.ROTATION_0 ||
-                rotation == Surface.ROTATION_180
+        val isNewRotationNatural =
+            rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180
 
         if (isNaturalRotation != isNewRotationNatural) {
             isNaturalRotation = isNewRotationNatural

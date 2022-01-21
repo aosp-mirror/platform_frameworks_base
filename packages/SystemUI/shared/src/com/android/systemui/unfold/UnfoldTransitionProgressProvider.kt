@@ -16,12 +16,14 @@
 package com.android.systemui.unfold
 
 import android.annotation.FloatRange
-import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 import com.android.systemui.statusbar.policy.CallbackController
+import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
 
 /**
  * Interface that allows to receive unfold transition progress updates.
+ *
  * It can be used to update view properties based on the current animation progress.
+ *
  * onTransitionProgress callback could be called on each frame.
  *
  * Use [createUnfoldTransitionProgressProvider] to create instances of this interface

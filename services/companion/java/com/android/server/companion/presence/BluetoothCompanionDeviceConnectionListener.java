@@ -1,0 +1,175 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.server.companion.presence;
+
+import android.annotation.NonNull;
+import android.annotation.SuppressLint;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.companion.AssociationInfo;
+import android.net.MacAddress;
+import android.os.Handler;
+import android.os.HandlerExecutor;
+import android.util.Log;
+
+import com.android.server.companion.AssociationStore;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@SuppressLint("LongLogTag")
+class BluetoothCompanionDeviceConnectionListener
+        extends BluetoothAdapter.BluetoothConnectionCallback
+        implements AssociationStore.OnChangeListener {
+    private static final boolean DEBUG = false;
+    private static final String TAG = "CompanionDevice_PresenceMonitor_BT";
+
+    interface Callback {
+        void onBluetoothCompanionDeviceConnected(int associationId);
+
+        void onBluetoothCompanionDeviceDisconnected(int associationId);
+    }
+
+    private final @NonNull AssociationStore mAssociationStore;
+    private final @NonNull Callback mCallback;
+    /** A set of ALL connected BT device (not only companion.) */
+    private final @NonNull Map<MacAddress, BluetoothDevice> mAllConnectedDevices = new HashMap<>();
+
+    BluetoothCompanionDeviceConnectionListener(@NonNull AssociationStore associationStore,
+            @NonNull Callback callback) {
+        mAssociationStore = associationStore;
+        mCallback = callback;
+    }
+
+    public void init(@NonNull BluetoothAdapter btAdapter) {
+        if (DEBUG) Log.i(TAG, "init()");
+
+        btAdapter.registerBluetoothConnectionCallback(
+                new HandlerExecutor(Handler.getMain()), /* callback */this);
+        mAssociationStore.registerListener(this);
+    }
+
+    /**
+     * Overrides
+     * {@link BluetoothAdapter.BluetoothConnectionCallback#onDeviceConnected(BluetoothDevice)}.
+     */
+    @Override
+    public void onDeviceConnected(@NonNull BluetoothDevice device) {
+        if (DEBUG) Log.i(TAG, "onDevice_Connected() " + toString(device));
+
+        final MacAddress macAddress = MacAddress.fromString(device.getAddress());
+        if (mAllConnectedDevices.put(macAddress, device) != null) {
+            if (DEBUG) Log.w(TAG, "Device " + toString(device) + " is already connected.");
+            return;
+        }
+
+        onDeviceConnectivityChanged(device, true);
+    }
+
+    /**
+     * Overrides
+     * {@link BluetoothAdapter.BluetoothConnectionCallback#onDeviceConnected(BluetoothDevice)}.
+     * Also invoked when user turns BT off while the device is connected.
+     */
+    @Override
+    public void onDeviceDisconnected(@NonNull BluetoothDevice device,
+            @DisconnectReason int reason) {
+        if (DEBUG) {
+            Log.i(TAG, "onDevice_Disconnected() " + toString(device));
+            Log.d(TAG, "  reason=" + disconnectReasonText(reason));
+        }
+
+        final MacAddress macAddress = MacAddress.fromString(device.getAddress());
+        if (mAllConnectedDevices.remove(macAddress) == null) {
+            if (DEBUG) Log.w(TAG, "The device wasn't tracked as connected " + toString(device));
+            return;
+        }
+
+        onDeviceConnectivityChanged(device, false);
+    }
+
+    private void onDeviceConnectivityChanged(@NonNull BluetoothDevice device, boolean connected) {
+        final List<AssociationInfo> associations =
+                mAssociationStore.getAssociationsByAddress(device.getAddress());
+
+        if (DEBUG) {
+            Log.d(TAG, "onDevice_ConnectivityChanged() " + toString(device)
+                    + " connected=" + connected);
+            if (associations.isEmpty()) {
+                Log.d(TAG, "  > No CDM associations");
+            } else {
+                Log.d(TAG, "  > associations=" + Arrays.toString(associations.toArray()));
+            }
+        }
+
+        for (AssociationInfo association : associations) {
+            final int id = association.getId();
+            if (connected) {
+                mCallback.onBluetoothCompanionDeviceConnected(id);
+            } else {
+                mCallback.onBluetoothCompanionDeviceDisconnected(id);
+            }
+        }
+    }
+
+    @Override
+    public void onAssociationAdded(AssociationInfo association) {
+        if (DEBUG) Log.d(TAG, "onAssociation_Added() " + association);
+
+        if (mAllConnectedDevices.containsKey(association.getDeviceMacAddress())) {
+            mCallback.onBluetoothCompanionDeviceConnected(association.getId());
+        }
+    }
+
+    @Override
+    public void onAssociationUpdated(AssociationInfo association, boolean addressChanged) {
+        if (DEBUG) {
+            Log.d(TAG, "onAssociation_Updated() addrChange=" + addressChanged
+                    + " " + association);
+        }
+
+        if (!addressChanged) {
+            // Don't need to do anything.
+            return;
+        }
+
+        // At the moment CDM does allow changing association addresses, so we will never come here.
+        // This will be implemented when CDM support updating addresses.
+        throw new IllegalArgumentException("Address changes are not supported.");
+    }
+
+    private static String toString(@NonNull BluetoothDevice btDevice) {
+        final StringBuilder sb = new StringBuilder(btDevice.getAddress());
+
+        sb.append(" [name=");
+        final String name = btDevice.getName();
+        if (name != null) {
+            sb.append('\'').append(name).append('\'');
+        } else {
+            sb.append("null");
+        }
+
+        final String alias = btDevice.getAlias();
+        if (alias != null) {
+            sb.append(", alias='").append(alias).append("'");
+        }
+
+        return sb.append(']').toString();
+    }
+}

@@ -141,7 +141,7 @@ public final class TimeZoneProviderEvent implements Parcelable {
                     int type = in.readInt();
                     long creationElapsedMillis = in.readLong();
                     TimeZoneProviderSuggestion suggestion =
-                            in.readParcelable(getClass().getClassLoader());
+                            in.readParcelable(getClass().getClassLoader(), android.service.timezone.TimeZoneProviderSuggestion.class);
                     String failureCause = in.readString8();
                     return new TimeZoneProviderEvent(
                             type, creationElapsedMillis, suggestion, failureCause);

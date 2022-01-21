@@ -23,10 +23,10 @@ import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider.TransitionProgressListener
-import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_HALF_OPEN
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_CLOSED
-import com.android.systemui.unfold.updates.FOLD_UPDATE_START_CLOSING
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_FULL_OPEN
+import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_HALF_OPEN
+import com.android.systemui.unfold.updates.FOLD_UPDATE_START_CLOSING
 import com.android.systemui.unfold.updates.FOLD_UPDATE_UNFOLDED_SCREEN_AVAILABLE
 import com.android.systemui.unfold.updates.FoldStateProvider
 import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdate
@@ -35,13 +35,10 @@ import com.android.systemui.unfold.updates.FoldStateProvider.FoldUpdatesListener
 /** Maps fold updates to unfold transition progress using DynamicAnimation. */
 internal class PhysicsBasedUnfoldTransitionProgressProvider(
     private val foldStateProvider: FoldStateProvider
-) :
-    UnfoldTransitionProgressProvider,
-    FoldUpdatesListener,
-    DynamicAnimation.OnAnimationEndListener {
+) : UnfoldTransitionProgressProvider, FoldUpdatesListener, DynamicAnimation.OnAnimationEndListener {
 
-    private val springAnimation = SpringAnimation(this, AnimationProgressProperty)
-        .apply {
+    private val springAnimation =
+        SpringAnimation(this, AnimationProgressProperty).apply {
             addEndListener(this@PhysicsBasedUnfoldTransitionProgressProvider)
         }
 
@@ -121,9 +118,7 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
             isTransitionRunning = false
             springAnimation.cancel()
 
-            listeners.forEach {
-                it.onTransitionFinished()
-            }
+            listeners.forEach { it.onTransitionFinished() }
 
             if (DEBUG) {
                 Log.d(TAG, "onTransitionFinished")
@@ -143,9 +138,7 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
     }
 
     private fun onStartTransition() {
-        listeners.forEach {
-            it.onTransitionStarted()
-        }
+        listeners.forEach { it.onTransitionStarted() }
         isTransitionRunning = true
 
         if (DEBUG) {
@@ -157,11 +150,12 @@ internal class PhysicsBasedUnfoldTransitionProgressProvider(
         if (!isTransitionRunning) onStartTransition()
 
         springAnimation.apply {
-            spring = SpringForce().apply {
-                finalPosition = startValue
-                dampingRatio = SpringForce.DAMPING_RATIO_NO_BOUNCY
-                stiffness = SPRING_STIFFNESS
-            }
+            spring =
+                SpringForce().apply {
+                    finalPosition = startValue
+                    dampingRatio = SpringForce.DAMPING_RATIO_NO_BOUNCY
+                    stiffness = SPRING_STIFFNESS
+                }
             minimumVisibleChange = MINIMAL_VISIBLE_CHANGE
             setStartValue(startValue)
             setMinValue(0f)

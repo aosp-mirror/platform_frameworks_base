@@ -69,7 +69,7 @@ public class VibratorInfo implements Parcelable {
         mPwlePrimitiveDurationMax = in.readInt();
         mPwleSizeMax = in.readInt();
         mQFactor = in.readFloat();
-        mFrequencyMapping = in.readParcelable(VibratorInfo.class.getClassLoader());
+        mFrequencyMapping = in.readParcelable(VibratorInfo.class.getClassLoader(), android.os.VibratorInfo.FrequencyMapping.class);
     }
 
     /**

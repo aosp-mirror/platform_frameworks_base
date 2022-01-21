@@ -4745,6 +4745,12 @@
     <permission android:name="android.permission.CAPTURE_AUDIO_HOTWORD"
         android:protectionLevel="signature|privileged|role" />
 
+    <!-- @SystemApi Allows an application to access the ultrasound content.
+         <p>Not for use by third-party applications.</p>
+         @hide -->
+    <permission android:name="android.permission.ACCESS_ULTRASOUND"
+        android:protectionLevel="signature|privileged" />
+
     <!-- Puts an application in the chain of trust for sound trigger
          operations. Being in the chain of trust allows an application to
          delegate an identity of a separate entity to the sound trigger system
@@ -5120,6 +5126,11 @@
          @hide XXX Change to signature once the picker is moved to its
          own apk as Ghod Intended. -->
     <permission android:name="android.permission.SET_WALLPAPER_COMPONENT"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi Allows applications to set the wallpaper dim amount.
+         @hide. -->
+    <permission android:name="android.permission.SET_WALLPAPER_DIM_AMOUNT"
         android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Allows applications to read dream settings and dream state.

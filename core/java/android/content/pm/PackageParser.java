@@ -7300,7 +7300,7 @@ public class PackageParser {
             splitFlags = dest.createIntArray();
             splitPrivateFlags = dest.createIntArray();
             baseHardwareAccelerated = (dest.readInt() == 1);
-            applicationInfo = dest.readParcelable(boot);
+            applicationInfo = dest.readParcelable(boot, android.content.pm.ApplicationInfo.class);
             if (applicationInfo.permission != null) {
                 applicationInfo.permission = applicationInfo.permission.intern();
             }
@@ -7308,19 +7308,19 @@ public class PackageParser {
             // We don't serialize the "owner" package and the application info object for each of
             // these components, in order to save space and to avoid circular dependencies while
             // serialization. We need to fix them all up here.
-            dest.readParcelableList(permissions, boot);
+            dest.readParcelableList(permissions, boot, android.content.pm.PackageParser.Permission.class);
             fixupOwner(permissions);
-            dest.readParcelableList(permissionGroups, boot);
+            dest.readParcelableList(permissionGroups, boot, android.content.pm.PackageParser.PermissionGroup.class);
             fixupOwner(permissionGroups);
-            dest.readParcelableList(activities, boot);
+            dest.readParcelableList(activities, boot, android.content.pm.PackageParser.Activity.class);
             fixupOwner(activities);
-            dest.readParcelableList(receivers, boot);
+            dest.readParcelableList(receivers, boot, android.content.pm.PackageParser.Activity.class);
             fixupOwner(receivers);
-            dest.readParcelableList(providers, boot);
+            dest.readParcelableList(providers, boot, android.content.pm.PackageParser.Provider.class);
             fixupOwner(providers);
-            dest.readParcelableList(services, boot);
+            dest.readParcelableList(services, boot, android.content.pm.PackageParser.Service.class);
             fixupOwner(services);
-            dest.readParcelableList(instrumentation, boot);
+            dest.readParcelableList(instrumentation, boot, android.content.pm.PackageParser.Instrumentation.class);
             fixupOwner(instrumentation);
 
             dest.readStringList(requestedPermissions);
@@ -7330,10 +7330,10 @@ public class PackageParser {
             protectedBroadcasts = dest.createStringArrayList();
             internStringArrayList(protectedBroadcasts);
 
-            parentPackage = dest.readParcelable(boot);
+            parentPackage = dest.readParcelable(boot, android.content.pm.PackageParser.Package.class);
 
             childPackages = new ArrayList<>();
-            dest.readParcelableList(childPackages, boot);
+            dest.readParcelableList(childPackages, boot, android.content.pm.PackageParser.Package.class);
             if (childPackages.size() == 0) {
                 childPackages = null;
             }
@@ -7367,7 +7367,7 @@ public class PackageParser {
             }
 
             preferredActivityFilters = new ArrayList<>();
-            dest.readParcelableList(preferredActivityFilters, boot);
+            dest.readParcelableList(preferredActivityFilters, boot, android.content.pm.PackageParser.ActivityIntentInfo.class);
             if (preferredActivityFilters.size() == 0) {
                 preferredActivityFilters = null;
             }
@@ -7388,7 +7388,7 @@ public class PackageParser {
             }
             mSharedUserLabel = dest.readInt();
 
-            mSigningDetails = dest.readParcelable(boot);
+            mSigningDetails = dest.readParcelable(boot, android.content.pm.PackageParser.SigningDetails.class);
 
             mPreferredOrder = dest.readInt();
 
@@ -7400,19 +7400,19 @@ public class PackageParser {
 
 
             configPreferences = new ArrayList<>();
-            dest.readParcelableList(configPreferences, boot);
+            dest.readParcelableList(configPreferences, boot, android.content.pm.ConfigurationInfo.class);
             if (configPreferences.size() == 0) {
                 configPreferences = null;
             }
 
             reqFeatures = new ArrayList<>();
-            dest.readParcelableList(reqFeatures, boot);
+            dest.readParcelableList(reqFeatures, boot, android.content.pm.FeatureInfo.class);
             if (reqFeatures.size() == 0) {
                 reqFeatures = null;
             }
 
             featureGroups = new ArrayList<>();
-            dest.readParcelableList(featureGroups, boot);
+            dest.readParcelableList(featureGroups, boot, android.content.pm.FeatureGroupInfo.class);
             if (featureGroups.size() == 0) {
                 featureGroups = null;
             }
@@ -7809,13 +7809,13 @@ public class PackageParser {
         private Permission(Parcel in) {
             super(in);
             final ClassLoader boot = Object.class.getClassLoader();
-            info = in.readParcelable(boot);
+            info = in.readParcelable(boot, android.content.pm.PermissionInfo.class);
             if (info.group != null) {
                 info.group = info.group.intern();
             }
 
             tree = (in.readInt() == 1);
-            group = in.readParcelable(boot);
+            group = in.readParcelable(boot, android.content.pm.PackageParser.PermissionGroup.class);
         }
 
         public static final Parcelable.Creator CREATOR = new Parcelable.Creator<Permission>() {
@@ -7870,7 +7870,7 @@ public class PackageParser {
 
         private PermissionGroup(Parcel in) {
             super(in);
-            info = in.readParcelable(Object.class.getClassLoader());
+            info = in.readParcelable(Object.class.getClassLoader(), android.content.pm.PermissionGroupInfo.class);
         }
 
         public static final Parcelable.Creator CREATOR = new Parcelable.Creator<PermissionGroup>() {
@@ -8163,7 +8163,7 @@ public class PackageParser {
 
         private Activity(Parcel in) {
             super(in);
-            info = in.readParcelable(Object.class.getClassLoader());
+            info = in.readParcelable(Object.class.getClassLoader(), android.content.pm.ActivityInfo.class);
             mHasMaxAspectRatio = in.readBoolean();
             mHasMinAspectRatio = in.readBoolean();
 
@@ -8257,7 +8257,7 @@ public class PackageParser {
 
         private Service(Parcel in) {
             super(in);
-            info = in.readParcelable(Object.class.getClassLoader());
+            info = in.readParcelable(Object.class.getClassLoader(), android.content.pm.ServiceInfo.class);
 
             for (ServiceIntentInfo aii : intents) {
                 aii.service = this;
@@ -8347,7 +8347,7 @@ public class PackageParser {
 
         private Provider(Parcel in) {
             super(in);
-            info = in.readParcelable(Object.class.getClassLoader());
+            info = in.readParcelable(Object.class.getClassLoader(), android.content.pm.ProviderInfo.class);
             syncable = (in.readInt() == 1);
 
             for (ProviderIntentInfo aii : intents) {
@@ -8439,7 +8439,7 @@ public class PackageParser {
 
         private Instrumentation(Parcel in) {
             super(in);
-            info = in.readParcelable(Object.class.getClassLoader());
+            info = in.readParcelable(Object.class.getClassLoader(), android.content.pm.InstrumentationInfo.class);
 
             if (info.targetPackage != null) {
                 info.targetPackage = info.targetPackage.intern();

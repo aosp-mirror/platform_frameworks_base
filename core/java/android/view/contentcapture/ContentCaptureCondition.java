@@ -133,7 +133,7 @@ public final class ContentCaptureCondition implements Parcelable {
 
                 @Override
                 public ContentCaptureCondition createFromParcel(@NonNull Parcel parcel) {
-                    return new ContentCaptureCondition(parcel.readParcelable(null),
+                    return new ContentCaptureCondition(parcel.readParcelable(null, android.content.LocusId.class),
                             parcel.readInt());
                 }
 

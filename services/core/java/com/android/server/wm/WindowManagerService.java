@@ -738,6 +738,8 @@ public class WindowManagerService extends IWindowManager.Stub
     final WindowContextListenerController mWindowContextListenerController =
             new WindowContextListenerController();
 
+    private InputTarget mFocusedInputTarget;
+
     @VisibleForTesting
     final class SettingsObserver extends ContentObserver {
         private final Uri mDisplayInversionEnabledUri =
@@ -5011,6 +5013,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 Slog.v(TAG_WM, "Unknown focus tokens, dropping reportFocusChanged");
                 return;
             }
+            mFocusedInputTarget = newTarget;
 
             mAccessibilityController.onFocusChanged(lastTarget, newTarget);
             ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "Focus changing: %s -> %s", lastTarget, newTarget);
@@ -8170,21 +8173,14 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void onPointerDownOutsideFocusLocked(IBinder touchedToken) {
-        WindowState touchedWindow = mInputToWindowMap.get(touchedToken);
-        if (touchedWindow == null) {
-            // if a user taps outside the currently focused window onto an embedded window, treat
-            // it as if the host window was tapped.
-            touchedWindow = mEmbeddedWindowController.getHostWindow(touchedToken);
-        }
-
-        if (touchedWindow == null || !touchedWindow.canReceiveKeys(true /* fromUserTouch */)) {
+        InputTarget t = getInputTargetFromToken(touchedToken);
+        if (t == null || !t.receiveFocusFromTapOutside()) {
             // If the window that received the input event cannot receive keys, don't move the
             // display it's on to the top since that window won't be able to get focus anyway.
             return;
         }
-
         if (mRecentsAnimationController != null
-                && mRecentsAnimationController.getTargetAppMainWindow() == touchedWindow) {
+            && mRecentsAnimationController.getTargetAppMainWindow() == t) {
             // If there is an active recents animation and touched window is the target, then ignore
             // the touch. The target already handles touches using its own input monitor and we
             // don't want to trigger any lifecycle changes from focusing another window.
@@ -8194,13 +8190,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         ProtoLog.i(WM_DEBUG_FOCUS_LIGHT, "onPointerDownOutsideFocusLocked called on %s",
-                touchedWindow);
-        final DisplayContent displayContent = touchedWindow.getDisplayContent();
-        if (!displayContent.isOnTop()) {
-            displayContent.getParent().positionChildAt(WindowContainer.POSITION_TOP, displayContent,
-                    true /* includingParents */);
+                t);
+        if (mFocusedInputTarget != t && mFocusedInputTarget != null) {
+            mFocusedInputTarget.handleTapOutsideFocusOutsideSelf();
         }
-        handleTaskFocusChange(touchedWindow.getTask(), touchedWindow.mActivityRecord);
+        t.handleTapOutsideFocusInsideSelf();
     }
 
     @VisibleForTesting
@@ -8777,4 +8771,5 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mTaskTransitionSpec = null;
     }
+
 }

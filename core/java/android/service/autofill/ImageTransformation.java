@@ -247,7 +247,7 @@ public final class ImageTransformation extends InternalTransformation implements
             new Parcelable.Creator<ImageTransformation>() {
         @Override
         public ImageTransformation createFromParcel(Parcel parcel) {
-            final AutofillId id = parcel.readParcelable(null);
+            final AutofillId id = parcel.readParcelable(null, android.view.autofill.AutofillId.class);
 
             final Pattern[] regexs = (Pattern[]) parcel.readSerializable();
             final int[] resIds = parcel.createIntArray();

@@ -83,16 +83,16 @@ public final class ConversationChannel implements Parcelable {
     }
 
     public ConversationChannel(Parcel in) {
-        mShortcutInfo = in.readParcelable(ShortcutInfo.class.getClassLoader());
+        mShortcutInfo = in.readParcelable(ShortcutInfo.class.getClassLoader(), android.content.pm.ShortcutInfo.class);
         mUid = in.readInt();
-        mNotificationChannel = in.readParcelable(NotificationChannel.class.getClassLoader());
+        mNotificationChannel = in.readParcelable(NotificationChannel.class.getClassLoader(), android.app.NotificationChannel.class);
         mNotificationChannelGroup =
-                in.readParcelable(NotificationChannelGroup.class.getClassLoader());
+                in.readParcelable(NotificationChannelGroup.class.getClassLoader(), android.app.NotificationChannelGroup.class);
         mLastEventTimestamp = in.readLong();
         mHasActiveNotifications = in.readBoolean();
         mHasBirthdayToday = in.readBoolean();
         mStatuses = new ArrayList<>();
-        in.readParcelableList(mStatuses, ConversationStatus.class.getClassLoader());
+        in.readParcelableList(mStatuses, ConversationStatus.class.getClassLoader(), android.app.people.ConversationStatus.class);
     }
 
     @Override

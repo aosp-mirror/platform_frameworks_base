@@ -93,6 +93,18 @@ class EmbeddedWindowController {
         return embeddedWindow != null ? embeddedWindow.mHostWindowState : null;
     }
 
+    boolean isOverlay(IBinder inputToken) {
+        EmbeddedWindow embeddedWindow = mWindows.get(inputToken);
+        return embeddedWindow != null ? embeddedWindow.getIsOverlay() : false;
+    }
+
+    void setIsOverlay(IBinder inputToken) {
+        EmbeddedWindow embeddedWindow = mWindows.get(inputToken);
+        if (embeddedWindow != null) {
+            embeddedWindow.setIsOverlay();
+        }
+    }
+
     void remove(IWindow client) {
         for (int i = mWindows.size() - 1; i >= 0; i--) {
             if (mWindows.valueAt(i).mClient.asBinder() == client.asBinder()) {
@@ -138,6 +150,12 @@ class EmbeddedWindowController {
         public Session mSession;
         InputChannel mInputChannel;
         final int mWindowType;
+        // Track whether the EmbeddedWindow is a system hosted overlay via
+        // {@link OverlayHost}. In the case of client hosted overlays, the client
+        // view hierarchy will take care of invoking requestEmbeddedWindowFocus
+        // but for system hosted overlays we have to do this via tapOutsideDetection
+        // and this variable is mostly used for tracking that.
+        boolean mIsOverlay = false;
 
         /**
          * @param session  calling session to check ownership of the window
@@ -215,6 +233,40 @@ class EmbeddedWindowController {
         @Override
         public int getPid() {
             return mOwnerPid;
+        }
+
+        void setIsOverlay() {
+            mIsOverlay = true;
+        }
+        boolean getIsOverlay() {
+            return mIsOverlay;
+        }
+
+        /**
+         * System hosted overlays need the WM to invoke grantEmbeddedWindowFocus and
+         * so we need to participate inside handlePointerDownOutsideFocus logic
+         * however client hosted overlays will rely on the hosting view hierarchy
+         * to grant and revoke focus, and so the server side logic is not needed.
+         */
+        @Override
+        public boolean receiveFocusFromTapOutside() {
+            return mIsOverlay;
+        }
+
+        private void handleTap(boolean grantFocus) {
+            if (mInputChannel != null) {
+                mWmService.grantEmbeddedWindowFocus(mSession, mInputChannel.getToken(), grantFocus);
+            }
+        }
+
+        @Override
+        public void handleTapOutsideFocusOutsideSelf() {
+            handleTap(false);
+        }
+
+        @Override
+        public void handleTapOutsideFocusInsideSelf() {
+            handleTap(true);
         }
     }
 }

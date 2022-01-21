@@ -114,8 +114,8 @@ public final class DateTransformation extends InternalTransformation implements
             new Parcelable.Creator<DateTransformation>() {
         @Override
         public DateTransformation createFromParcel(Parcel parcel) {
-            return new DateTransformation(parcel.readParcelable(null),
-                    (DateFormat) parcel.readSerializable());
+            return new DateTransformation(parcel.readParcelable(null, android.view.autofill.AutofillId.class),
+                    (DateFormat) parcel.readSerializable(android.icu.text.DateFormat.class.getClassLoader(), android.icu.text.DateFormat.class));
         }
 
         @Override
