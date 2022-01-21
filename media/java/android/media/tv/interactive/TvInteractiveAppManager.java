@@ -193,9 +193,7 @@ public final class TvInteractiveAppManager {
      * Key for package name in app link.
      * <p>Type: String
      *
-     * @see #registerAppLinkInfo(String, Bundle)
      * @see #sendAppLinkCommand(String, Bundle)
-     * @hide
      */
     public static final String KEY_PACKAGE_NAME = "package_name";
 
@@ -203,9 +201,7 @@ public final class TvInteractiveAppManager {
      * Key for class name in app link.
      * <p>Type: String
      *
-     * @see #registerAppLinkInfo(String, Bundle)
      * @see #sendAppLinkCommand(String, Bundle)
-     * @hide
      */
     public static final String KEY_CLASS_NAME = "class_name";
 
@@ -241,7 +237,6 @@ public final class TvInteractiveAppManager {
      * <p>Type: String
      *
      * @see #sendAppLinkCommand(String, Bundle)
-     * @hide
      */
     public static final String KEY_COMMAND_TYPE = "command_type";
 
@@ -250,7 +245,6 @@ public final class TvInteractiveAppManager {
      * <p>Type: String
      *
      * @see #sendAppLinkCommand(String, Bundle)
-     * @hide
      */
     public static final String KEY_SERVICE_ID = "service_id";
 
@@ -259,7 +253,6 @@ public final class TvInteractiveAppManager {
      * <p>Type: String
      *
      * @see #sendAppLinkCommand(String, Bundle)
-     * @hide
      */
     public static final String KEY_BACK_URI = "back_uri";
 
@@ -773,7 +766,6 @@ public final class TvInteractiveAppManager {
      * @param tvIAppServiceId The ID of TV interactive service which the command to be sent to. The
      *                        ID can be found in {@link TvInputInfo#getId()}.
      * @param command The command to be sent.
-     * @hide
      */
     public void sendAppLinkCommand(@NonNull String tvIAppServiceId, @NonNull Bundle command) {
         try {

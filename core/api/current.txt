@@ -26178,6 +26178,37 @@ package android.media.session {
 
 package android.media.tv {
 
+  public final class AdRequest implements android.os.Parcelable {
+    ctor public AdRequest(int, int, @Nullable android.os.ParcelFileDescriptor, long, long, long, @Nullable String, @NonNull android.os.Bundle);
+    method public int describeContents();
+    method public long getEchoIntervalMillis();
+    method @Nullable public android.os.ParcelFileDescriptor getFileDescriptor();
+    method public int getId();
+    method @Nullable public String getMediaFileType();
+    method @NonNull public android.os.Bundle getMetadata();
+    method public int getRequestType();
+    method public long getStartTimeMillis();
+    method public long getStopTimeMillis();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.AdRequest> CREATOR;
+    field public static final int REQUEST_TYPE_START = 1; // 0x1
+    field public static final int REQUEST_TYPE_STOP = 2; // 0x2
+  }
+
+  public final class AdResponse implements android.os.Parcelable {
+    ctor public AdResponse(int, int, long);
+    method public int describeContents();
+    method public long getElapsedTimeMillis();
+    method public int getId();
+    method public int getResponseType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.AdResponse> CREATOR;
+    field public static final int RESPONSE_TYPE_ERROR = 4; // 0x4
+    field public static final int RESPONSE_TYPE_FINISHED = 2; // 0x2
+    field public static final int RESPONSE_TYPE_PLAYING = 1; // 0x1
+    field public static final int RESPONSE_TYPE_STOPPED = 3; // 0x3
+  }
+
   public final class AitInfo implements android.os.Parcelable {
     ctor public AitInfo(int, int);
     method public int describeContents();
@@ -26757,6 +26788,7 @@ package android.media.tv {
   public abstract static class TvInputService.Session implements android.view.KeyEvent.Callback {
     ctor public TvInputService.Session(android.content.Context);
     method public void layoutSurface(int, int, int, int);
+    method public void notifyAdResponse(@NonNull android.media.tv.AdResponse);
     method public void notifyAitInfoUpdated(@NonNull android.media.tv.AitInfo);
     method public void notifyChannelRetuned(android.net.Uri);
     method public void notifyContentAllowed();
@@ -26776,6 +26808,7 @@ package android.media.tv {
     method public boolean onKeyUp(int, android.view.KeyEvent);
     method public void onOverlayViewSizeChanged(int, int);
     method public abstract void onRelease();
+    method public void onRequestAd(@NonNull android.media.tv.AdRequest);
     method public boolean onSelectTrack(int, @Nullable String);
     method public abstract void onSetCaptionEnabled(boolean);
     method public void onSetInteractiveAppNotificationEnabled(boolean);
@@ -26941,6 +26974,7 @@ package android.media.tv.interactive {
   public final class TvInteractiveAppManager {
     method @NonNull public java.util.List<android.media.tv.interactive.TvInteractiveAppInfo> getTvInteractiveAppServiceList();
     method public void registerCallback(@NonNull android.media.tv.interactive.TvInteractiveAppManager.TvInteractiveAppCallback, @NonNull java.util.concurrent.Executor);
+    method public void sendAppLinkCommand(@NonNull String, @NonNull android.os.Bundle);
     method public void unregisterCallback(@NonNull android.media.tv.interactive.TvInteractiveAppManager.TvInteractiveAppCallback);
     field public static final int ERROR_BLOCKED = 5; // 0x5
     field public static final int ERROR_ENCRYPTED = 6; // 0x6
@@ -26953,6 +26987,11 @@ package android.media.tv.interactive {
     field public static final int INTERACTIVE_APP_STATE_ERROR = 3; // 0x3
     field public static final int INTERACTIVE_APP_STATE_RUNNING = 2; // 0x2
     field public static final int INTERACTIVE_APP_STATE_STOPPED = 1; // 0x1
+    field public static final String KEY_BACK_URI = "back_uri";
+    field public static final String KEY_CLASS_NAME = "class_name";
+    field public static final String KEY_COMMAND_TYPE = "command_type";
+    field public static final String KEY_PACKAGE_NAME = "package_name";
+    field public static final String KEY_SERVICE_ID = "service_id";
     field public static final int SERVICE_STATE_ERROR = 4; // 0x4
     field public static final int SERVICE_STATE_PREPARING = 2; // 0x2
     field public static final int SERVICE_STATE_READY = 3; // 0x3
@@ -26967,6 +27006,7 @@ package android.media.tv.interactive {
   public abstract class TvInteractiveAppService extends android.app.Service {
     ctor public TvInteractiveAppService();
     method public final void notifyStateChanged(int, int, int);
+    method public void onAppLinkCommand(@NonNull android.os.Bundle);
     method public final android.os.IBinder onBind(android.content.Intent);
     method @Nullable public abstract android.media.tv.interactive.TvInteractiveAppService.Session onCreateSession(@NonNull String, int);
     method public abstract void onPrepare(int);
@@ -26979,6 +27019,7 @@ package android.media.tv.interactive {
     method public void layoutSurface(int, int, int, int);
     method public final void notifyBiInteractiveAppCreated(@NonNull android.net.Uri, @Nullable String);
     method public void notifySessionStateChanged(int, int);
+    method public void onAdResponse(@NonNull android.media.tv.AdResponse);
     method public void onCreateBiInteractiveApp(@NonNull android.net.Uri, @Nullable android.os.Bundle);
     method public void onDestroyBiInteractiveApp(@NonNull String);
     method public boolean onKeyDown(int, @NonNull android.view.KeyEvent);
@@ -26990,6 +27031,7 @@ package android.media.tv.interactive {
     method public void onStopInteractiveApp();
     method public void onSurfaceChanged(int, int, int);
     method public void onTuned(@NonNull android.net.Uri);
+    method public void requestAd(@NonNull android.media.tv.AdRequest);
   }
 
   public class TvInteractiveAppView extends android.view.ViewGroup {
