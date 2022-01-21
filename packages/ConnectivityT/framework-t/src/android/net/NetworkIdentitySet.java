@@ -116,9 +116,9 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
             out.writeInt(ident.getRatType());
             writeOptionalString(out, ident.getSubscriberId());
             writeOptionalString(out, ident.getWifiNetworkKey());
-            out.writeBoolean(ident.getRoaming());
-            out.writeBoolean(ident.getMetered());
-            out.writeBoolean(ident.getDefaultNetwork());
+            out.writeBoolean(ident.isRoaming());
+            out.writeBoolean(ident.isMetered());
+            out.writeBoolean(ident.isDefaultNetwork());
             out.writeInt(ident.getOemManaged());
         }
     }
@@ -132,7 +132,7 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
             return false;
         }
         for (NetworkIdentity ident : this) {
-            if (ident.getMetered()) {
+            if (ident.isMetered()) {
                 return true;
             }
         }
@@ -148,7 +148,7 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
             return false;
         }
         for (NetworkIdentity ident : this) {
-            if (ident.getRoaming()) {
+            if (ident.isRoaming()) {
                 return true;
             }
         }
@@ -165,7 +165,7 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
             return true;
         }
         for (NetworkIdentity ident : this) {
-            if (!ident.getDefaultNetwork()) {
+            if (!ident.isDefaultNetwork()) {
                 return false;
             }
         }
