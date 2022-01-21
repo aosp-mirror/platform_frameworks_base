@@ -21,9 +21,11 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/** @hide */
+/**
+ * A request for DSM-CC from broadcast signal.
+ */
 public final class DsmccRequest extends BroadcastInfoRequest implements Parcelable {
-    public static final @TvInputManager.BroadcastInfoType int requestType =
+    private static final @TvInputManager.BroadcastInfoType int REQUEST_TYPE =
             TvInputManager.BROADCAST_INFO_TYPE_DSMCC;
 
     public static final @NonNull Parcelable.Creator<DsmccRequest> CREATOR =
@@ -42,23 +44,32 @@ public final class DsmccRequest extends BroadcastInfoRequest implements Parcelab
 
     private final Uri mUri;
 
-    public static DsmccRequest createFromParcelBody(Parcel in) {
+    static DsmccRequest createFromParcelBody(Parcel in) {
         return new DsmccRequest(in);
     }
 
-    public DsmccRequest(int requestId, @RequestOption int option, Uri uri) {
-        super(requestType, requestId, option);
+    public DsmccRequest(int requestId, @RequestOption int option, @NonNull Uri uri) {
+        super(REQUEST_TYPE, requestId, option);
         mUri = uri;
     }
 
-    protected DsmccRequest(Parcel source) {
-        super(requestType, source);
+    DsmccRequest(Parcel source) {
+        super(REQUEST_TYPE, source);
         String uriString = source.readString();
         mUri = uriString == null ? null : Uri.parse(uriString);
     }
 
+    /**
+     * Gets the URI for DSM-CC object.
+     */
+    @NonNull
     public Uri getUri() {
         return mUri;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     @Override

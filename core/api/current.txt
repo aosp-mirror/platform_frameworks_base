@@ -24957,6 +24957,120 @@ package android.media.tv {
     field public static final int RESPONSE_RESULT_OK = 2; // 0x2
   }
 
+  public final class CommandRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
+    ctor public CommandRequest(int, int, @NonNull String, @NonNull String, @NonNull String);
+    method @NonNull public String getArguments();
+    method @NonNull public String getName();
+    method @NonNull public String getNameSpace();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.CommandRequest> CREATOR;
+  }
+
+  public final class CommandResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
+    ctor public CommandResponse(int, int, int, @Nullable String);
+    method @Nullable public String getResponse();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.CommandResponse> CREATOR;
+  }
+
+  public final class DsmccRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
+    ctor public DsmccRequest(int, int, @NonNull android.net.Uri);
+    method @NonNull public android.net.Uri getUri();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.DsmccRequest> CREATOR;
+  }
+
+  public final class DsmccResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
+    ctor public DsmccResponse(int, int, int, @Nullable android.os.ParcelFileDescriptor);
+    ctor public DsmccResponse(int, int, int, boolean, @Nullable java.util.List<java.lang.String>);
+    ctor public DsmccResponse(int, int, int, @Nullable int[], @Nullable String[]);
+    method @NonNull public String getBiopMessageType();
+    method @NonNull public java.util.List<java.lang.String> getChildList();
+    method @NonNull public android.os.ParcelFileDescriptor getFile();
+    method @NonNull public int[] getStreamEventIds();
+    method @NonNull public String[] getStreamEventNames();
+    field public static final String BIOP_MESSAGE_TYPE_DIRECTORY = "directory";
+    field public static final String BIOP_MESSAGE_TYPE_FILE = "file";
+    field public static final String BIOP_MESSAGE_TYPE_SERVICE_GATEWAY = "service_gateway";
+    field public static final String BIOP_MESSAGE_TYPE_STREAM = "stream";
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.DsmccResponse> CREATOR;
+  }
+
+  public final class PesRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
+    ctor public PesRequest(int, int, int, int);
+    method public int getStreamId();
+    method public int getTsPid();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.PesRequest> CREATOR;
+  }
+
+  public final class PesResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
+    ctor public PesResponse(int, int, int, @Nullable String);
+    method @Nullable public String getSharedFilterToken();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.PesResponse> CREATOR;
+  }
+
+  public final class SectionRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
+    ctor public SectionRequest(int, int, int, int, int);
+    method public int getTableId();
+    method public int getTsPid();
+    method public int getVersion();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.SectionRequest> CREATOR;
+  }
+
+  public final class SectionResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
+    ctor public SectionResponse(int, int, int, int, int, @Nullable android.os.Bundle);
+    method @NonNull public android.os.Bundle getSessionData();
+    method public int getSessionId();
+    method public int getVersion();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.SectionResponse> CREATOR;
+  }
+
+  public final class StreamEventRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
+    ctor public StreamEventRequest(int, int, @NonNull android.net.Uri, @NonNull String);
+    method @NonNull public String getEventName();
+    method @NonNull public android.net.Uri getTargetUri();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.StreamEventRequest> CREATOR;
+  }
+
+  public final class StreamEventResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
+    ctor public StreamEventResponse(int, int, int, int, long, @Nullable byte[]);
+    method @Nullable public byte[] getData();
+    method public int getEventId();
+    method public long getNpt();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.StreamEventResponse> CREATOR;
+  }
+
+  public final class TableRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
+    ctor public TableRequest(int, int, int, int, int);
+    method public int getTableId();
+    method public int getTableName();
+    method public int getVersion();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.TableRequest> CREATOR;
+    field public static final int TABLE_NAME_PAT = 0; // 0x0
+    field public static final int TABLE_NAME_PMT = 1; // 0x1
+  }
+
+  public final class TableResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
+    ctor public TableResponse(int, int, int, @Nullable android.net.Uri, int, int);
+    method public int getSize();
+    method @Nullable public android.net.Uri getTableUri();
+    method public int getVersion();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.TableResponse> CREATOR;
+  }
+
+  public final class TimelineRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
+    ctor public TimelineRequest(int, int, int);
+    method public int getIntervalMillis();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.TimelineRequest> CREATOR;
+  }
+
+  public final class TimelineResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
+    ctor public TimelineResponse(int, int, int, @Nullable String, int, int, long, long);
+    method @Nullable public String getSelector();
+    method public long getTicks();
+    method public int getUnitsPerSecond();
+    method public int getUnitsPerTick();
+    method public long getWallClock();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.TimelineResponse> CREATOR;
+  }
+
   public final class TsRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
     ctor public TsRequest(int, int, int);
     method public int getTsPid();
@@ -24964,7 +25078,7 @@ package android.media.tv {
   }
 
   public final class TsResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
-    ctor public TsResponse(int, int, int, @NonNull String);
+    ctor public TsResponse(int, int, int, @Nullable String);
     method @Nullable public String getSharedFilterToken();
     field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.TsResponse> CREATOR;
   }

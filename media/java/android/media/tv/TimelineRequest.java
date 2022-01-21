@@ -20,7 +20,9 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/** @hide */
+/**
+ * A request for Timeline from broadcast signal.
+ */
 public final class TimelineRequest extends BroadcastInfoRequest implements Parcelable {
     private static final @TvInputManager.BroadcastInfoType int REQUEST_TYPE =
             TvInputManager.BROADCAST_INFO_TYPE_TIMELINE;
@@ -39,24 +41,27 @@ public final class TimelineRequest extends BroadcastInfoRequest implements Parce
                 }
             };
 
-    private final int mIntervalMs;
+    private final int mIntervalMillis;
 
     static TimelineRequest createFromParcelBody(Parcel in) {
         return new TimelineRequest(in);
     }
 
-    public TimelineRequest(int requestId, @RequestOption int option, int intervalMs) {
+    public TimelineRequest(int requestId, @RequestOption int option, int intervalMillis) {
         super(REQUEST_TYPE, requestId, option);
-        mIntervalMs = intervalMs;
+        mIntervalMillis = intervalMillis;
     }
 
-    protected TimelineRequest(Parcel source) {
+    TimelineRequest(Parcel source) {
         super(REQUEST_TYPE, source);
-        mIntervalMs = source.readInt();
+        mIntervalMillis = source.readInt();
     }
 
-    public int getIntervalMs() {
-        return mIntervalMs;
+    /**
+     * Gets the interval of TIS sending response to TIAS in millisecond.
+     */
+    public int getIntervalMillis() {
+        return mIntervalMillis;
     }
 
     @Override
@@ -67,6 +72,6 @@ public final class TimelineRequest extends BroadcastInfoRequest implements Parce
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeInt(mIntervalMs);
+        dest.writeInt(mIntervalMillis);
     }
 }
