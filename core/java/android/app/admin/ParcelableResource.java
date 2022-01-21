@@ -43,7 +43,7 @@ import java.util.concurrent.Callable;
 
 /**
  * Used to store the required information to load a resource that was updated using
- * {@link DevicePolicyManager#setDrawables}.
+ * {@link DevicePolicyManager#setDrawables} and {@link DevicePolicyManager#setStrings}.
  *
  * @hide
  */
@@ -57,10 +57,13 @@ public final class ParcelableResource implements Parcelable {
     private static final String ATTR_RESOURCE_TYPE = "resource-type";
 
     public static final int RESOURCE_TYPE_DRAWABLE = 1;
+    public static final int RESOURCE_TYPE_STRING = 2;
+
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "RESOURCE_TYPE_" }, value = {
-            RESOURCE_TYPE_DRAWABLE
+            RESOURCE_TYPE_DRAWABLE,
+            RESOURCE_TYPE_STRING
     })
     public @interface ResourceType {}
 
@@ -78,13 +81,11 @@ public final class ParcelableResource implements Parcelable {
      *                resource
      * @param resourceId of the resource to use as an updated resource
      * @param resourceType see {@link ResourceType}
-     * @throws IllegalArgumentException if the given {@code resourceId} doesn't exist in the
-     * {@link Context#getResources()} of the given {@code context}
      */
-    public ParcelableResource(@NonNull Context context, @AnyRes int resourceId,
-            @ResourceType int resourceType) throws IllegalArgumentException {
+    public ParcelableResource(
+            @NonNull Context context, @AnyRes int resourceId, @ResourceType int resourceType)
+            throws IllegalStateException, IllegalArgumentException {
         Objects.requireNonNull(context, "context must be provided");
-
         verifyResourceExistsInCallingPackage(context, resourceId, resourceType);
 
         this.mResourceId = resourceId;
@@ -108,25 +109,41 @@ public final class ParcelableResource implements Parcelable {
 
     private static void verifyResourceExistsInCallingPackage(
             Context context, @AnyRes int resourceId, @ResourceType int resourceType)
-            throws IllegalArgumentException {
+            throws IllegalStateException, IllegalArgumentException {
         switch (resourceType) {
             case RESOURCE_TYPE_DRAWABLE:
                 if (!hasDrawableInCallingPackage(context, resourceId)) {
-                    throw new IllegalArgumentException(String.format(
+                    throw new IllegalStateException(String.format(
                             "Drawable with id %d doesn't exist in the calling package %s",
+                            resourceId,
+                            context.getPackageName()));
+                }
+                break;
+            case RESOURCE_TYPE_STRING:
+                if (!hasStringInCallingPackage(context, resourceId)) {
+                    throw new IllegalStateException(String.format(
+                            "String with id %d doesn't exist in the calling package %s",
                             resourceId,
                             context.getPackageName()));
                 }
                 break;
             default:
                 throw new IllegalArgumentException(
-                        "Unknown ParcelableDevicePolicyResourceType: " + resourceType);
+                        "Unknown ResourceType: " + resourceType);
         }
     }
 
     private static boolean hasDrawableInCallingPackage(Context context, @AnyRes int resourceId) {
         try {
-            return context.getDrawable(resourceId) != null;
+            return "drawable".equals(context.getResources().getResourceTypeName(resourceId));
+        } catch (Resources.NotFoundException e) {
+            return false;
+        }
+    }
+
+    private static boolean hasStringInCallingPackage(Context context, @AnyRes int resourceId) {
+        try {
+            return "string".equals(context.getResources().getResourceTypeName(resourceId));
         } catch (Resources.NotFoundException e) {
             return false;
         }
@@ -158,7 +175,7 @@ public final class ParcelableResource implements Parcelable {
      * <p>Returns the default drawable by calling the {@code defaultDrawableLoader} if the updated
      * drawable was not found or could not be loaded.</p>
      */
-    @Nullable
+    @NonNull
     public Drawable getDrawable(
             Context context,
             int density,
@@ -172,6 +189,59 @@ public final class ParcelableResource implements Parcelable {
         } catch (PackageManager.NameNotFoundException | RuntimeException e) {
             Slog.e(TAG, "Unable to load drawable resource " + mResourceName, e);
             return loadDefaultDrawable(defaultDrawableLoader);
+        }
+    }
+
+    /**
+     * Loads the string with id {@code mResourceId} from {@code mPackageName} using the
+     * configuration returned from {@link Resources#getConfiguration} of the provided
+     * {@code context}.
+     *
+     * <p>Returns the default string by calling  {@code defaultStringLoader} if the updated
+     * string was not found or could not be loaded.</p>
+     */
+    @NonNull
+    public String getString(
+            Context context,
+            @NonNull Callable<String> defaultStringLoader) {
+        // TODO(b/203548565): properly handle edge case when the device manager role holder is
+        //  unavailable because it's being updated.
+        try {
+            Resources resources = getAppResourcesWithCallersConfiguration(context);
+            verifyResourceName(resources);
+            return resources.getString(mResourceId);
+        } catch (PackageManager.NameNotFoundException | RuntimeException e) {
+            Slog.e(TAG, "Unable to load string resource " + mResourceName, e);
+            return loadDefaultString(defaultStringLoader);
+        }
+    }
+
+    /**
+     * Loads the string with id {@code mResourceId} from {@code mPackageName} using the
+     * configuration returned from {@link Resources#getConfiguration} of the provided
+     * {@code context}.
+     *
+     * <p>Returns the default string by calling  {@code defaultStringLoader} if the updated
+     * string was not found or could not be loaded.</p>
+     */
+    @Nullable
+    public String getString(
+            Context context,
+            @NonNull Callable<String> defaultStringLoader,
+            @NonNull Object... formatArgs) {
+        // TODO(b/203548565): properly handle edge case when the device manager role holder is
+        //  unavailable because it's being updated.
+        try {
+            Resources resources = getAppResourcesWithCallersConfiguration(context);
+            verifyResourceName(resources);
+            String rawString = resources.getString(mResourceId);
+            return String.format(
+                    context.getResources().getConfiguration().getLocales().get(0),
+                    rawString,
+                    formatArgs);
+        } catch (PackageManager.NameNotFoundException | RuntimeException e) {
+            Slog.e(TAG, "Unable to load string resource " + mResourceName, e);
+            return loadDefaultString(defaultStringLoader);
         }
     }
 
@@ -195,15 +265,40 @@ public final class ParcelableResource implements Parcelable {
     }
 
     /**
-     * returns the {@link Drawable} loaded from calling
-     * {@code defaultDrawableLoader}.
+     * returns the {@link Drawable} loaded from calling {@code defaultDrawableLoader}.
      */
-    public static Drawable loadDefaultDrawable(
-            @NonNull Callable<Drawable> defaultDrawableLoader) {
+    @NonNull
+    public static Drawable loadDefaultDrawable(@NonNull Callable<Drawable> defaultDrawableLoader) {
         try {
-            return defaultDrawableLoader.call();
+            Objects.requireNonNull(defaultDrawableLoader, "defaultDrawableLoader can't be null");
+
+            Drawable drawable = defaultDrawableLoader.call();
+            Objects.requireNonNull(drawable, "defaultDrawable can't be null");
+
+            return drawable;
+        } catch (NullPointerException rethrown) {
+            throw rethrown;
         } catch (Exception e) {
-            throw new RuntimeException("Couldn't load default drawable", e);
+            throw new RuntimeException("Couldn't load default drawable: ", e);
+        }
+    }
+
+    /**
+     * returns the {@link String} loaded from calling {@code defaultStringLoader}.
+     */
+    @NonNull
+    public static String loadDefaultString(@NonNull Callable<String> defaultStringLoader) {
+        try {
+            Objects.requireNonNull(defaultStringLoader, "defaultStringLoader can't be null");
+
+            String string = defaultStringLoader.call();
+            Objects.requireNonNull(string, "defaultString can't be null");
+
+            return string;
+        } catch (NullPointerException rethrown) {
+            throw rethrown;
+        } catch (Exception e) {
+            throw new RuntimeException("Couldn't load default string: ", e);
         }
     }
 

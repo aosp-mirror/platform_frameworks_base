@@ -20,6 +20,7 @@ import static android.app.admin.DevicePolicyResources.Drawable.Source.UPDATABLE_
 import static android.app.admin.DevicePolicyResources.Drawable.Style;
 import static android.app.admin.DevicePolicyResources.Drawable.Style.UPDATABLE_DRAWABLE_STYLES;
 import static android.app.admin.DevicePolicyResources.Drawable.UPDATABLE_DRAWABLE_IDS;
+import static android.app.admin.DevicePolicyResources.Strings.UPDATABLE_STRING_IDS;
 
 import static java.util.Objects.requireNonNull;
 
@@ -27,6 +28,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyDrawableResource;
 import android.app.admin.DevicePolicyResources;
+import android.app.admin.DevicePolicyStringResource;
 import android.app.admin.ParcelableResource;
 import android.os.Environment;
 import android.util.AtomicFile;
@@ -64,13 +66,25 @@ class DeviceManagementResourcesProvider {
     private static final String ATTR_DRAWABLE_STYLE = "drawable-style";
     private static final String ATTR_DRAWABLE_SOURCE = "drawable-source";
     private static final String ATTR_DRAWABLE_ID = "drawable-id";
+    private static final String TAG_STRING_ENTRY = "string-entry";
+    private static final String ATTR_SOURCE_ID = "source-id";
 
-
+    /**
+     * Map of <drawable_id, <style_id, resource_value>>
+     */
     private final Map<Integer, Map<Integer, ParcelableResource>>
             mUpdatedDrawablesForStyle = new HashMap<>();
 
+    /**
+     * Map of <drawable_id, <source_id, resource_value>>
+     */
     private final Map<Integer, Map<Integer, ParcelableResource>>
             mUpdatedDrawablesForSource = new HashMap<>();
+
+    /**
+     * Map of <string_id, resource_value>
+     */
+    private final Map<String, ParcelableResource> mUpdatedStrings = new HashMap<>();
 
     private final Object mLock = new Object();
     private final Injector mInjector;
@@ -114,12 +128,10 @@ class DeviceManagementResourcesProvider {
     private boolean updateDrawable(
             int drawableId, int drawableStyle, ParcelableResource updatableResource) {
         if (!UPDATABLE_DRAWABLE_IDS.contains(drawableId)) {
-            throw new IllegalArgumentException(
-                    "Can't update drawable resource, invalid drawable " + "id " + drawableId);
+            Log.w(TAG, "Updating a resource for an unknown drawable id " + drawableId);
         }
         if (!UPDATABLE_DRAWABLE_STYLES.contains(drawableStyle)) {
-            throw new IllegalArgumentException(
-                    "Can't update drawable resource, invalid style id " + drawableStyle);
+            Log.w(TAG, "Updating a resource for an unknown style id " + drawableStyle);
         }
         synchronized (mLock) {
             if (!mUpdatedDrawablesForStyle.containsKey(drawableId)) {
@@ -139,12 +151,10 @@ class DeviceManagementResourcesProvider {
     private boolean updateDrawableForSource(
             int drawableId, int drawableSource, ParcelableResource updatableResource) {
         if (!UPDATABLE_DRAWABLE_IDS.contains(drawableId)) {
-            throw new IllegalArgumentException("Can't update drawable resource, invalid drawable "
-                    + "id " + drawableId);
+            Log.w(TAG, "Updating a resource for an unknown drawable id " + drawableId);
         }
         if (!UPDATABLE_DRAWABLE_SOURCES.contains(drawableSource)) {
-            throw new IllegalArgumentException("Can't update drawable resource, invalid source id "
-                    + drawableSource);
+            Log.w(TAG, "Updating a resource for an unknown source id " + drawableSource);
         }
         synchronized (mLock) {
             if (!mUpdatedDrawablesForSource.containsKey(drawableId)) {
@@ -183,19 +193,15 @@ class DeviceManagementResourcesProvider {
     ParcelableResource getDrawable(
             int drawableId, int drawableStyle, int drawableSource) {
         if (!UPDATABLE_DRAWABLE_IDS.contains(drawableId)) {
-            Log.e(TAG, "Can't get updated drawable resource, invalid drawable id "
-                    + drawableId);
-            return null;
+            Log.w(TAG, "Getting an updated resource for an unknown drawable id " + drawableId);
         }
         if (!UPDATABLE_DRAWABLE_STYLES.contains(drawableStyle)) {
-            Log.e(TAG, "Can't get updated drawable resource, invalid style id "
+            Log.w(TAG, "Getting an updated resource for an unknown drawable style "
                     + drawableStyle);
-            return null;
         }
         if (!UPDATABLE_DRAWABLE_SOURCES.contains(drawableSource)) {
-            Log.e(TAG, "Can't get updated drawable resource, invalid source id "
+            Log.w(TAG, "Getting an updated resource for an unknown drawable Source "
                     + drawableSource);
-            return null;
         }
         if (mUpdatedDrawablesForSource.containsKey(drawableId)
                 && mUpdatedDrawablesForSource.get(drawableId).containsKey(drawableSource)) {
@@ -213,6 +219,73 @@ class DeviceManagementResourcesProvider {
             return mUpdatedDrawablesForStyle.get(drawableId).get(Style.DEFAULT);
         }
         Log.d(TAG, "No updated drawable found for drawable id " + drawableId);
+        return null;
+    }
+
+    /**
+     * Returns {@code false} if no resources were updated.
+     */
+    boolean updateStrings(@NonNull List<DevicePolicyStringResource> strings) {
+        boolean updated = false;
+        for (int i = 0; i < strings.size(); i++) {
+            String stringId = strings.get(i).getStringId();
+            ParcelableResource resource = strings.get(i).getResource();
+
+            Objects.requireNonNull(resource, "ParcelableResource must be provided.");
+            updated |= updateString(stringId, resource);
+        }
+        if (!updated) {
+            return false;
+        }
+        synchronized (mLock) {
+            write();
+            return true;
+        }
+    }
+
+    private boolean updateString(String stringId, ParcelableResource updatableResource) {
+        if (!UPDATABLE_STRING_IDS.contains(stringId)) {
+            Log.w(TAG, "Updating a resource for an unknown string id " + stringId);
+        }
+        synchronized (mLock) {
+            ParcelableResource current = mUpdatedStrings.get(stringId);
+            if (updatableResource.equals(current)) {
+                return false;
+            }
+            mUpdatedStrings.put(stringId, updatableResource);
+            return true;
+        }
+    }
+
+    /**
+     * Returns {@code false} if no resources were removed.
+     */
+    boolean removeStrings(@NonNull String[] stringIds) {
+        synchronized (mLock) {
+            boolean removed = false;
+            for (int i = 0; i < stringIds.length; i++) {
+                String stringId = stringIds[i];
+                removed |= mUpdatedStrings.remove(stringId) != null;
+            }
+            if (!removed) {
+                return false;
+            }
+            write();
+            return true;
+        }
+    }
+
+    @Nullable
+    ParcelableResource getString(String stringId) {
+        if (!UPDATABLE_STRING_IDS.contains(stringId)) {
+            Log.w(TAG, "Getting an updated resource for an unknown string id " + stringId);
+        }
+
+        if (mUpdatedStrings.containsKey(stringId)) {
+            return mUpdatedStrings.get(stringId);
+        }
+
+        Log.d(TAG, "No updated string found for string id " + stringId);
         return null;
     }
 
@@ -362,6 +435,18 @@ class DeviceManagementResourcesProvider {
                     out.endTag(/* namespace= */ null, TAG_DRAWABLE_SOURCE_ENTRY);
                 }
             }
+            if (mUpdatedStrings != null && !mUpdatedStrings.isEmpty()) {
+                for (Map.Entry<String, ParcelableResource> entry
+                        : mUpdatedStrings.entrySet()) {
+                    out.startTag(/* namespace= */ null, TAG_STRING_ENTRY);
+                    out.attribute(
+                            /* namespace= */ null,
+                            ATTR_SOURCE_ID,
+                            entry.getKey());
+                    entry.getValue().writeToXmlFile(out);
+                    out.endTag(/* namespace= */ null, TAG_STRING_ENTRY);
+                }
+            }
         }
 
         private boolean readInner(
@@ -400,6 +485,12 @@ class DeviceManagementResourcesProvider {
                                 source,
                                 ParcelableResource.createFromXml(parser));
                     }
+                    break;
+                case TAG_STRING_ENTRY:
+                    String sourceId = parser.getAttributeValue(
+                            /* namespace= */ null, ATTR_SOURCE_ID);
+                    mUpdatedStrings.put(
+                            sourceId, ParcelableResource.createFromXml(parser));
                     break;
                 default:
                     Log.e(TAG, "Unexpected tag: " + tag);

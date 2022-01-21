@@ -3282,14 +3282,15 @@ public class DevicePolicyManager {
 
     /**
      * Broadcast action: notify system apps (e.g. settings, SysUI, etc) that the device management
-     * resources with IDs {@link #EXTRA_RESOURCE_ID} has been updated using, the updated resources
-     * can be retrieved using {@link #getDrawable}.
+     * resources with IDs {@link #EXTRA_RESOURCE_ID} has been updated, the updated resources can be
+     * retrieved using {@link #getDrawable} and {@code #getString}.
      *
      * <p>This broadcast is sent to registered receivers only.
      *
      * <p> The following extras will be included to identify the type of resource being updated:
      * <ul>
      *     <li>{@link #EXTRA_RESOURCE_TYPE_DRAWABLE} for drawable resources</li>
+     *     <li>{@link #EXTRA_RESOURCE_TYPE_STRING} for string resources</li>
      * </ul>
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
@@ -3304,8 +3305,16 @@ public class DevicePolicyManager {
             "android.app.extra.RESOURCE_TYPE_DRAWABLE";
 
     /**
+     * A boolean extra for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to indicate that a
+     * resource of type {@link String} is being updated.
+     */
+    public static final String EXTRA_RESOURCE_TYPE_STRING =
+            "android.app.extra.RESOURCE_TYPE_STRING";
+
+    /**
      * An integer array extra for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to indicate which
-     * drawable IDs (see {@link DevicePolicyResources.UpdatableDrawableId}) have been updated.
+     * resource IDs (see {@link DevicePolicyResources.UpdatableDrawableId} and
+     * {@link DevicePolicyResources.UpdatableStringId}) have been updated.
      */
     public static final String EXTRA_RESOURCE_ID =
             "android.app.extra.RESOURCE_ID";
@@ -14535,11 +14544,6 @@ public class DevicePolicyManager {
      *
      * @param drawables The list of {@link DevicePolicyDrawableResource} to update.
      *
-     * @throws IllegalArgumentException if {@link DevicePolicyDrawableResource#getDrawableId()},
-     * {@link DevicePolicyDrawableResource#getDrawableStyle()}, or
-     * {@link DevicePolicyDrawableResource#getDrawableSource()} aren't defined in
-     * {@link DevicePolicyResources.Drawable}.
-     *
      * @hide
      */
     @SystemApi
@@ -14567,9 +14571,6 @@ public class DevicePolicyManager {
      *
      * @param drawableIds The list of IDs  to remove.
      *
-     * @throws IllegalArgumentException if IDs are not defined in
-     * {@link DevicePolicyResources.Drawable}
-     *
      * @hide
      */
     @SystemApi
@@ -14593,6 +14594,9 @@ public class DevicePolicyManager {
      * <p>Also returns the drawable from {@code defaultDrawableLoader} if
      * {@link DevicePolicyResources.Drawable#INVALID_ID} was passed.
      *
+     * <p>{@code defaultDrawableLoader} must return a non {@code null} {@link Drawable}, otherwise a
+     * {@link NullPointerException} is thrown.
+     *
      * <p>This API uses the screen density returned from {@link Resources#getConfiguration()}, to
      * set a different value use
      * {@link #getDrawableForDensity(int, int, int, Callable)}.
@@ -14608,7 +14612,7 @@ public class DevicePolicyManager {
      * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
      *                              the provided params.
      */
-    @Nullable
+    @NonNull
     public Drawable getDrawable(
             @DevicePolicyResources.UpdatableDrawableId int drawableId,
             @DevicePolicyResources.UpdatableDrawableStyle int drawableStyle,
@@ -14622,6 +14626,9 @@ public class DevicePolicyManager {
      * could result in returning a different drawable than {@link #getDrawable(int, int, Callable)}
      * if an override was set for that specific source.
      *
+     * <p>{@code defaultDrawableLoader} must return a non {@code null} {@link Drawable}, otherwise a
+     * {@link NullPointerException} is thrown.
+     *
      * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
      * notified when a resource has been updated.
      *
@@ -14631,7 +14638,7 @@ public class DevicePolicyManager {
      * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
      *                              the provided params.
      */
-    @Nullable
+    @NonNull
     public Drawable getDrawable(
             @DevicePolicyResources.UpdatableDrawableId int drawableId,
             @DevicePolicyResources.UpdatableDrawableStyle int drawableStyle,
@@ -14669,6 +14676,9 @@ public class DevicePolicyManager {
      * Similar to {@link #getDrawable(int, int, Callable)}, but also accepts
      * {@code density}. See {@link Resources#getDrawableForDensity(int, int, Resources.Theme)}.
      *
+     * <p>{@code defaultDrawableLoader} must return a non {@code null} {@link Drawable}, otherwise a
+     * {@link NullPointerException} is thrown.
+     *
      * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
      * notified when a resource has been updated.
      *
@@ -14680,7 +14690,7 @@ public class DevicePolicyManager {
      * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
      *                              the provided params.
      */
-    @Nullable
+    @NonNull
     public Drawable getDrawableForDensity(
             @DevicePolicyResources.UpdatableDrawableId int drawableId,
             @DevicePolicyResources.UpdatableDrawableStyle int drawableStyle,
@@ -14698,6 +14708,9 @@ public class DevicePolicyManager {
      * Similar to {@link #getDrawable(int, int, int, Callable)}, but also accepts
      * {@code density}. See {@link Resources#getDrawableForDensity(int, int, Resources.Theme)}.
      *
+     * <p>{@code defaultDrawableLoader} must return a non {@code null} {@link Drawable}, otherwise a
+     * {@link NullPointerException} is thrown.
+     *
      * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
      * notified when a resource has been updated.
      *
@@ -14710,7 +14723,7 @@ public class DevicePolicyManager {
      * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
      *                              the provided params.
      */
-    @Nullable
+    @NonNull
     public Drawable getDrawableForDensity(
             @DevicePolicyResources.UpdatableDrawableId int drawableId,
             @DevicePolicyResources.UpdatableDrawableStyle int drawableStyle,
@@ -14739,5 +14752,168 @@ public class DevicePolicyManager {
             }
         }
         return ParcelableResource.loadDefaultDrawable(defaultDrawableLoader);
+    }
+
+    /**
+     * For each {@link DevicePolicyStringResource} item in {@code strings}, it updates the string
+     * resource for {@link DevicePolicyStringResource#getStringId()} to the string with ID
+     * {@code callingPackageResourceId} (see {@link DevicePolicyResources.String}), meaning any
+     * system UI surface calling {@link #getString} with {@code stringId} will get
+     * the new resource after this API is called.
+     *
+     * <p>Sends a broadcast with action {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to
+     * registered receivers when a resource has been updated successfully.
+     *
+     * <p>Important notes to consider when using this API:
+     * <ul>
+     * <li> {@link #getString} references the resource
+     * {@code callingPackageResourceId} in the calling package each time it gets called. You have to
+     * ensure that the resource is always available in the calling package as long as it is used as
+     * an updated resource.
+     * <li> You still have to re-call {@code setStrings} even if you only make changes to the
+     * content of the resource with ID {@code callingPackageResourceId} as the content might be
+     * cached and would need updating.
+     * </ul>
+     *
+     * @param strings The list of {@link DevicePolicyStringResource} to update.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES)
+    public void setStrings(@NonNull Set<DevicePolicyStringResource> strings) {
+        if (mService != null) {
+            try {
+                mService.setStrings(new ArrayList<>(strings));
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Removes the updated strings for the list of {@code stringIds} (see
+     * {@link DevicePolicyResources.String}) that was previously set by calling {@link #setStrings},
+     * meaning any subsequent calls to {@link #getString} for the provided IDs will
+     * return the default string from {@code defaultStringLoader}.
+     *
+     * <p>Sends a broadcast with action {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to
+     * registered receivers when a resource has been reset successfully.
+     *
+     * @param stringIds The list of IDs to remove the updated resources for.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES)
+    public void resetStrings(@NonNull String[] stringIds) {
+        if (mService != null) {
+            try {
+                mService.resetStrings(stringIds);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns the appropriate updated string for the {@code stringId} (see
+     * {@link DevicePolicyResources.String}) if one was set using
+     * {@link #setStrings}, otherwise returns the string from {@code defaultStringLoader}.
+     *
+     * <p>Also returns the string from {@code defaultStringLoader} if
+     * {@link DevicePolicyResources.String#INVALID_ID} was passed.
+     *
+     * <p>{@code defaultStringLoader} must return a non {@code null} {@link String}, otherwise a
+     * {@link NullPointerException} is thrown.
+     *
+     * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
+     * notified when a resource has been updated.
+     *
+     * <p>Note that each call to this API loads the resource from the package that called
+     * {@link #setStrings} to set the updated resource.
+     *
+     * @param stringId The IDs to get the updated resource for.
+     * @param defaultStringLoader To get the default string if no updated string was set for
+     *         {@code stringId}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    public String getString(
+            @NonNull @DevicePolicyResources.UpdatableStringId String stringId,
+            @NonNull Callable<String> defaultStringLoader) {
+
+        Objects.requireNonNull(stringId, "stringId can't be null");
+        Objects.requireNonNull(defaultStringLoader, "defaultStringLoader can't be null");
+
+        if (stringId.equals(DevicePolicyResources.Strings.INVALID_ID)) {
+            return ParcelableResource.loadDefaultString(defaultStringLoader);
+        }
+        if (mService != null) {
+            try {
+                ParcelableResource resource = mService.getString(stringId);
+                if (resource == null) {
+                    return ParcelableResource.loadDefaultString(defaultStringLoader);
+                }
+                return resource.getString(mContext, defaultStringLoader);
+            } catch (RemoteException e) {
+                Log.e(
+                        TAG,
+                        "Error getting the updated string from DevicePolicyManagerService.",
+                        e);
+                return ParcelableResource.loadDefaultString(defaultStringLoader);
+            }
+        }
+        return ParcelableResource.loadDefaultString(defaultStringLoader);
+    }
+
+    /**
+     * Similar to {@link #getString(String, Callable)} but accepts {@code formatArgs} and returns a
+     * localized formatted string, substituting the format arguments as defined in
+     * {@link java.util.Formatter} and {@link java.lang.String#format}, (see
+     * {@link Resources#getString(int, Object...)}).
+     *
+     * <p>{@code defaultStringLoader} must return a non {@code null} {@link String}, otherwise a
+     * {@link NullPointerException} is thrown.
+     *
+     * @param stringId The IDs to get the updated resource for.
+     * @param defaultStringLoader To get the default string if no updated string was set for
+     *         {@code stringId}.
+     * @param formatArgs The format arguments that will be used for substitution.
+     *
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @SuppressLint("SamShouldBeLast")
+    public String getString(
+            @NonNull @DevicePolicyResources.UpdatableStringId String stringId,
+            @NonNull Callable<String> defaultStringLoader,
+            @NonNull Object... formatArgs) {
+
+        Objects.requireNonNull(stringId, "stringId can't be null");
+        Objects.requireNonNull(defaultStringLoader, "defaultStringLoader can't be null");
+
+        if (stringId.equals(DevicePolicyResources.Strings.INVALID_ID)) {
+            return ParcelableResource.loadDefaultString(defaultStringLoader);
+        }
+        if (mService != null) {
+            try {
+                ParcelableResource resource = mService.getString(stringId);
+                if (resource == null) {
+                    return ParcelableResource.loadDefaultString(defaultStringLoader);
+                }
+                return resource.getString(mContext, defaultStringLoader, formatArgs);
+            } catch (RemoteException e) {
+                Log.e(
+                        TAG,
+                        "Error getting the updated string from DevicePolicyManagerService.",
+                        e);
+                return ParcelableResource.loadDefaultString(defaultStringLoader);
+            }
+        }
+        return ParcelableResource.loadDefaultString(defaultStringLoader);
     }
 }
