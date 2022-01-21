@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.companion.virtual.IVirtualDevice;
+import android.graphics.PointF;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.MotionEvent;
@@ -61,6 +62,8 @@ public class VirtualMouse implements Closeable {
      * Send a mouse button event to the system.
      *
      * @param event the event
+     * @throws IllegalStateException if the display this mouse is associated with is not currently
+     * targeted
      */
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void sendButtonEvent(@NonNull VirtualMouseButtonEvent event) {
@@ -76,6 +79,8 @@ public class VirtualMouse implements Closeable {
      * {@link MotionEvent#AXIS_SCROLL}.
      *
      * @param event the event
+     * @throws IllegalStateException if the display this mouse is associated with is not currently
+     * targeted
      */
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void sendScrollEvent(@NonNull VirtualMouseScrollEvent event) {
@@ -90,11 +95,29 @@ public class VirtualMouse implements Closeable {
      * Sends a relative movement event to the system.
      *
      * @param event the event
+     * @throws IllegalStateException if the display this mouse is associated with is not currently
+     * targeted
      */
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void sendRelativeEvent(@NonNull VirtualMouseRelativeEvent event) {
         try {
             mVirtualDevice.sendRelativeEvent(mToken, event);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the current cursor position.
+     *
+     * @return the position, expressed as x and y coordinates
+     * @throws IllegalStateException if the display this mouse is associated with is not currently
+     * targeted
+     */
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public @NonNull PointF getCursorPosition() {
+        try {
+            return mVirtualDevice.getCursorPosition(mToken);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

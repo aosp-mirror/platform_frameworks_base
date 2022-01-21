@@ -17,6 +17,7 @@
 package android.hardware.input;
 
 import android.annotation.NonNull;
+import android.graphics.PointF;
 import android.hardware.display.DisplayViewport;
 import android.os.IBinder;
 import android.view.InputEvent;
@@ -78,6 +79,22 @@ public abstract class InputManagerInternal {
      */
     public abstract boolean transferTouchFocus(@NonNull IBinder fromChannelToken,
             @NonNull IBinder toChannelToken);
+
+    /**
+     * Sets the display id that the MouseCursorController will be forced to target. Pass
+     * {@link android.view.Display#INVALID_DISPLAY} to clear the override.
+     */
+    public abstract void setVirtualMousePointerDisplayId(int pointerDisplayId);
+
+    /** Gets the current position of the mouse cursor. */
+    public abstract PointF getCursorPosition();
+
+    /**
+     * Sets the eligibility of windows on a given display for pointer capture. If a display is
+     * marked ineligible, requests to enable pointer capture for windows on that display will be
+     * ignored.
+     */
+    public abstract void setDisplayEligibilityForPointerCapture(int displayId, boolean isEligible);
 
     /** Registers the {@link LidSwitchCallback} to begin receiving notifications. */
     public abstract void registerLidSwitchCallback(@NonNull LidSwitchCallback callbacks);
