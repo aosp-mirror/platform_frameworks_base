@@ -83,7 +83,6 @@ import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.LongSparseLongArray;
 import android.util.MutableInt;
-import android.util.Pools;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
@@ -11852,8 +11851,6 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    private final Pools.Pool<NetworkStats> mNetworkStatsPool = new Pools.SynchronizedPool<>(6);
-
     private final Object mWifiNetworkLock = new Object();
 
     @GuardedBy("mWifiNetworkLock")
@@ -11898,18 +11895,13 @@ public class BatteryStatsImpl extends BatteryStats {
         synchronized (mWifiNetworkLock) {
             final NetworkStats latestStats = readWifiNetworkStatsLocked(networkStatsManager);
             if (latestStats != null) {
-                delta = NetworkStats.subtract(latestStats, mLastWifiNetworkStats, null, null,
-                        mNetworkStatsPool.acquire());
-                mNetworkStatsPool.release(mLastWifiNetworkStats);
+                delta = latestStats.subtract(mLastWifiNetworkStats);
                 mLastWifiNetworkStats = latestStats;
             }
         }
 
         synchronized (this) {
             if (!mOnBatteryInternal || mIgnoreNextExternalStats) {
-                if (delta != null) {
-                    mNetworkStatsPool.release(delta);
-                }
                 if (mIgnoreNextExternalStats) {
                     // TODO: Strictly speaking, we should re-mark all 5 timers for each uid (and the
                     //  global one) here like we do for display. But I'm not sure it's worth the
@@ -12016,7 +12008,6 @@ public class BatteryStatsImpl extends BatteryStats {
                                         uidRunningMs, uidScanMs, uidBatchScanMs));
                     }
                 }
-                mNetworkStatsPool.release(delta);
                 delta = null;
             }
 
@@ -12265,18 +12256,13 @@ public class BatteryStatsImpl extends BatteryStats {
         synchronized (mModemNetworkLock) {
             final NetworkStats latestStats = readMobileNetworkStatsLocked(networkStatsManager);
             if (latestStats != null) {
-                delta = NetworkStats.subtract(latestStats, mLastModemNetworkStats, null, null,
-                        mNetworkStatsPool.acquire());
-                mNetworkStatsPool.release(mLastModemNetworkStats);
+                delta = latestStats.subtract(mLastModemNetworkStats);
                 mLastModemNetworkStats = latestStats;
             }
         }
 
         synchronized (this) {
             if (!mOnBatteryInternal || mIgnoreNextExternalStats) {
-                if (delta != null) {
-                    mNetworkStatsPool.release(delta);
-                }
                 return;
             }
 
@@ -12478,7 +12464,6 @@ public class BatteryStatsImpl extends BatteryStats {
                             totalEstimatedConsumptionMah);
                 }
 
-                mNetworkStatsPool.release(delta);
                 delta = null;
             }
         }
