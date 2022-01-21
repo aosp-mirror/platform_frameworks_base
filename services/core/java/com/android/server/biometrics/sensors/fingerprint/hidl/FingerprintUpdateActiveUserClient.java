@@ -27,6 +27,7 @@ import android.os.SELinux;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.io.File;
@@ -62,7 +63,7 @@ public class FingerprintUpdateActiveUserClient extends HalClientMonitor<IBiometr
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
 
         if (mCurrentUserId.get() == getTargetUserId() && !mForceUpdateAuthenticatorId) {

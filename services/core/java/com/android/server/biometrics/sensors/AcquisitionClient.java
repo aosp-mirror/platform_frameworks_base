@@ -138,7 +138,7 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
     }
 
     @Override
-    public void cancelWithoutStarting(@NonNull Callback callback) {
+    public void cancelWithoutStarting(@NonNull ClientMonitorCallback callback) {
         Slog.d(TAG, "cancelWithoutStarting: " + this);
 
         final int errorCode = BiometricConstants.BIOMETRIC_ERROR_CANCELED;

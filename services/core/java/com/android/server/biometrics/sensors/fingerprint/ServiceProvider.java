@@ -30,7 +30,7 @@ import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
@@ -121,7 +121,7 @@ public interface ServiceProvider {
             @NonNull String opPackageName);
 
     void scheduleInternalCleanup(int sensorId, int userId,
-            @Nullable BaseClientMonitor.Callback callback);
+            @Nullable ClientMonitorCallback callback);
 
     boolean isHardwareDetected(int sensorId);
 

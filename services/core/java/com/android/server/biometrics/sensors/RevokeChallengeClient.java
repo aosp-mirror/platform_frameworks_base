@@ -38,7 +38,7 @@ public abstract class RevokeChallengeClient<T> extends HalClientMonitor<T> {
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
 
         startHalOperation();

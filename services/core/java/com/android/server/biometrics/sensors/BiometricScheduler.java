@@ -160,7 +160,7 @@ public class BiometricScheduler {
     // Internal callback, notified when an operation is complete. Notifies the requester
     // that the operation is complete, before performing internal scheduler work (such as
     // starting the next client).
-    private final BaseClientMonitor.Callback mInternalCallback = new BaseClientMonitor.Callback() {
+    private final ClientMonitorCallback mInternalCallback = new ClientMonitorCallback() {
         @Override
         public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
             Slog.d(getTag(), "[Started] " + clientMonitor);
@@ -247,7 +247,7 @@ public class BiometricScheduler {
     }
 
     @VisibleForTesting
-    public BaseClientMonitor.Callback getInternalCallback() {
+    public ClientMonitorCallback getInternalCallback() {
         return mInternalCallback;
     }
 
@@ -368,7 +368,7 @@ public class BiometricScheduler {
      * @param clientCallback optional callback, invoked when the client state changes.
      */
     public void scheduleClientMonitor(@NonNull BaseClientMonitor clientMonitor,
-            @Nullable BaseClientMonitor.Callback clientCallback) {
+            @Nullable ClientMonitorCallback clientCallback) {
         // If the incoming operation should interrupt preceding clients, mark any interruptable
         // pending clients as canceling. Once they reach the head of the queue, the scheduler will
         // send ERROR_CANCELED and skip the operation.

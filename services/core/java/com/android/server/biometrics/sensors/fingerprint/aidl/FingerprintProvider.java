@@ -55,7 +55,9 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
+import com.android.server.biometrics.sensors.ClientMonitorCompositeCallback;
 import com.android.server.biometrics.sensors.InvalidationRequesterClient;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.PerformanceTracker;
@@ -248,7 +250,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     }
 
     private void scheduleForSensor(int sensorId, @NonNull BaseClientMonitor client,
-            BaseClientMonitor.Callback callback) {
+            ClientMonitorCallback callback) {
         if (!mSensors.contains(sensorId)) {
             throw new IllegalStateException("Unable to schedule client: " + client
                     + " for sensor: " + sensorId);
@@ -361,7 +363,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                     opPackageName, FingerprintUtils.getInstance(sensorId), sensorId,
                     mSensors.get(sensorId).getSensorProperties(),
                     mUdfpsOverlayController, mSidefpsController, maxTemplatesPerUser, enrollReason);
-            scheduleForSensor(sensorId, client, new BaseClientMonitor.Callback() {
+            scheduleForSensor(sensorId, client, new ClientMonitorCallback() {
 
                 @Override
                 public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
@@ -484,7 +486,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
     @Override
     public void scheduleInternalCleanup(int sensorId, int userId,
-            @Nullable BaseClientMonitor.Callback callback) {
+            @Nullable ClientMonitorCallback callback) {
         mHandler.post(() -> {
             final List<Fingerprint> enrolledList = getEnrolledFingerprints(sensorId, userId);
             final FingerprintInternalCleanupClient client =
@@ -493,7 +495,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                             mContext.getOpPackageName(), sensorId, enrolledList,
                             FingerprintUtils.getInstance(sensorId),
                             mSensors.get(sensorId).getAuthenticatorIds());
-            scheduleForSensor(sensorId, client, new BaseClientMonitor.CompositeCallback(callback,
+            scheduleForSensor(sensorId, client, new ClientMonitorCompositeCallback(callback,
                     mFingerprintStateCallback));
         });
     }
