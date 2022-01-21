@@ -551,6 +551,11 @@ interface IWindowManager
     void stopWindowTrace();
 
     /**
+    * If window tracing is active, saves the window trace to file, otherwise does nothing
+    */
+    void saveWindowTraceToFile();
+
+    /**
      * Returns true if window trace is enabled.
      */
     boolean isWindowTraceEnabled();

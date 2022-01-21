@@ -5681,6 +5681,11 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public void saveWindowTraceToFile() {
+        mWindowTracing.saveForBugreport(null /* printwriter */);
+    }
+
+    @Override
     public boolean isWindowTraceEnabled() {
         return mWindowTracing.isEnabled();
     }
