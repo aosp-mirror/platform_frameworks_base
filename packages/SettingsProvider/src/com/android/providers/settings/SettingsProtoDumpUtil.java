@@ -1378,9 +1378,6 @@ class SettingsProtoDumpUtil {
                 Settings.Global.SYS_STORAGE_CACHE_PERCENTAGE,
                 GlobalSettingsProto.Sys.STORAGE_CACHE_PERCENTAGE);
         dumpSetting(s, p,
-                Settings.Global.SYS_STORAGE_CACHE_MAX_BYTES,
-                GlobalSettingsProto.Sys.STORAGE_CACHE_MAX_BYTES);
-        dumpSetting(s, p,
                 Settings.Global.SYS_UIDCPUPOWER,
                 GlobalSettingsProto.Sys.UIDCPUPOWER);
         p.end(sysToken);
