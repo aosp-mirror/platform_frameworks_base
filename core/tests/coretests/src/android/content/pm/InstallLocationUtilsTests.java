@@ -25,7 +25,7 @@ import android.platform.test.annotations.Presubmit;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
-import com.android.internal.content.PackageHelper;
+import com.android.internal.content.InstallLocationUtils;
 
 import org.mockito.Mockito;
 
@@ -36,10 +36,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Presubmit
-public class PackageHelperTests extends AndroidTestCase {
+public class InstallLocationUtilsTests extends AndroidTestCase {
     private static final boolean localLOGV = true;
     public static final String TAG = "PackageHelperTests";
-    protected final String PREFIX = "android.content.pm";
 
     private static final String sInternalVolPath = "/data";
     private static final String sAdoptedVolPath = "/mnt/expand/123";
@@ -88,11 +87,14 @@ public class PackageHelperTests extends AndroidTestCase {
         UUID internalUuid = UUID.randomUUID();
         UUID adoptedUuid = UUID.randomUUID();
         UUID publicUuid = UUID.randomUUID();
-        Mockito.when(storageManager.getStorageBytesUntilLow(internalFile)).thenReturn(sInternalSize);
+        Mockito.when(storageManager.getStorageBytesUntilLow(internalFile))
+                .thenReturn(sInternalSize);
         Mockito.when(storageManager.getStorageBytesUntilLow(adoptedFile)).thenReturn(sAdoptedSize);
         Mockito.when(storageManager.getStorageBytesUntilLow(publicFile)).thenReturn(sPublicSize);
-        Mockito.when(storageManager.getUuidForPath(Mockito.eq(internalFile))).thenReturn(internalUuid);
-        Mockito.when(storageManager.getUuidForPath(Mockito.eq(adoptedFile))).thenReturn(adoptedUuid);
+        Mockito.when(storageManager.getUuidForPath(Mockito.eq(internalFile)))
+                .thenReturn(internalUuid);
+        Mockito.when(storageManager.getUuidForPath(Mockito.eq(adoptedFile)))
+                .thenReturn(adoptedUuid);
         Mockito.when(storageManager.getUuidForPath(Mockito.eq(publicFile))).thenReturn(publicUuid);
         Mockito.when(storageManager.getAllocatableBytes(Mockito.eq(internalUuid), Mockito.anyInt()))
                 .thenReturn(sInternalSize);
@@ -103,7 +105,7 @@ public class PackageHelperTests extends AndroidTestCase {
         return storageManager;
     }
 
-    private static final class MockedInterface extends PackageHelper.TestableInterface {
+    private static final class MockedInterface extends InstallLocationUtils.TestableInterface {
         private boolean mForceAllowOnExternal = false;
         private boolean mAllow3rdPartyOnInternal = true;
         private ApplicationInfo mApplicationInfo = null;
@@ -164,25 +166,25 @@ public class PackageHelperTests extends AndroidTestCase {
         mockedInterface.setMockValues(systemAppInfo, false /*force allow on external*/,
                 true /*allow 3rd party on internal*/);
         String volume = null;
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
             1 /*install location*/, 1000 /*size bytes*/, mockedInterface);
         assertEquals(StorageManager.UUID_PRIVATE_INTERNAL, volume);
 
         mockedInterface.setMockValues(systemAppInfo, true /*force allow on external*/,
                 true /*allow 3rd party on internal*/);
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                 1 /*install location*/, 1000 /*size bytes*/, mockedInterface);
         assertEquals(StorageManager.UUID_PRIVATE_INTERNAL, volume);
 
         mockedInterface.setMockValues(systemAppInfo, false /*force allow on external*/,
                 false /*allow 3rd party on internal*/);
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                 1 /*install location*/, 1000 /*size bytes*/, mockedInterface);
         assertEquals(StorageManager.UUID_PRIVATE_INTERNAL, volume);
 
         mockedInterface.setMockValues(systemAppInfo, true /*force allow on external*/,
                 false /*allow 3rd party on internal*/);
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                 1 /*install location*/, 1000 /*size bytes*/, mockedInterface);
         assertEquals(StorageManager.UUID_PRIVATE_INTERNAL, volume);
 
@@ -192,7 +194,7 @@ public class PackageHelperTests extends AndroidTestCase {
         mockedInterface.setMockValues(systemAppInfo, true /*force allow on external*/,
                 true /*allow 3rd party on internal*/);
         try {
-            PackageHelper.resolveInstallVolume(getContext(), "package.name",
+            InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                     1 /*install location*/, 1000000 /*size bytes*/, mockedInterface);
             fail("Expected exception in resolveInstallVolume was not thrown");
         } catch(IOException e) {
@@ -202,7 +204,7 @@ public class PackageHelperTests extends AndroidTestCase {
         mockedInterface.setMockValues(systemAppInfo, false /*force allow on external*/,
                 true /*allow 3rd party on internal*/);
         try {
-            PackageHelper.resolveInstallVolume(getContext(), "package.name",
+            InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                     1 /*install location*/, 1000000 /*size bytes*/, mockedInterface);
             fail("Expected exception in resolveInstallVolume was not thrown");
         } catch(IOException e) {
@@ -212,7 +214,7 @@ public class PackageHelperTests extends AndroidTestCase {
         mockedInterface.setMockValues(systemAppInfo, false /*force allow on external*/,
                 false /*allow 3rd party on internal*/);
         try {
-            PackageHelper.resolveInstallVolume(getContext(), "package.name",
+            InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                     1 /*install location*/, 1000000 /*size bytes*/, mockedInterface);
             fail("Expected exception in resolveInstallVolume was not thrown");
         } catch(IOException e) {
@@ -222,7 +224,7 @@ public class PackageHelperTests extends AndroidTestCase {
         mockedInterface.setMockValues(systemAppInfo, true /*force allow on external*/,
                 false /*allow 3rd party on internal*/);
         try {
-            PackageHelper.resolveInstallVolume(getContext(), "package.name",
+            InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                     1 /*install location*/, 1000000 /*size bytes*/, mockedInterface);
             fail("Expected exception in resolveInstallVolume was not thrown");
         } catch(IOException e) {
@@ -240,13 +242,13 @@ public class PackageHelperTests extends AndroidTestCase {
         mockedInterface.setMockValues(appInfo, false /*force allow on external*/,
                 true /*allow 3rd party on internal*/);
         String volume = null;
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                 0 /*install location*/, 1000 /*size bytes*/, mockedInterface);
         assertEquals(sInternalVolUuid, volume);
 
         mockedInterface.setMockValues(appInfo, true /*force allow on external*/,
                 true /*allow 3rd party on internal*/);
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                 0 /*install location*/, 1000 /*size bytes*/, mockedInterface);
         assertEquals(sInternalVolUuid, volume);
     }
@@ -260,25 +262,25 @@ public class PackageHelperTests extends AndroidTestCase {
         appInfo.volumeUuid = sAdoptedVolUuid;
         mockedInterface.setMockValues(appInfo, false /*force allow on external*/,
                 true /*allow 3rd party on internal*/);
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
             0 /*install location*/, 1000 /*size bytes*/, mockedInterface);
         assertEquals(sAdoptedVolUuid, volume);
 
         mockedInterface.setMockValues(appInfo, true /*force allow on external*/,
                 true /*allow 3rd party on internal*/);
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                 0 /*install location*/, 1000 /*size bytes*/, mockedInterface);
         assertEquals(sAdoptedVolUuid, volume);
 
         mockedInterface.setMockValues(appInfo, false /*force allow on external*/,
                 false /*allow 3rd party on internal*/);
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                 0 /*install location*/, 1000 /*size bytes*/, mockedInterface);
         assertEquals(sAdoptedVolUuid, volume);
 
         mockedInterface.setMockValues(appInfo, true /*force allow on external*/,
                 false /*allow 3rd party on internal*/);
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                 0 /*install location*/, 1000 /*size bytes*/, mockedInterface);
         assertEquals(sAdoptedVolUuid, volume);
     }
@@ -292,7 +294,7 @@ public class PackageHelperTests extends AndroidTestCase {
         mockedInterface.setMockValues(appInfo, false /*force allow on external*/,
                 true /*allow 3rd party on internal*/);
         try {
-            PackageHelper.resolveInstallVolume(getContext(), "package.name",
+            InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                     0 /*install location*/, 10000001 /*BIG size, won't fit*/, mockedInterface);
             fail("Expected exception was not thrown " + appInfo.volumeUuid);
         } catch (IOException e) {
@@ -302,7 +304,7 @@ public class PackageHelperTests extends AndroidTestCase {
         mockedInterface.setMockValues(appInfo, false /*force allow on external*/,
                 false /*allow 3rd party on internal*/);
         try {
-            PackageHelper.resolveInstallVolume(getContext(), "package.name",
+            InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                     0 /*install location*/, 10000001 /*BIG size, won't fit*/, mockedInterface);
             fail("Expected exception was not thrown " + appInfo.volumeUuid);
         } catch (IOException e) {
@@ -312,7 +314,7 @@ public class PackageHelperTests extends AndroidTestCase {
         mockedInterface.setMockValues(appInfo, true /*force allow on external*/,
                 false /*allow 3rd party on internal*/);
         try {
-            PackageHelper.resolveInstallVolume(getContext(), "package.name",
+            InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                     0 /*install location*/, 10000001 /*BIG size, won't fit*/, mockedInterface);
             fail("Expected exception was not thrown " + appInfo.volumeUuid);
         } catch (IOException e) {
@@ -322,7 +324,7 @@ public class PackageHelperTests extends AndroidTestCase {
         mockedInterface.setMockValues(appInfo, true /*force allow on external*/,
                 true /*allow 3rd party on internal*/);
         try {
-            PackageHelper.resolveInstallVolume(getContext(), "package.name",
+            InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                     0 /*install location*/, 10000001 /*BIG size, won't fit*/, mockedInterface);
             fail("Expected exception was not thrown " + appInfo.volumeUuid);
         } catch (IOException e) {
@@ -336,28 +338,28 @@ public class PackageHelperTests extends AndroidTestCase {
         mockedInterface.setMockValues(appInfo, false /*force allow on external*/,
                 true /*allow 3rd party on internal*/);
         String volume = null;
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
             0 /*install location auto*/, 1000 /*size bytes*/, mockedInterface);
         // Should return the volume with bigger available space.
         assertEquals(sInternalVolUuid, volume);
 
         mockedInterface.setMockValues(appInfo, true /*force allow on external*/,
                 true /*allow 3rd party on internal*/);
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                 0 /*install location auto*/, 1000 /*size bytes*/, mockedInterface);
         // Should return the volume with bigger available space.
         assertEquals(sInternalVolUuid, volume);
 
         mockedInterface.setMockValues(appInfo, true /*force allow on external*/,
                 false /*allow 3rd party on internal*/);
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                 0 /*install location auto*/, 1000 /*size bytes*/, mockedInterface);
         // Should return the volume with bigger available space.
         assertEquals(sAdoptedVolUuid, volume);
 
         mockedInterface.setMockValues(appInfo, false /*force allow on external*/,
                 false /*allow 3rd party on internal*/);
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                 0 /*install location auto*/, 1000 /*size bytes*/, mockedInterface);
         // Should return the volume with bigger available space.
         assertEquals(sAdoptedVolUuid, volume);
@@ -371,20 +373,20 @@ public class PackageHelperTests extends AndroidTestCase {
         mockedInterface.setMockValues(appInfo, false /*force allow on external*/,
                 true /*allow 3rd party on internal*/);
         String volume = null;
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
             1 /*install location internal ONLY*/, 1000 /*size bytes*/, mockedInterface);
         assertEquals(sInternalVolUuid, volume);
 
         mockedInterface.setMockValues(appInfo, true /*force allow on external*/,
                 true /*allow 3rd party on internal*/);
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                 1 /*install location internal ONLY*/, 1000 /*size bytes*/, mockedInterface);
         assertEquals(sInternalVolUuid, volume);
 
         mockedInterface.setMockValues(appInfo, false /*force allow on external*/,
                 false /*allow 3rd party on internal*/);
         try {
-            volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+            volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                     1 /*install location internal only*/, 1000 /*size bytes*/, mockedInterface);
             fail("Expected exception in resolveInstallVolume was not thrown");
         } catch (IOException e) {
@@ -395,7 +397,7 @@ public class PackageHelperTests extends AndroidTestCase {
         mockedInterface.setMockValues(appInfo, true /*force allow on external*/,
                 false /*allow 3rd party on internal*/);
         volume = null;
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                 1 /*install location internal only*/, 1000 /*size bytes*/, mockedInterface);
         assertEquals(sAdoptedVolUuid, volume);
     }
@@ -407,7 +409,7 @@ public class PackageHelperTests extends AndroidTestCase {
         mockedInterface.setMockValues(appInfo, false /*force allow on external*/,
                 false /*allow 3rd party on internal*/);
         String volume = null;
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
             0 /*install location auto*/, 1000 /*size bytes*/, mockedInterface);
         // Should return the non-internal volume.
         assertEquals(sAdoptedVolUuid, volume);
@@ -415,7 +417,7 @@ public class PackageHelperTests extends AndroidTestCase {
         appInfo = null;
         mockedInterface.setMockValues(appInfo, true /*force allow on external*/,
                 false /*allow 3rd party on internal*/);
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                 0 /*install location auto*/, 1000 /*size bytes*/, mockedInterface);
         // Should return the non-internal volume.
         assertEquals(sAdoptedVolUuid, volume);
@@ -428,7 +430,7 @@ public class PackageHelperTests extends AndroidTestCase {
                 true /*allow 3rd party on internal*/);
         String volume = null;
         try {
-            volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+            volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                     1 /*install location internal ONLY*/,
                     1000000 /*size too big*/, mockedInterface);
             fail("Expected exception in resolveInstallVolume was not thrown");
@@ -445,7 +447,7 @@ public class PackageHelperTests extends AndroidTestCase {
                 false /*allow 3rd party on internal*/);
         String volume = null;
         try {
-            volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+            volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
                     1 /*install location internal only*/, 1000 /*size bytes*/, mockedInterface);
             fail("Expected exception in resolveInstallVolume was not thrown");
         } catch (IOException e) {
@@ -456,7 +458,7 @@ public class PackageHelperTests extends AndroidTestCase {
         mockedInterface.setMockValues(appInfo, true /*force allow on external*/,
                 false /*allow 3rd party on internal*/);
         volume = null;
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
             1 /*install location internal only*/, 1000 /*size bytes*/, mockedInterface);
         assertEquals(sAdoptedVolUuid, volume);
 
@@ -474,7 +476,7 @@ public class PackageHelperTests extends AndroidTestCase {
         mockedInterface.setMockValues(appInfo, true /*force allow on external*/,
                 false /*allow 3rd party on internal*/);
         String volume = null;
-        volume = PackageHelper.resolveInstallVolume(getContext(), "package.name",
+        volume = InstallLocationUtils.resolveInstallVolume(getContext(), "package.name",
             1 /*install location internal only*/, 1000 /*size bytes*/, mockedInterface);
         assertEquals(sAdoptedVolUuid, volume);
     }

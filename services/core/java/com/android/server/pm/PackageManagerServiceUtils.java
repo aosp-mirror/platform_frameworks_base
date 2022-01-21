@@ -43,6 +43,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
 import android.content.pm.PackageInfoLite;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackagePartitions;
 import android.content.pm.ResolveInfo;
@@ -79,8 +80,8 @@ import android.util.Printer;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.content.NativeLibraryHelper;
-import com.android.internal.content.PackageHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.HexDump;
@@ -805,27 +806,37 @@ public class PackageManagerServiceUtils {
         final PackageInfoLite ret = new PackageInfoLite();
         if (packagePath == null || pkg == null) {
             Slog.i(TAG, "Invalid package file " + packagePath);
-            ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_APK;
+            ret.recommendedInstallLocation = InstallLocationUtils.RECOMMEND_FAILED_INVALID_APK;
             return ret;
         }
 
         final File packageFile = new File(packagePath);
         final long sizeBytes;
         try {
-            sizeBytes = PackageHelper.calculateInstalledSize(pkg, abiOverride);
+            sizeBytes = InstallLocationUtils.calculateInstalledSize(pkg, abiOverride);
         } catch (IOException e) {
             if (!packageFile.exists()) {
-                ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_URI;
+                ret.recommendedInstallLocation = InstallLocationUtils.RECOMMEND_FAILED_INVALID_URI;
             } else {
-                ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_APK;
+                ret.recommendedInstallLocation = InstallLocationUtils.RECOMMEND_FAILED_INVALID_APK;
             }
 
             return ret;
         }
 
-        final int recommendedInstallLocation = PackageHelper.resolveInstallLocation(context,
-                pkg.getPackageName(), pkg.getInstallLocation(), sizeBytes, flags);
-
+        final PackageInstaller.SessionParams sessionParams = new PackageInstaller.SessionParams(
+                PackageInstaller.SessionParams.MODE_INVALID);
+        sessionParams.appPackageName = pkg.getPackageName();
+        sessionParams.installLocation = pkg.getInstallLocation();
+        sessionParams.sizeBytes = sizeBytes;
+        sessionParams.installFlags = flags;
+        final int recommendedInstallLocation;
+        try {
+            recommendedInstallLocation = InstallLocationUtils.resolveInstallLocation(context,
+                    sessionParams);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
         ret.packageName = pkg.getPackageName();
         ret.splitNames = pkg.getSplitNames();
         ret.versionCode = pkg.getVersionCode();
@@ -837,7 +848,6 @@ public class PackageManagerServiceUtils {
         ret.recommendedInstallLocation = recommendedInstallLocation;
         ret.multiArch = pkg.isMultiArch();
         ret.debuggable = pkg.isDebuggable();
-
         return ret;
     }
 
@@ -857,7 +867,7 @@ public class PackageManagerServiceUtils {
                 throw new PackageManagerException(result.getErrorCode(),
                         result.getErrorMessage(), result.getException());
             }
-            return PackageHelper.calculateInstalledSize(result.getResult(), abiOverride);
+            return InstallLocationUtils.calculateInstalledSize(result.getResult(), abiOverride);
         } catch (PackageManagerException | IOException e) {
             Slog.w(TAG, "Failed to calculate installed size: " + e);
             return -1;

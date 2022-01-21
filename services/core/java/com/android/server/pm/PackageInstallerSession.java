@@ -143,8 +143,8 @@ import android.util.apk.ApkSignatureVerifier;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.content.NativeLibraryHelper;
-import com.android.internal.content.PackageHelper;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.security.VerityUtils;
@@ -1537,7 +1537,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (stageDir != null && lengthBytes > 0) {
                 mContext.getSystemService(StorageManager.class).allocateBytes(
                         targetPfd.getFileDescriptor(), lengthBytes,
-                        PackageHelper.translateAllocateFlags(params.installFlags));
+                        InstallLocationUtils.translateAllocateFlags(params.installFlags));
             }
 
             if (offsetBytes > 0) {

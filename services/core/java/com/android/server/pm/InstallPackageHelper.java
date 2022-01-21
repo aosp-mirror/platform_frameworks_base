@@ -141,7 +141,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.F2fsUtils;
-import com.android.internal.content.PackageHelper;
+import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.security.VerityUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
@@ -2358,26 +2358,26 @@ final class InstallPackageHelper {
                 if ((installFlags & PackageManager.INSTALL_REPLACE_EXISTING) != 0) {
                     // Check for updated system application.
                     if (installedPkg.isSystem()) {
-                        return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+                        return InstallLocationUtils.RECOMMEND_INSTALL_INTERNAL;
                     } else {
                         // If current upgrade specifies particular preference
                         if (installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
                             // Application explicitly specified internal.
-                            return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+                            return InstallLocationUtils.RECOMMEND_INSTALL_INTERNAL;
                         } else if (
                                 installLocation == PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL) {
                             // App explicitly prefers external. Let policy decide
                         } else {
                             // Prefer previous location
                             if (installedPkg.isExternalStorage()) {
-                                return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
+                                return InstallLocationUtils.RECOMMEND_INSTALL_EXTERNAL;
                             }
-                            return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+                            return InstallLocationUtils.RECOMMEND_INSTALL_INTERNAL;
                         }
                     }
                 } else {
                     // Invalid install. Return error code
-                    return PackageHelper.RECOMMEND_FAILED_ALREADY_EXISTS;
+                    return InstallLocationUtils.RECOMMEND_FAILED_ALREADY_EXISTS;
                 }
             }
         }

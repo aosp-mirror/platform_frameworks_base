@@ -50,7 +50,7 @@ import android.util.IntArray;
 import android.util.SparseArray;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
-import com.android.internal.content.PackageHelper;
+import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
 
@@ -101,12 +101,12 @@ public class StagingManagerTest {
         mMockitoSession = ExtendedMockito.mockitoSession()
                     .strictness(Strictness.LENIENT)
                     .mockStatic(SystemProperties.class)
-                    .mockStatic(PackageHelper.class)
+                    .mockStatic(InstallLocationUtils.class)
                     .startMocking();
 
         when(mStorageManager.supportsCheckpoint()).thenReturn(true);
         when(mStorageManager.needsCheckpoint()).thenReturn(true);
-        when(PackageHelper.getStorageManager()).thenReturn(mStorageManager);
+        when(InstallLocationUtils.getStorageManager()).thenReturn(mStorageManager);
 
         when(SystemProperties.get(eq("ro.apex.updatable"))).thenReturn("true");
         when(SystemProperties.get(eq("ro.apex.updatable"), anyString())).thenReturn("true");

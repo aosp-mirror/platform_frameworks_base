@@ -28,7 +28,6 @@ import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.SigningDetails;
-import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.rollback.RollbackInfo;
@@ -43,11 +42,12 @@ import android.util.Slog;
 import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.content.PackageHelper;
+import com.android.internal.content.InstallLocationUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
 import com.android.server.rollback.RollbackManagerInternal;
 
 import java.io.File;
@@ -291,8 +291,8 @@ final class PackageSessionVerifier {
             throws PackageManagerException {
         // Before marking the session as ready, start checkpoint service if available
         try {
-            if (PackageHelper.getStorageManager().supportsCheckpoint()) {
-                PackageHelper.getStorageManager().startCheckpoint(2);
+            if (InstallLocationUtils.getStorageManager().supportsCheckpoint()) {
+                InstallLocationUtils.getStorageManager().startCheckpoint(2);
             }
         } catch (Exception e) {
             // Failed to get hold of StorageManager
@@ -544,7 +544,7 @@ final class PackageSessionVerifier {
      */
     private void checkActiveSessions() throws PackageManagerException {
         try {
-            checkActiveSessions(PackageHelper.getStorageManager().supportsCheckpoint());
+            checkActiveSessions(InstallLocationUtils.getStorageManager().supportsCheckpoint());
         } catch (RemoteException e) {
             throw new PackageManagerException(SessionInfo.SESSION_VERIFICATION_FAILED,
                     "Can't query fs-checkpoint status : " + e);

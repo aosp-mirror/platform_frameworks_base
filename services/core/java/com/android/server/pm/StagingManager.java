@@ -53,7 +53,7 @@ import android.util.TimingsTraceLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.content.PackageHelper;
+import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
@@ -237,7 +237,7 @@ public class StagingManager {
                     mApexManager.revertActiveSessions();
                 }
 
-                PackageHelper.getStorageManager().abortChanges(
+                InstallLocationUtils.getStorageManager().abortChanges(
                         "abort-staged-install", false /*retry*/);
             }
         } catch (Exception e) {
@@ -674,8 +674,8 @@ public class StagingManager {
         boolean needsCheckpoint = false;
         boolean supportsCheckpoint = false;
         try {
-            supportsCheckpoint = PackageHelper.getStorageManager().supportsCheckpoint();
-            needsCheckpoint = PackageHelper.getStorageManager().needsCheckpoint();
+            supportsCheckpoint = InstallLocationUtils.getStorageManager().supportsCheckpoint();
+            needsCheckpoint = InstallLocationUtils.getStorageManager().needsCheckpoint();
         } catch (RemoteException e) {
             // This means that vold has crashed, and device is in a bad state.
             throw new IllegalStateException("Failed to get checkpoint status", e);
