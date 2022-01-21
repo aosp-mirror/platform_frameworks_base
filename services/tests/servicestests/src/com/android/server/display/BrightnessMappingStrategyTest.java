@@ -393,7 +393,8 @@ public class BrightnessMappingStrategyTest {
 
         // Create an idle mode bms
         // This will fail if it tries to fetch the wrong configuration.
-        BrightnessMappingStrategy bms = BrightnessMappingStrategy.createForIdleMode(res, ddc);
+        BrightnessMappingStrategy bms = BrightnessMappingStrategy.createForIdleMode(res, ddc,
+                null);
         assertNotNull("BrightnessMappingStrategy should not be null", bms);
 
         // Ensure that the config is the one we set
