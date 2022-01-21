@@ -33,7 +33,7 @@ oneway interface ITvInteractiveAppSessionCallback {
     void onLayoutSurface(int left, int top, int right, int bottom);
     void onBroadcastInfoRequest(in BroadcastInfoRequest request);
     void onRemoveBroadcastInfo(int id);
-    void onSessionStateChanged(int state);
+    void onSessionStateChanged(int state, int err);
     void onBiInteractiveAppCreated(in Uri biIAppUri, in String biIAppId);
     void onTeletextAppStateChanged(int state);
     void onCommandRequest(in String cmdType, in Bundle parameters);

@@ -256,15 +256,16 @@ public class TvInteractiveAppManagerService extends SystemService {
 
     @GuardedBy("mLock")
     private void notifyStateChangedLocked(
-            UserState userState, String iAppServiceId, int type, int state) {
+            UserState userState, String iAppServiceId, int type, int state, int err) {
         if (DEBUG) {
             Slog.d(TAG, "notifyRteStateChanged(iAppServiceId="
-                    + iAppServiceId + ", type=" + type + ", state=" + state + ")");
+                    + iAppServiceId + ", type=" + type + ", state=" + state + ", err=" + err + ")");
         }
         int n = userState.mCallbacks.beginBroadcast();
         for (int i = 0; i < n; ++i) {
             try {
-                userState.mCallbacks.getBroadcastItem(i).onStateChanged(iAppServiceId, type, state);
+                userState.mCallbacks.getBroadcastItem(i)
+                        .onStateChanged(iAppServiceId, type, state, err);
             } catch (RemoteException e) {
                 Slog.e(TAG, "failed to report RTE state changed", e);
             }
@@ -1866,6 +1867,16 @@ public class TvInteractiveAppManagerService extends SystemService {
                 ServiceState serviceState = userState.mServiceStateMap.get(mComponent);
                 serviceState.mService = ITvInteractiveAppService.Stub.asInterface(service);
 
+                // Register a callback, if we need to.
+                if (serviceState.mCallback == null) {
+                    serviceState.mCallback = new ServiceCallback(mComponent, mUserId);
+                    try {
+                        serviceState.mService.registerCallback(serviceState.mCallback);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "error in registerCallback", e);
+                    }
+                }
+
                 if (serviceState.mPendingPrepare) {
                     final long identity = Binder.clearCallingIdentity();
                     try {
@@ -1968,14 +1979,14 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
-        public void onStateChanged(int type, int state) {
+        public void onStateChanged(int type, int state, int error) {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
                     ServiceState serviceState = getServiceStateLocked(mComponent, mUserId);
                     String iAppServiceId = serviceState.mIAppServiceId;
                     UserState userState = getUserStateLocked(mUserId);
-                    notifyStateChangedLocked(userState, iAppServiceId, type, state);
+                    notifyStateChangedLocked(userState, iAppServiceId, type, state, error);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -2210,16 +2221,16 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
-        public void onSessionStateChanged(int state) {
+        public void onSessionStateChanged(int state, int err) {
             synchronized (mLock) {
                 if (DEBUG) {
-                    Slogf.d(TAG, "onSessionStateChanged (state=" + state + ")");
+                    Slogf.d(TAG, "onSessionStateChanged (state=" + state + ", err=" + err + ")");
                 }
                 if (mSessionState.mSession == null || mSessionState.mClient == null) {
                     return;
                 }
                 try {
-                    mSessionState.mClient.onSessionStateChanged(state, mSessionState.mSeq);
+                    mSessionState.mClient.onSessionStateChanged(state, err, mSessionState.mSeq);
                 } catch (RemoteException e) {
                     Slogf.e(TAG, "error in onSessionStateChanged", e);
                 }

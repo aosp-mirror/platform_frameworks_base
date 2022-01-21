@@ -58,7 +58,7 @@ public final class TvInteractiveAppInfo implements Parcelable {
             INTERACTIVE_APP_TYPE_ATSC,
             INTERACTIVE_APP_TYPE_GINGA,
     })
-    @interface InteractiveAppType {}
+    public @interface InteractiveAppType {}
 
     /** HbbTV interactive app type */
     public static final int INTERACTIVE_APP_TYPE_HBBTV = 0x1;

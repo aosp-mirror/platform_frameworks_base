@@ -22,5 +22,5 @@ package android.media.tv.interactive;
  * @hide
  */
 oneway interface ITvInteractiveAppServiceCallback {
-    void onStateChanged(int type, int state);
+    void onStateChanged(int type, int state, int error);
 }

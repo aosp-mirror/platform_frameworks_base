@@ -2593,9 +2593,9 @@ public final class TvInputManager {
 
         /**
          * Enables interactive app notification.
+         *
          * @param enabled {@code true} if you want to enable interactive app notifications.
          *                {@code false} otherwise.
-         * @hide
          */
         public void setInteractiveAppNotificationEnabled(boolean enabled) {
             if (mToken == null) {
