@@ -226,8 +226,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final int MSG_REMOVE_IME_SURFACE_FROM_WINDOW = 1061;
     private static final int MSG_UPDATE_IME_WINDOW_STATUS = 1070;
 
-    private static final int MSG_START_INPUT = 2000;
-
     private static final int MSG_UNBIND_CLIENT = 3000;
     private static final int MSG_BIND_CLIENT = 3010;
     private static final int MSG_SET_ACTIVE = 3020;
@@ -645,9 +643,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     boolean mBoundToMethod;
 
     /**
-     * Currently enabled session.  Only touched by service thread, not
-     * protected by a lock.
+     * Currently enabled session.
      */
+    @GuardedBy("ImfLock.class")
     SessionState mEnabledSession;
 
     /**
@@ -696,11 +694,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             new CopyOnWriteArrayList<>();
 
     /**
-     * Internal state snapshot when {@link #MSG_START_INPUT} message is about to be posted to the
-     * internal message queue. Any subsequent state change inside {@link InputMethodManagerService}
-     * will not affect those tasks that are already posted.
+     * Internal state snapshot when
+     * {@link IInputMethod#startInput(IBinder, IInputContext, EditorInfo, boolean)} is about to be
+     * called.
      *
-     * <p>Posting {@link #MSG_START_INPUT} message basically means that
+     * <p>Calling that IPC endpoint basically means that
      * {@link InputMethodService#doStartInput(InputConnection, EditorInfo, boolean)} will be called
      * back in the current IME process shortly, which will also affect what the current IME starts
      * receiving from {@link InputMethodService#getCurrentInputConnection()}. In other words, this
@@ -2305,10 +2303,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mBoundToMethod = true;
         }
 
+        final boolean restarting = !initial;
         final Binder startInputToken = new Binder();
         final StartInputInfo info = new StartInputInfo(mSettings.getCurrentUserId(),
                 getCurTokenLocked(),
-                mCurTokenDisplayId, getCurIdLocked(), startInputReason, !initial,
+                mCurTokenDisplayId, getCurIdLocked(), startInputReason, restarting,
                 UserHandle.getUserId(mCurClient.uid), mCurClient.selfReportedDisplayId,
                 mCurFocusedWindow, mCurAttribute, mCurFocusedWindowSoftInputMode,
                 getSequenceNumberLocked());
@@ -2327,9 +2326,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         final SessionState session = mCurClient.curSession;
-        executeOrSendMessage(session.method, mCaller.obtainMessageIIOOOO(
-                MSG_START_INPUT, 0 /* unused */, initial ? 0 : 1 /* restarting */,
-                startInputToken, session, mCurInputContext, mCurAttribute));
+        try {
+            setEnabledSessionLocked(session);
+            session.method.startInput(startInputToken, mCurInputContext, mCurAttribute, restarting);
+        } catch (RemoteException e) {
+        }
+
         if (mShowRequested) {
             if (DEBUG) Slog.v(TAG, "Attach new input asks to show input");
             showCurrentInputLocked(mCurFocusedWindow, getAppShowFlagsLocked(), null,
@@ -4213,7 +4215,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
-    void setEnabledSessionInHandlerThread(SessionState session) {
+    @GuardedBy("ImfLock.class")
+    void setEnabledSessionLocked(SessionState session) {
         if (mEnabledSession != session) {
             if (mEnabledSession != null && mEnabledSession.session != null) {
                 try {
@@ -4303,25 +4306,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 updateImeWindowStatus(msg.arg1 == 1);
                 return true;
             }
-            // ---------------------------------------------------------
-
-            case MSG_START_INPUT: {
-                final boolean restarting = msg.arg2 != 0;
-                args = (SomeArgs) msg.obj;
-                final IBinder startInputToken = (IBinder) args.arg1;
-                final SessionState session = (SessionState) args.arg2;
-                final IInputContext inputContext = (IInputContext) args.arg3;
-                final EditorInfo editorInfo = (EditorInfo) args.arg4;
-                try {
-                    setEnabledSessionInHandlerThread(session);
-                    session.method.startInput(startInputToken, inputContext, editorInfo,
-                            restarting);
-                } catch (RemoteException e) {
-                }
-                args.recycle();
-                return true;
-            }
-
             // ---------------------------------------------------------
 
             case MSG_UNBIND_CLIENT:
