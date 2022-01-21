@@ -22,24 +22,29 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.ComponentName;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.games.CreateGameSessionRequest;
 import android.service.games.CreateGameSessionResult;
+import android.service.games.GameScreenshotResult;
 import android.service.games.GameSessionViewHostConfiguration;
 import android.service.games.GameStartedEvent;
 import android.service.games.IGameService;
 import android.service.games.IGameServiceController;
 import android.service.games.IGameSession;
+import android.service.games.IGameSessionController;
 import android.service.games.IGameSessionService;
 import android.util.Slog;
 import android.view.SurfaceControlViewHost.SurfacePackage;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.ServiceConnector;
 import com.android.server.wm.WindowManagerInternal;
+import com.android.server.wm.WindowManagerService;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -87,11 +92,24 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                 }
             };
 
+    private final IGameSessionController mGameSessionController =
+            new IGameSessionController.Stub() {
+                @Override
+                public void takeScreenshot(int taskId,
+                        @NonNull AndroidFuture gameScreenshotResultFuture) {
+                    mBackgroundExecutor.execute(() -> {
+                        GameServiceProviderInstanceImpl.this.takeScreenshot(taskId,
+                                gameScreenshotResultFuture);
+                    });
+                }
+            };
+
     private final Object mLock = new Object();
     private final UserHandle mUserHandle;
     private final Executor mBackgroundExecutor;
     private final GameClassifier mGameClassifier;
     private final IActivityTaskManager mActivityTaskManager;
+    private final WindowManagerService mWindowManagerService;
     private final WindowManagerInternal mWindowManagerInternal;
     private final ServiceConnector<IGameService> mGameServiceConnector;
     private final ServiceConnector<IGameSessionService> mGameSessionServiceConnector;
@@ -107,6 +125,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
             @NonNull Executor backgroundExecutor,
             @NonNull GameClassifier gameClassifier,
             @NonNull IActivityTaskManager activityTaskManager,
+            @NonNull WindowManagerService windowManagerService,
             @NonNull WindowManagerInternal windowManagerInternal,
             @NonNull ServiceConnector<IGameService> gameServiceConnector,
             @NonNull ServiceConnector<IGameSessionService> gameSessionServiceConnector) {
@@ -114,6 +133,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         mBackgroundExecutor = backgroundExecutor;
         mGameClassifier = gameClassifier;
         mActivityTaskManager = activityTaskManager;
+        mWindowManagerService = windowManagerService;
         mWindowManagerInternal = windowManagerInternal;
         mGameServiceConnector = gameServiceConnector;
         mGameSessionServiceConnector = gameSessionServiceConnector;
@@ -300,6 +320,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                                     taskId,
                                     existingGameSessionRecord.getComponentName().getPackageName());
                     gameService.create(
+                            mGameSessionController,
                             createGameSessionRequest,
                             gameSessionViewHostConfiguration,
                             createGameSessionResultFuture);
@@ -404,7 +425,6 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         }
     }
 
-
     @Nullable
     private GameSessionViewHostConfiguration createViewHostConfigurationForTask(int taskId) {
         RunningTaskInfo runningTaskInfo = getRunningTaskInfoForTask(taskId);
@@ -439,5 +459,27 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         }
 
         return null;
+    }
+
+    @VisibleForTesting
+    void takeScreenshot(int taskId, @NonNull AndroidFuture callback) {
+        synchronized (mLock) {
+            boolean isTaskAssociatedWithGameSession = mGameSessions.containsKey(taskId);
+            if (!isTaskAssociatedWithGameSession) {
+                Slog.w(TAG, "No game session found for id: " + taskId);
+                callback.complete(GameScreenshotResult.createInternalErrorResult());
+                return;
+            }
+        }
+
+        mBackgroundExecutor.execute(() -> {
+            final Bitmap bitmap = mWindowManagerService.captureTaskBitmap(taskId);
+            if (bitmap == null) {
+                Slog.w(TAG, "Could not get bitmap for id: " + taskId);
+                callback.complete(GameScreenshotResult.createInternalErrorResult());
+            } else {
+                callback.complete(GameScreenshotResult.createSuccessResult(bitmap));
+            }
+        });
     }
 }

@@ -23,6 +23,7 @@ import static com.android.server.app.GameServiceProviderInstanceImplTest.FakeGam
 import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -37,17 +38,20 @@ import android.app.IActivityTaskManager;
 import android.app.ITaskStackListener;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.service.games.CreateGameSessionRequest;
 import android.service.games.CreateGameSessionResult;
+import android.service.games.GameScreenshotResult;
 import android.service.games.GameSessionViewHostConfiguration;
 import android.service.games.GameStartedEvent;
 import android.service.games.IGameService;
 import android.service.games.IGameServiceController;
 import android.service.games.IGameSession;
+import android.service.games.IGameSessionController;
 import android.service.games.IGameSessionService;
 import android.view.SurfaceControlViewHost.SurfacePackage;
 
@@ -59,6 +63,7 @@ import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.FunctionalUtils.ThrowingConsumer;
 import com.android.internal.util.Preconditions;
 import com.android.server.wm.WindowManagerInternal;
+import com.android.server.wm.WindowManagerService;
 
 import org.junit.After;
 import org.junit.Before;
@@ -93,10 +98,14 @@ public final class GameServiceProviderInstanceImplTest {
     private static final ComponentName GAME_A_MAIN_ACTIVITY =
             new ComponentName(GAME_A_PACKAGE, "com.package.game.a.MainActivity");
 
+    private static final Bitmap TEST_BITMAP = Bitmap.createBitmap(32, 32, Bitmap.Config.ARGB_8888);
+
     private MockitoSession mMockingSession;
     private GameServiceProviderInstance mGameServiceProviderInstance;
     @Mock
     private IActivityTaskManager mMockActivityTaskManager;
+    @Mock
+    private WindowManagerService mMockWindowManagerService;
     @Mock
     private WindowManagerInternal mMockWindowManagerInternal;
     private FakeGameClassifier mFakeGameClassifier;
@@ -142,6 +151,7 @@ public final class GameServiceProviderInstanceImplTest {
                 ConcurrentUtils.DIRECT_EXECUTOR,
                 mFakeGameClassifier,
                 mMockActivityTaskManager,
+                mMockWindowManagerService,
                 mMockWindowManagerInternal,
                 mFakeGameServiceConnector,
                 mFakeGameSessionServiceConnector);
@@ -574,6 +584,41 @@ public final class GameServiceProviderInstanceImplTest {
         assertThat(mFakeGameSessionServiceConnector.getIsConnected()).isFalse();
     }
 
+    @Test
+    public void takeScreenshot_failureNoBitmapCaptured() throws Exception {
+        mGameServiceProviderInstance.start();
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        IGameSessionController gameSessionController = getOnlyElement(
+                mFakeGameSessionService.getCapturedCreateInvocations()).mGameSessionController;
+        AndroidFuture<GameScreenshotResult> resultFuture = new AndroidFuture<>();
+        gameSessionController.takeScreenshot(10, resultFuture);
+
+        GameScreenshotResult result = resultFuture.get();
+        assertEquals(GameScreenshotResult.GAME_SCREENSHOT_ERROR_INTERNAL_ERROR,
+                result.getStatus());
+        verify(mMockWindowManagerService).captureTaskBitmap(10);
+    }
+
+    @Test
+    public void takeScreenshot_success() throws Exception {
+        when(mMockWindowManagerService.captureTaskBitmap(10)).thenReturn(TEST_BITMAP);
+
+        mGameServiceProviderInstance.start();
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        IGameSessionController gameSessionController = getOnlyElement(
+                mFakeGameSessionService.getCapturedCreateInvocations()).mGameSessionController;
+        AndroidFuture<GameScreenshotResult> resultFuture = new AndroidFuture<>();
+        gameSessionController.takeScreenshot(10, resultFuture);
+
+        GameScreenshotResult result = resultFuture.get();
+        assertEquals(GameScreenshotResult.GAME_SCREENSHOT_SUCCESS, result.getStatus());
+        assertEquals(TEST_BITMAP, result.getBitmap());
+    }
+
     private void startTask(int taskId, ComponentName componentName) {
         RunningTaskInfo runningTaskInfo = new RunningTaskInfo();
         runningTaskInfo.taskId = taskId;
@@ -677,12 +722,15 @@ public final class GameServiceProviderInstanceImplTest {
                 new HashMap<>();
 
         public static final class CapturedCreateInvocation {
+            private final IGameSessionController mGameSessionController;
             private final CreateGameSessionRequest mCreateGameSessionRequest;
             private final GameSessionViewHostConfiguration mGameSessionViewHostConfiguration;
 
             CapturedCreateInvocation(
+                    IGameSessionController gameSessionController,
                     CreateGameSessionRequest createGameSessionRequest,
                     GameSessionViewHostConfiguration gameSessionViewHostConfiguration) {
+                mGameSessionController = gameSessionController;
                 mCreateGameSessionRequest = createGameSessionRequest;
                 mGameSessionViewHostConfiguration = gameSessionViewHostConfiguration;
             }
@@ -698,12 +746,14 @@ public final class GameServiceProviderInstanceImplTest {
 
         @Override
         public void create(
+                IGameSessionController gameSessionController,
                 CreateGameSessionRequest createGameSessionRequest,
                 GameSessionViewHostConfiguration gameSessionViewHostConfiguration,
                 AndroidFuture createGameSessionResultFuture) {
 
             mCapturedCreateInvocations.add(
                     new CapturedCreateInvocation(
+                            gameSessionController,
                             createGameSessionRequest,
                             gameSessionViewHostConfiguration));
 

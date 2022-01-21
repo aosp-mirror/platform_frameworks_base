@@ -52,8 +52,6 @@ import java.util.Objects;
  */
 @SystemApi
 public abstract class GameSessionService extends Service {
-    private static final String TAG = "GameSessionService";
-
     /**
      * The {@link Intent} action used when binding to the service.
      * To be supported, the service must require the
@@ -67,11 +65,13 @@ public abstract class GameSessionService extends Service {
     private final IGameSessionService mInterface = new IGameSessionService.Stub() {
         @Override
         public void create(
+                IGameSessionController gameSessionController,
                 CreateGameSessionRequest createGameSessionRequest,
                 GameSessionViewHostConfiguration gameSessionViewHostConfiguration,
                 AndroidFuture gameSessionFuture) {
             Handler.getMain().post(PooledLambda.obtainRunnable(
                     GameSessionService::doCreate, GameSessionService.this,
+                    gameSessionController,
                     createGameSessionRequest,
                     gameSessionViewHostConfiguration,
                     gameSessionFuture));
@@ -101,6 +101,7 @@ public abstract class GameSessionService extends Service {
     }
 
     private void doCreate(
+            IGameSessionController gameSessionController,
             CreateGameSessionRequest createGameSessionRequest,
             GameSessionViewHostConfiguration gameSessionViewHostConfiguration,
             AndroidFuture<CreateGameSessionResult> createGameSessionResultFuture) {
@@ -119,7 +120,10 @@ public abstract class GameSessionService extends Service {
         SurfaceControlViewHost surfaceControlViewHost =
                 new SurfaceControlViewHost(this, display, hostToken);
 
-        gameSession.attach(this,
+        gameSession.attach(
+                gameSessionController,
+                createGameSessionRequest.getTaskId(),
+                this,
                 surfaceControlViewHost,
                 gameSessionViewHostConfiguration.mWidthPx,
                 gameSessionViewHostConfiguration.mHeightPx);
@@ -129,7 +133,6 @@ public abstract class GameSessionService extends Service {
                         surfaceControlViewHost.getSurfacePackage());
 
         createGameSessionResultFuture.complete(createGameSessionResult);
-
 
         gameSession.doCreate();
     }

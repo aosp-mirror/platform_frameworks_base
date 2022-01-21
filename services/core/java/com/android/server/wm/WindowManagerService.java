@@ -3843,6 +3843,40 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
+     * Generates and returns an up-to-date {@link Bitmap} for the specified taskId. The returned
+     * bitmap will be full size and will not include any secure content.
+     *
+     * @param taskId The task ID of the task for which a snapshot is requested.
+     * @return The Bitmap, or null if no task with the specified ID can be found or the bitmap could
+     * not be generated.
+     */
+    @Nullable public Bitmap captureTaskBitmap(int taskId) {
+        if (mTaskSnapshotController.shouldDisableSnapshots()) {
+            return null;
+        }
+
+        synchronized (mGlobalLock) {
+            final Task task = mRoot.anyTaskForId(taskId);
+            if (task == null) {
+                return null;
+            }
+
+            task.getBounds(mTmpRect);
+            final SurfaceControl sc = task.getSurfaceControl();
+            final SurfaceControl.ScreenshotHardwareBuffer buffer = SurfaceControl.captureLayers(
+                    new SurfaceControl.LayerCaptureArgs.Builder(sc)
+                            .setSourceCrop(mTmpRect)
+                            .build());
+            if (buffer == null) {
+                Slog.w(TAG, "Could not get screenshot buffer for taskId: " + taskId);
+                return null;
+            }
+
+            return buffer.asBitmap();
+        }
+    }
+
+    /**
      * In case a task write/delete operation was lost because the system crashed, this makes sure to
      * clean up the directory to remove obsolete files.
      *
