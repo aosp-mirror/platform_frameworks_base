@@ -123,6 +123,7 @@ public class TrustManagerService extends SystemService {
     private static final int MSG_DISPATCH_UNLOCK_LOCKOUT = 13;
     private static final int MSG_REFRESH_DEVICE_LOCKED_FOR_USER = 14;
     private static final int MSG_SCHEDULE_TRUST_TIMEOUT = 15;
+    public static final int MSG_USER_REQUESTED_UNLOCK = 16;
 
     private static final String REFRESH_DEVICE_LOCKED_EXCEPT_USER = "except";
 
@@ -981,6 +982,15 @@ public class TrustManagerService extends SystemService {
         }
     }
 
+    private void dispatchUserRequestedUnlock(int userId) {
+        for (int i = 0; i < mActiveAgents.size(); i++) {
+            AgentInfo info = mActiveAgents.valueAt(i);
+            if (info.userId == userId) {
+                info.agent.onUserRequestedUnlock();
+            }
+        }
+    }
+
     private void dispatchUnlockLockout(int timeoutMs, int userId) {
         for (int i = 0; i < mActiveAgents.size(); i++) {
             AgentInfo info = mActiveAgents.valueAt(i);
@@ -1107,6 +1117,12 @@ public class TrustManagerService extends SystemService {
             enforceReportPermission();
             mHandler.obtainMessage(MSG_DISPATCH_UNLOCK_ATTEMPT, authenticated ? 1 : 0, userId)
                     .sendToTarget();
+        }
+
+        @Override
+        public void reportUserRequestedUnlock(int userId) throws RemoteException {
+            enforceReportPermission();
+            mHandler.obtainMessage(MSG_USER_REQUESTED_UNLOCK, userId).sendToTarget();
         }
 
         @Override
@@ -1388,6 +1404,9 @@ public class TrustManagerService extends SystemService {
                     break;
                 case MSG_DISPATCH_UNLOCK_ATTEMPT:
                     dispatchUnlockAttempt(msg.arg1 != 0, msg.arg2);
+                    break;
+                case MSG_USER_REQUESTED_UNLOCK:
+                    dispatchUserRequestedUnlock(msg.arg1);
                     break;
                 case MSG_DISPATCH_UNLOCK_LOCKOUT:
                     dispatchUnlockLockout(msg.arg1, msg.arg2);
