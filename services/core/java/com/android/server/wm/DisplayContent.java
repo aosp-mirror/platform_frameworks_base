@@ -191,13 +191,13 @@ import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.IntArray;
 import android.util.RotationUtils;
+import android.util.Size;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.DisplayCutout;
-import android.view.DisplayCutout.CutoutPathParserInfo;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IDisplayWindowInsetsController;
@@ -238,7 +238,6 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
-import com.android.server.wm.utils.DisplayRotationUtil;
 import com.android.server.wm.utils.RotationCache;
 import com.android.server.wm.utils.WmDisplayCutout;
 
@@ -577,8 +576,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** Caches the value whether told display manager that we have content. */
     private boolean mLastHasContent;
-
-    private static DisplayRotationUtil sRotationUtil = new DisplayRotationUtil();
 
     /**
      * The input method window for this display.
@@ -2082,20 +2079,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return WmDisplayCutout.computeSafeInsets(
                     cutout, displayWidth, displayHeight);
         }
-        final Insets waterfallInsets =
-                RotationUtils.rotateInsets(cutout.getWaterfallInsets(), rotation);
+        final DisplayCutout rotatedCutout =
+                cutout.getRotated(displayWidth, displayHeight, ROTATION_0, rotation);
         final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
-        final Rect[] newBounds = sRotationUtil.getRotatedBounds(
-                cutout.getBoundingRectsAll(),
-                rotation, displayWidth, displayHeight);
-        final CutoutPathParserInfo info = cutout.getCutoutPathParserInfo();
-        final CutoutPathParserInfo newInfo = new CutoutPathParserInfo(
-                info.getDisplayWidth(), info.getDisplayHeight(), info.getDensity(),
-                info.getCutoutSpec(), rotation, info.getScale());
-        return WmDisplayCutout.computeSafeInsets(
-                DisplayCutout.constructDisplayCutout(newBounds, waterfallInsets, newInfo),
+        return new WmDisplayCutout(rotatedCutout, new Size(
                 rotated ? displayHeight : displayWidth,
-                rotated ? displayWidth : displayHeight);
+                rotated ? displayWidth : displayHeight));
     }
 
     private WmDisplayCutout calculateDisplayCutoutForRotationUncached(
