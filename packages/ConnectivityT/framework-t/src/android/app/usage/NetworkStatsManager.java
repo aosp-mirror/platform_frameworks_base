@@ -211,9 +211,10 @@ public class NetworkStatsManager {
      */
     @NonNull
     @WorkerThread
-    // @SystemApi(client = MODULE_LIBRARIES)
+    @SystemApi(client = MODULE_LIBRARIES)
     public Bucket querySummaryForDevice(@NonNull NetworkTemplate template,
             long startTime, long endTime) {
+        Objects.requireNonNull(template);
         try {
             NetworkStats stats =
                     new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
@@ -385,10 +386,11 @@ public class NetworkStatsManager {
      * @hide
      */
     @NonNull
-    // @SystemApi(client = MODULE_LIBRARIES)
+    @SystemApi(client = MODULE_LIBRARIES)
     @WorkerThread
     public NetworkStats querySummary(@NonNull NetworkTemplate template, long startTime,
             long endTime) throws SecurityException {
+        Objects.requireNonNull(template);
         try {
             NetworkStats result =
                     new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
@@ -418,10 +420,11 @@ public class NetworkStatsManager {
      * @hide
      */
     @NonNull
-    // @SystemApi(client = MODULE_LIBRARIES)
+    @SystemApi(client = MODULE_LIBRARIES)
     @WorkerThread
     public NetworkStats queryTaggedSummary(@NonNull NetworkTemplate template, long startTime,
             long endTime) throws SecurityException {
+        Objects.requireNonNull(template);
         try {
             NetworkStats result =
                     new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
@@ -453,10 +456,11 @@ public class NetworkStatsManager {
      * @hide
      */
     @NonNull
-    // @SystemApi(client = MODULE_LIBRARIES)
+    @SystemApi(client = MODULE_LIBRARIES)
     @WorkerThread
     public NetworkStats queryDetailsForDevice(@NonNull NetworkTemplate template,
             long startTime, long endTime) {
+        Objects.requireNonNull(template);
         try {
             final NetworkStats result =
                     new NetworkStats(mContext, template, mFlags, startTime, endTime, mService);
@@ -580,10 +584,11 @@ public class NetworkStatsManager {
      * @hide
      */
     @NonNull
-    // @SystemApi(client = MODULE_LIBRARIES)
+    @SystemApi(client = MODULE_LIBRARIES)
     @WorkerThread
     public NetworkStats queryDetailsForUidTagState(@NonNull NetworkTemplate template,
             long startTime, long endTime, int uid, int tag, int state) throws SecurityException {
+        Objects.requireNonNull(template);
         try {
             final NetworkStats result = new NetworkStats(
                     mContext, template, mFlags, startTime, endTime, mService);
