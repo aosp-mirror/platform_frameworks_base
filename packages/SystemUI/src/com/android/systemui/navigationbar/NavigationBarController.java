@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
 import java.io.FileDescriptor;
@@ -109,7 +110,8 @@ public class NavigationBarController implements
             DumpManager dumpManager,
             AutoHideController autoHideController,
             LightBarController lightBarController,
-            Optional<Pip> pipOptional) {
+            Optional<Pip> pipOptional,
+            Optional<BackAnimation> backAnimation) {
         mContext = context;
         mHandler = mainHandler;
         mNavigationBarFactory = navigationBarFactory;
@@ -121,7 +123,8 @@ public class NavigationBarController implements
         mTaskbarDelegate = taskbarDelegate;
         mTaskbarDelegate.setDependencies(commandQueue, overviewProxyService,
                 navBarHelper, navigationModeController, sysUiFlagsContainer,
-                dumpManager, autoHideController, lightBarController, pipOptional);
+                dumpManager, autoHideController, lightBarController, pipOptional,
+                backAnimation.orElse(null));
         mIsTablet = isTablet(mContext);
         dumpManager.registerDumpable(this);
     }

@@ -221,10 +221,10 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.IRecentsAnimationRunner;
-import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
+import android.window.BackNavigationInfo;
 import android.window.IWindowOrganizerController;
 import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.TaskSnapshot;
@@ -458,7 +458,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private final ClientLifecycleManager mLifecycleManager;
 
     @Nullable
-    private final BackGestureController mBackGestureController;
+    private final BackNavigationController mBackNavigationController;
 
     private TaskChangeNotificationController mTaskChangeNotificationController;
     /** The controller for all operations related to locktask. */
@@ -836,8 +836,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mSystemThread = ActivityThread.currentActivityThread();
         mUiContext = mSystemThread.getSystemUiContext();
         mLifecycleManager = new ClientLifecycleManager();
-        mBackGestureController = BackGestureController.isEnabled() ? new BackGestureController()
-                : null;
         mVisibleActivityProcessTracker = new VisibleActivityProcessTracker(this);
         mInternal = new LocalService();
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version", GL_ES_VERSION_UNDEFINED);
@@ -845,6 +843,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mTaskOrganizerController = mWindowOrganizerController.mTaskOrganizerController;
         mTaskFragmentOrganizerController =
                 mWindowOrganizerController.mTaskFragmentOrganizerController;
+        mBackNavigationController = BackNavigationController.isEnabled()
+                ? new BackNavigationController() : null;
     }
 
     public void onSystemReady() {
@@ -1022,6 +1022,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mLockTaskController.setWindowManager(wm);
             mTaskSupervisor.setWindowManager(wm);
             mRootWindowContainer.setWindowManager(wm);
+            if (mBackNavigationController != null) {
+                mBackNavigationController.setTaskSnapshotController(wm.mTaskSnapshotController);
+            }
         }
     }
 
@@ -1768,11 +1771,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void startBackPreview(IRemoteAnimationRunner runner) {
-        if (mBackGestureController == null) {
-            return;
+    public BackNavigationInfo startBackNavigation() {
+        mAmInternal.enforceCallingPermission(START_TASKS_FROM_RECENTS,
+                "startBackNavigation()");
+        if (mBackNavigationController == null) {
+            return null;
         }
-        mBackGestureController.startBackPreview();
+        return mBackNavigationController.startBackNavigation(getTopDisplayFocusedRootTask());
     }
 
     /**

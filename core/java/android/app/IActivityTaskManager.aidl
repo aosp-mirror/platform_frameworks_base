@@ -72,6 +72,7 @@ import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationAdapter;
 import android.window.IWindowOrganizerController;
+import android.window.BackNavigationInfo;
 import android.window.SplashScreenView;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.IResultReceiver;
@@ -346,7 +347,8 @@ interface IActivityTaskManager {
     void setRunningRemoteTransitionDelegate(in IApplicationThread caller);
 
     /**
-     * Prepare the back preview in the server
+     * Prepare the back navigation in the server. This setups the leashed for sysui to animate
+     * the back gesture and returns the data needed for the animation.
      */
-    void startBackPreview(IRemoteAnimationRunner runner);
+    android.window.BackNavigationInfo startBackNavigation();
 }

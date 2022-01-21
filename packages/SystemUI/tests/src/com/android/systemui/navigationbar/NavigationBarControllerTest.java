@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
 import org.junit.After;
@@ -92,7 +93,8 @@ public class NavigationBarControllerTest extends SysuiTestCase {
                         mock(DumpManager.class),
                         mock(AutoHideController.class),
                         mock(LightBarController.class),
-                        Optional.of(mock(Pip.class))));
+                        Optional.of(mock(Pip.class)),
+                        Optional.of(mock(BackAnimation.class))));
         initializeNavigationBars();
     }
 
