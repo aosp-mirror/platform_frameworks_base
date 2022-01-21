@@ -19,12 +19,15 @@ package com.android.server.net;
 import static android.Manifest.permission.NETWORK_STATS_PROVIDER;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.UPDATE_DEVICE_STATS;
+import static android.app.usage.NetworkStatsManager.PREFIX_DEV;
+import static android.app.usage.NetworkStatsManager.PREFIX_UID;
+import static android.app.usage.NetworkStatsManager.PREFIX_UID_TAG;
+import static android.app.usage.NetworkStatsManager.PREFIX_XT;
 import static android.content.Intent.ACTION_SHUTDOWN;
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.net.NetworkIdentity.SUBTYPE_COMBINED;
 import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.IFACE_VT;
@@ -230,11 +233,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private PendingIntent mPollIntent;
 
-    private static final String PREFIX_DEV = "dev";
-    private static final String PREFIX_XT = "xt";
-    private static final String PREFIX_UID = "uid";
-    private static final String PREFIX_UID_TAG = "uid_tag";
-
     /**
      * Settings that can be changed externally.
      */
@@ -244,9 +242,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         boolean getSampleEnabled();
         boolean getAugmentEnabled();
         /**
-         * When enabled, all mobile data is reported under {@link NetworkIdentity#SUBTYPE_COMBINED}.
-         * When disabled, mobile data is broken down by a granular subtype representative of the
-         * actual subtype. {@see NetworkTemplate#getCollapsedRatType}.
+         * When enabled, all mobile data is reported under {@link NetworkTemplate#NETWORK_TYPE_ALL}.
+         * When disabled, mobile data is broken down by a granular ratType representative of the
+         * actual ratType. {@see NetworkTemplate#getCollapsedRatType}.
          * Enabling this decreases the level of detail but saves performance, disk space and
          * amount of data logged.
          */
@@ -1376,10 +1374,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             final boolean isMobile = (NetworkCapabilities.TRANSPORT_CELLULAR == displayTransport);
             final boolean isDefault = CollectionUtils.contains(
                     mDefaultNetworks, snapshot.getNetwork());
-            final int subType = combineSubtypeEnabled ? SUBTYPE_COMBINED
-                    : getSubTypeForStateSnapshot(snapshot);
+            final int ratType = combineSubtypeEnabled ? NetworkTemplate.NETWORK_TYPE_ALL
+                    : getRatTypeForStateSnapshot(snapshot);
             final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, snapshot,
-                    isDefault, subType);
+                    isDefault, ratType);
 
             // Traffic occurring on the base interface is always counted for
             // both total usage and UID details.
@@ -1398,7 +1396,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
                     // Copy the identify from IMS one but mark it as metered.
                     NetworkIdentity vtIdent = new NetworkIdentity(ident.getType(),
-                            ident.getSubType(), ident.getSubscriberId(), ident.getNetworkId(),
+                            ident.getRatType(), ident.getSubscriberId(), ident.getWifiNetworkKey(),
                             ident.getRoaming(), true /* metered */,
                             true /* onDefaultNetwork */, ident.getOemManaged());
                     final String ifaceVt = IFACE_VT + getSubIdForMobile(snapshot);
@@ -1479,11 +1477,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     /**
-     * For networks with {@code TRANSPORT_CELLULAR}, get subType that was obtained through
+     * For networks with {@code TRANSPORT_CELLULAR}, get ratType that was obtained through
      * {@link PhoneStateListener}. Otherwise, return 0 given that other networks with different
      * transport types do not actually fill this value.
      */
-    private int getSubTypeForStateSnapshot(@NonNull NetworkStateSnapshot state) {
+    private int getRatTypeForStateSnapshot(@NonNull NetworkStateSnapshot state) {
         if (!state.getNetworkCapabilities().hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
             return 0;
         }
