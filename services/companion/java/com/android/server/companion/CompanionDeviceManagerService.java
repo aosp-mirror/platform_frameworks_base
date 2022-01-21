@@ -77,11 +77,13 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.UserInfo;
 import android.net.MacAddress;
 import android.net.NetworkPolicyManager;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Message;
 import android.os.Parcel;
 import android.os.PowerWhitelistManager;
 import android.os.RemoteCallbackList;
@@ -185,6 +187,7 @@ public class CompanionDeviceManagerService extends SystemService
     private final CompanionDeviceManagerServiceInternal mLocalService = new LocalService(this);
 
     final Handler mMainHandler = Handler.getMain();
+    private final PersistUserStateHandler mUserPersistenceHandler = new PersistUserStateHandler();
     private CompanionDevicePresenceController mCompanionDevicePresenceController;
 
     /**
@@ -366,9 +369,8 @@ public class CompanionDeviceManagerService extends SystemService
 
         final List<AssociationInfo> updatedAssociations =
                 mAssociationStore.getAssociationsForUser(userId);
-        final Map<String, Set<Integer>> usedIdsForUser = getPreviouslyUsedIdsForUser(userId);
-        BackgroundThread.getHandler().post(() ->
-                mPersistentStore.persistStateForUser(userId, updatedAssociations, usedIdsForUser));
+
+        mUserPersistenceHandler.postPersistUserState(userId);
 
         // Notify listeners if ADDED, REMOVED or UPDATED_ADDRESS_CHANGED.
         // Do NOT notify when UPDATED_ADDRESS_UNCHANGED, which means a minor tweak in association's
@@ -379,6 +381,13 @@ public class CompanionDeviceManagerService extends SystemService
         updateAtm(userId, updatedAssociations);
 
         restartBleScan();
+    }
+
+    private void persistStateForUser(@UserIdInt int userId) {
+        final List<AssociationInfo> updatedAssociations =
+                mAssociationStore.getAssociationsForUser(userId);
+        final Map<String, Set<Integer>> usedIdsForUser = getPreviouslyUsedIdsForUser(userId);
+        mPersistentStore.persistStateForUser(userId, updatedAssociations, usedIdsForUser);
     }
 
     private void notifyListeners(
@@ -1347,6 +1356,49 @@ public class CompanionDeviceManagerService extends SystemService
         @Override
         public void associationCleanUp(String profile) {
             mService.associationCleanUp(profile);
+        }
+    }
+
+    /**
+     * This method must only be called from {@link CompanionDeviceShellCommand} for testing
+     * purposes only!
+     */
+    void persistState() {
+        mUserPersistenceHandler.clearMessages();
+        for (UserInfo user : mUserManager.getAliveUsers()) {
+            persistStateForUser(user.id);
+        }
+    }
+
+    /**
+     * This class is dedicated to handling requests to persist user state.
+     */
+    @SuppressLint("HandlerLeak")
+    private class PersistUserStateHandler extends Handler {
+        PersistUserStateHandler() {
+            super(BackgroundThread.get().getLooper());
+        }
+
+        /**
+         * Persists user state unless there is already an outstanding request for the given user.
+         */
+        synchronized void postPersistUserState(@UserIdInt int userId) {
+            if (!hasMessages(userId)) {
+                sendMessage(obtainMessage(userId));
+            }
+        }
+
+        /**
+         * Clears *ALL* outstanding persist requests for *ALL* users.
+         */
+        synchronized void clearMessages() {
+            removeCallbacksAndMessages(null);
+        }
+
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            final int userId = msg.what;
+            persistStateForUser(userId);
         }
     }
 }
