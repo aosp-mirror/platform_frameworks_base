@@ -184,8 +184,8 @@ public class SystemUIApplication extends Application implements
      */
 
     public void startServicesIfNeeded() {
-        final String[] additionalNames = SystemUIFactory.getInstance()
-                .getAdditionalSystemUIServiceComponents(getResources());
+        final String vendorComponent = SystemUIFactory.getInstance()
+                .getVendorComponent(getResources());
 
         // Sort the startables so that we get a deterministic ordering.
         // TODO: make #start idempotent and require users of CoreStartable to call it.
@@ -193,7 +193,7 @@ public class SystemUIApplication extends Application implements
                 Comparator.comparing(Class::getName));
         sortedStartables.putAll(SystemUIFactory.getInstance().getStartableComponents());
         startServicesIfNeeded(
-                sortedStartables, "StartServices", additionalNames);
+                sortedStartables, "StartServices", vendorComponent);
     }
 
     /**
@@ -208,17 +208,17 @@ public class SystemUIApplication extends Application implements
                 Comparator.comparing(Class::getName));
         sortedStartables.putAll(SystemUIFactory.getInstance().getStartableComponentsPerUser());
         startServicesIfNeeded(
-                sortedStartables, "StartSecondaryServices", new String[]{});
+                sortedStartables, "StartSecondaryServices", null);
     }
 
     private void startServicesIfNeeded(
             Map<Class<?>, Provider<CoreStartable>> startables,
             String metricsPrefix,
-            String[] services) {
+            String vendorComponent) {
         if (mServicesStarted) {
             return;
         }
-        mServices = new CoreStartable[startables.size() + services.length];
+        mServices = new CoreStartable[startables.size() + (vendorComponent == null ? 0 : 1)];
 
         if (!mBootCompleteCache.isBootComplete()) {
             // check to see if maybe it was already completed long before we began
@@ -251,14 +251,11 @@ public class SystemUIApplication extends Application implements
             i++;
         }
 
-        // Loop over any "additional" startables that are defined in an xml overlay.
-        final int N = services.length;
-        for (i = 0; i < N; i++) {
-            int j = i;  // Copied to make lambda happy.
-            String clsName = services[i];
+        if (vendorComponent != null) {
             timeInitialization(
-                    clsName,
-                    () -> mServices[j + startables.size()] = startAdditionalStartable(clsName),
+                    vendorComponent,
+                    () -> mServices[mServices.length - 1] =
+                            startAdditionalStartable(vendorComponent),
                     log,
                     metricsPrefix);
         }
@@ -294,12 +291,9 @@ public class SystemUIApplication extends Application implements
         CoreStartable startable;
         if (DEBUG) Log.d(TAG, "loading: " + clsName);
         try {
-            startable = mComponentHelper.resolveAdditionalCoreStartable(clsName);
-            if (startable == null) {
-                Constructor<?> constructor = Class.forName(clsName).getConstructor(
-                        Context.class);
-                startable = (CoreStartable) constructor.newInstance(this);
-            }
+            Constructor<?> constructor = Class.forName(clsName).getConstructor(
+                    Context.class);
+            startable = (CoreStartable) constructor.newInstance(this);
         } catch (ClassNotFoundException
                 | NoSuchMethodException
                 | IllegalAccessException

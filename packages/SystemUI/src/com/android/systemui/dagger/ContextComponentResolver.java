@@ -20,8 +20,6 @@ import android.app.Activity;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 
-import com.android.systemui.CoreStartable;
-import com.android.systemui.dagger.qualifiers.AdditionalStartable;
 import com.android.systemui.recents.RecentsImplementation;
 
 import java.util.Map;
@@ -36,20 +34,16 @@ import javax.inject.Provider;
 public class ContextComponentResolver implements ContextComponentHelper {
     private final Map<Class<?>, Provider<Activity>> mActivityCreators;
     private final Map<Class<?>, Provider<Service>> mServiceCreators;
-    private final Map<Class<?>, Provider<CoreStartable>> mAdditionalStartableCreators;
     private final Map<Class<?>, Provider<RecentsImplementation>> mRecentsCreators;
     private final Map<Class<?>, Provider<BroadcastReceiver>> mBroadcastReceiverCreators;
 
     @Inject
     ContextComponentResolver(Map<Class<?>, Provider<Activity>> activityCreators,
             Map<Class<?>, Provider<Service>> serviceCreators,
-            Map<Class<?>, Provider<CoreStartable>> startableCreators,
-            @AdditionalStartable Map<Class<?>, Provider<CoreStartable>> additionalStartableCreators,
             Map<Class<?>, Provider<RecentsImplementation>> recentsCreators,
             Map<Class<?>, Provider<BroadcastReceiver>> broadcastReceiverCreators) {
         mActivityCreators = activityCreators;
         mServiceCreators = serviceCreators;
-        mAdditionalStartableCreators = additionalStartableCreators;
         mRecentsCreators = recentsCreators;
         mBroadcastReceiverCreators = broadcastReceiverCreators;
     }
@@ -84,14 +78,6 @@ public class ContextComponentResolver implements ContextComponentHelper {
     @Override
     public Service resolveService(String className) {
         return resolve(className, mServiceCreators);
-    }
-
-    /**
-     * Looks up the SystemUI class name to see if Dagger has an instance of it.
-     */
-    @Override
-    public CoreStartable resolveAdditionalCoreStartable(String className) {
-        return resolve(className, mAdditionalStartableCreators);
     }
 
     private <T> T resolve(String className, Map<Class<?>, Provider<T>> creators) {

@@ -32,7 +32,6 @@ import com.android.systemui.navigationbar.gestural.BackGestureTfClassifierProvid
 import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
 import com.android.wm.shell.transition.ShellTransitions;
 
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -203,16 +202,8 @@ public class SystemUIFactory {
     /**
      * Returns the list of additional system UI components that should be started.
      */
-    public String[] getAdditionalSystemUIServiceComponents(Resources resources) {
-        String[] results = resources.getStringArray(
-                R.array.config_additionalSystemUIServiceComponents);
-        String vendorComponent = resources.getString(
-                R.string.config_systemUIVendorServiceComponent);
-
-        results = Arrays.copyOf(results, results.length + 1);
-        results[results.length - 1] = vendorComponent;
-
-        return results;
+    public String getVendorComponent(Resources resources) {
+        return resources.getString(R.string.config_systemUIVendorServiceComponent);
     }
 
     /**

@@ -25,9 +25,7 @@ import com.android.systemui.accessibility.SystemActions
 import com.android.systemui.accessibility.WindowMagnification
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.clipboardoverlay.ClipboardListener
-import com.android.systemui.dagger.qualifiers.AdditionalStartable
 import com.android.systemui.dagger.qualifiers.PerUser
-import com.android.systemui.dreams.DreamOverlayRegistrant
 import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.keyboard.KeyboardUI
 import com.android.systemui.keyguard.KeyguardViewMediator
@@ -200,13 +198,4 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(WMShell::class)
     abstract fun bindWMShell(sysui: WMShell): CoreStartable
-
-    /** Inject into DreamOverlay.  */
-    @Binds
-    @IntoMap
-    @ClassKey(DreamOverlayRegistrant::class)
-    @AdditionalStartable
-    abstract fun bindDreamOverlayRegistrant(
-        dreamOverlayRegistrant: DreamOverlayRegistrant
-    ): CoreStartable
 }

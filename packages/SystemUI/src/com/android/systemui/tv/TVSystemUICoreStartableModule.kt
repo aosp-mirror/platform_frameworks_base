@@ -19,7 +19,6 @@ package com.android.systemui.tv
 import com.android.systemui.CoreStartable
 import com.android.systemui.SliceBroadcastRelayHandler
 import com.android.systemui.accessibility.WindowMagnification
-import com.android.systemui.dagger.qualifiers.AdditionalStartable
 import com.android.systemui.dagger.qualifiers.PerUser
 import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.keyboard.KeyboardUI
@@ -42,18 +41,12 @@ import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
-import dagger.multibindings.Multibinds
 
 /**
  * Collection of {@link CoreStartable}s that should be run on TV.
  */
 @Module
 abstract class TVSystemUICoreStartableModule {
-    /** Ensure that AdditionalStartables exists. */
-    @Multibinds
-    @AdditionalStartable
-    abstract fun bindEmptyAdditionalStartables(): Map<Class<*>, CoreStartable>
-
     /** Inject into GlobalActionsComponent.  */
     @Binds
     @IntoMap

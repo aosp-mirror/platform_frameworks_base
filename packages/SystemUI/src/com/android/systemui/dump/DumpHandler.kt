@@ -176,12 +176,12 @@ class DumpHandler @Inject constructor(
         pw.println("SystemUiServiceComponents configuration:")
         pw.print("vendor component: ")
         pw.println(context.resources.getString(R.string.config_systemUIVendorServiceComponent))
-        val services: Array<String> = startables.keys.stream()
-                .map({ cls -> cls!!.simpleName })
-                .toArray() as Array<String>
-        val additionalServices = context.resources.getStringArray(
-                R.array.config_additionalSystemUIServiceComponents)
-        dumpServiceList(pw, "global", services + additionalServices)
+        val services: MutableList<String> = startables.keys
+                .map({ cls: Class<*> -> cls.simpleName })
+                .toMutableList()
+
+        services.add(context.resources.getString(R.string.config_systemUIVendorServiceComponent))
+        dumpServiceList(pw, "global", services.toTypedArray())
         dumpServiceList(pw, "per-user", R.array.config_systemUIServiceComponentsPerUser)
     }
 
