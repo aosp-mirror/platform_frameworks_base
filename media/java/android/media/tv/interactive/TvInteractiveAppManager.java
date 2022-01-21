@@ -175,17 +175,14 @@ public final class TvInteractiveAppManager {
 
     /**
      * State of Teletext app: show
-     * @hide
      */
     public static final int TELETEXT_APP_STATE_SHOW = 1;
     /**
      * State of Teletext app: hide
-     * @hide
      */
     public static final int TELETEXT_APP_STATE_HIDE = 2;
     /**
      * State of Teletext app: error
-     * @hide
      */
     public static final int TELETEXT_APP_STATE_ERROR = 3;
 
@@ -233,7 +230,6 @@ public final class TvInteractiveAppManager {
      * Broadcast intent action to send app command to TV app.
      *
      * @see #sendAppLinkCommand(String, Bundle)
-     * @hide
      */
     public static final String ACTION_APP_LINK_COMMAND =
             "android.media.tv.interactive.action.APP_LINK_COMMAND";
@@ -244,7 +240,6 @@ public final class TvInteractiveAppManager {
      *
      * @see #sendAppLinkCommand(String, Bundle)
      * @see #ACTION_APP_LINK_COMMAND
-     * @hide
      */
     public static final String INTENT_KEY_TV_INPUT_ID = "tv_input_id";
 
@@ -255,7 +250,6 @@ public final class TvInteractiveAppManager {
      * @see #sendAppLinkCommand(String, Bundle)
      * @see #ACTION_APP_LINK_COMMAND
      * @see android.media.tv.interactive.TvInteractiveAppInfo#getId()
-     * @hide
      */
     public static final String INTENT_KEY_INTERACTIVE_APP_SERVICE_ID = "interactive_app_id";
 
@@ -265,7 +259,6 @@ public final class TvInteractiveAppManager {
      *
      * @see #sendAppLinkCommand(String, Bundle)
      * @see #ACTION_APP_LINK_COMMAND
-     * @hide
      */
     public static final String INTENT_KEY_CHANNEL_URI = "channel_uri";
 
@@ -277,8 +270,7 @@ public final class TvInteractiveAppManager {
      * @see #sendAppLinkCommand(String, Bundle)
      * @see #ACTION_APP_LINK_COMMAND
      * @see android.media.tv.interactive.TvInteractiveAppInfo#getSupportedTypes()
-     * @see Session#createBiInteractiveApp(Uri, Bundle)
-     * @hide
+     * @see android.media.tv.interactive.TvInteractiveAppView#createBiInteractiveApp(Uri, Bundle)
      */
     public static final String INTENT_KEY_BI_INTERACTIVE_APP_TYPE = "bi_interactive_app_type";
 
@@ -289,8 +281,7 @@ public final class TvInteractiveAppManager {
      *
      * @see #sendAppLinkCommand(String, Bundle)
      * @see #ACTION_APP_LINK_COMMAND
-     * @see Session#createBiInteractiveApp(Uri, Bundle)
-     * @hide
+     * @see android.media.tv.interactive.TvInteractiveAppView#createBiInteractiveApp(Uri, Bundle)
      */
     public static final String INTENT_KEY_BI_INTERACTIVE_APP_URI = "bi_interactive_app_uri";
 
@@ -590,7 +581,6 @@ public final class TvInteractiveAppManager {
          * that implements {@link TvInteractiveAppService} interface.
          *
          * @param iAppServiceId The ID of the TV Interactive App service.
-         * @hide
          */
         public void onInteractiveAppServiceAdded(@NonNull String iAppServiceId) {
         }
@@ -602,7 +592,6 @@ public final class TvInteractiveAppManager {
          * App service package.
          *
          * @param iAppServiceId The ID of the TV Interactive App service.
-         * @hide
          */
         public void onInteractiveAppServiceRemoved(@NonNull String iAppServiceId) {
         }
@@ -614,7 +603,6 @@ public final class TvInteractiveAppManager {
          * re-installed or a newer version of the package exists becomes available/unavailable.
          *
          * @param iAppServiceId The ID of the TV Interactive App service.
-         * @hide
          */
         public void onInteractiveAppServiceUpdated(@NonNull String iAppServiceId) {
         }
@@ -762,7 +750,6 @@ public final class TvInteractiveAppManager {
 
     /**
      * Prepares TV Interactive App service environment for the given type.
-     * @hide
      */
     public void prepare(@NonNull String tvIAppServiceId, int type) {
         try {

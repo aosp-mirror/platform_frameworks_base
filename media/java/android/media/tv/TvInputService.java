@@ -976,7 +976,6 @@ public abstract class TvInputService extends Service {
 
         /**
          * Notifies signal strength.
-         * @hide
          */
         public void notifySignalStrength(@TvInputManager.SignalStrength final int strength) {
             executeOrPostRunnableOnMainThread(new Runnable() {
