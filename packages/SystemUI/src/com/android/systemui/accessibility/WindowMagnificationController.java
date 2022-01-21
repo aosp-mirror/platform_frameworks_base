@@ -26,6 +26,7 @@ import android.animation.PropertyValuesHolder;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UiContext;
+import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -76,7 +77,8 @@ import java.util.Locale;
  * Class to handle adding and removing a window magnification.
  */
 class WindowMagnificationController implements View.OnTouchListener, SurfaceHolder.Callback,
-        MirrorWindowControl.MirrorWindowDelegate, MagnificationGestureDetector.OnGestureListener {
+        MirrorWindowControl.MirrorWindowDelegate, MagnificationGestureDetector.OnGestureListener,
+        ComponentCallbacks {
 
     private static final String TAG = "WindowMagnificationController";
     @SuppressWarnings("isloggabletaglength")
@@ -143,6 +145,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private View mTopDrag;
     private View mRightDrag;
     private View mBottomDrag;
+    private final Configuration mConfiguration;
 
     @NonNull
     private final WindowMagnifierCallback mWindowMagnifierCallback;
@@ -191,6 +194,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mSfVsyncFrameProvider = sfVsyncFrameProvider;
         mWindowMagnifierCallback = callback;
         mSysUiState = sysUiState;
+        mConfiguration = new Configuration(context.getResources().getConfiguration());
 
         final Display display = mContext.getDisplay();
         mDisplayId = mContext.getDisplayId();
@@ -339,6 +343,18 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         }
         mMirrorViewBounds.setEmpty();
         updateSystemUIStateIfNeeded();
+        mContext.unregisterComponentCallbacks(this);
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        final int configDiff = newConfig.diff(mConfiguration);
+        mConfiguration.setTo(newConfig);
+        onConfigurationChanged(configDiff);
+    }
+
+    @Override
+    public void onLowMemory() {
     }
 
     /**
@@ -350,6 +366,9 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         if (DEBUG) {
             Log.d(TAG, "onConfigurationChanged = " + Configuration.configurationDiffToString(
                     configDiff));
+        }
+        if (configDiff == 0) {
+            return;
         }
         if ((configDiff & ActivityInfo.CONFIG_ORIENTATION) != 0) {
             onRotate();
@@ -390,7 +409,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
         if (currentWindowBounds.equals(oldWindowBounds)) {
             if (DEBUG) {
-                Log.d(TAG, "updateMagnificationFrame -- window bounds is not changed");
+                Log.d(TAG, "handleScreenSizeChanged -- window bounds is not changed");
             }
             return false;
         }
@@ -850,6 +869,10 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         if (Float.compare(scale, 1.0f)  <= 0) {
             deleteWindowMagnification();
             return;
+        }
+        if (!isWindowVisible()) {
+            onConfigurationChanged(mResources.getConfiguration());
+            mContext.registerComponentCallbacks(this);
         }
 
         mMagnificationFrameOffsetX = Float.isNaN(magnificationFrameOffsetRatioX)
