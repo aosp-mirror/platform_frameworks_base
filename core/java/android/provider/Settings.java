@@ -7168,6 +7168,12 @@ public final class Settings {
         public static final String LOCATION_COARSE_ACCURACY_M = "locationCoarseAccuracy";
 
         /**
+         * Whether or not to show display system location accesses.
+         * @hide
+         */
+        public static final String LOCATION_SHOW_SYSTEM_OPS = "locationShowSystemOps";
+
+        /**
          * A flag containing settings used for biometric weak
          * @hide
          */
