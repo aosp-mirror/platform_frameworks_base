@@ -25404,12 +25404,12 @@ package android.media.midi {
   }
 
   public final class MidiManager {
-    method public android.media.midi.MidiDeviceInfo[] getDevices();
-    method @NonNull public java.util.Collection<android.media.midi.MidiDeviceInfo> getDevicesForTransport(int);
+    method @Deprecated public android.media.midi.MidiDeviceInfo[] getDevices();
+    method @NonNull public java.util.Set<android.media.midi.MidiDeviceInfo> getDevicesForTransport(int);
     method public void openBluetoothDevice(android.bluetooth.BluetoothDevice, android.media.midi.MidiManager.OnDeviceOpenedListener, android.os.Handler);
     method public void openDevice(android.media.midi.MidiDeviceInfo, android.media.midi.MidiManager.OnDeviceOpenedListener, android.os.Handler);
-    method public void registerDeviceCallback(android.media.midi.MidiManager.DeviceCallback, android.os.Handler);
-    method public void registerDeviceCallbackForTransport(@NonNull android.media.midi.MidiManager.DeviceCallback, @Nullable android.os.Handler, int);
+    method @Deprecated public void registerDeviceCallback(android.media.midi.MidiManager.DeviceCallback, android.os.Handler);
+    method public void registerDeviceCallback(int, @NonNull java.util.concurrent.Executor, @NonNull android.media.midi.MidiManager.DeviceCallback);
     method public void unregisterDeviceCallback(android.media.midi.MidiManager.DeviceCallback);
     field public static final int TRANSPORT_MIDI_BYTE_STREAM = 1; // 0x1
     field public static final int TRANSPORT_UNIVERSAL_MIDI_PACKETS = 2; // 0x2
