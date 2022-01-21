@@ -46,6 +46,7 @@ import static java.lang.Float.isNaN;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.Fragment;
 import android.app.StatusBarManager;
@@ -211,8 +212,10 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -4918,33 +4921,53 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private class DebugDrawable extends Drawable {
 
+        private final Set<Integer> mDebugTextUsedYPositions = new HashSet<>();
+        private final Paint mDebugPaint = new Paint();
+
         @Override
-        public void draw(Canvas canvas) {
-            Paint p = new Paint();
-            p.setColor(Color.RED);
-            p.setStrokeWidth(2);
-            p.setStyle(Paint.Style.STROKE);
-            canvas.drawLine(0, getMaxPanelHeight(), mView.getWidth(), getMaxPanelHeight(), p);
-            p.setTextSize(24);
-            if (mHeaderDebugInfo != null) canvas.drawText(mHeaderDebugInfo, 50, 100, p);
-            p.setColor(Color.BLUE);
-            canvas.drawLine(0, getExpandedHeight(), mView.getWidth(), getExpandedHeight(), p);
-            p.setColor(Color.GREEN);
-            canvas.drawLine(0, calculatePanelHeightQsExpanded(), mView.getWidth(),
-                    calculatePanelHeightQsExpanded(), p);
-            p.setColor(Color.YELLOW);
-            canvas.drawLine(0, calculatePanelHeightShade(), mView.getWidth(),
-                    calculatePanelHeightShade(), p);
-            p.setColor(Color.MAGENTA);
-            canvas.drawLine(
-                    0, calculateNotificationsTopPadding(), mView.getWidth(),
-                    calculateNotificationsTopPadding(), p);
-            p.setColor(Color.CYAN);
+        public void draw(@NonNull Canvas canvas) {
+            mDebugTextUsedYPositions.clear();
+
+            mDebugPaint.setColor(Color.RED);
+            mDebugPaint.setStrokeWidth(2);
+            mDebugPaint.setStyle(Paint.Style.STROKE);
+            mDebugPaint.setTextSize(24);
+            if (mHeaderDebugInfo != null) canvas.drawText(mHeaderDebugInfo, 50, 100, mDebugPaint);
+
+            drawDebugInfo(canvas, getMaxPanelHeight(), Color.RED, "getMaxPanelHeight()");
+            drawDebugInfo(canvas, (int) getExpandedHeight(), Color.BLUE, "getExpandedHeight()");
+            drawDebugInfo(canvas, calculatePanelHeightQsExpanded(), Color.GREEN,
+                    "calculatePanelHeightQsExpanded()");
+            drawDebugInfo(canvas, calculatePanelHeightShade(), Color.YELLOW,
+                    "calculatePanelHeightShade()");
+            drawDebugInfo(canvas, (int) calculateNotificationsTopPadding(), Color.MAGENTA,
+                    "calculateNotificationsTopPadding()");
+            drawDebugInfo(canvas, mClockPositionResult.clockY, Color.GRAY,
+                    "mClockPositionResult.clockY");
+
+            mDebugPaint.setColor(Color.CYAN);
             canvas.drawLine(0, mClockPositionResult.stackScrollerPadding, mView.getWidth(),
-                    mNotificationStackScrollLayoutController.getTopPadding(), p);
-            p.setColor(Color.GRAY);
-            canvas.drawLine(0, mClockPositionResult.clockY, mView.getWidth(),
-                    mClockPositionResult.clockY, p);
+                    mNotificationStackScrollLayoutController.getTopPadding(), mDebugPaint);
+        }
+
+        private void drawDebugInfo(Canvas canvas, int y, int color, String label) {
+            mDebugPaint.setColor(color);
+            canvas.drawLine(/* startX= */ 0, /* startY= */ y, /* stopX= */ mView.getWidth(),
+                    /* stopY= */ y, mDebugPaint);
+            canvas.drawText(label, /* x= */ 0, /* y= */ computeDebugYTextPosition(y), mDebugPaint);
+        }
+
+        private int computeDebugYTextPosition(int lineY) {
+            if (lineY - mDebugPaint.getTextSize() < 0) {
+                // Avoiding drawing out of bounds
+                lineY += mDebugPaint.getTextSize();
+            }
+            int textY = lineY;
+            while (mDebugTextUsedYPositions.contains(textY)) {
+                textY = (int) (textY + mDebugPaint.getTextSize());
+            }
+            mDebugTextUsedYPositions.add(textY);
+            return textY;
         }
 
         @Override
