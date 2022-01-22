@@ -1176,8 +1176,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
                         com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault);
                 loadBooleanSetting(stmt, Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
                         com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault);
-                loadStringSetting(stmt, Settings.Secure.SCREENSAVER_COMPONENTS,
-                        com.android.internal.R.string.config_dreamsDefaultComponent);
                 loadStringSetting(stmt, Settings.Secure.SCREENSAVER_DEFAULT_COMPONENT,
                         com.android.internal.R.string.config_dreamsDefaultComponent);
 
@@ -2362,8 +2360,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
                     com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault);
             loadBooleanSetting(stmt, Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
                     com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault);
-            loadStringSetting(stmt, Settings.Secure.SCREENSAVER_COMPONENTS,
-                    com.android.internal.R.string.config_dreamsDefaultComponent);
             loadStringSetting(stmt, Settings.Secure.SCREENSAVER_DEFAULT_COMPONENT,
                     com.android.internal.R.string.config_dreamsDefaultComponent);
 
