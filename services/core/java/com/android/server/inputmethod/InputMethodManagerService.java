@@ -219,7 +219,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     private static final int MSG_SHOW_IM_SUBTYPE_PICKER = 1;
-    private static final int MSG_SHOW_IM_CONFIG = 3;
 
     private static final int MSG_HIDE_CURRENT_INPUT_METHOD = 1035;
     private static final int MSG_REMOVE_IME_SURFACE = 1060;
@@ -4261,10 +4260,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mMenuController.showInputMethodMenu(showAuxSubtypes, displayId);
                 return true;
 
-            case MSG_SHOW_IM_CONFIG:
-                showConfigureInputMethods();
-                return true;
-
             // ---------------------------------------------------------
 
             case MSG_HIDE_CURRENT_INPUT_METHOD:
@@ -4663,14 +4658,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             userId = mSettings.getCurrentUserId();
         }
         mContext.startActivityAsUser(intent, null, UserHandle.of(userId));
-    }
-
-    private void showConfigureInputMethods() {
-        Intent intent = new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
-                | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        mContext.startActivityAsUser(intent, null, UserHandle.CURRENT);
     }
 
     // ----------------------------------------------------------------------
