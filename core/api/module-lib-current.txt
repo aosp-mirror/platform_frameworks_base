@@ -317,6 +317,10 @@ package android.net {
     method public static void setHttpProxyConfiguration(@Nullable android.net.ProxyInfo);
   }
 
+  public class TrafficStats {
+    method public static void init(@NonNull android.content.Context);
+  }
+
   public final class UnderlyingNetworkInfo implements android.os.Parcelable {
     ctor public UnderlyingNetworkInfo(int, @NonNull String, @NonNull java.util.List<java.lang.String>);
     method public int describeContents();
