@@ -3987,11 +3987,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (target == mImeLayeringTarget) {
             return;
         }
-        // Prepare the IME screenshot for the last IME target when its task is applying app
-        // transition. This is for the better IME transition to keep IME visibility when
-        // transitioning to the next task.
+        // If the IME target is the input target, before it changes, prepare the IME screenshot
+        // for the last IME target when its task is applying app transition. This is for the
+        // better IME transition to keep IME visibility when transitioning to the next task.
         if (mImeLayeringTarget != null && mImeLayeringTarget.isAnimating(PARENTS | TRANSITION,
-                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)) {
+                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)
+                && mImeLayeringTarget == mImeInputTarget) {
             attachAndShowImeScreenshotOnTarget();
         }
 
