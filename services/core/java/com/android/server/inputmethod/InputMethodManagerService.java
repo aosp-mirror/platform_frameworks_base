@@ -2209,16 +2209,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    // TODO(b/215609403): This method will be removed soon!
-    private void executeOrSendMessage(IInputMethod target, Message msg) {
-        if (target.asBinder() instanceof Binder) {
-            throw new UnsupportedOperationException(
-                    "InputMethodService is not supported to run in the system_server");
-        }
-        handleMessage(msg);
-        msg.recycle();
-    }
-
     private void executeOrSendMessage(IInputMethodClient target, Message msg) {
          if (target.asBinder() instanceof Binder) {
              // This is supposed to be emulating the one-way semantics when the IME client is
