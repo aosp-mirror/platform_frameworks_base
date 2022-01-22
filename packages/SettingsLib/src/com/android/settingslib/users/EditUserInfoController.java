@@ -143,9 +143,8 @@ public class EditUserInfoController {
             mEditUserPhotoController = createEditUserPhotoController(activity, activityStarter,
                     userPhotoView);
         } else {
-            // some users can't change their photos so we need to remove suggestive
-            // background from the photoView
-            userPhotoView.setBackground(null);
+            // some users can't change their photos, so we need to remove the suggestive icon
+            content.findViewById(R.id.add_a_photo_icon).setVisibility(View.GONE);
         }
 
         mEditUserInfoDialog = buildDialog(activity, content, userNameView, oldUserIcon,

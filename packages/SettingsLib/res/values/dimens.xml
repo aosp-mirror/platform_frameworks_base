@@ -98,4 +98,8 @@
     <!-- Minimum width for the popup for updating a user's photo. -->
     <dimen name="update_user_photo_popup_min_width">300dp</dimen>
 
+    <dimen name="add_a_photo_circled_padding">6dp</dimen>
+    <dimen name="user_photo_size_in_profile_info_dialog">112dp</dimen>
+    <dimen name="add_a_photo_icon_size_in_profile_info_dialog">32dp</dimen>
+
 </resources>
