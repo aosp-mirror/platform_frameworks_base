@@ -189,8 +189,8 @@ public class PackageManagerServiceTest {
     @Test
     public void testKnownPackageToString_shouldNotGetUnknown() {
         final List<String> packageNames = new ArrayList<>();
-        for (int i = 0; i <= PackageManagerInternal.LAST_KNOWN_PACKAGE; i++) {
-            packageNames.add(PackageManagerInternal.knownPackageToString(i));
+        for (int i = 0; i <= KnownPackages.LAST_KNOWN_PACKAGE; i++) {
+            packageNames.add(KnownPackages.knownPackageToString(i));
         }
         assertWithMessage(
                 "The Ids of KnownPackage should be continuous and the string representation "
@@ -205,7 +205,7 @@ public class PackageManagerServiceTest {
                 "The last KnownPackage Id should be assigned to PackageManagerInternal"
                         + ".LAST_KNOWN_PACKAGE.").that(
                 knownPackageIds.get(knownPackageIds.size() - 1)).isEqualTo(
-                PackageManagerInternal.LAST_KNOWN_PACKAGE);
+                KnownPackages.LAST_KNOWN_PACKAGE);
     }
 
     @Test
@@ -470,7 +470,7 @@ public class PackageManagerServiceTest {
 
     private List<Integer> getKnownPackageIdsList() throws IllegalAccessException {
         final ArrayList<Integer> knownPackageIds = new ArrayList<>();
-        final Field[] allFields = PackageManagerInternal.class.getDeclaredFields();
+        final Field[] allFields = KnownPackages.class.getDeclaredFields();
         for (Field field : allFields) {
             final int modifier = field.getModifiers();
             if (isPublic(modifier) && isStatic(modifier) && isFinal(modifier)
