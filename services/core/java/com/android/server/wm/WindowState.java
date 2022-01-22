@@ -1729,20 +1729,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             } else {
                 intersectWithRootTaskBounds = false;
             }
-            if (inSplitScreenPrimaryWindowingMode()) {
-                // If this is in the primary split and the root home task is the top visible task in
-                // the secondary split, it means this is "minimized" and thus must prevent
-                // overlapping with home.
-                // TODO(b/158242495): get rid of this when drag/drop can use surface bounds.
-                final Task rootSecondary =
-                        task.getDisplayArea().getRootSplitScreenSecondaryTask();
-                if (rootSecondary.isActivityTypeHome() || rootSecondary.isActivityTypeRecents()) {
-                    final WindowContainer topTask = rootSecondary.getTopChild();
-                    if (topTask.isVisible()) {
-                        cutRect(mTmpRect, topTask.getBounds());
-                    }
-                }
-            }
         }
 
         bounds.set(mWindowFrames.mFrame);
@@ -4703,14 +4689,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             boolean traverseTopToBottom) {
         // No need to apply to IME window if the window is not the current IME layering target.
         if (!isImeLayeringTarget()) {
-            return false;
-        }
-        // If we are in split screen which case we process the IME at the DisplayContent level to
-        // ensure it is above the docked divider.
-        // i.e. Like {@link DisplayContent.ImeContainer#skipImeWindowsDuringTraversal}, the IME
-        // window will be ignored to traverse when the IME target is still in split-screen mode.
-        if (mDisplayContent.getDefaultTaskDisplayArea().isSplitScreenModeActivated()
-                && getTask() != null) {
             return false;
         }
         // Note that we don't process IME window if the IME input target is not on the screen.

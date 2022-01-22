@@ -4500,20 +4500,9 @@ class Task extends TaskFragment {
         // right mode.
         if (!creating) {
             if (!taskDisplayArea.isValidWindowingMode(windowingMode, null /* ActivityRecord */,
-                    topTask, getActivityType())) {
+                    topTask)) {
                 windowingMode = WINDOWING_MODE_UNDEFINED;
             }
-        }
-
-        final boolean alreadyInSplitScreenMode = taskDisplayArea.isSplitScreenModeActivated();
-
-        if (creating && alreadyInSplitScreenMode && windowingMode == WINDOWING_MODE_FULLSCREEN
-                && isActivityTypeStandardOrUndefined()) {
-            // If the root task is being created explicitly in fullscreen mode, dismiss split-screen
-            // and display a warning toast about it.
-            mAtmService.getTaskChangeNotificationController()
-                    .notifyActivityDismissingDockedRootTask();
-            taskDisplayArea.onSplitScreenModeDismissed(this);
         }
 
         if (currentMode == windowingMode) {
@@ -6501,9 +6490,8 @@ class Task extends TaskFragment {
 
             if (!TaskDisplayArea.isWindowingModeSupported(mWindowingMode,
                     mAtmService.mSupportsMultiWindow,
-                    mAtmService.mSupportsSplitScreenMultiWindow,
                     mAtmService.mSupportsFreeformWindowManagement,
-                    mAtmService.mSupportsPictureInPicture, mActivityType)) {
+                    mAtmService.mSupportsPictureInPicture)) {
                 throw new IllegalArgumentException("Can't create root task for unsupported "
                         + "windowingMode=" + mWindowingMode);
             }
