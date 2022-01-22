@@ -43,6 +43,9 @@
     <!-- PiP minimum size, which is a % based off the shorter side of display width and height -->
     <fraction name="config_pipShortestEdgePercent">40%</fraction>
 
+    <!-- Show PiP enter split icon, which allows apps to directly enter splitscreen from PiP. -->
+    <bool name="config_pipEnableEnterSplitButton">false</bool>
+
     <!-- Animation duration when using long press on recents to dock -->
     <integer name="long_press_dock_anim_duration">250</integer>
 
