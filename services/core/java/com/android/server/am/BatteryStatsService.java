@@ -42,6 +42,7 @@ import android.os.BatteryStatsInternal;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.Binder;
+import android.os.BluetoothBatteryStats;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -2623,6 +2624,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         awaitCompletion();
         synchronized (mStats) {
             return mStats.getWakeLockStats();
+        }
+    }
+
+    /**
+     * Gets a snapshot of Bluetooth stats
+     * @hide
+     */
+    public BluetoothBatteryStats getBluetoothBatteryStats() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BATTERY_STATS, null);
+
+        // Wait for the completion of pending works if there is any
+        awaitCompletion();
+        synchronized (mStats) {
+            return mStats.getBluetoothBatteryStats();
         }
     }
 
