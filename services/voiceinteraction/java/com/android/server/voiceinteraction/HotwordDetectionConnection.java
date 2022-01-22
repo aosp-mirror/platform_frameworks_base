@@ -51,6 +51,7 @@ import android.os.ServiceManager;
 import android.os.SharedMemory;
 import android.service.voice.HotwordDetectedResult;
 import android.service.voice.HotwordDetectionService;
+import android.service.voice.HotwordDetector;
 import android.service.voice.HotwordRejectedResult;
 import android.service.voice.IDspHotwordDetectionCallback;
 import android.service.voice.IHotwordDetectionService;
@@ -132,12 +133,13 @@ final class HotwordDetectionConnection {
     private @NonNull ServiceConnection mRemoteHotwordDetectionService;
     private IBinder mAudioFlinger;
     private boolean mDebugHotwordLogging = false;
+    private final int mDetectorType;
 
     HotwordDetectionConnection(Object lock, Context context, int voiceInteractionServiceUid,
             Identity voiceInteractorIdentity, ComponentName serviceName, int userId,
             boolean bindInstantServiceAllowed, @Nullable PersistableBundle options,
             @Nullable SharedMemory sharedMemory,
-            @NonNull IHotwordRecognitionStatusCallback callback) {
+            @NonNull IHotwordRecognitionStatusCallback callback, int detectorType) {
         if (callback == null) {
             Slog.w(TAG, "Callback is null while creating connection");
             throw new IllegalArgumentException("Callback is null while creating connection");
@@ -149,6 +151,7 @@ final class HotwordDetectionConnection {
         mDetectionComponentName = serviceName;
         mUser = userId;
         mCallback = callback;
+        mDetectorType = detectorType;
         final Intent intent = new Intent(HotwordDetectionService.SERVICE_INTERFACE);
         intent.setComponent(mDetectionComponentName);
         initAudioFlingerLocked();
@@ -657,7 +660,8 @@ final class HotwordDetectionConnection {
         pw.print(", mValidatingDspTrigger=" + mValidatingDspTrigger);
         pw.print(", mPerformingSoftwareHotwordDetection=" + mPerformingSoftwareHotwordDetection);
         pw.print(", mRestartCount=" + mServiceConnectionFactory.mRestartCount);
-        pw.println(", mLastRestartInstant=" + mLastRestartInstant);
+        pw.print(", mLastRestartInstant=" + mLastRestartInstant);
+        pw.println(", mDetectorType=" + HotwordDetector.detectorTypeToString(mDetectorType));
     }
 
     private void handleExternalSourceHotwordDetection(
