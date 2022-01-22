@@ -99,6 +99,7 @@ import android.net.TetheringManager;
 import android.net.TrafficStats;
 import android.net.UnderlyingNetworkInfo;
 import android.net.Uri;
+import android.net.netstats.IUsageCallback;
 import android.net.netstats.provider.INetworkStatsProvider;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.net.netstats.provider.NetworkStatsProvider;
@@ -110,7 +111,6 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -1136,21 +1136,20 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @Override
-    public DataUsageRequest registerUsageCallback(String callingPackage,
-                DataUsageRequest request, Messenger messenger, IBinder binder) {
+    public DataUsageRequest registerUsageCallback(@NonNull String callingPackage,
+                @NonNull DataUsageRequest request, @NonNull IUsageCallback callback) {
         Objects.requireNonNull(callingPackage, "calling package is null");
         Objects.requireNonNull(request, "DataUsageRequest is null");
         Objects.requireNonNull(request.template, "NetworkTemplate is null");
-        Objects.requireNonNull(messenger, "messenger is null");
-        Objects.requireNonNull(binder, "binder is null");
+        Objects.requireNonNull(callback, "callback is null");
 
         int callingUid = Binder.getCallingUid();
         @NetworkStatsAccess.Level int accessLevel = checkAccessLevel(callingPackage);
         DataUsageRequest normalizedRequest;
         final long token = Binder.clearCallingIdentity();
         try {
-            normalizedRequest = mStatsObservers.register(request, messenger, binder,
-                    callingUid, accessLevel);
+            normalizedRequest = mStatsObservers.register(
+                    request, callback, callingUid, accessLevel);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
