@@ -30,6 +30,7 @@ import android.content.IntentFilter;
 import android.content.PermissionChecker;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.database.ContentObserver;
 import android.location.LocationManager;
 import android.os.Handler;
 import android.os.Looper;
@@ -55,6 +56,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.Utils;
+import com.android.systemui.util.settings.SecureSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,17 +79,21 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     private final H mHandler;
     private final Handler mBackgroundHandler;
     private final PackageManager mPackageManager;
+    private final ContentObserver mContentObserver;
+    private final SecureSettings mSecureSettings;
 
     private boolean mAreActiveLocationRequests;
     private boolean mShouldDisplayAllAccesses;
-    private boolean mShowSystemAccesses;
+    private boolean mShowSystemAccessesFlag;
+    private boolean mShowSystemAccessesSetting;
 
     @Inject
     public LocationControllerImpl(Context context, AppOpsController appOpsController,
             DeviceConfigProxy deviceConfigProxy,
             @Main Looper mainLooper, @Background Handler backgroundHandler,
             BroadcastDispatcher broadcastDispatcher, BootCompleteCache bootCompleteCache,
-            UserTracker userTracker, PackageManager packageManager, UiEventLogger uiEventLogger) {
+            UserTracker userTracker, PackageManager packageManager, UiEventLogger uiEventLogger,
+            SecureSettings secureSettings) {
         mContext = context;
         mAppOpsController = appOpsController;
         mDeviceConfigProxy = deviceConfigProxy;
@@ -95,10 +101,22 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         mHandler = new H(mainLooper);
         mUserTracker = userTracker;
         mUiEventLogger = uiEventLogger;
+        mSecureSettings = secureSettings;
         mBackgroundHandler = backgroundHandler;
         mPackageManager = packageManager;
         mShouldDisplayAllAccesses = getAllAccessesSetting();
-        mShowSystemAccesses = getShowSystemSetting();
+        mShowSystemAccessesFlag = getShowSystemFlag();
+        mShowSystemAccessesSetting = getShowSystemSetting();
+        mContentObserver = new ContentObserver(mBackgroundHandler) {
+            @Override
+            public void onChange(boolean selfChange) {
+                mShowSystemAccessesSetting = getShowSystemSetting();
+            }
+        };
+
+        // Register to listen for changes in Settings.Secure settings.
+        mSecureSettings.registerContentObserver(
+                Settings.Secure.LOCATION_SHOW_SYSTEM_OPS, mContentObserver);
 
         // Register to listen for changes in DeviceConfig settings.
         mDeviceConfigProxy.addOnPropertiesChangedListener(
@@ -106,7 +124,7 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
                 backgroundHandler::post,
                 properties -> {
                     mShouldDisplayAllAccesses = getAllAccessesSetting();
-                    mShowSystemAccesses = getShowSystemSetting();
+                    mShowSystemAccessesFlag = getShowSystemSetting();
                     updateActiveLocationRequests();
                 });
 
@@ -195,10 +213,15 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
                 SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_SMALL_ENABLED, false);
     }
 
-    private boolean getShowSystemSetting() {
+    private boolean getShowSystemFlag() {
         return mDeviceConfigProxy.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
                 SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_SHOW_SYSTEM, false);
     }
+
+    private boolean getShowSystemSetting() {
+        return mSecureSettings.getInt(Settings.Secure.LOCATION_SHOW_SYSTEM_OPS, 0) == 1;
+    }
+
     /**
      * Returns true if there currently exist active high power location requests.
      */
@@ -226,6 +249,7 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         }
         boolean hadActiveLocationRequests = mAreActiveLocationRequests;
         boolean shouldDisplay = false;
+        boolean showSystem = mShowSystemAccessesFlag || mShowSystemAccessesSetting;
         boolean systemAppOp = false;
         boolean nonSystemAppOp = false;
         boolean isSystemApp;
@@ -243,7 +267,7 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
                     nonSystemAppOp = true;
                 }
 
-                shouldDisplay = mShowSystemAccesses || shouldDisplay || !isSystemApp;
+                shouldDisplay = showSystem || shouldDisplay || !isSystemApp;
             }
         }
 
