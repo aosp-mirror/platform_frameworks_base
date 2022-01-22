@@ -18,7 +18,6 @@ package android.media.midi;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.annotation.SystemService;
 import android.bluetooth.BluetoothDevice;
@@ -29,14 +28,17 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.ArraySet;
 import android.util.Log;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 
 // BLE-MIDI
 
@@ -111,18 +113,30 @@ public final class MidiManager {
     private class DeviceListener extends IMidiDeviceListener.Stub {
         private final DeviceCallback mCallback;
         private final Handler mHandler;
+        private final Executor mExecutor;
         private final int mTransport;
 
         DeviceListener(DeviceCallback callback, Handler handler, int transport) {
             mCallback = callback;
             mHandler = handler;
+            mExecutor = null;
+            mTransport = transport;
+        }
+
+        DeviceListener(DeviceCallback callback, Executor executor, int transport) {
+            mCallback = callback;
+            mHandler = null;
+            mExecutor = executor;
             mTransport = transport;
         }
 
         @Override
         public void onDeviceAdded(MidiDeviceInfo device) {
             if (shouldInvokeCallback(device)) {
-                if (mHandler != null) {
+                if (mExecutor != null) {
+                    mExecutor.execute(() ->
+                            mCallback.onDeviceAdded(device));
+                } else if (mHandler != null) {
                     final MidiDeviceInfo deviceF = device;
                     mHandler.post(new Runnable() {
                             @Override public void run() {
@@ -138,7 +152,10 @@ public final class MidiManager {
         @Override
         public void onDeviceRemoved(MidiDeviceInfo device) {
             if (shouldInvokeCallback(device)) {
-                if (mHandler != null) {
+                if (mExecutor != null) {
+                    mExecutor.execute(() ->
+                            mCallback.onDeviceRemoved(device));
+                } else if (mHandler != null) {
                     final MidiDeviceInfo deviceF = device;
                     mHandler.post(new Runnable() {
                             @Override public void run() {
@@ -153,7 +170,10 @@ public final class MidiManager {
 
         @Override
         public void onDeviceStatusChanged(MidiDeviceStatus status) {
-            if (mHandler != null) {
+            if (mExecutor != null) {
+                mExecutor.execute(() ->
+                        mCallback.onDeviceStatusChanged(status));
+            } else if (mHandler != null) {
                 final MidiDeviceStatus statusF = status;
                 mHandler.post(new Runnable() {
                         @Override public void run() {
@@ -237,7 +257,7 @@ public final class MidiManager {
     /**
      * Registers a callback to receive notifications when MIDI 1.0 devices are added and removed.
      * These are devices that do not default to Universal MIDI Packets. To register for a callback
-     * for those, call {@link #registerDeviceCallbackForTransport} instead.
+     * for those, call {@link #registerDeviceCallback} instead.
 
      * The {@link  DeviceCallback#onDeviceStatusChanged} method will be called immediately
      * for any devices that have open ports. This allows applications to know which input
@@ -250,9 +270,19 @@ public final class MidiManager {
      * @param handler The {@link android.os.Handler Handler} that will be used for delivering the
      *                device notifications. If handler is null, then the thread used for the
      *                callback is unspecified.
+     * @deprecated Use the {@link #registerDeviceCallback}
+     *             method with Executor and transport instead.
      */
+    @Deprecated
     public void registerDeviceCallback(DeviceCallback callback, Handler handler) {
-        registerDeviceCallbackForTransport(callback, handler, TRANSPORT_MIDI_BYTE_STREAM);
+        DeviceListener deviceListener = new DeviceListener(callback, handler,
+                TRANSPORT_MIDI_BYTE_STREAM);
+        try {
+            mService.registerListener(mToken, deviceListener);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        mDeviceListeners.put(callback, deviceListener);
     }
 
     /**
@@ -266,16 +296,16 @@ public final class MidiManager {
      * Applications should call {@link #getDevicesForTransport} before registering the callback
      * to get a list of devices already added.
      *
-     * @param callback a {@link DeviceCallback} for MIDI device notifications
-     * @param handler The {@link android.os.Handler Handler} that will be used for delivering the
-     *                device notifications. If handler is null, then the thread used for the
-     *                callback is unspecified.
      * @param transport The transport to be used. This is either TRANSPORT_MIDI_BYTE_STREAM or
      *            TRANSPORT_UNIVERSAL_MIDI_PACKETS.
+     * @param executor The {@link Executor} that will be used for delivering the
+     *                device notifications.
+     * @param callback a {@link DeviceCallback} for MIDI device notifications
      */
-    public void registerDeviceCallbackForTransport(@NonNull DeviceCallback callback,
-            @Nullable Handler handler, @Transport int transport) {
-        DeviceListener deviceListener = new DeviceListener(callback, handler, transport);
+    public void registerDeviceCallback(@Transport int transport,
+            @NonNull Executor executor, @NonNull DeviceCallback callback) {
+        Objects.requireNonNull(executor);
+        DeviceListener deviceListener = new DeviceListener(callback, executor, transport);
         try {
             mService.registerListener(mToken, deviceListener);
         } catch (RemoteException e) {
@@ -306,7 +336,9 @@ public final class MidiManager {
      * {@link #getDevicesForTransport} instead.
      *
      * @return an array of MIDI devices
+     * @deprecated Use {@link #getDevicesForTransport} instead.
      */
+    @Deprecated
     public MidiDeviceInfo[] getDevices() {
         try {
            return mService.getDevices();
@@ -325,14 +357,13 @@ public final class MidiManager {
      *                  TRANSPORT_UNIVERSAL_MIDI_PACKETS.
      * @return a collection of MIDI devices
      */
-    public @NonNull Collection<MidiDeviceInfo> getDevicesForTransport(@Transport int transport) {
+    public @NonNull Set<MidiDeviceInfo> getDevicesForTransport(@Transport int transport) {
         try {
             MidiDeviceInfo[] devices = mService.getDevicesForTransport(transport);
-            Collection<MidiDeviceInfo> out = new ArrayList<MidiDeviceInfo>(devices.length);
-            for (int i = 0; i < devices.length; i++) {
-                out.add(devices[i]);
+            if (devices == null) {
+                return Collections.emptySet();
             }
-            return out;
+            return new ArraySet<>(devices);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

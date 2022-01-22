@@ -159,7 +159,7 @@ public final class MidiDeviceInfo implements Parcelable {
             PROTOCOL_UNKNOWN
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface DefaultProtocol {}
+    public @interface Protocol {}
 
     /**
      * Bundle key for the device's user visible name property.
@@ -429,7 +429,7 @@ public final class MidiDeviceInfo implements Parcelable {
      *
      * @return the device's default protocol.
      */
-    @DefaultProtocol
+    @Protocol
     public int getDefaultProtocol() {
         return mDefaultProtocol;
     }
