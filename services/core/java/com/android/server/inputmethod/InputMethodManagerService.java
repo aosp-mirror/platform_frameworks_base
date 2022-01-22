@@ -2347,11 +2347,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 curId, getSequenceNumberLocked(), suppressesSpellChecker);
     }
 
+    /**
+     * Called by {@link #startInputOrWindowGainedFocusInternalLocked} to bind/unbind/attach the
+     * selected InputMethod to the given focused IME client.
+     *
+     * Note that this should be called after validating if the IME client has IME focus.
+     *
+     * @see WindowManagerInternal#hasInputMethodClientFocus(IBinder, int, int, int)
+     */
     @GuardedBy("ImfLock.class")
     @NonNull
-    InputBindResult startInputUncheckedLocked(@NonNull ClientState cs, IInputContext inputContext,
-            @NonNull EditorInfo attribute, @StartInputFlags int startInputFlags,
-            @StartInputReason int startInputReason, int unverifiedTargetSdkVersion) {
+    private InputBindResult startInputUncheckedLocked(@NonNull ClientState cs,
+            IInputContext inputContext, @NonNull EditorInfo attribute,
+            @StartInputFlags int startInputFlags, @StartInputReason int startInputReason,
+            int unverifiedTargetSdkVersion) {
         // If no method is currently selected, do nothing.
         String selectedMethodId = getSelectedMethodIdLocked();
         if (selectedMethodId == null) {
@@ -2373,10 +2382,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return InputBindResult.INVALID_PACKAGE_NAME;
         }
 
-        if (!mWindowManagerInternal.isUidAllowedOnDisplay(cs.selfReportedDisplayId, cs.uid)) {
-            // Wait, the client no longer has access to the display.
-            return InputBindResult.INVALID_DISPLAY_ID;
-        }
         // Compute the final shown display ID with validated cs.selfReportedDisplayId for this
         // session & other conditions.
         mDisplayIdToShowIme = computeImeDisplayIdForTarget(cs.selfReportedDisplayId,
@@ -3200,14 +3205,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // be made before input is started in it.
                     final ClientState cs = mClients.get(client.asBinder());
                     if (cs == null) {
-                        throw new IllegalArgumentException(
-                                "unknown client " + client.asBinder());
+                        throw new IllegalArgumentException("unknown client " + client.asBinder());
                     }
-                    if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid,
-                            cs.selfReportedDisplayId)) {
+                    if (!isImeClientFocused(windowToken, cs)) {
                         if (DEBUG) {
-                            Slog.w(TAG,
-                                    "Ignoring hideSoftInput of uid " + uid + ": " + client);
+                            Slog.w(TAG, "Ignoring hideSoftInput of uid " + uid + ": " + client);
                         }
                         return false;
                     }
@@ -3275,6 +3277,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mShowExplicitlyRequested = false;
         mShowForced = false;
         return res;
+    }
+
+    private boolean isImeClientFocused(IBinder windowToken, ClientState cs) {
+        final int imeClientFocus = mWindowManagerInternal.hasInputMethodClientFocus(
+                windowToken, cs.uid, cs.pid, cs.selfReportedDisplayId);
+        return imeClientFocus == WindowManagerInternal.ImeClientFocusResult.HAS_IME_FOCUS;
     }
 
     @NonNull
@@ -3370,31 +3378,30 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + " unverifiedTargetSdkVersion=" + unverifiedTargetSdkVersion);
         }
 
-        final int windowDisplayId = mWindowManagerInternal.getDisplayIdForWindow(windowToken);
-
         final ClientState cs = mClients.get(client.asBinder());
         if (cs == null) {
             throw new IllegalArgumentException("unknown client " + client.asBinder());
         }
-        if (cs.selfReportedDisplayId != windowDisplayId) {
-            Slog.e(TAG, "startInputOrWindowGainedFocusInternal: display ID mismatch."
-                    + " from client:" + cs.selfReportedDisplayId
-                    + " from window:" + windowDisplayId);
-            return InputBindResult.DISPLAY_ID_MISMATCH;
-        }
 
-        if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid,
-                cs.selfReportedDisplayId)) {
-            // Check with the window manager to make sure this client actually
-            // has a window with focus.  If not, reject.  This is thread safe
-            // because if the focus changes some time before or after, the
-            // next client receiving focus that has any interest in input will
-            // be calling through here after that change happens.
-            if (DEBUG) {
-                Slog.w(TAG, "Focus gain on non-focused client " + cs.client
-                        + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
-            }
-            return InputBindResult.NOT_IME_TARGET_WINDOW;
+        final int imeClientFocus = mWindowManagerInternal.hasInputMethodClientFocus(
+                windowToken, cs.uid, cs.pid, cs.selfReportedDisplayId);
+        switch (imeClientFocus) {
+            case WindowManagerInternal.ImeClientFocusResult.DISPLAY_ID_MISMATCH:
+                Slog.e(TAG, "startInputOrWindowGainedFocusInternal: display ID mismatch.");
+                return InputBindResult.DISPLAY_ID_MISMATCH;
+            case WindowManagerInternal.ImeClientFocusResult.NOT_IME_TARGET_WINDOW:
+                // Check with the window manager to make sure this client actually
+                // has a window with focus.  If not, reject.  This is thread safe
+                // because if the focus changes some time before or after, the
+                // next client receiving focus that has any interest in input will
+                // be calling through here after that change happens.
+                if (DEBUG) {
+                    Slog.w(TAG, "Focus gain on non-focused client " + cs.client
+                            + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
+                }
+                return InputBindResult.NOT_IME_TARGET_WINDOW;
+            case WindowManagerInternal.ImeClientFocusResult.INVALID_DISPLAY_ID:
+                return InputBindResult.INVALID_DISPLAY_ID;
         }
 
         if (mUserSwitchHandlerTask != null) {
@@ -3622,8 +3629,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (cs == null) {
                 throw new IllegalArgumentException("unknown client " + client.asBinder());
             }
-            if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid,
-                    cs.selfReportedDisplayId)) {
+            if (!isImeClientFocused(mCurFocusedWindow, cs)) {
                 Slog.w(TAG, String.format("Ignoring %s of uid %d : %s", methodName, uid, client));
                 return false;
             }
