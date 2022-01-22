@@ -163,6 +163,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     // and exit, since exit itself can trigger a number of changes that update the stages.
     private boolean mShouldUpdateRecents;
     private boolean mExitSplitScreenOnHide;
+    private boolean mIsDividerRemoteAnimating;
 
     /** The target stage to dismiss to when unlock after folded. */
     @StageType
@@ -389,6 +390,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     RemoteAnimationTarget[] wallpapers,
                     RemoteAnimationTarget[] nonApps,
                     final IRemoteAnimationFinishedCallback finishedCallback) {
+                mIsDividerRemoteAnimating = true;
                 RemoteAnimationTarget[] augmentedNonApps =
                         new RemoteAnimationTarget[nonApps.length + 1];
                 for (int i = 0; i < nonApps.length; ++i) {
@@ -400,6 +402,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                         new IRemoteAnimationFinishedCallback.Stub() {
                             @Override
                             public void onAnimationFinished() throws RemoteException {
+                                mIsDividerRemoteAnimating = false;
                                 mShouldUpdateRecents = true;
                                 mSyncQueue.queue(evictWct);
                                 mSyncQueue.runInSync(t -> setDividerVisibility(true, t));
@@ -423,6 +426,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
             @Override
             public void onAnimationCancelled() {
+                mIsDividerRemoteAnimating = false;
                 mShouldUpdateRecents = true;
                 mSyncQueue.queue(evictWct);
                 mSyncQueue.runInSync(t -> setDividerVisibility(true, t));
@@ -467,6 +471,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
         // Using legacy transitions, so we can't use blast sync since it conflicts.
         mTaskOrganizer.applyTransaction(wct);
+        mSyncQueue.runInSync(t -> updateSurfaceBounds(mSplitLayout, t));
     }
 
     /** Start an intent and a task ordered by {@code intentFirst}. */
@@ -1055,7 +1060,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private void applyDividerVisibility(SurfaceControl.Transaction t) {
         final SurfaceControl dividerLeash = mSplitLayout.getDividerLeash();
-        if (dividerLeash == null) return;
+        if (mIsDividerRemoteAnimating || dividerLeash == null) return;
 
         if (mDividerVisible) {
             t.show(dividerLeash);
