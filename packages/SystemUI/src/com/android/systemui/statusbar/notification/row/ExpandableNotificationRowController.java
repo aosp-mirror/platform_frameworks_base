@@ -268,6 +268,18 @@ public class ExpandableNotificationRowController implements NotifViewController 
     }
 
     @Override
+    public void onViewAdded() {
+    }
+
+    @Override
+    public void onViewMoved() {
+    }
+
+    @Override
+    public void onViewRemoved() {
+    }
+
+    @Override
     public int getChildCount() {
         final List<ExpandableNotificationRow> mChildren = mView.getAttachedChildren();
         return mChildren != null ? mChildren.size() : 0;
