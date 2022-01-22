@@ -29,6 +29,7 @@ import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
 import com.android.internal.power.MeasuredEnergyStats;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Queue;
@@ -45,7 +46,12 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     private DummyExternalStatsSync mExternalStatsSync = new DummyExternalStatsSync();
 
     MockBatteryStatsImpl(Clocks clocks) {
-        super(clocks);
+        this(clocks, null);
+    }
+
+    MockBatteryStatsImpl(Clocks clocks, File historyDirectory) {
+        super(clocks, historyDirectory);
+
         this.clocks = mClocks;
         initTimersAndCounters();
 

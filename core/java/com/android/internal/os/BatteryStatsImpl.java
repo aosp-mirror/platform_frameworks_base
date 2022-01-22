@@ -1272,12 +1272,21 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public BatteryStatsImpl(Clocks clocks) {
+        this(clocks, (File) null);
+    }
+
+    public BatteryStatsImpl(Clocks clocks, File historyDirectory) {
         init(clocks);
         mStartClockTimeMs = clocks.currentTimeMillis();
-        mStatsFile = null;
         mCheckinFile = null;
         mDailyFile = null;
-        mBatteryStatsHistory = new BatteryStatsHistory(mHistoryBuffer);
+        if (historyDirectory == null) {
+            mStatsFile = null;
+            mBatteryStatsHistory = new BatteryStatsHistory(mHistoryBuffer);
+        } else {
+            mStatsFile = new AtomicFile(new File(historyDirectory, "batterystats.bin"));
+            mBatteryStatsHistory = new BatteryStatsHistory(this, historyDirectory, mHistoryBuffer);
+        }
         mHandler = null;
         mPlatformIdleStateCallback = null;
         mMeasuredEnergyRetriever = null;
