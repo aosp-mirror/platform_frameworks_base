@@ -4130,6 +4130,13 @@
     <permission android:name="android.permission.BIND_TV_INPUT"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Must be required by a {@link android.media.tv.interactive.TvInteractiveAppService}
+         to ensure that only the system can bind to it.
+         <p>Protection level: signature|privileged
+    -->
+    <permission android:name="android.permission.BIND_TV_INTERACTIVE_APP"
+                android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi
          Must be required by a {@link com.android.media.tv.remoteprovider.TvRemoteProvider}
          to ensure that only the system can bind to it.
