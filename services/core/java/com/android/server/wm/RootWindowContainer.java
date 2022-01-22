@@ -987,6 +987,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         forAllDisplays(dc -> {
             dc.getInputMonitor().updateInputWindowsLw(true /*force*/);
             dc.updateSystemGestureExclusion();
+            dc.updateKeepClearAreas();
             dc.updateTouchExcludeRegion();
         });
 

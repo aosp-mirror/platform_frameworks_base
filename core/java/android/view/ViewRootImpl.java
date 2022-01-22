@@ -749,7 +749,10 @@ public final class ViewRootImpl implements ViewParent,
         return mImeFocusController;
     }
 
-    private final GestureExclusionTracker mGestureExclusionTracker = new GestureExclusionTracker();
+    private final ViewRootRectTracker mGestureExclusionTracker =
+            new ViewRootRectTracker(v -> v.getSystemGestureExclusionRects());
+    private final ViewRootRectTracker mKeepClearRectsTracker =
+            new ViewRootRectTracker(v -> v.collectPreferKeepClearRects());
 
     private IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
 
@@ -4767,7 +4770,7 @@ public final class ViewRootImpl implements ViewParent,
      * the root's view hierarchy.
      */
     public void setRootSystemGestureExclusionRects(@NonNull List<Rect> rects) {
-        mGestureExclusionTracker.setRootSystemGestureExclusionRects(rects);
+        mGestureExclusionTracker.setRootRects(rects);
         mHandler.sendEmptyMessage(MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED);
     }
 
@@ -4777,7 +4780,26 @@ public final class ViewRootImpl implements ViewParent,
      */
     @NonNull
     public List<Rect> getRootSystemGestureExclusionRects() {
-        return mGestureExclusionTracker.getRootSystemGestureExclusionRects();
+        return mGestureExclusionTracker.getRootRects();
+    }
+
+    /**
+     * Called from View when the position listener is triggered
+     */
+    void updateKeepClearRectsForView(View view) {
+        mKeepClearRectsTracker.updateRectsForView(view);
+        mHandler.sendEmptyMessage(MSG_KEEP_CLEAR_RECTS_CHANGED);
+    }
+
+    void keepClearRectsChanged() {
+        final List<Rect> rectsForWindowManager = mKeepClearRectsTracker.computeChangedRects();
+        if (rectsForWindowManager != null && mView != null) {
+            try {
+                mWindowSession.reportKeepClearAreasChanged(mWindow, rectsForWindowManager);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -5273,6 +5295,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final int MSG_HIDE_INSETS = 35;
     private static final int MSG_REQUEST_SCROLL_CAPTURE = 36;
     private static final int MSG_WINDOW_TOUCH_MODE_CHANGED = 37;
+    private static final int MSG_KEEP_CLEAR_RECTS_CHANGED = 38;
 
 
     final class ViewRootHandler extends Handler {
@@ -5341,6 +5364,8 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_HIDE_INSETS";
                 case MSG_WINDOW_TOUCH_MODE_CHANGED:
                     return "MSG_WINDOW_TOUCH_MODE_CHANGED";
+                case MSG_KEEP_CLEAR_RECTS_CHANGED:
+                    return "MSG_KEEP_CLEAR_RECTS_CHANGED";
             }
             return super.getMessageName(message);
         }
@@ -5564,7 +5589,10 @@ public final class ViewRootImpl implements ViewParent,
                 } break;
                 case MSG_SYSTEM_GESTURE_EXCLUSION_CHANGED: {
                     systemGestureExclusionChanged();
-                } break;
+                }   break;
+                case MSG_KEEP_CLEAR_RECTS_CHANGED: {
+                    keepClearRectsChanged();
+                }   break;
                 case MSG_REQUEST_SCROLL_CAPTURE:
                     handleScrollCaptureRequest((IScrollCaptureResponseListener) msg.obj);
                     break;

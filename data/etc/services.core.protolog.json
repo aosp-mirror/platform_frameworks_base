@@ -2761,6 +2761,12 @@
       "group": "WM_SHOW_SURFACE_ALLOC",
       "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
     },
+    "751854538": {
+      "message": "DisplayArea keep clear rects changed name =%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
+    },
     "765395228": {
       "message": "onAnimationFinished(): controller=%s reorderMode=%d",
       "level": "DEBUG",
@@ -3690,12 +3696,6 @@
       "level": "WARN",
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/DisplayAreaPolicyBuilder.java"
-    },
-    "1884961873": {
-      "message": "Sleep still need to stop %d activities",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STATES",
-      "at": "com\/android\/server\/wm\/Task.java"
     },
     "1891501279": {
       "message": "cancelAnimation(): reason=%s",

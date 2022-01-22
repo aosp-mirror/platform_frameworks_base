@@ -3257,6 +3257,7 @@
     <public name="localeConfig" />
     <public name="showBackground" />
     <public name="inheritKeyStoreKeys" />
+    <public name="preferKeepClear" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01de0000">
