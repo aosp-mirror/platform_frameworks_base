@@ -90,6 +90,11 @@ class ExitPipWithDismissButtonTest(testSpec: FlickerTestParameter) : ExitPipTran
     @Test
     override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
+    /** {@inheritDoc}  */
+    @FlakyTest(bugId = 215869110)
+    @Test
+    override fun focusDoesNotChange() = super.focusDoesNotChange()
+
     companion object {
         /**
          * Creates the test configurations.
