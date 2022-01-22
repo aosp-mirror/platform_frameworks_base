@@ -783,6 +783,38 @@ public class GnssNative {
     }
 
     /**
+     * Starts sv status collection.
+     */
+    public boolean startSvStatusCollection() {
+        Preconditions.checkState(mRegistered);
+        return mGnssHal.startSvStatusCollection();
+    }
+
+    /**
+     * Stops sv status collection.
+     */
+    public boolean stopSvStatusCollection() {
+        Preconditions.checkState(mRegistered);
+        return mGnssHal.stopSvStatusCollection();
+    }
+
+    /**
+     * Starts NMEA message collection.
+     */
+    public boolean startNmeaMessageCollection() {
+        Preconditions.checkState(mRegistered);
+        return mGnssHal.startNmeaMessageCollection();
+    }
+
+    /**
+     * Stops NMEA message collection.
+     */
+    public boolean stopNmeaMessageCollection() {
+        Preconditions.checkState(mRegistered);
+        return mGnssHal.stopNmeaMessageCollection();
+    }
+
+    /**
      * Returns true if measurement corrections are supported.
      */
     public boolean isMeasurementCorrectionsSupported() {
@@ -1369,6 +1401,22 @@ public class GnssNative {
             return native_inject_measurement_corrections(corrections);
         }
 
+        protected boolean startSvStatusCollection() {
+            return native_start_sv_status_collection();
+        }
+
+        protected boolean stopSvStatusCollection() {
+            return native_stop_sv_status_collection();
+        }
+
+        protected boolean startNmeaMessageCollection() {
+            return native_start_nmea_message_collection();
+        }
+
+        protected boolean stopNmeaMessageCollection() {
+            return native_stop_nmea_message_collection();
+        }
+
         protected int getBatchSize() {
             return native_get_batch_size();
         }
@@ -1478,6 +1526,10 @@ public class GnssNative {
 
     private static native int native_read_nmea(byte[] buffer, int bufferSize);
 
+    private static native boolean native_start_nmea_message_collection();
+
+    private static native boolean native_stop_nmea_message_collection();
+
     // location injection APIs
 
     private static native void native_inject_location(
@@ -1500,6 +1552,11 @@ public class GnssNative {
     // time injection APIs
 
     private static native void native_inject_time(long time, long timeReference, int uncertainty);
+
+    // sv status APIs
+    private static native boolean native_start_sv_status_collection();
+
+    private static native boolean native_stop_sv_status_collection();
 
     // navigation message APIs
 
