@@ -263,7 +263,7 @@ public final class NetworkTemplate implements Parcelable {
      * Template to match {@link ConnectivityManager#TYPE_WIFI} networks with the
      * given key of the wifi network.
      *
-     * @param wifiNetworkKey key of the wifi network. see {@link WifiInfo#getCurrentNetworkKey()}
+     * @param wifiNetworkKey key of the wifi network. see {@link WifiInfo#getNetworkKey()}
      *                  to know details about the key.
      * @hide
      */
@@ -283,7 +283,7 @@ public final class NetworkTemplate implements Parcelable {
      * Call with {@link #WIFI_NETWORK_KEY_ALL} for {@code wifiNetworkKey} to get result regardless
      * of key of the wifi network.
      *
-     * @param wifiNetworkKey key of the wifi network. see {@link WifiInfo#getCurrentNetworkKey()}
+     * @param wifiNetworkKey key of the wifi network. see {@link WifiInfo#getNetworkKey()}
      *                  to know details about the key.
      * @param subscriberId the IMSI associated to this wifi network.
      *
@@ -593,7 +593,7 @@ public final class NetworkTemplate implements Parcelable {
 
     /**
      * Get the set of Wifi Network Keys of the template.
-     * See {@link WifiInfo#getCurrentNetworkKey()}.
+     * See {@link WifiInfo#getNetworkKey()}.
      */
     @NonNull
     public Set<String> getWifiNetworkKeys() {
@@ -729,7 +729,7 @@ public final class NetworkTemplate implements Parcelable {
      * Returns true when the key matches, or when {@code mMatchWifiNetworkKeys} is
      * empty.
      *
-     * @param wifiNetworkKey key of the wifi network. see {@link WifiInfo#getCurrentNetworkKey()}
+     * @param wifiNetworkKey key of the wifi network. see {@link WifiInfo#getNetworkKey()}
      *                  to know details about the key.
      */
     private boolean matchesWifiNetworkKey(@NonNull String wifiNetworkKey) {
@@ -1059,9 +1059,9 @@ public final class NetworkTemplate implements Parcelable {
          * the intention of matching any Wifi Network Key.
          *
          * @param wifiNetworkKeys the list of Wifi Network Key,
-         *                        see {@link WifiInfo#getCurrentNetworkKey()}.
+         *                        see {@link WifiInfo#getNetworkKey()}.
          *                        Or an empty list to match all networks.
-         *                        Note that {@code getCurrentNetworkKey()} might get null key
+         *                        Note that {@code getNetworkKey()} might get null key
          *                        when wifi disconnects. However, the caller should never invoke
          *                        this function with a null Wifi Network Key since such statistics
          *                        never exists.
