@@ -72,7 +72,6 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_START_INPUT = 32;
     private static final int DO_CREATE_SESSION = 40;
     private static final int DO_SET_SESSION_ENABLED = 45;
-    private static final int DO_REVOKE_SESSION = 50;
     private static final int DO_SHOW_SOFT_INPUT = 60;
     private static final int DO_HIDE_SOFT_INPUT = 70;
     private static final int DO_CHANGE_INPUTMETHOD_SUBTYPE = 80;
@@ -214,9 +213,6 @@ class IInputMethodWrapper extends IInputMethod.Stub
             case DO_SET_SESSION_ENABLED:
                 inputMethod.setSessionEnabled((InputMethodSession)msg.obj,
                         msg.arg1 != 0);
-                return;
-            case DO_REVOKE_SESSION:
-                inputMethod.revokeSession((InputMethodSession)msg.obj);
                 return;
             case DO_SHOW_SOFT_INPUT: {
                 final SomeArgs args = (SomeArgs)msg.obj;
@@ -361,22 +357,6 @@ class IInputMethodWrapper extends IInputMethod.Stub
             }
             mCaller.executeOrSendMessage(mCaller.obtainMessageIO(
                     DO_SET_SESSION_ENABLED, enabled ? 1 : 0, ls));
-        } catch (ClassCastException e) {
-            Log.w(TAG, "Incoming session not of correct type: " + session, e);
-        }
-    }
-
-    @BinderThread
-    @Override
-    public void revokeSession(IInputMethodSession session) {
-        try {
-            InputMethodSession ls = ((IInputMethodSessionWrapper)
-                    session).getInternalInputMethodSession();
-            if (ls == null) {
-                Log.w(TAG, "Session is already finished: " + session);
-                return;
-            }
-            mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_REVOKE_SESSION, ls));
         } catch (ClassCastException e) {
             Log.w(TAG, "Incoming session not of correct type: " + session, e);
         }
