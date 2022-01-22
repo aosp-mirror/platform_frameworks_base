@@ -37,13 +37,14 @@ import com.android.server.FgThread;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * To prevent idmap2d from continuously running, the idmap daemon will terminate after 10
- * seconds without a transaction.
+ * To prevent idmap2d from continuously running, the idmap daemon will terminate after 10 seconds
+ * without a transaction.
  **/
 class IdmapDaemon {
     // The amount of time in milliseconds to wait after a transaction to the idmap service is made
@@ -67,11 +68,14 @@ class IdmapDaemon {
      * to the service is open.
      **/
     private class Connection implements AutoCloseable {
+        @Nullable
+        private final IIdmap2 mIdmap2;
         private boolean mOpened = true;
 
-        private Connection() {
+        private Connection(IIdmap2 idmap2) {
             synchronized (mIdmapToken) {
                 mOpenedCount.incrementAndGet();
+                mIdmap2 = idmap2;
             }
         }
 
@@ -102,6 +106,11 @@ class IdmapDaemon {
                 }, mIdmapToken, SERVICE_TIMEOUT_MS);
             }
         }
+
+        @Nullable
+        public IIdmap2 getIdmap2() {
+            return mIdmap2;
+        }
     }
 
     static IdmapDaemon getInstance() {
@@ -115,14 +124,29 @@ class IdmapDaemon {
             @Nullable String overlayName, int policies, boolean enforce, int userId)
             throws TimeoutException, RemoteException {
         try (Connection c = connect()) {
-            return mService.createIdmap(targetPath, overlayPath, TextUtils.emptyIfNull(overlayName),
+            final IIdmap2 idmap2 = c.getIdmap2();
+            if (idmap2 == null) {
+                Slog.w(TAG, "idmap2d service is not ready for createIdmap(\"" + targetPath
+                        + "\", \"" + overlayPath + "\", \"" + overlayName + "\", " + policies + ", "
+                        + enforce + ", " + userId + ")");
+                return null;
+            }
+
+            return idmap2.createIdmap(targetPath, overlayPath, TextUtils.emptyIfNull(overlayName),
                     policies, enforce, userId);
         }
     }
 
     boolean removeIdmap(String overlayPath, int userId) throws TimeoutException, RemoteException {
         try (Connection c = connect()) {
-            return mService.removeIdmap(overlayPath, userId);
+            final IIdmap2 idmap2 = c.getIdmap2();
+            if (idmap2 == null) {
+                Slog.w(TAG, "idmap2d service is not ready for removeIdmap(\"" + overlayPath
+                        + "\", " + userId + ")");
+                return false;
+            }
+
+            return idmap2.removeIdmap(overlayPath, userId);
         }
     }
 
@@ -130,14 +154,29 @@ class IdmapDaemon {
             @Nullable String overlayName, int policies, boolean enforce, int userId)
             throws Exception {
         try (Connection c = connect()) {
-            return mService.verifyIdmap(targetPath, overlayPath, TextUtils.emptyIfNull(overlayName),
+            final IIdmap2 idmap2 = c.getIdmap2();
+            if (idmap2 == null) {
+                Slog.w(TAG, "idmap2d service is not ready for verifyIdmap(\"" + targetPath
+                        + "\", \"" + overlayPath + "\", \"" + overlayName + "\", " + policies + ", "
+                        + enforce + ", " + userId + ")");
+                return false;
+            }
+
+            return idmap2.verifyIdmap(targetPath, overlayPath, TextUtils.emptyIfNull(overlayName),
                     policies, enforce, userId);
         }
     }
 
     boolean idmapExists(String overlayPath, int userId) {
         try (Connection c = connect()) {
-            return new File(mService.getIdmapPath(overlayPath, userId)).isFile();
+            final IIdmap2 idmap2 = c.getIdmap2();
+            if (idmap2 == null) {
+                Slog.w(TAG, "idmap2d service is not ready for idmapExists(\"" + overlayPath
+                        + "\", " + userId + ")");
+                return false;
+            }
+
+            return new File(idmap2.getIdmapPath(overlayPath, userId)).isFile();
         } catch (Exception e) {
             Slog.wtf(TAG, "failed to check if idmap exists for " + overlayPath, e);
             return false;
@@ -146,7 +185,13 @@ class IdmapDaemon {
 
     FabricatedOverlayInfo createFabricatedOverlay(@NonNull FabricatedOverlayInternal overlay) {
         try (Connection c = connect()) {
-            return mService.createFabricatedOverlay(overlay);
+            final IIdmap2 idmap2 = c.getIdmap2();
+            if (idmap2 == null) {
+                Slog.w(TAG, "idmap2d service is not ready for createFabricatedOverlay()");
+                return null;
+            }
+
+            return idmap2.createFabricatedOverlay(overlay);
         } catch (Exception e) {
             Slog.wtf(TAG, "failed to fabricate overlay " + overlay, e);
             return null;
@@ -155,7 +200,14 @@ class IdmapDaemon {
 
     boolean deleteFabricatedOverlay(@NonNull String path) {
         try (Connection c = connect()) {
-            return mService.deleteFabricatedOverlay(path);
+            final IIdmap2 idmap2 = c.getIdmap2();
+            if (idmap2 == null) {
+                Slog.w(TAG, "idmap2d service is not ready for deleteFabricatedOverlay(\"" + path
+                        + "\")");
+                return false;
+            }
+
+            return idmap2.deleteFabricatedOverlay(path);
         } catch (Exception e) {
             Slog.wtf(TAG, "failed to delete fabricated overlay '" + path + "'", e);
             return false;
@@ -164,10 +216,18 @@ class IdmapDaemon {
 
     synchronized List<FabricatedOverlayInfo> getFabricatedOverlayInfos() {
         final ArrayList<FabricatedOverlayInfo> allInfos = new ArrayList<>();
-        try (Connection c = connect()) {
-            mService.acquireFabricatedOverlayIterator();
+        Connection c = null;
+        try {
+            c = connect();
+            final IIdmap2 service = c.getIdmap2();
+            if (service == null) {
+                Slog.w(TAG, "idmap2d service is not ready for getFabricatedOverlayInfos()");
+                return Collections.emptyList();
+            }
+
+            service.acquireFabricatedOverlayIterator();
             List<FabricatedOverlayInfo> infos;
-            while (!(infos = mService.nextFabricatedOverlayInfos()).isEmpty()) {
+            while (!(infos = service.nextFabricatedOverlayInfos()).isEmpty()) {
                 allInfos.addAll(infos);
             }
             return allInfos;
@@ -175,17 +235,26 @@ class IdmapDaemon {
             Slog.wtf(TAG, "failed to get all fabricated overlays", e);
         } finally {
             try {
-                mService.releaseFabricatedOverlayIterator();
+                if (c.getIdmap2() != null) {
+                    c.getIdmap2().releaseFabricatedOverlayIterator();
+                }
             } catch (RemoteException e) {
                 // ignore
             }
+            c.close();
         }
         return allInfos;
     }
 
     String dumpIdmap(@NonNull String overlayPath) {
         try (Connection c = connect()) {
-            String dump = mService.dumpIdmap(overlayPath);
+            final IIdmap2 service = c.getIdmap2();
+            if (service == null) {
+                final String dumpText = "idmap2d service is not ready for dumpIdmap()";
+                Slog.w(TAG, dumpText);
+                return dumpText;
+            }
+            String dump = service.dumpIdmap(overlayPath);
             return TextUtils.nullIfEmpty(dump);
         } catch (Exception e) {
             Slog.wtf(TAG, "failed to dump idmap", e);
@@ -193,8 +262,16 @@ class IdmapDaemon {
         }
     }
 
+    @Nullable
     private IBinder getIdmapService() throws TimeoutException, RemoteException {
-        SystemService.start(IDMAP_DAEMON);
+        try {
+            SystemService.start(IDMAP_DAEMON);
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("failed to set system property")) {
+                Slog.w(TAG, "Failed to enable idmap2 daemon", e);
+                return null;
+            }
+        }
 
         final long endMillis = SystemClock.elapsedRealtime() + SERVICE_CONNECT_TIMEOUT_MS;
         while (SystemClock.elapsedRealtime() <= endMillis) {
@@ -226,17 +303,23 @@ class IdmapDaemon {
         }
     }
 
+    @NonNull
     private Connection connect() throws TimeoutException, RemoteException {
         synchronized (mIdmapToken) {
             FgThread.getHandler().removeCallbacksAndMessages(mIdmapToken);
             if (mService != null) {
                 // Not enough time has passed to stop the idmap service. Reuse the existing
                 // interface.
-                return new Connection();
+                return new Connection(mService);
             }
 
-            mService = IIdmap2.Stub.asInterface(getIdmapService());
-            return new Connection();
+            IBinder binder = getIdmapService();
+            if (binder == null) {
+                return new Connection(null);
+            }
+
+            mService = IIdmap2.Stub.asInterface(binder);
+            return new Connection(mService);
         }
     }
 }

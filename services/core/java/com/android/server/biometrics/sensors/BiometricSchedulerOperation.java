@@ -65,7 +65,7 @@ public class BiometricSchedulerOperation {
     protected static final int STATE_WAITING_FOR_COOKIE = 4;
 
     /**
-     * The {@link BaseClientMonitor.Callback} has been invoked and the client is finished.
+     * The {@link ClientMonitorCallback} has been invoked and the client is finished.
      */
     protected static final int STATE_FINISHED = 5;
 
@@ -83,7 +83,7 @@ public class BiometricSchedulerOperation {
     @NonNull
     private final BaseClientMonitor mClientMonitor;
     @Nullable
-    private final BaseClientMonitor.Callback mClientCallback;
+    private final ClientMonitorCallback mClientCallback;
     @OperationState
     private int mState;
     @VisibleForTesting
@@ -92,14 +92,14 @@ public class BiometricSchedulerOperation {
 
     BiometricSchedulerOperation(
             @NonNull BaseClientMonitor clientMonitor,
-            @Nullable BaseClientMonitor.Callback callback
+            @Nullable ClientMonitorCallback callback
     ) {
         this(clientMonitor, callback, STATE_WAITING_IN_QUEUE);
     }
 
     protected BiometricSchedulerOperation(
             @NonNull BaseClientMonitor clientMonitor,
-            @Nullable BaseClientMonitor.Callback callback,
+            @Nullable ClientMonitorCallback callback,
             @OperationState int state
     ) {
         mClientMonitor = clientMonitor;
@@ -139,7 +139,7 @@ public class BiometricSchedulerOperation {
      * @param callback lifecycle callback
      * @return if this operation started
      */
-    public boolean start(@NonNull BaseClientMonitor.Callback callback) {
+    public boolean start(@NonNull ClientMonitorCallback callback) {
         checkInState("start",
                 STATE_WAITING_IN_QUEUE,
                 STATE_WAITING_FOR_COOKIE,
@@ -159,7 +159,7 @@ public class BiometricSchedulerOperation {
      * @param cookie   cookie indicting the operation should begin
      * @return if this operation started
      */
-    public boolean startWithCookie(@NonNull BaseClientMonitor.Callback callback, int cookie) {
+    public boolean startWithCookie(@NonNull ClientMonitorCallback callback, int cookie) {
         checkInState("start",
                 STATE_WAITING_IN_QUEUE,
                 STATE_WAITING_FOR_COOKIE,
@@ -173,8 +173,8 @@ public class BiometricSchedulerOperation {
         return doStart(callback);
     }
 
-    private boolean doStart(@NonNull BaseClientMonitor.Callback callback) {
-        final BaseClientMonitor.Callback cb = getWrappedCallback(callback);
+    private boolean doStart(@NonNull ClientMonitorCallback callback) {
+        final ClientMonitorCallback cb = getWrappedCallback(callback);
 
         if (mState == STATE_WAITING_IN_QUEUE_CANCELING) {
             Slog.d(TAG, "Operation marked for cancellation, cancelling now: " + this);
@@ -239,9 +239,9 @@ public class BiometricSchedulerOperation {
      *
      * @param handler handler to use for the cancellation watchdog
      * @param callback lifecycle callback (only used if this operation hasn't started, otherwise
-     *                 the callback used from {@link #start(BaseClientMonitor.Callback)} is used)
+     *                 the callback used from {@link #start(ClientMonitorCallback)} is used)
      */
-    public void cancel(@NonNull Handler handler, @NonNull BaseClientMonitor.Callback callback) {
+    public void cancel(@NonNull Handler handler, @NonNull ClientMonitorCallback callback) {
         checkNotInState("cancel", STATE_FINISHED);
 
         final int currentState = mState;
@@ -270,14 +270,14 @@ public class BiometricSchedulerOperation {
     }
 
     @NonNull
-    private BaseClientMonitor.Callback getWrappedCallback() {
+    private ClientMonitorCallback getWrappedCallback() {
         return getWrappedCallback(null);
     }
 
     @NonNull
-    private BaseClientMonitor.Callback getWrappedCallback(
-            @Nullable BaseClientMonitor.Callback callback) {
-        final BaseClientMonitor.Callback destroyCallback = new BaseClientMonitor.Callback() {
+    private ClientMonitorCallback getWrappedCallback(
+            @Nullable ClientMonitorCallback callback) {
+        final ClientMonitorCallback destroyCallback = new ClientMonitorCallback() {
             @Override
             public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                     boolean success) {
@@ -286,7 +286,7 @@ public class BiometricSchedulerOperation {
                 mState = STATE_FINISHED;
             }
         };
-        return new BaseClientMonitor.CompositeCallback(destroyCallback, callback, mClientCallback);
+        return new ClientMonitorCompositeCallback(destroyCallback, callback, mClientCallback);
     }
 
     /** {@link BaseClientMonitor#getSensorId()}. */

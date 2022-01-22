@@ -111,6 +111,7 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mContext = Mockito.spy(getContext());
         final WindowManager wm = mContext.getSystemService(WindowManager.class);
         mSwitchListener = new SwitchListenerStub();
         mWindowManager = spy(new TestableWindowManager(wm));
@@ -139,16 +140,18 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
     public void tearDown() {
         mFadeOutAnimation = null;
         mMotionEventHelper.recycleEvents();
+        mMagnificationModeSwitch.removeButton();
     }
 
     @Test
-    public void removeButton_buttonIsShowing_removeView() {
+    public void removeButton_buttonIsShowing_removeViewAndUnregisterComponentCallbacks() {
         mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
 
         mMagnificationModeSwitch.removeButton();
 
         verify(mWindowManager).removeView(mSpyImageView);
         verify(mViewPropertyAnimator).cancel();
+        verify(mContext).unregisterComponentCallbacks(mMagnificationModeSwitch);
     }
 
     @Test
@@ -461,6 +464,13 @@ public class MagnificationModeSwitchTest extends SysuiTestCase {
         assertEquals(getContext().getResources().getString(
                 com.android.internal.R.string.android_system_label),
                 layoutPrams.accessibilityTitle);
+    }
+
+    @Test
+    public void showButton_registerComponentCallbacks() {
+        mMagnificationModeSwitch.showButton(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+
+        verify(mContext).registerComponentCallbacks(mMagnificationModeSwitch);
     }
 
     @Test

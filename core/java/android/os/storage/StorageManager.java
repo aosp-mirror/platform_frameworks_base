@@ -80,6 +80,7 @@ import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.sysprop.VoldProperties;
@@ -1443,28 +1444,39 @@ public class StorageManager {
      *
      * @hide
      */
-    public static final int STORAGE_THRESHOLD_PERCENT_HIGH = 20;
+    public static final int DEFAULT_STORAGE_THRESHOLD_PERCENT_HIGH = 20;
+    /** {@hide} */
+    @TestApi
+    public static final String
+            STORAGE_THRESHOLD_PERCENT_HIGH_KEY = "storage_threshold_percent_high";
     /**
      * Devices having below STORAGE_THRESHOLD_PERCENT_LOW of total space free are considered to be
-     * in low free space category.
+     * in low free space category and can be configured via
+     * Settings.Global.SYS_STORAGE_THRESHOLD_PERCENTAGE.
      *
      * @hide
      */
-    public static final int STORAGE_THRESHOLD_PERCENT_LOW = 5;
+    public static final int DEFAULT_STORAGE_THRESHOLD_PERCENT_LOW = 5;
     /**
      * For devices in high free space category, CACHE_RESERVE_PERCENT_HIGH percent of total space is
      * allocated for cache.
      *
      * @hide
      */
-    public static final int CACHE_RESERVE_PERCENT_HIGH = 10;
+    public static final int DEFAULT_CACHE_RESERVE_PERCENT_HIGH = 10;
+    /** {@hide} */
+    @TestApi
+    public static final String CACHE_RESERVE_PERCENT_HIGH_KEY = "cache_reserve_percent_high";
     /**
      * For devices in low free space category, CACHE_RESERVE_PERCENT_LOW percent of total space is
      * allocated for cache.
      *
      * @hide
      */
-    public static final int CACHE_RESERVE_PERCENT_LOW = 2;
+    public static final int DEFAULT_CACHE_RESERVE_PERCENT_LOW = 2;
+    /** {@hide} */
+    @TestApi
+    public static final String CACHE_RESERVE_PERCENT_LOW_KEY = "cache_reserve_percent_low";
 
     private static final long DEFAULT_THRESHOLD_MAX_BYTES = DataUnit.MEBIBYTES.toBytes(500);
 
@@ -1490,7 +1502,8 @@ public class StorageManager {
     @UnsupportedAppUsage
     public long getStorageLowBytes(File path) {
         final long lowPercent = Settings.Global.getInt(mResolver,
-                Settings.Global.SYS_STORAGE_THRESHOLD_PERCENTAGE, STORAGE_THRESHOLD_PERCENT_LOW);
+                Settings.Global.SYS_STORAGE_THRESHOLD_PERCENTAGE,
+                DEFAULT_STORAGE_THRESHOLD_PERCENT_LOW);
         final long lowBytes = (path.getTotalSpace() * lowPercent) / 100;
 
         final long maxLowBytes = Settings.Global.getLong(mResolver,
@@ -1510,24 +1523,33 @@ public class StorageManager {
     @TestApi
     @SuppressLint("StreamFiles")
     public long computeStorageCacheBytes(@NonNull File path) {
+        final int storageThresholdPercentHigh = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                STORAGE_THRESHOLD_PERCENT_HIGH_KEY, DEFAULT_STORAGE_THRESHOLD_PERCENT_HIGH);
+        final int cacheReservePercentHigh = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                CACHE_RESERVE_PERCENT_HIGH_KEY, DEFAULT_CACHE_RESERVE_PERCENT_HIGH);
+        final int cacheReservePercentLow = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                CACHE_RESERVE_PERCENT_LOW_KEY, DEFAULT_CACHE_RESERVE_PERCENT_LOW);
         final long totalBytes = path.getTotalSpace();
         final long usableBytes = path.getUsableSpace();
-        final long storageThresholdHighBytes = totalBytes * STORAGE_THRESHOLD_PERCENT_HIGH / 100;
+        final long storageThresholdHighBytes = totalBytes * storageThresholdPercentHigh / 100;
         final long storageThresholdLowBytes = getStorageLowBytes(path);
         long result;
         if (usableBytes > storageThresholdHighBytes) {
-            // If free space is >STORAGE_THRESHOLD_PERCENT_HIGH of total space,
-            // reserve CACHE_RESERVE_PERCENT_HIGH of total space
-            result = totalBytes * CACHE_RESERVE_PERCENT_HIGH / 100;
+            // If free space is >storageThresholdPercentHigh of total space,
+            // reserve cacheReservePercentHigh of total space
+            result = totalBytes * cacheReservePercentHigh / 100;
         } else if (usableBytes < storageThresholdLowBytes) {
-            // If free space is <min(STORAGE_THRESHOLD_PERCENT_LOW of total space, 500MB),
-            // reserve CACHE_RESERVE_PERCENT_LOW of total space
-            result = totalBytes * CACHE_RESERVE_PERCENT_LOW / 100;
+            // If free space is <min(storageThresholdPercentLow of total space, 500MB),
+            // reserve cacheReservePercentLow of total space
+            result = totalBytes * cacheReservePercentLow / 100;
         } else {
             // Else, linearly interpolate the amount of space to reserve
-            double slope = (CACHE_RESERVE_PERCENT_HIGH - CACHE_RESERVE_PERCENT_LOW) * totalBytes
+            double slope = (cacheReservePercentHigh - cacheReservePercentLow) * totalBytes
                     / (100.0 * (storageThresholdHighBytes - storageThresholdLowBytes));
-            double intercept = totalBytes * CACHE_RESERVE_PERCENT_LOW / 100.0
+            double intercept = totalBytes * cacheReservePercentLow / 100.0
                     - storageThresholdLowBytes * slope;
             result = Math.round(slope * usableBytes + intercept);
         }

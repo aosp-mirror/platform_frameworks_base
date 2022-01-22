@@ -125,8 +125,7 @@ class AssociationStoreImpl implements AssociationStore {
             // Update the MacAddress-to-List<Association> map if needed.
             final MacAddress updatedAddress = updated.getDeviceMacAddress();
             final MacAddress currentAddress = current.getDeviceMacAddress();
-            macAddressChanged = Objects.equals(
-                    current.getDeviceMacAddress(), updated.getDeviceMacAddress());
+            macAddressChanged = Objects.equals(currentAddress, updatedAddress);
             if (macAddressChanged) {
                 if (currentAddress != null) {
                     mAddressMap.get(currentAddress).remove(id);
@@ -213,11 +212,9 @@ class AssociationStoreImpl implements AssociationStore {
             final Set<Integer> ids = mAddressMap.get(address);
             if (ids == null) return Collections.emptyList();
 
-            final List<AssociationInfo> associations = new ArrayList<>();
-            for (AssociationInfo association : mIdMap.values()) {
-                if (address.equals(association.getDeviceMacAddress())) {
-                    associations.add(association);
-                }
+            final List<AssociationInfo> associations = new ArrayList<>(ids.size());
+            for (Integer id : ids) {
+                associations.add(mIdMap.get(id));
             }
 
             return Collections.unmodifiableList(associations);
@@ -263,24 +260,6 @@ class AssociationStoreImpl implements AssociationStore {
         synchronized (mListeners) {
             for (OnChangeListener listener : mListeners) {
                 listener.onAssociationChanged(changeType, association);
-
-                switch (changeType) {
-                    case CHANGE_TYPE_ADDED:
-                        listener.onAssociationAdded(association);
-                        break;
-
-                    case CHANGE_TYPE_REMOVED:
-                        listener.onAssociationRemoved(association);
-                        break;
-
-                    case CHANGE_TYPE_UPDATED_ADDRESS_CHANGED:
-                        listener.onAssociationUpdated(association, true);
-                        break;
-
-                    case CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED:
-                        listener.onAssociationUpdated(association, false);
-                        break;
-                }
             }
         }
     }

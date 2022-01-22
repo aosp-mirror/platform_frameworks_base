@@ -121,7 +121,6 @@ import android.os.IThermalService;
 import android.os.OutcomeReceiver;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
@@ -231,7 +230,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -2332,11 +2330,7 @@ public class StatsPullAtomService extends SystemService {
         List<ProcessMemoryState> managedProcessList =
                 LocalServices.getService(ActivityManagerInternal.class)
                         .getMemoryStateForProcesses();
-        managedProcessList.sort(Comparator.comparingInt(x -> x.oomScore));
         for (ProcessMemoryState process : managedProcessList) {
-            if (process.uid == Process.SYSTEM_UID) {
-                continue;
-            }
             KernelAllocationStats.ProcessDmabuf proc =
                     KernelAllocationStats.getDmabufAllocations(process.pid);
             if (proc == null || (proc.retainedBuffersCount <= 0 && proc.mappedBuffersCount <= 0)) {
@@ -2348,6 +2342,32 @@ public class StatsPullAtomService extends SystemService {
                             process.uid,
                             process.processName,
                             process.oomScore,
+                            proc.retainedSizeKb,
+                            proc.retainedBuffersCount,
+                            proc.mappedSizeKb,
+                            proc.mappedBuffersCount));
+        }
+        SparseArray<String> processCmdlines = getProcessCmdlines();
+        managedProcessList.forEach(managedProcess -> processCmdlines.delete(managedProcess.pid));
+        int size = processCmdlines.size();
+        for (int i = 0; i < size; ++i) {
+            int pid = processCmdlines.keyAt(i);
+            int uid = getUidForPid(pid);
+            // ignore root processes (unlikely to be interesting)
+            if (uid <= 0) {
+                continue;
+            }
+            KernelAllocationStats.ProcessDmabuf proc =
+                    KernelAllocationStats.getDmabufAllocations(pid);
+            if (proc == null || (proc.retainedBuffersCount <= 0 && proc.mappedBuffersCount <= 0)) {
+                continue;
+            }
+            pulledData.add(
+                    FrameworkStatsLog.buildStatsEvent(
+                            atomTag,
+                            uid,
+                            processCmdlines.valueAt(i),
+                            -1001 /*Placeholder for native processes, OOM_SCORE_ADJ_MIN - 1.*/,
                             proc.retainedSizeKb,
                             proc.retainedBuffersCount,
                             proc.mappedSizeKb,

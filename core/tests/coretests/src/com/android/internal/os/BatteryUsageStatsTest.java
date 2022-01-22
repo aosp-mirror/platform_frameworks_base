@@ -83,7 +83,7 @@ public class BatteryUsageStatsTest {
         final Parcel parcel = Parcel.obtain();
         parcel.writeParcelable(outBatteryUsageStats, 0);
 
-        assertThat(parcel.dataSize()).isLessThan(6000);
+        assertThat(parcel.dataSize()).isLessThan(7000);
 
         parcel.setDataPosition(0);
 

@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.collection.render
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
+import com.android.systemui.statusbar.notification.SectionHeaderVisibilityProvider
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.ListEntry
@@ -43,6 +44,7 @@ class NodeSpecBuilderTest : SysuiTestCase() {
 
     private val mediaContainerController: MediaContainerController = mock()
     private val sectionsFeatureManager: NotificationSectionsFeatureManager = mock()
+    private val sectionHeaderVisibilityProvider: SectionHeaderVisibilityProvider = mock()
     private val viewBarn: NotifViewBarn = mock()
 
     private var rootController: NodeController = buildFakeController("rootController")
@@ -72,11 +74,13 @@ class NodeSpecBuilderTest : SysuiTestCase() {
             fakeViewBarn.getViewByEntry(it.getArgument(0))
         }
 
-        specBuilder = NodeSpecBuilder(mediaContainerController, sectionsFeatureManager, viewBarn)
+        specBuilder = NodeSpecBuilder(mediaContainerController, sectionsFeatureManager,
+                sectionHeaderVisibilityProvider, viewBarn)
     }
 
     @Test
     fun testMultipleSectionsWithSameController() {
+        whenever(sectionHeaderVisibilityProvider.sectionHeadersVisible).thenReturn(true)
         checkOutput(
                 listOf(
                         notif(0, section0),
@@ -95,6 +99,7 @@ class NodeSpecBuilderTest : SysuiTestCase() {
 
     @Test(expected = RuntimeException::class)
     fun testMultipleSectionsWithSameControllerNonConsecutive() {
+        whenever(sectionHeaderVisibilityProvider.sectionHeadersVisible).thenReturn(true)
         checkOutput(
                 listOf(
                         notif(0, section0),
@@ -108,6 +113,7 @@ class NodeSpecBuilderTest : SysuiTestCase() {
 
     @Test
     fun testSimpleMapping() {
+        whenever(sectionHeaderVisibilityProvider.sectionHeadersVisible).thenReturn(true)
         checkOutput(
             // GIVEN a simple flat list of notifications all in the same headerless section
             listOf(
@@ -129,6 +135,7 @@ class NodeSpecBuilderTest : SysuiTestCase() {
 
     @Test
     fun testSimpleMappingWithMedia() {
+        whenever(sectionHeaderVisibilityProvider.sectionHeadersVisible).thenReturn(true)
         // WHEN media controls are enabled
         whenever(sectionsFeatureManager.isMediaControlsEnabled()).thenReturn(true)
 
@@ -154,6 +161,8 @@ class NodeSpecBuilderTest : SysuiTestCase() {
 
     @Test
     fun testHeaderInjection() {
+        // WHEN section headers are supposed to be visible
+        whenever(sectionHeaderVisibilityProvider.sectionHeadersVisible).thenReturn(true)
         checkOutput(
                 // GIVEN a flat list of notifications, spread across three sections
                 listOf(
@@ -177,7 +186,31 @@ class NodeSpecBuilderTest : SysuiTestCase() {
     }
 
     @Test
+    fun testHeaderSuppression() {
+        // WHEN section headers are supposed to be hidden
+        whenever(sectionHeaderVisibilityProvider.sectionHeadersVisible).thenReturn(false)
+        checkOutput(
+                // GIVEN a flat list of notifications, spread across three sections
+                listOf(
+                        notif(0, section0),
+                        notif(1, section0),
+                        notif(2, section1),
+                        notif(3, section2)
+                ),
+
+                // THEN each section has its header injected
+                tree(
+                        notifNode(0),
+                        notifNode(1),
+                        notifNode(2),
+                        notifNode(3)
+                )
+        )
+    }
+
+    @Test
     fun testGroups() {
+        whenever(sectionHeaderVisibilityProvider.sectionHeadersVisible).thenReturn(true)
         checkOutput(
                 // GIVEN a mixed list of top-level notifications and groups
                 listOf(
@@ -218,6 +251,7 @@ class NodeSpecBuilderTest : SysuiTestCase() {
 
     @Test
     fun testSecondSectionWithNoHeader() {
+        whenever(sectionHeaderVisibilityProvider.sectionHeadersVisible).thenReturn(true)
         checkOutput(
                 // GIVEN a middle section with no associated header view
                 listOf(
@@ -247,6 +281,7 @@ class NodeSpecBuilderTest : SysuiTestCase() {
 
     @Test(expected = RuntimeException::class)
     fun testRepeatedSectionsThrow() {
+        whenever(sectionHeaderVisibilityProvider.sectionHeadersVisible).thenReturn(true)
         checkOutput(
                 // GIVEN a malformed list where sections are not contiguous
                 listOf(

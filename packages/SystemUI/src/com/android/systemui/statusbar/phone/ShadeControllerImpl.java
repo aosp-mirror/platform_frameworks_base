@@ -123,7 +123,8 @@ public class ShadeControllerImpl implements ShadeController {
                 + " canPanelBeCollapsed(): "
                 + getNotificationPanelViewController().canPanelBeCollapsed());
         if (getNotificationShadeWindowView() != null
-                && getNotificationPanelViewController().canPanelBeCollapsed()) {
+                && getNotificationPanelViewController().canPanelBeCollapsed()
+                && (flags & CommandQueue.FLAG_EXCLUDE_NOTIFICATION_PANEL) == 0) {
             // release focus immediately to kick off focus change transition
             mNotificationShadeWindowController.setNotificationShadeFocusable(false);
 

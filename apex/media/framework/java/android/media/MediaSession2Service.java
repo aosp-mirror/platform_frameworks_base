@@ -161,19 +161,19 @@ public abstract class MediaSession2Service extends Service {
     public abstract MediaSession2 onGetSession(@NonNull ControllerInfo controllerInfo);
 
     /**
-     * Called when notification UI needs update. Override this method to show or cancel your own
-     * notification UI.
+     * Called to update the media notification when the playback state changes.
      * <p>
-     * This would be called on {@link MediaSession2}'s callback executor when playback state is
-     * changed.
+     * If playback is active and a notification is returned, the service uses it to become a
+     * foreground service. If playback is not active then the notification is still posted, but the
+     * service does not become a foreground service.
      * <p>
-     * With the notification returned here, the service becomes foreground service when the playback
-     * is started. Apps must request the permission
-     * {@link android.Manifest.permission#FOREGROUND_SERVICE} in order to use this API. It becomes
-     * background service after the playback is stopped.
+     * Apps must request the {@link android.Manifest.permission#FOREGROUND_SERVICE} permission
+     * in order to use this API. For apps targeting {@link android.os.Build.VERSION_CODES#TIRAMISU}
+     * or later, notifications will only be posted if the app has also been granted the
+     * {@link android.Manifest.permission#POST_NOTIFICATIONS} permission.
      *
-     * @param session a session that needs notification update.
-     * @return a {@link MediaNotification}. Can be {@code null}.
+     * @param session the session for which an updated media notification is required.
+     * @return the {@link MediaNotification}. Can be {@code null}.
      */
     @Nullable
     public abstract MediaNotification onUpdateNotification(@NonNull MediaSession2 session);

@@ -29,6 +29,7 @@ import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,6 +39,7 @@ import android.app.ActivityManagerInternal;
 import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.om.IOverlayManager;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -96,6 +98,10 @@ public class StatusBarManagerServiceTest {
     private ApplicationInfo mApplicationInfo;
     @Mock
     private IStatusBar.Stub mMockStatusBar;
+    @Mock
+    private IOverlayManager mOverlayManager;
+    @Mock
+    private PackageManager mPackageManager;
     @Captor
     private ArgumentCaptor<IAddTileResultCallback> mAddTileResultCallbackCaptor;
 
@@ -130,6 +136,7 @@ public class StatusBarManagerServiceTest {
                 mStatusBarManagerService);
 
         mStatusBarManagerService.registerStatusBar(mMockStatusBar);
+        mStatusBarManagerService.registerOverlayManager(mOverlayManager);
 
         mIcon = Icon.createWithResource(mContext, android.R.drawable.btn_plus);
     }
@@ -577,27 +584,56 @@ public class StatusBarManagerServiceTest {
     }
 
     @Test
-    public void testSetNavBarModeOverride_setsOverrideModeKids() {
+    public void testSetNavBarModeOverride_setsOverrideModeKids() throws RemoteException {
         int navBarModeOverrideKids = StatusBarManager.NAV_BAR_MODE_OVERRIDE_KIDS;
+
         mStatusBarManagerService.setNavBarModeOverride(navBarModeOverrideKids);
 
         assertEquals(navBarModeOverrideKids, mStatusBarManagerService.getNavBarModeOverride());
+        verify(mOverlayManager).setEnabledExclusiveInCategory(anyString(), anyInt());
     }
 
     @Test
-    public void testSetNavBarModeOverride_setsOverrideModeNone() {
+    public void testSetNavBarModeOverride_setsOverrideModeNone() throws RemoteException {
         int navBarModeOverrideNone = StatusBarManager.NAV_BAR_MODE_OVERRIDE_NONE;
+
         mStatusBarManagerService.setNavBarModeOverride(navBarModeOverrideNone);
 
         assertEquals(navBarModeOverrideNone, mStatusBarManagerService.getNavBarModeOverride());
+        verify(mOverlayManager, never()).setEnabledExclusiveInCategory(anyString(), anyInt());
     }
 
     @Test
-    public void testSetNavBarModeOverride_invalidInputThrowsError() {
+    public void testSetNavBarModeOverride_invalidInputThrowsError() throws RemoteException {
         int navBarModeOverrideInvalid = -1;
 
         assertThrows(UnsupportedOperationException.class,
                 () -> mStatusBarManagerService.setNavBarModeOverride(navBarModeOverrideInvalid));
+        verify(mOverlayManager, never()).setEnabledExclusiveInCategory(anyString(), anyInt());
+    }
+
+    @Test
+    public void testSetNavBarModeOverride_noOverlayManagerDoesNotEnable() throws RemoteException {
+        mOverlayManager = null;
+        int navBarModeOverrideKids = StatusBarManager.NAV_BAR_MODE_OVERRIDE_KIDS;
+
+        mStatusBarManagerService.setNavBarModeOverride(navBarModeOverrideKids);
+
+        assertEquals(navBarModeOverrideKids, mStatusBarManagerService.getNavBarModeOverride());
+        verify(mOverlayManager, never()).setEnabledExclusiveInCategory(anyString(), anyInt());
+    }
+
+    @Test
+    public void testSetNavBarModeOverride_noPackageDoesNotEnable() throws Exception {
+        mContext.setMockPackageManager(mPackageManager);
+        when(mPackageManager.getPackageInfo(anyString(),
+                any(PackageManager.PackageInfoFlags.class))).thenReturn(null);
+        int navBarModeOverrideKids = StatusBarManager.NAV_BAR_MODE_OVERRIDE_KIDS;
+
+        mStatusBarManagerService.setNavBarModeOverride(navBarModeOverrideKids);
+
+        assertEquals(navBarModeOverrideKids, mStatusBarManagerService.getNavBarModeOverride());
+        verify(mOverlayManager, never()).setEnabledExclusiveInCategory(anyString(), anyInt());
     }
 
     private void mockUidCheck() {

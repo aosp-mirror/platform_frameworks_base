@@ -17,7 +17,6 @@
 package com.android.server.biometrics.sensors;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
@@ -59,7 +58,7 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
 
         // The biometric template ids will be removed when we get confirmation from the HAL

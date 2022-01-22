@@ -70,7 +70,8 @@ class SplitScreenTransitions {
     IBinder mPendingRecent = null;
 
     private IBinder mAnimatingTransition = null;
-    private OneShotRemoteHandler mRemoteHandler = null;
+    private OneShotRemoteHandler mPendingRemoteHandler = null;
+    private OneShotRemoteHandler mActiveRemoteHandler = null;
 
     private final Transitions.TransitionFinishCallback mRemoteFinishCB = this::onFinish;
 
@@ -96,10 +97,11 @@ class SplitScreenTransitions {
             @NonNull WindowContainerToken mainRoot, @NonNull WindowContainerToken sideRoot) {
         mFinishCallback = finishCallback;
         mAnimatingTransition = transition;
-        if (mRemoteHandler != null) {
-            mRemoteHandler.startAnimation(transition, info, startTransaction, finishTransaction,
-                    mRemoteFinishCB);
-            mRemoteHandler = null;
+        if (mPendingRemoteHandler != null) {
+            mPendingRemoteHandler.startAnimation(transition, info, startTransaction,
+                    finishTransaction, mRemoteFinishCB);
+            mActiveRemoteHandler = mPendingRemoteHandler;
+            mPendingRemoteHandler = null;
             return;
         }
         playInternalAnimation(transition, info, startTransaction, mainRoot, sideRoot);
@@ -172,15 +174,14 @@ class SplitScreenTransitions {
     IBinder startEnterTransition(@WindowManager.TransitionType int transitType,
             @NonNull WindowContainerTransaction wct, @Nullable RemoteTransition remoteTransition,
             @NonNull Transitions.TransitionHandler handler) {
-        if (remoteTransition != null) {
-            // Wrapping it for ease-of-use (OneShot handles all the binder linking/death stuff)
-            mRemoteHandler = new OneShotRemoteHandler(
-                    mTransitions.getMainExecutor(), remoteTransition);
-        }
         final IBinder transition = mTransitions.startTransition(transitType, wct, handler);
         mPendingEnter = transition;
-        if (mRemoteHandler != null) {
-            mRemoteHandler.setTransition(transition);
+
+        if (remoteTransition != null) {
+            // Wrapping it for ease-of-use (OneShot handles all the binder linking/death stuff)
+            mPendingRemoteHandler = new OneShotRemoteHandler(
+                    mTransitions.getMainExecutor(), remoteTransition);
+            mPendingRemoteHandler.setTransition(transition);
         }
         return transition;
     }
@@ -211,14 +212,21 @@ class SplitScreenTransitions {
 
         if (remoteTransition != null) {
             // Wrapping it for ease-of-use (OneShot handles all the binder linking/death stuff)
-            mRemoteHandler = new OneShotRemoteHandler(
+            mPendingRemoteHandler = new OneShotRemoteHandler(
                     mTransitions.getMainExecutor(), remoteTransition);
-            mRemoteHandler.setTransition(transition);
+            mPendingRemoteHandler.setTransition(transition);
         }
 
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
                         + " deduced Enter recent panel");
         return transition;
+    }
+
+    void mergeAnimation(IBinder transition, TransitionInfo info, SurfaceControl.Transaction t,
+            IBinder mergeTarget, Transitions.TransitionFinishCallback finishCallback) {
+        if (mergeTarget == mAnimatingTransition && mActiveRemoteHandler != null) {
+            mActiveRemoteHandler.mergeAnimation(transition, info, t, mergeTarget, finishCallback);
+        }
     }
 
     void onFinish(WindowContainerTransaction wct, WindowContainerTransactionCallback wctCB) {
@@ -241,11 +249,13 @@ class SplitScreenTransitions {
         }
         if (mAnimatingTransition == mPendingRecent) {
             // If the wct is not null while finishing recent transition, it indicates it's not
-            // returning to home and hence needing the wct to reorder tasks.
-            final boolean toHome = wct == null;
-            mStageCoordinator.finishRecentAnimation(toHome);
+            // dismissing split and thus need to reorder split task so they can be on top again.
+            final boolean dismissSplit = wct == null;
+            mStageCoordinator.finishRecentAnimation(dismissSplit);
             mPendingRecent = null;
         }
+        mPendingRemoteHandler = null;
+        mActiveRemoteHandler = null;
         mAnimatingTransition = null;
     }
 

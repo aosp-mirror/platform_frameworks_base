@@ -562,12 +562,12 @@ public final class PermissionManager {
     }
 
     /**
-     * @see Context#selfRevokePermissions(Collection)
+     * @see Context#revokeOwnPermissionsOnKill(Collection)
      * @hide
      */
-    public void selfRevokePermissions(@NonNull Collection<String> permissions) {
+    public void revokeOwnPermissionsOnKill(@NonNull Collection<String> permissions) {
         try {
-            mPermissionManager.selfRevokePermissions(mContext.getPackageName(),
+            mPermissionManager.revokeOwnPermissionsOnKill(mContext.getPackageName(),
                     new ArrayList<String>(permissions));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

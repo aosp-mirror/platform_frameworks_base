@@ -41,7 +41,9 @@ import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.BiometricUtils;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
+import com.android.server.biometrics.sensors.ClientMonitorCompositeCallback;
 import com.android.server.biometrics.sensors.EnrollClient;
 import com.android.server.biometrics.sensors.face.FaceService;
 import com.android.server.biometrics.sensors.face.FaceUtils;
@@ -67,8 +69,8 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
     private final int mMaxTemplatesPerUser;
     private final boolean mDebugConsent;
 
-    private final BaseClientMonitor.Callback mPreviewHandleDeleterCallback =
-            new BaseClientMonitor.Callback() {
+    private final ClientMonitorCallback mPreviewHandleDeleterCallback =
+            new ClientMonitorCallback() {
                 @Override
                 public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
                 }
@@ -101,7 +103,7 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
 
         BiometricNotificationUtils.cancelReEnrollNotification(getContext());
@@ -109,8 +111,8 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
 
     @NonNull
     @Override
-    protected Callback wrapCallbackForStart(@NonNull Callback callback) {
-        return new CompositeCallback(mPreviewHandleDeleterCallback,
+    protected ClientMonitorCallback wrapCallbackForStart(@NonNull ClientMonitorCallback callback) {
+        return new ClientMonitorCompositeCallback(mPreviewHandleDeleterCallback,
                 getLogger().createALSCallback(true /* startWithClient */), callback);
     }
 

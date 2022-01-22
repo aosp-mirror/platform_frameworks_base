@@ -18,29 +18,42 @@ package com.android.server.app;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.app.GameServiceProviderInstanceImplTest.FakeGameService.GameServiceState;
 
+import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.IActivityTaskManager;
 import android.app.ITaskStackListener;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
-import android.os.IBinder;
+import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.service.games.CreateGameSessionRequest;
+import android.service.games.CreateGameSessionResult;
+import android.service.games.GameScreenshotResult;
+import android.service.games.GameSessionViewHostConfiguration;
 import android.service.games.GameStartedEvent;
 import android.service.games.IGameService;
 import android.service.games.IGameServiceController;
 import android.service.games.IGameSession;
+import android.service.games.IGameSessionController;
 import android.service.games.IGameSessionService;
+import android.view.SurfaceControlViewHost.SurfacePackage;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -48,20 +61,21 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.FunctionalUtils.ThrowingConsumer;
+import com.android.internal.util.Preconditions;
+import com.android.server.wm.WindowManagerInternal;
+import com.android.server.wm.WindowManagerService;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoSession;
 import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
+import java.util.HashMap;
 
 
 /**
@@ -72,6 +86,9 @@ import java.util.function.Supplier;
 @Presubmit
 public final class GameServiceProviderInstanceImplTest {
 
+    private static final GameSessionViewHostConfiguration
+            DEFAULT_GAME_SESSION_VIEW_HOST_CONFIGURATION =
+            new GameSessionViewHostConfiguration(1, 500, 800);
     private static final int USER_ID = 10;
     private static final String APP_A_PACKAGE = "com.package.app.a";
     private static final ComponentName APP_A_MAIN_ACTIVITY =
@@ -81,19 +98,23 @@ public final class GameServiceProviderInstanceImplTest {
     private static final ComponentName GAME_A_MAIN_ACTIVITY =
             new ComponentName(GAME_A_PACKAGE, "com.package.game.a.MainActivity");
 
+    private static final Bitmap TEST_BITMAP = Bitmap.createBitmap(32, 32, Bitmap.Config.ARGB_8888);
+
     private MockitoSession mMockingSession;
     private GameServiceProviderInstance mGameServiceProviderInstance;
     @Mock
     private IActivityTaskManager mMockActivityTaskManager;
     @Mock
-    private IGameService mMockGameService;
+    private WindowManagerService mMockWindowManagerService;
     @Mock
-    private IGameSessionService mMockGameSessionService;
+    private WindowManagerInternal mMockWindowManagerInternal;
     private FakeGameClassifier mFakeGameClassifier;
+    private FakeGameService mFakeGameService;
     private FakeServiceConnector<IGameService> mFakeGameServiceConnector;
+    private FakeGameSessionService mFakeGameSessionService;
     private FakeServiceConnector<IGameSessionService> mFakeGameSessionServiceConnector;
     private ArrayList<ITaskStackListener> mTaskStackListeners;
-    private InOrder mInOrder;
+    private ArrayList<RunningTaskInfo> mRunningTaskInfos;
 
     @Before
     public void setUp() throws PackageManager.NameNotFoundException, RemoteException {
@@ -102,19 +123,23 @@ public final class GameServiceProviderInstanceImplTest {
                 .strictness(Strictness.LENIENT)
                 .startMocking();
 
-        mInOrder = inOrder(mMockGameService, mMockGameSessionService);
-
         mFakeGameClassifier = new FakeGameClassifier();
         mFakeGameClassifier.recordGamePackage(GAME_A_PACKAGE);
 
-        mFakeGameServiceConnector = new FakeServiceConnector<>(mMockGameService);
-        mFakeGameSessionServiceConnector = new FakeServiceConnector<>(mMockGameSessionService);
+        mFakeGameService = new FakeGameService();
+        mFakeGameServiceConnector = new FakeServiceConnector<>(mFakeGameService);
+        mFakeGameSessionService = new FakeGameSessionService();
+        mFakeGameSessionServiceConnector = new FakeServiceConnector<>(mFakeGameSessionService);
 
         mTaskStackListeners = new ArrayList<>();
         doAnswer(invocation -> {
             mTaskStackListeners.add(invocation.getArgument(0));
             return null;
         }).when(mMockActivityTaskManager).registerTaskStackListener(any());
+
+        mRunningTaskInfos = new ArrayList<>();
+        when(mMockActivityTaskManager.getTasks(anyInt(), anyBoolean(), anyBoolean())).thenReturn(
+                mRunningTaskInfos);
 
         doAnswer(invocation -> {
             mTaskStackListeners.remove(invocation.getArgument(0));
@@ -126,6 +151,8 @@ public final class GameServiceProviderInstanceImplTest {
                 ConcurrentUtils.DIRECT_EXECUTOR,
                 mFakeGameClassifier,
                 mMockActivityTaskManager,
+                mMockWindowManagerService,
+                mMockWindowManagerInternal,
                 mFakeGameServiceConnector,
                 mFakeGameSessionServiceConnector);
     }
@@ -139,8 +166,7 @@ public final class GameServiceProviderInstanceImplTest {
     public void start_startsGameSession() throws Exception {
         mGameServiceProviderInstance.start();
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verifyNoMoreInteractions();
+        assertThat(mFakeGameService.getState()).isEqualTo(GameServiceState.CONNECTED);
         assertThat(mFakeGameServiceConnector.getIsConnected()).isTrue();
         assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(1);
         assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(0);
@@ -149,9 +175,9 @@ public final class GameServiceProviderInstanceImplTest {
     @Test
     public void start_multipleTimes_startsGameSessionOnce() throws Exception {
         mGameServiceProviderInstance.start();
+        mGameServiceProviderInstance.start();
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verifyNoMoreInteractions();
+        assertThat(mFakeGameService.getState()).isEqualTo(GameServiceState.CONNECTED);
         assertThat(mFakeGameServiceConnector.getIsConnected()).isTrue();
         assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(1);
         assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(0);
@@ -161,9 +187,10 @@ public final class GameServiceProviderInstanceImplTest {
     public void stop_neverStarted_doesNothing() throws Exception {
         mGameServiceProviderInstance.stop();
 
+
+        assertThat(mFakeGameService.getState()).isEqualTo(GameServiceState.DISCONNECTED);
         assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(0);
         assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(0);
-        mInOrder.verifyNoMoreInteractions();
     }
 
     @Test
@@ -171,9 +198,8 @@ public final class GameServiceProviderInstanceImplTest {
         mGameServiceProviderInstance.start();
         mGameServiceProviderInstance.stop();
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verify(mMockGameService).disconnected();
-        mInOrder.verifyNoMoreInteractions();
+        assertThat(mFakeGameService.getState()).isEqualTo(GameServiceState.DISCONNECTED);
+        assertThat(mFakeGameService.getConnectedCount()).isEqualTo(1);
         assertThat(mFakeGameServiceConnector.getIsConnected()).isFalse();
         assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(1);
         assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(0);
@@ -187,11 +213,8 @@ public final class GameServiceProviderInstanceImplTest {
         mGameServiceProviderInstance.start();
         mGameServiceProviderInstance.stop();
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verify(mMockGameService).disconnected();
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verify(mMockGameService).disconnected();
-        mInOrder.verifyNoMoreInteractions();
+        assertThat(mFakeGameService.getState()).isEqualTo(GameServiceState.DISCONNECTED);
+        assertThat(mFakeGameService.getConnectedCount()).isEqualTo(2);
         assertThat(mFakeGameServiceConnector.getIsConnected()).isFalse();
         assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(2);
         assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(0);
@@ -203,9 +226,8 @@ public final class GameServiceProviderInstanceImplTest {
         mGameServiceProviderInstance.stop();
         mGameServiceProviderInstance.stop();
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verify(mMockGameService).disconnected();
-        mInOrder.verifyNoMoreInteractions();
+        assertThat(mFakeGameService.getState()).isEqualTo(GameServiceState.DISCONNECTED);
+        assertThat(mFakeGameService.getConnectedCount()).isEqualTo(1);
         assertThat(mFakeGameServiceConnector.getIsConnected()).isFalse();
         assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(1);
         assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(0);
@@ -215,7 +237,6 @@ public final class GameServiceProviderInstanceImplTest {
     public void gameTaskStarted_neverStarted_doesNothing() throws Exception {
         dispatchTaskCreated(10, GAME_A_MAIN_ACTIVITY);
 
-        mInOrder.verifyNoMoreInteractions();
         assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(0);
         assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(0);
     }
@@ -224,35 +245,25 @@ public final class GameServiceProviderInstanceImplTest {
     public void gameTaskRemoved_neverStarted_doesNothing() throws Exception {
         dispatchTaskRemoved(10);
 
-        mInOrder.verifyNoMoreInteractions();
         assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(0);
         assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(0);
     }
 
     @Test
-    public void gameTaskStarted_afterStopped_doesNothing() throws Exception {
+    public void gameTaskStarted_afterStopped_doesNotSendGameStartedEvent() throws Exception {
         mGameServiceProviderInstance.start();
         mGameServiceProviderInstance.stop();
         dispatchTaskCreated(10, GAME_A_MAIN_ACTIVITY);
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verify(mMockGameService).disconnected();
-        mInOrder.verifyNoMoreInteractions();
-        assertThat(mFakeGameServiceConnector.getIsConnected()).isFalse();
-        assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(1);
-        assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(0);
+        assertThat(mFakeGameService.getGameStartedEvents()).isEmpty();
     }
 
     @Test
-    public void appTaskStarted_doesNothing() throws Exception {
+    public void appTaskStarted_doesNotSendGameStartedEvent() throws Exception {
         mGameServiceProviderInstance.start();
         dispatchTaskCreated(10, APP_A_MAIN_ACTIVITY);
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verifyNoMoreInteractions();
-        assertThat(mFakeGameServiceConnector.getIsConnected()).isTrue();
-        assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(1);
-        assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(0);
+        assertThat(mFakeGameService.getGameStartedEvents()).isEmpty();
     }
 
     @Test
@@ -260,26 +271,17 @@ public final class GameServiceProviderInstanceImplTest {
         mGameServiceProviderInstance.start();
         dispatchTaskCreated(10, null);
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verifyNoMoreInteractions();
-        assertThat(mFakeGameServiceConnector.getIsConnected()).isTrue();
-        assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(1);
-        assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(0);
+        assertThat(mFakeGameService.getGameStartedEvents()).isEmpty();
     }
 
     @Test
-    public void gameSessionRequested_withoutTaskDispatch_ignoredAndDoesNotCrash() throws Exception {
+    public void gameSessionRequested_withoutTaskDispatch_doesNotCrashAndDoesNotCreateGameSession()
+            throws Exception {
         mGameServiceProviderInstance.start();
-        ArgumentCaptor<IGameServiceController> controllerArgumentCaptor = ArgumentCaptor.forClass(
-                IGameServiceController.class);
-        verify(mMockGameService).connected(controllerArgumentCaptor.capture());
-        controllerArgumentCaptor.getValue().createGameSession(10);
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verifyNoMoreInteractions();
-        assertThat(mFakeGameServiceConnector.getIsConnected()).isTrue();
-        assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(1);
-        assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(0);
+        mFakeGameService.requestCreateGameSession(10);
+
+        assertThat(mFakeGameSessionService.getCapturedCreateInvocations()).isEmpty();
     }
 
     @Test
@@ -287,425 +289,356 @@ public final class GameServiceProviderInstanceImplTest {
         mGameServiceProviderInstance.start();
         dispatchTaskCreated(10, GAME_A_MAIN_ACTIVITY);
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verify(mMockGameService).gameStarted(
-                eq(new GameStartedEvent(10, GAME_A_PACKAGE)));
-        mInOrder.verifyNoMoreInteractions();
-        assertThat(mFakeGameServiceConnector.getIsConnected()).isTrue();
-        assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(1);
-        assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(0);
+        GameStartedEvent expectedGameStartedEvent = new GameStartedEvent(10, GAME_A_PACKAGE);
+        assertThat(mFakeGameService.getGameStartedEvents())
+                .containsExactly(expectedGameStartedEvent).inOrder();
+    }
+
+    @Test
+    public void gameTaskStarted_requestToCreateGameSessionIncludesTaskConfiguration()
+            throws Exception {
+        mGameServiceProviderInstance.start();
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+
+        mFakeGameService.requestCreateGameSession(10);
+
+        FakeGameSessionService.CapturedCreateInvocation capturedCreateInvocation =
+                getOnlyElement(mFakeGameSessionService.getCapturedCreateInvocations());
+        assertThat(capturedCreateInvocation.mGameSessionViewHostConfiguration)
+                .isEqualTo(DEFAULT_GAME_SESSION_VIEW_HOST_CONFIGURATION);
+    }
+
+    @Test
+    public void gameTaskStarted_failsToDetermineTaskOverlayConfiguration_gameSessionNotCreated()
+            throws Exception {
+        mGameServiceProviderInstance.start();
+        dispatchTaskCreated(10, GAME_A_MAIN_ACTIVITY);
+
+        mFakeGameService.requestCreateGameSession(10);
+
+        assertThat(mFakeGameSessionService.getCapturedCreateInvocations()).isEmpty();
     }
 
     @Test
     public void gameTaskStartedAndSessionRequested_createsGameSession() throws Exception {
-        CreateGameSessionRequest createGameSessionRequest =
-                new CreateGameSessionRequest(10, GAME_A_PACKAGE);
-        Supplier<AndroidFuture<IBinder>> gameSession10Future =
-                captureCreateGameSessionFuture(createGameSessionRequest);
-
         mGameServiceProviderInstance.start();
-        ArgumentCaptor<IGameServiceController> controllerArgumentCaptor = ArgumentCaptor.forClass(
-                IGameServiceController.class);
-        verify(mMockGameService).connected(controllerArgumentCaptor.capture());
-        dispatchTaskCreatedAndTriggerSessionRequest(10, GAME_A_MAIN_ACTIVITY,
-                controllerArgumentCaptor.getValue());
-        IGameSessionStub gameSession10 = new IGameSessionStub();
-        gameSession10Future.get().complete(gameSession10);
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verify(mMockGameService).gameStarted(
-                eq(new GameStartedEvent(10, GAME_A_PACKAGE)));
-        mInOrder.verify(mMockGameSessionService).create(eq(createGameSessionRequest), any());
-        mInOrder.verifyNoMoreInteractions();
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
         assertThat(gameSession10.mIsDestroyed).isFalse();
-        assertThat(mFakeGameServiceConnector.getIsConnected()).isTrue();
-        assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(1);
-        assertThat(mFakeGameSessionServiceConnector.getIsConnected()).isTrue();
-        assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(1);
     }
 
     @Test
     public void gameTaskStartedAndSessionRequested_secondSessionRequest_ignoredAndDoesNotCrash()
             throws Exception {
-        CreateGameSessionRequest createGameSessionRequest =
-                new CreateGameSessionRequest(10, GAME_A_PACKAGE);
-        Supplier<AndroidFuture<IBinder>> gameSession10Future =
-                captureCreateGameSessionFuture(createGameSessionRequest);
-
         mGameServiceProviderInstance.start();
-        ArgumentCaptor<IGameServiceController> controllerArgumentCaptor = ArgumentCaptor.forClass(
-                IGameServiceController.class);
-        verify(mMockGameService).connected(controllerArgumentCaptor.capture());
-        dispatchTaskCreatedAndTriggerSessionRequest(10, GAME_A_MAIN_ACTIVITY,
-                controllerArgumentCaptor.getValue());
-        IGameSessionStub gameSession10 = new IGameSessionStub();
-        gameSession10Future.get().complete(gameSession10);
+        startTask(10, GAME_A_MAIN_ACTIVITY);
 
-        controllerArgumentCaptor.getValue().createGameSession(10);
+        mFakeGameService.requestCreateGameSession(10);
+        mFakeGameService.requestCreateGameSession(10);
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verify(mMockGameService).gameStarted(
-                eq(new GameStartedEvent(10, GAME_A_PACKAGE)));
-        mInOrder.verify(mMockGameSessionService).create(eq(createGameSessionRequest), any());
-        mInOrder.verifyNoMoreInteractions();
-        assertThat(gameSession10.mIsDestroyed).isFalse();
-        assertThat(mFakeGameServiceConnector.getIsConnected()).isTrue();
-        assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(1);
-        assertThat(mFakeGameSessionServiceConnector.getIsConnected()).isTrue();
-        assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(1);
+        CreateGameSessionRequest expectedCreateGameSessionRequest = new CreateGameSessionRequest(10,
+                GAME_A_PACKAGE);
+        assertThat(getOnlyElement(
+                mFakeGameSessionService.getCapturedCreateInvocations()).mCreateGameSessionRequest)
+                .isEqualTo(expectedCreateGameSessionRequest);
+    }
+
+    @Test
+    public void gameSessionSuccessfullyCreated_createsTaskOverlay() throws Exception {
+        mGameServiceProviderInstance.start();
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
+        verify(mMockWindowManagerInternal).addTaskOverlay(eq(10), eq(mockSurfacePackage10));
+        verifyNoMoreInteractions(mMockWindowManagerInternal);
     }
 
     @Test
     public void gameTaskRemoved_whileAwaitingGameSessionAttached_destroysGameSession()
             throws Exception {
-        CreateGameSessionRequest createGameSessionRequest =
-                new CreateGameSessionRequest(10, GAME_A_PACKAGE);
-        Supplier<AndroidFuture<IBinder>> gameSession10Future =
-                captureCreateGameSessionFuture(createGameSessionRequest);
-
         mGameServiceProviderInstance.start();
-        ArgumentCaptor<IGameServiceController> controllerArgumentCaptor = ArgumentCaptor.forClass(
-                IGameServiceController.class);
-        verify(mMockGameService).connected(controllerArgumentCaptor.capture());
-        dispatchTaskCreatedAndTriggerSessionRequest(10, GAME_A_MAIN_ACTIVITY,
-                controllerArgumentCaptor.getValue());
-        dispatchTaskRemoved(10);
-        IGameSessionStub gameSession10 = new IGameSessionStub();
-        gameSession10Future.get().complete(gameSession10);
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verify(mMockGameService).gameStarted(
-                eq(new GameStartedEvent(10, GAME_A_PACKAGE)));
-        mInOrder.verify(mMockGameSessionService).create(eq(createGameSessionRequest), any());
-        mInOrder.verifyNoMoreInteractions();
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        dispatchTaskRemoved(10);
+
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
         assertThat(gameSession10.mIsDestroyed).isTrue();
-        assertThat(mFakeGameServiceConnector.getIsConnected()).isTrue();
-        assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(1);
-        assertThat(mFakeGameSessionServiceConnector.getIsConnected()).isFalse();
-        assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(1);
     }
 
     @Test
-    public void gameTaskRemoved_destroysGameSession() throws Exception {
-        CreateGameSessionRequest createGameSessionRequest =
-                new CreateGameSessionRequest(10, GAME_A_PACKAGE);
-        Supplier<AndroidFuture<IBinder>> gameSession10Future =
-                captureCreateGameSessionFuture(createGameSessionRequest);
-
+    public void gameTaskRemoved_whileGameSessionAttached_destroysGameSession() throws Exception {
         mGameServiceProviderInstance.start();
-        ArgumentCaptor<IGameServiceController> controllerArgumentCaptor = ArgumentCaptor.forClass(
-                IGameServiceController.class);
-        verify(mMockGameService).connected(controllerArgumentCaptor.capture());
-        dispatchTaskCreatedAndTriggerSessionRequest(10, GAME_A_MAIN_ACTIVITY,
-                controllerArgumentCaptor.getValue());
-        IGameSessionStub gameSession10 = new IGameSessionStub();
-        gameSession10Future.get().complete(gameSession10);
+
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
         dispatchTaskRemoved(10);
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verify(mMockGameService).gameStarted(
-                eq(new GameStartedEvent(10, GAME_A_PACKAGE)));
-        mInOrder.verify(mMockGameSessionService).create(eq(createGameSessionRequest), any());
-        mInOrder.verifyNoMoreInteractions();
         assertThat(gameSession10.mIsDestroyed).isTrue();
-        assertThat(mFakeGameServiceConnector.getIsConnected()).isTrue();
-        assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(1);
-        assertThat(mFakeGameSessionServiceConnector.getIsConnected()).isFalse();
-        assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(1);
+    }
+
+    @Test
+    public void gameTaskRemoved_removesTaskOverlay() throws Exception {
+        mGameServiceProviderInstance.start();
+
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
+        stopTask(10);
+
+        verify(mMockWindowManagerInternal).addTaskOverlay(eq(10), eq(mockSurfacePackage10));
+        verify(mMockWindowManagerInternal).removeTaskOverlay(eq(10), eq(mockSurfacePackage10));
+        verifyNoMoreInteractions(mMockWindowManagerInternal);
     }
 
     @Test
     public void gameTaskStartedAndSessionRequested_multipleTimes_createsMultipleGameSessions()
             throws Exception {
-        CreateGameSessionRequest createGameSessionRequest10 =
-                new CreateGameSessionRequest(10, GAME_A_PACKAGE);
-        Supplier<AndroidFuture<IBinder>> gameSession10Future =
-                captureCreateGameSessionFuture(createGameSessionRequest10);
-
-        CreateGameSessionRequest createGameSessionRequest11 =
-                new CreateGameSessionRequest(11, GAME_A_PACKAGE);
-        Supplier<AndroidFuture<IBinder>> gameSession11Future =
-                captureCreateGameSessionFuture(createGameSessionRequest11);
-
         mGameServiceProviderInstance.start();
-        ArgumentCaptor<IGameServiceController> controllerArgumentCaptor = ArgumentCaptor.forClass(
-                IGameServiceController.class);
-        verify(mMockGameService).connected(controllerArgumentCaptor.capture());
-        dispatchTaskCreatedAndTriggerSessionRequest(10, GAME_A_MAIN_ACTIVITY,
-                controllerArgumentCaptor.getValue());
-        IGameSessionStub gameSession10 = new IGameSessionStub();
-        gameSession10Future.get().complete(gameSession10);
 
-        dispatchTaskCreatedAndTriggerSessionRequest(11, GAME_A_MAIN_ACTIVITY,
-                controllerArgumentCaptor.getValue());
-        IGameSessionStub gameSession11 = new IGameSessionStub();
-        gameSession11Future.get().complete(gameSession11);
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verify(mMockGameService).gameStarted(
-                eq(new GameStartedEvent(10, GAME_A_PACKAGE)));
-        mInOrder.verify(mMockGameSessionService).create(eq(createGameSessionRequest10), any());
-        mInOrder.verify(mMockGameService).gameStarted(
-                eq(new GameStartedEvent(11, GAME_A_PACKAGE)));
-        mInOrder.verify(mMockGameSessionService).create(eq(createGameSessionRequest11), any());
-        mInOrder.verifyNoMoreInteractions();
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
+        startTask(11, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(11);
+
+        FakeGameSession gameSession11 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage11 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(11)
+                .complete(new CreateGameSessionResult(gameSession11, mockSurfacePackage11));
+
         assertThat(gameSession10.mIsDestroyed).isFalse();
         assertThat(gameSession11.mIsDestroyed).isFalse();
-        assertThat(mFakeGameServiceConnector.getIsConnected()).isTrue();
-        assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(1);
-        assertThat(mFakeGameSessionServiceConnector.getIsConnected()).isTrue();
-        assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(1);
     }
 
     @Test
-    public void gameTaskStartedTwice_sessionRequestedSecondTimeOnly_createsOneGameSessions()
+    public void gameTaskStartedTwice_sessionRequestedSecondTimeOnly_createsOneGameSession()
             throws Exception {
-        CreateGameSessionRequest createGameSessionRequest11 =
-                new CreateGameSessionRequest(11, GAME_A_PACKAGE);
-        Supplier<AndroidFuture<IBinder>> gameSession11Future =
-                captureCreateGameSessionFuture(createGameSessionRequest11);
-
-        // The game task is started twice, but a session is requested only for the second one.
         mGameServiceProviderInstance.start();
-        ArgumentCaptor<IGameServiceController> controllerArgumentCaptor = ArgumentCaptor.forClass(
-                IGameServiceController.class);
-        verify(mMockGameService).connected(controllerArgumentCaptor.capture());
-        dispatchTaskCreated(10, GAME_A_MAIN_ACTIVITY);
 
-        dispatchTaskCreatedAndTriggerSessionRequest(11, GAME_A_MAIN_ACTIVITY,
-                controllerArgumentCaptor.getValue());
-        IGameSessionStub gameSession11 = new IGameSessionStub();
-        gameSession11Future.get().complete(gameSession11);
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        startTask(11, GAME_A_MAIN_ACTIVITY);
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verify(mMockGameService).gameStarted(
-                eq(new GameStartedEvent(10, GAME_A_PACKAGE)));
-        mInOrder.verify(mMockGameService).gameStarted(
-                eq(new GameStartedEvent(11, GAME_A_PACKAGE)));
-        mInOrder.verify(mMockGameSessionService).create(eq(createGameSessionRequest11), any());
-        mInOrder.verifyNoMoreInteractions();
-        assertThat(gameSession11.mIsDestroyed).isFalse();
-        assertThat(mFakeGameServiceConnector.getIsConnected()).isTrue();
-        assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(1);
-        assertThat(mFakeGameSessionServiceConnector.getIsConnected()).isTrue();
-        assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(1);
+        mFakeGameService.requestCreateGameSession(10);
+
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
+        assertThat(gameSession10.mIsDestroyed).isFalse();
+        assertThat(mFakeGameSessionService.getCapturedCreateInvocations()).hasSize(1);
     }
 
     @Test
-    public void gameTaskRemoved_afterMultipleCreated_destroysOnlyThatGameSession()
+    public void gameTaskRemoved_multipleSessions_destroysOnlyThatGameSession()
             throws Exception {
-        CreateGameSessionRequest createGameSessionRequest10 =
-                new CreateGameSessionRequest(10, GAME_A_PACKAGE);
-        Supplier<AndroidFuture<IBinder>> gameSession10Future =
-                captureCreateGameSessionFuture(createGameSessionRequest10);
-
-        CreateGameSessionRequest createGameSessionRequest11 =
-                new CreateGameSessionRequest(11, GAME_A_PACKAGE);
-        Supplier<AndroidFuture<IBinder>> gameSession11Future =
-                captureCreateGameSessionFuture(createGameSessionRequest11);
-
         mGameServiceProviderInstance.start();
-        ArgumentCaptor<IGameServiceController> controllerArgumentCaptor = ArgumentCaptor.forClass(
-                IGameServiceController.class);
-        verify(mMockGameService).connected(controllerArgumentCaptor.capture());
-        dispatchTaskCreatedAndTriggerSessionRequest(10, GAME_A_MAIN_ACTIVITY,
-                controllerArgumentCaptor.getValue());
-        IGameSessionStub gameSession10 = new IGameSessionStub();
-        gameSession10Future.get().complete(gameSession10);
 
-        dispatchTaskCreatedAndTriggerSessionRequest(11, GAME_A_MAIN_ACTIVITY,
-                controllerArgumentCaptor.getValue());
-        IGameSessionStub gameSession11 = new IGameSessionStub();
-        gameSession11Future.get().complete(gameSession11);
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
+        startTask(11, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(11);
+
+        FakeGameSession gameSession11 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage11 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(11)
+                .complete(new CreateGameSessionResult(gameSession11, mockSurfacePackage11));
 
         dispatchTaskRemoved(10);
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verify(mMockGameService).gameStarted(
-                eq(new GameStartedEvent(10, GAME_A_PACKAGE)));
-        mInOrder.verify(mMockGameSessionService).create(eq(createGameSessionRequest10), any());
-        mInOrder.verify(mMockGameService).gameStarted(
-                eq(new GameStartedEvent(11, GAME_A_PACKAGE)));
-        mInOrder.verify(mMockGameSessionService).create(eq(createGameSessionRequest11), any());
-        mInOrder.verifyNoMoreInteractions();
         assertThat(gameSession10.mIsDestroyed).isTrue();
         assertThat(gameSession11.mIsDestroyed).isFalse();
-        assertThat(mFakeGameServiceConnector.getIsConnected()).isTrue();
-        assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(1);
         assertThat(mFakeGameSessionServiceConnector.getIsConnected()).isTrue();
-        assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(1);
     }
 
     @Test
-    public void allGameTasksRemoved_destroysAllGameSessions() throws Exception {
-        CreateGameSessionRequest createGameSessionRequest10 =
-                new CreateGameSessionRequest(10, GAME_A_PACKAGE);
-        Supplier<AndroidFuture<IBinder>> gameSession10Future =
-                captureCreateGameSessionFuture(createGameSessionRequest10);
-
-        CreateGameSessionRequest createGameSessionRequest11 =
-                new CreateGameSessionRequest(11, GAME_A_PACKAGE);
-        Supplier<AndroidFuture<IBinder>> gameSession11Future =
-                captureCreateGameSessionFuture(createGameSessionRequest11);
-
+    public void allGameTasksRemoved_destroysAllGameSessionsAndGameSessionServiceIsDisconnected() {
         mGameServiceProviderInstance.start();
-        ArgumentCaptor<IGameServiceController> controllerArgumentCaptor = ArgumentCaptor.forClass(
-                IGameServiceController.class);
-        verify(mMockGameService).connected(controllerArgumentCaptor.capture());
-        dispatchTaskCreatedAndTriggerSessionRequest(10, GAME_A_MAIN_ACTIVITY,
-                controllerArgumentCaptor.getValue());
-        IGameSessionStub gameSession10 = new IGameSessionStub();
-        gameSession10Future.get().complete(gameSession10);
 
-        dispatchTaskCreatedAndTriggerSessionRequest(11, GAME_A_MAIN_ACTIVITY,
-                controllerArgumentCaptor.getValue());
-        IGameSessionStub gameSession11 = new IGameSessionStub();
-        gameSession11Future.get().complete(gameSession11);
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
+        startTask(11, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(11);
+
+        FakeGameSession gameSession11 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage11 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(11)
+                .complete(new CreateGameSessionResult(gameSession11, mockSurfacePackage11));
 
         dispatchTaskRemoved(10);
         dispatchTaskRemoved(11);
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verify(mMockGameService).gameStarted(
-                eq(new GameStartedEvent(10, GAME_A_PACKAGE)));
-        mInOrder.verify(mMockGameSessionService).create(eq(createGameSessionRequest10), any());
-        mInOrder.verify(mMockGameService).gameStarted(
-                eq(new GameStartedEvent(11, GAME_A_PACKAGE)));
-        mInOrder.verify(mMockGameSessionService).create(eq(createGameSessionRequest11), any());
-        mInOrder.verifyNoMoreInteractions();
         assertThat(gameSession10.mIsDestroyed).isTrue();
         assertThat(gameSession11.mIsDestroyed).isTrue();
-        assertThat(mFakeGameServiceConnector.getIsConnected()).isTrue();
-        assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(1);
         assertThat(mFakeGameSessionServiceConnector.getIsConnected()).isFalse();
-        assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(1);
     }
 
     @Test
-    public void gameTasksCreatedAndSessionsReq_afterAllPreviousSessionsDestroyed_createsSession()
+    public void createSessionRequested_afterAllPreviousSessionsDestroyed_createsSession()
             throws Exception {
-        CreateGameSessionRequest createGameSessionRequest10 =
-                new CreateGameSessionRequest(10, GAME_A_PACKAGE);
-        Supplier<AndroidFuture<IBinder>> gameSession10Future =
-                captureCreateGameSessionFuture(createGameSessionRequest10);
-
-        CreateGameSessionRequest createGameSessionRequest11 =
-                new CreateGameSessionRequest(11, GAME_A_PACKAGE);
-        Supplier<AndroidFuture<IBinder>> gameSession11Future =
-                captureCreateGameSessionFuture(createGameSessionRequest11);
-
-        CreateGameSessionRequest createGameSessionRequest12 =
-                new CreateGameSessionRequest(12, GAME_A_PACKAGE);
-        Supplier<AndroidFuture<IBinder>> unusedGameSession12Future =
-                captureCreateGameSessionFuture(createGameSessionRequest12);
-
         mGameServiceProviderInstance.start();
-        ArgumentCaptor<IGameServiceController> controllerArgumentCaptor = ArgumentCaptor.forClass(
-                IGameServiceController.class);
-        verify(mMockGameService).connected(controllerArgumentCaptor.capture());
-        dispatchTaskCreatedAndTriggerSessionRequest(10, GAME_A_MAIN_ACTIVITY,
-                controllerArgumentCaptor.getValue());
-        IGameSessionStub gameSession10 = new IGameSessionStub();
-        gameSession10Future.get().complete(gameSession10);
 
-        dispatchTaskCreatedAndTriggerSessionRequest(11, GAME_A_MAIN_ACTIVITY,
-                controllerArgumentCaptor.getValue());
-        IGameSessionStub gameSession11 = new IGameSessionStub();
-        gameSession11Future.get().complete(gameSession11);
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
+        startTask(11, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(11);
+
+        FakeGameSession gameSession11 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage11 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(11)
+                .complete(new CreateGameSessionResult(gameSession11, mockSurfacePackage11));
 
         dispatchTaskRemoved(10);
         dispatchTaskRemoved(11);
 
-        dispatchTaskCreatedAndTriggerSessionRequest(12, GAME_A_MAIN_ACTIVITY,
-                controllerArgumentCaptor.getValue());
-        IGameSessionStub gameSession12 = new IGameSessionStub();
-        gameSession11Future.get().complete(gameSession12);
+        startTask(12, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(12);
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verify(mMockGameService).gameStarted(
-                eq(new GameStartedEvent(10, GAME_A_PACKAGE)));
-        mInOrder.verify(mMockGameSessionService).create(eq(createGameSessionRequest10), any());
-        mInOrder.verify(mMockGameService).gameStarted(
-                eq(new GameStartedEvent(11, GAME_A_PACKAGE)));
-        mInOrder.verify(mMockGameSessionService).create(eq(createGameSessionRequest11), any());
-        mInOrder.verify(mMockGameService).gameStarted(
-                eq(new GameStartedEvent(12, GAME_A_PACKAGE)));
-        mInOrder.verify(mMockGameSessionService).create(eq(createGameSessionRequest12), any());
-        mInOrder.verifyNoMoreInteractions();
+        FakeGameSession gameSession12 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage12 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(12)
+                .complete(new CreateGameSessionResult(gameSession12, mockSurfacePackage12));
+
         assertThat(gameSession10.mIsDestroyed).isTrue();
         assertThat(gameSession11.mIsDestroyed).isTrue();
         assertThat(gameSession12.mIsDestroyed).isFalse();
-        assertThat(mFakeGameServiceConnector.getIsConnected()).isTrue();
-        assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(1);
         assertThat(mFakeGameSessionServiceConnector.getIsConnected()).isTrue();
-        assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(2);
     }
 
     @Test
     public void stop_severalActiveGameSessions_destroysGameSessionsAndUnbinds() throws Exception {
-        CreateGameSessionRequest createGameSessionRequest10 =
-                new CreateGameSessionRequest(10, GAME_A_PACKAGE);
-        Supplier<AndroidFuture<IBinder>> gameSession10Future =
-                captureCreateGameSessionFuture(createGameSessionRequest10);
-
-        CreateGameSessionRequest createGameSessionRequest11 =
-                new CreateGameSessionRequest(11, GAME_A_PACKAGE);
-        Supplier<AndroidFuture<IBinder>> gameSession11Future =
-                captureCreateGameSessionFuture(createGameSessionRequest11);
-
         mGameServiceProviderInstance.start();
-        ArgumentCaptor<IGameServiceController> controllerArgumentCaptor = ArgumentCaptor.forClass(
-                IGameServiceController.class);
-        verify(mMockGameService).connected(controllerArgumentCaptor.capture());
-        dispatchTaskCreatedAndTriggerSessionRequest(10, GAME_A_MAIN_ACTIVITY,
-                controllerArgumentCaptor.getValue());
-        IGameSessionStub gameSession10 = new IGameSessionStub();
-        gameSession10Future.get().complete(gameSession10);
-        dispatchTaskCreatedAndTriggerSessionRequest(11, GAME_A_MAIN_ACTIVITY,
-                controllerArgumentCaptor.getValue());
-        IGameSessionStub gameSession11 = new IGameSessionStub();
-        gameSession11Future.get().complete(gameSession11);
+
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
+        startTask(11, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(11);
+
+        FakeGameSession gameSession11 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage11 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(11)
+                .complete(new CreateGameSessionResult(gameSession11, mockSurfacePackage11));
+
         mGameServiceProviderInstance.stop();
 
-        mInOrder.verify(mMockGameService).connected(any());
-        mInOrder.verify(mMockGameService).gameStarted(
-                eq(new GameStartedEvent(10, GAME_A_PACKAGE)));
-        mInOrder.verify(mMockGameSessionService).create(eq(createGameSessionRequest10), any());
-        mInOrder.verify(mMockGameService).gameStarted(
-                eq(new GameStartedEvent(11, GAME_A_PACKAGE)));
-        mInOrder.verify(mMockGameSessionService).create(eq(createGameSessionRequest11), any());
-        mInOrder.verify(mMockGameService).disconnected();
-        mInOrder.verifyNoMoreInteractions();
         assertThat(gameSession10.mIsDestroyed).isTrue();
         assertThat(gameSession11.mIsDestroyed).isTrue();
         assertThat(mFakeGameServiceConnector.getIsConnected()).isFalse();
-        assertThat(mFakeGameServiceConnector.getConnectCount()).isEqualTo(1);
         assertThat(mFakeGameSessionServiceConnector.getIsConnected()).isFalse();
-        assertThat(mFakeGameSessionServiceConnector.getConnectCount()).isEqualTo(1);
     }
 
-    private Supplier<AndroidFuture<IBinder>> captureCreateGameSessionFuture(
-            CreateGameSessionRequest expectedCreateGameSessionRequest) throws Exception {
-        final AtomicReference<AndroidFuture<IBinder>> gameSessionFuture = new AtomicReference<>();
-        doAnswer(invocation -> {
-            gameSessionFuture.set(invocation.getArgument(1));
-            return null;
-        }).when(mMockGameSessionService).create(eq(expectedCreateGameSessionRequest), any());
+    @Test
+    public void takeScreenshot_failureNoBitmapCaptured() throws Exception {
+        mGameServiceProviderInstance.start();
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
 
-        return gameSessionFuture::get;
+        IGameSessionController gameSessionController = getOnlyElement(
+                mFakeGameSessionService.getCapturedCreateInvocations()).mGameSessionController;
+        AndroidFuture<GameScreenshotResult> resultFuture = new AndroidFuture<>();
+        gameSessionController.takeScreenshot(10, resultFuture);
+
+        GameScreenshotResult result = resultFuture.get();
+        assertEquals(GameScreenshotResult.GAME_SCREENSHOT_ERROR_INTERNAL_ERROR,
+                result.getStatus());
+        verify(mMockWindowManagerService).captureTaskBitmap(10);
     }
+
+    @Test
+    public void takeScreenshot_success() throws Exception {
+        when(mMockWindowManagerService.captureTaskBitmap(10)).thenReturn(TEST_BITMAP);
+
+        mGameServiceProviderInstance.start();
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        IGameSessionController gameSessionController = getOnlyElement(
+                mFakeGameSessionService.getCapturedCreateInvocations()).mGameSessionController;
+        AndroidFuture<GameScreenshotResult> resultFuture = new AndroidFuture<>();
+        gameSessionController.takeScreenshot(10, resultFuture);
+
+        GameScreenshotResult result = resultFuture.get();
+        assertEquals(GameScreenshotResult.GAME_SCREENSHOT_SUCCESS, result.getStatus());
+        assertEquals(TEST_BITMAP, result.getBitmap());
+    }
+
+    private void startTask(int taskId, ComponentName componentName) {
+        RunningTaskInfo runningTaskInfo = new RunningTaskInfo();
+        runningTaskInfo.taskId = taskId;
+        runningTaskInfo.displayId = 1;
+        runningTaskInfo.configuration.windowConfiguration.setBounds(new Rect(0, 0, 500, 800));
+        mRunningTaskInfos.add(runningTaskInfo);
+
+        dispatchTaskCreated(taskId, componentName);
+    }
+
+    private void stopTask(int taskId) {
+        mRunningTaskInfos.removeIf(runningTaskInfo -> runningTaskInfo.taskId == taskId);
+        dispatchTaskRemoved(taskId);
+    }
+
 
     private void dispatchTaskRemoved(int taskId) {
         dispatchTaskChangeEvent(taskStackListener -> {
             taskStackListener.onTaskRemoved(taskId);
         });
-    }
-
-    private void dispatchTaskCreatedAndTriggerSessionRequest(int taskId,
-            @Nullable ComponentName componentName, IGameServiceController gameServiceController)
-            throws Exception {
-        dispatchTaskCreated(taskId, componentName);
-        gameServiceController.createGameSession(taskId);
     }
 
     private void dispatchTaskCreated(int taskId, @Nullable ComponentName componentName) {
@@ -721,7 +654,118 @@ public final class GameServiceProviderInstanceImplTest {
         }
     }
 
-    private static class IGameSessionStub extends IGameSession.Stub {
+    static final class FakeGameService extends IGameService.Stub {
+        private IGameServiceController mGameServiceController;
+
+        public enum GameServiceState {
+            DISCONNECTED,
+            CONNECTED,
+        }
+
+        private ArrayList<GameStartedEvent> mGameStartedEvents = new ArrayList<>();
+        private int mConnectedCount = 0;
+        private GameServiceState mGameServiceState = GameServiceState.DISCONNECTED;
+
+        public GameServiceState getState() {
+            return mGameServiceState;
+        }
+
+        public int getConnectedCount() {
+            return mConnectedCount;
+        }
+
+        public ArrayList<GameStartedEvent> getGameStartedEvents() {
+            return mGameStartedEvents;
+        }
+
+        @Override
+        public void connected(IGameServiceController gameServiceController) {
+            Preconditions.checkState(mGameServiceState == GameServiceState.DISCONNECTED);
+
+            mGameServiceState = GameServiceState.CONNECTED;
+            mConnectedCount += 1;
+            mGameServiceController = gameServiceController;
+        }
+
+        @Override
+        public void disconnected() {
+            Preconditions.checkState(mGameServiceState == GameServiceState.CONNECTED);
+
+            mGameServiceState = GameServiceState.DISCONNECTED;
+            mGameServiceController = null;
+        }
+
+        @Override
+        public void gameStarted(GameStartedEvent gameStartedEvent) {
+            Preconditions.checkState(mGameServiceState == GameServiceState.CONNECTED);
+
+            mGameStartedEvents.add(gameStartedEvent);
+        }
+
+        public void requestCreateGameSession(int task) {
+            Preconditions.checkState(mGameServiceState == GameServiceState.CONNECTED);
+
+            try {
+                mGameServiceController.createGameSession(task);
+            } catch (RemoteException ex) {
+                throw new AssertionError(ex);
+            }
+        }
+    }
+
+    static final class FakeGameSessionService extends IGameSessionService.Stub {
+
+        private final ArrayList<CapturedCreateInvocation> mCapturedCreateInvocations =
+                new ArrayList<>();
+        private final HashMap<Integer, AndroidFuture<CreateGameSessionResult>>
+                mPendingCreateGameSessionResultFutures =
+                new HashMap<>();
+
+        public static final class CapturedCreateInvocation {
+            private final IGameSessionController mGameSessionController;
+            private final CreateGameSessionRequest mCreateGameSessionRequest;
+            private final GameSessionViewHostConfiguration mGameSessionViewHostConfiguration;
+
+            CapturedCreateInvocation(
+                    IGameSessionController gameSessionController,
+                    CreateGameSessionRequest createGameSessionRequest,
+                    GameSessionViewHostConfiguration gameSessionViewHostConfiguration) {
+                mGameSessionController = gameSessionController;
+                mCreateGameSessionRequest = createGameSessionRequest;
+                mGameSessionViewHostConfiguration = gameSessionViewHostConfiguration;
+            }
+        }
+
+        public ArrayList<CapturedCreateInvocation> getCapturedCreateInvocations() {
+            return mCapturedCreateInvocations;
+        }
+
+        public AndroidFuture<CreateGameSessionResult> removePendingFutureForTaskId(int taskId) {
+            return mPendingCreateGameSessionResultFutures.remove(taskId);
+        }
+
+        @Override
+        public void create(
+                IGameSessionController gameSessionController,
+                CreateGameSessionRequest createGameSessionRequest,
+                GameSessionViewHostConfiguration gameSessionViewHostConfiguration,
+                AndroidFuture createGameSessionResultFuture) {
+
+            mCapturedCreateInvocations.add(
+                    new CapturedCreateInvocation(
+                            gameSessionController,
+                            createGameSessionRequest,
+                            gameSessionViewHostConfiguration));
+
+            Preconditions.checkState(!mPendingCreateGameSessionResultFutures.containsKey(
+                    createGameSessionRequest.getTaskId()));
+            mPendingCreateGameSessionResultFutures.put(
+                    createGameSessionRequest.getTaskId(),
+                    createGameSessionResultFuture);
+        }
+    }
+
+    private static class FakeGameSession extends IGameSession.Stub {
         boolean mIsDestroyed = false;
 
         @Override

@@ -49,7 +49,25 @@ public interface AssociationStore {
     /**  Listener for any changes to {@link AssociationInfo}-s. */
     interface OnChangeListener {
         default void onAssociationChanged(
-                @ChangeType int changeType, AssociationInfo association) {}
+                @ChangeType int changeType, AssociationInfo association) {
+            switch (changeType) {
+                case CHANGE_TYPE_ADDED:
+                    onAssociationAdded(association);
+                    break;
+
+                case CHANGE_TYPE_REMOVED:
+                    onAssociationRemoved(association);
+                    break;
+
+                case CHANGE_TYPE_UPDATED_ADDRESS_CHANGED:
+                    onAssociationUpdated(association, true);
+                    break;
+
+                case CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED:
+                    onAssociationUpdated(association, false);
+                    break;
+            }
+        }
 
         default void onAssociationAdded(AssociationInfo association) {}
 

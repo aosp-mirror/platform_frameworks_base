@@ -24,6 +24,7 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.util.Map;
@@ -48,7 +49,7 @@ class FingerprintGetAuthenticatorIdClient extends HalClientMonitor<ISession> {
         // Nothing to do here
     }
 
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
         startHalOperation();
     }

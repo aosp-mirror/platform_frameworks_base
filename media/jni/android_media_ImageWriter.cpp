@@ -375,7 +375,8 @@ static void ImageWriter_classInit(JNIEnv* env, jclass clazz) {
 }
 
 static jlong ImageWriter_init(JNIEnv* env, jobject thiz, jobject weakThiz, jobject jsurface,
-        jint maxImages, jint userFormat, jint userWidth, jint userHeight) {
+        jint maxImages, jint userWidth, jint userHeight, jboolean useSurfaceImageFormatInfo,
+        jint hardwareBufferFormat, jlong dataSpace, jlong ndkUsage) {
     status_t res;
 
     ALOGV("%s: maxImages:%d", __FUNCTION__, maxImages);
@@ -450,7 +451,7 @@ static jlong ImageWriter_init(JNIEnv* env, jobject thiz, jobject weakThiz, jobje
 
     // Query surface format if no valid user format is specified, otherwise, override surface format
     // with user format.
-    if (userFormat == IMAGE_FORMAT_UNKNOWN) {
+    if (useSurfaceImageFormatInfo) {
         if ((res = anw->query(anw.get(), NATIVE_WINDOW_FORMAT, &surfaceFormat)) != OK) {
             ALOGE("%s: Query Surface format failed: %s (%d)", __FUNCTION__, strerror(-res), res);
             jniThrowRuntimeException(env, "Failed to query Surface format");
@@ -458,13 +459,13 @@ static jlong ImageWriter_init(JNIEnv* env, jobject thiz, jobject weakThiz, jobje
         }
     } else {
         // Set consumer buffer format to user specified format
-        PublicFormat publicFormat = static_cast<PublicFormat>(userFormat);
-        int nativeFormat = mapPublicFormatToHalFormat(publicFormat);
-        android_dataspace nativeDataspace = mapPublicFormatToHalDataspace(publicFormat);
-        res = native_window_set_buffers_format(anw.get(), nativeFormat);
+        android_dataspace nativeDataspace = static_cast<android_dataspace>(dataSpace);
+        int userFormat = static_cast<int>(mapHalFormatDataspaceToPublicFormat(
+            hardwareBufferFormat, nativeDataspace));
+        res = native_window_set_buffers_format(anw.get(), hardwareBufferFormat);
         if (res != OK) {
             ALOGE("%s: Unable to configure consumer native buffer format to %#x",
-                    __FUNCTION__, nativeFormat);
+                    __FUNCTION__, hardwareBufferFormat);
             jniThrowRuntimeException(env, "Failed to set Surface format");
             return 0;
         }
@@ -484,15 +485,13 @@ static jlong ImageWriter_init(JNIEnv* env, jobject thiz, jobject weakThiz, jobje
     env->SetIntField(thiz,
             gImageWriterClassInfo.mWriterFormat, reinterpret_cast<jint>(surfaceFormat));
 
-    if (!isFormatOpaque(surfaceFormat)) {
-        res = native_window_set_usage(anw.get(), GRALLOC_USAGE_SW_WRITE_OFTEN);
-        if (res != OK) {
-            ALOGE("%s: Configure usage %08x for format %08x failed: %s (%d)",
-                  __FUNCTION__, static_cast<unsigned int>(GRALLOC_USAGE_SW_WRITE_OFTEN),
-                  surfaceFormat, strerror(-res), res);
-            jniThrowRuntimeException(env, "Failed to SW_WRITE_OFTEN configure usage");
-            return 0;
-        }
+    res = native_window_set_usage(anw.get(), ndkUsage);
+    if (res != OK) {
+        ALOGE("%s: Configure usage %08x for format %08x failed: %s (%d)",
+              __FUNCTION__, static_cast<unsigned int>(ndkUsage),
+              surfaceFormat, strerror(-res), res);
+        jniThrowRuntimeException(env, "Failed to SW_WRITE_OFTEN configure usage");
+        return 0;
     }
 
     int minUndequeuedBufferCount = 0;
@@ -1093,7 +1092,7 @@ static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
 
 static JNINativeMethod gImageWriterMethods[] = {
     {"nativeClassInit",         "()V",                        (void*)ImageWriter_classInit },
-    {"nativeInit",              "(Ljava/lang/Object;Landroid/view/Surface;IIII)J",
+    {"nativeInit",              "(Ljava/lang/Object;Landroid/view/Surface;IIIZIJJ)J",
                                                               (void*)ImageWriter_init },
     {"nativeClose",              "(J)V",                      (void*)ImageWriter_close },
     {"nativeAttachAndQueueImage",

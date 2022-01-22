@@ -15138,6 +15138,15 @@ public class TelephonyManager {
     public static final int CALL_WAITING_STATUS_NOT_SUPPORTED = 4;
 
     /**
+     * Indicates the call waiting status could not be set or queried because the Fixed Dialing
+     * Numbers (FDN) feature is enabled.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int CALL_WAITING_STATUS_FDN_CHECK_FAILURE = 5;
+
+    /**
      * @hide
      */
     @IntDef(prefix = { "CALL_WAITING_STATUS_" }, value = {
@@ -15145,6 +15154,7 @@ public class TelephonyManager {
             CALL_WAITING_STATUS_DISABLED,
             CALL_WAITING_STATUS_UNKNOWN_ERROR,
             CALL_WAITING_STATUS_NOT_SUPPORTED,
+            CALL_WAITING_STATUS_FDN_CHECK_FAILURE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CallWaitingStatus {
@@ -15165,6 +15175,7 @@ public class TelephonyManager {
      *                          <li>{@link #CALL_WAITING_STATUS_DISABLED}}</li>
      *                          <li>{@link #CALL_WAITING_STATUS_UNKNOWN_ERROR}}</li>
      *                          <li>{@link #CALL_WAITING_STATUS_NOT_SUPPORTED}}</li>
+     *                          <li>{@link #CALL_WAITING_STATUS_FDN_CHECK_FAILURE}}</li>
      *                       </ul>
      * @hide
      */
@@ -15214,7 +15225,8 @@ public class TelephonyManager {
      *                       {@link #CALL_WAITING_STATUS_ENABLED} or
      *                       {@link #CALL_WAITING_STATUS_DISABLED} if the operation succeeded and
      *                       {@link #CALL_WAITING_STATUS_NOT_SUPPORTED} or
-     *                       {@link #CALL_WAITING_STATUS_UNKNOWN_ERROR} if it failed.
+     *                       {@link #CALL_WAITING_STATUS_UNKNOWN_ERROR} or
+     *                       {@link #CALL_WAITING_STATUS_FDN_CHECK_FAILURE} if it failed.
      * @hide
      */
     @SystemApi

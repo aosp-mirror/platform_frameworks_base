@@ -62,7 +62,7 @@ public abstract class InvalidationClient<S extends BiometricAuthenticator.Identi
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
 
         startHalOperation();

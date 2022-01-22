@@ -104,7 +104,8 @@ import java.util.List;
 import java.util.Objects;
 
 /** Manages uri grants. */
-public class UriGrantsManagerService extends IUriGrantsManager.Stub {
+public class UriGrantsManagerService extends IUriGrantsManager.Stub implements
+        UriMetricsHelper.PersistentUriGrantsProvider {
     private static final boolean DEBUG = false;
     private static final String TAG = "UriGrantsManagerService";
     // Maximum number of persisted Uri grants a package is allowed
@@ -115,6 +116,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     private final H mH;
     ActivityManagerInternal mAmInternal;
     PackageManagerInternal mPmInternal;
+    UriMetricsHelper mMetricsHelper;
 
     /** File storing persisted {@link #mGrantedUriPermissions}. */
     private final AtomicFile mGrantFile;
@@ -168,16 +170,19 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     }
 
     public static final class Lifecycle extends SystemService {
+        private final Context mContext;
         private final UriGrantsManagerService mService;
 
         public Lifecycle(Context context) {
             super(context);
+            mContext = context;
             mService = new UriGrantsManagerService();
         }
 
         @Override
         public void onStart() {
             publishBinderService(Context.URI_GRANTS_SERVICE, mService);
+            mService.mMetricsHelper = new UriMetricsHelper(mContext, mService);
             mService.start();
         }
 
@@ -186,6 +191,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
             if (phase == PHASE_SYSTEM_SERVICES_READY) {
                 mService.mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
                 mService.mPmInternal = LocalServices.getService(PackageManagerInternal.class);
+                mService.mMetricsHelper.registerPuller();
             }
         }
 
@@ -1298,10 +1304,35 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         return false;
     }
 
+    @Override
+    public ArrayList<UriPermission> providePersistentUriGrants() {
+        final ArrayList<UriPermission> result = new ArrayList<>();
+
+        synchronized (mLock) {
+            final int size = mGrantedUriPermissions.size();
+            for (int i = 0; i < size; i++) {
+                final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.valueAt(i);
+
+                final int permissionsForPackageSize = perms.size();
+                for (int j = 0; j < permissionsForPackageSize; j++) {
+                    final UriPermission permission = perms.valueAt(j);
+
+                    if (permission.persistedModeFlags != 0) {
+                        result.add(permission);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
     private void writeGrantedUriPermissions() {
         if (DEBUG) Slog.v(TAG, "writeGrantedUriPermissions()");
 
         final long startTime = SystemClock.uptimeMillis();
+
+        int persistentUriPermissionsCount = 0;
 
         // Snapshot permissions so we can persist without lock
         ArrayList<UriPermission.Snapshot> persist = Lists.newArrayList();
@@ -1309,9 +1340,14 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
             final int size = mGrantedUriPermissions.size();
             for (int i = 0; i < size; i++) {
                 final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.valueAt(i);
-                for (UriPermission perm : perms.values()) {
-                    if (perm.persistedModeFlags != 0) {
-                        persist.add(perm.snapshot());
+
+                final int permissionsForPackageSize = perms.size();
+                for (int j = 0; j < permissionsForPackageSize; j++) {
+                    final UriPermission permission = perms.valueAt(j);
+
+                    if (permission.persistedModeFlags != 0) {
+                        persistentUriPermissionsCount++;
+                        persist.add(permission.snapshot());
                     }
                 }
             }
@@ -1345,6 +1381,8 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
                 mGrantFile.failWrite(fos);
             }
         }
+
+        mMetricsHelper.reportPersistentUriFlushed(persistentUriPermissionsCount);
     }
 
     final class H extends Handler {

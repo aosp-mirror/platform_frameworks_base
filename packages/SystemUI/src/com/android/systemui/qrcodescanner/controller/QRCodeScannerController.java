@@ -93,6 +93,7 @@ public class QRCodeScannerController implements
     private final DeviceConfigProxy mDeviceConfigProxy;
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
     private final UserTracker mUserTracker;
+    private final boolean mConfigEnableLockScreenButton;
 
     private HashMap<Integer, ContentObserver> mQRCodeScannerPreferenceObserver = new HashMap<>();
     private DeviceConfig.OnPropertiesChangedListener mOnDefaultQRCodeScannerChangedListener = null;
@@ -118,6 +119,9 @@ public class QRCodeScannerController implements
         mSecureSettings = secureSettings;
         mDeviceConfigProxy = proxy;
         mUserTracker = userTracker;
+
+        mConfigEnableLockScreenButton = mContext.getResources().getBoolean(
+            android.R.bool.config_enableQrCodeScannerOnLockScreen);
     }
 
     /**
@@ -156,7 +160,7 @@ public class QRCodeScannerController implements
      * Returns true if lock screen entry point for QR Code Scanner is to be enabled.
      */
     public boolean isEnabledForLockScreenButton() {
-        return mQRCodeScannerEnabled && mIntent != null;
+        return mQRCodeScannerEnabled && mIntent != null && mConfigEnableLockScreenButton;
     }
 
     /**
@@ -235,6 +239,11 @@ public class QRCodeScannerController implements
     }
 
     private void updateQRCodeScannerPreferenceDetails(boolean updateSettings) {
+        if (!mConfigEnableLockScreenButton) {
+            // Settings only apply to lock screen entry point.
+            return;
+        }
+
         boolean prevQRCodeScannerEnabled = mQRCodeScannerEnabled;
         mQRCodeScannerEnabled = mSecureSettings.getIntForUser(LOCK_SCREEN_SHOW_QR_CODE_SCANNER, 0,
                 mUserTracker.getUserId()) != 0;
@@ -251,8 +260,15 @@ public class QRCodeScannerController implements
     private void updateQRCodeScannerActivityDetails() {
         String qrCodeScannerActivity = mDeviceConfigProxy.getString(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.DEFAULT_QR_CODE_SCANNER,
-                mContext.getResources().getString(R.string.def_qr_code_component));
+                SystemUiDeviceConfigFlags.DEFAULT_QR_CODE_SCANNER, "");
+
+        // "" means either the flags is not available or is set to "", and in both the cases we
+        // want to use R.string.def_qr_code_component
+        if (Objects.equals(qrCodeScannerActivity, "")) {
+            qrCodeScannerActivity =
+                    mContext.getResources().getString(R.string.def_qr_code_component);
+        }
+
         String prevQrCodeScannerActivity = mQRCodeScannerActivity;
         ComponentName componentName = null;
         Intent intent = new Intent();
@@ -281,8 +297,12 @@ public class QRCodeScannerController implements
         // Our intent should always be explicit and should have a component set
         if (intent.getComponent() == null) return false;
 
-        int flags = PackageManager.MATCH_DEFAULT_ONLY | PackageManager.MATCH_DIRECT_BOOT_AWARE
-                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+        int flags = PackageManager.MATCH_DIRECT_BOOT_AWARE
+                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                | PackageManager.MATCH_UNINSTALLED_PACKAGES
+                | PackageManager.MATCH_DISABLED_COMPONENTS
+                | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+                | PackageManager.MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS;
         return !mContext.getPackageManager().queryIntentActivities(intent,
                 flags).isEmpty();
     }
@@ -296,6 +316,11 @@ public class QRCodeScannerController implements
     }
 
     private void unregisterQRCodePreferenceObserver() {
+        if (!mConfigEnableLockScreenButton) {
+            // Settings only apply to lock screen entry point.
+            return;
+        }
+
         mQRCodeScannerPreferenceObserver.forEach((key, value) -> {
             mSecureSettings.unregisterContentObserver(value);
         });
@@ -357,6 +382,11 @@ public class QRCodeScannerController implements
     }
 
     private void registerQRCodePreferenceObserver() {
+        if (!mConfigEnableLockScreenButton) {
+            // Settings only apply to lock screen entry point.
+            return;
+        }
+
         int userId = mUserTracker.getUserId();
         if (mQRCodeScannerPreferenceObserver.getOrDefault(userId, null) != null) return;
 

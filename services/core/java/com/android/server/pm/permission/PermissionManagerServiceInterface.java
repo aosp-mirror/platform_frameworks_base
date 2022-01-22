@@ -27,6 +27,7 @@ import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.permission.IOnPermissionsChangeListener;
 import android.permission.PermissionManagerInternal;
 
+import com.android.internal.infra.AndroidFuture;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.FileDescriptor;
@@ -343,8 +344,10 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      *
      * @param packageName The name of the package for which the permissions will be revoked.
      * @param permissions List of permissions to be revoked.
+     * @param callback Callback called when the revocation request has been completed.
      */
-    void selfRevokePermissions(String packageName, List<String> permissions);
+    void revokeOwnPermissionsOnKill(String packageName, List<String> permissions,
+            AndroidFuture<Void> callback);
 
     /**
      * Get whether you should show UI with rationale for requesting a permission. You should do this

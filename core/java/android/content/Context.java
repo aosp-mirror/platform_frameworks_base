@@ -3829,7 +3829,7 @@ public abstract class Context {
             PRINT_SERVICE,
             CONSUMER_IR_SERVICE,
             //@hide: TRUST_SERVICE,
-            TV_IAPP_SERVICE,
+            TV_INTERACTIVE_APP_SERVICE,
             TV_INPUT_SERVICE,
             //@hide: TV_TUNER_RESOURCE_MGR_SERVICE,
             //@hide: NETWORK_SCORE_SERVICE,
@@ -5356,13 +5356,13 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.media.tv.interactive.TvIAppManager} for interacting with TV interactive
-     * applications (TV iApp) on the device.
+     * {@link android.media.tv.interactive.TvInteractiveAppManager} for interacting with TV
+     * interactive applications on the device.
      *
      * @see #getSystemService(String)
-     * @see android.media.tv.interactive.TvIAppManager
+     * @see android.media.tv.interactive.TvInteractiveAppManager
      */
-    public static final String TV_IAPP_SERVICE = "tv_iapp";
+    public static final String TV_INTERACTIVE_APP_SERVICE = "tv_interactive_app";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
@@ -6417,10 +6417,10 @@ public abstract class Context {
      * Triggers the asynchronous revocation of a permission.
      *
      * @param permName The name of the permission to be revoked.
-     * @see #selfRevokePermissions(Collection)
+     * @see #revokeOwnPermissionsOnKill(Collection)
      */
-    public void selfRevokePermission(@NonNull String permName) {
-        selfRevokePermissions(Collections.singletonList(permName));
+    public void revokeOwnPermissionOnKill(@NonNull String permName) {
+        revokeOwnPermissionsOnKill(Collections.singletonList(permName));
     }
 
     /**
@@ -6445,7 +6445,7 @@ public abstract class Context {
      * @see PackageManager#getGroupOfPlatformPermission(String, Executor, Consumer)
      * @see PackageManager#getPlatformPermissionsForGroup(String, Executor, Consumer)
      */
-    public void selfRevokePermissions(@NonNull Collection<String> permissions) {
+    public void revokeOwnPermissionsOnKill(@NonNull Collection<String> permissions) {
         throw new AbstractMethodError("Must be overridden in implementing class");
     }
 

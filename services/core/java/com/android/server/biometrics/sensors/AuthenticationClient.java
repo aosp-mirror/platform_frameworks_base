@@ -91,7 +91,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
     /**
      * Handles lifecycle, e.g. {@link BiometricScheduler},
-     * {@link com.android.server.biometrics.sensors.BaseClientMonitor.Callback} after authentication
+     * {@link ClientMonitorCallback} after authentication
      * results are known. Note that this happens asynchronously from (but shortly after)
      * {@link #onAuthenticated(BiometricAuthenticator.Identifier, boolean, ArrayList)} and allows
      * {@link CoexCoordinator} a chance to invoke/delay this event.
@@ -440,7 +440,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
      * Start authentication
      */
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
 
         final @LockoutTracker.LockoutMode int lockoutMode =

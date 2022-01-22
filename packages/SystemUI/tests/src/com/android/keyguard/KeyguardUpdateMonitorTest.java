@@ -88,7 +88,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -108,6 +107,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -174,10 +174,10 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private InteractionJankMonitor mInteractionJankMonitor;
     @Mock
     private LatencyTracker mLatencyTracker;
-    @Mock
-    private FeatureFlags mFeatureFlags;
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStatusBarStateListenerCaptor;
+    @Mock
+    private KeyguardUpdateMonitorCallback mTestCallback;
     // Direct executor
     private Executor mBackgroundExecutor = Runnable::run;
     private Executor mMainExecutor = Runnable::run;
@@ -255,11 +255,13 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
         mStatusBarStateListener = mStatusBarStateListenerCaptor.getValue();
+        mKeyguardUpdateMonitor.registerCallback(mTestCallback);
     }
 
     @After
     public void tearDown() {
         mMockitoSession.finishMocking();
+        mKeyguardUpdateMonitor.removeCallback(mTestCallback);
         mKeyguardUpdateMonitor.destroy();
     }
 
@@ -599,7 +601,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
         when(mKeyguardBypassController.canBypass()).thenReturn(true);
         mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
-                KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */);
+                KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */,
+                new ArrayList<>());
         mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
         verify(mFaceManager).authenticate(any(), any(), any(), any(), anyInt(), anyBoolean());
     }
@@ -609,7 +612,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.dispatchStartedWakingUp();
         mTestableLooper.processAllMessages();
         mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
-                KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */);
+                KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */, new ArrayList<>());
         mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
         verify(mFaceManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
                 anyBoolean());
@@ -754,7 +757,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     @Test
     public void testGetUserCanSkipBouncer_whenTrust() {
         int user = KeyguardUpdateMonitor.getCurrentUser();
-        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */, user, 0 /* flags */);
+        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */, user, 0 /* flags */,
+                new ArrayList<>());
         assertThat(mKeyguardUpdateMonitor.getUserCanSkipBouncer(user)).isTrue();
     }
 
@@ -985,7 +989,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         // WHEN trust is enabled (ie: via smartlock)
         mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
-                KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */);
+                KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */, new ArrayList<>());
 
         // THEN we shouldn't listen for udfps
         assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(false);
@@ -1069,6 +1073,17 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                 anyBoolean());
     }
 
+    @Test
+    public void testShowTrustGrantedMessage_onTrustGranted() {
+        // WHEN trust is enabled (ie: via some trust agent) with a trustGranted string
+        mKeyguardUpdateMonitor.onTrustChanged(true /* enabled */,
+                KeyguardUpdateMonitor.getCurrentUser(), 0 /* flags */,
+                Arrays.asList("Unlocked by wearable"));
+
+        // THEN the showTrustGrantedMessage should be called with the first message
+        verify(mTestCallback).showTrustGrantedMessage("Unlocked by wearable");
+    }
+
     private void setKeyguardBouncerVisibility(boolean isVisible) {
         mKeyguardUpdateMonitor.sendKeyguardBouncerChanged(isVisible);
         mTestableLooper.processAllMessages();
@@ -1108,7 +1123,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mRingerModeTracker, mBackgroundExecutor, mMainExecutor,
                     mStatusBarStateController, mLockPatternUtils,
                     mAuthController, mTelephonyListenerManager,
-                    mInteractionJankMonitor, mLatencyTracker, mFeatureFlags);
+                    mInteractionJankMonitor, mLatencyTracker);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 

@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.collection.render
 import android.content.Context
 import android.view.View
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
+import com.android.systemui.statusbar.notification.SectionHeaderVisibilityProvider
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -38,13 +39,15 @@ class ShadeViewManager @AssistedInject constructor(
     @Assisted private val stackController: NotifStackController,
     mediaContainerController: MediaContainerController,
     featureManager: NotificationSectionsFeatureManager,
+    sectionHeaderVisibilityProvider: SectionHeaderVisibilityProvider,
     logger: ShadeViewDifferLogger,
     private val viewBarn: NotifViewBarn
 ) {
     // We pass a shim view here because the listContainer may not actually have a view associated
     // with it and the differ never actually cares about the root node's view.
     private val rootController = RootNodeController(listContainer, View(context))
-    private val specBuilder = NodeSpecBuilder(mediaContainerController, featureManager, viewBarn)
+    private val specBuilder = NodeSpecBuilder(mediaContainerController, featureManager,
+            sectionHeaderVisibilityProvider, viewBarn)
     private val viewDiffer = ShadeViewDiffer(rootController, logger)
 
     /** Method for attaching this manager to the pipeline. */

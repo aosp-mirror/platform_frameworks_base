@@ -49,14 +49,8 @@ interface INetworkStatsService {
     @UnsupportedAppUsage
     NetworkStats getDataLayerSnapshotForUid(int uid);
 
-    /** Get a detailed snapshot of stats since boot for all UIDs.
-    *
-    * <p>Results will not always be limited to stats on requiredIfaces when specified: stats for
-    * interfaces stacked on the specified interfaces, or for interfaces on which the specified
-    * interfaces are stacked on, will also be included.
-    * @param requiredIfaces Interface names to get data for, or {@link NetworkStats#INTERFACES_ALL}.
-    */
-    NetworkStats getDetailedUidStats(in String[] requiredIfaces);
+    /** Get the transport NetworkStats for all UIDs since boot. */
+    NetworkStats getUidStatsForTransport(int transport);
 
     /** Return set of any ifaces associated with mobile networks since boot. */
     @UnsupportedAppUsage

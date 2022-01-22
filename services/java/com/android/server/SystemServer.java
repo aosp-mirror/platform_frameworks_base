@@ -194,7 +194,7 @@ import com.android.server.tracing.TracingServiceProxy;
 import com.android.server.trust.TrustManagerService;
 import com.android.server.tv.TvInputManagerService;
 import com.android.server.tv.TvRemoteService;
-import com.android.server.tv.interactive.TvIAppManagerService;
+import com.android.server.tv.interactive.TvInteractiveAppManagerService;
 import com.android.server.tv.tunerresourcemanager.TunerResourceManagerService;
 import com.android.server.twilight.TwilightService;
 import com.android.server.uri.UriGrantsManagerService;
@@ -261,6 +261,8 @@ public final class SystemServer implements Dumpable {
             "/apex/com.android.os.statsd/javalib/service-statsd.jar";
     private static final String CONNECTIVITY_SERVICE_APEX_PATH =
             "/apex/com.android.tethering/javalib/service-connectivity.jar";
+    private static final String NEARBY_SERVICE_APEX_PATH =
+            "/apex/com.android.nearby/javalib/service-nearby.jar";
     private static final String STATS_COMPANION_LIFECYCLE_CLASS =
             "com.android.server.stats.StatsCompanion$Lifecycle";
     private static final String STATS_PULL_ATOM_SERVICE_CLASS =
@@ -271,6 +273,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.usb.UsbService$Lifecycle";
     private static final String MIDI_SERVICE_CLASS =
             "com.android.server.midi.MidiService$Lifecycle";
+    private static final String NEARBY_SERVICE_CLASS =
+            "com.android.server.nearby.NearbyService";
     private static final String WIFI_APEX_SERVICE_JAR_PATH =
             "/apex/com.android.wifi/javalib/service-wifi.jar";
     private static final String WIFI_SERVICE_CLASS =
@@ -403,8 +407,6 @@ public final class SystemServer implements Dumpable {
     private static final String SAFETY_CENTER_SERVICE_CLASS =
             "com.android.safetycenter.SafetyCenterService";
 
-    private static final String SUPPLEMENTALPROCESS_APEX_PATH =
-            "/apex/com.android.supplementalprocess/javalib/service-supplementalprocess.jar";
     private static final String SUPPLEMENTALPROCESS_SERVICE_CLASS =
             "com.android.server.supplementalprocess.SupplementalProcessManagerService$Lifecycle";
 
@@ -1976,6 +1978,16 @@ public final class SystemServer implements Dumpable {
             }
             t.traceEnd();
 
+            // Start Nearby Service.
+            t.traceBegin("StartNearbyService");
+            try {
+                mSystemServiceManager.startServiceFromJar(NEARBY_SERVICE_CLASS,
+                        NEARBY_SERVICE_APEX_PATH);
+            } catch (Throwable e) {
+                reportWtf("starting NearbyService", e);
+            }
+            t.traceEnd();
+
             t.traceBegin("StartConnectivityService");
             // This has to be called after NetworkManagementService, NetworkStatsService
             // and NetworkPolicyManager because ConnectivityService needs to take these
@@ -2367,8 +2379,8 @@ public final class SystemServer implements Dumpable {
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_LIVE_TV)
                     || mPackageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
-                t.traceBegin("StartTvIAppManager");
-                mSystemServiceManager.startService(TvIAppManagerService.class);
+                t.traceBegin("StartTvInteractiveAppManager");
+                mSystemServiceManager.startService(TvInteractiveAppManagerService.class);
                 t.traceEnd();
             }
 
@@ -2558,8 +2570,7 @@ public final class SystemServer implements Dumpable {
 
         // Supplemental Process
         t.traceBegin("StartSupplementalProcessManagerService");
-        mSystemServiceManager.startServiceFromJar(SUPPLEMENTALPROCESS_SERVICE_CLASS,
-                SUPPLEMENTALPROCESS_APEX_PATH);
+        mSystemServiceManager.startService(SUPPLEMENTALPROCESS_SERVICE_CLASS);
         t.traceEnd();
 
         if (safeMode) {

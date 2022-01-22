@@ -141,6 +141,7 @@ import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
+import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.pip.Pip;
 
@@ -190,6 +191,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final Optional<Pip> mPipOptional;
     private final Optional<LegacySplitScreen> mSplitScreenOptional;
     private final Optional<Recents> mRecentsOptional;
+    private final Optional<BackAnimation> mBackAnimation;
     private final SystemActions mSystemActions;
     private final Handler mHandler;
     private final NavigationBarOverlayController mNavbarOverlayController;
@@ -504,7 +506,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             AutoHideController mainAutoHideController,
             AutoHideController.Factory autoHideControllerFactory,
             Optional<TelecomManager> telecomManagerOptional,
-            InputMethodManager inputMethodManager) {
+            InputMethodManager inputMethodManager,
+            Optional<BackAnimation> backAnimation) {
         mContext = context;
         mWindowManager = windowManager;
         mAccessibilityManager = accessibilityManager;
@@ -524,6 +527,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mPipOptional = pipOptional;
         mSplitScreenOptional = splitScreenOptional;
         mRecentsOptional = recentsOptional;
+        mBackAnimation = backAnimation;
         mSystemActions = systemActions;
         mHandler = mainHandler;
         mNavbarOverlayController = navbarOverlayController;
@@ -629,6 +633,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
         mSplitScreenOptional.ifPresent(mNavigationBarView::registerDockedListener);
         mPipOptional.ifPresent(mNavigationBarView::addPipExclusionBoundsChangeListener);
+        mBackAnimation.ifPresent(mNavigationBarView::registerBackAnimation);
 
         prepareNavigationBarView();
         checkNavBarModes();
@@ -1680,6 +1685,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         private final AutoHideController.Factory mAutoHideControllerFactory;
         private final Optional<TelecomManager> mTelecomManagerOptional;
         private final InputMethodManager mInputMethodManager;
+        private final Optional<BackAnimation> mBackAnimation;
 
         @Inject
         public Factory(
@@ -1712,7 +1718,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 AutoHideController mainAutoHideController,
                 AutoHideController.Factory autoHideControllerFactory,
                 Optional<TelecomManager> telecomManagerOptional,
-                InputMethodManager inputMethodManager) {
+                InputMethodManager inputMethodManager,
+                Optional<BackAnimation> backAnimation) {
             mAssistManagerLazy = assistManagerLazy;
             mAccessibilityManager = accessibilityManager;
             mDeviceProvisionedController = deviceProvisionedController;
@@ -1743,6 +1750,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             mAutoHideControllerFactory = autoHideControllerFactory;
             mTelecomManagerOptional = telecomManagerOptional;
             mInputMethodManager = inputMethodManager;
+            mBackAnimation = backAnimation;
         }
 
         /** Construct a {@link NavigationBar} */
@@ -1759,7 +1767,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                     mNavbarOverlayController, mUiEventLogger, mNavBarHelper,
                     mUserTracker, mMainLightBarController, mLightBarControllerFactory,
                     mMainAutoHideController, mAutoHideControllerFactory, mTelecomManagerOptional,
-                    mInputMethodManager);
+                    mInputMethodManager, mBackAnimation);
         }
     }
 }

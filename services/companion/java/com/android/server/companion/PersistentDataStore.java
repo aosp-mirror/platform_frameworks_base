@@ -25,9 +25,10 @@ import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
-
-import static org.xmlpull.v1.XmlPullParser.END_TAG;
-import static org.xmlpull.v1.XmlPullParser.START_TAG;
+import static com.android.server.companion.DataStoreUtils.createStorageFileForUser;
+import static com.android.server.companion.DataStoreUtils.isEndOfTag;
+import static com.android.server.companion.DataStoreUtils.isStartOfTag;
+import static com.android.server.companion.DataStoreUtils.writeToFileSafely;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -44,7 +45,6 @@ import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
-import com.android.internal.util.FunctionalUtils.ThrowingConsumer;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -53,7 +53,6 @@ import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -210,6 +209,7 @@ final class PersistentDataStore {
             @NonNull Collection<AssociationInfo> associationsOut,
             @NonNull Map<String, Set<Integer>> previouslyUsedIdsPerPackageOut) {
         Slog.i(LOG_TAG, "Reading associations for user " + userId + " from disk");
+
         final AtomicFile file = getStorageFileForUser(userId);
         if (DEBUG) Slog.d(LOG_TAG, "  > File=" + file.getBaseFile().getPath());
 
@@ -349,11 +349,7 @@ final class PersistentDataStore {
      */
     private @NonNull AtomicFile getStorageFileForUser(@UserIdInt int userId) {
         return mUserIdToStorageFile.computeIfAbsent(userId,
-                u -> new AtomicFile(getBaseStorageFileForUser(userId)));
-    }
-
-    private static @NonNull File getBaseStorageFileForUser(@UserIdInt int userId) {
-        return new File(Environment.getDataSystemDeDirectory(userId), FILE_NAME);
+                u -> createStorageFileForUser(userId, FILE_NAME));
     }
 
     private static @NonNull File getBaseLegacyStorageFileForUser(@UserIdInt int userId) {
@@ -512,16 +508,6 @@ final class PersistentDataStore {
         serializer.endTag(null, XML_TAG_PACKAGE);
     }
 
-    private static boolean isStartOfTag(@NonNull XmlPullParser parser, @NonNull String tag)
-            throws XmlPullParserException {
-        return parser.getEventType() == START_TAG && tag.equals(parser.getName());
-    }
-
-    private static boolean isEndOfTag(@NonNull XmlPullParser parser, @NonNull String tag)
-            throws XmlPullParserException {
-        return parser.getEventType() == END_TAG && tag.equals(parser.getName());
-    }
-
     private static void requireStartOfTag(@NonNull XmlPullParser parser, @NonNull String tag)
             throws XmlPullParserException {
         if (isStartOfTag(parser, tag)) return;
@@ -545,14 +531,5 @@ final class PersistentDataStore {
             if (DEBUG) Slog.w(LOG_TAG, "Could not create AssociationInfo", e);
         }
         return associationInfo;
-    }
-
-    private static void writeToFileSafely(@NonNull AtomicFile file,
-            @NonNull ThrowingConsumer<FileOutputStream> consumer) {
-        try {
-            file.write(consumer);
-        } catch (Exception e) {
-            Slog.e(LOG_TAG, "Error while writing to file " + file, e);
-        }
     }
 }

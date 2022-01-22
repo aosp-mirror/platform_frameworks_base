@@ -102,7 +102,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                             // IBinder -> ConnectionRecord of all bound clients
 
     ProcessRecord app;      // where this service is running or null.
-    ProcessRecord isolatedProc; // keep track of isolated process, if requested
+    ProcessRecord isolationHostProc; // process which we've started for this service (used for
+                                     // isolated and supplemental processes)
     ServiceState tracker; // tracking service execution, may be null
     ServiceState restartTracker; // tracking service restart
     boolean allowlistManager; // any bindings to this service have BIND_ALLOW_WHITELIST_MANAGEMENT?
@@ -352,8 +353,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         if (app != null) {
             app.dumpDebug(proto, ServiceRecordProto.APP);
         }
-        if (isolatedProc != null) {
-            isolatedProc.dumpDebug(proto, ServiceRecordProto.ISOLATED_PROC);
+        if (isolationHostProc != null) {
+            isolationHostProc.dumpDebug(proto, ServiceRecordProto.ISOLATED_PROC);
         }
         proto.write(ServiceRecordProto.WHITELIST_MANAGER, allowlistManager);
         proto.write(ServiceRecordProto.DELAYED, delayed);
@@ -455,8 +456,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             pw.print(prefix); pw.print("dataDir="); pw.println(appInfo.dataDir);
         }
         pw.print(prefix); pw.print("app="); pw.println(app);
-        if (isolatedProc != null) {
-            pw.print(prefix); pw.print("isolatedProc="); pw.println(isolatedProc);
+        if (isolationHostProc != null) {
+            pw.print(prefix); pw.print("isolationHostProc="); pw.println(isolationHostProc);
         }
         if (allowlistManager) {
             pw.print(prefix); pw.print("allowlistManager="); pw.println(allowlistManager);

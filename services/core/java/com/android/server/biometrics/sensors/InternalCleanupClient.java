@@ -64,7 +64,7 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
     private final boolean mHasEnrollmentsBeforeStarting;
     private BaseClientMonitor mCurrentTask;
 
-    private final Callback mEnumerateCallback = new Callback() {
+    private final ClientMonitorCallback mEnumerateCallback = new ClientMonitorCallback() {
         @Override
         public void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
             final List<BiometricAuthenticator.Identifier> unknownHALTemplates =
@@ -90,7 +90,7 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
         }
     };
 
-    private final Callback mRemoveCallback = new Callback() {
+    private final ClientMonitorCallback mRemoveCallback = new ClientMonitorCallback() {
         @Override
         public void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
             Slog.d(TAG, "Remove onClientFinished: " + clientMonitor + ", success: " + success);
@@ -139,7 +139,7 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
 
         // Start enumeration. Removal will start if necessary, when enumeration is completed.

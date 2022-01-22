@@ -945,7 +945,13 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Notifies AIT info updated.
+         * Informs the app that the AIT (Application Information Table) is updated.
+         *
+         * <p>This method should also be call when
+         * {@link #onSetInteractiveAppNotificationEnabled(boolean)} is called to send the first AIT
+         * info.
+         *
+         * @see #onSetInteractiveAppNotificationEnabled(boolean)
          * @hide
          */
         public void notifyAitInfoUpdated(@NonNull final AitInfo aitInfo) {
@@ -1198,7 +1204,16 @@ public abstract class TvInputService extends Service {
 
         /**
          * Enables or disables interactive app notification.
+         *
+         * <p>This method enables or disables the event detection from the corresponding TV input.
+         * When it's enabled, the TV input service detects events related to interactive app, such
+         * as AIT (Application Information Table) and sends to TvView or the linked TV interactive
+         * app service.
+         *
          * @param enabled {@code true} to enable, {@code false} to disable.
+         *
+         * @see TvView#setInteractiveAppNotificationEnabled(boolean)
+         * @see Session#notifyAitInfoUpdated(android.media.tv.AitInfo)
          * @hide
          */
         public void onSetInteractiveAppNotificationEnabled(boolean enabled) {

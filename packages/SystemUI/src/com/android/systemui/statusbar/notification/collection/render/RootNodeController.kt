@@ -40,6 +40,7 @@ class RootNodeController(
 
     override fun addChildAt(child: NodeController, index: Int) {
         listContainer.addContainerViewAt(child.view, index)
+        listContainer.onNotificationViewUpdateFinished()
     }
 
     override fun moveChildTo(child: NodeController, index: Int) {

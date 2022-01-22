@@ -29,15 +29,15 @@ public interface Interruptable {
 
     /**
      * Notifies the client that it needs to finish before
-     * {@link BaseClientMonitor#start(BaseClientMonitor.Callback)} was invoked. This usually happens
+     * {@link BaseClientMonitor#start(ClientMonitorCallback)} was invoked. This usually happens
      * if the client is still waiting in the pending queue and got notified that a subsequent
      * operation is preempting it.
      *
      * This method must invoke
-     * {@link BaseClientMonitor.Callback#onClientFinished(BaseClientMonitor, boolean)} on the
+     * {@link ClientMonitorCallback#onClientFinished(BaseClientMonitor, boolean)} on the
      * given callback (with success).
      *
      * @param callback invoked when the operation is completed.
      */
-    void cancelWithoutStarting(@NonNull BaseClientMonitor.Callback callback);
+    void cancelWithoutStarting(@NonNull ClientMonitorCallback callback);
 }

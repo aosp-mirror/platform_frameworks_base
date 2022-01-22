@@ -38,8 +38,8 @@ public class UsbACAudioControlEndpoint extends UsbACEndpoint {
     static final byte ATTRIBSMASK_SYNC  = 0x0C;
     static final byte ATTRIBMASK_TRANS  = 0x03;
 
-    public UsbACAudioControlEndpoint(int length, byte type, int subclass) {
-        super(length, type, subclass);
+    public UsbACAudioControlEndpoint(int length, byte type, int subclass, byte subtype) {
+        super(length, type, subclass, subtype);
     }
 
     public byte getAddress() {

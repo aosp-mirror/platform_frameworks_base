@@ -2245,6 +2245,17 @@ final class InstallPackageHelper {
             if (reconciledPkg.mScanResult.needsNewAppId()) {
                 // Only set previousAppId if the app is migrating out of shared UID
                 previousAppId = reconciledPkg.mScanResult.mPreviousAppId;
+
+                if (pkg.shouldInheritKeyStoreKeys()) {
+                    // Migrate keystore data
+                    mAppDataHelper.migrateKeyStoreData(
+                            previousAppId, reconciledPkg.mPkgSetting.getAppId());
+                }
+
+                if (reconciledPkg.mInstallResult.mRemovedInfo.mRemovedAppId == previousAppId) {
+                    // If the previous app ID is removed, clear the keys
+                    mAppDataHelper.clearKeystoreData(UserHandle.USER_ALL, previousAppId);
+                }
             }
             mAppDataHelper.prepareAppDataPostCommitLIF(pkg, previousAppId);
             if (reconciledPkg.mPrepareResult.mClearCodeCache) {

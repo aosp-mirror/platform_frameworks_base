@@ -25,6 +25,7 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.internal.util.Preconditions;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.GenerateChallengeClient;
 
@@ -39,7 +40,7 @@ public class FaceGenerateChallengeClient extends GenerateChallengeClient<IBiomet
 
     private static final String TAG = "FaceGenerateChallengeClient";
     static final int CHALLENGE_TIMEOUT_SEC = 600; // 10 minutes
-    private static final Callback EMPTY_CALLBACK = new Callback() {
+    private static final ClientMonitorCallback EMPTY_CALLBACK = new ClientMonitorCallback() {
     };
 
     private final long mCreatedAt;
@@ -94,7 +95,7 @@ public class FaceGenerateChallengeClient extends GenerateChallengeClient<IBiomet
     }
 
     private void sendChallengeResult(@NonNull ClientMonitorCallbackConverter receiver,
-            @NonNull Callback ownerCallback) {
+            @NonNull ClientMonitorCallback ownerCallback) {
         Preconditions.checkState(mChallengeResult != null, "result not available");
         try {
             receiver.onChallengeGenerated(getSensorId(), getTargetUserId(), mChallengeResult);

@@ -1968,7 +1968,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         }
 
         @Override
-        public int compare(ListEntry o1, ListEntry o2) {
+        public int compare(@NonNull ListEntry o1, @NonNull ListEntry o2) {
             boolean contains1 = mPreferredPackages.contains(
                     o1.getRepresentativeEntry().getSbn().getPackageName());
             boolean contains2 = mPreferredPackages.contains(

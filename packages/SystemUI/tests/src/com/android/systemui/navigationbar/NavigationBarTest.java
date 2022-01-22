@@ -95,6 +95,7 @@ import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
+import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.pip.Pip;
 
@@ -105,7 +106,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 
 import java.util.Optional;
 
@@ -383,7 +383,8 @@ public class NavigationBarTest extends SysuiTestCase {
                 mAutoHideController,
                 mAutoHideControllerFactory,
                 Optional.of(mTelecomManager),
-                mInputMethodManager);
+                mInputMethodManager,
+                Optional.of(mock(BackAnimation.class)));
         return spy(factory.create(context));
     }
 

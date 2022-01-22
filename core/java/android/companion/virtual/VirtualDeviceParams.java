@@ -20,7 +20,10 @@ import static android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
+import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
@@ -39,7 +42,7 @@ import java.util.Set;
  *
  * @hide
  */
-// TODO(b/194949534): Unhide this API
+@SystemApi
 public final class VirtualDeviceParams implements Parcelable {
 
     /** @hide */
@@ -51,32 +54,36 @@ public final class VirtualDeviceParams implements Parcelable {
 
     /**
      * Indicates that the lock state of the virtual device should be always locked.
-     *
-     * @hide  // TODO(b/194949534): Unhide this API
      */
     public static final int LOCK_STATE_ALWAYS_LOCKED = 0;
 
     /**
      * Indicates that the lock state of the virtual device should be always unlocked.
-     *
-     * @hide  // TODO(b/194949534): Unhide this API
      */
     public static final int LOCK_STATE_ALWAYS_UNLOCKED = 1;
 
     private final int mLockState;
     private final ArraySet<UserHandle> mUsersWithMatchingAccounts;
+    @Nullable private final ArraySet<ComponentName> mAllowedActivities;
+    @Nullable private final ArraySet<ComponentName> mBlockedActivities;
 
     private VirtualDeviceParams(
             @LockState int lockState,
-            @NonNull Set<UserHandle> usersWithMatchingAccounts) {
+            @NonNull Set<UserHandle> usersWithMatchingAccounts,
+            @Nullable Set<ComponentName> allowedActivities,
+            @Nullable Set<ComponentName> blockedActivities) {
         mLockState = lockState;
         mUsersWithMatchingAccounts = new ArraySet<>(usersWithMatchingAccounts);
+        mAllowedActivities = allowedActivities == null ? null : new ArraySet<>(allowedActivities);
+        mBlockedActivities = blockedActivities == null ? null : new ArraySet<>(blockedActivities);
     }
 
     @SuppressWarnings("unchecked")
     private VirtualDeviceParams(Parcel parcel) {
         mLockState = parcel.readInt();
         mUsersWithMatchingAccounts = (ArraySet<UserHandle>) parcel.readArraySet(null);
+        mAllowedActivities = (ArraySet<ComponentName>) parcel.readArraySet(null);
+        mBlockedActivities = (ArraySet<ComponentName>) parcel.readArraySet(null);
     }
 
     /**
@@ -98,6 +105,35 @@ public final class VirtualDeviceParams implements Parcelable {
         return Collections.unmodifiableSet(mUsersWithMatchingAccounts);
     }
 
+    /**
+     * Returns the set of activities allowed to be streamed, or {@code null} if this is not set.
+     *
+     * @see Builder#setAllowedActivities(Set)
+     * @hide  // TODO(b/194949534): Unhide this API
+     */
+    @Nullable
+    public Set<ComponentName> getAllowedActivities() {
+        if (mAllowedActivities == null) {
+            return null;
+        }
+        return Collections.unmodifiableSet(mAllowedActivities);
+    }
+
+    /**
+     * Returns the set of activities that are blocked from streaming, or {@code null} if this is not
+     * set.
+     *
+     * @see Builder#setBlockedActivities(Set)
+     * @hide  // TODO(b/194949534): Unhide this API
+     */
+    @Nullable
+    public Set<ComponentName> getBlockedActivities() {
+        if (mBlockedActivities == null) {
+            return null;
+        }
+        return Collections.unmodifiableSet(mBlockedActivities);
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -107,6 +143,8 @@ public final class VirtualDeviceParams implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mLockState);
         dest.writeArraySet(mUsersWithMatchingAccounts);
+        dest.writeArraySet(mAllowedActivities);
+        dest.writeArraySet(mBlockedActivities);
     }
 
     @Override
@@ -118,8 +156,10 @@ public final class VirtualDeviceParams implements Parcelable {
             return false;
         }
         VirtualDeviceParams that = (VirtualDeviceParams) o;
-        return mLockState == that.mLockState && mUsersWithMatchingAccounts.equals(
-                that.mUsersWithMatchingAccounts);
+        return mLockState == that.mLockState
+                && mUsersWithMatchingAccounts.equals(that.mUsersWithMatchingAccounts)
+                && Objects.equals(mAllowedActivities, that.mAllowedActivities)
+                && Objects.equals(mBlockedActivities, that.mBlockedActivities);
     }
 
     @Override
@@ -128,13 +168,17 @@ public final class VirtualDeviceParams implements Parcelable {
     }
 
     @Override
+    @NonNull
     public String toString() {
         return "VirtualDeviceParams("
                 + " mLockState=" + mLockState
                 + " mUsersWithMatchingAccounts=" + mUsersWithMatchingAccounts
+                + " mAllowedActivities=" + mAllowedActivities
+                + " mBlockedActivities=" + mBlockedActivities
                 + ")";
     }
 
+    @NonNull
     public static final Parcelable.Creator<VirtualDeviceParams> CREATOR =
             new Parcelable.Creator<VirtualDeviceParams>() {
                 public VirtualDeviceParams createFromParcel(Parcel in) {
@@ -153,6 +197,8 @@ public final class VirtualDeviceParams implements Parcelable {
 
         private @LockState int mLockState = LOCK_STATE_ALWAYS_LOCKED;
         private Set<UserHandle> mUsersWithMatchingAccounts;
+        @Nullable private Set<ComponentName> mBlockedActivities;
+        @Nullable private Set<ComponentName> mAllowedActivities;
 
         /**
          * Sets the lock state of the device. The permission {@code ADD_ALWAYS_UNLOCKED_DISPLAY}
@@ -171,15 +217,76 @@ public final class VirtualDeviceParams implements Parcelable {
 
         /**
          * Sets the user handles with matching managed accounts on the remote device to which
-         * this virtual device is streaming.
+         * this virtual device is streaming. The caller is responsible for verifying the presence
+         * and legitimacy of a matching managed account on the remote device.
+         *
+         * <p>If the app streaming policy is
+         * {@link android.app.admin.DevicePolicyManager#NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY
+         * NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY}, activities not in
+         * {@code usersWithMatchingAccounts} will be blocked from starting.
+         *
+         * <p> If {@code usersWithMatchingAccounts} is empty (the default), streaming is allowed
+         * only if there is no device policy, or if the nearby streaming policy is
+         * {@link android.app.admin.DevicePolicyManager#NEARBY_STREAMING_ENABLED
+         * NEARBY_STREAMING_ENABLED}.
          *
          * @param usersWithMatchingAccounts A set of user handles with matching managed
          *   accounts on the remote device this is streaming to.
+         *
          * @see android.app.admin.DevicePolicyManager#NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY
          */
+        @NonNull
         public Builder setUsersWithMatchingAccounts(
                 @NonNull Set<UserHandle> usersWithMatchingAccounts) {
             mUsersWithMatchingAccounts = usersWithMatchingAccounts;
+            return this;
+        }
+
+        /**
+         * Sets the activities allowed to be launched in the virtual device. If
+         * {@code allowedActivities} is non-null, all activities other than the ones in the set will
+         * be blocked from launching.
+         *
+         * <p>{@code allowedActivities} and the set in {@link #setBlockedActivities(Set)} cannot
+         * both be non-null at the same time.
+         *
+         * @throws IllegalArgumentException if {@link #setBlockedActivities(Set)} has been set to a
+         *   non-null value.
+         *
+         * @param allowedActivities A set of activity {@link ComponentName} allowed to be launched
+         *   in the virtual device.
+         * @hide  // TODO(b/194949534): Unhide this API
+         */
+        public Builder setAllowedActivities(@Nullable Set<ComponentName> allowedActivities) {
+            if (mBlockedActivities != null && allowedActivities != null) {
+                throw new IllegalArgumentException(
+                        "Allowed activities and Blocked activities cannot both be set.");
+            }
+            mAllowedActivities = allowedActivities;
+            return this;
+        }
+
+        /**
+         * Sets the activities blocked from launching in the virtual device. If the {@code
+         * blockedActivities} is non-null, activities in the set are blocked from launching in the
+         * virtual device.
+         *
+         * {@code blockedActivities} and the set in {@link #setAllowedActivities(Set)} cannot both
+         * be non-null at the same time.
+         *
+         * @throws IllegalArgumentException if {@link #setAllowedActivities(Set)} has been set to a
+         *   non-null value.
+         *
+         * @param blockedActivities A set of {@link ComponentName} to be blocked launching from
+         *   virtual device.
+         * @hide  // TODO(b/194949534): Unhide this API
+         */
+        public Builder setBlockedActivities(@Nullable Set<ComponentName> blockedActivities) {
+            if (mAllowedActivities != null && blockedActivities != null) {
+                throw new IllegalArgumentException(
+                        "Allowed activities and Blocked activities cannot both be set.");
+            }
+            mBlockedActivities = blockedActivities;
             return this;
         }
 
@@ -191,7 +298,13 @@ public final class VirtualDeviceParams implements Parcelable {
             if (mUsersWithMatchingAccounts == null) {
                 mUsersWithMatchingAccounts = Collections.emptySet();
             }
-            return new VirtualDeviceParams(mLockState, mUsersWithMatchingAccounts);
+            if (mAllowedActivities != null && mBlockedActivities != null) {
+                // Should never reach here because the setters block this as well.
+                throw new IllegalStateException(
+                        "Allowed activities and Blocked activities cannot both be set.");
+            }
+            return new VirtualDeviceParams(mLockState, mUsersWithMatchingAccounts,
+                    mAllowedActivities, mBlockedActivities);
         }
     }
 }

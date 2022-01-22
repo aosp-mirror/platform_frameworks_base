@@ -34,7 +34,7 @@ oneway interface ITvInteractiveAppClient {
     void onLayoutSurface(int left, int top, int right, int bottom, int seq);
     void onBroadcastInfoRequest(in BroadcastInfoRequest request, int seq);
     void onRemoveBroadcastInfo(int id, int seq);
-    void onSessionStateChanged(int state, int seq);
+    void onSessionStateChanged(int state, int err, int seq);
     void onBiInteractiveAppCreated(in Uri biIAppUri, in String biIAppId, int seq);
     void onTeletextAppStateChanged(int state, int seq);
     void onCommandRequest(in String cmdType, in Bundle parameters, int seq);

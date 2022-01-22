@@ -24,6 +24,7 @@ import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.ShellInit;
 import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.apppairs.AppPairs;
+import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.compatui.CompatUI;
 import com.android.wm.shell.dagger.TvWMShellModule;
@@ -123,4 +124,7 @@ public interface WMComponent {
 
     @WMSingleton
     DragAndDrop getDragAndDrop();
+
+    @WMSingleton
+    Optional<BackAnimation> getBackAnimation();
 }

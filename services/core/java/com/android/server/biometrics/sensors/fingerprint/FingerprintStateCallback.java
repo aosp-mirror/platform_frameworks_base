@@ -31,6 +31,7 @@ import android.util.Slog;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.EnrollClient;
 import com.android.server.biometrics.sensors.EnrollmentModifier;
 
@@ -39,7 +40,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * A callback for receiving notifications about changes in fingerprint state.
  */
-public class FingerprintStateCallback implements BaseClientMonitor.Callback {
+public class FingerprintStateCallback implements ClientMonitorCallback {
 
     @NonNull private final CopyOnWriteArrayList<IFingerprintStateListener>
             mFingerprintStateListeners = new CopyOnWriteArrayList<>();

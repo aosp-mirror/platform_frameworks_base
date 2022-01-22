@@ -52,13 +52,14 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 public class DeviceStateRotationLockSettingControllerTest extends SysuiTestCase {
 
-    private static final String[] DEFAULT_SETTINGS = new String[] {"0:0", "1:2"};
+    private static final String[] DEFAULT_SETTINGS = new String[]{"0:1", "2:0:1", "1:2"};
 
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeExecutor mFakeExecutor = new FakeExecutor(mFakeSystemClock);
-    @Mock DeviceStateManager mDeviceStateManager;
-    RotationPolicyWrapper mFakeRotationPolicy = new FakeRotationPolicy();
-    DeviceStateRotationLockSettingController mDeviceStateRotationLockSettingController;
+    @Mock
+    private DeviceStateManager mDeviceStateManager;
+    private final RotationPolicyWrapper mFakeRotationPolicy = new FakeRotationPolicy();
+    private DeviceStateRotationLockSettingController mDeviceStateRotationLockSettingController;
     private DeviceStateManager.DeviceStateCallback mDeviceStateCallback;
     private DeviceStateRotationLockSettingsManager mSettingsManager;
     private TestableContentResolver mContentResolver;
@@ -93,7 +94,7 @@ public class DeviceStateRotationLockSettingControllerTest extends SysuiTestCase 
                                 mContentResolver,
                                 Settings.Secure.DEVICE_STATE_ROTATION_LOCK,
                                 UserHandle.USER_CURRENT))
-                .isEqualTo("0:0:1:2");
+                .isEqualTo("0:1:1:2:2:0");
     }
 
     @Test
@@ -121,6 +122,31 @@ public class DeviceStateRotationLockSettingControllerTest extends SysuiTestCase 
         assertThat(mFakeRotationPolicy.isRotationLocked()).isFalse();
 
         mDeviceStateCallback.onStateChanged(1);
+        assertThat(mFakeRotationPolicy.isRotationLocked()).isTrue();
+    }
+
+    @Test
+    public void whenDeviceStateSwitched_settingIsIgnored_loadsDefaultFallbackSetting() {
+        initializeSettingsWith();
+        mFakeRotationPolicy.setRotationLock(true);
+
+        // State 2 -> Ignored -> Fall back to state 1 which is unlocked
+        mDeviceStateCallback.onStateChanged(2);
+
+        assertThat(mFakeRotationPolicy.isRotationLocked()).isFalse();
+    }
+
+    @Test
+    public void whenDeviceStateSwitched_ignoredSetting_fallbackValueChanges_usesFallbackValue() {
+        initializeSettingsWith(
+                0, DEVICE_STATE_ROTATION_LOCK_UNLOCKED,
+                1, DEVICE_STATE_ROTATION_LOCK_LOCKED,
+                2, DEVICE_STATE_ROTATION_LOCK_IGNORED);
+        mFakeRotationPolicy.setRotationLock(false);
+
+        // State 2 -> Ignored -> Fall back to state 1 which is locked
+        mDeviceStateCallback.onStateChanged(2);
+
         assertThat(mFakeRotationPolicy.isRotationLocked()).isTrue();
     }
 
@@ -159,15 +185,15 @@ public class DeviceStateRotationLockSettingControllerTest extends SysuiTestCase 
     }
 
     @Test
-    public void whenDeviceStateSwitchedToIgnoredState_newSettingsSaveForPreviousState() {
+    public void whenDeviceStateSwitchedToIgnoredState_noFallback_newSettingsSaveForPreviousState() {
         initializeSettingsWith(
-                0, DEVICE_STATE_ROTATION_LOCK_IGNORED, 1, DEVICE_STATE_ROTATION_LOCK_UNLOCKED);
+                8, DEVICE_STATE_ROTATION_LOCK_IGNORED, 1, DEVICE_STATE_ROTATION_LOCK_UNLOCKED);
         mFakeRotationPolicy.setRotationLock(true);
 
         mDeviceStateCallback.onStateChanged(1);
         assertThat(mFakeRotationPolicy.isRotationLocked()).isFalse();
 
-        mDeviceStateCallback.onStateChanged(0);
+        mDeviceStateCallback.onStateChanged(8);
         assertThat(mFakeRotationPolicy.isRotationLocked()).isFalse();
 
         mDeviceStateRotationLockSettingController.onRotationLockStateChanged(
@@ -178,7 +204,7 @@ public class DeviceStateRotationLockSettingControllerTest extends SysuiTestCase 
                                 mContentResolver,
                                 Settings.Secure.DEVICE_STATE_ROTATION_LOCK,
                                 UserHandle.USER_CURRENT))
-                .isEqualTo("0:0:1:1");
+                .isEqualTo("1:1:8:0");
     }
 
     @Test
@@ -198,12 +224,78 @@ public class DeviceStateRotationLockSettingControllerTest extends SysuiTestCase 
         assertThat(mFakeRotationPolicy.isRotationLocked()).isTrue();
     }
 
+    @Test
+    public void onRotationLockStateChanged_newSettingIsPersisted() {
+        initializeSettingsWith(
+                0, DEVICE_STATE_ROTATION_LOCK_LOCKED,
+                1, DEVICE_STATE_ROTATION_LOCK_UNLOCKED);
+        mDeviceStateCallback.onStateChanged(0);
+
+        mDeviceStateRotationLockSettingController.onRotationLockStateChanged(
+                /* rotationLocked= */ false,
+                /* affordanceVisible= */ true
+        );
+
+        assertThat(
+                Settings.Secure.getStringForUser(
+                        mContentResolver,
+                        Settings.Secure.DEVICE_STATE_ROTATION_LOCK,
+                        UserHandle.USER_CURRENT))
+                .isEqualTo("0:2:1:2");
+    }
+
+    @Test
+    public void onRotationLockStateChanged_deviceStateIsIgnored_newSettingIsPersistedToFallback() {
+        initializeSettingsWith(
+                0, DEVICE_STATE_ROTATION_LOCK_LOCKED,
+                1, DEVICE_STATE_ROTATION_LOCK_UNLOCKED,
+                2, DEVICE_STATE_ROTATION_LOCK_IGNORED);
+        mDeviceStateCallback.onStateChanged(2);
+
+        mDeviceStateRotationLockSettingController.onRotationLockStateChanged(
+                /* rotationLocked= */ true,
+                /* affordanceVisible= */ true
+        );
+
+        assertThat(
+                Settings.Secure.getStringForUser(
+                        mContentResolver,
+                        Settings.Secure.DEVICE_STATE_ROTATION_LOCK,
+                        UserHandle.USER_CURRENT))
+                .isEqualTo("0:1:1:1:2:0");
+    }
+
+    @Test
+    public void onRotationLockStateChange_stateIgnored_noFallback_settingIsPersistedToPrevious() {
+        initializeSettingsWith(
+                0, DEVICE_STATE_ROTATION_LOCK_LOCKED,
+                1, DEVICE_STATE_ROTATION_LOCK_UNLOCKED,
+                8, DEVICE_STATE_ROTATION_LOCK_IGNORED);
+        mDeviceStateCallback.onStateChanged(1);
+        mDeviceStateCallback.onStateChanged(8);
+
+        mDeviceStateRotationLockSettingController.onRotationLockStateChanged(
+                /* rotationLocked= */ true,
+                /* affordanceVisible= */ true
+        );
+
+        assertThat(
+                Settings.Secure.getStringForUser(
+                        mContentResolver,
+                        Settings.Secure.DEVICE_STATE_ROTATION_LOCK,
+                        UserHandle.USER_CURRENT))
+                .isEqualTo("0:1:1:1:8:0");
+    }
+
     private void initializeSettingsWith(int... values) {
         if (values.length % 2 != 0) {
             throw new IllegalArgumentException("Expecting key-value pairs");
         }
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < values.length; sb.append(":")) {
+        for (int i = 0; i < values.length; ) {
+            if (i > 0) {
+                sb.append(":");
+            }
             sb.append(values[i++]).append(":").append(values[i++]);
         }
 

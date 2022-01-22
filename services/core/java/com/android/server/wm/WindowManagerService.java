@@ -143,6 +143,7 @@ import android.Manifest;
 import android.Manifest.permission;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -172,6 +173,7 @@ import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.configstore.V1_0.OptionalBool;
@@ -282,6 +284,7 @@ import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
 import android.window.ClientWindowFrames;
+import android.window.IOnFpsCallbackListener;
 import android.window.TaskSnapshot;
 
 import com.android.internal.R;
@@ -708,6 +711,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final TaskSnapshotController mTaskSnapshotController;
 
     final BlurController mBlurController;
+    final TaskFpsCallbackController mTaskFpsCallbackController;
 
     boolean mIsTouchDevice;
     boolean mIsFakeTouchDevice;
@@ -1354,6 +1358,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mStartingSurfaceController = new StartingSurfaceController(this);
 
         mBlurController = new BlurController(mContext, mPowerManager);
+        mTaskFpsCallbackController = new TaskFpsCallbackController(mContext);
         mAccessibilityController = new AccessibilityController(this);
     }
 
@@ -3835,6 +3840,40 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean restoreFromDisk) {
         return mTaskSnapshotController.getSnapshot(taskId, userId, restoreFromDisk,
                 isLowResolution);
+    }
+
+    /**
+     * Generates and returns an up-to-date {@link Bitmap} for the specified taskId. The returned
+     * bitmap will be full size and will not include any secure content.
+     *
+     * @param taskId The task ID of the task for which a snapshot is requested.
+     * @return The Bitmap, or null if no task with the specified ID can be found or the bitmap could
+     * not be generated.
+     */
+    @Nullable public Bitmap captureTaskBitmap(int taskId) {
+        if (mTaskSnapshotController.shouldDisableSnapshots()) {
+            return null;
+        }
+
+        synchronized (mGlobalLock) {
+            final Task task = mRoot.anyTaskForId(taskId);
+            if (task == null) {
+                return null;
+            }
+
+            task.getBounds(mTmpRect);
+            final SurfaceControl sc = task.getSurfaceControl();
+            final SurfaceControl.ScreenshotHardwareBuffer buffer = SurfaceControl.captureLayers(
+                    new SurfaceControl.LayerCaptureArgs.Builder(sc)
+                            .setSourceCrop(mTmpRect)
+                            .build());
+            if (buffer == null) {
+                Slog.w(TAG, "Could not get screenshot buffer for taskId: " + taskId);
+                return null;
+            }
+
+            return buffer.asBitmap();
+        }
     }
 
     /**
@@ -7066,6 +7105,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    PointF getLatestMousePosition() {
+        synchronized (mMousePositionTracker) {
+            return new PointF(mMousePositionTracker.mLatestMouseX,
+                    mMousePositionTracker.mLatestMouseY);
+        }
+    }
+
     /**
      * Update a tap exclude region in the window identified by the provided id. Touches down on this
      * region will not:
@@ -8772,4 +8818,34 @@ public class WindowManagerService extends IWindowManager.Stub
         mTaskTransitionSpec = null;
     }
 
+    @Override
+    @RequiresPermission(Manifest.permission.ACCESS_FPS_COUNTER)
+    public void registerTaskFpsCallback(@IntRange(from = 0) int taskId,
+            IOnFpsCallbackListener listener) {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FPS_COUNTER)
+                != PackageManager.PERMISSION_GRANTED) {
+            final int pid = Binder.getCallingPid();
+            throw new SecurityException("Access denied to process: " + pid
+                    + ", must have permission " + Manifest.permission.ACCESS_FPS_COUNTER);
+        }
+
+        if (mRoot.anyTaskForId(taskId) == null) {
+            throw new IllegalArgumentException("no task with taskId: " + taskId);
+        }
+
+        mTaskFpsCallbackController.registerCallback(taskId, listener);
+    }
+
+    @Override
+    @RequiresPermission(Manifest.permission.ACCESS_FPS_COUNTER)
+    public void unregisterTaskFpsCallback(IOnFpsCallbackListener listener) {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.ACCESS_FPS_COUNTER)
+                != PackageManager.PERMISSION_GRANTED) {
+            final int pid = Binder.getCallingPid();
+            throw new SecurityException("Access denied to process: " + pid
+                    + ", must have permission " + Manifest.permission.ACCESS_FPS_COUNTER);
+        }
+
+        mTaskFpsCallbackController.unregisterCallback(listener);
+    }
 }

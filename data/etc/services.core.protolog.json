@@ -103,18 +103,6 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/TaskFragment.java"
     },
-    "-2002500255": {
-      "message": "Defer removing snapshot surface in %dms",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/TaskSnapshotSurface.java"
-    },
-    "-1991255017": {
-      "message": "Drawing snapshot surface sizeMismatch=%b",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/TaskSnapshotSurface.java"
-    },
     "-1980468143": {
       "message": "DisplayArea appeared name=%s",
       "level": "VERBOSE",
@@ -744,6 +732,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-1343787701": {
+      "message": "startBackNavigation task=%s, topRunningActivity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "-1340540100": {
       "message": "Creating SnapshotStartingData",
@@ -1597,12 +1591,6 @@
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
-    "-405536909": {
-      "message": "Removing snapshot surface",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/TaskSnapshotSurface.java"
-    },
     "-401282500": {
       "message": "destroyIfPossible: r=%s destroy returned removed=%s",
       "level": "DEBUG",
@@ -1867,6 +1855,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/Task.java"
     },
+    "-134091882": {
+      "message": "Screenshotting Activity %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/TaskFragment.java"
+    },
     "-124316973": {
       "message": "Translucent=%s Floating=%s ShowWallpaper=%s Disable=%s",
       "level": "VERBOSE",
@@ -1951,6 +1945,12 @@
       "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
       "at": "com\/android\/server\/wm\/WindowContainer.java"
     },
+    "-23020844": {
+      "message": "Back: Reset surfaces",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "-21399771": {
       "message": "activity %s already destroying, skipping request with reason:%s",
       "level": "VERBOSE",
@@ -2004,12 +2004,6 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "44438983": {
-      "message": "performLayout: Activity exiting now removed %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "45285419": {
       "message": "startingWindow was set but startingSurface==null, couldn't remove",
@@ -3271,12 +3265,6 @@
       "group": "WM_DEBUG_LAYER_MIRRORING",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
-    "1417601133": {
-      "message": "Enqueueing ADD_STARTING",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STARTING_WINDOW",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "1422781269": {
       "message": "Resuming rotation after re-position",
       "level": "DEBUG",
@@ -3396,6 +3384,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "1554795024": {
+      "message": "Previous Activity is %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "1557732761": {
       "message": "For Intent %s bringing to top: %s",
@@ -3923,6 +3917,9 @@
     },
     "WM_DEBUG_APP_TRANSITIONS_ANIM": {
       "tag": "WindowManager"
+    },
+    "WM_DEBUG_BACK_PREVIEW": {
+      "tag": "CoreBackPreview"
     },
     "WM_DEBUG_BOOT": {
       "tag": "WindowManager"

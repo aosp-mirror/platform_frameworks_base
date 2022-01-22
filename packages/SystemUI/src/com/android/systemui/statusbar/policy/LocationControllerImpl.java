@@ -22,10 +22,14 @@ import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
 
 import static com.android.settingslib.Utils.updateLocationEnabled;
 
+import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.PermissionChecker;
+import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.location.LocationManager;
 import android.os.Handler;
 import android.os.Looper;
@@ -68,31 +72,37 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     private final BootCompleteCache mBootCompleteCache;
     private final UserTracker mUserTracker;
     private final H mHandler;
-
+    private final Handler mBackgroundHandler;
+    private final PackageManager mPackageManager;
 
     private boolean mAreActiveLocationRequests;
     private boolean mShouldDisplayAllAccesses;
+    private boolean mShowSystemAccesses;
 
     @Inject
     public LocationControllerImpl(Context context, AppOpsController appOpsController,
             DeviceConfigProxy deviceConfigProxy,
             @Main Looper mainLooper, @Background Handler backgroundHandler,
             BroadcastDispatcher broadcastDispatcher, BootCompleteCache bootCompleteCache,
-            UserTracker userTracker) {
+            UserTracker userTracker, PackageManager packageManager) {
         mContext = context;
         mAppOpsController = appOpsController;
         mDeviceConfigProxy = deviceConfigProxy;
         mBootCompleteCache = bootCompleteCache;
         mHandler = new H(mainLooper);
         mUserTracker = userTracker;
-        mShouldDisplayAllAccesses = getDeviceConfigSetting();
+        mBackgroundHandler = backgroundHandler;
+        mPackageManager = packageManager;
+        mShouldDisplayAllAccesses = getAllAccessesSetting();
+        mShowSystemAccesses = getShowSystemSetting();
 
         // Register to listen for changes in DeviceConfig settings.
         mDeviceConfigProxy.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_PRIVACY,
                 backgroundHandler::post,
                 properties -> {
-                    mShouldDisplayAllAccesses = getDeviceConfigSetting();
+                    mShouldDisplayAllAccesses = getAllAccessesSetting();
+                    mShowSystemAccesses = getShowSystemSetting();
                     updateActiveLocationRequests();
                 });
 
@@ -176,11 +186,15 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
                 UserHandle.of(userId));
     }
 
-    private boolean getDeviceConfigSetting() {
+    private boolean getAllAccessesSetting() {
         return mDeviceConfigProxy.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
                 SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_SMALL_ENABLED, false);
     }
 
+    private boolean getShowSystemSetting() {
+        return mDeviceConfigProxy.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
+                SystemUiDeviceConfigFlags.PROPERTY_LOCATION_INDICATORS_SHOW_SYSTEM, false);
+    }
     /**
      * Returns true if there currently exist active high power location requests.
      */
@@ -202,35 +216,74 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
      * Returns true if there currently exist active location requests.
      */
     @VisibleForTesting
-    protected boolean areActiveLocationRequests() {
+    protected void areActiveLocationRequests() {
         if (!mShouldDisplayAllAccesses) {
-            return false;
+            return;
         }
-        List<AppOpItem> appOpsItems = mAppOpsController.getActiveAppOps();
+        boolean hadActiveLocationRequests = mAreActiveLocationRequests;
+        boolean shouldDisplay = false;
 
+        List<AppOpItem> appOpsItems = mAppOpsController.getActiveAppOps();
+        final List<UserInfo> profiles = mUserTracker.getUserProfiles();
         final int numItems = appOpsItems.size();
         for (int i = 0; i < numItems; i++) {
             if (appOpsItems.get(i).getCode() == OP_FINE_LOCATION
                     || appOpsItems.get(i).getCode() == OP_COARSE_LOCATION) {
-                return true;
+                if (mShowSystemAccesses) {
+                    shouldDisplay = true;
+                } else {
+                    shouldDisplay |= !isSystemApp(profiles, appOpsItems.get(i));
+                }
             }
         }
 
-        return false;
+        mAreActiveLocationRequests = areActiveHighPowerLocationRequests() || shouldDisplay;
+        if (mAreActiveLocationRequests != hadActiveLocationRequests) {
+            mHandler.sendEmptyMessage(H.MSG_LOCATION_ACTIVE_CHANGED);
+        }
+    }
+
+    private boolean isSystemApp(List<UserInfo> profiles, AppOpItem item) {
+        final String permission = AppOpsManager.opToPermission(item.getCode());
+        UserHandle user = UserHandle.getUserHandleForUid(item.getUid());
+
+        // Don't show apps belonging to background users except managed users.
+        boolean foundUser = false;
+        final int numProfiles = profiles.size();
+        for (int i = 0; i < numProfiles; i++) {
+            if (profiles.get(i).getUserHandle().equals(user)) {
+                foundUser = true;
+            }
+        }
+        if (!foundUser) {
+            return true;
+        }
+
+        final int permissionFlags = mPackageManager.getPermissionFlags(
+                permission, item.getPackageName(), user);
+        if (PermissionChecker.checkPermissionForPreflight(mContext, permission,
+                PermissionChecker.PID_UNKNOWN, item.getUid(), item.getPackageName())
+                == PermissionChecker.PERMISSION_GRANTED) {
+            return (permissionFlags
+                    & PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED)
+                    == 0;
+        } else {
+            return (permissionFlags
+                    & PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED) == 0;
+        }
     }
 
     // Reads the active location requests from either OP_MONITOR_HIGH_POWER_LOCATION,
     // OP_FINE_LOCATION, or OP_COARSE_LOCATION and updates the status view if necessary.
     private void updateActiveLocationRequests() {
-        boolean hadActiveLocationRequests = mAreActiveLocationRequests;
         if (mShouldDisplayAllAccesses) {
-            mAreActiveLocationRequests =
-                    areActiveHighPowerLocationRequests() || areActiveLocationRequests();
+            mBackgroundHandler.post(this::areActiveLocationRequests);
         } else {
+            boolean hadActiveLocationRequests = mAreActiveLocationRequests;
             mAreActiveLocationRequests = areActiveHighPowerLocationRequests();
-        }
-        if (mAreActiveLocationRequests != hadActiveLocationRequests) {
-            mHandler.sendEmptyMessage(H.MSG_LOCATION_ACTIVE_CHANGED);
+            if (mAreActiveLocationRequests != hadActiveLocationRequests) {
+                mHandler.sendEmptyMessage(H.MSG_LOCATION_ACTIVE_CHANGED);
+            }
         }
     }
 

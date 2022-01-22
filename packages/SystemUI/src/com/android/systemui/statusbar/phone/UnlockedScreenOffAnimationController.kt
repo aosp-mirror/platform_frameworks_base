@@ -290,6 +290,9 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         return true
     }
 
+    override fun shouldDelayDisplayDozeTransition(): Boolean =
+        dozeParameters.get().shouldControlUnlockedScreenOff()
+
     fun addCallback(callback: Callback) {
         callbacks.add(callback)
     }

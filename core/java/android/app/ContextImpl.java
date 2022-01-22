@@ -2179,8 +2179,8 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public void selfRevokePermissions(@NonNull Collection<String> permissions) {
-        getSystemService(PermissionManager.class).selfRevokePermissions(permissions);
+    public void revokeOwnPermissionsOnKill(@NonNull Collection<String> permissions) {
+        getSystemService(PermissionManager.class).revokeOwnPermissionsOnKill(permissions);
     }
 
     @Override

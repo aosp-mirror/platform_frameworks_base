@@ -73,19 +73,12 @@ class CompanionDeviceShellCommand extends android.os.ShellCommand {
                 }
                 break;
 
-                case "simulate_connect": {
-                    mService.onDeviceConnected(getNextArgRequired());
-                }
-                break;
-
-                case "simulate_disconnect": {
-                    mService.onDeviceDisconnected(getNextArgRequired());
-                }
-                break;
                 case "clear-association-memory-cache": {
+                    mService.persistState();
                     mService.loadAssociationsFromDisk();
                 }
                 break;
+
                 default:
                     return handleDefaultCommands(cmd);
             }

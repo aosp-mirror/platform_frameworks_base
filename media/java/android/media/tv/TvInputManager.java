@@ -31,7 +31,7 @@ import android.graphics.Rect;
 import android.media.AudioDeviceInfo;
 import android.media.AudioFormat.Encoding;
 import android.media.PlaybackParams;
-import android.media.tv.interactive.TvIAppManager;
+import android.media.tv.interactive.TvInteractiveAppManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -2318,7 +2318,7 @@ public final class TvInputManager {
         // @GuardedBy("mMetadataLock")
         private int mVideoHeight;
 
-        private TvIAppManager.Session mIAppSession;
+        private TvInteractiveAppManager.Session mIAppSession;
         private boolean mIAppNotificationEnabled = false;
 
         private Session(IBinder token, InputChannel channel, ITvInputManager service, int userId,
@@ -2331,11 +2331,11 @@ public final class TvInputManager {
             mSessionCallbackRecordMap = sessionCallbackRecordMap;
         }
 
-        public TvIAppManager.Session getInteractiveAppSession() {
+        public TvInteractiveAppManager.Session getInteractiveAppSession() {
             return mIAppSession;
         }
 
-        public void setInteractiveAppSession(TvIAppManager.Session iAppSession) {
+        public void setInteractiveAppSession(TvInteractiveAppManager.Session iAppSession) {
             this.mIAppSession = iAppSession;
         }
 
@@ -2593,9 +2593,9 @@ public final class TvInputManager {
 
         /**
          * Enables interactive app notification.
+         *
          * @param enabled {@code true} if you want to enable interactive app notifications.
          *                {@code false} otherwise.
-         * @hide
          */
         public void setInteractiveAppNotificationEnabled(boolean enabled) {
             if (mToken == null) {

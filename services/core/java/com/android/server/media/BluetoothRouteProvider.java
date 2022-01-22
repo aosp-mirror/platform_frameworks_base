@@ -344,10 +344,19 @@ class BluetoothRouteProvider {
     }
 
     private void addActiveRoute(BluetoothRouteInfo btRoute) {
+        if (btRoute == null) {
+            if (DEBUG) {
+                Log.d(TAG, " btRoute is null");
+            }
+            return;
+        }
         if (DEBUG) {
             Log.d(TAG, "Adding active route: " + btRoute.route);
         }
-        if (btRoute == null || mActiveRoutes.contains(btRoute)) {
+        if (mActiveRoutes.contains(btRoute)) {
+            if (DEBUG) {
+                Log.d(TAG, " btRoute is already added.");
+            }
             return;
         }
         setRouteConnectionState(btRoute, STATE_CONNECTED);

@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.ServiceManager;
 import android.service.games.GameService;
 import android.service.games.GameSessionService;
 import android.service.games.IGameService;
@@ -27,6 +28,9 @@ import android.service.games.IGameSessionService;
 
 import com.android.internal.infra.ServiceConnector;
 import com.android.internal.os.BackgroundThread;
+import com.android.server.LocalServices;
+import com.android.server.wm.WindowManagerInternal;
+import com.android.server.wm.WindowManagerService;
 
 final class GameServiceProviderInstanceFactoryImpl implements GameServiceProviderInstanceFactory {
     private final Context mContext;
@@ -44,6 +48,8 @@ final class GameServiceProviderInstanceFactoryImpl implements GameServiceProvide
                 BackgroundThread.getExecutor(),
                 new GameClassifierImpl(mContext.getPackageManager()),
                 ActivityTaskManager.getService(),
+                (WindowManagerService) ServiceManager.getService(Context.WINDOW_SERVICE),
+                LocalServices.getService(WindowManagerInternal.class),
                 new GameServiceConnector(mContext, gameServiceProviderConfiguration),
                 new GameSessionServiceConnector(mContext, gameServiceProviderConfiguration));
     }

@@ -52,12 +52,14 @@ public final class DeviceStateRotationLockSettingsManager {
     private final Handler mMainHandler = Handler.getMain();
     private final Set<DeviceStateRotationLockSettingsListener> mListeners = new HashSet<>();
     private SparseIntArray mDeviceStateRotationLockSettings;
+    private SparseIntArray mDeviceStateRotationLockFallbackSettings;
 
     private DeviceStateRotationLockSettingsManager(Context context) {
         mContentResolver = context.getContentResolver();
         mDeviceStateRotationLockDefaults =
                 context.getResources()
                         .getStringArray(R.array.config_perDeviceStateRotationLockDefaults);
+        loadDefaults();
         initializeInMemoryMap();
         listenForSettingsChange(context);
     }
@@ -114,6 +116,11 @@ public final class DeviceStateRotationLockSettingsManager {
 
     /** Updates the rotation lock setting for a specified device state. */
     public void updateSetting(int deviceState, boolean rotationLocked) {
+        if (mDeviceStateRotationLockFallbackSettings.indexOfKey(deviceState) >= 0) {
+            // The setting for this device state is IGNORED, and has a fallback device state.
+            // The setting for that fallback device state should be the changed in this case.
+            deviceState = mDeviceStateRotationLockFallbackSettings.get(deviceState);
+        }
         mDeviceStateRotationLockSettings.put(
                 deviceState,
                 rotationLocked
@@ -123,15 +130,36 @@ public final class DeviceStateRotationLockSettingsManager {
     }
 
     /**
-     * Returns the {@link DeviceStateRotationLockSetting} for the given device state. If no setting
-     * is specified for this device state, it will return {@link
+     * Returns the {@link Settings.Secure.DeviceStateRotationLockSetting} for the given device
+     * state.
+     *
+     * <p>If the setting for this device state is {@link DEVICE_STATE_ROTATION_LOCK_IGNORED}, it
+     * will return the setting for the fallback device state.
+     *
+     * <p>If no fallback is specified for this device state, it will return {@link
      * DEVICE_STATE_ROTATION_LOCK_IGNORED}.
      */
     @Settings.Secure.DeviceStateRotationLockSetting
     public int getRotationLockSetting(int deviceState) {
-        return mDeviceStateRotationLockSettings.get(
-                deviceState, DEVICE_STATE_ROTATION_LOCK_IGNORED);
+        int rotationLockSetting = mDeviceStateRotationLockSettings.get(
+                deviceState, /* valueIfKeyNotFound= */ DEVICE_STATE_ROTATION_LOCK_IGNORED);
+        if (rotationLockSetting == DEVICE_STATE_ROTATION_LOCK_IGNORED) {
+            rotationLockSetting = getFallbackRotationLockSetting(deviceState);
+        }
+        return rotationLockSetting;
     }
+
+    private int getFallbackRotationLockSetting(int deviceState) {
+        int indexOfFallbackState = mDeviceStateRotationLockFallbackSettings.indexOfKey(deviceState);
+        if (indexOfFallbackState < 0) {
+            Log.w(TAG, "Setting is ignored, but no fallback was specified.");
+            return DEVICE_STATE_ROTATION_LOCK_IGNORED;
+        }
+        int fallbackState = mDeviceStateRotationLockFallbackSettings.valueAt(indexOfFallbackState);
+        return mDeviceStateRotationLockSettings.get(fallbackState,
+                /* valueIfKeyNotFound= */ DEVICE_STATE_ROTATION_LOCK_IGNORED);
+    }
+
 
     /** Returns true if the rotation is locked for the current device state */
     public boolean isRotationLocked(int deviceState) {
@@ -223,21 +251,30 @@ public final class DeviceStateRotationLockSettingsManager {
     }
 
     private void loadDefaults() {
-        if (mDeviceStateRotationLockDefaults.length == 0) {
-            Log.w(TAG, "Empty default settings");
-            mDeviceStateRotationLockSettings = new SparseIntArray(/* initialCapacity= */ 0);
-            return;
-        }
-        mDeviceStateRotationLockSettings =
-                new SparseIntArray(mDeviceStateRotationLockDefaults.length);
-        for (String serializedDefault : mDeviceStateRotationLockDefaults) {
-            String[] entry = serializedDefault.split(SEPARATOR_REGEX);
+        mDeviceStateRotationLockSettings = new SparseIntArray(
+                mDeviceStateRotationLockDefaults.length);
+        mDeviceStateRotationLockFallbackSettings = new SparseIntArray(1);
+        for (String entry : mDeviceStateRotationLockDefaults) {
+            String[] values = entry.split(SEPARATOR_REGEX);
             try {
-                int key = Integer.parseInt(entry[0]);
-                int value = Integer.parseInt(entry[1]);
-                mDeviceStateRotationLockSettings.put(key, value);
+                int deviceState = Integer.parseInt(values[0]);
+                int rotationLockSetting = Integer.parseInt(values[1]);
+                if (rotationLockSetting == DEVICE_STATE_ROTATION_LOCK_IGNORED) {
+                    if (values.length == 3) {
+                        int fallbackDeviceState = Integer.parseInt(values[2]);
+                        mDeviceStateRotationLockFallbackSettings.put(deviceState,
+                                fallbackDeviceState);
+                    } else {
+                        Log.w(TAG,
+                                "Rotation lock setting is IGNORED, but values have unexpected "
+                                        + "size of "
+                                        + values.length);
+                    }
+                }
+                mDeviceStateRotationLockSettings.put(deviceState, rotationLockSetting);
             } catch (NumberFormatException e) {
-                Log.wtf(TAG, "Error deserializing default settings", e);
+                Log.wtf(TAG, "Error parsing settings entry. Entry was: " + entry, e);
+                return;
             }
         }
     }

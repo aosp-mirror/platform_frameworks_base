@@ -72,7 +72,7 @@ public abstract class InternalEnumerateClient<T> extends HalClientMonitor<T>
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
 
         // The biometric template ids will be removed when we get confirmation from the HAL

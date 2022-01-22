@@ -503,6 +503,11 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
                     PackageManager.Property::getString
                 )
             }
+        ),
+        getSetByValue(
+            AndroidPackage::shouldInheritKeyStoreKeys,
+            ParsingPackage::setInheritKeyStoreKeys,
+            true
         )
     )
 

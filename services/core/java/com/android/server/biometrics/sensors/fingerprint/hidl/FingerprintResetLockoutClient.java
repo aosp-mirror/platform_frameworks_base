@@ -22,6 +22,7 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 
 import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 
 /**
  * Clears lockout, which is handled in the framework (and not the HAL) for the
@@ -40,7 +41,7 @@ public class FingerprintResetLockoutClient extends BaseClientMonitor {
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
         mLockoutTracker.resetFailedAttemptsForUser(true /* clearAttemptCounter */,
                 getTargetUserId());

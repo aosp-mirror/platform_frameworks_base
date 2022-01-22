@@ -186,6 +186,7 @@ public class TrustAgentService extends Service {
     private static final int MSG_ESCROW_TOKEN_ADDED = 7;
     private static final int MSG_ESCROW_TOKEN_STATE_RECEIVED = 8;
     private static final int MSG_ESCROW_TOKEN_REMOVED = 9;
+    private static final int MSG_USER_REQUESTED_UNLOCK = 10;
 
     private static final String EXTRA_TOKEN = "token";
     private static final String EXTRA_TOKEN_HANDLE = "token_handle";
@@ -218,6 +219,9 @@ public class TrustAgentService extends Service {
             switch (msg.what) {
                 case MSG_UNLOCK_ATTEMPT:
                     onUnlockAttempt(msg.arg1 != 0);
+                    break;
+                case MSG_USER_REQUESTED_UNLOCK:
+                    onUserRequestedUnlock();
                     break;
                 case MSG_UNLOCK_LOCKOUT:
                     onDeviceUnlockLockout(msg.arg1);
@@ -306,7 +310,7 @@ public class TrustAgentService extends Service {
      *
      * @see #FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE
      *
-     * TODO(b/213631672): Hook up call from system server & SystemUI, then un-hide
+     * TODO(b/213631672): Add CTS tests
      * @hide
      */
     public void onUserRequestedUnlock() {
@@ -662,6 +666,11 @@ public class TrustAgentService extends Service {
         @Override /* Binder API */
         public void onUnlockAttempt(boolean successful) {
             mHandler.obtainMessage(MSG_UNLOCK_ATTEMPT, successful ? 1 : 0, 0).sendToTarget();
+        }
+
+        @Override
+        public void onUserRequestedUnlock() {
+            mHandler.obtainMessage(MSG_USER_REQUESTED_UNLOCK).sendToTarget();
         }
 
         @Override

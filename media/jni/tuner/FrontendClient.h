@@ -120,6 +120,11 @@ public:
      */
     Result getHardwareInfo(string& info);
 
+    /**
+     * Filter out unnecessary PID from frontend output.
+     */
+    Result removeOutputPid(int32_t pid);
+
     int32_t getId();
 
     shared_ptr<ITunerFrontend> getAidlFrontend();

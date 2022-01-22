@@ -34,3 +34,7 @@ per-file res/values/dimens_car.xml = file:/platform/packages/services/Car:/OWNER
 
 # Wear
 per-file res/*-watch/* = file:/platform/frameworks/opt/wear:/OWNERS
+
+# PowerProfile
+per-file res/xml/power_profile.xml = file:/BATTERY_STATS_OWNERS
+per-file res/xml/power_profile_test.xml = file:/BATTERY_STATS_OWNERS

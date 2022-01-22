@@ -513,7 +513,7 @@ class ProcessRecord implements WindowProcessListener {
             }
         }
         processInfo = procInfo;
-        isolated = _info.uid != _uid;
+        isolated = Process.isIsolated(_uid);
         appZygote = (UserHandle.getAppId(_uid) >= Process.FIRST_APP_ZYGOTE_ISOLATED_UID
                 && UserHandle.getAppId(_uid) <= Process.LAST_APP_ZYGOTE_ISOLATED_UID);
         uid = _uid;

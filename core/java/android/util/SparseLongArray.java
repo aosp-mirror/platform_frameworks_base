@@ -164,6 +164,30 @@ public class SparseLongArray implements Cloneable {
     }
 
     /**
+     * Adds a mapping from the specified key to the specified value,
+     * <b>adding</b> its value to the previous mapping from the specified key if there
+     * was one.
+     *
+     * <p>This differs from {@link #put} because instead of replacing any previous value, it adds
+     * (in the numerical sense) to it.
+     *
+     * @hide
+     */
+    public void incrementValue(int key, long summand) {
+        int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
+
+        if (i >= 0) {
+            mValues[i] += summand;
+        } else {
+            i = ~i;
+
+            mKeys = GrowingArrayUtils.insert(mKeys, mSize, i, key);
+            mValues = GrowingArrayUtils.insert(mValues, mSize, i, summand);
+            mSize++;
+        }
+    }
+
+    /**
      * Returns the number of key-value mappings that this SparseLongArray
      * currently stores.
      */

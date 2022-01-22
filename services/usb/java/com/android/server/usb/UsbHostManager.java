@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
@@ -45,6 +46,8 @@ import com.android.server.usb.descriptors.UsbDeviceDescriptor;
 import com.android.server.usb.descriptors.UsbInterfaceDescriptor;
 import com.android.server.usb.descriptors.report.TextReportCanvas;
 import com.android.server.usb.descriptors.tree.UsbDescriptorsTree;
+
+import libcore.io.IoUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -89,6 +92,13 @@ public class UsbHostManager {
     private final LinkedList<ConnectionRecord> mConnections = new LinkedList<ConnectionRecord>();
     private ConnectionRecord mLastConnect;
     private final ArrayMap<String, ConnectionRecord> mConnected = new ArrayMap<>();
+
+    /**
+     * List of connected MIDI devices
+     */
+    private final HashMap<String, UsbUniversalMidiDevice>
+            mMidiDevices = new HashMap<String, UsbUniversalMidiDevice>();
+    private final boolean mHasMidiFeature;
 
     /*
      * ConnectionRecord
@@ -245,6 +255,7 @@ public class UsbHostManager {
             setUsbDeviceConnectionHandler(ComponentName.unflattenFromString(
                     deviceConnectionHandler));
         }
+        mHasMidiFeature = context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_MIDI);
     }
 
     public void setCurrentUserSettings(UsbProfileGroupSettingsManager settings) {
@@ -413,6 +424,18 @@ public class UsbHostManager {
 
                 mUsbAlsaManager.usbDeviceAdded(deviceAddress, newDevice, parser);
 
+                if (mHasMidiFeature) {
+                    if (parser.containsUniversalMidiDeviceEndpoint()) {
+                        UsbUniversalMidiDevice midiDevice = UsbUniversalMidiDevice.create(mContext,
+                                newDevice, parser);
+                        if (midiDevice != null) {
+                            mMidiDevices.put(deviceAddress, midiDevice);
+                        } else {
+                            Slog.e(TAG, "Universal Midi Device is null.");
+                        }
+                    }
+                }
+
                 // Tracking
                 addConnectionRecord(deviceAddress, ConnectionRecord.CONNECT,
                         parser.getRawDescriptors());
@@ -446,6 +469,14 @@ public class UsbHostManager {
                 Slog.d(TAG, "Removed device at " + deviceAddress + ": " + device.getProductName());
                 mUsbAlsaManager.usbDeviceRemoved(deviceAddress);
                 mPermissionManager.usbDeviceRemoved(device);
+
+                // MIDI
+                UsbUniversalMidiDevice midiDevice = mMidiDevices.remove(deviceAddress);
+                if (midiDevice != null) {
+                    Slog.i(TAG, "USB Universal MIDI Device Removed: " + deviceAddress);
+                    IoUtils.closeQuietly(midiDevice);
+                }
+
                 getCurrentUserSettings().usbDeviceRemoved(device);
                 ConnectionRecord current = mConnected.get(deviceAddress);
                 // Tracking

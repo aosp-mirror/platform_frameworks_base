@@ -40,6 +40,8 @@ import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.apppairs.AppPairsController;
+import com.android.wm.shell.back.BackAnimation;
+import com.android.wm.shell.back.BackAnimationController;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.common.DisplayController;
@@ -235,6 +237,17 @@ public abstract class WMShellBaseModule {
     static WindowManagerShellWrapper provideWindowManagerShellWrapper(
             @ShellMainThread ShellExecutor mainExecutor) {
         return new WindowManagerShellWrapper(mainExecutor);
+    }
+
+    //
+    // Back animation
+    //
+
+    @WMSingleton
+    @Provides
+    static Optional<BackAnimation> provideBackAnimation(
+            Optional<BackAnimationController> backAnimationController) {
+        return backAnimationController.map(BackAnimationController::getBackAnimationImpl);
     }
 
     //
@@ -677,5 +690,17 @@ public abstract class WMShellBaseModule {
         return new ShellCommandHandlerImpl(shellTaskOrganizer,
                 legacySplitScreenOptional, splitScreenOptional, pipOptional, oneHandedOptional,
                 hideDisplayCutout, appPairsOptional, recentTasksOptional, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<BackAnimationController> provideBackAnimationController(
+            @ShellMainThread ShellExecutor shellExecutor
+    ) {
+        if (BackAnimationController.IS_ENABLED) {
+            return Optional.of(
+                    new BackAnimationController(shellExecutor));
+        }
+        return Optional.empty();
     }
 }

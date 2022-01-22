@@ -3256,6 +3256,7 @@
     <public name="gameSessionService" />
     <public name="localeConfig" />
     <public name="showBackground" />
+    <public name="inheritKeyStoreKeys" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01de0000">
@@ -3279,6 +3280,8 @@
     <public name="config_systemAppProtectionService" />
     <!-- @hide @SystemApi @TestApi -->
     <public name="config_systemAutomotiveCalendarSyncManager" />
+    <!-- @hide @SystemApi -->
+    <public name="config_defaultAutomotiveNavigation" />
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01db0000">
@@ -3322,6 +3325,8 @@
   <staging-public-group type="bool" first-id="0x01cf0000">
     <!-- @hide @TestApi -->
     <public name="config_preventImeStartupUnlessTextEditor" />
+    <!-- @hide @SystemApi -->
+    <public name="config_enableQrCodeScannerOnLockScreen" />
   </staging-public-group>
 
   <staging-public-group type="fraction" first-id="0x01ce0000">

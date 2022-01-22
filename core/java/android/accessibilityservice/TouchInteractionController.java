@@ -24,6 +24,8 @@ import android.util.ArrayMap;
 import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.concurrent.Executor;
 
 /**
@@ -102,6 +104,11 @@ public final class TouchInteractionController {
     private boolean mServiceDetectsGestures;
     /** Map of callbacks to executors. Lazily created when adding the first callback. */
     private ArrayMap<Callback, Executor> mCallbacks;
+    // A list of motion events that should be queued until a pending transition has taken place.
+    private Queue<MotionEvent> mQueuedMotionEvents = new LinkedList<>();
+    // Whether this controller is waiting for a state transition.
+    // Motion events will be queued and sent to listeners after the transition has taken place.
+    private boolean mStateChangeRequested = false;
 
     // The current state of the display.
     private int mState = STATE_CLEAR;
@@ -169,6 +176,14 @@ public final class TouchInteractionController {
      * main thread.
      */
     void onMotionEvent(MotionEvent event) {
+        if (mStateChangeRequested) {
+            mQueuedMotionEvents.add(event);
+        } else {
+            sendEventToAllListeners(event);
+        }
+    }
+
+    private void sendEventToAllListeners(MotionEvent event) {
         final ArrayMap<Callback, Executor> entries;
         synchronized (mLock) {
             // callbacks may remove themselves. Perform a shallow copy to avoid concurrent
@@ -208,6 +223,10 @@ public final class TouchInteractionController {
                 // We're already on the main thread, just run the callback.
                 callback.onStateChanged(state);
             }
+        }
+        mStateChangeRequested = false;
+        while (mQueuedMotionEvents.size() > 0) {
+            sendEventToAllListeners(mQueuedMotionEvents.poll());
         }
     }
 
@@ -253,6 +272,7 @@ public final class TouchInteractionController {
             } catch (RemoteException re) {
                 throw new RuntimeException(re);
             }
+            mStateChangeRequested = true;
         }
     }
 
@@ -281,6 +301,7 @@ public final class TouchInteractionController {
             } catch (RemoteException re) {
                 throw new RuntimeException(re);
             }
+            mStateChangeRequested = true;
         }
     }
 
@@ -302,6 +323,7 @@ public final class TouchInteractionController {
             } catch (RemoteException re) {
                 throw new RuntimeException(re);
             }
+            mStateChangeRequested = true;
         }
     }
 
