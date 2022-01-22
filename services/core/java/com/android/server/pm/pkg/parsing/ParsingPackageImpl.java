@@ -492,6 +492,10 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
                 ENABLED,
                 DISALLOW_PROFILING,
                 REQUEST_FOREGROUND_SERVICE_EXEMPTION,
+                ATTRIBUTIONS_ARE_USER_VISIBLE,
+                RESET_ENABLED_SETTINGS_ON_APP_DATA_CLEARED,
+                SDK_LIBRARY,
+                INHERIT_KEYSTORE_KEYS,
         })
         public @interface Values {}
         private static final long EXTERNAL_STORAGE = 1L;
@@ -544,6 +548,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         private static final long ATTRIBUTIONS_ARE_USER_VISIBLE = 1L << 47;
         private static final long RESET_ENABLED_SETTINGS_ON_APP_DATA_CLEARED = 1L << 48;
         private static final long SDK_LIBRARY = 1L << 49;
+        private static final long INHERIT_KEYSTORE_KEYS = 1L << 50;
     }
 
     private ParsingPackageImpl setBoolean(@Booleans.Values long flag, boolean value) {
@@ -2371,6 +2376,11 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     }
 
     @Override
+    public boolean shouldInheritKeyStoreKeys() {
+        return getBoolean(Booleans.INHERIT_KEYSTORE_KEYS);
+    }
+
+    @Override
     public ParsingPackageImpl setBaseRevisionCode(int value) {
         baseRevisionCode = value;
         return this;
@@ -2511,6 +2521,11 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     public ParsingPackageImpl setInstallLocation(int value) {
         installLocation = value;
         return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setInheritKeyStoreKeys(boolean value) {
+        return setBoolean(Booleans.INHERIT_KEYSTORE_KEYS, value);
     }
 
     @Override

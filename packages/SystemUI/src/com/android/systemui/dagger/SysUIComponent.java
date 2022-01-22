@@ -36,6 +36,7 @@ import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider;
 import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.apppairs.AppPairs;
+import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.compatui.CompatUI;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
@@ -120,6 +121,9 @@ public interface SysUIComponent {
 
         @BindsInstance
         Builder setDragAndDrop(Optional<DragAndDrop> d);
+
+        @BindsInstance
+        Builder setBackAnimation(Optional<BackAnimation> b);
 
         SysUIComponent build();
     }

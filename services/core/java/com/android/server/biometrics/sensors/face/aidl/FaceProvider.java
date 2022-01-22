@@ -49,6 +49,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.InvalidationRequesterClient;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
@@ -217,7 +218,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     }
 
     private void scheduleForSensor(int sensorId, @NonNull BaseClientMonitor client,
-            BaseClientMonitor.Callback callback) {
+            ClientMonitorCallback callback) {
         if (!mSensors.contains(sensorId)) {
             throw new IllegalStateException("Unable to schedule client: " + client
                     + " for sensor: " + sensorId);
@@ -341,7 +342,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                     opPackageName, id, FaceUtils.getInstance(sensorId), disabledFeatures,
                     ENROLL_TIMEOUT_SEC, previewSurface, sensorId, maxTemplatesPerUser,
                     debugConsent);
-            scheduleForSensor(sensorId, client, new BaseClientMonitor.Callback() {
+            scheduleForSensor(sensorId, client, new ClientMonitorCallback() {
                 @Override
                 public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                         boolean success) {
@@ -511,7 +512,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
 
     @Override
     public void scheduleInternalCleanup(int sensorId, int userId,
-            @Nullable BaseClientMonitor.Callback callback) {
+            @Nullable ClientMonitorCallback callback) {
         mHandler.post(() -> {
             final List<Face> enrolledList = getEnrolledFaces(sensorId, userId);
             final FaceInternalCleanupClient client =

@@ -98,7 +98,7 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
 
         if (hasReachedEnrollmentLimit()) {

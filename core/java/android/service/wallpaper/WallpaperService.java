@@ -1629,6 +1629,7 @@ public abstract class WallpaperService extends Service {
                 return;
             }
             Surface surface = mSurfaceHolder.getSurface();
+            if (!surface.isValid()) return;
             boolean widthIsLarger = mSurfaceSize.x > mSurfaceSize.y;
             int smaller = widthIsLarger ? mSurfaceSize.x
                     : mSurfaceSize.y;

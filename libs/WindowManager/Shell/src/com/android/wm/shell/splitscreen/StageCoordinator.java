@@ -166,17 +166,6 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     @StageType
     private int mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
 
-    private final Runnable mOnTransitionAnimationComplete = () -> {
-        // If still playing, let it finish.
-        if (!isSplitScreenVisible()) {
-            // Update divider state after animation so that it is still around and positioned
-            // properly for the animation itself.
-            mSplitLayout.release();
-            mSplitLayout.resetDividerPosition();
-            mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
-        }
-    };
-
     private final SplitWindowManager.ParentContainerCallbacks mParentContainerCallbacks =
             new SplitWindowManager.ParentContainerCallbacks() {
                 @Override
@@ -237,7 +226,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         deviceStateManager.registerCallback(taskOrganizer.getExecutor(),
                 new DeviceStateManager.FoldStateListener(mContext, this::onFoldedStateChanged));
         mSplitTransitions = new SplitScreenTransitions(transactionPool, transitions,
-                mOnTransitionAnimationComplete, this);
+                this::onTransitionAnimationComplete, this);
         mDisplayController.addDisplayWindowListener(this);
         mDisplayLayout = new DisplayLayout(displayController.getDisplayLayout(displayId));
         transitions.addHandler(this);
@@ -267,7 +256,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mRootTDAOrganizer.registerListener(displayId, this);
         mSplitLayout = splitLayout;
         mSplitTransitions = new SplitScreenTransitions(transactionPool, transitions,
-                mOnTransitionAnimationComplete, this);
+                this::onTransitionAnimationComplete, this);
         mMainUnfoldController = unfoldControllerProvider.get().orElse(null);
         mSideUnfoldController = unfoldControllerProvider.get().orElse(null);
         mLogger = logger;
@@ -1234,7 +1223,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final ActivityManager.RunningTaskInfo triggerTask = request.getTriggerTask();
         if (triggerTask == null) {
             // Still want to monitor everything while in split-screen, so return non-null.
-            return isSplitScreenVisible() ? new WindowContainerTransaction() : null;
+            return mMainStage.isActive() ? new WindowContainerTransaction() : null;
         } else if (triggerTask.displayId != mDisplayId) {
             // Skip handling task on the other display.
             return null;
@@ -1250,7 +1239,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mRecentTasks.ifPresent(recentTasks -> recentTasks.removeSplitPair(triggerTask.taskId));
         }
 
-        if (isSplitScreenVisible()) {
+        if (mMainStage.isActive()) {
             // Try to handle everything while in split-screen, so return a WCT even if it's empty.
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  split is active so using split"
                             + "Transition to handle request. triggerTask=%d type=%s mainChildren=%d"
@@ -1293,6 +1282,13 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
         }
         return out;
+    }
+
+    @Override
+    public void mergeAnimation(IBinder transition, TransitionInfo info,
+            SurfaceControl.Transaction t, IBinder mergeTarget,
+            Transitions.TransitionFinishCallback finishCallback) {
+        mSplitTransitions.mergeAnimation(transition, info, t, mergeTarget, finishCallback);
     }
 
     @Override
@@ -1373,6 +1369,17 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mSplitTransitions.playAnimation(transition, info, startTransaction, finishTransaction,
                 finishCallback, mMainStage.mRootTaskInfo.token, mSideStage.mRootTaskInfo.token);
         return true;
+    }
+
+    void onTransitionAnimationComplete() {
+        // If still playing, let it finish.
+        if (!mMainStage.isActive()) {
+            // Update divider state after animation so that it is still around and positioned
+            // properly for the animation itself.
+            mSplitLayout.release();
+            mSplitLayout.resetDividerPosition();
+            mTopStageAfterFoldDismiss = STAGE_TYPE_UNDEFINED;
+        }
     }
 
     private boolean startPendingEnterAnimation(@NonNull IBinder transition,
@@ -1513,8 +1520,17 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return true;
     }
 
-    void finishRecentAnimation(boolean toHome) {
-        if (toHome) {
+    void finishRecentAnimation(boolean dismissSplit) {
+        // Exclude the case that the split screen has been dismissed already.
+        if (!mMainStage.isActive()) {
+            // The latest split dismissing transition might be a no-op transition and thus won't
+            // callback startAnimation, update split visibility here to cover this kind of no-op
+            // transition case.
+            setSplitsVisible(false);
+            return;
+        }
+
+        if (dismissSplit) {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, wct);
             mSplitTransitions.startDismissTransition(null /* transition */, wct, this,

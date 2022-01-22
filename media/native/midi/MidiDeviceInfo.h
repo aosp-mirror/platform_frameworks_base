@@ -38,6 +38,7 @@ public:
     int getType() const { return mType; }
     int getUid() const { return mId; }
     bool isPrivate() const { return mIsPrivate; }
+    int getDefaultProtocol() const { return mDefaultProtocol; }
     const Vector<String16>& getInputPortNames() const { return mInputPortNames; }
     const Vector<String16>&  getOutputPortNames() const { return mOutputPortNames; }
     String16 getProperty(const char* propertyName);
@@ -48,6 +49,18 @@ public:
         TYPE_VIRTUAL = 2,
         TYPE_BLUETOOTH = 3,
     };
+
+    enum {
+        PROTOCOL_UMP_USE_MIDI_CI = 0,
+        PROTOCOL_UMP_MIDI_1_0_UP_TO_64_BITS = 1,
+        PROTOCOL_UMP_MIDI_1_0_UP_TO_64_BITS_AND_JRTS = 2,
+        PROTOCOL_UMP_MIDI_1_0_UP_TO_128_BITS = 3,
+        PROTOCOL_UMP_MIDI_1_0_UP_TO_128_BITS_AND_JRTS = 4,
+        PROTOCOL_UMP_MIDI_2_0 = 17,
+        PROTOCOL_UMP_MIDI_2_0_AND_JRTS = 18,
+        PROTOCOL_UNKNOWN = -1,
+    };
+
     static const char* const PROPERTY_NAME;
     static const char* const PROPERTY_MANUFACTURER;
     static const char* const PROPERTY_PRODUCT;
@@ -72,6 +85,7 @@ private:
     Vector<String16> mOutputPortNames;
     os::PersistableBundle mProperties;
     bool mIsPrivate;
+    int32_t mDefaultProtocol;
 };
 
 }  // namespace midi

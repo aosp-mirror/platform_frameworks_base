@@ -368,6 +368,21 @@ public final class BatteryStatsManager {
     }
 
     /**
+     * Retrieves accumulated bluetooth stats.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BATTERY_STATS)
+    @NonNull
+    public BluetoothBatteryStats getBluetoothBatteryStats() {
+        try {
+            return mBatteryStats.getBluetoothBatteryStats();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Indicates an app acquiring full wifi lock.
      *
      * @param ws worksource (to be used for battery blaming).

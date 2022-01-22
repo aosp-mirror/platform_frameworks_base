@@ -44,7 +44,6 @@ import java.util.List;
 
 /**
  * This class is used to specify meta information of a TV interactive app.
- * @hide
  */
 public final class TvInteractiveAppInfo implements Parcelable {
     private static final boolean DEBUG = false;
@@ -59,7 +58,7 @@ public final class TvInteractiveAppInfo implements Parcelable {
             INTERACTIVE_APP_TYPE_ATSC,
             INTERACTIVE_APP_TYPE_GINGA,
     })
-    @interface InteractiveAppType {}
+    public @interface InteractiveAppType {}
 
     /** HbbTV interactive app type */
     public static final int INTERACTIVE_APP_TYPE_HBBTV = 0x1;
@@ -77,7 +76,7 @@ public final class TvInteractiveAppInfo implements Parcelable {
             throw new IllegalArgumentException("context cannot be null.");
         }
         Intent intent =
-                new Intent(TvIAppService.SERVICE_INTERFACE).setComponent(component);
+                new Intent(TvInteractiveAppService.SERVICE_INTERFACE).setComponent(component);
         ResolveInfo resolveInfo = context.getPackageManager().resolveService(intent,
                 PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
         if (resolveInfo == null) {
@@ -171,10 +170,10 @@ public final class TvInteractiveAppInfo implements Parcelable {
         ServiceInfo si = resolveInfo.serviceInfo;
         PackageManager pm = context.getPackageManager();
         try (XmlResourceParser parser =
-                     si.loadXmlMetaData(pm, TvIAppService.SERVICE_META_DATA)) {
+                     si.loadXmlMetaData(pm, TvInteractiveAppService.SERVICE_META_DATA)) {
             if (parser == null) {
                 throw new IllegalStateException(
-                        "No " + TvIAppService.SERVICE_META_DATA
+                        "No " + TvInteractiveAppService.SERVICE_META_DATA
                         + " meta-data found for " + si.name);
             }
 
@@ -194,9 +193,9 @@ public final class TvInteractiveAppInfo implements Parcelable {
             }
 
             TypedArray sa = res.obtainAttributes(attrs,
-                    com.android.internal.R.styleable.TvIAppService);
+                    com.android.internal.R.styleable.TvInteractiveAppService);
             CharSequence[] textArr = sa.getTextArray(
-                    com.android.internal.R.styleable.TvIAppService_supportedTypes);
+                    com.android.internal.R.styleable.TvInteractiveAppService_supportedTypes);
             for (CharSequence cs : textArr) {
                 types.add(cs.toString().toLowerCase());
             }

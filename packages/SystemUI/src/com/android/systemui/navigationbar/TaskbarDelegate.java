@@ -69,6 +69,7 @@ import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LightBarTransitionsController;
+import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.pip.Pip;
 
 import java.io.FileDescriptor;
@@ -150,6 +151,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             mAutoHideController.touchAutoHide();
         }
     };
+    private BackAnimation mBackAnimation;
 
     @Inject
     public TaskbarDelegate(Context context) {
@@ -172,7 +174,8 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
             SysUiState sysUiState, DumpManager dumpManager,
             AutoHideController autoHideController,
             LightBarController lightBarController,
-            Optional<Pip> pipOptional) {
+            Optional<Pip> pipOptional,
+            BackAnimation backAnimation) {
         // TODO: adding this in the ctor results in a dagger dependency cycle :(
         mCommandQueue = commandQueue;
         mOverviewProxyService = overviewProxyService;
@@ -184,6 +187,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mLightBarController = lightBarController;
         mLightBarTransitionsController = createLightBarTransitionsController();
         mPipOptional = pipOptional;
+        mBackAnimation = backAnimation;
     }
 
     // Separated into a method to keep setDependencies() clean/readable.
@@ -233,6 +237,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mAutoHideController.setNavigationBar(mAutoHideUiElement);
         mLightBarController.setNavigationBar(mLightBarTransitionsController);
         mPipOptional.ifPresent(this::addPipExclusionBoundsChangeListener);
+        mEdgeBackGestureHandler.setBackAnimation(mBackAnimation);
         mInitialized = true;
     }
 

@@ -38,6 +38,7 @@
     <uses-permission android:name="android.permission.ACCESS_CACHE_FILESYSTEM" />
     <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
     <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER_ADVANCED" />
+    <uses-permission android:name="android.permission.ACCESS_FPS_COUNTER" />
     <uses-permission android:name="android.permission.DOWNLOAD_CACHE_NON_PURGEABLE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -64,6 +65,7 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.READ_DREAM_STATE" />
+    <uses-permission android:name="android.permission.REAL_GET_TASKS"/>
     <uses-permission android:name="android.permission.WRITE_DREAM_STATE" />
     <uses-permission android:name="android.permission.READ_CLIPBOARD_IN_BACKGROUND" />
     <uses-permission android:name="android.permission.READ_LOGS"/>

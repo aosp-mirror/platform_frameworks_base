@@ -45,7 +45,7 @@ public abstract class HalClientMonitor<T> extends BaseClientMonitor {
     /**
      * Invoked if the scheduler is unable to start the ClientMonitor (for example the HAL is null).
      * If such a problem is detected, the scheduler will not invoke
-     * {@link #start(Callback)}.
+     * {@link #start(ClientMonitorCallback)}.
      */
     public abstract void unableToStart();
 

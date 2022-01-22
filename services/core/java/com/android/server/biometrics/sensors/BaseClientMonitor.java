@@ -29,8 +29,6 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.log.BiometricLogger;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
@@ -45,63 +43,6 @@ public abstract class BaseClientMonitor implements IBinder.DeathRecipient {
 
     // Counter used to distinguish between ClientMonitor instances to help debugging.
     private static int sCount = 0;
-
-    /**
-     * Interface that ClientMonitor holders should use to receive callbacks.
-     */
-    public interface Callback {
-        /**
-         * Invoked when the ClientMonitor operation has been started (e.g. reached the head of
-         * the queue and becomes the current operation).
-         *
-         * @param clientMonitor Reference of the ClientMonitor that is starting.
-         */
-        default void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
-        }
-
-        /**
-         * Invoked when the ClientMonitor operation is complete. This abstracts away asynchronous
-         * (i.e. Authenticate, Enroll, Enumerate, Remove) and synchronous (i.e. generateChallenge,
-         * revokeChallenge) so that a scheduler can process ClientMonitors regardless of their
-         * implementation.
-         *
-         * @param clientMonitor Reference of the ClientMonitor that finished.
-         * @param success True if the operation completed successfully.
-         */
-        default void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
-        }
-    }
-
-    /** Holder for wrapping multiple handlers into a single Callback. */
-    public static class CompositeCallback implements Callback {
-        @NonNull
-        private final List<Callback> mCallbacks;
-
-        public CompositeCallback(@NonNull Callback... callbacks) {
-            mCallbacks = new ArrayList<>();
-
-            for (Callback callback : callbacks) {
-                if (callback != null) {
-                    mCallbacks.add(callback);
-                }
-            }
-        }
-
-        @Override
-        public final void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
-            for (int i = 0; i < mCallbacks.size(); i++) {
-                mCallbacks.get(i).onClientStarted(clientMonitor);
-            }
-        }
-
-        @Override
-        public final void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
-                boolean success) {
-            for (int i = mCallbacks.size() - 1; i >= 0; i--) {
-                mCallbacks.get(i).onClientFinished(clientMonitor, success);
-            }
-        }
-    }
 
     private final int mSequentialId;
     @NonNull private final Context mContext;
@@ -120,7 +61,7 @@ public abstract class BaseClientMonitor implements IBinder.DeathRecipient {
 
     // Use an empty callback by default since delayed operations can receive events
     // before they are started and cause NPE in subclasses that access this field directly.
-    @NonNull protected Callback mCallback = new Callback() {
+    @NonNull protected ClientMonitorCallback mCallback = new ClientMonitorCallback() {
         @Override
         public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
             Slog.e(TAG, "mCallback onClientStarted: called before set (should not happen)");
@@ -132,18 +73,6 @@ public abstract class BaseClientMonitor implements IBinder.DeathRecipient {
             Slog.e(TAG, "mCallback onClientFinished: called before set (should not happen)");
         }
     };
-
-    /**
-     * @return A ClientMonitorEnum constant defined in biometrics.proto
-     */
-    public abstract int getProtoEnum();
-
-    /**
-     * @return True if the ClientMonitor should cancel any current and pending interruptable clients
-     */
-    public boolean interruptsPrecedingClients() {
-        return false;
-    }
 
     /**
      * @param context    system_server context
@@ -189,11 +118,19 @@ public abstract class BaseClientMonitor implements IBinder.DeathRecipient {
         }
     }
 
+    /** A ClientMonitorEnum constant defined in biometrics.proto */
+    public abstract int getProtoEnum();
+
+    /** True if the ClientMonitor should cancel any current and pending interruptable clients. */
+    public boolean interruptsPrecedingClients() {
+        return false;
+    }
+
     /**
      * Starts the ClientMonitor's lifecycle.
      * @param callback invoked when the operation is complete (succeeds, fails, etc)
      */
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         mCallback = wrapCallbackForStart(callback);
         mCallback.onClientStarted(this);
     }
@@ -204,7 +141,7 @@ public abstract class BaseClientMonitor implements IBinder.DeathRecipient {
      * Returns the original callback unless overridden.
      */
     @NonNull
-    protected Callback wrapCallbackForStart(@NonNull Callback callback) {
+    protected ClientMonitorCallback wrapCallbackForStart(@NonNull ClientMonitorCallback callback) {
         return callback;
     }
 
@@ -329,7 +266,7 @@ public abstract class BaseClientMonitor implements IBinder.DeathRecipient {
     }
 
     @VisibleForTesting
-    public Callback getCallback() {
+    public ClientMonitorCallback getCallback() {
         return mCallback;
     }
 

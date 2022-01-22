@@ -45,6 +45,7 @@ import android.os.BatteryConsumer;
 import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Binder;
+import android.os.BluetoothBatteryStats;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBatteryPropertiesRegistrar;
@@ -84,7 +85,6 @@ import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.LongSparseLongArray;
 import android.util.MutableInt;
-import android.util.Pools;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
@@ -137,9 +137,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
@@ -265,6 +263,7 @@ public class BatteryStatsImpl extends BatteryStats {
             MeasuredEnergyStats.POWER_BUCKET_CPU,
             MeasuredEnergyStats.POWER_BUCKET_MOBILE_RADIO,
             MeasuredEnergyStats.POWER_BUCKET_WIFI,
+            MeasuredEnergyStats.POWER_BUCKET_BLUETOOTH,
     };
 
     // TimeInState counters need NUM_PROCESS_STATE states in order to accommodate
@@ -1196,6 +1195,48 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
         return new WakeLockStats(uidWakeLockStats);
+    }
+
+    @Override
+    @GuardedBy("this")
+    public BluetoothBatteryStats getBluetoothBatteryStats() {
+        final long elapsedRealtimeUs = mClock.elapsedRealtime() * 1000;
+        ArrayList<BluetoothBatteryStats.UidStats> uidStats = new ArrayList<>();
+        for (int i = mUidStats.size() - 1; i >= 0; i--) {
+            final Uid uid = mUidStats.valueAt(i);
+            final Timer scanTimer = uid.getBluetoothScanTimer();
+            final long scanTimeMs =
+                    scanTimer != null ? scanTimer.getTotalTimeLocked(
+                            elapsedRealtimeUs, STATS_SINCE_CHARGED) / 1000 : 0;
+
+            final Timer unoptimizedScanTimer = uid.getBluetoothUnoptimizedScanTimer();
+            final long unoptimizedScanTimeMs =
+                    unoptimizedScanTimer != null ? unoptimizedScanTimer.getTotalTimeLocked(
+                            elapsedRealtimeUs, STATS_SINCE_CHARGED) / 1000 : 0;
+
+            final Counter scanResultCounter = uid.getBluetoothScanResultCounter();
+            final int scanResultCount =
+                    scanResultCounter != null ? scanResultCounter.getCountLocked(
+                            STATS_SINCE_CHARGED) : 0;
+
+            final ControllerActivityCounter counter = uid.getBluetoothControllerActivity();
+            final long rxTimeMs =  counter != null ? counter.getRxTimeCounter().getCountLocked(
+                    STATS_SINCE_CHARGED) : 0;
+            final long txTimeMs =  counter != null ? counter.getTxTimeCounters()[0].getCountLocked(
+                    STATS_SINCE_CHARGED) : 0;
+
+            if (scanTimeMs != 0 || unoptimizedScanTimeMs != 0 || scanResultCount != 0
+                    || rxTimeMs != 0 || txTimeMs != 0) {
+                uidStats.add(new BluetoothBatteryStats.UidStats(uid.getUid(),
+                        scanTimeMs,
+                        unoptimizedScanTimeMs,
+                        scanResultCount,
+                        rxTimeMs,
+                        txTimeMs));
+            }
+        }
+
+        return new BluetoothBatteryStats(uidStats);
     }
 
     String mLastWakeupReason = null;
@@ -8371,6 +8412,11 @@ public class BatteryStatsImpl extends BatteryStats {
             if (wifiControllerActivity != null) {
                 wifiControllerActivity.setState(batteryConsumerProcessState, elapsedTimeMs);
             }
+            final ControllerActivityCounterImpl bluetoothControllerActivity =
+                    getBluetoothControllerActivity();
+            if (bluetoothControllerActivity != null) {
+                bluetoothControllerActivity.setState(batteryConsumerProcessState, elapsedTimeMs);
+            }
             final MeasuredEnergyStats energyStats =
                     getOrCreateMeasuredEnergyStatsIfSupportedLocked();
             if (energyStats != null) {
@@ -8718,7 +8764,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         @Override
-        public ControllerActivityCounter getBluetoothControllerActivity() {
+        public ControllerActivityCounterImpl getBluetoothControllerActivity() {
             return mBluetoothControllerActivity;
         }
 
@@ -8835,6 +8881,14 @@ public class BatteryStatsImpl extends BatteryStats {
         @Override
         public long getBluetoothMeasuredBatteryConsumptionUC() {
             return getMeasuredBatteryConsumptionUC(MeasuredEnergyStats.POWER_BUCKET_BLUETOOTH);
+        }
+
+        @GuardedBy("mBsi")
+        @Override
+        public long getBluetoothMeasuredBatteryConsumptionUC(
+                @BatteryConsumer.ProcessState int processState) {
+            return getMeasuredBatteryConsumptionUC(MeasuredEnergyStats.POWER_BUCKET_BLUETOOTH,
+                    processState);
         }
 
         @GuardedBy("mBsi")
@@ -11424,6 +11478,13 @@ public class BatteryStatsImpl extends BatteryStats {
                     wifiControllerActivity.setState(batteryConsumerProcessState, elapsedRealtimeMs);
                 }
 
+                final ControllerActivityCounterImpl bluetoothControllerActivity =
+                        getBluetoothControllerActivity();
+                if (bluetoothControllerActivity != null) {
+                    bluetoothControllerActivity.setState(batteryConsumerProcessState,
+                            elapsedRealtimeMs);
+                }
+
                 final MeasuredEnergyStats energyStats =
                         getOrCreateMeasuredEnergyStatsIfSupportedLocked();
                 if (energyStats != null) {
@@ -12669,8 +12730,6 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    private final Pools.Pool<NetworkStats> mNetworkStatsPool = new Pools.SynchronizedPool<>(6);
-
     private final Object mWifiNetworkLock = new Object();
 
     @GuardedBy("mWifiNetworkLock")
@@ -12688,13 +12747,15 @@ public class BatteryStatsImpl extends BatteryStats {
     private NetworkStats mLastModemNetworkStats = new NetworkStats(0, -1);
 
     @VisibleForTesting
-    protected NetworkStats readNetworkStatsLocked(@NonNull NetworkStatsManager networkStatsManager,
-            String[] ifaces) {
-        Objects.requireNonNull(networkStatsManager);
-        if (!ArrayUtils.isEmpty(ifaces)) {
-            return networkStatsManager.getDetailedUidStats(Set.of(ifaces));
-        }
-        return null;
+    protected NetworkStats readMobileNetworkStatsLocked(
+            @NonNull NetworkStatsManager networkStatsManager) {
+        return networkStatsManager.getMobileUidStats();
+    }
+
+    @VisibleForTesting
+    protected NetworkStats readWifiNetworkStatsLocked(
+            @NonNull NetworkStatsManager networkStatsManager) {
+        return networkStatsManager.getWifiUidStats();
     }
 
     /**
@@ -12714,21 +12775,15 @@ public class BatteryStatsImpl extends BatteryStats {
         // Grab a separate lock to acquire the network stats, which may do I/O.
         NetworkStats delta = null;
         synchronized (mWifiNetworkLock) {
-            final NetworkStats latestStats = readNetworkStatsLocked(networkStatsManager,
-                    mWifiIfaces);
+            final NetworkStats latestStats = readWifiNetworkStatsLocked(networkStatsManager);
             if (latestStats != null) {
-                delta = NetworkStats.subtract(latestStats, mLastWifiNetworkStats, null, null,
-                        mNetworkStatsPool.acquire());
-                mNetworkStatsPool.release(mLastWifiNetworkStats);
+                delta = latestStats.subtract(mLastWifiNetworkStats);
                 mLastWifiNetworkStats = latestStats;
             }
         }
 
         synchronized (this) {
             if (!mOnBatteryInternal || mIgnoreNextExternalStats) {
-                if (delta != null) {
-                    mNetworkStatsPool.release(delta);
-                }
                 if (mIgnoreNextExternalStats) {
                     // TODO: Strictly speaking, we should re-mark all 5 timers for each uid (and the
                     //  global one) here like we do for display. But I'm not sure it's worth the
@@ -12746,6 +12801,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
             SparseLongArray rxPackets = new SparseLongArray();
             SparseLongArray txPackets = new SparseLongArray();
+            SparseLongArray rxTimesMs = new SparseLongArray();
+            SparseLongArray txTimesMs = new SparseLongArray();
             long totalTxPackets = 0;
             long totalRxPackets = 0;
             if (delta != null) {
@@ -12779,7 +12836,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         mNetworkPacketActivityCounters[NETWORK_WIFI_RX_DATA].addCountLocked(
                                 entry.rxPackets);
 
-                        add(rxPackets, uid, entry.rxPackets);
+                        rxPackets.incrementValue(uid, entry.rxPackets);
 
                         // Sum the total number of packets so that the Rx Power can
                         // be evenly distributed amongst the apps.
@@ -12798,7 +12855,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         mNetworkPacketActivityCounters[NETWORK_WIFI_TX_DATA].addCountLocked(
                                 entry.txPackets);
 
-                        add(txPackets, uid, entry.txPackets);
+                        txPackets.incrementValue(uid, entry.txPackets);
 
                         // Sum the total number of packets so that the Tx Power can
                         // be evenly distributed amongst the apps.
@@ -12828,13 +12885,12 @@ public class BatteryStatsImpl extends BatteryStats {
                             }
                         }
 
-                        uidEstimatedConsumptionMah.add(u.getUid(),
+                        uidEstimatedConsumptionMah.incrementValue(u.getUid(),
                                 mWifiPowerCalculator.calcPowerWithoutControllerDataMah(
                                         entry.rxPackets, entry.txPackets,
                                         uidRunningMs, uidScanMs, uidBatchScanMs));
                     }
                 }
-                mNetworkStatsPool.release(delta);
                 delta = null;
             }
 
@@ -12923,12 +12979,9 @@ public class BatteryStatsImpl extends BatteryStats {
                                     + scanTxTimeSinceMarkMs + " ms)");
                         }
 
-                        ControllerActivityCounterImpl activityCounter =
-                                uid.getOrCreateWifiControllerActivityLocked();
-                        activityCounter.getOrCreateRxTimeCounter()
-                                .increment(scanRxTimeSinceMarkMs, elapsedRealtimeMs);
-                        activityCounter.getOrCreateTxTimeCounters()[0]
-                                .increment(scanTxTimeSinceMarkMs, elapsedRealtimeMs);
+                        rxTimesMs.incrementValue(uid.getUid(), scanRxTimeSinceMarkMs);
+                        txTimesMs.incrementValue(uid.getUid(), scanTxTimeSinceMarkMs);
+
                         leftOverRxTimeMs -= scanRxTimeSinceMarkMs;
                         leftOverTxTimeMs -= scanTxTimeSinceMarkMs;
                     }
@@ -12955,7 +13008,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     if (uidEstimatedConsumptionMah != null) {
                         double uidEstMah = mWifiPowerCalculator.calcPowerFromControllerDataMah(
                                 scanRxTimeSinceMarkMs, scanTxTimeSinceMarkMs, myIdleTimeMs);
-                        uidEstimatedConsumptionMah.add(uid.getUid(), uidEstMah);
+                        uidEstimatedConsumptionMah.incrementValue(uid.getUid(), uidEstMah);
                     }
                 }
 
@@ -12967,43 +13020,57 @@ public class BatteryStatsImpl extends BatteryStats {
                 // Distribute the remaining Tx power appropriately between all apps that transmitted
                 // packets.
                 for (int i = 0; i < txPackets.size(); i++) {
-                    final Uid uid = getUidStatsLocked(txPackets.keyAt(i),
-                            elapsedRealtimeMs, uptimeMs);
+                    final int uid = txPackets.keyAt(i);
                     final long myTxTimeMs = (txPackets.valueAt(i) * leftOverTxTimeMs)
                             / totalTxPackets;
-                    if (DEBUG_ENERGY) {
-                        Slog.d(TAG, "  TxTime for UID " + uid.getUid() + ": " + myTxTimeMs + " ms");
-                    }
-                    uid.getOrCreateWifiControllerActivityLocked().getOrCreateTxTimeCounters()[0]
-                            .increment(myTxTimeMs, elapsedRealtimeMs);
-                    if (uidEstimatedConsumptionMah != null) {
-                        uidEstimatedConsumptionMah.add(uid.getUid(),
-                                mWifiPowerCalculator.calcPowerFromControllerDataMah(
-                                        0, myTxTimeMs, 0));
-                    }
+                    txTimesMs.incrementValue(uid, myTxTimeMs);
                 }
 
                 // Distribute the remaining Rx power appropriately between all apps that received
                 // packets.
                 for (int i = 0; i < rxPackets.size(); i++) {
-                    final Uid uid = getUidStatsLocked(rxPackets.keyAt(i),
-                            elapsedRealtimeMs, uptimeMs);
+                    final int uid = rxPackets.keyAt(i);
                     final long myRxTimeMs = (rxPackets.valueAt(i) * leftOverRxTimeMs)
                             / totalRxPackets;
+                    rxTimesMs.incrementValue(uid, myRxTimeMs);
+                }
+
+                for (int i = 0; i < txTimesMs.size(); i++) {
+                    final int uid = txTimesMs.keyAt(i);
+                    final long myTxTimeMs = txTimesMs.valueAt(i);
                     if (DEBUG_ENERGY) {
-                        Slog.d(TAG, "  RxTime for UID " + uid.getUid() + ": " + myRxTimeMs + " ms");
+                        Slog.d(TAG, "  TxTime for UID " + uid + ": " + myTxTimeMs + " ms");
                     }
-                    uid.getOrCreateWifiControllerActivityLocked().getOrCreateRxTimeCounter()
+                    getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
+                            .getOrCreateWifiControllerActivityLocked()
+                            .getOrCreateTxTimeCounters()[0]
+                            .increment(myTxTimeMs, elapsedRealtimeMs);
+                    if (uidEstimatedConsumptionMah != null) {
+                        uidEstimatedConsumptionMah.incrementValue(uid,
+                                mWifiPowerCalculator.calcPowerFromControllerDataMah(
+                                        0, myTxTimeMs, 0));
+                    }
+                }
+
+                for (int i = 0; i < rxTimesMs.size(); i++) {
+                    final int uid = rxTimesMs.keyAt(i);
+                    final long myRxTimeMs = rxTimesMs.valueAt(i);
+                    if (DEBUG_ENERGY) {
+                        Slog.d(TAG, "  RxTime for UID " + uid + ": " + myRxTimeMs + " ms");
+                    }
+
+                    getUidStatsLocked(rxTimesMs.keyAt(i), elapsedRealtimeMs, uptimeMs)
+                            .getOrCreateWifiControllerActivityLocked()
+                            .getOrCreateRxTimeCounter()
                             .increment(myRxTimeMs, elapsedRealtimeMs);
                     if (uidEstimatedConsumptionMah != null) {
-                        uidEstimatedConsumptionMah.add(uid.getUid(),
+                        uidEstimatedConsumptionMah.incrementValue(uid,
                                 mWifiPowerCalculator.calcPowerFromControllerDataMah(
                                         myRxTimeMs, 0, 0));
                     }
                 }
 
                 // Any left over power use will be picked up by the WiFi category in BatteryStatsHelper.
-
 
                 // Update WiFi controller stats.
                 mWifiActivity.getOrCreateRxTimeCounter().increment(
@@ -13083,21 +13150,15 @@ public class BatteryStatsImpl extends BatteryStats {
         // Grab a separate lock to acquire the network stats, which may do I/O.
         NetworkStats delta = null;
         synchronized (mModemNetworkLock) {
-            final NetworkStats latestStats = readNetworkStatsLocked(networkStatsManager,
-                    mModemIfaces);
+            final NetworkStats latestStats = readMobileNetworkStatsLocked(networkStatsManager);
             if (latestStats != null) {
-                delta = NetworkStats.subtract(latestStats, mLastModemNetworkStats, null, null,
-                        mNetworkStatsPool.acquire());
-                mNetworkStatsPool.release(mLastModemNetworkStats);
+                delta = latestStats.subtract(mLastModemNetworkStats);
                 mLastModemNetworkStats = latestStats;
             }
         }
 
         synchronized (this) {
             if (!mOnBatteryInternal || mIgnoreNextExternalStats) {
-                if (delta != null) {
-                    mNetworkStatsPool.release(delta);
-                }
                 return;
             }
 
@@ -13224,7 +13285,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         // Distribute measured mobile radio charge consumption based on app radio
                         // active time
                         if (uidEstimatedConsumptionMah != null) {
-                            uidEstimatedConsumptionMah.add(u.getUid(),
+                            uidEstimatedConsumptionMah.incrementValue(u.getUid(),
                                     mMobileRadioPowerCalculator.calcPowerFromRadioActiveDurationMah(
                                             appRadioTimeUs / 1000));
                         }
@@ -13303,7 +13364,6 @@ public class BatteryStatsImpl extends BatteryStats {
                             totalEstimatedConsumptionMah, elapsedRealtimeMs);
                 }
 
-                mNetworkStatsPool.release(delta);
                 delta = null;
             }
         }
@@ -13349,8 +13409,8 @@ public class BatteryStatsImpl extends BatteryStats {
             energy = info.getControllerEnergyUsed();
             if (!info.getUidTraffic().isEmpty()) {
                 for (UidTraffic traffic : info.getUidTraffic()) {
-                    add(uidRxBytes, traffic.getUid(), traffic.getRxBytes());
-                    add(uidTxBytes, traffic.getUid(), traffic.getTxBytes());
+                    uidRxBytes.incrementValue(traffic.getUid(), traffic.getRxBytes());
+                    uidTxBytes.incrementValue(traffic.getUid(), traffic.getTxBytes());
                 }
             }
         }
@@ -13442,6 +13502,9 @@ public class BatteryStatsImpl extends BatteryStats {
         long leftOverRxTimeMs = rxTimeMs;
         long leftOverTxTimeMs = txTimeMs;
 
+        final SparseLongArray rxTimesMs = new SparseLongArray(uidCount);
+        final SparseLongArray txTimesMs = new SparseLongArray(uidCount);
+
         for (int i = 0; i < uidCount; i++) {
             final Uid u = mUidStats.valueAt(i);
             if (u.mBluetoothScanTimer == null) {
@@ -13471,15 +13534,11 @@ public class BatteryStatsImpl extends BatteryStats {
                     scanTimeTxSinceMarkMs = (txTimeMs * scanTimeTxSinceMarkMs) / totalScanTimeMs;
                 }
 
-                final ControllerActivityCounterImpl counter =
-                        u.getOrCreateBluetoothControllerActivityLocked();
-                counter.getOrCreateRxTimeCounter()
-                        .increment(scanTimeRxSinceMarkMs, elapsedRealtimeMs);
-                counter.getOrCreateTxTimeCounters()[0]
-                        .increment(scanTimeTxSinceMarkMs, elapsedRealtimeMs);
+                rxTimesMs.incrementValue(u.getUid(), scanTimeRxSinceMarkMs);
+                txTimesMs.incrementValue(u.getUid(), scanTimeTxSinceMarkMs);
 
                 if (uidEstimatedConsumptionMah != null) {
-                    uidEstimatedConsumptionMah.add(u.getUid(),
+                    uidEstimatedConsumptionMah.incrementValue(u.getUid(),
                             mBluetoothPowerCalculator.calculatePowerMah(
                                     scanTimeRxSinceMarkMs, scanTimeTxSinceMarkMs, 0));
                 }
@@ -13540,29 +13599,45 @@ public class BatteryStatsImpl extends BatteryStats {
 
                 if (totalRxBytes > 0 && rxBytes > 0) {
                     final long timeRxMs = (leftOverRxTimeMs * rxBytes) / totalRxBytes;
-                    if (DEBUG_ENERGY) {
-                        Slog.d(TAG, "UID=" + uid + " rx_bytes=" + rxBytes + " rx_time=" + timeRxMs);
-                    }
-                    counter.getOrCreateRxTimeCounter().increment(timeRxMs, elapsedRealtimeMs);
-
-                    if (uidEstimatedConsumptionMah != null) {
-                        uidEstimatedConsumptionMah.add(u.getUid(),
-                                mBluetoothPowerCalculator.calculatePowerMah(timeRxMs, 0, 0));
-                    }
+                    rxTimesMs.incrementValue(uid, timeRxMs);
                 }
 
                 if (totalTxBytes > 0 && txBytes > 0) {
                     final long timeTxMs = (leftOverTxTimeMs * txBytes) / totalTxBytes;
-                    if (DEBUG_ENERGY) {
-                        Slog.d(TAG, "UID=" + uid + " tx_bytes=" + txBytes + " tx_time=" + timeTxMs);
-                    }
-                    counter.getOrCreateTxTimeCounters()[0]
-                            .increment(timeTxMs, elapsedRealtimeMs);
+                    txTimesMs.incrementValue(uid, timeTxMs);
+                }
+            }
 
-                    if (uidEstimatedConsumptionMah != null) {
-                        uidEstimatedConsumptionMah.add(u.getUid(),
-                                mBluetoothPowerCalculator.calculatePowerMah(0, timeTxMs, 0));
-                    }
+            for (int i = 0; i < txTimesMs.size(); i++) {
+                final int uid = txTimesMs.keyAt(i);
+                final long myTxTimeMs = txTimesMs.valueAt(i);
+                if (DEBUG_ENERGY) {
+                    Slog.d(TAG, "  TxTime for UID " + uid + ": " + myTxTimeMs + " ms");
+                }
+                getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs)
+                        .getOrCreateBluetoothControllerActivityLocked()
+                        .getOrCreateTxTimeCounters()[0]
+                        .increment(myTxTimeMs, elapsedRealtimeMs);
+                if (uidEstimatedConsumptionMah != null) {
+                    uidEstimatedConsumptionMah.incrementValue(uid,
+                            mBluetoothPowerCalculator.calculatePowerMah(0, myTxTimeMs, 0));
+                }
+            }
+
+            for (int i = 0; i < rxTimesMs.size(); i++) {
+                final int uid = rxTimesMs.keyAt(i);
+                final long myRxTimeMs = rxTimesMs.valueAt(i);
+                if (DEBUG_ENERGY) {
+                    Slog.d(TAG, "  RxTime for UID " + uid + ": " + myRxTimeMs + " ms");
+                }
+
+                getUidStatsLocked(rxTimesMs.keyAt(i), elapsedRealtimeMs, uptimeMs)
+                        .getOrCreateBluetoothControllerActivityLocked()
+                        .getOrCreateRxTimeCounter()
+                        .increment(myRxTimeMs, elapsedRealtimeMs);
+                if (uidEstimatedConsumptionMah != null) {
+                    uidEstimatedConsumptionMah.incrementValue(uid,
+                            mBluetoothPowerCalculator.calculatePowerMah(myRxTimeMs, 0, 0));
                 }
             }
         }
@@ -16183,6 +16258,18 @@ public class BatteryStatsImpl extends BatteryStats {
         iPw.decreaseIndent();
     }
 
+    /**
+     * Dump Power Profile
+     */
+    @GuardedBy("this")
+    public void dumpPowerProfileLocked(PrintWriter pw) {
+        final IndentingPrintWriter iPw = new IndentingPrintWriter(pw, "    ");
+        iPw.printf("Power Profile: \n");
+        iPw.increaseIndent();
+        mPowerProfile.dump(iPw);
+        iPw.decreaseIndent();
+    }
+
     final ReentrantLock mWriteLock = new ReentrantLock();
 
     @GuardedBy("this")
@@ -18139,9 +18226,5 @@ public class BatteryStatsImpl extends BatteryStats {
 
         pw.println();
         dumpMeasuredEnergyStatsLocked(pw);
-    }
-
-    private static void add(SparseLongArray array, int key, long delta) {
-        array.put(key, array.get(key) + delta);
     }
 }

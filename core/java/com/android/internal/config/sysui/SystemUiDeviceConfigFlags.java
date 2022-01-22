@@ -163,6 +163,12 @@ public final class SystemUiDeviceConfigFlags {
     public static final String PROPERTY_LOCATION_INDICATORS_SMALL_ENABLED =
             "location_indicators_small_enabled";
 
+    /**
+     * Whether to show the location indicator for system apps.
+     */
+    public static final String PROPERTY_LOCATION_INDICATORS_SHOW_SYSTEM =
+            "location_indicators_show_system";
+
     // Flags related to Assistant
 
     /**

@@ -38,6 +38,7 @@ import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.database.ContentObserver;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayViewport;
@@ -269,6 +270,10 @@ public class InputManagerService extends IInputManager.Stub
     private final Map<String, Integer> mRuntimeAssociations = new ArrayMap<String, Integer>();
     @GuardedBy("mAssociationLock")
     private final Map<String, String> mUniqueIdAssociations = new ArrayMap<>();
+    private final Object mPointerDisplayIdLock = new Object();
+    // Forces the MouseCursorController to target a specific display id.
+    @GuardedBy("mPointerDisplayIdLock")
+    private int mOverriddenPointerDisplayId = Display.INVALID_DISPLAY;
 
     private static native long nativeInit(InputManagerService service,
             Context context, MessageQueue messageQueue);
@@ -341,6 +346,9 @@ public class InputManagerService extends IInputManager.Stub
     private static native boolean nativeCanDispatchToDisplay(long ptr, int deviceId, int displayId);
     private static native void nativeNotifyPortAssociationsChanged(long ptr);
     private static native void nativeChangeUniqueIdAssociation(long ptr);
+    private static native void nativeNotifyPointerDisplayIdChanged(long ptr);
+    private static native void nativeSetDisplayEligibilityForPointerCapture(long ptr, int displayId,
+            boolean enabled);
     private static native void nativeSetMotionClassifierEnabled(long ptr, boolean enabled);
     private static native InputSensorInfo[] nativeGetSensorList(long ptr, int deviceId);
     private static native boolean nativeFlushSensor(long ptr, int deviceId, int sensorType);
@@ -1902,6 +1910,18 @@ public class InputManagerService extends IInputManager.Stub
         return result;
     }
 
+    private void setVirtualMousePointerDisplayId(int displayId) {
+        synchronized (mPointerDisplayIdLock) {
+            mOverriddenPointerDisplayId = displayId;
+        }
+        // TODO(b/215597605): trigger MousePositionTracker update
+        nativeNotifyPointerDisplayIdChanged(mPtr);
+    }
+
+    private void setDisplayEligibilityForPointerCapture(int displayId, boolean isEligible) {
+        nativeSetDisplayEligibilityForPointerCapture(mPtr, displayId, isEligible);
+    }
+
     private static class VibrationInfo {
         private final long[] mPattern;
         private final int[] mAmplitudes;
@@ -2575,6 +2595,7 @@ public class InputManagerService extends IInputManager.Stub
         synchronized (mInputFilterLock) { }
         synchronized (mAssociationsLock) { /* Test if blocked by associations lock. */}
         synchronized (mLidSwitchLock) { /* Test if blocked by lid switch lock. */ }
+        synchronized (mPointerDisplayIdLock) { /* Test if blocked by pointer display id lock */ }
         nativeMonitor(mPtr);
     }
 
@@ -2965,6 +2986,12 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     private int getPointerDisplayId() {
+        synchronized (mPointerDisplayIdLock) {
+            // Prefer the override to all other displays.
+            if (mOverriddenPointerDisplayId != Display.INVALID_DISPLAY) {
+                return mOverriddenPointerDisplayId;
+            }
+        }
         return mWindowManagerCallbacks.getPointerDisplayId();
     }
 
@@ -3108,6 +3135,9 @@ public class InputManagerService extends IInputManager.Stub
         int getPointerLayer();
 
         int getPointerDisplayId();
+
+        /** Gets the x and y coordinates of the cursor's current position. */
+        PointF getCursorPosition();
 
         /**
          * Notifies window manager that a {@link android.view.MotionEvent#ACTION_DOWN} pointer event
@@ -3424,6 +3454,21 @@ public class InputManagerService extends IInputManager.Stub
         public boolean transferTouchFocus(@NonNull IBinder fromChannelToken,
                 @NonNull IBinder toChannelToken) {
             return InputManagerService.this.transferTouchFocus(fromChannelToken, toChannelToken);
+        }
+
+        @Override
+        public void setVirtualMousePointerDisplayId(int pointerDisplayId) {
+            InputManagerService.this.setVirtualMousePointerDisplayId(pointerDisplayId);
+        }
+
+        @Override
+        public PointF getCursorPosition() {
+            return mWindowManagerCallbacks.getCursorPosition();
+        }
+
+        @Override
+        public void setDisplayEligibilityForPointerCapture(int displayId, boolean isEligible) {
+            InputManagerService.this.setDisplayEligibilityForPointerCapture(displayId, isEligible);
         }
 
         @Override

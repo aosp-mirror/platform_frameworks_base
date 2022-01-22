@@ -25,6 +25,7 @@ typedef struct {
     int32_t type;            /* one of AMIDI_DEVICE_TYPE_* constants */
     int32_t inputPortCount;  /* number of input (send) ports associated with the device */
     int32_t outputPortCount; /* number of output (received) ports associated with the device */
+    int32_t defaultProtocol; /* one of the AMIDI_DEVICE_PROTOCOL_* constants */
 } AMidiDeviceInfo;
 
 struct AMidiDevice {

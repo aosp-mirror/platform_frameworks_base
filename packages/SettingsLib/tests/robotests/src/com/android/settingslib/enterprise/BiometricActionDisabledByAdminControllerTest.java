@@ -22,7 +22,6 @@ import static com.android.settingslib.enterprise.FakeDeviceAdminStringProvider.D
 
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertSame;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -37,7 +36,6 @@ import android.provider.Settings;
 import com.android.settingslib.RestrictedLockUtils;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -67,9 +65,8 @@ public class BiometricActionDisabledByAdminControllerTest {
     }
 
     @Test
-    @Ignore
     public void buttonClicked() {
-        ComponentName componentName = mock(ComponentName.class);
+        ComponentName componentName = new ComponentName("com.android.test", "AThing");
         RestrictedLockUtils.EnforcedAdmin enforcedAdmin = new RestrictedLockUtils.EnforcedAdmin(
                 componentName, new UserHandle(UserHandle.myUserId()));
 
@@ -85,6 +82,6 @@ public class BiometricActionDisabledByAdminControllerTest {
         assertEquals(Settings.SUPERVISOR_VERIFICATION_SETTING_BIOMETRICS,
                 intentCaptor.getValue().getStringExtra(
                         Settings.EXTRA_SUPERVISOR_RESTRICTED_SETTING_KEY));
-        assertSame(componentName, intentCaptor.getValue().getComponent());
+        assertEquals(componentName.getPackageName(), intentCaptor.getValue().getPackage());
     }
 }

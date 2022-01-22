@@ -8190,6 +8190,37 @@ public class Intent implements Parcelable, Cloneable {
                     hasIntentInfo = true;
                 }
                 break;
+                case "--ed": {
+                    String key = cmd.getNextArgRequired();
+                    String value = cmd.getNextArgRequired();
+                    intent.putExtra(key, Double.valueOf(value));
+                    hasIntentInfo = true;
+                }
+                break;
+                case "--eda": {
+                    String key = cmd.getNextArgRequired();
+                    String value = cmd.getNextArgRequired();
+                    String[] strings = value.split(",");
+                    double[] list = new double[strings.length];
+                    for (int i = 0; i < strings.length; i++) {
+                        list[i] = Double.valueOf(strings[i]);
+                    }
+                    intent.putExtra(key, list);
+                    hasIntentInfo = true;
+                }
+                break;
+                case "--edal": {
+                    String key = cmd.getNextArgRequired();
+                    String value = cmd.getNextArgRequired();
+                    String[] strings = value.split(",");
+                    ArrayList<Double> list = new ArrayList<>(strings.length);
+                    for (int i = 0; i < strings.length; i++) {
+                        list.add(Double.valueOf(strings[i]));
+                    }
+                    intent.putExtra(key, list);
+                    hasIntentInfo = true;
+                }
+                break;
                 case "--esa": {
                     String key = cmd.getNextArgRequired();
                     String value = cmd.getNextArgRequired();
@@ -8435,25 +8466,30 @@ public class Intent implements Parcelable, Cloneable {
                 "    [--ei <EXTRA_KEY> <EXTRA_INT_VALUE> ...]",
                 "    [--el <EXTRA_KEY> <EXTRA_LONG_VALUE> ...]",
                 "    [--ef <EXTRA_KEY> <EXTRA_FLOAT_VALUE> ...]",
+                "    [--ed <EXTRA_KEY> <EXTRA_DOUBLE_VALUE> ...]",
                 "    [--eu <EXTRA_KEY> <EXTRA_URI_VALUE> ...]",
                 "    [--ecn <EXTRA_KEY> <EXTRA_COMPONENT_NAME_VALUE>]",
                 "    [--eia <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]",
-                "        (mutiple extras passed as Integer[])",
+                "        (multiple extras passed as Integer[])",
                 "    [--eial <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]",
-                "        (mutiple extras passed as List<Integer>)",
+                "        (multiple extras passed as List<Integer>)",
                 "    [--ela <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]",
-                "        (mutiple extras passed as Long[])",
+                "        (multiple extras passed as Long[])",
                 "    [--elal <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]",
-                "        (mutiple extras passed as List<Long>)",
+                "        (multiple extras passed as List<Long>)",
                 "    [--efa <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]",
-                "        (mutiple extras passed as Float[])",
+                "        (multiple extras passed as Float[])",
                 "    [--efal <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]",
-                "        (mutiple extras passed as List<Float>)",
+                "        (multiple extras passed as List<Float>)",
+                "    [--eda <EXTRA_KEY> <EXTRA_DOUBLE_VALUE>[,<EXTRA_DOUBLE_VALUE...]]",
+                "        (multiple extras passed as Double[])",
+                "    [--edal <EXTRA_KEY> <EXTRA_DOUBLE_VALUE>[,<EXTRA_DOUBLE_VALUE...]]",
+                "        (multiple extras passed as List<Double>)",
                 "    [--esa <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]",
-                "        (mutiple extras passed as String[]; to embed a comma into a string,",
+                "        (multiple extras passed as String[]; to embed a comma into a string,",
                 "         escape it using \"\\,\")",
                 "    [--esal <EXTRA_KEY> <EXTRA_STRING_VALUE>[,<EXTRA_STRING_VALUE...]]",
-                "        (mutiple extras passed as List<String>; to embed a comma into a string,",
+                "        (multiple extras passed as List<String>; to embed a comma into a string,",
                 "         escape it using \"\\,\")",
                 "    [-f <FLAG>]",
                 "    [--grant-read-uri-permission] [--grant-write-uri-permission]",

@@ -397,12 +397,16 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                 // We already told the displays to turn off, now we need to wake the device as
                 // we transition to this new state. We do it here so that the waking happens
                 // between the transition from one layout to another.
-                mPowerManager.wakeUp(SystemClock.uptimeMillis(),
-                        PowerManager.WAKE_REASON_UNFOLD_DEVICE, "server.display:unfold");
+                mHandler.post(() -> {
+                    mPowerManager.wakeUp(SystemClock.uptimeMillis(),
+                            PowerManager.WAKE_REASON_UNFOLD_DEVICE, "server.display:unfold");
+                });
             } else if (sleepDevice) {
                 // Send the device to sleep when required.
-                mPowerManager.goToSleep(SystemClock.uptimeMillis(),
-                        PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD, 0);
+                mHandler.post(() -> {
+                    mPowerManager.goToSleep(SystemClock.uptimeMillis(),
+                            PowerManager.GO_TO_SLEEP_REASON_DEVICE_FOLD, 0);
+                });
             }
         }
 

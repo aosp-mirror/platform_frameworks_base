@@ -56,7 +56,7 @@ public class UserAwareBiometricScheduler extends BiometricScheduler {
     @NonNull private final UserSwitchCallback mUserSwitchCallback;
     @Nullable private StopUserClient<?> mStopUserClient;
 
-    private class ClientFinishedCallback implements BaseClientMonitor.Callback {
+    private class ClientFinishedCallback implements ClientMonitorCallback {
         private final BaseClientMonitor mOwner;
 
         ClientFinishedCallback(BaseClientMonitor owner) {

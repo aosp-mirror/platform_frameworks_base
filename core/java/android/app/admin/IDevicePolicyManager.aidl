@@ -18,6 +18,7 @@
 package android.app.admin;
 
 import android.app.admin.DevicePolicyDrawableResource;
+import android.app.admin.DevicePolicyStringResource;
 import android.app.admin.ParcelableResource;
 import android.app.admin.NetworkEvent;
 import android.app.IApplicationThread;
@@ -533,7 +534,11 @@ interface IDevicePolicyManager {
     boolean canUsbDataSignalingBeDisabled();
 
     List<UserHandle> listForegroundAffiliatedUsers();
-    void setDrawables(in List<DevicePolicyDrawableResource> resource);
+    void setDrawables(in List<DevicePolicyDrawableResource> drawables);
     void resetDrawables(in int[] drawableIds);
     ParcelableResource getDrawable(int drawableId, int drawableStyle, int drawableSource);
+
+    void setStrings(in List<DevicePolicyStringResource> strings);
+    void resetStrings(in String[] stringIds);
+    ParcelableResource getString(String stringId);
 }

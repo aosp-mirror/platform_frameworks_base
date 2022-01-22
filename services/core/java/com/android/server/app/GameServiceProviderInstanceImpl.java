@@ -17,24 +17,36 @@
 package com.android.server.app;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.ComponentName;
-import android.os.IBinder;
+import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.games.CreateGameSessionRequest;
+import android.service.games.CreateGameSessionResult;
+import android.service.games.GameScreenshotResult;
+import android.service.games.GameSessionViewHostConfiguration;
 import android.service.games.GameStartedEvent;
 import android.service.games.IGameService;
 import android.service.games.IGameServiceController;
 import android.service.games.IGameSession;
+import android.service.games.IGameSessionController;
 import android.service.games.IGameSessionService;
 import android.util.Slog;
+import android.view.SurfaceControlViewHost.SurfacePackage;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.ServiceConnector;
+import com.android.server.wm.WindowManagerInternal;
+import com.android.server.wm.WindowManagerService;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -62,6 +74,12 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                 GameServiceProviderInstanceImpl.this.onTaskRemoved(taskId);
             });
         }
+
+        // TODO(b/204503192): Limit the lifespan of the game session in the Game Service provider
+        // to only when the associated task is running. Right now it is possible for a task to
+        // move into the background and for all associated processes to die and for the Game Session
+        // provider's GameSessionService to continue to be running. Ideally we could unbind the
+        // service when this happens.
     };
 
     private final IGameServiceController mGameServiceController =
@@ -74,11 +92,25 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                 }
             };
 
+    private final IGameSessionController mGameSessionController =
+            new IGameSessionController.Stub() {
+                @Override
+                public void takeScreenshot(int taskId,
+                        @NonNull AndroidFuture gameScreenshotResultFuture) {
+                    mBackgroundExecutor.execute(() -> {
+                        GameServiceProviderInstanceImpl.this.takeScreenshot(taskId,
+                                gameScreenshotResultFuture);
+                    });
+                }
+            };
+
     private final Object mLock = new Object();
     private final UserHandle mUserHandle;
     private final Executor mBackgroundExecutor;
     private final GameClassifier mGameClassifier;
     private final IActivityTaskManager mActivityTaskManager;
+    private final WindowManagerService mWindowManagerService;
+    private final WindowManagerInternal mWindowManagerInternal;
     private final ServiceConnector<IGameService> mGameServiceConnector;
     private final ServiceConnector<IGameSessionService> mGameSessionServiceConnector;
 
@@ -89,16 +121,20 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
     private volatile boolean mIsRunning;
 
     GameServiceProviderInstanceImpl(
-            UserHandle userHandle,
+            @NonNull UserHandle userHandle,
             @NonNull Executor backgroundExecutor,
             @NonNull GameClassifier gameClassifier,
             @NonNull IActivityTaskManager activityTaskManager,
+            @NonNull WindowManagerService windowManagerService,
+            @NonNull WindowManagerInternal windowManagerInternal,
             @NonNull ServiceConnector<IGameService> gameServiceConnector,
             @NonNull ServiceConnector<IGameSessionService> gameSessionServiceConnector) {
         mUserHandle = userHandle;
         mBackgroundExecutor = backgroundExecutor;
         mGameClassifier = gameClassifier;
         mActivityTaskManager = activityTaskManager;
+        mWindowManagerService = windowManagerService;
+        mWindowManagerInternal = windowManagerInternal;
         mGameServiceConnector = gameServiceConnector;
         mGameSessionServiceConnector = gameSessionServiceConnector;
     }
@@ -151,16 +187,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         }
 
         for (GameSessionRecord gameSessionRecord : mGameSessions.values()) {
-            IGameSession gameSession = gameSessionRecord.getGameSession();
-            if (gameSession == null) {
-                continue;
-            }
-
-            try {
-                gameSession.destroy();
-            } catch (RemoteException ex) {
-                Slog.w(TAG, "Failed to destroy session: " + gameSessionRecord, ex);
-            }
+            destroyGameSessionFromRecord(gameSessionRecord);
         }
         mGameSessions.clear();
 
@@ -186,30 +213,30 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
     }
 
     @GuardedBy("mLock")
-    private void gameTaskStartedLocked(int sessionId, @NonNull ComponentName componentName) {
+    private void gameTaskStartedLocked(int taskId, @NonNull ComponentName componentName) {
         if (DEBUG) {
-            Slog.i(TAG, "gameStartedLocked() id: " + sessionId + " component: " + componentName);
+            Slog.i(TAG, "gameStartedLocked() id: " + taskId + " component: " + componentName);
         }
 
         if (!mIsRunning) {
             return;
         }
 
-        GameSessionRecord existingGameSessionRecord = mGameSessions.get(sessionId);
+        GameSessionRecord existingGameSessionRecord = mGameSessions.get(taskId);
         if (existingGameSessionRecord != null) {
-            Slog.w(TAG, "Existing game session found for task (id: " + sessionId
+            Slog.w(TAG, "Existing game session found for task (id: " + taskId
                     + ") creation. Ignoring.");
             return;
         }
 
         GameSessionRecord gameSessionRecord = GameSessionRecord.awaitingGameSessionRequest(
-                sessionId, componentName);
-        mGameSessions.put(sessionId, gameSessionRecord);
+                taskId, componentName);
+        mGameSessions.put(taskId, gameSessionRecord);
 
         AndroidFuture<Void> unusedPostGameStartedFuture = mGameServiceConnector.post(
                 gameService -> {
                     gameService.gameStarted(
-                            new GameStartedEvent(sessionId, componentName.getPackageName()));
+                            new GameStartedEvent(taskId, componentName.getPackageName()));
                 });
     }
 
@@ -220,7 +247,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                 return;
             }
 
-            destroyGameSessionIfNecessaryLocked(taskId);
+            removeAndDestroyGameSessionIfNecessaryLocked(taskId);
         }
     }
 
@@ -231,106 +258,151 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
     }
 
     @GuardedBy("mLock")
-    private void createGameSessionLocked(int sessionId) {
+    private void createGameSessionLocked(int taskId) {
         if (DEBUG) {
-            Slog.i(TAG, "createGameSessionLocked() id: " + sessionId);
+            Slog.i(TAG, "createGameSessionLocked() id: " + taskId);
         }
 
         if (!mIsRunning) {
             return;
         }
 
-        GameSessionRecord existingGameSessionRecord = mGameSessions.get(sessionId);
+        GameSessionRecord existingGameSessionRecord = mGameSessions.get(taskId);
         if (existingGameSessionRecord == null) {
-            Slog.w(TAG, "No existing game session record found for task (id: " + sessionId
+            Slog.w(TAG, "No existing game session record found for task (id: " + taskId
                     + ") creation. Ignoring.");
             return;
         }
         if (!existingGameSessionRecord.isAwaitingGameSessionRequest()) {
-            Slog.w(TAG, "Existing game session for task (id: " + sessionId
+            Slog.w(TAG, "Existing game session for task (id: " + taskId
                     + ") is not awaiting game session request. Ignoring.");
             return;
         }
-        mGameSessions.put(sessionId, existingGameSessionRecord.withGameSessionRequested());
 
-        ComponentName componentName = existingGameSessionRecord.getComponentName();
+        GameSessionViewHostConfiguration gameSessionViewHostConfiguration =
+                createViewHostConfigurationForTask(taskId);
+        if (gameSessionViewHostConfiguration == null) {
+            Slog.w(TAG, "Failed to create view host configuration for task (id" + taskId
+                    + ") creation. Ignoring.");
+            return;
+        }
 
-        // TODO(b/207035150): Allow the game service provider to determine if a game session
-        //  should be created. For now we will assume all games should have a session.
-        AndroidFuture<IBinder> gameSessionFuture = new AndroidFuture<IBinder>()
-                .orTimeout(CREATE_GAME_SESSION_TIMEOUT_MS, TimeUnit.MILLISECONDS)
-                .whenCompleteAsync((gameSessionIBinder, exception) -> {
-                    IGameSession gameSession = IGameSession.Stub.asInterface(gameSessionIBinder);
-                    if (exception != null || gameSession == null) {
-                        Slog.w(TAG, "Failed to create GameSession: " + existingGameSessionRecord,
-                                exception);
-                        synchronized (mLock) {
-                            destroyGameSessionIfNecessaryLocked(sessionId);
-                        }
-                        return;
-                    }
+        if (DEBUG) {
+            Slog.d(TAG, "Determined initial view host configuration for task (id: " + taskId + "): "
+                    + gameSessionViewHostConfiguration);
+        }
 
-                    synchronized (mLock) {
-                        attachGameSessionLocked(sessionId, gameSession);
-                    }
-                }, mBackgroundExecutor);
+        mGameSessions.put(taskId, existingGameSessionRecord.withGameSessionRequested());
+
+        AndroidFuture<CreateGameSessionResult> createGameSessionResultFuture =
+                new AndroidFuture<CreateGameSessionResult>()
+                        .orTimeout(CREATE_GAME_SESSION_TIMEOUT_MS, TimeUnit.MILLISECONDS)
+                        .whenCompleteAsync((createGameSessionResult, exception) -> {
+                            if (exception != null || createGameSessionResult == null) {
+                                Slog.w(TAG, "Failed to create GameSession: "
+                                                + existingGameSessionRecord,
+                                        exception);
+                                synchronized (mLock) {
+                                    removeAndDestroyGameSessionIfNecessaryLocked(taskId);
+                                }
+                                return;
+                            }
+
+                            synchronized (mLock) {
+                                attachGameSessionLocked(taskId, createGameSessionResult);
+                            }
+                        }, mBackgroundExecutor);
 
         AndroidFuture<Void> unusedPostCreateGameSessionFuture =
                 mGameSessionServiceConnector.post(gameService -> {
                     CreateGameSessionRequest createGameSessionRequest =
-                            new CreateGameSessionRequest(sessionId, componentName.getPackageName());
-                    gameService.create(createGameSessionRequest, gameSessionFuture);
+                            new CreateGameSessionRequest(
+                                    taskId,
+                                    existingGameSessionRecord.getComponentName().getPackageName());
+                    gameService.create(
+                            mGameSessionController,
+                            createGameSessionRequest,
+                            gameSessionViewHostConfiguration,
+                            createGameSessionResultFuture);
                 });
     }
 
     @GuardedBy("mLock")
-    private void attachGameSessionLocked(int sessionId, @NonNull IGameSession gameSession) {
+    private void attachGameSessionLocked(
+            int taskId,
+            @NonNull CreateGameSessionResult createGameSessionResult) {
         if (DEBUG) {
-            Slog.i(TAG, "attachGameSession() id: " + sessionId);
+            Slog.d(TAG, "attachGameSession() id: " + taskId);
         }
 
-        GameSessionRecord gameSessionRecord = mGameSessions.get(sessionId);
-        boolean isValidAttachRequest = true;
+        GameSessionRecord gameSessionRecord = mGameSessions.get(taskId);
+
         if (gameSessionRecord == null) {
-            Slog.w(TAG, "No associated game session record. Destroying id: " + sessionId);
-            isValidAttachRequest = false;
-        }
-        if (gameSessionRecord != null && !gameSessionRecord.isGameSessionRequested()) {
-            Slog.w(TAG,
-                    "Game session not requested for existing game session record. Destroying id: "
-                            + sessionId);
-            isValidAttachRequest = false;
-        }
-
-        if (!isValidAttachRequest) {
-            try {
-                gameSession.destroy();
-            } catch (RemoteException ex) {
-                Slog.w(TAG, "Failed to destroy session: " + gameSessionRecord, ex);
-            }
+            Slog.w(TAG, "No associated game session record. Destroying id: " + taskId);
+            destroyGameSessionDuringAttach(taskId, createGameSessionResult);
             return;
         }
 
-        mGameSessions.put(sessionId, gameSessionRecord.withGameSession(gameSession));
+        if (!gameSessionRecord.isGameSessionRequested()) {
+            destroyGameSessionDuringAttach(taskId, createGameSessionResult);
+            return;
+        }
+
+        try {
+            mWindowManagerInternal.addTaskOverlay(
+                    taskId,
+                    createGameSessionResult.getSurfacePackage());
+        } catch (IllegalArgumentException ex) {
+            Slog.w(TAG, "Failed to add task overlay. Destroying id: " + taskId);
+            destroyGameSessionDuringAttach(taskId, createGameSessionResult);
+            return;
+        }
+
+        mGameSessions.put(taskId,
+                gameSessionRecord.withGameSession(
+                        createGameSessionResult.getGameSession(),
+                        createGameSessionResult.getSurfacePackage()));
+    }
+
+    private void destroyGameSessionDuringAttach(
+            int taskId,
+            CreateGameSessionResult createGameSessionResult) {
+        try {
+            createGameSessionResult.getGameSession().destroy();
+        } catch (RemoteException ex) {
+            Slog.w(TAG, "Failed to destroy session: " + taskId);
+        }
     }
 
     @GuardedBy("mLock")
-    private void destroyGameSessionIfNecessaryLocked(int sessionId) {
-        // TODO(b/204503192): Limit the lifespan of the game session in the Game Service provider
-        // to only when the associated task is running. Right now it is possible for a task to
-        // move into the background and for all associated processes to die and for the Game Session
-        // provider's GameSessionService to continue to be running. Ideally we could unbind the
-        // service when this happens.
+    private void removeAndDestroyGameSessionIfNecessaryLocked(int taskId) {
         if (DEBUG) {
-            Slog.i(TAG, "destroyGameSession() id: " + sessionId);
+            Slog.d(TAG, "destroyGameSession() id: " + taskId);
         }
 
-        GameSessionRecord gameSessionRecord = mGameSessions.remove(sessionId);
+        GameSessionRecord gameSessionRecord = mGameSessions.remove(taskId);
         if (gameSessionRecord == null) {
             if (DEBUG) {
-                Slog.w(TAG, "No game session found for id: " + sessionId);
+                Slog.w(TAG, "No game session found for id: " + taskId);
             }
             return;
+        }
+        destroyGameSessionFromRecord(gameSessionRecord);
+    }
+
+    private void destroyGameSessionFromRecord(@NonNull GameSessionRecord gameSessionRecord) {
+        SurfacePackage surfacePackage = gameSessionRecord.getSurfacePackage();
+        if (surfacePackage != null) {
+            try {
+                mWindowManagerInternal.removeTaskOverlay(
+                        gameSessionRecord.getTaskId(),
+                        surfacePackage);
+            } catch (IllegalArgumentException ex) {
+                Slog.i(TAG,
+                        "Failed to remove task overlay. This is expected if the task is already "
+                                + "destroyed: "
+                                + gameSessionRecord);
+            }
         }
 
         IGameSession gameSession = gameSessionRecord.getGameSession();
@@ -344,12 +416,70 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
 
         if (mGameSessions.isEmpty()) {
             if (DEBUG) {
-                Slog.i(TAG, "No active game sessions. Disconnecting GameSessionService");
+                Slog.d(TAG, "No active game sessions. Disconnecting GameSessionService");
             }
 
             if (mGameSessionServiceConnector != null) {
                 mGameSessionServiceConnector.unbind();
             }
         }
+    }
+
+    @Nullable
+    private GameSessionViewHostConfiguration createViewHostConfigurationForTask(int taskId) {
+        RunningTaskInfo runningTaskInfo = getRunningTaskInfoForTask(taskId);
+        if (runningTaskInfo == null) {
+            return null;
+        }
+
+        Rect bounds = runningTaskInfo.configuration.windowConfiguration.getBounds();
+        return new GameSessionViewHostConfiguration(
+                runningTaskInfo.displayId,
+                bounds.width(),
+                bounds.height());
+    }
+
+    @Nullable
+    private RunningTaskInfo getRunningTaskInfoForTask(int taskId) {
+        List<RunningTaskInfo> runningTaskInfos;
+        try {
+            runningTaskInfos = mActivityTaskManager.getTasks(
+                    /* maxNum= */ Integer.MAX_VALUE,
+                    /* filterOnlyVisibleRecents= */ true,
+                    /* keepIntentExtra= */ false);
+        } catch (RemoteException ex) {
+            Slog.w(TAG, "Failed to fetch running tasks");
+            return null;
+        }
+
+        for (RunningTaskInfo taskInfo : runningTaskInfos) {
+            if (taskInfo.taskId == taskId) {
+                return taskInfo;
+            }
+        }
+
+        return null;
+    }
+
+    @VisibleForTesting
+    void takeScreenshot(int taskId, @NonNull AndroidFuture callback) {
+        synchronized (mLock) {
+            boolean isTaskAssociatedWithGameSession = mGameSessions.containsKey(taskId);
+            if (!isTaskAssociatedWithGameSession) {
+                Slog.w(TAG, "No game session found for id: " + taskId);
+                callback.complete(GameScreenshotResult.createInternalErrorResult());
+                return;
+            }
+        }
+
+        mBackgroundExecutor.execute(() -> {
+            final Bitmap bitmap = mWindowManagerService.captureTaskBitmap(taskId);
+            if (bitmap == null) {
+                Slog.w(TAG, "Could not get bitmap for id: " + taskId);
+                callback.complete(GameScreenshotResult.createInternalErrorResult());
+            } else {
+                callback.complete(GameScreenshotResult.createSuccessResult(bitmap));
+            }
+        });
     }
 }

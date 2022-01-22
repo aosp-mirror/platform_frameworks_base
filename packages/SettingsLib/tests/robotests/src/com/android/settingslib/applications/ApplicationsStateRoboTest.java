@@ -64,7 +64,6 @@ import com.android.settingslib.testutils.shadow.ShadowUserManager;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -436,7 +435,6 @@ public class ApplicationsStateRoboTest {
     }
 
     @Test
-    @Ignore
     public void noAppRemoved_noWorkprofile_doResumeIfNeededLocked_shouldNotClearEntries()
             throws RemoteException {
         // scenario: only owner user
@@ -630,7 +628,6 @@ public class ApplicationsStateRoboTest {
     }
 
     @Test
-    @Ignore
     public void noAppRemoved_workprofileExists_doResumeIfNeededLocked_shouldNotClearEntries()
             throws RemoteException {
         if (!MU_ENABLED) {
@@ -711,11 +708,11 @@ public class ApplicationsStateRoboTest {
             throws RemoteException {
 
         if (ownerApps != null) {
-            when(mApplicationsState.mIpm.getInstalledApplications(anyInt(), eq(0)))
+            when(mApplicationsState.mIpm.getInstalledApplications(anyLong(), eq(0)))
                 .thenReturn(new ParceledListSlice<>(ownerApps));
         }
         if (profileApps != null) {
-            when(mApplicationsState.mIpm.getInstalledApplications(anyInt(), eq(PROFILE_USERID)))
+            when(mApplicationsState.mIpm.getInstalledApplications(anyLong(), eq(PROFILE_USERID)))
                 .thenReturn(new ParceledListSlice<>(profileApps));
         }
         final InterestingConfigChanges configChanges = mock(InterestingConfigChanges.class);

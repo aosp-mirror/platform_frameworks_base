@@ -54,7 +54,7 @@ public class FrontendStatus {
             FRONTEND_STATUS_TYPE_IS_MISO_ENABLED, FRONTEND_STATUS_TYPE_IS_LINEAR,
             FRONTEND_STATUS_TYPE_IS_SHORT_FRAMES_ENABLED, FRONTEND_STATUS_TYPE_ISDBT_MODE,
             FRONTEND_STATUS_TYPE_ISDBT_PARTIAL_RECEPTION_FLAG, FRONTEND_STATUS_TYPE_STREAM_IDS,
-            FRONTEND_STATUS_TYPE_DVBT_CELL_IDS})
+            FRONTEND_STATUS_TYPE_DVBT_CELL_IDS, FRONTEND_STATUS_TYPE_ATSC3_ALL_PLP_INFO})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrontendStatusType {}
 
@@ -165,7 +165,7 @@ public class FrontendStatus {
     public static final int FRONTEND_STATUS_TYPE_RF_LOCK =
             android.hardware.tv.tuner.FrontendStatusType.RF_LOCK;
     /**
-     * PLP information in a frequency band for ATSC-3.0 frontend.
+     * Current tuned PLP information in a frequency band for ATSC-3.0 frontend.
      */
     public static final int FRONTEND_STATUS_TYPE_ATSC3_PLP_INFO =
             android.hardware.tv.tuner.FrontendStatusType.ATSC3_PLP_INFO;
@@ -266,6 +266,13 @@ public class FrontendStatus {
      */
     public static final int FRONTEND_STATUS_TYPE_DVBT_CELL_IDS =
             android.hardware.tv.tuner.FrontendStatusType.DVBT_CELL_IDS;
+
+    /**
+     * All PLP information in a frequency band for ATSC-3.0 frontend, which includes both tuned and
+     * not tuned PLPs for currently watching service.
+     */
+    public static final int FRONTEND_STATUS_TYPE_ATSC3_ALL_PLP_INFO =
+            android.hardware.tv.tuner.FrontendStatusType.ATSC3_ALL_PLP_INFO;
 
     /** @hide */
     @IntDef(value = {
@@ -508,6 +515,7 @@ public class FrontendStatus {
     private Integer mIsdbtPartialReceptionFlag;
     private int[] mStreamIds;
     private int[] mDvbtCellIds;
+    private Atsc3PlpInfo[] mAllPlpInfo;
 
     // Constructed and fields set by JNI code.
     private FrontendStatus() {
@@ -1075,6 +1083,25 @@ public class FrontendStatus {
             throw new IllegalStateException("dvbt cell ids are empty");
         }
         return mDvbtCellIds;
+    }
+
+    /**
+     * Gets an array of all PLPs information of ATSC3 frontend, which includes both tuned and not
+     * tuned PLPs for currently watching service.
+     *
+     * <p>This query is only supported by Tuner HAL 2.0 or higher. Unsupported version or if HAL
+     * doesn't return all PLPs information will throw IllegalStateException. Use
+     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     */
+    @SuppressLint("ArrayReturn")
+    @NonNull
+    public Atsc3PlpInfo[] getAllAtsc3PlpInfo() {
+        TunerVersionChecker.checkHigherOrEqualVersionTo(
+                TunerVersionChecker.TUNER_VERSION_2_0, "Atsc3PlpInfo all status");
+        if (mAllPlpInfo == null) {
+            throw new IllegalStateException("Atsc3PlpInfo all status is empty");
+        }
+        return mAllPlpInfo;
     }
 
     /**

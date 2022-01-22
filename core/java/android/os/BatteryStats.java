@@ -1037,6 +1037,16 @@ public abstract class BatteryStats implements Parcelable {
         public abstract long getBluetoothMeasuredBatteryConsumptionUC();
 
         /**
+         * Returns the battery consumption (in microcoulombs) of the uid's bluetooth usage
+         * when in the specified process state.
+         * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
+         *
+         * {@hide}
+         */
+        public abstract long getBluetoothMeasuredBatteryConsumptionUC(
+                @BatteryConsumer.ProcessState int processState);
+
+        /**
          * Returns the battery consumption (in microcoulombs) of the uid's cpu usage, derived from
          * on device power measurement data.
          * Will return {@link #POWER_DATA_UNAVAILABLE} if data is unavailable.
@@ -3394,6 +3404,11 @@ public abstract class BatteryStats implements Parcelable {
      * Returns aggregated wake lock stats.
      */
     public abstract WakeLockStats getWakeLockStats();
+
+    /**
+     * Returns aggregated Bluetooth stats.
+     */
+    public abstract BluetoothBatteryStats getBluetoothBatteryStats();
 
     /**
      * Returns Timers tracking the total time of each Resource Power Manager state and voter.

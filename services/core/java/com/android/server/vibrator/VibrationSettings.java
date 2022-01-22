@@ -97,6 +97,15 @@ final class VibrationSettings {
                     USAGE_ALARM,
                     USAGE_COMMUNICATION_REQUEST));
 
+    /**
+     * Usage allowed for vibrations when {@link Settings.System#VIBRATE_ON} is disabled.
+     *
+     * <p>The only allowed usage is accessibility, which is applied when the user enables talkback.
+     * Other usages that must ignore this setting should use
+     * {@link VibrationAttributes#FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF}.
+     */
+    private static final int VIBRATE_ON_DISABLED_USAGE_ALLOWED = USAGE_ACCESSIBILITY;
+
     /** Listener for changes on vibration settings. */
     interface OnVibratorSettingsChanged {
         /** Callback triggered when any of the vibrator settings change. */
@@ -127,6 +136,8 @@ final class VibrationSettings {
     private SparseIntArray mCurrentVibrationIntensities = new SparseIntArray();
     @GuardedBy("mLock")
     private boolean mBatterySaverMode;
+    @GuardedBy("mLock")
+    private boolean mVibrateOn;
 
     VibrationSettings(Context context, Handler handler) {
         this(context, handler, new VibrationConfig(context.getResources()));
@@ -199,6 +210,7 @@ final class VibrationSettings {
 
         // Listen to all settings that might affect the result of Vibrator.getVibrationIntensity.
         registerSettingsObserver(Settings.System.getUriFor(Settings.System.VIBRATE_INPUT_DEVICES));
+        registerSettingsObserver(Settings.System.getUriFor(Settings.System.VIBRATE_ON));
         registerSettingsObserver(Settings.System.getUriFor(Settings.System.VIBRATE_WHEN_RINGING));
         registerSettingsObserver(Settings.System.getUriFor(Settings.System.APPLY_RAMPING_RINGER));
         registerSettingsObserver(Settings.System.getUriFor(
@@ -314,11 +326,14 @@ final class VibrationSettings {
                 return Vibration.Status.IGNORED_FOR_POWER;
             }
 
-            int intensity = getCurrentIntensity(usage);
-            if ((intensity == Vibrator.VIBRATION_INTENSITY_OFF)
-                    && !attrs.isFlagSet(
-                            VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)) {
-                return Vibration.Status.IGNORED_FOR_SETTINGS;
+            if (!attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF)) {
+                if (!mVibrateOn && (VIBRATE_ON_DISABLED_USAGE_ALLOWED != usage)) {
+                    return Vibration.Status.IGNORED_FOR_SETTINGS;
+                }
+
+                if (getCurrentIntensity(usage) == Vibrator.VIBRATION_INTENSITY_OFF) {
+                    return Vibration.Status.IGNORED_FOR_SETTINGS;
+                }
             }
 
             if (!shouldVibrateForRingerModeLocked(usage)) {
@@ -357,6 +372,7 @@ final class VibrationSettings {
     void updateSettings() {
         synchronized (mLock) {
             mVibrateInputDevices = loadSystemSetting(Settings.System.VIBRATE_INPUT_DEVICES, 0) > 0;
+            mVibrateOn = loadSystemSetting(Settings.System.VIBRATE_ON, 1) > 0;
 
             int alarmIntensity = toIntensity(
                     loadSystemSetting(Settings.System.ALARM_VIBRATION_INTENSITY, -1),
@@ -437,8 +453,9 @@ final class VibrationSettings {
                     + "mVibratorConfig=" + mVibrationConfig
                     + ", mVibrateInputDevices=" + mVibrateInputDevices
                     + ", mBatterySaverMode=" + mBatterySaverMode
-                    + ", mProcStatesCache=" + mUidObserver.mProcStatesCache
+                    + ", mVibrateOn=" + mVibrateOn
                     + ", mVibrationIntensities=" + vibrationIntensitiesString
+                    + ", mProcStatesCache=" + mUidObserver.mProcStatesCache
                     + '}';
         }
     }
@@ -446,6 +463,8 @@ final class VibrationSettings {
     /** Write current settings into given {@link ProtoOutputStream}. */
     public void dumpProto(ProtoOutputStream proto) {
         synchronized (mLock) {
+            proto.write(VibratorManagerServiceDumpProto.VIBRATE_ON, mVibrateOn);
+            proto.write(VibratorManagerServiceDumpProto.LOW_POWER_MODE, mBatterySaverMode);
             proto.write(VibratorManagerServiceDumpProto.ALARM_INTENSITY,
                     getCurrentIntensity(USAGE_ALARM));
             proto.write(VibratorManagerServiceDumpProto.ALARM_DEFAULT_INTENSITY,

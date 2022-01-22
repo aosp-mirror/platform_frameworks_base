@@ -29,7 +29,6 @@ import static com.android.server.pm.PackageManagerService.TAG;
 
 import android.annotation.NonNull;
 import android.content.pm.PackageManager;
-import com.android.server.pm.pkg.component.ParsedInstrumentation;
 import android.os.UserHandle;
 import android.os.incremental.IncrementalManager;
 import android.util.Log;
@@ -43,6 +42,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.component.ParsedInstrumentation;
 
 import java.io.File;
 import java.util.Collections;
@@ -330,8 +330,7 @@ final class RemovePackageHelper {
         if (removedAppId != -1) {
             // A user ID was deleted here. Go through all users and remove it
             // from KeyStore.
-            mPm.removeKeystoreDataIfNeeded(
-                    mUserManagerInternal, UserHandle.USER_ALL, removedAppId);
+            mAppDataHelper.clearKeystoreData(UserHandle.USER_ALL, removedAppId);
         }
     }
 }

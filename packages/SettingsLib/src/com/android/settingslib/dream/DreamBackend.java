@@ -38,6 +38,8 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
 
+import com.android.settingslib.R;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -45,9 +47,12 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class DreamBackend {
     private static final String TAG = "DreamBackend";
@@ -78,12 +83,32 @@ public class DreamBackend {
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({WHILE_CHARGING, WHILE_DOCKED, EITHER, NEVER})
-    public @interface WhenToDream{}
+    public @interface WhenToDream {}
 
     public static final int WHILE_CHARGING = 0;
     public static final int WHILE_DOCKED = 1;
     public static final int EITHER = 2;
     public static final int NEVER = 3;
+
+    /**
+     * The type of dream complications which can be provided by a
+     * {@link com.android.systemui.dreams.ComplicationProvider}.
+     */
+    @IntDef(prefix = {"COMPLICATION_TYPE_"}, value = {
+            COMPLICATION_TYPE_TIME,
+            COMPLICATION_TYPE_DATE,
+            COMPLICATION_TYPE_WEATHER,
+            COMPLICATION_TYPE_AIR_QUALITY,
+            COMPLICATION_TYPE_CAST_INFO
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ComplicationType {}
+
+    public static final int COMPLICATION_TYPE_TIME = 1;
+    public static final int COMPLICATION_TYPE_DATE = 2;
+    public static final int COMPLICATION_TYPE_WEATHER = 3;
+    public static final int COMPLICATION_TYPE_AIR_QUALITY = 4;
+    public static final int COMPLICATION_TYPE_CAST_INFO = 5;
 
     private final Context mContext;
     private final IDreamManager mDreamManager;
@@ -91,6 +116,8 @@ public class DreamBackend {
     private final boolean mDreamsEnabledByDefault;
     private final boolean mDreamsActivatedOnSleepByDefault;
     private final boolean mDreamsActivatedOnDockByDefault;
+    private final Set<Integer> mSupportedComplications;
+    private final Set<Integer> mDefaultEnabledComplications;
 
     private static DreamBackend sInstance;
 
@@ -103,17 +130,31 @@ public class DreamBackend {
 
     public DreamBackend(Context context) {
         mContext = context.getApplicationContext();
+        final Resources resources = mContext.getResources();
+
         mDreamManager = IDreamManager.Stub.asInterface(
                 ServiceManager.getService(DreamService.DREAM_SERVICE));
         mComparator = new DreamInfoComparator(getDefaultDream());
-        mDreamsEnabledByDefault = mContext.getResources()
-                .getBoolean(com.android.internal.R.bool.config_dreamsEnabledByDefault);
-        mDreamsActivatedOnSleepByDefault = mContext.getResources()
-                .getBoolean(com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault);
-        mDreamsActivatedOnDockByDefault = mContext.getResources()
-                .getBoolean(com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault);
-        mDreamPreviewDefault = mContext.getResources().getDrawable(
+        mDreamsEnabledByDefault = resources.getBoolean(
+                com.android.internal.R.bool.config_dreamsEnabledByDefault);
+        mDreamsActivatedOnSleepByDefault = resources.getBoolean(
+                com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault);
+        mDreamsActivatedOnDockByDefault = resources.getBoolean(
+                com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault);
+        mDreamPreviewDefault = resources.getDrawable(
                 com.android.internal.R.drawable.default_dream_preview);
+
+        mSupportedComplications =
+                Arrays.stream(resources.getIntArray(R.array.config_supportedDreamComplications))
+                        .boxed()
+                        .collect(Collectors.toSet());
+
+        mDefaultEnabledComplications = Arrays.stream(
+                        resources.getIntArray(R.array.config_dreamComplicationsEnabledByDefault))
+                .boxed()
+                // A complication can only be enabled by default if it is also supported.
+                .filter(mSupportedComplications::contains)
+                .collect(Collectors.toSet());
     }
 
     public List<DreamInfo> getDreamInfos() {
@@ -242,7 +283,57 @@ public class DreamBackend {
             default:
                 break;
         }
+    }
 
+    /** Gets all complications which have been enabled by the user. */
+    public Set<Integer> getEnabledComplications() {
+        final String enabledComplications = Settings.Secure.getString(
+                mContext.getContentResolver(),
+                Settings.Secure.SCREENSAVER_ENABLED_COMPLICATIONS);
+
+        if (enabledComplications == null) {
+            return mDefaultEnabledComplications;
+        }
+
+        return parseFromString(enabledComplications);
+    }
+
+    /** Gets all dream complications which are supported on this device. **/
+    public Set<Integer> getSupportedComplications() {
+        return mSupportedComplications;
+    }
+
+    /**
+     * Enables or disables a particular dream complication.
+     *
+     * @param complicationType The dream complication to be enabled/disabled.
+     * @param value            If true, the complication is enabled. Otherwise it is disabled.
+     */
+    public void setComplicationEnabled(@ComplicationType int complicationType, boolean value) {
+        if (!mSupportedComplications.contains(complicationType)) return;
+
+        Set<Integer> enabledComplications = getEnabledComplications();
+        if (value) {
+            enabledComplications.add(complicationType);
+        } else {
+            enabledComplications.remove(complicationType);
+        }
+
+        Settings.Secure.putString(mContext.getContentResolver(),
+                Settings.Secure.SCREENSAVER_ENABLED_COMPLICATIONS,
+                convertToString(enabledComplications));
+    }
+
+    private static String convertToString(Set<Integer> set) {
+        return set.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+    }
+
+    private static Set<Integer> parseFromString(String string) {
+        return Arrays.stream(string.split(","))
+                .map(Integer::parseInt)
+                .collect(Collectors.toSet());
     }
 
     public boolean isEnabled() {

@@ -123,7 +123,6 @@ extern int register_android_view_InputApplicationHandle(JNIEnv* env);
 extern int register_android_view_InputWindowHandle(JNIEnv* env);
 extern int register_android_view_Surface(JNIEnv* env);
 extern int register_android_view_SurfaceControl(JNIEnv* env);
-extern int register_android_view_SurfaceControlFpsListener(JNIEnv* env);
 extern int register_android_view_SurfaceControlHdrLayerInfoListener(JNIEnv* env);
 extern int register_android_view_SurfaceSession(JNIEnv* env);
 extern int register_android_view_CompositionSamplingListener(JNIEnv* env);
@@ -1546,7 +1545,6 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_view_InputWindowHandle),
         REG_JNI(register_android_view_Surface),
         REG_JNI(register_android_view_SurfaceControl),
-        REG_JNI(register_android_view_SurfaceControlFpsListener),
         REG_JNI(register_android_view_SurfaceControlHdrLayerInfoListener),
         REG_JNI(register_android_view_SurfaceSession),
         REG_JNI(register_android_view_CompositionSamplingListener),

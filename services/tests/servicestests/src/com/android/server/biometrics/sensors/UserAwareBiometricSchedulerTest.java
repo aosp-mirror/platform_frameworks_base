@@ -155,7 +155,7 @@ public class UserAwareBiometricSchedulerTest {
         assertNull(mScheduler.mCurrentOperation);
 
         final BiometricSchedulerOperation fakeOperation = new BiometricSchedulerOperation(
-                mock(BaseClientMonitor.class), new BaseClientMonitor.Callback() {});
+                mock(BaseClientMonitor.class), new ClientMonitorCallback() {});
         mScheduler.mCurrentOperation = fakeOperation;
         startUserClient.mCallback.onClientFinished(startUserClient, true);
         assertSame(fakeOperation, mScheduler.mCurrentOperation);
@@ -234,7 +234,7 @@ public class UserAwareBiometricSchedulerTest {
         }
 
         @Override
-        public void start(@NonNull Callback callback) {
+        public void start(@NonNull ClientMonitorCallback callback) {
             super.start(callback);
             onUserStopped();
         }
@@ -248,7 +248,7 @@ public class UserAwareBiometricSchedulerTest {
     private static class TestStartUserClient extends StartUserClient<Object, Object> {
         private final boolean mShouldFinish;
 
-        Callback mCallback;
+        ClientMonitorCallback mCallback;
 
         public TestStartUserClient(@NonNull Context context,
                 @NonNull LazyDaemon<Object> lazyDaemon, @Nullable IBinder token, int userId,
@@ -263,7 +263,7 @@ public class UserAwareBiometricSchedulerTest {
         }
 
         @Override
-        public void start(@NonNull Callback callback) {
+        public void start(@NonNull ClientMonitorCallback callback) {
             super.start(callback);
 
             mCallback = callback;

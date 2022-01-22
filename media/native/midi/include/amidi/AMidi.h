@@ -62,6 +62,78 @@ enum {
 };
 
 /*
+ * Protocol IDs for various MIDI devices.
+ *
+ * Introduced in API 33.
+ */
+enum AMidiDevice_Protocol : int32_t {
+    /**
+     * Constant representing a default protocol with Universal MIDI Packets (UMP).
+     * UMP is defined in "Universal MIDI Packet (UMP) Format and MIDI 2.0 Protocol" spec.
+     * All UMP data should be a multiple of 4 bytes.
+     * Use UMP to negotiate with the device with MIDI-CI.
+     * MIDI-CI is defined in "MIDI Capability Inquiry (MIDI-CI)" spec.
+     */
+    AMIDI_DEVICE_PROTOCOL_UMP_USE_MIDI_CI = 0,
+
+    /**
+     * Constant representing a default protocol with Universal MIDI Packets (UMP).
+     * UMP is defined in "Universal MIDI Packet (UMP) Format and MIDI 2.0 Protocol" spec.
+     * All UMP data should be a multiple of 4 bytes.
+     * Use MIDI 1.0 through UMP with packet sizes up to 64 bits.
+     */
+    AMIDI_DEVICE_PROTOCOL_UMP_MIDI_1_0_UP_TO_64_BITS = 1,
+
+    /**
+     * Constant representing a default protocol with Universal MIDI Packets (UMP).
+     * UMP is defined in "Universal MIDI Packet (UMP) Format and MIDI 2.0 Protocol" spec.
+     * All UMP data should be a multiple of 4 bytes.
+     * Use MIDI 1.0 through UMP with packet sizes up to 64 bits and jitter reduction timestamps.
+     */
+    AMIDI_DEVICE_PROTOCOL_UMP_MIDI_1_0_UP_TO_64_BITS_AND_JRTS = 2,
+
+    /**
+     * Constant representing a default protocol with Universal MIDI Packets (UMP).
+     * UMP is defined in "Universal MIDI Packet (UMP) Format and MIDI 2.0 Protocol" spec.
+     * All UMP data should be a multiple of 4 bytes.
+     * Use MIDI 1.0 through UMP with packet sizes up to 128 bits.
+     */
+    AMIDI_DEVICE_PROTOCOL_UMP_MIDI_1_0_UP_TO_128_BITS = 3,
+
+    /**
+     * Constant representing a default protocol with Universal MIDI Packets (UMP).
+     * UMP is defined in "Universal MIDI Packet (UMP) Format and MIDI 2.0 Protocol" spec.
+     * All UMP data should be a multiple of 4 bytes.
+     * Use MIDI 1.0 through UMP with packet sizes up to 128 bits and jitter reduction timestamps.
+     */
+    AMIDI_DEVICE_PROTOCOL_UMP_MIDI_1_0_UP_TO_128_BITS_AND_JRTS = 4,
+
+    /**
+     * Constant representing a default protocol with Universal MIDI Packets (UMP).
+     * UMP is defined in "Universal MIDI Packet (UMP) Format and MIDI 2.0 Protocol" spec.
+     * All UMP data should be a multiple of 4 bytes.
+     * Use MIDI 2.0 through UMP.
+     */
+    AMIDI_DEVICE_PROTOCOL_UMP_MIDI_2_0 = 17,
+
+     /**
+     * Constant representing a default protocol with Universal MIDI Packets (UMP).
+     * UMP is defined in "Universal MIDI Packet (UMP) Format and MIDI 2.0 Protocol" spec.
+     * All UMP data should be a multiple of 4 bytes.
+     * Use MIDI 2.0 through UMP and jitter reduction timestamps.
+     */
+    AMIDI_DEVICE_PROTOCOL_UMP_MIDI_2_0_AND_JRTS = 18,
+
+    /**
+     * Constant representing a device with an unknown default protocol.
+     * If Universal MIDI Packets (UMP) are needed, use MIDI-CI through MIDI 1.0.
+     * UMP is defined in "Universal MIDI Packet (UMP) Format and MIDI 2.0 Protocol" spec.
+     * MIDI-CI is defined in "MIDI Capability Inquiry (MIDI-CI)" spec.
+     */
+    AMIDI_DEVICE_PROTOCOL_UNKNOWN = -1
+};
+
+/*
  * Device API
  */
 /**
@@ -133,6 +205,30 @@ ssize_t AMIDI_API AMidiDevice_getNumInputPorts(const AMidiDevice *device) __INTR
  *  @see AMEDIA_ERROR_UNKNOWN - couldn't retrieve the device info.
  */
 ssize_t AMIDI_API AMidiDevice_getNumOutputPorts(const AMidiDevice *device) __INTRODUCED_IN(29);
+
+/**
+ * Gets the MIDI device default protocol.
+ *
+ * @param device Specifies the MIDI device.
+ *
+ * @return The identifier of the MIDI device default protocol:
+ * AMIDI_DEVICE_PROTOCOL_UMP_USE_MIDI_CI
+ * AMIDI_DEVICE_PROTOCOL_UMP_MIDI_1_0_UP_TO_64_BITS
+ * AMIDI_DEVICE_PROTOCOL_UMP_MIDI_1_0_UP_TO_64_BITS_AND_JRTS
+ * AMIDI_DEVICE_PROTOCOL_UMP_MIDI_1_0_UP_TO_128_BITS
+ * AMIDI_DEVICE_PROTOCOL_UMP_MIDI_1_0_UP_TO_128_BITS_AND_JRTS
+ * AMIDI_DEVICE_PROTOCOL_UMP_MIDI_2_0
+ * AMIDI_DEVICE_PROTOCOL_UMP_MIDI_2_0_AND_JRTS
+ * AMIDI_DEVICE_PROTOCOL_UNKNOWN
+ *
+ * Most devices should return PROTOCOL_UNKNOWN (-1). This is intentional as devices
+ * with default UMP support are not backwards compatible. When the device is null,
+ * return AMIDI_DEVICE_PROTOCOL_UNKNOWN.
+ *
+ * Available since API 33.
+ */
+AMidiDevice_Protocol AMIDI_API AMidiDevice_getDefaultProtocol(const AMidiDevice *device)
+        __INTRODUCED_IN(33);
 
 /*
  * API for receiving data from the Output port of a device.

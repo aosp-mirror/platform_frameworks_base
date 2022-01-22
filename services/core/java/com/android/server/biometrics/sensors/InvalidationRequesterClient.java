@@ -84,7 +84,7 @@ public class InvalidationRequesterClient<S extends BiometricAuthenticator.Identi
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
 
         mUtils.setInvalidationInProgress(getContext(), getTargetUserId(), true /* inProgress */);

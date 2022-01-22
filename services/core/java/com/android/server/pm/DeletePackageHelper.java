@@ -485,8 +485,7 @@ final class DeletePackageHelper {
                 mAppDataHelper.destroyAppDataLIF(pkg, nextUserId,
                         FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
             }
-            PackageManagerService.removeKeystoreDataIfNeeded(mUserManagerInternal, nextUserId,
-                    ps.getAppId());
+            mAppDataHelper.clearKeystoreData(nextUserId, ps.getAppId());
             preferredActivityHelper.clearPackagePreferredActivities(ps.getPackageName(),
                     nextUserId);
             mPm.mDomainVerificationManager.clearPackageForUser(ps.getPackageName(), nextUserId);

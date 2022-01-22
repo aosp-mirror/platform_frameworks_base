@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.service.games.IGameSession;
+import android.view.SurfaceControlViewHost.SurfacePackage;
 
 import java.util.Objects;
 
@@ -37,26 +38,34 @@ final class GameSessionRecord {
     }
 
     private final int mTaskId;
+    private final State mState;
     private final ComponentName mRootComponentName;
     @Nullable
     private final IGameSession mIGameSession;
-    private final State mState;
+    @Nullable
+    private final SurfacePackage mSurfacePackage;
 
     static GameSessionRecord awaitingGameSessionRequest(int taskId,
             ComponentName rootComponentName) {
-        return new GameSessionRecord(taskId, rootComponentName, /* gameSession= */ null,
-                State.NO_GAME_SESSION_REQUESTED);
+        return new GameSessionRecord(
+                taskId,
+                State.NO_GAME_SESSION_REQUESTED,
+                rootComponentName,
+                /* gameSession= */ null,
+                /* surfacePackage= */ null);
     }
 
     private GameSessionRecord(
             int taskId,
+            @NonNull State state,
             @NonNull ComponentName rootComponentName,
             @Nullable IGameSession gameSession,
-            @NonNull State state) {
+            @Nullable SurfacePackage surfacePackage) {
         this.mTaskId = taskId;
+        this.mState = state;
         this.mRootComponentName = rootComponentName;
         this.mIGameSession = gameSession;
-        this.mState = state;
+        this.mSurfacePackage = surfacePackage;
     }
 
     public boolean isAwaitingGameSessionRequest() {
@@ -65,8 +74,12 @@ final class GameSessionRecord {
 
     @NonNull
     public GameSessionRecord withGameSessionRequested() {
-        return new GameSessionRecord(mTaskId, mRootComponentName, /* gameSession=*/ null,
-                State.GAME_SESSION_REQUESTED);
+        return new GameSessionRecord(
+                mTaskId,
+                State.GAME_SESSION_REQUESTED,
+                mRootComponentName,
+                /* gameSession=*/ null,
+                /* surfacePackage=*/ null);
     }
 
     public boolean isGameSessionRequested() {
@@ -74,15 +87,20 @@ final class GameSessionRecord {
     }
 
     @NonNull
-    public GameSessionRecord withGameSession(@NonNull IGameSession gameSession) {
+    public GameSessionRecord withGameSession(
+            @NonNull IGameSession gameSession,
+            @NonNull SurfacePackage surfacePackage) {
         Objects.requireNonNull(gameSession);
-        return new GameSessionRecord(mTaskId, mRootComponentName, gameSession,
-                State.GAME_SESSION_ATTACHED);
+        return new GameSessionRecord(mTaskId,
+                State.GAME_SESSION_ATTACHED,
+                mRootComponentName,
+                gameSession,
+                surfacePackage);
     }
 
-    @Nullable
-    public IGameSession getGameSession() {
-        return mIGameSession;
+    @NonNull
+    public int getTaskId() {
+        return mTaskId;
     }
 
     @NonNull
@@ -90,17 +108,29 @@ final class GameSessionRecord {
         return mRootComponentName;
     }
 
+    @Nullable
+    public IGameSession getGameSession() {
+        return mIGameSession;
+    }
+
+    @Nullable
+    public SurfacePackage getSurfacePackage() {
+        return mSurfacePackage;
+    }
+
     @Override
     public String toString() {
         return "GameSessionRecord{"
                 + "mTaskId="
                 + mTaskId
+                + ", mState="
+                + mState
                 + ", mRootComponentName="
                 + mRootComponentName
                 + ", mIGameSession="
                 + mIGameSession
-                + ", mState="
-                + mState
+                + ", mSurfacePackage="
+                + mSurfacePackage
                 + '}';
     }
 
@@ -115,12 +145,16 @@ final class GameSessionRecord {
         }
 
         GameSessionRecord that = (GameSessionRecord) o;
-        return mTaskId == that.mTaskId && mRootComponentName.equals(that.mRootComponentName)
-                && Objects.equals(mIGameSession, that.mIGameSession) && mState == that.mState;
+        return mTaskId == that.mTaskId
+                && mState == that.mState
+                && mRootComponentName.equals(that.mRootComponentName)
+                && Objects.equals(mIGameSession, that.mIGameSession)
+                && Objects.equals(mSurfacePackage, that.mSurfacePackage);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mTaskId, mRootComponentName, mIGameSession, mState);
+        return Objects.hash(
+                mTaskId, mState, mRootComponentName, mIGameSession, mState, mSurfacePackage);
     }
 }

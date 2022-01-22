@@ -62,7 +62,9 @@ import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
+import com.android.server.biometrics.sensors.ClientMonitorCompositeCallback;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
 import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.HalClientMonitor;
@@ -492,7 +494,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                 new FingerprintUpdateActiveUserClient(mContext, mLazyDaemon, targetUserId,
                         mContext.getOpPackageName(), mSensorProperties.sensorId,
                         this::getCurrentUser, hasEnrolled, mAuthenticatorIds, force);
-        mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
+        mScheduler.scheduleClientMonitor(client, new ClientMonitorCallback() {
             @Override
             public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
                     boolean success) {
@@ -577,7 +579,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                     FingerprintUtils.getLegacyInstance(mSensorId), ENROLL_TIMEOUT_SEC,
                     mSensorProperties.sensorId, mUdfpsOverlayController, mSidefpsController,
                     enrollReason);
-            mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
+            mScheduler.scheduleClientMonitor(client, new ClientMonitorCallback() {
                 @Override
                 public void onClientStarted(@NonNull BaseClientMonitor clientMonitor) {
                     mFingerprintStateCallback.onClientStarted(clientMonitor);
@@ -699,7 +701,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     }
 
     private void scheduleInternalCleanup(int userId,
-            @Nullable BaseClientMonitor.Callback callback) {
+            @Nullable ClientMonitorCallback callback) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -715,8 +717,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
     @Override
     public void scheduleInternalCleanup(int sensorId, int userId,
-            @Nullable BaseClientMonitor.Callback callback) {
-        scheduleInternalCleanup(userId, new BaseClientMonitor.CompositeCallback(callback,
+            @Nullable ClientMonitorCallback callback) {
+        scheduleInternalCleanup(userId, new ClientMonitorCompositeCallback(callback,
                 mFingerprintStateCallback));
     }
 

@@ -254,9 +254,14 @@ class AssociationRequestsProcessor {
     private AssociationInfo createAssociationAndNotifyApplication(
             @NonNull AssociationRequest request, @NonNull String packageName, @UserIdInt int userId,
             @Nullable MacAddress macAddress, @NonNull IAssociationRequestCallback callback) {
-        final AssociationInfo association = mService.createAssociation(userId, packageName,
-                macAddress, request.getDisplayName(), request.getDeviceProfile(),
-                request.isSelfManaged());
+        final AssociationInfo association;
+        final long callingIdentity = Binder.clearCallingIdentity();
+        try {
+            association = mService.createAssociation(userId, packageName, macAddress,
+                    request.getDisplayName(), request.getDeviceProfile(), request.isSelfManaged());
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentity);
+        }
 
         try {
             callback.onAssociationCreated(association);

@@ -598,7 +598,7 @@ public class OomAdjuster {
             for (int i = psr.numberOfConnections() - 1; i >= 0; i--) {
                 ConnectionRecord cr = psr.getConnectionAt(i);
                 ProcessRecord service = (cr.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0
-                        ? cr.binding.service.isolatedProc : cr.binding.service.app;
+                        ? cr.binding.service.isolationHostProc : cr.binding.service.app;
                 if (service == null || service == pr) {
                     continue;
                 }

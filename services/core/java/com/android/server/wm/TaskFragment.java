@@ -39,6 +39,7 @@ import static android.view.WindowManager.TRANSIT_FLAG_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BACK_PREVIEW;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
@@ -100,6 +101,7 @@ import com.android.internal.util.function.pooled.PooledPredicate;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -253,6 +255,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     private final Rect mTmpFullBounds = new Rect();
     private final Rect mTmpStableBounds = new Rect();
     private final Rect mTmpNonDecorBounds = new Rect();
+
+    //TODO(b/207481538) Remove once the infrastructure to support per-activity screenshot is
+    // implemented
+    HashMap<String, SurfaceControl.ScreenshotHardwareBuffer> mBackScreenshots = new HashMap<>();
 
     private final EnsureActivitiesVisibleHelper mEnsureActivitiesVisibleHelper =
             new EnsureActivitiesVisibleHelper(this);
@@ -1683,6 +1689,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     @Override
     void addChild(WindowContainer child, int index) {
+        ActivityRecord r = topRunningActivity();
         mClearedTaskForReuse = false;
 
         boolean isAddingActivity = child.asActivityRecord() != null;
@@ -1697,6 +1704,18 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         super.addChild(child, index);
 
         if (isAddingActivity && task != null) {
+
+            // TODO(b/207481538): temporary per-activity screenshoting
+            if (r != null && BackNavigationController.isEnabled()) {
+                ProtoLog.v(WM_DEBUG_BACK_PREVIEW, "Screenshotting Activity %s",
+                        r.mActivityComponent.flattenToString());
+                Rect outBounds = r.getBounds();
+                SurfaceControl.ScreenshotHardwareBuffer backBuffer = SurfaceControl.captureLayers(
+                        r.mSurfaceControl,
+                        new Rect(0, 0, outBounds.width(), outBounds.height()),
+                        1f);
+                mBackScreenshots.put(r.mActivityComponent.flattenToString(), backBuffer);
+            }
             child.asActivityRecord().inHistory = true;
             task.onDescendantActivityAdded(taskHadActivity, activityType, child.asActivityRecord());
         }
@@ -2290,6 +2309,14 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     void removeChild(WindowContainer child, boolean removeSelfIfPossible) {
         super.removeChild(child);
+        if (BackNavigationController.isEnabled()) {
+            //TODO(b/207481538) Remove once the infrastructure to support per-activity screenshot is
+            // implemented
+            ActivityRecord r = child.asActivityRecord();
+            if (r != null) {
+                mBackScreenshots.remove(r.mActivityComponent.flattenToString());
+            }
+        }
         if (removeSelfIfPossible && (!mCreatedByOrganizer || mIsRemovalRequested) && !hasChild()) {
             removeImmediately("removeLastChild " + child);
         }

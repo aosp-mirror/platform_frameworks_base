@@ -319,6 +319,34 @@ public class VibrationSettingsTest {
         }
     }
 
+
+    @Test
+    public void shouldIgnoreVibration_vibrateOnDisabled_ignoresUsagesNotAccessibility() {
+        setUserSetting(Settings.System.VIBRATE_ON, 0);
+
+        for (int usage : ALL_USAGES) {
+            if (usage == USAGE_ACCESSIBILITY) {
+                assertVibrationNotIgnoredForUsage(usage);
+            } else {
+                assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_FOR_SETTINGS);
+            }
+            assertVibrationNotIgnoredForUsageAndFlags(usage,
+                    VibrationAttributes.FLAG_BYPASS_USER_VIBRATION_INTENSITY_OFF);
+        }
+    }
+
+    @Test
+    public void shouldIgnoreVibration_vibrateOnEnabledOrUnset_allowsAnyUsage() {
+        deleteUserSetting(Settings.System.VIBRATE_ON);
+        for (int usage : ALL_USAGES) {
+            assertVibrationNotIgnoredForUsage(usage);
+        }
+
+        setUserSetting(Settings.System.VIBRATE_ON, 1);
+        for (int usage : ALL_USAGES) {
+            assertVibrationNotIgnoredForUsage(usage);
+        }
+    }
     @Test
     public void shouldIgnoreVibration_withRingSettingsOff_disableRingtoneVibrations() {
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 0);
@@ -560,10 +588,17 @@ public class VibrationSettingsTest {
         when(mVibrationConfigMock.getDefaultVibrationIntensity(eq(usage))).thenReturn(intensity);
     }
 
+    private void deleteUserSetting(String settingName) {
+        Settings.System.putStringForUser(
+                mContextSpy.getContentResolver(), settingName, null, UserHandle.USER_CURRENT);
+        // FakeSettingsProvider doesn't support testing triggering ContentObserver yet.
+        mVibrationSettings.updateSettings();
+    }
+
     private void setUserSetting(String settingName, int value) {
         Settings.System.putIntForUser(
                 mContextSpy.getContentResolver(), settingName, value, UserHandle.USER_CURRENT);
-        // FakeSettingsProvider don't support testing triggering ContentObserver yet.
+        // FakeSettingsProvider doesn't support testing triggering ContentObserver yet.
         mVibrationSettings.updateSettings();
     }
 

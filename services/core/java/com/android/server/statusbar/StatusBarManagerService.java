@@ -22,6 +22,7 @@ import static android.app.StatusBarManager.NAV_BAR_MODE_OVERRIDE_KIDS;
 import static android.app.StatusBarManager.NAV_BAR_MODE_OVERRIDE_NONE;
 import static android.app.StatusBarManager.NavBarModeOverride;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -38,6 +39,7 @@ import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.om.IOverlayManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
@@ -60,6 +62,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -79,6 +82,7 @@ import android.view.WindowInsetsController.Behavior;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.statusbar.IAddTileResultCallback;
@@ -153,6 +157,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @GuardedBy("mCurrentRequestAddTilePackages")
     private final ArrayMap<String, Long> mCurrentRequestAddTilePackages = new ArrayMap<>();
     private static final long REQUEST_TIME_OUT = TimeUnit.MINUTES.toNanos(5);
+
+    private IOverlayManager mOverlayManager;
 
     private class DeathRecipient implements IBinder.DeathRecipient {
         public void binderDied() {
@@ -254,6 +260,18 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
 
         mTileRequestTracker = new TileRequestTracker(mContext);
+    }
+
+    private IOverlayManager getOverlayManager() {
+        // No need to synchronize; worst-case scenario it will be fetched twice.
+        if (mOverlayManager == null) {
+            mOverlayManager = IOverlayManager.Stub.asInterface(
+                    ServiceManager.getService(Context.OVERLAY_SERVICE));
+            if (mOverlayManager == null) {
+                Slog.w("StatusBarManager", "warning: no OVERLAY_SERVICE");
+            }
+        }
+        return mOverlayManager;
     }
 
     @Override
@@ -1296,6 +1314,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         });
     }
 
+    @VisibleForTesting
+    void registerOverlayManager(IOverlayManager overlayManager) {
+        mOverlayManager = overlayManager;
+    }
+
     /**
      * @param clearNotificationEffects whether to consider notifications as "shown" and stop
      *     LED, vibration, and ringing
@@ -1869,6 +1892,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         try {
             Settings.Secure.putIntForUser(mContext.getContentResolver(),
                     Settings.Secure.NAV_BAR_KIDS_MODE, navBarModeOverride, userId);
+
+            IOverlayManager overlayManager = getOverlayManager();
+            if (overlayManager != null && navBarModeOverride == NAV_BAR_MODE_OVERRIDE_KIDS
+                    && isPackageSupported(NAV_BAR_MODE_3BUTTON_OVERLAY)) {
+                overlayManager.setEnabledExclusiveInCategory(NAV_BAR_MODE_3BUTTON_OVERLAY, userId);
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         } finally {
             Binder.restoreCallingIdentity(userIdentity);
         }
@@ -1894,6 +1925,21 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             Binder.restoreCallingIdentity(userIdentity);
         }
         return navBarKidsMode;
+    }
+
+    private boolean isPackageSupported(String packageName) {
+        if (packageName == null) {
+            return false;
+        }
+        try {
+            return mContext.getPackageManager().getPackageInfo(packageName,
+                    PackageManager.PackageInfoFlags.of(0)) != null;
+        } catch (PackageManager.NameNotFoundException ignored) {
+            if (SPEW) {
+                Slog.d(TAG, "Package not found: " + packageName);
+            }
+        }
+        return false;
     }
 
     /** @hide */

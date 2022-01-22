@@ -162,7 +162,10 @@ public class OneTimePermissionUserManager {
      * The delay to wait before revoking on the event an app is terminated. Recommended to be long
      * enough so that apps don't lose permission on an immediate restart
      */
-    private static long getKilledDelayMillis() {
+    private long getKilledDelayMillis(boolean isSelfRevokedPermissionSession) {
+        if (isSelfRevokedPermissionSession) {
+            return 0;
+        }
         return DeviceConfig.getLong(DeviceConfig.NAMESPACE_PERMISSIONS,
                 PROPERTY_KILLED_DELAY_CONFIG_KEY, DEFAULT_KILLED_DELAY_MILLIS);
     }
@@ -173,6 +176,18 @@ public class OneTimePermissionUserManager {
      */
     void registerUninstallListener() {
         mContext.registerReceiver(mUninstallListener, new IntentFilter(Intent.ACTION_UID_REMOVED));
+    }
+
+    void setSelfRevokedPermissionSession(int uid) {
+        synchronized (mLock) {
+            PackageInactivityListener listener = mListeners.get(uid);
+            if (listener == null) {
+                Log.e(LOG_TAG, "Could not set session for uid " + uid
+                        + " as self-revoke session: session not found");
+                return;
+            }
+            listener.setSelfRevokedPermissionSession();
+        }
     }
 
     /**
@@ -189,6 +204,7 @@ public class OneTimePermissionUserManager {
         private final int mImportanceToResetTimer;
         private final int mImportanceToKeepSessionAlive;
 
+        private boolean mIsSelfRevokedPermissionSession;
         private boolean mIsAlarmSet;
         private boolean mIsFinished;
 
@@ -255,7 +271,7 @@ public class OneTimePermissionUserManager {
                             }
                             onImportanceChanged(mUid, imp);
                         }
-                    }, mToken, getKilledDelayMillis());
+                    }, mToken, getKilledDelayMillis(mIsSelfRevokedPermissionSession));
                     return;
                 }
                 if (importance > mImportanceToResetTimer) {
@@ -288,6 +304,14 @@ public class OneTimePermissionUserManager {
                 mActivityManager.removeOnUidImportanceListener(mSessionKillableListener);
                 mActivityManager.removeOnUidImportanceListener(mGoneListener);
             }
+        }
+
+        /**
+         * Marks the session as a self-revoke session, which does not delay the revocation when
+         * the app is restarting.
+         */
+        public void setSelfRevokedPermissionSession() {
+            mIsSelfRevokedPermissionSession = true;
         }
 
         /**

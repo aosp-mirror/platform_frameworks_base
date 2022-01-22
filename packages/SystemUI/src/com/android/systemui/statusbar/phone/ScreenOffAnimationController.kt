@@ -180,6 +180,14 @@ class ScreenOffAnimationController @Inject constructor(
         animations.all { it.shouldAnimateDozingChange() }
 
     /**
+     * Returns true when moving display state to power save mode should be
+     * delayed for a few seconds. This might be useful to play animations in full quality,
+     * without reducing FPS.
+     */
+    fun shouldDelayDisplayDozeTransition(): Boolean =
+        animations.any { it.shouldDelayDisplayDozeTransition() }
+
+    /**
      * Return true to animate large <-> small clock transition
      */
     fun shouldAnimateClockChange(): Boolean =
@@ -207,6 +215,7 @@ interface ScreenOffAnimation {
     fun shouldHideScrimOnWakeUp(): Boolean = false
     fun overrideNotificationsDozeAmount(): Boolean = false
     fun shouldShowAodIconsWhenShade(): Boolean = false
+    fun shouldDelayDisplayDozeTransition(): Boolean = false
     fun shouldAnimateAodIcons(): Boolean = true
     fun shouldAnimateDozingChange(): Boolean = true
     fun shouldAnimateClockChange(): Boolean = true

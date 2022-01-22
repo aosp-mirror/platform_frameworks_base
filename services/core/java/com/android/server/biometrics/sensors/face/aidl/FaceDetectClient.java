@@ -30,6 +30,7 @@ import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.sensors.AcquisitionClient;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.DetectionConsumer;
 
@@ -58,7 +59,7 @@ public class FaceDetectClient extends AcquisitionClient<ISession> implements Det
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
         startHalOperation();
     }

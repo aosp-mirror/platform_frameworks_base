@@ -16,6 +16,8 @@
 
 package com.android.systemui.accessibility;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Choreographer.FrameCallback;
 import static android.view.WindowInsets.Type.systemGestures;
 import static android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
@@ -45,6 +47,7 @@ import static org.mockito.Mockito.when;
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.PointF;
@@ -223,13 +226,9 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         final int screenSize = mContext.getResources().getDimensionPixelSize(
                 R.dimen.magnification_max_frame_size) * 10;
         mWindowManager.setWindowBounds(new Rect(0, 0, screenSize, screenSize));
-        //We need to initialize new one because the window size is determined when initialization.
-        final WindowMagnificationController controller = new WindowMagnificationController(mContext,
-                mHandler, mWindowMagnificationAnimationController, mSfVsyncFrameProvider,
-                mMirrorWindowControl, mTransaction, mWindowMagnifierCallback, mSysUiState);
 
         mInstrumentation.runOnMainSync(() -> {
-            controller.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
+            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
                     Float.NaN);
         });
 
@@ -242,17 +241,17 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void deleteWindowMagnification_destroyControl() {
-        mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN, Float.NaN,
-                    Float.NaN);
-        });
+    public void deleteWindowMagnification_destroyControlAndUnregisterComponentCallback() {
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+                        Float.NaN,
+                        Float.NaN));
 
-        mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.deleteWindowMagnification();
-        });
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.deleteWindowMagnification());
 
         verify(mMirrorWindowControl).destroyControl();
+        verify(mContext).unregisterComponentCallbacks(mWindowMagnificationController);
     }
 
     @Test
@@ -322,11 +321,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
     @Test
     public void onOrientationChanged_enabled_updateDisplayRotationAndCenterStayAtSamePosition() {
-        final Display display = Mockito.spy(mContext.getDisplay());
-        final int currentRotation = display.getRotation();
-        final int newRotation = (currentRotation + 1) % 4;
-        when(display.getRotation()).thenReturn(newRotation);
-        when(mContext.getDisplay()).thenReturn(display);
+        final int newRotation = simulateRotateTheDevice();
         final Rect windowBounds = new Rect(mWindowManager.getCurrentWindowMetrics().getBounds());
         final float center = Math.min(windowBounds.exactCenterX(), windowBounds.exactCenterY());
         final float displayWidth = windowBounds.width();
@@ -535,6 +530,30 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void enableWindowMagnification_rotationIsChanged_updateRotationValue() {
+        final Configuration config = mContext.getResources().getConfiguration();
+        config.orientation = config.orientation == ORIENTATION_LANDSCAPE ? ORIENTATION_PORTRAIT
+                : ORIENTATION_LANDSCAPE;
+        final int newRotation = simulateRotateTheDevice();
+
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+                        Float.NaN, Float.NaN));
+
+        assertEquals(newRotation, mWindowMagnificationController.mRotation);
+    }
+
+    @Test
+    public void enableWindowMagnification_registerComponentCallback() {
+        mInstrumentation.runOnMainSync(
+                () -> mWindowMagnificationController.enableWindowMagnificationInternal(Float.NaN,
+                        Float.NaN,
+                        Float.NaN));
+
+        verify(mContext).registerComponentCallbacks(mWindowMagnificationController);
+    }
+
+    @Test
     public void onLocaleChanged_enabled_updateA11yWindowTitle() {
         final String newA11yWindowTitle = "new a11y window title";
         mInstrumentation.runOnMainSync(() -> {
@@ -609,5 +628,15 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
                 .setInsets(systemGestures(), Insets.of(0, 0, 0, 10))
                 .build();
         mWindowManager.setWindowInsets(testInsets);
+    }
+
+    @Surface.Rotation
+    private int simulateRotateTheDevice() {
+        final Display display = Mockito.spy(mContext.getDisplay());
+        final int currentRotation = display.getRotation();
+        final int newRotation = (currentRotation + 1) % 4;
+        when(display.getRotation()).thenReturn(newRotation);
+        when(mContext.getDisplay()).thenReturn(display);
+        return newRotation;
     }
 }

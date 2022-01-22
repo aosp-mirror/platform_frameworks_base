@@ -286,6 +286,7 @@ public:
     void requestPointerCapture(const sp<IBinder>& windowToken, bool enabled);
     void setCustomPointerIcon(const SpriteIcon& icon);
     void setMotionClassifierEnabled(bool enabled);
+    void notifyPointerDisplayIdChanged();
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -1494,6 +1495,18 @@ void NativeInputManager::setMotionClassifierEnabled(bool enabled) {
     mInputManager->getClassifier().setMotionClassifierEnabled(enabled);
 }
 
+void NativeInputManager::notifyPointerDisplayIdChanged() {
+    int32_t pointerDisplayId = getPointerDisplayId();
+
+    { // acquire lock
+        AutoMutex _l(mLock);
+        mLocked.pointerDisplayId = pointerDisplayId;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_DISPLAY_INFO);
+}
+
 // ----------------------------------------------------------------------------
 
 static jlong nativeInit(JNIEnv* env, jclass /* clazz */,
@@ -2186,6 +2199,18 @@ static void nativeNotifyPortAssociationsChanged(JNIEnv* env, jclass /* clazz */,
             InputReaderConfiguration::CHANGE_DISPLAY_INFO);
 }
 
+static void nativeNotifyPointerDisplayIdChanged(JNIEnv* env, jclass /* clazz */, jlong ptr) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    im->notifyPointerDisplayIdChanged();
+}
+
+static void nativeSetDisplayEligibilityForPointerCapture(JNIEnv* env, jclass /* clazz */, jlong ptr,
+                                                         jint displayId, jboolean isEligible) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+    im->getInputManager()->getDispatcher().setDisplayEligibilityForPointerCapture(displayId,
+                                                                                  isEligible);
+}
+
 static void nativeChangeUniqueIdAssociation(JNIEnv* env, jclass /* clazz */, jlong ptr) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
     im->getInputManager()->getReader().requestRefreshConfiguration(
@@ -2370,6 +2395,9 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"nativeCanDispatchToDisplay", "(JII)Z", (void*)nativeCanDispatchToDisplay},
         {"nativeNotifyPortAssociationsChanged", "(J)V", (void*)nativeNotifyPortAssociationsChanged},
         {"nativeChangeUniqueIdAssociation", "(J)V", (void*)nativeChangeUniqueIdAssociation},
+        {"nativeNotifyPointerDisplayIdChanged", "(J)V", (void*)nativeNotifyPointerDisplayIdChanged},
+        {"nativeSetDisplayEligibilityForPointerCapture", "(JIZ)V",
+         (void*)nativeSetDisplayEligibilityForPointerCapture},
         {"nativeSetMotionClassifierEnabled", "(JZ)V", (void*)nativeSetMotionClassifierEnabled},
         {"nativeGetSensorList", "(JI)[Landroid/hardware/input/InputSensorInfo;",
          (void*)nativeGetSensorList},

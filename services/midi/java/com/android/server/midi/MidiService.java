@@ -18,9 +18,11 @@ package com.android.server.midi;
 
 import android.annotation.NonNull;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -33,6 +35,7 @@ import android.media.midi.IMidiDeviceListener;
 import android.media.midi.IMidiDeviceOpenCallback;
 import android.media.midi.IMidiDeviceServer;
 import android.media.midi.IMidiManager;
+import android.media.midi.MidiDevice;
 import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiDeviceService;
 import android.media.midi.MidiDeviceStatus;
@@ -55,6 +58,7 @@ import com.android.server.SystemService.TargetUser;
 import org.xmlpull.v1.XmlPullParser;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -96,8 +100,11 @@ public class MidiService extends IMidiManager.Stub {
             = new HashMap<MidiDeviceInfo, Device>();
 
     // list of all Bluetooth devices, keyed by BluetoothDevice
-     private final HashMap<BluetoothDevice, Device> mBluetoothDevices
+    private final HashMap<BluetoothDevice, Device> mBluetoothDevices
             = new HashMap<BluetoothDevice, Device>();
+
+    private final HashMap<BluetoothDevice, MidiDevice> mBleMidiDeviceMap =
+            new HashMap<BluetoothDevice, MidiDevice>();
 
     // list of all devices, keyed by IMidiDeviceServer
     private final HashMap<IBinder, Device> mDevicesByServer = new HashMap<IBinder, Device>();
@@ -569,9 +576,44 @@ public class MidiService extends IMidiManager.Stub {
         }
     }
 
+    private final BroadcastReceiver mBleMidiReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action == null) {
+                Log.w(TAG, "MidiService, action is null");
+                return;
+            }
+
+            switch (action) {
+                case BluetoothDevice.ACTION_ACL_CONNECTED: {
+                    Log.d(TAG, "ACTION_ACL_CONNECTED");
+                    BluetoothDevice btDevice =
+                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    openBluetoothDevice(btDevice);
+                }
+                break;
+
+                case BluetoothDevice.ACTION_ACL_DISCONNECTED: {
+                    Log.d(TAG, "ACTION_ACL_DISCONNECTED");
+                    BluetoothDevice btDevice =
+                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    closeBluetoothDevice(btDevice);
+                }
+                break;
+            }
+        }
+    };
+
     public MidiService(Context context) {
         mContext = context;
         mPackageManager = context.getPackageManager();
+
+        // Setup broadcast receivers
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        context.registerReceiver(mBleMidiReceiver, filter);
 
         mBluetoothServiceUid = -1;
     }
@@ -643,13 +685,31 @@ public class MidiService extends IMidiManager.Stub {
     private static final MidiDeviceInfo[] EMPTY_DEVICE_INFO_ARRAY = new MidiDeviceInfo[0];
 
     public MidiDeviceInfo[] getDevices() {
+        return getDevicesForTransport(MidiManager.TRANSPORT_MIDI_BYTE_STREAM);
+    }
+
+    /**
+    * @hide
+    */
+    public MidiDeviceInfo[] getDevicesForTransport(int transport) {
         ArrayList<MidiDeviceInfo> deviceInfos = new ArrayList<MidiDeviceInfo>();
         int uid = Binder.getCallingUid();
 
         synchronized (mDevicesByInfo) {
             for (Device device : mDevicesByInfo.values()) {
                 if (device.isUidAllowed(uid)) {
-                    deviceInfos.add(device.getDeviceInfo());
+                    // UMP devices have protocols that are not PROTOCOL_UNKNOWN
+                    if (transport == MidiManager.TRANSPORT_UNIVERSAL_MIDI_PACKETS) {
+                        if (device.getDeviceInfo().getDefaultProtocol()
+                                != MidiDeviceInfo.PROTOCOL_UNKNOWN) {
+                            deviceInfos.add(device.getDeviceInfo());
+                        }
+                    } else if (transport == MidiManager.TRANSPORT_MIDI_BYTE_STREAM) {
+                        if (device.getDeviceInfo().getDefaultProtocol()
+                                == MidiDeviceInfo.PROTOCOL_UNKNOWN) {
+                            deviceInfos.add(device.getDeviceInfo());
+                        }
+                    }
                 }
             }
         }
@@ -683,9 +743,43 @@ public class MidiService extends IMidiManager.Stub {
         }
     }
 
+    private void openBluetoothDevice(BluetoothDevice bluetoothDevice) {
+        Log.d(TAG, "openBluetoothDevice() device: " + bluetoothDevice);
+
+        MidiManager midiManager = mContext.getSystemService(MidiManager.class);
+        midiManager.openBluetoothDevice(bluetoothDevice,
+                new MidiManager.OnDeviceOpenedListener() {
+                    @Override
+                    public void onDeviceOpened(MidiDevice device) {
+                        synchronized (mBleMidiDeviceMap) {
+                            mBleMidiDeviceMap.put(bluetoothDevice, device);
+                        }
+                    }
+                }, null);
+    }
+
+    private void closeBluetoothDevice(BluetoothDevice bluetoothDevice) {
+        Log.d(TAG, "closeBluetoothDevice() device: " + bluetoothDevice);
+
+        MidiDevice midiDevice;
+        synchronized (mBleMidiDeviceMap) {
+            midiDevice = mBleMidiDeviceMap.remove(bluetoothDevice);
+        }
+
+        if (midiDevice != null) {
+            try {
+                midiDevice.close();
+            } catch (IOException ex) {
+                Log.e(TAG, "Exception closing BLE-MIDI device" + ex);
+            }
+        }
+    }
+
     @Override
     public void openBluetoothDevice(IBinder token, BluetoothDevice bluetoothDevice,
             IMidiDeviceOpenCallback callback) {
+        Log.d(TAG, "openBluetoothDevice()");
+
         Client client = getClient(token);
         if (client == null) return;
 
@@ -718,7 +812,7 @@ public class MidiService extends IMidiManager.Stub {
     @Override
     public MidiDeviceInfo registerDeviceServer(IMidiDeviceServer server, int numInputPorts,
             int numOutputPorts, String[] inputPortNames, String[] outputPortNames,
-            Bundle properties, int type) {
+            Bundle properties, int type, int defaultProtocol) {
         int uid = Binder.getCallingUid();
         if (type == MidiDeviceInfo.TYPE_USB && uid != Process.SYSTEM_UID) {
             throw new SecurityException("only system can create USB devices");
@@ -728,7 +822,8 @@ public class MidiService extends IMidiManager.Stub {
 
         synchronized (mDevicesByInfo) {
             return addDeviceLocked(type, numInputPorts, numOutputPorts, inputPortNames,
-                    outputPortNames, properties, server, null, false, uid);
+                    outputPortNames, properties, server, null, false, uid,
+                    defaultProtocol);
         }
     }
 
@@ -797,11 +892,12 @@ public class MidiService extends IMidiManager.Stub {
     private MidiDeviceInfo addDeviceLocked(int type, int numInputPorts, int numOutputPorts,
             String[] inputPortNames, String[] outputPortNames, Bundle properties,
             IMidiDeviceServer server, ServiceInfo serviceInfo,
-            boolean isPrivate, int uid) {
+            boolean isPrivate, int uid, int defaultProtocol) {
 
         int id = mNextDeviceId++;
         MidiDeviceInfo deviceInfo = new MidiDeviceInfo(type, id, numInputPorts, numOutputPorts,
-                inputPortNames, outputPortNames, properties, isPrivate);
+                inputPortNames, outputPortNames, properties, isPrivate,
+                defaultProtocol);
 
         if (server != null) {
             try {
@@ -988,10 +1084,11 @@ public class MidiService extends IMidiManager.Stub {
 
                             synchronized (mDevicesByInfo) {
                                 addDeviceLocked(MidiDeviceInfo.TYPE_VIRTUAL,
-                                    numInputPorts, numOutputPorts,
-                                    inputPortNames.toArray(EMPTY_STRING_ARRAY),
-                                    outputPortNames.toArray(EMPTY_STRING_ARRAY),
-                                    properties, null, serviceInfo, isPrivate, uid);
+                                        numInputPorts, numOutputPorts,
+                                        inputPortNames.toArray(EMPTY_STRING_ARRAY),
+                                        outputPortNames.toArray(EMPTY_STRING_ARRAY),
+                                        properties, null, serviceInfo, isPrivate, uid,
+                                        MidiDeviceInfo.PROTOCOL_UNKNOWN);
                             }
                             // setting properties to null signals that we are no longer
                             // processing a <device>

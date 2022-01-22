@@ -2135,6 +2135,11 @@
     <string name="config_systemAppProtectionService" translatable="false"></string>
     <!-- The name of the package that will hold the system calendar sync manager role. -->
     <string name="config_systemAutomotiveCalendarSyncManager" translatable="false"></string>
+    <!-- The name of the package that will hold the default automotive navigation role. -->
+    <string name="config_defaultAutomotiveNavigation" translatable="false"></string>
+
+    <!-- The name of the package that will handle updating the device management role. -->
+    <string name="config_deviceManagerUpdater" translatable="false"></string>
 
     <!-- The name of the package that will be allowed to change its components' label/icon. -->
     <string name="config_overrideComponentUiPackage" translatable="false">com.android.stk</string>
@@ -4242,7 +4247,7 @@
     <string translatable="false" name="config_defaultRingtoneVibrationSound"></string>
 
     <!-- Default number of notifications from the same app before they are automatically grouped by the OS -->
-    <integer translatable="false" name="config_autoGroupAtCount">4</integer>
+    <integer translatable="false" name="config_autoGroupAtCount">2</integer>
 
     <!-- The OEM specified sensor type for the lift trigger to launch the camera app. -->
     <integer name="config_cameraLiftTriggerSensorType">-1</integer>
@@ -5607,4 +5612,7 @@
 
     <!-- Flag indicating if help links for Settings app should be enabled. -->
     <bool name="config_settingsHelpLinksEnabled">false</bool>
+
+    <!-- Whether or not to enable the lock screen entry point for the QR code scanner. -->
+    <bool name="config_enableQrCodeScannerOnLockScreen">false</bool>
 </resources>

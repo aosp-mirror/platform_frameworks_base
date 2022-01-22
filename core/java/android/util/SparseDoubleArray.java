@@ -81,9 +81,17 @@ public class SparseDoubleArray implements Cloneable {
      * if no such mapping has been made.
      */
     public double get(int key) {
+        return get(key, 0);
+    }
+
+    /**
+     * Gets the double mapped from the specified key, or the specified value
+     * if no such mapping has been made.
+     */
+    public double get(int key, double valueIfKeyNotFound) {
         final int index = mValues.indexOfKey(key);
         if (index < 0) {
-            return 0.0d;
+            return valueIfKeyNotFound;
         }
         return valueAt(index);
     }
@@ -105,7 +113,7 @@ public class SparseDoubleArray implements Cloneable {
      * <p>This differs from {@link #put} because instead of replacing any previous value, it adds
      * (in the numerical sense) to it.
      */
-    public void add(int key, double summand) {
+    public void incrementValue(int key, double summand) {
         final double oldValue = get(key);
         put(key, oldValue + summand);
     }
@@ -135,6 +143,13 @@ public class SparseDoubleArray implements Cloneable {
      */
     public double valueAt(int index) {
         return Double.longBitsToDouble(mValues.valueAt(index));
+    }
+
+    /**
+     * Removes all key-value mappings from this SparseDoubleArray.
+     */
+    public void clear() {
+        mValues.clear();
     }
 
     /**

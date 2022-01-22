@@ -707,7 +707,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                     mNotificationsAlpha = behindFraction * mDefaultScrimAlpha;
                 } else {
                     mBehindAlpha = behindFraction * mDefaultScrimAlpha;
-                    mNotificationsAlpha = mBehindAlpha;
+                    // Delay fade-in of notification scrim a bit further, to coincide with the
+                    // view fade in. Otherwise the empty panel can be quite jarring.
+                    mNotificationsAlpha = MathUtils.constrainedMap(0f, 1f, 0.3f, 0.75f,
+                            mPanelExpansionFraction);
                 }
                 mInFrontAlpha = 0;
             }

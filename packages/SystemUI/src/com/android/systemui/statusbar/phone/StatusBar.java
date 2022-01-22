@@ -268,6 +268,7 @@ public class StatusBar extends CoreStartable implements
 
     // Should match the values in PhoneWindowManager
     public static final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
+    public static final String SYSTEM_DIALOG_REASON_DREAM = "dream";
     static public final String SYSTEM_DIALOG_REASON_SCREENSHOT = "screenshot";
 
     private static final String BANNER_ACTION_CANCEL =
@@ -2635,8 +2636,17 @@ public class StatusBar extends CoreStartable implements
                 if (mLockscreenUserManager.isCurrentProfile(getSendingUserId())) {
                     int flags = CommandQueue.FLAG_EXCLUDE_NONE;
                     String reason = intent.getStringExtra("reason");
-                    if (reason != null && reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS)) {
-                        flags |= CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL;
+                    if (reason != null) {
+                        if (reason.equals(SYSTEM_DIALOG_REASON_RECENT_APPS)) {
+                            flags |= CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL;
+                        }
+                        // Do not collapse notifications when starting dreaming if the notifications
+                        // shade is used for the screen off animation. It might require expanded
+                        // state for the scrims to be visible
+                        if (reason.equals(SYSTEM_DIALOG_REASON_DREAM)
+                                && mScreenOffAnimationController.shouldExpandNotifications()) {
+                            flags |= CommandQueue.FLAG_EXCLUDE_NOTIFICATION_PANEL;
+                        }
                     }
                     mShadeController.animateCollapsePanels(flags);
                 }

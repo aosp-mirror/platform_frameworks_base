@@ -1622,6 +1622,15 @@ int32_t JTuner::getMaxNumberOfFrontends(int32_t type) {
     return mTunerClient->getMaxNumberOfFrontends(static_cast<FrontendType>(type));
 }
 
+jint JTuner::removeOutputPid(int32_t pid) {
+    if (mFeClient == nullptr) {
+        ALOGE("frontend is not initialized");
+        return (jint)Result::INVALID_STATE;
+    }
+
+    return (jint)mFeClient->removeOutputPid(pid);
+}
+
 jobject JTuner::openLnbByHandle(int handle) {
     if (mTunerClient == nullptr) {
         return nullptr;
@@ -2606,6 +2615,24 @@ jobject JTuner::getFrontendStatus(jintArray types) {
 
                 jintArray valObj = env->NewIntArray(v.size());
                 env->SetIntArrayRegion(valObj, 0, v.size(), reinterpret_cast<jint *>(&ids[0]));
+
+                env->SetObjectField(statusObj, field, valObj);
+                break;
+            }
+            case FrontendStatus::Tag::allPlpInfo: {
+                jfieldID field = env->GetFieldID(clazz, "mAllPlpInfo",
+                                                 "[Landroid/media/tv/tuner/frontend/Atsc3PlpInfo;");
+                jclass plpClazz = env->FindClass("android/media/tv/tuner/frontend/Atsc3PlpInfo");
+                jmethodID initPlp = env->GetMethodID(plpClazz, "<init>", "(IZ)V");
+
+                vector<FrontendScanAtsc3PlpInfo> plpInfos =
+                        s.get<FrontendStatus::Tag::allPlpInfo>();
+                jobjectArray valObj = env->NewObjectArray(plpInfos.size(), plpClazz, nullptr);
+                for (int i = 0; i < plpInfos.size(); i++) {
+                    jobject plpObj = env->NewObject(plpClazz, initPlp, plpInfos[i].plpId,
+                                                    plpInfos[i].bLlsFlag);
+                    env->SetObjectArrayElement(valObj, i, plpObj);
+                }
 
                 env->SetObjectField(statusObj, field, valObj);
                 break;
@@ -4357,6 +4384,11 @@ static jint android_media_tv_Tuner_get_maximum_frontends(JNIEnv *env, jobject th
     return tuner->getMaxNumberOfFrontends(type);
 }
 
+static jint android_media_tv_Tuner_remove_output_pid(JNIEnv *env, jobject thiz, jint pid) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->removeOutputPid(pid);
+}
+
 static jint android_media_tv_Tuner_close_frontend(JNIEnv* env, jobject thiz, jint /* handle */) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->closeFrontend();
@@ -4676,6 +4708,8 @@ static const JNINativeMethod gTunerMethods[] = {
              (void *)android_media_tv_Tuner_set_maximum_frontends },
     { "nativeGetMaxNumberOfFrontends", "(I)I",
             (void *)android_media_tv_Tuner_get_maximum_frontends },
+    { "nativeRemoveOutputPid", "(I)I",
+            (void *)android_media_tv_Tuner_remove_output_pid },
 };
 
 static const JNINativeMethod gFilterMethods[] = {

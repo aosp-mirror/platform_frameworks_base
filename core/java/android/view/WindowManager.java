@@ -118,6 +118,7 @@ import android.view.WindowInsets.Side.InsetsSide;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.window.TaskFpsCallback;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -4858,4 +4859,31 @@ public interface WindowManager extends ViewManager {
     default boolean isTaskSnapshotSupported() {
         return false;
     }
+
+    /**
+     * Registers the frame rate per second count callback for one given task ID.
+     * Each callback can only register for receiving FPS callback for one task id until unregister
+     * is called. If there's no task associated with the given task id,
+     * {@link IllegalArgumentException} will be thrown. If a task id destroyed after a callback is
+     * registered, the registered callback will not be unregistered until
+     * {@link #unregisterTaskFpsCallback(TaskFpsCallback))} is called
+     * @param taskId task id of the task.
+     * @param callback callback to be registered.
+     *
+     * @hide
+     */
+    @SystemApi
+    default void registerTaskFpsCallback(@IntRange(from = 0) int taskId,
+            @NonNull TaskFpsCallback callback) {}
+
+    /**
+     * Unregisters the frame rate per second count callback which was registered with
+     * {@link #registerTaskFpsCallback(int,TaskFpsCallback)}.
+     *
+     * @param callback callback to be unregistered.
+     *
+     * @hide
+     */
+    @SystemApi
+    default void unregisterTaskFpsCallback(@NonNull TaskFpsCallback callback) {}
 }

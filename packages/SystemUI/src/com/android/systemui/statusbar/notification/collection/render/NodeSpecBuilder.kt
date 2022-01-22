@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.render
 
+import com.android.systemui.statusbar.notification.SectionHeaderVisibilityProvider
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
@@ -35,6 +36,7 @@ import com.android.systemui.util.traceSection
 class NodeSpecBuilder(
     private val mediaContainerController: MediaContainerController,
     private val sectionsFeatureManager: NotificationSectionsFeatureManager,
+    private val sectionHeaderVisibilityProvider: SectionHeaderVisibilityProvider,
     private val viewBarn: NotifViewBarn
 ) {
     fun buildNodeSpec(
@@ -51,6 +53,7 @@ class NodeSpecBuilder(
 
         var currentSection: NotifSection? = null
         val prevSections = mutableSetOf<NotifSection?>()
+        val showHeaders = sectionHeaderVisibilityProvider.sectionHeadersVisible
 
         for (entry in notifList) {
             val section = entry.section!!
@@ -61,7 +64,7 @@ class NodeSpecBuilder(
 
             // If this notif begins a new section, first add the section's header view
             if (section != currentSection) {
-                if (section.headerController != currentSection?.headerController) {
+                if (section.headerController != currentSection?.headerController && showHeaders) {
                     section.headerController?.let { headerController ->
                         root.children.add(NodeSpecImpl(root, headerController))
                     }

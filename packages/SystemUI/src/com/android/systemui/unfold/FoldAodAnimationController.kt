@@ -136,6 +136,8 @@ constructor(
 
     override fun shouldAnimateClockChange(): Boolean = !isAnimationPlaying()
 
+    override fun shouldDelayDisplayDozeTransition(): Boolean = shouldPlayAnimation()
+
     /** Called when AOD status is changed */
     override fun onAlwaysOnChanged(alwaysOn: Boolean) {
         alwaysOnEnabled = alwaysOn

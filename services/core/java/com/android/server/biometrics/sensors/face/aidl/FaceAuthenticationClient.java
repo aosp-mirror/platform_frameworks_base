@@ -39,7 +39,9 @@ import com.android.internal.R;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
+import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
+import com.android.server.biometrics.sensors.ClientMonitorCompositeCallback;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutConsumer;
 import com.android.server.biometrics.sensors.LockoutTracker;
@@ -97,15 +99,15 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
     }
 
     @Override
-    public void start(@NonNull Callback callback) {
+    public void start(@NonNull ClientMonitorCallback callback) {
         super.start(callback);
         mState = STATE_STARTED;
     }
 
     @NonNull
     @Override
-    protected Callback wrapCallbackForStart(@NonNull Callback callback) {
-        return new CompositeCallback(
+    protected ClientMonitorCallback wrapCallbackForStart(@NonNull ClientMonitorCallback callback) {
+        return new ClientMonitorCompositeCallback(
                 getLogger().createALSCallback(true /* startWithClient */), callback);
     }
 

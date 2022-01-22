@@ -37,6 +37,7 @@ import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
+import android.provider.DeviceConfig;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.DataUnit;
@@ -255,11 +256,14 @@ public class DeviceStorageMonitorService extends SystemService {
     private void checkHigh() {
         final StorageManager storage = getContext().getSystemService(StorageManager.class);
         // Check every mounted private volume to see if they're under the high storage threshold
-        // which is StorageManager.STORAGE_THRESHOLD_PERCENT_HIGH of total space
+        // which is storageThresholdPercentHigh of total space
+        final int storageThresholdPercentHigh = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                StorageManager.STORAGE_THRESHOLD_PERCENT_HIGH_KEY,
+                StorageManager.DEFAULT_STORAGE_THRESHOLD_PERCENT_HIGH);
         for (VolumeInfo vol : storage.getWritablePrivateVolumes()) {
             final File file = vol.getPath();
-            if (file.getUsableSpace() < file.getTotalSpace()
-                    * StorageManager.STORAGE_THRESHOLD_PERCENT_HIGH / 100) {
+            if (file.getUsableSpace() < file.getTotalSpace() * storageThresholdPercentHigh / 100) {
                 final PackageManagerService pms = (PackageManagerService) ServiceManager
                         .getService("package");
                 try {
