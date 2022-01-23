@@ -17,7 +17,6 @@
 package android.net;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -27,8 +26,8 @@ import android.app.usage.NetworkStatsManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.os.Binder;
 import android.os.Build;
-import android.os.IBinder;
 import android.os.RemoteException;
 
 import com.android.server.NetworkManagementSocketTagger;
@@ -37,8 +36,6 @@ import dalvik.system.SocketTagger;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.DatagramSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -177,23 +174,10 @@ public class TrafficStats {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 130143562)
     private synchronized static INetworkStatsService getStatsService() {
         if (sStatsService == null) {
-            sStatsService = getStatsBinder();
+            throw new IllegalStateException("TrafficStats not initialized, uid="
+                    + Binder.getCallingUid());
         }
         return sStatsService;
-    }
-
-    @Nullable
-    private static INetworkStatsService getStatsBinder() {
-        try {
-            final Method getServiceMethod = Class.forName("android.os.ServiceManager")
-                    .getDeclaredMethod("getService", new Class[]{String.class});
-            final IBinder binder = (IBinder) getServiceMethod.invoke(
-                    null, Context.NETWORK_STATS_SERVICE);
-            return INetworkStatsService.Stub.asInterface(binder);
-        } catch (NoSuchMethodException | ClassNotFoundException | IllegalAccessException
-                | InvocationTargetException e) {
-            throw new NullPointerException("Cannot get INetworkStatsService: " + e);
-        }
     }
 
     /**
@@ -208,6 +192,26 @@ public class TrafficStats {
     private static Object sProfilingLock = new Object();
 
     private static final String LOOPBACK_IFACE = "lo";
+
+    /**
+     * Initialization {@link TrafficStats} with the context, to
+     * allow {@link TrafficStats} to fetch the needed binder.
+     *
+     * @param context a long-lived context, such as the application context or system
+     *                server context.
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SuppressLint("VisiblySynchronized")
+    public static synchronized void init(@NonNull final Context context) {
+        if (sStatsService != null) {
+            throw new IllegalStateException("TrafficStats is already initialized, uid="
+                    + Binder.getCallingUid());
+        }
+        final NetworkStatsManager statsManager =
+                context.getSystemService(NetworkStatsManager.class);
+        sStatsService = statsManager.getBinder();
+    }
 
     /**
      * Set active tag to use when accounting {@link Socket} traffic originating

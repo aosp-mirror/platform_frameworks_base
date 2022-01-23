@@ -91,6 +91,10 @@ MissingNullability: android.telephony.mbms.DownloadRequest.Builder#setServiceId(
 
 
 
+NoSettingsProvider: android.provider.Settings.Secure#FAST_PAIR_SCAN_ENABLED:
+    New setting keys are not allowed (Field: FAST_PAIR_SCAN_ENABLED); use getters/setters in relevant manager class
+
+
 OnNameExpected: android.service.smartspace.SmartspaceService#notifySmartspaceEvent(android.app.smartspace.SmartspaceSessionId, android.app.smartspace.SmartspaceTargetEvent):
     Methods implemented by developers should follow the on<Something> style, was `notifySmartspaceEvent`
 

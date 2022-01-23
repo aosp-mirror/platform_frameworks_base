@@ -19,7 +19,6 @@ package android.view;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Rect;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -74,11 +73,6 @@ public class HandwritingInitiator {
     @Nullable
     @VisibleForTesting
     public WeakReference<View> mConnectedView = null;
-
-    /** The editor bound reported by the connected View. */
-    @Nullable
-    @VisibleForTesting
-    public Rect mEditorBound = null;
 
     /**
      * When InputConnection restarts for a View, View#onInputConnectionCreatedInternal
@@ -174,9 +168,8 @@ public class HandwritingInitiator {
      * @param view the view that created the current InputConnection.
      * @see  #onInputConnectionClosed(View)
      */
-    public void onInputConnectionCreated(@NonNull View view, @NonNull EditorInfo editorInfo) {
+    public void onInputConnectionCreated(@NonNull View view) {
         final View connectedView = getConnectedView();
-//        updateEditorBound(editorInfo.getInitialEditorBound());
         if (connectedView == view) {
             ++mConnectionCount;
         } else {
@@ -198,29 +191,11 @@ public class HandwritingInitiator {
             --mConnectionCount;
             if (mConnectionCount == 0) {
                 mConnectedView = null;
-                mEditorBound = null;
             }
         } else {
             // Unexpected branch, set mConnectedView to null to avoid further problem.
             mConnectedView = null;
-            mEditorBound = null;
             mConnectionCount = 0;
-        }
-    }
-
-    /**
-     * Notify the HandwritingInitiator that editor bound of the connected view(the view with
-     * active InputConnection) has be updated.
-     * @param editorBound new the editor bounds of the connected view.
-     */
-    public void updateEditorBound(@NonNull Rect editorBound) {
-        if (mEditorBound == null) {
-            mEditorBound = new Rect(editorBound);
-        } else {
-            mEditorBound.left = editorBound.left;
-            mEditorBound.top = editorBound.top;
-            mEditorBound.right = editorBound.right;
-            mEditorBound.bottom = editorBound.bottom;
         }
     }
 
@@ -240,18 +215,19 @@ public class HandwritingInitiator {
             return;
         }
         final View connectedView = getConnectedView();
-        if (connectedView == null || mEditorBound == null) {
+        if (connectedView == null) {
             return;
         }
         final ViewParent viewParent = connectedView.getParent();
         // Do a final check before startHandwriting.
         if (viewParent != null && connectedView.isAttachedToWindow()) {
-            final Rect editorBounds = new Rect(mEditorBound);
+            final Rect editorBounds =
+                    new Rect(0, 0, connectedView.getWidth(), connectedView.getHeight());
             if (viewParent.getChildVisibleRect(connectedView, editorBounds, null)) {
                 final int roundedInitX = Math.round(mState.mStylusDownX);
                 final int roundedInitY = Math.round(mState.mStylusDownY);
                 if (editorBounds.contains(roundedInitX, roundedInitY)) {
-                    startHandwriting(mConnectedView.get());
+                    startHandwriting(connectedView);
                 }
             }
         }
@@ -261,7 +237,7 @@ public class HandwritingInitiator {
     /** For test only. */
     @VisibleForTesting
     public void startHandwriting(View view) {
-        // mImm.startHandwriting(view);
+        mImm.startStylusHandwriting(view);
     }
 
     private boolean largerThanTouchSlop(float x1, float y1, float x2, float y2) {

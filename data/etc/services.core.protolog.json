@@ -493,12 +493,6 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "-1556507536": {
-      "message": "Passing transform hint %d for window %s%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
     "-1554521902": {
       "message": "showInsets(ime) was requested by different window: %s ",
       "level": "WARN",
@@ -816,6 +810,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
+    },
+    "-1248290210": {
+      "message": "Passing transform hint %d for window %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "-1228653755": {
       "message": "Launch on display check: displayId=%d callingPid=%d callingUid=%d",
@@ -2761,6 +2761,12 @@
       "group": "WM_SHOW_SURFACE_ALLOC",
       "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
     },
+    "751854538": {
+      "message": "DisplayArea keep clear rects changed name =%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_ORGANIZER",
+      "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
+    },
     "765395228": {
       "message": "onAnimationFinished(): controller=%s reorderMode=%d",
       "level": "DEBUG",
@@ -3690,12 +3696,6 @@
       "level": "WARN",
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/DisplayAreaPolicyBuilder.java"
-    },
-    "1884961873": {
-      "message": "Sleep still need to stop %d activities",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STATES",
-      "at": "com\/android\/server\/wm\/Task.java"
     },
     "1891501279": {
       "message": "cancelAnimation(): reason=%s",

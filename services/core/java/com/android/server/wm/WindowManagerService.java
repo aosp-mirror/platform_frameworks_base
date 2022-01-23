@@ -177,9 +177,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.configstore.V1_0.OptionalBool;
-import android.hardware.configstore.V1_1.DisplayOrientation;
 import android.hardware.configstore.V1_1.ISurfaceFlingerConfigs;
-import android.hardware.configstore.V1_1.OptionalDisplayOrientation;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManager;
@@ -231,7 +229,6 @@ import android.util.TypedValue;
 import android.util.proto.ProtoOutputStream;
 import android.view.Choreographer;
 import android.view.Display;
-import android.view.DisplayAddress;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IAppTransitionAnimationSpecsFuture;
@@ -442,8 +439,6 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     static final boolean ENABLE_FIXED_ROTATION_TRANSFORM =
             SystemProperties.getBoolean("persist.wm.fixed_rotation_transform", true);
-    private @Surface.Rotation int mPrimaryDisplayOrientation = Surface.ROTATION_0;
-    private DisplayAddress mPrimaryDisplayPhysicalAddress;
 
     // Enums for animation scale update types.
     @Retention(RetentionPolicy.SOURCE)
@@ -590,6 +585,13 @@ public class WindowManagerService extends IWindowManager.Stub
      * underlying surface.
      */
     final ArrayList<WindowState> mResizingWindows = new ArrayList<>();
+
+    /**
+     * Mapping of displayId to {@link DisplayImePolicy}.
+     * Note that this can be accessed without holding the lock.
+     */
+    volatile Map<Integer, Integer> mDisplayImePolicyCache = Collections.unmodifiableMap(
+            new ArrayMap<>());
 
     /**
      * Windows whose surface should be destroyed.
@@ -2444,21 +2446,12 @@ public class WindowManagerService extends IWindowManager.Stub
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
 
             final DisplayInfo displayInfo = win.getDisplayInfo();
-            int transformHint = displayInfo.rotation;
-            // If the window is on the primary display, use the panel orientation to adjust the
-            // transform hint
-            final boolean isPrimaryDisplay = displayInfo.address != null &&
-                    displayInfo.address.equals(mPrimaryDisplayPhysicalAddress);
-            if (isPrimaryDisplay) {
-                transformHint = (transformHint + mPrimaryDisplayOrientation) % 4;
-            }
+            final int transformHint = (displayInfo.rotation + displayInfo.installOrientation) % 4;
             outSurfaceControl.setTransformHint(
                     SurfaceControl.rotationToBufferTransform(transformHint));
             ProtoLog.v(WM_DEBUG_ORIENTATION,
-                    "Passing transform hint %d for window %s%s",
-                    transformHint, win,
-                    isPrimaryDisplay ? " on primary display with orientation "
-                            + mPrimaryDisplayOrientation : "");
+                    "Passing transform hint %d for window %s",
+                    transformHint, win);
 
             if (toBeDisplayed && win.mIsWallpaper) {
                 displayContent.mWallpaperController.updateWallpaperOffset(win, false /* sync */);
@@ -4355,6 +4348,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    void reportKeepClearAreasChanged(Session session, IWindow window, List<Rect> keepClearAreas) {
+        synchronized (mGlobalLock) {
+            final WindowState win = windowForClientLocked(session, window, true);
+            if (win.setKeepClearAreas(keepClearAreas)) {
+                win.getDisplayContent().updateKeepClearAreas();
+            }
+        }
+    }
+
     @Override
     public void registerDisplayFoldListener(IDisplayFoldListener listener) {
         mPolicy.registerDisplayFoldListener(listener);
@@ -4927,9 +4929,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mTaskSnapshotController.systemReady();
         mHasWideColorGamutSupport = queryWideColorGamutSupport();
         mHasHdrSupport = queryHdrSupport();
-        mPrimaryDisplayOrientation = queryPrimaryDisplayOrientation();
-        mPrimaryDisplayPhysicalAddress =
-            DisplayAddress.fromPhysicalDisplayId(SurfaceControl.getPrimaryPhysicalDisplayId());
         UiThread.getHandler().post(mSettingsObserver::loadSettings);
         IVrManager vrManager = IVrManager.Stub.asInterface(
                 ServiceManager.getService(Context.VR_SERVICE));
@@ -4990,39 +4989,6 @@ public class WindowManagerService extends IWindowManager.Stub
             return defaultValue;
         }
         return false;
-    }
-
-    private static @Surface.Rotation int queryPrimaryDisplayOrientation() {
-        Optional<SurfaceFlingerProperties.primary_display_orientation_values> prop =
-                SurfaceFlingerProperties.primary_display_orientation();
-        if (prop.isPresent()) {
-            switch (prop.get()) {
-                case ORIENTATION_90: return Surface.ROTATION_90;
-                case ORIENTATION_180: return Surface.ROTATION_180;
-                case ORIENTATION_270: return Surface.ROTATION_270;
-                case ORIENTATION_0:
-                default:
-                    return Surface.ROTATION_0;
-            }
-        }
-        try {
-            ISurfaceFlingerConfigs surfaceFlinger = ISurfaceFlingerConfigs.getService();
-            OptionalDisplayOrientation primaryDisplayOrientation =
-                    surfaceFlinger.primaryDisplayOrientation();
-            if (primaryDisplayOrientation != null && primaryDisplayOrientation.specified) {
-                switch (primaryDisplayOrientation.value) {
-                    case DisplayOrientation.ORIENTATION_90: return Surface.ROTATION_90;
-                    case DisplayOrientation.ORIENTATION_180: return Surface.ROTATION_180;
-                    case DisplayOrientation.ORIENTATION_270: return Surface.ROTATION_270;
-                    case DisplayOrientation.ORIENTATION_0:
-                    default:
-                        return Surface.ROTATION_0;
-                }
-            }
-        } catch (Exception e) {
-            // Use default value if we can't talk to config store.
-        }
-        return Surface.ROTATION_0;
     }
 
     // Returns an input target which is mapped to the given input token. This can be a WindowState
@@ -6947,6 +6913,7 @@ public class WindowManagerService extends IWindowManager.Stub
     void setForceDesktopModeOnExternalDisplays(boolean forceDesktopModeOnExternalDisplays) {
         synchronized (mGlobalLock) {
             mForceDesktopModeOnExternalDisplays = forceDesktopModeOnExternalDisplays;
+            mRoot.updateDisplayImePolicyCache();
         }
     }
 
@@ -7378,16 +7345,14 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "getDisplayImePolicy()")) {
             throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
         }
-        final DisplayContent dc = mRoot.getDisplayContent(displayId);
-        if (dc == null) {
+        final Map<Integer, Integer> displayImePolicyCache = mDisplayImePolicyCache;
+        if (!displayImePolicyCache.containsKey(displayId)) {
             ProtoLog.w(WM_ERROR,
                     "Attempted to get IME policy of a display that does not exist: %d",
                     displayId);
             return DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
         }
-        synchronized (mGlobalLock) {
-            return dc.getImePolicy();
-        }
+        return displayImePolicyCache.get(displayId);
     }
 
     @Override
@@ -7736,19 +7701,32 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public boolean isInputMethodClientFocus(int uid, int pid, int displayId) {
+        public @ImeClientFocusResult int hasInputMethodClientFocus(IBinder windowToken,
+                int uid, int pid, int displayId) {
             if (displayId == Display.INVALID_DISPLAY) {
-                return false;
+                return ImeClientFocusResult.INVALID_DISPLAY_ID;
             }
             synchronized (mGlobalLock) {
                 final DisplayContent displayContent = mRoot.getTopFocusedDisplayContent();
+                final WindowState window = mWindowMap.get(windowToken);
+                if (window == null) {
+                    return ImeClientFocusResult.NOT_IME_TARGET_WINDOW;
+                }
+                final int tokenDisplayId = window.getDisplayContent().getDisplayId();
+                if (tokenDisplayId != displayId) {
+                    Slog.e(TAG, "isInputMethodClientFocus: display ID mismatch."
+                            + " from client: " + displayId
+                            + " from window: " + tokenDisplayId);
+                    return ImeClientFocusResult.DISPLAY_ID_MISMATCH;
+                }
                 if (displayContent == null
                         || displayContent.getDisplayId() != displayId
                         || !displayContent.hasAccess(uid)) {
-                    return false;
+                    return ImeClientFocusResult.INVALID_DISPLAY_ID;
                 }
+
                 if (displayContent.isInputMethodClientFocus(uid, pid)) {
-                    return true;
+                    return ImeClientFocusResult.HAS_IME_FOCUS;
                 }
                 // Okay, how about this...  what is the current focus?
                 // It seems in some cases we may not have moved the IM
@@ -7761,10 +7739,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 final WindowState currentFocus = displayContent.mCurrentFocus;
                 if (currentFocus != null && currentFocus.mSession.mUid == uid
                         && currentFocus.mSession.mPid == pid) {
-                    return currentFocus.canBeImeTarget();
+                    return currentFocus.canBeImeTarget() ? ImeClientFocusResult.HAS_IME_FOCUS
+                            : ImeClientFocusResult.NOT_IME_TARGET_WINDOW;
                 }
             }
-            return false;
+            return ImeClientFocusResult.NOT_IME_TARGET_WINDOW;
         }
 
         @Override
@@ -7863,9 +7842,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         @Override
         public @DisplayImePolicy int getDisplayImePolicy(int displayId) {
-            synchronized (mGlobalLock) {
-                return WindowManagerService.this.getDisplayImePolicy(displayId);
-            }
+            return WindowManagerService.this.getDisplayImePolicy(displayId);
         }
 
         @Override
@@ -8760,20 +8737,21 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean shouldRestoreImeVisibility(IBinder imeTargetWindowToken) {
+        final Task imeTargetWindowTask;
         synchronized (mGlobalLock) {
             final WindowState imeTargetWindow = mWindowMap.get(imeTargetWindowToken);
             if (imeTargetWindow == null) {
                 return false;
             }
-            final Task imeTargetWindowTask = imeTargetWindow.getTask();
+            imeTargetWindowTask = imeTargetWindow.getTask();
             if (imeTargetWindowTask == null) {
                 return false;
             }
-            final TaskSnapshot snapshot = getTaskSnapshot(imeTargetWindowTask.mTaskId,
-                    imeTargetWindowTask.mUserId, false /* isLowResolution */,
-                    false /* restoreFromDisk */);
-            return snapshot != null && snapshot.hasImeSurface();
         }
+        final TaskSnapshot snapshot = getTaskSnapshot(imeTargetWindowTask.mTaskId,
+                imeTargetWindowTask.mUserId, false /* isLowResolution */,
+                false /* restoreFromDisk */);
+        return snapshot != null && snapshot.hasImeSurface();
     }
 
     @Override

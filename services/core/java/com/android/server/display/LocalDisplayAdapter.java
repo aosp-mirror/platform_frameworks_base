@@ -641,6 +641,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
                 mInfo.roundedCorners = RoundedCorners.fromResources(
                         res, mInfo.uniqueId, mInfo.width, mInfo.height);
+                mInfo.installOrientation = mStaticDisplayInfo.installOrientation;
 
                 if (mStaticDisplayInfo.isInternal) {
                     mInfo.type = Display.TYPE_INTERNAL;

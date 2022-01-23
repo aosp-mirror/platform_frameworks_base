@@ -219,7 +219,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     private static final int MSG_SHOW_IM_SUBTYPE_PICKER = 1;
-    private static final int MSG_SHOW_IM_CONFIG = 3;
 
     private static final int MSG_HIDE_CURRENT_INPUT_METHOD = 1035;
     private static final int MSG_REMOVE_IME_SURFACE = 1060;
@@ -236,8 +235,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     private static final int MSG_SYSTEM_UNLOCK_USER = 5000;
     private static final int MSG_DISPATCH_ON_INPUT_METHOD_LIST_UPDATED = 5010;
-
-    private static final int MSG_INLINE_SUGGESTIONS_REQUEST = 6000;
 
     private static final int MSG_NOTIFY_IME_UID_TO_AUDIO_SERVICE = 7000;
 
@@ -1957,12 +1954,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             IInputMethod curMethod = getCurMethodLocked();
             if (userId == mSettings.getCurrentUserId() && imi != null
                     && imi.isInlineSuggestionsEnabled() && curMethod != null) {
-                executeOrSendMessage(curMethod,
-                        mCaller.obtainMessageOOO(MSG_INLINE_SUGGESTIONS_REQUEST, curMethod,
-                                requestInfo, new InlineSuggestionsRequestCallbackDecorator(callback,
-                                        imi.getPackageName(), mCurTokenDisplayId,
-                                        getCurTokenLocked(),
-                                        this)));
+                final IInlineSuggestionsRequestCallback callbackImpl =
+                        new InlineSuggestionsRequestCallbackDecorator(callback,
+                                imi.getPackageName(), mCurTokenDisplayId, getCurTokenLocked(),
+                                this);
+                try {
+                    curMethod.onCreateInlineSuggestionsRequest(requestInfo, callbackImpl);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "RemoteException calling onCreateInlineSuggestionsRequest()", e);
+                }
             } else {
                 callback.onInlineSuggestionsUnsupported();
             }
@@ -2208,16 +2208,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    // TODO(b/215609403): This method will be removed soon!
-    private void executeOrSendMessage(IInputMethod target, Message msg) {
-        if (target.asBinder() instanceof Binder) {
-            throw new UnsupportedOperationException(
-                    "InputMethodService is not supported to run in the system_server");
-        }
-        handleMessage(msg);
-        msg.recycle();
-    }
-
     private void executeOrSendMessage(IInputMethodClient target, Message msg) {
          if (target.asBinder() instanceof Binder) {
              // This is supposed to be emulating the one-way semantics when the IME client is
@@ -2347,11 +2337,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 curId, getSequenceNumberLocked(), suppressesSpellChecker);
     }
 
+    /**
+     * Called by {@link #startInputOrWindowGainedFocusInternalLocked} to bind/unbind/attach the
+     * selected InputMethod to the given focused IME client.
+     *
+     * Note that this should be called after validating if the IME client has IME focus.
+     *
+     * @see WindowManagerInternal#hasInputMethodClientFocus(IBinder, int, int, int)
+     */
     @GuardedBy("ImfLock.class")
     @NonNull
-    InputBindResult startInputUncheckedLocked(@NonNull ClientState cs, IInputContext inputContext,
-            @NonNull EditorInfo attribute, @StartInputFlags int startInputFlags,
-            @StartInputReason int startInputReason, int unverifiedTargetSdkVersion) {
+    private InputBindResult startInputUncheckedLocked(@NonNull ClientState cs,
+            IInputContext inputContext, @NonNull EditorInfo attribute,
+            @StartInputFlags int startInputFlags, @StartInputReason int startInputReason,
+            int unverifiedTargetSdkVersion) {
         // If no method is currently selected, do nothing.
         String selectedMethodId = getSelectedMethodIdLocked();
         if (selectedMethodId == null) {
@@ -2373,10 +2372,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return InputBindResult.INVALID_PACKAGE_NAME;
         }
 
-        if (!mWindowManagerInternal.isUidAllowedOnDisplay(cs.selfReportedDisplayId, cs.uid)) {
-            // Wait, the client no longer has access to the display.
-            return InputBindResult.INVALID_DISPLAY_ID;
-        }
         // Compute the final shown display ID with validated cs.selfReportedDisplayId for this
         // session & other conditions.
         mDisplayIdToShowIme = computeImeDisplayIdForTarget(cs.selfReportedDisplayId,
@@ -3200,14 +3195,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     // be made before input is started in it.
                     final ClientState cs = mClients.get(client.asBinder());
                     if (cs == null) {
-                        throw new IllegalArgumentException(
-                                "unknown client " + client.asBinder());
+                        throw new IllegalArgumentException("unknown client " + client.asBinder());
                     }
-                    if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid,
-                            cs.selfReportedDisplayId)) {
+                    if (!isImeClientFocused(windowToken, cs)) {
                         if (DEBUG) {
-                            Slog.w(TAG,
-                                    "Ignoring hideSoftInput of uid " + uid + ": " + client);
+                            Slog.w(TAG, "Ignoring hideSoftInput of uid " + uid + ": " + client);
                         }
                         return false;
                     }
@@ -3275,6 +3267,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mShowExplicitlyRequested = false;
         mShowForced = false;
         return res;
+    }
+
+    private boolean isImeClientFocused(IBinder windowToken, ClientState cs) {
+        final int imeClientFocus = mWindowManagerInternal.hasInputMethodClientFocus(
+                windowToken, cs.uid, cs.pid, cs.selfReportedDisplayId);
+        return imeClientFocus == WindowManagerInternal.ImeClientFocusResult.HAS_IME_FOCUS;
     }
 
     @NonNull
@@ -3370,31 +3368,30 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + " unverifiedTargetSdkVersion=" + unverifiedTargetSdkVersion);
         }
 
-        final int windowDisplayId = mWindowManagerInternal.getDisplayIdForWindow(windowToken);
-
         final ClientState cs = mClients.get(client.asBinder());
         if (cs == null) {
             throw new IllegalArgumentException("unknown client " + client.asBinder());
         }
-        if (cs.selfReportedDisplayId != windowDisplayId) {
-            Slog.e(TAG, "startInputOrWindowGainedFocusInternal: display ID mismatch."
-                    + " from client:" + cs.selfReportedDisplayId
-                    + " from window:" + windowDisplayId);
-            return InputBindResult.DISPLAY_ID_MISMATCH;
-        }
 
-        if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid,
-                cs.selfReportedDisplayId)) {
-            // Check with the window manager to make sure this client actually
-            // has a window with focus.  If not, reject.  This is thread safe
-            // because if the focus changes some time before or after, the
-            // next client receiving focus that has any interest in input will
-            // be calling through here after that change happens.
-            if (DEBUG) {
-                Slog.w(TAG, "Focus gain on non-focused client " + cs.client
-                        + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
-            }
-            return InputBindResult.NOT_IME_TARGET_WINDOW;
+        final int imeClientFocus = mWindowManagerInternal.hasInputMethodClientFocus(
+                windowToken, cs.uid, cs.pid, cs.selfReportedDisplayId);
+        switch (imeClientFocus) {
+            case WindowManagerInternal.ImeClientFocusResult.DISPLAY_ID_MISMATCH:
+                Slog.e(TAG, "startInputOrWindowGainedFocusInternal: display ID mismatch.");
+                return InputBindResult.DISPLAY_ID_MISMATCH;
+            case WindowManagerInternal.ImeClientFocusResult.NOT_IME_TARGET_WINDOW:
+                // Check with the window manager to make sure this client actually
+                // has a window with focus.  If not, reject.  This is thread safe
+                // because if the focus changes some time before or after, the
+                // next client receiving focus that has any interest in input will
+                // be calling through here after that change happens.
+                if (DEBUG) {
+                    Slog.w(TAG, "Focus gain on non-focused client " + cs.client
+                            + " (uid=" + cs.uid + " pid=" + cs.pid + ")");
+                }
+                return InputBindResult.NOT_IME_TARGET_WINDOW;
+            case WindowManagerInternal.ImeClientFocusResult.INVALID_DISPLAY_ID:
+                return InputBindResult.INVALID_DISPLAY_ID;
         }
 
         if (mUserSwitchHandlerTask != null) {
@@ -3622,8 +3619,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (cs == null) {
                 throw new IllegalArgumentException("unknown client " + client.asBinder());
             }
-            if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid,
-                    cs.selfReportedDisplayId)) {
+            if (!isImeClientFocused(mCurFocusedWindow, cs)) {
                 Slog.w(TAG, String.format("Ignoring %s of uid %d : %s", methodName, uid, client));
                 return false;
             }
@@ -4264,10 +4260,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mMenuController.showInputMethodMenu(showAuxSubtypes, displayId);
                 return true;
 
-            case MSG_SHOW_IM_CONFIG:
-                showConfigureInputMethods();
-                return true;
-
             // ---------------------------------------------------------
 
             case MSG_HIDE_CURRENT_INPUT_METHOD:
@@ -4377,23 +4369,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 final List<InputMethodInfo> imes = (List<InputMethodInfo>) msg.obj;
                 mInputMethodListListeners.forEach(
                         listener -> listener.onInputMethodListUpdated(imes, userId));
-                return true;
-            }
-
-            // ---------------------------------------------------------------
-            case MSG_INLINE_SUGGESTIONS_REQUEST: {
-                args = (SomeArgs) msg.obj;
-                final InlineSuggestionsRequestInfo requestInfo =
-                        (InlineSuggestionsRequestInfo) args.arg2;
-                final IInlineSuggestionsRequestCallback callback =
-                        (IInlineSuggestionsRequestCallback) args.arg3;
-                try {
-                    ((IInputMethod) args.arg1).onCreateInlineSuggestionsRequest(requestInfo,
-                            callback);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "RemoteException calling onCreateInlineSuggestionsRequest(): " + e);
-                }
-                args.recycle();
                 return true;
             }
 
@@ -4683,14 +4658,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             userId = mSettings.getCurrentUserId();
         }
         mContext.startActivityAsUser(intent, null, UserHandle.of(userId));
-    }
-
-    private void showConfigureInputMethods() {
-        Intent intent = new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
-                | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        mContext.startActivityAsUser(intent, null, UserHandle.CURRENT);
     }
 
     // ----------------------------------------------------------------------

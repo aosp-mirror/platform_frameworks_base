@@ -54,6 +54,7 @@ import android.hardware.display.DisplayManagerInternal;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityModuleConnector;
 import android.net.NetworkStackClient;
+import android.net.TrafficStats;
 import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Build;
@@ -1903,6 +1904,7 @@ public final class SystemServer implements Dumpable {
             try {
                 networkStats = NetworkStatsService.create(context);
                 ServiceManager.addService(Context.NETWORK_STATS_SERVICE, networkStats);
+                TrafficStats.init(context);
             } catch (Throwable e) {
                 reportWtf("starting NetworkStats Service", e);
             }

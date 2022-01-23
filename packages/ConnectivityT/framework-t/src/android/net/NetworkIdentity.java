@@ -206,7 +206,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         return mSubscriberId;
     }
 
-    /** Get the Wifi Network Key of this instance. See {@link WifiInfo#getCurrentNetworkKey()}. */
+    /** Get the Wifi Network Key of this instance. See {@link WifiInfo#getNetworkKey()}. */
     @Nullable
     public String getWifiNetworkKey() {
         return mWifiNetworkKey;
@@ -375,7 +375,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
                 if (transportInfo instanceof WifiInfo) {
                     final WifiInfo info = (WifiInfo) transportInfo;
                     if (info != null) {
-                        setWifiNetworkKey(info.getCurrentNetworkKey());
+                        setWifiNetworkKey(info.getNetworkKey());
                     }
                 }
             }
@@ -436,7 +436,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
          * Set the Wifi Network Key.
          *
          * @param wifiNetworkKey Wifi Network Key of the network,
-         *                        see {@link WifiInfo#getCurrentNetworkKey()}.
+         *                        see {@link WifiInfo#getNetworkKey()}.
          *                        Or null if not applicable.
          * @return this builder.
          */

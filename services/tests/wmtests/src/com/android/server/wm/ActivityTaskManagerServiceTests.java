@@ -77,6 +77,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoSession;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -188,6 +189,9 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
             @Override
             public void onFixedRotationFinished(int displayId) {}
+
+            @Override
+            public void onKeepClearAreasChanged(int displayId, List<Rect> keepClearAreas) {}
         };
         int[] displayIds = mAtm.mWindowManager.registerDisplayWindowListener(listener);
         for (int i = 0; i < displayIds.length; i++) {

@@ -225,6 +225,7 @@ message DisplayContentProto {
     repeated InsetsSourceProviderProto insets_source_providers = 35;
     optional bool is_sleeping = 36;
     repeated string sleep_tokens = 37;
+    repeated .android.graphics.RectProto keep_clear_areas = 38;
 
 }
 
@@ -443,6 +444,7 @@ message WindowStateProto {
     optional bool force_seamless_rotation = 42;
     optional bool has_compat_scale = 43;
     optional float global_scale = 44;
+    repeated .android.graphics.RectProto keep_clear_areas = 45;
 }
 
 message IdentifierProto {

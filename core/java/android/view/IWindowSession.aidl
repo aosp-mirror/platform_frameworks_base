@@ -290,6 +290,11 @@ interface IWindowSession {
     oneway void reportSystemGestureExclusionChanged(IWindow window, in List<Rect> exclusionRects);
 
     /**
+     * Called when the keep-clear areas for this window have changed.
+     */
+    oneway void reportKeepClearAreasChanged(IWindow window, in List<Rect> keepClearRects);
+
+    /**
     * Request the server to call setInputWindowInfo on a given Surface, and return
     * an input channel where the client can receive input.
     */
