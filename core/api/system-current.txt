@@ -162,6 +162,7 @@ package android {
     field public static final String MANAGE_DEBUGGING = "android.permission.MANAGE_DEBUGGING";
     field public static final String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
     field public static final String MANAGE_FACTORY_RESET_PROTECTION = "android.permission.MANAGE_FACTORY_RESET_PROTECTION";
+    field public static final String MANAGE_GAME_MODE = "android.permission.MANAGE_GAME_MODE";
     field public static final String MANAGE_HOTWORD_DETECTION = "android.permission.MANAGE_HOTWORD_DETECTION";
     field public static final String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
     field public static final String MANAGE_MUSIC_RECOGNITION = "android.permission.MANAGE_MUSIC_RECOGNITION";
@@ -758,7 +759,17 @@ package android.app {
   }
 
   public final class GameManager {
-    method @RequiresPermission("android.permission.MANAGE_GAME_MODE") public void setGameMode(@NonNull String, int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE) public android.app.GameModeInfo getGameModeInfo(@NonNull String);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE) public void setGameMode(@NonNull String, int);
+  }
+
+  public final class GameModeInfo implements android.os.Parcelable {
+    ctor public GameModeInfo(int, @NonNull int[]);
+    method public int describeContents();
+    method public int getActiveGameMode();
+    method @NonNull public int[] getAvailableGameModes();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.GameModeInfo> CREATOR;
   }
 
   public abstract class InstantAppResolverService extends android.app.Service {

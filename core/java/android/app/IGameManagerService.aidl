@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.app.GameModeInfo;
 import android.app.GameState;
 
 /**
@@ -27,4 +28,5 @@ interface IGameManagerService {
     int[] getAvailableGameModes(String packageName);
     boolean getAngleEnabled(String packageName, int userId);
     void setGameState(String packageName, in GameState gameState, int userId);
+    GameModeInfo getGameModeInfo(String packageName, int userId);
 }

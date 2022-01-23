@@ -30,6 +30,7 @@
         <permission name="android.permission.GET_APP_OPS_STATS"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_DEBUGGING"/>
+        <permission name="android.permission.MANAGE_GAME_MODE" />
         <permission name="android.permission.MANAGE_SENSOR_PRIVACY"/>
         <permission name="android.permission.MANAGE_USB"/>
         <permission name="android.permission.MANAGE_USERS"/>
