@@ -74,6 +74,7 @@ filegroup {
         ":services.appwidget-sources",
         ":services.autofill-sources",
         ":services.backup-sources",
+        ":services.bluetooth-sources", // TODO(b/214988855) : Remove once apex/service-bluetooth jar is ready
         ":backuplib-sources",
         ":services.companion-sources",
         ":services.contentcapture-sources",

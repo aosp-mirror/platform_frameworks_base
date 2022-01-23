@@ -27,18 +27,11 @@ import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkIdentity.OEM_PAID;
 import static android.net.NetworkIdentity.OEM_PRIVATE;
-import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
-import static android.net.NetworkStats.METERED_ALL;
 import static android.net.NetworkStats.METERED_YES;
-import static android.net.NetworkStats.ROAMING_ALL;
 import static android.net.NetworkTemplate.MATCH_ETHERNET;
-import static android.net.NetworkTemplate.MATCH_MOBILE_WILDCARD;
-import static android.net.NetworkTemplate.MATCH_WIFI_WILDCARD;
-import static android.net.NetworkTemplate.NETWORK_TYPE_ALL;
+import static android.net.NetworkTemplate.MATCH_MOBILE;
+import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.net.NetworkTemplate.OEM_MANAGED_ALL;
-import static android.net.NetworkTemplate.buildTemplateMobileWildcard;
-import static android.net.NetworkTemplate.buildTemplateMobileWithRatType;
-import static android.net.NetworkTemplate.buildTemplateWifiWildcard;
 import static android.net.NetworkTemplate.getAllCollapsedRatTypes;
 import static android.os.Debug.getIonHeapsSizeKb;
 import static android.os.Process.LAST_SHARED_APPLICATION_GID;
@@ -1155,9 +1148,10 @@ public class StatsPullAtomService extends SystemService {
             }
             case FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED: {
                 final NetworkStats wifiStats = getUidNetworkStatsSnapshotForTemplate(
-                        buildTemplateWifiWildcard(), /*includeTags=*/true);
+                        new NetworkTemplate.Builder(MATCH_WIFI).build(), /*includeTags=*/true);
                 final NetworkStats cellularStats = getUidNetworkStatsSnapshotForTemplate(
-                        buildTemplateMobileWildcard(), /*includeTags=*/true);
+                        new NetworkTemplate.Builder(MATCH_MOBILE)
+                        .setMeteredness(METERED_YES).build(), /*includeTags=*/true);
                 if (wifiStats != null && cellularStats != null) {
                     final NetworkStats stats = wifiStats.add(cellularStats);
                     ret.add(new NetworkStatsExt(sliceNetworkStatsByUidTagAndMetered(stats),
@@ -1307,24 +1301,22 @@ public class StatsPullAtomService extends SystemService {
     }
 
     @NonNull private List<NetworkStatsExt> getDataUsageBytesTransferSnapshotForOemManaged() {
-        final int[] transports = new int[] {MATCH_ETHERNET, MATCH_MOBILE_WILDCARD,
-                MATCH_WIFI_WILDCARD};
+        final int[] matchRules = new int[] {MATCH_ETHERNET, MATCH_MOBILE, MATCH_WIFI};
         final int[] oemManagedTypes = new int[] {OEM_PAID | OEM_PRIVATE, OEM_PAID, OEM_PRIVATE};
 
         final List<NetworkStatsExt> ret = new ArrayList<>();
 
-        for (final int transport : transports) {
+        for (final int matchRule : matchRules) {
             for (final int oemManaged : oemManagedTypes) {
-                /* A null subscriberId will set wildcard=true, since we aren't trying to select a
-                   specific ssid or subscriber. */
-                final NetworkTemplate template = new NetworkTemplate(transport,
-                        /*subscriberId=*/null, /*matchSubscriberIds=*/null, /*networkId=*/null,
-                        METERED_ALL, ROAMING_ALL, DEFAULT_NETWORK_ALL, NETWORK_TYPE_ALL,
-                        oemManaged);
+                // Subscriber Ids and Wifi Network Keys will not be set since the purpose is to
+                // slice statistics of different OEM managed networks among all network types.
+                // Thus, specifying networks through their identifiers are not needed.
+                final NetworkTemplate template = new NetworkTemplate.Builder(matchRule)
+                        .setOemManaged(oemManaged).build();
                 final NetworkStats stats = getUidNetworkStatsSnapshotForTemplate(template, true);
                 if (stats != null) {
                     ret.add(new NetworkStatsExt(sliceNetworkStatsByUidTagAndMetered(stats),
-                            new int[] {transport}, /*slicedByFgbg=*/true, /*slicedByTag=*/true,
+                            new int[] {matchRule}, /*slicedByFgbg=*/true, /*slicedByTag=*/true,
                             /*slicedByMetered=*/true, TelephonyManager.NETWORK_TYPE_UNKNOWN,
                             /*subInfo=*/null, oemManaged));
                 }
@@ -1338,10 +1330,18 @@ public class StatsPullAtomService extends SystemService {
      * Create a snapshot of NetworkStats for a given transport.
      */
     @Nullable private NetworkStats getUidNetworkStatsSnapshotForTransport(int transport) {
-        final NetworkTemplate template = (transport == TRANSPORT_CELLULAR)
-                ? NetworkTemplate.buildTemplateMobileWithRatType(
-                /*subscriptionId=*/null, NETWORK_TYPE_ALL, METERED_YES)
-                : NetworkTemplate.buildTemplateWifiWildcard();
+        NetworkTemplate template = null;
+        switch (transport) {
+            case TRANSPORT_CELLULAR:
+                template = new NetworkTemplate.Builder(MATCH_MOBILE)
+                        .setMeteredness(METERED_YES).build();
+                break;
+            case TRANSPORT_WIFI:
+                template = new NetworkTemplate.Builder(MATCH_WIFI).build();
+                break;
+            default:
+                Log.wtf(TAG, "Unexpected transport.");
+        }
         return getUidNetworkStatsSnapshotForTemplate(template, /*includeTags=*/false);
     }
 
@@ -1380,8 +1380,10 @@ public class StatsPullAtomService extends SystemService {
         final List<NetworkStatsExt> ret = new ArrayList<>();
         for (final int ratType : getAllCollapsedRatTypes()) {
             final NetworkTemplate template =
-                    buildTemplateMobileWithRatType(subInfo.subscriberId, ratType,
-                    METERED_YES);
+                    new NetworkTemplate.Builder(MATCH_MOBILE)
+                    .setSubscriberIds(Set.of(subInfo.subscriberId))
+                    .setRatType(ratType)
+                    .setMeteredness(METERED_YES).build();
             final NetworkStats stats =
                     getUidNetworkStatsSnapshotForTemplate(template, /*includeTags=*/false);
             if (stats != null) {

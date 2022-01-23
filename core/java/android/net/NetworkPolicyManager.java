@@ -546,7 +546,7 @@ public class NetworkPolicyManager {
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_STACK})
-    // @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public SubscriptionPlan getSubscriptionPlan(@NonNull NetworkTemplate template) {
         try {
             return mService.getSubscriptionPlan(template);
@@ -565,10 +565,10 @@ public class NetworkPolicyManager {
     @RequiresPermission(anyOf = {
             NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
             android.Manifest.permission.NETWORK_STACK})
-    // @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public void onStatsProviderWarningOrLimitReached() {
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void notifyStatsProviderWarningOrLimitReached() {
         try {
-            mService.onStatsProviderWarningOrLimitReached();
+            mService.notifyStatsProviderWarningOrLimitReached();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

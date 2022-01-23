@@ -245,6 +245,7 @@
     <uses-permission android:name="android.permission.MANAGE_APP_PREDICTIONS" />
     <uses-permission android:name="android.permission.MANAGE_SEARCH_UI" />
     <uses-permission android:name="android.permission.MANAGE_SMARTSPACE" />
+    <uses-permission android:name="android.permission.MANAGE_WALLPAPER_EFFECTS_GENERATION" />
     <uses-permission android:name="android.permission.MANAGE_UI_TRANSLATION" />
     <uses-permission android:name="android.permission.NETWORK_SETTINGS" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
@@ -339,6 +340,9 @@
 
     <!-- Permission required for CTS test - CrossProfileAppsHostSideTest -->
     <uses-permission android:name="android.permission.INTERACT_ACROSS_PROFILES"/>
+
+    <!-- Permission required for CTS test - CrossProfileAppsHostSideTest -->
+    <uses-permission android:name="android.permission.START_CROSS_PROFILE_ACTIVITIES"/>
 
     <!-- permissions required for CTS test - PhoneStateListenerTest -->
     <uses-permission android:name="android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH" />
@@ -523,6 +527,10 @@
 
     <!-- Permission required for CTS test - PeopleManagerTest -->
     <uses-permission android:name="android.permission.READ_PEOPLE_DATA" />
+
+    <!-- Permissions required for CTS test - TrustTestCases -->
+    <uses-permission android:name="android.permission.PROVIDE_TRUST_AGENT" />
+    <uses-permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE" />
 
     <!-- Permission required for CTS test - CtsGameManagerTestCases -->
     <uses-permission android:name="android.permission.MANAGE_GAME_MODE" />

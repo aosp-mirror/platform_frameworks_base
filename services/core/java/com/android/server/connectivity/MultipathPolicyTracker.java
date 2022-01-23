@@ -199,6 +199,7 @@ public class MultipathPolicyTracker {
         private final NetworkTemplate mNetworkTemplate;
         private final UsageCallback mUsageCallback;
         private NetworkCapabilities mNetworkCapabilities;
+        private final NetworkStatsManager mStatsManager;
 
         public MultipathTracker(Network network, NetworkCapabilities nc) {
             this.network = network;
@@ -238,6 +239,13 @@ public class MultipathPolicyTracker {
                     updateMultipathBudget();
                 }
             };
+            mStatsManager = mContext.getSystemService(NetworkStatsManager.class);
+            // Query stats from NetworkStatsService will trigger a poll by default.
+            // But since MultipathPolicyTracker listens NPMS events that triggered by
+            // stats updated event, and will query stats
+            // after the event. A polling -> updated -> query -> polling loop will be introduced
+            // if polls on open. Hence, set flag to false to prevent a polling loop.
+            mStatsManager.setPollOnOpen(false);
 
             updateMultipathBudget();
         }
@@ -262,8 +270,7 @@ public class MultipathPolicyTracker {
         private long getNetworkTotalBytes(long start, long end) {
             try {
                 final android.app.usage.NetworkStats.Bucket ret =
-                        mContext.getSystemService(NetworkStatsManager.class)
-                        .querySummaryForDevice(mNetworkTemplate, start, end);
+                        mStatsManager.querySummaryForDevice(mNetworkTemplate, start, end);
                 return ret.getRxBytes() + ret.getTxBytes();
             } catch (RuntimeException e) {
                 Log.w(TAG, "Failed to get data usage: " + e);

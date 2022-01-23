@@ -93,6 +93,7 @@ java_library_static {
     defaults: ["platform_service_defaults"],
     srcs: [
         ":statslog-art-java-gen",
+        ":services.bluetooth-sources", // TODO(b/214988855) : Remove once apex is ready
         ":services.core-sources",
         ":services.core.protologsrc",
         ":dumpstate_aidl",
