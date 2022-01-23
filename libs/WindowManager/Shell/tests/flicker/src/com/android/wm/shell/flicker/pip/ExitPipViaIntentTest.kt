@@ -101,6 +101,11 @@ class ExitPipViaIntentTest(testSpec: FlickerTestParameter) : ExitPipToAppTransit
     @Test
     override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
+    /** {@inheritDoc}  */
+    @FlakyTest(bugId = 197726610)
+    @Test
+    override fun pipLayerExpands() = super.pipLayerExpands()
+
     companion object {
         /**
          * Creates the test configurations.
