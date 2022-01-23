@@ -105,6 +105,9 @@ public abstract class StackScrollerDecorView extends ExpandableView {
                 runAfter.run();
             };
             setViewVisible(mContent, visible, animate, endRunnable);
+        } else if (runAfter != null) {
+            // Execute the runAfter runnable immediately if there's no animation to perform.
+            runAfter.run();
         }
 
         if (!mContentAnimating) {
@@ -228,7 +231,7 @@ public abstract class StackScrollerDecorView extends ExpandableView {
             Runnable onFinishedRunnable,
             AnimatorListenerAdapter animationListener) {
         // TODO: Use duration
-        setContentVisible(false);
+        setContentVisible(false, true /* animate */, onFinishedRunnable);
         return 0;
     }
 
