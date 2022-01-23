@@ -95,6 +95,7 @@ import android.app.admin.DevicePolicyManagerLiteInternal;
 import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.SystemUpdatePolicy;
+import android.app.admin.WifiSsidPolicy;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -7864,6 +7865,94 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             dpm.setMinimumRequiredWifiSecurityLevel(level);
             assertThat(dpm.getMinimumRequiredWifiSecurityLevel()).isEqualTo(level);
         }
+    }
+
+    @Test
+    public void testSetSsidAllowlist_noDeviceOwnerOrPoOfOrgOwnedDevice() {
+        final Set<String> ssids = Collections.singleton("ssid1");
+        WifiSsidPolicy policy = WifiSsidPolicy.createAllowlistPolicy(ssids);
+        assertThrows(SecurityException.class, () -> dpm.setWifiSsidPolicy(policy));
+    }
+
+    @Test
+    public void testSetSsidAllowlist_asDeviceOwner() throws Exception {
+        setDeviceOwner();
+
+        final Set<String> ssids = Collections.singleton("ssid1");
+        WifiSsidPolicy policy = WifiSsidPolicy.createAllowlistPolicy(ssids);
+        dpm.setWifiSsidPolicy(policy);
+        assertThat(dpm.getWifiSsidPolicy().getSsids()).isEqualTo(ssids);
+        assertThat(dpm.getWifiSsidPolicy().getPolicyType()).isEqualTo(
+                WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST);
+    }
+
+    @Test
+    public void testSetSsidAllowlist_asPoOfOrgOwnedDevice() throws Exception {
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+        addManagedProfile(admin1, managedProfileAdminUid, admin1);
+        configureProfileOwnerOfOrgOwnedDevice(admin1, managedProfileUserId);
+        mContext.binder.callingUid = managedProfileAdminUid;
+
+        final Set<String> ssids = new ArraySet<>(Arrays.asList("ssid1", "ssid2", "ssid3"));
+        WifiSsidPolicy policy = WifiSsidPolicy.createAllowlistPolicy(ssids);
+        dpm.setWifiSsidPolicy(policy);
+        assertThat(dpm.getWifiSsidPolicy().getSsids()).isEqualTo(ssids);
+        assertThat(dpm.getWifiSsidPolicy().getPolicyType()).isEqualTo(
+                WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST);
+    }
+
+    @Test
+    public void testSetSsidAllowlist_emptyList() throws Exception {
+        setDeviceOwner();
+
+        final Set<String> ssids = new ArraySet<>();
+        assertThrows(IllegalArgumentException.class,
+                () -> WifiSsidPolicy.createAllowlistPolicy(ssids));
+    }
+
+    @Test
+    public void testSetSsidDenylist_noDeviceOwnerOrPoOfOrgOwnedDevice() {
+        final Set<String> ssids = Collections.singleton("ssid1");
+        WifiSsidPolicy policy = WifiSsidPolicy.createDenylistPolicy(ssids);
+        assertThrows(SecurityException.class, () -> dpm.setWifiSsidPolicy(policy));
+    }
+
+    @Test
+    public void testSetSsidDenylist_asDeviceOwner() throws Exception {
+        setDeviceOwner();
+
+        final Set<String> ssids = Collections.singleton("ssid1");
+        WifiSsidPolicy policy = WifiSsidPolicy.createDenylistPolicy(ssids);
+        dpm.setWifiSsidPolicy(policy);
+        assertThat(dpm.getWifiSsidPolicy().getSsids()).isEqualTo(ssids);
+        assertThat(dpm.getWifiSsidPolicy().getPolicyType()).isEqualTo(
+                WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_DENYLIST);
+    }
+
+    @Test
+    public void testSetSsidDenylist_asPoOfOrgOwnedDevice() throws Exception {
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+        addManagedProfile(admin1, managedProfileAdminUid, admin1);
+        configureProfileOwnerOfOrgOwnedDevice(admin1, managedProfileUserId);
+        mContext.binder.callingUid = managedProfileAdminUid;
+
+        final Set<String> ssids = new ArraySet<>(Arrays.asList("ssid1", "ssid2", "ssid3"));
+        WifiSsidPolicy policy = WifiSsidPolicy.createDenylistPolicy(ssids);
+        dpm.setWifiSsidPolicy(policy);
+        assertThat(dpm.getWifiSsidPolicy().getSsids()).isEqualTo(ssids);
+        assertThat(dpm.getWifiSsidPolicy().getPolicyType()).isEqualTo(
+                WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_DENYLIST);
+    }
+
+    @Test
+    public void testSetSsidDenylist_emptyList() throws Exception {
+        setDeviceOwner();
+
+        final Set<String> ssids = new ArraySet<>();
+        assertThrows(IllegalArgumentException.class,
+                () -> WifiSsidPolicy.createDenylistPolicy(ssids));
     }
 
     private void setupVpnAuthorization(String userVpnPackage, int userVpnUid) {

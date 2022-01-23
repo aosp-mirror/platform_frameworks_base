@@ -14671,6 +14671,66 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by device owner or profile owner of an organization-owned managed profile to
+     * specify the Wi-Fi SSID policy ({@link WifiSsidPolicy}).
+     * Wi-Fi SSID policy specifies the SSID restriction the network must satisfy
+     * in order to be eligible for a connection. Providing a null policy results in the
+     * deactivation of the SSID restriction
+     *
+     * @param policy Wi-Fi SSID policy
+     * @throws SecurityException if the caller is not a device owner or a profile owner on
+     *         an organization-owned managed profile.
+     */
+    public void setWifiSsidPolicy(@Nullable WifiSsidPolicy policy) {
+        throwIfParentInstance("setWifiSsidPolicy");
+        if (mService != null) {
+            try {
+                if (policy == null) {
+                    mService.setSsidAllowlist(new ArrayList<>());
+                } else {
+                    int policyType = policy.getPolicyType();
+                    if (policyType == WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST) {
+                        mService.setSsidAllowlist(new ArrayList<>(policy.getSsids()));
+                    } else {
+                        mService.setSsidDenylist(new ArrayList<>(policy.getSsids()));
+                    }
+                }
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns the current Wi-Fi SSID policy.
+     * If the policy has not been set, it will return NULL.
+     *
+     * @see #setWifiSsidPolicy(WifiSsidPolicy)
+     * @throws SecurityException if the caller is not a device owner or a profile owner on
+     * an organization-owned managed profile or a system app.
+     */
+    @Nullable
+    public WifiSsidPolicy getWifiSsidPolicy() {
+        throwIfParentInstance("getWifiSsidPolicy");
+        if (mService == null) {
+            return null;
+        }
+        try {
+            List<String> allowlist = mService.getSsidAllowlist();
+            if (!allowlist.isEmpty()) {
+                return WifiSsidPolicy.createAllowlistPolicy(new ArraySet<>(allowlist));
+            }
+            List<String> denylist = mService.getSsidDenylist();
+            if (!denylist.isEmpty()) {
+                return WifiSsidPolicy.createDenylistPolicy(new ArraySet<>(denylist));
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return null;
+    }
+
+    /**
      * For each {@link DevicePolicyDrawableResource} item in {@code drawables}, if
      * {@link DevicePolicyDrawableResource#getDrawableSource()} is not set or is set to
      * {@link DevicePolicyResources.Drawable.Source#UNDEFINED}, it updates the drawable resource for
