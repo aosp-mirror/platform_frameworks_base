@@ -34,6 +34,10 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_LOW;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_MEDIUM;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_SET_NO_ERROR;
+import static android.app.admin.DevicePolicyManager.WIFI_SECURITY_ENTERPRISE_192;
+import static android.app.admin.DevicePolicyManager.WIFI_SECURITY_ENTERPRISE_EAP;
+import static android.app.admin.DevicePolicyManager.WIFI_SECURITY_OPEN;
+import static android.app.admin.DevicePolicyManager.WIFI_SECURITY_PERSONAL;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.PasswordMetrics.computeForPasswordOrPin;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE;
@@ -7826,6 +7830,40 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testGetOrganizationNameForUser_calledByNonPrivilegedApp_throwsException() {
         assertExpectException(SecurityException.class, "Calling identity is not authorized",
                 () -> dpm.getOrganizationNameForUser(UserHandle.USER_SYSTEM));
+    }
+
+    @Test
+    public void testSetWifiMinimumSecurity_noDeviceOwnerOrPoOfOrgOwnedDevice() {
+        assertThrows(SecurityException.class, () -> dpm.setMinimumRequiredWifiSecurityLevel(
+                DevicePolicyManager.WIFI_SECURITY_PERSONAL));
+    }
+
+    @Test
+    public void testSetWifiMinimumSecurity_asDeviceOwner() throws Exception {
+        setDeviceOwner();
+
+        final Set<Integer> allowedLevels = Set.of(WIFI_SECURITY_OPEN, WIFI_SECURITY_PERSONAL,
+                WIFI_SECURITY_ENTERPRISE_EAP, WIFI_SECURITY_ENTERPRISE_192);
+        for (int level : allowedLevels) {
+            dpm.setMinimumRequiredWifiSecurityLevel(level);
+            assertThat(dpm.getMinimumRequiredWifiSecurityLevel()).isEqualTo(level);
+        }
+    }
+
+    @Test
+    public void testSetWifiMinimumSecurity_asPoOfOrgOwnedDevice() throws Exception {
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+        addManagedProfile(admin1, managedProfileAdminUid, admin1);
+        configureProfileOwnerOfOrgOwnedDevice(admin1, managedProfileUserId);
+        mContext.binder.callingUid = managedProfileAdminUid;
+
+        final Set<Integer> allowedLevels = Set.of(WIFI_SECURITY_OPEN, WIFI_SECURITY_PERSONAL,
+                WIFI_SECURITY_ENTERPRISE_EAP, WIFI_SECURITY_ENTERPRISE_192);
+        for (int level : allowedLevels) {
+            dpm.setMinimumRequiredWifiSecurityLevel(level);
+            assertThat(dpm.getMinimumRequiredWifiSecurityLevel()).isEqualTo(level);
+        }
     }
 
     private void setupVpnAuthorization(String userVpnPackage, int userVpnUid) {
