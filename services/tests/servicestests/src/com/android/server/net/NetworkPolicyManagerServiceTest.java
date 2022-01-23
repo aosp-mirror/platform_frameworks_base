@@ -2046,7 +2046,7 @@ public class NetworkPolicyManagerServiceTest {
     private static NetworkStateSnapshot buildWifi() {
         WifiInfo mockWifiInfo = mock(WifiInfo.class);
         when(mockWifiInfo.makeCopy(anyLong())).thenReturn(mockWifiInfo);
-        when(mockWifiInfo.getCurrentNetworkKey()).thenReturn(TEST_WIFI_NETWORK_KEY);
+        when(mockWifiInfo.getNetworkKey()).thenReturn(TEST_WIFI_NETWORK_KEY);
         final LinkProperties prop = new LinkProperties();
         prop.setInterfaceName(TEST_IFACE);
         final NetworkCapabilities networkCapabilities = new NetworkCapabilities.Builder()
