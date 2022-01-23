@@ -83,7 +83,6 @@ import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.LongSparseLongArray;
 import android.util.MutableInt;
-import android.util.Pools;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
@@ -136,9 +135,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
@@ -1203,12 +1200,21 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public BatteryStatsImpl(Clocks clocks) {
+        this(clocks, (File) null);
+    }
+
+    public BatteryStatsImpl(Clocks clocks, File historyDirectory) {
         init(clocks);
         mStartClockTimeMs = clocks.currentTimeMillis();
-        mStatsFile = null;
         mCheckinFile = null;
         mDailyFile = null;
-        mBatteryStatsHistory = new BatteryStatsHistory(mHistoryBuffer);
+        if (historyDirectory == null) {
+            mStatsFile = null;
+            mBatteryStatsHistory = new BatteryStatsHistory(mHistoryBuffer);
+        } else {
+            mStatsFile = new AtomicFile(new File(historyDirectory, "batterystats.bin"));
+            mBatteryStatsHistory = new BatteryStatsHistory(this, historyDirectory, mHistoryBuffer);
+        }
         mHandler = null;
         mPlatformIdleStateCallback = null;
         mMeasuredEnergyRetriever = null;
@@ -11522,8 +11528,6 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    private final Pools.Pool<NetworkStats> mNetworkStatsPool = new Pools.SynchronizedPool<>(6);
-
     private final Object mWifiNetworkLock = new Object();
 
     @GuardedBy("mWifiNetworkLock")
@@ -11541,13 +11545,15 @@ public class BatteryStatsImpl extends BatteryStats {
     private NetworkStats mLastModemNetworkStats = new NetworkStats(0, -1);
 
     @VisibleForTesting
-    protected NetworkStats readNetworkStatsLocked(@NonNull NetworkStatsManager networkStatsManager,
-            String[] ifaces) {
-        Objects.requireNonNull(networkStatsManager);
-        if (!ArrayUtils.isEmpty(ifaces)) {
-            return networkStatsManager.getDetailedUidStats(Set.of(ifaces));
-        }
-        return null;
+    protected NetworkStats readMobileNetworkStatsLocked(
+            @NonNull NetworkStatsManager networkStatsManager) {
+        return networkStatsManager.getMobileUidStats();
+    }
+
+    @VisibleForTesting
+    protected NetworkStats readWifiNetworkStatsLocked(
+            @NonNull NetworkStatsManager networkStatsManager) {
+        return networkStatsManager.getWifiUidStats();
     }
 
     /**
@@ -11564,21 +11570,15 @@ public class BatteryStatsImpl extends BatteryStats {
         // Grab a separate lock to acquire the network stats, which may do I/O.
         NetworkStats delta = null;
         synchronized (mWifiNetworkLock) {
-            final NetworkStats latestStats = readNetworkStatsLocked(networkStatsManager,
-                    mWifiIfaces);
+            final NetworkStats latestStats = readWifiNetworkStatsLocked(networkStatsManager);
             if (latestStats != null) {
-                delta = NetworkStats.subtract(latestStats, mLastWifiNetworkStats, null, null,
-                        mNetworkStatsPool.acquire());
-                mNetworkStatsPool.release(mLastWifiNetworkStats);
+                delta = latestStats.subtract(mLastWifiNetworkStats);
                 mLastWifiNetworkStats = latestStats;
             }
         }
 
         synchronized (this) {
             if (!mOnBatteryInternal || mIgnoreNextExternalStats) {
-                if (delta != null) {
-                    mNetworkStatsPool.release(delta);
-                }
                 if (mIgnoreNextExternalStats) {
                     // TODO: Strictly speaking, we should re-mark all 5 timers for each uid (and the
                     //  global one) here like we do for display. But I'm not sure it's worth the
@@ -11685,7 +11685,6 @@ public class BatteryStatsImpl extends BatteryStats {
                                         uidRunningMs, uidScanMs, uidBatchScanMs));
                     }
                 }
-                mNetworkStatsPool.release(delta);
                 delta = null;
             }
 
@@ -11932,21 +11931,15 @@ public class BatteryStatsImpl extends BatteryStats {
         // Grab a separate lock to acquire the network stats, which may do I/O.
         NetworkStats delta = null;
         synchronized (mModemNetworkLock) {
-            final NetworkStats latestStats = readNetworkStatsLocked(networkStatsManager,
-                    mModemIfaces);
+            final NetworkStats latestStats = readMobileNetworkStatsLocked(networkStatsManager);
             if (latestStats != null) {
-                delta = NetworkStats.subtract(latestStats, mLastModemNetworkStats, null, null,
-                        mNetworkStatsPool.acquire());
-                mNetworkStatsPool.release(mLastModemNetworkStats);
+                delta = latestStats.subtract(mLastModemNetworkStats);
                 mLastModemNetworkStats = latestStats;
             }
         }
 
         synchronized (this) {
             if (!mOnBatteryInternal || mIgnoreNextExternalStats) {
-                if (delta != null) {
-                    mNetworkStatsPool.release(delta);
-                }
                 return;
             }
 
@@ -12148,7 +12141,6 @@ public class BatteryStatsImpl extends BatteryStats {
                             totalEstimatedConsumptionMah);
                 }
 
-                mNetworkStatsPool.release(delta);
                 delta = null;
             }
         }

@@ -26,9 +26,9 @@ import android.app.usage.NetworkStatsManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.os.Binder;
 import android.os.Build;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 
 import com.android.server.NetworkManagementSocketTagger;
 
@@ -53,6 +53,7 @@ import java.net.SocketException;
  * use {@link NetworkStatsManager} instead.
  */
 public class TrafficStats {
+    private static final String TAG = TrafficStats.class.getSimpleName();
     /**
      * The return value to indicate that the device does not support the statistic.
      */
@@ -173,8 +174,8 @@ public class TrafficStats {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 130143562)
     private synchronized static INetworkStatsService getStatsService() {
         if (sStatsService == null) {
-            sStatsService = INetworkStatsService.Stub.asInterface(
-                    ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
+            throw new IllegalStateException("TrafficStats not initialized, uid="
+                    + Binder.getCallingUid());
         }
         return sStatsService;
     }
@@ -191,6 +192,26 @@ public class TrafficStats {
     private static Object sProfilingLock = new Object();
 
     private static final String LOOPBACK_IFACE = "lo";
+
+    /**
+     * Initialization {@link TrafficStats} with the context, to
+     * allow {@link TrafficStats} to fetch the needed binder.
+     *
+     * @param context a long-lived context, such as the application context or system
+     *                server context.
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SuppressLint("VisiblySynchronized")
+    public static synchronized void init(@NonNull final Context context) {
+        if (sStatsService != null) {
+            throw new IllegalStateException("TrafficStats is already initialized, uid="
+                    + Binder.getCallingUid());
+        }
+        final NetworkStatsManager statsManager =
+                context.getSystemService(NetworkStatsManager.class);
+        sStatsService = statsManager.getBinder();
+    }
 
     /**
      * Set active tag to use when accounting {@link Socket} traffic originating
@@ -262,6 +283,18 @@ public class TrafficStats {
     @SystemApi
     public static void setThreadStatsTagApp() {
         setThreadStatsTag(TAG_SYSTEM_APP);
+    }
+
+    /**
+     * Set active tag to use when accounting {@link Socket} traffic originating
+     * from the current thread. The tag used internally is well-defined to
+     * distinguish all download provider traffic.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static void setThreadStatsTagDownload() {
+        setThreadStatsTag(TAG_SYSTEM_DOWNLOAD);
     }
 
     /**

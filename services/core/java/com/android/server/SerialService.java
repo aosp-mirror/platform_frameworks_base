@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.annotation.EnforcePermission;
 import android.content.Context;
 import android.hardware.ISerialManager;
 import android.os.ParcelFileDescriptor;
@@ -34,9 +35,8 @@ public class SerialService extends ISerialManager.Stub {
                 com.android.internal.R.array.config_serialPorts);
     }
 
+    @EnforcePermission(android.Manifest.permission.SERIAL_PORT)
     public String[] getSerialPorts() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SERIAL_PORT, null);
-
         ArrayList<String> ports = new ArrayList<String>();
         for (int i = 0; i < mSerialPorts.length; i++) {
             String path = mSerialPorts[i];
@@ -49,8 +49,8 @@ public class SerialService extends ISerialManager.Stub {
         return result;
     }
 
+    @EnforcePermission(android.Manifest.permission.SERIAL_PORT)
     public ParcelFileDescriptor openSerialPort(String path) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SERIAL_PORT, null);
         for (int i = 0; i < mSerialPorts.length; i++) {
             if (mSerialPorts[i].equals(path)) {
                 return native_open(path);

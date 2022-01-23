@@ -26,6 +26,7 @@ import java.net.SocketException;
 
 /**
  * Assigns tags to sockets for traffic stats.
+ * @hide
  */
 public final class NetworkManagementSocketTagger extends SocketTagger {
     private static final String TAG = "NetworkManagementSocketTagger";

@@ -41,6 +41,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -57,7 +58,7 @@ import java.util.function.Predicate;
  */
 // @NotThreadSafe
 @SystemApi
-public final class NetworkStats implements Parcelable {
+public final class NetworkStats implements Parcelable, Iterable<NetworkStats.Entry> {
     private static final String TAG = "NetworkStats";
 
     /**
@@ -383,6 +384,95 @@ public final class NetworkStats implements Parcelable {
             this.operations += another.operations;
         }
 
+        /**
+         * @return interface name of this entry.
+         * @hide
+         */
+        @Nullable public String getIface() {
+            return iface;
+        }
+
+        /**
+         * @return the uid of this entry.
+         */
+        public int getUid() {
+            return uid;
+        }
+
+        /**
+         * @return the set state of this entry. Should be one of the following
+         * values: {@link #SET_DEFAULT}, {@link #SET_FOREGROUND}.
+         */
+        @State public int getSet() {
+            return set;
+        }
+
+        /**
+         * @return the tag value of this entry.
+         */
+        public int getTag() {
+            return tag;
+        }
+
+        /**
+         * @return the metered state. Should be one of the following
+         * values: {link #METERED_YES}, {link #METERED_NO}.
+         */
+        @Meteredness public int getMetered() {
+            return metered;
+        }
+
+        /**
+         * @return the roaming state. Should be one of the following
+         * values: {link #ROAMING_YES}, {link #ROAMING_NO}.
+         */
+        @Roaming public int getRoaming() {
+            return roaming;
+        }
+
+        /**
+         * @return the default network state. Should be one of the following
+         * values: {link #DEFAULT_NETWORK_YES}, {link #DEFAULT_NETWORK_NO}.
+         */
+        @DefaultNetwork public int getDefaultNetwork() {
+            return defaultNetwork;
+        }
+
+        /**
+         * @return the number of received bytes.
+         */
+        public long getRxBytes() {
+            return rxBytes;
+        }
+
+        /**
+         * @return the number of received packets.
+         */
+        public long getRxPackets() {
+            return rxPackets;
+        }
+
+        /**
+         * @return the number of transmitted bytes.
+         */
+        public long getTxBytes() {
+            return txBytes;
+        }
+
+        /**
+         * @return the number of transmitted packets.
+         */
+        public long getTxPackets() {
+            return txPackets;
+        }
+
+        /**
+         * @return the count of network operations performed for this entry.
+         */
+        public long getOperations() {
+            return operations;
+        }
+
         @Override
         public String toString() {
             final StringBuilder builder = new StringBuilder();
@@ -589,11 +679,40 @@ public final class NetworkStats implements Parcelable {
     }
 
     /**
+     * Iterate over Entry objects.
+     *
+     * Return an iterator of this object that will iterate through all contained Entry objects.
+     *
+     * This iterator does not support concurrent modification and makes no guarantee of fail-fast
+     * behavior. If any method that can mutate the contents of this object is called while
+     * iteration is in progress, either inside the loop or in another thread, then behavior is
+     * undefined.
+     * The remove() method is not implemented and will throw UnsupportedOperationException.
+     * @hide
+     */
+    @SystemApi
+    @NonNull public Iterator<Entry> iterator() {
+        return new Iterator<Entry>() {
+            int mIndex = 0;
+
+            @Override
+            public boolean hasNext() {
+                return mIndex < size;
+            }
+
+            @Override
+            public Entry next() {
+                return getValues(mIndex++, null);
+            }
+        };
+    }
+
+    /**
      * Return specific stats entry.
      * @hide
      */
     @UnsupportedAppUsage
-    public Entry getValues(int i, Entry recycle) {
+    public Entry getValues(int i, @Nullable Entry recycle) {
         final Entry entry = recycle != null ? recycle : new Entry();
         entry.iface = iface[i];
         entry.uid = uid[i];
