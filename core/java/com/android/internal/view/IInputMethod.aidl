@@ -53,8 +53,6 @@ oneway interface IInputMethod {
 
     void setSessionEnabled(IInputMethodSession session, boolean enabled);
 
-    void revokeSession(IInputMethodSession session);
-
     void showSoftInput(in IBinder showInputToken, int flags, in ResultReceiver resultReceiver);
 
     void hideSoftInput(in IBinder hideInputToken, int flags, in ResultReceiver resultReceiver);

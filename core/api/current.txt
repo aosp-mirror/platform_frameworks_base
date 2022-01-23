@@ -1135,6 +1135,7 @@ package android {
     field public static final int popupWindowStyle = 16842870; // 0x1010076
     field public static final int port = 16842793; // 0x1010029
     field public static final int positiveButtonText = 16843253; // 0x10101f5
+    field public static final int preferKeepClear;
     field public static final int preferMinimalPostProcessing = 16844300; // 0x101060c
     field public static final int preferenceCategoryStyle = 16842892; // 0x101008c
     field public static final int preferenceFragmentStyle = 16844038; // 0x1010506
@@ -13190,6 +13191,7 @@ package android.content.pm {
     field public static final String FEATURE_WIFI_DIRECT = "android.hardware.wifi.direct";
     field public static final String FEATURE_WIFI_PASSPOINT = "android.hardware.wifi.passpoint";
     field public static final String FEATURE_WIFI_RTT = "android.hardware.wifi.rtt";
+    field public static final String FEATURE_WINDOW_MAGNIFICATION = "android.software.window_magnification";
     field public static final int FLAG_PERMISSION_WHITELIST_INSTALLER = 2; // 0x2
     field public static final int FLAG_PERMISSION_WHITELIST_SYSTEM = 1; // 0x1
     field public static final int FLAG_PERMISSION_WHITELIST_UPGRADE = 4; // 0x4
@@ -41816,11 +41818,11 @@ package android.telephony {
     field public static final String KEY_CARRIER_SUPPORTS_SS_OVER_UT_BOOL = "carrier_supports_ss_over_ut_bool";
     field public static final String KEY_CARRIER_USE_IMS_FIRST_FOR_EMERGENCY_BOOL = "carrier_use_ims_first_for_emergency_bool";
     field public static final String KEY_CARRIER_USSD_METHOD_INT = "carrier_ussd_method_int";
-    field public static final String KEY_CARRIER_UT_PROVISIONING_REQUIRED_BOOL = "carrier_ut_provisioning_required_bool";
+    field @Deprecated public static final String KEY_CARRIER_UT_PROVISIONING_REQUIRED_BOOL = "carrier_ut_provisioning_required_bool";
     field public static final String KEY_CARRIER_VOLTE_AVAILABLE_BOOL = "carrier_volte_available_bool";
     field public static final String KEY_CARRIER_VOLTE_OVERRIDE_WFC_PROVISIONING_BOOL = "carrier_volte_override_wfc_provisioning_bool";
-    field public static final String KEY_CARRIER_VOLTE_PROVISIONED_BOOL = "carrier_volte_provisioned_bool";
-    field public static final String KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL = "carrier_volte_provisioning_required_bool";
+    field @Deprecated public static final String KEY_CARRIER_VOLTE_PROVISIONED_BOOL = "carrier_volte_provisioned_bool";
+    field @Deprecated public static final String KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL = "carrier_volte_provisioning_required_bool";
     field public static final String KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL = "carrier_volte_tty_supported_bool";
     field public static final String KEY_CARRIER_VT_AVAILABLE_BOOL = "carrier_vt_available_bool";
     field @Deprecated public static final String KEY_CARRIER_VVM_PACKAGE_NAME_STRING = "carrier_vvm_package_name_string";
@@ -42066,6 +42068,13 @@ package android.telephony {
     field public static final int IPSEC_ENCRYPTION_ALGORITHM_AES_CBC = 2; // 0x2
     field public static final int IPSEC_ENCRYPTION_ALGORITHM_DES_EDE3_CBC = 1; // 0x1
     field public static final int IPSEC_ENCRYPTION_ALGORITHM_NULL = 0; // 0x0
+    field public static final String KEY_CAPABILITY_CALL_COMPOSER_INT_ARRAY = "ims.key_capability_type_call_composer_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_OPTIONS_UCE_INT_ARRAY = "ims.key_capability_type_options_uce_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY = "ims.key_capability_type_presence_uce_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_SMS_INT_ARRAY = "ims.key_capability_type_sms_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_UT_INT_ARRAY = "ims.key_capability_type_ut_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_VIDEO_INT_ARRAY = "ims.key_capability_type_video_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_VOICE_INT_ARRAY = "ims.key_capability_type_voice_int_array";
     field public static final String KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL = "ims.enable_presence_capability_exchange_bool";
     field public static final String KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL = "ims.enable_presence_group_subscribe_bool";
     field public static final String KEY_ENABLE_PRESENCE_PUBLISH_BOOL = "ims.enable_presence_publish_bool";
@@ -42080,11 +42089,13 @@ package android.telephony {
     field public static final String KEY_IPV4_SIP_MTU_SIZE_CELLULAR_INT = "ims.ipv4_sip_mtu_size_cellular_int";
     field public static final String KEY_IPV6_SIP_MTU_SIZE_CELLULAR_INT = "ims.ipv6_sip_mtu_size_cellular_int";
     field public static final String KEY_KEEP_PDN_UP_IN_NO_VOPS_BOOL = "ims.keep_pdn_up_in_no_vops_bool";
+    field public static final String KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE = "ims.mmtel_requires_provisioning_bundle";
     field public static final String KEY_NON_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC_INT = "ims.non_rcs_capabilities_cache_expiration_sec_int";
     field public static final String KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING = "ims.phone_context_domain_name_string";
     field public static final String KEY_PREFIX = "ims.";
     field public static final String KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL = "ims.rcs_bulk_capability_exchange_bool";
     field public static final String KEY_RCS_FEATURE_TAG_ALLOWED_STRING_ARRAY = "ims.rcs_feature_tag_allowed_string_array";
+    field public static final String KEY_RCS_REQUIRES_PROVISIONING_BUNDLE = "ims.rcs_requires_provisioning_bundle";
     field public static final String KEY_REGISTRATION_EVENT_PACKAGE_SUPPORTED_BOOL = "ims.registration_event_package_supported_bool";
     field public static final String KEY_REGISTRATION_EXPIRY_TIMER_SEC_INT = "ims.registration_expiry_timer_sec_int";
     field public static final String KEY_REGISTRATION_RETRY_BASE_TIMER_MILLIS_INT = "ims.registration_retry_base_timer_millis_int";
@@ -42347,6 +42358,7 @@ package android.telephony {
     field public static final String KEY_SUPPORTED_IKE_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY = "iwlan.supported_ike_session_encryption_algorithms_int_array";
     field public static final String KEY_SUPPORTED_INTEGRITY_ALGORITHMS_INT_ARRAY = "iwlan.supported_integrity_algorithms_int_array";
     field public static final String KEY_SUPPORTED_PRF_ALGORITHMS_INT_ARRAY = "iwlan.supported_prf_algorithms_int_array";
+    field public static final String KEY_SUPPORTS_EAP_AKA_FAST_REAUTH_BOOL = "iwlan.supports_eap_aka_fast_reauth_bool";
   }
 
   public abstract class CellIdentity implements android.os.Parcelable {
@@ -44732,6 +44744,7 @@ package android.telephony.ims {
   public class ImsManager {
     method @NonNull public android.telephony.ims.ImsMmTelManager getImsMmTelManager(int);
     method @NonNull public android.telephony.ims.ImsRcsManager getImsRcsManager(int);
+    method @NonNull public android.telephony.ims.ProvisioningManager getProvisioningManager(int);
     field public static final String ACTION_WFC_IMS_REGISTRATION_ERROR = "android.telephony.ims.action.WFC_IMS_REGISTRATION_ERROR";
     field public static final String EXTRA_WFC_REGISTRATION_FAILURE_MESSAGE = "android.telephony.ims.extra.WFC_REGISTRATION_FAILURE_MESSAGE";
     field public static final String EXTRA_WFC_REGISTRATION_FAILURE_TITLE = "android.telephony.ims.extra.WFC_REGISTRATION_FAILURE_TITLE";
@@ -44982,6 +44995,23 @@ package android.telephony.ims {
     field public static final int REASON_UNKNOWN_TEMPORARY_ERROR = 1; // 0x1
   }
 
+  public class ProvisioningManager {
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) @WorkerThread public boolean getProvisioningStatusForCapability(int, int);
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) @WorkerThread public boolean getRcsProvisioningStatusForCapability(int, int);
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public boolean isProvisioningRequiredForCapability(int, int);
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public boolean isRcsProvisioningRequiredForCapability(int, int);
+    method @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE) public void registerFeatureProvisioningChangedCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ProvisioningManager.FeatureProvisioningCallback) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void setProvisioningStatusForCapability(int, int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void setRcsProvisioningStatusForCapability(int, int, boolean);
+    method public void unregisterFeatureProvisioningChangedCallback(@NonNull android.telephony.ims.ProvisioningManager.FeatureProvisioningCallback);
+  }
+
+  public static class ProvisioningManager.FeatureProvisioningCallback {
+    ctor public ProvisioningManager.FeatureProvisioningCallback();
+    method public void onFeatureProvisioningChanged(int, int, boolean);
+    method public void onRcsFeatureProvisioningChanged(int, int, boolean);
+  }
+
   public class RcsUceAdapter {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isUceSettingEnabled() throws android.telephony.ims.ImsException;
   }
@@ -45020,6 +45050,27 @@ package android.telephony.ims.feature {
     field public static final int CAPABILITY_TYPE_UT = 4; // 0x4
     field public static final int CAPABILITY_TYPE_VIDEO = 2; // 0x2
     field public static final int CAPABILITY_TYPE_VOICE = 1; // 0x1
+  }
+
+  public class RcsFeature {
+  }
+
+  public static class RcsFeature.RcsImsCapabilities {
+    field public static final int CAPABILITY_TYPE_NONE = 0; // 0x0
+    field public static final int CAPABILITY_TYPE_OPTIONS_UCE = 1; // 0x1
+    field public static final int CAPABILITY_TYPE_PRESENCE_UCE = 2; // 0x2
+  }
+
+}
+
+package android.telephony.ims.stub {
+
+  public class ImsRegistrationImplBase {
+    field public static final int REGISTRATION_TECH_CROSS_SIM = 2; // 0x2
+    field public static final int REGISTRATION_TECH_IWLAN = 1; // 0x1
+    field public static final int REGISTRATION_TECH_LTE = 0; // 0x0
+    field public static final int REGISTRATION_TECH_NONE = -1; // 0xffffffff
+    field public static final int REGISTRATION_TECH_NR = 3; // 0x3
   }
 
 }
@@ -50220,6 +50271,7 @@ package android.view {
     method public float getPivotX();
     method public float getPivotY();
     method public android.view.PointerIcon getPointerIcon();
+    method @NonNull public final java.util.List<android.graphics.Rect> getPreferKeepClearRects();
     method @Nullable public String[] getReceiveContentMimeTypes();
     method public android.content.res.Resources getResources();
     method public final boolean getRevealOnFocusHint();
@@ -50337,6 +50389,7 @@ package android.view {
     method protected boolean isPaddingOffsetRequired();
     method public boolean isPaddingRelative();
     method public boolean isPivotSet();
+    method public final boolean isPreferKeepClear();
     method public boolean isPressed();
     method public boolean isSaveEnabled();
     method public boolean isSaveFromParentEnabled();
@@ -50579,6 +50632,8 @@ package android.view {
     method public void setPivotX(float);
     method public void setPivotY(float);
     method public void setPointerIcon(android.view.PointerIcon);
+    method public final void setPreferKeepClear(boolean);
+    method public final void setPreferKeepClearRects(@NonNull java.util.List<android.graphics.Rect>);
     method public void setPressed(boolean);
     method public void setRenderEffect(@Nullable android.graphics.RenderEffect);
     method public final void setRevealOnFocusHint(boolean);

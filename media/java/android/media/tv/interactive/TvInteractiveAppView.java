@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.media.tv.TvInputManager;
@@ -237,6 +238,7 @@ public class TvInteractiveAppView extends ViewGroup {
         // The surface view's content should be treated as secure all the time.
         mSurfaceView.setSecure(true);
         mSurfaceView.getHolder().addCallback(mSurfaceHolderCallback);
+        mSurfaceView.getHolder().setFormat(PixelFormat.TRANSLUCENT);
         addView(mSurfaceView);
     }
 

@@ -2139,7 +2139,7 @@ public final class InputMethodManager {
             view.onInputConnectionOpenedInternal(ic, tba, icHandler);
             final ViewRootImpl viewRoot = view.getViewRootImpl();
             if (viewRoot != null) {
-                viewRoot.getHandwritingInitiator().onInputConnectionCreated(view, tba);
+                viewRoot.getHandwritingInitiator().onInputConnectionCreated(view);
             }
         }
 

@@ -165,6 +165,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -986,6 +987,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         forAllDisplays(dc -> {
             dc.getInputMonitor().updateInputWindowsLw(true /*force*/);
             dc.updateSystemGestureExclusion();
+            dc.updateKeepClearAreas();
             dc.updateTouchExcludeRegion();
         });
 
@@ -2530,7 +2532,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // Drop any cached DisplayInfos associated with this display id - the values are now
             // out of date given this display changed event.
             mWmService.mPossibleDisplayInfoMapper.removePossibleDisplayInfos(displayId);
+            updateDisplayImePolicyCache();
         }
+    }
+
+    void updateDisplayImePolicyCache() {
+        ArrayMap<Integer, Integer> displayImePolicyMap = new ArrayMap<>();
+        forAllDisplays(dc -> displayImePolicyMap.put(dc.getDisplayId(), dc.getImePolicy()));
+        mWmService.mDisplayImePolicyCache = Collections.unmodifiableMap(displayImePolicyMap);
     }
 
     /** Update lists of UIDs that are present on displays and have access to them. */

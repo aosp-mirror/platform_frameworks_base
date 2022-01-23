@@ -490,6 +490,16 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         }
     }
 
+    @Override
+    public void reportKeepClearAreasChanged(IWindow window, List<Rect> keepClearAreas) {
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mService.reportKeepClearAreasChanged(this, window, keepClearAreas);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
     private void actionOnWallpaper(IBinder window,
             BiConsumer<WallpaperController, WindowState> action) {
         final WindowState windowState = mService.windowForClientLocked(this, window, true);

@@ -97,5 +97,16 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".DialogThemedActivity"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.DialogThemedActivity"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/DialogTheme"
+            android:label="DialogThemedActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

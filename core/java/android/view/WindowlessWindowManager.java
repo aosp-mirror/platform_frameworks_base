@@ -459,6 +459,11 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
+    public void reportKeepClearAreasChanged(android.view.IWindow window,
+            java.util.List<android.graphics.Rect> exclusionRects) {
+    }
+
+    @Override
     public void grantInputChannel(int displayId, SurfaceControl surface, IWindow window,
             IBinder hostInputToken, int flags, int privateFlags, int type,
             InputChannel outInputChannel) {
