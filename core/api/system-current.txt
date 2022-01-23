@@ -2,6 +2,7 @@
 package android {
 
   public static final class Manifest.permission {
+    field public static final String ACCESS_AMBIENT_CONTEXT_EVENT = "android.permission.ACCESS_AMBIENT_CONTEXT_EVENT";
     field public static final String ACCESS_AMBIENT_LIGHT_STATS = "android.permission.ACCESS_AMBIENT_LIGHT_STATS";
     field public static final String ACCESS_BROADCAST_RADIO = "android.permission.ACCESS_BROADCAST_RADIO";
     field public static final String ACCESS_CACHE_FILESYSTEM = "android.permission.ACCESS_CACHE_FILESYSTEM";
@@ -38,6 +39,7 @@ package android {
     field public static final String BACKGROUND_CAMERA = "android.permission.BACKGROUND_CAMERA";
     field public static final String BACKUP = "android.permission.BACKUP";
     field public static final String BATTERY_PREDICTION = "android.permission.BATTERY_PREDICTION";
+    field public static final String BIND_AMBIENT_CONTEXT_DETECTION_SERVICE = "android.permission.BIND_AMBIENT_CONTEXT_DETECTION_SERVICE";
     field public static final String BIND_ATTENTION_SERVICE = "android.permission.BIND_ATTENTION_SERVICE";
     field public static final String BIND_AUGMENTED_AUTOFILL_SERVICE = "android.permission.BIND_AUGMENTED_AUTOFILL_SERVICE";
     field public static final String BIND_CALL_DIAGNOSTIC_SERVICE = "android.permission.BIND_CALL_DIAGNOSTIC_SERVICE";
@@ -1209,6 +1211,87 @@ package android.app.admin {
   public static class SystemUpdatePolicy.InstallationOption {
     method public long getEffectiveTime();
     method public int getType();
+  }
+
+}
+
+package android.app.ambientcontext {
+
+  public final class AmbientContextEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getConfidenceLevel();
+    method public int getDensityLevel();
+    method @NonNull public java.time.Instant getEndTime();
+    method public int getEventType();
+    method @NonNull public java.time.Instant getStartTime();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.ambientcontext.AmbientContextEvent> CREATOR;
+    field public static final int EVENT_COUGH = 1; // 0x1
+    field public static final int EVENT_SNORE = 2; // 0x2
+    field public static final int EVENT_UNKNOWN = 0; // 0x0
+    field public static final int LEVEL_HIGH = 5; // 0x5
+    field public static final int LEVEL_LOW = 1; // 0x1
+    field public static final int LEVEL_MEDIUM = 3; // 0x3
+    field public static final int LEVEL_MEDIUM_HIGH = 4; // 0x4
+    field public static final int LEVEL_MEDIUM_LOW = 2; // 0x2
+    field public static final int LEVEL_UNKNOWN = 0; // 0x0
+  }
+
+  public static final class AmbientContextEvent.Builder {
+    ctor public AmbientContextEvent.Builder();
+    method @NonNull public android.app.ambientcontext.AmbientContextEvent build();
+    method @NonNull public android.app.ambientcontext.AmbientContextEvent.Builder setConfidenceLevel(int);
+    method @NonNull public android.app.ambientcontext.AmbientContextEvent.Builder setDensityLevel(int);
+    method @NonNull public android.app.ambientcontext.AmbientContextEvent.Builder setEndTime(@NonNull java.time.Instant);
+    method @NonNull public android.app.ambientcontext.AmbientContextEvent.Builder setEventType(int);
+    method @NonNull public android.app.ambientcontext.AmbientContextEvent.Builder setStartTime(@NonNull java.time.Instant);
+  }
+
+  public final class AmbientContextEventRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.Set<java.lang.Integer> getEventTypes();
+    method @NonNull public android.os.PersistableBundle getOptions();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.ambientcontext.AmbientContextEventRequest> CREATOR;
+  }
+
+  public static final class AmbientContextEventRequest.Builder {
+    ctor public AmbientContextEventRequest.Builder();
+    method @NonNull public android.app.ambientcontext.AmbientContextEventRequest.Builder addEventType(int);
+    method @NonNull public android.app.ambientcontext.AmbientContextEventRequest build();
+    method @NonNull public android.app.ambientcontext.AmbientContextEventRequest.Builder setOptions(@NonNull android.os.PersistableBundle);
+  }
+
+  public final class AmbientContextEventResponse implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.app.PendingIntent getActionPendingIntent();
+    method @NonNull public java.util.List<android.app.ambientcontext.AmbientContextEvent> getEvents();
+    method @NonNull public String getPackageName();
+    method public int getStatusCode();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.ambientcontext.AmbientContextEventResponse> CREATOR;
+    field public static final int STATUS_ACCESS_DENIED = 5; // 0x5
+    field public static final int STATUS_MICROPHONE_DISABLED = 4; // 0x4
+    field public static final int STATUS_NOT_SUPPORTED = 2; // 0x2
+    field public static final int STATUS_SERVICE_UNAVAILABLE = 3; // 0x3
+    field public static final int STATUS_SUCCESS = 1; // 0x1
+    field public static final int STATUS_UNKNOWN = 0; // 0x0
+  }
+
+  public static final class AmbientContextEventResponse.Builder {
+    ctor public AmbientContextEventResponse.Builder();
+    method @NonNull public android.app.ambientcontext.AmbientContextEventResponse.Builder addEvent(@NonNull android.app.ambientcontext.AmbientContextEvent);
+    method @NonNull public android.app.ambientcontext.AmbientContextEventResponse build();
+    method @NonNull public android.app.ambientcontext.AmbientContextEventResponse.Builder setActionPendingIntent(@NonNull android.app.PendingIntent);
+    method @NonNull public android.app.ambientcontext.AmbientContextEventResponse.Builder setPackageName(@NonNull String);
+    method @NonNull public android.app.ambientcontext.AmbientContextEventResponse.Builder setStatusCode(int);
+  }
+
+  public final class AmbientContextManager {
+    method @Nullable public static android.app.ambientcontext.AmbientContextEventResponse getResponseFromIntent(@NonNull android.content.Intent);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT) public void registerObserver(@NonNull android.app.ambientcontext.AmbientContextEventRequest, @NonNull android.app.PendingIntent);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT) public void unregisterObserver();
+    field public static final String EXTRA_AMBIENT_CONTEXT_EVENT_RESPONSE = "android.app.ambientcontext.extra.AMBIENT_CONTEXT_EVENT_RESPONSE";
   }
 
 }
@@ -2703,6 +2786,7 @@ package android.content {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public abstract void sendBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle, @Nullable String, @Nullable android.os.Bundle);
     method public abstract void sendOrderedBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable android.os.Bundle, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public void startActivityAsUser(@NonNull @RequiresPermission android.content.Intent, @NonNull android.os.UserHandle);
+    field public static final String AMBIENT_CONTEXT_SERVICE = "ambient_context";
     field public static final String APP_HIBERNATION_SERVICE = "app_hibernation";
     field public static final String APP_INTEGRITY_SERVICE = "app_integrity";
     field public static final String APP_PREDICTION_SERVICE = "app_prediction";
@@ -9962,6 +10046,7 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.WRITE_DEVICE_CONFIG) public static boolean setProperty(@NonNull String, @NonNull String, @Nullable String, boolean);
     field public static final String NAMESPACE_ACTIVITY_MANAGER = "activity_manager";
     field public static final String NAMESPACE_ACTIVITY_MANAGER_NATIVE_BOOT = "activity_manager_native_boot";
+    field public static final String NAMESPACE_AMBIENT_CONTEXT_MANAGER_SERVICE = "ambient_context_manager_service";
     field public static final String NAMESPACE_APPSEARCH = "appsearch";
     field public static final String NAMESPACE_APP_COMPAT = "app_compat";
     field public static final String NAMESPACE_APP_HIBERNATION = "app_hibernation";
@@ -10530,6 +10615,18 @@ package android.security.keystore.recovery {
     method @NonNull public android.security.keystore.recovery.WrappedApplicationKey.Builder setAlias(@NonNull String);
     method @NonNull public android.security.keystore.recovery.WrappedApplicationKey.Builder setEncryptedKeyMaterial(@NonNull byte[]);
     method @NonNull public android.security.keystore.recovery.WrappedApplicationKey.Builder setMetadata(@Nullable byte[]);
+  }
+
+}
+
+package android.service.ambientcontext {
+
+  public abstract class AmbientContextDetectionService extends android.app.Service {
+    ctor public AmbientContextDetectionService();
+    method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public abstract void onStartDetection(@NonNull android.app.ambientcontext.AmbientContextEventRequest, @NonNull String, @NonNull java.util.function.Consumer<android.app.ambientcontext.AmbientContextEventResponse>);
+    method public abstract void onStopDetection(@NonNull String);
+    field public static final String SERVICE_INTERFACE = "android.service.ambientcontext.AmbientContextDetectionService";
   }
 
 }
