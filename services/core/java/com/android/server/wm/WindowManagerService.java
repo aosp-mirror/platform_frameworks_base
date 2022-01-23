@@ -8263,7 +8263,8 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     void grantInputChannel(Session session, int callingUid, int callingPid, int displayId,
                            SurfaceControl surface, IWindow window, IBinder hostInputToken,
-                           int flags, int privateFlags, int type, InputChannel outInputChannel) {
+                           int flags, int privateFlags, int type, IBinder focusGrantToken,
+                           InputChannel outInputChannel) {
         final InputApplicationHandle applicationHandle;
         final String name;
         final InputChannel clientChannel;
@@ -8271,7 +8272,7 @@ public class WindowManagerService extends IWindowManager.Stub
             EmbeddedWindowController.EmbeddedWindow win =
                     new EmbeddedWindowController.EmbeddedWindow(session, this, window,
                             mInputToWindowMap.get(hostInputToken), callingUid, callingPid, type,
-                            displayId);
+                            displayId, focusGrantToken);
             clientChannel = win.openInputChannel();
             mEmbeddedWindowController.add(clientChannel.getToken(), win);
             applicationHandle = win.getApplicationHandle();
@@ -8538,16 +8539,21 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void grantEmbeddedWindowFocus(Session session, IBinder inputToken, boolean grantFocus) {
+    void grantEmbeddedWindowFocus(Session session, IBinder focusToken, boolean grantFocus) {
         synchronized (mGlobalLock) {
             final EmbeddedWindowController.EmbeddedWindow embeddedWindow =
-                    mEmbeddedWindowController.get(inputToken);
+                    mEmbeddedWindowController.getByFocusToken(focusToken);
             if (embeddedWindow == null) {
                 Slog.e(TAG, "Embedded window not found");
                 return;
             }
             if (embeddedWindow.mSession != session) {
                 Slog.e(TAG, "Window not in session:" + session);
+                return;
+            }
+            IBinder inputToken = embeddedWindow.getInputChannelToken();
+            if (inputToken == null) {
+                Slog.e(TAG, "Focus token found but input channel token not found");
                 return;
             }
             SurfaceControl.Transaction t = mTransactionFactory.get();
