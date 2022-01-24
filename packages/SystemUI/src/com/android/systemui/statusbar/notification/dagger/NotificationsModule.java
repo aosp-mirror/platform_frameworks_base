@@ -67,6 +67,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManagerImpl;
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewManager;
+import com.android.systemui.statusbar.notification.collection.render.NotifPanelEventSourceModule;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
@@ -101,8 +102,9 @@ import dagger.Provides;
  * Dagger Module for classes found within the com.android.systemui.statusbar.notification package.
  */
 @Module(includes = {
+        CoordinatorsModule.class,
+        NotifPanelEventSourceModule.class,
         NotificationSectionHeadersModule.class,
-        CoordinatorsModule.class
 })
 public interface NotificationsModule {
     @Binds

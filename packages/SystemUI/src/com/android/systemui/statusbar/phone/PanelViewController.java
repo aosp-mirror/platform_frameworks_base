@@ -502,7 +502,7 @@ public abstract class PanelViewController {
 
     private void endClosing() {
         if (mClosing) {
-            mClosing = false;
+            setIsClosing(false);
             onClosingFinished();
         }
     }
@@ -577,7 +577,7 @@ public abstract class PanelViewController {
             boolean expandBecauseOfFalsing) {
         float target = expand ? getMaxPanelHeight() : 0;
         if (!expand) {
-            mClosing = true;
+            setIsClosing(true);
         }
         flingToHeight(vel, expand, target, collapseSpeedUpFactor, expandBecauseOfFalsing);
     }
@@ -864,7 +864,7 @@ public abstract class PanelViewController {
             notifyExpandingStarted();
 
             // Set after notifyExpandingStarted, as notifyExpandingStarted resets the closing state.
-            mClosing = true;
+            setIsClosing(true);
             if (delayed) {
                 mNextCollapseSpeedUpFactor = speedUpFactor;
                 mView.postDelayed(mFlingCollapseRunnable, 120);
@@ -1143,6 +1143,14 @@ public abstract class PanelViewController {
 
     public void setIsLaunchAnimationRunning(boolean running) {
         mIsLaunchAnimationRunning = running;
+    }
+
+    protected void setIsClosing(boolean isClosing) {
+        mClosing = isClosing;
+    }
+
+    protected boolean isClosing() {
+        return mClosing;
     }
 
     public void collapseWithDuration(int animationDuration) {
