@@ -246,7 +246,7 @@ public final class DeviceIdleJobsController extends StateController {
             pw.print((jobStatus.satisfiedConstraints
                     & JobStatus.CONSTRAINT_DEVICE_NOT_DOZING) != 0
                             ? " RUNNABLE" : " WAITING");
-            if (jobStatus.dozeWhitelisted) {
+            if (jobStatus.appHasDozeExemption) {
                 pw.print(" WHITELISTED");
             }
             if (mAllowInIdleJobs.contains(jobStatus)) {
@@ -273,7 +273,7 @@ public final class DeviceIdleJobsController extends StateController {
             proto.write(TrackedJob.SOURCE_PACKAGE_NAME, jobStatus.getSourcePackageName());
             proto.write(TrackedJob.ARE_CONSTRAINTS_SATISFIED,
                     (jobStatus.satisfiedConstraints & JobStatus.CONSTRAINT_DEVICE_NOT_DOZING) != 0);
-            proto.write(TrackedJob.IS_DOZE_WHITELISTED, jobStatus.dozeWhitelisted);
+            proto.write(TrackedJob.IS_DOZE_WHITELISTED, jobStatus.appHasDozeExemption);
             proto.write(TrackedJob.IS_ALLOWED_IN_DOZE, mAllowInIdleJobs.contains(jobStatus));
 
             proto.end(jsToken);

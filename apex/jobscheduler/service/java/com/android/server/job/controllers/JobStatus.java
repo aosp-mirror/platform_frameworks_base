@@ -267,7 +267,7 @@ public final class JobStatus {
     private final boolean mHasMediaBackupExemption;
 
     // Set to true if doze constraint was satisfied due to app being whitelisted.
-    public boolean dozeWhitelisted;
+    boolean appHasDozeExemption;
 
     // Set to true when the app is "active" per AppStateTracker
     public boolean uidActive;
@@ -1179,7 +1179,8 @@ public final class JobStatus {
      * in Doze.
      */
     public boolean canRunInDoze() {
-        return (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0
+        return appHasDozeExemption
+                || (getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0
                 || ((shouldTreatAsExpeditedJob() || startedAsExpeditedJob)
                 && (mDynamicConstraints & CONSTRAINT_DEVICE_NOT_DOZING) == 0);
     }
@@ -1243,7 +1244,7 @@ public final class JobStatus {
     /** @return true if the constraint was changed, false otherwise. */
     boolean setDeviceNotDozingConstraintSatisfied(final long nowElapsed,
             boolean state, boolean whitelisted) {
-        dozeWhitelisted = whitelisted;
+        appHasDozeExemption = whitelisted;
         if (setConstraintSatisfied(CONSTRAINT_DEVICE_NOT_DOZING, nowElapsed, state)) {
             // The constraint was changed. Update the ready flag.
             mReadyNotDozing = state || canRunInDoze();
@@ -2110,7 +2111,7 @@ public final class JobStatus {
             }
             pw.decreaseIndent();
 
-            if (dozeWhitelisted) {
+            if (appHasDozeExemption) {
                 pw.println("Doze whitelisted: true");
             }
             if (uidActive) {
@@ -2323,7 +2324,7 @@ public final class JobStatus {
             dumpConstraints(proto, JobStatusDumpProto.SATISFIED_CONSTRAINTS, satisfiedConstraints);
             dumpConstraints(proto, JobStatusDumpProto.UNSATISFIED_CONSTRAINTS,
                     ((requiredConstraints | CONSTRAINT_WITHIN_QUOTA) & ~satisfiedConstraints));
-            proto.write(JobStatusDumpProto.IS_DOZE_WHITELISTED, dozeWhitelisted);
+            proto.write(JobStatusDumpProto.IS_DOZE_WHITELISTED, appHasDozeExemption);
             proto.write(JobStatusDumpProto.IS_UID_ACTIVE, uidActive);
             proto.write(JobStatusDumpProto.IS_EXEMPTED_FROM_APP_STANDBY,
                     job.isExemptedFromAppStandby());
