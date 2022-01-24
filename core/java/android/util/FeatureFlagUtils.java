@@ -81,6 +81,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_USE_NEW_BACKUP_ELIGIBILITY_RULES, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SECURITY_HUB, "true");
         DEFAULT_FLAGS.put(SETTINGS_SUPPORT_LARGE_SCREEN, "true");
+        DEFAULT_FLAGS.put("settings_search_always_expand", "false");
         DEFAULT_FLAGS.put(SETTINGS_APP_LANGUAGE_SELECTION, "false");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS, "true");
     }
