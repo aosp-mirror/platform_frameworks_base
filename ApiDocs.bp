@@ -57,7 +57,10 @@ framework_docs_only_libs = [
 
 stubs_defaults {
     name: "android-non-updatable-doc-stubs-defaults",
-    defaults: ["android-non-updatable-stubs-defaults"],
+    defaults: [
+        "android-non-updatable-stubs-defaults",
+        "module-classpath-stubs-defaults",
+    ],
     srcs: [
         // No longer part of the stubs, but are included in the docs.
         ":android-test-base-sources",
