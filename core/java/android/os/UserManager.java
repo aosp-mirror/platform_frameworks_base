@@ -820,6 +820,20 @@ public class UserManager {
     public static final String DISALLOW_ADD_MANAGED_PROFILE = "no_add_managed_profile";
 
     /**
+     * Specifies if a user is disallowed from creating clone profile.
+     * <p>The default value for an unmanaged user is <code>false</code>.
+     * For users with a device owner set, the default is <code>true</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     * @hide
+     */
+    public static final String DISALLOW_ADD_CLONE_PROFILE = "no_add_clone_profile";
+
+    /**
      * Specifies if a user is disallowed from disabling application verification. The default
      * value is <code>false</code>.
      *
@@ -1497,6 +1511,7 @@ public class UserManager {
             DISALLOW_FACTORY_RESET,
             DISALLOW_ADD_USER,
             DISALLOW_ADD_MANAGED_PROFILE,
+            DISALLOW_ADD_CLONE_PROFILE,
             ENSURE_VERIFY_APPS,
             DISALLOW_CONFIG_CELL_BROADCASTS,
             DISALLOW_CONFIG_MOBILE_NETWORKS,

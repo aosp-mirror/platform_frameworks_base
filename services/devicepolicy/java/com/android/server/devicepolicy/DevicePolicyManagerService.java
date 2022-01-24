@@ -2236,7 +2236,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * a managed profile.
      */
     @GuardedBy("getLockObject()")
-    private void applyManagedProfileRestrictionIfDeviceOwnerLocked() {
+    private void applyProfileRestrictionsIfDeviceOwnerLocked() {
         final int doUserId = mOwners.getDeviceOwnerUserId();
         if (doUserId == UserHandle.USER_NULL) {
             if (VERBOSE_LOG) Slogf.d(LOG_TAG, "No DO found, skipping application of restriction.");
@@ -2244,7 +2244,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         final UserHandle doUserHandle = UserHandle.of(doUserId);
-        // Set the restriction if not set.
+
+        // Based on  CDD : https://source.android.com/compatibility/12/android-12-cdd#95_multi-user_support,
+        // creation of clone profile is not allowed in case device owner is set.
+        // Enforcing this restriction on setting up of device owner.
+        if (!mUserManager.hasUserRestriction(
+                UserManager.DISALLOW_ADD_CLONE_PROFILE, doUserHandle)) {
+            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE, true,
+                    doUserHandle);
+        }
+        // Creation of managed profile is restricted in case device owner is set, enforcing this
+        // restriction by setting user level restriction at time of device owner setup.
         if (!mUserManager.hasUserRestriction(
                 UserManager.DISALLOW_ADD_MANAGED_PROFILE, doUserHandle)) {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, true,
@@ -3153,7 +3163,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             case SystemService.PHASE_ACTIVITY_MANAGER_READY:
                 synchronized (getLockObject()) {
                     migrateToProfileOnOrganizationOwnedDeviceIfCompLocked();
-                    applyManagedProfileRestrictionIfDeviceOwnerLocked();
+                    applyProfileRestrictionsIfDeviceOwnerLocked();
                 }
                 maybeStartSecurityLogMonitorOnActivityManagerReady();
                 break;
@@ -3776,6 +3786,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // Remove this restriction when the device owner is cleared.
         if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, userHandle)) {
             mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, false,
+                    userHandle);
+        }
+        // When a device owner is set, the system automatically restricts adding a clone profile.
+        // Remove this restriction when the device owner is cleared.
+        if (mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE, userHandle)) {
+            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE, false,
                     userHandle);
         }
     }
@@ -8470,6 +8486,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // on the primary profile).
                 mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_MANAGED_PROFILE, true,
                         UserHandle.of(userId));
+                // Restrict adding a clone profile when a device owner is set on the device.
+                // That is to prevent the co-existence of a clone profile and a device owner
+                // on the same device.
+                // CDD for reference : https://source.android.com/compatibility/12/android-12-cdd#95_multi-user_support
+                mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE, true,
+                        UserHandle.of(userId));
                 // TODO Send to system too?
                 sendOwnerChangedBroadcast(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED, userId);
             });
@@ -8942,7 +8964,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mOwners.writeProfileOwner(userId);
         deleteTransferOwnershipBundleLocked(userId);
         toggleBackupServiceActive(userId, true);
-        applyManagedProfileRestrictionIfDeviceOwnerLocked();
+        applyProfileRestrictionsIfDeviceOwnerLocked();
         setNetworkLoggingActiveInternal(false);
     }
 
