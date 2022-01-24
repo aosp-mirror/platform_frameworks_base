@@ -66,6 +66,7 @@ filegroup {
 filegroup {
     name: "services.connectivity-ethernet-sources",
     srcs: [
+        "src/com/android/server/net/DelayedDiskWrite.java",
         "src/com/android/server/net/IpConfigStore.java",
     ],
     path: "src",
