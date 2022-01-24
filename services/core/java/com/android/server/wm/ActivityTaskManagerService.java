@@ -3954,6 +3954,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         getActivityStartController().dump(pw, "", dumpPackage);
     }
 
+    /** Dumps installed packages having app-specific config. */
+    void dumpInstalledPackagesConfig(PrintWriter pw) {
+        mPackageConfigPersister.dump(pw, getCurrentUserId());
+    }
+
     /**
      * There are three things that cmd can be:
      * - a flattened component name that matches an existing activity
