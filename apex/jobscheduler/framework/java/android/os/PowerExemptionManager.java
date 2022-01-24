@@ -350,6 +350,21 @@ public class PowerExemptionManager {
      * @hide
      */
     public static final int REASON_MEDIA_SESSION_CALLBACK = 317;
+    /**
+     * Dialer app.
+     * @hide
+     */
+    public static final int REASON_ROLE_DIALER = 318;
+    /**
+     * Emergency app.
+     * @hide
+     */
+    public static final int REASON_ROLE_EMERGENCY = 319;
+    /**
+     * System Module.
+     * @hide
+     */
+    public static final int REASON_SYSTEM_MODULE = 320;
 
     /** @hide The app requests out-out. */
     public static final int REASON_OPT_OUT_REQUESTED = 1000;
@@ -423,6 +438,9 @@ public class PowerExemptionManager {
             REASON_EVENT_MMS,
             REASON_SHELL,
             REASON_MEDIA_SESSION_CALLBACK,
+            REASON_ROLE_DIALER,
+            REASON_ROLE_EMERGENCY,
+            REASON_SYSTEM_MODULE,
             REASON_OPT_OUT_REQUESTED,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -726,6 +744,12 @@ public class PowerExemptionManager {
                 return "SHELL";
             case REASON_MEDIA_SESSION_CALLBACK:
                 return "MEDIA_SESSION_CALLBACK";
+            case REASON_ROLE_DIALER:
+                return "ROLE_DIALER";
+            case REASON_ROLE_EMERGENCY:
+                return "ROLE_EMERGENCY";
+            case REASON_SYSTEM_MODULE:
+                return "SYSTEM_MODULE";
             case REASON_OPT_OUT_REQUESTED:
                 return "REASON_OPT_OUT_REQUESTED";
             default:

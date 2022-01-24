@@ -2249,6 +2249,11 @@ public final class BackgroundRestrictionTest {
         }
 
         @Override
+        ActivityManagerInternal getActivityManagerInternal() {
+            return mActivityManagerInternal;
+        }
+
+        @Override
         AppRestrictionController getAppRestrictionController() {
             return mBgRestrictionController;
         }
@@ -2296,6 +2301,11 @@ public final class BackgroundRestrictionTest {
         @Override
         NotificationManager getNotificationManager() {
             return mNotificationManager;
+        }
+
+        @Override
+        RoleManager getRoleManager() {
+            return mRoleManager;
         }
 
         @Override

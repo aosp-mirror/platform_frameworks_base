@@ -18,6 +18,8 @@ package com.android.server.am;
 
 import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
 import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+import static android.app.ActivityManager.PROCESS_STATE_PERSISTENT;
+import static android.app.ActivityManager.PROCESS_STATE_PERSISTENT_UI;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_EXEMPTED;
@@ -51,6 +53,20 @@ import static android.content.Intent.ACTION_SHOW_FOREGROUND_SERVICE_MANAGER;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
+import static android.os.PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE;
+import static android.os.PowerExemptionManager.REASON_COMPANION_DEVICE_MANAGER;
+import static android.os.PowerExemptionManager.REASON_DENIED;
+import static android.os.PowerExemptionManager.REASON_DEVICE_DEMO_MODE;
+import static android.os.PowerExemptionManager.REASON_DEVICE_OWNER;
+import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_PLATFORM_VPN;
+import static android.os.PowerExemptionManager.REASON_OP_ACTIVATE_VPN;
+import static android.os.PowerExemptionManager.REASON_PROC_STATE_PERSISTENT;
+import static android.os.PowerExemptionManager.REASON_PROC_STATE_PERSISTENT_UI;
+import static android.os.PowerExemptionManager.REASON_PROFILE_OWNER;
+import static android.os.PowerExemptionManager.REASON_ROLE_DIALER;
+import static android.os.PowerExemptionManager.REASON_ROLE_EMERGENCY;
+import static android.os.PowerExemptionManager.REASON_SYSTEM_MODULE;
+import static android.os.PowerExemptionManager.REASON_SYSTEM_UID;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.internal.notification.SystemNotificationChannels.ABUSIVE_BACKGROUND_APPS;
@@ -65,6 +81,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RestrictionLevel;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.AppBackgroundRestrictionListener;
 import android.app.ActivityThread;
 import android.app.AppOpsManager;
@@ -73,6 +90,8 @@ import android.app.IUidObserver;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.role.OnRoleHoldersChangedListener;
+import android.app.role.RoleManager;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
@@ -81,6 +100,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ModuleInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ServiceInfo;
@@ -88,19 +109,25 @@ import android.content.pm.ServiceInfo.ForegroundServiceType;
 import android.database.ContentObserver;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerExemptionManager.ReasonCode;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.OnPropertiesChangedListener;
 import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.util.ArraySet;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseArrayMap;
 import android.util.TimeUtils;
 
@@ -123,6 +150,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Consumer;
@@ -151,6 +179,7 @@ public final class AppRestrictionController {
     private final Context mContext;
     private final HandlerThread mBgHandlerThread;
     private final BgHandler mBgHandler;
+    private final HandlerExecutor mBgExecutor;
 
     // No lock is needed, as it's immutable after initialization in constructor.
     private final ArrayList<BaseAppStateTracker> mAppStateTrackers = new ArrayList<>();
@@ -184,6 +213,21 @@ public final class AppRestrictionController {
     private final Object mLock = new Object();
     private final Injector mInjector;
     private final NotificationHelper mNotificationHelper;
+
+    private final OnRoleHoldersChangedListener mRoleHolderChangedListener =
+            this::onRoleHoldersChanged;
+
+    /**
+     * The key is the UID, the value is the list of the roles it holds.
+     */
+    @GuardedBy("mLock")
+    private final SparseArray<ArrayList<String>> mUidRolesMapping = new SparseArray<>();
+
+    /**
+     * Cache the package name and information about if it's a system module.
+     */
+    @GuardedBy("mLock")
+    private final HashMap<String, Boolean> mSystemModulesCache = new HashMap<>();
 
     final ActivityManagerService mActivityManagerService;
 
@@ -636,6 +680,7 @@ public final class AppRestrictionController {
         mBgHandlerThread = new HandlerThread("bgres-controller");
         mBgHandlerThread.start();
         mBgHandler = new BgHandler(mBgHandlerThread.getLooper(), injector);
+        mBgExecutor = new HandlerExecutor(mBgHandler);
         mConstantsObserver = new ConstantsObserver(mBgHandler);
         mNotificationHelper = new NotificationHelper(this);
         injector.initAppStateTrackers(this);
@@ -646,12 +691,15 @@ public final class AppRestrictionController {
                 ActivityThread.currentApplication().getMainExecutor(), mConstantsObserver);
         mConstantsObserver.start();
         initRestrictionStates();
+        initSystemModuleNames();
         registerForUidObservers();
         registerForSystemBroadcasts();
         mNotificationHelper.onSystemReady();
         mInjector.getAppStateTracker().addBackgroundRestrictedAppListener(
                 mBackgroundRestrictionListener);
         mInjector.getAppStandbyInternal().addListener(mAppIdleStateChangeListener);
+        mInjector.getRoleManager().addOnRoleHoldersChangedListenerAsUser(mBgExecutor,
+                mRoleHolderChangedListener, UserHandle.ALL);
         for (int i = 0, size = mAppStateTrackers.size(); i < size; i++) {
             mAppStateTrackers.get(i).onSystemReady();
         }
@@ -669,6 +717,54 @@ public final class AppRestrictionController {
             refreshAppRestrictionLevelForUser(userId, REASON_MAIN_FORCED_BY_USER,
                     REASON_SUB_FORCED_USER_FLAG_INTERACTION);
         }
+    }
+
+    private void initSystemModuleNames() {
+        final PackageManager pm = mInjector.getPackageManager();
+        final List<ModuleInfo> moduleInfos = pm.getInstalledModules(0 /* flags */);
+        if (moduleInfos == null) {
+            return;
+        }
+        synchronized (mLock) {
+            for (ModuleInfo info : moduleInfos) {
+                mSystemModulesCache.put(info.getPackageName(), Boolean.TRUE);
+            }
+        }
+    }
+
+    private boolean isSystemModule(String packageName) {
+        synchronized (mLock) {
+            final Boolean val = mSystemModulesCache.get(packageName);
+            if (val != null) {
+                return val.booleanValue();
+            }
+        }
+
+        // Slow path: check if the package is listed among the system modules.
+        final PackageManager pm = mInjector.getPackageManager();
+        boolean isSystemModule = false;
+        try {
+            isSystemModule = pm.getModuleInfo(packageName, 0 /* flags */) != null;
+        } catch (PackageManager.NameNotFoundException e) {
+        }
+
+        if (!isSystemModule) {
+            try {
+                final PackageInfo pkg = pm.getPackageInfo(packageName, 0 /* flags */);
+                // Check if the package is contained in an APEX. There is no public API to properly
+                // check whether a given APK package comes from an APEX registered as module.
+                // Therefore we conservatively assume that any package scanned from an /apex path is
+                // a system package.
+                isSystemModule = pkg != null && pkg.applicationInfo.sourceDir.startsWith(
+                        Environment.getApexDirectory().getAbsolutePath());
+            } catch (PackageManager.NameNotFoundException e) {
+            }
+        }
+        // Update the cache.
+        synchronized (mLock) {
+            mSystemModulesCache.put(packageName, isSystemModule);
+        }
+        return isSystemModule;
     }
 
     private void registerForUidObservers() {
@@ -1462,6 +1558,112 @@ public final class AppRestrictionController {
     }
 
     /**
+     * @return The reason code of whether or not the given UID should be exempted from background
+     * restrictions here.
+     *
+     * <p>
+     * Note: Call it with caution as it'll try to acquire locks in other services.
+     * </p>
+     */
+    @ReasonCode
+    int getBackgroundRestrictionExemptionReason(int uid) {
+        if (UserHandle.isCore(uid)) {
+            return REASON_SYSTEM_UID;
+        }
+        if (isOnDeviceIdleAllowlist(uid, false)) {
+            return REASON_ALLOWLISTED_PACKAGE;
+        }
+        final ActivityManagerInternal am = mInjector.getActivityManagerInternal();
+        if (am.isAssociatedCompanionApp(UserHandle.getUserId(uid), uid)) {
+            return REASON_COMPANION_DEVICE_MANAGER;
+        }
+        if (UserManager.isDeviceInDemoMode(mContext)) {
+            return REASON_DEVICE_DEMO_MODE;
+        }
+        if (am.isDeviceOwner(uid)) {
+            return REASON_DEVICE_OWNER;
+        }
+        if (am.isProfileOwner(uid)) {
+            return REASON_PROFILE_OWNER;
+        }
+        final int uidProcState = am.getUidProcessState(uid);
+        if (uidProcState <= PROCESS_STATE_PERSISTENT) {
+            return REASON_PROC_STATE_PERSISTENT;
+        } else if (uidProcState <= PROCESS_STATE_PERSISTENT_UI) {
+            return REASON_PROC_STATE_PERSISTENT_UI;
+        }
+        final String[] packages = mInjector.getPackageManager().getPackagesForUid(uid);
+        if (packages != null) {
+            final AppOpsManager appOpsManager = mInjector.getAppOpsManager();
+            for (String pkg : packages) {
+                if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN,
+                        uid, pkg) == AppOpsManager.MODE_ALLOWED) {
+                    return REASON_OP_ACTIVATE_VPN;
+                } else if (appOpsManager.checkOpNoThrow(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN,
+                        uid, pkg) == AppOpsManager.MODE_ALLOWED) {
+                    return REASON_OP_ACTIVATE_PLATFORM_VPN;
+                } else if (isSystemModule(pkg)) {
+                    return REASON_SYSTEM_MODULE;
+                }
+            }
+        }
+        if (isRoleHeldByUid(RoleManager.ROLE_DIALER, uid)) {
+            return REASON_ROLE_DIALER;
+        }
+        if (isRoleHeldByUid(RoleManager.ROLE_EMERGENCY, uid)) {
+            return REASON_ROLE_EMERGENCY;
+        }
+        return REASON_DENIED;
+    }
+
+    private boolean isRoleHeldByUid(@NonNull String roleName, int uid) {
+        synchronized (mLock) {
+            final ArrayList<String> roles = mUidRolesMapping.get(uid);
+            return roles != null && roles.indexOf(roleName) >= 0;
+        }
+    }
+
+    private void onRoleHoldersChanged(@NonNull String roleName, @NonNull UserHandle user) {
+        final List<String> rolePkgs = mInjector.getRoleManager().getRoleHoldersAsUser(
+                roleName, user);
+        final ArraySet<Integer> roleUids = new ArraySet<>();
+        final int userId = user.getIdentifier();
+        if (rolePkgs != null) {
+            final PackageManagerInternal pm = mInjector.getPackageManagerInternal();
+            for (String pkg: rolePkgs) {
+                roleUids.add(pm.getPackageUid(pkg, STOCK_PM_FLAGS, userId));
+            }
+        }
+        synchronized (mLock) {
+            for (int i = mUidRolesMapping.size() - 1; i >= 0; i--) {
+                final int uid = mUidRolesMapping.keyAt(i);
+                if (UserHandle.getUserId(uid) != userId) {
+                    continue;
+                }
+                final ArrayList<String> roles = mUidRolesMapping.valueAt(i);
+                final int index = roles.indexOf(roleName);
+                final boolean isRole = roleUids.contains(uid);
+                if (index >= 0) {
+                    if (!isRole) { // Not holding this role anymore, remove it.
+                        roles.remove(index);
+                        if (roles.isEmpty()) {
+                            mUidRolesMapping.removeAt(i);
+                        }
+                    }
+                } else if (isRole) { // Got this new role, add it.
+                    roles.add(roleName);
+                    roleUids.remove(uid);
+                }
+            }
+            for (int i = roleUids.size() - 1; i >= 0; i--) { // Take care of the leftovers.
+                final ArrayList<String> roles = new ArrayList<>();
+                roles.add(roleName);
+                mUidRolesMapping.put(roleUids.valueAt(i), roles);
+            }
+        }
+    }
+
+    /**
      * @return The background handler of this controller.
      */
     Handler getBackgroundHandler() {
@@ -1574,6 +1776,7 @@ public final class AppRestrictionController {
 
     static class Injector {
         private final Context mContext;
+        private ActivityManagerInternal mActivityManagerInternal;
         private AppRestrictionController mAppRestrictionController;
         private AppOpsManager mAppOpsManager;
         private AppStandbyInternal mAppStandbyInternal;
@@ -1583,6 +1786,7 @@ public final class AppRestrictionController {
         private UserManagerInternal mUserManagerInternal;
         private PackageManagerInternal mPackageManagerInternal;
         private NotificationManager mNotificationManager;
+        private RoleManager mRoleManager;
         private AppBatteryTracker mAppBatteryTracker;
         private AppBatteryExemptionTracker mAppBatteryExemptionTracker;
         private AppFGSTracker mAppFGSTracker;
@@ -1608,6 +1812,13 @@ public final class AppRestrictionController {
             controller.mAppStateTrackers.add(mAppMediaSessionTracker);
             controller.mAppStateTrackers.add(new AppBroadcastEventsTracker(mContext, controller));
             controller.mAppStateTrackers.add(new AppBindServiceEventsTracker(mContext, controller));
+        }
+
+        ActivityManagerInternal getActivityManagerInternal() {
+            if (mActivityManagerInternal == null) {
+                mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+            }
+            return mActivityManagerInternal;
         }
 
         AppRestrictionController getAppRestrictionController() {
@@ -1670,6 +1881,13 @@ public final class AppRestrictionController {
                 mNotificationManager = getContext().getSystemService(NotificationManager.class);
             }
             return mNotificationManager;
+        }
+
+        RoleManager getRoleManager() {
+            if (mRoleManager == null) {
+                mRoleManager = getContext().getSystemService(RoleManager.class);
+            }
+            return mRoleManager;
         }
 
         AppFGSTracker getAppFGSTracker() {

@@ -17078,6 +17078,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @Override
+    @ReasonCode
+    public int getBackgroundRestrictionExemptionReason(int uid) {
+        enforceCallingPermission(android.Manifest.permission.DEVICE_POWER,
+                "getBackgroundRestrictionExemptionReason()");
+        return mAppRestrictionController.getBackgroundRestrictionExemptionReason(uid);
+    }
+
     /**
      * Force the settings cache to be loaded
      */
