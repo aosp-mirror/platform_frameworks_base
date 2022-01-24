@@ -36,7 +36,7 @@ class MediaTttSenderServiceTest : SysuiTestCase() {
     }
 
     @Test
-    fun closeToReceiverToStartCast_controllerTriggeredWithMoveCloserToStartCastState() {
+    fun closeToReceiverToStartCast_controllerTriggeredWithCorrectState() {
         val name = "Fake name"
         callback.closeToReceiverToStartCast(mediaInfo, DeviceInfo(name))
 
@@ -48,11 +48,23 @@ class MediaTttSenderServiceTest : SysuiTestCase() {
     }
 
     @Test
-    fun closeToReceiverToEndCast_controllerTriggeredWithMoveCloserToEndCastState() {
+    fun closeToReceiverToEndCast_controllerTriggeredWithCorrectState() {
         val name = "Fake name"
         callback.closeToReceiverToEndCast(mediaInfo, DeviceInfo(name))
 
         val chipStateCaptor = argumentCaptor<MoveCloserToEndCast>()
+        verify(controller).displayChip(capture(chipStateCaptor))
+
+        val chipState = chipStateCaptor.value!!
+        assertThat(chipState.otherDeviceName).isEqualTo(name)
+    }
+
+    @Test
+    fun transferToReceiverTriggered_controllerTriggeredWithCorrectState() {
+        val name = "Fake name"
+        callback.transferToReceiverTriggered(mediaInfo, DeviceInfo(name))
+
+        val chipStateCaptor = argumentCaptor<TransferToReceiverTriggered>()
         verify(controller).displayChip(capture(chipStateCaptor))
 
         val chipState = chipStateCaptor.value!!

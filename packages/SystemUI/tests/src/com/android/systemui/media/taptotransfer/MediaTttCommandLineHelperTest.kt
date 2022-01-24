@@ -26,11 +26,9 @@ import com.android.systemui.shared.mediattt.DeviceInfo
 import com.android.systemui.shared.mediattt.IDeviceSenderCallback
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
-import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
-import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -75,7 +73,6 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
                 context,
                 mediaTttChipControllerSender,
                 mediaTttChipControllerReceiver,
-                FakeExecutor(FakeSystemClock())
             )
     }
 
@@ -138,10 +135,14 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     }
 
     @Test
-    fun sender_transferInitiated_chipDisplayWithCorrectState() {
-        commandRegistry.onShellCommand(pw, getTransferInitiatedCommand())
+    fun sender_transferToReceiverTriggered_chipDisplayWithCorrectState() {
+        commandRegistry.onShellCommand(pw, getTransferToReceiverTriggeredCommand())
 
-        verify(mediaTttChipControllerSender).displayChip(any(TransferInitiated::class.java))
+        assertThat(context.isBound(mediaSenderServiceComponentName)).isTrue()
+
+        val deviceInfoCaptor = argumentCaptor<DeviceInfo>()
+        verify(mediaSenderService).transferToReceiverTriggered(any(), capture(deviceInfoCaptor))
+        assertThat(deviceInfoCaptor.value!!.name).isEqualTo(DEVICE_NAME)
     }
 
     @Test
@@ -194,11 +195,11 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
             MOVE_CLOSER_TO_END_CAST_COMMAND_NAME
         )
 
-    private fun getTransferInitiatedCommand(): Array<String> =
+    private fun getTransferToReceiverTriggeredCommand(): Array<String> =
         arrayOf(
             ADD_CHIP_COMMAND_SENDER_TAG,
             DEVICE_NAME,
-            TRANSFER_INITIATED_COMMAND_NAME
+            TRANSFER_TO_RECEIVER_TRIGGERED_COMMAND_NAME
         )
 
     private fun getTransferSucceededCommand(): Array<String> =

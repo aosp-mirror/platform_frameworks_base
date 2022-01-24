@@ -23,11 +23,7 @@ import android.view.WindowManager
 import android.widget.TextView
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCommon
-import java.util.concurrent.Executor
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 /**
@@ -38,8 +34,6 @@ import javax.inject.Inject
 class MediaTttChipControllerSender @Inject constructor(
     context: Context,
     windowManager: WindowManager,
-    @Main private val mainExecutor: Executor,
-    @Background private val backgroundExecutor: Executor,
 ) : MediaTttChipControllerCommon<ChipStateSender>(
     context, windowManager, R.layout.media_ttt_chip
 ) {
@@ -55,7 +49,7 @@ class MediaTttChipControllerSender @Inject constructor(
         }
 
         // Loading
-        val showLoading = chipState is TransferInitiated
+        val showLoading = chipState is TransferToReceiverTriggered
         currentChipView.requireViewById<View>(R.id.loading).visibility =
             if (showLoading) { View.VISIBLE } else { View.GONE }
 
@@ -77,47 +71,5 @@ class MediaTttChipControllerSender @Inject constructor(
         val showFailure = chipState is TransferFailed
         currentChipView.requireViewById<View>(R.id.failure_icon).visibility =
             if (showFailure) { View.VISIBLE } else { View.GONE }
-
-        // Future handling
-        if (chipState is TransferInitiated) {
-            addFutureCallback(chipState)
-        }
-    }
-
-    /**
-     * Adds the appropriate callbacks to [chipState.future] so that we update the chip correctly
-     * when the future resolves.
-     */
-    private fun addFutureCallback(chipState: TransferInitiated) {
-        // Listen to the future on a background thread so we don't occupy the main thread while we
-        // wait for it to complete.
-        backgroundExecutor.execute {
-            try {
-                val undoRunnable = chipState.future.get(TRANSFER_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-                // Make UI changes on the main thread
-                mainExecutor.execute {
-                    displayChip(
-                        TransferSucceeded(
-                            chipState.appIconDrawable,
-                            chipState.appIconContentDescription,
-                            chipState.otherDeviceName,
-                            undoRunnable
-                        )
-                    )
-                }
-            } catch (ex: Exception) {
-                mainExecutor.execute {
-                    displayChip(
-                        TransferFailed(
-                            chipState.appIconDrawable,
-                            chipState.appIconContentDescription,
-                            chipState.otherDeviceName,
-                        )
-                    )
-                }
-            }
-        }
     }
 }
-
-private const val TRANSFER_TIMEOUT_SECONDS = 10L
