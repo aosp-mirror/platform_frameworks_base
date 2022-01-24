@@ -499,6 +499,7 @@ public class NotificationManagerService extends SystemService {
     private IPlatformCompat mPlatformCompat;
     private ShortcutHelper mShortcutHelper;
     private PermissionHelper mPermissionHelper;
+    private UsageStatsManagerInternal mUsageStatsManagerInternal;
 
     final IBinder mForegroundToken = new Binder();
     private WorkerHandler mHandler;
@@ -2092,7 +2093,8 @@ public class NotificationManagerService extends SystemService {
             UserManager userManager,
             NotificationHistoryManager historyManager, StatsManager statsManager,
             TelephonyManager telephonyManager, ActivityManagerInternal ami,
-            MultiRateLimiter toastRateLimiter, PermissionHelper permissionHelper) {
+            MultiRateLimiter toastRateLimiter, PermissionHelper permissionHelper,
+            UsageStatsManagerInternal usageStatsManagerInternal) {
         mHandler = handler;
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
@@ -2110,6 +2112,7 @@ public class NotificationManagerService extends SystemService {
         mPackageManagerClient = packageManagerClient;
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mPermissionPolicyInternal = LocalServices.getService(PermissionPolicyInternal.class);
+        mUsageStatsManagerInternal = usageStatsManagerInternal;
         mAppOps = appOps;
         mAppOpsService = iAppOps;
         try {
@@ -2411,7 +2414,8 @@ public class NotificationManagerService extends SystemService {
                 LocalServices.getService(ActivityManagerInternal.class),
                 createToastRateLimiter(), new PermissionHelper(LocalServices.getService(
                         PermissionManagerServiceInternal.class), AppGlobals.getPackageManager(),
-                        AppGlobals.getPermissionManager(), mEnableAppSettingMigration));
+                        AppGlobals.getPermissionManager(), mEnableAppSettingMigration),
+                LocalServices.getService(UsageStatsManagerInternal.class));
 
         publishBinderService(Context.NOTIFICATION_SERVICE, mService, /* allowIsolated= */ false,
                 DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_NORMAL);
@@ -7259,6 +7263,8 @@ public class NotificationManagerService extends SystemService {
                     if (index < 0) {
                         mNotificationList.add(r);
                         mUsageStats.registerPostedByApp(r);
+                        mUsageStatsManagerInternal.reportNotificationPosted(r.getSbn().getOpPkg(),
+                                r.getSbn().getUser(), SystemClock.elapsedRealtime());
                         final boolean isInterruptive = isVisuallyInterruptive(null, r);
                         r.setInterruptive(isInterruptive);
                         r.setTextChanged(isInterruptive);
@@ -7266,6 +7272,8 @@ public class NotificationManagerService extends SystemService {
                         old = mNotificationList.get(index);  // Potentially *changes* old
                         mNotificationList.set(index, r);
                         mUsageStats.registerUpdatedByApp(r, old);
+                        mUsageStatsManagerInternal.reportNotificationUpdated(r.getSbn().getOpPkg(),
+                                r.getSbn().getUser(), SystemClock.elapsedRealtime());
                         // Make sure we don't lose the foreground service state.
                         notification.flags |=
                                 old.getNotification().flags & FLAG_FOREGROUND_SERVICE;
@@ -8748,6 +8756,8 @@ public class NotificationManagerService extends SystemService {
             case REASON_APP_CANCEL:
             case REASON_APP_CANCEL_ALL:
                 mUsageStats.registerRemovedByApp(r);
+                mUsageStatsManagerInternal.reportNotificationRemoved(r.getSbn().getOpPkg(),
+                        r.getUser(), SystemClock.elapsedRealtime());
                 break;
         }
 
