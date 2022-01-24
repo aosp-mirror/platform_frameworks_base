@@ -4051,7 +4051,7 @@ package android.app {
     method public int getMaxNumPictureInPictureActions();
     method public final android.media.session.MediaController getMediaController();
     method @NonNull public android.view.MenuInflater getMenuInflater();
-    method @Nullable public android.view.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
+    method @NonNull public android.view.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
     method public final android.app.Activity getParent();
     method @Nullable public android.content.Intent getParentActivityIntent();
     method public android.content.SharedPreferences getPreferences(int);
@@ -4952,7 +4952,7 @@ package android.app {
     method @NonNull @UiContext public final android.content.Context getContext();
     method @Nullable public android.view.View getCurrentFocus();
     method @NonNull public android.view.LayoutInflater getLayoutInflater();
-    method @Nullable public android.view.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
+    method @NonNull public android.view.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
     method @Nullable public final android.app.Activity getOwnerActivity();
     method @Nullable public final android.view.SearchEvent getSearchEvent();
     method public final int getVolumeControlStream();
@@ -48944,7 +48944,7 @@ package android.view {
   }
 
   public interface OnBackInvokedDispatcherOwner {
-    method @Nullable public android.view.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
+    method @NonNull public android.view.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
   }
 
   public interface OnReceiveContentListener {
@@ -49372,7 +49372,7 @@ package android.view {
     field @NonNull public static final android.os.Parcelable.Creator<android.view.VerifiedMotionEvent> CREATOR;
   }
 
-  @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback android.view.OnBackInvokedDispatcherOwner {
+  @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
     ctor public View(android.content.Context);
     ctor public View(android.content.Context, @Nullable android.util.AttributeSet);
     ctor public View(android.content.Context, @Nullable android.util.AttributeSet, int);
@@ -49576,7 +49576,6 @@ package android.view {
     method @IdRes public int getNextFocusLeftId();
     method @IdRes public int getNextFocusRightId();
     method @IdRes public int getNextFocusUpId();
-    method @Nullable public android.view.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
     method public android.view.View.OnFocusChangeListener getOnFocusChangeListener();
     method @ColorInt public int getOutlineAmbientShadowColor();
     method public android.view.ViewOutlineProvider getOutlineProvider();

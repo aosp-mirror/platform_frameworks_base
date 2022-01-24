@@ -8742,17 +8742,15 @@ public class Activity extends ContextThemeWrapper
      * Returns the {@link OnBackInvokedDispatcher} instance associated with the window that this
      * activity is attached to.
      *
-     * Returns null if the activity is not attached to a window with a decor.
+     * @throws IllegalStateException if this Activity is not visual.
      */
-    @Nullable
+    @NonNull
     @Override
     public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
-        if (mWindow != null) {
-            View decorView = mWindow.getDecorView();
-            if (decorView != null) {
-                return decorView.getOnBackInvokedDispatcher();
-            }
+        if (mWindow == null) {
+            throw new IllegalStateException("OnBackInvokedDispatcher are not available on "
+                    + "non-visual activities");
         }
-        return null;
+        return ((OnBackInvokedDispatcherOwner) mWindow).getOnBackInvokedDispatcher();
     }
 }

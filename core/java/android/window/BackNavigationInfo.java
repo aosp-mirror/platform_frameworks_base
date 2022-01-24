@@ -16,8 +16,6 @@
 
 package android.window;
 
-import static java.util.Objects.requireNonNull;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -61,6 +59,12 @@ public final class BackNavigationInfo implements Parcelable {
     public static final int TYPE_CROSS_TASK = 3;
 
     /**
+     * A {@link android.view.OnBackInvokedCallback} is available and needs to be called.
+     * <p>
+     */
+    public static final int TYPE_CALLBACK = 4;
+
+    /**
      * Defines the type of back destinations a back even can lead to. This is used to define the
      * type of animation that need to be run on SystemUI.
      */
@@ -84,35 +88,39 @@ public final class BackNavigationInfo implements Parcelable {
     private final RemoteCallback mRemoteCallback;
     @Nullable
     private final WindowConfiguration mTaskWindowConfiguration;
+    @Nullable
+    private final IOnBackInvokedCallback mOnBackInvokedCallback;
 
     /**
      * Create a new {@link BackNavigationInfo} instance.
      *
-     * @param type  The {@link BackTargetType} of the destination (what will be displayed after
-     *              the back action)
-     * @param topWindowLeash      The leash to animate away the current topWindow. The consumer
-     *                            of the leash is responsible for removing it.
-     * @param screenshotSurface The screenshot of the previous activity to be displayed.
-     * @param screenshotBuffer      A buffer containing a screenshot used to display the activity.
-     *                            See {@link  #getScreenshotHardwareBuffer()} for information
-     *                            about nullity.
-     * @param taskWindowConfiguration The window configuration of the Task being animated
-     *                            beneath.
-     * @param onBackNavigationDone   The callback to be called once the client is done with the back
-     *                           preview.
+     * @param type                    The {@link BackTargetType} of the destination (what will be
+     *                                displayed after the back action).
+     * @param topWindowLeash          The leash to animate away the current topWindow. The consumer
+     *                                of the leash is responsible for removing it.
+     * @param screenshotSurface       The screenshot of the previous activity to be displayed.
+     * @param screenshotBuffer        A buffer containing a screenshot used to display the activity.
+     *                                See {@link  #getScreenshotHardwareBuffer()} for information
+     *                                about nullity.
+     * @param taskWindowConfiguration The window configuration of the Task being animated beneath.
+     * @param onBackNavigationDone    The callback to be called once the client is done with the
+     *                                back preview.
+     * @param onBackInvokedCallback   The back callback registered by the current top level window.
      */
     public BackNavigationInfo(@BackTargetType int type,
             @Nullable SurfaceControl topWindowLeash,
             @Nullable SurfaceControl screenshotSurface,
             @Nullable HardwareBuffer screenshotBuffer,
             @Nullable WindowConfiguration taskWindowConfiguration,
-            @NonNull RemoteCallback onBackNavigationDone) {
+            @Nullable RemoteCallback onBackNavigationDone,
+            @Nullable IOnBackInvokedCallback onBackInvokedCallback) {
         mType = type;
         mDepartingWindowContainer = topWindowLeash;
         mScreenshotSurface = screenshotSurface;
         mScreenshotBuffer = screenshotBuffer;
         mTaskWindowConfiguration = taskWindowConfiguration;
         mRemoteCallback = onBackNavigationDone;
+        mOnBackInvokedCallback = onBackInvokedCallback;
     }
 
     private BackNavigationInfo(@NonNull Parcel in) {
@@ -121,7 +129,8 @@ public final class BackNavigationInfo implements Parcelable {
         mScreenshotSurface = in.readTypedObject(SurfaceControl.CREATOR);
         mScreenshotBuffer = in.readTypedObject(HardwareBuffer.CREATOR);
         mTaskWindowConfiguration = in.readTypedObject(WindowConfiguration.CREATOR);
-        mRemoteCallback = requireNonNull(in.readTypedObject(RemoteCallback.CREATOR));
+        mRemoteCallback = in.readTypedObject(RemoteCallback.CREATOR);
+        mOnBackInvokedCallback = IOnBackInvokedCallback.Stub.asInterface(in.readStrongBinder());
     }
 
     @Override
@@ -132,10 +141,12 @@ public final class BackNavigationInfo implements Parcelable {
         dest.writeTypedObject(mScreenshotBuffer, flags);
         dest.writeTypedObject(mTaskWindowConfiguration, flags);
         dest.writeTypedObject(mRemoteCallback, flags);
+        dest.writeStrongInterface(mOnBackInvokedCallback);
     }
 
     /**
      * Returns the type of back navigation that is about to happen.
+     *
      * @see BackTargetType
      */
     public @BackTargetType int getType() {
@@ -152,8 +163,8 @@ public final class BackNavigationInfo implements Parcelable {
     }
 
     /**
-     *  Returns the {@link SurfaceControl} that should be used to display a screenshot of the
-     *  previous activity.
+     * Returns the {@link SurfaceControl} that should be used to display a screenshot of the
+     * previous activity.
      */
     @Nullable
     public SurfaceControl getScreenshotSurface() {
@@ -185,11 +196,27 @@ public final class BackNavigationInfo implements Parcelable {
     }
 
     /**
+     * Returns the {@link android.view.OnBackInvokedCallback} of the top level window or null if
+     * the client didn't register a callback.
+     * <p>
+     * This is never null when {@link #getType} returns {@link #TYPE_CALLBACK}.
+     *
+     * @see android.view.OnBackInvokedCallback
+     * @see android.view.OnBackInvokedDispatcher
+     */
+    @Nullable
+    public IOnBackInvokedCallback getOnBackInvokedCallback() {
+        return mOnBackInvokedCallback;
+    }
+
+    /**
      * Callback to be called when the back preview is finished in order to notify the server that
      * it can clean up the resources created for the animation.
      */
     public void onBackNavigationFinished() {
-        mRemoteCallback.sendResult(null);
+        if (mRemoteCallback != null) {
+            mRemoteCallback.sendResult(null);
+        }
     }
 
     @Override
@@ -218,6 +245,7 @@ public final class BackNavigationInfo implements Parcelable {
                 + ", mTaskWindowConfiguration= " + mTaskWindowConfiguration
                 + ", mScreenshotBuffer=" + mScreenshotBuffer
                 + ", mRemoteCallback=" + mRemoteCallback
+                + ", mOnBackInvokedCallback=" + mOnBackInvokedCallback
                 + '}';
     }
 
@@ -226,7 +254,7 @@ public final class BackNavigationInfo implements Parcelable {
      */
     public static String typeToString(@BackTargetType int type) {
         switch (type) {
-            case  TYPE_UNDEFINED:
+            case TYPE_UNDEFINED:
                 return "TYPE_UNDEFINED";
             case TYPE_DIALOG_CLOSE:
                 return "TYPE_DIALOG_CLOSE";

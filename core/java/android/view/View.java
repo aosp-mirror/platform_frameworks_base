@@ -834,7 +834,7 @@ import java.util.function.Predicate;
  */
 @UiThread
 public class View implements Drawable.Callback, KeyEvent.Callback,
-        AccessibilityEventSource, OnBackInvokedDispatcherOwner {
+        AccessibilityEventSource {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static final boolean DBG = false;
 
@@ -31444,25 +31444,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public @Nullable AttachedSurfaceControl getRootSurfaceControl() {
         if (mAttachInfo != null) {
           return mAttachInfo.getRootSurfaceControl();
-        }
-        return null;
-    }
-
-    /**
-     * Returns the {@link OnBackInvokedDispatcher} instance of the window this view is attached to.
-     *
-     * @return The {@link OnBackInvokedDispatcher} or {@code null} if the view is neither attached
-     *         to a window or a view tree with a decor.
-     */
-    @Nullable
-    public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
-        ViewParent parent = getParent();
-        if (parent instanceof View) {
-            return ((View) parent).getOnBackInvokedDispatcher();
-        } else if (parent instanceof ViewRootImpl) {
-            // Get the fallback dispatcher on {@link ViewRootImpl} if the view tree doesn't have
-            // a {@link com.android.internal.policy.DecorView}.
-            return ((ViewRootImpl) parent).getOnBackInvokedDispatcher();
         }
         return null;
     }

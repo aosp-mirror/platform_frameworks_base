@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.window.BackNavigationInfo.typeToString;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -71,7 +72,8 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     @Test
     public void backTypeCrossActivityWhenBackToPreviousActivity() {
         Task task = createTopTaskWithActivity();
-        mAtm.setFocusedTask(task.mTaskId, createActivityRecord(task));
+        mAtm.setFocusedTask(task.mTaskId,
+                createAppWindow(task, FIRST_APPLICATION_WINDOW, "window").mActivityRecord);
         BackNavigationInfo backNavigationInfo =
                 mBackNavigationController.startBackNavigation(task, new StubTransaction());
         assertThat(backNavigationInfo).isNotNull();
@@ -85,7 +87,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     @Test
     public void backNavInfoFullyPopulated() {
         Task task = createTopTaskWithActivity();
-        createActivityRecord(task);
+        createAppWindow(task, FIRST_APPLICATION_WINDOW, "window");
 
         // We need a mock screenshot so
         TaskSnapshotController taskSnapshotController = createMockTaskSnapshotController();
@@ -115,6 +117,7 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     private Task createTopTaskWithActivity() {
         Task task = createTask(mDefaultDisplay);
         ActivityRecord record = createActivityRecord(task);
+        createWindow(null, FIRST_APPLICATION_WINDOW, record, "window");
         when(record.mSurfaceControl.isValid()).thenReturn(true);
         mAtm.setFocusedTask(task.mTaskId, record);
         return task;
