@@ -5520,21 +5520,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return keepClearAreas;
     }
 
-    /**
-     * @see IWindowManager#setForwardedInsets
-     */
-    public void setForwardedInsets(Insets insets) {
-        if (insets == null) {
-            insets = Insets.NONE;
-        }
-        if (mDisplayPolicy.getForwardedInsets().equals(insets)) {
-            return;
-        }
-        mDisplayPolicy.setForwardedInsets(insets);
-        setLayoutNeeded();
-        mWmService.mWindowPlacerLocked.requestTraversal();
-    }
-
     protected MetricsLogger getMetricsLogger() {
         if (mMetricsLogger == null) {
             mMetricsLogger = new MetricsLogger();

@@ -359,16 +359,6 @@ public class DisplayPolicy {
 
     private int mDisplayCutoutTouchableRegionSize;
 
-    /**
-     * The area covered by system windows which belong to another display. Forwarded insets is set
-     * in case this is a virtual display, this is displayed on another display that has insets, and
-     * the bounds of this display is overlapping with the insets of the host display (e.g. IME is
-     * displayed on the host display, and it covers a part of this virtual display.)
-     * The forwarded insets is used to compute display frames of this virtual display, which will
-     * be then used to layout windows in the virtual display.
-     */
-    @NonNull private Insets mForwardedInsets = Insets.NONE;
-
     private RefreshRatePolicy mRefreshRatePolicy;
 
     /**
@@ -2147,18 +2137,6 @@ public class DisplayPolicy {
             outInsets.right += displayCutout.getSafeInsetRight();
             outInsets.bottom += displayCutout.getSafeInsetBottom();
         }
-    }
-
-    /**
-     * @see IWindowManager#setForwardedInsets
-     */
-    public void setForwardedInsets(@NonNull Insets forwardedInsets) {
-        mForwardedInsets = forwardedInsets;
-    }
-
-    @NonNull
-    public Insets getForwardedInsets() {
-        return mForwardedInsets;
     }
 
     @NavigationBarPosition

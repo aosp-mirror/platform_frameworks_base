@@ -171,7 +171,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
-import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -6958,23 +6957,6 @@ public class WindowManagerService extends IWindowManager.Stub
         if (dc != null) {
             final DisplayInfo di = dc.getDisplayInfo();
             dc.getDisplayPolicy().getStableInsetsLw(di.rotation, di.displayCutout, outInsets);
-        }
-    }
-
-    @Override
-    public void setForwardedInsets(int displayId, Insets insets) throws RemoteException {
-        synchronized (mGlobalLock) {
-            final DisplayContent dc = mRoot.getDisplayContent(displayId);
-            if (dc == null) {
-                return;
-            }
-            final int callingUid = Binder.getCallingUid();
-            final int displayOwnerUid = dc.getDisplay().getOwnerUid();
-            if (callingUid != displayOwnerUid) {
-                throw new SecurityException(
-                        "Only owner of the display can set ForwardedInsets to it.");
-            }
-            dc.setForwardedInsets(insets);
         }
     }
 
