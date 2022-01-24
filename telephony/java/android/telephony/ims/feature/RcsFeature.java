@@ -488,9 +488,7 @@ public class RcsFeature extends ImsFeature {
      * has already been created in the framework.
      * @param listener A {@link CapabilityExchangeEventListener} to send the capability exchange
      * event to the framework.
-     * @hide
      */
-    @SystemApi
     private void initRcsCapabilityExchangeImplBase(
             @NonNull CapabilityExchangeEventListener listener) {
         synchronized (mLock) {
