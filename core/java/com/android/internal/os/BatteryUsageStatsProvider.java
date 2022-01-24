@@ -21,6 +21,7 @@ import android.hardware.SensorManager;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
+import android.os.Parcel;
 import android.os.SystemClock;
 import android.os.UidBatteryConsumer;
 import android.util.Log;
@@ -28,6 +29,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -186,16 +188,28 @@ public class BatteryUsageStatsProvider {
             }
 
             BatteryStatsImpl batteryStatsImpl = (BatteryStatsImpl) mStats;
+
+            // Make a copy of battery history to avoid concurrent modification.
+            Parcel historyBuffer = Parcel.obtain();
+            historyBuffer.appendFrom(batteryStatsImpl.mHistoryBuffer, 0,
+                    batteryStatsImpl.mHistoryBuffer.dataSize());
+
             ArrayList<BatteryStats.HistoryTag> tags = new ArrayList<>(
                     batteryStatsImpl.mHistoryTagPool.size());
             for (Map.Entry<BatteryStats.HistoryTag, Integer> entry :
                     batteryStatsImpl.mHistoryTagPool.entrySet()) {
-                final BatteryStats.HistoryTag tag = entry.getKey();
+                final BatteryStats.HistoryTag tag = new BatteryStats.HistoryTag();
+                tag.setTo(entry.getKey());
                 tag.poolIdx = entry.getValue();
                 tags.add(tag);
             }
 
-            batteryUsageStatsBuilder.setBatteryHistory(batteryStatsImpl.mHistoryBuffer, tags);
+            final File systemDir =
+                    batteryStatsImpl.mBatteryStatsHistory.getHistoryDirectory().getParentFile();
+            final BatteryStatsHistory batteryStatsHistory =
+                    new BatteryStatsHistory(batteryStatsImpl, systemDir, historyBuffer);
+
+            batteryUsageStatsBuilder.setBatteryHistory(historyBuffer, tags, batteryStatsHistory);
         }
 
         return batteryUsageStatsBuilder.build();
