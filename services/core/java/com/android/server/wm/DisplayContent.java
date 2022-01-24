@@ -545,7 +545,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** The delay to avoid toggling the animation quickly. */
     private static final long FIXED_ROTATION_HIDE_ANIMATION_DEBOUNCE_DELAY_MS = 250;
-    private FadeRotationAnimationController mFadeRotationAnimationController;
+    private AsyncRotationController mAsyncRotationController;
 
     final FixedRotationTransitionListener mFixedRotationTransitionListener =
             new FixedRotationTransitionListener();
@@ -1714,8 +1714,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     @VisibleForTesting
-    @Nullable FadeRotationAnimationController getFadeRotationAnimationController() {
-        return mFadeRotationAnimationController;
+    @Nullable AsyncRotationController getAsyncRotationController() {
+        return mAsyncRotationController;
     }
 
     void setFixedRotationLaunchingAppUnchecked(@Nullable ActivityRecord r) {
@@ -1725,13 +1725,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void setFixedRotationLaunchingAppUnchecked(@Nullable ActivityRecord r, int rotation) {
         if (mFixedRotationLaunchingApp == null && r != null) {
             mWmService.mDisplayNotificationController.dispatchFixedRotationStarted(this, rotation);
-            startFadeRotationAnimation(
+            startAsyncRotation(
                     // Delay the hide animation to avoid blinking by clicking navigation bar that
                     // may toggle fixed rotation in a short time.
                     r == mFixedRotationTransitionListener.mAnimatingRecents /* shouldDebounce */);
         } else if (mFixedRotationLaunchingApp != null && r == null) {
             mWmService.mDisplayNotificationController.dispatchFixedRotationFinished(this);
-            finishFadeRotationAnimationIfPossible();
+            finishAsyncRotationIfPossible();
         }
         mFixedRotationLaunchingApp = r;
     }
@@ -1844,9 +1844,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mDisplayRotation.getRotation() != getWindowConfiguration().getRotation();
     }
 
-    private void startFadeRotationAnimationIfNeeded() {
+    private void startAsyncRotationIfNeeded() {
         if (isRotationChanging()) {
-            startFadeRotationAnimation(false /* shouldDebounce */);
+            startAsyncRotation(false /* shouldDebounce */);
         }
     }
 
@@ -1855,12 +1855,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      *
      * @return {@code true} if the animation is executed right now.
      */
-    private boolean startFadeRotationAnimation(boolean shouldDebounce) {
+    private boolean startAsyncRotation(boolean shouldDebounce) {
         if (shouldDebounce) {
             mWmService.mH.postDelayed(() -> {
                 synchronized (mWmService.mGlobalLock) {
                     if (mFixedRotationLaunchingApp != null
-                            && startFadeRotationAnimation(false /* shouldDebounce */)) {
+                            && startAsyncRotation(false /* shouldDebounce */)) {
                         // Apply the transaction so the animation leash can take effect immediately.
                         getPendingTransaction().apply();
                     }
@@ -1868,28 +1868,28 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }, FIXED_ROTATION_HIDE_ANIMATION_DEBOUNCE_DELAY_MS);
             return false;
         }
-        if (mFadeRotationAnimationController == null) {
-            mFadeRotationAnimationController = new FadeRotationAnimationController(this);
-            mFadeRotationAnimationController.hide();
+        if (mAsyncRotationController == null) {
+            mAsyncRotationController = new AsyncRotationController(this);
+            mAsyncRotationController.hide();
             return true;
         }
         return false;
     }
 
     /** Re-show the previously hidden windows if all seamless rotated windows are done. */
-    void finishFadeRotationAnimationIfPossible() {
-        final FadeRotationAnimationController controller = mFadeRotationAnimationController;
+    void finishAsyncRotationIfPossible() {
+        final AsyncRotationController controller = mAsyncRotationController;
         if (controller != null && !mDisplayRotation.hasSeamlessRotatingWindow()) {
             controller.show();
-            mFadeRotationAnimationController = null;
+            mAsyncRotationController = null;
         }
     }
 
     /** Shows the given window which may be hidden for screen rotation. */
-    void finishFadeRotationAnimation(WindowToken windowToken) {
-        final FadeRotationAnimationController controller = mFadeRotationAnimationController;
+    void finishAsyncRotation(WindowToken windowToken) {
+        final AsyncRotationController controller = mAsyncRotationController;
         if (controller != null && controller.show(windowToken)) {
-            mFadeRotationAnimationController = null;
+            mAsyncRotationController = null;
         }
     }
 
@@ -1899,7 +1899,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // The window should look no different before and after rotation.
             return false;
         }
-        final FadeRotationAnimationController controller = mFadeRotationAnimationController;
+        final AsyncRotationController controller = mAsyncRotationController;
         return controller == null || !controller.isHandledToken(w.mToken);
     }
 
@@ -3206,7 +3206,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // Hide the windows which are not significant in rotation animation. So that the windows
         // don't need to block the unfreeze time.
         if (screenRotationAnimation != null && screenRotationAnimation.hasScreenshot()) {
-            startFadeRotationAnimationIfNeeded();
+            startAsyncRotationIfNeeded();
         }
     }
 
@@ -3228,7 +3228,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
             if (!controller.isCollecting(this)) {
                 controller.collect(this);
-                startFadeRotationAnimationIfNeeded();
+                startAsyncRotationIfNeeded();
             }
             return;
         }
@@ -3240,7 +3240,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mWmService.mLatencyTracker.onActionStart(ACTION_ROTATE_SCREEN);
                 controller.mTransitionMetricsReporter.associate(t,
                         startTime -> mWmService.mLatencyTracker.onActionEnd(ACTION_ROTATE_SCREEN));
-                startFadeRotationAnimation(false /* shouldDebounce */);
+                startAsyncRotation(false /* shouldDebounce */);
             }
             t.setKnownConfigChanges(this, changes);
         }
@@ -3969,8 +3969,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mInputMethodWindow.mToken.linkFixedRotationTransform(mImeLayeringTarget.mToken);
             // Hide the window until the rotation is done to avoid intermediate artifacts if the
             // parent surface of IME container is changed.
-            if (mFadeRotationAnimationController != null) {
-                mFadeRotationAnimationController.hideImmediately(mInputMethodWindow.mToken);
+            if (mAsyncRotationController != null) {
+                mAsyncRotationController.hideImmediately(mInputMethodWindow.mToken);
             }
         }
     }

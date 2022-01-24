@@ -491,9 +491,9 @@ public class TransitionTests extends WindowTestsBase {
         mDisplayContent.setLastHasContent();
         mDisplayContent.requestChangeTransitionIfNeeded(1 /* any changes */,
                 null /* displayChange */);
-        final FadeRotationAnimationController fadeController =
-                mDisplayContent.getFadeRotationAnimationController();
-        assertNotNull(fadeController);
+        final AsyncRotationController asyncRotationController =
+                mDisplayContent.getAsyncRotationController();
+        assertNotNull(asyncRotationController);
         for (WindowState w : windows) {
             w.setOrientationChanging(true);
         }
@@ -506,7 +506,7 @@ public class TransitionTests extends WindowTestsBase {
         // Status bar finishes drawing before the start transaction. Its fade-in animation will be
         // executed until the transaction is committed, so it is still in target tokens.
         statusBar.setOrientationChanging(false);
-        assertTrue(fadeController.isTargetToken(statusBar.mToken));
+        assertTrue(asyncRotationController.isTargetToken(statusBar.mToken));
 
         final SurfaceControl.Transaction startTransaction = mock(SurfaceControl.Transaction.class);
         final ArgumentCaptor<TransactionCommittedListener> listenerCaptor =
@@ -516,13 +516,13 @@ public class TransitionTests extends WindowTestsBase {
         verify(startTransaction).addTransactionCommittedListener(any(), listenerCaptor.capture());
         // The transaction is committed, so fade-in animation for status bar is consumed.
         listenerCaptor.getValue().onTransactionCommitted();
-        assertFalse(fadeController.isTargetToken(statusBar.mToken));
+        assertFalse(asyncRotationController.isTargetToken(statusBar.mToken));
 
         // Status bar finishes drawing after the start transaction, so its fade-in animation can
         // execute directly.
         navBar.setOrientationChanging(false);
-        assertFalse(fadeController.isTargetToken(navBar.mToken));
-        assertNull(mDisplayContent.getFadeRotationAnimationController());
+        assertFalse(asyncRotationController.isTargetToken(navBar.mToken));
+        assertNull(mDisplayContent.getAsyncRotationController());
     }
 
     @Test
@@ -540,10 +540,10 @@ public class TransitionTests extends WindowTestsBase {
         mDisplayContent.setLastHasContent();
         mDisplayContent.requestChangeTransitionIfNeeded(anyChanges, null /* displayChange */);
         transition.setKnownConfigChanges(mDisplayContent, anyChanges);
-        final FadeRotationAnimationController fadeController =
-                mDisplayContent.getFadeRotationAnimationController();
-        assertNotNull(fadeController);
-        assertTrue(fadeController.shouldFreezeInsetsPosition(statusBar));
+        final AsyncRotationController asyncRotationController =
+                mDisplayContent.getAsyncRotationController();
+        assertNotNull(asyncRotationController);
+        assertTrue(asyncRotationController.shouldFreezeInsetsPosition(statusBar));
 
         statusBar.setOrientationChanging(true);
         player.startTransition();
@@ -569,7 +569,7 @@ public class TransitionTests extends WindowTestsBase {
         // The controller should capture the draw transaction and merge it when preparing to run
         // fade-in animation.
         verify(mDisplayContent.getPendingTransaction()).merge(eq(postDrawTransaction));
-        assertNull(mDisplayContent.getFadeRotationAnimationController());
+        assertNull(mDisplayContent.getAsyncRotationController());
     }
 
     @Test
