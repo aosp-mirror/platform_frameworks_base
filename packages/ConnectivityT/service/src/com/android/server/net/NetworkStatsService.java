@@ -357,6 +357,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @NonNull
     private final LocationPermissionChecker mLocationPermissionChecker;
 
+    @NonNull
+    private final BpfInterfaceMapUpdater mInterfaceMapUpdater;
+
     private static @NonNull File getDefaultSystemDir() {
         return new File(Environment.getDataDirectory(), "system");
     }
@@ -454,6 +457,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mContentObserver = mDeps.makeContentObserver(mHandler, mSettings,
                 mNetworkStatsSubscriptionsMonitor);
         mLocationPermissionChecker = mDeps.makeLocationPermissionChecker(mContext);
+        mInterfaceMapUpdater = mDeps.makeBpfInterfaceMapUpdater(mContext, mHandler);
+        mInterfaceMapUpdater.start();
     }
 
     /**
@@ -507,6 +512,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
          */
         public LocationPermissionChecker makeLocationPermissionChecker(final Context context) {
             return new LocationPermissionChecker(context);
+        }
+
+        /** Create BpfInterfaceMapUpdater to update bpf interface map. */
+        @NonNull
+        public BpfInterfaceMapUpdater makeBpfInterfaceMapUpdater(
+                @NonNull Context ctx, @NonNull Handler handler) {
+            return new BpfInterfaceMapUpdater(ctx, handler);
         }
     }
 
