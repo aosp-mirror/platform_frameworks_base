@@ -22,13 +22,13 @@ import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
-import static android.net.NetworkIdentity.OEM_PAID;
-import static android.net.NetworkIdentity.OEM_PRIVATE;
 import static android.net.NetworkStats.METERED_YES;
 import static android.net.NetworkTemplate.MATCH_ETHERNET;
 import static android.net.NetworkTemplate.MATCH_MOBILE;
 import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.net.NetworkTemplate.OEM_MANAGED_ALL;
+import static android.net.NetworkTemplate.OEM_MANAGED_PAID;
+import static android.net.NetworkTemplate.OEM_MANAGED_PRIVATE;
 import static android.net.NetworkTemplate.getAllCollapsedRatTypes;
 import static android.os.Debug.getIonHeapsSizeKb;
 import static android.os.Process.LAST_SHARED_APPLICATION_GID;
@@ -1266,7 +1266,8 @@ public class StatsPullAtomService extends SystemService {
 
     @NonNull private List<NetworkStatsExt> getDataUsageBytesTransferSnapshotForOemManaged() {
         final int[] matchRules = new int[] {MATCH_ETHERNET, MATCH_MOBILE, MATCH_WIFI};
-        final int[] oemManagedTypes = new int[] {OEM_PAID | OEM_PRIVATE, OEM_PAID, OEM_PRIVATE};
+        final int[] oemManagedTypes = new int[] {OEM_MANAGED_PAID | OEM_MANAGED_PRIVATE,
+                OEM_MANAGED_PAID, OEM_MANAGED_PRIVATE};
 
         final List<NetworkStatsExt> ret = new ArrayList<>();
 
@@ -1340,12 +1341,12 @@ public class StatsPullAtomService extends SystemService {
                 NetworkStatsUtils.fromPublicNetworkStats(queryNonTaggedStats);
         if (!includeTags) return nonTaggedStats;
 
-        final android.app.usage.NetworkStats quaryTaggedStats =
+        final android.app.usage.NetworkStats queryTaggedStats =
                 mNetworkStatsManager.queryTaggedSummary(template,
                 currentTimeInMillis - elapsedMillisSinceBoot - bucketDuration,
                 currentTimeInMillis);
         final NetworkStats taggedStats =
-                NetworkStatsUtils.fromPublicNetworkStats(quaryTaggedStats);
+                NetworkStatsUtils.fromPublicNetworkStats(queryTaggedStats);
         return nonTaggedStats.add(taggedStats);
     }
 
@@ -1442,7 +1443,7 @@ public class StatsPullAtomService extends SystemService {
      */
     @NonNull private NetworkStats sliceNetworkStats(@NonNull NetworkStats stats,
             @NonNull Function<NetworkStats.Entry, NetworkStats.Entry> slicer) {
-        NetworkStats ret = new NetworkStats(stats.getElapsedRealtime(), 1);
+        NetworkStats ret = new NetworkStats(0, 1);
         NetworkStats.Entry entry = new NetworkStats.Entry();
         for (NetworkStats.Entry e : stats) {
             if (slicer != null) {
