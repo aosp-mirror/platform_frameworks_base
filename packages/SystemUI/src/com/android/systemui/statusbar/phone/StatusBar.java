@@ -619,6 +619,8 @@ public class StatusBar extends CoreStartable implements
     protected boolean mDozing;
     private boolean mIsFullscreen;
 
+    boolean mCloseQsBeforeScreenOff;
+
     private final NotificationMediaManager mMediaManager;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final NotificationRemoteInputManager mRemoteInputManager;
@@ -1124,6 +1126,15 @@ public class StatusBar extends CoreStartable implements
         }
         if (leaveOpen) {
             mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
+            if (mIsKeyguard) {
+                // When device state changes on keyguard we don't want to keep the state of
+                // the shade and instead we open clean state of keyguard with shade closed.
+                // Normally some parts of QS state (like expanded/collapsed) are persisted and
+                // that causes incorrect UI rendering, especially when changing state with QS
+                // expanded. To prevent that we can close QS which resets QS and some parts of
+                // the shade to its default state. Read more in b/201537421
+                mCloseQsBeforeScreenOff = true;
+            }
         }
     }
 
@@ -2923,10 +2934,10 @@ public class StatusBar extends CoreStartable implements
     }
 
     boolean updateIsKeyguard() {
-        return updateIsKeyguard(false /* force */);
+        return updateIsKeyguard(false /* forceStateChange */);
     }
 
-    boolean updateIsKeyguard(boolean force) {
+    boolean updateIsKeyguard(boolean forceStateChange) {
         boolean wakeAndUnlocking = mBiometricUnlockController.getMode()
                 == BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
 
@@ -2959,7 +2970,7 @@ public class StatusBar extends CoreStartable implements
             //    as the animation could prepare 'fake AOD' interface (without actually
             //    transitioning to keyguard state) and this might reset the view states
             if (!mScreenOffAnimationController.isKeyguardHideDelayed()) {
-                return hideKeyguardImpl(force);
+                return hideKeyguardImpl(forceStateChange);
             }
         }
         return false;
@@ -3087,12 +3098,12 @@ public class StatusBar extends CoreStartable implements
     /**
      * @return true if we would like to stay in the shade, false if it should go away entirely
      */
-    public boolean hideKeyguardImpl(boolean force) {
+    public boolean hideKeyguardImpl(boolean forceStateChange) {
         mIsKeyguard = false;
         Trace.beginSection("StatusBar#hideKeyguard");
         boolean staying = mStatusBarStateController.leaveOpenOnKeyguardHide();
         int previousState = mStatusBarStateController.getState();
-        if (!(mStatusBarStateController.setState(StatusBarState.SHADE, force))) {
+        if (!(mStatusBarStateController.setState(StatusBarState.SHADE, forceStateChange))) {
             //TODO: StatusBarStateController should probably know about hiding the keyguard and
             // notify listeners.
 
@@ -3654,6 +3665,10 @@ public class StatusBar extends CoreStartable implements
         public void onScreenTurnedOff() {
             mFalsingCollector.onScreenOff();
             mScrimController.onScreenTurnedOff();
+            if (mCloseQsBeforeScreenOff) {
+                mNotificationPanelViewController.closeQs();
+                mCloseQsBeforeScreenOff = false;
+            }
             updateIsKeyguard();
         }
     };

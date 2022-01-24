@@ -219,7 +219,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
             // even if we're going from SHADE to SHADE or KEYGUARD to KEYGUARD, since we might have
             // changed parts of the UI (such as showing AOD in the shade) without actually changing
             // the StatusBarState. This ensures that the UI definitely reflects the desired state.
-            statusBar.updateIsKeyguard(true /* force */)
+            statusBar.updateIsKeyguard(true /* forceStateChange */)
         }
     }
 
