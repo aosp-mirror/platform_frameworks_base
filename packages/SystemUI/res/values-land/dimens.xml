@@ -66,4 +66,6 @@
     <dimen name="controls_management_favorites_top_margin">8dp</dimen>
 
     <dimen name="wallet_card_carousel_container_top_margin">24dp</dimen>
+
+    <dimen name="large_dialog_width">348dp</dimen>
 </resources>
