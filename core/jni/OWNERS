@@ -76,6 +76,9 @@ per-file AndroidRuntime.cpp = file:/graphics/java/android/graphics/OWNERS
 per-file AndroidRuntime.cpp = calin@google.com, ngeoffray@google.com, oth@google.com
 # Although marked "view" this is mostly graphics stuff
 per-file android_view_* = file:/graphics/java/android/graphics/OWNERS
+# File used for Android Studio layoutlib
+per-file LayoutlibLoader.cpp = file:/graphics/java/android/graphics/OWNERS
+per-file LayoutlibLoader.cpp = diegoperez@google.com, jgaillard@google.com
 
 # Verity
 per-file com_android_internal_security_Verity* = ebiggers@google.com, victorhsieh@google.com
