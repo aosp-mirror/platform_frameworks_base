@@ -145,6 +145,7 @@ package android {
     field public static final String KILL_UID = "android.permission.KILL_UID";
     field public static final String LAUNCH_DEVICE_MANAGER_SETUP = "android.permission.LAUNCH_DEVICE_MANAGER_SETUP";
     field public static final String LOCAL_MAC_ADDRESS = "android.permission.LOCAL_MAC_ADDRESS";
+    field public static final String LOCATION_BYPASS = "android.permission.LOCATION_BYPASS";
     field public static final String LOCK_DEVICE = "android.permission.LOCK_DEVICE";
     field public static final String LOOP_RADIO = "android.permission.LOOP_RADIO";
     field public static final String MANAGE_ACCESSIBILITY = "android.permission.MANAGE_ACCESSIBILITY";
@@ -5342,9 +5343,9 @@ package android.location {
     ctor public LastLocationRequest.Builder();
     ctor public LastLocationRequest.Builder(@NonNull android.location.LastLocationRequest);
     method @NonNull public android.location.LastLocationRequest build();
-    method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public android.location.LastLocationRequest.Builder setAdasGnssBypass(boolean);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.LOCATION_BYPASS}) public android.location.LastLocationRequest.Builder setAdasGnssBypass(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_APP_OPS_STATS) public android.location.LastLocationRequest.Builder setHiddenFromAppOps(boolean);
-    method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public android.location.LastLocationRequest.Builder setLocationSettingsIgnored(boolean);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.LOCATION_BYPASS}) public android.location.LastLocationRequest.Builder setLocationSettingsIgnored(boolean);
   }
 
   public class Location implements android.os.Parcelable {
@@ -5373,7 +5374,7 @@ package android.location {
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.LocationListener);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.app.PendingIntent);
-    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setAdasGnssLocationEnabled(boolean);
+    method @RequiresPermission(anyOf={android.Manifest.permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.LOCATION_BYPASS}) public void setAdasGnssLocationEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setExtraLocationControllerPackage(@Nullable String);
     method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void setExtraLocationControllerPackageEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, @NonNull android.os.UserHandle);
@@ -5406,7 +5407,7 @@ package android.location {
     method @Deprecated @NonNull public android.location.LocationRequest setFastestInterval(long);
     method @Deprecated public void setHideFromAppOps(boolean);
     method @Deprecated @NonNull public android.location.LocationRequest setInterval(long);
-    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public android.location.LocationRequest setLocationSettingsIgnored(boolean);
+    method @Deprecated @NonNull @RequiresPermission(anyOf={android.Manifest.permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.LOCATION_BYPASS}) public android.location.LocationRequest setLocationSettingsIgnored(boolean);
     method @Deprecated @NonNull public android.location.LocationRequest setLowPowerMode(boolean);
     method @Deprecated @NonNull public android.location.LocationRequest setNumUpdates(int);
     method @Deprecated @NonNull public android.location.LocationRequest setProvider(@NonNull String);
@@ -5422,9 +5423,9 @@ package android.location {
   }
 
   public static final class LocationRequest.Builder {
-    method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public android.location.LocationRequest.Builder setAdasGnssBypass(boolean);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.LOCATION_BYPASS}) public android.location.LocationRequest.Builder setAdasGnssBypass(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_APP_OPS_STATS) public android.location.LocationRequest.Builder setHiddenFromAppOps(boolean);
-    method @NonNull @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public android.location.LocationRequest.Builder setLocationSettingsIgnored(boolean);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.WRITE_SECURE_SETTINGS, android.Manifest.permission.LOCATION_BYPASS}) public android.location.LocationRequest.Builder setLocationSettingsIgnored(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public android.location.LocationRequest.Builder setLowPower(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.location.LocationRequest.Builder setWorkSource(@Nullable android.os.WorkSource);
   }
