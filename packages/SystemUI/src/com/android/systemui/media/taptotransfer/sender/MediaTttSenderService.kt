@@ -43,6 +43,18 @@ class MediaTttSenderService @Inject constructor(
         ) {
             this@MediaTttSenderService.closeToReceiverToStartCast(mediaInfo, otherDeviceInfo)
         }
+
+        override fun closeToReceiverToEndCast(
+            mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo
+        ) {
+            this@MediaTttSenderService.closeToReceiverToEndCast(mediaInfo, otherDeviceInfo)
+        }
+
+        override fun transferFailed(
+            mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo
+        ) {
+            this@MediaTttSenderService.transferFailed(mediaInfo, otherDeviceInfo)
+        }
     }
 
     // TODO(b/203800643): Use the app icon from the media info instead of a fake one.
@@ -57,6 +69,24 @@ class MediaTttSenderService @Inject constructor(
         mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo
     ) {
         val chipState = MoveCloserToStartCast(
+            appIconDrawable = fakeAppIconDrawable,
+            appIconContentDescription = mediaInfo.name.toString(),
+            otherDeviceName = otherDeviceInfo.name
+        )
+        controller.displayChip(chipState)
+    }
+
+    private fun closeToReceiverToEndCast(mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo) {
+        val chipState = MoveCloserToEndCast(
+            appIconDrawable = fakeAppIconDrawable,
+            appIconContentDescription = mediaInfo.name.toString(),
+            otherDeviceName = otherDeviceInfo.name
+        )
+        controller.displayChip(chipState)
+    }
+
+    private fun transferFailed(mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo) {
+        val chipState = TransferFailed(
             appIconDrawable = fakeAppIconDrawable,
             appIconContentDescription = mediaInfo.name.toString(),
             otherDeviceName = otherDeviceInfo.name

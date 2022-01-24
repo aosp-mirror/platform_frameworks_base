@@ -43,4 +43,28 @@ interface IDeviceSenderCallback {
      */
     oneway void closeToReceiverToStartCast(
         in MediaRoute2Info mediaInfo, in DeviceInfo otherDeviceInfo);
+
+    /**
+     * Invoke to notify System UI that this device (the sender) is close to a receiver device, so
+     * the user can potentially *end* a cast on the receiver device if the user moves this device a
+     * bit closer.
+     *
+     * Important notes:
+     *   - When this callback triggers, the device is close enough to inform the user that
+     *     transferring is an option, but the device is *not* close enough to actually initiate a
+     *     transfer yet.
+     *   - This callback is for *ending* a cast. It should be used when media is currently being
+     *     played on the receiver device and the media should be transferred to play locally
+     *     instead.
+     */
+    oneway void closeToReceiverToEndCast(
+        in MediaRoute2Info mediaInfo, in DeviceInfo otherDeviceInfo);
+
+    /**
+     * Invoke to notify System UI that the attempted transfer has failed.
+     *
+     * This callback will be used for both the transfer that should've *started* playing the media
+     * on the receiver and the transfer that should've *ended* the playing on the receiver.
+     */
+    oneway void transferFailed(in MediaRoute2Info mediaInfo, in DeviceInfo otherDeviceInfo);
 }

@@ -127,6 +127,17 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     }
 
     @Test
+    fun sender_moveCloserToEndCast_serviceCallbackCalled() {
+        commandRegistry.onShellCommand(pw, getMoveCloserToEndCastCommand())
+
+        assertThat(context.isBound(mediaSenderServiceComponentName)).isTrue()
+
+        val deviceInfoCaptor = argumentCaptor<DeviceInfo>()
+        verify(mediaSenderService).closeToReceiverToEndCast(any(), capture(deviceInfoCaptor))
+        assertThat(deviceInfoCaptor.value!!.name).isEqualTo(DEVICE_NAME)
+    }
+
+    @Test
     fun sender_transferInitiated_chipDisplayWithCorrectState() {
         commandRegistry.onShellCommand(pw, getTransferInitiatedCommand())
 
@@ -138,6 +149,14 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
         commandRegistry.onShellCommand(pw, getTransferSucceededCommand())
 
         verify(mediaTttChipControllerSender).displayChip(any(TransferSucceeded::class.java))
+    }
+
+    @Test
+    fun sender_transferFailed_serviceCallbackCalled() {
+        commandRegistry.onShellCommand(pw, getTransferFailedCommand())
+
+        assertThat(context.isBound(mediaSenderServiceComponentName)).isTrue()
+        verify(mediaSenderService).transferFailed(any(), any())
     }
 
     @Test
@@ -168,6 +187,13 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
             MOVE_CLOSER_TO_START_CAST_COMMAND_NAME
         )
 
+    private fun getMoveCloserToEndCastCommand(): Array<String> =
+        arrayOf(
+            ADD_CHIP_COMMAND_SENDER_TAG,
+            DEVICE_NAME,
+            MOVE_CLOSER_TO_END_CAST_COMMAND_NAME
+        )
+
     private fun getTransferInitiatedCommand(): Array<String> =
         arrayOf(
             ADD_CHIP_COMMAND_SENDER_TAG,
@@ -180,6 +206,13 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
             ADD_CHIP_COMMAND_SENDER_TAG,
             DEVICE_NAME,
             TRANSFER_SUCCEEDED_COMMAND_NAME
+        )
+
+    private fun getTransferFailedCommand(): Array<String> =
+        arrayOf(
+            ADD_CHIP_COMMAND_SENDER_TAG,
+            DEVICE_NAME,
+            TRANSFER_FAILED_COMMAND_NAME
         )
 
     class EmptyCommand : Command {
