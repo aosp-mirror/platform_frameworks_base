@@ -89,8 +89,11 @@ class TextInterpolator(
     private var lines = listOf<Line>()
     private val fontInterpolator = FontInterpolator()
 
-    // Recycling object for glyph drawing. Will be extended for the longest font run if needed.
-    private val tmpDrawPaint = TextPaint()
+    // Recycling object for glyph drawing and tweaking.
+    private val tmpPaint = TextPaint()
+    private val tmpPaintForGlyph by lazy { TextPaint() }
+    private val tmpGlyph by lazy { MutablePositionedGlyph() }
+    // Will be extended for the longest font run if needed.
     private var tmpPositionArray = FloatArray(20)
 
     /**
@@ -206,8 +209,8 @@ class TextInterpolator(
         } else if (progress == 1f) {
             basePaint.set(targetPaint)
         } else {
-            lerp(basePaint, targetPaint, progress, tmpDrawPaint)
-            basePaint.set(tmpDrawPaint)
+            lerp(basePaint, targetPaint, progress, tmpPaint)
+            basePaint.set(tmpPaint)
         }
 
         lines.forEach { line ->
@@ -231,7 +234,7 @@ class TextInterpolator(
      * @param canvas a canvas.
      */
     fun draw(canvas: Canvas) {
-        lerp(basePaint, targetPaint, progress, tmpDrawPaint)
+        lerp(basePaint, targetPaint, progress, tmpPaint)
         lines.forEachIndexed { lineNo, line ->
             line.runs.forEach { run ->
                 canvas.save()
@@ -241,7 +244,7 @@ class TextInterpolator(
                     canvas.translate(origin, layout.getLineBaseline(lineNo).toFloat())
 
                     run.fontRuns.forEach { fontRun ->
-                        drawFontRun(canvas, run, fontRun, tmpDrawPaint)
+                        drawFontRun(canvas, run, fontRun, tmpPaint)
                     }
                 } finally {
                     canvas.restore()
@@ -330,24 +333,82 @@ class TextInterpolator(
         }
     }
 
+    private class MutablePositionedGlyph : TextAnimator.PositionedGlyph() {
+        override var runStart: Int = 0
+            public set
+        override var runLength: Int = 0
+            public set
+        override var glyphIndex: Int = 0
+            public set
+        override lateinit var font: Font
+            public set
+        override var glyphId: Int = 0
+            public set
+    }
+
+    var glyphFilter: GlyphCallback? = null
+
     // Draws single font run.
     private fun drawFontRun(c: Canvas, line: Run, run: FontRun, paint: Paint) {
         var arrayIndex = 0
+        val font = fontInterpolator.lerp(run.baseFont, run.targetFont, progress)
+
+        val glyphFilter = glyphFilter
+        if (glyphFilter == null) {
+            for (i in run.start until run.end) {
+                tmpPositionArray[arrayIndex++] =
+                        MathUtils.lerp(line.baseX[i], line.targetX[i], progress)
+                tmpPositionArray[arrayIndex++] =
+                        MathUtils.lerp(line.baseY[i], line.targetY[i], progress)
+            }
+            c.drawGlyphs(line.glyphIds, run.start, tmpPositionArray, 0, run.length, font, paint)
+            return
+        }
+
+        tmpGlyph.font = font
+        tmpGlyph.runStart = run.start
+        tmpGlyph.runLength = run.end - run.start
+
+        tmpPaintForGlyph.set(paint)
+        var prevStart = run.start
+
         for (i in run.start until run.end) {
-            tmpPositionArray[arrayIndex++] =
-                    MathUtils.lerp(line.baseX[i], line.targetX[i], progress)
-            tmpPositionArray[arrayIndex++] =
-                    MathUtils.lerp(line.baseY[i], line.targetY[i], progress)
+            tmpGlyph.glyphId = line.glyphIds[i]
+            tmpGlyph.x = MathUtils.lerp(line.baseX[i], line.targetX[i], progress)
+            tmpGlyph.y = MathUtils.lerp(line.baseY[i], line.targetY[i], progress)
+            tmpGlyph.textSize = paint.textSize
+            tmpGlyph.color = paint.color
+
+            glyphFilter(tmpGlyph, progress)
+
+            if (tmpGlyph.textSize != paint.textSize || tmpGlyph.color != paint.color) {
+                tmpPaintForGlyph.textSize = tmpGlyph.textSize
+                tmpPaintForGlyph.color = tmpGlyph.color
+
+                c.drawGlyphs(
+                        line.glyphIds,
+                        prevStart,
+                        tmpPositionArray,
+                        0,
+                        i - prevStart,
+                        font,
+                        tmpPaintForGlyph)
+                prevStart = i
+                arrayIndex = 0
+            }
+
+            tmpPositionArray[arrayIndex++] = tmpGlyph.x
+            tmpPositionArray[arrayIndex++] = tmpGlyph.y
         }
 
         c.drawGlyphs(
                 line.glyphIds,
-                run.start,
+                prevStart,
                 tmpPositionArray,
                 0,
-                run.length,
-                fontInterpolator.lerp(run.baseFont, run.targetFont, progress),
-                paint)
+                run.end - prevStart,
+                font,
+                tmpPaintForGlyph)
     }
 
     private fun updatePositionsAndFonts(
