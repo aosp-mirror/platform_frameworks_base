@@ -93,6 +93,167 @@ import static android.app.admin.DevicePolicyResources.Strings.MediaProvider.BLOC
 import static android.app.admin.DevicePolicyResources.Strings.MediaProvider.SWITCH_TO_PERSONAL_MESSAGE;
 import static android.app.admin.DevicePolicyResources.Strings.MediaProvider.SWITCH_TO_WORK_MESSAGE;
 import static android.app.admin.DevicePolicyResources.Strings.MediaProvider.WORK_PROFILE_PAUSED_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ACCESSIBILITY_CATEGORY_PERSONAL;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ACCESSIBILITY_CATEGORY_WORK;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ACCESSIBILITY_PERSONAL_ACCOUNT_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ACCESSIBILITY_WORK_ACCOUNT_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ACCOUNTS_SEARCH_KEYWORDS;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ACTIVATE_DEVICE_ADMIN_APP;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ACTIVATE_DEVICE_ADMIN_APP_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ACTIVATE_THIS_DEVICE_ADMIN_APP;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ACTIVE_DEVICE_ADMIN_WARNING;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_ACTIONS_APPS_COUNT;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_ACTIONS_APPS_COUNT_MINIMUM;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_ACTION_ACCESS_CAMERA;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_ACTION_ACCESS_LOCATION;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_ACTION_ACCESS_MICROPHONE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_ACTION_APPS_COUNT_ESTIMATED;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_ACTION_APPS_INSTALLED;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_ACTION_NONE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_ACTION_SET_CURRENT_INPUT_METHOD;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_ACTION_SET_DEFAULT_APPS;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_ACTION_SET_HTTP_PROXY;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_ACTION_SET_INPUT_METHOD_NAME;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_CAN_LOCK_DEVICE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_CAN_SEE_APPS_WARNING;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_CAN_SEE_BUG_REPORT_WARNING;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_CAN_SEE_SECURITY_LOGS_WARNING;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_CAN_SEE_NETWORK_LOGS_WARNING;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_CAN_SEE_USAGE_WARNING;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_CAN_SEE_WORK_DATA_WARNING;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_CAN_WIPE_DEVICE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_CONFIGURED_FAILED_PASSWORD_WIPE_DEVICE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_CONFIGURED_FAILED_PASSWORD_WIPE_WORK_PROFILE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ALWAYS_ON_VPN_DEVICE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ALWAYS_ON_VPN_PERSONAL_PROFILE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ALWAYS_ON_VPN_WORK_PROFILE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.APP_CAN_ACCESS_PERSONAL_DATA;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.APP_CAN_ACCESS_PERSONAL_PERMISSIONS;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.CA_CERTS_DEVICE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.CA_CERTS_PERSONAL_PROFILE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.CA_CERTS_WORK_PROFILE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.CHANGES_MADE_BY_YOUR_ORGANIZATION_ADMIN_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.CONFIRM_WORK_PROFILE_PASSWORD_HEADER;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.CONFIRM_WORK_PROFILE_PATTERN_HEADER;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.CONFIRM_WORK_PROFILE_PIN_HEADER;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.CONNECTED_APPS_SEARCH_KEYWORDS;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.CONNECTED_APPS_SHARE_PERMISSIONS_AND_DATA;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.CONNECTED_WORK_AND_PERSONAL_APPS_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.CONNECT_APPS_DIALOG_SUMMARY;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.CONNECT_APPS_DIALOG_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.CONTACT_YOUR_IT_ADMIN;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.CONTROLLED_BY_ADMIN_SUMMARY;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.CROSS_PROFILE_CALENDAR_SUMMARY;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.CROSS_PROFILE_CALENDAR_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.DEVICE_ADMIN_POLICIES_WARNING;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.DEVICE_ADMIN_SETTINGS_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.DEVICE_MANAGED_WITHOUT_NAME;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.DEVICE_MANAGED_WITH_NAME;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.DEVICE_OWNER_INSTALLED_CERTIFICATE_AUTHORITY_WARNING;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.DISABLED_BY_IT_ADMIN_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ENABLE_WORK_PROFILE_SYNC_WITH_PERSONAL_SOUNDS_DIALOG_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ENABLE_WORK_PROFILE_SYNC_WITH_PERSONAL_SOUNDS_DIALOG_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ENTERPRISE_PRIVACY_HEADER;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ERROR_MOVE_DEVICE_ADMIN;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.FACE_SETTINGS_FOR_WORK_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.FACE_UNLOCK_DISABLED;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.FINGERPRINT_FOR_WORK;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.FINGERPRINT_UNLOCK_DISABLED;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.FINGERPRINT_UNLOCK_DISABLED_EXPLANATION;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.FORGOT_PASSWORD_TEXT;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.FORGOT_PASSWORD_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.HOW_TO_DISCONNECT_APPS;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.INFORMATION_YOUR_ORGANIZATION_CAN_SEE_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.INSTALL_IN_PERSONAL_PROFILE_TO_CONNECT_PROMPT;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.INSTALL_IN_WORK_PROFILE_TO_CONNECT_PROMPT;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.IT_ADMIN_POLICY_DISABLING_INFO_URL;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.MANAGED_BY;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.MANAGED_DEVICE_INFO;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.MANAGED_DEVICE_INFO_SUMMARY;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.MANAGED_DEVICE_INFO_SUMMARY_WITH_NAME;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.MANAGED_PROFILE_SETTINGS_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.MANAGE_DEVICE_ADMIN_APPS;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.NEW_DEVICE_ADMIN_WARNING;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.NEW_DEVICE_ADMIN_WARNING_SIMPLIFIED;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.NO_DEVICE_ADMINS;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.NUMBER_OF_DEVICE_ADMINS;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.NUMBER_OF_DEVICE_ADMINS_NONE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ONLY_CONNECT_TRUSTED_APPS;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.OTHER_OPTIONS_DISABLED_BY_ADMIN;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.PASSWORD_RECENTLY_USED;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.PERSONAL_CATEGORY_HEADER;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.PERSONAL_PROFILE_APP_SUBTEXT;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.PIN_RECENTLY_USED;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.REENTER_WORK_PROFILE_PASSWORD_HEADER;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.REENTER_WORK_PROFILE_PIN_HEADER;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.REMOVE_ACCOUNT_FAILED_ADMIN_RESTRICTION;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.REMOVE_AND_UNINSTALL_DEVICE_ADMIN;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.REMOVE_DEVICE_ADMIN;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.REMOVE_WORK_PROFILE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.SELECT_DEVICE_ADMIN_APPS;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.SET_PROFILE_OWNER_DIALOG_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.SET_PROFILE_OWNER_POSTSETUP_WARNING;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.SET_PROFILE_OWNER_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.SET_WORK_PROFILE_PASSWORD_HEADER;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.SET_WORK_PROFILE_PATTERN_HEADER;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.SET_WORK_PROFILE_PIN_HEADER;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.SHARE_REMOTE_BUGREPORT_DIALOG_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.SHARE_REMOTE_BUGREPORT_FINISHED_REQUEST_CONSENT;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.SHARE_REMOTE_BUGREPORT_NOT_FINISHED_REQUEST_CONSENT;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.SHARING_REMOTE_BUGREPORT_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.UNINSTALL_DEVICE_ADMIN;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.USER_ADMIN_POLICIES_WARNING;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_APPS_CANNOT_ACCESS_NOTIFICATION_SETTINGS;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_CATEGORY_HEADER;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_ADMIN_POLICIES_WARNING;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_ALARM_RINGTONE_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_APP_SUBTEXT;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_CONFIRM_PATTERN;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_CONFIRM_PIN;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_CONFIRM_REMOVE_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_CONFIRM_REMOVE_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_CONTACT_SEARCH_SUMMARY;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_CONTACT_SEARCH_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_DISABLE_USAGE_ACCESS_WARNING;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_FINGERPRINT_LAST_DELETE_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_INSTALLED_CERTIFICATE_AUTHORITY_WARNING;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_IT_ADMIN_CANT_RESET_SCREEN_LOCK;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_KEYBOARDS_AND_TOOLS;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_LAST_PASSWORD_ATTEMPT_BEFORE_WIPE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_LAST_PATTERN_ATTEMPT_BEFORE_WIPE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_LAST_PIN_ATTEMPT_BEFORE_WIPE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_LOCATION_SWITCH_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_LOCKED_NOTIFICATION_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_LOCK_ATTEMPTS_FAILED;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_LOCK_SCREEN_REDACT_NOTIFICATION_SUMMARY;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_LOCK_SCREEN_REDACT_NOTIFICATION_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_MANAGED_BY;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_NOTIFICATIONS_SECTION_HEADER;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_NOTIFICATION_LISTENER_BLOCKED;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_NOTIFICATION_RINGTONE_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_NOT_AVAILABLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_OFF_CONDITION_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_PASSWORD_REQUIRED;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_PRIVACY_POLICY_INFO;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_PRIVACY_POLICY_INFO_SUMMARY;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_RINGTONE_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_SCREEN_LOCK_SETUP_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_SECURITY_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_SETTING;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_SETTING_OFF_SUMMARY;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_SETTING_ON_SUMMARY;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_SET_UNLOCK_LAUNCH_PICKER_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_SOUND_SETTINGS_SECTION_HEADER;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_SYNC_WITH_PERSONAL_SOUNDS_ACTIVE_SUMMARY;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_UNIFICATION_SEARCH_KEYWORDS;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_UNIFY_LOCKS_DETAIL;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_UNIFY_LOCKS_NONCOMPLIANT;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_UNIFY_LOCKS_SUMMARY;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_UNIFY_LOCKS_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_USER_LABEL;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_USE_PERSONAL_SOUNDS_SUMMARY;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.WORK_PROFILE_USE_PERSONAL_SOUNDS_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.YOUR_ACCESS_TO_THIS_DEVICE_TITLE;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.BIOMETRIC_DIALOG_WORK_LOCK_FAILED_ATTEMPTS;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.BIOMETRIC_DIALOG_WORK_PASSWORD_LAST_ATTEMPT;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.BIOMETRIC_DIALOG_WORK_PATTERN_LAST_ATTEMPT;
@@ -159,7 +320,8 @@ public final class DevicePolicyResources {
             Drawables.WORK_PROFILE_OFF_ICON,
             Drawables.WORK_PROFILE_USER_ICON
     })
-    public @interface UpdatableDrawableId {}
+    public @interface UpdatableDrawableId {
+    }
 
     /**
      * Identifiers to specify the desired style for the updatable device management system
@@ -174,7 +336,8 @@ public final class DevicePolicyResources {
             Drawables.Style.OUTLINE,
             Drawables.Style.DEFAULT
     })
-    public @interface UpdatableDrawableStyle {}
+    public @interface UpdatableDrawableStyle {
+    }
 
     /**
      * Identifiers to specify the location if the updatable device management system resource.
@@ -191,7 +354,8 @@ public final class DevicePolicyResources {
             Drawables.Source.QUICK_SETTINGS,
             Drawables.Source.STATUS_BAR
     })
-    public @interface UpdatableDrawableSource {}
+    public @interface UpdatableDrawableSource {
+    }
 
     /**
      * Resource identifiers used to update device management-related string resources.
@@ -231,7 +395,7 @@ public final class DevicePolicyResources {
             PERSONAL_APP_SUSPENSION_TITLE, PERSONAL_APP_SUSPENSION_MESSAGE,
             PERSONAL_APP_SUSPENSION_SOON_MESSAGE, PERSONAL_APP_SUSPENSION_TURN_ON_PROFILE,
             PRINTING_DISABLED_NAMED_ADMIN, LOCATION_CHANGED_TITLE, LOCATION_CHANGED_MESSAGE,
-            NETWORK_LOGGING_TITLE,  NETWORK_LOGGING_MESSAGE,
+            NETWORK_LOGGING_TITLE, NETWORK_LOGGING_MESSAGE,
             NOTIFICATION_WORK_PROFILE_CONTENT_DESCRIPTION, NOTIFICATION_CHANNEL_DEVICE_ADMIN,
             SWITCH_TO_WORK_LABEL, SWITCH_TO_PERSONAL_LABEL, FORWARD_INTENT_TO_WORK,
             FORWARD_INTENT_TO_PERSONAL, RESOLVER_WORK_PROFILE_NOT_SUPPORTED, RESOLVER_PERSONAL_TAB,
@@ -257,7 +421,86 @@ public final class DevicePolicyResources {
             SWITCH_TO_WORK_MESSAGE, SWITCH_TO_PERSONAL_MESSAGE, BLOCKED_BY_ADMIN_TITLE,
             BLOCKED_FROM_PERSONAL_MESSAGE, BLOCKED_FROM_PERSONAL_MESSAGE,
             BLOCKED_FROM_WORK_MESSAGE, Strings.MediaProvider.WORK_PROFILE_PAUSED_TITLE,
-            WORK_PROFILE_PAUSED_MESSAGE
+            WORK_PROFILE_PAUSED_MESSAGE,
+
+            // Settings Strings
+            FACE_SETTINGS_FOR_WORK_TITLE, WORK_PROFILE_FINGERPRINT_LAST_DELETE_MESSAGE,
+            WORK_PROFILE_IT_ADMIN_CANT_RESET_SCREEN_LOCK, WORK_PROFILE_SCREEN_LOCK_SETUP_MESSAGE,
+            WORK_PROFILE_SET_UNLOCK_LAUNCH_PICKER_TITLE,
+            WORK_PROFILE_LAST_PATTERN_ATTEMPT_BEFORE_WIPE,
+            WORK_PROFILE_LAST_PIN_ATTEMPT_BEFORE_WIPE,
+            WORK_PROFILE_LAST_PASSWORD_ATTEMPT_BEFORE_WIPE, WORK_PROFILE_LOCK_ATTEMPTS_FAILED,
+            ACCESSIBILITY_CATEGORY_WORK, ACCESSIBILITY_CATEGORY_PERSONAL,
+            ACCESSIBILITY_WORK_ACCOUNT_TITLE, ACCESSIBILITY_PERSONAL_ACCOUNT_TITLE,
+            WORK_PROFILE_LOCATION_SWITCH_TITLE, SET_WORK_PROFILE_PASSWORD_HEADER,
+            SET_WORK_PROFILE_PIN_HEADER, SET_WORK_PROFILE_PATTERN_HEADER,
+            CONFIRM_WORK_PROFILE_PASSWORD_HEADER, CONFIRM_WORK_PROFILE_PIN_HEADER,
+            CONFIRM_WORK_PROFILE_PATTERN_HEADER, REENTER_WORK_PROFILE_PASSWORD_HEADER,
+            REENTER_WORK_PROFILE_PIN_HEADER, WORK_PROFILE_CONFIRM_PATTERN, WORK_PROFILE_CONFIRM_PIN,
+            WORK_PROFILE_PASSWORD_REQUIRED, WORK_PROFILE_SECURITY_TITLE,
+            WORK_PROFILE_UNIFY_LOCKS_TITLE, WORK_PROFILE_UNIFY_LOCKS_SUMMARY,
+            WORK_PROFILE_UNIFY_LOCKS_DETAIL, WORK_PROFILE_UNIFY_LOCKS_NONCOMPLIANT,
+            WORK_PROFILE_KEYBOARDS_AND_TOOLS, WORK_PROFILE_NOT_AVAILABLE, WORK_PROFILE_SETTING,
+            WORK_PROFILE_SETTING_ON_SUMMARY, WORK_PROFILE_SETTING_OFF_SUMMARY, REMOVE_WORK_PROFILE,
+            DEVICE_OWNER_INSTALLED_CERTIFICATE_AUTHORITY_WARNING,
+            WORK_PROFILE_INSTALLED_CERTIFICATE_AUTHORITY_WARNING, WORK_PROFILE_CONFIRM_REMOVE_TITLE,
+            WORK_PROFILE_CONFIRM_REMOVE_MESSAGE, WORK_APPS_CANNOT_ACCESS_NOTIFICATION_SETTINGS,
+            WORK_PROFILE_SOUND_SETTINGS_SECTION_HEADER, WORK_PROFILE_USE_PERSONAL_SOUNDS_TITLE,
+            WORK_PROFILE_USE_PERSONAL_SOUNDS_SUMMARY, WORK_PROFILE_RINGTONE_TITLE,
+            WORK_PROFILE_NOTIFICATION_RINGTONE_TITLE, WORK_PROFILE_ALARM_RINGTONE_TITLE,
+            WORK_PROFILE_SYNC_WITH_PERSONAL_SOUNDS_ACTIVE_SUMMARY,
+            ENABLE_WORK_PROFILE_SYNC_WITH_PERSONAL_SOUNDS_DIALOG_TITLE,
+            ENABLE_WORK_PROFILE_SYNC_WITH_PERSONAL_SOUNDS_DIALOG_MESSAGE,
+            WORK_PROFILE_NOTIFICATIONS_SECTION_HEADER, WORK_PROFILE_LOCKED_NOTIFICATION_TITLE,
+            WORK_PROFILE_LOCK_SCREEN_REDACT_NOTIFICATION_TITLE,
+            WORK_PROFILE_LOCK_SCREEN_REDACT_NOTIFICATION_SUMMARY,
+            WORK_PROFILE_NOTIFICATION_LISTENER_BLOCKED, CONNECTED_WORK_AND_PERSONAL_APPS_TITLE,
+            CONNECTED_APPS_SHARE_PERMISSIONS_AND_DATA, ONLY_CONNECT_TRUSTED_APPS,
+            HOW_TO_DISCONNECT_APPS, CONNECT_APPS_DIALOG_TITLE, CONNECT_APPS_DIALOG_SUMMARY,
+            APP_CAN_ACCESS_PERSONAL_DATA, APP_CAN_ACCESS_PERSONAL_PERMISSIONS,
+            INSTALL_IN_WORK_PROFILE_TO_CONNECT_PROMPT,
+            INSTALL_IN_PERSONAL_PROFILE_TO_CONNECT_PROMPT, WORK_PROFILE_MANAGED_BY, MANAGED_BY,
+            WORK_PROFILE_DISABLE_USAGE_ACCESS_WARNING, DISABLED_BY_IT_ADMIN_TITLE,
+            CONTACT_YOUR_IT_ADMIN, WORK_PROFILE_ADMIN_POLICIES_WARNING, USER_ADMIN_POLICIES_WARNING,
+            DEVICE_ADMIN_POLICIES_WARNING, WORK_PROFILE_OFF_CONDITION_TITLE,
+            MANAGED_PROFILE_SETTINGS_TITLE, WORK_PROFILE_CONTACT_SEARCH_TITLE,
+            WORK_PROFILE_CONTACT_SEARCH_SUMMARY, CROSS_PROFILE_CALENDAR_TITLE,
+            CROSS_PROFILE_CALENDAR_SUMMARY, ALWAYS_ON_VPN_PERSONAL_PROFILE, ALWAYS_ON_VPN_DEVICE,
+            ALWAYS_ON_VPN_WORK_PROFILE, CA_CERTS_PERSONAL_PROFILE, CA_CERTS_WORK_PROFILE,
+            CA_CERTS_DEVICE, ADMIN_CAN_LOCK_DEVICE, ADMIN_CAN_WIPE_DEVICE,
+            ADMIN_CONFIGURED_FAILED_PASSWORD_WIPE_DEVICE,
+            ADMIN_CONFIGURED_FAILED_PASSWORD_WIPE_WORK_PROFILE, DEVICE_MANAGED_WITHOUT_NAME,
+            DEVICE_MANAGED_WITH_NAME, WORK_PROFILE_APP_SUBTEXT, PERSONAL_PROFILE_APP_SUBTEXT,
+            FINGERPRINT_FOR_WORK, FACE_UNLOCK_DISABLED, FINGERPRINT_UNLOCK_DISABLED,
+            FINGERPRINT_UNLOCK_DISABLED_EXPLANATION, PIN_RECENTLY_USED, PASSWORD_RECENTLY_USED,
+            MANAGE_DEVICE_ADMIN_APPS, NUMBER_OF_DEVICE_ADMINS_NONE, NUMBER_OF_DEVICE_ADMINS,
+            FORGOT_PASSWORD_TITLE, FORGOT_PASSWORD_TEXT, ERROR_MOVE_DEVICE_ADMIN,
+            DEVICE_ADMIN_SETTINGS_TITLE, REMOVE_DEVICE_ADMIN, UNINSTALL_DEVICE_ADMIN,
+            REMOVE_AND_UNINSTALL_DEVICE_ADMIN, SELECT_DEVICE_ADMIN_APPS, NO_DEVICE_ADMINS,
+            ACTIVATE_DEVICE_ADMIN_APP, ACTIVATE_THIS_DEVICE_ADMIN_APP,
+            ACTIVATE_DEVICE_ADMIN_APP_TITLE, NEW_DEVICE_ADMIN_WARNING,
+            NEW_DEVICE_ADMIN_WARNING_SIMPLIFIED, ACTIVE_DEVICE_ADMIN_WARNING,
+            SET_PROFILE_OWNER_TITLE, SET_PROFILE_OWNER_DIALOG_TITLE,
+            SET_PROFILE_OWNER_POSTSETUP_WARNING, OTHER_OPTIONS_DISABLED_BY_ADMIN,
+            REMOVE_ACCOUNT_FAILED_ADMIN_RESTRICTION, IT_ADMIN_POLICY_DISABLING_INFO_URL,
+            SHARE_REMOTE_BUGREPORT_DIALOG_TITLE, SHARE_REMOTE_BUGREPORT_FINISHED_REQUEST_CONSENT,
+            SHARE_REMOTE_BUGREPORT_NOT_FINISHED_REQUEST_CONSENT, SHARING_REMOTE_BUGREPORT_MESSAGE,
+            MANAGED_DEVICE_INFO, MANAGED_DEVICE_INFO_SUMMARY, MANAGED_DEVICE_INFO_SUMMARY_WITH_NAME,
+            ENTERPRISE_PRIVACY_HEADER, INFORMATION_YOUR_ORGANIZATION_CAN_SEE_TITLE,
+            CHANGES_MADE_BY_YOUR_ORGANIZATION_ADMIN_TITLE, YOUR_ACCESS_TO_THIS_DEVICE_TITLE,
+            ADMIN_CAN_SEE_WORK_DATA_WARNING, ADMIN_CAN_SEE_APPS_WARNING,
+            ADMIN_CAN_SEE_USAGE_WARNING, ADMIN_CAN_SEE_NETWORK_LOGS_WARNING,
+            ADMIN_CAN_SEE_BUG_REPORT_WARNING, ADMIN_CAN_SEE_SECURITY_LOGS_WARNING,
+            ADMIN_ACTION_NONE, ADMIN_ACTION_APPS_INSTALLED, ADMIN_ACTION_APPS_COUNT_ESTIMATED,
+            ADMIN_ACTIONS_APPS_COUNT_MINIMUM, ADMIN_ACTION_ACCESS_LOCATION,
+            ADMIN_ACTION_ACCESS_MICROPHONE, ADMIN_ACTION_ACCESS_CAMERA,
+            ADMIN_ACTION_SET_DEFAULT_APPS, ADMIN_ACTIONS_APPS_COUNT,
+            ADMIN_ACTION_SET_CURRENT_INPUT_METHOD, ADMIN_ACTION_SET_INPUT_METHOD_NAME,
+            ADMIN_ACTION_SET_HTTP_PROXY, WORK_PROFILE_PRIVACY_POLICY_INFO_SUMMARY,
+            WORK_PROFILE_PRIVACY_POLICY_INFO, CONNECTED_APPS_SEARCH_KEYWORDS,
+            WORK_PROFILE_UNIFICATION_SEARCH_KEYWORDS, ACCOUNTS_SEARCH_KEYWORDS,
+            CONTROLLED_BY_ADMIN_SUMMARY, WORK_PROFILE_USER_LABEL, WORK_CATEGORY_HEADER,
+            PERSONAL_CATEGORY_HEADER
     })
     public @interface UpdatableStringId {
     }
@@ -432,7 +675,8 @@ public final class DevicePolicyResources {
     @SystemApi
     public static final class Strings {
 
-        private Strings() {}
+        private Strings() {
+        }
 
         /**
          * An ID for any string that can't be updated.
@@ -456,13 +700,1209 @@ public final class DevicePolicyResources {
 
         /**
          * Class containing the identifiers used to update device management-related system strings
+         * in the Settings package
+         *
+         * @hide
+         */
+        public static final class Settings {
+
+            private Settings() {
+            }
+
+            private static final String PREFIX = "Settings.";
+
+            /**
+             * Title shown for menu item that launches face settings or enrollment, for work profile
+             */
+            public static final String FACE_SETTINGS_FOR_WORK_TITLE =
+                    PREFIX + "FACE_SETTINGS_FOR_WORK_TITLE";
+
+            /**
+             * Warning when removing the last fingerprint on a work profile
+             */
+            public static final String WORK_PROFILE_FINGERPRINT_LAST_DELETE_MESSAGE =
+                    PREFIX + "WORK_PROFILE_FINGERPRINT_LAST_DELETE_MESSAGE";
+
+            /**
+             * Text letting the user know that their IT admin can't reset their screen lock if they
+             * forget it, and they can choose to set another lock that would be specifically for
+             * their work apps
+             */
+            public static final String WORK_PROFILE_IT_ADMIN_CANT_RESET_SCREEN_LOCK =
+                    PREFIX + "WORK_PROFILE_IT_ADMIN_CANT_RESET_SCREEN_LOCK";
+
+            /**
+             * Message shown in screen lock picker for setting up a work profile screen lock
+             */
+            public static final String WORK_PROFILE_SCREEN_LOCK_SETUP_MESSAGE =
+                    PREFIX + "WORK_PROFILE_SCREEN_LOCK_SETUP_MESSAGE";
+
+            /**
+             * Title for PreferenceScreen to launch picker for security method for the managed
+             * profile when there is none
+             */
+            public static final String WORK_PROFILE_SET_UNLOCK_LAUNCH_PICKER_TITLE =
+                    PREFIX + "WORK_PROFILE_SET_UNLOCK_LAUNCH_PICKER_TITLE";
+
+            /**
+             * Content of the dialog shown when the user only has one attempt left to provide the
+             * work lock pattern before the work profile is removed
+             */
+            public static final String WORK_PROFILE_LAST_PATTERN_ATTEMPT_BEFORE_WIPE =
+                    PREFIX + "WORK_PROFILE_LAST_PATTERN_ATTEMPT_BEFORE_WIPE";
+
+            /**
+             * Content of the dialog shown when the user only has one attempt left to provide the
+             * work lock pattern before the work profile is removed
+             */
+            public static final String WORK_PROFILE_LAST_PIN_ATTEMPT_BEFORE_WIPE =
+                    PREFIX + "WORK_PROFILE_LAST_PIN_ATTEMPT_BEFORE_WIPE";
+
+            /**
+             * Content of the dialog shown when the user only has one attempt left to provide the
+             * work lock pattern before the work profile is removed
+             */
+            public static final String WORK_PROFILE_LAST_PASSWORD_ATTEMPT_BEFORE_WIPE =
+                    PREFIX + "WORK_PROFILE_LAST_PASSWORD_ATTEMPT_BEFORE_WIPE";
+
+            /**
+             * Content of the dialog shown when the user has failed to provide the device lock too
+             * many times and the device is wiped
+             */
+            public static final String WORK_PROFILE_LOCK_ATTEMPTS_FAILED =
+                    PREFIX + "WORK_PROFILE_LOCK_ATTEMPTS_FAILED";
+
+            /**
+             * Content description for work profile accounts group
+             */
+            public static final String ACCESSIBILITY_CATEGORY_WORK =
+                    PREFIX + "ACCESSIBILITY_CATEGORY_WORK";
+
+            /**
+             * Content description for personal profile accounts group
+             */
+            public static final String ACCESSIBILITY_CATEGORY_PERSONAL =
+                    PREFIX + "ACCESSIBILITY_CATEGORY_PERSONAL";
+
+            /**
+             * Content description for work profile details page title
+             */
+            public static final String ACCESSIBILITY_WORK_ACCOUNT_TITLE =
+                    PREFIX + "ACCESSIBILITY_WORK_ACCOUNT_TITLE";
+
+            /**
+             * Content description for personal profile details page title
+             */
+            public static final String ACCESSIBILITY_PERSONAL_ACCOUNT_TITLE =
+                    PREFIX + "ACCESSIBILITY_PERSONAL_ACCOUNT_TITLE";
+
+            /**
+             * Title for work profile location switch
+             */
+            public static final String WORK_PROFILE_LOCATION_SWITCH_TITLE =
+                    PREFIX + "WORK_PROFILE_LOCATION_SWITCH_TITLE";
+
+            /**
+             * Header when setting work profile password
+             */
+            public static final String SET_WORK_PROFILE_PASSWORD_HEADER =
+                    PREFIX + "SET_WORK_PROFILE_PASSWORD_HEADER";
+
+            /**
+             * Header when setting work profile PIN
+             */
+            public static final String SET_WORK_PROFILE_PIN_HEADER =
+                    PREFIX + "SET_WORK_PROFILE_PIN_HEADER";
+
+            /**
+             * Header when setting work profile pattern
+             */
+            public static final String SET_WORK_PROFILE_PATTERN_HEADER =
+                    PREFIX + "SET_WORK_PROFILE_PATTERN_HEADER";
+
+            /**
+             * Header when confirming work profile password
+             */
+            public static final String CONFIRM_WORK_PROFILE_PASSWORD_HEADER =
+                    PREFIX + "CONFIRM_WORK_PROFILE_PASSWORD_HEADER";
+
+            /**
+             * Header when confirming work profile pin
+             */
+            public static final String CONFIRM_WORK_PROFILE_PIN_HEADER =
+                    PREFIX + "CONFIRM_WORK_PROFILE_PIN_HEADER";
+
+            /**
+             * Header when confirming work profile pattern
+             */
+            public static final String CONFIRM_WORK_PROFILE_PATTERN_HEADER =
+                    PREFIX + "CONFIRM_WORK_PROFILE_PATTERN_HEADER";
+
+            /**
+             * Header when re-entering work profile password
+             */
+            public static final String REENTER_WORK_PROFILE_PASSWORD_HEADER =
+                    PREFIX + "REENTER_WORK_PROFILE_PASSWORD_HEADER";
+
+            /**
+             * Header when re-entering work profile pin
+             */
+            public static final String REENTER_WORK_PROFILE_PIN_HEADER =
+                    PREFIX + "REENTER_WORK_PROFILE_PIN_HEADER";
+
+            /**
+             * Message to be used to explain the users that they need to enter their work pattern to
+             * continue a particular operation
+             */
+            public static final String WORK_PROFILE_CONFIRM_PATTERN =
+                    PREFIX + "WORK_PROFILE_CONFIRM_PATTERN";
+
+            /**
+             * Message to be used to explain the users that they need to enter their work pin to
+             * continue a particular operation
+             */
+            public static final String WORK_PROFILE_CONFIRM_PIN =
+                    PREFIX + "WORK_PROFILE_CONFIRM_PIN";
+
+            /**
+             * Message to be used to explain the users that they need to enter their work password
+             * to
+             * continue a particular operation
+             */
+            public static final String WORK_PROFILE_CONFIRM_PASSWORD =
+                    PREFIX + "WORK_PROFILE_CONFIRM_PASSWORD";
+
+            /**
+             * This string shows = PREFIX + "shows"; up on a screen where a user can enter a pattern
+             * that lets them access
+             * their work profile. This is an extra security measure that's required for them to
+             * continue
+             */
+            public static final String WORK_PROFILE_PATTERN_REQUIRED =
+                    PREFIX + "WORK_PROFILE_PATTERN_REQUIRED";
+
+            /**
+             * This string shows = PREFIX + "shows"; up on a screen where a user can enter a pin
+             * that lets them access
+             * their work profile. This is an extra security measure that's required for them to
+             * continue
+             */
+            public static final String WORK_PROFILE_PIN_REQUIRED =
+                    PREFIX + "WORK_PROFILE_PIN_REQUIRED";
+
+            /**
+             * This string shows = PREFIX + "shows"; up on a screen where a user can enter a
+             * password that lets them access
+             * their work profile. This is an extra security measure that's required for them to
+             * continue
+             */
+            public static final String WORK_PROFILE_PASSWORD_REQUIRED =
+                    PREFIX + "WORK_PROFILE_PASSWORD_REQUIRED";
+
+            /**
+             * Header for Work Profile security settings
+             */
+            public static final String WORK_PROFILE_SECURITY_TITLE =
+                    PREFIX + "WORK_PROFILE_SECURITY_TITLE";
+
+            /**
+             * Header for Work Profile unify locks settings
+             */
+            public static final String WORK_PROFILE_UNIFY_LOCKS_TITLE =
+                    PREFIX + "WORK_PROFILE_UNIFY_LOCKS_TITLE";
+
+            /**
+             * Setting option explanation to unify work and personal locks
+             */
+            public static final String WORK_PROFILE_UNIFY_LOCKS_SUMMARY =
+                    PREFIX + "WORK_PROFILE_UNIFY_LOCKS_SUMMARY";
+
+            /**
+             * Further explanation when the user wants to unify work and personal locks
+             */
+            public static final String WORK_PROFILE_UNIFY_LOCKS_DETAIL =
+                    PREFIX + "WORK_PROFILE_UNIFY_LOCKS_DETAIL";
+
+            /**
+             * Ask if the user wants to create a new lock for personal and work as the current work
+             * lock is not enough for the device
+             */
+            public static final String WORK_PROFILE_UNIFY_LOCKS_NONCOMPLIANT =
+                    PREFIX + "WORK_PROFILE_UNIFY_LOCKS_NONCOMPLIANT";
+
+            /**
+             * Title of 'Work profile keyboards & tools' preference category
+             */
+            public static final String WORK_PROFILE_KEYBOARDS_AND_TOOLS =
+                    PREFIX + "WORK_PROFILE_KEYBOARDS_AND_TOOLS";
+
+            /**
+             * Label for state when work profile is not available
+             */
+            public static final String WORK_PROFILE_NOT_AVAILABLE =
+                    PREFIX + "WORK_PROFILE_NOT_AVAILABLE";
+
+            /**
+             * Label for work profile setting (to allow turning work profile on and off)
+             */
+            public static final String WORK_PROFILE_SETTING = PREFIX + "WORK_PROFILE_SETTING";
+
+            /**
+             * Description of the work profile setting when the work profile is on
+             */
+            public static final String WORK_PROFILE_SETTING_ON_SUMMARY =
+                    PREFIX + "WORK_PROFILE_SETTING_ON_SUMMARY";
+
+            /**
+             * Description of the work profile setting when the work profile is off
+             */
+            public static final String WORK_PROFILE_SETTING_OFF_SUMMARY =
+                    PREFIX + "WORK_PROFILE_SETTING_OFF_SUMMARY";
+
+            /**
+             * Button text to remove work profile
+             */
+            public static final String REMOVE_WORK_PROFILE = PREFIX + "REMOVE_WORK_PROFILE";
+
+            /**
+             * Text of message to show to device owner user whose administrator has installed a SSL
+             * CA Cert
+             */
+            public static final String DEVICE_OWNER_INSTALLED_CERTIFICATE_AUTHORITY_WARNING =
+                    PREFIX + "DEVICE_OWNER_INSTALLED_CERTIFICATE_AUTHORITY_WARNING";
+
+            /**
+             * Text of message to show to work profile users whose administrator has installed a SSL
+             * CA Cert
+             */
+            public static final String WORK_PROFILE_INSTALLED_CERTIFICATE_AUTHORITY_WARNING =
+                    PREFIX + "WORK_PROFILE_INSTALLED_CERTIFICATE_AUTHORITY_WARNING";
+
+            /**
+             * Work profile removal confirmation title
+             */
+            public static final String WORK_PROFILE_CONFIRM_REMOVE_TITLE =
+                    PREFIX + "WORK_PROFILE_CONFIRM_REMOVE_TITLE";
+
+            /**
+             * Work profile removal confirmation message
+             */
+            public static final String WORK_PROFILE_CONFIRM_REMOVE_MESSAGE =
+                    PREFIX + "WORK_PROFILE_CONFIRM_REMOVE_MESSAGE";
+
+            /**
+             * Toast shown when an app in the work profile attempts to open notification settings
+             * and apps in the work profile cannot access notification settings
+             */
+            public static final String WORK_APPS_CANNOT_ACCESS_NOTIFICATION_SETTINGS =
+                    PREFIX + "WORK_APPS_CANNOT_ACCESS_NOTIFICATION_SETTINGS";
+
+            /**
+             * Work sound settings section header
+             */
+            public static final String WORK_PROFILE_SOUND_SETTINGS_SECTION_HEADER =
+                    PREFIX + "WORK_PROFILE_SOUND_SETTINGS_SECTION_HEADER";
+
+            /**
+             * Title for the switch that enables syncing of personal ringtones to work profile
+             */
+            public static final String WORK_PROFILE_USE_PERSONAL_SOUNDS_TITLE =
+                    PREFIX + "WORK_PROFILE_USE_PERSONAL_SOUNDS_TITLE";
+
+            /**
+             * Summary for the switch that enables syncing of personal ringtones to work profile
+             */
+            public static final String WORK_PROFILE_USE_PERSONAL_SOUNDS_SUMMARY =
+                    PREFIX + "WORK_PROFILE_USE_PERSONAL_SOUNDS_SUMMARY";
+
+            /**
+             * Title for the option defining the work profile phone ringtone
+             */
+            public static final String WORK_PROFILE_RINGTONE_TITLE =
+                    PREFIX + "WORK_PROFILE_RINGTONE_TITLE";
+
+            /**
+             * Title for the option defining the default work profile notification ringtone
+             */
+            public static final String WORK_PROFILE_NOTIFICATION_RINGTONE_TITLE =
+                    PREFIX + "WORK_PROFILE_NOTIFICATION_RINGTONE_TITLE";
+
+            /**
+             * Title for the option defining the default work alarm ringtone
+             */
+            public static final String WORK_PROFILE_ALARM_RINGTONE_TITLE =
+                    PREFIX + "WORK_PROFILE_ALARM_RINGTONE_TITLE";
+
+            /**
+             * Summary for sounds when sync with personal sounds is active
+             */
+            public static final String WORK_PROFILE_SYNC_WITH_PERSONAL_SOUNDS_ACTIVE_SUMMARY =
+                    PREFIX + "WORK_PROFILE_SYNC_WITH_PERSONAL_SOUNDS_ACTIVE_SUMMARY";
+
+            /**
+             * Title for dialog shown when enabling sync with personal sounds
+             */
+            public static final String
+                    ENABLE_WORK_PROFILE_SYNC_WITH_PERSONAL_SOUNDS_DIALOG_TITLE =
+                    PREFIX + "ENABLE_WORK_PROFILE_SYNC_WITH_PERSONAL_SOUNDS_DIALOG_TITLE";
+
+            /**
+             * Message for dialog shown when using the same sounds for work events as for personal
+             * events
+             */
+            public static final String
+                    ENABLE_WORK_PROFILE_SYNC_WITH_PERSONAL_SOUNDS_DIALOG_MESSAGE =
+                    PREFIX + "ENABLE_WORK_PROFILE_SYNC_WITH_PERSONAL_SOUNDS_DIALOG_MESSAGE";
+
+            /**
+             * Work profile notifications section header
+             */
+            public static final String WORK_PROFILE_NOTIFICATIONS_SECTION_HEADER =
+                    PREFIX + "WORK_PROFILE_NOTIFICATIONS_SECTION_HEADER";
+
+            /**
+             * Title for the option controlling notifications for work profile
+             */
+            public static final String WORK_PROFILE_LOCKED_NOTIFICATION_TITLE =
+                    PREFIX + "WORK_PROFILE_LOCKED_NOTIFICATION_TITLE";
+
+            /**
+             * Title for redacting sensitive content on lockscreen for work profiles
+             */
+            public static final String WORK_PROFILE_LOCK_SCREEN_REDACT_NOTIFICATION_TITLE =
+                    PREFIX + "WORK_PROFILE_LOCK_SCREEN_REDACT_NOTIFICATION_TITLE";
+
+            /**
+             * Summary for redacting sensitive content on lockscreen for work profiles
+             */
+            public static final String WORK_PROFILE_LOCK_SCREEN_REDACT_NOTIFICATION_SUMMARY =
+                    PREFIX + "WORK_PROFILE_LOCK_SCREEN_REDACT_NOTIFICATION_SUMMARY";
+
+            /**
+             * Indicates that the work profile admin doesn't allow this notification listener to
+             * access
+             * work profile notifications
+             */
+            public static final String WORK_PROFILE_NOTIFICATION_LISTENER_BLOCKED =
+                    PREFIX + "WORK_PROFILE_NOTIFICATION_LISTENER_BLOCKED";
+
+            /**
+             * This setting shows a user's connected work and personal apps.
+             */
+            public static final String CONNECTED_WORK_AND_PERSONAL_APPS_TITLE =
+                    PREFIX + "CONNECTED_WORK_AND_PERSONAL_APPS_TITLE";
+
+            /**
+             * This text lets a user know that if they connect work and personal apps,
+             * they will share permissions and can access each other's data
+             */
+            public static final String CONNECTED_APPS_SHARE_PERMISSIONS_AND_DATA =
+                    PREFIX + "CONNECTED_APPS_SHARE_PERMISSIONS_AND_DATA";
+
+            /**
+             * This text lets a user know that they should only connect work and personal apps if
+             * they
+             * trust the work app with their personal data
+             */
+            public static final String ONLY_CONNECT_TRUSTED_APPS =
+                    PREFIX + "ONLY_CONNECT_TRUSTED_APPS";
+
+            /**
+             * This text lets a user know how to disconnect work and personal apps
+             */
+            public static final String HOW_TO_DISCONNECT_APPS = PREFIX + "HOW_TO_DISCONNECT_APPS";
+
+            /**
+             * Title of confirmation dialog when connecting work and personal apps
+             */
+            public static final String CONNECT_APPS_DIALOG_TITLE =
+                    PREFIX + "CONNECT_APPS_DIALOG_TITLE";
+
+            /**
+             * This dialog is shown when a user tries to connect a work app to a personal
+             * app
+             */
+            public static final String CONNECT_APPS_DIALOG_SUMMARY =
+                    PREFIX + "CONNECT_APPS_DIALOG_SUMMARY";
+
+            /**
+             * This text lets the user know that their work app will be able to access data in their
+             * personal app
+             */
+            public static final String APP_CAN_ACCESS_PERSONAL_DATA =
+                    PREFIX + "APP_CAN_ACCESS_PERSONAL_DATA";
+
+            /**
+             * This text lets the user know that their work app will be able to use permissions in
+             * their personal app
+             */
+            public static final String APP_CAN_ACCESS_PERSONAL_PERMISSIONS =
+                    PREFIX + "APP_CAN_ACCESS_PERSONAL_PERMISSIONS";
+
+            /**
+             * lets a user know that they need to install an app in their work profile in order to
+             * connect it to the corresponding personal app
+             */
+            public static final String INSTALL_IN_WORK_PROFILE_TO_CONNECT_PROMPT =
+                    PREFIX + "INSTALL_IN_WORK_PROFILE_TO_CONNECT_PROMPT";
+
+            /**
+             * lets a user know that they need to install an app in their personal profile in order
+             * to
+             * connect it to the corresponding work app
+             */
+            public static final String INSTALL_IN_PERSONAL_PROFILE_TO_CONNECT_PROMPT =
+                    PREFIX + "INSTALL_IN_PERSONAL_PROFILE_TO_CONNECT_PROMPT";
+
+            /**
+             * Header for showing the organisation managing the work profile
+             */
+            public static final String WORK_PROFILE_MANAGED_BY = PREFIX + "WORK_PROFILE_MANAGED_BY";
+
+            /**
+             * Summary showing the enterprise who manages the device or profile.
+             */
+            public static final String MANAGED_BY = PREFIX + "MANAGED_BY";
+
+            /**
+             * Warning message about disabling usage access on profile owner
+             */
+            public static final String WORK_PROFILE_DISABLE_USAGE_ACCESS_WARNING =
+                    PREFIX + "WORK_PROFILE_DISABLE_USAGE_ACCESS_WARNING";
+
+            /**
+             * Title for dialog displayed when user taps a setting on their phone that's blocked by
+             * their IT admin
+             */
+            public static final String DISABLED_BY_IT_ADMIN_TITLE =
+                    PREFIX + "DISABLED_BY_IT_ADMIN_TITLE";
+
+            /**
+             * Shown when the user tries to change phone settings that are blocked by their IT admin
+             */
+            public static final String CONTACT_YOUR_IT_ADMIN = PREFIX + "CONTACT_YOUR_IT_ADMIN";
+
+            /**
+             * warn user about policies the admin can set in a work profile
+             */
+            public static final String WORK_PROFILE_ADMIN_POLICIES_WARNING =
+                    PREFIX + "WORK_PROFILE_ADMIN_POLICIES_WARNING";
+
+            /**
+             * warn user about policies the admin can set on a user
+             */
+            public static final String USER_ADMIN_POLICIES_WARNING =
+                    PREFIX + "USER_ADMIN_POLICIES_WARNING";
+
+            /**
+             * warn user about policies the admin can set on a device
+             */
+            public static final String DEVICE_ADMIN_POLICIES_WARNING =
+                    PREFIX + "DEVICE_ADMIN_POLICIES_WARNING";
+
+            /**
+             * Condition that work profile is off
+             */
+            public static final String WORK_PROFILE_OFF_CONDITION_TITLE =
+                    PREFIX + "WORK_PROFILE_OFF_CONDITION_TITLE";
+
+            /**
+             * Title of work profile setting page
+             */
+            public static final String MANAGED_PROFILE_SETTINGS_TITLE =
+                    PREFIX + "MANAGED_PROFILE_SETTINGS_TITLE";
+
+            /**
+             * Setting that lets a user's personal apps identify contacts using the user's work
+             * directory
+             */
+            public static final String WORK_PROFILE_CONTACT_SEARCH_TITLE =
+                    PREFIX + "WORK_PROFILE_CONTACT_SEARCH_TITLE";
+
+            /**
+             * This setting lets a user's personal apps identify contacts using the user's work
+             * directory
+             */
+            public static final String WORK_PROFILE_CONTACT_SEARCH_SUMMARY =
+                    PREFIX + "WORK_PROFILE_CONTACT_SEARCH_SUMMARY";
+
+            /**
+             * This setting lets the user show their work events on their personal calendar
+             */
+            public static final String CROSS_PROFILE_CALENDAR_TITLE =
+                    PREFIX + "CROSS_PROFILE_CALENDAR_TITLE";
+
+            /**
+             * Setting description. If the user turns on this setting, they can see their work
+             * events on their personal calendar
+             */
+            public static final String CROSS_PROFILE_CALENDAR_SUMMARY =
+                    PREFIX + "CROSS_PROFILE_CALENDAR_SUMMARY";
+
+            /**
+             * Label explaining that an always-on VPN was set by the admin in the personal profile
+             */
+            public static final String ALWAYS_ON_VPN_PERSONAL_PROFILE =
+                    PREFIX + "ALWAYS_ON_VPN_PERSONAL_PROFILE";
+
+            /**
+             * Label explaining that an always-on VPN was set by the admin for the entire device
+             */
+            public static final String ALWAYS_ON_VPN_DEVICE = PREFIX + "ALWAYS_ON_VPN_DEVICE";
+
+            /**
+             * Label explaining that an always-on VPN was set by the admin in the work profile
+             */
+            public static final String ALWAYS_ON_VPN_WORK_PROFILE =
+                    PREFIX + "ALWAYS_ON_VPN_WORK_PROFILE";
+
+            /**
+             * Label explaining that the admin installed trusted CA certificates in personal profile
+             */
+            public static final String CA_CERTS_PERSONAL_PROFILE =
+                    PREFIX + "CA_CERTS_PERSONAL_PROFILE";
+
+            /**
+             * Label explaining that the admin installed trusted CA certificates in work profile
+             */
+            public static final String CA_CERTS_WORK_PROFILE = PREFIX + "CA_CERTS_WORK_PROFILE";
+
+            /**
+             * Label explaining that the admin installed trusted CA certificates for the entire
+             * device
+             */
+            public static final String CA_CERTS_DEVICE = PREFIX + "CA_CERTS_DEVICE";
+
+            /**
+             * Label explaining that the admin can lock the device and change the user's password
+             */
+            public static final String ADMIN_CAN_LOCK_DEVICE = PREFIX + "ADMIN_CAN_LOCK_DEVICE";
+
+            /**
+             * Label explaining that the admin can wipe the device remotely
+             */
+            public static final String ADMIN_CAN_WIPE_DEVICE = PREFIX + "ADMIN_CAN_WIPE_DEVICE";
+
+            /**
+             * Label explaining that the admin configured the device to wipe itself when the
+             * password is mistyped too many times
+             */
+            public static final String ADMIN_CONFIGURED_FAILED_PASSWORD_WIPE_DEVICE =
+                    PREFIX + "ADMIN_CONFIGURED_FAILED_PASSWORD_WIPE_DEVICE";
+
+            /**
+             * Label explaining that the admin configured the work profile to wipe itself when the
+             * password is mistyped too many times
+             */
+            public static final String ADMIN_CONFIGURED_FAILED_PASSWORD_WIPE_WORK_PROFILE =
+                    PREFIX + "ADMIN_CONFIGURED_FAILED_PASSWORD_WIPE_WORK_PROFILE";
+
+            /**
+             * Message indicating that the device is enterprise-managed by a Device Owner
+             */
+            public static final String DEVICE_MANAGED_WITHOUT_NAME =
+                    PREFIX + "DEVICE_MANAGED_WITHOUT_NAME";
+
+            /**
+             * Message indicating that the device is enterprise-managed by a Device Owner
+             */
+            public static final String DEVICE_MANAGED_WITH_NAME =
+                    PREFIX + "DEVICE_MANAGED_WITH_NAME";
+
+            /**
+             * Subtext of work profile app for current setting
+             */
+            public static final String WORK_PROFILE_APP_SUBTEXT =
+                    PREFIX + "WORK_PROFILE_APP_SUBTEXT";
+
+            /**
+             * Subtext of personal profile app for current setting
+             */
+            public static final String PERSONAL_PROFILE_APP_SUBTEXT =
+                    PREFIX + "PERSONAL_PROFILE_APP_SUBTEXT";
+
+            /**
+             * Title shown for work menu item that launches fingerprint settings or enrollment
+             */
+            public static final String FINGERPRINT_FOR_WORK = PREFIX + "FINGERPRINT_FOR_WORK";
+
+            /**
+             * Message shown in face enrollment dialog, when face unlock is disabled by device admin
+             */
+            public static final String FACE_UNLOCK_DISABLED = PREFIX + "FACE_UNLOCK_DISABLED";
+
+            /**
+             * message shown in fingerprint enrollment dialog, when fingerprint unlock is disabled
+             * by device admin
+             */
+            public static final String FINGERPRINT_UNLOCK_DISABLED =
+                    PREFIX + "FINGERPRINT_UNLOCK_DISABLED";
+
+            /**
+             * Text shown in fingerprint settings explaining what the fingerprint can be used for in
+             * the case unlocking is disabled
+             */
+            public static final String FINGERPRINT_UNLOCK_DISABLED_EXPLANATION =
+                    PREFIX + "FINGERPRINT_UNLOCK_DISABLED_EXPLANATION";
+
+            /**
+             * Error shown when in PIN mode and PIN has been used recently
+             */
+            public static final String PIN_RECENTLY_USED = PREFIX + "PIN_RECENTLY_USED";
+
+            /**
+             * Error shown when in PASSWORD mode and password has been used recently
+             */
+            public static final String PASSWORD_RECENTLY_USED = PREFIX + "PASSWORD_RECENTLY_USED";
+
+            /**
+             * Title of preference to manage device admin apps
+             */
+            public static final String MANAGE_DEVICE_ADMIN_APPS =
+                    PREFIX + "MANAGE_DEVICE_ADMIN_APPS";
+
+            /**
+             * Inform the user that currently no device admin apps are installed and active
+             */
+            public static final String NUMBER_OF_DEVICE_ADMINS_NONE =
+                    PREFIX + "NUMBER_OF_DEVICE_ADMINS_NONE";
+
+            /**
+             * Inform the user how many device admin apps are installed and active
+             */
+            public static final String NUMBER_OF_DEVICE_ADMINS = PREFIX + "NUMBER_OF_DEVICE_ADMINS";
+
+            /**
+             * Title that asks the user to contact the IT admin to reset password
+             */
+            public static final String FORGOT_PASSWORD_TITLE = PREFIX + "FORGOT_PASSWORD_TITLE";
+
+            /**
+             * Content that asks the user to contact the IT admin to reset password
+             */
+            public static final String FORGOT_PASSWORD_TEXT = PREFIX + "FORGOT_PASSWORD_TEXT";
+
+            /**
+             * Error message shown when trying to move device administrators to external disks, such
+             * as SD card
+             */
+            public static final String ERROR_MOVE_DEVICE_ADMIN = PREFIX + "ERROR_MOVE_DEVICE_ADMIN";
+
+            /**
+             * Device admin app settings title
+             */
+            public static final String DEVICE_ADMIN_SETTINGS_TITLE =
+                    PREFIX + "DEVICE_ADMIN_SETTINGS_TITLE";
+
+            /**
+             * Button to remove the active device admin app
+             */
+            public static final String REMOVE_DEVICE_ADMIN = PREFIX + "REMOVE_DEVICE_ADMIN";
+
+            /**
+             * Button to uninstall the device admin app
+             */
+            public static final String UNINSTALL_DEVICE_ADMIN = PREFIX + "UNINSTALL_DEVICE_ADMIN";
+
+            /**
+             * Button to deactivate and uninstall the device admin app
+             */
+            public static final String REMOVE_AND_UNINSTALL_DEVICE_ADMIN =
+                    PREFIX + "REMOVE_AND_UNINSTALL_DEVICE_ADMIN";
+
+            /**
+             * Title for selecting device admin apps
+             */
+            public static final String SELECT_DEVICE_ADMIN_APPS =
+                    PREFIX + "SELECT_DEVICE_ADMIN_APPS";
+
+            /**
+             * Message when there are no available device admin apps to display
+             */
+            public static final String NO_DEVICE_ADMINS = PREFIX + "NO_DEVICE_ADMINS";
+
+            /**
+             * Title for screen to add a device admin app
+             */
+            public static final String ACTIVATE_DEVICE_ADMIN_APP =
+                    PREFIX + "ACTIVATE_DEVICE_ADMIN_APP";
+
+            /**
+             * Label for button to set the active device admin
+             */
+            public static final String ACTIVATE_THIS_DEVICE_ADMIN_APP =
+                    PREFIX + "ACTIVATE_THIS_DEVICE_ADMIN_APP";
+
+            /**
+             * Activate a specific device admin app title
+             */
+            public static final String ACTIVATE_DEVICE_ADMIN_APP_TITLE =
+                    PREFIX + "ACTIVATE_DEVICE_ADMIN_APP_TITLE";
+
+            /**
+             * Device admin warning message about policies a not active admin can use
+             */
+            public static final String NEW_DEVICE_ADMIN_WARNING =
+                    PREFIX + "NEW_DEVICE_ADMIN_WARNING";
+
+            /**
+             * Simplified device admin warning message
+             */
+            public static final String NEW_DEVICE_ADMIN_WARNING_SIMPLIFIED =
+                    PREFIX + "NEW_DEVICE_ADMIN_WARNING_SIMPLIFIED";
+
+            /**
+             * Device admin warning message about policies the active admin can use
+             */
+            public static final String ACTIVE_DEVICE_ADMIN_WARNING =
+                    PREFIX + "ACTIVE_DEVICE_ADMIN_WARNING";
+
+            /**
+             * Title for screen to set a profile owner
+             */
+            public static final String SET_PROFILE_OWNER_TITLE = PREFIX + "SET_PROFILE_OWNER_TITLE";
+
+            /**
+             * Simplified title for dialog to set a profile owner
+             */
+            public static final String SET_PROFILE_OWNER_DIALOG_TITLE =
+                    PREFIX + "SET_PROFILE_OWNER_DIALOG_TITLE";
+
+            /**
+             * Warning when trying to add a profile owner admin after setup has completed
+             */
+            public static final String SET_PROFILE_OWNER_POSTSETUP_WARNING =
+                    PREFIX + "SET_PROFILE_OWNER_POSTSETUP_WARNING";
+
+            /**
+             * Message displayed to let the user know that some of the options are disabled by admin
+             */
+            public static final String OTHER_OPTIONS_DISABLED_BY_ADMIN =
+                    PREFIX + "OTHER_OPTIONS_DISABLED_BY_ADMIN";
+
+            /**
+             * This is shown if the authenticator for a given account fails to remove it due to
+             * admin restrictions
+             */
+            public static final String REMOVE_ACCOUNT_FAILED_ADMIN_RESTRICTION =
+                    PREFIX + "REMOVE_ACCOUNT_FAILED_ADMIN_RESTRICTION";
+
+            /**
+             * Url for learning more about IT admin policy disabling
+             */
+            public static final String IT_ADMIN_POLICY_DISABLING_INFO_URL =
+                    PREFIX + "IT_ADMIN_POLICY_DISABLING_INFO_URL";
+
+            /**
+             * Title of dialog shown to ask for user consent for sharing a bugreport that was
+             * requested
+             * remotely by the IT administrator
+             */
+            public static final String SHARE_REMOTE_BUGREPORT_DIALOG_TITLE =
+                    PREFIX + "SHARE_REMOTE_BUGREPORT_DIALOG_TITLE";
+
+            /**
+             * Message of a dialog shown to ask for user consent for sharing a bugreport that was
+             * requested remotely by the IT administrator
+             */
+            public static final String SHARE_REMOTE_BUGREPORT_FINISHED_REQUEST_CONSENT =
+                    PREFIX + "SHARE_REMOTE_BUGREPORT_FINISHED_REQUEST_CONSENT";
+
+            /**
+             * Message of a dialog shown to ask for user consent for sharing a bugreport that was
+             * requested remotely by the IT administrator and it's still being taken
+             */
+            public static final String SHARE_REMOTE_BUGREPORT_NOT_FINISHED_REQUEST_CONSENT =
+                    PREFIX + "SHARE_REMOTE_BUGREPORT_NOT_FINISHED_REQUEST_CONSENT";
+
+            /**
+             * Message of a dialog shown to inform that the remote bugreport that was requested
+             * remotely by the IT administrator is still being taken and will be shared when
+             * finished
+             */
+            public static final String SHARING_REMOTE_BUGREPORT_MESSAGE =
+                    PREFIX + "SHARING_REMOTE_BUGREPORT_MESSAGE";
+
+            /**
+             * Managed device information screen title
+             */
+            public static final String MANAGED_DEVICE_INFO = PREFIX + "MANAGED_DEVICE_INFO";
+
+            /**
+             * Summary for managed device info section
+             */
+            public static final String MANAGED_DEVICE_INFO_SUMMARY =
+                    PREFIX + "MANAGED_DEVICE_INFO_SUMMARY";
+
+            /**
+             * Summary for managed device info section including organization name
+             */
+            public static final String MANAGED_DEVICE_INFO_SUMMARY_WITH_NAME =
+                    PREFIX + "MANAGED_DEVICE_INFO_SUMMARY_WITH_NAME";
+
+            /**
+             * Enterprise Privacy settings header, summarizing the powers that the admin has
+             */
+            public static final String ENTERPRISE_PRIVACY_HEADER =
+                    PREFIX + "ENTERPRISE_PRIVACY_HEADER";
+
+            /**
+             * Types of information your organization can see section title
+             */
+            public static final String INFORMATION_YOUR_ORGANIZATION_CAN_SEE_TITLE =
+                    PREFIX + "INFORMATION_YOUR_ORGANIZATION_CAN_SEE_TITLE";
+
+            /**
+             * Changes made by your organization's admin section title
+             */
+            public static final String CHANGES_MADE_BY_YOUR_ORGANIZATION_ADMIN_TITLE =
+                    PREFIX + "CHANGES_MADE_BY_YOUR_ORGANIZATION_ADMIN_TITLE";
+
+            /**
+             * Your access to this device section title
+             */
+            public static final String YOUR_ACCESS_TO_THIS_DEVICE_TITLE =
+                    PREFIX + "YOUR_ACCESS_TO_THIS_DEVICE_TITLE";
+
+            /**
+             * Things the admin can see: data associated with the work account
+             */
+            public static final String ADMIN_CAN_SEE_WORK_DATA_WARNING =
+                    PREFIX + "ADMIN_CAN_SEE_WORK_DATA_WARNING";
+
+            /**
+             * Things the admin can see: Apps installed on the device
+             */
+            public static final String ADMIN_CAN_SEE_APPS_WARNING =
+                    PREFIX + "ADMIN_CAN_SEE_APPS_WARNING";
+
+            /**
+             * Things the admin can see: Amount of time and data spent in each app
+             */
+            public static final String ADMIN_CAN_SEE_USAGE_WARNING =
+                    PREFIX + "ADMIN_CAN_SEE_USAGE_WARNING";
+
+            /**
+             * Things the admin can see: Most recent network traffic log
+             */
+            public static final String ADMIN_CAN_SEE_NETWORK_LOGS_WARNING =
+                    PREFIX + "ADMIN_CAN_SEE_NETWORK_LOGS_WARNING";
+            /**
+             * Things the admin can see: Most recent bug report
+             */
+            public static final String ADMIN_CAN_SEE_BUG_REPORT_WARNING =
+                    PREFIX + "ADMIN_CAN_SEE_BUG_REPORT_WARNING";
+
+            /**
+             * Things the admin can see: Security logs
+             */
+            public static final String ADMIN_CAN_SEE_SECURITY_LOGS_WARNING =
+                    PREFIX + "ADMIN_CAN_SEE_SECURITY_LOGS_WARNING";
+
+            /**
+             * Indicate that the admin never took a given action so far (e.g. did not retrieve
+             * security logs or request bug reports).
+             */
+            public static final String ADMIN_ACTION_NONE = PREFIX + "ADMIN_ACTION_NONE";
+
+            /**
+             * Indicate that the admin installed one or more apps on the device
+             */
+            public static final String ADMIN_ACTION_APPS_INSTALLED =
+                    PREFIX + "ADMIN_ACTION_APPS_INSTALLED";
+
+            /**
+             * Explaining that the number of apps is an estimation
+             */
+            public static final String ADMIN_ACTION_APPS_COUNT_ESTIMATED =
+                    PREFIX + "ADMIN_ACTION_APPS_COUNT_ESTIMATED";
+
+            /**
+             * Indicating the minimum number of apps that a label refers to
+             */
+            public static final String ADMIN_ACTIONS_APPS_COUNT_MINIMUM =
+                    PREFIX + "ADMIN_ACTIONS_APPS_COUNT_MINIMUM";
+
+            /**
+             * Indicate that the admin granted one or more apps access to the device's location
+             */
+            public static final String ADMIN_ACTION_ACCESS_LOCATION =
+                    PREFIX + "ADMIN_ACTION_ACCESS_LOCATION";
+
+            /**
+             * Indicate that the admin granted one or more apps access to the microphone
+             */
+            public static final String ADMIN_ACTION_ACCESS_MICROPHONE =
+                    PREFIX + "ADMIN_ACTION_ACCESS_MICROPHONE";
+
+            /**
+             * Indicate that the admin granted one or more apps access to the camera
+             */
+            public static final String ADMIN_ACTION_ACCESS_CAMERA =
+                    PREFIX + "ADMIN_ACTION_ACCESS_CAMERA";
+
+            /**
+             * Indicate that the admin set one or more apps as defaults for common actions
+             */
+            public static final String ADMIN_ACTION_SET_DEFAULT_APPS =
+                    PREFIX + "ADMIN_ACTION_SET_DEFAULT_APPS";
+
+            /**
+             * Indicate the number of apps that a label refers to
+             */
+            public static final String ADMIN_ACTIONS_APPS_COUNT =
+                    PREFIX + "ADMIN_ACTIONS_APPS_COUNT";
+
+            /**
+             * Indicate that the current input method was set by the admin
+             */
+            public static final String ADMIN_ACTION_SET_CURRENT_INPUT_METHOD =
+                    PREFIX + "ADMIN_ACTION_SET_CURRENT_INPUT_METHOD";
+
+            /**
+             * The input method set by the admin
+             */
+            public static final String ADMIN_ACTION_SET_INPUT_METHOD_NAME =
+                    PREFIX + "ADMIN_ACTION_SET_INPUT_METHOD_NAME";
+
+            /**
+             * Indicate that a global HTTP proxy was set by the admin
+             */
+            public static final String ADMIN_ACTION_SET_HTTP_PROXY =
+                    PREFIX + "ADMIN_ACTION_SET_HTTP_PROXY";
+
+            /**
+             * Summary for Enterprise Privacy settings, explaining what the user can expect to find
+             * under it
+             */
+            public static final String WORK_PROFILE_PRIVACY_POLICY_INFO_SUMMARY =
+                    PREFIX + "WORK_PROFILE_PRIVACY_POLICY_INFO_SUMMARY";
+
+            /**
+             * Setting on privacy settings screen that will show work policy info
+             */
+            public static final String WORK_PROFILE_PRIVACY_POLICY_INFO =
+                    PREFIX + "WORK_PROFILE_PRIVACY_POLICY_INFO";
+
+            /**
+             * Search keywords for connected work and personal apps
+             */
+            public static final String CONNECTED_APPS_SEARCH_KEYWORDS =
+                    PREFIX + "CONNECTED_APPS_SEARCH_KEYWORDS";
+
+            /**
+             * Work profile unification keywords
+             */
+            public static final String WORK_PROFILE_UNIFICATION_SEARCH_KEYWORDS =
+                    PREFIX + "WORK_PROFILE_UNIFICATION_SEARCH_KEYWORDS";
+
+            /**
+             * Accounts keywords
+             */
+            public static final String ACCOUNTS_SEARCH_KEYWORDS =
+                    PREFIX + "ACCOUNTS_SEARCH_KEYWORDS";
+
+            /**
+             * Summary for settings preference disabled by administrator
+             */
+            public static final String CONTROLLED_BY_ADMIN_SUMMARY =
+                    PREFIX + "CONTROLLED_BY_ADMIN_SUMMARY";
+
+            /**
+             * User label for a work profile
+             */
+            public static final String WORK_PROFILE_USER_LABEL = PREFIX + "WORK_PROFILE_USER_LABEL";
+
+            /**
+             * Header for items under the work user
+             */
+            public static final String WORK_CATEGORY_HEADER = PREFIX + "WORK_CATEGORY_HEADER";
+
+            /**
+             * Header for items under the personal user
+             */
+            public static final String PERSONAL_CATEGORY_HEADER = PREFIX + "category_personal";
+
+            /**
+             * @hide
+             */
+            static Set<String> buildStringsSet() {
+                Set<String> strings = new HashSet<>();
+                strings.add(FACE_SETTINGS_FOR_WORK_TITLE);
+                strings.add(WORK_PROFILE_FINGERPRINT_LAST_DELETE_MESSAGE);
+                strings.add(WORK_PROFILE_IT_ADMIN_CANT_RESET_SCREEN_LOCK);
+                strings.add(WORK_PROFILE_SCREEN_LOCK_SETUP_MESSAGE);
+                strings.add(WORK_PROFILE_SET_UNLOCK_LAUNCH_PICKER_TITLE);
+                strings.add(WORK_PROFILE_LAST_PATTERN_ATTEMPT_BEFORE_WIPE);
+                strings.add(WORK_PROFILE_LAST_PIN_ATTEMPT_BEFORE_WIPE);
+                strings.add(WORK_PROFILE_LAST_PASSWORD_ATTEMPT_BEFORE_WIPE);
+                strings.add(WORK_PROFILE_LOCK_ATTEMPTS_FAILED);
+                strings.add(ACCESSIBILITY_CATEGORY_WORK);
+                strings.add(ACCESSIBILITY_CATEGORY_PERSONAL);
+                strings.add(ACCESSIBILITY_WORK_ACCOUNT_TITLE);
+                strings.add(ACCESSIBILITY_PERSONAL_ACCOUNT_TITLE);
+                strings.add(WORK_PROFILE_LOCATION_SWITCH_TITLE);
+                strings.add(SET_WORK_PROFILE_PASSWORD_HEADER);
+                strings.add(SET_WORK_PROFILE_PIN_HEADER);
+                strings.add(SET_WORK_PROFILE_PATTERN_HEADER);
+                strings.add(CONFIRM_WORK_PROFILE_PASSWORD_HEADER);
+                strings.add(CONFIRM_WORK_PROFILE_PIN_HEADER);
+                strings.add(CONFIRM_WORK_PROFILE_PATTERN_HEADER);
+                strings.add(REENTER_WORK_PROFILE_PASSWORD_HEADER);
+                strings.add(REENTER_WORK_PROFILE_PIN_HEADER);
+                strings.add(WORK_PROFILE_CONFIRM_PATTERN);
+                strings.add(WORK_PROFILE_CONFIRM_PIN);
+                strings.add(WORK_PROFILE_PASSWORD_REQUIRED);
+                strings.add(WORK_PROFILE_SECURITY_TITLE);
+                strings.add(WORK_PROFILE_UNIFY_LOCKS_TITLE);
+                strings.add(WORK_PROFILE_UNIFY_LOCKS_SUMMARY);
+                strings.add(WORK_PROFILE_UNIFY_LOCKS_DETAIL);
+                strings.add(WORK_PROFILE_UNIFY_LOCKS_NONCOMPLIANT);
+                strings.add(WORK_PROFILE_KEYBOARDS_AND_TOOLS);
+                strings.add(WORK_PROFILE_NOT_AVAILABLE);
+                strings.add(WORK_PROFILE_SETTING);
+                strings.add(WORK_PROFILE_SETTING_ON_SUMMARY);
+                strings.add(WORK_PROFILE_SETTING_OFF_SUMMARY);
+                strings.add(REMOVE_WORK_PROFILE);
+                strings.add(DEVICE_OWNER_INSTALLED_CERTIFICATE_AUTHORITY_WARNING);
+                strings.add(WORK_PROFILE_INSTALLED_CERTIFICATE_AUTHORITY_WARNING);
+                strings.add(WORK_PROFILE_CONFIRM_REMOVE_TITLE);
+                strings.add(WORK_PROFILE_CONFIRM_REMOVE_MESSAGE);
+                strings.add(WORK_APPS_CANNOT_ACCESS_NOTIFICATION_SETTINGS);
+                strings.add(WORK_PROFILE_SOUND_SETTINGS_SECTION_HEADER);
+                strings.add(WORK_PROFILE_USE_PERSONAL_SOUNDS_TITLE);
+                strings.add(WORK_PROFILE_USE_PERSONAL_SOUNDS_SUMMARY);
+                strings.add(WORK_PROFILE_RINGTONE_TITLE);
+                strings.add(WORK_PROFILE_NOTIFICATION_RINGTONE_TITLE);
+                strings.add(WORK_PROFILE_ALARM_RINGTONE_TITLE);
+                strings.add(WORK_PROFILE_SYNC_WITH_PERSONAL_SOUNDS_ACTIVE_SUMMARY);
+                strings.add(ENABLE_WORK_PROFILE_SYNC_WITH_PERSONAL_SOUNDS_DIALOG_TITLE);
+                strings.add(ENABLE_WORK_PROFILE_SYNC_WITH_PERSONAL_SOUNDS_DIALOG_MESSAGE);
+                strings.add(WORK_PROFILE_NOTIFICATIONS_SECTION_HEADER);
+                strings.add(WORK_PROFILE_LOCKED_NOTIFICATION_TITLE);
+                strings.add(WORK_PROFILE_LOCK_SCREEN_REDACT_NOTIFICATION_TITLE);
+                strings.add(WORK_PROFILE_LOCK_SCREEN_REDACT_NOTIFICATION_SUMMARY);
+                strings.add(WORK_PROFILE_NOTIFICATION_LISTENER_BLOCKED);
+                strings.add(CONNECTED_WORK_AND_PERSONAL_APPS_TITLE);
+                strings.add(CONNECTED_APPS_SHARE_PERMISSIONS_AND_DATA);
+                strings.add(ONLY_CONNECT_TRUSTED_APPS);
+                strings.add(HOW_TO_DISCONNECT_APPS);
+                strings.add(CONNECT_APPS_DIALOG_TITLE);
+                strings.add(CONNECT_APPS_DIALOG_SUMMARY);
+                strings.add(APP_CAN_ACCESS_PERSONAL_DATA);
+                strings.add(APP_CAN_ACCESS_PERSONAL_PERMISSIONS);
+                strings.add(INSTALL_IN_WORK_PROFILE_TO_CONNECT_PROMPT);
+                strings.add(INSTALL_IN_PERSONAL_PROFILE_TO_CONNECT_PROMPT);
+                strings.add(WORK_PROFILE_MANAGED_BY);
+                strings.add(MANAGED_BY);
+                strings.add(WORK_PROFILE_DISABLE_USAGE_ACCESS_WARNING);
+                strings.add(DISABLED_BY_IT_ADMIN_TITLE);
+                strings.add(CONTACT_YOUR_IT_ADMIN);
+                strings.add(WORK_PROFILE_ADMIN_POLICIES_WARNING);
+                strings.add(USER_ADMIN_POLICIES_WARNING);
+                strings.add(DEVICE_ADMIN_POLICIES_WARNING);
+                strings.add(WORK_PROFILE_OFF_CONDITION_TITLE);
+                strings.add(MANAGED_PROFILE_SETTINGS_TITLE);
+                strings.add(WORK_PROFILE_CONTACT_SEARCH_TITLE);
+                strings.add(WORK_PROFILE_CONTACT_SEARCH_SUMMARY);
+                strings.add(CROSS_PROFILE_CALENDAR_TITLE);
+                strings.add(CROSS_PROFILE_CALENDAR_SUMMARY);
+                strings.add(ALWAYS_ON_VPN_PERSONAL_PROFILE);
+                strings.add(ALWAYS_ON_VPN_DEVICE);
+                strings.add(ALWAYS_ON_VPN_WORK_PROFILE);
+                strings.add(CA_CERTS_PERSONAL_PROFILE);
+                strings.add(CA_CERTS_WORK_PROFILE);
+                strings.add(CA_CERTS_DEVICE);
+                strings.add(ADMIN_CAN_LOCK_DEVICE);
+                strings.add(ADMIN_CAN_WIPE_DEVICE);
+                strings.add(ADMIN_CONFIGURED_FAILED_PASSWORD_WIPE_DEVICE);
+                strings.add(ADMIN_CONFIGURED_FAILED_PASSWORD_WIPE_WORK_PROFILE);
+                strings.add(DEVICE_MANAGED_WITHOUT_NAME);
+                strings.add(DEVICE_MANAGED_WITH_NAME);
+                strings.add(WORK_PROFILE_APP_SUBTEXT);
+                strings.add(PERSONAL_PROFILE_APP_SUBTEXT);
+                strings.add(FINGERPRINT_FOR_WORK);
+                strings.add(FACE_UNLOCK_DISABLED);
+                strings.add(FINGERPRINT_UNLOCK_DISABLED);
+                strings.add(FINGERPRINT_UNLOCK_DISABLED_EXPLANATION);
+                strings.add(PIN_RECENTLY_USED);
+                strings.add(PASSWORD_RECENTLY_USED);
+                strings.add(MANAGE_DEVICE_ADMIN_APPS);
+                strings.add(NUMBER_OF_DEVICE_ADMINS_NONE);
+                strings.add(NUMBER_OF_DEVICE_ADMINS);
+                strings.add(FORGOT_PASSWORD_TITLE);
+                strings.add(FORGOT_PASSWORD_TEXT);
+                strings.add(ERROR_MOVE_DEVICE_ADMIN);
+                strings.add(DEVICE_ADMIN_SETTINGS_TITLE);
+                strings.add(REMOVE_DEVICE_ADMIN);
+                strings.add(UNINSTALL_DEVICE_ADMIN);
+                strings.add(REMOVE_AND_UNINSTALL_DEVICE_ADMIN);
+                strings.add(SELECT_DEVICE_ADMIN_APPS);
+                strings.add(NO_DEVICE_ADMINS);
+                strings.add(ACTIVATE_DEVICE_ADMIN_APP);
+                strings.add(ACTIVATE_THIS_DEVICE_ADMIN_APP);
+                strings.add(ACTIVATE_DEVICE_ADMIN_APP_TITLE);
+                strings.add(NEW_DEVICE_ADMIN_WARNING);
+                strings.add(NEW_DEVICE_ADMIN_WARNING_SIMPLIFIED);
+                strings.add(ACTIVE_DEVICE_ADMIN_WARNING);
+                strings.add(SET_PROFILE_OWNER_TITLE);
+                strings.add(SET_PROFILE_OWNER_DIALOG_TITLE);
+                strings.add(SET_PROFILE_OWNER_POSTSETUP_WARNING);
+                strings.add(OTHER_OPTIONS_DISABLED_BY_ADMIN);
+                strings.add(REMOVE_ACCOUNT_FAILED_ADMIN_RESTRICTION);
+                strings.add(IT_ADMIN_POLICY_DISABLING_INFO_URL);
+                strings.add(SHARE_REMOTE_BUGREPORT_DIALOG_TITLE);
+                strings.add(SHARE_REMOTE_BUGREPORT_FINISHED_REQUEST_CONSENT);
+                strings.add(SHARE_REMOTE_BUGREPORT_NOT_FINISHED_REQUEST_CONSENT);
+                strings.add(SHARING_REMOTE_BUGREPORT_MESSAGE);
+                strings.add(MANAGED_DEVICE_INFO);
+                strings.add(MANAGED_DEVICE_INFO_SUMMARY);
+                strings.add(MANAGED_DEVICE_INFO_SUMMARY_WITH_NAME);
+                strings.add(ENTERPRISE_PRIVACY_HEADER);
+                strings.add(INFORMATION_YOUR_ORGANIZATION_CAN_SEE_TITLE);
+                strings.add(CHANGES_MADE_BY_YOUR_ORGANIZATION_ADMIN_TITLE);
+                strings.add(YOUR_ACCESS_TO_THIS_DEVICE_TITLE);
+                strings.add(ADMIN_CAN_SEE_WORK_DATA_WARNING);
+                strings.add(ADMIN_CAN_SEE_APPS_WARNING);
+                strings.add(ADMIN_CAN_SEE_USAGE_WARNING);
+                strings.add(ADMIN_CAN_SEE_NETWORK_LOGS_WARNING);
+                strings.add(ADMIN_CAN_SEE_BUG_REPORT_WARNING);
+                strings.add(ADMIN_CAN_SEE_SECURITY_LOGS_WARNING);
+                strings.add(ADMIN_ACTION_NONE);
+                strings.add(ADMIN_ACTION_APPS_INSTALLED);
+                strings.add(ADMIN_ACTION_APPS_COUNT_ESTIMATED);
+                strings.add(ADMIN_ACTIONS_APPS_COUNT_MINIMUM);
+                strings.add(ADMIN_ACTION_ACCESS_LOCATION);
+                strings.add(ADMIN_ACTION_ACCESS_MICROPHONE);
+                strings.add(ADMIN_ACTION_ACCESS_CAMERA);
+                strings.add(ADMIN_ACTION_SET_DEFAULT_APPS);
+                strings.add(ADMIN_ACTIONS_APPS_COUNT);
+                strings.add(ADMIN_ACTION_SET_CURRENT_INPUT_METHOD);
+                strings.add(ADMIN_ACTION_SET_INPUT_METHOD_NAME);
+                strings.add(ADMIN_ACTION_SET_HTTP_PROXY);
+                strings.add(WORK_PROFILE_PRIVACY_POLICY_INFO_SUMMARY);
+                strings.add(WORK_PROFILE_PRIVACY_POLICY_INFO);
+                strings.add(CONNECTED_APPS_SEARCH_KEYWORDS);
+                strings.add(WORK_PROFILE_UNIFICATION_SEARCH_KEYWORDS);
+                strings.add(ACCOUNTS_SEARCH_KEYWORDS);
+                strings.add(CONTROLLED_BY_ADMIN_SUMMARY);
+                strings.add(WORK_PROFILE_USER_LABEL);
+                strings.add(WORK_CATEGORY_HEADER);
+                strings.add(PERSONAL_CATEGORY_HEADER);
+                return strings;
+            }
+        }
+
+        /**
+         * Class containing the identifiers used to update device management-related system strings
          * in the Launcher package.
          *
          * @hide
          */
         public static final class Launcher {
 
-            private Launcher(){}
+            private Launcher() {
+            }
 
             private static final String PREFIX = "Launcher.";
 
@@ -576,6 +2016,7 @@ public final class DevicePolicyResources {
 
             private SystemUi() {
             }
+
             private static final String PREFIX = "SystemUi.";
 
             /**
@@ -649,9 +2090,9 @@ public final class DevicePolicyResources {
                     PREFIX + "QS_MSG_NAMED_WORK_PROFILE_MONITORING";
 
             /**
-            * Disclosure at the bottom of Quick Settings to indicate network activity is visible to
+             * Disclosure at the bottom of Quick Settings to indicate network activity is visible to
              * admin.
-            */
+             */
             public static final String QS_MSG_WORK_PROFILE_NETWORK =
                     PREFIX + "QS_MSG_WORK_PROFILE_NETWORK";
 
