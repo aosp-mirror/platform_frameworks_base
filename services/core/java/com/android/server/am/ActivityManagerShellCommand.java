@@ -98,6 +98,7 @@ import android.util.DebugUtils;
 import android.util.DisplayMetrics;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
+import android.window.SplashScreen;
 
 import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.util.HexDump;
@@ -178,6 +179,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private boolean mIsLockTask;
     private boolean mAsync;
     private BroadcastOptions mBroadcastOptions;
+    private boolean mShowSplashScreen;
 
     final boolean mDumping;
 
@@ -428,6 +430,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     mBroadcastOptions.setBackgroundActivityStartsAllowed(true);
                 } else if (opt.equals("--async")) {
                     mAsync = true;
+                } else if (opt.equals("--splashscreen-show-icon")) {
+                    mShowSplashScreen = true;
                 } else {
                     return false;
                 }
@@ -565,6 +569,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     options = ActivityOptions.makeBasic();
                 }
                 options.setLockTaskEnabled(true);
+            }
+            if (mShowSplashScreen) {
+                if (options == null) {
+                    options = ActivityOptions.makeBasic();
+                }
+                options.setSplashScreenStyle(SplashScreen.SPLASH_SCREEN_STYLE_ICON);
             }
             if (mWaitOption) {
                 result = mInternal.startActivityAndWait(null, SHELL_PACKAGE_NAME, null, intent,
@@ -3301,6 +3311,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --windowingMode <WINDOWING_MODE>: The windowing mode to launch the activity into.");
             pw.println("      --activityType <ACTIVITY_TYPE>: The activity type to launch the activity as.");
             pw.println("      --display <DISPLAY_ID>: The display to launch the activity into.");
+            pw.println("      --splashscreen-icon: Show the splash screen icon on launch.");
             pw.println("  start-service [--user <USER_ID> | current] <INTENT>");
             pw.println("      Start a Service.  Options are:");
             pw.println("      --user <USER_ID> | current: Specify which user to run as; if not");
