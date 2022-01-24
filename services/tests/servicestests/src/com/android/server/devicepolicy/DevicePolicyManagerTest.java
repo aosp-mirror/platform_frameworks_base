@@ -40,6 +40,7 @@ import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE;
 import static android.net.InetAddresses.parseNumericAddress;
+import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
@@ -4122,6 +4123,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         ProfileNetworkPreference preferenceDetails2 =
                 new ProfileNetworkPreference.Builder()
                         .setPreference(PROFILE_NETWORK_PREFERENCE_ENTERPRISE)
+                        .setPreferenceEnterpriseId(NET_ENTERPRISE_ID_1)
                         .build();
         List<ProfileNetworkPreference> preferences2 = new ArrayList<>();
         preferences2.add(preferenceDetails);

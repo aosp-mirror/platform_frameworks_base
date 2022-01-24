@@ -109,6 +109,7 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE;
+import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
@@ -17793,7 +17794,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 ? PROFILE_NETWORK_PREFERENCE_ENTERPRISE : PROFILE_NETWORK_PREFERENCE_DEFAULT;
         ProfileNetworkPreference.Builder preferenceBuilder =
                 new ProfileNetworkPreference.Builder();
-        preferenceBuilder.setPreference(networkPreference);
+        if (preferentialNetworkServiceEnabled) {
+            preferenceBuilder.setPreference(PROFILE_NETWORK_PREFERENCE_ENTERPRISE);
+            preferenceBuilder.setPreferenceEnterpriseId(NET_ENTERPRISE_ID_1);
+        } else {
+            preferenceBuilder.setPreference(PROFILE_NETWORK_PREFERENCE_DEFAULT);
+        }
         List<ProfileNetworkPreference> preferences = new ArrayList<>();
         preferences.add(preferenceBuilder.build());
         mInjector.binderWithCleanCallingIdentity(() ->
