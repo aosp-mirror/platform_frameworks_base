@@ -15067,7 +15067,7 @@ public class DevicePolicyManager {
         Objects.requireNonNull(stringId, "stringId can't be null");
         Objects.requireNonNull(defaultStringLoader, "defaultStringLoader can't be null");
 
-        if (stringId.equals(DevicePolicyResources.Strings.INVALID_ID)) {
+        if (stringId.equals(DevicePolicyResources.Strings.UNDEFINED)) {
             return ParcelableResource.loadDefaultString(defaultStringLoader);
         }
         if (mService != null) {
@@ -15115,7 +15115,7 @@ public class DevicePolicyManager {
         Objects.requireNonNull(stringId, "stringId can't be null");
         Objects.requireNonNull(defaultStringLoader, "defaultStringLoader can't be null");
 
-        if (stringId.equals(DevicePolicyResources.Strings.INVALID_ID)) {
+        if (stringId.equals(DevicePolicyResources.Strings.UNDEFINED)) {
             return ParcelableResource.loadDefaultString(defaultStringLoader);
         }
         if (mService != null) {
