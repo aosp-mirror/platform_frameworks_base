@@ -54,7 +54,7 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSpec) {
+class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppFromLauncherTransition(testSpec) {
     /**
      * Defines the transition used to run the test
      */
@@ -100,11 +100,6 @@ class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
     @Test
     override fun appWindowReplacesLauncherAsTopWindow() =
         super.appWindowReplacesLauncherAsTopWindow()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
-    override fun launcherWindowBecomesInvisible() = super.launcherWindowBecomesInvisible()
 
     /** {@inheritDoc} */
     @Presubmit
