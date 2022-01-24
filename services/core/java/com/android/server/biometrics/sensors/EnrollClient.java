@@ -20,13 +20,14 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricOverlayConstants;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 
 import java.util.Arrays;
 import java.util.function.Supplier;
@@ -53,10 +54,10 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> implements En
     public EnrollClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner, @NonNull BiometricUtils utils,
-            int timeoutSec, int statsModality, int sensorId, boolean shouldVibrate) {
+            int timeoutSec, int sensorId, boolean shouldVibrate,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
-                shouldVibrate, statsModality, BiometricsProtoEnums.ACTION_ENROLL,
-                BiometricsProtoEnums.CLIENT_UNKNOWN);
+                shouldVibrate, logger, biometricContext);
         mBiometricUtils = utils;
         mHardwareAuthToken = Arrays.copyOf(hardwareAuthToken, hardwareAuthToken.length);
         mTimeoutSec = timeoutSec;

@@ -23,6 +23,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.RevokeChallengeClient;
 
 import java.util.function.Supplier;
@@ -37,8 +39,9 @@ public class FaceRevokeChallengeClient extends RevokeChallengeClient<IBiometrics
 
     FaceRevokeChallengeClient(@NonNull Context context,
             @NonNull Supplier<IBiometricsFace> lazyDaemon, @NonNull IBinder token,
-            int userId, @NonNull String owner, int sensorId) {
-        super(context, lazyDaemon, token, userId, owner, sensorId);
+            int userId, @NonNull String owner, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext) {
+        super(context, lazyDaemon, token, userId, owner, sensorId, logger, biometricContext);
     }
 
     @Override

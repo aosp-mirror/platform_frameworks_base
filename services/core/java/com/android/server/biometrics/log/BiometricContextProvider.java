@@ -16,14 +16,23 @@
 
 package com.android.server.biometrics.log;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.IBiometricContextListener;
+import android.hardware.biometrics.common.OperationContext;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Singleton;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * A default provider for {@link BiometricContext}.
@@ -32,33 +41,65 @@ class BiometricContextProvider implements BiometricContext {
 
     private static final String TAG = "BiometricContextProvider";
 
-    private BiometricContextProvider() {}
-
     static final Singleton<BiometricContextProvider> sInstance =
             new Singleton<BiometricContextProvider>() {
-        @Override
-        protected BiometricContextProvider create() {
-            final BiometricContextProvider provider =  new BiometricContextProvider();
-            try {
-                IStatusBarService.Stub.asInterface(
-                        ServiceManager.getService(Context.STATUS_BAR_SERVICE))
-                            .setBiometicContextListener(new IBiometricContextListener.Stub() {
-                                @Override
-                                public void onDozeChanged(boolean isDozing) {
-                                    provider.mIsDozing = isDozing;
-                                }
-                            });
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to register biometric context listener", e);
-            }
-            return provider;
+                @Override
+                protected BiometricContextProvider create() {
+                    return new BiometricContextProvider(IStatusBarService.Stub.asInterface(
+                            ServiceManager.getService(
+                                    Context.STATUS_BAR_SERVICE)), null /* handler */);
+                }
+            };
+
+    @NonNull
+    private final Map<OperationContext, Consumer<OperationContext>> mSubscribers =
+            new ConcurrentHashMap<>();
+
+    @VisibleForTesting
+    BiometricContextProvider(@NonNull IStatusBarService service, @Nullable Handler handler) {
+        try {
+            service.setBiometicContextListener(new IBiometricContextListener.Stub() {
+                @Override
+                public void onDozeChanged(boolean isDozing) {
+                    mIsDozing = isDozing;
+                    notifyChanged();
+                }
+
+                private void notifyChanged() {
+                    if (handler != null) {
+                        handler.post(() -> notifySubscribers());
+                    } else {
+                        notifySubscribers();
+                    }
+                }
+            });
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Unable to register biometric context listener", e);
         }
-    };
+    }
 
     private boolean mIsDozing = false;
 
     @Override
-    public boolean isDozing() {
+    public boolean isAoD() {
         return mIsDozing;
+    }
+
+    @Override
+    public void subscribe(@NonNull OperationContext context,
+            @NonNull Consumer<OperationContext> consumer) {
+        mSubscribers.put(context, consumer);
+    }
+
+    @Override
+    public void unsubscribe(@NonNull OperationContext context) {
+        mSubscribers.remove(context);
+    }
+
+    private void notifySubscribers() {
+        mSubscribers.forEach((context, consumer) -> {
+            context.isAoD = mIsDozing;
+            consumer.accept(context);
+        });
     }
 }

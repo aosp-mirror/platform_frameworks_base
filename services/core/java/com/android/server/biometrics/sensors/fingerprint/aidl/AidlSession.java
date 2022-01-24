@@ -16,10 +16,10 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static com.android.server.biometrics.sensors.fingerprint.aidl.Sensor.HalSessionCallback;
+
 import android.annotation.NonNull;
 import android.hardware.biometrics.fingerprint.ISession;
-
-import static com.android.server.biometrics.sensors.fingerprint.aidl.Sensor.HalSessionCallback;
 
 /**
  * A holder for an AIDL {@link ISession} with additional metadata about the current user

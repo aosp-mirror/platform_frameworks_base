@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricOverlayConstants;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.common.OperationReason;
@@ -30,6 +29,8 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -54,11 +55,10 @@ class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements 
             @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int sensorId,
-            @Nullable IUdfpsOverlayController udfpsOverlayController, boolean isStrongBiometric,
-            int statsClient) {
+            @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
+            @Nullable IUdfpsOverlayController udfpsOverlayController, boolean isStrongBiometric) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
-                true /* shouldVibrate */, BiometricsProtoEnums.MODALITY_FINGERPRINT,
-                BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
+                true /* shouldVibrate */, biometricLogger, biometricContext);
         setRequestId(requestId);
         mIsStrongBiometric = isStrongBiometric;
         mSensorOverlays = new SensorOverlays(udfpsOverlayController, null /* sideFpsController*/);
@@ -100,10 +100,10 @@ class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements 
 
         if (session.hasContextMethods()) {
             final OperationContext context = new OperationContext();
-            // TODO: add reason, id, and isAoD
+            // TODO: add reason, id
             context.id = 0;
             context.reason = OperationReason.UNKNOWN;
-            context.isAoD = false;
+            context.isAoD = getBiometricContext().isAoD();
             context.isCrypto = isCryptoOperation();
             return session.getSession().detectInteractionWithContext(context);
         } else {

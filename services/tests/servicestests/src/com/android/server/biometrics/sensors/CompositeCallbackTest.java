@@ -64,7 +64,7 @@ public class CompositeCallbackTest {
         ClientMonitorCompositeCallback callback = new ClientMonitorCompositeCallback(callbacks);
 
         callback.onClientStarted(mClientMonitor);
-        final InOrder order = inOrder(expected);
+        final InOrder order = inOrder((Object[]) expected);
         for (ClientMonitorCallback cb : expected) {
             order.verify(cb).onClientStarted(eq(mClientMonitor));
         }

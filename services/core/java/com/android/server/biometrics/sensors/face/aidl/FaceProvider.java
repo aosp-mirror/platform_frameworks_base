@@ -23,6 +23,7 @@ import android.app.ActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.ComponentInfoInternal;
 import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
@@ -47,6 +48,8 @@ import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
@@ -237,6 +240,9 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             final FaceGetAuthenticatorIdClient client = new FaceGetAuthenticatorIdClient(
                     mContext, mSensors.get(sensorId).getLazySession(), userId,
                     mContext.getOpPackageName(), sensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    BiometricContext.getInstance(),
                     mSensors.get(sensorId).getAuthenticatorIds());
 
             scheduleForSensor(sensorId, client);
@@ -247,6 +253,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mHandler.post(() -> {
             final InvalidationRequesterClient<Face> client =
                     new InvalidationRequesterClient<>(mContext, userId, sensorId,
+                            BiometricLogger.ofUnknown(mContext), BiometricContext.getInstance(),
                             FaceUtils.getInstance(sensorId));
             scheduleForSensor(sensorId, client);
         });
@@ -285,6 +292,9 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mHandler.post(() -> {
             final FaceInvalidationClient client = new FaceInvalidationClient(mContext,
                     mSensors.get(sensorId).getLazySession(), userId, sensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    BiometricContext.getInstance(),
                     mSensors.get(sensorId).getAuthenticatorIds(), callback);
             scheduleForSensor(sensorId, client);
         });
@@ -311,7 +321,10 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mHandler.post(() -> {
             final FaceGenerateChallengeClient client = new FaceGenerateChallengeClient(mContext,
                     mSensors.get(sensorId).getLazySession(), token,
-                    new ClientMonitorCallbackConverter(receiver), userId, opPackageName, sensorId);
+                    new ClientMonitorCallbackConverter(receiver), userId, opPackageName, sensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    BiometricContext.getInstance());
             scheduleForSensor(sensorId, client);
         });
     }
@@ -322,7 +335,9 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mHandler.post(() -> {
             final FaceRevokeChallengeClient client = new FaceRevokeChallengeClient(mContext,
                     mSensors.get(sensorId).getLazySession(), token, userId, opPackageName, sensorId,
-                    challenge);
+                    createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    BiometricContext.getInstance(), challenge);
             scheduleForSensor(sensorId, client);
         });
     }
@@ -340,8 +355,10 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                     mSensors.get(sensorId).getLazySession(), token,
                     new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
                     opPackageName, id, FaceUtils.getInstance(sensorId), disabledFeatures,
-                    ENROLL_TIMEOUT_SEC, previewSurface, sensorId, maxTemplatesPerUser,
-                    debugConsent);
+                    ENROLL_TIMEOUT_SEC, previewSurface, sensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_ENROLL,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    BiometricContext.getInstance(), maxTemplatesPerUser, debugConsent);
             scheduleForSensor(sensorId, client, new ClientMonitorCallback() {
                 @Override
                 public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
@@ -372,8 +389,9 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             final boolean isStrongBiometric = Utils.isStrongBiometric(sensorId);
             final FaceDetectClient client = new FaceDetectClient(mContext,
                     mSensors.get(sensorId).getLazySession(),
-                    token, id, callback, userId, opPackageName,
-                    sensorId, isStrongBiometric, statsClient);
+                    token, id, callback, userId, opPackageName, sensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient),
+                    BiometricContext.getInstance(), isStrongBiometric);
             scheduleForSensor(sensorId, client);
         });
 
@@ -396,7 +414,9 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             final FaceAuthenticationClient client = new FaceAuthenticationClient(
                     mContext, mSensors.get(sensorId).getLazySession(), token, requestId, callback,
                     userId, operationId, restricted, opPackageName, cookie,
-                    false /* requireConfirmation */, sensorId, isStrongBiometric, statsClient,
+                    false /* requireConfirmation */, sensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient),
+                    BiometricContext.getInstance(), isStrongBiometric,
                     mUsageStats, mSensors.get(sensorId).getLockoutCache(),
                     allowBackgroundAuthentication, isKeyguardBypassEnabled);
             scheduleForSensor(sensorId, client);
@@ -450,6 +470,9 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                     mSensors.get(sensorId).getLazySession(), token,
                     new ClientMonitorCallbackConverter(receiver), faceIds, userId,
                     opPackageName, FaceUtils.getInstance(sensorId), sensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_REMOVE,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    BiometricContext.getInstance(),
                     mSensors.get(sensorId).getAuthenticatorIds());
             scheduleForSensor(sensorId, client);
         });
@@ -460,7 +483,10 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
         mHandler.post(() -> {
             final FaceResetLockoutClient client = new FaceResetLockoutClient(
                     mContext, mSensors.get(sensorId).getLazySession(), userId,
-                    mContext.getOpPackageName(), sensorId, hardwareAuthToken,
+                    mContext.getOpPackageName(), sensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    BiometricContext.getInstance(), hardwareAuthToken,
                     mSensors.get(sensorId).getLockoutCache(), mLockoutResetDispatcher);
 
             scheduleForSensor(sensorId, client);
@@ -481,7 +507,9 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             final FaceSetFeatureClient client = new FaceSetFeatureClient(mContext,
                     mSensors.get(sensorId).getLazySession(), token,
                     new ClientMonitorCallbackConverter(receiver), userId,
-                    mContext.getOpPackageName(), sensorId, feature, enabled, hardwareAuthToken);
+                    mContext.getOpPackageName(), sensorId,
+                    BiometricLogger.ofUnknown(mContext), BiometricContext.getInstance(),
+                    feature, enabled, hardwareAuthToken);
             scheduleForSensor(sensorId, client);
         });
     }
@@ -498,7 +526,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             }
             final FaceGetFeatureClient client = new FaceGetFeatureClient(mContext,
                     mSensors.get(sensorId).getLazySession(), token, callback, userId,
-                    mContext.getOpPackageName(), sensorId);
+                    mContext.getOpPackageName(), sensorId, BiometricLogger.ofUnknown(mContext),
+                    BiometricContext.getInstance());
             scheduleForSensor(sensorId, client);
         });
     }
@@ -518,11 +547,19 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
             final FaceInternalCleanupClient client =
                     new FaceInternalCleanupClient(mContext,
                             mSensors.get(sensorId).getLazySession(), userId,
-                            mContext.getOpPackageName(), sensorId, enrolledList,
+                            mContext.getOpPackageName(), sensorId,
+                            createLogger(BiometricsProtoEnums.ACTION_ENUMERATE,
+                                    BiometricsProtoEnums.CLIENT_UNKNOWN),
+                            BiometricContext.getInstance(), enrolledList,
                             FaceUtils.getInstance(sensorId),
                             mSensors.get(sensorId).getAuthenticatorIds());
             scheduleForSensor(sensorId, client, callback);
         });
+    }
+
+    private BiometricLogger createLogger(int statsAction, int statsClient) {
+        return new BiometricLogger(mContext, BiometricsProtoEnums.MODALITY_FACE,
+                statsAction, statsClient);
     }
 
     @Override

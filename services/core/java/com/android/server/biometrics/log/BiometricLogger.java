@@ -79,6 +79,12 @@ public class BiometricLogger {
         }
     };
 
+    /** Get a new logger with all unknown fields (for operations that do not require logs). */
+    public static BiometricLogger ofUnknown(@NonNull Context context) {
+        return new BiometricLogger(context, BiometricsProtoEnums.MODALITY_UNKNOWN,
+                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
+    }
+
     /**
      * @param context system_server context
      * @param statsModality One of {@link BiometricsProtoEnums} MODALITY_* constants.
@@ -101,6 +107,11 @@ public class BiometricLogger {
         mStatsClient = statsClient;
         mSink = logSink;
         mSensorManager = sensorManager;
+    }
+
+    /** Creates a new logger with the action replaced with the new action. */
+    public BiometricLogger swapAction(@NonNull Context context, int statsAction) {
+        return new BiometricLogger(context, mStatsModality, statsAction, mStatsClient);
     }
 
     /** Disable logging metrics and only log critical events, such as system health issues. */

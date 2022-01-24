@@ -18,11 +18,12 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
@@ -36,11 +37,12 @@ class FingerprintGetAuthenticatorIdClient extends HalClientMonitor<AidlSession> 
     private final Map<Integer, Long> mAuthenticatorIds;
 
     FingerprintGetAuthenticatorIdClient(@NonNull Context context,
-            @NonNull Supplier<AidlSession> lazyDaemon, int userId, @NonNull String owner,
-            int sensorId, Map<Integer, Long> authenticatorIds) {
+            @NonNull Supplier<AidlSession> lazyDaemon,
+            int userId, @NonNull String owner, int sensorId,
+            @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
+            Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
-                0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_FINGERPRINT,
-                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
+                0 /* cookie */, sensorId, biometricLogger, biometricContext);
         mAuthenticatorIds = authenticatorIds;
     }
 

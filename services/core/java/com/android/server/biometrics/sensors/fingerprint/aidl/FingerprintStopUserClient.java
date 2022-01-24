@@ -23,6 +23,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.StopUserClient;
 
@@ -33,8 +35,10 @@ public class FingerprintStopUserClient extends StopUserClient<AidlSession> {
 
     public FingerprintStopUserClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon, @Nullable IBinder token, int userId,
-            int sensorId, @NonNull UserStoppedCallback callback) {
-        super(context, lazyDaemon, token, userId, sensorId, callback);
+            int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+            @NonNull UserStoppedCallback callback) {
+        super(context, lazyDaemon, token, userId, sensorId, logger, biometricContext, callback);
     }
 
     @Override

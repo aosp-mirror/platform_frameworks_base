@@ -23,6 +23,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.RevokeChallengeClient;
 
 import java.util.function.Supplier;
@@ -38,8 +40,10 @@ class FingerprintRevokeChallengeClient extends RevokeChallengeClient<AidlSession
 
     FingerprintRevokeChallengeClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon, @NonNull IBinder token,
-            int userId, @NonNull String owner, int sensorId, long challenge) {
-        super(context, lazyDaemon, token, userId, owner, sensorId);
+            int userId, @NonNull String owner, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+            long challenge) {
+        super(context, lazyDaemon, token, userId, owner, sensorId, logger, biometricContext);
         mChallenge = challenge;
     }
 

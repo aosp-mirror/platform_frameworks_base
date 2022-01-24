@@ -16,6 +16,11 @@
 
 package com.android.server.biometrics.log;
 
+import android.annotation.NonNull;
+import android.hardware.biometrics.common.OperationContext;
+
+import java.util.function.Consumer;
+
 /**
  * Cache for system state not directly related to biometric operations that is used for
  * logging or optimizations.
@@ -26,6 +31,17 @@ public interface BiometricContext {
         return BiometricContextProvider.sInstance.get();
     }
 
-    /** If the display is off or in AOD. */
-    boolean isDozing();
+    /** If the display is in AOD. */
+    boolean isAoD();
+
+    /**
+     * Subscribe to context changes.
+     *
+     * @param context context that will be modified when changed
+     * @param consumer callback when the context is modified
+     */
+    void subscribe(@NonNull OperationContext context, @NonNull Consumer<OperationContext> consumer);
+
+    /** Unsubscribe from context changes. */
+    void unsubscribe(@NonNull OperationContext context);
 }

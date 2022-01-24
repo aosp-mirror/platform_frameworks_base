@@ -27,6 +27,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.StartUserClient;
 
@@ -40,9 +42,10 @@ public class FaceStartUserClient extends StartUserClient<IFace, ISession> {
     public FaceStartUserClient(@NonNull Context context,
             @NonNull Supplier<IFace> lazyDaemon,
             @Nullable IBinder token, int userId, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             @NonNull ISessionCallback sessionCallback,
             @NonNull UserStartedCallback<ISession> callback) {
-        super(context, lazyDaemon, token, userId, sensorId, callback);
+        super(context, lazyDaemon, token, userId, sensorId, logger, biometricContext, callback);
         mSessionCallback = sessionCallback;
     }
 

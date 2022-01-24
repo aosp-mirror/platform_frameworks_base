@@ -19,8 +19,11 @@ package com.android.server.biometrics.sensors;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.common.OperationContext;
 import android.os.IBinder;
+
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 
 import java.util.function.Supplier;
 
@@ -33,6 +36,9 @@ public abstract class HalClientMonitor<T> extends BaseClientMonitor {
     @NonNull
     protected final Supplier<T> mLazyDaemon;
 
+    @NonNull
+    protected final OperationContext mOperationContext = new OperationContext();
+
     /**
      * @param context    system_server context
      * @param lazyDaemon pointer for lazy retrieval of the HAL
@@ -42,16 +48,15 @@ public abstract class HalClientMonitor<T> extends BaseClientMonitor {
      * @param owner      name of the client that owns this
      * @param cookie     BiometricPrompt authentication cookie (to be moved into a subclass soon)
      * @param sensorId   ID of the sensor that the operation should be requested of
-     * @param statsModality One of {@link BiometricsProtoEnums} MODALITY_* constants
-     * @param statsAction   One of {@link BiometricsProtoEnums} ACTION_* constants
-     * @param statsClient   One of {@link BiometricsProtoEnums} CLIENT_* constants
+     * @param biometricLogger framework stats logger
+     * @param biometricContext system context metadata
      */
     public HalClientMonitor(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @Nullable IBinder token, @Nullable ClientMonitorCallbackConverter listener, int userId,
-            @NonNull String owner, int cookie, int sensorId, int statsModality, int statsAction,
-            int statsClient) {
-        super(context, token, listener, userId, owner, cookie, sensorId, statsModality,
-                statsAction, statsClient);
+            @NonNull String owner, int cookie, int sensorId,
+            @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext) {
+        super(context, token, listener, userId, owner, cookie, sensorId,
+                biometricLogger, biometricContext);
         mLazyDaemon = lazyDaemon;
     }
 
@@ -71,4 +76,12 @@ public abstract class HalClientMonitor<T> extends BaseClientMonitor {
      * {@link #start(ClientMonitorCallback)}.
      */
     public abstract void unableToStart();
+
+    @Override
+    public void destroy() {
+        super.destroy();
+
+        // subclasses should do this earlier in most cases, but ensure it happens now
+        getBiometricContext().unsubscribe(mOperationContext);
+    }
 }

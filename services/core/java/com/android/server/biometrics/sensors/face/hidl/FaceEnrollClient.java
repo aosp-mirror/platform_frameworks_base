@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricFaceConstants;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.Status;
 import android.hardware.face.Face;
@@ -32,6 +31,8 @@ import android.view.Surface;
 
 import com.android.internal.R;
 import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -58,10 +59,10 @@ public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner, long requestId,
             @NonNull BiometricUtils<Face> utils, @NonNull int[] disabledFeatures, int timeoutSec,
-            @Nullable Surface previewSurface, int sensorId) {
+            @Nullable Surface previewSurface, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
-                timeoutSec, BiometricsProtoEnums.MODALITY_FACE, sensorId,
-                false /* shouldVibrate */);
+                timeoutSec, sensorId, false /* shouldVibrate */, logger, biometricContext);
         setRequestId(requestId);
         mDisabledFeatures = Arrays.copyOf(disabledFeatures, disabledFeatures.length);
         mEnrollIgnoreList = getContext().getResources()
