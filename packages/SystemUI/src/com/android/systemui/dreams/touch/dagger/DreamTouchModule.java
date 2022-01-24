@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams.dagger;
-
-import com.android.systemui.dreams.touch.dagger.DreamTouchModule;
+package com.android.systemui.dreams.touch.dagger;
 
 import dagger.Module;
 
 /**
- * Dagger Module providing Communal-related functionality.
+ * {@link DreamTouchModule} encapsulates dream touch-related components.
  */
-@Module(includes = {
-            DreamTouchModule.class,
-        },
-        subcomponents = {
-            DreamOverlayComponent.class,
-        })
-public interface DreamModule {
+@Module(subcomponents = {
+        InputSessionComponent.class,
+})
+public interface DreamTouchModule {
+    String INPUT_SESSION_NAME = "INPUT_SESSION_NAME";
+    String PILFER_ON_GESTURE_CONSUME = "PILFER_ON_GESTURE_CONSUME";
 }

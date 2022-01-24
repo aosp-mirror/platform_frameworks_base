@@ -81,7 +81,7 @@ public class ComplicationLayoutParamsTest extends SysuiTestCase {
                 final boolean properDirection = (invalidPosition & position) != invalidPosition;
 
                 try {
-                    final ComplicationLayoutParams params = new ComplicationLayoutParams(
+                    new ComplicationLayoutParams(
                             100,
                             100,
                             position,

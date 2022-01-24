@@ -33,12 +33,12 @@ import android.view.WindowManagerImpl;
 
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
+import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
@@ -65,10 +65,6 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     @Rule
     public final LeakCheckedTest.SysuiLeakCheck mLeakCheck = new LeakCheckedTest.SysuiLeakCheck();
 
-    @Rule
-    public SysuiTestableContext mContext = new SysuiTestableContext(
-            InstrumentationRegistry.getContext(), mLeakCheck);
-
     WindowManager.LayoutParams mWindowParams = new WindowManager.LayoutParams();
 
     @Mock
@@ -89,6 +85,13 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     @Mock
     DreamOverlayContainerViewController mDreamOverlayContainerViewController;
 
+    @Mock
+    KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+
+    @Mock
+    DreamOverlayTouchMonitor mDreamOverlayTouchMonitor;
+
+
     DreamOverlayService mService;
 
     @Before
@@ -102,6 +105,8 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 .thenReturn(mLifecycleOwner);
         when(mDreamOverlayComponent.getLifecycleRegistry())
                 .thenReturn(mLifecycleRegistry);
+        when(mDreamOverlayComponent.getDreamOverlayTouchMonitor())
+                .thenReturn(mDreamOverlayTouchMonitor);
         when(mDreamOverlayComponentFactory
                 .create(any(), any()))
                 .thenReturn(mDreamOverlayComponent);
@@ -109,7 +114,8 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 .thenReturn(mDreamOverlayContainerView);
 
         mService = new DreamOverlayService(mContext, mMainExecutor,
-                mDreamOverlayComponentFactory);
+                mDreamOverlayComponentFactory,
+                mKeyguardUpdateMonitor);
         final IBinder proxy = mService.onBind(new Intent());
         final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
 
