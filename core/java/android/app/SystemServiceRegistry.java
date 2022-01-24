@@ -28,6 +28,8 @@ import android.app.ambientcontext.AmbientContextManager;
 import android.app.ambientcontext.IAmbientContextEventObserver;
 import android.app.appsearch.AppSearchManagerFrameworkInitializer;
 import android.app.blob.BlobStoreManagerFrameworkInitializer;
+import android.app.cloudsearch.CloudSearchManager;
+import android.app.cloudsearch.ICloudSearchManager;
 import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IContentSuggestionsManager;
 import android.app.job.JobSchedulerFrameworkInitializer;
@@ -1245,6 +1247,17 @@ public final class SystemServiceRegistry {
                     throws ServiceNotFoundException {
                     IBinder b = ServiceManager.getService(Context.SMARTSPACE_SERVICE);
                     return b == null ? null : new SmartspaceManager(ctx);
+                }
+            });
+
+        registerService(Context.CLOUDSEARCH_SERVICE, CloudSearchManager.class,
+            new CachedServiceFetcher<CloudSearchManager>() {
+                @Override
+                public CloudSearchManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                    IBinder b = ServiceManager.getService(Context.CLOUDSEARCH_SERVICE);
+                    return b == null ? null :
+                        new CloudSearchManager(ICloudSearchManager.Stub.asInterface(b));
                 }
             });
 
