@@ -27,10 +27,12 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,6 +48,7 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.ComponentInfoInternal;
+import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorProperties;
@@ -70,6 +73,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.concurrency.FakeExecution;
@@ -80,6 +84,7 @@ import org.junit.runner.RunWith;
 import org.mockito.AdditionalMatchers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -98,6 +103,8 @@ public class AuthControllerTest extends SysuiTestCase {
     private PackageManager mPackageManager;
     @Mock
     private IBiometricSysuiReceiver mReceiver;
+    @Mock
+    private IBiometricContextListener mContextListener;
     @Mock
     private AuthDialog mDialog1;
     @Mock
@@ -120,10 +127,14 @@ public class AuthControllerTest extends SysuiTestCase {
     private DisplayManager mDisplayManager;
     @Mock
     private WakefulnessLifecycle mWakefulnessLifecycle;
+    @Mock
+    private StatusBarStateController mStatusBarStateController;
     @Captor
     ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mAuthenticatorsRegisteredCaptor;
     @Captor
     ArgumentCaptor<FingerprintStateListener> mFingerprintStateCaptor;
+    @Captor
+    ArgumentCaptor<StatusBarStateController.StateListener> mStatusBarStateListenerCaptor;
 
     private TestableContext mContextSpy;
     private Execution mExecution;
@@ -175,11 +186,14 @@ public class AuthControllerTest extends SysuiTestCase {
 
         mAuthController = new TestableAuthController(mContextSpy, mExecution, mCommandQueue,
                 mActivityTaskManager, mWindowManager, mFingerprintManager, mFaceManager,
-                () -> mUdfpsController, () -> mSidefpsController);
+                () -> mUdfpsController, () -> mSidefpsController, mStatusBarStateController);
 
         mAuthController.start();
         verify(mFingerprintManager).addAuthenticatorsRegisteredCallback(
                 mAuthenticatorsRegisteredCaptor.capture());
+
+        when(mStatusBarStateController.isDozing()).thenReturn(false);
+        verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
 
         mAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(props);
 
@@ -198,7 +212,8 @@ public class AuthControllerTest extends SysuiTestCase {
         // This test requires an uninitialized AuthController.
         AuthController authController = new TestableAuthController(mContextSpy, mExecution,
                 mCommandQueue, mActivityTaskManager, mWindowManager, mFingerprintManager,
-                mFaceManager, () -> mUdfpsController, () -> mSidefpsController);
+                mFaceManager, () -> mUdfpsController, () -> mSidefpsController,
+                mStatusBarStateController);
         authController.start();
 
         verify(mFingerprintManager).addAuthenticatorsRegisteredCallback(
@@ -221,7 +236,8 @@ public class AuthControllerTest extends SysuiTestCase {
         // This test requires an uninitialized AuthController.
         AuthController authController = new TestableAuthController(mContextSpy, mExecution,
                 mCommandQueue, mActivityTaskManager, mWindowManager, mFingerprintManager,
-                mFaceManager, () -> mUdfpsController, () -> mSidefpsController);
+                mFaceManager, () -> mUdfpsController, () -> mSidefpsController,
+                mStatusBarStateController);
         authController.start();
 
         verify(mFingerprintManager).addAuthenticatorsRegisteredCallback(
@@ -656,6 +672,19 @@ public class AuthControllerTest extends SysuiTestCase {
         verify(callback).onBiometricPromptDismissed();
     }
 
+    @Test
+    public void testForwardsDozeEvent() throws RemoteException {
+        mAuthController.setBiometicContextListener(mContextListener);
+
+        mStatusBarStateListenerCaptor.getValue().onDozingChanged(false);
+        mStatusBarStateListenerCaptor.getValue().onDozingChanged(true);
+
+        InOrder order = inOrder(mContextListener);
+        // invoked twice since the initial state is false
+        order.verify(mContextListener, times(2)).onDozeChanged(eq(false));
+        order.verify(mContextListener).onDozeChanged(eq(true));
+    }
+
     // Helpers
 
     private void showDialog(int[] sensorIds, boolean credentialAllowed) {
@@ -705,10 +734,12 @@ public class AuthControllerTest extends SysuiTestCase {
                 FingerprintManager fingerprintManager,
                 FaceManager faceManager,
                 Provider<UdfpsController> udfpsControllerFactory,
-                Provider<SidefpsController> sidefpsControllerFactory) {
+                Provider<SidefpsController> sidefpsControllerFactory,
+                StatusBarStateController statusBarStateController) {
             super(context, execution, commandQueue, activityTaskManager, windowManager,
                     fingerprintManager, faceManager, udfpsControllerFactory,
-                    sidefpsControllerFactory, mDisplayManager, mWakefulnessLifecycle, mHandler);
+                    sidefpsControllerFactory, mDisplayManager, mWakefulnessLifecycle,
+                    statusBarStateController, mHandler);
         }
 
         @Override

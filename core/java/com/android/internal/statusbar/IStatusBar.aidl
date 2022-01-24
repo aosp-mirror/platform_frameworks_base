@@ -20,6 +20,7 @@ import android.app.ITransientNotificationCallback;
 import android.content.ComponentName;
 import android.graphics.drawable.Icon;
 import android.graphics.Rect;
+import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.fingerprint.IUdfpsHbmListener;
@@ -166,6 +167,8 @@ oneway interface IStatusBar
     * Used to hide the authentication dialog, e.g. when the application cancels authentication.
     */
     void hideAuthenticationDialog();
+    /* Used to notify the biometric service of events that occur outside of an operation. */
+    void setBiometicContextListener(in IBiometricContextListener listener);
 
     /**
      * Sets an instance of IUdfpsHbmListener for UdfpsController.
