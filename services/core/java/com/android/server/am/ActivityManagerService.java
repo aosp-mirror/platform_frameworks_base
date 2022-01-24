@@ -2871,13 +2871,51 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mode == AppOpsManager.MODE_ALLOWED;
     }
 
-    @Override
-    public int getPackageProcessState(String packageName, String callingPackage) {
-        if (!hasUsageStatsPermission(callingPackage)) {
-            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
-                    "getPackageProcessState");
+    /**
+     * Checks whether the calling package is trusted.
+     *
+     * The calling package is trusted if it's from system or the supposed package name matches the
+     * UID making the call.
+     *
+     * @throws SecurityException if the package name and UID don't match.
+     */
+    private void verifyCallingPackage(String callingPackage) {
+        final int callingUid = Binder.getCallingUid();
+        // The caller is System or Shell.
+        if (callingUid == SYSTEM_UID || isCallerShell()) {
+            return;
         }
 
+        // Handle the special UIDs that don't have real package (audioserver, cameraserver, etc).
+        final String resolvedPackage = AppOpsManager.resolvePackageName(callingUid,
+                null /* packageName */);
+        if (resolvedPackage != null && resolvedPackage.equals(callingPackage)) {
+            return;
+        }
+
+        final int claimedUid = getPackageManagerInternal().getPackageUid(callingPackage,
+                0 /* flags */, UserHandle.getUserId(callingUid));
+        if (callingUid == claimedUid) {
+            return;
+        }
+
+        throw new SecurityException(
+                "Claimed calling package " + callingPackage + " does not match the calling UID "
+                        + Binder.getCallingUid());
+    }
+
+    private void enforceUsageStatsPermission(String callingPackage, String func) {
+        verifyCallingPackage(callingPackage);
+        // Since the protection level of PACKAGE_USAGE_STATS has 'appop', apps may grant this
+        // permission via that way. We need to check both app-ops and permission.
+        if (!hasUsageStatsPermission(callingPackage)) {
+            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS, func);
+        }
+    }
+
+    @Override
+    public int getPackageProcessState(String packageName, String callingPackage) {
+        enforceUsageStatsPermission(callingPackage, "getPackageProcessState");
         final int[] procState = {PROCESS_STATE_NONEXISTENT};
         synchronized (mProcLock) {
             mProcessList.forEachLruProcessesLOSP(false, proc -> {
@@ -6938,11 +6976,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public int getUidProcessState(int uid, String callingPackage) {
-        if (!hasUsageStatsPermission(callingPackage)) {
-            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
-                    "getUidProcessState");
-        }
-
+        enforceUsageStatsPermission(callingPackage, "getUidProcessState");
         synchronized (mProcLock) {
             return mProcessList.getUidProcStateLOSP(uid);
         }
@@ -6950,11 +6984,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public @ProcessCapability int getUidProcessCapabilities(int uid, String callingPackage) {
-        if (!hasUsageStatsPermission(callingPackage)) {
-            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
-                    "getUidProcessState");
-        }
-
+        enforceUsageStatsPermission(callingPackage, "getUidProcessCapabilities");
         synchronized (mProcLock) {
             return mProcessList.getUidProcessCapabilityLOSP(uid);
         }
@@ -6963,10 +6993,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void registerUidObserver(IUidObserver observer, int which, int cutpoint,
             String callingPackage) {
-        if (!hasUsageStatsPermission(callingPackage)) {
-            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
-                    "registerUidObserver");
-        }
+        enforceUsageStatsPermission(callingPackage, "registerUidObserver");
         mUidObserverController.register(observer, which, cutpoint, callingPackage,
                 Binder.getCallingUid());
     }
@@ -6978,10 +7005,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public boolean isUidActive(int uid, String callingPackage) {
-        if (!hasUsageStatsPermission(callingPackage)) {
-            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
-                    "isUidActive");
-        }
+        enforceUsageStatsPermission(callingPackage, "isUidActive");
         synchronized (mProcLock) {
             if (isUidActiveLOSP(uid)) {
                 return true;
