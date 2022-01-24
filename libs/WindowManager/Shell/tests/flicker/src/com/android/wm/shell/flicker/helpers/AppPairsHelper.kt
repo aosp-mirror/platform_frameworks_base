@@ -28,14 +28,14 @@ class AppPairsHelper(
     component: FlickerComponentName
 ) : BaseAppHelper(instrumentation, activityLabel, component) {
     fun getPrimaryBounds(dividerBounds: Region): Region {
-        val primaryAppBounds = Region(0, 0, dividerBounds.bounds.right,
+        val primaryAppBounds = Region.from(0, 0, dividerBounds.bounds.right,
                 dividerBounds.bounds.bottom + WindowUtils.dockedStackDividerInset)
         return primaryAppBounds
     }
 
     fun getSecondaryBounds(dividerBounds: Region): Region {
         val displayBounds = WindowUtils.displayBounds
-        val secondaryAppBounds = Region(0,
+        val secondaryAppBounds = Region.from(0,
                 dividerBounds.bounds.bottom - WindowUtils.dockedStackDividerInset,
                 displayBounds.right, displayBounds.bottom - WindowUtils.navigationBarHeight)
         return secondaryAppBounds

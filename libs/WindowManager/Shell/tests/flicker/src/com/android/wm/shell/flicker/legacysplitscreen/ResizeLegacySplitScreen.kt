@@ -166,9 +166,9 @@ class ResizeLegacySplitScreen(
             val dividerBounds =
                 layer(DOCKED_STACK_DIVIDER_COMPONENT).visibleRegion.region.bounds
 
-            val topAppBounds = Region(0, 0, dividerBounds.right,
+            val topAppBounds = Region.from(0, 0, dividerBounds.right,
                 dividerBounds.top + WindowUtils.dockedStackDividerInset)
-            val bottomAppBounds = Region(0,
+            val bottomAppBounds = Region.from(0,
                 dividerBounds.bottom - WindowUtils.dockedStackDividerInset,
                 displayBounds.right,
                 displayBounds.bottom - WindowUtils.navigationBarHeight)
@@ -187,9 +187,9 @@ class ResizeLegacySplitScreen(
             val dividerBounds =
                 layer(DOCKED_STACK_DIVIDER_COMPONENT).visibleRegion.region.bounds
 
-            val topAppBounds = Region(0, 0, dividerBounds.right,
+            val topAppBounds = Region.from(0, 0, dividerBounds.right,
                 dividerBounds.top + WindowUtils.dockedStackDividerInset)
-            val bottomAppBounds = Region(0,
+            val bottomAppBounds = Region.from(0,
                 dividerBounds.bottom - WindowUtils.dockedStackDividerInset,
                 displayBounds.right,
                 displayBounds.bottom - WindowUtils.navigationBarHeight)
