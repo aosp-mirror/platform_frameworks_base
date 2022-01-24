@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -115,9 +114,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     private Task mRootHomeTask;
     private Task mRootPinnedTask;
     private Task mRootSplitScreenPrimaryTask;
-
-    // TODO(b/159029784): Remove when getStack() behavior is cleaned-up
-    private Task mRootRecentsTask;
 
     private final ArrayList<WindowContainer> mTmpAlwaysOnTopChildren = new ArrayList<>();
     private final ArrayList<WindowContainer> mTmpNormalChildren = new ArrayList<>();
@@ -227,8 +223,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     Task getRootTask(int windowingMode, int activityType) {
         if (activityType == ACTIVITY_TYPE_HOME) {
             return mRootHomeTask;
-        } else if (activityType == ACTIVITY_TYPE_RECENTS) {
-            return mRootRecentsTask;
         }
         if (windowingMode == WINDOWING_MODE_PINNED) {
             return mRootPinnedTask;
@@ -254,11 +248,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     @Nullable
     Task getRootHomeTask() {
         return mRootHomeTask;
-    }
-
-    @Nullable
-    Task getRootRecentsTask() {
-        return mRootRecentsTask;
     }
 
     Task getRootPinnedTask() {
@@ -310,16 +299,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             } else {
                 mRootHomeTask = rootTask;
             }
-        } else if (rootTask.isActivityTypeRecents()) {
-            if (mRootRecentsTask != null) {
-                if (!rootTask.isDescendantOf(mRootRecentsTask)) {
-                    throw new IllegalArgumentException("addRootTaskReferenceIfNeeded: root recents"
-                            + " task=" + mRootRecentsTask + " already exist on display=" + this
-                            + " rootTask=" + rootTask);
-                }
-            } else {
-                mRootRecentsTask = rootTask;
-            }
         }
 
         if (!rootTask.isRootTask()) {
@@ -347,8 +326,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     void removeRootTaskReferenceIfNeeded(Task rootTask) {
         if (rootTask == mRootHomeTask) {
             mRootHomeTask = null;
-        } else if (rootTask == mRootRecentsTask) {
-            mRootRecentsTask = null;
         } else if (rootTask == mRootPinnedTask) {
             mRootPinnedTask = null;
         } else if (rootTask == mRootSplitScreenPrimaryTask) {
