@@ -67,10 +67,9 @@ class ImeAppAutoFocusHelper @JvmOverloads constructor(
         val dialog = uiDevice.wait(
                 Until.findObject(By.text("Dialog for test")), FIND_TIMEOUT)
 
-        // Tapping outside of the dialog to dismiss
+        // Pressing back key to dismiss the dialog
         if (dialog != null) {
-            val dialogBounds = dialog.visibleBounds
-            uiDevice.click(dialogBounds.left, dialogBounds.top - 300)
+            uiDevice.pressBack()
             wmHelper.waitForAppTransitionIdle()
         }
     }
