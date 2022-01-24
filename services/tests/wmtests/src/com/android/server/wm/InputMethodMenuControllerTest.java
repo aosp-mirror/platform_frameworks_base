@@ -26,11 +26,14 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 
 import android.app.ActivityThread;
 import android.content.Context;
@@ -43,6 +46,7 @@ import android.view.Display;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.window.WindowTokenClient;
 
 import com.android.server.inputmethod.InputMethodManagerService;
 import com.android.server.inputmethod.InputMethodMenuController;
@@ -130,15 +134,31 @@ public class InputMethodMenuControllerTest extends WindowTestsBase {
     @Test
     public void testGetSettingsContextOnDualDisplayContent() {
         final Context context = mController.getSettingsContext(mSecondaryDisplay.getDisplayId());
+        final WindowTokenClient tokenClient = (WindowTokenClient) context.getWindowContextToken();
+        assertNotNull(tokenClient);
+        spyOn(tokenClient);
 
         final DisplayArea.Tokens imeContainer = mSecondaryDisplay.getImeContainer();
+        spyOn(imeContainer);
         assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mSecondaryDisplay);
 
         mSecondaryDisplay.mFirstRoot.placeImeContainer(imeContainer);
+
+        verify(imeContainer, atLeastOnce()).onConfigurationChanged(
+                eq(mSecondaryDisplay.mFirstRoot.getConfiguration()));
+        verify(tokenClient, atLeastOnce()).onConfigurationChanged(
+                eq(mSecondaryDisplay.mFirstRoot.getConfiguration()),
+                eq(mSecondaryDisplay.mDisplayId));
         assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mSecondaryDisplay.mFirstRoot);
         assertImeSwitchContextMetricsValidity(context, mSecondaryDisplay);
 
         mSecondaryDisplay.mSecondRoot.placeImeContainer(imeContainer);
+
+        verify(imeContainer, atLeastOnce()).onConfigurationChanged(
+                eq(mSecondaryDisplay.mSecondRoot.getConfiguration()));
+        verify(tokenClient, atLeastOnce()).onConfigurationChanged(
+                eq(mSecondaryDisplay.mSecondRoot.getConfiguration()),
+                eq(mSecondaryDisplay.mDisplayId));
         assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mSecondaryDisplay.mSecondRoot);
         assertImeSwitchContextMetricsValidity(context, mSecondaryDisplay);
     }
