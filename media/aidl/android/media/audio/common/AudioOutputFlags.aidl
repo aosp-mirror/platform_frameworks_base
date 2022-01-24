@@ -26,7 +26,7 @@ package android.media.audio.common;
  */
 @VintfStability
 @Backing(type="int")
-enum AudioOutputFlags {
+enum AudioOutputFlags{
     /**
      * Output must not be altered by the framework, it bypasses software mixers.
      */
@@ -98,7 +98,11 @@ enum AudioOutputFlags {
      */
     GAPLESS_OFFLOAD = 15,
     /**
+     * Output is used for spatial audio.
+     */
+    SPATIALIZER = 16,
+    /**
      * Output is used for transmitting ultrasound audio.
      */
-    ULTRASOUND = 16,
+    ULTRASOUND = 17,
 }
