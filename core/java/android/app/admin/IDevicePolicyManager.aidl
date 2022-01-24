@@ -543,8 +543,8 @@ interface IDevicePolicyManager {
 
     List<UserHandle> listForegroundAffiliatedUsers();
     void setDrawables(in List<DevicePolicyDrawableResource> drawables);
-    void resetDrawables(in int[] drawableIds);
-    ParcelableResource getDrawable(int drawableId, int drawableStyle, int drawableSource);
+    void resetDrawables(in String[] drawableIds);
+    ParcelableResource getDrawable(String drawableId, String drawableStyle, String drawableSource);
 
     void setStrings(in List<DevicePolicyStringResource> strings);
     void resetStrings(in String[] stringIds);

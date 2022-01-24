@@ -18122,13 +18122,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mInjector.binderWithCleanCallingIdentity(() -> {
             if (mDeviceManagementResourcesProvider.updateDrawables(drawables)) {
                 sendDrawableUpdatedBroadcast(
-                        drawables.stream().mapToInt(d -> d.getDrawableId()).toArray());
+                        drawables.stream().map(s -> s.getDrawableId()).toArray(String[]::new));
             }
         });
     }
 
     @Override
-    public void resetDrawables(@NonNull int[] drawableIds) {
+    public void resetDrawables(@NonNull String[] drawableIds) {
         Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(
                 android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES));
 
@@ -18142,24 +18142,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public ParcelableResource getDrawable(int drawableId, int drawableStyle, int drawableSource) {
+    public ParcelableResource getDrawable(
+            String drawableId, String drawableStyle, String drawableSource) {
         return mInjector.binderWithCleanCallingIdentity(() ->
                 mDeviceManagementResourcesProvider.getDrawable(
                         drawableId, drawableStyle, drawableSource));
     }
 
-    private void sendDrawableUpdatedBroadcast(int[] drawableIds) {
-        final Intent intent = new Intent(ACTION_DEVICE_POLICY_RESOURCE_UPDATED);
-        intent.putExtra(EXTRA_RESOURCE_ID, drawableIds);
-        intent.putExtra(EXTRA_RESOURCE_TYPE_DRAWABLE, /* value= */ true);
-        intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-
-        List<UserInfo> users = mUserManager.getAliveUsers();
-        for (int i = 0; i < users.size(); i++) {
-            UserHandle user = users.get(i).getUserHandle();
-            mContext.sendBroadcastAsUser(intent, user);
-        }
+    private void sendDrawableUpdatedBroadcast(String[] drawableIds) {
+        sendResourceUpdatedBroadcast(EXTRA_RESOURCE_TYPE_DRAWABLE, drawableIds);
     }
 
     @Override
@@ -18195,9 +18186,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void sendStringsUpdatedBroadcast(String[] stringIds) {
+        sendResourceUpdatedBroadcast(EXTRA_RESOURCE_TYPE_STRING, stringIds);
+    }
+
+    private void sendResourceUpdatedBroadcast(String resourceType, String[] resourceIds) {
         final Intent intent = new Intent(ACTION_DEVICE_POLICY_RESOURCE_UPDATED);
-        intent.putExtra(EXTRA_RESOURCE_ID, stringIds);
-        intent.putExtra(EXTRA_RESOURCE_TYPE_STRING, /* value= */ true);
+        intent.putExtra(EXTRA_RESOURCE_ID, resourceIds);
+        intent.putExtra(resourceType, /* value= */ true);
         intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
 

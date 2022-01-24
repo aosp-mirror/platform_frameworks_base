@@ -107,7 +107,6 @@ import static android.app.admin.DevicePolicyResources.Strings.SystemUi.QS_MSG_WO
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.STATUS_BAR_WORK_ICON_ACCESSIBILITY;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.WORK_LOCK_ACCESSIBILITY;
 
-import android.annotation.IntDef;
 import android.annotation.StringDef;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -132,12 +131,12 @@ public final class DevicePolicyResources {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(value = {
-            Drawable.INVALID_ID,
-            Drawable.WORK_PROFILE_ICON_BADGE,
-            Drawable.WORK_PROFILE_ICON,
-            Drawable.WORK_PROFILE_OFF_ICON,
-            Drawable.WORK_PROFILE_USER_ICON
+    @StringDef(value = {
+            Drawables.UNDEFINED,
+            Drawables.WORK_PROFILE_ICON_BADGE,
+            Drawables.WORK_PROFILE_ICON,
+            Drawables.WORK_PROFILE_OFF_ICON,
+            Drawables.WORK_PROFILE_USER_ICON
     })
     public @interface UpdatableDrawableId {}
 
@@ -148,10 +147,11 @@ public final class DevicePolicyResources {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(value = {
-            Drawable.Style.SOLID_COLORED,
-            Drawable.Style.SOLID_NOT_COLORED,
-            Drawable.Style.OUTLINE,
+    @StringDef(value = {
+            Drawables.Style.SOLID_COLORED,
+            Drawables.Style.SOLID_NOT_COLORED,
+            Drawables.Style.OUTLINE,
+            Drawables.Style.DEFAULT
     })
     public @interface UpdatableDrawableStyle {}
 
@@ -161,14 +161,14 @@ public final class DevicePolicyResources {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(value = {
-            Drawable.Source.UNDEFINED,
-            Drawable.Source.NOTIFICATION,
-            Drawable.Source.PROFILE_SWITCH_ANIMATION,
-            Drawable.Source.HOME_WIDGET,
-            Drawable.Source.LAUNCHER_OFF_BUTTON,
-            Drawable.Source.QUICK_SETTINGS,
-            Drawable.Source.STATUS_BAR
+    @StringDef(value = {
+            Drawables.Source.UNDEFINED,
+            Drawables.Source.NOTIFICATION,
+            Drawables.Source.PROFILE_SWITCH_ANIMATION,
+            Drawables.Source.HOME_WIDGET,
+            Drawables.Source.LAUNCHER_OFF_BUTTON,
+            Drawables.Source.QUICK_SETTINGS,
+            Drawables.Source.STATUS_BAR
     })
     public @interface UpdatableDrawableSource {}
 
@@ -229,44 +229,44 @@ public final class DevicePolicyResources {
     /**
      * Class containing the identifiers used to update device management-related system drawable.
      */
-    public static final class Drawable {
+    public static final class Drawables {
 
-        private Drawable() {
+        private Drawables() {
         }
 
         /**
          * An ID for any drawable that can't be updated.
          */
-        public static final int INVALID_ID = -1;
+        public static final String UNDEFINED = "UNDEFINED";
 
         /**
          * Specifically used to badge work profile app icons.
          */
-        public static final int WORK_PROFILE_ICON_BADGE = 0;
+        public static final String WORK_PROFILE_ICON_BADGE = "WORK_PROFILE_ICON_BADGE";
 
         /**
          * General purpose work profile icon (i.e. generic icon badging). For badging app icons
          * specifically, see {@link #WORK_PROFILE_ICON_BADGE}.
          */
-        public static final int WORK_PROFILE_ICON = 1;
+        public static final String WORK_PROFILE_ICON = "WORK_PROFILE_ICON";
 
         /**
          * General purpose icon representing the work profile off state.
          */
-        public static final int WORK_PROFILE_OFF_ICON = 2;
+        public static final String WORK_PROFILE_OFF_ICON = "WORK_PROFILE_OFF_ICON";
 
         /**
          * General purpose icon for the work profile user avatar.
          */
-        public static final int WORK_PROFILE_USER_ICON = 3;
+        public static final String WORK_PROFILE_USER_ICON = "WORK_PROFILE_USER_ICON";
 
         /**
          * @hide
          */
-        public static final Set<Integer> UPDATABLE_DRAWABLE_IDS = buildDrawablesSet();
+        public static final Set<String> UPDATABLE_DRAWABLE_IDS = buildDrawablesSet();
 
-        private static Set<Integer> buildDrawablesSet() {
-            Set<Integer> drawables = new HashSet<>();
+        private static Set<String> buildDrawablesSet() {
+            Set<String> drawables = new HashSet<>();
             drawables.add(WORK_PROFILE_ICON_BADGE);
             drawables.add(WORK_PROFILE_ICON);
             drawables.add(WORK_PROFILE_OFF_ICON);
@@ -287,48 +287,48 @@ public final class DevicePolicyResources {
              * A source identifier indicating that the updatable resource is used in a generic
              * undefined location.
              */
-            public static final int UNDEFINED = -1;
+            public static final String UNDEFINED = "UNDEFINED";
 
             /**
              * A source identifier indicating that the updatable drawable is used in notifications.
              */
-            public static final int NOTIFICATION = 0;
+            public static final String NOTIFICATION = "NOTIFICATION";
 
             /**
              * A source identifier indicating that the updatable drawable is used in a cross
              * profile switching animation.
              */
-            public static final int PROFILE_SWITCH_ANIMATION = 1;
+            public static final String PROFILE_SWITCH_ANIMATION = "PROFILE_SWITCH_ANIMATION";
 
             /**
              * A source identifier indicating that the updatable drawable is used in a work
              * profile home screen widget.
              */
-            public static final int HOME_WIDGET = 2;
+            public static final String HOME_WIDGET = "HOME_WIDGET";
 
             /**
              * A source identifier indicating that the updatable drawable is used in the launcher
              * turn off work button.
              */
-            public static final int LAUNCHER_OFF_BUTTON = 3;
+            public static final String LAUNCHER_OFF_BUTTON = "LAUNCHER_OFF_BUTTON";
 
             /**
              * A source identifier indicating that the updatable drawable is used in quick settings.
              */
-            public static final int QUICK_SETTINGS = 4;
+            public static final String QUICK_SETTINGS = "QUICK_SETTINGS";
 
             /**
              * A source identifier indicating that the updatable drawable is used in the status bar.
              */
-            public static final int STATUS_BAR = 5;
+            public static final String STATUS_BAR = "STATUS_BAR";
 
             /**
              * @hide
              */
-            public static final Set<Integer> UPDATABLE_DRAWABLE_SOURCES = buildSourcesSet();
+            public static final Set<String> UPDATABLE_DRAWABLE_SOURCES = buildSourcesSet();
 
-            private static Set<Integer> buildSourcesSet() {
-                Set<Integer> sources = new HashSet<>();
+            private static Set<String> buildSourcesSet() {
+                Set<String> sources = new HashSet<>();
                 sources.add(UNDEFINED);
                 sources.add(NOTIFICATION);
                 sources.add(PROFILE_SWITCH_ANIMATION);
@@ -354,31 +354,31 @@ public final class DevicePolicyResources {
              * A style identifier indicating that the updatable drawable should use the default
              * style.
              */
-            public static final int DEFAULT = -1;
+            public static final String DEFAULT = "DEFAULT";
 
             /**
              * A style identifier indicating that the updatable drawable has a solid color fill.
              */
-            public static final int SOLID_COLORED = 0;
+            public static final String SOLID_COLORED = "SOLID_COLORED";
 
             /**
              * A style identifier indicating that the updatable drawable has a solid non-colored
              * fill.
              */
-            public static final int SOLID_NOT_COLORED = 1;
+            public static final String SOLID_NOT_COLORED = "SOLID_NOT_COLORED";
 
             /**
              * A style identifier indicating that the updatable drawable is an outline.
              */
-            public static final int OUTLINE = 2;
+            public static final String OUTLINE = "OUTLINE";
 
             /**
              * @hide
              */
-            public static final Set<Integer> UPDATABLE_DRAWABLE_STYLES = buildStylesSet();
+            public static final Set<String> UPDATABLE_DRAWABLE_STYLES = buildStylesSet();
 
-            private static Set<Integer> buildStylesSet() {
-                Set<Integer> styles = new HashSet<>();
+            private static Set<String> buildStylesSet() {
+                Set<String> styles = new HashSet<>();
                 styles.add(DEFAULT);
                 styles.add(SOLID_COLORED);
                 styles.add(SOLID_NOT_COLORED);
