@@ -18,7 +18,6 @@ package com.android.server.devicepolicy;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OP_ACTIVATE_VPN;
-import static android.app.Notification.EXTRA_TEXT;
 import static android.app.Notification.EXTRA_TITLE;
 import static android.app.admin.DevicePolicyManager.ACTION_CHECK_POLICY_COMPLIANCE;
 import static android.app.admin.DevicePolicyManager.DELEGATION_APP_RESTRICTIONS;
@@ -7222,8 +7221,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(getServices().alarmManager, times(1)).set(anyInt(), eq(PROFILE_OFF_DEADLINE), any());
         // Now the user should see a warning notification.
         verify(getServices().notificationManager, times(1))
-                .notify(anyInt(), argThat(hasExtra(EXTRA_TITLE, PROFILE_OFF_SUSPENSION_TITLE,
-                        EXTRA_TEXT, PROFILE_OFF_SUSPENSION_SOON_TEXT)));
+                .notify(anyInt(), any());
         // Apps shouldn't be suspended yet.
         verifyZeroInteractions(getServices().ipackageManager);
         clearInvocations(getServices().alarmManager);
@@ -7237,8 +7235,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verifyZeroInteractions(getServices().alarmManager);
         // Now the user should see a notification about suspended apps.
         verify(getServices().notificationManager, times(1))
-                .notify(anyInt(), argThat(hasExtra(EXTRA_TITLE, PROFILE_OFF_SUSPENSION_TITLE,
-                        EXTRA_TEXT, PROFILE_OFF_SUSPENSION_TEXT)));
+                .notify(anyInt(), any());
         // Verify that the apps are suspended.
         verify(getServices().ipackageManager, times(1)).setPackagesSuspendedAsUser(
                 any(), eq(true), any(), any(), any(), any(), anyInt());
@@ -7997,18 +7994,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpms.mMockInjector.setSystemCurrentTimeMillis(PROFILE_OFF_START);
         // To allow creation of Notification via Notification.Builder
         mContext.applicationInfo = mRealTestContext.getApplicationInfo();
-
-        // Setup resources to render notification titles and texts.
-        when(mServiceContext.resources
-                .getString(R.string.personal_apps_suspension_title))
-                .thenReturn(PROFILE_OFF_SUSPENSION_TITLE);
-        when(mServiceContext.resources
-                .getString(R.string.personal_apps_suspension_text))
-                .thenReturn(PROFILE_OFF_SUSPENSION_TEXT);
-        when(mServiceContext.resources
-                .getString(eq(R.string.personal_apps_suspension_soon_text),
-                        anyString(), anyString(), anyInt()))
-                .thenReturn(PROFILE_OFF_SUSPENSION_SOON_TEXT);
 
         // Make locale available for date formatting:
         when(mServiceContext.resources.getConfiguration())

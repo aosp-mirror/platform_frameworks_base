@@ -16,11 +16,17 @@
 
 package android.content.pm;
 
+import static android.app.admin.DevicePolicyResources.Strings.Core.SWITCH_TO_PERSONAL_LABEL;
+import static android.app.admin.DevicePolicyResources.Strings.Core.SWITCH_TO_WORK_LABEL;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -58,6 +64,8 @@ public class CrossProfileAppsTest {
     @Mock
     private UserManager mUserManager;
     @Mock
+    private DevicePolicyManager mDevicePolicyManager;
+    @Mock
     private ICrossProfileApps mService;
     @Mock
     private Resources mResources;
@@ -75,6 +83,10 @@ public class CrossProfileAppsTest {
         when(mContext.getPackageName()).thenReturn(MY_PACKAGE);
         when(mContext.getSystemServiceName(UserManager.class)).thenReturn(Context.USER_SERVICE);
         when(mContext.getSystemService(Context.USER_SERVICE)).thenReturn(mUserManager);
+        when(mContext.getSystemServiceName(DevicePolicyManager.class)).thenReturn(
+                Context.DEVICE_POLICY_SERVICE);
+        when(mContext.getSystemService(Context.DEVICE_POLICY_SERVICE)).thenReturn(
+                mDevicePolicyManager);
     }
 
     @Before
@@ -98,7 +110,7 @@ public class CrossProfileAppsTest {
         setValidTargetProfile(MANAGED_PROFILE);
 
         mCrossProfileApps.getProfileSwitchingLabel(MANAGED_PROFILE);
-        verify(mResources).getString(R.string.managed_profile_label);
+        verify(mDevicePolicyManager).getString(eq(SWITCH_TO_WORK_LABEL), any());
     }
 
     @Test
@@ -106,7 +118,7 @@ public class CrossProfileAppsTest {
         setValidTargetProfile(PERSONAL_PROFILE);
 
         mCrossProfileApps.getProfileSwitchingLabel(PERSONAL_PROFILE);
-        verify(mResources).getString(R.string.user_owner_label);
+        verify(mDevicePolicyManager).getString(eq(SWITCH_TO_PERSONAL_LABEL), any());
     }
 
     @Test(expected = SecurityException.class)
