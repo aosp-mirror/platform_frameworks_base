@@ -18,16 +18,17 @@ package com.android.systemui.shared.mediattt;
 
 import android.media.MediaRoute2Info;
 import com.android.systemui.shared.mediattt.DeviceInfo;
+import com.android.systemui.shared.mediattt.IUndoTransferCallback;
 
 /**
- * A callback interface that can be invoked to trigger media transfer events on System UI.
+ * An interface that can be invoked to trigger media transfer events on System UI.
  *
  * This interface is for the *sender* device, which is the device currently playing media. This
  * sender device can transfer the media to a different device, called the receiver.
  *
  * System UI will implement this interface and other services will invoke it.
  */
-interface IDeviceSenderCallback {
+interface IDeviceSenderService {
     /**
      * Invoke to notify System UI that this device (the sender) is close to a receiver device, so
      * the user can potentially *start* a cast to the receiver device if the user moves their device
@@ -73,10 +74,60 @@ interface IDeviceSenderCallback {
         in MediaRoute2Info mediaInfo, in DeviceInfo otherDeviceInfo);
 
     /**
+     * Invoke to notify System UI that a media transfer from the receiver and back to this device
+     * (the sender) has been started.
+     *
+     * Important notes:
+     *   - This callback is for *ending* a cast. It should be used when media is currently being
+     *     played on the receiver device and the media has started being transferred to play locally
+     *     instead.
+     */
+    oneway void transferToThisDeviceTriggered(
+        in MediaRoute2Info mediaInfo, in DeviceInfo otherDeviceInfo);
+
+    /**
+     * Invoke to notify System UI that a media transfer from this device (the sender) to a receiver
+     * device has finished successfully.
+     *
+     * Important notes:
+     *   - This callback is for *starting* a cast. It should be used when this device had previously
+     *     been playing media locally and the media has successfully been transferred to the
+     *     receiver device instead.
+     *
+     * @param undoCallback will be invoked if the user chooses to undo this transfer.
+     */
+    oneway void transferToReceiverSucceeded(
+        in MediaRoute2Info mediaInfo,
+        in DeviceInfo otherDeviceInfo,
+        in IUndoTransferCallback undoCallback);
+
+    /**
+     * Invoke to notify System UI that a media transfer from the receiver and back to this device
+     * (the sender) has finished successfully.
+     *
+     * Important notes:
+     *   - This callback is for *ending* a cast. It should be used when media was previously being
+     *     played on the receiver device and has been successfully transferred to play locally on
+     *     this device instead.
+     *
+     * @param undoCallback will be invoked if the user chooses to undo this transfer.
+     */
+    oneway void transferToThisDeviceSucceeded(
+        in MediaRoute2Info mediaInfo,
+        in DeviceInfo otherDeviceInfo,
+        in IUndoTransferCallback undoCallback);
+
+    /**
      * Invoke to notify System UI that the attempted transfer has failed.
      *
      * This callback will be used for both the transfer that should've *started* playing the media
      * on the receiver and the transfer that should've *ended* the playing on the receiver.
      */
     oneway void transferFailed(in MediaRoute2Info mediaInfo, in DeviceInfo otherDeviceInfo);
+
+    /**
+     * Invoke to notify System UI that this device is no longer close to the receiver device.
+     */
+    oneway void noLongerCloseToReceiver(
+        in MediaRoute2Info mediaInfo, in DeviceInfo otherDeviceInfo);
 }

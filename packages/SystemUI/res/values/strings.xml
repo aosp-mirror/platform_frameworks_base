@@ -2161,7 +2161,9 @@
     <!-- Text to ask the user to move their device closer to a different device (deviceName) in order to transfer media from the different device and back onto the current device. [CHAR LIMIT=75] -->
     <string name="media_move_closer_to_end_cast">Move closer to <xliff:g id="deviceName" example="My Tablet">%1$s</xliff:g> to play here</string>
     <!-- Text informing the user that their media is now playing on a different device (deviceName). [CHAR LIMIT=50] -->
-    <string name="media_transfer_playing">Playing on <xliff:g id="deviceName" example="My Tablet">%1$s</xliff:g></string>
+    <string name="media_transfer_playing_different_device">Playing on <xliff:g id="deviceName" example="My Tablet">%1$s</xliff:g></string>
+    <!-- Text informing the user that their media is now playing on this device. [CHAR LIMIT=50] -->
+    <string name="media_transfer_playing_this_device">Playing on this phone</string>
     <!-- Text informing the user that the media transfer has failed because something went wrong. [CHAR LIMIT=50] -->
     <string name="media_transfer_failed">Something went wrong</string>
 

@@ -112,7 +112,6 @@ public interface MediaModule {
             MediaTttFlags mediaTttFlags,
             CommandRegistry commandRegistry,
             Context context,
-            MediaTttChipControllerSender mediaTttChipControllerSender,
             MediaTttChipControllerReceiver mediaTttChipControllerReceiver) {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
@@ -121,7 +120,6 @@ public interface MediaModule {
                 new MediaTttCommandLineHelper(
                         commandRegistry,
                         context,
-                        mediaTttChipControllerSender,
                         mediaTttChipControllerReceiver));
     }
 

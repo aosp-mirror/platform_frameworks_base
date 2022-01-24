@@ -45,27 +45,18 @@ class MediaTttChipControllerSender @Inject constructor(
 
         // Text
         currentChipView.requireViewById<TextView>(R.id.text).apply {
-            text = context.getString(chipState.chipText, chipState.otherDeviceName)
+            text = chipState.getChipTextString(context)
         }
 
         // Loading
-        val showLoading = chipState is TransferToReceiverTriggered
         currentChipView.requireViewById<View>(R.id.loading).visibility =
-            if (showLoading) { View.VISIBLE } else { View.GONE }
+            if (chipState.showLoading()) { View.VISIBLE } else { View.GONE }
 
         // Undo
-        val undoClickListener: View.OnClickListener? =
-            if (chipState is TransferSucceeded && chipState.undoRunnable != null)
-                View.OnClickListener { chipState.undoRunnable.run() }
-            else
-                null
         val undoView = currentChipView.requireViewById<View>(R.id.undo)
-        undoView.visibility = if (undoClickListener != null) {
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
+        val undoClickListener = chipState.undoClickListener(this)
         undoView.setOnClickListener(undoClickListener)
+        undoView.visibility = if (undoClickListener != null) { View.VISIBLE } else { View.GONE }
 
         // Failure
         val showFailure = chipState is TransferFailed
