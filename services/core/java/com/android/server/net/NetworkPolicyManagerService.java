@@ -63,7 +63,6 @@ import static android.net.INetd.FIREWALL_RULE_DENY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
-import static android.net.NetworkIdentity.OEM_NONE;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
@@ -1498,13 +1497,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         for (int i = 0; i < mSubIdToSubscriberId.size(); i++) {
             final int subId = mSubIdToSubscriberId.keyAt(i);
             final String subscriberId = mSubIdToSubscriberId.valueAt(i);
-            final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                    TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true,
-                    true, OEM_NONE);
-            /* While OEM_NONE indicates "any non OEM managed network", OEM_NONE is meant to be a
-             * placeholder value here. The probeIdent is matched against a NetworkTemplate which
-             * should have its OEM managed value set to OEM_MANAGED_ALL, which will cause the
-             * template to match probeIdent without regard to OEM managed status. */
+            final NetworkIdentity probeIdent = new NetworkIdentity.Builder()
+                    .setType(TYPE_MOBILE)
+                    .setSubscriberId(subscriberId)
+                    .setMetered(true)
+                    .setDefaultNetwork(true).build();
             if (template.matches(probeIdent)) {
                 return subId;
             }
@@ -1737,9 +1734,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // find and update the carrier NetworkPolicy for this subscriber id
         boolean policyUpdated = false;
-        final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true, true,
-                OEM_NONE);
+        final NetworkIdentity probeIdent = new NetworkIdentity.Builder()
+                .setType(TYPE_MOBILE)
+                .setSubscriberId(subscriberId)
+                .setMetered(true)
+                .setDefaultNetwork(true).build();
         for (int i = mNetworkPolicy.size() - 1; i >= 0; i--) {
             final NetworkTemplate template = mNetworkPolicy.keyAt(i);
             if (template.matches(probeIdent)) {
@@ -1967,10 +1966,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 for (int i = 0; i < mSubIdToSubscriberId.size(); i++) {
                     final int subId = mSubIdToSubscriberId.keyAt(i);
                     final String subscriberId = mSubIdToSubscriberId.valueAt(i);
-
-                    final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                            TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true,
-                            true, OEM_NONE);
+                    final NetworkIdentity probeIdent = new NetworkIdentity.Builder()
+                            .setType(TYPE_MOBILE)
+                            .setSubscriberId(subscriberId)
+                            .setMetered(true)
+                            .setDefaultNetwork(true).build();
                     // Template is matched when subscriber id matches.
                     if (template.matches(probeIdent)) {
                         matchingSubIds.add(subId);
@@ -2074,11 +2074,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         for (final NetworkStateSnapshot snapshot : snapshots) {
             mNetIdToSubId.put(snapshot.getNetwork().getNetId(), parseSubId(snapshot));
 
-            // Policies matched by NPMS only match by subscriber ID or by network ID. Thus subtype
-            // in the object created here is never used and its value doesn't matter, so use
-            // NETWORK_TYPE_UNKNOWN.
-            final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, snapshot,
-                    true, TelephonyManager.NETWORK_TYPE_UNKNOWN /* subType */);
+            // Policies matched by NPMS only match by subscriber ID or by network ID.
+            final NetworkIdentity ident = new NetworkIdentity.Builder()
+                    .setNetworkStateSnapshot(snapshot).setDefaultNetwork(true).build();
             identified.put(snapshot, ident);
         }
 
@@ -2275,9 +2273,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @GuardedBy("mNetworkPoliciesSecondLock")
     private boolean ensureActiveCarrierPolicyAL(int subId, String subscriberId) {
         // Poke around to see if we already have a policy
-        final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true, true,
-                OEM_NONE);
+        final NetworkIdentity probeIdent = new NetworkIdentity.Builder()
+                .setType(TYPE_MOBILE)
+                .setSubscriberId(subscriberId)
+                .setMetered(true)
+                .setDefaultNetwork(true).build();
         for (int i = mNetworkPolicy.size() - 1; i >= 0; i--) {
             final NetworkTemplate template = mNetworkPolicy.keyAt(i);
             if (template.matches(probeIdent)) {

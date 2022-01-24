@@ -16,6 +16,7 @@
 
 package android.net;
 
+import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkTemplate.NETWORK_TYPE_ALL;
 
@@ -30,6 +31,7 @@ import android.telephony.Annotation;
 import android.telephony.TelephonyManager;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.net.module.util.CollectionUtils;
 import com.android.net.module.util.NetworkCapabilitiesUtils;
 import com.android.net.module.util.NetworkIdentityUtils;
 
@@ -55,7 +57,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "OEM_MANAGED_" }, value = {
+    @IntDef(prefix = { "OEM_MANAGED_" }, flag = true, value = {
             NetworkTemplate.OEM_MANAGED_NO,
             NetworkTemplate.OEM_MANAGED_PAID,
             NetworkTemplate.OEM_MANAGED_PRIVATE
@@ -71,12 +73,14 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
      * Network has {@link NetworkCapabilities#NET_CAPABILITY_OEM_PAID}.
      * @hide
      */
-    public static final int OEM_PAID = 0x1;
+    public static final int OEM_PAID = 1 << 0;
     /**
      * Network has {@link NetworkCapabilities#NET_CAPABILITY_OEM_PRIVATE}.
      * @hide
      */
-    public static final int OEM_PRIVATE = 0x2;
+    public static final int OEM_PRIVATE = 1 << 1;
+
+    private static final long SUPPORTED_OEM_MANAGED_TYPES = OEM_PAID | OEM_PRIVATE;
 
     final int mType;
     final int mRatType;
@@ -218,7 +222,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         return mRoaming;
     }
 
-    /** Return the roaming status of this instance. */
+    /** Return whether this network is roaming. */
     public boolean isRoaming() {
         return mRoaming;
     }
@@ -229,7 +233,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         return mMetered;
     }
 
-    /** Return the meteredness of this instance. */
+    /** Return whether this network is metered. */
     public boolean isMetered() {
         return mMetered;
     }
@@ -240,7 +244,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         return mDefaultNetwork;
     }
 
-    /** Return the default network status of this instance. */
+    /** Return whether this network is the default network. */
     public boolean isDefaultNetwork() {
         return mDefaultNetwork;
     }
@@ -262,7 +266,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
      *                {@link TelephonyManager#NETWORK_TYPE_UNKNOWN} if not applicable.
      *                See {@code TelephonyManager.NETWORK_TYPE_*}.
      * @hide
-     * @deprecated See {@link NetworkIdentity#Builder}.
+     * @deprecated See {@link NetworkIdentity.Builder}.
      */
     // TODO: Remove this after all callers are migrated to use new Api.
     @Deprecated
@@ -270,8 +274,12 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
     public static NetworkIdentity buildNetworkIdentity(Context context,
             @NonNull NetworkStateSnapshot snapshot,
             boolean defaultNetwork, @Annotation.NetworkType int ratType) {
-        return new NetworkIdentity.Builder().setNetworkStateSnapshot(snapshot)
-                .setDefaultNetwork(defaultNetwork).setRatType(ratType).build();
+        final NetworkIdentity.Builder builder = new NetworkIdentity.Builder()
+                .setNetworkStateSnapshot(snapshot).setDefaultNetwork(defaultNetwork);
+        if (snapshot.getLegacyType() == TYPE_MOBILE && ratType != NETWORK_TYPE_ALL) {
+            builder.setRatType(ratType);
+        }
+        return builder.build();
     }
 
     /**
@@ -323,6 +331,11 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
      * Builder class for {@link NetworkIdentity}.
      */
     public static final class Builder {
+        // Need to be synchronized with ConnectivityManager.
+        // TODO: Use {@link ConnectivityManager#MAX_NETWORK_TYPE} when this file is in the module.
+        private static final int MAX_NETWORK_TYPE = 18; // TYPE_TEST
+        private static final int MIN_NETWORK_TYPE = TYPE_MOBILE;
+
         private int mType;
         private int mRatType;
         private String mSubscriberId;
@@ -374,9 +387,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
                         .getTransportInfo();
                 if (transportInfo instanceof WifiInfo) {
                     final WifiInfo info = (WifiInfo) transportInfo;
-                    if (info != null) {
-                        setWifiNetworkKey(info.getNetworkKey());
-                    }
+                    setWifiNetworkKey(info.getNetworkKey());
                 }
             }
             return this;
@@ -391,6 +402,12 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
          */
         @NonNull
         public Builder setType(int type) {
+            // Include TYPE_NONE for compatibility, type field might not be filled by some
+            // networks such as test networks.
+            if ((type < MIN_NETWORK_TYPE || MAX_NETWORK_TYPE < type)
+                    && type != ConnectivityManager.TYPE_NONE) {
+                throw new IllegalArgumentException("Invalid network type: " + type);
+            }
             mType = type;
             return this;
         }
@@ -405,6 +422,10 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
          */
         @NonNull
         public Builder setRatType(@Annotation.NetworkType int ratType) {
+            if (!CollectionUtils.contains(TelephonyManager.getAllNetworkTypes(), ratType)
+                    && ratType != TelephonyManager.NETWORK_TYPE_UNKNOWN) {
+                throw new IllegalArgumentException("Invalid ratType " + ratType);
+            }
             mRatType = ratType;
             return this;
         }
@@ -447,7 +468,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         }
 
         /**
-         * Set the roaming.
+         * Set whether this network is roaming.
          *
          * @param roaming the roaming status of the network.
          * @return this builder.
@@ -459,7 +480,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         }
 
         /**
-         * Set the meteredness.
+         * Set whether this network is metered.
          *
          * @param metered the meteredness of the network.
          * @return this builder.
@@ -471,7 +492,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         }
 
         /**
-         * Set the default network status.
+         * Set whether this network is the default network.
          *
          * @param defaultNetwork the default network status of the network.
          * @return this builder.
@@ -491,8 +512,25 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
          */
         @NonNull
         public Builder setOemManaged(@OemManaged int oemManaged) {
+            // Assert input does not contain illegal oemManage bits.
+            if ((~SUPPORTED_OEM_MANAGED_TYPES & oemManaged) != 0) {
+                throw new IllegalArgumentException("Invalid value for OemManaged : " + oemManaged);
+            }
             mOemManaged = oemManaged;
             return this;
+        }
+
+        private void ensureValidParameters() {
+            // Assert non-mobile network cannot have a ratType.
+            if (mType != TYPE_MOBILE && mRatType != NetworkTemplate.NETWORK_TYPE_ALL) {
+                throw new IllegalArgumentException(
+                        "Invalid ratType " + mRatType + " for type " + mType);
+            }
+
+            // Assert non-wifi network cannot have a wifi network key.
+            if (mType != TYPE_WIFI && mWifiNetworkKey != null) {
+                throw new IllegalArgumentException("Invalid wifi network key for type " + mType);
+            }
         }
 
         /**
@@ -502,6 +540,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
          */
         @NonNull
         public NetworkIdentity build() {
+            ensureValidParameters();
             return new NetworkIdentity(mType, mRatType, mSubscriberId, mWifiNetworkKey,
                     mRoaming, mMetered, mDefaultNetwork, mOemManaged);
         }
