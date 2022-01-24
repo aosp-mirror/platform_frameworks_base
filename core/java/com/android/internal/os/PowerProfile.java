@@ -274,16 +274,15 @@ public class PowerProfile {
      * [31:0] - per Subsystem fields, see {@link ModemPowerProfile}.
      *
      */
-    private static final int SUBSYSTEM_SHIFT = 32;
-    private static final long SUBSYSTEM_MASK = 0xF << SUBSYSTEM_SHIFT;
+    private static final long SUBSYSTEM_MASK = 0xF_0000_0000L;
     /**
      * Power constant not associated with a subsystem.
      */
-    public static final long SUBSYSTEM_NONE = 0 << SUBSYSTEM_SHIFT;
+    public static final long SUBSYSTEM_NONE = 0x0_0000_0000L;
     /**
      * Modem power constant.
      */
-    public static final long SUBSYSTEM_MODEM = 1 << SUBSYSTEM_SHIFT;
+    public static final long SUBSYSTEM_MODEM = 0x1_0000_0000L;
 
     @LongDef(prefix = { "SUBSYSTEM_" }, value = {
             SUBSYSTEM_NONE,
@@ -292,7 +291,7 @@ public class PowerProfile {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Subsystem {}
 
-    private static final long SUBSYSTEM_FIELDS_MASK = 0xFFFFFFFF;
+    private static final long SUBSYSTEM_FIELDS_MASK = 0xFFFF_FFFF;
 
     /**
      * A map from Power Use Item to its power consumption.
@@ -582,7 +581,7 @@ public class PowerProfile {
         handleDeprecatedModemConstant(ModemPowerProfile.MODEM_DRAIN_TYPE_SLEEP,
                 POWER_MODEM_CONTROLLER_SLEEP, 0);
         handleDeprecatedModemConstant(ModemPowerProfile.MODEM_DRAIN_TYPE_IDLE,
-                POWER_MODEM_CONTROLLER_SLEEP, 0);
+                POWER_MODEM_CONTROLLER_IDLE, 0);
         handleDeprecatedModemConstant(
                 ModemPowerProfile.MODEM_RAT_TYPE_DEFAULT | ModemPowerProfile.MODEM_DRAIN_TYPE_RX,
                 POWER_MODEM_CONTROLLER_RX, 0);
