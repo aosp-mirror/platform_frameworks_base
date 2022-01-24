@@ -41469,7 +41469,7 @@ package android.telecom {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.telecom.PhoneAccountHandle getDefaultOutgoingPhoneAccount(String);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.READ_SMS, android.Manifest.permission.READ_PHONE_NUMBERS}, conditional=true) public String getLine1Number(android.telecom.PhoneAccountHandle);
     method public android.telecom.PhoneAccount getPhoneAccount(android.telecom.PhoneAccountHandle);
-    method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telecom.PhoneAccountHandle> getSelfManagedPhoneAccounts();
+    method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.MANAGE_OWN_CALLS}) public java.util.List<android.telecom.PhoneAccountHandle> getSelfManagedPhoneAccounts();
     method public android.telecom.PhoneAccountHandle getSimCallManager();
     method @Nullable public android.telecom.PhoneAccountHandle getSimCallManagerForSubscription(int);
     method @Nullable public String getSystemDialerPackage();
