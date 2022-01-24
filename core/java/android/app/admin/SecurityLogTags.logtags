@@ -40,3 +40,4 @@ option java_package android.app.admin
 210033 security_cert_validation_failure         (reason|3)
 210034 security_camera_policy_set               (package|3),(admin_user|1),(target_user|1),(disabled|1)
 210035 security_password_complexity_required    (package|3),(admin_user|1),(target_user|1),(complexity|1)
+210036 security_password_changed                (password_complexity|1),(target_user|1)
