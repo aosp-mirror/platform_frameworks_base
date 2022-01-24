@@ -3497,6 +3497,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             pw.append("hasWindowMagnificationConnection=").append(
                     String.valueOf(getWindowMagnificationMgr().isConnected()));
             pw.println();
+            mMagnificationProcessor.dump(pw, getValidDisplayList());
             final int userCount = mUserStates.size();
             for (int i = 0; i < userCount; i++) {
                 mUserStates.valueAt(i).dump(fd, pw, args);

@@ -26,6 +26,10 @@ import static android.view.accessibility.MagnificationAnimationCallback.STUB_ANI
 import android.accessibilityservice.MagnificationConfig;
 import android.annotation.NonNull;
 import android.graphics.Region;
+import android.view.Display;
+
+import java.io.PrintWriter;
+import java.util.ArrayList;
 
 /**
  * Processor class for AccessibilityService connection to control magnification on the specified
@@ -359,5 +363,30 @@ public class MagnificationProcessor {
      */
     private void unregister(int displayId) {
         mController.getFullScreenMagnificationController().unregister(displayId);
+    }
+
+    /** Dumps {@link MagnificationConfig} and magnification region of magnifiers on the displays. */
+    public void dump(final PrintWriter pw, ArrayList<Display> displaysList) {
+        for (int i = 0; i < displaysList.size(); i++) {
+            final int displayId = displaysList.get(i).getDisplayId();
+            final MagnificationConfig config = getMagnificationConfig(displayId);
+            pw.println("Magnifier on display#" + displayId);
+            pw.append("    " + config).println();
+            final Region region = new Region();
+            getCurrentMagnificationRegion(displayId, region, true);
+            if (!region.isEmpty()) {
+                pw.append("    Magnification region=").append(region.toString()).println();
+            }
+            pw.append("    IdOfLastServiceToMagnify="
+                    + getIdOfLastServiceToMagnify(config.getMode(), displayId)).println();
+        }
+    }
+
+    private int getIdOfLastServiceToMagnify(int mode, int displayId) {
+        return (mode == MAGNIFICATION_MODE_FULLSCREEN)
+                ? mController.getFullScreenMagnificationController()
+                .getIdOfLastServiceToMagnify(displayId)
+                : mController.getWindowMagnificationMgr().getIdOfLastServiceToMagnify(
+                        displayId);
     }
 }
