@@ -106,7 +106,6 @@ import android.os.Binder;
 import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
@@ -450,7 +449,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         handlerThread.start();
         mHandler = new NetworkStatsHandler(handlerThread.getLooper());
         mNetworkStatsSubscriptionsMonitor = deps.makeSubscriptionsMonitor(mContext,
-                new HandlerExecutor(mHandler), this);
+                (command) -> mHandler.post(command) , this);
         mContentResolver = mContext.getContentResolver();
         mContentObserver = mDeps.makeContentObserver(mHandler, mSettings,
                 mNetworkStatsSubscriptionsMonitor);
@@ -557,7 +556,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // watch for tethering changes
         final TetheringManager tetheringManager = mContext.getSystemService(TetheringManager.class);
         tetheringManager.registerTetheringEventCallback(
-                new HandlerExecutor(mHandler), mTetherListener);
+                (command) -> mHandler.post(command), mTetherListener);
 
         // listen for periodic polling events
         final IntentFilter pollFilter = new IntentFilter(ACTION_NETWORK_STATS_POLL);

@@ -72,6 +72,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Collection of {@link NetworkStatsHistory}, stored based on combined key of
@@ -702,7 +703,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
     private ArrayList<Key> getSortedKeys() {
         final ArrayList<Key> keys = new ArrayList<>();
         keys.addAll(mStats.keySet());
-        Collections.sort(keys);
+        Collections.sort(keys, (left, right) -> Key.compare(left, right));
         return keys;
     }
 
@@ -812,7 +813,7 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
      * the identifier that associate with the {@link NetworkStatsHistory} object to identify
      * a certain record in the {@link NetworkStatsCollection} object.
      */
-    public static class Key implements Comparable<Key> {
+    public static class Key {
         /** @hide */
         public final NetworkIdentitySet ident;
         /** @hide */
@@ -832,6 +833,11 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
          * @param set Set of the record, see {@code NetworkStats#SET_*}.
          * @param tag Tag of the record, see {@link TrafficStats#setThreadStatsTag(int)}.
          */
+        public Key(@NonNull Set<NetworkIdentity> ident, int uid, int set, int tag) {
+            this(new NetworkIdentitySet(Objects.requireNonNull(ident)), uid, set, tag);
+        }
+
+        /** @hide */
         public Key(@NonNull NetworkIdentitySet ident, int uid, int set, int tag) {
             this.ident = Objects.requireNonNull(ident);
             this.uid = uid;
@@ -855,21 +861,22 @@ public class NetworkStatsCollection implements FileRotator.Reader, FileRotator.W
             return false;
         }
 
-        @Override
-        public int compareTo(@NonNull Key another) {
-            Objects.requireNonNull(another);
+        /** @hide */
+        public static int compare(@NonNull Key left, @NonNull Key right) {
+            Objects.requireNonNull(left);
+            Objects.requireNonNull(right);
             int res = 0;
-            if (ident != null && another.ident != null) {
-                res = ident.compareTo(another.ident);
+            if (left.ident != null && right.ident != null) {
+                res = NetworkIdentitySet.compare(left.ident, right.ident);
             }
             if (res == 0) {
-                res = Integer.compare(uid, another.uid);
+                res = Integer.compare(left.uid, right.uid);
             }
             if (res == 0) {
-                res = Integer.compare(set, another.set);
+                res = Integer.compare(left.set, right.set);
             }
             if (res == 0) {
-                res = Integer.compare(tag, another.tag);
+                res = Integer.compare(left.tag, right.tag);
             }
             return res;
         }
