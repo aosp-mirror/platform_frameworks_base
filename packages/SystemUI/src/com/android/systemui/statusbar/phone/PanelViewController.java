@@ -55,6 +55,7 @@ import com.android.systemui.classifier.Classifier;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
@@ -212,6 +213,8 @@ public abstract class PanelViewController {
         return mAmbientState;
     }
 
+    private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
+
     public PanelViewController(
             PanelView view,
             FeatureFlags featureFlags,
@@ -227,7 +230,15 @@ public abstract class PanelViewController {
             LockscreenGestureLogger lockscreenGestureLogger,
             PanelExpansionStateManager panelExpansionStateManager,
             AmbientState ambientState,
-            InteractionJankMonitor interactionJankMonitor) {
+            InteractionJankMonitor interactionJankMonitor,
+            KeyguardUnlockAnimationController keyguardUnlockAnimationController) {
+        mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
+        keyguardStateController.addCallback(new KeyguardStateController.Callback() {
+            @Override
+            public void onKeyguardFadingAwayChanged() {
+                requestPanelHeightUpdate();
+            }
+        });
         mAmbientState = ambientState;
         mView = view;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
@@ -437,7 +448,8 @@ public abstract class PanelViewController {
                 mUpdateFlingVelocity = vel;
             }
         } else if (!mStatusBar.isBouncerShowing()
-                && !mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating()) {
+                && !mStatusBarKeyguardViewManager.isShowingAlternateAuthOrAnimating()
+                && !mKeyguardStateController.isKeyguardGoingAway()) {
             boolean expands = onEmptySpaceClick(mInitialTouchX);
             onTrackingStopped(expands);
         }

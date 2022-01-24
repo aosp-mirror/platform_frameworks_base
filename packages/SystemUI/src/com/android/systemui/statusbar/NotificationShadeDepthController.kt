@@ -154,6 +154,16 @@ class NotificationShadeDepthController @Inject constructor(
         }
 
     /**
+     * We're unlocking, and should not blur as the panel expansion changes.
+     */
+    var blursDisabledForUnlock: Boolean = false
+    set(value) {
+        if (field == value) return
+        field = value
+        scheduleUpdate()
+    }
+
+    /**
      * Force stop blur effect when necessary.
      */
     private var scrimsVisible: Boolean = false
@@ -192,7 +202,7 @@ class NotificationShadeDepthController @Inject constructor(
         combinedBlur = max(combinedBlur, blurUtils.blurRadiusOfRatio(transitionToFullShadeProgress))
         var shadeRadius = max(combinedBlur, wakeAndUnlockBlurRadius)
 
-        if (blursDisabledForAppLaunch) {
+        if (blursDisabledForAppLaunch || blursDisabledForUnlock) {
             shadeRadius = 0f
         }
 
@@ -309,9 +319,7 @@ class NotificationShadeDepthController @Inject constructor(
     /**
      * Update blurs when pulling down the shade
      */
-    override fun onPanelExpansionChanged(
-        rawFraction: Float, expanded: Boolean, tracking: Boolean
-    ) {
+    override fun onPanelExpansionChanged(rawFraction: Float, expanded: Boolean, tracking: Boolean) {
         val timestamp = SystemClock.elapsedRealtimeNanos()
         val expansion = MathUtils.saturate(
                 (rawFraction - panelPullDownMinFraction) / (1f - panelPullDownMinFraction))

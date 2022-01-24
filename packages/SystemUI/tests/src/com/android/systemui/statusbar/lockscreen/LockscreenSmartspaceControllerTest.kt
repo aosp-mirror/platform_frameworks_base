@@ -561,6 +561,10 @@ class LockscreenSmartspaceControllerTest : SysuiTestCase() {
 
             override fun setMediaTarget(target: SmartspaceTarget?) {
             }
+
+            override fun getSelectedPage(): Int {
+                return -1
+            }
         })
     }
 }

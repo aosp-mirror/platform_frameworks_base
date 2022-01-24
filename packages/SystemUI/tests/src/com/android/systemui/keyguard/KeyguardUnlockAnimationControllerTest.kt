@@ -14,7 +14,6 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import junit.framework.Assert.assertEquals
@@ -44,8 +43,6 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var keyguardViewController: KeyguardViewController
     @Mock
-    private lateinit var smartspaceTransitionController: SmartspaceTransitionController
-    @Mock
     private lateinit var featureFlags: FeatureFlags
     @Mock
     private lateinit var biometricUnlockController: BiometricUnlockController
@@ -59,7 +56,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         keyguardUnlockAnimationController = KeyguardUnlockAnimationController(
             context, keyguardStateController, { keyguardViewMediator }, keyguardViewController,
-            smartspaceTransitionController, featureFlags, biometricUnlockController
+            featureFlags, { biometricUnlockController }
         )
 
         `when`(keyguardViewController.viewRootImpl).thenReturn(mock(ViewRootImpl::class.java))
@@ -87,7 +84,7 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     fun noSurfaceAnimation_ifWakeAndUnlocking() {
         `when`(biometricUnlockController.isWakeAndUnlock).thenReturn(true)
 
-        keyguardUnlockAnimationController.notifyStartKeyguardExitAnimation(
+        keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
             remoteAnimationTarget,
             0 /* startTime */,
             false /* requestedShowSurfaceBehindKeyguard */
@@ -118,14 +115,11 @@ class KeyguardUnlockAnimationControllerTest : SysuiTestCase() {
     fun surfaceAnimation_ifNotWakeAndUnlocking() {
         `when`(biometricUnlockController.isWakeAndUnlock).thenReturn(false)
 
-        keyguardUnlockAnimationController.notifyStartKeyguardExitAnimation(
+        keyguardUnlockAnimationController.notifyStartSurfaceBehindRemoteAnimation(
             remoteAnimationTarget,
             0 /* startTime */,
             false /* requestedShowSurfaceBehindKeyguard */
         )
-
-        // Make sure the animator was started.
-        assertTrue(keyguardUnlockAnimationController.surfaceBehindEntryAnimator.isRunning)
 
         // Since the animation is running, we should not have finished the remote animation.
         verify(keyguardViewMediator, times(0)).onKeyguardExitRemoteAnimationFinished(

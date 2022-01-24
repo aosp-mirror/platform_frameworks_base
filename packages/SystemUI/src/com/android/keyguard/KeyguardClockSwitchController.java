@@ -20,6 +20,7 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
+import static com.android.keyguard.KeyguardClockSwitch.SMALL;
 
 import android.app.WallpaperManager;
 import android.content.res.Resources;
@@ -41,7 +42,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.plugins.ClockPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
@@ -86,6 +86,9 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private AnimatableClockController mLargeClockViewController;
     private FrameLayout mLargeClockFrame; // centered clock
 
+    @KeyguardClockSwitch.ClockSize
+    private int mCurrentClockSize = SMALL;
+
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final KeyguardBypassController mBypassController;
 
@@ -110,7 +113,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private View mSmartspaceView;
 
     private final KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
-    private SmartspaceTransitionController mSmartspaceTransitionController;
 
     private boolean mOnlyClock = false;
     private Executor mUiExecutor;
@@ -136,7 +138,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             KeyguardBypassController bypassController,
             LockscreenSmartspaceController smartspaceController,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
-            SmartspaceTransitionController smartspaceTransitionController,
             SecureSettings secureSettings,
             @Main Executor uiExecutor,
             @Main Resources resources) {
@@ -155,7 +156,22 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mSecureSettings = secureSettings;
         mUiExecutor = uiExecutor;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
-        mSmartspaceTransitionController = smartspaceTransitionController;
+        mKeyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
+                new KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener() {
+                    @Override
+                    public void onSmartspaceSharedElementTransitionStarted() {
+                        // The smartspace needs to be able to translate out of bounds in order to
+                        // end up where the launcher's smartspace is, while its container is being
+                        // swiped off the top of the screen.
+                        setClipChildrenForUnlock(false);
+                    }
+
+                    @Override
+                    public void onUnlockAnimationFinished() {
+                        // For performance reasons, reset this once the unlock animation ends.
+                        setClipChildrenForUnlock(true);
+                    }
+                });
     }
 
     /**
@@ -236,7 +252,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             mSmartspaceView.setPaddingRelative(startPadding, 0, endPadding, 0);
 
             updateClockLayout();
-            mSmartspaceTransitionController.setLockscreenSmartspace(mSmartspaceView);
+            mKeyguardUnlockAnimationController.setLockscreenSmartspace(mSmartspaceView);
         }
 
         mSecureSettings.registerContentObserver(
@@ -292,6 +308,8 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         if (!mCanShowDoubleLineClock && clockSize == KeyguardClockSwitch.LARGE) {
             return;
         }
+
+        mCurrentClockSize = clockSize;
 
         boolean appeared = mView.switchToClock(clockSize, animate);
         if (animate && appeared && clockSize == LARGE) {
@@ -368,7 +386,14 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         final Set<View> excludedViews = new HashSet<>();
 
         if (mSmartspaceView != null) {
-            excludedViews.add(mSmartspaceView);
+            excludedViews.add(mStatusArea);
+        }
+
+        // Don't change the alpha of the invisible clock.
+        if (mCurrentClockSize == LARGE) {
+            excludedViews.add(mClockFrame);
+        } else {
+            excludedViews.add(mLargeClockFrame);
         }
 
         setChildrenAlphaExcluding(alpha, excludedViews);
@@ -447,6 +472,18 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
         if (!mCanShowDoubleLineClock) {
             mUiExecutor.execute(() -> displayClock(KeyguardClockSwitch.SMALL, /* animate */ true));
+        }
+    }
+
+    /**
+     * Sets the clipChildren property on relevant views, to allow the smartspace to draw out of
+     * bounds during the unlock transition.
+     */
+    private void setClipChildrenForUnlock(boolean clip) {
+        mView.setClipChildren(clip);
+
+        if (mStatusArea != null) {
+            mStatusArea.setClipChildren(clip);
         }
     }
 }
