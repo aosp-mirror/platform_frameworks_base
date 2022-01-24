@@ -840,7 +840,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
             w.mSurfacePlacementNeeded = true;
             w.mLayoutNeeded = false;
-            w.prelayout();
             final boolean firstLayout = !w.isLaidOut();
             getDisplayPolicy().layoutWindowLw(w, null, mDisplayFrames);
             w.mLayoutSeq = mLayoutSeq;
@@ -883,7 +882,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             }
             w.mSurfacePlacementNeeded = true;
             w.mLayoutNeeded = false;
-            w.prelayout();
             getDisplayPolicy().layoutWindowLw(w, w.getParentWindow(), mDisplayFrames);
             w.mLayoutSeq = mLayoutSeq;
             if (DEBUG_LAYOUT) Slog.v(TAG, " LAYOUT: mFrame=" + w.getFrame()

@@ -31,10 +31,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
@@ -44,7 +42,6 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
-import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.InsetsState;
 import android.view.PrivacyIndicatorBounds;
@@ -208,24 +205,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         win2.mAttrs.providesInsetsTypes = new int[]{ITYPE_CLIMATE_BAR, ITYPE_EXTRA_NAVIGATION_BAR};
 
         expectThrows(IllegalArgumentException.class, () -> addWindow(win2));
-    }
-
-    @Test
-    public void layoutHint_appWindow() {
-        mWindow.mAttrs.setFitInsetsTypes(0);
-
-        final DisplayCutout.ParcelableWrapper outDisplayCutout =
-                new DisplayCutout.ParcelableWrapper();
-        final InsetsState outState = new InsetsState();
-
-        mDisplayPolicy.getLayoutHint(mWindow.mAttrs, null /* windowToken */, outState,
-                true /* localClient */);
-
-        assertThat(outDisplayCutout, is(new DisplayCutout.ParcelableWrapper()));
-        assertThat(outState.getSource(ITYPE_STATUS_BAR).getFrame(),
-                is(new Rect(0, 0, DISPLAY_WIDTH, STATUS_BAR_HEIGHT)));
-        assertThat(outState.getSource(ITYPE_NAVIGATION_BAR).getFrame(),
-                is(new Rect(0, DISPLAY_HEIGHT - NAV_BAR_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT)));
     }
 
     /**
