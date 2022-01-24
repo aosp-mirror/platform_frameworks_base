@@ -41,7 +41,7 @@ jboolean AGnssRil::setCallback(const std::unique_ptr<AGnssRilCallback>& callback
 jboolean AGnssRil::setSetId(jint type, const jstring& setid_string) {
     JNIEnv* env = getJniEnv();
     ScopedJniString jniSetId{env, setid_string};
-    auto status = mIAGnssRil->setSetId((IAGnssRil::SetIDType)type, jniSetId.c_str());
+    auto status = mIAGnssRil->setSetId((IAGnssRil::SetIdType)type, jniSetId.c_str());
     return checkAidlStatus(status, "IAGnssRilAidl setSetId() failed.");
 }
 
