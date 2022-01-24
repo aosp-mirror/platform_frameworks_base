@@ -43,6 +43,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.GameManager;
 import android.app.GameManager.GameMode;
+import android.app.GameModeInfo;
 import android.app.GameState;
 import android.app.IGameManagerService;
 import android.app.compat.PackageOverride;
@@ -694,6 +695,32 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
     }
 
+    private @GameMode int[] getAvailableGameModesUnchecked(String packageName) {
+        GamePackageConfiguration config = null;
+        synchronized (mOverrideConfigLock) {
+            config = mOverrideConfigs.get(packageName);
+        }
+        if (config == null) {
+            synchronized (mDeviceConfigLock) {
+                config = mConfigs.get(packageName);
+            }
+        }
+        if (config == null) {
+            return new int[]{};
+        }
+        return config.getAvailableGameModes();
+    }
+
+    private boolean isPackageGame(String packageName, @UserIdInt int userId) {
+        try {
+            final ApplicationInfo applicationInfo = mPackageManager
+                    .getApplicationInfoAsUser(packageName, PackageManager.MATCH_ALL, userId);
+            return applicationInfo.category == ApplicationInfo.CATEGORY_GAME;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+    }
+
     /**
      * Get an array of game modes available for a given package.
      * Checks that the caller has {@link android.Manifest.permission#MANAGE_GAME_MODE}.
@@ -702,19 +729,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
     public @GameMode int[] getAvailableGameModes(String packageName) throws SecurityException {
         checkPermission(Manifest.permission.MANAGE_GAME_MODE);
-        GamePackageConfiguration config = null;
-        synchronized (mOverrideConfigLock) {
-            config = mOverrideConfigs.get(packageName);
-        }
-        if (config == null) {
-        synchronized (mDeviceConfigLock) {
-                config = mConfigs.get(packageName);
-            }
-        }
-        if (config == null) {
-            return new int[]{GameManager.GAME_MODE_UNSUPPORTED};
-        }
-        return config.getAvailableGameModes();
+        return getAvailableGameModesUnchecked(packageName);
     }
 
     private @GameMode int getGameModeFromSettings(String packageName, @UserIdInt int userId) {
@@ -735,28 +750,22 @@ public final class GameManagerService extends IGameManagerService.Stub {
      * {@link android.Manifest.permission#MANAGE_GAME_MODE}.
      */
     @Override
-    public @GameMode int getGameMode(String packageName, int userId)
+    public @GameMode int getGameMode(@NonNull String packageName, @UserIdInt int userId)
             throws SecurityException {
         userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), userId, false, true, "getGameMode",
                 "com.android.server.app.GameManagerService");
 
         // Restrict to games only.
-        try {
-            final ApplicationInfo applicationInfo = mPackageManager
-                    .getApplicationInfoAsUser(packageName, PackageManager.MATCH_ALL, userId);
-            if (applicationInfo.category != ApplicationInfo.CATEGORY_GAME) {
-                // The game mode for applications that are not identified as game is always
-                // UNSUPPORTED. See {@link PackageManager#setApplicationCategoryHint(String, int)}
-                return GameManager.GAME_MODE_UNSUPPORTED;
-            }
-        } catch (PackageManager.NameNotFoundException e) {
+        if (!isPackageGame(packageName, userId)) {
+            // The game mode for applications that are not identified as game is always
+            // UNSUPPORTED. See {@link PackageManager#setApplicationCategoryHint(String, int)}
             return GameManager.GAME_MODE_UNSUPPORTED;
         }
 
         // This function handles two types of queries:
-        // 1.) A normal, non-privileged app querying its own Game Mode.
-        // 2.) A privileged system service querying the Game Mode of another package.
+        // 1) A normal, non-privileged app querying its own Game Mode.
+        // 2) A privileged system service querying the Game Mode of another package.
         // The least privileged case is a normal app performing a query, so check that first and
         // return a value if the package name is valid. Next, check if the caller has the necessary
         // permission and return a value. Do this check last, since it can throw an exception.
@@ -769,14 +778,32 @@ public final class GameManagerService extends IGameManagerService.Stub {
         return getGameModeFromSettings(packageName, userId);
     }
 
-    private boolean isPackageGame(String packageName, int userId) {
-        try {
-            final ApplicationInfo applicationInfo = mPackageManager
-                    .getApplicationInfoAsUser(packageName, PackageManager.MATCH_ALL, userId);
-            return applicationInfo.category == ApplicationInfo.CATEGORY_GAME;
-        } catch (PackageManager.NameNotFoundException e) {
-            return false;
+    /**
+     * Get the GameModeInfo for the package name.
+     * Verifies that the calling process is for the matching package UID or has
+     * {@link android.Manifest.permission#MANAGE_GAME_MODE}. If the package is not a game,
+     * null is always returned.
+     */
+    @Override
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
+    @Nullable
+    public GameModeInfo getGameModeInfo(@NonNull String packageName, @UserIdInt int userId) {
+        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
+                Binder.getCallingUid(), userId, false, true, "getGameModeInfo",
+                "com.android.server.app.GameManagerService");
+
+        // Check the caller has the necessary permission.
+        checkPermission(Manifest.permission.MANAGE_GAME_MODE);
+
+        // Restrict to games only.
+        if (!isPackageGame(packageName, userId)) {
+            return null;
         }
+
+        final @GameMode int activeGameMode = getGameModeFromSettings(packageName, userId);
+        final @GameMode int[] availableGameModes = getAvailableGameModesUnchecked(packageName);
+
+        return new GameModeInfo(activeGameMode, availableGameModes);
     }
 
     /**

@@ -95,6 +95,10 @@ public class TvInteractiveAppManagerService extends SystemService {
     @GuardedBy("mLock")
     private final SparseArray<UserState> mUserStates = new SparseArray<>();
 
+    // TODO: remove mGetServiceListCalled if onBootPhrase work correctly
+    @GuardedBy("mLock")
+    private boolean mGetServiceListCalled = false;
+
     private final UserManager mUserManager;
 
     /**
@@ -638,6 +642,10 @@ public class TvInteractiveAppManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
+                    if (!mGetServiceListCalled) {
+                        buildTvInteractiveAppServiceListLocked(userId, null);
+                        mGetServiceListCalled = true;
+                    }
                     UserState userState = getOrCreateUserStateLocked(resolvedUserId);
                     List<TvInteractiveAppInfo> iAppList = new ArrayList<>();
                     for (TvInteractiveAppState state : userState.mIAppMap.values()) {

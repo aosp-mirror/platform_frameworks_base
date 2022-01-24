@@ -533,6 +533,14 @@ interface IDevicePolicyManager {
     boolean isUsbDataSignalingEnabledForUser(int userId);
     boolean canUsbDataSignalingBeDisabled();
 
+    void setMinimumRequiredWifiSecurityLevel(int level);
+    int getMinimumRequiredWifiSecurityLevel();
+
+    void setSsidAllowlist(in List<String> ssids);
+    List<String> getSsidAllowlist();
+    void setSsidDenylist(in List<String> ssids);
+    List<String> getSsidDenylist();
+
     List<UserHandle> listForegroundAffiliatedUsers();
     void setDrawables(in List<DevicePolicyDrawableResource> drawables);
     void resetDrawables(in int[] drawableIds);

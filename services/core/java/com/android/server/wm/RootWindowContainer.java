@@ -3674,7 +3674,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
             try {
                 if (mTaskSupervisor.realStartActivityLocked(r, mApp,
-                        mTop == r && r.isFocusable() /* andResume */, true /* checkConfig */)) {
+                        mTop == r && r.getTask().canBeResumed(r) /* andResume */,
+                        true /* checkConfig */)) {
                     mHasActivityStarted = true;
                 }
             } catch (RemoteException e) {

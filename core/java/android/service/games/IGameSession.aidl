@@ -20,5 +20,6 @@ package android.service.games;
  * @hide
  */
 oneway interface IGameSession {
-    void destroy();
+    void onDestroyed();
+    void onTaskFocusChanged(boolean focused);
 }

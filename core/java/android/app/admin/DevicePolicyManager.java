@@ -1578,6 +1578,78 @@ public class DevicePolicyManager {
     public static final int FLAG_SUPPORTED_MODES_DEVICE_OWNER = 1 << 2;
 
     /**
+     * Constant for {@link #getMinimumRequiredWifiSecurityLevel()} and
+     * {@link #setMinimumRequiredWifiSecurityLevel(int)}: no minimum security level.
+     *
+     * <p> When returned from {@link #getMinimumRequiredWifiSecurityLevel()}, the constant
+     * represents the current minimum security level required.
+     * When passed to {@link #setMinimumRequiredWifiSecurityLevel(int)}, it sets the
+     * minimum security level a Wi-Fi network must meet.
+     *
+     * @see #WIFI_SECURITY_PERSONAL
+     * @see #WIFI_SECURITY_ENTERPRISE_EAP
+     * @see #WIFI_SECURITY_ENTERPRISE_192
+     */
+    public static final int WIFI_SECURITY_OPEN = 0;
+
+    /**
+     * Constant for {@link #getMinimumRequiredWifiSecurityLevel()} and
+     * {@link #setMinimumRequiredWifiSecurityLevel(int)}: personal network such as WEP, WPA2-PSK.
+     *
+     * <p> When returned from {@link #getMinimumRequiredWifiSecurityLevel()}, the constant
+     * represents the current minimum security level required.
+     * When passed to {@link #setMinimumRequiredWifiSecurityLevel(int)}, it sets the
+     * minimum security level a Wi-Fi network must meet.
+     *
+     * @see #WIFI_SECURITY_OPEN
+     * @see #WIFI_SECURITY_ENTERPRISE_EAP
+     * @see #WIFI_SECURITY_ENTERPRISE_192
+     */
+    public static final int WIFI_SECURITY_PERSONAL = 1;
+
+    /**
+     * Constant for {@link #getMinimumRequiredWifiSecurityLevel()} and
+     * {@link #setMinimumRequiredWifiSecurityLevel(int)}: enterprise EAP network.
+     *
+     * <p> When returned from {@link #getMinimumRequiredWifiSecurityLevel()}, the constant
+     * represents the current minimum security level required.
+     * When passed to {@link #setMinimumRequiredWifiSecurityLevel(int)}, it sets the
+     * minimum security level a Wi-Fi network must meet.
+     *
+     * @see #WIFI_SECURITY_OPEN
+     * @see #WIFI_SECURITY_PERSONAL
+     * @see #WIFI_SECURITY_ENTERPRISE_192
+     */
+    public static final int WIFI_SECURITY_ENTERPRISE_EAP = 2;
+
+    /**
+     * Constant for {@link #getMinimumRequiredWifiSecurityLevel()} and
+     * {@link #setMinimumRequiredWifiSecurityLevel(int)}: enterprise 192 bit network.
+     *
+     * <p> When returned from {@link #getMinimumRequiredWifiSecurityLevel()}, the constant
+     * represents the current minimum security level required.
+     * When passed to {@link #setMinimumRequiredWifiSecurityLevel(int)}, it sets the
+     * minimum security level a Wi-Fi network must meet.
+     *
+     * @see #WIFI_SECURITY_OPEN
+     * @see #WIFI_SECURITY_PERSONAL
+     * @see #WIFI_SECURITY_ENTERPRISE_EAP
+     */
+    public static final int WIFI_SECURITY_ENTERPRISE_192 = 3;
+
+    /**
+     * Possible Wi-Fi minimum security levels
+     *
+     * @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"WIFI_SECURITY_"}, value = {
+            WIFI_SECURITY_OPEN,
+            WIFI_SECURITY_PERSONAL,
+            WIFI_SECURITY_ENTERPRISE_EAP,
+            WIFI_SECURITY_ENTERPRISE_192})
+    public @interface WifiSecurity {}
+
+    /**
      * This MIME type is used for starting the device owner provisioning.
      *
      * <p>During device owner provisioning a device admin app is set as the owner of the device.
@@ -14557,6 +14629,105 @@ public class DevicePolicyManager {
     @SystemApi
     public Intent createProvisioningIntentFromNfcIntent(@NonNull Intent nfcIntent) {
         return ProvisioningIntentHelper.createProvisioningIntentFromNfcIntent(nfcIntent);
+    }
+
+    /**
+     * Called by device owner or profile owner of an organization-owned managed profile to
+     * specify the minimum security level required for Wi-Fi networks.
+     * The device may not connect to networks that do not meet the minimum security level.
+     * If the current network does not meet the minimum security level set, it will be disconnected.
+     *
+     *
+     * @param level minimum security level
+     * @throws SecurityException if the caller is not a device owner or a profile owner on
+     *         an organization-owned managed profile.
+     */
+    public void setMinimumRequiredWifiSecurityLevel(@WifiSecurity int level) {
+        throwIfParentInstance("setMinimumRequiredWifiSecurityLevel");
+        if (mService != null) {
+            try {
+                mService.setMinimumRequiredWifiSecurityLevel(level);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns the current Wi-Fi minimum security level.
+     *
+     * @see #setMinimumRequiredWifiSecurityLevel(int)
+     */
+    public @WifiSecurity int getMinimumRequiredWifiSecurityLevel() {
+        throwIfParentInstance("getMinimumRequiredWifiSecurityLevel");
+        if (mService == null) {
+            return WIFI_SECURITY_OPEN;
+        }
+        try {
+            return mService.getMinimumRequiredWifiSecurityLevel();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called by device owner or profile owner of an organization-owned managed profile to
+     * specify the Wi-Fi SSID policy ({@link WifiSsidPolicy}).
+     * Wi-Fi SSID policy specifies the SSID restriction the network must satisfy
+     * in order to be eligible for a connection. Providing a null policy results in the
+     * deactivation of the SSID restriction
+     *
+     * @param policy Wi-Fi SSID policy
+     * @throws SecurityException if the caller is not a device owner or a profile owner on
+     *         an organization-owned managed profile.
+     */
+    public void setWifiSsidPolicy(@Nullable WifiSsidPolicy policy) {
+        throwIfParentInstance("setWifiSsidPolicy");
+        if (mService != null) {
+            try {
+                if (policy == null) {
+                    mService.setSsidAllowlist(new ArrayList<>());
+                } else {
+                    int policyType = policy.getPolicyType();
+                    if (policyType == WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST) {
+                        mService.setSsidAllowlist(new ArrayList<>(policy.getSsids()));
+                    } else {
+                        mService.setSsidDenylist(new ArrayList<>(policy.getSsids()));
+                    }
+                }
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns the current Wi-Fi SSID policy.
+     * If the policy has not been set, it will return NULL.
+     *
+     * @see #setWifiSsidPolicy(WifiSsidPolicy)
+     * @throws SecurityException if the caller is not a device owner or a profile owner on
+     * an organization-owned managed profile or a system app.
+     */
+    @Nullable
+    public WifiSsidPolicy getWifiSsidPolicy() {
+        throwIfParentInstance("getWifiSsidPolicy");
+        if (mService == null) {
+            return null;
+        }
+        try {
+            List<String> allowlist = mService.getSsidAllowlist();
+            if (!allowlist.isEmpty()) {
+                return WifiSsidPolicy.createAllowlistPolicy(new ArraySet<>(allowlist));
+            }
+            List<String> denylist = mService.getSsidDenylist();
+            if (!denylist.isEmpty()) {
+                return WifiSsidPolicy.createDenylistPolicy(new ArraySet<>(denylist));
+            }
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return null;
     }
 
     /**
