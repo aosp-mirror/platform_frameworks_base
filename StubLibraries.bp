@@ -24,23 +24,12 @@
 // with the latest frozen API signature.
 
 /////////////////////////////////////////////////////////////////////
-// Common metalava configs
-/////////////////////////////////////////////////////////////////////
-
-stubs_defaults {
-    name: "metalava-non-updatable-api-stubs-default",
-    defaults: ["android-non-updatable-stubs-defaults"],
-    api_levels_annotations_enabled: false,
-    defaults_visibility: ["//visibility:private"],
-}
-
-/////////////////////////////////////////////////////////////////////
 // These modules provide source files for the stub libraries
 /////////////////////////////////////////////////////////////////////
 
 droidstubs {
     name: "api-stubs-docs-non-updatable",
-    defaults: ["metalava-non-updatable-api-stubs-default"],
+    defaults: ["android-non-updatable-stubs-defaults"],
     args: metalava_framework_docs_args,
     check_api: {
         current: {
@@ -89,7 +78,7 @@ module_libs = " --show-annotation android.annotation.SystemApi\\(" +
 
 droidstubs {
     name: "system-api-stubs-docs-non-updatable",
-    defaults: ["metalava-non-updatable-api-stubs-default"],
+    defaults: ["android-non-updatable-stubs-defaults"],
     args: metalava_framework_docs_args + priv_apps,
     check_api: {
         current: {
@@ -125,7 +114,7 @@ droidstubs {
 
 droidstubs {
     name: "test-api-stubs-docs-non-updatable",
-    defaults: ["metalava-non-updatable-api-stubs-default"],
+    defaults: ["android-non-updatable-stubs-defaults"],
     args: metalava_framework_docs_args + test + priv_apps_in_stubs,
     check_api: {
         current: {
@@ -167,7 +156,7 @@ droidstubs {
 
 droidstubs {
     name: "module-lib-api-stubs-docs-non-updatable",
-    defaults: ["metalava-non-updatable-api-stubs-default"],
+    defaults: ["android-non-updatable-stubs-defaults"],
     args: metalava_framework_docs_args + priv_apps_in_stubs + module_libs,
     check_api: {
         current: {
