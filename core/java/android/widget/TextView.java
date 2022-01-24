@@ -350,6 +350,7 @@ import java.util.function.Supplier;
  * @attr ref android.R.styleable#TextView_breakStrategy
  * @attr ref android.R.styleable#TextView_hyphenationFrequency
  * @attr ref android.R.styleable#TextView_lineBreakStyle
+ * @attr ref android.R.styleable#TextView_lineBreakWordStyle
  * @attr ref android.R.styleable#TextView_autoSizeTextType
  * @attr ref android.R.styleable#TextView_autoSizeMinTextSize
  * @attr ref android.R.styleable#TextView_autoSizeMaxTextSize
@@ -460,6 +461,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static final int KEY_DOWN_HANDLED_BY_MOVEMENT_METHOD = 2;
 
     private static final int FLOATING_TOOLBAR_SELECT_ALL_REFRESH_DELAY = 500;
+
+    // The default value of the line break style.
+    private static final int DEFAULT_LINE_BREAK_STYLE = LineBreakConfig.LINE_BREAK_STYLE_NONE;
+
+    // The default value of the line break word style.
+    private static final int DEFAULT_LINE_BREAK_WORD_STYLE =
+            LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE;
 
     /**
      * This change ID enables the fallback text line spacing (line height) for BoringLayout.
@@ -1451,6 +1459,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 case com.android.internal.R.styleable.TextView_lineBreakStyle:
                     mLineBreakConfig.setLineBreakStyle(
                             a.getInt(attr, LineBreakConfig.LINE_BREAK_STYLE_NONE));
+                    break;
+
+                case com.android.internal.R.styleable.TextView_lineBreakWordStyle:
+                    mLineBreakConfig.setLineBreakWordStyle(
+                            a.getInt(attr, LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE));
                     break;
 
                 case com.android.internal.R.styleable.TextView_autoSizeTextType:
@@ -3985,6 +3998,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         float mLetterSpacing = 0;
         String mFontFeatureSettings = null;
         String mFontVariationSettings = null;
+        boolean mHasLineBreakStyle = false;
+        boolean mHasLineBreakWordStyle = false;
+        int mLineBreakStyle = DEFAULT_LINE_BREAK_STYLE;
+        int mLineBreakWordStyle = DEFAULT_LINE_BREAK_WORD_STYLE;
 
         @Override
         public String toString() {
@@ -4015,6 +4032,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     + "    mLetterSpacing:" + mLetterSpacing + "\n"
                     + "    mFontFeatureSettings:" + mFontFeatureSettings + "\n"
                     + "    mFontVariationSettings:" + mFontVariationSettings + "\n"
+                    + "    mHasLineBreakStyle:" + mHasLineBreakStyle + "\n"
+                    + "    mHasLineBreakWordStyle:" + mHasLineBreakWordStyle + "\n"
+                    + "    mLineBreakStyle:" + mLineBreakStyle + "\n"
+                    + "    mLineBreakWordStyle:" + mLineBreakWordStyle + "\n"
                     + "}";
         }
     }
@@ -4062,6 +4083,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 com.android.internal.R.styleable.TextAppearance_fontFeatureSettings);
         sAppearanceValues.put(com.android.internal.R.styleable.TextView_fontVariationSettings,
                 com.android.internal.R.styleable.TextAppearance_fontVariationSettings);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_lineBreakStyle,
+                com.android.internal.R.styleable.TextAppearance_lineBreakStyle);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_lineBreakWordStyle,
+                com.android.internal.R.styleable.TextAppearance_lineBreakWordStyle);
     }
 
     /**
@@ -4177,6 +4202,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 case com.android.internal.R.styleable.TextAppearance_fontVariationSettings:
                     attributes.mFontVariationSettings = appearance.getString(attr);
                     break;
+                case com.android.internal.R.styleable.TextAppearance_lineBreakStyle:
+                    attributes.mHasLineBreakStyle = true;
+                    attributes.mLineBreakStyle =
+                            appearance.getInt(attr, attributes.mLineBreakStyle);
+                    break;
+                case com.android.internal.R.styleable.TextAppearance_lineBreakWordStyle:
+                    attributes.mHasLineBreakWordStyle = true;
+                    attributes.mLineBreakWordStyle =
+                            appearance.getInt(attr, attributes.mLineBreakWordStyle);
+                    break;
                 default:
             }
         }
@@ -4242,8 +4277,45 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (attributes.mFontVariationSettings != null) {
             setFontVariationSettings(attributes.mFontVariationSettings);
         }
+
+        if (attributes.mHasLineBreakStyle || attributes.mHasLineBreakWordStyle) {
+            updateLineBreakConfigFromTextAppearance(attributes.mHasLineBreakStyle,
+                    attributes.mHasLineBreakWordStyle, attributes.mLineBreakStyle,
+                    attributes.mLineBreakWordStyle);
+        }
     }
 
+    /**
+     * Updates the LineBreakConfig from the TextAppearance.
+     *
+     * This method updates the given line configuration from the TextAppearance. This method will
+     * request new layout if line break config has been changed.
+     *
+     * @param isLineBreakStyleSpecified true if the line break style is specified.
+     * @param isLineBreakWordStyleSpecified true if the line break word style is specified.
+     * @param lineBreakStyle the value of the line break style in the TextAppearance.
+     * @param lineBreakWordStyle the value of the line break word style in the TextAppearance.
+     */
+    private void updateLineBreakConfigFromTextAppearance(boolean isLineBreakStyleSpecified,
+            boolean isLineBreakWordStyleSpecified,
+            @LineBreakConfig.LineBreakStyle int lineBreakStyle,
+            @LineBreakConfig.LineBreakWordStyle int lineBreakWordStyle) {
+        boolean updated = false;
+        if (isLineBreakStyleSpecified && mLineBreakConfig.getLineBreakStyle() != lineBreakStyle) {
+            mLineBreakConfig.setLineBreakStyle(lineBreakStyle);
+            updated = true;
+        }
+        if (isLineBreakWordStyleSpecified
+                && mLineBreakConfig.getLineBreakWordStyle() != lineBreakWordStyle) {
+            mLineBreakConfig.setLineBreakWordStyle(lineBreakWordStyle);
+            updated = true;
+        }
+        if (updated && mLayout != null) {
+            nullLayouts();
+            requestLayout();
+            invalidate();
+        }
+    }
     /**
      * Get the default primary {@link Locale} of the text in this TextView. This will always be
      * the first member of {@link #getTextLocales()}.
@@ -4800,18 +4872,29 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /**
      * Sets line break configuration indicates which strategy needs to be used when calculating the
-     * text wrapping. There are thee strategies for the line break style(lb):
+     * text wrapping.
+     * <P>
+     * There are two types of line break rules that can be configured at the same time. One is
+     * line break style(lb) and the other is line break word style(lw). The line break style
+     * affects rule-based breaking. The line break word style affects dictionary-based breaking
+     * and provide phrase-based breaking opportunities. There are several types for the
+     * line break style:
      * {@link LineBreakConfig#LINE_BREAK_STYLE_LOOSE},
      * {@link LineBreakConfig#LINE_BREAK_STYLE_NORMAL} and
      * {@link LineBreakConfig#LINE_BREAK_STYLE_STRICT}.
-     * The default value of the line break style is {@link LineBreakConfig#LINE_BREAK_STYLE_NONE},
-     * which means no line break style is specified.
+     * The type for the line break word style is
+     * {@link LineBreakConfig#LINE_BREAK_WORD_STYLE_PHRASE}.
+     * The default values of the line break style and the line break word style are
+     * {@link LineBreakConfig#LINE_BREAK_STYLE_NONE} and
+     * {@link LineBreakConfig#LINE_BREAK_WORD_STYLE_NONE} respectively, indicating that no line
+     * breaking rules are specified.
      * See <a href="https://drafts.csswg.org/css-text/#line-break-property">
      *         the line-break property</a>
      *
      * @param lineBreakConfig the line break config for text wrapping.
      */
     public void setLineBreakConfig(@NonNull LineBreakConfig lineBreakConfig) {
+        Objects.requireNonNull(lineBreakConfig);
         if (mLineBreakConfig.equals(lineBreakConfig)) {
             return;
         }
@@ -4858,7 +4941,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mTextDir = params.getTextDirection();
         mBreakStrategy = params.getBreakStrategy();
         mHyphenationFrequency = params.getHyphenationFrequency();
-        mLineBreakConfig.set(params.getLineBreakConfig());
+        if (params.getLineBreakConfig() != null) {
+            mLineBreakConfig.set(params.getLineBreakConfig());
+        } else {
+            // Set default value if the line break config in the PrecomputedText.Params is null.
+            mLineBreakConfig.setLineBreakStyle(DEFAULT_LINE_BREAK_STYLE);
+            mLineBreakConfig.setLineBreakWordStyle(DEFAULT_LINE_BREAK_WORD_STYLE);
+        }
         if (mLayout != null) {
             nullLayouts();
             requestLayout();

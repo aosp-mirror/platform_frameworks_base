@@ -363,6 +363,9 @@ public class PrecomputedText implements Spannable {
         public String toString() {
             int lineBreakStyle = (mLineBreakConfig != null)
                     ? mLineBreakConfig.getLineBreakStyle() : LineBreakConfig.LINE_BREAK_STYLE_NONE;
+            int lineBreakWordStyle = (mLineBreakConfig != null)
+                    ? mLineBreakConfig.getLineBreakWordStyle()
+                            : LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE;
             return "{"
                 + "textSize=" + mPaint.getTextSize()
                 + ", textScaleX=" + mPaint.getTextScaleX()
@@ -376,6 +379,7 @@ public class PrecomputedText implements Spannable {
                 + ", breakStrategy=" + mBreakStrategy
                 + ", hyphenationFrequency=" + mHyphenationFrequency
                 + ", lineBreakStyle=" + lineBreakStyle
+                + ", lineBreakWordStyle=" + lineBreakWordStyle
                 + "}";
         }
     };
