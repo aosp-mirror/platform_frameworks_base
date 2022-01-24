@@ -105,9 +105,10 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
     public static final int PACKAGE_COMPANION = 15;
     public static final int PACKAGE_RETAIL_DEMO = 16;
     public static final int PACKAGE_RECENTS = 17;
+    public static final int PACKAGE_AMBIENT_CONTEXT_DETECTION = 18;
     // Integer value of the last known package ID. Increases as new ID is added to KnownPackage.
     // Please note the numbers should be continuous.
-    public static final int LAST_KNOWN_PACKAGE = PACKAGE_RECENTS;
+    public static final int LAST_KNOWN_PACKAGE = PACKAGE_AMBIENT_CONTEXT_DETECTION;
 
     @LongDef(flag = true, prefix = "RESOLVE_", value = {
             RESOLVE_NON_BROWSER_ONLY,

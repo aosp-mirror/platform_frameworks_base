@@ -20,6 +20,7 @@ import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import android.view.WindowManagerPolicyConstants
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerBuilderProvider
@@ -71,7 +72,7 @@ class LaunchAppShowImeAndDialogThemeAppTest(private val testSpec: FlickerTestPar
     /**
      * Checks that [FlickerComponentName.IME] layer becomes visible during the transition
      */
-    @Presubmit
+    @FlakyTest(bugId = 215884488)
     @Test
     fun imeWindowIsAlwaysVisible() = testSpec.imeWindowIsAlwaysVisible()
 

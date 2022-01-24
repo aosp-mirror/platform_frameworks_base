@@ -108,6 +108,15 @@ class CloseAppHomeButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
         super.entireScreenCovered()
     }
 
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun visibleLayersShownMoreThanOneConsecutiveEntry() {
+        // This test doesn't work in shell transitions because of b/215885246
+        assumeFalse(isShellTransitionsEnabled)
+        super.visibleLayersShownMoreThanOneConsecutiveEntry()
+    }
+
     companion object {
         /**
          * Creates the test configurations.

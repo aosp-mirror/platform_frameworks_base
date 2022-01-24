@@ -928,6 +928,18 @@ public final class Display {
     }
 
     /**
+     * Returns the install orientation of the display.
+     * @hide
+     */
+    @Surface.Rotation
+    public int getInstallOrientation() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            return mDisplayInfo.installOrientation;
+        }
+    }
+
+    /**
      * @deprecated use {@link #getRotation}
      * @return orientation of this display.
      */

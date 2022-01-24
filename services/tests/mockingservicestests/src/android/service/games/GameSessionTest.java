@@ -20,6 +20,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -29,11 +31,12 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import android.graphics.Bitmap;
 import android.platform.test.annotations.Presubmit;
 import android.service.games.GameSession.ScreenshotCallback;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.view.SurfaceControlViewHost;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.infra.AndroidFuture;
 
@@ -44,15 +47,18 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Unit tests for the {@link android.service.games.GameSession}.
  */
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
 @SmallTest
 @Presubmit
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public final class GameSessionTest {
     private static final long WAIT_FOR_CALLBACK_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(1);
     private static final Bitmap TEST_BITMAP = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
@@ -61,8 +67,7 @@ public final class GameSessionTest {
     private IGameSessionController mMockGameSessionController;
     @Mock
     SurfaceControlViewHost mSurfaceControlViewHost;
-    private GameSession mGameSession;
-
+    private LifecycleTrackingGameSession mGameSession;
     private MockitoSession mMockitoSession;
 
     @Before
@@ -71,7 +76,7 @@ public final class GameSessionTest {
                 .initMocks(this)
                 .startMocking();
 
-        mGameSession = new GameSession() {};
+        mGameSession = new LifecycleTrackingGameSession() {};
         mGameSession.attach(mMockGameSessionController, /* taskId= */ 10,
                 InstrumentationRegistry.getContext(),
                 mSurfaceControlViewHost,
@@ -190,5 +195,197 @@ public final class GameSessionTest {
 
         assertTrue(countDownLatch.await(
                 WAIT_FOR_CALLBACK_TIMEOUT_MS, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void moveState_InitializedToInitialized_noLifecycleCalls() throws Exception {
+        mGameSession.moveToState(GameSession.LifecycleState.INITIALIZED);
+
+        assertThat(mGameSession.mLifecycleMethodCalls.isEmpty()).isTrue();
+    }
+
+    @Test
+    public void moveState_FullLifecycle_ExpectedLifecycleCalls() throws Exception {
+        mGameSession.moveToState(GameSession.LifecycleState.CREATED);
+        mGameSession.moveToState(GameSession.LifecycleState.TASK_FOCUSED);
+        mGameSession.moveToState(GameSession.LifecycleState.CREATED);
+        mGameSession.moveToState(GameSession.LifecycleState.DESTROYED);
+
+        assertThat(mGameSession.mLifecycleMethodCalls).containsExactly(
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_CREATE,
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_GAME_TASK_FOCUSED,
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_GAME_TASK_UNFOCUSED,
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_DESTROY).inOrder();
+    }
+
+    @Test
+    public void moveState_DestroyedWhenInitialized_ExpectedLifecycleCalls() throws Exception {
+        mGameSession.moveToState(GameSession.LifecycleState.DESTROYED);
+
+        // ON_CREATE is always called before ON_DESTROY.
+        assertThat(mGameSession.mLifecycleMethodCalls).containsExactly(
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_CREATE,
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_DESTROY).inOrder();
+    }
+
+    @Test
+    public void moveState_DestroyedWhenFocused_ExpectedLifecycleCalls() throws Exception {
+        mGameSession.moveToState(GameSession.LifecycleState.CREATED);
+        mGameSession.moveToState(GameSession.LifecycleState.TASK_FOCUSED);
+        mGameSession.moveToState(GameSession.LifecycleState.DESTROYED);
+
+        // The ON_GAME_TASK_UNFOCUSED lifecycle event is implied because the session is destroyed
+        // while in focus.
+        assertThat(mGameSession.mLifecycleMethodCalls).containsExactly(
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_CREATE,
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_GAME_TASK_FOCUSED,
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_GAME_TASK_UNFOCUSED,
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_DESTROY).inOrder();
+    }
+
+    @Test
+    public void moveState_FocusCycled_ExpectedLifecycleCalls() throws Exception {
+        mGameSession.moveToState(GameSession.LifecycleState.CREATED);
+        mGameSession.moveToState(GameSession.LifecycleState.TASK_FOCUSED);
+        mGameSession.moveToState(GameSession.LifecycleState.TASK_UNFOCUSED);
+        mGameSession.moveToState(GameSession.LifecycleState.TASK_FOCUSED);
+        mGameSession.moveToState(GameSession.LifecycleState.TASK_UNFOCUSED);
+
+        // Both cycles from focus and unfocus are captured.
+        assertThat(mGameSession.mLifecycleMethodCalls).containsExactly(
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_CREATE,
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_GAME_TASK_FOCUSED,
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_GAME_TASK_UNFOCUSED,
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_GAME_TASK_FOCUSED,
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_GAME_TASK_UNFOCUSED).inOrder();
+    }
+
+    @Test
+    public void moveState_MultipleFocusAndUnfocusCalls_ExpectedLifecycleCalls() throws Exception {
+        mGameSession.moveToState(GameSession.LifecycleState.CREATED);
+        mGameSession.moveToState(GameSession.LifecycleState.TASK_FOCUSED);
+        mGameSession.moveToState(GameSession.LifecycleState.TASK_FOCUSED);
+        mGameSession.moveToState(GameSession.LifecycleState.TASK_UNFOCUSED);
+        mGameSession.moveToState(GameSession.LifecycleState.TASK_UNFOCUSED);
+
+        // The second TASK_FOCUSED call and the second TASK_UNFOCUSED call are ignored.
+        assertThat(mGameSession.mLifecycleMethodCalls).containsExactly(
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_CREATE,
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_GAME_TASK_FOCUSED,
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_GAME_TASK_UNFOCUSED).inOrder();
+    }
+
+    @Test
+    public void moveState_CreatedAfterFocused_ExpectedLifecycleCalls() throws Exception {
+        mGameSession.moveToState(GameSession.LifecycleState.CREATED);
+        mGameSession.moveToState(GameSession.LifecycleState.TASK_FOCUSED);
+        mGameSession.moveToState(GameSession.LifecycleState.CREATED);
+
+        // The second CREATED call is ignored.
+        assertThat(mGameSession.mLifecycleMethodCalls).containsExactly(
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_CREATE,
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_GAME_TASK_FOCUSED).inOrder();
+    }
+
+    @Test
+    public void moveState_UnfocusedWithoutFocused_ExpectedLifecycleCalls() throws Exception {
+        mGameSession.moveToState(GameSession.LifecycleState.CREATED);
+        mGameSession.moveToState(GameSession.LifecycleState.TASK_UNFOCUSED);
+
+        // The TASK_UNFOCUSED call without an earlier TASK_FOCUSED call is ignored.
+        assertThat(mGameSession.mLifecycleMethodCalls).containsExactly(
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_CREATE).inOrder();
+    }
+
+    @Test
+    public void moveState_NeverFocused_ExpectedLifecycleCalls() throws Exception {
+        mGameSession.moveToState(GameSession.LifecycleState.CREATED);
+        mGameSession.moveToState(GameSession.LifecycleState.DESTROYED);
+
+        assertThat(mGameSession.mLifecycleMethodCalls).containsExactly(
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_CREATE,
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_DESTROY).inOrder();
+    }
+
+    @Test
+    public void moveState_MultipleFocusCalls_ExpectedLifecycleCalls() throws Exception {
+        mGameSession.moveToState(GameSession.LifecycleState.CREATED);
+        mGameSession.moveToState(GameSession.LifecycleState.TASK_FOCUSED);
+        mGameSession.moveToState(GameSession.LifecycleState.TASK_FOCUSED);
+        mGameSession.moveToState(GameSession.LifecycleState.TASK_FOCUSED);
+
+        // The extra TASK_FOCUSED moves are ignored.
+        assertThat(mGameSession.mLifecycleMethodCalls).containsExactly(
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_CREATE,
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_GAME_TASK_FOCUSED).inOrder();
+    }
+
+    @Test
+    public void moveState_MultipleCreateCalls_ExpectedLifecycleCalls() throws Exception {
+        mGameSession.moveToState(GameSession.LifecycleState.CREATED);
+        mGameSession.moveToState(GameSession.LifecycleState.CREATED);
+        mGameSession.moveToState(GameSession.LifecycleState.CREATED);
+
+        // The extra CREATE moves are ignored.
+        assertThat(mGameSession.mLifecycleMethodCalls).containsExactly(
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_CREATE).inOrder();
+    }
+
+    @Test
+    public void moveState_FocusBeforeCreate_ExpectedLifecycleCalls() throws Exception {
+        mGameSession.moveToState(GameSession.LifecycleState.TASK_FOCUSED);
+
+        // The TASK_FOCUSED move before CREATE is ignored.
+        assertThat(mGameSession.mLifecycleMethodCalls.isEmpty()).isTrue();
+    }
+
+    @Test
+    public void moveState_UnfocusBeforeCreate_ExpectedLifecycleCalls() throws Exception {
+        mGameSession.moveToState(GameSession.LifecycleState.TASK_UNFOCUSED);
+
+        // The TASK_UNFOCUSED move before CREATE is ignored.
+        assertThat(mGameSession.mLifecycleMethodCalls.isEmpty()).isTrue();
+    }
+
+    @Test
+    public void moveState_FocusWhenDestroyed_ExpectedLifecycleCalls() throws Exception {
+        mGameSession.moveToState(GameSession.LifecycleState.CREATED);
+        mGameSession.moveToState(GameSession.LifecycleState.DESTROYED);
+        mGameSession.moveToState(GameSession.LifecycleState.TASK_FOCUSED);
+
+        // The TASK_FOCUSED move after DESTROYED is ignored.
+        assertThat(mGameSession.mLifecycleMethodCalls).containsExactly(
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_CREATE,
+                LifecycleTrackingGameSession.LifecycleMethodCall.ON_DESTROY).inOrder();
+    }
+
+    private static class LifecycleTrackingGameSession extends GameSession {
+        private enum LifecycleMethodCall {
+            ON_CREATE,
+            ON_DESTROY,
+            ON_GAME_TASK_FOCUSED,
+            ON_GAME_TASK_UNFOCUSED
+        }
+
+        final List<LifecycleMethodCall> mLifecycleMethodCalls = new ArrayList<>();
+
+        @Override
+        public void onCreate() {
+            mLifecycleMethodCalls.add(LifecycleMethodCall.ON_CREATE);
+        }
+
+        @Override
+        public void onDestroy() {
+            mLifecycleMethodCalls.add(LifecycleMethodCall.ON_DESTROY);
+        }
+
+        @Override
+        public void onGameTaskFocusChanged(boolean focused) {
+            if (focused) {
+                mLifecycleMethodCalls.add(LifecycleMethodCall.ON_GAME_TASK_FOCUSED);
+            } else {
+                mLifecycleMethodCalls.add(LifecycleMethodCall.ON_GAME_TASK_UNFOCUSED);
+            }
+        }
     }
 }

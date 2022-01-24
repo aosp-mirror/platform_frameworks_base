@@ -127,7 +127,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
      * The `isAppWindowInvisible` step is optional because we log once per frame, upon logging,
      * the window may be visible or not depending on what was processed until that moment.
      */
-    @Presubmit
+    @FlakyTest(bugId = 203538234)
     @Test
     fun appWindowBecomesVisible() {
         testSpec.assertWm {
@@ -240,7 +240,7 @@ class OpenAppNonResizeableTest(testSpec: FlickerTestParameter) : OpenAppTransiti
      * it cannot use the regular assertion (check over time), because on lock screen neither
      * the app not the launcher are visible, and there is no top visible window.
      */
-    @Presubmit
+    @FlakyTest(bugId = 203538234)
     @Test
     override fun appWindowReplacesLauncherAsTopWindow() {
         testSpec.assertWm {

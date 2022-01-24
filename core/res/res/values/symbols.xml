@@ -3652,6 +3652,7 @@
   <java-symbol type="string" name="config_defaultRotationResolverService" />
   <java-symbol type="string" name="config_defaultSystemCaptionsService" />
   <java-symbol type="string" name="config_defaultSystemCaptionsManagerService" />
+  <java-symbol type="string" name="config_defaultAmbientContextDetectionService" />
   <java-symbol type="string" name="config_retailDemoPackage" />
   <java-symbol type="string" name="config_retailDemoPackageSignature" />
 

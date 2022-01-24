@@ -122,6 +122,11 @@ class OpenAppColdTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSp
     @Test
     override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
 
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 213852103)
+    @Test
+    override fun entireScreenCovered() = super.entireScreenCovered()
+
     companion object {
         /**
          * Creates the test configurations.

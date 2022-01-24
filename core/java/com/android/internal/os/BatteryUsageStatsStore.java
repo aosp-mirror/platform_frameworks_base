@@ -58,6 +58,7 @@ public class BatteryUsageStatsStore {
             new BatteryUsageStatsQuery.Builder()
                     .setMaxStatsAgeMs(0)
                     .includePowerModels()
+                    .includeProcessStateData()
                     .build());
     private static final String BATTERY_USAGE_STATS_DIR = "battery-usage-stats";
     private static final String SNAPSHOT_FILE_EXTENSION = ".bus";

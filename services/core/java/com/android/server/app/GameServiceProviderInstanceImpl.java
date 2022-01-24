@@ -19,6 +19,7 @@ package com.android.server.app;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.ComponentName;
@@ -72,6 +73,13 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         public void onTaskRemoved(int taskId) throws RemoteException {
             mBackgroundExecutor.execute(() -> {
                 GameServiceProviderInstanceImpl.this.onTaskRemoved(taskId);
+            });
+        }
+
+        @Override
+        public void onTaskFocusChanged(int taskId, boolean focused) {
+            mBackgroundExecutor.execute(() -> {
+                GameServiceProviderInstanceImpl.this.onTaskFocusChanged(taskId, focused);
             });
         }
 
@@ -212,6 +220,30 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         }
     }
 
+    private void onTaskFocusChanged(int taskId, boolean focused) {
+        synchronized (mLock) {
+            onTaskFocusChangedLocked(taskId, focused);
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void onTaskFocusChangedLocked(int taskId, boolean focused) {
+        if (DEBUG) {
+            Slog.d(TAG, "onTaskFocusChangedLocked() id: " + taskId + " focused: " + focused);
+        }
+
+        final GameSessionRecord gameSessionRecord = mGameSessions.get(taskId);
+        if (gameSessionRecord == null || gameSessionRecord.getGameSession() == null) {
+            return;
+        }
+
+        try {
+            gameSessionRecord.getGameSession().onTaskFocusChanged(focused);
+        } catch (RemoteException ex) {
+            Slog.w(TAG, "Failed to notify session of task focus change: " + gameSessionRecord);
+        }
+    }
+
     @GuardedBy("mLock")
     private void gameTaskStartedLocked(int taskId, @NonNull ComponentName componentName) {
         if (DEBUG) {
@@ -311,6 +343,12 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                             synchronized (mLock) {
                                 attachGameSessionLocked(taskId, createGameSessionResult);
                             }
+
+                            // The TaskStackListener may have made its task focused call for the
+                            // game session's task before the game session was created, so check if
+                            // the task is already focused so that the game session can be notified.
+                            setGameSessionFocusedIfNecessary(taskId,
+                                    createGameSessionResult.getGameSession());
                         }, mBackgroundExecutor);
 
         AndroidFuture<Void> unusedPostCreateGameSessionFuture =
@@ -325,6 +363,18 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                             gameSessionViewHostConfiguration,
                             createGameSessionResultFuture);
                 });
+    }
+
+    private void setGameSessionFocusedIfNecessary(int taskId, IGameSession gameSession) {
+        try {
+            final ActivityTaskManager.RootTaskInfo rootTaskInfo =
+                    mActivityTaskManager.getFocusedRootTaskInfo();
+            if (rootTaskInfo != null && rootTaskInfo.taskId == taskId) {
+                gameSession.onTaskFocusChanged(true);
+            }
+        } catch (RemoteException ex) {
+            Slog.w(TAG, "Failed to set task focused for ID: " + taskId);
+        }
     }
 
     @GuardedBy("mLock")
@@ -368,7 +418,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
             int taskId,
             CreateGameSessionResult createGameSessionResult) {
         try {
-            createGameSessionResult.getGameSession().destroy();
+            createGameSessionResult.getGameSession().onDestroyed();
         } catch (RemoteException ex) {
             Slog.w(TAG, "Failed to destroy session: " + taskId);
         }
@@ -408,7 +458,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         IGameSession gameSession = gameSessionRecord.getGameSession();
         if (gameSession != null) {
             try {
-                gameSession.destroy();
+                gameSession.onDestroyed();
             } catch (RemoteException ex) {
                 Slog.w(TAG, "Failed to destroy session: " + gameSessionRecord, ex);
             }

@@ -131,6 +131,13 @@ public abstract class TvInteractiveAppService extends Service {
     /** @hide */
     public static final String COMMAND_PARAMETER_KEY_TRACK_SELECT_MODE =
             "command_track_select_mode";
+    /**
+     * Command to quiet channel change. No channel banner or channel info is shown.
+     * <p>Refer to HbbTV Spec 2.0.4 chapter A.2.4.3.
+     * @hide
+     */
+    public static final String COMMAND_PARAMETER_KEY_CHANGE_CHANNEL_QUIETLY =
+            "command_change_channel_quietly";
 
     private final Handler mServiceHandler = new ServiceHandler();
     private final RemoteCallbackList<ITvInteractiveAppServiceCallback> mCallbacks =

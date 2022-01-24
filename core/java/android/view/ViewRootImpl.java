@@ -398,6 +398,8 @@ public final class ViewRootImpl implements ViewParent,
     final DisplayManager mDisplayManager;
     final String mBasePackageName;
 
+    private @Surface.Rotation int mDisplayInstallOrientation;
+
     final int[] mTmpLocation = new int[2];
 
     final TypedValue mTmpValue = new TypedValue();
@@ -1028,6 +1030,7 @@ public final class ViewRootImpl implements ViewParent,
                 mView = view;
 
                 mAttachInfo.mDisplayState = mDisplay.getState();
+                mDisplayInstallOrientation = mDisplay.getInstallOrientation();
                 mViewLayoutDirectionInitial = mView.getRawLayoutDirection();
                 mFallbackEventHandler.setView(view);
                 mWindowAttributes.copyFrom(attrs);
@@ -7937,6 +7940,10 @@ public final class ViewRootImpl implements ViewParent,
                 mTmpFrames, mPendingMergedConfiguration, mSurfaceControl, mTempInsets,
                 mTempControls, mSurfaceSize);
 
+        final int transformHint = SurfaceControl.rotationToBufferTransform(
+                (mDisplayInstallOrientation + mDisplay.getRotation()) % 4);
+        mSurfaceControl.setTransformHint(transformHint);
+
         if (mAttachInfo.mContentCaptureManager != null) {
             MainContentCaptureSession mainSession = mAttachInfo.mContentCaptureManager
                     .getMainContentCaptureSession();
@@ -7955,7 +7962,6 @@ public final class ViewRootImpl implements ViewParent,
                 mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl);
                 mAttachInfo.mThreadedRenderer.setBlastBufferQueue(mBlastBufferQueue);
             }
-            int transformHint = mSurfaceControl.getTransformHint();
             if (mPreviousTransformHint != transformHint) {
                 mPreviousTransformHint = transformHint;
                 dispatchTransformHintChanged(transformHint);

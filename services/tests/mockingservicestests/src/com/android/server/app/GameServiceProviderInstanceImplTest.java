@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.ITaskStackListener;
 import android.content.ComponentName;
@@ -331,6 +332,7 @@ public final class GameServiceProviderInstanceImplTest {
                 .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
 
         assertThat(gameSession10.mIsDestroyed).isFalse();
+        assertThat(gameSession10.mIsFocused).isFalse();
     }
 
     @Test
@@ -362,6 +364,45 @@ public final class GameServiceProviderInstanceImplTest {
 
         verify(mMockWindowManagerInternal).addTaskOverlay(eq(10), eq(mockSurfacePackage10));
         verifyNoMoreInteractions(mMockWindowManagerInternal);
+    }
+
+    @Test
+    public void gameTaskFocused_propagatedToGameSession() throws Exception {
+        mGameServiceProviderInstance.start();
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
+        assertThat(gameSession10.mIsFocused).isFalse();
+
+        dispatchTaskFocused(10, /*focused=*/ true);
+        assertThat(gameSession10.mIsFocused).isTrue();
+
+        dispatchTaskFocused(10, /*focused=*/ false);
+        assertThat(gameSession10.mIsFocused).isFalse();
+    }
+
+    @Test
+    public void gameTaskAlreadyFocusedWhenGameSessionCreated_propagatedToGameSession()
+            throws Exception {
+        ActivityTaskManager.RootTaskInfo gameATaskInfo = new ActivityTaskManager.RootTaskInfo();
+        gameATaskInfo.taskId = 10;
+        when(mMockActivityTaskManager.getFocusedRootTaskInfo()).thenReturn(gameATaskInfo);
+
+        mGameServiceProviderInstance.start();
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
+        assertThat(gameSession10.mIsFocused).isTrue();
     }
 
     @Test
@@ -647,6 +688,12 @@ public final class GameServiceProviderInstanceImplTest {
         });
     }
 
+    private void dispatchTaskFocused(int taskId, boolean focused) {
+        dispatchTaskChangeEvent(taskStackListener -> {
+            taskStackListener.onTaskFocusChanged(taskId, focused);
+        });
+    }
+
     private void dispatchTaskChangeEvent(
             ThrowingConsumer<ITaskStackListener> taskStackListenerConsumer) {
         for (ITaskStackListener taskStackListener : mTaskStackListeners) {
@@ -767,10 +814,16 @@ public final class GameServiceProviderInstanceImplTest {
 
     private static class FakeGameSession extends IGameSession.Stub {
         boolean mIsDestroyed = false;
+        boolean mIsFocused = false;
 
         @Override
-        public void destroy() {
+        public void onDestroyed() {
             mIsDestroyed = true;
+        }
+
+        @Override
+        public void onTaskFocusChanged(boolean focused) {
+            mIsFocused = focused;
         }
     }
 }
