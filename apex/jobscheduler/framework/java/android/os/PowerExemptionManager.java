@@ -259,7 +259,7 @@ public class PowerExemptionManager {
      */
     public static final int REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED = 207;
     /**
-     * Broadcast {@link android.content.Intent#ACTION_REFRESH_SAFETY_SOURCES}.
+     * Broadcast {@link android.safetycenter.SafetyCenterManager#ACTION_REFRESH_SAFETY_SOURCES}.
      * @hide
      */
     public static final int REASON_ACTION_REFRESH_SAFETY_SOURCES = 208;
