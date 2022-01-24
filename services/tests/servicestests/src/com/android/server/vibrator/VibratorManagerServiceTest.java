@@ -316,7 +316,7 @@ public class VibratorManagerServiceTest {
 
         assertNotNull(info);
         assertEquals(1, info.getId());
-        assertEquals(123.f, info.getResonantFrequency(), 0.01 /*tolerance*/);
+        assertEquals(123.f, info.getResonantFrequencyHz(), 0.01 /*tolerance*/);
     }
 
     @Test
@@ -341,7 +341,7 @@ public class VibratorManagerServiceTest {
                 info.isEffectSupported(VibrationEffect.EFFECT_TICK));
         assertTrue(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_CLICK));
         assertFalse(info.isPrimitiveSupported(VibrationEffect.Composition.PRIMITIVE_TICK));
-        assertEquals(123.f, info.getResonantFrequency(), 0.01 /*tolerance*/);
+        assertEquals(123.f, info.getResonantFrequencyHz(), 0.01 /*tolerance*/);
         assertTrue(Float.isNaN(info.getQFactor()));
     }
 
@@ -360,7 +360,7 @@ public class VibratorManagerServiceTest {
         VibratorInfo info = createService().getVibratorInfo(1);
         assertNotNull(info);
         assertEquals(1, info.getId());
-        assertEquals(123.f, info.getResonantFrequency(), 0.01 /*tolerance*/);
+        assertEquals(123.f, info.getResonantFrequencyHz(), 0.01 /*tolerance*/);
     }
 
     @Test

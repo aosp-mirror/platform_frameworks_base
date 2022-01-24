@@ -16,7 +16,6 @@
 
 package android.os;
 
-import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.vibrator.Braking;
@@ -25,6 +24,8 @@ import android.util.MathUtils;
 import android.util.Range;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,7 +57,7 @@ public class VibratorInfo implements Parcelable {
     private final int mPwlePrimitiveDurationMax;
     private final int mPwleSizeMax;
     private final float mQFactor;
-    private final FrequencyMapping mFrequencyMapping;
+    private final FrequencyProfile mFrequencyProfile;
 
     VibratorInfo(Parcel in) {
         mId = in.readInt();
@@ -69,7 +70,15 @@ public class VibratorInfo implements Parcelable {
         mPwlePrimitiveDurationMax = in.readInt();
         mPwleSizeMax = in.readInt();
         mQFactor = in.readFloat();
-        mFrequencyMapping = in.readParcelable(VibratorInfo.class.getClassLoader(), android.os.VibratorInfo.FrequencyMapping.class);
+        mFrequencyProfile = FrequencyProfile.CREATOR.createFromParcel(in);
+    }
+
+    public VibratorInfo(int id, @NonNull VibratorInfo baseVibratorInfo) {
+        this(id, baseVibratorInfo.mCapabilities, baseVibratorInfo.mSupportedEffects,
+                baseVibratorInfo.mSupportedBraking, baseVibratorInfo.mSupportedPrimitives,
+                baseVibratorInfo.mPrimitiveDelayMax, baseVibratorInfo.mCompositionSizeMax,
+                baseVibratorInfo.mPwlePrimitiveDurationMax, baseVibratorInfo.mPwleSizeMax,
+                baseVibratorInfo.mQFactor, baseVibratorInfo.mFrequencyProfile);
     }
 
     /**
@@ -92,7 +101,7 @@ public class VibratorInfo implements Parcelable {
      * @param pwleSizeMax              The maximum number of primitives supported by a PWLE
      *                                 composition.
      * @param qFactor                  The vibrator quality factor.
-     * @param frequencyMapping         The description of the vibrator supported frequencies and max
+     * @param frequencyProfile         The description of the vibrator supported frequencies and max
      *                                 amplitude mappings.
      * @hide
      */
@@ -100,7 +109,9 @@ public class VibratorInfo implements Parcelable {
             @Nullable SparseBooleanArray supportedBraking,
             @NonNull SparseIntArray supportedPrimitives, int primitiveDelayMax,
             int compositionSizeMax, int pwlePrimitiveDurationMax, int pwleSizeMax,
-            float qFactor, @NonNull FrequencyMapping frequencyMapping) {
+            float qFactor, @NonNull FrequencyProfile frequencyProfile) {
+        Preconditions.checkNotNull(supportedPrimitives);
+        Preconditions.checkNotNull(frequencyProfile);
         mId = id;
         mCapabilities = capabilities;
         mSupportedEffects = supportedEffects == null ? null : supportedEffects.clone();
@@ -111,14 +122,7 @@ public class VibratorInfo implements Parcelable {
         mPwlePrimitiveDurationMax = pwlePrimitiveDurationMax;
         mPwleSizeMax = pwleSizeMax;
         mQFactor = qFactor;
-        mFrequencyMapping = frequencyMapping;
-    }
-
-    protected VibratorInfo(int id, int capabilities, VibratorInfo baseVibrator) {
-        this(id, capabilities, baseVibrator.mSupportedEffects, baseVibrator.mSupportedBraking,
-                baseVibrator.mSupportedPrimitives, baseVibrator.mPrimitiveDelayMax,
-                baseVibrator.mCompositionSizeMax, baseVibrator.mPwlePrimitiveDurationMax,
-                baseVibrator.mPwleSizeMax, baseVibrator.mQFactor, baseVibrator.mFrequencyMapping);
+        mFrequencyProfile = frequencyProfile;
     }
 
     @Override
@@ -133,7 +137,7 @@ public class VibratorInfo implements Parcelable {
         dest.writeInt(mPwlePrimitiveDurationMax);
         dest.writeInt(mPwleSizeMax);
         dest.writeFloat(mQFactor);
-        dest.writeParcelable(mFrequencyMapping, flags);
+        mFrequencyProfile.writeToParcel(dest, flags);
     }
 
     @Override
@@ -170,13 +174,13 @@ public class VibratorInfo implements Parcelable {
                 && Objects.equals(mSupportedEffects, that.mSupportedEffects)
                 && Objects.equals(mSupportedBraking, that.mSupportedBraking)
                 && Objects.equals(mQFactor, that.mQFactor)
-                && Objects.equals(mFrequencyMapping, that.mFrequencyMapping);
+                && Objects.equals(mFrequencyProfile, that.mFrequencyProfile);
     }
 
     @Override
     public int hashCode() {
         int hashCode = Objects.hash(mId, mCapabilities, mSupportedEffects, mSupportedBraking,
-                mQFactor, mFrequencyMapping);
+                mQFactor, mFrequencyProfile);
         for (int i = 0; i < mSupportedPrimitives.size(); i++) {
             hashCode = 31 * hashCode + mSupportedPrimitives.keyAt(i);
             hashCode = 31 * hashCode + mSupportedPrimitives.valueAt(i);
@@ -198,7 +202,7 @@ public class VibratorInfo implements Parcelable {
                 + ", mPwlePrimitiveDurationMax=" + mPwlePrimitiveDurationMax
                 + ", mPwleSizeMax=" + mPwleSizeMax
                 + ", mQFactor=" + mQFactor
-                + ", mFrequencyMapping=" + mFrequencyMapping
+                + ", mFrequencyProfile=" + mFrequencyProfile
                 + '}';
     }
 
@@ -234,6 +238,30 @@ public class VibratorInfo implements Parcelable {
         return Braking.NONE;
     }
 
+    /** @hide */
+    @Nullable
+    public SparseBooleanArray getSupportedBraking() {
+        if (mSupportedBraking == null) {
+            return null;
+        }
+        return mSupportedBraking.clone();
+    }
+
+    /** @hide */
+    public boolean isBrakingSupportKnown() {
+        return mSupportedBraking != null;
+    }
+
+    /** @hide */
+    public boolean hasBrakingSupport(@Braking int braking) {
+        return (mSupportedBraking != null) && mSupportedBraking.get(braking);
+    }
+
+    /** @hide */
+    public boolean isEffectSupportKnown() {
+        return mSupportedEffects != null;
+    }
+
     /**
      * Query whether the vibrator supports the given effect.
      *
@@ -250,6 +278,15 @@ public class VibratorInfo implements Parcelable {
         }
         return mSupportedEffects.get(effectId) ? Vibrator.VIBRATION_EFFECT_SUPPORT_YES
                 : Vibrator.VIBRATION_EFFECT_SUPPORT_NO;
+    }
+
+    /** @hide */
+    @Nullable
+    public SparseBooleanArray getSupportedEffects() {
+        if (mSupportedEffects == null) {
+            return null;
+        }
+        return mSupportedEffects.clone();
     }
 
     /**
@@ -274,6 +311,11 @@ public class VibratorInfo implements Parcelable {
     public int getPrimitiveDuration(
             @VibrationEffect.Composition.PrimitiveType int primitiveId) {
         return mSupportedPrimitives.get(primitiveId);
+    }
+
+    /** @hide */
+    public SparseIntArray getSupportedPrimitives() {
+        return mSupportedPrimitives.clone();
     }
 
     /**
@@ -329,8 +371,8 @@ public class VibratorInfo implements Parcelable {
      * @return the resonant frequency of the vibrator, or {@link Float#NaN NaN} if it's unknown or
      *         this vibrator is a composite of multiple physical devices.
      */
-    public float getResonantFrequency() {
-        return mFrequencyMapping.mResonantFrequencyHz;
+    public float getResonantFrequencyHz() {
+        return mFrequencyProfile.mResonantFrequencyHz;
     }
 
     /**
@@ -344,31 +386,14 @@ public class VibratorInfo implements Parcelable {
     }
 
     /**
-     * Return a range of frequency values supported by the vibrator.
+     * Gets the profile of supported frequencies, including the measurements of maximum relative
+     * output acceleration for supported vibration frequencies.
      *
-     * @return A range of frequency values supported, in hertz. The range will always contain the
-     * device resonant frequency. Devices without frequency control will return null.
-     * @hide
+     * <p>If the devices does not have frequency control then the profile should be empty.
      */
-    @Nullable
-    public Range<Float> getFrequencyRangeHz() {
-        return mFrequencyMapping.mFrequencyRangeHz;
-    }
-
-    /**
-     * Return the maximum amplitude the vibrator can play at given frequency.
-     *
-     * @param frequencyHz The frequency, in hertz, for query.
-
-     * @return a value in [0,1] representing the maximum amplitude the device can play at given
-     * frequency. Devices without frequency control will return 0 to any input. Devices with
-     * frequency control will return the supported value, for input in
-     * {@link #getFrequencyRangeHz()}, and 0 for any other input.
-     * @hide
-     */
-    @FloatRange(from = 0, to = 1)
-    public float getMaxAmplitude(float frequencyHz) {
-        return mFrequencyMapping.getMaxAmplitude(frequencyHz);
+    @NonNull
+    public FrequencyProfile getFrequencyProfile() {
+        return mFrequencyProfile;
     }
 
     protected long getCapabilities() {
@@ -452,7 +477,7 @@ public class VibratorInfo implements Parcelable {
      * Describes the maximum relative output acceleration that can be achieved for each supported
      * frequency in a specific vibrator.
      *
-     * <p>This mapping is defined by the following parameters:
+     * <p>This profile is defined by the following parameters:
      *
      * <ol>
      *     <li>{@code minFrequencyHz}, {@code resonantFrequencyHz} and {@code frequencyResolutionHz}
@@ -466,7 +491,7 @@ public class VibratorInfo implements Parcelable {
      *
      * @hide
      */
-    public static final class FrequencyMapping implements Parcelable {
+    public static final class FrequencyProfile implements Parcelable {
         @Nullable
         private final Range<Float> mFrequencyRangeHz;
         private final float mMinFrequencyHz;
@@ -474,7 +499,7 @@ public class VibratorInfo implements Parcelable {
         private final float mFrequencyResolutionHz;
         private final float[] mMaxAmplitudes;
 
-        FrequencyMapping(Parcel in) {
+        FrequencyProfile(Parcel in) {
             this(in.readFloat(), in.readFloat(), in.readFloat(), in.createFloatArray());
         }
 
@@ -484,13 +509,13 @@ public class VibratorInfo implements Parcelable {
          * @param resonantFrequencyHz   The vibrator resonant frequency, in hertz.
          * @param minFrequencyHz        Minimum supported frequency, in hertz.
          * @param frequencyResolutionHz The frequency resolution, in hertz, used by the max
-         *                              amplitudes mapping.
+         *                              amplitude measurements.
          * @param maxAmplitudes         The max amplitude supported by each supported frequency,
          *                              starting at minimum frequency with jumps of frequency
          *                              resolution.
          * @hide
          */
-        public FrequencyMapping(float resonantFrequencyHz, float minFrequencyHz,
+        public FrequencyProfile(float resonantFrequencyHz, float minFrequencyHz,
                 float frequencyResolutionHz, float[] maxAmplitudes) {
             mMinFrequencyHz = minFrequencyHz;
             mResonantFrequencyHz = resonantFrequencyHz;
@@ -500,18 +525,25 @@ public class VibratorInfo implements Parcelable {
                 System.arraycopy(maxAmplitudes, 0, mMaxAmplitudes, 0, maxAmplitudes.length);
             }
 
-            // If any required field is undefined then leave this mapping empty.
+            // If any required field is undefined or has a bad value then this profile is invalid.
             boolean isValid = !Float.isNaN(resonantFrequencyHz)
+                    && (resonantFrequencyHz > 0)
                     && !Float.isNaN(minFrequencyHz)
+                    && (minFrequencyHz > 0)
                     && !Float.isNaN(frequencyResolutionHz)
+                    && (frequencyResolutionHz > 0)
                     && (mMaxAmplitudes.length > 0);
+
+            // If any max amplitude is outside the allowed range then this profile is invalid.
+            for (int i = 0; i < mMaxAmplitudes.length; i++) {
+                isValid &= (mMaxAmplitudes[i] >= 0) && (mMaxAmplitudes[i] <= 1);
+            }
 
             float maxFrequencyHz = isValid
                     ? minFrequencyHz + frequencyResolutionHz * (mMaxAmplitudes.length - 1)
                     : Float.NaN;
 
-            // If the non-empty mapping does not have min < resonant < max frequency respected
-            // then leave this mapping empty.
+            // If the constraint min < resonant < max is not met then it is invalid.
             isValid &= !Float.isNaN(maxFrequencyHz)
                     && (resonantFrequencyHz >= minFrequencyHz)
                     && (resonantFrequencyHz <= maxFrequencyHz)
@@ -520,12 +552,15 @@ public class VibratorInfo implements Parcelable {
             mFrequencyRangeHz = isValid ? Range.create(minFrequencyHz, maxFrequencyHz) : null;
         }
 
-        /**
-         * Returns true if this frequency mapping is empty, i.e. the only supported is the resonant
-         * frequency.
-         */
+        /** Returns true if the supported frequency range is empty. */
         public boolean isEmpty() {
             return mFrequencyRangeHz == null;
+        }
+
+        /** Returns the supported frequency range, in hertz. */
+        @Nullable
+        public Range<Float> getFrequencyRangeHz() {
+            return mFrequencyRangeHz;
         }
 
         /**
@@ -535,7 +570,7 @@ public class VibratorInfo implements Parcelable {
          * @param frequencyHz frequency, in hertz, for query.
          * @return A value in [0,1] representing the max relative amplitude supported at the given
          * frequency. This will return 0 if the frequency is outside the supported range, or if the
-         * mapping is empty.
+         * supported frequency range is empty.
          */
         public float getMaxAmplitude(float frequencyHz) {
             if (isEmpty() || Float.isNaN(frequencyHz)) {
@@ -553,6 +588,17 @@ public class VibratorInfo implements Parcelable {
                 return MathUtils.min(mMaxAmplitudes[floorIndex], mMaxAmplitudes[ceilIndex]);
             }
             return mMaxAmplitudes[floorIndex];
+        }
+
+        /** Returns the raw list of maximum relative output accelerations from the vibrator. */
+        @NonNull
+        public float[] getMaxAmplitudes() {
+            return Arrays.copyOf(mMaxAmplitudes, mMaxAmplitudes.length);
+        }
+
+        /** Returns the raw frequency resolution used for max amplitude measurements, in hertz. */
+        public float getFrequencyResolutionHz() {
+            return mFrequencyResolutionHz;
         }
 
         @Override
@@ -573,10 +619,10 @@ public class VibratorInfo implements Parcelable {
             if (this == o) {
                 return true;
             }
-            if (!(o instanceof FrequencyMapping)) {
+            if (!(o instanceof FrequencyProfile)) {
                 return false;
             }
-            FrequencyMapping that = (FrequencyMapping) o;
+            FrequencyProfile that = (FrequencyProfile) o;
             return Float.compare(mMinFrequencyHz, that.mMinFrequencyHz) == 0
                     && Float.compare(mResonantFrequencyHz, that.mResonantFrequencyHz) == 0
                     && Float.compare(mFrequencyResolutionHz, that.mFrequencyResolutionHz) == 0
@@ -593,7 +639,7 @@ public class VibratorInfo implements Parcelable {
 
         @Override
         public String toString() {
-            return "FrequencyMapping{"
+            return "FrequencyProfile{"
                     + "mFrequencyRange=" + mFrequencyRangeHz
                     + ", mMinFrequency=" + mMinFrequencyHz
                     + ", mResonantFrequency=" + mResonantFrequencyHz
@@ -603,16 +649,16 @@ public class VibratorInfo implements Parcelable {
         }
 
         @NonNull
-        public static final Creator<FrequencyMapping> CREATOR =
-                new Creator<FrequencyMapping>() {
+        public static final Creator<FrequencyProfile> CREATOR =
+                new Creator<FrequencyProfile>() {
                     @Override
-                    public FrequencyMapping createFromParcel(Parcel in) {
-                        return new FrequencyMapping(in);
+                    public FrequencyProfile createFromParcel(Parcel in) {
+                        return new FrequencyProfile(in);
                     }
 
                     @Override
-                    public FrequencyMapping[] newArray(int size) {
-                        return new FrequencyMapping[size];
+                    public FrequencyProfile[] newArray(int size) {
+                        return new FrequencyProfile[size];
                     }
                 };
     }
@@ -629,8 +675,8 @@ public class VibratorInfo implements Parcelable {
         private int mPwlePrimitiveDurationMax;
         private int mPwleSizeMax;
         private float mQFactor = Float.NaN;
-        private FrequencyMapping mFrequencyMapping =
-                new FrequencyMapping(Float.NaN, Float.NaN, Float.NaN, null);
+        private FrequencyProfile mFrequencyProfile =
+                new FrequencyProfile(Float.NaN, Float.NaN, Float.NaN, null);
 
         /** A builder class for a {@link VibratorInfo}. */
         public Builder(int id) {
@@ -702,8 +748,8 @@ public class VibratorInfo implements Parcelable {
 
         /** Configure the vibrator frequency information like resonant frequency and bandwidth. */
         @NonNull
-        public Builder setFrequencyMapping(FrequencyMapping frequencyMapping) {
-            mFrequencyMapping = frequencyMapping;
+        public Builder setFrequencyProfile(@NonNull FrequencyProfile frequencyProfile) {
+            mFrequencyProfile = frequencyProfile;
             return this;
         }
 
@@ -712,7 +758,7 @@ public class VibratorInfo implements Parcelable {
         public VibratorInfo build() {
             return new VibratorInfo(mId, mCapabilities, mSupportedEffects, mSupportedBraking,
                     mSupportedPrimitives, mPrimitiveDelayMax, mCompositionSizeMax,
-                    mPwlePrimitiveDurationMax, mPwleSizeMax, mQFactor, mFrequencyMapping);
+                    mPwlePrimitiveDurationMax, mPwleSizeMax, mQFactor, mFrequencyProfile);
         }
 
         /**
