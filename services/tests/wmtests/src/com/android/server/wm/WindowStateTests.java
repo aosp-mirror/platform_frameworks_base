@@ -20,7 +20,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
@@ -266,22 +265,19 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(appWindow.canBeImeTarget());
         assertFalse(imeWindow.canBeImeTarget());
 
-        // Simulate the window is in split screen primary root task and the current state is
-        // minimized and home root task is resizable, so that we should ignore input for the
-        // root task.
+        // Simulate the window is in split screen root task.
         final DockedTaskDividerController controller =
                 mDisplayContent.getDockedDividerController();
         final Task rootTask = createTask(mDisplayContent,
-                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD);
+                WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
         spyOn(appWindow);
         spyOn(controller);
         spyOn(rootTask);
         rootTask.setFocusable(false);
         doReturn(rootTask).when(appWindow).getRootTask();
 
-        // Make sure canBeImeTarget is false due to shouldIgnoreInput is true;
+        // Make sure canBeImeTarget is false;
         assertFalse(appWindow.canBeImeTarget());
-        assertTrue(rootTask.shouldIgnoreInput());
     }
 
     @Test
@@ -728,8 +724,9 @@ public class WindowStateTests extends WindowTestsBase {
     @Test
     public void testCantReceiveTouchWhenNotFocusable() {
         final WindowState win0 = createWindow(null, TYPE_APPLICATION, "win0");
-        win0.mActivityRecord.getRootTask().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        win0.mActivityRecord.getRootTask().setFocusable(false);
+        final Task rootTask = win0.mActivityRecord.getRootTask();
+        spyOn(rootTask);
+        when(rootTask.shouldIgnoreInput()).thenReturn(true);
         assertFalse(win0.canReceiveTouchInput());
     }
 
@@ -929,8 +926,8 @@ public class WindowStateTests extends WindowTestsBase {
         mDisplayContent.setImeLayeringTarget(mAppWindow);
 
         // Simulate entering multi-window mode and verify if the IME control target is remote.
-        app.mActivityRecord.getRootTask().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        assertEquals(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, app.getWindowingMode());
+        app.mActivityRecord.getRootTask().setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, app.getWindowingMode());
         assertEquals(mDisplayContent.mRemoteInsetsControlTarget,
                 mDisplayContent.computeImeControlTarget());
 
@@ -945,14 +942,13 @@ public class WindowStateTests extends WindowTestsBase {
 
     @UseTestDisplay(addWindows = { W_ACTIVITY, W_INPUT_METHOD, W_NOTIFICATION_SHADE })
     @Test
-    public void testNotificationShadeHasImeInsetsWhenSplitscreenActivated() {
+    public void testNotificationShadeHasImeInsetsWhenMultiWindow() {
         WindowState app = createWindow(null, TYPE_BASE_APPLICATION,
                 mAppWindow.mToken, "app");
 
-        // Simulate entering multi-window mode and verify if the split-screen is activated.
-        app.mActivityRecord.getRootTask().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        assertEquals(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, app.getWindowingMode());
-        assertTrue(mDisplayContent.getDefaultTaskDisplayArea().isSplitScreenModeActivated());
+        // Simulate entering multi-window mode and windowing mode is multi-window.
+        app.mActivityRecord.getRootTask().setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        assertEquals(WINDOWING_MODE_MULTI_WINDOW, app.getWindowingMode());
 
         // Simulate notificationShade is shown and being IME layering target.
         mNotificationShadeWindow.setHasSurface(true);
@@ -966,7 +962,7 @@ public class WindowStateTests extends WindowTestsBase {
         mDisplayContent.getInsetsStateController().getRawInsetsState()
                 .setSourceVisible(ITYPE_IME, true);
 
-        // Verify notificationShade can still get IME insets even the split-screen is activated.
+        // Verify notificationShade can still get IME insets even windowing mode is multi-window.
         InsetsState state = mDisplayContent.getInsetsStateController().getInsetsForWindow(
                 mNotificationShadeWindow);
         assertNotNull(state.peekSource(ITYPE_IME));
