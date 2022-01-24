@@ -29,7 +29,10 @@
 
 droidstubs {
     name: "api-stubs-docs-non-updatable",
-    defaults: ["android-non-updatable-stubs-defaults"],
+    defaults: [
+        "android-non-updatable-stubs-defaults",
+        "module-classpath-stubs-defaults",
+    ],
     args: metalava_framework_docs_args,
     check_api: {
         current: {
@@ -78,7 +81,10 @@ module_libs = " --show-annotation android.annotation.SystemApi\\(" +
 
 droidstubs {
     name: "system-api-stubs-docs-non-updatable",
-    defaults: ["android-non-updatable-stubs-defaults"],
+    defaults: [
+        "android-non-updatable-stubs-defaults",
+        "module-classpath-stubs-defaults",
+    ],
     args: metalava_framework_docs_args + priv_apps,
     check_api: {
         current: {
@@ -114,7 +120,10 @@ droidstubs {
 
 droidstubs {
     name: "test-api-stubs-docs-non-updatable",
-    defaults: ["android-non-updatable-stubs-defaults"],
+    defaults: [
+        "android-non-updatable-stubs-defaults",
+        "module-classpath-stubs-defaults",
+    ],
     args: metalava_framework_docs_args + test + priv_apps_in_stubs,
     check_api: {
         current: {
@@ -156,7 +165,10 @@ droidstubs {
 
 droidstubs {
     name: "module-lib-api-stubs-docs-non-updatable",
-    defaults: ["android-non-updatable-stubs-defaults"],
+    defaults: [
+        "android-non-updatable-stubs-defaults",
+        "module-classpath-stubs-defaults",
+    ],
     args: metalava_framework_docs_args + priv_apps_in_stubs + module_libs,
     check_api: {
         current: {
