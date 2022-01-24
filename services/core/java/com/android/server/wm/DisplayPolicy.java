@@ -305,10 +305,10 @@ public class DisplayPolicy {
     private WindowState mRoundedCornerWindow;
 
     /**
-     * Windows to determine the color of status bar. See {@link #mNavBarColorWindowCandidate} for
-     * the conditions of being candidate window.
+     * A collection of {@link AppearanceRegion} to indicate that which region of status bar applies
+     * which appearance.
      */
-    private final ArrayList<WindowState> mStatusBarColorWindows = new ArrayList<>();
+    private final ArrayList<AppearanceRegion> mStatusBarAppearanceRegionList = new ArrayList<>();
 
     /**
      * Windows to determine opacity and background of translucent status bar. The window needs to be
@@ -323,7 +323,7 @@ public class DisplayPolicy {
     private InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
     private AppearanceRegion[] mLastStatusBarAppearanceRegions;
 
-    /** The union of checked bounds while fetching {@link #mStatusBarColorWindows}. */
+    /** The union of checked bounds while building {@link #mStatusBarAppearanceRegionList}. */
     private final Rect mStatusBarColorCheckedBounds = new Rect();
 
     /** The union of checked bounds while fetching {@link #mStatusBarBackgroundWindows}. */
@@ -336,6 +336,7 @@ public class DisplayPolicy {
     private long mPendingPanicGestureUptime;
 
     private static final Rect sTmpRect = new Rect();
+    private static final Rect sTmpRect2 = new Rect();
     private static final Rect sTmpLastParentFrame = new Rect();
     private static final Rect sTmpDisplayCutoutSafe = new Rect();
     private static final Rect sTmpDisplayFrame = new Rect();
@@ -1526,7 +1527,7 @@ public class DisplayPolicy {
         mTopFullscreenOpaqueWindowState = null;
         mNavBarColorWindowCandidate = null;
         mNavBarBackgroundWindow = null;
-        mStatusBarColorWindows.clear();
+        mStatusBarAppearanceRegionList.clear();
         mStatusBarBackgroundWindows.clear();
         mStatusBarColorCheckedBounds.setEmpty();
         mStatusBarBackgroundCheckedBounds.setEmpty();
@@ -1606,7 +1607,9 @@ public class DisplayPolicy {
                 mStatusBarBackgroundWindows.add(win);
                 mStatusBarBackgroundCheckedBounds.union(sTmpRect);
                 if (!mStatusBarColorCheckedBounds.contains(sTmpRect)) {
-                    mStatusBarColorWindows.add(win);
+                    mStatusBarAppearanceRegionList.add(new AppearanceRegion(
+                            win.mAttrs.insetsFlags.appearance & APPEARANCE_LIGHT_STATUS_BARS,
+                            new Rect(win.getFrame())));
                     mStatusBarColorCheckedBounds.union(sTmpRect);
                 }
             }
@@ -1626,18 +1629,57 @@ public class DisplayPolicy {
                 }
             }
         } else if (win.isDimming()) {
-            // For dimming window whose host bounds is overlapping with system bars, it can be
-            // used to determine colors but not opacity of system bars.
-            if (mStatusBar != null
-                    && sTmpRect.setIntersect(win.getBounds(), mStatusBar.getFrame())
-                    && !mStatusBarColorCheckedBounds.contains(sTmpRect)) {
-                mStatusBarColorWindows.add(win);
-                mStatusBarColorCheckedBounds.union(sTmpRect);
+            if (mStatusBar != null) {
+                addStatusBarAppearanceRegionsForDimmingWindow(
+                        win.mAttrs.insetsFlags.appearance & APPEARANCE_LIGHT_STATUS_BARS,
+                        mStatusBar.getFrame(), win.getBounds(), win.getFrame());
             }
             if (isOverlappingWithNavBar && mNavBarColorWindowCandidate == null) {
                 mNavBarColorWindowCandidate = win;
             }
         }
+    }
+
+    private void addStatusBarAppearanceRegionsForDimmingWindow(int appearance, Rect statusBarFrame,
+            Rect winBounds, Rect winFrame) {
+        if (!sTmpRect.setIntersect(winBounds, statusBarFrame)) {
+            return;
+        }
+        if (mStatusBarColorCheckedBounds.contains(sTmpRect)) {
+            return;
+        }
+        if (appearance == 0 || !sTmpRect2.setIntersect(winFrame, statusBarFrame)) {
+            mStatusBarAppearanceRegionList.add(new AppearanceRegion(0, new Rect(winBounds)));
+            mStatusBarColorCheckedBounds.union(sTmpRect);
+            return;
+        }
+        // A dimming window can divide status bar into different appearance regions (up to 3).
+        // +---------+-------------+---------+
+        // |/////////|             |/////////| <-- Status Bar
+        // +---------+-------------+---------+
+        // |/////////|             |/////////|
+        // |/////////|             |/////////|
+        // |/////////|             |/////////|
+        // |/////////|             |/////////|
+        // |/////////|             |/////////|
+        // +---------+-------------+---------+
+        //      ^           ^           ^
+        //  dim layer     window    dim layer
+        mStatusBarAppearanceRegionList.add(new AppearanceRegion(appearance, new Rect(winFrame)));
+        if (!sTmpRect.equals(sTmpRect2)) {
+            if (sTmpRect.height() == sTmpRect2.height()) {
+                if (sTmpRect.left != sTmpRect2.left) {
+                    mStatusBarAppearanceRegionList.add(new AppearanceRegion(0, new Rect(
+                            winBounds.left, winBounds.top, sTmpRect2.left, winBounds.bottom)));
+                }
+                if (sTmpRect.right != sTmpRect2.right) {
+                    mStatusBarAppearanceRegionList.add(new AppearanceRegion(0, new Rect(
+                            sTmpRect2.right, winBounds.top, winBounds.right, winBounds.bottom)));
+                }
+            }
+            // We don't have vertical status bar yet, so we don't handle the other orientation.
+        }
+        mStatusBarColorCheckedBounds.union(sTmpRect);
     }
 
     /**
@@ -2270,14 +2312,9 @@ public class DisplayPolicy {
         final String focusedApp = win.mAttrs.packageName;
         final boolean isFullscreen = !win.getRequestedVisibility(ITYPE_STATUS_BAR)
                 || !win.getRequestedVisibility(ITYPE_NAVIGATION_BAR);
-        final AppearanceRegion[] appearanceRegions =
-                new AppearanceRegion[mStatusBarColorWindows.size()];
-        for (int i = mStatusBarColorWindows.size() - 1; i >= 0; i--) {
-            final WindowState windowState = mStatusBarColorWindows.get(i);
-            appearanceRegions[i] = new AppearanceRegion(
-                    getStatusBarAppearance(windowState, windowState),
-                    new Rect(windowState.getFrame()));
-        }
+        final AppearanceRegion[] statusBarAppearanceRegions =
+                new AppearanceRegion[mStatusBarAppearanceRegionList.size()];
+        mStatusBarAppearanceRegionList.toArray(statusBarAppearanceRegions);
         if (mLastDisableFlags != disableFlags) {
             mLastDisableFlags = disableFlags;
             final String cause = win.toString();
@@ -2289,7 +2326,7 @@ public class DisplayPolicy {
                 && mRequestedVisibilities.equals(win.getRequestedVisibilities())
                 && Objects.equals(mFocusedApp, focusedApp)
                 && mLastFocusIsFullscreen == isFullscreen
-                && Arrays.equals(mLastStatusBarAppearanceRegions, appearanceRegions)) {
+                && Arrays.equals(mLastStatusBarAppearanceRegions, statusBarAppearanceRegions)) {
             return;
         }
         if (mDisplayContent.isDefaultDisplay && mLastFocusIsFullscreen != isFullscreen
@@ -2304,18 +2341,10 @@ public class DisplayPolicy {
         mRequestedVisibilities = requestedVisibilities;
         mFocusedApp = focusedApp;
         mLastFocusIsFullscreen = isFullscreen;
-        mLastStatusBarAppearanceRegions = appearanceRegions;
+        mLastStatusBarAppearanceRegions = statusBarAppearanceRegions;
         callStatusBarSafely(statusBar -> statusBar.onSystemBarAttributesChanged(displayId,
-                appearance, appearanceRegions, isNavbarColorManagedByIme, behavior,
+                appearance, statusBarAppearanceRegions, isNavbarColorManagedByIme, behavior,
                 requestedVisibilities, focusedApp));
-    }
-
-    private int getStatusBarAppearance(WindowState opaque, WindowState opaqueOrDimming) {
-        final boolean onKeyguard = isKeyguardShowing() && !isKeyguardOccluded();
-        final WindowState colorWin = onKeyguard ? mNotificationShade : opaqueOrDimming;
-        return isLightBarAllowed(colorWin, Type.statusBars()) && (colorWin == opaque || onKeyguard)
-                ? (colorWin.mAttrs.insetsFlags.appearance & APPEARANCE_LIGHT_STATUS_BARS)
-                : 0;
     }
 
     private void callStatusBarSafely(Consumer<StatusBarManagerInternal> consumer) {
@@ -2711,11 +2740,10 @@ public class DisplayPolicy {
             pw.print(prefix); pw.print("mNavBarBackgroundWindow=");
             pw.println(mNavBarBackgroundWindow);
         }
-        if (!mStatusBarColorWindows.isEmpty()) {
-            pw.print(prefix); pw.println("mStatusBarColorWindows=");
-            for (int i = mStatusBarColorWindows.size() - 1; i >= 0; i--) {
-                final WindowState win = mStatusBarColorWindows.get(i);
-                pw.print(prefixInner); pw.println(win);
+        if (mLastStatusBarAppearanceRegions != null) {
+            pw.print(prefix); pw.println("mLastStatusBarAppearanceRegions=");
+            for (int i = mLastStatusBarAppearanceRegions.length - 1; i >= 0; i--) {
+                pw.print(prefixInner);  pw.println(mLastStatusBarAppearanceRegions[i]);
             }
         }
         if (!mStatusBarBackgroundWindows.isEmpty()) {
