@@ -384,6 +384,46 @@ public class UsbPortManager {
     }
 
     /**
+     * Enables USB data when disabled due to {@link UsbPortStatus#USB_DATA_STATUS_DISABLED_DOCK}
+     */
+    public void enableUsbDataWhileDocked(@NonNull String portId, long transactionId,
+            IUsbOperationInternal callback, IndentingPrintWriter pw) {
+        Objects.requireNonNull(portId);
+        final PortInfo portInfo = mPorts.get(portId);
+        if (portInfo == null) {
+            logAndPrint(Log.ERROR, pw, "enableUsbDataWhileDocked: No such port: " + portId
+                    + " opId:" + transactionId);
+            try {
+                if (callback != null) {
+                    callback.onOperationComplete(USB_OPERATION_ERROR_PORT_MISMATCH);
+                }
+            } catch (RemoteException e) {
+                logAndPrintException(pw,
+                        "enableUsbDataWhileDocked: Failed to call OperationComplete. opId:"
+                        + transactionId, e);
+            }
+            return;
+        }
+
+        try {
+            try {
+                mUsbPortHal.enableUsbDataWhileDocked(portId, transactionId, callback);
+            } catch (Exception e) {
+                logAndPrintException(pw,
+                    "enableUsbDataWhileDocked: Failed to limit power transfer. opId:"
+                    + transactionId , e);
+                if (callback != null) {
+                    callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                }
+            }
+        } catch (RemoteException e) {
+            logAndPrintException(pw,
+                    "enableUsbDataWhileDocked:Failed to call onOperationComplete. opId:"
+                    + transactionId, e);
+        }
+    }
+
+    /**
      * Enable/disable the USB data signaling
      *
      * @param enable enable or disable USB data signaling
@@ -759,8 +799,9 @@ public class UsbPortManager {
                         portInfo.contaminantProtectionStatus,
                         portInfo.supportsEnableContaminantPresenceDetection,
                         portInfo.contaminantDetectionStatus,
-                        portInfo.usbDataEnabled,
-                        portInfo.powerTransferLimited, pw);
+                        portInfo.usbDataStatus,
+                        portInfo.powerTransferLimited,
+                        portInfo.powerBrickStatus, pw);
             }
         } else {
             for (RawPortInfo currentPortInfo : newPortInfo) {
@@ -773,8 +814,9 @@ public class UsbPortManager {
                         currentPortInfo.contaminantProtectionStatus,
                         currentPortInfo.supportsEnableContaminantPresenceDetection,
                         currentPortInfo.contaminantDetectionStatus,
-                        currentPortInfo.usbDataEnabled,
-                        currentPortInfo.powerTransferLimited, pw);
+                        currentPortInfo.usbDataStatus,
+                        currentPortInfo.powerTransferLimited,
+                        currentPortInfo.powerBrickStatus, pw);
             }
         }
 
@@ -810,8 +852,9 @@ public class UsbPortManager {
             int contaminantProtectionStatus,
             boolean supportsEnableContaminantPresenceDetection,
             int contaminantDetectionStatus,
-            boolean usbDataEnabled,
+            int[] usbDataStatus,
             boolean powerTransferLimited,
+            int powerBrickStatus,
             IndentingPrintWriter pw) {
         // Only allow mode switch capability for dual role ports.
         // Validate that the current mode matches the supported modes we expect.
@@ -870,8 +913,8 @@ public class UsbPortManager {
                     currentPowerRole, canChangePowerRole,
                     currentDataRole, canChangeDataRole,
                     supportedRoleCombinations, contaminantProtectionStatus,
-                    contaminantDetectionStatus, usbDataEnabled,
-                    powerTransferLimited);
+                    contaminantDetectionStatus, usbDataStatus,
+                    powerTransferLimited, powerBrickStatus);
             mPorts.put(portId, portInfo);
         } else {
             // Validate that ports aren't changing definition out from under us.
@@ -908,8 +951,8 @@ public class UsbPortManager {
                     currentPowerRole, canChangePowerRole,
                     currentDataRole, canChangeDataRole,
                     supportedRoleCombinations, contaminantProtectionStatus,
-                    contaminantDetectionStatus, usbDataEnabled,
-                    powerTransferLimited)) {
+                    contaminantDetectionStatus, usbDataStatus,
+                    powerTransferLimited, powerBrickStatus)) {
                 portInfo.mDisposition = PortInfo.DISPOSITION_CHANGED;
             } else {
                 portInfo.mDisposition = PortInfo.DISPOSITION_READY;
@@ -1135,7 +1178,9 @@ public class UsbPortManager {
                     != supportedRoleCombinations) {
                 mUsbPortStatus = new UsbPortStatus(currentMode, currentPowerRole, currentDataRole,
                         supportedRoleCombinations, UsbPortStatus.CONTAMINANT_PROTECTION_NONE,
-                        UsbPortStatus.CONTAMINANT_DETECTION_NOT_SUPPORTED, true, false);
+                        UsbPortStatus.CONTAMINANT_DETECTION_NOT_SUPPORTED,
+                        new int[]{UsbPortStatus.USB_DATA_STATUS_UNKNOWN}, false,
+                        UsbPortStatus.POWER_BRICK_STATUS_UNKNOWN);
                 dispositionChanged = true;
             }
 
@@ -1150,12 +1195,31 @@ public class UsbPortManager {
             return dispositionChanged;
         }
 
+        private boolean dataStatusEquals(int[] dataStatusL, int[] dataStatusR) {
+            if (dataStatusL == null && dataStatusR == null) {
+                return true;
+            }
+            if ((dataStatusL == null && dataStatusR != null)
+                || (dataStatusL != null && dataStatusR == null)) {
+                return false;
+            }
+            if (dataStatusL.length != dataStatusR.length) {
+                return false;
+            }
+            for (int i = 0; i < dataStatusL.length; i++) {
+                if (dataStatusL[i] != dataStatusR[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public boolean setStatus(int currentMode, boolean canChangeMode,
                 int currentPowerRole, boolean canChangePowerRole,
                 int currentDataRole, boolean canChangeDataRole,
                 int supportedRoleCombinations, int contaminantProtectionStatus,
-                int contaminantDetectionStatus, boolean usbDataEnabled,
-                boolean powerTransferLimited) {
+                int contaminantDetectionStatus, int[] usbDataStatus,
+                boolean powerTransferLimited, int powerBrickStatus) {
             boolean dispositionChanged = false;
 
             mCanChangeMode = canChangeMode;
@@ -1171,14 +1235,15 @@ public class UsbPortManager {
                     != contaminantProtectionStatus
                     || mUsbPortStatus.getContaminantDetectionStatus()
                     != contaminantDetectionStatus
-                    || mUsbPortStatus.getUsbDataStatus()
-                    != usbDataEnabled
+                    || !dataStatusEquals(mUsbPortStatus.getUsbDataStatus(), usbDataStatus)
                     || mUsbPortStatus.isPowerTransferLimited()
-                    != powerTransferLimited) {
+                    != powerTransferLimited
+                    || mUsbPortStatus.getPowerBrickStatus()
+                    != powerBrickStatus) {
                 mUsbPortStatus = new UsbPortStatus(currentMode, currentPowerRole, currentDataRole,
                         supportedRoleCombinations, contaminantProtectionStatus,
-                        contaminantDetectionStatus, usbDataEnabled,
-                        powerTransferLimited);
+                        contaminantDetectionStatus, usbDataStatus,
+                        powerTransferLimited, powerBrickStatus);
                 dispositionChanged = true;
             }
 

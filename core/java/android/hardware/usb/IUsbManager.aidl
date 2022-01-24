@@ -139,6 +139,9 @@ interface IUsbManager
     /* Set USB data on or off */
     boolean enableUsbData(in String portId, boolean enable, int operationId, in IUsbOperationInternal callback);
 
+    /* Enable USB data when disabled due to docking event  */
+    void enableUsbDataWhileDocked(in String portId, int operationId, in IUsbOperationInternal callback);
+
     /* Gets the USB Hal Version. */
     int getUsbHalVersion();
 
