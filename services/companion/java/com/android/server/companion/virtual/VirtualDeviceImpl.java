@@ -29,7 +29,10 @@ import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.companion.AssociationInfo;
 import android.companion.virtual.IVirtualDevice;
+import android.companion.virtual.IVirtualDeviceActivityListener;
+import android.companion.virtual.VirtualDeviceManager.ActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
+import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -75,6 +78,30 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final OnDeviceCloseListener mListener;
     private final IBinder mAppToken;
     private final VirtualDeviceParams mParams;
+    private final IVirtualDeviceActivityListener mActivityListener;
+
+    private ActivityListener createListenerAdapter(int displayId) {
+        return new ActivityListener() {
+
+            @Override
+            public void onTopActivityChanged(int unusedDisplayId, ComponentName topActivity) {
+                try {
+                    mActivityListener.onTopActivityChanged(displayId, topActivity);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Unable to call mActivityListener", e);
+                }
+            }
+
+            @Override
+            public void onDisplayEmpty(int unusedDisplayId) {
+                try {
+                    mActivityListener.onDisplayEmpty(displayId);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Unable to call mActivityListener", e);
+                }
+            }
+        };
+    }
 
     /**
      * A mapping from the virtual display ID to its corresponding
@@ -85,18 +112,22 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     VirtualDeviceImpl(Context context, AssociationInfo associationInfo,
             IBinder token, int ownerUid, OnDeviceCloseListener listener,
-            PendingTrampolineCallback pendingTrampolineCallback, VirtualDeviceParams params) {
+            PendingTrampolineCallback pendingTrampolineCallback,
+            IVirtualDeviceActivityListener activityListener,
+            VirtualDeviceParams params) {
         this(context, associationInfo, token, ownerUid, /* inputController= */ null, listener,
-                pendingTrampolineCallback, params);
+                pendingTrampolineCallback, activityListener, params);
     }
 
     @VisibleForTesting
     VirtualDeviceImpl(Context context, AssociationInfo associationInfo, IBinder token,
             int ownerUid, InputController inputController, OnDeviceCloseListener listener,
-            PendingTrampolineCallback pendingTrampolineCallback, VirtualDeviceParams params) {
+            PendingTrampolineCallback pendingTrampolineCallback,
+            IVirtualDeviceActivityListener activityListener, VirtualDeviceParams params) {
         mContext = context;
         mAssociationInfo = associationInfo;
         mPendingTrampolineCallback = pendingTrampolineCallback;
+        mActivityListener = activityListener;
         mOwnerUid = ownerUid;
         mAppToken = token;
         mParams = params;
@@ -361,9 +392,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 displayId, false);
         final GenericWindowPolicyController dwpc =
                 new GenericWindowPolicyController(FLAG_SECURE,
-                        SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS, getAllowedUserHandles(),
+                        SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                        getAllowedUserHandles(),
                         mParams.getAllowedActivities(),
-                        mParams.getBlockedActivities());
+                        mParams.getBlockedActivities(),
+                        createListenerAdapter(displayId));
         mWindowPolicyControllers.put(displayId, dwpc);
         return dwpc;
     }
