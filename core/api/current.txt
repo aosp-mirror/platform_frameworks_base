@@ -51430,6 +51430,7 @@ package android.view.accessibility {
     method public CharSequence getPackageName();
     method public android.view.accessibility.AccessibilityRecord getRecord(int);
     method public int getRecordCount();
+    method public int getSpeechStateChangeTypes();
     method public int getWindowChanges();
     method public void initFromParcel(android.os.Parcel);
     method @Deprecated public static android.view.accessibility.AccessibilityEvent obtain(int);
@@ -51441,6 +51442,7 @@ package android.view.accessibility {
     method public void setEventType(int);
     method public void setMovementGranularity(int);
     method public void setPackageName(CharSequence);
+    method public void setSpeechStateChangeTypes(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION = 4; // 0x4
     field public static final int CONTENT_CHANGE_TYPE_DRAG_CANCELLED = 512; // 0x200
@@ -51456,12 +51458,17 @@ package android.view.accessibility {
     field @NonNull public static final android.os.Parcelable.Creator<android.view.accessibility.AccessibilityEvent> CREATOR;
     field public static final int INVALID_POSITION = -1; // 0xffffffff
     field @Deprecated public static final int MAX_TEXT_LENGTH = 500; // 0x1f4
+    field public static final int SPEECH_STATE_LISTENING_END = 8; // 0x8
+    field public static final int SPEECH_STATE_LISTENING_START = 4; // 0x4
+    field public static final int SPEECH_STATE_SPEAKING_END = 2; // 0x2
+    field public static final int SPEECH_STATE_SPEAKING_START = 1; // 0x1
     field public static final int TYPES_ALL_MASK = -1; // 0xffffffff
     field public static final int TYPE_ANNOUNCEMENT = 16384; // 0x4000
     field public static final int TYPE_ASSIST_READING_CONTEXT = 16777216; // 0x1000000
     field public static final int TYPE_GESTURE_DETECTION_END = 524288; // 0x80000
     field public static final int TYPE_GESTURE_DETECTION_START = 262144; // 0x40000
     field public static final int TYPE_NOTIFICATION_STATE_CHANGED = 64; // 0x40
+    field public static final int TYPE_SPEECH_STATE_CHANGE = 33554432; // 0x2000000
     field public static final int TYPE_TOUCH_EXPLORATION_GESTURE_END = 1024; // 0x400
     field public static final int TYPE_TOUCH_EXPLORATION_GESTURE_START = 512; // 0x200
     field public static final int TYPE_TOUCH_INTERACTION_END = 2097152; // 0x200000
