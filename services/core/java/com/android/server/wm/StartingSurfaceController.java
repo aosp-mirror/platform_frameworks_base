@@ -32,6 +32,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityOptions;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
@@ -215,12 +216,12 @@ public class StartingSurfaceController {
                 deferring, prev, source));
     }
 
-    private void showStartingWindowFromDeferringActivities() {
+    private void showStartingWindowFromDeferringActivities(ActivityOptions topOptions) {
         // Attempt to add starting window from the top-most activity.
         for (int i = mDeferringAddStartActivities.size() - 1; i >= 0; --i) {
             final DeferringStartingWindowRecord next = mDeferringAddStartActivities.get(i);
             next.mDeferring.showStartingWindow(next.mPrev, mInitNewTask, mInitTaskSwitch,
-                    mInitProcessRunning, true /* startActivity */, next.mSource);
+                    mInitProcessRunning, true /* startActivity */, next.mSource, topOptions);
             // If one succeeds, it is done.
             if (next.mDeferring.mStartingData != null) {
                 break;
@@ -243,9 +244,9 @@ public class StartingSurfaceController {
     /**
      * End deferring add starting window.
      */
-    void endDeferAddStartingWindow() {
+    void endDeferAddStartingWindow(ActivityOptions topOptions) {
         mDeferringAddStartingWindow = false;
-        showStartingWindowFromDeferringActivities();
+        showStartingWindowFromDeferringActivities(topOptions);
     }
 
     final class StartingSurface {
