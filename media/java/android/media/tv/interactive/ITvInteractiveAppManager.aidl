@@ -20,6 +20,7 @@ import android.graphics.Rect;
 import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvTrackInfo;
+import android.media.tv.interactive.AppLinkInfo;
 import android.media.tv.interactive.ITvInteractiveAppClient;
 import android.media.tv.interactive.ITvInteractiveAppManagerCallback;
 import android.media.tv.interactive.TvInteractiveAppInfo;
@@ -34,8 +35,8 @@ import android.view.Surface;
 interface ITvInteractiveAppManager {
     List<TvInteractiveAppInfo> getTvInteractiveAppServiceList(int userId);
     void prepare(String tiasId, int type, int userId);
-    void registerAppLinkInfo(String tiasId, in Bundle info, int userId);
-    void unregisterAppLinkInfo(String tiasId, in Bundle info, int userId);
+    void registerAppLinkInfo(String tiasId, in AppLinkInfo info, int userId);
+    void unregisterAppLinkInfo(String tiasId, in AppLinkInfo info, int userId);
     void sendAppLinkCommand(String tiasId, in Bundle command, int userId);
     void startInteractiveApp(in IBinder sessionToken, int userId);
     void stopInteractiveApp(in IBinder sessionToken, int userId);
