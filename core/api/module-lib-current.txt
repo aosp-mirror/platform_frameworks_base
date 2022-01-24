@@ -266,6 +266,32 @@ package android.net {
     method public int getResourceId();
   }
 
+  public class NetworkIdentity {
+    method public int getOemManaged();
+    method public int getRatType();
+    method @Nullable public String getSubscriberId();
+    method public int getType();
+    method @Nullable public String getWifiNetworkKey();
+    method public boolean isDefaultNetwork();
+    method public boolean isMetered();
+    method public boolean isRoaming();
+  }
+
+  public static final class NetworkIdentity.Builder {
+    ctor public NetworkIdentity.Builder();
+    method @NonNull public android.net.NetworkIdentity build();
+    method @NonNull public android.net.NetworkIdentity.Builder clearRatType();
+    method @NonNull public android.net.NetworkIdentity.Builder setDefaultNetwork(boolean);
+    method @NonNull public android.net.NetworkIdentity.Builder setMetered(boolean);
+    method @NonNull public android.net.NetworkIdentity.Builder setNetworkStateSnapshot(@NonNull android.net.NetworkStateSnapshot);
+    method @NonNull public android.net.NetworkIdentity.Builder setOemManaged(int);
+    method @NonNull public android.net.NetworkIdentity.Builder setRatType(int);
+    method @NonNull public android.net.NetworkIdentity.Builder setRoaming(boolean);
+    method @NonNull public android.net.NetworkIdentity.Builder setSubscriberId(@Nullable String);
+    method @NonNull public android.net.NetworkIdentity.Builder setType(int);
+    method @NonNull public android.net.NetworkIdentity.Builder setWifiNetworkKey(@Nullable String);
+  }
+
   public class NetworkPolicyManager {
     method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public int getMultipathPreference(@NonNull android.net.Network);
     method @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public int getRestrictBackgroundStatus(int);
@@ -291,6 +317,30 @@ package android.net {
     method @Nullable public String getSubscriberId();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkStateSnapshot> CREATOR;
+  }
+
+  public final class NetworkStatsHistory implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.net.NetworkStatsHistory.Entry> getEntries();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkStatsHistory> CREATOR;
+  }
+
+  public static final class NetworkStatsHistory.Builder {
+    ctor public NetworkStatsHistory.Builder(long, int);
+    method @NonNull public android.net.NetworkStatsHistory.Builder addEntry(@NonNull android.net.NetworkStatsHistory.Entry);
+    method @NonNull public android.net.NetworkStatsHistory build();
+  }
+
+  public static final class NetworkStatsHistory.Entry {
+    ctor public NetworkStatsHistory.Entry(long, long, long, long, long, long, long);
+    method public long getActiveTime();
+    method public long getBucketStart();
+    method public long getOperations();
+    method public long getRxBytes();
+    method public long getRxPackets();
+    method public long getTxBytes();
+    method public long getTxPackets();
   }
 
   public final class NetworkTemplate implements android.os.Parcelable {

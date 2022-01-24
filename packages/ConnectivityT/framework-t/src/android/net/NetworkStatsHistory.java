@@ -16,6 +16,7 @@
 
 package android.net;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.TAG_NONE;
@@ -31,6 +32,7 @@ import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static com.android.net.module.util.NetworkStatsUtils.multiplySafeByRational;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -67,7 +69,7 @@ import java.util.Random;
  *
  * @hide
  */
-// @SystemApi(client = MODULE_LIBRARIES)
+@SystemApi(client = MODULE_LIBRARIES)
 public final class NetworkStatsHistory implements Parcelable {
     private static final int VERSION_INIT = 1;
     private static final int VERSION_ADD_PACKETS = 2;
