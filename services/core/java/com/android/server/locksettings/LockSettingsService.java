@@ -20,6 +20,7 @@ import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
 import static android.Manifest.permission.MANAGE_BIOMETRIC;
 import static android.Manifest.permission.READ_CONTACTS;
 import static android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS;
+import static android.Manifest.permission.SET_INITIAL_LOCK;
 import static android.app.admin.DevicePolicyResources.Strings.Core.PROFILE_ENCRYPTED_DETAIL;
 import static android.app.admin.DevicePolicyResources.Strings.Core.PROFILE_ENCRYPTED_MESSAGE;
 import static android.app.admin.DevicePolicyResources.Strings.Core.PROFILE_ENCRYPTED_TITLE;
@@ -1650,9 +1651,13 @@ public class LockSettingsService extends ILockSettings.Stub {
                     "This operation requires secure lock screen feature");
         }
         if (!hasPermission(PERMISSION) && !hasPermission(SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS)) {
-            throw new SecurityException(
-                    "setLockCredential requires SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS or "
-                            + PERMISSION);
+            if (hasPermission(SET_INITIAL_LOCK) && savedCredential.isNone()) {
+                // SET_INITIAL_LOCK can only be used if credential is not set.
+            } else {
+                throw new SecurityException(
+                        "setLockCredential requires SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS or "
+                                + PERMISSION);
+            }
         }
 
         final long identity = Binder.clearCallingIdentity();
