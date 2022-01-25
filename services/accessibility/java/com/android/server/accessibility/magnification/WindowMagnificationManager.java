@@ -318,6 +318,10 @@ public class WindowMagnificationManager implements
         mMagnificationFollowTypingEnabled = enabled;
     }
 
+    boolean isMagnificationFollowTypingEnabled() {
+        return mMagnificationFollowTypingEnabled;
+    }
+
     /**
      * Get the ID of the last service that changed the magnification config.
      *
