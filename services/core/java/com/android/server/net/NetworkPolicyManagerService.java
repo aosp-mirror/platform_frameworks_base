@@ -100,7 +100,6 @@ import static android.net.NetworkTemplate.MATCH_MOBILE;
 import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.net.NetworkTemplate.buildTemplateCarrierMetered;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
-import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.net.netstats.provider.NetworkStatsProvider.QUOTA_UNLIMITED;
 import static android.os.Trace.TRACE_TAG_NETWORK;
 import static android.provider.Settings.Global.NETPOLICY_OVERRIDE_ENABLED;
@@ -182,7 +181,6 @@ import android.net.NetworkStack;
 import android.net.NetworkStateSnapshot;
 import android.net.NetworkTemplate;
 import android.net.TelephonyNetworkSpecifier;
-import android.net.TrafficStats;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.BestClock;
@@ -2319,7 +2317,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (dataWarningConfig == WARNING_DISABLED) {
             return WARNING_DISABLED;
         } else {
-            return dataWarningConfig * MB_IN_BYTES;
+            return DataUnit.MEBIBYTES.toBytes(dataWarningConfig);
         }
     }
 
@@ -3488,9 +3486,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2007-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_BILLED)
-                        .setDataUsage(1 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(1),
                                 ZonedDateTime.now().minusHours(36).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
@@ -3498,15 +3496,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         .setTitle("G-Mobile Happy")
                         .setDataLimit(SubscriptionPlan.BYTES_UNLIMITED,
                                 SubscriptionPlan.LIMIT_BEHAVIOR_BILLED)
-                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(5),
                                 ZonedDateTime.now().minusHours(36).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2017-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile, Charged after limit")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_BILLED)
-                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(5),
                                 ZonedDateTime.now().minusHours(36).toInstant().toEpochMilli())
                         .build());
             } else if ("month_soft".equals(fake)) {
@@ -3515,25 +3513,25 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         .setTitle("G-Mobile is the carriers name who this plan belongs to")
                         .setSummary("Crazy unlimited bandwidth plan with incredibly long title "
                                 + "that should be cut off to prevent UI from looking terrible")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(1 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(1),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2017-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile, Throttled after limit")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(5),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2017-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile, No data connection after limit")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_DISABLED)
-                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(5),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
 
@@ -3541,25 +3539,25 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2007-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile is the carriers name who this plan belongs to")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(6 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(6),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2017-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile, Throttled after limit")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(5),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2017-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile, No data connection after limit")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_DISABLED)
-                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(5),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
 
@@ -3573,9 +3571,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         .createNonrecurring(ZonedDateTime.now().minusDays(20),
                                 ZonedDateTime.now().plusDays(10))
                         .setTitle("G-Mobile")
-                        .setDataLimit(512 * TrafficStats.MB_IN_BYTES,
+                        .setDataLimit(DataUnit.MEBIBYTES.toBytes(512),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_DISABLED)
-                        .setDataUsage(100 * TrafficStats.MB_IN_BYTES,
+                        .setDataUsage(DataUnit.MEBIBYTES.toBytes(100),
                                 ZonedDateTime.now().minusHours(3).toInstant().toEpochMilli())
                         .build());
             } else if ("prepaid_crazy".equals(fake)) {
@@ -3583,9 +3581,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         .createNonrecurring(ZonedDateTime.now().minusDays(20),
                                 ZonedDateTime.now().plusDays(10))
                         .setTitle("G-Mobile Anytime")
-                        .setDataLimit(512 * TrafficStats.MB_IN_BYTES,
+                        .setDataLimit(DataUnit.MEBIBYTES.toBytes(512),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_DISABLED)
-                        .setDataUsage(100 * TrafficStats.MB_IN_BYTES,
+                        .setDataUsage(DataUnit.MEBIBYTES.toBytes(100),
                                 ZonedDateTime.now().minusHours(3).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
@@ -3593,9 +3591,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                                 ZonedDateTime.now().plusDays(20))
                         .setTitle("G-Mobile Nickel Nights")
                         .setSummary("5¢/GB between 1-5AM")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(15 * TrafficStats.MB_IN_BYTES,
+                        .setDataUsage(DataUnit.MEBIBYTES.toBytes(15),
                                 ZonedDateTime.now().minusHours(30).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
@@ -3603,9 +3601,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                                 ZonedDateTime.now().plusDays(20))
                         .setTitle("G-Mobile Bonus 3G")
                         .setSummary("Unlimited 3G data")
-                        .setDataLimit(1 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(1),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(300 * TrafficStats.MB_IN_BYTES,
+                        .setDataUsage(DataUnit.MEBIBYTES.toBytes(300),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
             } else if ("unlimited".equals(fake)) {
@@ -3615,7 +3613,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         .setTitle("G-Mobile Awesome")
                         .setDataLimit(SubscriptionPlan.BYTES_UNLIMITED,
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(50 * TrafficStats.MB_IN_BYTES,
+                        .setDataUsage(DataUnit.MEBIBYTES.toBytes(50),
                                 ZonedDateTime.now().minusHours(3).toInstant().toEpochMilli())
                         .build());
             }
