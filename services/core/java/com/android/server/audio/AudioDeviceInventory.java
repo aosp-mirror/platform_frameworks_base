@@ -48,7 +48,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Class to manage the inventory of all connected devices.
@@ -185,12 +187,20 @@ public class AudioDeviceInventory {
         final @NonNull String mDeviceName;
         final @NonNull String mDeviceAddress;
         int mDeviceCodecFormat;
+        final UUID mSensorUuid;
 
-        DeviceInfo(int deviceType, String deviceName, String deviceAddress, int deviceCodecFormat) {
+        DeviceInfo(int deviceType, String deviceName, String deviceAddress,
+                   int deviceCodecFormat, UUID sensorUuid) {
             mDeviceType = deviceType;
             mDeviceName = deviceName == null ? "" : deviceName;
             mDeviceAddress = deviceAddress == null ? "" : deviceAddress;
             mDeviceCodecFormat = deviceCodecFormat;
+            mSensorUuid = sensorUuid;
+        }
+
+        DeviceInfo(int deviceType, String deviceName, String deviceAddress,
+                   int deviceCodecFormat) {
+            this(deviceType, deviceName, deviceAddress, deviceCodecFormat, null);
         }
 
         @Override
@@ -199,7 +209,8 @@ public class AudioDeviceInventory {
                     + " (" + AudioSystem.getDeviceName(mDeviceType)
                     + ") name:" + mDeviceName
                     + " addr:" + mDeviceAddress
-                    + " codec: " + Integer.toHexString(mDeviceCodecFormat) + "]";
+                    + " codec: " + Integer.toHexString(mDeviceCodecFormat)
+                    + " sensorUuid: " + Objects.toString(mSensorUuid) + "]";
         }
 
         @NonNull String getKey() {
@@ -980,8 +991,13 @@ public class AudioDeviceInventory {
         // Reset A2DP suspend state each time a new sink is connected
         mAudioSystem.setParameters("A2dpSuspended=false");
 
+        // The convention for head tracking sensors associated with A2DP devices is to
+        // use a UUID derived from the MAC address as follows:
+        //   time_low = 0, time_mid = 0, time_hi = 0, clock_seq = 0, node = MAC Address
+        UUID sensorUuid = UuidUtils.uuidFromAudioDeviceAttributes(
+                new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address));
         final DeviceInfo di = new DeviceInfo(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, name,
-                address, a2dpCodec);
+                address, a2dpCodec, sensorUuid);
         final String diKey = di.getKey();
         mConnectedDevices.put(diKey, di);
         // on a connection always overwrite the device seen by AudioPolicy, see comment above when
@@ -1456,6 +1472,17 @@ public class AudioDeviceInventory {
         mDevRoleCapturePresetDispatchers.finishBroadcast();
     }
 
+    UUID getDeviceSensorUuid(AudioDeviceAttributes device) {
+        final String key = DeviceInfo.makeDeviceListKey(device.getInternalType(),
+                device.getAddress());
+        synchronized (mDevicesLock) {
+            DeviceInfo di = mConnectedDevices.get(key);
+            if (di == null) {
+                return null;
+            }
+            return di.mSensorUuid;
+        }
+    }
     //----------------------------------------------------------
     // For tests only
 
