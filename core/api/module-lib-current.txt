@@ -368,6 +368,7 @@ package android.net {
   }
 
   public class TrafficStats {
+    method public static void attachSocketTagger();
     method public static void init(@NonNull android.content.Context);
   }
 
