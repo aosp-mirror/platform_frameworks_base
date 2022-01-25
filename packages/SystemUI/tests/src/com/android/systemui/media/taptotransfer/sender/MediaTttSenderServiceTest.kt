@@ -11,12 +11,14 @@ import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@Ignore("b/216286227")
 class MediaTttSenderServiceTest : SysuiTestCase() {
 
     private lateinit var service: IDeviceSenderService
