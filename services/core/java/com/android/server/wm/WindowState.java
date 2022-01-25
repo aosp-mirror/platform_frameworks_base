@@ -254,6 +254,8 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -4083,6 +4085,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         proto.end(token);
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         pw.print(prefix + "mDisplayId=" + getDisplayId());
