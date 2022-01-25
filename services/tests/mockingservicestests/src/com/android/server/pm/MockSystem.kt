@@ -521,6 +521,8 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         val parsedPackage = parseResult.hideAsParsed() as ParsedPackage
         whenever(mocks.packageParser.parsePackage(
                 or(eq(path), eq(basePath)), anyInt(), anyBoolean())) { parsedPackage }
+        whenever(mocks.packageParser.parsePackage(
+                or(eq(path), eq(basePath)), anyInt(), anyBoolean(), any())) { parsedPackage }
         return parsedPackage
     }
 
