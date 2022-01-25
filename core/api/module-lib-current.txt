@@ -97,6 +97,7 @@ package android.bluetooth {
 
   public class BluetoothFrameworkInitializer {
     method public static void registerServiceWrappers();
+    method public static void setBinderCallsStatsInitializer(@NonNull java.util.function.Consumer<android.content.Context>);
     method public static void setBluetoothServiceManager(@NonNull android.os.BluetoothServiceManager);
   }
 
