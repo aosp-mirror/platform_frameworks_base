@@ -16,6 +16,8 @@
 
 package com.android.server.selectiontoolbar;
 
+import android.service.selectiontoolbar.DefaultSelectionToolbarRenderService;
+
 import com.android.server.infra.ServiceNameResolver;
 
 import java.io.PrintWriter;
@@ -24,7 +26,7 @@ final class SelectionToolbarServiceNameResolver implements ServiceNameResolver {
 
     // TODO: move to SysUi or ExtServices
     private static final String SELECTION_TOOLBAR_SERVICE_NAME =
-            "android/com.android.server.selectiontoolbar.DefaultSelectionToolbarRenderService";
+            "android/" + DefaultSelectionToolbarRenderService.class.getName();
 
     @Override
     public String getDefaultServiceName(int userId) {

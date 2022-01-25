@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.server.selectiontoolbar;
+package android.service.selectiontoolbar;
 
-import android.service.selectiontoolbar.SelectionToolbarRenderService;
 import android.util.Log;
 import android.view.selectiontoolbar.ShowInfo;
 
 /**
  * The default implementation of {@link SelectionToolbarRenderService}.
+ *
+ *  @hide
  */
+// TODO(b/214122495): fix class not found then move to system service folder
 public final class DefaultSelectionToolbarRenderService extends SelectionToolbarRenderService {
 
     private static final String TAG = "DefaultSelectionToolbarRenderService";
