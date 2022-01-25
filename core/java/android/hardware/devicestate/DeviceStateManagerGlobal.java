@@ -299,20 +299,6 @@ public final class DeviceStateManagerGlobal {
 
     /**
      * Handles a call from the server that a request for the supplied {@code token} has become
-     * suspended.
-     */
-    private void handleRequestSuspended(IBinder token) {
-        DeviceStateRequestWrapper request;
-        synchronized (mLock) {
-            request = mRequests.get(token);
-        }
-        if (request != null) {
-            request.notifyRequestSuspended();
-        }
-    }
-
-    /**
-     * Handles a call from the server that a request for the supplied {@code token} has become
      * canceled.
      */
     private void handleRequestCanceled(IBinder token) {
@@ -334,11 +320,6 @@ public final class DeviceStateManagerGlobal {
         @Override
         public void onRequestActive(IBinder token) {
             handleRequestActive(token);
-        }
-
-        @Override
-        public void onRequestSuspended(IBinder token) {
-            handleRequestSuspended(token);
         }
 
         @Override
@@ -393,14 +374,6 @@ public final class DeviceStateManagerGlobal {
             }
 
             mExecutor.execute(() -> mCallback.onRequestActivated(mRequest));
-        }
-
-        void notifyRequestSuspended() {
-            if (mCallback == null) {
-                return;
-            }
-
-            mExecutor.execute(() -> mCallback.onRequestSuspended(mRequest));
         }
 
         void notifyRequestCanceled() {

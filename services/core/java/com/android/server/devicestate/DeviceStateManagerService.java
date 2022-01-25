@@ -23,7 +23,6 @@ import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STA
 import static com.android.server.devicestate.DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS;
 import static com.android.server.devicestate.OverrideRequestController.STATUS_ACTIVE;
 import static com.android.server.devicestate.OverrideRequestController.STATUS_CANCELED;
-import static com.android.server.devicestate.OverrideRequestController.STATUS_SUSPENDED;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -348,7 +347,7 @@ public final class DeviceStateManagerService extends SystemService {
             mBaseState = Optional.of(baseState);
 
             if (baseState.hasFlag(FLAG_CANCEL_OVERRIDE_REQUESTS)) {
-                mOverrideRequestController.cancelOverrideRequests();
+                mOverrideRequestController.cancelOverrideRequest();
             }
             mOverrideRequestController.handleBaseStateChanged();
             updatePendingStateLocked();
@@ -503,7 +502,7 @@ public final class DeviceStateManagerService extends SystemService {
             @OverrideRequestController.RequestStatus int status) {
         if (status == STATUS_ACTIVE) {
             mActiveOverride = Optional.of(request);
-        } else if (status == STATUS_SUSPENDED || status == STATUS_CANCELED) {
+        } else if (status == STATUS_CANCELED) {
             if (mActiveOverride.isPresent() && mActiveOverride.get() == request) {
                 mActiveOverride = Optional.empty();
             }
@@ -528,8 +527,6 @@ public final class DeviceStateManagerService extends SystemService {
                 // Schedule the notification now.
                 processRecord.notifyRequestActiveAsync(request.getToken());
             }
-        } else if (status == STATUS_SUSPENDED) {
-            processRecord.notifyRequestSuspendedAsync(request.getToken());
         } else {
             processRecord.notifyRequestCanceledAsync(request.getToken());
         }
@@ -709,24 +706,6 @@ public final class DeviceStateManagerService extends SystemService {
             mHandler.post(() -> {
                 try {
                     mCallback.onRequestActive(token);
-                } catch (RemoteException ex) {
-                    Slog.w(TAG, "Failed to notify process " + mPid + " that request state changed.",
-                            ex);
-                }
-            });
-        }
-
-        public void notifyRequestSuspendedAsync(IBinder token) {
-            @RequestStatus Integer lastStatus = mLastNotifiedStatus.get(token);
-            if (lastStatus != null
-                    && (lastStatus == STATUS_SUSPENDED || lastStatus == STATUS_CANCELED)) {
-                return;
-            }
-
-            mLastNotifiedStatus.put(token, STATUS_SUSPENDED);
-            mHandler.post(() -> {
-                try {
-                    mCallback.onRequestSuspended(token);
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "Failed to notify process " + mPid + " that request state changed.",
                             ex);

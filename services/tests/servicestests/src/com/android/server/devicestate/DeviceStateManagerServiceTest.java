@@ -326,7 +326,7 @@ public final class DeviceStateManagerServiceTest {
         assertEquals(callback.getLastNotifiedInfo().currentState,
                 OTHER_DEVICE_STATE.getIdentifier());
 
-        mService.getBinderService().cancelRequest(token);
+        mService.getBinderService().cancelRequest();
         flushHandler();
 
         assertEquals(callback.getLastNotifiedStatus(token),
@@ -402,7 +402,7 @@ public final class DeviceStateManagerServiceTest {
                 DEFAULT_DEVICE_STATE.getIdentifier());
 
         // Now cancel the second request to make the first request active.
-        mService.getBinderService().cancelRequest(secondRequestToken);
+        mService.getBinderService().cancelRequest();
         flushHandler();
 
         assertEquals(callback.getLastNotifiedStatus(firstRequestToken),

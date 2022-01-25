@@ -249,7 +249,7 @@ public final class DeviceStateManagerGlobalTest {
                 final Request topRequest = mRequests.get(mRequests.size() - 1);
                 for (IDeviceStateManagerCallback callback : mCallbacks) {
                     try {
-                        callback.onRequestSuspended(topRequest.token);
+                        callback.onRequestCanceled(topRequest.token);
                     } catch (RemoteException e) {
                         // Do nothing. Should never happen.
                     }
