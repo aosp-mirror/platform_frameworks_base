@@ -204,7 +204,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * This class provides a system service that manages input methods.
  */
-public class InputMethodManagerService extends IInputMethodManager.Stub
+public final class InputMethodManagerService extends IInputMethodManager.Stub
         implements Handler.Callback {
     static final boolean DEBUG = false;
     static final String TAG = "InputMethodManagerService";
