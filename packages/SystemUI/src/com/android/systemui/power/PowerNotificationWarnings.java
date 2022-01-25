@@ -58,7 +58,6 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.settingslib.Utils;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
 import com.android.settingslib.utils.PowerUtil;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.dagger.SysUISingleton;
@@ -421,7 +420,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                                     new Intent(Intent.ACTION_VIEW)
                                             .setData(Uri.parse(url))
                                             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            Dependency.get(ActivityStarter.class).startActivity(helpIntent,
+                            mActivityStarter.startActivity(helpIntent,
                                     true /* dismissShade */, resultCode -> {
                                         mHighTempDialog = null;
                                     });
@@ -456,7 +455,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                                     new Intent(Intent.ACTION_VIEW)
                                             .setData(Uri.parse(url))
                                             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            Dependency.get(ActivityStarter.class).startActivity(helpIntent,
+                            mActivityStarter.startActivity(helpIntent,
                                     true /* dismissShade */, resultCode -> {
                                         mThermalShutdownDialog = null;
                                     });
@@ -516,7 +515,7 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
                     helpIntent.setClassName("com.android.settings",
                             "com.android.settings.HelpTrampoline");
                     helpIntent.putExtra(Intent.EXTRA_TEXT, contextString);
-                    Dependency.get(ActivityStarter.class).startActivity(helpIntent,
+                    mActivityStarter.startActivity(helpIntent,
                             true /* dismissShade */, resultCode -> {
                                 mUsbHighTempDialog = null;
                             });
