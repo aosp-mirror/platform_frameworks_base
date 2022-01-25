@@ -109,19 +109,6 @@ public class LocalSocket implements Closeable {
     }
 
     /**
-     * Creates a LocalSocket instances using the FileDescriptor for an already-connected
-     * AF_LOCAL/UNIX domain stream socket. Note: the FileDescriptor must be closed by the caller:
-     * closing the LocalSocket will not close it.
-     *
-     * TODO: delete this method when Bluetooth is no longer using it.
-     *
-     * @hide
-     */
-    public static LocalSocket createConnectedLocalSocket(FileDescriptor fd) {
-        return new LocalSocket(fd);
-    }
-
-    /**
      * for use with LocalServerSocket.accept()
      */
     static LocalSocket createLocalSocketForAccept(LocalSocketImpl impl) {
