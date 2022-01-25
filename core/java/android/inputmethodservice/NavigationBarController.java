@@ -16,19 +16,27 @@
 
 package android.inputmethodservice;
 
+import static android.content.Intent.ACTION_OVERLAY_CHANGED;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.StatusBarManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.inputmethodservice.navigationbar.NavigationBarFrame;
 import android.inputmethodservice.navigationbar.NavigationBarView;
+import android.os.PatternMatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowInsets;
@@ -109,6 +117,9 @@ final class NavigationBarController {
         @Nullable
         Insets mLastInsets;
 
+        @Nullable
+        private BroadcastReceiver mSystemOverlayChangedReceiver;
+
         Impl(@NonNull InputMethodService inputMethodService) {
             mService = inputMethodService;
         }
@@ -134,6 +145,9 @@ final class NavigationBarController {
 
         private void installNavigationBarFrameIfNecessary() {
             if (!mRenderGesturalNavButtons) {
+                return;
+            }
+            if (mNavigationBarFrame != null) {
                 return;
             }
             final View rawDecorView = mService.mWindow.getWindow().getDecorView();
@@ -173,6 +187,17 @@ final class NavigationBarController {
             }
 
             mNavigationBarFrame.setBackground(null);
+        }
+
+        private void uninstallNavigationBarFrameIfNecessary() {
+            if (mNavigationBarFrame == null) {
+                return;
+            }
+            final ViewParent parent = mNavigationBarFrame.getParent();
+            if (parent instanceof ViewGroup) {
+                ((ViewGroup) parent).removeView(mNavigationBarFrame);
+            }
+            mNavigationBarFrame = null;
         }
 
         @Override
@@ -284,11 +309,38 @@ final class NavigationBarController {
                 return;
             }
             mRenderGesturalNavButtons = isGesturalNavigationEnabled();
+            if (mSystemOverlayChangedReceiver == null) {
+                final IntentFilter intentFilter = new IntentFilter(ACTION_OVERLAY_CHANGED);
+                intentFilter.addDataScheme(IntentFilter.SCHEME_PACKAGE);
+                intentFilter.addDataSchemeSpecificPart("android", PatternMatcher.PATTERN_LITERAL);
+                mSystemOverlayChangedReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        if (mDestroyed) {
+                            return;
+                        }
+                        mRenderGesturalNavButtons = isGesturalNavigationEnabled();
+                        if (mRenderGesturalNavButtons) {
+                            installNavigationBarFrameIfNecessary();
+                        } else {
+                            uninstallNavigationBarFrameIfNecessary();
+                        }
+                    }
+                };
+                mService.registerReceiver(mSystemOverlayChangedReceiver, intentFilter);
+            }
             installNavigationBarFrameIfNecessary();
         }
 
         @Override
         public void onDestroy() {
+            if (mDestroyed) {
+                return;
+            }
+            if (mSystemOverlayChangedReceiver != null) {
+                mService.unregisterReceiver(mSystemOverlayChangedReceiver);
+                mSystemOverlayChangedReceiver = null;
+            }
             mDestroyed = true;
         }
 
@@ -322,7 +374,9 @@ final class NavigationBarController {
 
         @Override
         public String toDebugString() {
-            return "{mRenderGesturalNavButtons=" + mRenderGesturalNavButtons + "}";
+            return "{mRenderGesturalNavButtons=" + mRenderGesturalNavButtons
+                    + " mNavigationBarFrame=" + mNavigationBarFrame
+                    + "}";
         }
     }
 }
