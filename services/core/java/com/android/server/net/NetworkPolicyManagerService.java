@@ -255,6 +255,8 @@ import com.android.server.connectivity.MultipathPolicyTracker;
 import com.android.server.usage.AppStandbyInternal;
 import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import libcore.io.IoUtils;
 
 import java.io.File;
@@ -3734,6 +3736,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return 0;
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     @Override
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, writer)) return;
