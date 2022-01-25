@@ -22,6 +22,7 @@ import dagger.Module;
  * Dagger Module providing Communal-related functionality.
  */
 @Module(subcomponents = {
-        DreamOverlayComponent.class})
+        DreamOverlayComponent.class,
+})
 public interface DreamModule {
 }

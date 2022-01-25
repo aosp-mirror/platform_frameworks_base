@@ -18,25 +18,36 @@ package com.android.systemui.dreams.dagger;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleRegistry;
+import androidx.lifecycle.ViewModelStore;
+
 import com.android.systemui.dreams.DreamOverlayContainerViewController;
+import com.android.systemui.dreams.complication.Complication;
+import com.android.systemui.dreams.complication.dagger.ComplicationModule;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 
 import javax.inject.Scope;
 
+import dagger.BindsInstance;
 import dagger.Subcomponent;
 
 /**
  * Dagger subcomponent for {@link DreamOverlayModule}.
  */
-@Subcomponent(modules = {DreamOverlayModule.class})
+@Subcomponent(modules = {
+        DreamOverlayModule.class,
+        ComplicationModule.class,
+})
 @DreamOverlayComponent.DreamOverlayScope
 public interface DreamOverlayComponent {
     /** Simple factory for {@link DreamOverlayComponent}. */
     @Subcomponent.Factory
     interface Factory {
-        DreamOverlayComponent create();
+        DreamOverlayComponent create(@BindsInstance ViewModelStore store,
+                @BindsInstance Complication.Host host);
     }
 
     /** Scope annotation for singleton items within the {@link DreamOverlayComponent}. */
@@ -46,6 +57,11 @@ public interface DreamOverlayComponent {
     @interface DreamOverlayScope {}
 
     /** Builds a {@link DreamOverlayContainerViewController}. */
-    @DreamOverlayScope
     DreamOverlayContainerViewController getDreamOverlayContainerViewController();
+
+    /** Builds a {@link androidx.lifecycle.LifecycleRegistry} */
+    LifecycleRegistry getLifecycleRegistry();
+
+    /** Builds a {@link androidx.lifecycle.LifecycleOwner} */
+    LifecycleOwner getLifecycleOwner();
 }

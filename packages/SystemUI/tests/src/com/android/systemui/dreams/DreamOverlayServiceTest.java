@@ -28,12 +28,11 @@ import android.service.dreams.DreamService;
 import android.service.dreams.IDreamOverlay;
 import android.service.dreams.IDreamOverlayCallback;
 import android.testing.AndroidTestingRunner;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 
-import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleRegistry;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
@@ -48,17 +47,20 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.Arrays;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class DreamOverlayServiceTest extends SysuiTestCase {
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
+
+    @Mock
+    LifecycleOwner mLifecycleOwner;
+
+    @Mock
+    LifecycleRegistry mLifecycleRegistry;
 
     @Rule
     public final LeakCheckedTest.SysuiLeakCheck mLeakCheck = new LeakCheckedTest.SysuiLeakCheck();
@@ -74,12 +76,6 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
     @Mock
     WindowManagerImpl mWindowManager;
-
-    @Mock
-    ComplicationProvider mProvider;
-
-    @Mock
-    DreamOverlayStateController mDreamOverlayStateController;
 
     @Mock
     DreamOverlayComponent.Factory mDreamOverlayComponentFactory;
@@ -102,13 +98,18 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
         when(mDreamOverlayComponent.getDreamOverlayContainerViewController())
                 .thenReturn(mDreamOverlayContainerViewController);
-        when(mDreamOverlayComponentFactory.create())
+        when(mDreamOverlayComponent.getLifecycleOwner())
+                .thenReturn(mLifecycleOwner);
+        when(mDreamOverlayComponent.getLifecycleRegistry())
+                .thenReturn(mLifecycleRegistry);
+        when(mDreamOverlayComponentFactory
+                .create(any(), any()))
                 .thenReturn(mDreamOverlayComponent);
         when(mDreamOverlayContainerViewController.getContainerView())
                 .thenReturn(mDreamOverlayContainerView);
 
         mService = new DreamOverlayService(mContext, mMainExecutor,
-                mDreamOverlayStateController, mDreamOverlayComponentFactory);
+                mDreamOverlayComponentFactory);
         final IBinder proxy = mService.onBind(new Intent());
         final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
 
@@ -125,78 +126,6 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     @Test
     public void testDreamOverlayContainerViewControllerInitialized() {
         verify(mDreamOverlayContainerViewController).init();
-    }
-
-    @Test
-    public void testAddingOverlayToDream() throws Exception {
-        // Add overlay.
-        mService.addComplication(mProvider);
-        mMainExecutor.runAllReady();
-
-        final ArgumentCaptor<ComplicationHost.CreationCallback> creationCallbackCapture =
-                ArgumentCaptor.forClass(ComplicationHost.CreationCallback.class);
-        final ArgumentCaptor<ComplicationHost.InteractionCallback> interactionCallbackCapture =
-                ArgumentCaptor.forClass(ComplicationHost.InteractionCallback.class);
-
-        // Ensure overlay provider is asked to create view.
-        verify(mProvider).onCreateComplication(any(), creationCallbackCapture.capture(),
-                interactionCallbackCapture.capture());
-        mMainExecutor.runAllReady();
-
-        // Inform service of overlay view creation.
-        final View view = new View(mContext);
-        final ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
-        );
-        creationCallbackCapture.getValue().onCreated(view, lp);
-        mMainExecutor.runAllReady();
-
-        // Verify that DreamOverlayContainerViewController is asked to add an overlay for the view.
-        verify(mDreamOverlayContainerViewController).addOverlay(view, lp);
-    }
-
-    @Test
-    public void testDreamOverlayExit() throws Exception {
-        // Add overlay.
-        mService.addComplication(mProvider);
-        mMainExecutor.runAllReady();
-
-        // Capture interaction callback from overlay creation.
-        final ArgumentCaptor<ComplicationHost.InteractionCallback> interactionCallbackCapture =
-                ArgumentCaptor.forClass(ComplicationHost.InteractionCallback.class);
-        verify(mProvider).onCreateComplication(any(), any(), interactionCallbackCapture.capture());
-
-        // Ask service to exit.
-        interactionCallbackCapture.getValue().onExit();
-        mMainExecutor.runAllReady();
-
-        // Ensure service informs dream host of exit.
-        verify(mDreamOverlayCallback).onExitRequested();
-    }
-
-    @Test
-    public void testListenerRegisteredWithDreamOverlayStateController() {
-        // Verify overlay service registered as listener with DreamOverlayStateController
-        // and inform callback of addition.
-        final ArgumentCaptor<DreamOverlayStateController.Callback> callbackCapture =
-                ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
-
-        verify(mDreamOverlayStateController).addCallback(callbackCapture.capture());
-        when(mDreamOverlayStateController.getComplications()).thenReturn(Arrays.asList(mProvider));
-        callbackCapture.getValue().onComplicationsChanged();
-        mMainExecutor.runAllReady();
-
-        // Verify provider is asked to create overlay.
-        verify(mProvider).onCreateComplication(any(), any(), any());
-    }
-
-    @Test
-    public void testOnDestroyRemovesOverlayStateCallback() {
-        final ArgumentCaptor<DreamOverlayStateController.Callback> callbackCapture =
-                ArgumentCaptor.forClass(DreamOverlayStateController.Callback.class);
-        verify(mDreamOverlayStateController).addCallback(callbackCapture.capture());
-        mService.onDestroy();
-        verify(mDreamOverlayStateController).removeCallback(callbackCapture.getValue());
     }
 
     @Test

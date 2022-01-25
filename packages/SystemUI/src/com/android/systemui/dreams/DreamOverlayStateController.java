@@ -17,18 +17,17 @@
 package com.android.systemui.dreams;
 
 import androidx.annotation.NonNull;
-import androidx.concurrent.futures.CallbackToFutureAdapter;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dreams.complication.Complication;
 import com.android.systemui.statusbar.policy.CallbackController;
-
-import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -42,35 +41,6 @@ import javax.inject.Inject;
 @SysUISingleton
 public class DreamOverlayStateController implements
         CallbackController<DreamOverlayStateController.Callback> {
-    // A counter for guaranteeing unique complications tokens within the scope of this state
-    // controller.
-    private int mNextComplicationTokenId = 0;
-
-    /**
-     * {@link ComplicationToken} provides a unique key for identifying {@link ComplicationProvider}
-     * instances registered with {@link DreamOverlayStateController}.
-     */
-    public static class ComplicationToken {
-        private final int mId;
-
-        private ComplicationToken(int id) {
-            mId = id;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof ComplicationToken)) return false;
-            ComplicationToken that = (ComplicationToken) o;
-            return mId == that.mId;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(mId);
-        }
-    }
-
     /**
      * Callback for dream overlay events.
      */
@@ -84,7 +54,8 @@ public class DreamOverlayStateController implements
 
     private final Executor mExecutor;
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
-    private final HashMap<ComplicationToken, ComplicationProvider> mComplications = new HashMap<>();
+
+    private final Collection<Complication> mComplications = new HashSet();
 
     @VisibleForTesting
     @Inject
@@ -93,47 +64,32 @@ public class DreamOverlayStateController implements
     }
 
     /**
-     * Adds a complication to be presented on top of dreams.
-     * @param provider The {@link ComplicationProvider} providing the dream.
-     * @return The {@link ComplicationToken} tied to the supplied {@link ComplicationProvider}.
+     * Adds a complication to be included on the dream overlay.
      */
-    public ListenableFuture<ComplicationToken> addComplication(ComplicationProvider provider) {
-        return CallbackToFutureAdapter.getFuture(completer -> {
-            mExecutor.execute(() -> {
-                final ComplicationToken token = new ComplicationToken(mNextComplicationTokenId++);
-                mComplications.put(token, provider);
-                notifyCallbacks();
-                completer.set(token);
-            });
-            return "DreamOverlayStateController::addComplication";
+    public void addComplication(Complication complication) {
+        mExecutor.execute(() -> {
+            if (mComplications.add(complication)) {
+                mCallbacks.stream().forEach(callback -> callback.onComplicationsChanged());
+            }
         });
     }
 
     /**
-     * Removes a complication from being shown on dreams.
-     * @param token The {@link ComplicationToken} associated with the {@link ComplicationProvider}
-     *              to be removed.
-     * @return The removed {@link ComplicationProvider}, {@code null} if not found.
+     * Removes a complication from inclusion on the dream overlay.
      */
-    public ListenableFuture<ComplicationProvider> removeComplication(ComplicationToken token) {
-        return CallbackToFutureAdapter.getFuture(completer -> {
-            mExecutor.execute(() -> {
-                final ComplicationProvider removedComplication = mComplications.remove(token);
-
-                if (removedComplication != null) {
-                    notifyCallbacks();
-                }
-                completer.set(removedComplication);
-            });
-
-            return "DreamOverlayStateController::removeComplication";
+    public void removeComplication(Complication complication) {
+        mExecutor.execute(() -> {
+            if (mComplications.remove(complication)) {
+                mCallbacks.stream().forEach(callback -> callback.onComplicationsChanged());
+            }
         });
     }
 
-    private void notifyCallbacks() {
-        for (Callback callback : mCallbacks) {
-            callback.onComplicationsChanged();
-        }
+    /**
+     * Returns collection of present {@link Complication}.
+     */
+    public Collection<Complication> getComplications() {
+        return Collections.unmodifiableCollection(mComplications);
     }
 
     @Override
@@ -160,13 +116,5 @@ public class DreamOverlayStateController implements
             Objects.requireNonNull(callback, "Callback must not be null. b/128895449");
             mCallbacks.remove(callback);
         });
-    }
-
-    /**
-     * Returns all registered {@link ComplicationProvider} instances.
-     * @return A collection of {@link ComplicationProvider}.
-     */
-    public Collection<ComplicationProvider> getComplications() {
-        return mComplications.values();
     }
 }
