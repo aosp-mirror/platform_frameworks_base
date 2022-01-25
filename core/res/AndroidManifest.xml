@@ -2306,6 +2306,18 @@
     <permission android:name="android.permission.MANAGE_FACTORY_RESET_PROTECTION"
         android:protectionLevel="signature|privileged"/>
 
+    <!-- ======================================== -->
+    <!-- Permissions for lost mode -->
+    <!-- ======================================== -->
+    <eat-comment />
+
+    <!-- @SystemApi Allows an application to trigger lost mode on an organization-owned device.
+         <p>Not for use by third-party applications.
+         @hide
+    -->
+    <permission android:name="android.permission.TRIGGER_LOST_MODE"
+        android:protectionLevel="signature|role"/>
+
     <!-- ================================== -->
     <!-- Permissions for accessing hardware -->
     <!-- ================================== -->
