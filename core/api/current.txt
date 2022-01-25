@@ -26763,6 +26763,7 @@ package android.media.tv {
     method public void notifyTimeShiftStatusChanged(int);
     method public void notifyTrackSelected(int, String);
     method public void notifyTracksChanged(java.util.List<android.media.tv.TvTrackInfo>);
+    method public void notifyTuned(@NonNull android.net.Uri);
     method public void notifyVideoAvailable();
     method public void notifyVideoUnavailable(int);
     method public void onAppPrivateCommand(@NonNull String, android.os.Bundle);
@@ -26975,7 +26976,10 @@ package android.media.tv.interactive {
   public abstract static class TvInteractiveAppService.Session implements android.view.KeyEvent.Callback {
     ctor public TvInteractiveAppService.Session(@NonNull android.content.Context);
     method public void layoutSurface(int, int, int, int);
+    method public final void notifyBiInteractiveAppCreated(@NonNull android.net.Uri, @Nullable String);
     method public void notifySessionStateChanged(int, int);
+    method public void onCreateBiInteractiveApp(@NonNull android.net.Uri, @Nullable android.os.Bundle);
+    method public void onDestroyBiInteractiveApp(@NonNull String);
     method public boolean onKeyDown(int, @NonNull android.view.KeyEvent);
     method public boolean onKeyLongPress(int, @NonNull android.view.KeyEvent);
     method public boolean onKeyMultiple(int, int, @NonNull android.view.KeyEvent);
@@ -26984,6 +26988,7 @@ package android.media.tv.interactive {
     method public void onStartInteractiveApp();
     method public void onStopInteractiveApp();
     method public void onSurfaceChanged(int, int, int);
+    method public void onTuned(@NonNull android.net.Uri);
   }
 
   public class TvInteractiveAppView extends android.view.ViewGroup {
@@ -26991,6 +26996,8 @@ package android.media.tv.interactive {
     ctor public TvInteractiveAppView(@NonNull android.content.Context, @Nullable android.util.AttributeSet);
     ctor public TvInteractiveAppView(@NonNull android.content.Context, @Nullable android.util.AttributeSet, int);
     method public void clearCallback();
+    method public void createBiInteractiveApp(@NonNull android.net.Uri, @Nullable android.os.Bundle);
+    method public void destroyBiInteractiveApp(@NonNull String);
     method public void prepareInteractiveApp(@NonNull String, int);
     method public void setCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.interactive.TvInteractiveAppView.TvInteractiveAppCallback);
     method public int setTvView(@Nullable android.media.tv.TvView);
@@ -27000,6 +27007,7 @@ package android.media.tv.interactive {
 
   public abstract static class TvInteractiveAppView.TvInteractiveAppCallback {
     ctor public TvInteractiveAppView.TvInteractiveAppCallback();
+    method public void onBiInteractiveAppCreated(@NonNull String, @NonNull android.net.Uri, @Nullable String);
     method public void onStateChanged(@NonNull String, int, int);
   }
 

@@ -522,8 +522,10 @@ public class TvInteractiveAppView extends ViewGroup {
     /**
      * Creates broadcast-independent(BI) interactive application.
      *
-     * @see #destroyBiInteractiveApp(String)
-     * @hide
+     * <p>{@link TvInteractiveAppCallback#onBiInteractiveAppCreated(String, Uri, String)} will be
+     * called for the result.
+     *
+     * @see TvInteractiveAppCallback#onBiInteractiveAppCreated(String, Uri, String)
      */
     public void createBiInteractiveApp(@NonNull Uri biIAppUri, @Nullable Bundle params) {
         if (DEBUG) {
@@ -540,7 +542,6 @@ public class TvInteractiveAppView extends ViewGroup {
      * @param biIAppId the BI interactive app ID from {@link #createBiInteractiveApp(Uri, Bundle)}
      *
      * @see #createBiInteractiveApp(Uri, Bundle)
-     * @hide
      */
     public void destroyBiInteractiveApp(@NonNull String biIAppId) {
         if (DEBUG) {
@@ -639,10 +640,12 @@ public class TvInteractiveAppView extends ViewGroup {
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
          * @param biIAppUri URI associated this BI interactive app. This is the same URI in
-         *                  {@link Session#createBiInteractiveApp(Uri, Bundle)}
+         *                  {@link #createBiInteractiveApp(Uri, Bundle)}
          * @param biIAppId BI interactive app ID, which can be used to destroy the BI interactive
-         *                 app.
-         * @hide
+         *                 app. {@code null} if it's not created successfully.
+         *
+         * @see #createBiInteractiveApp(Uri, Bundle)
+         * @see #destroyBiInteractiveApp(String)
          */
         public void onBiInteractiveAppCreated(@NonNull String iAppServiceId, @NonNull Uri biIAppUri,
                 @Nullable String biIAppId) {
