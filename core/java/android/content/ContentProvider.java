@@ -18,6 +18,7 @@ package android.content;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.os.Process.myUserHandle;
 import static android.os.Trace.TRACE_TAG_DATABASE;
 
 import android.annotation.NonNull;
@@ -738,7 +739,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     boolean checkUser(int pid, int uid, Context context) {
-        int callingUserId = UserHandle.getUserId(uid);
+        final int callingUserId = UserHandle.getUserId(uid);
 
         if (callingUserId == context.getUserId() || mSingleUser) {
             return true;
@@ -765,8 +766,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 if (um != null && um.isCloneProfile()) {
                     UserHandle parent = um.getProfileParent(callingUser);
 
-                    if (parent != null && parent.equals(context.getUser())) {
-                        mUsersRedirectedToOwner.put(callingUser.getIdentifier(), true);
+                    if (parent != null && parent.equals(myUserHandle())) {
+                        mUsersRedirectedToOwner.put(callingUserId, true);
                         return true;
                     }
                 }
@@ -774,7 +775,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 // ignore
             }
 
-            mUsersRedirectedToOwner.put(UserHandle.getUserId(uid), false);
+            mUsersRedirectedToOwner.put(callingUserId, false);
             return false;
         }
 
