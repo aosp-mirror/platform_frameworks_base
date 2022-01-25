@@ -277,7 +277,6 @@ public class RemoteTransitionCompat implements Parcelable {
                 mLeashMap.put(mOpeningLeashes.get(i), target.leash);
                 t.reparent(target.leash, mInfo.getRootLeash());
                 t.setLayer(target.leash, layer);
-                t.hide(target.leash);
                 targets[i] = target;
             }
             t.apply();
@@ -332,13 +331,6 @@ public class RemoteTransitionCompat implements Parcelable {
                 }
             } else {
                 wct = null;
-                if (mOpeningLeashes != null) {
-                    // TODO: the launcher animation should handle this
-                    for (int i = 0; i < mOpeningLeashes.size(); ++i) {
-                        t.show(mOpeningLeashes.get(i));
-                        t.setAlpha(mOpeningLeashes.get(i), 1.f);
-                    }
-                }
                 if (mPipTask != null && mPipTransaction != null) {
                     t.show(mInfo.getChange(mPipTask).getLeash());
                     PictureInPictureSurfaceTransaction.apply(mPipTransaction,
