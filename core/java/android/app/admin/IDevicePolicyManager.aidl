@@ -21,6 +21,7 @@ import android.app.admin.NetworkEvent;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.admin.ParcelableGranteeMap;
+import android.app.admin.PreferentialNetworkServiceConfig;
 import android.app.admin.StartInstallingUpdateCallback;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
@@ -279,6 +280,10 @@ interface IDevicePolicyManager {
 
     void setPreferentialNetworkServiceEnabled(in boolean enabled);
     boolean isPreferentialNetworkServiceEnabled(int userHandle);
+
+    void setPreferentialNetworkServiceConfig(
+            in PreferentialNetworkServiceConfig preferentialNetworkServiceConfig);
+    PreferentialNetworkServiceConfig getPreferentialNetworkServiceConfig();
 
     void setLockTaskPackages(in ComponentName who, in String[] packages);
     String[] getLockTaskPackages(in ComponentName who);
