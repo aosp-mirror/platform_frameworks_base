@@ -53,6 +53,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -367,6 +368,33 @@ public final class DisplayCutout {
             @Nullable Rect boundTop, @Nullable Rect boundRight, @Nullable Rect boundBottom) {
         this(safeInsets.toRect(), Insets.NONE, boundLeft, boundTop, boundRight, boundBottom, null,
                 true);
+    }
+
+    /**
+     * Creates a DisplayCutout instance.
+     *
+     * <p>Note that this is only useful for tests. For production code, developers should always
+     * use a {@link DisplayCutout} obtained from the system.</p>
+     *
+     * @param safeInsets the insets from each edge which avoid the display cutout as returned by
+     *                   {@link #getSafeInsetTop()} etc.
+     * @param boundLeft the left bounding rect of the display cutout in pixels. If null is passed,
+     *                  it's treated as an empty rectangle (0,0)-(0,0).
+     * @param boundTop the top bounding rect of the display cutout in pixels.  If null is passed,
+     *                  it's treated as an empty rectangle (0,0)-(0,0).
+     * @param boundRight the right bounding rect of the display cutout in pixels.  If null is
+     *                  passed, it's treated as an empty rectangle (0,0)-(0,0).
+     * @param boundBottom the bottom bounding rect of the display cutout in pixels.  If null is
+     *                   passed, it's treated as an empty rectangle (0,0)-(0,0).
+     * @param waterfallInsets the insets for the curved areas in waterfall display.
+     * @param info the cutout path parser info.
+     * @hide
+     */
+    public DisplayCutout(@NonNull Insets safeInsets, @Nullable Rect boundLeft,
+            @Nullable Rect boundTop, @Nullable Rect boundRight, @Nullable Rect boundBottom,
+            @NonNull Insets waterfallInsets, @Nullable CutoutPathParserInfo info) {
+        this(safeInsets.toRect(), waterfallInsets, boundLeft, boundTop, boundRight, boundBottom,
+                info, true);
     }
 
     /**
@@ -1095,6 +1123,85 @@ public final class DisplayCutout {
                 res.getDimensionPixelSize(R.dimen.waterfall_display_top_edge_size),
                 res.getDimensionPixelSize(R.dimen.waterfall_display_right_edge_size),
                 res.getDimensionPixelSize(R.dimen.waterfall_display_bottom_edge_size));
+    }
+
+    /**
+     * @return a copy of this cutout that has been rotated for a display in toRotation.
+     * @hide
+     */
+    public DisplayCutout getRotated(int startWidth, int startHeight,
+            int fromRotation, int toRotation) {
+        if (this == DisplayCutout.NO_CUTOUT) {
+            return DisplayCutout.NO_CUTOUT;
+        }
+        final int rotation = RotationUtils.deltaRotation(fromRotation, toRotation);
+        if (rotation == ROTATION_0) {
+            return this;
+        }
+        final Insets waterfallInsets = RotationUtils.rotateInsets(getWaterfallInsets(), rotation);
+        // returns a copy
+        final Rect[] newBounds = getBoundingRectsAll();
+        final Rect displayBounds = new Rect(0, 0, startWidth, startHeight);
+        for (int i = 0; i < newBounds.length; ++i) {
+            if (newBounds[i].isEmpty()) continue;
+            RotationUtils.rotateBounds(newBounds[i], displayBounds, rotation);
+        }
+        Collections.rotate(Arrays.asList(newBounds), -rotation);
+        final CutoutPathParserInfo info = getCutoutPathParserInfo();
+        final CutoutPathParserInfo newInfo = new CutoutPathParserInfo(
+                info.getDisplayWidth(), info.getDisplayHeight(), info.getDensity(),
+                info.getCutoutSpec(), toRotation, info.getScale());
+        final boolean swapAspect = (rotation % 2) != 0;
+        final int endWidth = swapAspect ? startHeight : startWidth;
+        final int endHeight = swapAspect ? startWidth : startHeight;
+        final DisplayCutout tmp =
+                DisplayCutout.constructDisplayCutout(newBounds, waterfallInsets, newInfo);
+        final Rect safeInsets = DisplayCutout.computeSafeInsets(endWidth, endHeight, tmp);
+        return tmp.replaceSafeInsets(safeInsets);
+    }
+
+    /**
+     * Compute the insets derived from a cutout. This is usually used to populate the safe-insets
+     * of the cutout via {@link #replaceSafeInsets}.
+     * @hide
+     */
+    public static Rect computeSafeInsets(int displayW, int displayH, DisplayCutout cutout) {
+        if (displayW == displayH) {
+            throw new UnsupportedOperationException("not implemented: display=" + displayW + "x"
+                    + displayH + " cutout=" + cutout);
+        }
+
+        int leftInset = Math.max(cutout.getWaterfallInsets().left, findCutoutInsetForSide(
+                displayW, displayH, cutout.getBoundingRectLeft(), Gravity.LEFT));
+        int topInset = Math.max(cutout.getWaterfallInsets().top, findCutoutInsetForSide(
+                displayW, displayH, cutout.getBoundingRectTop(), Gravity.TOP));
+        int rightInset = Math.max(cutout.getWaterfallInsets().right, findCutoutInsetForSide(
+                displayW, displayH, cutout.getBoundingRectRight(), Gravity.RIGHT));
+        int bottomInset = Math.max(cutout.getWaterfallInsets().bottom, findCutoutInsetForSide(
+                displayW, displayH, cutout.getBoundingRectBottom(), Gravity.BOTTOM));
+
+        return new Rect(leftInset, topInset, rightInset, bottomInset);
+    }
+
+    private static int findCutoutInsetForSide(int displayW, int displayH, Rect boundingRect,
+            int gravity) {
+        if (boundingRect.isEmpty()) {
+            return 0;
+        }
+
+        int inset = 0;
+        switch (gravity) {
+            case Gravity.TOP:
+                return Math.max(inset, boundingRect.bottom);
+            case Gravity.BOTTOM:
+                return Math.max(inset, displayH - boundingRect.top);
+            case Gravity.LEFT:
+                return Math.max(inset, boundingRect.right);
+            case Gravity.RIGHT:
+                return Math.max(inset, displayW - boundingRect.left);
+            default:
+                throw new IllegalArgumentException("unknown gravity: " + gravity);
+        }
     }
 
     /**
