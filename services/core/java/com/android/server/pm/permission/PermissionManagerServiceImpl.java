@@ -42,6 +42,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM
 import static android.content.pm.PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE;
 import static android.content.pm.PackageManager.MASK_PERMISSION_FLAGS_ALL;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+import static android.os.Process.INVALID_UID;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.permission.PermissionManager.KILL_APP_REASON_GIDS_CHANGED;
 import static android.permission.PermissionManager.KILL_APP_REASON_PERMISSIONS_REVOKED;
@@ -130,6 +131,7 @@ import com.android.server.pm.UserManagerService;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
+import com.android.server.pm.pkg.AndroidPackageApi;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;
 import com.android.server.pm.pkg.component.ParsedPermission;
@@ -2542,16 +2544,18 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 if (uidState.isMissing()) {
                     Collection<String> uidRequestedPermissions;
                     int targetSdkVersion;
-                    if (ps.getSharedUser() == null) {
+                    if (!ps.hasSharedUser()) {
                         uidRequestedPermissions = pkg.getRequestedPermissions();
                         targetSdkVersion = pkg.getTargetSdkVersion();
                     } else {
                         uidRequestedPermissions = new ArraySet<>();
                         targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
-                        List<AndroidPackage> packages = ps.getSharedUser().getPackages();
+                        final ArraySet<PackageStateInternal> packages =
+                                mPackageManagerInt.getSharedUserPackages(ps.getSharedUserAppId());
                         int packagesSize = packages.size();
                         for (int i = 0; i < packagesSize; i++) {
-                            AndroidPackage sharedUserPackage = packages.get(i);
+                            AndroidPackageApi sharedUserPackage =
+                                    packages.valueAt(i).getAndroidPackage();
                             uidRequestedPermissions.addAll(
                                     sharedUserPackage.getRequestedPermissions());
                             targetSdkVersion = Math.min(targetSdkVersion,
@@ -2593,7 +2597,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
                 if (replace) {
                     userState.setInstallPermissionsFixed(ps.getPackageName(), false);
-                    if (ps.getSharedUser() == null) {
+                    if (!ps.hasSharedUser()) {
                         origState = new UidPermissionState(uidState);
                         uidState.reset();
                     } else {
@@ -2603,7 +2607,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                         // changed runtime permissions here are promotion of an install to
                         // runtime and revocation of a runtime from a shared user.
                         if (revokeUnusedSharedUserPermissionsLocked(
-                                ps.getSharedUser().getPackages(), uidState)) {
+                                mPackageManagerInt.getSharedUserPackages(ps.getSharedUserAppId()),
+                                uidState)) {
                             updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
                             runtimePermissionsRevoked = true;
                         }
@@ -3849,13 +3854,14 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
     @GuardedBy("mLock")
     private boolean revokeUnusedSharedUserPermissionsLocked(
-            List<AndroidPackage> pkgList, UidPermissionState uidState) {
+            ArraySet<PackageStateInternal> pkgList, UidPermissionState uidState) {
         // Collect all used permissions in the UID
         final ArraySet<String> usedPermissions = new ArraySet<>();
         if (pkgList == null || pkgList.size() == 0) {
             return false;
         }
-        for (AndroidPackage pkg : pkgList) {
+        for (PackageStateInternal pkgState : pkgList) {
+            final AndroidPackageApi pkg = pkgState.getAndroidPackage();
             if (pkg.getRequestedPermissions().isEmpty()) {
                 continue;
             }
@@ -4489,8 +4495,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         final int[] userIds = getAllUserIds();
         mPackageManagerInt.forEachPackageState(ps -> {
             final int appId = ps.getAppId();
-            final LegacyPermissionState legacyState = ps.getLegacyPermissionState();
-
+            final LegacyPermissionState legacyState;
+            if (ps.hasSharedUser()) {
+                legacyState = mPackageManagerInt.getSharedUserApi(
+                        ps.getSharedUserAppId()).getSharedUserLegacyPermissionState();
+            } else {
+                legacyState = ps.getLegacyPermissionState();
+            }
             synchronized (mLock) {
                 for (final int userId : userIds) {
                     final UserPermissionState userState = mState.getOrCreateUserState(userId);
@@ -4530,7 +4541,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         }
         mPackageManagerInt.forEachPackageSetting(ps -> {
             ps.setInstallPermissionsFixed(false);
-            final LegacyPermissionState legacyState = ps.getLegacyPermissionState();
+            final LegacyPermissionState legacyState;
+            if (ps.hasSharedUser()) {
+                legacyState = mPackageManagerInt.getSharedUserApi(
+                        ps.getSharedUserAppId()).getSharedUserLegacyPermissionState();
+            } else {
+                legacyState = ps.getLegacyPermissionState();
+            }
             legacyState.reset();
             final int appId = ps.getAppId();
 
@@ -4876,7 +4893,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         final PackageStateInternal ps =
                 mPackageManagerInt.getPackageStateInternal(pkg.getPackageName());
 
-        if (ps.getSharedUser() != null) {
+        if (ps.hasSharedUser()) {
             // The package is joining a shared user group. This can only happen when a system
             // app left shared UID with an update, and then the update is uninstalled.
             // If no apps remain in its original shared UID group, clone the current
@@ -4967,7 +4984,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     private void onPackageInstalledInternal(@NonNull AndroidPackage pkg, int previousAppId,
             @NonNull PermissionManagerServiceInternal.PackageInstalledParams params,
             @UserIdInt int[] userIds) {
-        if (previousAppId != Process.INVALID_UID) {
+        if (previousAppId != INVALID_UID) {
             handleAppIdMigration(pkg, previousAppId);
         }
         updatePermissions(pkg.getPackageName(), pkg);

@@ -780,13 +780,13 @@ public final class Settings implements Watchable, Snappable {
         SharedUserSetting s = mSharedUsers.get(name);
         if (s == null && create) {
             s = new SharedUserSetting(name, pkgFlags, pkgPrivateFlags);
-            s.userId = acquireAndRegisterNewAppIdLPw(s);
-            if (s.userId < 0) {
+            s.mAppId = acquireAndRegisterNewAppIdLPw(s);
+            if (s.mAppId < 0) {
                 // < 0 means we couldn't assign a userid; throw exception
                 throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
                         "Creating shared user " + name + " failed");
             }
-            Log.i(PackageManagerService.TAG, "New shared user " + name + ": id=" + s.userId);
+            Log.i(PackageManagerService.TAG, "New shared user " + name + ": id=" + s.mAppId);
             mSharedUsers.put(name, s);
         }
         return s;
@@ -818,8 +818,9 @@ public final class Settings implements Watchable, Snappable {
                 disabled = p;
             }
             mDisabledSysPackages.put(name, disabled);
-            if (disabled.getSharedUser() != null) {
-                disabled.getSharedUser().mDisabledPackages.add(disabled);
+            SharedUserSetting sharedUserSetting = getSharedUserSettingLPr(disabled);
+            if (sharedUserSetting != null) {
+                sharedUserSetting.mDisabledPackages.add(disabled);
             }
             return true;
         }
@@ -832,8 +833,9 @@ public final class Settings implements Watchable, Snappable {
             Log.w(PackageManagerService.TAG, "Package " + name + " is not disabled");
             return null;
         }
-        if (p.getSharedUser() != null) {
-            p.getSharedUser().mDisabledPackages.remove(p);
+        SharedUserSetting sharedUserSetting = getSharedUserSettingLPr(p);
+        if (sharedUserSetting != null) {
+            sharedUserSetting.mDisabledPackages.remove(p);
         }
         p.getPkgState().setUpdatedSystemApp(false);
         PackageSetting ret = addPackageLPw(name, p.getRealName(), p.getPath(),
@@ -856,9 +858,12 @@ public final class Settings implements Watchable, Snappable {
 
     void removeDisabledSystemPackageLPw(String name) {
         final PackageSetting p = mDisabledSysPackages.remove(name);
-        if (p != null && p.getSharedUser() != null) {
-            p.getSharedUser().mDisabledPackages.remove(p);
-            checkAndPruneSharedUserLPw(p.getSharedUser(), false);
+        if (p != null) {
+            SharedUserSetting sharedUserSetting = getSharedUserSettingLPr(p);
+            if (sharedUserSetting != null) {
+                sharedUserSetting.mDisabledPackages.remove(p);
+                checkAndPruneSharedUserLPw(sharedUserSetting, false);
+            }
         }
     }
 
@@ -893,7 +898,7 @@ public final class Settings implements Watchable, Snappable {
     SharedUserSetting addSharedUserLPw(String name, int uid, int pkgFlags, int pkgPrivateFlags) {
         SharedUserSetting s = mSharedUsers.get(name);
         if (s != null) {
-            if (s.userId == uid) {
+            if (s.mAppId == uid) {
                 return s;
             }
             PackageManagerService.reportSettingsProblem(Log.ERROR,
@@ -901,7 +906,7 @@ public final class Settings implements Watchable, Snappable {
             return null;
         }
         s = new SharedUserSetting(name, pkgFlags, pkgPrivateFlags);
-        s.userId = uid;
+        s.mAppId = uid;
         if (registerExistingAppIdLPw(uid, s, name)) {
             mSharedUsers.put(name, s);
             return s;
@@ -974,7 +979,9 @@ public final class Settings implements Watchable, Snappable {
                     usesStaticLibraries, usesStaticLibrariesVersions,
                     createMimeGroups(mimeGroupNames), domainSetId);
             pkgSetting.setLastModifiedTime(codePath.lastModified());
-            pkgSetting.setSharedUser(sharedUser);
+            if (sharedUser != null) {
+                pkgSetting.setSharedUserAppId(sharedUser.mAppId);
+            }
             // If this is not a system app, it starts out stopped.
             if ((pkgFlags&ApplicationInfo.FLAG_SYSTEM) == 0) {
                 if (DEBUG_STOPPED) {
@@ -1025,7 +1032,7 @@ public final class Settings implements Watchable, Snappable {
                 }
             }
             if (sharedUser != null) {
-                pkgSetting.setAppId(sharedUser.userId);
+                pkgSetting.setAppId(sharedUser.mAppId);
             } else {
                 // Clone the setting here for disabled system packages
                 if (disabledPkg != null) {
@@ -1069,7 +1076,9 @@ public final class Settings implements Watchable, Snappable {
      * WARNING: The provided PackageSetting object may be mutated.
      */
     static void updatePackageSetting(@NonNull PackageSetting pkgSetting,
-            @Nullable PackageSetting disabledPkg, @Nullable SharedUserSetting sharedUser,
+            @Nullable PackageSetting disabledPkg,
+            @Nullable SharedUserSetting existingSharedUserSetting,
+            @Nullable SharedUserSetting sharedUser,
             @NonNull File codePath, @Nullable String legacyNativeLibraryPath,
             @Nullable String primaryCpuAbi, @Nullable String secondaryCpuAbi, int pkgFlags,
             int pkgPrivateFlags, @NonNull UserManagerService userManager,
@@ -1078,16 +1087,18 @@ public final class Settings implements Watchable, Snappable {
             @Nullable Set<String> mimeGroupNames, @NonNull UUID domainSetId)
                     throws PackageManagerException {
         final String pkgName = pkgSetting.getPackageName();
-        if (!Objects.equals(pkgSetting.getSharedUser(), sharedUser) && sharedUser != null) {
-            PackageManagerService.reportSettingsProblem(Log.WARN,
-                    "Package " + pkgName + " shared user changed from "
-                    + (pkgSetting.getSharedUser() != null
-                                            ? pkgSetting.getSharedUser().name : "<nothing>")
-                    + " to " + sharedUser.name);
-            throw new PackageManagerException(INSTALL_FAILED_UID_CHANGED,
-                    "Updating application package " + pkgName + " failed");
+        if (sharedUser != null) {
+            if (!Objects.equals(existingSharedUserSetting, sharedUser)) {
+                PackageManagerService.reportSettingsProblem(Log.WARN,
+                        "Package " + pkgName + " shared user changed from "
+                                + (existingSharedUserSetting != null
+                                ? existingSharedUserSetting.name : "<nothing>")
+                                + " to " + sharedUser.name);
+                throw new PackageManagerException(INSTALL_FAILED_UID_CHANGED,
+                        "Updating application package " + pkgName + " failed");
+            }
+            pkgSetting.setSharedUserAppId(sharedUser.mAppId);
         }
-        pkgSetting.setSharedUser(sharedUser);
 
         if (!pkgSetting.getPath().equals(codePath)) {
             final boolean isSystem = pkgSetting.isSystem();
@@ -1228,11 +1239,13 @@ public final class Settings implements Watchable, Snappable {
         }
         // If this app defines a shared user id initialize
         // the shared user signatures as well.
-        if (p.getSharedUser() != null
-                && p.getSharedUser().signatures.mSigningDetails.getSignatures() == null) {
-            p.getSharedUser().signatures.mSigningDetails = pkg.getSigningDetails();
+        SharedUserSetting sharedUserSetting = getSharedUserSettingLPr(p);
+        if (sharedUserSetting != null) {
+            if (sharedUserSetting.signatures.mSigningDetails.getSignatures() == null) {
+                sharedUserSetting.signatures.mSigningDetails = pkg.getSigningDetails();
+            }
         }
-        addPackageSettingLPw(p, p.getSharedUser());
+        addPackageSettingLPw(p, sharedUserSetting);
     }
 
     // Utility method that adds a PackageSetting to mPackages and
@@ -1241,23 +1254,24 @@ public final class Settings implements Watchable, Snappable {
     private void addPackageSettingLPw(PackageSetting p, SharedUserSetting sharedUser) {
         mPackages.put(p.getPackageName(), p);
         if (sharedUser != null) {
-            if (p.getSharedUser() != null && p.getSharedUser() != sharedUser) {
+            SharedUserSetting existingSharedUserSetting = getSharedUserSettingLPr(p);
+            if (existingSharedUserSetting != null && existingSharedUserSetting != sharedUser) {
                 PackageManagerService.reportSettingsProblem(Log.ERROR,
                         "Package " + p.getPackageName() + " was user "
-                        + p.getSharedUser() + " but is now " + sharedUser
+                        + existingSharedUserSetting + " but is now " + sharedUser
                         + "; I am not changing its files so it will probably fail!");
-                p.getSharedUser().removePackage(p);
-            } else if (p.getAppId() != sharedUser.userId) {
+                sharedUser.removePackage(p);
+            } else if (p.getAppId() != sharedUser.mAppId) {
                 PackageManagerService.reportSettingsProblem(Log.ERROR,
-                    "Package " + p.getPackageName() + " was user id " + p.getAppId()
-                    + " but is now user " + sharedUser
-                    + " with id " + sharedUser.userId
-                    + "; I am not changing its files so it will probably fail!");
+                        "Package " + p.getPackageName() + " was user id " + p.getAppId()
+                                + " but is now user " + sharedUser
+                                + " with id " + sharedUser.mAppId
+                                + "; I am not changing its files so it will probably fail!");
             }
 
             sharedUser.addPackage(p);
-            p.setSharedUser(sharedUser);
-            p.setAppId(sharedUser.userId);
+            p.setSharedUserAppId(sharedUser.mAppId);
+            p.setAppId(sharedUser.mAppId);
         }
 
         // If the we know about this user id, we have to update it as it
@@ -1277,7 +1291,7 @@ public final class Settings implements Watchable, Snappable {
     boolean checkAndPruneSharedUserLPw(SharedUserSetting s, boolean skipCheck) {
         if (skipCheck || (s.packages.isEmpty() && s.mDisabledPackages.isEmpty())) {
             if (mSharedUsers.remove(s.name) != null) {
-                removeAppIdLPw(s.userId);
+                removeAppIdLPw(s.mAppId);
                 return true;
             }
         }
@@ -1288,10 +1302,11 @@ public final class Settings implements Watchable, Snappable {
         final PackageSetting p = mPackages.remove(name);
         if (p != null) {
             removeInstallerPackageStatus(name);
-            if (p.getSharedUser() != null) {
-                p.getSharedUser().removePackage(p);
-                if (checkAndPruneSharedUserLPw(p.getSharedUser(), false)) {
-                    return p.getSharedUser().userId;
+            SharedUserSetting sharedUserSetting = getSharedUserSettingLPr(p);
+            if (sharedUserSetting != null) {
+                sharedUserSetting.removePackage(p);
+                if (checkAndPruneSharedUserLPw(sharedUserSetting, false)) {
+                    return sharedUserSetting.mAppId;
                 }
             } else {
                 removeAppIdLPw(p.getAppId());
@@ -2465,7 +2480,7 @@ public final class Settings implements Watchable, Snappable {
             for (final SharedUserSetting usr : mSharedUsers.values()) {
                 serializer.startTag(null, "shared-user");
                 serializer.attribute(null, ATTR_NAME, usr.name);
-                serializer.attributeInt(null, "userId", usr.userId);
+                serializer.attributeInt(null, "userId", usr.mAppId);
                 usr.signatures.writeXml(serializer, "sigs", mPastSignatures.untrackedStorage());
                 serializer.endTag(null, "shared-user");
             }
@@ -2784,7 +2799,7 @@ public final class Settings implements Watchable, Snappable {
             serializer.attribute(null, "cpuAbiOverride", pkg.getCpuAbiOverride());
         }
 
-        if (pkg.getSharedUser() == null) {
+        if (!pkg.hasSharedUser()) {
             serializer.attributeInt(null, "userId", pkg.getAppId());
         } else {
             serializer.attributeInt(null, "sharedUserId", pkg.getAppId());
@@ -2827,7 +2842,7 @@ public final class Settings implements Watchable, Snappable {
         serializer.attributeLongHex(null, "ft", pkg.getLastModifiedTime());
         serializer.attributeLongHex(null, "ut", pkg.getLastUpdateTime());
         serializer.attributeLong(null, "version", pkg.getVersionCode());
-        if (pkg.getSharedUser() == null) {
+        if (!pkg.hasSharedUser()) {
             serializer.attributeInt(null, "userId", pkg.getAppId());
         } else {
             serializer.attributeInt(null, "sharedUserId", pkg.getAppId());
@@ -3099,21 +3114,22 @@ public final class Settings implements Watchable, Snappable {
 
         for (int i = 0; i < N; i++) {
             final PackageSetting p = mPendingPackages.get(i);
-            final int sharedUserId = p.getSharedUserIdInt();
-            final Object idObj = getSettingLPr(sharedUserId);
+            final int sharedUserAppId = p.getSharedUserAppId();
+            if (sharedUserAppId <= 0) {
+                continue;
+            }
+            final Object idObj = getSettingLPr(sharedUserAppId);
             if (idObj instanceof SharedUserSetting) {
                 final SharedUserSetting sharedUser = (SharedUserSetting) idObj;
-                p.setSharedUser(sharedUser);
-                p.setAppId(sharedUser.userId);
                 addPackageSettingLPw(p, sharedUser);
             } else if (idObj != null) {
                 String msg = "Bad package setting: package " + p.getPackageName()
-                        + " has shared uid " + sharedUserId + " that is not a shared uid\n";
+                        + " has shared uid " + sharedUserAppId + " that is not a shared uid\n";
                 mReadMessages.append(msg);
                 PackageManagerService.reportSettingsProblem(Log.ERROR, msg);
             } else {
                 String msg = "Bad package setting: package " + p.getPackageName()
-                        + " has shared uid " + sharedUserId + " that is not defined\n";
+                        + " has shared uid " + sharedUserAppId + " that is not defined\n";
                 mReadMessages.append(msg);
                 PackageManagerService.reportSettingsProblem(Log.ERROR, msg);
             }
@@ -3146,8 +3162,9 @@ public final class Settings implements Watchable, Snappable {
         for (PackageSetting disabledPs : mDisabledSysPackages.values()) {
             final Object id = getSettingLPr(disabledPs.getAppId());
             if (id instanceof SharedUserSetting) {
-                disabledPs.setSharedUser((SharedUserSetting) id);
-                disabledPs.getSharedUser().mDisabledPackages.add(disabledPs);
+                SharedUserSetting sharedUserSetting = (SharedUserSetting) id;
+                sharedUserSetting.mDisabledPackages.add(disabledPs);
+                disabledPs.setSharedUserAppId(sharedUserSetting.mAppId);
             }
         }
 
@@ -3563,7 +3580,9 @@ public final class Settings implements Watchable, Snappable {
         ps.setLastUpdateTime(parser.getAttributeLongHex(null, "ut", 0));
         ps.setAppId(parser.getAttributeInt(null, "userId", 0));
         if (ps.getAppId() <= 0) {
-            ps.setAppId(parser.getAttributeInt(null, "sharedUserId", 0));
+            final int sharedUserAppId = parser.getAttributeInt(null, "sharedUserId", 0);
+            ps.setAppId(sharedUserAppId);
+            ps.setSharedUserAppId(sharedUserAppId);
         }
         final float loadingProgress =
                 parser.getAttributeFloat(null, "loadingProgress", 0);
@@ -3578,7 +3597,13 @@ public final class Settings implements Watchable, Snappable {
             }
 
             if (parser.getName().equals(TAG_PERMISSIONS)) {
-                readInstallPermissionsLPr(parser, ps.getLegacyPermissionState(), users);
+                final LegacyPermissionState legacyState;
+                if (ps.hasSharedUser()) {
+                    legacyState = getSettingLPr(ps.getSharedUserAppId()).getLegacyPermissionState();
+                } else {
+                    legacyState = ps.getLegacyPermissionState();
+                }
+                readInstallPermissionsLPr(parser, legacyState, users);
             } else if (parser.getName().equals(TAG_USES_STATIC_LIB)) {
                 readUsesStaticLibLPw(parser, ps);
             } else if (parser.getName().equals(TAG_USES_SDK_LIB)) {
@@ -3603,7 +3628,7 @@ public final class Settings implements Watchable, Snappable {
         String name = null;
         String realName = null;
         int userId = 0;
-        int sharedUserId = 0;
+        int sharedUserAppId = 0;
         String codePathStr = null;
         String legacyCpuAbiString = null;
         String legacyNativeLibraryPathStr = null;
@@ -3635,7 +3660,7 @@ public final class Settings implements Watchable, Snappable {
             name = parser.getAttributeValue(null, ATTR_NAME);
             realName = parser.getAttributeValue(null, "realName");
             userId = parser.getAttributeInt(null, "userId", 0);
-            sharedUserId = parser.getAttributeInt(null, "sharedUserId", 0);
+            sharedUserAppId = parser.getAttributeInt(null, "sharedUserId", 0);
             codePathStr = parser.getAttributeValue(null, "codePath");
 
             legacyCpuAbiString = parser.getAttributeValue(null, "requiredCpuAbi");
@@ -3729,7 +3754,7 @@ public final class Settings implements Watchable, Snappable {
             lastUpdateTime = parser.getAttributeLongHex(null, "ut", 0);
             if (PackageManagerService.DEBUG_SETTINGS)
                 Log.v(PackageManagerService.TAG, "Reading package: " + name + " userId=" + userId
-                        + " sharedUserId=" + sharedUserId);
+                        + " sharedUserId=" + sharedUserAppId);
             if (realName != null) {
                 realName = realName.intern();
             }
@@ -3759,12 +3784,12 @@ public final class Settings implements Watchable, Snappable {
                     packageSetting.setLastModifiedTime(timeStamp);
                     packageSetting.setLastUpdateTime(lastUpdateTime);
                 }
-            } else if (sharedUserId != 0) {
-                if (sharedUserId > 0) {
+            } else if (sharedUserAppId != 0) {
+                if (sharedUserAppId > 0) {
                     packageSetting = new PackageSetting(name.intern(), realName,
                             new File(codePathStr), legacyNativeLibraryPathStr,
                             primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
-                            versionCode, pkgFlags, pkgPrivateFlags, sharedUserId,
+                            versionCode, pkgFlags, pkgPrivateFlags, sharedUserAppId,
                             null /* usesSdkLibraries */,
                             null /* usesSdkLibrariesVersions */,
                             null /* usesStaticLibraries */,
@@ -3775,11 +3800,11 @@ public final class Settings implements Watchable, Snappable {
                     mPendingPackages.add(packageSetting);
                     if (PackageManagerService.DEBUG_SETTINGS)
                         Log.i(PackageManagerService.TAG, "Reading package " + name
-                                + ": sharedUserId=" + sharedUserId + " pkg=" + packageSetting);
+                                + ": sharedUserId=" + sharedUserAppId + " pkg=" + packageSetting);
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Error in package manager settings: package " + name
-                                    + " has bad sharedId " + sharedUserId + " at "
+                                    + " has bad sharedId " + sharedUserAppId + " at "
                                     + parser.getPositionDescription());
                 }
             } else {
@@ -3849,8 +3874,14 @@ public final class Settings implements Watchable, Snappable {
                     packageSetting.getSignatures()
                             .readXml(parser,mPastSignatures.untrackedStorage());
                 } else if (tagName.equals(TAG_PERMISSIONS)) {
-                    readInstallPermissionsLPr(parser,
-                            packageSetting.getLegacyPermissionState(), users);
+                    final LegacyPermissionState legacyState;
+                    if (packageSetting.hasSharedUser()) {
+                        legacyState = getSettingLPr(
+                                packageSetting.getSharedUserAppId()).getLegacyPermissionState();
+                    } else {
+                        legacyState = packageSetting.getLegacyPermissionState();
+                    }
+                    readInstallPermissionsLPr(parser, legacyState, users);
                     packageSetting.setInstallPermissionsFixed(true);
                 } else if (tagName.equals("proper-signing-keyset")) {
                     long id = parser.getAttributeLong(null, "identifier");
@@ -4305,6 +4336,19 @@ public final class Settings implements Watchable, Snappable {
         return pkg.getCurrentEnabledStateLPr(classNameStr, userId);
     }
 
+    SharedUserSetting getSharedUserSettingLPr(String packageName) {
+        final PackageSetting ps = mPackages.get(packageName);
+        return getSharedUserSettingLPr(ps);
+    }
+
+    @Nullable
+    SharedUserSetting getSharedUserSettingLPr(PackageSetting ps) {
+        if (ps == null || !ps.hasSharedUser()) {
+            return null;
+        }
+        return (SharedUserSetting) getSettingLPr(ps.getSharedUserAppId());
+    }
+
     /**
      * Returns all users on the device, including pre-created and dying users.
      *
@@ -4523,8 +4567,9 @@ public final class Settings implements Watchable, Snappable {
 
         pw.print(prefix); pw.print("  userId="); pw.println(ps.getAppId());
 
-        if (ps.getSharedUser() != null) {
-            pw.print(prefix); pw.print("  sharedUser="); pw.println(ps.getSharedUser());
+        SharedUserSetting sharedUserSetting = getSharedUserSettingLPr(ps);
+        if (sharedUserSetting != null) {
+            pw.print(prefix); pw.print("  sharedUser="); pw.println(sharedUserSetting);
         }
         pw.print(prefix); pw.print("  pkg="); pw.println(pkg);
         pw.print(prefix); pw.print("  codePath="); pw.println(ps.getPathString());
@@ -4808,7 +4853,7 @@ public final class Settings implements Watchable, Snappable {
             }
         }
 
-        if (ps.getSharedUser() == null || permissionNames != null || dumpAll) {
+        if (!ps.hasSharedUser() || permissionNames != null || dumpAll) {
             dumpInstallPermissionsLPr(pw, prefix + "  ", permissionNames, permissionsState, users);
         }
 
@@ -4928,7 +4973,7 @@ public final class Settings implements Watchable, Snappable {
                         pw.println(lastDisabledAppCaller);
             }
 
-            if (ps.getSharedUser() == null) {
+            if (!ps.hasSharedUser()) {
                 dumpGidsLPr(pw, prefix + "    ", mPermissionDataProvider.getGidsForUid(
                         UserHandle.getUid(user.id, ps.getAppId())));
                 dumpRuntimePermissionsLPr(pw, prefix + "    ", permissionNames, permissionsState
@@ -4981,7 +5026,7 @@ public final class Settings implements Watchable, Snappable {
             }
 
             if (!checkin && packageName != null) {
-                dumpState.setSharedUser(ps.getSharedUser());
+                dumpState.setSharedUser(getSharedUserSettingLPr(ps));
             }
 
             if (!checkin && !printedSomething) {
@@ -5064,7 +5109,7 @@ public final class Settings implements Watchable, Snappable {
                 continue;
             }
             final LegacyPermissionState permissionsState =
-                    mPermissionDataProvider.getLegacyPermissionState(su.userId);
+                    mPermissionDataProvider.getLegacyPermissionState(su.mAppId);
             if (permissionNames != null
                     && !permissionsState.hasPermissionState(permissionNames)) {
                 continue;
@@ -5084,7 +5129,7 @@ public final class Settings implements Watchable, Snappable {
                 pw.println("):");
 
                 String prefix = "    ";
-                pw.print(prefix); pw.print("userId="); pw.println(su.userId);
+                pw.print(prefix); pw.print("userId="); pw.println(su.mAppId);
 
                 pw.print(prefix); pw.println("Packages");
                 final int numPackages = su.packages.size();
@@ -5108,7 +5153,7 @@ public final class Settings implements Watchable, Snappable {
                 for (UserInfo user : users) {
                     final int userId = user.id;
                     final int[] gids = mPermissionDataProvider.getGidsForUid(UserHandle.getUid(
-                            userId, su.userId));
+                            userId, su.mAppId));
                     final Collection<PermissionState> permissions =
                             permissionsState.getPermissionStates(userId);
                     if (!ArrayUtils.isEmpty(gids) || !permissions.isEmpty()) {
@@ -5119,7 +5164,7 @@ public final class Settings implements Watchable, Snappable {
                     }
                 }
             } else {
-                pw.print("suid,"); pw.print(su.userId); pw.print(","); pw.println(su.name);
+                pw.print("suid,"); pw.print(su.mAppId); pw.print(","); pw.println(su.name);
             }
         }
     }
@@ -5521,7 +5566,7 @@ public final class Settings implements Watchable, Snappable {
                 for (int i = 0; i < packagesSize; i++) {
                     String packageName = packageStates.keyAt(i);
                     PackageStateInternal packageState = packageStates.valueAt(i);
-                    if (packageState.getSharedUser() == null) {
+                    if (!packageState.hasSharedUser()) {
                         List<RuntimePermissionsState.PermissionState> permissions =
                                 getPermissionsFromPermissionsState(
                                         packageState.getLegacyPermissionState(), userId);
@@ -5627,7 +5672,7 @@ public final class Settings implements Watchable, Snappable {
                                 packageSetting.getLegacyPermissionState(),
                                 userId);
                         packageSetting.setInstallPermissionsFixed(true);
-                    } else if (packageSetting.getSharedUser() == null && !isUpgradeToR) {
+                    } else if (!packageSetting.hasSharedUser() && !isUpgradeToR) {
                         Slogf.w(TAG, "Missing permission state for package %s on user %d",
                                 packageName, userId);
                         packageSetting.getLegacyPermissionState().setMissing(true, userId);

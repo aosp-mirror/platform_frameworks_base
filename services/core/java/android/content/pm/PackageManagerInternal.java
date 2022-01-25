@@ -49,6 +49,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.AndroidPackageApi;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.pm.pkg.component.ParsedMainComponent;
 import com.android.server.pm.pkg.mutate.PackageStateMutator;
 
@@ -1260,6 +1261,21 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
      */
     public abstract void reconcileAppsData(int userId, @StorageManager.StorageFlags int flags,
             boolean migrateAppsData);
+
+    /**
+     * Returns an array of PackageStateInternal that are all part of a shared user setting which is
+     * denoted by the app ID. Returns an empty set if the shared user setting doesn't exist or does
+     * not contain any package.
+     */
+    @NonNull
+    public abstract ArraySet<PackageStateInternal> getSharedUserPackages(int sharedUserAppId);
+
+    /**
+     * Returns the SharedUserApi denoted by the app ID of the shared user setting. Returns null if
+     * the corresponding shared user setting doesn't exist.
+     */
+    @Nullable
+    public abstract SharedUserApi getSharedUserApi(int sharedUserAppId);
 
     /**
      * Initiates a package state mutation request, returning the current state as known by

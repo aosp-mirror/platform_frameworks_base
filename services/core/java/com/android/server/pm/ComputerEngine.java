@@ -264,7 +264,7 @@ public class ComputerEngine implements Computer {
         }
 
         @Nullable
-        public SharedUserSetting getSharedUser(String name) {
+        public SharedUserSetting getSharedUserFromId(String name) {
             try {
                 return mSettings.getSharedUserLPw(name, 0, 0, false /*create*/);
             } catch (PackageManagerException ignored) {
@@ -297,6 +297,31 @@ public class ComputerEngine implements Computer {
         @NonNull
         public Collection<SharedUserSetting> getAllSharedUsers() {
             return mSettings.getAllSharedUsersLPw();
+        }
+
+        @Nullable
+        public SharedUserApi getSharedUserFromPackageName(String packageName) {
+            return mSettings.getSharedUserSettingLPr(packageName);
+        }
+
+        @Nullable
+        public SharedUserApi getSharedUserFromAppId(int sharedUserAppId) {
+            return (SharedUserSetting) mSettings.getSettingLPr(sharedUserAppId);
+        }
+
+        @NonNull
+        public ArraySet<PackageStateInternal> getSharedUserPackages(int sharedUserAppId) {
+            final ArraySet<PackageStateInternal> res = new ArraySet<>();
+            final SharedUserSetting sharedUserSetting =
+                    (SharedUserSetting) mSettings.getSettingLPr(sharedUserAppId);
+            if (sharedUserSetting != null) {
+                final ArraySet<? extends PackageStateInternal> sharedUserPackages =
+                        sharedUserSetting.getPackageStates();
+                for (PackageStateInternal ps : sharedUserPackages) {
+                    res.add(ps);
+                }
+            }
+            return res;
         }
     }
 
@@ -1570,7 +1595,8 @@ public class ComputerEngine implements Computer {
             PackageInfo pi = new PackageInfo();
             pi.packageName = ps.getPackageName();
             pi.setLongVersionCode(ps.getVersionCode());
-            pi.sharedUserId = (ps.getSharedUser() != null) ? ps.getSharedUser().getName() : null;
+            SharedUserApi sharedUser = mSettings.getSharedUserFromPackageName(pi.packageName);
+            pi.sharedUserId = (sharedUser != null) ? sharedUser.getName() : null;
             pi.firstInstallTime = state.getFirstInstallTime();
             pi.lastUpdateTime = ps.getLastUpdateTime();
 
@@ -4306,7 +4332,7 @@ public class ComputerEngine implements Computer {
             if (shouldFilterApplication(sus, callingUid, callingUserId)) {
                 return null;
             }
-            return sus.name + ":" + sus.userId;
+            return sus.name + ":" + sus.mAppId;
         } else if (obj instanceof PackageSetting) {
             final PackageSetting ps = (PackageSetting) obj;
             if (shouldFilterApplication(ps, callingUid, callingUserId)) {
@@ -4366,10 +4392,10 @@ public class ComputerEngine implements Computer {
         if (getInstantAppPackageName(callingUid) != null) {
             return Process.INVALID_UID;
         }
-        final SharedUserSetting suid = mSettings.getSharedUser(sharedUserName);
+        final SharedUserSetting suid = mSettings.getSharedUserFromId(sharedUserName);
         if (suid != null && !shouldFilterApplication(suid, callingUid,
                 UserHandle.getUserId(callingUid))) {
-            return suid.userId;
+            return suid.mAppId;
         }
         return Process.INVALID_UID;
     }
@@ -5430,7 +5456,7 @@ public class ComputerEngine implements Computer {
     public SparseArray<String> getAppsWithSharedUserIds() {
         final SparseArray<String> sharedUserIds = new SparseArray<>();
         for (SharedUserSetting setting : mSettings.getAllSharedUsers()) {
-            sharedUserIds.put(UserHandle.getAppId(setting.userId), setting.name);
+            sharedUserIds.put(UserHandle.getAppId(setting.mAppId), setting.name);
         }
         return sharedUserIds;
     }
@@ -5440,12 +5466,12 @@ public class ComputerEngine implements Computer {
     public String[] getSharedUserPackagesForPackage(@NonNull String packageName,
             @UserIdInt int userId) {
         final PackageStateInternal packageSetting = mSettings.getPackage(packageName);
-        if (packageSetting == null || packageSetting.getSharedUser() == null) {
+        if (packageSetting == null || mSettings.getSharedUserFromPackageName(packageName) == null) {
             return EmptyArray.STRING;
         }
 
         ArraySet<? extends PackageStateInternal> packages =
-                packageSetting.getSharedUser().getPackageStates();
+                mSettings.getSharedUserFromPackageName(packageName).getPackageStates();
         final int numPackages = packages.size();
         String[] res = new String[numPackages];
         int i = 0;
@@ -5626,5 +5652,17 @@ public class ComputerEngine implements Computer {
 
     private int getSupplementalProcessUid() {
         return getPackage(mService.getSupplementalProcessPackageName()).getUid();
+    }
+
+    @Nullable
+    @Override
+    public SharedUserApi getSharedUser(int sharedUserAppId) {
+        return mSettings.getSharedUserFromAppId(sharedUserAppId);
+    }
+
+    @NonNull
+    @Override
+    public ArraySet<PackageStateInternal> getSharedUserPackages(int sharedUserAppId) {
+        return mSettings.getSharedUserPackages(sharedUserAppId);
     }
 }

@@ -1283,4 +1283,20 @@ public final class ComputerTracker implements Computer {
             return current.mComputer.getPackageOrSharedUser(appId);
         }
     }
+
+    @Nullable
+    @Override
+    public SharedUserApi getSharedUser(int sharedUserAppId) {
+        try (ThreadComputer current = snapshot()) {
+            return current.mComputer.getSharedUser(sharedUserAppId);
+        }
+    }
+
+    @NonNull
+    @Override
+    public ArraySet<PackageStateInternal> getSharedUserPackages(int sharedUserAppId) {
+        try (ThreadComputer current = snapshot()) {
+            return current.mComputer.getSharedUserPackages(sharedUserAppId);
+        }
+    }
 }

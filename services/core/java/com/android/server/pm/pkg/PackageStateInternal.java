@@ -50,9 +50,6 @@ public interface PackageStateInternal extends PackageState {
     @NonNull
     InstallSource getInstallSource();
 
-    @Nullable
-    SharedUserApi getSharedUser();
-
     // TODO: Remove this in favor of boolean APIs
     int getFlags();
     int getPrivateFlags();

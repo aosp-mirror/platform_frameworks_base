@@ -505,6 +505,7 @@ public class PackageManagerServiceUtils {
      * @throws PackageManagerException if the signatures did not match.
      */
     public static boolean verifySignatures(PackageSetting pkgSetting,
+            @Nullable SharedUserSetting sharedUserSetting,
             PackageSetting disabledPkgSetting, SigningDetails parsedSignatures,
             boolean compareCompat, boolean compareRecover, boolean isRollback)
             throws PackageManagerException {
@@ -555,10 +556,8 @@ public class PackageManagerServiceUtils {
             }
         }
         // Check for shared user signatures
-        if (pkgSetting.getSharedUser() != null
-                && pkgSetting.getSharedUser().signatures.mSigningDetails
-                        != SigningDetails.UNKNOWN) {
-
+        if (sharedUserSetting != null
+                && sharedUserSetting.getSigningDetails() != SigningDetails.UNKNOWN) {
             // Already existing package. Make sure signatures match.  In case of signing certificate
             // rotation, the packages with newer certs need to be ok with being sharedUserId with
             // the older ones.  We check to see if either the new package is signed by an older cert
@@ -566,32 +565,32 @@ public class PackageManagerServiceUtils {
             // with being sharedUser with the existing signing cert.
             boolean match =
                     parsedSignatures.checkCapability(
-                            pkgSetting.getSharedUser().signatures.mSigningDetails,
+                            sharedUserSetting.getSigningDetails(),
                             SigningDetails.CertCapabilities.SHARED_USER_ID)
-                    || pkgSetting.getSharedUser().signatures.mSigningDetails.checkCapability(
+                    || sharedUserSetting.getSigningDetails().checkCapability(
                             parsedSignatures,
                             SigningDetails.CertCapabilities.SHARED_USER_ID);
             // Special case: if the sharedUserId capability check failed it could be due to this
             // being the only package in the sharedUserId so far and the lineage being updated to
             // deny the sharedUserId capability of the previous key in the lineage.
-            if (!match && pkgSetting.getSharedUser().packages.size() == 1
-                    && pkgSetting.getSharedUser().packages
+            if (!match && sharedUserSetting.packages.size() == 1
+                    && sharedUserSetting.packages
                             .valueAt(0).getPackageName().equals(packageName)) {
                 match = true;
             }
             if (!match && compareCompat) {
                 match = matchSignaturesCompat(
-                        packageName, pkgSetting.getSharedUser().signatures, parsedSignatures);
+                        packageName, sharedUserSetting.signatures, parsedSignatures);
             }
             if (!match && compareRecover) {
                 match =
                         matchSignaturesRecover(packageName,
-                                pkgSetting.getSharedUser().signatures.mSigningDetails,
+                                sharedUserSetting.signatures.mSigningDetails,
                                 parsedSignatures,
                                 SigningDetails.CertCapabilities.SHARED_USER_ID)
                         || matchSignaturesRecover(packageName,
                                 parsedSignatures,
-                                pkgSetting.getSharedUser().signatures.mSigningDetails,
+                                sharedUserSetting.signatures.mSigningDetails,
                                 SigningDetails.CertCapabilities.SHARED_USER_ID);
                 compatMatch |= match;
             }
@@ -599,14 +598,14 @@ public class PackageManagerServiceUtils {
                 throw new PackageManagerException(INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
                         "Package " + packageName
                         + " has no signatures that match those in shared user "
-                        + pkgSetting.getSharedUser().name + "; ignoring!");
+                        + sharedUserSetting.name + "; ignoring!");
             }
             // It is possible that this package contains a lineage that blocks sharedUserId access
             // to an already installed package in the sharedUserId signed with a previous key.
             // Iterate over all of the packages in the sharedUserId and ensure any that are signed
             // with a key in this package's lineage have the SHARED_USER_ID capability granted.
             if (parsedSignatures.hasPastSigningCertificates()) {
-                for (PackageSetting shUidPkgSetting : pkgSetting.getSharedUser().packages) {
+                for (PackageSetting shUidPkgSetting : sharedUserSetting.packages) {
                     // if the current package in the sharedUserId is the package being updated then
                     // skip this check as the update may revoke the sharedUserId capability from
                     // the key with which this app was previously signed.
@@ -633,7 +632,7 @@ public class PackageManagerServiceUtils {
             // If the lineage of this package diverges from the lineage of the sharedUserId then
             // do not allow the installation to proceed.
             if (!parsedSignatures.hasCommonAncestor(
-                    pkgSetting.getSharedUser().signatures.mSigningDetails)) {
+                    sharedUserSetting.signatures.mSigningDetails)) {
                 throw new PackageManagerException(INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
                         "Package " + packageName + " has a signing lineage "
                                 + "that diverges from the lineage of the sharedUserId");

@@ -23,6 +23,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.permission.LegacyPermissionState;
 import com.android.server.pm.pkg.component.ParsedProcess;
 
 import java.util.List;
@@ -33,7 +34,7 @@ public interface SharedUserApi {
     String getName();
 
     @UserIdInt
-    int getUserId();
+    int getAppId();
 
     // flags that are associated with this uid, regardless of any package flags
     int getUidFlags();
@@ -65,4 +66,7 @@ public interface SharedUserApi {
     ArrayMap<String, ParsedProcess> getProcesses();
 
     boolean isPrivileged();
+
+    @NonNull
+    LegacyPermissionState getSharedUserLegacyPermissionState();
 }

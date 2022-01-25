@@ -26,6 +26,7 @@ import com.android.server.pm.parsing.pkg.ParsedPackage;
 class ScanRequestBuilder {
     private final ParsedPackage mPkg;
     private AndroidPackage mOldPkg;
+    private SharedUserSetting mOldSharedUserSetting;
     private SharedUserSetting mSharedUserSetting;
     private PackageSetting mPkgSetting;
     private PackageSetting mDisabledPkgSetting;
@@ -49,6 +50,11 @@ class ScanRequestBuilder {
 
     public ScanRequestBuilder setSharedUserSetting(SharedUserSetting sharedUserSetting) {
         this.mSharedUserSetting = sharedUserSetting;
+        return this;
+    }
+
+    public ScanRequestBuilder setOldSharedUserSetting(SharedUserSetting oldSharedUserSetting) {
+        this.mOldSharedUserSetting = oldSharedUserSetting;
         return this;
     }
 
@@ -110,8 +116,8 @@ class ScanRequestBuilder {
 
     ScanRequest build() {
         return new ScanRequest(
-                mPkg, mSharedUserSetting, mOldPkg, mPkgSetting, mDisabledPkgSetting,
-                mOriginalPkgSetting, mRealPkgName, mParseFlags, mScanFlags, mIsPlatformPackage,
-                mUser, mCpuAbiOverride);
+                mPkg, mOldSharedUserSetting, mOldPkg, mPkgSetting, mSharedUserSetting,
+                mDisabledPkgSetting, mOriginalPkgSetting, mRealPkgName, mParseFlags, mScanFlags,
+                mIsPlatformPackage, mUser, mCpuAbiOverride);
     }
 }
