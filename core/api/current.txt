@@ -41598,6 +41598,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean doesSwitchMultiSimConfigTriggerReboot();
     method public int getActiveModemCount();
     method @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public java.util.List<android.telephony.CellInfo> getAllCellInfo();
+    method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public long getAllowedNetworkTypesForReason(int);
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public int getCallComposerStatus();
     method @Deprecated @RequiresPermission(value=android.Manifest.permission.READ_PHONE_STATE, conditional=true) public int getCallState();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int getCallStateForSubscription();
@@ -41658,6 +41659,7 @@ package android.telephony {
     method public int getSubscriptionId();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public int getSubscriptionId(@NonNull android.telecom.PhoneAccountHandle);
     method public int getSupportedModemCount();
+    method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public long getSupportedRadioAccessFamily();
     method @Nullable public String getTypeAllocationCode();
     method @Nullable public String getTypeAllocationCode(int);
     method @NonNull @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public java.util.List<android.telephony.UiccCardInfo> getUiccCardsInfo();
@@ -41703,6 +41705,7 @@ package android.telephony {
     method public String sendEnvelopeWithStatus(String);
     method @RequiresPermission(android.Manifest.permission.CALL_PHONE) public void sendUssdRequest(String, android.telephony.TelephonyManager.UssdResponseCallback, android.os.Handler);
     method public void sendVisualVoicemailSms(String, int, String, android.app.PendingIntent);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setAllowedNetworkTypesForReason(int, long);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCallComposerStatus(int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataEnabledForReason(int, boolean);
@@ -41739,6 +41742,8 @@ package android.telephony {
     field public static final String ACTION_SHOW_VOICEMAIL_NOTIFICATION = "android.telephony.action.SHOW_VOICEMAIL_NOTIFICATION";
     field public static final String ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED = "android.telephony.action.SUBSCRIPTION_CARRIER_IDENTITY_CHANGED";
     field public static final String ACTION_SUBSCRIPTION_SPECIFIC_CARRIER_IDENTITY_CHANGED = "android.telephony.action.SUBSCRIPTION_SPECIFIC_CARRIER_IDENTITY_CHANGED";
+    field public static final int ALLOWED_NETWORK_TYPES_REASON_CARRIER = 2; // 0x2
+    field public static final int ALLOWED_NETWORK_TYPES_REASON_USER = 0; // 0x0
     field public static final int APPTYPE_CSIM = 4; // 0x4
     field public static final int APPTYPE_ISIM = 5; // 0x5
     field public static final int APPTYPE_RUIM = 3; // 0x3
@@ -41809,6 +41814,26 @@ package android.telephony {
     field public static final int NETWORK_SELECTION_MODE_MANUAL = 2; // 0x2
     field public static final int NETWORK_SELECTION_MODE_UNKNOWN = 0; // 0x0
     field public static final int NETWORK_TYPE_1xRTT = 7; // 0x7
+    field public static final long NETWORK_TYPE_BITMASK_1xRTT = 64L; // 0x40L
+    field public static final long NETWORK_TYPE_BITMASK_CDMA = 8L; // 0x8L
+    field public static final long NETWORK_TYPE_BITMASK_EDGE = 2L; // 0x2L
+    field public static final long NETWORK_TYPE_BITMASK_EHRPD = 8192L; // 0x2000L
+    field public static final long NETWORK_TYPE_BITMASK_EVDO_0 = 16L; // 0x10L
+    field public static final long NETWORK_TYPE_BITMASK_EVDO_A = 32L; // 0x20L
+    field public static final long NETWORK_TYPE_BITMASK_EVDO_B = 2048L; // 0x800L
+    field public static final long NETWORK_TYPE_BITMASK_GPRS = 1L; // 0x1L
+    field public static final long NETWORK_TYPE_BITMASK_GSM = 32768L; // 0x8000L
+    field public static final long NETWORK_TYPE_BITMASK_HSDPA = 128L; // 0x80L
+    field public static final long NETWORK_TYPE_BITMASK_HSPA = 512L; // 0x200L
+    field public static final long NETWORK_TYPE_BITMASK_HSPAP = 16384L; // 0x4000L
+    field public static final long NETWORK_TYPE_BITMASK_HSUPA = 256L; // 0x100L
+    field public static final long NETWORK_TYPE_BITMASK_IWLAN = 131072L; // 0x20000L
+    field public static final long NETWORK_TYPE_BITMASK_LTE = 4096L; // 0x1000L
+    field public static final long NETWORK_TYPE_BITMASK_LTE_CA = 262144L; // 0x40000L
+    field public static final long NETWORK_TYPE_BITMASK_NR = 524288L; // 0x80000L
+    field public static final long NETWORK_TYPE_BITMASK_TD_SCDMA = 65536L; // 0x10000L
+    field public static final long NETWORK_TYPE_BITMASK_UMTS = 4L; // 0x4L
+    field public static final long NETWORK_TYPE_BITMASK_UNKNOWN = 0L; // 0x0L
     field public static final int NETWORK_TYPE_CDMA = 4; // 0x4
     field public static final int NETWORK_TYPE_EDGE = 2; // 0x2
     field public static final int NETWORK_TYPE_EHRPD = 14; // 0xe
