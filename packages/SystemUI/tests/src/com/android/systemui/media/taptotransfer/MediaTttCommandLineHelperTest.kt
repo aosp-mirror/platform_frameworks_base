@@ -21,9 +21,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.media.taptotransfer.receiver.ChipStateReceiver
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver
-import com.android.systemui.media.taptotransfer.sender.MediaTttSenderService
-import com.android.systemui.shared.mediattt.DeviceInfo
-import com.android.systemui.shared.mediattt.IDeviceSenderService
 import com.android.systemui.statusbar.commandline.Command
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.util.mockito.any
@@ -54,19 +51,10 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
 
     @Mock
     private lateinit var mediaTttChipControllerReceiver: MediaTttChipControllerReceiver
-    @Mock
-    private lateinit var mediaSenderService: IDeviceSenderService.Stub
-    private lateinit var mediaSenderServiceComponentName: ComponentName
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
-        mediaSenderServiceComponentName = ComponentName(context, MediaTttSenderService::class.java)
-        context.addMockService(mediaSenderServiceComponentName, mediaSenderService)
-        whenever(mediaSenderService.queryLocalInterface(anyString())).thenReturn(mediaSenderService)
-        whenever(mediaSenderService.asBinder()).thenReturn(mediaSenderService)
-
         mediaTttCommandLineHelper =
             MediaTttCommandLineHelper(
                 commandRegistry,
@@ -100,6 +88,7 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
         ) { EmptyCommand() }
     }
 
+    /* TODO(b/216318437): Revive these tests using the new SystemApis.
     @Test
     fun sender_moveCloserToStartCast_serviceCallbackCalled() {
         commandRegistry.onShellCommand(pw, getMoveCloserToStartCastCommand())
@@ -181,6 +170,8 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
         assertThat(context.isBound(mediaSenderServiceComponentName)).isFalse()
         verify(mediaSenderService).noLongerCloseToReceiver(any(), any())
     }
+
+     */
 
     @Test
     fun receiver_addCommand_chipAdded() {

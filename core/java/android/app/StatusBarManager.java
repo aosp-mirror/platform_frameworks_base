@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -27,6 +28,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.drawable.Icon;
+import android.media.MediaRoute2Info;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,6 +41,7 @@ import android.view.View;
 
 import com.android.internal.statusbar.IAddTileResultCallback;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.statusbar.IUndoMediaTransferCallback;
 import com.android.internal.statusbar.NotificationVisibility;
 
 import java.lang.annotation.Retention;
@@ -337,6 +340,166 @@ public class StatusBarManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NavBarModeOverride {}
+
+    /**
+     * State indicating that this sender device is close to a receiver device, so the user can
+     * potentially *start* a cast to the receiver device if the user moves their device a bit
+     * closer.
+     * <p>
+     * Important notes:
+     * <ul>
+     *     <li>This state represents that the device is close enough to inform the user that
+     *     transferring is an option, but the device is *not* close enough to actually initiate a
+     *     transfer yet.</li>
+     *     <li>This state is for *starting* a cast. It should be used when this device is currently
+     *     playing media locally and the media should be transferred to be played on the receiver
+     *     device instead.</li>
+     * </ul>
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST = 0;
+
+    /**
+     * State indicating that this sender device is close to a receiver device, so the user can
+     * potentially *end* a cast on the receiver device if the user moves this device a bit closer.
+     * <p>
+     * Important notes:
+     * <ul>
+     *     <li>This state represents that the device is close enough to inform the user that
+     *     transferring is an option, but the device is *not* close enough to actually initiate a
+     *     transfer yet.</li>
+     *     <li>This state is for *ending* a cast. It should be used when media is currently being
+     *     played on the receiver device and the media should be transferred to play locally
+     *     instead.</li>
+     * </ul>
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST = 1;
+
+    /**
+     * State indicating that a media transfer from this sender device to a receiver device has been
+     * started.
+     * <p>
+     * Important note: This state is for *starting* a cast. It should be used when this device is
+     * currently playing media locally and the media has started being transferred to the receiver
+     * device instead.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED = 2;
+
+    /**
+     * State indicating that a media transfer from the receiver and back to this sender device
+     * has been started.
+     * <p>
+     * Important note: This state is for *ending* a cast. It should be used when media is currently
+     * being played on the receiver device and the media has started being transferred to play
+     * locally instead.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED = 3;
+
+    /**
+     * State indicating that a media transfer from this sender device to a receiver device has
+     * finished successfully.
+     * <p>
+     * Important note: This state is for *starting* a cast. It should be used when this device had
+     * previously been playing media locally and the media has successfully been transferred to the
+     * receiver device instead.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED = 4;
+
+    /**
+     * State indicating that a media transfer from the receiver and back to this sender device has
+     * finished successfully.
+     * <p>
+     * Important note: This state is for *ending* a cast. It should be used when media was
+     * previously being played on the receiver device and has been successfully transferred to play
+     * locally on this device instead.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED = 5;
+
+    /**
+     * State indicating that the attempted transfer to the receiver device has failed.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_FAILED = 6;
+
+    /**
+     * State indicating that the attempted transfer back to this device has failed.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED = 7;
+
+    /**
+     * State indicating that this sender device is no longer close to the receiver device.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER = 8;
+
+    /** @hide */
+    @IntDef(prefix = {"MEDIA_TRANSFER_SENDER_STATE_"}, value = {
+            MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
+            MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
+            MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
+            MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
+            MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+            MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
+            MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_FAILED,
+            MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED,
+            MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MediaTransferSenderState {}
+
+    /**
+     * State indicating that this receiver device is close to a sender device, so the user can
+     * potentially start or end a cast to the receiver device if the user moves the sender device a
+     * bit closer.
+     * <p>
+     * Important note: This state represents that the device is close enough to inform the user that
+     * transferring is an option, but the device is *not* close enough to actually initiate a
+     * transfer yet.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER = 0;
+
+    /**
+     * State indicating that this receiver device is no longer close to the sender device.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER = 1;
+
+    /** @hide */
+    @IntDef(prefix = {"MEDIA_TRANSFER_RECEIVER_STATE_"}, value = {
+            MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
+            MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MediaTransferReceiverState {}
 
     @UnsupportedAppUsage
     private Context mContext;
@@ -789,6 +952,81 @@ public class StatusBarManager {
         return navBarModeOverride;
     }
 
+    /**
+     * Notifies the system of a new media tap-to-transfer state for the <b>sender</b> device.
+     *
+     * <p>The callback should only be provided for the {@link
+     * MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED} or {@link
+     * MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED} states, since those are the
+     * only states where an action can be un-done.
+     *
+     * @param displayState the new state for media tap-to-transfer.
+     * @param routeInfo the media route information for the media being transferred.
+     * @param undoExecutor an executor to run the callback on and must be provided if the
+     *                     callback is non-null.
+     * @param undoCallback a callback that will be triggered if the user elects to undo a media
+     *                     transfer.
+     *
+     * @throws IllegalArgumentException if an undo callback is provided for states that are not a
+     *   succeeded state.
+     * @throws IllegalArgumentException if an executor is not provided when a callback is.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
+    public void updateMediaTapToTransferSenderDisplay(
+            @MediaTransferSenderState int displayState,
+            @NonNull MediaRoute2Info routeInfo,
+            @Nullable Executor undoExecutor,
+            @Nullable Runnable undoCallback
+    ) {
+        Objects.requireNonNull(routeInfo);
+        if (displayState != MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED
+                && displayState != MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED
+                && undoCallback != null) {
+            throw new IllegalArgumentException(
+                    "The undoCallback should only be provided when the state is a "
+                            + "transfer succeeded state");
+        }
+        if (undoCallback != null && undoExecutor == null) {
+            throw new IllegalArgumentException(
+                    "You must pass an executor when you pass an undo callback");
+        }
+        IStatusBarService svc = getService();
+        try {
+            UndoCallback callbackProxy = null;
+            if (undoExecutor != null) {
+                callbackProxy = new UndoCallback(undoExecutor, undoCallback);
+            }
+            svc.updateMediaTapToTransferSenderDisplay(displayState, routeInfo, callbackProxy);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Notifies the system of a new media tap-to-transfer state for the <b>receiver</b> device.
+     *
+     * @param displayState the new state for media tap-to-transfer.
+     * @param routeInfo the media route information for the media being transferred.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
+    public void updateMediaTapToTransferReceiverDisplay(
+            @MediaTransferReceiverState int displayState,
+            @NonNull MediaRoute2Info routeInfo) {
+        Objects.requireNonNull(routeInfo);
+        IStatusBarService svc = getService();
+        try {
+            svc.updateMediaTapToTransferReceiverDisplay(displayState, routeInfo);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
     /** @hide */
     public static String windowStateToString(int state) {
         if (state == WINDOW_STATE_HIDING) return "WINDOW_STATE_HIDING";
@@ -1069,6 +1307,31 @@ public class StatusBarManager {
         @Override
         public void onTileRequest(int userResponse) {
             mExecutor.execute(() -> mCallback.accept(userResponse));
+        }
+    }
+
+    /**
+     * @hide
+     */
+    static final class UndoCallback extends IUndoMediaTransferCallback.Stub {
+        @NonNull
+        private final Executor mExecutor;
+        @NonNull
+        private final Runnable mCallback;
+
+        UndoCallback(@NonNull Executor executor, @NonNull Runnable callback) {
+            mExecutor = executor;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onUndoTriggered() {
+            final long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                mExecutor.execute(mCallback);
+            } finally {
+                restoreCallingIdentity(callingIdentity);
+            }
         }
     }
 }

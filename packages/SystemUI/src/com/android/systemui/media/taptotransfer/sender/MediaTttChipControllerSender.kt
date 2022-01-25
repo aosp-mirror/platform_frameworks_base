@@ -16,14 +16,20 @@
 
 package com.android.systemui.media.taptotransfer.sender
 
+import android.app.StatusBarManager
 import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.Icon
+import android.media.MediaRoute2Info
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.TextView
+import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.taptotransfer.common.MediaTttChipControllerCommon
+import com.android.systemui.statusbar.CommandQueue
 import javax.inject.Inject
 
 /**
@@ -34,9 +40,36 @@ import javax.inject.Inject
 class MediaTttChipControllerSender @Inject constructor(
     context: Context,
     windowManager: WindowManager,
+    private val commandQueue: CommandQueue
 ) : MediaTttChipControllerCommon<ChipStateSender>(
     context, windowManager, R.layout.media_ttt_chip
 ) {
+    // TODO(b/216141276): Use app icon from media route info instead of this fake one.
+    private val fakeAppIconDrawable =
+        Icon.createWithResource(context, R.drawable.ic_avatar_user).loadDrawable(context).also {
+            it.setTint(Color.YELLOW)
+        }
+
+    private val commandQueueCallback = object : CommandQueue.Callbacks {
+        override fun updateMediaTapToTransferSenderDisplay(
+                @StatusBarManager.MediaTransferSenderState displayState: Int,
+                routeInfo: MediaRoute2Info,
+                undoCallback: IUndoMediaTransferCallback?
+        ) {
+            // TODO(b/216318437): Trigger displayChip with the right state based on displayState.
+            displayChip(
+                MoveCloserToStartCast(
+                    // TODO(b/217418566): This app icon content description is incorrect --
+                    //   routeInfo.name is the name of the device, not the name of the app.
+                    fakeAppIconDrawable, routeInfo.name.toString(), routeInfo.name.toString()
+                )
+            )
+        }
+    }
+
+    init {
+        commandQueue.addCallback(commandQueueCallback)
+    }
 
     /** Displays the chip view for the given state. */
     override fun updateChipView(chipState: ChipStateSender, currentChipView: ViewGroup) {
