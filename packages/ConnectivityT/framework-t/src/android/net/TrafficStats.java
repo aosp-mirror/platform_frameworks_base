@@ -31,6 +31,7 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Build;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.android.server.NetworkManagementSocketTagger;
 
@@ -212,6 +213,13 @@ public class TrafficStats {
         }
         final NetworkStatsManager statsManager =
                 context.getSystemService(NetworkStatsManager.class);
+        if (statsManager == null) {
+            // TODO: Currently Process.isSupplemental is not working yet, because it depends on
+            //  process to run in a certain UID range, which is not true for now. Change this
+            //  to Log.wtf once Process.isSupplemental is ready.
+            Log.e(TAG, "TrafficStats not initialized, uid=" + Binder.getCallingUid());
+            return;
+        }
         sStatsService = statsManager.getBinder();
     }
 
