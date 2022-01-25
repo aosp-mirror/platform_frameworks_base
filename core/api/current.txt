@@ -9184,6 +9184,7 @@ package android.bluetooth {
     field public static final String EXTRA_PAIRING_VARIANT = "android.bluetooth.device.extra.PAIRING_VARIANT";
     field public static final String EXTRA_PREVIOUS_BOND_STATE = "android.bluetooth.device.extra.PREVIOUS_BOND_STATE";
     field public static final String EXTRA_RSSI = "android.bluetooth.device.extra.RSSI";
+    field public static final String EXTRA_TRANSPORT = "android.bluetooth.device.extra.TRANSPORT";
     field public static final String EXTRA_UUID = "android.bluetooth.device.extra.UUID";
     field public static final int PAIRING_VARIANT_PASSKEY_CONFIRMATION = 2; // 0x2
     field public static final int PAIRING_VARIANT_PIN = 0; // 0x0
