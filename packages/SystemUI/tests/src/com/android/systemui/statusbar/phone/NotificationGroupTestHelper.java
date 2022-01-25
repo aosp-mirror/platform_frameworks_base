@@ -59,6 +59,13 @@ public final class NotificationGroupTestHelper {
         return createEntry(id, tag, true, groupAlertBehavior);
     }
 
+    public NotificationEntry createSummaryNotification(
+            int groupAlertBehavior, int id, String tag, long when) {
+        NotificationEntry entry = createSummaryNotification(groupAlertBehavior, id, tag);
+        entry.getSbn().getNotification().when = when;
+        return entry;
+    }
+
     public NotificationEntry createChildNotification() {
         return createChildNotification(Notification.GROUP_ALERT_ALL);
     }
@@ -69,6 +76,13 @@ public final class NotificationGroupTestHelper {
 
     public NotificationEntry createChildNotification(int groupAlertBehavior, int id, String tag) {
         return createEntry(id, tag, false, groupAlertBehavior);
+    }
+
+    public NotificationEntry createChildNotification(
+            int groupAlertBehavior, int id, String tag, long when) {
+        NotificationEntry entry = createChildNotification(groupAlertBehavior, id, tag);
+        entry.getSbn().getNotification().when = when;
+        return entry;
     }
 
     public NotificationEntry createEntry(int id, String tag, boolean isSummary,
