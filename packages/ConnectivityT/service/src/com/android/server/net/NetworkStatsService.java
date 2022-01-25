@@ -422,7 +422,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final NetworkStatsService service = new NetworkStatsService(context,
                 INetd.Stub.asInterface((IBinder) context.getSystemService(Context.NETD_SERVICE)),
                 alarmManager, wakeLock, getDefaultClock(),
-                new DefaultNetworkStatsSettings(), new NetworkStatsFactory(netd),
+                new DefaultNetworkStatsSettings(), new NetworkStatsFactory(context),
                 new NetworkStatsObservers(), getDefaultSystemDir(), getDefaultBaseDir(),
                 new Dependencies());
 
@@ -1000,8 +1000,17 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         // TODO: switch to data layer stats once kernel exports
-        // for now, read network layer stats and flatten across all ifaces
-        final NetworkStats networkLayer = readNetworkStatsUidDetail(uid, INTERFACES_ALL, TAG_ALL);
+        // for now, read network layer stats and flatten across all ifaces.
+        // This function is used to query NeworkStats for calle's uid. The only caller method
+        // TrafficStats#getDataLayerSnapshotForUid alrady claim no special permission to query
+        // its own NetworkStats.
+        final long ident = Binder.clearCallingIdentity();
+        final NetworkStats networkLayer;
+        try {
+            networkLayer = readNetworkStatsUidDetail(uid, INTERFACES_ALL, TAG_ALL);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
 
         // splice in operation counts
         networkLayer.spliceOperationsFrom(mUidOperations);
