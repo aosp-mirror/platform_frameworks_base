@@ -43,6 +43,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.appops.AppOpItem;
 import com.android.systemui.appops.AppOpsController;
@@ -71,6 +73,7 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     private final DeviceConfigProxy mDeviceConfigProxy;
     private final BootCompleteCache mBootCompleteCache;
     private final UserTracker mUserTracker;
+    private final UiEventLogger mUiEventLogger;
     private final H mHandler;
     private final Handler mBackgroundHandler;
     private final PackageManager mPackageManager;
@@ -84,13 +87,14 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
             DeviceConfigProxy deviceConfigProxy,
             @Main Looper mainLooper, @Background Handler backgroundHandler,
             BroadcastDispatcher broadcastDispatcher, BootCompleteCache bootCompleteCache,
-            UserTracker userTracker, PackageManager packageManager) {
+            UserTracker userTracker, PackageManager packageManager, UiEventLogger uiEventLogger) {
         mContext = context;
         mAppOpsController = appOpsController;
         mDeviceConfigProxy = deviceConfigProxy;
         mBootCompleteCache = bootCompleteCache;
         mHandler = new H(mainLooper);
         mUserTracker = userTracker;
+        mUiEventLogger = uiEventLogger;
         mBackgroundHandler = backgroundHandler;
         mPackageManager = packageManager;
         mShouldDisplayAllAccesses = getAllAccessesSetting();
@@ -222,6 +226,9 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         }
         boolean hadActiveLocationRequests = mAreActiveLocationRequests;
         boolean shouldDisplay = false;
+        boolean systemAppOp = false;
+        boolean nonSystemAppOp = false;
+        boolean isSystemApp;
 
         List<AppOpItem> appOpsItems = mAppOpsController.getActiveAppOps();
         final List<UserInfo> profiles = mUserTracker.getUserProfiles();
@@ -229,17 +236,37 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         for (int i = 0; i < numItems; i++) {
             if (appOpsItems.get(i).getCode() == OP_FINE_LOCATION
                     || appOpsItems.get(i).getCode() == OP_COARSE_LOCATION) {
-                if (mShowSystemAccesses) {
-                    shouldDisplay = true;
+                isSystemApp = isSystemApp(profiles, appOpsItems.get(i));
+                if (isSystemApp) {
+                    systemAppOp = true;
                 } else {
-                    shouldDisplay |= !isSystemApp(profiles, appOpsItems.get(i));
+                    nonSystemAppOp = true;
                 }
+
+                shouldDisplay = mShowSystemAccesses || shouldDisplay || !isSystemApp;
             }
         }
 
-        mAreActiveLocationRequests = areActiveHighPowerLocationRequests() || shouldDisplay;
+        boolean highPowerOp = areActiveHighPowerLocationRequests();
+        mAreActiveLocationRequests = highPowerOp || shouldDisplay;
         if (mAreActiveLocationRequests != hadActiveLocationRequests) {
             mHandler.sendEmptyMessage(H.MSG_LOCATION_ACTIVE_CHANGED);
+        }
+
+        // Log each of the types of location access that would cause the location indicator to be
+        // shown, regardless of device's setting state. This is used to understand how often a
+        // user would see the location indicator based on any settings state the device could be in.
+        if (!hadActiveLocationRequests && (highPowerOp || systemAppOp || nonSystemAppOp)) {
+            if (highPowerOp) {
+                mUiEventLogger.log(
+                        LocationIndicatorEvent.LOCATION_INDICATOR_MONITOR_HIGH_POWER);
+            }
+            if (systemAppOp) {
+                mUiEventLogger.log(LocationIndicatorEvent.LOCATION_INDICATOR_SYSTEM_APP);
+            }
+            if (nonSystemAppOp) {
+                mUiEventLogger.log(LocationIndicatorEvent.LOCATION_INDICATOR_NON_SYSTEM_APP);
+            }
         }
     }
 
@@ -283,6 +310,11 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
             mAreActiveLocationRequests = areActiveHighPowerLocationRequests();
             if (mAreActiveLocationRequests != hadActiveLocationRequests) {
                 mHandler.sendEmptyMessage(H.MSG_LOCATION_ACTIVE_CHANGED);
+                if (mAreActiveLocationRequests) {
+                    // Log that the indicator was shown for a high power op.
+                    mUiEventLogger.log(
+                            LocationIndicatorEvent.LOCATION_INDICATOR_MONITOR_HIGH_POWER);
+                }
             }
         }
     }
@@ -339,6 +371,26 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
             boolean isEnabled = isLocationEnabled();
             Utils.safeForeach(mSettingsChangeCallbacks,
                     cb -> cb.onLocationSettingsChanged(isEnabled));
+        }
+    }
+
+    /**
+     * Enum for events which prompt the location indicator to appear.
+     */
+    enum LocationIndicatorEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "Location indicator shown for high power access")
+        LOCATION_INDICATOR_MONITOR_HIGH_POWER(935),
+        @UiEvent(doc = "Location indicator shown for system app access")
+        LOCATION_INDICATOR_SYSTEM_APP(936),
+        @UiEvent(doc = "Location indicator shown for non system app access")
+        LOCATION_INDICATOR_NON_SYSTEM_APP(937);
+
+        private final int mId;
+        LocationIndicatorEvent(int id) {
+            mId = id;
+        }
+        @Override public int getId() {
+            return mId;
         }
     }
 }
