@@ -196,9 +196,7 @@ public final class VirtualDeviceManager {
 
         /**
          * Creates a virtual display for this virtual device. All displays created on the same
-         * device belongs to the same display group. Requires the ADD_TRUSTED_DISPLAY permission
-         * to create a virtual display which is not in the default DisplayGroup, and to create
-         * trusted displays.
+         * device belongs to the same display group.
          *
          * @param width The width of the virtual display in pixels, must be greater than 0.
          * @param height The height of the virtual display in pixels, must be greater than 0.
