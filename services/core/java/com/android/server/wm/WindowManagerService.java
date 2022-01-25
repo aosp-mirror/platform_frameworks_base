@@ -171,7 +171,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
-import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -1795,8 +1794,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 prepareNoneTransitionForRelaunching(activity);
             }
 
-            if (displayPolicy.getLayoutHint(win.mAttrs, token, outInsetsState,
-                    win.isClientLocal())) {
+            if (displayPolicy.areSystemBarsForcedShownLw()) {
                 res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS;
             }
 
@@ -1843,6 +1841,7 @@ public class WindowManagerService extends IWindowManager.Stub
             displayContent.getInsetsStateController().updateAboveInsetsState(
                     win, false /* notifyInsetsChanged */);
 
+            outInsetsState.set(win.getCompatInsetsState(), win.isClientLocal());
             getInsetsSourceControls(win, outActiveControls);
         }
 
@@ -5681,6 +5680,11 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
+    public void saveWindowTraceToFile() {
+        mWindowTracing.saveForBugreport(null /* printwriter */);
+    }
+
+    @Override
     public boolean isWindowTraceEnabled() {
         return mWindowTracing.isEnabled();
     }
@@ -6958,23 +6962,6 @@ public class WindowManagerService extends IWindowManager.Stub
         if (dc != null) {
             final DisplayInfo di = dc.getDisplayInfo();
             dc.getDisplayPolicy().getStableInsetsLw(di.rotation, di.displayCutout, outInsets);
-        }
-    }
-
-    @Override
-    public void setForwardedInsets(int displayId, Insets insets) throws RemoteException {
-        synchronized (mGlobalLock) {
-            final DisplayContent dc = mRoot.getDisplayContent(displayId);
-            if (dc == null) {
-                return;
-            }
-            final int callingUid = Binder.getCallingUid();
-            final int displayOwnerUid = dc.getDisplay().getOwnerUid();
-            if (callingUid != displayOwnerUid) {
-                throw new SecurityException(
-                        "Only owner of the display can set ForwardedInsets to it.");
-            }
-            dc.setForwardedInsets(insets);
         }
     }
 
@@ -8490,6 +8477,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public boolean getWindowInsets(WindowManager.LayoutParams attrs, int displayId,
             InsetsState outInsetsState) {
         final boolean fromLocal = Binder.getCallingPid() == myPid();
+        final int uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -8498,9 +8486,20 @@ public class WindowManagerService extends IWindowManager.Stub
                     throw new WindowManager.InvalidDisplayException("Display#" + displayId
                             + "could not be found!");
                 }
-                final WindowToken windowToken = dc.getWindowToken(attrs.token);
-                return dc.getDisplayPolicy().getLayoutHint(attrs, windowToken, outInsetsState,
-                        fromLocal);
+                final WindowToken token = dc.getWindowToken(attrs.token);
+                final float overrideScale = mAtmService.mCompatModePackages.getCompatScale(
+                        attrs.packageName, uid);
+                final InsetsState state = dc.getInsetsPolicy().getInsetsForWindowMetrics(attrs);
+                final boolean hasCompatScale =
+                        WindowState.hasCompatScale(attrs, token, overrideScale);
+                outInsetsState.set(state, hasCompatScale || fromLocal);
+                if (hasCompatScale) {
+                    final float compatScale = token != null && token.hasSizeCompatBounds()
+                            ? token.getSizeCompatScale() * overrideScale
+                            : overrideScale;
+                    outInsetsState.scale(1f / compatScale);
+                }
+                return dc.getDisplayPolicy().areSystemBarsForcedShownLw();
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

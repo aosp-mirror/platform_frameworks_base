@@ -138,6 +138,7 @@ import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.idle.IdleHostView;
 import com.android.systemui.idle.IdleHostViewController;
 import com.android.systemui.idle.dagger.IdleViewComponent;
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
@@ -791,7 +792,8 @@ public class NotificationPanelViewController extends PanelViewController {
             Optional<SysUIUnfoldComponent> unfoldComponent,
             ControlsComponent controlsComponent,
             InteractionJankMonitor interactionJankMonitor,
-            QsFrameTranslateController qsFrameTranslateController) {
+            QsFrameTranslateController qsFrameTranslateController,
+            KeyguardUnlockAnimationController keyguardUnlockAnimationController) {
         super(view,
                 featureFlags,
                 falsingManager,
@@ -806,7 +808,8 @@ public class NotificationPanelViewController extends PanelViewController {
                 lockscreenGestureLogger,
                 panelExpansionStateManager,
                 ambientState,
-                interactionJankMonitor);
+                interactionJankMonitor,
+                keyguardUnlockAnimationController);
         mView = view;
         mVibratorHelper = vibratorHelper;
         mKeyguardMediaController = keyguardMediaController;
@@ -925,8 +928,33 @@ public class NotificationPanelViewController extends PanelViewController {
         mQsFrameTranslateController = qsFrameTranslateController;
         updateUserSwitcherFlags();
         onFinishInflate();
-
         mUseCombinedQSHeaders = featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS);
+        keyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
+                new KeyguardUnlockAnimationController.KeyguardUnlockAnimationListener() {
+                    @Override
+                    public void onUnlockAnimationFinished() {
+                        // Make sure the clock is in the correct position after the unlock animation
+                        // so that it's not in the wrong place when we show the keyguard again.
+                        positionClockAndNotifications(true /* forceClockUpdate */);
+                    }
+
+                    @Override
+                    public void onUnlockAnimationStarted(
+                            boolean playingCannedAnimation, boolean isWakeAndUnlock) {
+                        // Disable blurs while we're unlocking so that panel expansion does not
+                        // cause blurring. This will eventually be re-enabled by the panel view on
+                        // ACTION_UP, since the user's finger might still be down after a swipe to
+                        // unlock gesture, and we don't want that to cause blurring either.
+                        mDepthController.setBlursDisabledForUnlock(mTracking);
+
+                        if (playingCannedAnimation && !isWakeAndUnlock) {
+                            // Fling the panel away so it's not in the way or the surface behind the
+                            // keyguard, which will be appearing. If we're wake and unlocking, the
+                            // lock screen is hidden instantly so should not be flung away.
+                            fling(0f, false, 0.7f, false);
+                        }
+                    }
+                });
     }
 
     private void onFinishInflate() {
@@ -3324,6 +3352,10 @@ public class NotificationPanelViewController extends PanelViewController {
                 mAffordanceHelper.reset(true);
             }
         }
+
+        // If we unlocked from a swipe, the user's finger might still be down after the
+        // unlock animation ends. We need to wait until ACTION_UP to enable blurs again.
+        mDepthController.setBlursDisabledForUnlock(false);
     }
 
     private void updateMaxHeadsUpTranslation() {

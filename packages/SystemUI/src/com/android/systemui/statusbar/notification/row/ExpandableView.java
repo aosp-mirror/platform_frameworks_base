@@ -552,14 +552,8 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
         final ViewGroup transientContainer = getTransientContainer();
         if (parent == null || parent == newParent) {
             // If this view's current parent is null or the same as the new parent, the add will
-            // succeed, so just make sure the tracked transient container is in sync with the
-            // current parent.
-            if (transientContainer != null && transientContainer != parent) {
-                Log.w(TAG, "Expandable view " + this
-                        + " has transient container " + transientContainer
-                        + " but different parent" + parent);
-                setTransientContainer(null);
-            }
+            // succeed as long as it's a true child, so just make sure the view isn't transient.
+            removeFromTransientContainer();
             return;
         }
         if (transientContainer == null) {

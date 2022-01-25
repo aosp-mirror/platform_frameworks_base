@@ -121,6 +121,11 @@ filegroup {
     ],
 }
 
+filegroup {
+    name: "ILogcatManagerService_aidl",
+    srcs: ["android/os/logcat/ILogcatManagerService.aidl"],
+}
+
 genrule {
     name: "statslog-framework-java-gen",
     tools: ["stats-log-api-gen"],

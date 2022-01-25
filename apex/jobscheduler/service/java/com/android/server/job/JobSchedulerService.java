@@ -1633,12 +1633,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             for (int i=0; i<mActiveServices.size(); i++) {
                 final JobServiceContext jsc = mActiveServices.get(i);
                 final JobStatus job = jsc.getRunningJobLocked();
-                if (job != null
-                        && !job.canRunInDoze()
-                        && !job.dozeWhitelisted
-                        && !job.uidActive) {
-                    // We will report active if we have a job running and it is not an exception
-                    // due to being in the foreground or whitelisted.
+                if (job != null && !job.canRunInDoze()) {
+                    // We will report active if we have a job running and it does not have an
+                    // exception that allows it to run in Doze.
                     active = true;
                     break;
                 }

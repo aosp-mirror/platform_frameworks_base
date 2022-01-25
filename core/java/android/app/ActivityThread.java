@@ -61,6 +61,7 @@ import android.app.servertransaction.PendingTransactionActions.StopInfo;
 import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.TransactionExecutor;
 import android.app.servertransaction.TransactionExecutorHelper;
+import android.bluetooth.BluetoothFrameworkInitializer;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AttributionSource;
 import android.content.AutofillOptions;
@@ -109,6 +110,7 @@ import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.BluetoothServiceManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -7919,6 +7921,7 @@ public final class ActivityThread extends ClientTransactionHandler
         StatsFrameworkInitializer.setStatsServiceManager(new StatsServiceManager());
         MediaFrameworkPlatformInitializer.setMediaServiceManager(new MediaServiceManager());
         MediaFrameworkInitializer.setMediaServiceManager(new MediaServiceManager());
+        BluetoothFrameworkInitializer.setBluetoothServiceManager(new BluetoothServiceManager());
     }
 
     private void purgePendingResources() {

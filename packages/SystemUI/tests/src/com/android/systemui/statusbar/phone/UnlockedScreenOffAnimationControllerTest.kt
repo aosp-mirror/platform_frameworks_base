@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.phone
 
 import android.animation.Animator
+import android.os.Handler
+import android.os.PowerManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.View
@@ -29,13 +31,19 @@ import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.StatusBarStateControllerImpl
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.settings.GlobalSettings
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.Mockito.`when`
+import org.mockito.Mockito.anyLong
+import org.mockito.Mockito.never
 import org.mockito.Mockito.spy
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -53,7 +61,9 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var globalSettings: GlobalSettings
     @Mock
-    private lateinit var statusbar: StatusBar
+    private lateinit var statusBar: StatusBar
+    @Mock
+    private lateinit var notificationPanelViewController: NotificationPanelViewController
     @Mock
     private lateinit var lightRevealScrim: LightRevealScrim
     @Mock
@@ -62,6 +72,10 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
     private lateinit var statusBarStateController: StatusBarStateControllerImpl
     @Mock
     private lateinit var interactionJankMonitor: InteractionJankMonitor
+    @Mock
+    private lateinit var powerManager: PowerManager
+    @Mock
+    private lateinit var handler: Handler
 
     @Before
     fun setUp() {
@@ -75,9 +89,24 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
                 keyguardStateController,
                 dagger.Lazy<DozeParameters> { dozeParameters },
                 globalSettings,
-                interactionJankMonitor
+                interactionJankMonitor,
+                powerManager,
+                handler = handler
         )
-        controller.initialize(statusbar, lightRevealScrim)
+        controller.initialize(statusBar, lightRevealScrim)
+        `when`(statusBar.notificationPanelViewController).thenReturn(
+            notificationPanelViewController)
+
+        // Screen off does not run if the panel is expanded, so we should say it's collapsed to test
+        // screen off.
+        `when`(notificationPanelViewController.isFullyCollapsed).thenReturn(true)
+    }
+
+    @After
+    fun cleanUp() {
+        // Tell the screen off controller to cancel the animations and clean up its state, or
+        // subsequent tests will act unpredictably as the animator continues running.
+        controller.onStartedWakingUp()
     }
 
     @Test
@@ -92,5 +121,50 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
         // Verify that the listener is cleared when it ends
         listener.value.onAnimationEnd(null)
         Mockito.verify(animator).setListener(null)
+    }
+
+    /**
+     * The AOD UI is shown during the screen off animation, after a delay to allow the light reveal
+     * animation to start. If the device is woken up during the screen off, we should *never* do
+     * this.
+     *
+     * This test confirms that we do show the AOD UI when the device is not woken up
+     * (PowerManager#isInteractive = false).
+     */
+    @Test
+    fun testAodUiShownIfNotInteractive() {
+        `when`(dozeParameters.shouldControlUnlockedScreenOff()).thenReturn(true)
+        `when`(powerManager.isInteractive).thenReturn(false)
+
+        val callbackCaptor = ArgumentCaptor.forClass(Runnable::class.java)
+        controller.startAnimation()
+
+        verify(handler).postDelayed(callbackCaptor.capture(), anyLong())
+
+        callbackCaptor.value.run()
+
+        verify(notificationPanelViewController, times(1)).showAodUi()
+    }
+
+    /**
+     * The AOD UI is shown during the screen off animation, after a delay to allow the light reveal
+     * animation to start. If the device is woken up during the screen off, we should *never* do
+     * this.
+     *
+     * This test confirms that we do not show the AOD UI when the device is woken up during screen
+     * off (PowerManager#isInteractive = true).
+     */
+    @Test
+    fun testAodUiNotShownIfInteractive() {
+        `when`(dozeParameters.shouldControlUnlockedScreenOff()).thenReturn(true)
+        `when`(powerManager.isInteractive).thenReturn(true)
+
+        val callbackCaptor = ArgumentCaptor.forClass(Runnable::class.java)
+        controller.startAnimation()
+
+        verify(handler).postDelayed(callbackCaptor.capture(), anyLong())
+        callbackCaptor.value.run()
+
+        verify(notificationPanelViewController, never()).showAodUi()
     }
 }

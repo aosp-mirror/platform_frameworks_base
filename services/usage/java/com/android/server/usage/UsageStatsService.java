@@ -33,6 +33,7 @@ import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 
 import android.Manifest;
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -2946,6 +2947,27 @@ public class UsageStatsService extends SystemService implements
         public void unregisterLaunchTimeChangedListener(
                 @NonNull EstimatedLaunchTimeChangedListener listener) {
             UsageStatsService.this.unregisterLaunchTimeChangedListener(listener);
+        }
+
+        @Override
+        public void reportBroadcastDispatched(int sourceUid, @NonNull String targetPackage,
+                @NonNull UserHandle targetUser, long idForResponseEvent,
+                @ElapsedRealtimeLong long timestampMs) {
+        }
+
+        @Override
+        public void reportNotificationPosted(@NonNull String packageName,
+                @NonNull UserHandle user, @ElapsedRealtimeLong long timestampMs) {
+        }
+
+        @Override
+        public void reportNotificationUpdated(@NonNull String packageName,
+                @NonNull UserHandle user, @ElapsedRealtimeLong long timestampMs) {
+        }
+
+        @Override
+        public void reportNotificationRemoved(@NonNull String packageName,
+                @NonNull UserHandle user, @ElapsedRealtimeLong long timestampMs) {
         }
     }
 

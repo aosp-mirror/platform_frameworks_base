@@ -39,54 +39,53 @@ public final class StreamEventResponse extends BroadcastInfoResponse implements 
                 }
             };
 
-    private final String mName;
-    private final String mText;
-    private final String mData;
-    private final String mStatus;
+    private final int mEventId;
+    private final long mNpt;
+    private final byte[] mData;
 
     public static StreamEventResponse createFromParcelBody(Parcel in) {
         return new StreamEventResponse(in);
     }
 
     public StreamEventResponse(int requestId, int sequence, @ResponseResult int responseResult,
-            String name, String text, String data, String status) {
+            int eventId, long npt, @NonNull byte[] data) {
         super(responseType, requestId, sequence, responseResult);
-        mName = name;
-        mText = text;
+        mEventId = eventId;
+        mNpt = npt;
         mData = data;
-        mStatus = status;
     }
 
-    protected StreamEventResponse(Parcel source) {
+    private StreamEventResponse(@NonNull Parcel source) {
         super(responseType, source);
-        mName = source.readString();
-        mText = source.readString();
-        mData = source.readString();
-        mStatus = source.readString();
+        mEventId = source.readInt();
+        mNpt = source.readLong();
+        int dataLength = source.readInt();
+        mData = new byte[dataLength];
+        source.readByteArray(mData);
     }
 
-    public String getName() {
-        return mName;
+    /** Returns the event ID */
+    public int getEventId() {
+        return mEventId;
     }
 
-    public String getText() {
-        return mText;
+    /** Returns the NPT(Normal Play Time) value when the event occurred or will occur */
+    public long getNpt() {
+        return mNpt;
     }
 
-    public String getData() {
+    /** Returns the application specific data */
+    @NonNull
+    public byte[] getData() {
         return mData;
-    }
-
-    public String getStatus() {
-        return mStatus;
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
-        dest.writeString(mName);
-        dest.writeString(mText);
-        dest.writeString(mData);
-        dest.writeString(mStatus);
+        dest.writeInt(mEventId);
+        dest.writeLong(mNpt);
+        dest.writeInt(mData.length);
+        dest.writeByteArray(mData);
     }
 }

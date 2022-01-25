@@ -44,6 +44,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -254,6 +255,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                 );
     }
 
+    private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
+
     @Inject
     public BiometricUnlockController(Context context, DozeScrimController dozeScrimController,
             KeyguardViewMediator keyguardViewMediator, ScrimController scrimController,
@@ -269,7 +272,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             WakefulnessLifecycle wakefulnessLifecycle,
             ScreenLifecycle screenLifecycle,
             AuthController authController,
-            StatusBarStateController statusBarStateController) {
+            StatusBarStateController statusBarStateController,
+            KeyguardUnlockAnimationController keyguardUnlockAnimationController) {
         mContext = context;
         mPowerManager = powerManager;
         mShadeController = shadeController;
@@ -292,6 +296,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mMetricsLogger = metricsLogger;
         mAuthController = authController;
         mStatusBarStateController = statusBarStateController;
+        mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         dumpManager.registerDumpable(getClass().getName(), this);
     }
 
@@ -438,11 +443,15 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                 if (!wasDeviceInteractive) {
                     mPendingShowBouncer = true;
                 } else {
-                    mShadeController.animateCollapsePanels(
-                            CommandQueue.FLAG_EXCLUDE_NONE,
-                            true /* force */,
-                            false /* delayed */,
-                            BIOMETRIC_COLLAPSE_SPEEDUP_FACTOR);
+                    // If the keyguard unlock controller is going to handle the unlock animation, it
+                    // will fling the panel collapsed when it's ready.
+                    if (!mKeyguardUnlockAnimationController.willHandleUnlockAnimation()) {
+                        mShadeController.animateCollapsePanels(
+                                CommandQueue.FLAG_EXCLUDE_NONE,
+                                true /* force */,
+                                false /* delayed */,
+                                BIOMETRIC_COLLAPSE_SPEEDUP_FACTOR);
+                    }
                     mPendingShowBouncer = false;
                     mKeyguardViewController.notifyKeyguardAuthenticated(
                             false /* strongAuth */);

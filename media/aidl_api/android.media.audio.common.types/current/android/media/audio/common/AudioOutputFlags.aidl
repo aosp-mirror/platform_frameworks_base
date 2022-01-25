@@ -51,5 +51,6 @@ enum AudioOutputFlags {
   VOIP_RX = 13,
   INCALL_MUSIC = 14,
   GAPLESS_OFFLOAD = 15,
-  ULTRASOUND = 16,
+  SPATIALIZER = 16,
+  ULTRASOUND = 17,
 }

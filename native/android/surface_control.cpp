@@ -661,7 +661,7 @@ void ASurfaceTransaction_setOnCommit(ASurfaceTransaction* aSurfaceTransaction, v
 }
 
 void ASurfaceTransaction_setFrameTimeline(ASurfaceTransaction* aSurfaceTransaction,
-                                          int64_t vsyncId) {
+                                          AVsyncId vsyncId) {
     CHECK_NOT_NULL(aSurfaceTransaction);
     // TODO(b/210043506): Get start time from platform.
     ASurfaceTransaction_to_Transaction(aSurfaceTransaction)

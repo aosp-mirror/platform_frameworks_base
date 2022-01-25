@@ -50,6 +50,10 @@ interface IInputManager {
     // Reports whether the hardware supports the given keys; returns true if successful
     boolean hasKeys(int deviceId, int sourceMask, in int[] keyCodes, out boolean[] keyExists);
 
+    // Returns the keyCode produced when pressing the key at the specified location, given the
+    // active keyboard layout.
+    int getKeyCodeForKeyLocation(int deviceId, in int locationKeyCode);
+
     // Temporarily changes the pointer speed.
     void tryPointerSpeed(int speed);
 

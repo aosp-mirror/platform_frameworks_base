@@ -57,11 +57,13 @@ public class PowerProfileTest extends TestCase {
     @Before
     public void setUp() {
         mContext = InstrumentationRegistry.getContext();
-        mProfile = new PowerProfile(mContext, true);
+        mProfile = new PowerProfile(mContext);
     }
 
     @Test
     public void testPowerProfile() {
+        mProfile.forceInitForTesting(mContext, R.xml.power_profile_test);
+
         assertEquals(2, mProfile.getNumCpuClusters());
         assertEquals(4, mProfile.getNumCoresInCpuCluster(0));
         assertEquals(4, mProfile.getNumCoresInCpuCluster(1));
@@ -83,6 +85,43 @@ public class PowerProfileTest extends TestCase {
                 mProfile.getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_SCREEN_FULL, 0));
         assertEquals(100.0, mProfile.getAveragePower(PowerProfile.POWER_AUDIO));
         assertEquals(150.0, mProfile.getAveragePower(PowerProfile.POWER_VIDEO));
+
+        assertEquals(123.0, mProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_SLEEP));
+        assertEquals(456.0, mProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_IDLE));
+        assertEquals(789.0, mProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_RX));
+        assertEquals(10.0, mProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_TX, 0));
+        assertEquals(20.0, mProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_TX, 1));
+        assertEquals(30.0, mProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_TX, 2));
+        assertEquals(40.0, mProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_TX, 3));
+        assertEquals(50.0, mProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_TX, 4));
+
+        // Deprecated Modem constants should work with current format.
+        assertEquals(123.0, mProfile.getAverageBatteryDrainMa(
+                PowerProfile.SUBSYSTEM_MODEM | ModemPowerProfile.MODEM_DRAIN_TYPE_SLEEP));
+        assertEquals(456.0, mProfile.getAverageBatteryDrainMa(
+                PowerProfile.SUBSYSTEM_MODEM | ModemPowerProfile.MODEM_DRAIN_TYPE_IDLE));
+        assertEquals(789.0, mProfile.getAverageBatteryDrainMa(
+                PowerProfile.SUBSYSTEM_MODEM | ModemPowerProfile.MODEM_DRAIN_TYPE_RX));
+        assertEquals(10.0, mProfile.getAverageBatteryDrainMa(
+                PowerProfile.SUBSYSTEM_MODEM | ModemPowerProfile.MODEM_RAT_TYPE_DEFAULT
+                        | ModemPowerProfile.MODEM_DRAIN_TYPE_TX
+                        | ModemPowerProfile.MODEM_TX_LEVEL_0));
+        assertEquals(20.0, mProfile.getAverageBatteryDrainMa(
+                PowerProfile.SUBSYSTEM_MODEM | ModemPowerProfile.MODEM_RAT_TYPE_DEFAULT
+                        | ModemPowerProfile.MODEM_DRAIN_TYPE_TX
+                        | ModemPowerProfile.MODEM_TX_LEVEL_1));
+        assertEquals(30.0, mProfile.getAverageBatteryDrainMa(
+                PowerProfile.SUBSYSTEM_MODEM | ModemPowerProfile.MODEM_RAT_TYPE_DEFAULT
+                        | ModemPowerProfile.MODEM_DRAIN_TYPE_TX
+                        | ModemPowerProfile.MODEM_TX_LEVEL_2));
+        assertEquals(40.0, mProfile.getAverageBatteryDrainMa(
+                PowerProfile.SUBSYSTEM_MODEM | ModemPowerProfile.MODEM_RAT_TYPE_DEFAULT
+                        | ModemPowerProfile.MODEM_DRAIN_TYPE_TX
+                        | ModemPowerProfile.MODEM_TX_LEVEL_3));
+        assertEquals(50.0, mProfile.getAverageBatteryDrainMa(
+                PowerProfile.SUBSYSTEM_MODEM | ModemPowerProfile.MODEM_RAT_TYPE_DEFAULT
+                        | ModemPowerProfile.MODEM_DRAIN_TYPE_TX
+                        | ModemPowerProfile.MODEM_TX_LEVEL_4));
     }
 
     @Test

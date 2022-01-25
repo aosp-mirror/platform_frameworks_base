@@ -31,6 +31,7 @@ import android.content.res.Resources;
 import android.hardware.vibrator.IVibrator;
 import android.media.AudioAttributes;
 import android.os.vibrator.VibrationConfig;
+import android.os.vibrator.VibratorFrequencyProfile;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -208,8 +209,8 @@ public abstract class Vibrator {
     /**
      * Check whether the vibrator has independent frequency control.
      *
-     * @return True if the hardware can control the frequency of the vibrations, otherwise false.
-     * @hide
+     * @return True if the hardware can control the frequency of the vibrations independently of
+     * the vibration amplitude, false otherwise.
      */
     public boolean hasFrequencyControl() {
         // We currently can only control frequency of the vibration using the compose PWLE method.
@@ -229,25 +230,45 @@ public abstract class Vibrator {
     }
 
     /**
-     * Gets the resonant frequency of the vibrator.
+     * Gets the resonant frequency of the vibrator, if applicable.
      *
-     * @return the resonant frequency of the vibrator, or {@link Float#NaN NaN} if it's unknown or
-     * this vibrator is a composite of multiple physical devices.
-     * @hide
+     * @return the resonant frequency of the vibrator, or {@link Float#NaN NaN} if it's unknown, not
+     * applicable, or if this vibrator is a composite of multiple physical devices with different
+     * frequencies.
      */
     public float getResonantFrequency() {
-        return getInfo().getResonantFrequency();
+        return getInfo().getResonantFrequencyHz();
     }
 
     /**
      * Gets the <a href="https://en.wikipedia.org/wiki/Q_factor">Q factor</a> of the vibrator.
      *
-     * @return the Q factor of the vibrator, or {@link Float#NaN NaN} if it's unknown or
-     *         this vibrator is a composite of multiple physical devices.
-     * @hide
+     * @return the Q factor of the vibrator, or {@link Float#NaN NaN} if it's unknown, not
+     * applicable, or if this vibrator is a composite of multiple physical devices with different
+     * Q factors.
      */
     public float getQFactor() {
         return getInfo().getQFactor();
+    }
+
+    /**
+     * Gets the profile that describes the vibrator output across the supported frequency range.
+     *
+     * <p>The profile describes the relative output acceleration that the device can reach when it
+     * vibrates at different frequencies.
+     *
+     * @return The frequency profile for this vibrator, or null if the vibrator does not have
+     * frequency control. If this vibrator is a composite of multiple physical devices then this
+     * will return a profile supported in all devices, or null if the intersection is empty or not
+     * available.
+     */
+    @Nullable
+    public VibratorFrequencyProfile getFrequencyProfile() {
+        VibratorInfo.FrequencyProfile frequencyProfile = getInfo().getFrequencyProfile();
+        if (frequencyProfile.isEmpty()) {
+            return null;
+        }
+        return new VibratorFrequencyProfile(frequencyProfile);
     }
 
     /**

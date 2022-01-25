@@ -75,7 +75,7 @@ final class InputMethodBindingController {
     @GuardedBy("ImfLock.class") @Nullable private String mCurId;
     @GuardedBy("ImfLock.class") @Nullable private String mSelectedMethodId;
     @GuardedBy("ImfLock.class") @Nullable private Intent mCurIntent;
-    @GuardedBy("ImfLock.class") @Nullable private IInputMethod mCurMethod;
+    @GuardedBy("ImfLock.class") @Nullable private IInputMethodInvoker mCurMethod;
     @GuardedBy("ImfLock.class") private int mCurMethodUid = Process.INVALID_UID;
     @GuardedBy("ImfLock.class") private IBinder mCurToken;
     @GuardedBy("ImfLock.class") private int mCurSeq;
@@ -241,7 +241,7 @@ final class InputMethodBindingController {
      */
     @GuardedBy("ImfLock.class")
     @Nullable
-    IInputMethod getCurMethod() {
+    IInputMethodInvoker getCurMethod() {
         return mCurMethod;
     }
 
@@ -298,7 +298,7 @@ final class InputMethodBindingController {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.onServiceConnected");
             synchronized (ImfLock.class) {
                 if (mCurIntent != null && name.equals(mCurIntent.getComponent())) {
-                    mCurMethod = IInputMethod.Stub.asInterface(service);
+                    mCurMethod = IInputMethodInvoker.create(IInputMethod.Stub.asInterface(service));
                     updateCurrentMethodUid();
                     if (mCurToken == null) {
                         Slog.w(TAG, "Service connected without a token!");

@@ -371,7 +371,8 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
                 mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager, mGroupHelper, mAm, mAtm,
                 mAppUsageStats, mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
                 mAppOpsManager, mock(IAppOpsService.class), mUm, mHistoryManager, mStatsManager,
-                mock(TelephonyManager.class), mAmi, mToastRateLimiter, mPermissionHelper);
+                mock(TelephonyManager.class), mAmi, mToastRateLimiter, mPermissionHelper,
+                mock(UsageStatsManagerInternal.class));
         // Return first true for RoleObserver main-thread check
         when(mMainLooper.isCurrentThread()).thenReturn(true).thenReturn(false);
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY, mMainLooper);

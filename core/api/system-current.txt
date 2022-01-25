@@ -1143,7 +1143,36 @@ package android.app.admin {
   }
 
   public static final class DevicePolicyResources.Strings {
-    field public static final String INVALID_ID = "INVALID_ID";
+    field public static final String UNDEFINED = "UNDEFINED";
+  }
+
+  public static final class DevicePolicyResources.Strings.DocumentsUi {
+    field public static final String CANT_SAVE_TO_PERSONAL_MESSAGE = "DocumentsUi.CANT_SAVE_TO_PERSONAL_MESSAGE";
+    field public static final String CANT_SAVE_TO_PERSONAL_TITLE = "DocumentsUi.CANT_SAVE_TO_PERSONAL_TITLE";
+    field public static final String CANT_SAVE_TO_WORK_MESSAGE = "DocumentsUi.CANT_SAVE_TO_WORK_MESSAGE";
+    field public static final String CANT_SAVE_TO_WORK_TITLE = "DocumentsUi.CANT_SAVE_TO_WORK_TITLE";
+    field public static final String CANT_SELECT_PERSONAL_FILES_MESSAGE = "DocumentsUi.CANT_SELECT_PERSONAL_FILES_MESSAGE";
+    field public static final String CANT_SELECT_PERSONAL_FILES_TITLE = "DocumentsUi.CANT_SELECT_PERSONAL_FILES_TITLE";
+    field public static final String CANT_SELECT_WORK_FILES_MESSAGE = "DocumentsUi.CANT_SELECT_WORK_FILES_MESSAGE";
+    field public static final String CANT_SELECT_WORK_FILES_TITLE = "DocumentsUi.CANT_SELECT_WORK_FILES_TITLE";
+    field public static final String CROSS_PROFILE_NOT_ALLOWED_MESSAGE = "DocumentsUi.CROSS_PROFILE_NOT_ALLOWED_MESSAGE";
+    field public static final String CROSS_PROFILE_NOT_ALLOWED_TITLE = "DocumentsUi.CROSS_PROFILE_NOT_ALLOWED_TITLE";
+    field public static final String PERSONAL_TAB = "DocumentsUi.PERSONAL_TAB";
+    field public static final String PREVIEW_WORK_FILE_ACCESSIBILITY = "DocumentsUi.PREVIEW_WORK_FILE_ACCESSIBILITY";
+    field public static final String WORK_ACCESSIBILITY = "DocumentsUi.WORK_ACCESSIBILITY";
+    field public static final String WORK_PROFILE_OFF_ENABLE_BUTTON = "DocumentsUi.WORK_PROFILE_OFF_ENABLE_BUTTON";
+    field public static final String WORK_PROFILE_OFF_ERROR_TITLE = "DocumentsUi.WORK_PROFILE_OFF_ERROR_TITLE";
+    field public static final String WORK_TAB = "DocumentsUi.WORK_TAB";
+  }
+
+  public static final class DevicePolicyResources.Strings.MediaProvider {
+    field public static final String BLOCKED_BY_ADMIN_TITLE = "MediaProvider.BLOCKED_BY_ADMIN_TITLE";
+    field public static final String BLOCKED_FROM_PERSONAL_MESSAGE = "MediaProvider.BLOCKED_FROM_PERSONAL_MESSAGE";
+    field public static final String BLOCKED_FROM_WORK_MESSAGE = "MediaProvider.BLOCKED_FROM_WORK_MESSAGE";
+    field public static final String SWITCH_TO_PERSONAL_MESSAGE = "MediaProvider.SWITCH_TO_PERSONAL_MESSAGE";
+    field public static final String SWITCH_TO_WORK_MESSAGE = "MediaProvider.SWITCH_TO_WORK_MESSAGE";
+    field public static final String WORK_PROFILE_PAUSED_MESSAGE = "MediaProvider.WORK_PROFILE_PAUSED_MESSAGE";
+    field public static final String WORK_PROFILE_PAUSED_TITLE = "MediaProvider.WORK_PROFILE_PAUSED_TITLE";
   }
 
   public final class DevicePolicyStringResource implements android.os.Parcelable {
@@ -2387,6 +2416,15 @@ package android.bluetooth {
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.MODIFY_PHONE_STATE}) public boolean stopScoUsingVirtualVoiceCall();
   }
 
+  public final class BluetoothHeadsetClient implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
+    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionState(@NonNull android.bluetooth.BluetoothDevice);
+    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(@NonNull int[]);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
+    field @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.headsetprofile.action.CONNECTION_STATE_CHANGED";
+  }
+
   public final class BluetoothHearingAid implements android.bluetooth.BluetoothProfile {
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public long getHiSyncId(@NonNull android.bluetooth.BluetoothDevice);
@@ -2418,8 +2456,14 @@ package android.bluetooth {
     field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.map.profile.action.CONNECTION_STATE_CHANGED";
   }
 
-  public final class BluetoothMapClient implements android.bluetooth.BluetoothProfile {
+  public final class BluetoothMapClient implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
+    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public int getConnectionState(@NonNull android.bluetooth.BluetoothDevice);
+    method @NonNull @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(@NonNull int[]);
     method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.SEND_SMS}) public boolean sendMessage(@NonNull android.bluetooth.BluetoothDevice, @NonNull java.util.Collection<android.net.Uri>, @NonNull String, @Nullable android.app.PendingIntent, @Nullable android.app.PendingIntent);
+    method @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
+    field @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED}) public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.mapmce.profile.action.CONNECTION_STATE_CHANGED";
   }
 
   public final class BluetoothPan implements android.bluetooth.BluetoothProfile {
@@ -5192,6 +5236,7 @@ package android.hardware.usb {
   public final class UsbPort {
     method @CheckResult @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int enableLimitPowerTransfer(boolean);
     method @CheckResult @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int enableUsbData(boolean);
+    method @CheckResult @RequiresPermission(android.Manifest.permission.MANAGE_USB) public int enableUsbDataWhileDocked();
     method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USB) public android.hardware.usb.UsbPortStatus getStatus();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USB) public void setRoles(int, int);
     field public static final int ENABLE_LIMIT_POWER_TRANSFER_ERROR_INTERNAL = 1; // 0x1
@@ -5204,6 +5249,12 @@ package android.hardware.usb {
     field public static final int ENABLE_USB_DATA_ERROR_OTHER = 4; // 0x4
     field public static final int ENABLE_USB_DATA_ERROR_PORT_MISMATCH = 3; // 0x3
     field public static final int ENABLE_USB_DATA_SUCCESS = 0; // 0x0
+    field public static final int ENABLE_USB_DATA_WHILE_DOCKED_ERROR_DATA_ENABLED = 4; // 0x4
+    field public static final int ENABLE_USB_DATA_WHILE_DOCKED_ERROR_INTERNAL = 1; // 0x1
+    field public static final int ENABLE_USB_DATA_WHILE_DOCKED_ERROR_NOT_SUPPORTED = 2; // 0x2
+    field public static final int ENABLE_USB_DATA_WHILE_DOCKED_ERROR_OTHER = 5; // 0x5
+    field public static final int ENABLE_USB_DATA_WHILE_DOCKED_ERROR_PORT_MISMATCH = 3; // 0x3
+    field public static final int ENABLE_USB_DATA_WHILE_DOCKED_SUCCESS = 0; // 0x0
   }
 
   public final class UsbPortStatus implements android.os.Parcelable {
@@ -5211,7 +5262,9 @@ package android.hardware.usb {
     method public int getCurrentDataRole();
     method public int getCurrentMode();
     method public int getCurrentPowerRole();
+    method public int getPowerBrickStatus();
     method public int getSupportedRoleCombinations();
+    method @Nullable public int[] getUsbDataStatus();
     method public boolean isConnected();
     method public boolean isPowerTransferLimited();
     method public boolean isRoleCombinationSupported(int, int);
@@ -5225,9 +5278,19 @@ package android.hardware.usb {
     field public static final int MODE_DFP = 2; // 0x2
     field public static final int MODE_NONE = 0; // 0x0
     field public static final int MODE_UFP = 1; // 0x1
+    field public static final int POWER_BRICK_STATUS_CONNECTED = 1; // 0x1
+    field public static final int POWER_BRICK_STATUS_DISCONNECTED = 2; // 0x2
+    field public static final int POWER_BRICK_STATUS_UNKNOWN = 0; // 0x0
     field public static final int POWER_ROLE_NONE = 0; // 0x0
     field public static final int POWER_ROLE_SINK = 2; // 0x2
     field public static final int POWER_ROLE_SOURCE = 1; // 0x1
+    field public static final int USB_DATA_STATUS_DISABLED_CONTAMINANT = 3; // 0x3
+    field public static final int USB_DATA_STATUS_DISABLED_DEBUG = 6; // 0x6
+    field public static final int USB_DATA_STATUS_DISABLED_DOCK = 4; // 0x4
+    field public static final int USB_DATA_STATUS_DISABLED_FORCE = 5; // 0x5
+    field public static final int USB_DATA_STATUS_DISABLED_OVERHEAT = 2; // 0x2
+    field public static final int USB_DATA_STATUS_ENABLED = 1; // 0x1
+    field public static final int USB_DATA_STATUS_UNKNOWN = 0; // 0x0
   }
 
 }
@@ -8819,6 +8882,7 @@ package android.net.wifi.nl80211 {
     method @Nullable public android.net.wifi.nl80211.DeviceWiphyCapabilities getDeviceWiphyCapabilities(@NonNull String);
     method @NonNull public java.util.List<android.net.wifi.nl80211.NativeScanResult> getScanResults(@NonNull String, int);
     method @Nullable public android.net.wifi.nl80211.WifiNl80211Manager.TxPacketCounters getTxPacketCounters(@NonNull String);
+    method public boolean notifyCountryCodeChanged();
     method @Nullable public static android.net.wifi.nl80211.WifiNl80211Manager.OemSecurityType parseOemSecurityTypeElement(int, int, @NonNull byte[]);
     method @Deprecated public boolean registerApCallback(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.SoftApCallback);
     method public boolean registerCountryCodeChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.CountryCodeChangedListener);
@@ -9816,12 +9880,17 @@ package android.permission {
 
   public final class PermissionControllerManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.RESTORE_RUNTIME_PERMISSIONS}) public void applyStagedRuntimePermissionBackup(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public void getHibernationEligibility(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.IntConsumer);
     method @RequiresPermission(android.Manifest.permission.GET_RUNTIME_PERMISSIONS) public void getRuntimePermissionBackup(@NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<byte[]>);
     method public void getUnusedAppCount(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.IntConsumer);
     method @RequiresPermission(android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS) public void revokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull java.util.concurrent.Executor, @NonNull android.permission.PermissionControllerManager.OnRevokeRuntimePermissionsCallback);
     method @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.RESTORE_RUNTIME_PERMISSIONS}) public void stageAndApplyRuntimePermissionsBackup(@NonNull byte[], @NonNull android.os.UserHandle);
     field public static final int COUNT_ONLY_WHEN_GRANTED = 1; // 0x1
     field public static final int COUNT_WHEN_SYSTEM = 2; // 0x2
+    field public static final int HIBERNATION_ELIGIBILITY_ELIGIBLE = 0; // 0x0
+    field public static final int HIBERNATION_ELIGIBILITY_EXEMPT_BY_SYSTEM = 1; // 0x1
+    field public static final int HIBERNATION_ELIGIBILITY_EXEMPT_BY_USER = 2; // 0x2
+    field public static final int HIBERNATION_ELIGIBILITY_UNKNOWN = -1; // 0xffffffff
     field public static final int REASON_INSTALLER_POLICY_VIOLATION = 2; // 0x2
     field public static final int REASON_MALWARE = 1; // 0x1
   }
@@ -9839,6 +9908,7 @@ package android.permission {
     method @BinderThread public abstract void onCountPermissionApps(@NonNull java.util.List<java.lang.String>, int, @NonNull java.util.function.IntConsumer);
     method @BinderThread public abstract void onGetAppPermissions(@NonNull String, @NonNull java.util.function.Consumer<java.util.List<android.permission.RuntimePermissionPresentationInfo>>);
     method @BinderThread public void onGetGroupOfPlatformPermission(@NonNull String, @NonNull java.util.function.Consumer<java.lang.String>);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public void onGetHibernationEligibility(@NonNull String, @NonNull java.util.function.IntConsumer);
     method @BinderThread public abstract void onGetPermissionUsages(boolean, long, @NonNull java.util.function.Consumer<java.util.List<android.permission.RuntimePermissionUsageInfo>>);
     method @BinderThread public void onGetPlatformPermissionsForGroup(@NonNull String, @NonNull java.util.function.Consumer<java.util.List<java.lang.String>>);
     method @BinderThread public abstract void onGetRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.OutputStream, @NonNull Runnable);

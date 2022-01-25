@@ -67,4 +67,5 @@ enum AudioDeviceType {
   OUT_SUBMIX = 143,
   OUT_TELEPHONY_TX = 144,
   OUT_DOCK = 145,
+  OUT_BROADCAST = 146,
 }

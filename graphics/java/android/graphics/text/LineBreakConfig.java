@@ -17,7 +17,7 @@
 package android.graphics.text;
 
 import android.annotation.IntDef;
-import android.annotation.Nullable;
+import android.annotation.NonNull;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -58,7 +58,28 @@ public final class LineBreakConfig {
     @Retention(RetentionPolicy.SOURCE)
     public @interface LineBreakStyle {}
 
+    /**
+     * No line break word style specified.
+     */
+    public static final int LINE_BREAK_WORD_STYLE_NONE = 0;
+
+    /**
+     * Indicates the line breaking is based on the phrased. This makes text wrapping only on
+     * meaningful words. The support of the text wrapping word style varies depending on the
+     * locales. If the locale does not support the phrase based text wrapping,
+     * there will be no effect.
+     */
+    public static final int LINE_BREAK_WORD_STYLE_PHRASE = 1;
+
+    /** @hide */
+    @IntDef(prefix = { "LINE_BREAK_WORD_STYLE_" }, value = {
+        LINE_BREAK_WORD_STYLE_NONE, LINE_BREAK_WORD_STYLE_PHRASE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface LineBreakWordStyle {}
+
     private @LineBreakStyle int mLineBreakStyle = LINE_BREAK_STYLE_NONE;
+    private @LineBreakWordStyle int mLineBreakWordStyle = LINE_BREAK_WORD_STYLE_NONE;
 
     public LineBreakConfig() {
     }
@@ -66,14 +87,12 @@ public final class LineBreakConfig {
     /**
      * Set the line break configuration.
      *
-     * @param config the new line break configuration.
+     * @param lineBreakConfig the new line break configuration.
      */
-    public void set(@Nullable LineBreakConfig config) {
-        if (config != null) {
-            mLineBreakStyle = config.getLineBreakStyle();
-        } else {
-            mLineBreakStyle = LineBreakConfig.LINE_BREAK_STYLE_NONE;
-        }
+    public void set(@NonNull LineBreakConfig lineBreakConfig) {
+        Objects.requireNonNull(lineBreakConfig);
+        mLineBreakStyle = lineBreakConfig.getLineBreakStyle();
+        mLineBreakWordStyle = lineBreakConfig.getLineBreakWordStyle();
     }
 
     /**
@@ -94,17 +113,36 @@ public final class LineBreakConfig {
         mLineBreakStyle = lineBreakStyle;
     }
 
+    /**
+     * Get the line break word style.
+     *
+     * @return The current line break word style to be used for the text wrapping.
+     */
+    public @LineBreakWordStyle int getLineBreakWordStyle() {
+        return mLineBreakWordStyle;
+    }
+
+    /**
+     * Set the line break word style.
+     *
+     * @param lineBreakWordStyle the new line break word style.
+     */
+    public void setLineBreakWordStyle(@LineBreakWordStyle int lineBreakWordStyle) {
+        mLineBreakWordStyle = lineBreakWordStyle;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null) return false;
         if (this == o) return true;
         if (!(o instanceof LineBreakConfig)) return false;
         LineBreakConfig that = (LineBreakConfig) o;
-        return mLineBreakStyle == that.mLineBreakStyle;
+        return (mLineBreakStyle == that.mLineBreakStyle)
+                && (mLineBreakWordStyle == that.mLineBreakWordStyle);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mLineBreakStyle);
+        return Objects.hash(mLineBreakStyle, mLineBreakWordStyle);
     }
 }

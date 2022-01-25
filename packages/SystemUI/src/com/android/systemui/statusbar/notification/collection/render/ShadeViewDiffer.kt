@@ -215,13 +215,16 @@ private class ShadeNode(
 
     fun addChildAt(child: ShadeNode, index: Int) {
         controller.addChildAt(child.controller, index)
+        child.controller.onViewAdded()
     }
 
     fun moveChildTo(child: ShadeNode, index: Int) {
         controller.moveChildTo(child.controller, index)
+        child.controller.onViewMoved()
     }
 
     fun removeChild(child: ShadeNode, isTransfer: Boolean) {
         controller.removeChild(child.controller, isTransfer)
+        child.controller.onViewRemoved()
     }
 }

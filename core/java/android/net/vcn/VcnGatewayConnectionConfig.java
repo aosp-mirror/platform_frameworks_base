@@ -549,8 +549,8 @@ public final class VcnGatewayConnectionConfig {
          * networks, a network will be chosen arbitrarily amongst the networks matching the highest
          * priority rule.
          *
-         * <p>If all networks fail to match the rules provided, an underlying network will still be
-         * selected (at random if necessary).
+         * <p>If all networks fail to match the rules provided, a carrier-owned underlying network
+         * will still be selected (if available, at random if necessary).
          *
          * @param underlyingNetworkTemplates a list of unique VcnUnderlyingNetworkTemplates that are
          *     ordered from most to least preferred, or an empty list to use the default

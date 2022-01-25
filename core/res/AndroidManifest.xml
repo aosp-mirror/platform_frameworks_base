@@ -4251,7 +4251,8 @@
 
     <!-- Allows low-level access to setting the keyboard layout.
          <p>Not for use by third-party applications.
-         @hide -->
+         @hide
+         @TestApi -->
     <permission android:name="android.permission.SET_KEYBOARD_LAYOUT"
         android:protectionLevel="signature" />
 

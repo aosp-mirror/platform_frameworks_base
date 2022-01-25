@@ -664,6 +664,24 @@ public final class UserManagerTest {
         }
     }
 
+    // Make sure createProfile would fail if we have DISALLOW_ADD_CLONE_PROFILE.
+    @MediumTest
+    @Test
+    public void testCreateUser_disallowAddClonedUserProfile() throws Exception {
+        final int primaryUserId = ActivityManager.getCurrentUser();
+        final UserHandle primaryUserHandle = asHandle(primaryUserId);
+        mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE,
+                true, primaryUserHandle);
+        try {
+            UserInfo cloneProfileUserInfo = createProfileForUser("Clone",
+                    UserManager.USER_TYPE_PROFILE_CLONE, primaryUserId);
+            assertThat(cloneProfileUserInfo).isNull();
+        } finally {
+            mUserManager.setUserRestriction(UserManager.DISALLOW_ADD_CLONE_PROFILE, false,
+                    primaryUserHandle);
+        }
+    }
+
     // Make sure createProfile would fail if we have DISALLOW_ADD_MANAGED_PROFILE.
     @MediumTest
     @Test

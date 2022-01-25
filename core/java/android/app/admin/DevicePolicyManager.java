@@ -10019,14 +10019,17 @@ public class DevicePolicyManager {
 
     /**
      * Gets the user a {@link #logoutUser(ComponentName)} call would switch to,
-     * or {@link UserHandle#USER_NULL} if the current user is not in a session.
+     * or {@code null} if the current user is not in a session.
      *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
-    public @UserIdInt int getLogoutUserId() {
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public @Nullable UserHandle getLogoutUser() {
+        // TODO(b/214336184): add CTS test
         try {
-            return mService.getLogoutUserId();
+            int userId = mService.getLogoutUserId();
+            return userId == UserHandle.USER_NULL ? null : UserHandle.of(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -10040,7 +10043,9 @@ public class DevicePolicyManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void clearLogoutUser() {
+        // TODO(b/214336184): add CTS test
         try {
             mService.clearLogoutUser();
         } catch (RemoteException re) {
@@ -15067,7 +15072,7 @@ public class DevicePolicyManager {
         Objects.requireNonNull(stringId, "stringId can't be null");
         Objects.requireNonNull(defaultStringLoader, "defaultStringLoader can't be null");
 
-        if (stringId.equals(DevicePolicyResources.Strings.INVALID_ID)) {
+        if (stringId.equals(DevicePolicyResources.Strings.UNDEFINED)) {
             return ParcelableResource.loadDefaultString(defaultStringLoader);
         }
         if (mService != null) {
@@ -15115,7 +15120,7 @@ public class DevicePolicyManager {
         Objects.requireNonNull(stringId, "stringId can't be null");
         Objects.requireNonNull(defaultStringLoader, "defaultStringLoader can't be null");
 
-        if (stringId.equals(DevicePolicyResources.Strings.INVALID_ID)) {
+        if (stringId.equals(DevicePolicyResources.Strings.UNDEFINED)) {
             return ParcelableResource.loadDefaultString(defaultStringLoader);
         }
         if (mService != null) {

@@ -182,12 +182,12 @@ public abstract class TvInteractiveAppService extends Service {
             }
 
             @Override
-            public void registerAppLinkInfo(Bundle appLinkInfo) {
+            public void registerAppLinkInfo(AppLinkInfo appLinkInfo) {
                 onRegisterAppLinkInfo(appLinkInfo);
             }
 
             @Override
-            public void unregisterAppLinkInfo(Bundle appLinkInfo) {
+            public void unregisterAppLinkInfo(AppLinkInfo appLinkInfo) {
                 onUnregisterAppLinkInfo(appLinkInfo);
             }
 
@@ -210,7 +210,7 @@ public abstract class TvInteractiveAppService extends Service {
      * Registers App link info.
      * @hide
      */
-    public void onRegisterAppLinkInfo(Bundle appLinkInfo) {
+    public void onRegisterAppLinkInfo(AppLinkInfo appLinkInfo) {
         // TODO: make it abstract when unhide
     }
 
@@ -218,7 +218,7 @@ public abstract class TvInteractiveAppService extends Service {
      * Unregisters App link info.
      * @hide
      */
-    public void onUnregisterAppLinkInfo(Bundle appLinkInfo) {
+    public void onUnregisterAppLinkInfo(AppLinkInfo appLinkInfo) {
         // TODO: make it abstract when unhide
     }
 

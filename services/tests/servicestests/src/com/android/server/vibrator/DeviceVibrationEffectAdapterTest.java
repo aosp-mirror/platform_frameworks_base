@@ -53,10 +53,10 @@ public class DeviceVibrationEffectAdapterTest {
     private static final float[] TEST_AMPLITUDE_MAP = new float[]{
             /* 50Hz= */ 0.1f, 0.2f, 0.4f, 0.8f, /* 150Hz= */ 1f, 0.9f, /* 200Hz= */ 0.8f};
 
-    private static final VibratorInfo.FrequencyMapping EMPTY_FREQUENCY_MAPPING =
-            new VibratorInfo.FrequencyMapping(Float.NaN, Float.NaN, Float.NaN, null);
-    private static final VibratorInfo.FrequencyMapping TEST_FREQUENCY_MAPPING =
-            new VibratorInfo.FrequencyMapping(TEST_RESONANT_FREQUENCY, TEST_MIN_FREQUENCY,
+    private static final VibratorInfo.FrequencyProfile EMPTY_FREQUENCY_PROFILE =
+            new VibratorInfo.FrequencyProfile(Float.NaN, Float.NaN, Float.NaN, null);
+    private static final VibratorInfo.FrequencyProfile TEST_FREQUENCY_PROFILE =
+            new VibratorInfo.FrequencyProfile(TEST_RESONANT_FREQUENCY, TEST_MIN_FREQUENCY,
                     TEST_FREQUENCY_RESOLUTION, TEST_AMPLITUDE_MAP);
 
     private DeviceVibrationEffectAdapter mAdapter;
@@ -79,8 +79,8 @@ public class DeviceVibrationEffectAdapterTest {
                 new PrimitiveSegment(VibrationEffect.Composition.PRIMITIVE_SPIN, 0.5f, 100)),
                 /* repeatIndex= */ -1);
 
-        assertEquals(effect, mAdapter.apply(effect, createVibratorInfo(EMPTY_FREQUENCY_MAPPING)));
-        assertEquals(effect, mAdapter.apply(effect, createVibratorInfo(TEST_FREQUENCY_MAPPING)));
+        assertEquals(effect, mAdapter.apply(effect, createVibratorInfo(EMPTY_FREQUENCY_PROFILE)));
+        assertEquals(effect, mAdapter.apply(effect, createVibratorInfo(TEST_FREQUENCY_PROFILE)));
     }
 
     @Test
@@ -97,7 +97,7 @@ public class DeviceVibrationEffectAdapterTest {
                 /* repeatIndex= */ 3);
 
         VibrationEffect.Composed adaptedEffect = (VibrationEffect.Composed) mAdapter.apply(effect,
-                createVibratorInfo(EMPTY_FREQUENCY_MAPPING));
+                createVibratorInfo(EMPTY_FREQUENCY_PROFILE));
         assertTrue(adaptedEffect.getSegments().size() > effect.getSegments().size());
         assertTrue(adaptedEffect.getRepeatIndex() >= effect.getRepeatIndex());
 
@@ -128,7 +128,7 @@ public class DeviceVibrationEffectAdapterTest {
                         /* startFrequencyHz= */ 200, /* endFrequencyHz= */ 50, /* duration= */ 20)),
                 /* repeatIndex= */ 2);
 
-        VibratorInfo info = createVibratorInfo(TEST_FREQUENCY_MAPPING,
+        VibratorInfo info = createVibratorInfo(TEST_FREQUENCY_PROFILE,
                 IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
         assertEquals(expected, mAdapter.apply(effect, info));
     }
@@ -159,7 +159,7 @@ public class DeviceVibrationEffectAdapterTest {
                         /* duration= */ 20)),
                 /* repeatIndex= */ 2);
 
-        VibratorInfo info = createVibratorInfo(EMPTY_FREQUENCY_MAPPING,
+        VibratorInfo info = createVibratorInfo(EMPTY_FREQUENCY_PROFILE,
                 IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
         assertEquals(expected, mAdapter.apply(effect, info));
     }
@@ -188,17 +188,17 @@ public class DeviceVibrationEffectAdapterTest {
                         /* startFrequencyHz= */ 200, /* endFrequencyHz= */ 50, /* duration= */ 20)),
                 /* repeatIndex= */ 2);
 
-        VibratorInfo info = createVibratorInfo(TEST_FREQUENCY_MAPPING,
+        VibratorInfo info = createVibratorInfo(TEST_FREQUENCY_PROFILE,
                 IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
         assertEquals(expected, mAdapter.apply(effect, info));
     }
 
-    private static VibratorInfo createVibratorInfo(VibratorInfo.FrequencyMapping frequencyMapping,
+    private static VibratorInfo createVibratorInfo(VibratorInfo.FrequencyProfile frequencyProfile,
             int... capabilities) {
         int cap = IntStream.of(capabilities).reduce((a, b) -> a | b).orElse(0);
         return new VibratorInfo.Builder(0)
                 .setCapabilities(cap)
-                .setFrequencyMapping(frequencyMapping)
+                .setFrequencyProfile(frequencyProfile)
                 .build();
     }
 }

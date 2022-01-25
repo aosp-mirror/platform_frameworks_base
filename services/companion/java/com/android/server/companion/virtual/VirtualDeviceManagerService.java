@@ -27,6 +27,7 @@ import android.companion.AssociationInfo;
 import android.companion.CompanionDeviceManager;
 import android.companion.CompanionDeviceManager.OnAssociationsChangedListener;
 import android.companion.virtual.IVirtualDevice;
+import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.IVirtualDeviceManager;
 import android.companion.virtual.VirtualDeviceParams;
 import android.content.Context;
@@ -176,7 +177,8 @@ public class VirtualDeviceManagerService extends SystemService {
                 IBinder token,
                 String packageName,
                 int associationId,
-                @NonNull VirtualDeviceParams params) {
+                @NonNull VirtualDeviceParams params,
+                @NonNull IVirtualDeviceActivityListener activityListener) {
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
                     "createVirtualDevice");
@@ -206,7 +208,7 @@ public class VirtualDeviceManagerService extends SystemService {
                                 }
                             }
                         },
-                        this, params);
+                        this, activityListener, params);
                 mVirtualDevices.put(associationInfo.getId(), virtualDevice);
                 return virtualDevice;
             }

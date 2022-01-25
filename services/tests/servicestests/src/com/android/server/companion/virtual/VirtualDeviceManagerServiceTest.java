@@ -29,6 +29,7 @@ import static org.testng.Assert.assertThrows;
 
 import android.Manifest;
 import android.app.admin.DevicePolicyManager;
+import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -81,6 +82,8 @@ public class VirtualDeviceManagerServiceTest {
     private DevicePolicyManager mDevicePolicyManagerMock;
     @Mock
     private InputManagerInternal mInputManagerInternalMock;
+    @Mock
+    private IVirtualDeviceActivityListener mActivityListener;
 
     @Before
     public void setUp() {
@@ -102,7 +105,7 @@ public class VirtualDeviceManagerServiceTest {
         mInputController = new InputController(new Object(), mNativeWrapperMock);
         mDeviceImpl = new VirtualDeviceImpl(mContext,
                 /* association info */ null, new Binder(), /* uid */ 0, mInputController,
-                (int associationId) -> {}, mPendingTrampolineCallback,
+                (int associationId) -> {}, mPendingTrampolineCallback, mActivityListener,
                 new VirtualDeviceParams.Builder().build());
     }
 

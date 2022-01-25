@@ -56,7 +56,6 @@ import javax.inject.Named
  */
 class FooterActionsController @Inject constructor(
     view: FooterActionsView,
-    private val qsPanelController: QSPanelController,
     private val activityStarter: ActivityStarter,
     private val userManager: UserManager,
     private val userTracker: UserTracker,
@@ -82,7 +81,6 @@ class FooterActionsController @Inject constructor(
 
     private val settingsButton: SettingsButton = view.findViewById(R.id.settings_button)
     private val settingsButtonContainer: View? = view.findViewById(R.id.settings_button_container)
-    private val editButton: View = view.findViewById(android.R.id.edit)
     private val powerMenuLite: View = view.findViewById(R.id.pm_lite)
 
     private val onUserInfoChangedListener = OnUserInfoChangedListener { _, picture, _ ->
@@ -176,13 +174,6 @@ class FooterActionsController @Inject constructor(
             powerMenuLite.visibility = View.GONE
         }
         settingsButton.setOnClickListener(onClickListener)
-        editButton.setOnClickListener(View.OnClickListener { view: View? ->
-            if (falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                return@OnClickListener
-            }
-            activityStarter.postQSRunnableDismissingKeyguard { qsPanelController.showEdit(view) }
-        })
-
         updateView()
     }
 

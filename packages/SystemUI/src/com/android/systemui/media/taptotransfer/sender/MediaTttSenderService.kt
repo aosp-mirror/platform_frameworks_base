@@ -25,7 +25,8 @@ import android.media.MediaRoute2Info
 import android.os.IBinder
 import com.android.systemui.R
 import com.android.systemui.shared.mediattt.DeviceInfo
-import com.android.systemui.shared.mediattt.IDeviceSenderCallback
+import com.android.systemui.shared.mediattt.IUndoTransferCallback
+import com.android.systemui.shared.mediattt.IDeviceSenderService
 import javax.inject.Inject
 
 /**
@@ -37,11 +38,62 @@ class MediaTttSenderService @Inject constructor(
 ) : Service() {
 
     // TODO(b/203800643): Add logging when callbacks trigger.
-    private val binder: IBinder = object : IDeviceSenderCallback.Stub() {
+    private val binder: IBinder = object : IDeviceSenderService.Stub() {
         override fun closeToReceiverToStartCast(
             mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo
         ) {
             this@MediaTttSenderService.closeToReceiverToStartCast(mediaInfo, otherDeviceInfo)
+        }
+
+        override fun closeToReceiverToEndCast(
+            mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo
+        ) {
+            this@MediaTttSenderService.closeToReceiverToEndCast(mediaInfo, otherDeviceInfo)
+        }
+
+        override fun transferFailed(
+            mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo
+        ) {
+            this@MediaTttSenderService.transferFailed(mediaInfo)
+        }
+
+        override fun transferToReceiverTriggered(
+            mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo
+        ) {
+            this@MediaTttSenderService.transferToReceiverTriggered(mediaInfo, otherDeviceInfo)
+        }
+
+        override fun transferToThisDeviceTriggered(
+            mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo
+        ) {
+            this@MediaTttSenderService.transferToThisDeviceTriggered(mediaInfo)
+        }
+
+        override fun transferToReceiverSucceeded(
+            mediaInfo: MediaRoute2Info,
+            otherDeviceInfo: DeviceInfo,
+            undoCallback: IUndoTransferCallback
+        ) {
+            this@MediaTttSenderService.transferToReceiverSucceeded(
+                mediaInfo, otherDeviceInfo, undoCallback
+            )
+        }
+
+        override fun transferToThisDeviceSucceeded(
+            mediaInfo: MediaRoute2Info,
+            otherDeviceInfo: DeviceInfo,
+            undoCallback: IUndoTransferCallback
+        ) {
+            this@MediaTttSenderService.transferToThisDeviceSucceeded(
+                mediaInfo, otherDeviceInfo, undoCallback
+            )
+        }
+
+        override fun noLongerCloseToReceiver(
+            mediaInfo: MediaRoute2Info,
+            otherDeviceInfo: DeviceInfo
+        ) {
+            this@MediaTttSenderService.noLongerCloseToReceiver()
         }
     }
 
@@ -62,5 +114,69 @@ class MediaTttSenderService @Inject constructor(
             otherDeviceName = otherDeviceInfo.name
         )
         controller.displayChip(chipState)
+    }
+
+    private fun closeToReceiverToEndCast(mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo) {
+        val chipState = MoveCloserToEndCast(
+            appIconDrawable = fakeAppIconDrawable,
+            appIconContentDescription = mediaInfo.name.toString(),
+            otherDeviceName = otherDeviceInfo.name
+        )
+        controller.displayChip(chipState)
+    }
+
+    private fun transferFailed(mediaInfo: MediaRoute2Info) {
+        val chipState = TransferFailed(
+            appIconDrawable = fakeAppIconDrawable,
+            appIconContentDescription = mediaInfo.name.toString()
+        )
+        controller.displayChip(chipState)
+    }
+
+    private fun transferToReceiverTriggered(
+        mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo
+    ) {
+        val chipState = TransferToReceiverTriggered(
+            appIconDrawable = fakeAppIconDrawable,
+            appIconContentDescription = mediaInfo.name.toString(),
+            otherDeviceName = otherDeviceInfo.name
+        )
+        controller.displayChip(chipState)
+    }
+
+    private fun transferToThisDeviceTriggered(mediaInfo: MediaRoute2Info) {
+        val chipState = TransferToThisDeviceTriggered(
+            appIconDrawable = fakeAppIconDrawable,
+            appIconContentDescription = mediaInfo.name.toString()
+        )
+        controller.displayChip(chipState)
+    }
+
+    private fun transferToReceiverSucceeded(
+        mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo, undoCallback: IUndoTransferCallback
+    ) {
+        val chipState = TransferToReceiverSucceeded(
+            appIconDrawable = fakeAppIconDrawable,
+            appIconContentDescription = mediaInfo.name.toString(),
+            otherDeviceName = otherDeviceInfo.name,
+            undoCallback = undoCallback
+        )
+        controller.displayChip(chipState)
+    }
+
+    private fun transferToThisDeviceSucceeded(
+        mediaInfo: MediaRoute2Info, otherDeviceInfo: DeviceInfo, undoCallback: IUndoTransferCallback
+    ) {
+        val chipState = TransferToThisDeviceSucceeded(
+            appIconDrawable = fakeAppIconDrawable,
+            appIconContentDescription = mediaInfo.name.toString(),
+            otherDeviceName = otherDeviceInfo.name,
+            undoCallback = undoCallback
+        )
+        controller.displayChip(chipState)
+    }
+
+    private fun noLongerCloseToReceiver() {
+        controller.removeChip()
     }
 }

@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.telecom.CallAudioState;
+import android.telecom.CallEndpoint;
 import android.telecom.Connection;
 import android.telecom.ConnectionRequest;
 import android.telecom.Logging.Session;

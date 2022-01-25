@@ -757,7 +757,8 @@ public final class TvInteractiveAppManager {
      * Registers app link info.
      * @hide
      */
-    public void registerAppLinkInfo(@NonNull String tvIAppServiceId, @NonNull Bundle appLinkInfo) {
+    public void registerAppLinkInfo(
+            @NonNull String tvIAppServiceId, @NonNull AppLinkInfo appLinkInfo) {
         try {
             mService.registerAppLinkInfo(tvIAppServiceId, appLinkInfo, mUserId);
         } catch (RemoteException e) {
@@ -770,7 +771,7 @@ public final class TvInteractiveAppManager {
      * @hide
      */
     public void unregisterAppLinkInfo(
-            @NonNull String tvIAppServiceId, @NonNull Bundle appLinkInfo) {
+            @NonNull String tvIAppServiceId, @NonNull AppLinkInfo appLinkInfo) {
         try {
             mService.unregisterAppLinkInfo(tvIAppServiceId, appLinkInfo, mUserId);
         } catch (RemoteException e) {

@@ -36,7 +36,6 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class FooterActionsControllerBuilder @Inject constructor(
-    private val qsPanelController: QSPanelController,
     private val activityStarter: ActivityStarter,
     private val userManager: UserManager,
     private val userTracker: UserTracker,
@@ -66,7 +65,7 @@ class FooterActionsControllerBuilder @Inject constructor(
     }
 
     fun build(): FooterActionsController {
-        return FooterActionsController(view, qsPanelController, activityStarter, userManager,
+        return FooterActionsController(view, activityStarter, userManager,
                 userTracker, userInfoController, multiUserSwitchControllerFactory.create(view),
                 deviceProvisionedController, falsingManager, metricsLogger, tunerService,
                 globalActionsDialog, uiEventLogger, showPMLiteButton, buttonsVisibleState,

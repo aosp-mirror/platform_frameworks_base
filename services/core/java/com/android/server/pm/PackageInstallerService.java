@@ -16,6 +16,8 @@
 
 package com.android.server.pm;
 
+import static android.app.admin.DevicePolicyResources.Strings.Core.PACKAGE_DELETED_BY_DO;
+
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
@@ -29,6 +31,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PackageDeleteObserver;
 import android.app.admin.DevicePolicyEventLogger;
+import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
 import android.content.Intent;
@@ -1312,12 +1315,18 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             mPackageName = packageName;
             if (showNotification) {
                 mNotification = buildSuccessNotification(mContext,
-                        mContext.getResources().getString(R.string.package_deleted_device_owner),
+                        getDeviceOwnerDeletedPackageMsg(),
                         packageName,
                         userId);
             } else {
                 mNotification = null;
             }
+        }
+
+        private String getDeviceOwnerDeletedPackageMsg() {
+            DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+            return dpm.getString(PACKAGE_DELETED_BY_DO,
+                    () -> mContext.getString(R.string.package_updated_device_owner));
         }
 
         @Override

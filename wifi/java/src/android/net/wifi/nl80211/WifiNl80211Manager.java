@@ -1262,6 +1262,26 @@ public class WifiNl80211Manager {
     }
 
     /**
+     * Notifies the wificond daemon that the WiFi framework has successfully updated the Country
+     * Code of the driver. The wificond daemon needs this notification if the device does not
+     * support the NL80211_CMD_REG_CHANGED (otherwise it will find out on its own). The wificond
+     * updates in internal state in response to this Country Code update.
+     *
+     * @return true on success, false otherwise.
+     */
+    public boolean notifyCountryCodeChanged() {
+        try {
+            if (mWificond != null) {
+                mWificond.notifyCountryCodeChanged();
+                return true;
+            }
+        } catch (RemoteException e1) {
+            Log.e(TAG, "Failed to notify country code changed due to remote exception");
+        }
+        return false;
+    }
+
+    /**
      * Register the provided callback handler for SoftAp events. The interface must first be created
      * using {@link #setupInterfaceForSoftApMode(String)}. The callback registration is valid until
      * the interface is deleted using {@link #tearDownSoftApInterface(String)} (no deregistration

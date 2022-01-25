@@ -18,6 +18,7 @@ package com.android.internal.telecom;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.telecom.CallEndpoint;
 import android.telecom.TelecomAnalytics;
 import android.telecom.PhoneAccountHandle;
 import android.net.Uri;
@@ -368,4 +369,19 @@ interface ITelecomService {
      * @see TelecomServiceImpl#setTestCallDiagnosticService
      */
     void setTestCallDiagnosticService(in String packageName);
+
+    /**
+     * @see TelecomServiceImpl#registerCallEndpoints(in List<CallEndpoint>, in String);
+     */
+    void registerCallEndpoints(in List<CallEndpoint> endpoints, in String packageName);
+
+    /**
+     * @see TelecomServiceImpl#unregisterCallEndpoints(in List<CallEndpoint>, String);
+     */
+    void unregisterCallEndpoints(in List<CallEndpoint> endpoints, in String packageName);
+
+    /**
+     * @see TelecomServiceImpl#getCallEndpoints(in String packageName);
+     */
+    List<CallEndpoint> getCallEndpoints(in String packageName);
 }

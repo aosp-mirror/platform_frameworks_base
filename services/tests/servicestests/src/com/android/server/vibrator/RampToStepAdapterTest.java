@@ -47,8 +47,8 @@ public class RampToStepAdapterTest {
     private static final int TEST_STEP_DURATION = 5;
     private static final float[] TEST_AMPLITUDE_MAP = new float[]{
             /* 50Hz= */ 0.1f, 0.2f, 0.4f, 0.8f, /* 150Hz= */ 1f, 0.9f, /* 200Hz= */ 0.8f};
-    private static final VibratorInfo.FrequencyMapping TEST_FREQUENCY_MAPPING =
-            new VibratorInfo.FrequencyMapping(
+    private static final VibratorInfo.FrequencyProfile TEST_FREQUENCY_PROFILE =
+            new VibratorInfo.FrequencyProfile(
                     /* resonantFrequencyHz= */ 150f, /* minFrequencyHz= */ 50f,
                     /* frequencyResolutionHz= */ 25f, TEST_AMPLITUDE_MAP);
 
@@ -124,7 +124,7 @@ public class RampToStepAdapterTest {
     private static VibratorInfo createVibratorInfo(int... capabilities) {
         return new VibratorInfo.Builder(0)
                 .setCapabilities(IntStream.of(capabilities).reduce((a, b) -> a | b).orElse(0))
-                .setFrequencyMapping(TEST_FREQUENCY_MAPPING)
+                .setFrequencyProfile(TEST_FREQUENCY_PROFILE)
                 .build();
     }
 }

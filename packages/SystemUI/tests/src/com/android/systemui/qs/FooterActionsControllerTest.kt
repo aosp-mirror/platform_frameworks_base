@@ -54,8 +54,6 @@ class FooterActionsControllerTest : LeakCheckedTest() {
     @Mock
     private lateinit var userInfoController: UserInfoController
     @Mock
-    private lateinit var qsPanelController: QSPanelController
-    @Mock
     private lateinit var multiUserSwitchController: MultiUserSwitchController
     @Mock
     private lateinit var globalActionsDialog: GlobalActionsDialogLite
@@ -81,7 +79,7 @@ class FooterActionsControllerTest : LeakCheckedTest() {
         view = LayoutInflater.from(context)
                 .inflate(R.layout.footer_actions, null) as FooterActionsView
 
-        controller = FooterActionsController(view, qsPanelController, activityStarter,
+        controller = FooterActionsController(view, activityStarter,
                 userManager, userTracker, userInfoController, multiUserSwitchController,
                 deviceProvisionedController, falsingManager, metricsLogger, fakeTunerService,
                 globalActionsDialog, uiEventLogger, showPMLiteButton = true,

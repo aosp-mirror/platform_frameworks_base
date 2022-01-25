@@ -619,6 +619,8 @@ public class StatusBar extends CoreStartable implements
     protected boolean mDozing;
     private boolean mIsFullscreen;
 
+    boolean mCloseQsBeforeScreenOff;
+
     private final NotificationMediaManager mMediaManager;
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     private final NotificationRemoteInputManager mRemoteInputManager;
@@ -1124,6 +1126,15 @@ public class StatusBar extends CoreStartable implements
         }
         if (leaveOpen) {
             mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
+            if (mIsKeyguard) {
+                // When device state changes on keyguard we don't want to keep the state of
+                // the shade and instead we open clean state of keyguard with shade closed.
+                // Normally some parts of QS state (like expanded/collapsed) are persisted and
+                // that causes incorrect UI rendering, especially when changing state with QS
+                // expanded. To prevent that we can close QS which resets QS and some parts of
+                // the shade to its default state. Read more in b/201537421
+                mCloseQsBeforeScreenOff = true;
+            }
         }
     }
 
@@ -2923,10 +2934,10 @@ public class StatusBar extends CoreStartable implements
     }
 
     boolean updateIsKeyguard() {
-        return updateIsKeyguard(false /* force */);
+        return updateIsKeyguard(false /* forceStateChange */);
     }
 
-    boolean updateIsKeyguard(boolean force) {
+    boolean updateIsKeyguard(boolean forceStateChange) {
         boolean wakeAndUnlocking = mBiometricUnlockController.getMode()
                 == BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
 
@@ -2959,7 +2970,7 @@ public class StatusBar extends CoreStartable implements
             //    as the animation could prepare 'fake AOD' interface (without actually
             //    transitioning to keyguard state) and this might reset the view states
             if (!mScreenOffAnimationController.isKeyguardHideDelayed()) {
-                return hideKeyguardImpl(force);
+                return hideKeyguardImpl(forceStateChange);
             }
         }
         return false;
@@ -2967,6 +2978,8 @@ public class StatusBar extends CoreStartable implements
 
     public void showKeyguardImpl() {
         mIsKeyguard = true;
+        // In case we're locking while a smartspace transition is in progress, reset it.
+        mKeyguardUnlockAnimationController.resetSmartspaceTransition();
         if (mKeyguardStateController.isLaunchTransitionFadingAway()) {
             mNotificationPanelViewController.cancelAnimation();
             onLaunchTransitionFadingEnded();
@@ -3087,12 +3100,12 @@ public class StatusBar extends CoreStartable implements
     /**
      * @return true if we would like to stay in the shade, false if it should go away entirely
      */
-    public boolean hideKeyguardImpl(boolean force) {
+    public boolean hideKeyguardImpl(boolean forceStateChange) {
         mIsKeyguard = false;
         Trace.beginSection("StatusBar#hideKeyguard");
         boolean staying = mStatusBarStateController.leaveOpenOnKeyguardHide();
         int previousState = mStatusBarStateController.getState();
-        if (!(mStatusBarStateController.setState(StatusBarState.SHADE, force))) {
+        if (!(mStatusBarStateController.setState(StatusBarState.SHADE, forceStateChange))) {
             //TODO: StatusBarStateController should probably know about hiding the keyguard and
             // notify listeners.
 
@@ -3145,6 +3158,7 @@ public class StatusBar extends CoreStartable implements
         // bar.
         mKeyguardStateController.notifyKeyguardGoingAway(true);
         mCommandQueue.appTransitionPending(mDisplayId, true /* forced */);
+        updateScrimController();
     }
 
     /**
@@ -3316,7 +3330,10 @@ public class StatusBar extends CoreStartable implements
     }
 
     private void showBouncerOrLockScreenIfKeyguard() {
-        if (!mKeyguardViewMediator.isHiding()) {
+        // If the keyguard is animating away, we aren't really the keyguard anymore and should not
+        // show the bouncer/lockscreen.
+        if (!mKeyguardViewMediator.isHiding()
+                && !mKeyguardUnlockAnimationController.isPlayingCannedUnlockAnimation()) {
             if (mState == StatusBarState.SHADE_LOCKED
                     && mKeyguardUpdateMonitor.isUdfpsEnrolled()) {
                 // shade is showing while locked on the keyguard, so go back to showing the
@@ -3654,6 +3671,10 @@ public class StatusBar extends CoreStartable implements
         public void onScreenTurnedOff() {
             mFalsingCollector.onScreenOff();
             mScrimController.onScreenTurnedOff();
+            if (mCloseQsBeforeScreenOff) {
+                mNotificationPanelViewController.closeQs();
+                mCloseQsBeforeScreenOff = false;
+            }
             updateIsKeyguard();
         }
     };
@@ -3746,17 +3767,14 @@ public class StatusBar extends CoreStartable implements
     public void updateScrimController() {
         Trace.beginSection("StatusBar#updateScrimController");
 
-        // We don't want to end up in KEYGUARD state when we're unlocking with
-        // fingerprint from doze. We should cross fade directly from black.
-        boolean unlocking = mBiometricUnlockController.isWakeAndUnlock()
-                || mKeyguardStateController.isKeyguardFadingAway();
+        boolean unlocking = mKeyguardStateController.isShowing() && (
+                mBiometricUnlockController.isWakeAndUnlock()
+                        || mKeyguardStateController.isKeyguardFadingAway()
+                        || mKeyguardStateController.isKeyguardGoingAway()
+                        || mKeyguardViewMediator.requestedShowSurfaceBehindKeyguard()
+                        || mKeyguardViewMediator.isAnimatingBetweenKeyguardAndSurfaceBehind());
 
-        // Do not animate the scrim expansion when triggered by the fingerprint sensor.
-        boolean onKeyguardOrHidingIt = mKeyguardStateController.isShowing()
-                || mKeyguardStateController.isKeyguardFadingAway()
-                || mKeyguardStateController.isKeyguardGoingAway();
-        mScrimController.setExpansionAffectsAlpha(!(mBiometricUnlockController.isBiometricUnlock()
-                        && onKeyguardOrHidingIt));
+        mScrimController.setExpansionAffectsAlpha(!unlocking);
 
         boolean launchingAffordanceWithPreview =
                 mNotificationPanelViewController.isLaunchingAffordanceWithPreview();
@@ -3768,7 +3786,7 @@ public class StatusBar extends CoreStartable implements
             } else {
                 mScrimController.transitionTo(ScrimState.AUTH_SCRIMMED);
             }
-        } else if (mBouncerShowing) {
+        } else if (mBouncerShowing && !unlocking) {
             // Bouncer needs the front scrim when it's on top of an activity,
             // tapping on a notification, editing QS or being dismissed by
             // FLAG_DISMISS_KEYGUARD_ACTIVITY.

@@ -1360,6 +1360,9 @@ public class AudioDeviceInventory {
             case AudioSystem.DEVICE_OUT_USB_HEADSET:
                 connType = AudioRoutesInfo.MAIN_USB;
                 break;
+            case AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET:
+                connType = AudioRoutesInfo.MAIN_DOCK_SPEAKERS;
+                break;
         }
 
         synchronized (mCurAudioRoutes) {

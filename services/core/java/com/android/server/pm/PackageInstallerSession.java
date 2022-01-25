@@ -17,6 +17,8 @@
 package com.android.server.pm;
 
 import static android.app.AppOpsManager.MODE_DEFAULT;
+import static android.app.admin.DevicePolicyResources.Strings.Core.PACKAGE_INSTALLED_BY_DO;
+import static android.app.admin.DevicePolicyResources.Strings.Core.PACKAGE_UPDATED_BY_DO;
 import static android.content.pm.DataLoaderType.INCREMENTAL;
 import static android.content.pm.DataLoaderType.STREAMING;
 import static android.content.pm.PackageInstaller.LOCATION_DATA_APP;
@@ -56,6 +58,7 @@ import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.admin.DevicePolicyEventLogger;
+import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
@@ -91,7 +94,6 @@ import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.parsing.ApkLite;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.graphics.Bitmap;
@@ -156,6 +158,7 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
@@ -4336,9 +4339,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (INSTALL_SUCCEEDED == returnCode && showNotification) {
             boolean update = (extras != null) && extras.getBoolean(Intent.EXTRA_REPLACING);
             Notification notification = PackageInstallerService.buildSuccessNotification(context,
-                    context.getResources()
-                            .getString(update ? R.string.package_updated_device_owner :
-                                    R.string.package_installed_device_owner),
+                    getDeviceOwnerInstalledPackageMsg(context, update),
                     basePackageName,
                     userId);
             if (notification != null) {
@@ -4368,6 +4369,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             target.sendIntent(context, 0, fillIn, null, null);
         } catch (IntentSender.SendIntentException ignored) {
         }
+    }
+
+    private static String getDeviceOwnerInstalledPackageMsg(Context context, boolean update) {
+        DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
+        return update
+                ? dpm.getString(PACKAGE_UPDATED_BY_DO,
+                    () -> context.getString(R.string.package_updated_device_owner))
+                : dpm.getString(PACKAGE_INSTALLED_BY_DO,
+                    () -> context.getString(R.string.package_installed_device_owner));
     }
 
     /**

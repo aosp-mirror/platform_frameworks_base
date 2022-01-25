@@ -122,6 +122,11 @@ public interface BcSmartspaceDataPlugin extends Plugin {
          * Set or clear device media playing
          */
         void setMediaTarget(@Nullable SmartspaceTarget target);
+
+        /**
+         * Get the index of the currently selected page.
+         */
+        int getSelectedPage();
     }
 
     /** Interface for launching Intents, which can differ on the lockscreen */

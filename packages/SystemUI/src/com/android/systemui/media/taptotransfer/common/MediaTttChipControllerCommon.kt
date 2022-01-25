@@ -81,6 +81,9 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
 
     /** Hides the chip. */
     fun removeChip() {
+        // TODO(b/203800347): We may not want to hide the chip if we're currently in a
+        //  TransferTriggered state: Once the user has initiated the transfer, they should be able
+        //  to move away from the receiver device but still see the status of the transfer.
         if (chipView == null) { return }
         windowManager.removeView(chipView)
         chipView = null

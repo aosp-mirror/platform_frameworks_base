@@ -18,8 +18,8 @@ package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
+import android.view.Display
 import android.view.Surface
-import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -41,7 +41,9 @@ import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.statusBarLayerIsVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsVisible
+import com.android.server.wm.traces.common.ConditionList
 import com.android.server.wm.traces.common.FlickerComponentName
+import com.android.server.wm.traces.common.WindowManagerConditionsFactory
 import org.junit.Assume.assumeFalse
 import org.junit.Assume.assumeTrue
 import org.junit.FixMethodOrder
@@ -63,6 +65,12 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp = ImeAppAutoFocusHelper(instrumentation, testSpec.startRotation)
 
+    private val waitConditionSetup = ConditionList(listOf(
+        WindowManagerConditionsFactory.isAppTransitionIdle(Display.DEFAULT_DISPLAY),
+        WindowManagerConditionsFactory.hasLayersAnimating().negate(),
+        WindowManagerConditionsFactory.isHomeActivityVisible()
+    ))
+
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
@@ -73,8 +81,7 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
                 }
                 eachRun {
                     device.pressRecentApps()
-                    wmHelper.waitImeGone()
-                    wmHelper.waitForAppTransitionIdle()
+                    wmHelper.waitFor(waitConditionSetup)
                     this.setRotation(testSpec.startRotation)
                 }
             }
@@ -231,11 +238,8 @@ class ReOpenImeWindowTest(private val testSpec: FlickerTestParameter) {
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                    repetitions = 1,
-                    supportedRotations = listOf(Surface.ROTATION_0),
-                    supportedNavigationModes = listOf(
-                        WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                    )
+                    repetitions = 5,
+                    supportedRotations = listOf(Surface.ROTATION_0)
                 )
         }
     }

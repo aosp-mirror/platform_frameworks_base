@@ -170,18 +170,6 @@ public class BluetoothEventManager {
     }
 
     @VisibleForTesting
-    void registerIntentReceiver() {
-        mContext.registerReceiverAsUser(mBroadcastReceiver, mUserHandle, mAdapterIntentFilter,
-                null, mReceiverHandler);
-    }
-
-    @VisibleForTesting
-    void registerProfileIntentReceiverForTest() {
-        mContext.registerReceiverAsUser(mProfileBroadcastReceiver, mUserHandle,
-                mProfileIntentFilter, null, mReceiverHandler);
-    }
-
-    @VisibleForTesting
     void addProfileHandler(String action, Handler handler) {
         mHandlerMap.put(action, handler);
         mProfileIntentFilter.addAction(action);

@@ -16,6 +16,7 @@
 
 package android.net;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.TAG_NONE;
@@ -31,6 +32,7 @@ import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static com.android.net.module.util.NetworkStatsUtils.multiplySafeByRational;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -51,7 +53,9 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ProtocolException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -65,7 +69,7 @@ import java.util.Random;
  *
  * @hide
  */
-// @SystemApi(client = MODULE_LIBRARIES)
+@SystemApi(client = MODULE_LIBRARIES)
 public final class NetworkStatsHistory implements Parcelable {
     private static final int VERSION_INIT = 1;
     private static final int VERSION_ADD_PACKETS = 2;
@@ -97,23 +101,157 @@ public final class NetworkStatsHistory implements Parcelable {
     private long[] operations;
     private long totalBytes;
 
-    public static class Entry {
+    /** @hide */
+    public NetworkStatsHistory(long bucketDuration, long[] bucketStart, long[] activeTime,
+            long[] rxBytes, long[] rxPackets, long[] txBytes, long[] txPackets,
+            long[] operations, int bucketCount, long totalBytes) {
+        this.bucketDuration = bucketDuration;
+        this.bucketStart = bucketStart;
+        this.activeTime = activeTime;
+        this.rxBytes = rxBytes;
+        this.rxPackets = rxPackets;
+        this.txBytes = txBytes;
+        this.txPackets = txPackets;
+        this.operations = operations;
+        this.bucketCount = bucketCount;
+        this.totalBytes = totalBytes;
+    }
+
+    /**
+     * An instance to represent a single record in a {@link NetworkStatsHistory} object.
+     */
+    public static final class Entry {
+        /** @hide */
         public static final long UNKNOWN = -1;
 
+        /** @hide */
+        // TODO: Migrate all callers to get duration from the history object and remove this field.
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long bucketDuration;
+        /** @hide */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long bucketStart;
+        /** @hide */
         public long activeTime;
+        /** @hide */
         @UnsupportedAppUsage
         public long rxBytes;
+        /** @hide */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long rxPackets;
+        /** @hide */
         @UnsupportedAppUsage
         public long txBytes;
+        /** @hide */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public long txPackets;
+        /** @hide */
         public long operations;
+        /** @hide */
+        Entry() {}
+
+        /**
+         * Construct a {@link Entry} instance to represent a single record in a
+         * {@link NetworkStatsHistory} object.
+         *
+         * @param bucketStart Start of period for this {@link Entry}, in milliseconds since the
+         *                    Unix epoch, see {@link java.lang.System#currentTimeMillis}.
+         * @param activeTime Active time for this {@link Entry}, in milliseconds.
+         * @param rxBytes Number of bytes received for this {@link Entry}. Statistics should
+         *                represent the contents of IP packets, including IP headers.
+         * @param rxPackets Number of packets received for this {@link Entry}. Statistics should
+         *                  represent the contents of IP packets, including IP headers.
+         * @param txBytes Number of bytes transmitted for this {@link Entry}. Statistics should
+         *                represent the contents of IP packets, including IP headers.
+         * @param txPackets Number of bytes transmitted for this {@link Entry}. Statistics should
+         *                  represent the contents of IP packets, including IP headers.
+         * @param operations count of network operations performed for this {@link Entry}. This can
+         *                   be used to derive bytes-per-operation.
+         */
+        public Entry(long bucketStart, long activeTime, long rxBytes,
+                long rxPackets, long txBytes, long txPackets, long operations) {
+            this.bucketStart = bucketStart;
+            this.activeTime = activeTime;
+            this.rxBytes = rxBytes;
+            this.rxPackets = rxPackets;
+            this.txBytes = txBytes;
+            this.txPackets = txPackets;
+            this.operations = operations;
+        }
+
+        /**
+         * Get start timestamp of the bucket's time interval, in milliseconds since the Unix epoch.
+         */
+        public long getBucketStart() {
+            return bucketStart;
+        }
+
+        /**
+         * Get active time of the bucket's time interval, in milliseconds.
+         */
+        public long getActiveTime() {
+            return activeTime;
+        }
+
+        /** Get number of bytes received for this {@link Entry}. */
+        public long getRxBytes() {
+            return rxBytes;
+        }
+
+        /** Get number of packets received for this {@link Entry}. */
+        public long getRxPackets() {
+            return rxPackets;
+        }
+
+        /** Get number of bytes transmitted for this {@link Entry}. */
+        public long getTxBytes() {
+            return txBytes;
+        }
+
+        /** Get number of packets transmitted for this {@link Entry}. */
+        public long getTxPackets() {
+            return txPackets;
+        }
+
+        /** Get count of network operations performed for this {@link Entry}. */
+        public long getOperations() {
+            return operations;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o.getClass() != getClass()) return false;
+            Entry entry = (Entry) o;
+            return bucketStart == entry.bucketStart
+                    && activeTime == entry.activeTime && rxBytes == entry.rxBytes
+                    && rxPackets == entry.rxPackets && txBytes == entry.txBytes
+                    && txPackets == entry.txPackets && operations == entry.operations;
+        }
+
+        @Override
+        public int hashCode() {
+            return (int) (bucketStart * 2
+                    + activeTime * 3
+                    + rxBytes * 5
+                    + rxPackets * 7
+                    + txBytes * 11
+                    + txPackets * 13
+                    + operations * 17);
+        }
+
+        @Override
+        public String toString() {
+            return "Entry{"
+                    + "bucketStart=" + bucketStart
+                    + ", activeTime=" + activeTime
+                    + ", rxBytes=" + rxBytes
+                    + ", rxPackets=" + rxPackets
+                    + ", txBytes=" + txBytes
+                    + ", txPackets=" + txPackets
+                    + ", operations=" + operations
+                    + "}";
+        }
     }
 
     /** @hide */
@@ -322,6 +460,22 @@ public final class NetworkStatsHistory implements Parcelable {
         entry.txPackets = getLong(txPackets, i, UNKNOWN);
         entry.operations = getLong(operations, i, UNKNOWN);
         return entry;
+    }
+
+    /**
+     * Get List of {@link Entry} of the {@link NetworkStatsHistory} instance.
+     *
+     * @return
+     */
+    @NonNull
+    public List<Entry> getEntries() {
+        // TODO: Return a wrapper that uses this list instead, to prevent the returned result
+        //  from being changed.
+        final ArrayList<Entry> ret = new ArrayList<>(size());
+        for (int i = 0; i < size(); i++) {
+            ret.add(getValues(i, null /* recycle */));
+        }
+        return ret;
     }
 
     /** @hide */
@@ -928,4 +1082,80 @@ public final class NetworkStatsHistory implements Parcelable {
         }
     }
 
+    /**
+     * Builder class for {@link NetworkStatsHistory}.
+     */
+    public static final class Builder {
+        private final long mBucketDuration;
+        private final List<Long> mBucketStart;
+        private final List<Long> mActiveTime;
+        private final List<Long> mRxBytes;
+        private final List<Long> mRxPackets;
+        private final List<Long> mTxBytes;
+        private final List<Long> mTxPackets;
+        private final List<Long> mOperations;
+
+        /**
+         * Creates a new Builder with given bucket duration and initial capacity to construct
+         * {@link NetworkStatsHistory} objects.
+         *
+         * @param bucketDuration Duration of the buckets of the object, in milliseconds.
+         * @param initialCapacity Estimated number of records.
+         */
+        public Builder(long bucketDuration, int initialCapacity) {
+            mBucketDuration = bucketDuration;
+            mBucketStart = new ArrayList<>(initialCapacity);
+            mActiveTime = new ArrayList<>(initialCapacity);
+            mRxBytes = new ArrayList<>(initialCapacity);
+            mRxPackets = new ArrayList<>(initialCapacity);
+            mTxBytes = new ArrayList<>(initialCapacity);
+            mTxPackets = new ArrayList<>(initialCapacity);
+            mOperations = new ArrayList<>(initialCapacity);
+        }
+
+        /**
+         * Add an {@link Entry} into the {@link NetworkStatsHistory} instance.
+         *
+         * @param entry The target {@link Entry} object.
+         * @return The builder object.
+         */
+        @NonNull
+        public Builder addEntry(@NonNull Entry entry) {
+            mBucketStart.add(entry.bucketStart);
+            mActiveTime.add(entry.activeTime);
+            mRxBytes.add(entry.rxBytes);
+            mRxPackets.add(entry.rxPackets);
+            mTxBytes.add(entry.txBytes);
+            mTxPackets.add(entry.txPackets);
+            mOperations.add(entry.operations);
+            return this;
+        }
+
+        private static long sum(@NonNull List<Long> list) {
+            long sum = 0;
+            for (long entry : list) {
+                sum += entry;
+            }
+            return sum;
+        }
+
+        /**
+         * Builds the instance of the {@link NetworkStatsHistory}.
+         *
+         * @return the built instance of {@link NetworkStatsHistory}.
+         */
+        @NonNull
+        public NetworkStatsHistory build() {
+            return new NetworkStatsHistory(mBucketDuration,
+                    CollectionUtils.toLongArray(mBucketStart),
+                    CollectionUtils.toLongArray(mActiveTime),
+                    CollectionUtils.toLongArray(mRxBytes),
+                    CollectionUtils.toLongArray(mRxPackets),
+                    CollectionUtils.toLongArray(mTxBytes),
+                    CollectionUtils.toLongArray(mTxPackets),
+                    CollectionUtils.toLongArray(mOperations),
+                    mBucketStart.size(),
+                    sum(mRxBytes) + sum(mTxBytes));
+        }
+    }
 }
