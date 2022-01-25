@@ -18,6 +18,7 @@ package com.android.keyguard;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Handler;
@@ -58,7 +59,8 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
     private boolean mBouncerVisible;
     private boolean mAltBouncerShowing;
     private ViewGroup mContainer;
-    private int mTopMargin;
+    private int mContainerTopMargin;
+    private int mLastOrientation = -1;
 
     public KeyguardMessageArea(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -74,16 +76,28 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
         mContainer = getRootView().findViewById(R.id.keyguard_message_area_container);
     }
 
-    void onConfigChanged() {
+    void onConfigChanged(Configuration newConfig) {
         final int newTopMargin = SystemBarUtils.getStatusBarHeight(getContext());
-        if (mTopMargin == newTopMargin) {
-            return;
-        }
-        mTopMargin = newTopMargin;
-        ViewGroup.MarginLayoutParams lp =
+        if (mContainerTopMargin != newTopMargin) {
+            mContainerTopMargin = newTopMargin;
+            ViewGroup.MarginLayoutParams lp =
                 (ViewGroup.MarginLayoutParams) mContainer.getLayoutParams();
-        lp.topMargin = mTopMargin;
-        mContainer.setLayoutParams(lp);
+            lp.topMargin = mContainerTopMargin;
+            mContainer.setLayoutParams(lp);
+        }
+
+        if (mLastOrientation != newConfig.orientation) {
+            mLastOrientation = newConfig.orientation;
+            int messageAreaTopMargin = 0;
+            if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+                messageAreaTopMargin = mContext.getResources().getDimensionPixelSize(
+                        R.dimen.keyguard_lock_padding);
+            }
+
+            ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) getLayoutParams();
+            lp.topMargin = messageAreaTopMargin;
+            setLayoutParams(lp);
+        }
     }
 
     @Override
