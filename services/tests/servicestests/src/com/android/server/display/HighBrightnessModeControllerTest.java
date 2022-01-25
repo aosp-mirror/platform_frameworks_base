@@ -524,6 +524,24 @@ public class HighBrightnessModeControllerTest {
     }
 
     @Test
+    public void tetHbmStats_HighLuxLowBrightnessNoReport() {
+        final HighBrightnessModeController hbmc = createDefaultHbm(new OffsettableClock());
+        final int displayStatsId = mDisplayUniqueId.hashCode();
+
+        hbmc.setAutoBrightnessEnabled(AUTO_BRIGHTNESS_ENABLED);
+        hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
+        hbmc.onBrightnessChanged(DEFAULT_MIN);
+        advanceTime(0);
+        // verify in HBM sunlight mode
+        assertEquals(HIGH_BRIGHTNESS_MODE_SUNLIGHT, hbmc.getHighBrightnessMode());
+
+        // Verify Stats HBM_ON_SUNLIGHT not report
+        verify(mInjectorMock, never()).reportHbmStateChange(eq(displayStatsId),
+            eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_SUNLIGHT),
+            anyInt());
+    }
+
+    @Test
     public void testHbmStats_ThermalOff() throws Exception {
         final HighBrightnessModeController hbmc = createDefaultHbm(new OffsettableClock());
         final int displayStatsId = mDisplayUniqueId.hashCode();

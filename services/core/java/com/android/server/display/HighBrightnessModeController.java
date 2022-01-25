@@ -446,30 +446,32 @@ class HighBrightnessModeController {
 
     private void updateHbmMode() {
         int newHbmMode = calculateHighBrightnessMode();
-        updateHbmStats(mHbmMode, newHbmMode);
+        updateHbmStats(newHbmMode);
         if (mHbmMode != newHbmMode) {
             mHbmMode = newHbmMode;
             mHbmChangeCallback.run();
         }
     }
 
-    private void updateHbmStats(int mode, int newMode) {
+    private void updateHbmStats(int newMode) {
         int state = FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_OFF;
         if (newMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR
                 && getHdrBrightnessValue() > mHbmData.transitionPoint) {
             state = FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_HDR;
-        } else if (newMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT) {
+        } else if (newMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT
+                && mBrightness > mHbmData.transitionPoint) {
             state = FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_SUNLIGHT;
         }
         if (state == mHbmStatsState) {
             return;
         }
-        mHbmStatsState = state;
 
         int reason =
                 FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__REASON__HBM_TRANSITION_REASON_UNKNOWN;
-        boolean oldHbmSv = (mode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT);
-        boolean newHbmSv = (newMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT);
+        boolean oldHbmSv = (mHbmStatsState
+                == FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_SUNLIGHT);
+        boolean newHbmSv =
+                (state == FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_SUNLIGHT);
         if (oldHbmSv && !newHbmSv) {
             // If more than one conditions are flipped and turn off HBM sunlight
             // visibility, only one condition will be reported to make it simple.
@@ -496,6 +498,7 @@ class HighBrightnessModeController {
         }
 
         mInjector.reportHbmStateChange(mDisplayStatsId, state, reason);
+        mHbmStatsState = state;
     }
 
     private String hbmStatsStateToString(int hbmStatsState) {
