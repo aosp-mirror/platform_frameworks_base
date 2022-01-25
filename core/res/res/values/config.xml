@@ -4600,6 +4600,18 @@
     <array name="config_displayWhiteBalanceDisplayColorTemperatures">
     </array>
 
+    <!-- See DisplayWhiteBalanceController.
+         The same as config_displayWhiteBalanceAmbientColorTemperatures, but with a stronger
+         visual adjustment. -->
+    <array name="config_displayWhiteBalanceStrongAmbientColorTemperatures">
+    </array>
+
+    <!-- See DisplayWhiteBalanceController.
+         The same as config_displayWhiteBalanceDisplayColorTemperatures, but with a stronger
+         visual adjustment. -->
+    <array name="config_displayWhiteBalanceStrongDisplayColorTemperatures">
+    </array>
+
     <!-- All of the paths defined for the batterymeter are defined on a 12x20 canvas, and must
      be parsable by android.utill.PathParser -->
     <string name="config_batterymeterPerimeterPath" translatable="false">
