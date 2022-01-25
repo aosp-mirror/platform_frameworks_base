@@ -345,6 +345,7 @@ package android.net {
     method public int getRoaming();
     method @NonNull public java.util.Set<java.lang.String> getSubscriberIds();
     method @NonNull public java.util.Set<java.lang.String> getWifiNetworkKeys();
+    method public boolean matches(@NonNull android.net.NetworkIdentity);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkTemplate> CREATOR;
     field public static final int MATCH_BLUETOOTH = 8; // 0x8
