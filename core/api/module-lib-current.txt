@@ -240,6 +240,10 @@ package android.net {
     method public int getResourceId();
   }
 
+  public class LocalSocket implements java.io.Closeable {
+    ctor public LocalSocket(@NonNull java.io.FileDescriptor);
+  }
+
   public class NetworkIdentity {
     method public int getOemManaged();
     method public int getRatType();
