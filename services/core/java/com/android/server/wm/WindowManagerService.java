@@ -6420,7 +6420,6 @@ public class WindowManagerService extends IWindowManager.Stub
         pw.print("  mGlobalConfiguration="); pw.println(mRoot.getConfiguration());
         pw.print("  mHasPermanentDpad="); pw.println(mHasPermanentDpad);
         mRoot.dumpTopFocusedDisplayId(pw);
-        mRoot.dumpDefaultMinSizeOfResizableTask(pw);
         mRoot.forAllDisplays(dc -> {
             final int displayId = dc.getDisplayId();
             final InsetsControlTarget imeLayeringTarget = dc.getImeTarget(IME_TARGET_LAYERING);
@@ -6438,6 +6437,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.print("  imeControlTarget in display# "); pw.print(displayId);
                 pw.print(' '); pw.println(imeControlTarget);
             }
+            pw.print("  Minimum task size of display#"); pw.print(displayId);
+            pw.print(' '); pw.print(dc.mMinSizeOfResizeableTaskDp);
         });
         pw.print("  mInTouchMode="); pw.println(mInTouchMode);
         pw.print("  mBlurEnabled="); pw.println(mBlurController.getBlurEnabled());

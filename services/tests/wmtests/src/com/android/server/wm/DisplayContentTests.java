@@ -1598,6 +1598,30 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(mDisplayContent.hasTopFixedRotationLaunchingApp());
     }
 
+    /**
+     * Creates different types of displays, verifies that minimal task size doesn't change
+     * with density of display.
+     */
+    @Test
+    public void testCalculatesDisplaySpecificMinTaskSizes() {
+        DisplayContent defaultTestDisplay =
+                new TestDisplayContent.Builder(mAtm, 1000, 2000).build();
+        final int defaultMinTaskSize = defaultTestDisplay.mMinSizeOfResizeableTaskDp;
+        DisplayContent firstDisplay = new TestDisplayContent.Builder(mAtm, 1000, 2000)
+                .setDensityDpi(300)
+                .updateDisplayMetrics()
+                .setDefaultMinTaskSizeDp(defaultMinTaskSize + 10)
+                .build();
+        assertEquals(defaultMinTaskSize + 10, firstDisplay.mMinSizeOfResizeableTaskDp);
+
+        DisplayContent secondDisplay = new TestDisplayContent.Builder(mAtm, 200, 200)
+                .setDensityDpi(320)
+                .updateDisplayMetrics()
+                .setDefaultMinTaskSizeDp(defaultMinTaskSize + 20)
+                .build();
+        assertEquals(defaultMinTaskSize + 20, secondDisplay.mMinSizeOfResizeableTaskDp);
+    }
+
     @Test
     public void testRecentsNotRotatingWithFixedRotation() {
         unblockDisplayRotation(mDisplayContent);

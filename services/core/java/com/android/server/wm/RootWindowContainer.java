@@ -73,7 +73,6 @@ import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskSupervisor.dumpHistoryList;
 import static com.android.server.wm.ActivityTaskSupervisor.printThisActivity;
 import static com.android.server.wm.KeyguardController.KEYGUARD_SLEEP_TOKEN_TAG;
-import static com.android.server.wm.RootWindowContainerProto.DEFAULT_MIN_SIZE_RESIZABLE_TASK;
 import static com.android.server.wm.RootWindowContainerProto.IS_HOME_RECENTS_COMPONENT;
 import static com.android.server.wm.RootWindowContainerProto.KEYGUARD_CONTROLLER;
 import static com.android.server.wm.RootWindowContainerProto.WINDOW_CONTAINER;
@@ -111,7 +110,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
@@ -134,7 +132,6 @@ import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.DisplayMetrics;
 import android.util.IntArray;
 import android.util.Pair;
 import android.util.Slog;
@@ -1220,11 +1217,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         pw.println(mTopFocusedDisplayId);
     }
 
-    void dumpDefaultMinSizeOfResizableTask(PrintWriter pw) {
-        pw.print("  mDefaultMinSizeOfResizeableTaskDp=");
-        pw.println(mDefaultMinSizeOfResizeableTaskDp);
-    }
-
     void dumpLayoutNeededDisplayIds(PrintWriter pw) {
         if (!isLayoutNeeded()) {
             return;
@@ -1271,7 +1263,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mTaskSupervisor.getKeyguardController().dumpDebug(proto, KEYGUARD_CONTROLLER);
         proto.write(IS_HOME_RECENTS_COMPONENT,
                 mTaskSupervisor.mRecentTasks.isRecentsComponentHomeActivity(mCurrentUser));
-        proto.write(DEFAULT_MIN_SIZE_RESIZABLE_TASK, mDefaultMinSizeOfResizeableTaskDp);
         proto.end(token);
     }
 
@@ -1359,7 +1350,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 mDefaultDisplay = displayContent;
             }
         }
-        calculateDefaultMinimalSizeOfResizeableTasks();
 
         final TaskDisplayArea defaultTaskDisplayArea = getDefaultTaskDisplayArea();
         defaultTaskDisplayArea.getOrCreateRootHomeTask(ON_TOP);
@@ -3475,17 +3465,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
         mService.startLaunchPowerMode(reason);
-    }
-
-    // TODO(b/191434136): handle this properly when we add multi-window support on secondary
-    //  display.
-    private void calculateDefaultMinimalSizeOfResizeableTasks() {
-        final Resources res = mService.mContext.getResources();
-        final float minimalSize = res.getDimension(
-                com.android.internal.R.dimen.default_minimal_size_resizable_task);
-        final DisplayMetrics dm = res.getDisplayMetrics();
-
-        mDefaultMinSizeOfResizeableTaskDp = (int) (minimalSize / dm.density);
     }
 
     /**

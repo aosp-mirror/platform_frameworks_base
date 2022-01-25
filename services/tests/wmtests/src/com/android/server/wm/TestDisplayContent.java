@@ -29,17 +29,25 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doReturn;
 
 import android.annotation.Nullable;
+import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerGlobal;
+import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 
 import com.android.server.wm.DisplayWindowSettings.SettingsProvider.SettingsEntry;
+
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 class TestDisplayContent extends DisplayContent {
 
@@ -85,6 +93,11 @@ class TestDisplayContent extends DisplayContent {
         private boolean mSystemDecorations = false;
         private int mStatusBarHeight = 0;
         private SettingsEntry mOverrideSettings;
+        private DisplayMetrics mDisplayMetrics;
+        @Mock
+        Context mMockContext;
+        @Mock
+        Resources mResources;
 
         Builder(ActivityTaskManagerService service, int width, int height) {
             mService = service;
@@ -97,6 +110,8 @@ class TestDisplayContent extends DisplayContent {
             // Set unique ID so physical display overrides are not inheritted from
             // DisplayWindowSettings.
             mInfo.uniqueId = generateUniqueId();
+            mDisplayMetrics = new DisplayMetrics();
+            updateDisplayMetrics();
         }
         Builder(ActivityTaskManagerService service, DisplayInfo info) {
             mService = service;
@@ -151,6 +166,20 @@ class TestDisplayContent extends DisplayContent {
         }
         Builder setDensityDpi(int dpi) {
             mInfo.logicalDensityDpi = dpi;
+            return this;
+        }
+        Builder updateDisplayMetrics() {
+            mInfo.getAppMetrics(mDisplayMetrics);
+            return this;
+        }
+        Builder setDefaultMinTaskSizeDp(int valueDp) {
+            MockitoAnnotations.initMocks(this);
+            doReturn(mMockContext).when(mService.mContext).createConfigurationContext(any());
+            doReturn(mResources).when(mMockContext).getResources();
+            doReturn(valueDp * mDisplayMetrics.density)
+                    .when(mResources)
+                    .getDimension(
+                        com.android.internal.R.dimen.default_minimal_size_resizable_task);
             return this;
         }
         TestDisplayContent createInternal(Display display) {

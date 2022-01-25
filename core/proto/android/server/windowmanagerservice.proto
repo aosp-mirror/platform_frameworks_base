@@ -69,7 +69,7 @@ message RootWindowContainerProto {
     // know what activity types to check for when invoking splitscreen multi-window.
     optional bool is_home_recents_component = 6;
     repeated IdentifierProto pending_activities = 7 [deprecated=true];
-    optional int32 default_min_size_resizable_task = 8;
+    optional int32 default_min_size_resizable_task = 8 [deprecated=true];
 }
 
 message BarControllerProto {
@@ -226,7 +226,7 @@ message DisplayContentProto {
     optional bool is_sleeping = 36;
     repeated string sleep_tokens = 37;
     repeated .android.graphics.RectProto keep_clear_areas = 38;
-
+    optional int32 min_size_of_resizeable_task_dp = 39;
 }
 
 /* represents DisplayArea object */
