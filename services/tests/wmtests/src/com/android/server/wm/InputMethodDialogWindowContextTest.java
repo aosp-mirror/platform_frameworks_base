@@ -31,7 +31,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
@@ -48,8 +47,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.window.WindowTokenClient;
 
-import com.android.server.inputmethod.InputMethodManagerService;
-import com.android.server.inputmethod.InputMethodMenuController;
+import com.android.server.inputmethod.InputMethodDialogWindowContext;
 
 import org.junit.After;
 import org.junit.Before;
@@ -61,13 +59,13 @@ import org.mockito.Mockito;
 //  scenario there.
 /**
  * Build/Install/Run:
- *  atest WmTests:InputMethodMenuControllerTest
+ *  atest WmTests:InputMethodDialogWindowContextTest
  */
 @Presubmit
 @RunWith(WindowTestRunner.class)
-public class InputMethodMenuControllerTest extends WindowTestsBase {
+public class InputMethodDialogWindowContextTest extends WindowTestsBase {
 
-    private InputMethodMenuController mController;
+    private InputMethodDialogWindowContext mWindowContext;
     private DualDisplayAreaGroupPolicyTest.DualDisplayContent mSecondaryDisplay;
 
     private IWindowManager mIWindowManager;
@@ -80,7 +78,7 @@ public class InputMethodMenuControllerTest extends WindowTestsBase {
                 new DualDisplayAreaGroupPolicyTest.DualDisplayTestPolicyProvider();
         Mockito.doReturn(policyProvider).when(mWm).getDisplayAreaPolicyProvider();
 
-        mController = new InputMethodMenuController(mock(InputMethodManagerService.class));
+        mWindowContext = new InputMethodDialogWindowContext();
         mSecondaryDisplay = new DualDisplayAreaGroupPolicyTest.DualDisplayContent
                 .Builder(mAtm, 1000, 1000).build();
         mSecondaryDisplay.getDisplayInfo().state = STATE_ON;
@@ -119,21 +117,21 @@ public class InputMethodMenuControllerTest extends WindowTestsBase {
 
     @Test
     public void testGetSettingsContext() {
-        final Context contextOnDefaultDisplay = mController.getSettingsContext(DEFAULT_DISPLAY);
+        final Context contextOnDefaultDisplay = mWindowContext.get(DEFAULT_DISPLAY);
 
         assertImeSwitchContextMetricsValidity(contextOnDefaultDisplay, mDefaultDisplay);
 
         // Obtain the context again and check if the window metrics match the IME container bounds
         // of the secondary display.
-        final Context contextOnSecondaryDisplay = mController.getSettingsContext(
-                mSecondaryDisplay.getDisplayId());
+        final Context contextOnSecondaryDisplay =
+                mWindowContext.get(mSecondaryDisplay.getDisplayId());
 
         assertImeSwitchContextMetricsValidity(contextOnSecondaryDisplay, mSecondaryDisplay);
     }
 
     @Test
     public void testGetSettingsContextOnDualDisplayContent() {
-        final Context context = mController.getSettingsContext(mSecondaryDisplay.getDisplayId());
+        final Context context = mWindowContext.get(mSecondaryDisplay.getDisplayId());
         final WindowTokenClient tokenClient = (WindowTokenClient) context.getWindowContextToken();
         assertNotNull(tokenClient);
         spyOn(tokenClient);
