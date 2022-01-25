@@ -10259,6 +10259,13 @@ public final class Settings {
         public static final String NEARBY_SHARING_COMPONENT = "nearby_sharing_component";
 
         /**
+         * Nearby Sharing Slice URI for the SliceProvider to
+         * read Nearby Sharing scan results and then draw the UI.
+         * @hide
+         */
+        public static final String NEARBY_SHARING_SLICE_URI = "nearby_sharing_slice_uri";
+
+        /**
          * Controls whether aware is enabled.
          * @hide
          */
