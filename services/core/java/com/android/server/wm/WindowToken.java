@@ -430,6 +430,13 @@ class WindowToken extends WindowContainer<WindowState> {
         return isFixedRotationTransforming() ? mFixedRotationTransformState.mDisplayFrames : null;
     }
 
+    Rect getFixedRotationTransformMaxBounds() {
+        return isFixedRotationTransforming()
+                ? mFixedRotationTransformState.mRotatedOverrideConfiguration.windowConfiguration
+                .getMaxBounds()
+                : null;
+    }
+
     Rect getFixedRotationTransformDisplayBounds() {
         return isFixedRotationTransforming()
                 ? mFixedRotationTransformState.mRotatedOverrideConfiguration.windowConfiguration
@@ -645,14 +652,6 @@ class WindowToken extends WindowContainer<WindowState> {
             super.resetSurfacePositionForAnimationLeash(t);
         }
     }
-
-    /**
-     * Gives a chance to this {@link WindowToken} to adjust the {@link
-     * android.view.WindowManager.LayoutParams} of its windows.
-     */
-    void adjustWindowParams(WindowState win, WindowManager.LayoutParams attrs) {
-    }
-
 
     @CallSuper
     @Override

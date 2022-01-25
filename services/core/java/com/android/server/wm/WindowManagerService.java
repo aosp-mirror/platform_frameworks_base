@@ -2182,7 +2182,7 @@ public class WindowManagerService extends IWindowManager.Stub
             int requestedWidth, int requestedHeight, int viewVisibility, int flags,
             long frameNumber, ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls, Point outSurfaceSize) {
+            InsetsSourceControl[] outActiveControls) {
         Arrays.fill(outActiveControls, null);
         int result = 0;
         boolean configChanged;
@@ -2209,7 +2209,6 @@ public class WindowManagerService extends IWindowManager.Stub
             int privateFlagChanges = 0;
             if (attrs != null) {
                 displayPolicy.adjustWindowParamsLw(win, attrs);
-                win.mToken.adjustWindowParams(win, attrs);
                 attrs.flags = sanitizeFlagSlippery(attrs.flags, win.getName(), uid, pid);
                 attrs.inputFeatures = sanitizeSpyWindow(attrs.inputFeatures, win.getName(), uid,
                         pid);
@@ -2497,11 +2496,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayContent.sendNewConfiguration();
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             }
-            if (winAnimator.mSurfaceController != null) {
-                win.calculateSurfaceBounds(win.getLayoutingAttrs(
-                        win.getWindowConfiguration().getRotation()), mTmpRect);
-                outSurfaceSize.set(mTmpRect.width(), mTmpRect.height());
-            }
             getInsetsSourceControls(win, outActiveControls);
         }
 
@@ -2580,7 +2574,7 @@ public class WindowManagerService extends IWindowManager.Stub
         WindowSurfaceController surfaceController;
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "createSurfaceControl");
-            surfaceController = winAnimator.createSurfaceLocked(win.mAttrs.type);
+            surfaceController = winAnimator.createSurfaceLocked();
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
