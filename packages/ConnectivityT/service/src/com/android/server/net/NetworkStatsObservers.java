@@ -76,7 +76,7 @@ class NetworkStatsObservers {
      */
     public DataUsageRequest register(DataUsageRequest inputRequest, IUsageCallback callback,
             int callingUid, @NetworkStatsAccess.Level int accessLevel) {
-        DataUsageRequest request = buildRequest(inputRequest);
+        DataUsageRequest request = buildRequest(inputRequest, callingUid);
         RequestInfo requestInfo = buildRequestInfo(request, callback, callingUid,
                 accessLevel);
 
@@ -194,10 +194,12 @@ class NetworkStatsObservers {
         }
     }
 
-    private DataUsageRequest buildRequest(DataUsageRequest request) {
-        // Cap the minimum threshold to a safe default to avoid too many callbacks
-        long thresholdInBytes = Math.max(MIN_THRESHOLD_BYTES, request.thresholdInBytes);
-        if (thresholdInBytes < request.thresholdInBytes) {
+    private DataUsageRequest buildRequest(DataUsageRequest request, int callingUid) {
+        // For non-system uid, cap the minimum threshold to a safe default to avoid too
+        // many callbacks.
+        long thresholdInBytes = (callingUid == Process.SYSTEM_UID ? request.thresholdInBytes
+                : Math.max(MIN_THRESHOLD_BYTES, request.thresholdInBytes));
+        if (thresholdInBytes > request.thresholdInBytes) {
             Log.w(TAG, "Threshold was too low for " + request
                     + ". Overriding to a safer default of " + thresholdInBytes + " bytes");
         }
