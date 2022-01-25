@@ -41,7 +41,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.CoreStartable;
-import com.android.systemui.Dependency;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -125,6 +124,7 @@ public final class WMShell extends CoreStartable
     private final SysUiState mSysUiState;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
     private final ProtoTracer mProtoTracer;
+    private final UserInfoController mUserInfoController;
     private final Executor mSysUiMainExecutor;
 
     private boolean mIsSysUiStateValid;
@@ -153,6 +153,7 @@ public final class WMShell extends CoreStartable
             SysUiState sysUiState,
             ProtoTracer protoTracer,
             WakefulnessLifecycle wakefulnessLifecycle,
+            UserInfoController userInfoController,
             @Main Executor sysUiMainExecutor) {
         super(context);
         mCommandQueue = commandQueue;
@@ -171,6 +172,7 @@ public final class WMShell extends CoreStartable
         mShellCommandHandler = shellCommandHandler;
         mCompatUIOptional = sizeCompatUIOptional;
         mDragAndDropOptional = dragAndDropOptional;
+        mUserInfoController = userInfoController;
         mSysUiMainExecutor = sysUiMainExecutor;
     }
 
@@ -231,8 +233,7 @@ public final class WMShell extends CoreStartable
         });
 
         // The media session listener needs to be re-registered when switching users
-        UserInfoController userInfoController = Dependency.get(UserInfoController.class);
-        userInfoController.addCallback((String name, Drawable picture, String userAccount) ->
+        mUserInfoController.addCallback((String name, Drawable picture, String userAccount) ->
                 pip.registerSessionListenerForCurrentUser());
     }
 

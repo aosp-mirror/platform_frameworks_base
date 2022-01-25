@@ -150,7 +150,7 @@ public class GarbageMonitor implements Dumpable {
         mTrackedGarbage = leakDetector.getTrackedGarbage();
         mLeakReporter = leakReporter;
 
-        mDumpTruck = new DumpTruck(mContext);
+        mDumpTruck = new DumpTruck(mContext, this);
 
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
 

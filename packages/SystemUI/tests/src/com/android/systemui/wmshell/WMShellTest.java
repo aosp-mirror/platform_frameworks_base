@@ -32,6 +32,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.common.ShellExecutor;
@@ -79,6 +80,7 @@ public class WMShellTest extends SysuiTestCase {
     @Mock ProtoTracer mProtoTracer;
     @Mock ShellCommandHandler mShellCommandHandler;
     @Mock CompatUI mCompatUI;
+    @Mock UserInfoController mUserInfoController;
     @Mock ShellExecutor mSysUiMainExecutor;
     @Mock DragAndDrop mDragAndDrop;
 
@@ -92,7 +94,7 @@ public class WMShellTest extends SysuiTestCase {
                 Optional.of(mDragAndDrop),
                 mCommandQueue, mConfigurationController, mKeyguardUpdateMonitor,
                 mNavigationModeController, mScreenLifecycle, mSysUiState, mProtoTracer,
-                mWakefulnessLifecycle, mSysUiMainExecutor);
+                mWakefulnessLifecycle, mUserInfoController, mSysUiMainExecutor);
     }
 
     @Test
