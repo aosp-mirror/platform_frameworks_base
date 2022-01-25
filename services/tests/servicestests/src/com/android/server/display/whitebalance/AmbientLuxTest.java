@@ -21,6 +21,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -37,7 +38,9 @@ import android.util.TypedValue;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
+import com.android.server.LocalServices;
 import com.android.server.display.TestUtils;
+import com.android.server.display.color.ColorDisplayService;
 import com.android.server.display.utils.AmbientFilter;
 import com.android.server.display.utils.AmbientFilterStubber;
 
@@ -75,6 +78,7 @@ public final class AmbientLuxTest {
     @Mock private TypedArray mHighLightBiases;
     @Mock private TypedArray mAmbientColorTemperatures;
     @Mock private TypedArray mDisplayColorTemperatures;
+    @Mock private ColorDisplayService.ColorDisplayServiceInternal mColorDisplayServiceInternalMock;
 
     @Before
     public void setUp() throws Exception {
@@ -120,6 +124,18 @@ public final class AmbientLuxTest {
                 R.array.config_displayWhiteBalanceHighLightAmbientBiases))
                 .thenReturn(mHighLightBiases);
         mockThrottler();
+        LocalServices.removeServiceForTest(ColorDisplayService.ColorDisplayServiceInternal.class);
+        LocalServices.addService(ColorDisplayService.ColorDisplayServiceInternal.class,
+                mColorDisplayServiceInternalMock);
+    }
+
+    @Test
+    public void testCalculateAdjustedBrightnessNits() {
+        doReturn(0.9f).when(mColorDisplayServiceInternalMock).getDisplayWhiteBalanceLuminance();
+        DisplayWhiteBalanceController controller =
+                DisplayWhiteBalanceFactory.create(mHandler, mSensorManagerMock, mResourcesSpy);
+        final float adjustedNits = controller.calculateAdjustedBrightnessNits(500f);
+        assertEquals(/* expected= */ 550f, adjustedNits, /* delta= */ 0.001);
     }
 
     @Test
