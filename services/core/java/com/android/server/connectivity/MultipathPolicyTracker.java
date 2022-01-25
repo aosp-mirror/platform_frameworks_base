@@ -18,7 +18,6 @@ package com.android.server.connectivity;
 
 import static android.net.ConnectivityManager.MULTIPATH_PREFERENCE_HANDOVER;
 import static android.net.ConnectivityManager.MULTIPATH_PREFERENCE_RELIABILITY;
-import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
@@ -409,8 +408,8 @@ public class MultipathPolicyTracker {
 
         private void registerUsageCallback(long budget) {
             maybeUnregisterUsageCallback();
-            mStatsManager.registerUsageCallback(mNetworkTemplate, TYPE_MOBILE, budget,
-                    mUsageCallback, mHandler);
+            mStatsManager.registerUsageCallback(mNetworkTemplate, budget,
+                    (command) -> mHandler.post(command), mUsageCallback);
             mMultipathBudget = budget;
         }
 
