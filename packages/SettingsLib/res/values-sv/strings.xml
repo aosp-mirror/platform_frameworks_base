@@ -526,10 +526,8 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Ej registrerad"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Inte tillgängligt"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC-adressen slumpgenereras"</string>
-    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="other">%1$d enheter är anslutna</item>
-      <item quantity="one">%1$d enhet är ansluten</item>
-    </plurals>
+    <!-- no translation found for wifi_tether_connected_summary (5282919920463340158) -->
+    <skip />
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Längre tid."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Kortare tid."</string>
     <string name="cancel" msgid="5665114069455378395">"Avbryt"</string>

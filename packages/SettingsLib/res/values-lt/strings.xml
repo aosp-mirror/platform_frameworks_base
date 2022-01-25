@@ -526,12 +526,8 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Neužregistruota"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Užimta"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC parinktas atsitiktine tvarka"</string>
-    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="one">Prijungtas %1$d įrenginys</item>
-      <item quantity="few">Prijungti %1$d įrenginiai</item>
-      <item quantity="many">Prijungta %1$d įrenginio</item>
-      <item quantity="other">Prijungta %1$d įrenginių</item>
-    </plurals>
+    <!-- no translation found for wifi_tether_connected_summary (5282919920463340158) -->
+    <skip />
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Daugiau laiko."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Mažiau laiko."</string>
     <string name="cancel" msgid="5665114069455378395">"Atšaukti"</string>
