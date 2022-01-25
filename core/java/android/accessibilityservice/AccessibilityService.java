@@ -969,14 +969,6 @@ public abstract class AccessibilityService extends Service {
      * is currently touching or the window with input focus, if the user is not
      * touching any window. It could be from any logical display.
      * <p>
-     * The currently active window is defined as the window that most recently fired one
-     * of the following events:
-     * {@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED},
-     * {@link AccessibilityEvent#TYPE_VIEW_HOVER_ENTER},
-     * {@link AccessibilityEvent#TYPE_VIEW_HOVER_EXIT}.
-     * In other words, the last window shown that also has input focus.
-     * </p>
-     * <p>
      * <strong>Note:</strong> In order to access the root node your service has
      * to declare the capability to retrieve window content by setting the
      * {@link android.R.styleable#AccessibilityService_canRetrieveWindowContent}
@@ -984,10 +976,29 @@ public abstract class AccessibilityService extends Service {
      * </p>
      *
      * @return The root node if this service can retrieve window content.
+     * @see AccessibilityWindowInfo#isActive() for more explanation about the active window.
      */
     public AccessibilityNodeInfo getRootInActiveWindow() {
+        return getRootInActiveWindow(AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_HYBRID);
+    }
+
+    /**
+     * Gets the root node in the currently active window if this service
+     * can retrieve window content. The active window is the one that the user
+     * is currently touching or the window with input focus, if the user is not
+     * touching any window. It could be from any logical display.
+     *
+     * @param prefetchingStrategy the prefetching strategy.
+     * @return The root node if this service can retrieve window content.
+     *
+     * @see #getRootInActiveWindow()
+     * @see AccessibilityNodeInfo#getParent(int) for a description of prefetching.
+     */
+    @Nullable
+    public AccessibilityNodeInfo getRootInActiveWindow(
+            @AccessibilityNodeInfo.PrefetchingStrategy int prefetchingStrategy) {
         return AccessibilityInteractionClient.getInstance(this).getRootInActiveWindow(
-                mConnectionId);
+                mConnectionId, prefetchingStrategy);
     }
 
     /**

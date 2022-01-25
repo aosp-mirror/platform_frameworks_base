@@ -728,7 +728,8 @@ public final class UiAutomation {
         }
         // Calling out without a lock held.
         return AccessibilityInteractionClient.getInstance()
-                .getRootInActiveWindow(connectionId);
+                .getRootInActiveWindow(connectionId,
+                        AccessibilityNodeInfo.FLAG_PREFETCH_DESCENDANTS_HYBRID);
     }
 
     /**
