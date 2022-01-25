@@ -23,7 +23,7 @@ import android.content.ComponentName;
  *
  * @hide
  */
-interface IVirtualDeviceActivityListener {
+oneway interface IVirtualDeviceActivityListener {
 
     /**
      * Called when the top activity is changed.
