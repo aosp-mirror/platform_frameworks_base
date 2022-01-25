@@ -297,6 +297,20 @@ package android.net {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkStateSnapshot> CREATOR;
   }
 
+  public class NetworkStatsCollection {
+    method @NonNull public java.util.Map<android.net.NetworkStatsCollection.Key,android.net.NetworkStatsHistory> getEntries();
+  }
+
+  public static final class NetworkStatsCollection.Builder {
+    ctor public NetworkStatsCollection.Builder(long);
+    method @NonNull public android.net.NetworkStatsCollection.Builder addEntry(@NonNull android.net.NetworkStatsCollection.Key, @NonNull android.net.NetworkStatsHistory);
+    method @NonNull public android.net.NetworkStatsCollection build();
+  }
+
+  public static class NetworkStatsCollection.Key {
+    ctor public NetworkStatsCollection.Key(@NonNull java.util.Set<android.net.NetworkIdentity>, int, int, int);
+  }
+
   public final class NetworkStatsHistory implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public java.util.List<android.net.NetworkStatsHistory.Entry> getEntries();
