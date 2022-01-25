@@ -27,6 +27,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
@@ -34,6 +35,7 @@ import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@Ignore("b/216286227")
 class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     private lateinit var controllerReceiver: MediaTttChipControllerReceiver
 
