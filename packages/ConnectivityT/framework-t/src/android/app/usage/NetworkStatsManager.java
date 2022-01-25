@@ -21,6 +21,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -39,14 +40,11 @@ import android.net.NetworkStack;
 import android.net.NetworkStateSnapshot;
 import android.net.NetworkTemplate;
 import android.net.UnderlyingNetworkInfo;
+import android.net.netstats.IUsageCallback;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.net.netstats.provider.NetworkStatsProvider;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.os.Messenger;
 import android.os.RemoteException;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -57,6 +55,7 @@ import com.android.net.module.util.NetworkIdentityUtils;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * Provides access to network usage history and statistics. Usage data is collected in
@@ -723,26 +722,35 @@ public class NetworkStatsManager {
         }
     }
 
-    /** @hide */
-    public void registerUsageCallback(NetworkTemplate template, int networkType,
-            long thresholdBytes, UsageCallback callback, @Nullable Handler handler) {
+    /**
+     * Registers to receive notifications about data usage on specified networks.
+     *
+     * <p>The callbacks will continue to be called as long as the process is alive or
+     * {@link #unregisterUsageCallback} is called.
+     *
+     * @param template Template used to match networks. See {@link NetworkTemplate}.
+     * @param thresholdBytes Threshold in bytes to be notified on.
+     * @param executor The executor on which callback will be invoked. The provided {@link Executor}
+     *                 must run callback sequentially, otherwise the order of callbacks cannot be
+     *                 guaranteed.
+     * @param callback The {@link UsageCallback} that the system will call when data usage
+     *                 has exceeded the specified threshold.
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public void registerUsageCallback(@NonNull NetworkTemplate template, long thresholdBytes,
+            @NonNull @CallbackExecutor Executor executor, @NonNull UsageCallback callback) {
+        Objects.requireNonNull(template, "NetworkTemplate cannot be null");
         Objects.requireNonNull(callback, "UsageCallback cannot be null");
+        Objects.requireNonNull(executor, "Executor cannot be null");
 
-        final Looper looper;
-        if (handler == null) {
-            looper = Looper.myLooper();
-        } else {
-            looper = handler.getLooper();
-        }
-
-        DataUsageRequest request = new DataUsageRequest(DataUsageRequest.REQUEST_ID_UNSET,
+        final DataUsageRequest request = new DataUsageRequest(DataUsageRequest.REQUEST_ID_UNSET,
                 template, thresholdBytes);
         try {
-            CallbackHandler callbackHandler = new CallbackHandler(looper, networkType,
-                    template.getSubscriberId(), callback);
+            final UsageCallbackWrapper callbackWrapper =
+                    new UsageCallbackWrapper(executor, callback);
             callback.request = mService.registerUsageCallback(
-                    mContext.getOpPackageName(), request, new Messenger(callbackHandler),
-                    new Binder());
+                    mContext.getOpPackageName(), request, callbackWrapper);
             if (DBG) Log.d(TAG, "registerUsageCallback returned " + callback.request);
 
             if (callback.request == null) {
@@ -795,12 +803,15 @@ public class NetworkStatsManager {
         NetworkTemplate template = createTemplate(networkType, subscriberId);
         if (DBG) {
             Log.d(TAG, "registerUsageCallback called with: {"
-                + " networkType=" + networkType
-                + " subscriberId=" + subscriberId
-                + " thresholdBytes=" + thresholdBytes
-                + " }");
+                    + " networkType=" + networkType
+                    + " subscriberId=" + subscriberId
+                    + " thresholdBytes=" + thresholdBytes
+                    + " }");
         }
-        registerUsageCallback(template, networkType, thresholdBytes, callback, handler);
+
+        final Executor executor = handler == null ? r -> r.run() : r -> handler.post(r);
+
+        registerUsageCallback(template, thresholdBytes, executor, callback);
     }
 
     /**
@@ -825,6 +836,26 @@ public class NetworkStatsManager {
      * Base class for usage callbacks. Should be extended by applications wanting notifications.
      */
     public static abstract class UsageCallback {
+        /**
+         * Called when data usage has reached the given threshold.
+         *
+         * Called by {@code NetworkStatsService} when the registered threshold is reached.
+         * If a caller implements {@link #onThresholdReached(NetworkTemplate)}, the system
+         * will not call {@link #onThresholdReached(int, String)}.
+         *
+         * @param template The {@link NetworkTemplate} that associated with this callback.
+         * @hide
+         */
+        @SystemApi(client = MODULE_LIBRARIES)
+        public void onThresholdReached(@NonNull NetworkTemplate template) {
+            // Backward compatibility for those who didn't override this function.
+            final int networkType = networkTypeForTemplate(template);
+            if (networkType != ConnectivityManager.TYPE_NONE) {
+                final String subscriberId = template.getSubscriberIds().isEmpty() ? null
+                        : template.getSubscriberIds().iterator().next();
+                onThresholdReached(networkType, subscriberId);
+            }
+        }
 
         /**
          * Called when data usage has reached the given threshold.
@@ -835,6 +866,25 @@ public class NetworkStatsManager {
          * @hide used for internal bookkeeping
          */
         private DataUsageRequest request;
+
+        /**
+         * Get network type from a template if feasible.
+         *
+         * @param template the target {@link NetworkTemplate}.
+         * @return legacy network type, only supports for the types which is already supported in
+         *         {@link #registerUsageCallback(int, String, long, UsageCallback, Handler)}.
+         *         {@link ConnectivityManager#TYPE_NONE} for other types.
+         */
+        private static int networkTypeForTemplate(@NonNull NetworkTemplate template) {
+            switch (template.getMatchRule()) {
+                case NetworkTemplate.MATCH_MOBILE:
+                    return ConnectivityManager.TYPE_MOBILE;
+                case NetworkTemplate.MATCH_WIFI:
+                    return ConnectivityManager.TYPE_WIFI;
+                default:
+                    return ConnectivityManager.TYPE_NONE;
+            }
+        }
     }
 
     /**
@@ -953,43 +1003,32 @@ public class NetworkStatsManager {
         }
     }
 
-    private static class CallbackHandler extends Handler {
-        private final int mNetworkType;
-        private final String mSubscriberId;
-        private UsageCallback mCallback;
+    private static class UsageCallbackWrapper extends IUsageCallback.Stub {
+        // Null if unregistered.
+        private volatile UsageCallback mCallback;
 
-        CallbackHandler(Looper looper, int networkType, String subscriberId,
-                UsageCallback callback) {
-            super(looper);
-            mNetworkType = networkType;
-            mSubscriberId = subscriberId;
+        private final Executor mExecutor;
+
+        UsageCallbackWrapper(@NonNull Executor executor, @NonNull UsageCallback callback) {
             mCallback = callback;
+            mExecutor = executor;
         }
 
         @Override
-        public void handleMessage(Message message) {
-            DataUsageRequest request =
-                    (DataUsageRequest) getObject(message, DataUsageRequest.PARCELABLE_KEY);
-
-            switch (message.what) {
-                case CALLBACK_LIMIT_REACHED: {
-                    if (mCallback != null) {
-                        mCallback.onThresholdReached(mNetworkType, mSubscriberId);
-                    } else {
-                        Log.e(TAG, "limit reached with released callback for " + request);
-                    }
-                    break;
-                }
-                case CALLBACK_RELEASED: {
-                    if (DBG) Log.d(TAG, "callback released for " + request);
-                    mCallback = null;
-                    break;
-                }
+        public void onThresholdReached(DataUsageRequest request) {
+            // Copy it to a local variable in case mCallback changed inside the if condition.
+            final UsageCallback callback = mCallback;
+            if (callback != null) {
+                mExecutor.execute(() -> callback.onThresholdReached(request.template));
+            } else {
+                Log.e(TAG, "onThresholdReached with released callback for " + request);
             }
         }
 
-        private static Object getObject(Message msg, String key) {
-            return msg.getData().getParcelable(key);
+        @Override
+        public void onCallbackReleased(DataUsageRequest request) {
+            if (DBG) Log.d(TAG, "callback released for " + request);
+            mCallback = null;
         }
     }
 
