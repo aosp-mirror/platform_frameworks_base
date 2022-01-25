@@ -134,6 +134,9 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private final Provider<Optional<StageTaskUnfoldController>> mUnfoldControllerProvider;
 
     private StageCoordinator mStageCoordinator;
+    // Only used for the legacy recents animation from splitscreen to allow the tasks to be animated
+    // outside the bounds of the roots by being reparented into a higher level fullscreen container
+    private SurfaceControl mSplitTasksContainerLayer;
 
     public SplitScreenController(ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue, Context context,
@@ -364,20 +367,24 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
 
     RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel, RemoteAnimationTarget[] apps) {
         if (apps.length < 2) return null;
+        SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
+        if (mSplitTasksContainerLayer != null) {
+            // Remove the previous layer before recreating
+            transaction.remove(mSplitTasksContainerLayer);
+        }
         final SurfaceControl.Builder builder = new SurfaceControl.Builder(new SurfaceSession())
                 .setContainerLayer()
                 .setName("RecentsAnimationSplitTasks")
                 .setHidden(false)
                 .setCallsite("SplitScreenController#onGoingtoRecentsLegacy");
         mRootTDAOrganizer.attachToDisplayArea(DEFAULT_DISPLAY, builder);
-        SurfaceControl sc = builder.build();
-        SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
+        mSplitTasksContainerLayer = builder.build();
 
         // Ensure that we order these in the parent in the right z-order as their previous order
         Arrays.sort(apps, (a1, a2) -> a1.prefixOrderIndex - a2.prefixOrderIndex);
         int layer = 1;
         for (RemoteAnimationTarget appTarget : apps) {
-            transaction.reparent(appTarget.leash, sc);
+            transaction.reparent(appTarget.leash, mSplitTasksContainerLayer);
             transaction.setPosition(appTarget.leash, appTarget.screenSpaceBounds.left,
                     appTarget.screenSpaceBounds.top);
             transaction.setLayer(appTarget.leash, layer++);
