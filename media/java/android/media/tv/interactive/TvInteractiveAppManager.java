@@ -57,7 +57,7 @@ import java.util.concurrent.Executor;
 
 /**
  * Central system API to the overall TV interactive application framework (TIAF) architecture, which
- * arbitrates interaction between applications and interactive apps.
+ * arbitrates interaction between Android applications and TV interactive apps.
  */
 @SystemService(Context.TV_INTERACTIVE_APP_SERVICE)
 public final class TvInteractiveAppManager {
@@ -75,22 +75,22 @@ public final class TvInteractiveAppManager {
 
     /**
      * Unrealized state of interactive app service.
-     * @hide
      */
     public static final int SERVICE_STATE_UNREALIZED = 1;
     /**
      * Preparing state of interactive app service.
-     * @hide
      */
     public static final int SERVICE_STATE_PREPARING = 2;
     /**
      * Ready state of interactive app service.
-     * @hide
+     *
+     * <p>In this state, the interactive app service is ready, and interactive apps can be started.
+     *
+     * @see TvInteractiveAppView#startInteractiveApp()
      */
     public static final int SERVICE_STATE_READY = 3;
     /**
      * Error state of interactive app service.
-     * @hide
      */
     public static final int SERVICE_STATE_ERROR = 4;
 
@@ -105,17 +105,14 @@ public final class TvInteractiveAppManager {
 
     /**
      * Stopped (or not started) state of interactive application.
-     * @hide
      */
     public static final int INTERACTIVE_APP_STATE_STOPPED = 1;
     /**
      * Running state of interactive application.
-     * @hide
      */
     public static final int INTERACTIVE_APP_STATE_RUNNING = 2;
     /**
      * Error state of interactive application.
-     * @hide
      */
     public static final int INTERACTIVE_APP_STATE_ERROR = 3;
 
@@ -136,45 +133,36 @@ public final class TvInteractiveAppManager {
 
     /**
      * No error.
-     * @hide
      */
     public static final int ERROR_NONE = 0;
     /**
      * Unknown error code.
-     * @hide
      */
     public static final int ERROR_UNKNOWN = 1;
     /**
      * Error code for an unsupported channel.
-     * @hide
      */
     public static final int ERROR_NOT_SUPPORTED = 2;
     /**
      * Error code for weak signal.
-     * @hide
      */
     public static final int ERROR_WEAK_SIGNAL = 3;
     /**
      * Error code when resource (e.g. tuner) is unavailable.
-     * @hide
      */
     public static final int ERROR_RESOURCE_UNAVAILABLE = 4;
     /**
      * Error code for blocked contents.
-     * @hide
      */
     public static final int ERROR_BLOCKED = 5;
     /**
      * Error code when the key or module is missing for the encrypted channel.
-     * @hide
      */
     public static final int ERROR_ENCRYPTED = 6;
     /**
      * Error code when the current channel is an unknown channel.
-     * @hide
      */
     public static final int ERROR_UNKNOWN_CHANNEL = 7;
-
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -561,7 +549,6 @@ public final class TvInteractiveAppManager {
 
     /**
      * Callback used to monitor status of the TV Interactive App.
-     * @hide
      */
     public abstract static class TvInteractiveAppCallback {
         /**
@@ -796,7 +783,6 @@ public final class TvInteractiveAppManager {
      *
      * @param callback A callback used to monitor status of the TV Interactive App services.
      * @param executor A {@link Executor} that the status change will be delivered to.
-     * @hide
      */
     public void registerCallback(
             @NonNull TvInteractiveAppCallback callback,
@@ -812,7 +798,6 @@ public final class TvInteractiveAppManager {
      * Unregisters the existing {@link TvInteractiveAppCallback}.
      *
      * @param callback The existing callback to remove.
-     * @hide
      */
     public void unregisterCallback(@NonNull final TvInteractiveAppCallback callback) {
         Preconditions.checkNotNull(callback);
