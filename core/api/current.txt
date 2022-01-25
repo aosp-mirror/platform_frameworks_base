@@ -42344,6 +42344,7 @@ package android.telephony {
     field public static final String KEY_SIP_TIMER_T1_MILLIS_INT = "ims.sip_timer_t1_millis_int";
     field public static final String KEY_SIP_TIMER_T2_MILLIS_INT = "ims.sip_timer_t2_millis_int";
     field public static final String KEY_SIP_TIMER_T4_MILLIS_INT = "ims.sip_timer_t4_millis_int";
+    field public static final String KEY_SUPPORTED_RATS_INT_ARRAY = "ims.supported_rats_int_array";
     field public static final String KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT = "ims.wifi_off_deferring_time_millis_int";
     field public static final int NETWORK_TYPE_HOME = 0; // 0x0
     field public static final int NETWORK_TYPE_ROAMING = 1; // 0x1
@@ -42364,6 +42365,7 @@ package android.telephony {
     field public static final String KEY_EMERGENCY_QOS_PRECONDITION_SUPPORTED_BOOL = "imsemergency.emergency_qos_precondition_supported_bool";
     field public static final String KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT = "imsemergency.emergency_registration_timer_millis_int";
     field public static final String KEY_PREFIX = "imsemergency.";
+    field public static final String KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT = "imsemergency.refresh_geolocation_timeout_millis_int";
     field public static final String KEY_RETRY_EMERGENCY_ON_IMS_PDN_BOOL = "imsemergency.retry_emergency_on_ims_pdn_bool";
   }
 
@@ -42373,7 +42375,6 @@ package android.telephony {
     field public static final String KEY_T140_PAYLOAD_TYPE_INT = "imsrtt.t140_payload_type_int";
     field public static final String KEY_TEXT_AS_BANDWIDTH_KBPS_INT = "imsrtt.text_as_bandwidth_kbps_int";
     field public static final String KEY_TEXT_CODEC_CAPABILITY_PAYLOAD_TYPES_BUNDLE = "imsrtt.text_codec_capability_payload_types_bundle";
-    field public static final String KEY_TEXT_INACTIVITY_CALL_END_REASONS_INT_ARRAY = "imsrtt.text_inactivity_call_end_reasons_int_array";
     field public static final String KEY_TEXT_ON_DEFAULT_BEARER_SUPPORTED_BOOL = "imsrtt.text_on_default_bearer_supported_bool";
     field public static final String KEY_TEXT_QOS_PRECONDITION_SUPPORTED_BOOL = "imsrtt.text_qos_precondition_supported_bool";
     field public static final String KEY_TEXT_RR_BANDWIDTH_BPS_INT = "imsrtt.text_rr_bandwidth_bps_int";
@@ -42409,6 +42410,7 @@ package android.telephony {
     field public static final String KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL = "imsss.ut_requires_ims_registration_bool";
     field public static final String KEY_UT_SERVER_BASED_SERVICES_INT_ARRAY = "imsss.ut_server_based_services_int_array";
     field public static final String KEY_UT_SUPPORTED_WHEN_PS_DATA_OFF_BOOL = "imsss.ut_supported_when_ps_data_off_bool";
+    field public static final String KEY_UT_SUPPORTED_WHEN_ROAMING_BOOL = "imsss.ut_supported_when_roaming_bool";
     field public static final String KEY_UT_TERMINAL_BASED_SERVICES_INT_ARRAY = "imsss.ut_terminal_based_services_int_array";
     field public static final String KEY_UT_TRANSPORT_TYPE_INT = "imsss.ut_transport_type_int";
     field public static final String KEY_XCAP_OVER_UT_SUPPORTED_RATS_INT_ARRAY = "imsss.xcap_over_ut_supported_rats_int_array";
@@ -42508,6 +42510,7 @@ package android.telephony {
     field public static final String KEY_RINGBACK_TIMER_MILLIS_INT = "imsvoice.ringback_timer_millis_int";
     field public static final String KEY_RINGING_TIMER_MILLIS_INT = "imsvoice.ringing_timer_millis_int";
     field public static final String KEY_SESSION_EXPIRES_TIMER_SEC_INT = "imsvoice.session_expires_timer_sec_int";
+    field public static final String KEY_SESSION_PRIVACY_TYPE_INT = "imsvoice.session_privacy_type_int";
     field public static final String KEY_SESSION_REFRESHER_TYPE_INT = "imsvoice.session_refresher_type_int";
     field public static final String KEY_SESSION_REFRESH_METHOD_INT = "imsvoice.session_refresh_method_int";
     field public static final String KEY_SESSION_TIMER_SUPPORTED_BOOL = "imsvoice.session_timer_supported_bool";
@@ -42517,6 +42520,9 @@ package android.telephony {
     field public static final int MIDCALL_SRVCC_SUPPORT = 3; // 0x3
     field public static final int OCTET_ALIGNED = 1; // 0x1
     field public static final int PREALERTING_SRVCC_SUPPORT = 2; // 0x2
+    field public static final int SESSION_PRIVACY_TYPE_HEADER = 0; // 0x0
+    field public static final int SESSION_PRIVACY_TYPE_ID = 2; // 0x2
+    field public static final int SESSION_PRIVACY_TYPE_NONE = 1; // 0x1
     field public static final int SESSION_REFRESHER_TYPE_UAC = 1; // 0x1
     field public static final int SESSION_REFRESHER_TYPE_UAS = 2; // 0x2
     field public static final int SESSION_REFRESHER_TYPE_UNKNOWN = 0; // 0x0
