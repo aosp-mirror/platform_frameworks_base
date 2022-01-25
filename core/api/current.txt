@@ -57446,8 +57446,8 @@ package android.widget {
     method public void setViewOutlinePreferredRadiusDimen(@IdRes int, @DimenRes int);
     method public void setViewPadding(@IdRes int, @Px int, @Px int, @Px int, @Px int);
     method public void setViewVisibility(@IdRes int, int);
-    method public void showNext(@IdRes int);
-    method public void showPrevious(@IdRes int);
+    method @Deprecated public void showNext(@IdRes int);
+    method @Deprecated public void showPrevious(@IdRes int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.widget.RemoteViews> CREATOR;
     field public static final String EXTRA_CHECKED = "android.widget.extra.CHECKED";
