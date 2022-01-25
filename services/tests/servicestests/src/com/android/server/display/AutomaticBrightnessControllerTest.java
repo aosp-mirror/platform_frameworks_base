@@ -391,4 +391,33 @@ public class AutomaticBrightnessControllerTest {
         listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, 0));
         assertEquals(0.0f, mController.getAmbientLux(), EPSILON);
     }
+
+    @Test
+    public void testHysteresisLevels() {
+        int[] ambientBrighteningThresholds = {100, 200};
+        int[] ambientDarkeningThresholds = {400, 500};
+        int[] ambientThresholdLevels = {500};
+        float ambientDarkeningMinChangeThreshold = 3.0f;
+        float ambientBrighteningMinChangeThreshold = 1.5f;
+        HysteresisLevels hysteresisLevels = new HysteresisLevels(ambientBrighteningThresholds,
+                ambientDarkeningThresholds, ambientThresholdLevels,
+                ambientDarkeningMinChangeThreshold, ambientBrighteningMinChangeThreshold);
+
+        // test low, activate minimum change thresholds.
+        assertEquals(1.5f, hysteresisLevels.getBrighteningThreshold(0.0f), EPSILON);
+        assertEquals(0f, hysteresisLevels.getDarkeningThreshold(0.0f), EPSILON);
+        assertEquals(1f, hysteresisLevels.getDarkeningThreshold(4.0f), EPSILON);
+
+        // test max
+        assertEquals(12000f, hysteresisLevels.getBrighteningThreshold(10000.0f), EPSILON);
+        assertEquals(5000f, hysteresisLevels.getDarkeningThreshold(10000.0f), EPSILON);
+
+        // test just below threshold
+        assertEquals(548.9f, hysteresisLevels.getBrighteningThreshold(499f), EPSILON);
+        assertEquals(299.4f, hysteresisLevels.getDarkeningThreshold(499f), EPSILON);
+
+        // test at (considered above) threshold
+        assertEquals(600f, hysteresisLevels.getBrighteningThreshold(500f), EPSILON);
+        assertEquals(250f, hysteresisLevels.getDarkeningThreshold(500f), EPSILON);
+    }
 }
