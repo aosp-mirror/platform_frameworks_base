@@ -825,6 +825,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     private void fadeExistingPip(boolean show) {
+        if (mLeash == null || !mLeash.isValid()) {
+            Log.w(TAG, "Invalid leash on fadeExistingPip: " + mLeash);
+            return;
+        }
         final float alphaStart = show ? 0 : 1;
         final float alphaEnd = show ? 1 : 0;
         mPipAnimationController
