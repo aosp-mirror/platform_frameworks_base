@@ -30,7 +30,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.AudioSystem;
-import android.media.BtProfileConnectionInfo;
+import android.media.BluetoothProfileConnectionInfo;
 import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
@@ -100,7 +100,7 @@ public class AudioDeviceBrokerTest {
 
         mAudioDeviceBroker.queueOnBluetoothActiveDeviceChanged(
                 new AudioDeviceBroker.BtDeviceChangedData(mFakeBtDevice, null,
-                    BtProfileConnectionInfo.a2dpInfo(true, 1), "testSource"));
+                    BluetoothProfileConnectionInfo.createA2dpInfo(true, 1), "testSource"));
         Thread.sleep(2 * MAX_MESSAGE_HANDLING_DELAY_MS);
         verify(mSpyDevInventory, times(1)).setBluetoothActiveDevice(
                 any(AudioDeviceBroker.BtDeviceInfo.class)
@@ -208,13 +208,13 @@ public class AudioDeviceBrokerTest {
         // first connection: ensure the device is connected as a starting condition for the test
         mAudioDeviceBroker.queueOnBluetoothActiveDeviceChanged(
                 new AudioDeviceBroker.BtDeviceChangedData(mFakeBtDevice, null,
-                    BtProfileConnectionInfo.a2dpInfo(true, 1), "testSource"));
+                    BluetoothProfileConnectionInfo.createA2dpInfo(true, 1), "testSource"));
         Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS);
 
         // disconnection
         mAudioDeviceBroker.queueOnBluetoothActiveDeviceChanged(
                 new AudioDeviceBroker.BtDeviceChangedData(null, mFakeBtDevice,
-                    BtProfileConnectionInfo.a2dpInfo(false, -1), "testSource"));
+                    BluetoothProfileConnectionInfo.createA2dpInfo(false, -1), "testSource"));
         if (delayAfterDisconnection > 0) {
             Thread.sleep(delayAfterDisconnection);
         }
@@ -222,7 +222,7 @@ public class AudioDeviceBrokerTest {
         // reconnection
         mAudioDeviceBroker.queueOnBluetoothActiveDeviceChanged(
                 new AudioDeviceBroker.BtDeviceChangedData(mFakeBtDevice, null,
-                    BtProfileConnectionInfo.a2dpInfo(true, 2), "testSource"));
+                    BluetoothProfileConnectionInfo.createA2dpInfo(true, 2), "testSource"));
         Thread.sleep(AudioService.BECOMING_NOISY_DELAY_MS + MAX_MESSAGE_HANDLING_DELAY_MS);
 
         // Verify disconnection has been cancelled and we're seeing two connections attempts,
