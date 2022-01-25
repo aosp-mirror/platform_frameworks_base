@@ -77,4 +77,7 @@ interface IVirtualDevice {
     void launchPendingIntent(
             int displayId, in PendingIntent pendingIntent, in ResultReceiver resultReceiver);
     PointF getCursorPosition(IBinder token);
+
+    /** Sets whether to show or hide the cursor while this virtual device is active. */
+    void setShowPointerIcon(boolean showPointerIcon);
 }

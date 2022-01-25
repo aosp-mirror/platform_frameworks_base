@@ -64,6 +64,7 @@ import android.os.CombinedVibration;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IInputConstants;
 import android.os.IVibratorStateListener;
 import android.os.InputEventInjectionResult;
 import android.os.InputEventInjectionSync;
@@ -274,10 +275,19 @@ public class InputManagerService extends IInputManager.Stub
     private final Map<String, Integer> mRuntimeAssociations = new ArrayMap<String, Integer>();
     @GuardedBy("mAssociationLock")
     private final Map<String, String> mUniqueIdAssociations = new ArrayMap<>();
-    private final Object mPointerDisplayIdLock = new Object();
+
+    private final Object mAdditionalDisplayInputPropertiesLock = new Object();
+
     // Forces the MouseCursorController to target a specific display id.
-    @GuardedBy("mPointerDisplayIdLock")
+    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
     private int mOverriddenPointerDisplayId = Display.INVALID_DISPLAY;
+    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
+    private final SparseArray<AdditionalDisplayInputProperties> mAdditionalDisplayInputProperties =
+            new SparseArray<>();
+    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
+    private int mIconType = PointerIcon.TYPE_NOT_SPECIFIED;
+    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
+    private PointerIcon mIcon;
 
 
     // Holds all the registered gesture monitors that are implemented as spy windows. The spy
@@ -609,11 +619,26 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     private void setDisplayViewportsInternal(List<DisplayViewport> viewports) {
-        final DisplayViewport[] vArray = new DisplayViewport[viewports.size()];
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            final DisplayViewport[] vArray = new DisplayViewport[viewports.size()];
             for (int i = viewports.size() - 1; i >= 0; --i) {
                 vArray[i] = viewports.get(i);
             }
-        nativeSetDisplayViewports(mPtr, vArray);
+            nativeSetDisplayViewports(mPtr, vArray);
+
+            if (mOverriddenPointerDisplayId != Display.INVALID_DISPLAY) {
+                final AdditionalDisplayInputProperties properties =
+                        mAdditionalDisplayInputProperties.get(mOverriddenPointerDisplayId);
+                if (properties != null) {
+                    updatePointerIconVisibleLocked(properties.pointerIconVisible);
+                    updatePointerAccelerationLocked(properties.pointerAcceleration);
+                    return;
+                }
+            }
+            updatePointerIconVisibleLocked(
+                    AdditionalDisplayInputProperties.DEFAULT_POINTER_ICON_VISIBLE);
+            updatePointerAccelerationLocked(IInputConstants.DEFAULT_POINTER_ACCELERATION);
+        }
     }
 
     /**
@@ -1850,8 +1875,58 @@ public class InputManagerService extends IInputManager.Stub
         nativeSetPointerSpeed(mPtr, speed);
     }
 
-    private void setPointerAcceleration(float acceleration) {
+    private void setPointerAcceleration(float acceleration, int displayId) {
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            AdditionalDisplayInputProperties properties =
+                    mAdditionalDisplayInputProperties.get(displayId);
+            if (properties == null) {
+                properties = new AdditionalDisplayInputProperties();
+                mAdditionalDisplayInputProperties.put(displayId, properties);
+            }
+            properties.pointerAcceleration = acceleration;
+            if (properties.allDefaults()) {
+                mAdditionalDisplayInputProperties.remove(displayId);
+            }
+            if (mOverriddenPointerDisplayId == displayId) {
+                updatePointerAccelerationLocked(acceleration);
+            }
+        }
+    }
+
+    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
+    private void updatePointerAccelerationLocked(float acceleration) {
         nativeSetPointerAcceleration(mPtr, acceleration);
+    }
+
+    private void setPointerIconVisible(boolean visible, int displayId) {
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            AdditionalDisplayInputProperties properties =
+                    mAdditionalDisplayInputProperties.get(displayId);
+            if (properties == null) {
+                properties = new AdditionalDisplayInputProperties();
+                mAdditionalDisplayInputProperties.put(displayId, properties);
+            }
+            properties.pointerIconVisible = visible;
+            if (properties.allDefaults()) {
+                mAdditionalDisplayInputProperties.remove(displayId);
+            }
+            if (mOverriddenPointerDisplayId == displayId) {
+                updatePointerIconVisibleLocked(visible);
+            }
+        }
+    }
+
+    @GuardedBy("mAdditionalDisplayInputPropertiesLock")
+    private void updatePointerIconVisibleLocked(boolean visible) {
+        if (visible) {
+            if (mIconType == PointerIcon.TYPE_CUSTOM) {
+                nativeSetCustomPointerIcon(mPtr, mIcon);
+            } else {
+                nativeSetPointerIconType(mPtr, mIconType);
+            }
+        } else {
+            nativeSetPointerIconType(mPtr, PointerIcon.TYPE_NULL);
+        }
     }
 
     private void registerPointerSpeedSettingObserver() {
@@ -1988,11 +2063,25 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     private void setVirtualMousePointerDisplayId(int displayId) {
-        synchronized (mPointerDisplayIdLock) {
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
             mOverriddenPointerDisplayId = displayId;
+            if (displayId != Display.INVALID_DISPLAY) {
+                final AdditionalDisplayInputProperties properties =
+                        mAdditionalDisplayInputProperties.get(displayId);
+                if (properties != null) {
+                    updatePointerAccelerationLocked(properties.pointerAcceleration);
+                    updatePointerIconVisibleLocked(properties.pointerIconVisible);
+                }
+            }
         }
         // TODO(b/215597605): trigger MousePositionTracker update
         nativeNotifyPointerDisplayIdChanged(mPtr);
+    }
+
+    private int getVirtualMousePointerDisplayId() {
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            return mOverriddenPointerDisplayId;
+        }
     }
 
     private void setDisplayEligibilityForPointerCapture(int displayId, boolean isEligible) {
@@ -2283,15 +2372,44 @@ public class InputManagerService extends IInputManager.Stub
 
     // Binder call
     @Override
-    public void setPointerIconType(int iconId) {
-        nativeSetPointerIconType(mPtr, iconId);
+    public void setPointerIconType(int iconType) {
+        if (iconType == PointerIcon.TYPE_CUSTOM) {
+            throw new IllegalArgumentException("Use setCustomPointerIcon to set custom pointers");
+        }
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            mIcon = null;
+            mIconType = iconType;
+            if (mOverriddenPointerDisplayId != Display.INVALID_DISPLAY) {
+                final AdditionalDisplayInputProperties properties =
+                        mAdditionalDisplayInputProperties.get(mOverriddenPointerDisplayId);
+                if (properties == null || properties.pointerIconVisible) {
+                    nativeSetPointerIconType(mPtr, mIconType);
+                }
+            } else {
+                nativeSetPointerIconType(mPtr, mIconType);
+            }
+        }
     }
 
     // Binder call
     @Override
     public void setCustomPointerIcon(PointerIcon icon) {
         Objects.requireNonNull(icon);
-        nativeSetCustomPointerIcon(mPtr, icon);
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            mIconType = PointerIcon.TYPE_CUSTOM;
+            mIcon = icon;
+            if (mOverriddenPointerDisplayId != Display.INVALID_DISPLAY) {
+                final AdditionalDisplayInputProperties properties =
+                        mAdditionalDisplayInputProperties.get(mOverriddenPointerDisplayId);
+                if (properties == null || properties.pointerIconVisible) {
+                    // Only set the icon if it is not currently hidden; otherwise, it will be set
+                    // once it's no longer hidden.
+                    nativeSetCustomPointerIcon(mPtr, mIcon);
+                }
+            } else {
+                nativeSetCustomPointerIcon(mPtr, mIcon);
+            }
+        }
     }
 
     /**
@@ -2620,6 +2738,7 @@ public class InputManagerService extends IInputManager.Stub
         pw.println("Input Manager Service (Java) State:");
         dumpAssociations(pw, "  " /*prefix*/);
         dumpSpyWindowGestureMonitors(pw, "  " /*prefix*/);
+        dumpDisplayInputPropertiesValues(pw, "  " /* prefix */);
     }
 
     private void dumpAssociations(PrintWriter pw, String prefix) {
@@ -2660,6 +2779,25 @@ public class InputManagerService extends IInputManager.Stub
         }
     }
 
+    private void dumpDisplayInputPropertiesValues(PrintWriter pw, String prefix) {
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
+            if (mAdditionalDisplayInputProperties.size() != 0) {
+                pw.println(prefix + "mAdditionalDisplayInputProperties:");
+                for (int i = 0; i < mAdditionalDisplayInputProperties.size(); i++) {
+                    pw.println(prefix + "  displayId: "
+                            + mAdditionalDisplayInputProperties.keyAt(i));
+                    final AdditionalDisplayInputProperties properties =
+                            mAdditionalDisplayInputProperties.valueAt(i);
+                    pw.println(prefix + "  pointerAcceleration: " + properties.pointerAcceleration);
+                    pw.println(prefix + "  pointerIconVisible: " + properties.pointerIconVisible);
+                }
+            }
+            if (mOverriddenPointerDisplayId != Display.INVALID_DISPLAY) {
+                pw.println(prefix + "mOverriddenPointerDisplayId: " + mOverriddenPointerDisplayId);
+            }
+        }
+    }
+
     private boolean checkCallingPermission(String permission, String func) {
         // Quick check: if the calling permission is me, it's all okay.
         if (Binder.getCallingPid() == Process.myPid()) {
@@ -2683,8 +2821,8 @@ public class InputManagerService extends IInputManager.Stub
         synchronized (mInputFilterLock) { }
         synchronized (mAssociationsLock) { /* Test if blocked by associations lock. */}
         synchronized (mLidSwitchLock) { /* Test if blocked by lid switch lock. */ }
-        synchronized (mPointerDisplayIdLock) { /* Test if blocked by pointer display id lock */ }
         synchronized (mInputMonitors) { /* Test if blocked by input monitor lock. */ }
+        synchronized (mAdditionalDisplayInputPropertiesLock) { /* Test if blocked by props lock */ }
         nativeMonitor(mPtr);
     }
 
@@ -3102,7 +3240,7 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     private int getPointerDisplayId() {
-        synchronized (mPointerDisplayIdLock) {
+        synchronized (mAdditionalDisplayInputPropertiesLock) {
             // Prefer the override to all other displays.
             if (mOverriddenPointerDisplayId != Display.INVALID_DISPLAY) {
                 return mOverriddenPointerDisplayId;
@@ -3592,18 +3730,28 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
+        public int getVirtualMousePointerDisplayId() {
+            return InputManagerService.this.getVirtualMousePointerDisplayId();
+        }
+
+        @Override
         public PointF getCursorPosition() {
             return mWindowManagerCallbacks.getCursorPosition();
         }
 
         @Override
-        public void setPointerAcceleration(float acceleration) {
-            InputManagerService.this.setPointerAcceleration(acceleration);
+        public void setPointerAcceleration(float acceleration, int displayId) {
+            InputManagerService.this.setPointerAcceleration(acceleration, displayId);
         }
 
         @Override
         public void setDisplayEligibilityForPointerCapture(int displayId, boolean isEligible) {
             InputManagerService.this.setDisplayEligibilityForPointerCapture(displayId, isEligible);
+        }
+
+        @Override
+        public void setPointerIconVisible(boolean visible, int displayId) {
+            InputManagerService.this.setPointerIconVisible(visible, displayId);
         }
 
         @Override
@@ -3633,4 +3781,21 @@ public class InputManagerService extends IInputManager.Stub
         new InputShellCommand().exec(this, in, out, err, args, callback, resultReceiver);
     }
 
+    private static class AdditionalDisplayInputProperties {
+
+        static final boolean DEFAULT_POINTER_ICON_VISIBLE = true;
+        static final float DEFAULT_POINTER_ACCELERATION =
+                (float) IInputConstants.DEFAULT_POINTER_ACCELERATION;
+
+        // The pointer acceleration for this display.
+        public float pointerAcceleration = DEFAULT_POINTER_ACCELERATION;
+
+        // Whether the pointer icon should be visible or hidden on this display.
+        public boolean pointerIconVisible = DEFAULT_POINTER_ICON_VISIBLE;
+
+        public boolean allDefaults() {
+            return Float.compare(pointerAcceleration, DEFAULT_POINTER_ACCELERATION) == 0
+                    && pointerIconVisible == DEFAULT_POINTER_ICON_VISIBLE;
+        }
+    }
 }
