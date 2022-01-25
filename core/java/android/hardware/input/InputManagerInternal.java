@@ -90,6 +90,12 @@ public abstract class InputManagerInternal {
     public abstract PointF getCursorPosition();
 
     /**
+     * Sets the pointer acceleration.
+     * See {@code frameworks/native/include/input/VelocityControl.h#VelocityControlParameters}.
+     */
+    public abstract void setPointerAcceleration(float acceleration);
+
+    /**
      * Sets the eligibility of windows on a given display for pointer capture. If a display is
      * marked ineligible, requests to enable pointer capture for windows on that display will be
      * ignored.
