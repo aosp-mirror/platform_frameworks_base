@@ -938,6 +938,19 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
     }
 
+    /**
+     * Remove frame rate override due to mode switch
+     */
+    private void resetFps(String packageName, @UserIdInt int userId) {
+        try {
+            final float fps = 0.0f;
+            final int uid = mPackageManager.getPackageUidAsUser(packageName, userId);
+            nativeSetOverrideFrameRate(uid, fps);
+        } catch (PackageManager.NameNotFoundException e) {
+            return;
+        }
+    }
+
     private void enableCompatScale(String packageName, long scaleId) {
         final long uid = Binder.clearCallingIdentity();
         try {
@@ -1030,6 +1043,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         if (gameMode == GameManager.GAME_MODE_STANDARD
                 || gameMode == GameManager.GAME_MODE_UNSUPPORTED) {
             disableCompatScale(packageName);
+            resetFps(packageName, userId);
             return;
         }
         GamePackageConfiguration packageConfig = null;
