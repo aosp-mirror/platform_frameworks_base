@@ -127,8 +127,9 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
     }
 
     public void unbindLocked() {
-        // If requested ime
-        mSystemSupport.unbindImeLocked(this);
+        if (requestImeApis()) {
+            mSystemSupport.unbindImeLocked(this);
+        }
         mContext.unbindService(this);
         AccessibilityUserState userState = mUserStateWeakReference.get();
         if (userState == null) return;
@@ -190,8 +191,9 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             // the new configuration (for example, initializing the input filter).
             mMainHandler.sendMessage(obtainMessage(
                     AccessibilityServiceConnection::initializeService, this));
-            //if (service.mRequestedIme) {
-            mSystemSupport.requestImeLocked(this);
+            if (requestImeApis()) {
+                mSystemSupport.requestImeLocked(this);
+            }
         }
     }
 
@@ -375,7 +377,9 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
             if (!isConnectedLocked()) {
                 return;
             }
-            mSystemSupport.unbindImeLocked(this);
+            if (requestImeApis()) {
+                mSystemSupport.unbindImeLocked(this);
+            }
             mAccessibilityServiceInfo.crashed = true;
             AccessibilityUserState userState = mUserStateWeakReference.get();
             if (userState != null) {
@@ -515,6 +519,10 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 AccessibilityServiceConnection::notifyTouchStateInternal,
                 AccessibilityServiceConnection.this, displayId, state);
         mMainHandler.sendMessage(msg);
+    }
+
+    public boolean requestImeApis() {
+        return mRequestImeApis;
     }
 
     private void notifyMotionEventInternal(MotionEvent event) {

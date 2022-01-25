@@ -4372,10 +4372,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             userState = getCurrentUserStateLocked();
             for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
                 final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
-                // TODO(b/187453053): mRequestedIme implementation
-                //if (service.mRequestedIme) {
-                service.bindInputLocked(binding);
-                //}
+                if (service.requestImeApis()) {
+                    service.bindInputLocked(binding);
+                }
             }
         }
     }
@@ -4390,10 +4389,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             userState = getCurrentUserStateLocked();
             for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
                 final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
-                // TODO(187453053): mRequestedIme implementation
-                //if (service.mRequestedIme) {
-                service.unbindInputLocked();
-                //}
+                if (service.requestImeApis()) {
+                    service.unbindInputLocked();
+                }
             }
         }
     }
@@ -4403,7 +4401,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     public void startInput(IBinder startInputToken, IInputContext inputContext,
             EditorInfo editorInfo, boolean restarting) {
-        //TODO(b/187453053): including the java doc
         AccessibilityUserState userState;
         synchronized (mLock) {
             // Keep records of these in case new Accessibility Services are enabled.
@@ -4414,10 +4411,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             userState = getCurrentUserStateLocked();
             for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
                 final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
-                // TODO(b/187453053): mRequestedIme implementation
-                //if (service.mRequestedIme) {
-                service.startInputLocked(startInputToken, inputContext, editorInfo, restarting);
-                //}
+                if (service.requestImeApis()) {
+                    service.startInputLocked(startInputToken, inputContext, editorInfo, restarting);
+                }
             }
         }
     }
@@ -4432,10 +4428,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             userState = getCurrentUserStateLocked();
             for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
                 final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
-                // TODO(b/187453053): mRequestedIme implementation
-                //if (service.mRequestedIme) {
-                service.createImeSessionLocked();
-                //}
+                if (service.requestImeApis()) {
+                    service.createImeSessionLocked();
+                }
             }
         }
     }
@@ -4452,11 +4447,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             userState = getCurrentUserStateLocked();
             for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
                 final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
-                // TODO(b/187453053): mRequestedIme implementation
-                if (sessions.contains(service.mId)) {
-                    //if (service.mRequestedIme) {
+                if (sessions.contains(service.mId) && service.requestImeApis()) {
                     service.setImeSessionEnabledLocked(sessions.get(service.mId), enabled);
-                    //}
                 }
             }
         }

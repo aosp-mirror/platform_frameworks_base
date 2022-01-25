@@ -825,10 +825,16 @@ public abstract class AccessibilityService extends Service {
             for (int i = 0; i < mMagnificationControllers.size(); i++) {
                 mMagnificationControllers.valueAt(i).onServiceConnectedLocked();
             }
-            // TODO(b/187453053): If service requested ime capabilities
-            if (!mInputMethodInitialized) {
-                mInputMethod = onCreateInputMethod();
-                mInputMethodInitialized = true;
+            AccessibilityServiceInfo info = getServiceInfo();
+            if (info != null) {
+                boolean requestIme = (info.flags
+                        & AccessibilityServiceInfo.FLAG_INPUT_METHOD_EDITOR) != 0;
+                if (requestIme && !mInputMethodInitialized) {
+                    mInputMethod = onCreateInputMethod();
+                    mInputMethodInitialized = true;
+                }
+            } else {
+                Log.e(LOG_TAG, "AccessibilityServiceInfo is null in dispatchServiceConnected");
             }
         }
         if (mSoftKeyboardController != null) {
@@ -1885,7 +1891,7 @@ public abstract class AccessibilityService extends Service {
     /**
      * The default implementation returns our default {@link InputMethod}. Subclasses can override
      * it to provide their own customized version. Accessibility services need to set the
-     * {@link AccessibilityServiceInfo#FLAG_REQUEST_IME_APIS} flag to use input method APIs.
+     * {@link AccessibilityServiceInfo#FLAG_INPUT_METHOD_EDITOR} flag to use input method APIs.
      *
      * @return the InputMethod.
      */
@@ -1898,7 +1904,7 @@ public abstract class AccessibilityService extends Service {
      * Returns the InputMethod instance after the system calls {@link #onCreateInputMethod()},
      * which may be used to input text or get editable text selection change notifications. It will
      * return null if the accessibility service doesn't set the
-     * {@link AccessibilityServiceInfo#FLAG_REQUEST_IME_APIS} flag or the system doesn't call
+     * {@link AccessibilityServiceInfo#FLAG_INPUT_METHOD_EDITOR} flag or the system doesn't call
      * {@link #onCreateInputMethod()}.
      *
      * @return the InputMethod instance

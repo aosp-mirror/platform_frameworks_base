@@ -390,6 +390,15 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public static final int FLAG_SEND_MOTION_EVENTS = 0x0004000;
 
+    /**
+     * This flag makes the AccessibilityService an input method editor with a subset of input
+     * method editor capabilities: get the {@link android.view.inputmethod.InputConnection} and get
+     * text selection change notifications.
+     *
+     * @see AccessibilityService#getInputMethod()
+     */
+    public static final int FLAG_INPUT_METHOD_EDITOR = 0x0008000;
+
     /** {@hide} */
     public static final int FLAG_FORCE_DIRECT_BOOT_AWARE = 0x00010000;
 
@@ -497,6 +506,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see #FLAG_ENABLE_ACCESSIBILITY_VOLUME
      * @see #FLAG_REQUEST_ACCESSIBILITY_BUTTON
      * @see #FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK
+     * @see #FLAG_INPUT_METHOD_EDITOR
      */
     public int flags;
 
@@ -1332,6 +1342,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "FLAG_REQUEST_FINGERPRINT_GESTURES";
             case FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK:
                 return "FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK";
+            case FLAG_INPUT_METHOD_EDITOR:
+                return "FLAG_INPUT_METHOD_EDITOR";
             default:
                 return null;
         }

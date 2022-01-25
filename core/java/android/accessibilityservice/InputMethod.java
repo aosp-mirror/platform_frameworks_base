@@ -55,7 +55,7 @@ import java.util.concurrent.Executor;
  * developers should override them as needed. Developers should also override
  * {@link AccessibilityService#onCreateInputMethod()} to return
  * their custom InputMethod implementation. Accessibility services also need to set the
- * {@link AccessibilityServiceInfo#FLAG_REQUEST_IME_APIS} flag to use input method APIs.
+ * {@link AccessibilityServiceInfo#FLAG_INPUT_METHOD_EDITOR} flag to use input method APIs.
  */
 public class InputMethod {
     private static final String LOG_TAG = "A11yInputMethod";

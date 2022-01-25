@@ -188,6 +188,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     boolean mLastAccessibilityButtonCallbackState;
 
+    boolean mRequestImeApis;
+
     int mFetchFlags;
 
     long mNotificationTimeout;
@@ -385,6 +387,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 & AccessibilityServiceInfo.FLAG_REQUEST_FINGERPRINT_GESTURES) != 0;
         mRequestAccessibilityButton = (info.flags
                 & AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
+        // TODO(b/218193835): request ime when ime flag is set and clean up when ime flag is unset
+        mRequestImeApis = (info.flags
+                & AccessibilityServiceInfo.FLAG_INPUT_METHOD_EDITOR) != 0;
     }
 
     protected boolean supportsFlagForNotImportantViews(AccessibilityServiceInfo info) {
