@@ -184,6 +184,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         entry.setHeadsUp(false);
         setEntryPinned((HeadsUpEntry) alertEntry, false /* isPinned */);
         EventLogTags.writeSysuiHeadsUpStatus(entry.getKey(), 0 /* visible */);
+        mLogger.logNotificationActuallyRemoved(entry.getKey());
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpStateChanged(entry, false);
         }

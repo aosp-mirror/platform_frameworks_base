@@ -184,6 +184,7 @@ public class NotificationStackScrollLayoutController {
     private final SectionHeaderController mSilentHeaderController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final InteractionJankMonitor mJankMonitor;
+    private final StackStateLogger mStackStateLogger;
 
     private NotificationStackScrollLayout mView;
     private boolean mFadeNotificationsOnDismiss;
@@ -660,7 +661,9 @@ public class NotificationStackScrollLayoutController {
             NotificationRemoteInputManager remoteInputManager,
             VisualStabilityManager visualStabilityManager,
             ShadeController shadeController,
-            InteractionJankMonitor jankMonitor) {
+            InteractionJankMonitor jankMonitor,
+            StackStateLogger stackLogger) {
+        mStackStateLogger = stackLogger;
         mAllowLongPress = allowLongPress;
         mNotificationGutsManager = notificationGutsManager;
         mVisibilityProvider = visibilityProvider;
@@ -712,6 +715,7 @@ public class NotificationStackScrollLayoutController {
 
     public void attach(NotificationStackScrollLayout view) {
         mView = view;
+        mView.setLogger(mStackStateLogger);
         mView.setController(this);
         mView.setTouchHandler(new TouchHandler());
         mView.setStatusBar(mStatusBar);

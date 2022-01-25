@@ -242,6 +242,13 @@ public abstract class StackScrollerDecorView extends ExpandableView {
     }
 
     @Override
+    public void performAddAnimation(long delay, long duration, boolean isHeadsUpAppear,
+            Runnable endRunnable) {
+        // TODO: use delay and duration
+        setContentVisible(true);
+    }
+
+    @Override
     public boolean needsClippingToShelf() {
         return false;
     }

@@ -73,6 +73,14 @@ class HeadsUpManagerLogger @Inject constructor(
         })
     }
 
+    fun logNotificationActuallyRemoved(key: String) {
+        buffer.log(TAG, INFO, {
+            str1 = key
+        }, {
+            "notification removed $str1 "
+        })
+    }
+
     fun logUpdateNotification(key: String, alert: Boolean, hasEntry: Boolean) {
         buffer.log(TAG, INFO, {
             str1 = key
@@ -83,11 +91,12 @@ class HeadsUpManagerLogger @Inject constructor(
         })
     }
 
-    fun logUpdateEntry(updatePostTime: Boolean) {
+    fun logUpdateEntry(key: String, updatePostTime: Boolean) {
         buffer.log(TAG, INFO, {
+            str1 = key
             bool1 = updatePostTime
         }, {
-            "update entry updatePostTime: $bool1"
+            "update entry $key updatePostTime: $bool1"
         })
     }
 
