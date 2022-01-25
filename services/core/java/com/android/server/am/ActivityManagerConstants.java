@@ -44,6 +44,8 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
@@ -1389,6 +1391,7 @@ final class ActivityManagerConstants extends ContentObserver {
         }
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     void dump(PrintWriter pw) {
         pw.println("ACTIVITY MANAGER SETTINGS (dumpsys activity settings) "
                 + Settings.Global.ACTIVITY_MANAGER_CONSTANTS + ":");

@@ -106,6 +106,8 @@ import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.utils.Slogf;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -3235,6 +3237,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         dumpHelp(pw, mDumping);
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     static void dumpHelp(PrintWriter pw, boolean dumping) {
         if (dumping) {
             pw.println("Activity manager dump options:");
