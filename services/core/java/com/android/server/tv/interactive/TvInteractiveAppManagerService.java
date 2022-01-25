@@ -134,7 +134,12 @@ public class TvInteractiveAppManagerService extends SystemService {
 
         for (ResolveInfo ri : services) {
             ServiceInfo si = ri.serviceInfo;
-            // TODO: add BIND_TV_INTERACTIVE_APP permission and check it here
+            if (!android.Manifest.permission.BIND_TV_INTERACTIVE_APP.equals(si.permission)) {
+                Slog.w(TAG, "Skipping TV interactiva app service " + si.name
+                        + ": it does not require the permission "
+                        + android.Manifest.permission.BIND_TV_INTERACTIVE_APP);
+                continue;
+            }
 
             ComponentName component = new ComponentName(si.packageName, si.name);
             try {

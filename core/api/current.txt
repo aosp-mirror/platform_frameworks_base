@@ -50,6 +50,7 @@ package android {
     field public static final String BIND_TELECOM_CONNECTION_SERVICE = "android.permission.BIND_TELECOM_CONNECTION_SERVICE";
     field public static final String BIND_TEXT_SERVICE = "android.permission.BIND_TEXT_SERVICE";
     field public static final String BIND_TV_INPUT = "android.permission.BIND_TV_INPUT";
+    field public static final String BIND_TV_INTERACTIVE_APP = "android.permission.BIND_TV_INTERACTIVE_APP";
     field public static final String BIND_VISUAL_VOICEMAIL_SERVICE = "android.permission.BIND_VISUAL_VOICEMAIL_SERVICE";
     field public static final String BIND_VOICE_INTERACTION = "android.permission.BIND_VOICE_INTERACTION";
     field public static final String BIND_VPN_SERVICE = "android.permission.BIND_VPN_SERVICE";
