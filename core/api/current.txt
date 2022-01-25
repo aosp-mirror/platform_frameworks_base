@@ -7185,6 +7185,7 @@ package android.app.admin {
     method @Nullable public java.util.List<java.lang.String> getPermittedCrossProfileNotificationListeners(@NonNull android.content.ComponentName);
     method @Nullable public java.util.List<java.lang.String> getPermittedInputMethods(@NonNull android.content.ComponentName);
     method public int getPersonalAppsSuspendedReasons(@NonNull android.content.ComponentName);
+    method @NonNull public android.app.admin.PreferentialNetworkServiceConfig getPreferentialNetworkServiceConfig();
     method public int getRequiredPasswordComplexity();
     method public long getRequiredStrongAuthTimeout(@Nullable android.content.ComponentName);
     method public boolean getScreenCaptureDisabled(@Nullable android.content.ComponentName);
@@ -7327,6 +7328,7 @@ package android.app.admin {
     method public boolean setPermittedCrossProfileNotificationListeners(@NonNull android.content.ComponentName, @Nullable java.util.List<java.lang.String>);
     method public boolean setPermittedInputMethods(@NonNull android.content.ComponentName, java.util.List<java.lang.String>);
     method public void setPersonalAppsSuspended(@NonNull android.content.ComponentName, boolean);
+    method public void setPreferentialNetworkServiceConfig(@NonNull android.app.admin.PreferentialNetworkServiceConfig);
     method public void setPreferentialNetworkServiceEnabled(boolean);
     method public void setProfileEnabled(@NonNull android.content.ComponentName);
     method public void setProfileName(@NonNull android.content.ComponentName, String);
@@ -7570,6 +7572,32 @@ package android.app.admin {
     method public String getPackageName();
     method public long getTimestamp();
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.NetworkEvent> CREATOR;
+  }
+
+  public final class PreferentialNetworkServiceConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public int[] getExcludedUids();
+    method @NonNull public int[] getIncludedUids();
+    method public int getNetworkId();
+    method public boolean isEnabled();
+    method public boolean isFallbackToDefaultConnectionAllowed();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.PreferentialNetworkServiceConfig> CREATOR;
+    field public static final int PREFERENTIAL_NETWORK_ID_1 = 1; // 0x1
+    field public static final int PREFERENTIAL_NETWORK_ID_2 = 2; // 0x2
+    field public static final int PREFERENTIAL_NETWORK_ID_3 = 3; // 0x3
+    field public static final int PREFERENTIAL_NETWORK_ID_4 = 4; // 0x4
+    field public static final int PREFERENTIAL_NETWORK_ID_5 = 5; // 0x5
+  }
+
+  public static final class PreferentialNetworkServiceConfig.Builder {
+    ctor public PreferentialNetworkServiceConfig.Builder();
+    method @NonNull public android.app.admin.PreferentialNetworkServiceConfig build();
+    method @NonNull public android.app.admin.PreferentialNetworkServiceConfig.Builder setEnabled(boolean);
+    method @NonNull public android.app.admin.PreferentialNetworkServiceConfig.Builder setExcludedUids(@NonNull int[]);
+    method @NonNull public android.app.admin.PreferentialNetworkServiceConfig.Builder setFallbackToDefaultConnectionAllowed(boolean);
+    method @NonNull public android.app.admin.PreferentialNetworkServiceConfig.Builder setIncludedUids(@NonNull int[]);
+    method @NonNull public android.app.admin.PreferentialNetworkServiceConfig.Builder setNetworkId(int);
   }
 
   public class SecurityLog {
