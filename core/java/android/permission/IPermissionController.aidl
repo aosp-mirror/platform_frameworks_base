@@ -56,6 +56,9 @@ oneway interface IPermissionController {
             in AndroidFuture<String> callback);
     void getUnusedAppCount(
             in AndroidFuture callback);
+    void getHibernationEligibility(
+                in String packageName,
+                in AndroidFuture callback);
     void revokeOwnPermissionsOnKill(in String packageName, in List<String> permissions,
             in AndroidFuture callback);
 }

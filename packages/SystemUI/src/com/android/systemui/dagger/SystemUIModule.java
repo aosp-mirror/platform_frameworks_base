@@ -48,7 +48,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.settings.dagger.SettingsModule;
-import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -186,12 +185,6 @@ public abstract class SystemUIModule {
     @Provides
     static SystemUIFactory getSystemUIFactory() {
         return SystemUIFactory.getInstance();
-    }
-
-    @SysUISingleton
-    @Provides
-    static SmartspaceTransitionController provideSmartspaceTransitionController() {
-        return new SmartspaceTransitionController();
     }
 
     // TODO: This should provided by the WM component

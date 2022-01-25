@@ -14,11 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shared.system.smartspace;
+package com.android.internal.telecom;
 
-import com.android.systemui.shared.system.smartspace.ISmartspaceCallback;
+/**
+ * Internal remote CallEndpointSession interface for streaming app to update the status of the
+ * endpoint.
+ *
+ * @see android.telecom.CallEndpointSession
+ *
+ * {@hide}
+ */
 
-// Controller that keeps track of SmartSpace instances in remote processes (such as Launcher).
-interface ISmartspaceTransitionController {
-    oneway void setSmartspace(ISmartspaceCallback callback);
+oneway interface ICallEndpointSession {
+    void setCallEndpointSessionActivated();
+
+    void setCallEndpointSessionActivationFailed(int reason);
+
+    void setCallEndpointSessionDeactivated();
 }

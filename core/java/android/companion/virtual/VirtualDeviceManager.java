@@ -25,6 +25,7 @@ import android.annotation.SystemService;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.companion.AssociationInfo;
+import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager;
@@ -40,6 +41,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.util.ArrayMap;
 import android.view.Surface;
 
 import java.util.concurrent.Executor;
@@ -87,9 +89,7 @@ public final class VirtualDeviceManager {
             int associationId,
             @NonNull VirtualDeviceParams params) {
         try {
-            IVirtualDevice virtualDevice = mService.createVirtualDevice(
-                    new Binder(), mContext.getPackageName(), associationId, params);
-            return new VirtualDevice(mContext, virtualDevice);
+            return new VirtualDevice(mService, mContext, associationId, params);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -106,10 +106,49 @@ public final class VirtualDeviceManager {
 
         private final Context mContext;
         private final IVirtualDevice mVirtualDevice;
+        private final ArrayMap<ActivityListener, ActivityListenerDelegate> mActivityListeners =
+                new ArrayMap<>();
+        private final IVirtualDeviceActivityListener mActivityListenerBinder =
+                new IVirtualDeviceActivityListener.Stub() {
 
-        private VirtualDevice(Context context, IVirtualDevice virtualDevice) {
+                    @Override
+                    public void onTopActivityChanged(int displayId, ComponentName topActivity) {
+                        final long token = Binder.clearCallingIdentity();
+                        try {
+                            for (int i = 0; i < mActivityListeners.size(); i++) {
+                                mActivityListeners.valueAt(i)
+                                        .onTopActivityChanged(displayId, topActivity);
+                            }
+                        } finally {
+                            Binder.restoreCallingIdentity(token);
+                        }
+                    }
+
+                    @Override
+                    public void onDisplayEmpty(int displayId) {
+                        final long token = Binder.clearCallingIdentity();
+                        try {
+                            for (int i = 0; i < mActivityListeners.size(); i++) {
+                                mActivityListeners.valueAt(i).onDisplayEmpty(displayId);
+                            }
+                        } finally {
+                            Binder.restoreCallingIdentity(token);
+                        }
+                    }
+                };
+
+        private VirtualDevice(
+                IVirtualDeviceManager service,
+                Context context,
+                int associationId,
+                VirtualDeviceParams params) throws RemoteException {
             mContext = context.getApplicationContext();
-            mVirtualDevice = virtualDevice;
+            mVirtualDevice = service.createVirtualDevice(
+                    new Binder(),
+                    mContext.getPackageName(),
+                    associationId,
+                    params,
+                    mActivityListenerBinder);
         }
 
         /**
@@ -137,7 +176,7 @@ public final class VirtualDeviceManager {
                 mVirtualDevice.launchPendingIntent(
                         displayId,
                         pendingIntent,
-                        new ResultReceiver(new Handler(Looper.myLooper())) {
+                        new ResultReceiver(new Handler(Looper.getMainLooper())) {
                             @Override
                             protected void onReceiveResult(int resultCode, Bundle resultData) {
                                 super.onReceiveResult(resultCode, resultData);
@@ -323,6 +362,47 @@ public final class VirtualDeviceManager {
                 throw e.rethrowFromSystemServer();
             }
         }
+
+        /**
+         * Adds an activity listener to listen for events such as top activity change or virtual
+         * display task stack became empty.
+         *
+         * @param listener The listener to add.
+         * @see #removeActivityListener(ActivityListener)
+         * @hide
+         */
+        // TODO(b/194949534): Unhide this API
+        public void addActivityListener(@NonNull ActivityListener listener) {
+            addActivityListener(listener, mContext.getMainExecutor());
+        }
+
+        /**
+         * Adds an activity listener to listen for events such as top activity change or virtual
+         * display task stack became empty.
+         *
+         * @param listener The listener to add.
+         * @param executor The executor where the callback is executed on.
+         * @see #removeActivityListener(ActivityListener)
+         * @hide
+         */
+        // TODO(b/194949534): Unhide this API
+        public void addActivityListener(
+                @NonNull ActivityListener listener, @NonNull Executor executor) {
+            mActivityListeners.put(listener, new ActivityListenerDelegate(listener, executor));
+        }
+
+        /**
+         * Removes an activity listener previously added with
+         * {@link #addActivityListener}.
+         *
+         * @param listener The listener to remove.
+         * @see #addActivityListener(ActivityListener, Executor)
+         * @hide
+         */
+        // TODO(b/194949534): Unhide this API
+        public void removeActivityListener(@NonNull ActivityListener listener) {
+            mActivityListeners.remove(listener);
+        }
     }
 
     /**
@@ -341,5 +421,51 @@ public final class VirtualDeviceManager {
          * Called when the pending intent failed to launch.
          */
         void onLaunchFailed();
+    }
+
+    /**
+     * Listener for activity changes in this virtual device.
+     *
+     * @hide
+     */
+    // TODO(b/194949534): Unhide this API
+    public interface ActivityListener {
+
+        /**
+         * Called when the top activity is changed.
+         *
+         * @param displayId The display ID on which the activity change happened.
+         * @param topActivity The component name of the top activity.
+         */
+        void onTopActivityChanged(int displayId, @NonNull ComponentName topActivity);
+
+        /**
+         * Called when the display becomes empty (e.g. if the user hits back on the last
+         * activity of the root task).
+         *
+         * @param displayId The display ID that became empty.
+         */
+        void onDisplayEmpty(int displayId);
+    }
+
+    /**
+     * A wrapper for {@link ActivityListener} that executes callbacks on the given executor.
+     */
+    private static class ActivityListenerDelegate {
+        @NonNull private final ActivityListener mActivityListener;
+        @NonNull private final Executor mExecutor;
+
+        ActivityListenerDelegate(@NonNull ActivityListener listener, @NonNull Executor executor) {
+            mActivityListener = listener;
+            mExecutor = executor;
+        }
+
+        public void onTopActivityChanged(int displayId, ComponentName topActivity) {
+            mExecutor.execute(() -> mActivityListener.onTopActivityChanged(displayId, topActivity));
+        }
+
+        public void onDisplayEmpty(int displayId) {
+            mExecutor.execute(() -> mActivityListener.onDisplayEmpty(displayId));
+        }
     }
 }

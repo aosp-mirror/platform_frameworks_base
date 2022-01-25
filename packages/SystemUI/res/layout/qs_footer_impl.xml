@@ -43,7 +43,6 @@
                 android:id="@+id/build"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:paddingStart="@dimen/qs_tile_margin_horizontal"
                 android:paddingEnd="4dp"
                 android:layout_weight="1"
                 android:clickable="true"
@@ -61,10 +60,23 @@
                 android:layout_gravity="center_vertical"
                 android:visibility="gone" />
 
-            <View
+            <FrameLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1" />
+                android:layout_weight="1">
+                <com.android.systemui.statusbar.AlphaOptimizedImageView
+                    android:id="@android:id/edit"
+                    android:layout_width="@dimen/qs_footer_action_button_size"
+                    android:layout_height="@dimen/qs_footer_action_button_size"
+                    android:layout_gravity="center_vertical|end"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:contentDescription="@string/accessibility_quick_settings_edit"
+                    android:focusable="true"
+                    android:padding="@dimen/qs_footer_icon_padding"
+                    android:src="@*android:drawable/ic_mode_edit"
+                    android:tint="?android:attr/textColorPrimary" />
+            </FrameLayout>
 
         </LinearLayout>
 

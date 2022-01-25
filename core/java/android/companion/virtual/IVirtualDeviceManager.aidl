@@ -17,6 +17,7 @@
 package android.companion.virtual;
 
 import android.companion.virtual.IVirtualDevice;
+import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
 
 /**
@@ -39,5 +40,5 @@ interface IVirtualDeviceManager {
      */
     IVirtualDevice createVirtualDevice(
             in IBinder token, String packageName, int associationId,
-            in VirtualDeviceParams params);
+            in VirtualDeviceParams params, in IVirtualDeviceActivityListener activityListener);
 }

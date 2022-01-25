@@ -34,6 +34,7 @@ import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvTrackInfo;
+import android.media.tv.interactive.AppLinkInfo;
 import android.media.tv.interactive.ITvInteractiveAppClient;
 import android.media.tv.interactive.ITvInteractiveAppManager;
 import android.media.tv.interactive.ITvInteractiveAppManagerCallback;
@@ -695,9 +696,9 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
-        public void registerAppLinkInfo(String tiasId, Bundle appLinkInfo, int userId) {
+        public void registerAppLinkInfo(String tiasId, AppLinkInfo appLinkInfo, int userId) {
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
-                    Binder.getCallingUid(), userId, "registerAppLinkInfo");
+                    Binder.getCallingUid(), userId, "registerAppLinkInfo: " + appLinkInfo);
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
@@ -731,9 +732,9 @@ public class TvInteractiveAppManagerService extends SystemService {
         }
 
         @Override
-        public void unregisterAppLinkInfo(String tiasId, Bundle appLinkInfo, int userId) {
+        public void unregisterAppLinkInfo(String tiasId, AppLinkInfo appLinkInfo, int userId) {
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(),
-                    Binder.getCallingUid(), userId, "unregisterAppLinkInfo");
+                    Binder.getCallingUid(), userId, "unregisterAppLinkInfo: " + appLinkInfo);
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
@@ -1819,7 +1820,7 @@ public class TvInteractiveAppManagerService extends SystemService {
         private final ServiceConnection mConnection;
         private final ComponentName mComponent;
         private final String mIAppServiceId;
-        private final List<Pair<Bundle, Boolean>> mPendingAppLinkInfo = new ArrayList<>();
+        private final List<Pair<AppLinkInfo, Boolean>> mPendingAppLinkInfo = new ArrayList<>();
         private final List<Bundle> mPendingAppLinkCommand = new ArrayList<>();
 
         private boolean mPendingPrepare = false;
@@ -1842,7 +1843,7 @@ public class TvInteractiveAppManagerService extends SystemService {
             mIAppServiceId = tias;
         }
 
-        private void addPendingAppLink(Bundle info, boolean register) {
+        private void addPendingAppLink(AppLinkInfo info, boolean register) {
             mPendingAppLinkInfo.add(Pair.create(info, register));
         }
 
@@ -1899,10 +1900,10 @@ public class TvInteractiveAppManagerService extends SystemService {
                 }
 
                 if (!serviceState.mPendingAppLinkInfo.isEmpty()) {
-                    for (Iterator<Pair<Bundle, Boolean>> it =
+                    for (Iterator<Pair<AppLinkInfo, Boolean>> it =
                             serviceState.mPendingAppLinkInfo.iterator();
                             it.hasNext(); ) {
-                        Pair<Bundle, Boolean> appLinkInfoPair = it.next();
+                        Pair<AppLinkInfo, Boolean> appLinkInfoPair = it.next();
                         final long identity = Binder.clearCallingIdentity();
                         try {
                             if (appLinkInfoPair.second) {

@@ -170,7 +170,7 @@ final class FakeVibratorControllerProvider {
             }
             infoBuilder.setCompositionSizeMax(mCompositionSizeMax);
             infoBuilder.setQFactor(mQFactor);
-            infoBuilder.setFrequencyMapping(new VibratorInfo.FrequencyMapping(
+            infoBuilder.setFrequencyProfile(new VibratorInfo.FrequencyProfile(
                     mResonantFrequency, mMinFrequency, mFrequencyResolution, mMaxAmplitudes));
             return mIsInfoLoadSuccessful;
         }

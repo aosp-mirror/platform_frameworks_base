@@ -12806,60 +12806,58 @@ public class BatteryStatsImpl extends BatteryStats {
             long totalTxPackets = 0;
             long totalRxPackets = 0;
             if (delta != null) {
-                NetworkStats.Entry entry = new NetworkStats.Entry();
-                final int size = delta.size();
-                for (int i = 0; i < size; i++) {
-                    entry = delta.getValues(i, entry);
-
+                for (NetworkStats.Entry entry : delta) {
                     if (DEBUG_ENERGY) {
-                        Slog.d(TAG, "Wifi uid " + entry.uid + ": delta rx=" + entry.rxBytes
-                                + " tx=" + entry.txBytes + " rxPackets=" + entry.rxPackets
-                                + " txPackets=" + entry.txPackets);
+                        Slog.d(TAG, "Wifi uid " + entry.getUid()
+                                + ": delta rx=" + entry.getRxBytes()
+                                + " tx=" + entry.getTxBytes()
+                                + " rxPackets=" + entry.getRxPackets()
+                                + " txPackets=" + entry.getTxPackets());
                     }
 
-                    if (entry.rxBytes == 0 && entry.txBytes == 0) {
+                    if (entry.getRxBytes() == 0 && entry.getTxBytes() == 0) {
                         // Skip the lookup below since there is no work to do.
                         continue;
                     }
 
-                    final int uid = mapUid(entry.uid);
+                    final int uid = mapUid(entry.getUid());
                     final Uid u = getUidStatsLocked(uid, elapsedRealtimeMs, uptimeMs);
-                    if (entry.rxBytes != 0) {
-                        u.noteNetworkActivityLocked(NETWORK_WIFI_RX_DATA, entry.rxBytes,
-                                entry.rxPackets);
-                        if (entry.set == NetworkStats.SET_DEFAULT) { // Background transfers
-                            u.noteNetworkActivityLocked(NETWORK_WIFI_BG_RX_DATA, entry.rxBytes,
-                                    entry.rxPackets);
+                    if (entry.getRxBytes() != 0) {
+                        u.noteNetworkActivityLocked(NETWORK_WIFI_RX_DATA, entry.getRxBytes(),
+                                entry.getRxPackets());
+                        if (entry.getSet() == NetworkStats.SET_DEFAULT) { // Background transfers
+                            u.noteNetworkActivityLocked(NETWORK_WIFI_BG_RX_DATA, entry.getRxBytes(),
+                                    entry.getRxPackets());
                         }
                         mNetworkByteActivityCounters[NETWORK_WIFI_RX_DATA].addCountLocked(
-                                entry.rxBytes);
+                                entry.getRxBytes());
                         mNetworkPacketActivityCounters[NETWORK_WIFI_RX_DATA].addCountLocked(
-                                entry.rxPackets);
+                                entry.getRxPackets());
 
-                        rxPackets.incrementValue(uid, entry.rxPackets);
+                        rxPackets.incrementValue(uid, entry.getRxPackets());
 
                         // Sum the total number of packets so that the Rx Power can
                         // be evenly distributed amongst the apps.
-                        totalRxPackets += entry.rxPackets;
+                        totalRxPackets += entry.getRxPackets();
                     }
 
-                    if (entry.txBytes != 0) {
-                        u.noteNetworkActivityLocked(NETWORK_WIFI_TX_DATA, entry.txBytes,
-                                entry.txPackets);
-                        if (entry.set == NetworkStats.SET_DEFAULT) { // Background transfers
-                            u.noteNetworkActivityLocked(NETWORK_WIFI_BG_TX_DATA, entry.txBytes,
-                                    entry.txPackets);
+                    if (entry.getTxBytes() != 0) {
+                        u.noteNetworkActivityLocked(NETWORK_WIFI_TX_DATA, entry.getTxBytes(),
+                                entry.getTxPackets());
+                        if (entry.getSet() == NetworkStats.SET_DEFAULT) { // Background transfers
+                            u.noteNetworkActivityLocked(NETWORK_WIFI_BG_TX_DATA, entry.getTxBytes(),
+                                    entry.getTxPackets());
                         }
                         mNetworkByteActivityCounters[NETWORK_WIFI_TX_DATA].addCountLocked(
-                                entry.txBytes);
+                                entry.getTxBytes());
                         mNetworkPacketActivityCounters[NETWORK_WIFI_TX_DATA].addCountLocked(
-                                entry.txPackets);
+                                entry.getTxPackets());
 
-                        txPackets.incrementValue(uid, entry.txPackets);
+                        txPackets.incrementValue(uid, entry.getTxPackets());
 
                         // Sum the total number of packets so that the Tx Power can
                         // be evenly distributed amongst the apps.
-                        totalTxPackets += entry.txPackets;
+                        totalTxPackets += entry.getTxPackets();
                     }
 
                     // Calculate consumed energy for this uid. Only do so if WifiReporting isn't
@@ -12887,7 +12885,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
                         uidEstimatedConsumptionMah.incrementValue(u.getUid(),
                                 mWifiPowerCalculator.calcPowerWithoutControllerDataMah(
-                                        entry.rxPackets, entry.txPackets,
+                                        entry.getRxPackets(), entry.getTxPackets(),
                                         uidRunningMs, uidScanMs, uidBatchScanMs));
                     }
                 }

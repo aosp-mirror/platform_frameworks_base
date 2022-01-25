@@ -819,29 +819,25 @@ public class StatusBarTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSetExpansionAffectsAlpha_onlyWhenHidingKeyguard() {
-        mStatusBar.updateScrimController();
-        verify(mScrimController).setExpansionAffectsAlpha(eq(true));
-
-        clearInvocations(mScrimController);
-        when(mBiometricUnlockController.isBiometricUnlock()).thenReturn(true);
+    public void testSetExpansionAffectsAlpha_whenKeyguardShowingButGoingAwayForAnyReason() {
         mStatusBar.updateScrimController();
         verify(mScrimController).setExpansionAffectsAlpha(eq(true));
 
         clearInvocations(mScrimController);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mKeyguardStateController.isKeyguardGoingAway()).thenReturn(false);
         mStatusBar.updateScrimController();
-        verify(mScrimController).setExpansionAffectsAlpha(eq(false));
+        verify(mScrimController).setExpansionAffectsAlpha(eq(true));
 
         clearInvocations(mScrimController);
-        reset(mKeyguardStateController);
-        when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(true);
-        mStatusBar.updateScrimController();
-        verify(mScrimController).setExpansionAffectsAlpha(eq(false));
-
-        clearInvocations(mScrimController);
-        reset(mKeyguardStateController);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mKeyguardStateController.isKeyguardGoingAway()).thenReturn(true);
+        mStatusBar.updateScrimController();
+        verify(mScrimController).setExpansionAffectsAlpha(eq(false));
+
+        clearInvocations(mScrimController);
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mKeyguardStateController.isKeyguardFadingAway()).thenReturn(true);
         mStatusBar.updateScrimController();
         verify(mScrimController).setExpansionAffectsAlpha(eq(false));
     }

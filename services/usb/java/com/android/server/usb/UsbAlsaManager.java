@@ -237,6 +237,7 @@ public final class UsbAlsaManager {
         if (hasInput || hasOutput) {
             boolean isInputHeadset = parser.isInputHeadset();
             boolean isOutputHeadset = parser.isOutputHeadset();
+            boolean isDock = parser.isDock();
 
             if (mAudioService == null) {
                 Slog.e(TAG, "no AudioService");
@@ -246,7 +247,7 @@ public final class UsbAlsaManager {
             UsbAlsaDevice alsaDevice =
                     new UsbAlsaDevice(mAudioService, cardRec.getCardNum(), 0 /*device*/,
                                       deviceAddress, hasOutput, hasInput,
-                                      isInputHeadset, isOutputHeadset);
+                                      isInputHeadset, isOutputHeadset, isDock);
             if (alsaDevice != null) {
                 alsaDevice.setDeviceNameAndDescription(
                           cardRec.getCardName(), cardRec.getCardDescription());

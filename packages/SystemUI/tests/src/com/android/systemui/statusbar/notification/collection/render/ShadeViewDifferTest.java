@@ -274,6 +274,18 @@ public class ShadeViewDifferTest extends SysuiTestCase {
         public void removeChild(@NonNull NodeController child, boolean isTransfer) {
             view.removeView(child.getView());
         }
+
+        @Override
+        public void onViewAdded() {
+        }
+
+        @Override
+        public void onViewMoved() {
+        }
+
+        @Override
+        public void onViewRemoved() {
+        }
     }
 
     private static class SpecBuilder {

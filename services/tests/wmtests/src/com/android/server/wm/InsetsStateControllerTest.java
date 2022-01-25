@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
 import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
@@ -246,7 +245,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         final WindowState child = createWindow(app, TYPE_APPLICATION, "child");
         app.mAboveInsetsState.addSource(getController().getRawInsetsState().peekSource(ITYPE_IME));
         child.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
-        child.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        child.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
 
         mDisplayContent.computeImeTarget(true);
         mDisplayContent.setLayoutNeeded();

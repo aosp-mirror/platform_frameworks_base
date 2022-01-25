@@ -58,6 +58,22 @@ import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_
 import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_DELETED_GENERIC_MESSAGE;
 import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_DELETED_ORG_OWNED_MESSAGE;
 import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_DELETED_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.CANT_SAVE_TO_PERSONAL_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.CANT_SAVE_TO_PERSONAL_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.CANT_SAVE_TO_WORK_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.CANT_SAVE_TO_WORK_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.CANT_SELECT_PERSONAL_FILES_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.CANT_SELECT_PERSONAL_FILES_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.CANT_SELECT_WORK_FILES_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.CANT_SELECT_WORK_FILES_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.CROSS_PROFILE_NOT_ALLOWED_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.CROSS_PROFILE_NOT_ALLOWED_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.PERSONAL_TAB;
+import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.PREVIEW_WORK_FILE_ACCESSIBILITY;
+import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.WORK_ACCESSIBILITY;
+import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.WORK_PROFILE_OFF_ENABLE_BUTTON;
+import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.WORK_PROFILE_OFF_ERROR_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.WORK_TAB;
 import static android.app.admin.DevicePolicyResources.Strings.Launcher.ALL_APPS_PERSONAL_TAB;
 import static android.app.admin.DevicePolicyResources.Strings.Launcher.ALL_APPS_PERSONAL_TAB_ACCESSIBILITY;
 import static android.app.admin.DevicePolicyResources.Strings.Launcher.ALL_APPS_WORK_TAB;
@@ -70,8 +86,13 @@ import static android.app.admin.DevicePolicyResources.Strings.Launcher.WORK_PROF
 import static android.app.admin.DevicePolicyResources.Strings.Launcher.WORK_PROFILE_EDU_ACCEPT;
 import static android.app.admin.DevicePolicyResources.Strings.Launcher.WORK_PROFILE_ENABLE_BUTTON;
 import static android.app.admin.DevicePolicyResources.Strings.Launcher.WORK_PROFILE_PAUSED_DESCRIPTION;
-import static android.app.admin.DevicePolicyResources.Strings.Launcher.WORK_PROFILE_PAUSED_TITLE;
 import static android.app.admin.DevicePolicyResources.Strings.Launcher.WORK_PROFILE_PAUSE_BUTTON;
+import static android.app.admin.DevicePolicyResources.Strings.MediaProvider.BLOCKED_BY_ADMIN_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.MediaProvider.BLOCKED_FROM_PERSONAL_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.MediaProvider.BLOCKED_FROM_WORK_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.MediaProvider.SWITCH_TO_PERSONAL_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.MediaProvider.SWITCH_TO_WORK_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.MediaProvider.WORK_PROFILE_PAUSED_MESSAGE;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.BIOMETRIC_DIALOG_WORK_LOCK_FAILED_ATTEMPTS;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.BIOMETRIC_DIALOG_WORK_PASSWORD_LAST_ATTEMPT;
 import static android.app.admin.DevicePolicyResources.Strings.SystemUi.BIOMETRIC_DIALOG_WORK_PATTERN_LAST_ATTEMPT;
@@ -180,7 +201,7 @@ public final class DevicePolicyResources {
     @Retention(RetentionPolicy.SOURCE)
     @StringDef({
             // Launcher Strings
-            WORK_PROFILE_EDU, WORK_PROFILE_EDU_ACCEPT, WORK_PROFILE_PAUSED_TITLE,
+            WORK_PROFILE_EDU, WORK_PROFILE_EDU_ACCEPT, Strings.Launcher.WORK_PROFILE_PAUSED_TITLE,
             WORK_PROFILE_PAUSED_DESCRIPTION, WORK_PROFILE_PAUSE_BUTTON, WORK_PROFILE_ENABLE_BUTTON,
             ALL_APPS_WORK_TAB, ALL_APPS_PERSONAL_TAB, ALL_APPS_WORK_TAB_ACCESSIBILITY,
             ALL_APPS_PERSONAL_TAB_ACCESSIBILITY, WORK_FOLDER_NAME, WIDGETS_WORK_TAB,
@@ -221,7 +242,22 @@ public final class DevicePolicyResources {
             CANT_ADD_ACCOUNT_MESSAGE, PACKAGE_INSTALLED_BY_DO, PACKAGE_UPDATED_BY_DO,
             PACKAGE_DELETED_BY_DO, UNLAUNCHABLE_APP_WORK_PAUSED_TITLE,
             UNLAUNCHABLE_APP_WORK_PAUSED_MESSAGE, PROFILE_ENCRYPTED_TITLE, PROFILE_ENCRYPTED_DETAIL,
-            PROFILE_ENCRYPTED_MESSAGE, WORK_PROFILE_BADGED_LABEL
+            PROFILE_ENCRYPTED_MESSAGE, WORK_PROFILE_BADGED_LABEL,
+
+            // DocsUi Strings
+            WORK_PROFILE_OFF_ERROR_TITLE, WORK_PROFILE_OFF_ENABLE_BUTTON,
+            CANT_SELECT_WORK_FILES_TITLE, CANT_SELECT_WORK_FILES_MESSAGE,
+            CANT_SELECT_PERSONAL_FILES_TITLE, CANT_SELECT_PERSONAL_FILES_MESSAGE,
+            CANT_SAVE_TO_WORK_TITLE, CANT_SAVE_TO_WORK_MESSAGE, CANT_SAVE_TO_PERSONAL_TITLE,
+            CANT_SAVE_TO_PERSONAL_MESSAGE, CROSS_PROFILE_NOT_ALLOWED_TITLE,
+            CROSS_PROFILE_NOT_ALLOWED_MESSAGE, PREVIEW_WORK_FILE_ACCESSIBILITY, PERSONAL_TAB,
+            WORK_TAB, WORK_ACCESSIBILITY,
+
+            // MediaProvider Strings
+            SWITCH_TO_WORK_MESSAGE, SWITCH_TO_PERSONAL_MESSAGE, BLOCKED_BY_ADMIN_TITLE,
+            BLOCKED_FROM_PERSONAL_MESSAGE, BLOCKED_FROM_PERSONAL_MESSAGE,
+            BLOCKED_FROM_WORK_MESSAGE, Strings.MediaProvider.WORK_PROFILE_PAUSED_TITLE,
+            WORK_PROFILE_PAUSED_MESSAGE
     })
     public @interface UpdatableStringId {
     }
@@ -401,7 +437,7 @@ public final class DevicePolicyResources {
         /**
          * An ID for any string that can't be updated.
          */
-        public static final String INVALID_ID = "INVALID_ID";
+        public static final String UNDEFINED = "UNDEFINED";
 
         /**
          * @hide
@@ -413,6 +449,8 @@ public final class DevicePolicyResources {
             strings.addAll(Launcher.buildStringsSet());
             strings.addAll(SystemUi.buildStringsSet());
             strings.addAll(Core.buildStringsSet());
+            strings.addAll(DocumentsUi.buildStringsSet());
+            strings.addAll(MediaProvider.buildStringsSet());
             return strings;
         }
 
@@ -1158,6 +1196,220 @@ public final class DevicePolicyResources {
                 strings.add(PROFILE_ENCRYPTED_DETAIL);
                 strings.add(PROFILE_ENCRYPTED_MESSAGE);
                 strings.add(WORK_PROFILE_BADGED_LABEL);
+                return strings;
+            }
+        }
+
+        /**
+         * Class containing the identifiers used to update device management-related system strings
+         * in the DocumentsUi package.
+         */
+        public static final class DocumentsUi {
+
+            private DocumentsUi() {
+            }
+
+            private static final String PREFIX = "DocumentsUi.";
+
+            /**
+             * Title for error message shown when work profile is turned off.
+             */
+            public static final String WORK_PROFILE_OFF_ERROR_TITLE =
+                    PREFIX + "WORK_PROFILE_OFF_ERROR_TITLE";
+
+            /**
+             * Button text shown when work profile is turned off.
+             */
+            public static final String WORK_PROFILE_OFF_ENABLE_BUTTON =
+                    PREFIX + "WORK_PROFILE_OFF_ENABLE_BUTTON";
+
+            /**
+             * Title for error message shown when a user's IT admin does not allow the user to
+             * select work files from a personal app.
+             */
+            public static final String CANT_SELECT_WORK_FILES_TITLE =
+                    PREFIX + "CANT_SELECT_WORK_FILES_TITLE";
+
+            /**
+             * Message shown when a user's IT admin does not allow the user to select work files
+             * from a personal app.
+             */
+            public static final String CANT_SELECT_WORK_FILES_MESSAGE =
+                    PREFIX + "CANT_SELECT_WORK_FILES_MESSAGE";
+
+            /**
+             * Title for error message shown when a user's IT admin does not allow the user to
+             * select personal files from a work app.
+             */
+            public static final String CANT_SELECT_PERSONAL_FILES_TITLE =
+                    PREFIX + "CANT_SELECT_PERSONAL_FILES_TITLE";
+
+            /**
+             * Message shown when a user's IT admin does not allow the user to select personal files
+             * from a work app.
+             */
+            public static final String CANT_SELECT_PERSONAL_FILES_MESSAGE =
+                    PREFIX + "CANT_SELECT_PERSONAL_FILES_MESSAGE";
+
+            /**
+             * Title for error message shown when a user's IT admin does not allow the user to save
+             * files from their personal profile to their work profile.
+             */
+            public static final String CANT_SAVE_TO_WORK_TITLE =
+                    PREFIX + "CANT_SAVE_TO_WORK_TITLE";
+
+            /**
+             * Message shown when a user's IT admin does not allow the user to save files from their
+             * personal profile to their work profile.
+             */
+            public static final String CANT_SAVE_TO_WORK_MESSAGE =
+                    PREFIX + "CANT_SAVE_TO_WORK_MESSAGE";
+
+            /**
+             * Title for error message shown when a user's IT admin does not allow the user to save
+             * files from their work profile to their personal profile.
+             */
+            public static final String CANT_SAVE_TO_PERSONAL_TITLE =
+                    PREFIX + "CANT_SAVE_TO_PERSONAL_TITLE";
+
+            /**
+             * Message shown when a user's IT admin does not allow the user to save files from their
+             * work profile to their personal profile.
+             */
+            public static final String CANT_SAVE_TO_PERSONAL_MESSAGE =
+                    PREFIX + "CANT_SAVE_TO_PERSONAL_MESSAGE";
+
+            /**
+             * Title for error message shown when a user tries to do something on their work
+             * device, but that action isn't allowed by their IT admin.
+             */
+            public static final String CROSS_PROFILE_NOT_ALLOWED_TITLE =
+                    PREFIX + "CROSS_PROFILE_NOT_ALLOWED_TITLE";
+
+            /**
+             * Message shown when a user tries to do something on their work device, but that action
+             * isn't allowed by their IT admin.
+             */
+            public static final String CROSS_PROFILE_NOT_ALLOWED_MESSAGE =
+                    PREFIX + "CROSS_PROFILE_NOT_ALLOWED_MESSAGE";
+
+            /**
+             * Content description text that's spoken by a screen reader for previewing a work file
+             * before opening it. Accepts file name as a param.
+             */
+            public static final String PREVIEW_WORK_FILE_ACCESSIBILITY =
+                    PREFIX + "PREVIEW_WORK_FILE_ACCESSIBILITY";
+
+            /**
+             * Label for tab and sidebar to indicate personal content.
+             */
+            public static final String PERSONAL_TAB = PREFIX + "PERSONAL_TAB";
+
+            /**
+             * Label for tab and sidebar tab to indicate work content
+             */
+            public static final String WORK_TAB = PREFIX + "WORK_TAB";
+
+            /**
+             * Accessibility label to indicate the subject(e.g. file/folder) is from work profile.
+             */
+            public static final String WORK_ACCESSIBILITY = PREFIX + "WORK_ACCESSIBILITY";
+
+            /**
+             * @hide
+             */
+            static Set<String> buildStringsSet() {
+                Set<String> strings = new HashSet<>();
+                strings.add(WORK_PROFILE_OFF_ERROR_TITLE);
+                strings.add(WORK_PROFILE_OFF_ENABLE_BUTTON);
+                strings.add(CANT_SELECT_WORK_FILES_TITLE);
+                strings.add(CANT_SELECT_WORK_FILES_MESSAGE);
+                strings.add(CANT_SELECT_PERSONAL_FILES_TITLE);
+                strings.add(CANT_SELECT_PERSONAL_FILES_MESSAGE);
+                strings.add(CANT_SAVE_TO_WORK_TITLE);
+                strings.add(CANT_SAVE_TO_WORK_MESSAGE);
+                strings.add(CANT_SAVE_TO_PERSONAL_TITLE);
+                strings.add(CANT_SAVE_TO_PERSONAL_MESSAGE);
+                strings.add(CROSS_PROFILE_NOT_ALLOWED_TITLE);
+                strings.add(CROSS_PROFILE_NOT_ALLOWED_MESSAGE);
+                strings.add(PREVIEW_WORK_FILE_ACCESSIBILITY);
+                strings.add(PERSONAL_TAB);
+                strings.add(WORK_TAB);
+                strings.add(WORK_ACCESSIBILITY);
+                return strings;
+            }
+        }
+
+        /**
+         * Class containing the identifiers used to update device management-related system strings
+         * in the MediaProvider module.
+         */
+        public static final class MediaProvider {
+
+            private MediaProvider() {
+            }
+
+            private static final String PREFIX = "MediaProvider.";
+
+            /**
+             * The text shown to switch to the work profile in PhotoPicker.
+             */
+            public static final String SWITCH_TO_WORK_MESSAGE =
+                    PREFIX + "SWITCH_TO_WORK_MESSAGE";
+
+            /**
+             * The text shown to switch to the personal profile in PhotoPicker.
+             */
+            public static final String SWITCH_TO_PERSONAL_MESSAGE =
+                    PREFIX + "SWITCH_TO_PERSONAL_MESSAGE";
+
+            /**
+             * The title for error dialog in PhotoPicker when the admin blocks cross user
+             * interaction for the intent.
+             */
+            public static final String BLOCKED_BY_ADMIN_TITLE =
+                    PREFIX + "BLOCKED_BY_ADMIN_TITLE";
+
+            /**
+             * The message for error dialog in PhotoPicker when the admin blocks cross user
+             * interaction from the personal profile.
+             */
+            public static final String BLOCKED_FROM_PERSONAL_MESSAGE =
+                    PREFIX + "BLOCKED_FROM_PERSONAL_MESSAGE";
+
+            /**
+             * The message for error dialog in PhotoPicker when the admin blocks cross user
+             * interaction from the work profile.
+             */
+            public static final String BLOCKED_FROM_WORK_MESSAGE =
+                    PREFIX + "BLOCKED_FROM_WORK_MESSAGE";
+
+            /**
+             * The title of the error dialog in PhotoPicker when the user tries to switch to work
+             * content, but work profile is off.
+             */
+            public static final String WORK_PROFILE_PAUSED_TITLE =
+                    PREFIX + "WORK_PROFILE_PAUSED_TITLE";
+
+            /**
+             * The message of the error dialog in PhotoPicker when the user tries to switch to work
+             * content, but work profile is off.
+             */
+            public static final String WORK_PROFILE_PAUSED_MESSAGE =
+                    PREFIX + "WORK_PROFILE_PAUSED_MESSAGE";
+
+            /**
+             * @hide
+             */
+            static Set<String> buildStringsSet() {
+                Set<String> strings = new HashSet<>();
+                strings.add(SWITCH_TO_WORK_MESSAGE);
+                strings.add(SWITCH_TO_PERSONAL_MESSAGE);
+                strings.add(BLOCKED_BY_ADMIN_TITLE);
+                strings.add(BLOCKED_FROM_PERSONAL_MESSAGE);
+                strings.add(BLOCKED_FROM_WORK_MESSAGE);
+                strings.add(WORK_PROFILE_PAUSED_TITLE);
+                strings.add(WORK_PROFILE_PAUSED_MESSAGE);
                 return strings;
             }
         }

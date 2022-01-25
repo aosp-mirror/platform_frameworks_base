@@ -2235,8 +2235,9 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                         createInteractionJankMonitorConf("DismissPanel"));
 
                 // Pass the surface and metadata to the unlock animation controller.
-                mKeyguardUnlockAnimationControllerLazy.get().notifyStartKeyguardExitAnimation(
-                        apps[0], startTime, mSurfaceBehindRemoteAnimationRequested);
+                mKeyguardUnlockAnimationControllerLazy.get()
+                        .notifyStartSurfaceBehindRemoteAnimation(
+                                apps[0], startTime, mSurfaceBehindRemoteAnimationRequested);
             } else {
                 mInteractionJankMonitor.begin(
                         createInteractionJankMonitorConf("RemoteAnimationDisabled"));
@@ -2373,8 +2374,10 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
             finishSurfaceBehindRemoteAnimation(cancelled);
             mSurfaceBehindRemoteAnimationRequested = false;
-            mKeyguardUnlockAnimationControllerLazy.get().notifyFinishedKeyguardExitAnimation();
         });
+
+        mKeyguardUnlockAnimationControllerLazy.get().notifyFinishedKeyguardExitAnimation(
+                cancelled);
     }
 
     /**
@@ -2412,8 +2415,16 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         return mSurfaceBehindRemoteAnimationRequested;
     }
 
+    public boolean isAnimatingBetweenKeyguardAndSurfaceBehind() {
+        return mSurfaceBehindRemoteAnimationRunning;
+    }
+
     /** If it's running, finishes the RemoteAnimation on the surface behind the keyguard. */
     public void finishSurfaceBehindRemoteAnimation(boolean cancelled) {
+        if (!mSurfaceBehindRemoteAnimationRunning) {
+            return;
+        }
+
         mSurfaceBehindRemoteAnimationRunning = false;
 
         if (mSurfaceBehindRemoteAnimationFinishedCallback != null) {

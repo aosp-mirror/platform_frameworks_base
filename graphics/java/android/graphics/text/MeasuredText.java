@@ -264,8 +264,10 @@ public class MeasuredText {
             Preconditions.checkArgument(end <= mText.length, "Style exceeds the text length");
             int lbStyle = (lineBreakConfig != null) ? lineBreakConfig.getLineBreakStyle() :
                     LineBreakConfig.LINE_BREAK_STYLE_NONE;
-            nAddStyleRun(mNativePtr, paint.getNativeInstance(), lbStyle, mCurrentOffset, end,
-                    isRtl);
+            int lbWordStyle = (lineBreakConfig != null) ? lineBreakConfig.getLineBreakWordStyle() :
+                    LineBreakConfig.LINE_BREAK_WORD_STYLE_NONE;
+            nAddStyleRun(mNativePtr, paint.getNativeInstance(), lbStyle, lbWordStyle,
+                    mCurrentOffset, end, isRtl);
             mCurrentOffset = end;
             return this;
         }
@@ -445,7 +447,8 @@ public class MeasuredText {
          *
          * @param nativeBuilderPtr The native MeasuredParagraph builder pointer.
          * @param paintPtr The native paint pointer to be applied.
-         * @param lineBreakStyle The line break style of the text.
+         * @param lineBreakStyle The line break style(lb) of the text.
+         * @param lineBreakWordStyle The line break word style(lw) of the text.
          * @param start The start offset in the copied buffer.
          * @param end The end offset in the copied buffer.
          * @param isRtl True if the text is RTL.
@@ -453,6 +456,7 @@ public class MeasuredText {
         private static native void nAddStyleRun(/* Non Zero */ long nativeBuilderPtr,
                                                 /* Non Zero */ long paintPtr,
                                                 int lineBreakStyle,
+                                                int lineBreakWordStyle,
                                                 @IntRange(from = 0) int start,
                                                 @IntRange(from = 0) int end,
                                                 boolean isRtl);

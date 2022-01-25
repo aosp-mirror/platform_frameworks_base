@@ -814,6 +814,32 @@ public class UsbService extends IUsbManager.Stub {
     }
 
     @Override
+    public void enableUsbDataWhileDocked(String portId, int operationId,
+            IUsbOperationInternal callback) {
+        Objects.requireNonNull(portId, "enableUsbDataWhileDocked: portId must not be null. opId:"
+                + operationId);
+        Objects.requireNonNull(callback,
+                "enableUsbDataWhileDocked: callback must not be null. opId:"
+                + operationId);
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        final long ident = Binder.clearCallingIdentity();
+        boolean wait;
+        try {
+            if (mPortManager != null) {
+                mPortManager.enableUsbDataWhileDocked(portId, operationId, callback, null);
+            } else {
+                try {
+                    callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "enableUsbData: Failed to call onOperationComplete", e);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override
     public void setUsbDeviceConnectionHandler(ComponentName usbDeviceConnectionHandler) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
         synchronized (mLock) {

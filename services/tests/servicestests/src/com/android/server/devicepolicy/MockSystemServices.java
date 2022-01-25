@@ -31,6 +31,7 @@ import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.app.NotificationManager;
+import android.app.admin.DevicePolicyManager;
 import android.app.backup.IBackupManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
@@ -125,6 +126,7 @@ public class MockSystemServices {
     public final AppOpsManager appOpsManager;
     public final UsbManager usbManager;
     public final VpnManager vpnManager;
+    public final DevicePolicyManager devicePolicyManager;
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
     public final BuildMock buildMock = new BuildMock();
@@ -172,6 +174,7 @@ public class MockSystemServices {
         appOpsManager = mock(AppOpsManager.class);
         usbManager = mock(UsbManager.class);
         vpnManager = mock(VpnManager.class);
+        devicePolicyManager = mock(DevicePolicyManager.class);
 
         // Package manager is huge, so we use a partial mock instead.
         packageManager = spy(realContext.getPackageManager());

@@ -864,7 +864,15 @@ public class MidiService extends IMidiManager.Stub {
         if (device == null) {
             throw new IllegalArgumentException("no such device for " + deviceInfo);
         }
-        return device.getDeviceStatus();
+        int uid = Binder.getCallingUid();
+        if (device.isUidAllowed(uid)) {
+            return device.getDeviceStatus();
+        } else {
+            Log.e(TAG, "getDeviceStatus() invalid UID = " + uid);
+            EventLog.writeEvent(0x534e4554, "203549963",
+                    uid, "getDeviceStatus: invalid uid");
+            return null;
+        }
     }
 
     @Override

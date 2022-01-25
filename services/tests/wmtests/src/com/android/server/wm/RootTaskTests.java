@@ -88,6 +88,7 @@ import android.platform.test.annotations.Presubmit;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -529,6 +530,7 @@ public class RootTaskTests extends WindowTestsBase {
 
     // TODO(b/199236198): check this is unnecessary or need to migrate after remove legacy split.
     @Test
+    @Ignore
     public void testShouldBeVisible_SplitScreen() {
         // task not supporting split should be fullscreen for this test.
         final Task notSupportingSplitTask = createTaskForShouldBeVisibleTest(

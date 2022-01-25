@@ -6,6 +6,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.database.ContentObserver
 import android.os.Handler
+import android.os.PowerManager
 import android.provider.Settings
 import android.view.Surface
 import android.view.View
@@ -54,9 +55,10 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     private val keyguardStateController: KeyguardStateController,
     private val dozeParameters: dagger.Lazy<DozeParameters>,
     private val globalSettings: GlobalSettings,
-    private val interactionJankMonitor: InteractionJankMonitor
+    private val interactionJankMonitor: InteractionJankMonitor,
+    private val powerManager: PowerManager,
+    private val handler: Handler = Handler()
 ) : WakefulnessLifecycle.Observer, ScreenOffAnimation {
-    private val handler = Handler()
 
     private lateinit var statusBar: StatusBar
     private lateinit var lightRevealScrim: LightRevealScrim
@@ -219,7 +221,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
             // even if we're going from SHADE to SHADE or KEYGUARD to KEYGUARD, since we might have
             // changed parts of the UI (such as showing AOD in the shade) without actually changing
             // the StatusBarState. This ensures that the UI definitely reflects the desired state.
-            statusBar.updateIsKeyguard(true /* force */)
+            statusBar.updateIsKeyguard(true /* forceStateChange */)
         }
     }
 
@@ -231,10 +233,18 @@ class UnlockedScreenOffAnimationController @Inject constructor(
             lightRevealAnimationPlaying = true
             lightRevealAnimator.start()
             handler.postDelayed({
-                aodUiAnimationPlaying = true
+                // Only run this callback if the device is sleeping (not interactive). This callback
+                // is removed in onStartedWakingUp, but since that event is asynchronously
+                // dispatched, a race condition could make it possible for this callback to be run
+                // as the device is waking up. That results in the AOD UI being shown while we wake
+                // up, with unpredictable consequences.
+                if (!powerManager.isInteractive) {
+                    aodUiAnimationPlaying = true
 
-                // Show AOD. That'll cause the KeyguardVisibilityHelper to call #animateInKeyguard.
-                statusBar.notificationPanelViewController.showAodUi()
+                    // Show AOD. That'll cause the KeyguardVisibilityHelper to call
+                    // #animateInKeyguard.
+                    statusBar.notificationPanelViewController.showAodUi()
+                }
             }, (ANIMATE_IN_KEYGUARD_DELAY * animatorDurationScale).toLong())
 
             return true

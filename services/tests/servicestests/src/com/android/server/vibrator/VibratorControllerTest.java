@@ -310,13 +310,13 @@ public class VibratorControllerTest {
     }
 
     private void mockVibratorCapabilities(int capabilities) {
-        VibratorInfo.FrequencyMapping frequencyMapping = new VibratorInfo.FrequencyMapping(
+        VibratorInfo.FrequencyProfile frequencyProfile = new VibratorInfo.FrequencyProfile(
                 Float.NaN, Float.NaN, Float.NaN, null);
         when(mNativeWrapperMock.getInfo(any(VibratorInfo.Builder.class)))
                 .then(invocation -> {
                     ((VibratorInfo.Builder) invocation.getArgument(0))
                             .setCapabilities(capabilities)
-                            .setFrequencyMapping(frequencyMapping);
+                            .setFrequencyProfile(frequencyProfile);
                     return true;
                 });
     }

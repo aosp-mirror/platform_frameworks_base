@@ -127,6 +127,7 @@ static void init() {
     addHyphenator("or", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Oriya
     addHyphenator("pa", INDIC_MIN_PREFIX, INDIC_MIN_SUFFIX);  // Punjabi
     addHyphenator("pt", 2, 3);  // Portuguese
+    addHyphenator("ru", 2, 2);  // Russian
     addHyphenator("sk", 2, 2);  // Slovak
     addHyphenator("sl", 2, 2);  // Slovenian
     addHyphenator("sq", 2, 2);  // Albanian

@@ -167,7 +167,6 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
 import com.android.internal.view.IInlineSuggestionsResponseCallback;
 import com.android.internal.view.IInputContext;
-import com.android.internal.view.IInputMethod;
 import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
@@ -329,7 +328,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     static class SessionState {
         final ClientState client;
-        final IInputMethod method;
+        final IInputMethodInvoker method;
 
         IInputMethodSession session;
         InputChannel channel;
@@ -338,14 +337,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         public String toString() {
             return "SessionState{uid " + client.uid + " pid " + client.pid
                     + " method " + Integer.toHexString(
-                            System.identityHashCode(method))
+                            IInputMethodInvoker.getBinderIdentityHashCode(method))
                     + " session " + Integer.toHexString(
                             System.identityHashCode(session))
                     + " channel " + channel
                     + "}";
         }
 
-        SessionState(ClientState _client, IInputMethod _method,
+        SessionState(ClientState _client, IInputMethodInvoker _method,
                 IInputMethodSession _session, InputChannel _channel) {
             client = _client;
             method = _method;
@@ -613,7 +612,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @GuardedBy("ImfLock.class")
     @Nullable
-    private IInputMethod getCurMethodLocked() {
+    private IInputMethodInvoker getCurMethodLocked() {
         return mBindingController.getCurMethod();
     }
 
@@ -692,8 +691,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     /**
      * Internal state snapshot when
-     * {@link IInputMethod#startInput(IBinder, IInputContext, EditorInfo, boolean)} is about to be
-     * called.
+     * {@link com.android.internal.view.IInputMethod#startInput(IBinder, IInputContext, EditorInfo,
+     * boolean)} is about to be called.
      *
      * <p>Calling that IPC endpoint basically means that
      * {@link InputMethodService#doStartInput(InputConnection, EditorInfo, boolean)} will be called
@@ -1951,18 +1950,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback callback) {
         final InputMethodInfo imi = mMethodMap.get(getSelectedMethodIdLocked());
         try {
-            IInputMethod curMethod = getCurMethodLocked();
+            IInputMethodInvoker curMethod = getCurMethodLocked();
             if (userId == mSettings.getCurrentUserId() && imi != null
                     && imi.isInlineSuggestionsEnabled() && curMethod != null) {
                 final IInlineSuggestionsRequestCallback callbackImpl =
                         new InlineSuggestionsRequestCallbackDecorator(callback,
                                 imi.getPackageName(), mCurTokenDisplayId, getCurTokenLocked(),
                                 this);
-                try {
-                    curMethod.onCreateInlineSuggestionsRequest(requestInfo, callbackImpl);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "RemoteException calling onCreateInlineSuggestionsRequest()", e);
-                }
+                curMethod.onCreateInlineSuggestionsRequest(requestInfo, callbackImpl);
             } else {
                 callback.onInlineSuggestionsUnsupported();
             }
@@ -2190,13 +2185,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             mCurFocusedWindow, 0, null, SoftInputShowHideReason.HIDE_REMOVE_CLIENT);
                     if (mBoundToMethod) {
                         mBoundToMethod = false;
-                        IInputMethod curMethod = getCurMethodLocked();
+                        IInputMethodInvoker curMethod = getCurMethodLocked();
                         if (curMethod != null) {
-                            try {
-                                curMethod.unbindInput();
-                            } catch (RemoteException e) {
-                                // There is nothing interesting about the method dying.
-                            }
+                            curMethod.unbindInput();
                         }
                     }
                     mCurClient = null;
@@ -2230,13 +2221,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     + mCurClient.client.asBinder());
             if (mBoundToMethod) {
                 mBoundToMethod = false;
-                IInputMethod curMethod = getCurMethodLocked();
+                IInputMethodInvoker curMethod = getCurMethodLocked();
                 if (curMethod != null) {
-                    try {
-                        curMethod.unbindInput();
-                    } catch (RemoteException e) {
-                        // There is nothing interesting about the method dying.
-                    }
+                    curMethod.unbindInput();
                 }
             }
 
@@ -2285,11 +2272,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @NonNull
     InputBindResult attachNewInputLocked(@StartInputReason int startInputReason, boolean initial) {
         if (!mBoundToMethod) {
-            IInputMethod curMethod = getCurMethodLocked();
-            try {
-                curMethod.bindInput(mCurClient.binding);
-            } catch (RemoteException e) {
-            }
+            getCurMethodLocked().bindInput(mCurClient.binding);
             mBoundToMethod = true;
         }
 
@@ -2316,11 +2299,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         final SessionState session = mCurClient.curSession;
-        try {
-            setEnabledSessionLocked(session);
-            session.method.startInput(startInputToken, mCurInputContext, mCurAttribute, restarting);
-        } catch (RemoteException e) {
-        }
+        setEnabledSessionLocked(session);
+        session.method.startInput(startInputToken, mCurInputContext, mCurAttribute, restarting);
 
         if (mShowRequested) {
             if (DEBUG) Slog.v(TAG, "Attach new input asks to show input");
@@ -2514,18 +2494,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("ImfLock.class")
-    void initializeImeLocked(@NonNull IInputMethod inputMethod, @NonNull IBinder token,
+    void initializeImeLocked(@NonNull IInputMethodInvoker inputMethod, @NonNull IBinder token,
             @android.content.pm.ActivityInfo.Config int configChanges, boolean supportStylusHw) {
         if (DEBUG) {
             Slog.v(TAG, "Sending attach of token: " + token + " for display: "
                     + mCurTokenDisplayId);
         }
-        try {
-            inputMethod.initializeInternal(token,
-                    new InputMethodPrivilegedOperationsImpl(this, token), configChanges,
-                    supportStylusHw);
-        } catch (RemoteException e) {
-        }
+        inputMethod.initializeInternal(token, new InputMethodPrivilegedOperationsImpl(this, token),
+                configChanges, supportStylusHw);
     }
 
     @AnyThread
@@ -2535,7 +2511,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @BinderThread
-    void onSessionCreated(IInputMethod method, IInputMethodSession session, InputChannel channel) {
+    void onSessionCreated(IInputMethodInvoker method, IInputMethodSession session,
+            InputChannel channel) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.onSessionCreated");
         try {
             synchronized (ImfLock.class) {
@@ -2545,7 +2522,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     channel.dispose();
                     return;
                 }
-                IInputMethod curMethod = getCurMethodLocked();
+                IInputMethodInvoker curMethod = getCurMethodLocked();
                 if (curMethod != null && method != null
                         && curMethod.asBinder() == method.asBinder()) {
                     if (mCurClient != null) {
@@ -2609,7 +2586,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             cs.sessionRequested = true;
 
-            final IInputMethod curMethod = getCurMethodLocked();
+            final IInputMethodInvoker curMethod = getCurMethodLocked();
             final IInputSessionCallback.Stub callback = new IInputSessionCallback.Stub() {
                 @Override
                 public void sessionCreated(IInputMethodSession session) {
@@ -2624,7 +2601,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             try {
                 curMethod.createSession(clientChannel, callback);
-            } catch (RemoteException e) {
             } finally {
                 // Dispose the channel because the remote proxy will get its own copy when
                 // unparceled.
@@ -3012,14 +2988,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             if (newSubtype != oldSubtype) {
                 setSelectedInputMethodAndSubtypeLocked(info, subtypeId, true);
-                IInputMethod curMethod = getCurMethodLocked();
+                IInputMethodInvoker curMethod = getCurMethodLocked();
                 if (curMethod != null) {
-                    try {
-                        updateSystemUiLocked(mImeWindowVis, mBackDisposition);
-                        curMethod.changeInputMethodSubtype(newSubtype);
-                    } catch (RemoteException e) {
-                        Slog.w(TAG, "Failed to call changeInputMethodSubtype");
-                    }
+                    updateSystemUiLocked(mImeWindowVis, mBackDisposition);
+                    curMethod.changeInputMethodSubtype(newSubtype);
                 }
             }
             return;
@@ -3096,13 +3068,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     return;
                 }
                 if (DEBUG) Slog.v(TAG, "Client requesting Stylus Handwriting to be started");
-                final IInputMethod curMethod = getCurMethodLocked();
+                final IInputMethodInvoker curMethod = getCurMethodLocked();
                 if (curMethod != null) {
-                    try {
-                        curMethod.canStartStylusHandwriting(++mHwRequestId);
-                    } catch (RemoteException e) {
-                        Slog.w(TAG, "RemoteException calling canStartStylusHandwriting(): ", e);
-                    }
+                    curMethod.canStartStylusHandwriting(++mHwRequestId);
                 }
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -3153,21 +3121,20 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         mBindingController.setCurrentMethodVisible();
-        final IInputMethod curMethod = getCurMethodLocked();
+        final IInputMethodInvoker curMethod = getCurMethodLocked();
         if (curMethod != null) {
             // create a placeholder token for IMS so that IMS cannot inject windows into client app.
             Binder showInputToken = new Binder();
             mShowRequestWindowMap.put(showInputToken, windowToken);
             final int showFlags = getImeShowFlagsLocked();
-            try {
-                if (DEBUG) {
-                    Slog.v(TAG, "Calling " + curMethod + ".showSoftInput(" + showInputToken
-                            + ", " + showFlags + ", " + resultReceiver + ") for reason: "
-                            + InputMethodDebug.softInputDisplayReasonToString(reason));
-                }
-                curMethod.showSoftInput(showInputToken, showFlags, resultReceiver);
+            if (DEBUG) {
+                Slog.v(TAG, "Calling " + curMethod + ".showSoftInput(" + showInputToken
+                        + ", " + showFlags + ", " + resultReceiver + ") for reason: "
+                        + InputMethodDebug.softInputDisplayReasonToString(reason));
+            }
+            // TODO(b/192412909): Check if we can always call onShowHideSoftInputRequested() or not.
+            if (curMethod.showSoftInput(showInputToken, showFlags, resultReceiver)) {
                 onShowHideSoftInputRequested(true /* show */, windowToken, reason);
-            } catch (RemoteException e) {
             }
             mInputShown = true;
             return true;
@@ -3236,7 +3203,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // since Android Eclair.  That's why we need to accept IMM#hideSoftInput() even when only
         // IMMS#InputShown indicates that the software keyboard is shown.
         // TODO: Clean up, IMMS#mInputShown, IMMS#mImeWindowVis and mShowRequested.
-        IInputMethod curMethod = getCurMethodLocked();
+        IInputMethodInvoker curMethod = getCurMethodLocked();
         final boolean shouldHideSoftInput = (curMethod != null) && (mInputShown
                 || (mImeWindowVis & InputMethodService.IME_ACTIVE) != 0);
         boolean res;
@@ -3252,10 +3219,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         + ", " + resultReceiver + ") for reason: "
                         + InputMethodDebug.softInputDisplayReasonToString(reason));
             }
-            try {
-                curMethod.hideSoftInput(hideInputToken, 0 /* flags */, resultReceiver);
+            // TODO(b/192412909): Check if we can always call onShowHideSoftInputRequested() or not.
+            if (curMethod.hideSoftInput(hideInputToken, 0 /* flags */, resultReceiver)) {
                 onShowHideSoftInputRequested(false /* show */, windowToken, reason);
-            } catch (RemoteException e) {
             }
             res = true;
         } else {
@@ -4160,7 +4126,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    /** Called right after {@link IInputMethod#showSoftInput}. */
+    /** Called right after {@link com.android.internal.view.IInputMethod#showSoftInput}. */
     @GuardedBy("ImfLock.class")
     private void onShowHideSoftInputRequested(boolean show, IBinder requestToken,
             @SoftInputShowHideReason int reason) {
@@ -4215,19 +4181,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     void setEnabledSessionLocked(SessionState session) {
         if (mEnabledSession != session) {
             if (mEnabledSession != null && mEnabledSession.session != null) {
-                try {
-                    if (DEBUG) Slog.v(TAG, "Disabling: " + mEnabledSession);
-                    mEnabledSession.method.setSessionEnabled(mEnabledSession.session, false);
-                } catch (RemoteException e) {
-                }
+                if (DEBUG) Slog.v(TAG, "Disabling: " + mEnabledSession);
+                mEnabledSession.method.setSessionEnabled(mEnabledSession.session, false);
             }
             mEnabledSession = session;
             if (mEnabledSession != null && mEnabledSession.session != null) {
-                try {
-                    if (DEBUG) Slog.v(TAG, "Enabling: " + mEnabledSession);
-                    mEnabledSession.method.setSessionEnabled(mEnabledSession.session, true);
-                } catch (RemoteException e) {
-                }
+                if (DEBUG) Slog.v(TAG, "Enabling: " + mEnabledSession);
+                mEnabledSession.method.setSessionEnabled(mEnabledSession.session, true);
             }
         }
     }
@@ -4394,12 +4354,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 return;
             }
 
-            try {
-                // TODO: replace null  with actual Channel, MotionEvents
-                getCurMethodLocked().startStylusHandwriting(null, null);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "RemoteException calling startStylusHandwriting(): ", e);
-            }
+            // TODO: replace null  with actual Channel, MotionEvents
+            getCurMethodLocked().startStylusHandwriting(null, null);
         }
     }
 
@@ -5132,7 +5088,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     private void dumpAsStringNoCheck(FileDescriptor fd, PrintWriter pw, String[] args,
             boolean isCritical) {
-        IInputMethod method;
+        IInputMethodInvoker method;
         ClientState client;
         ClientState focusedWindowClient;
 

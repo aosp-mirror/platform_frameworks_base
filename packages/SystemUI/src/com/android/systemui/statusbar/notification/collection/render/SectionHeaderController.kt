@@ -94,6 +94,10 @@ internal class SectionHeaderNodeControllerImpl @Inject constructor(
         _view?.setOnClearAllClickListener(listener)
     }
 
+    override fun onViewAdded() {
+        headerView?.isContentVisible = true
+    }
+
     override val view: View
         get() = _view!!
 }

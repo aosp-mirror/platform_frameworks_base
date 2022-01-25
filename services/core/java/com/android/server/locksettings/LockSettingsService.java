@@ -20,6 +20,9 @@ import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
 import static android.Manifest.permission.MANAGE_BIOMETRIC;
 import static android.Manifest.permission.READ_CONTACTS;
 import static android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS;
+import static android.app.admin.DevicePolicyResources.Strings.Core.PROFILE_ENCRYPTED_DETAIL;
+import static android.app.admin.DevicePolicyResources.Strings.Core.PROFILE_ENCRYPTED_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.Core.PROFILE_ENCRYPTED_TITLE;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.UserHandle.USER_ALL;
@@ -117,6 +120,7 @@ import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
@@ -642,12 +646,9 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private void showEncryptionNotificationForProfile(UserHandle user) {
         Resources r = mContext.getResources();
-        CharSequence title = r.getText(
-                com.android.internal.R.string.profile_encrypted_title);
-        CharSequence message = r.getText(
-                com.android.internal.R.string.profile_encrypted_message);
-        CharSequence detail = r.getText(
-                com.android.internal.R.string.profile_encrypted_detail);
+        CharSequence title = getEncryptionNotificationTitle();
+        CharSequence message = getEncryptionNotificationMessage();
+        CharSequence detail = getEncryptionNotificationDetail();
 
         final KeyguardManager km = (KeyguardManager) mContext.getSystemService(KEYGUARD_SERVICE);
         final Intent unlockIntent = km.createConfirmDeviceCredentialIntent(null, null,
@@ -661,6 +662,24 @@ public class LockSettingsService extends ILockSettings.Stub {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE_UNAUDITED);
 
         showEncryptionNotification(user, title, message, detail, intent);
+    }
+
+    private String getEncryptionNotificationTitle() {
+        return mInjector.getDevicePolicyManager().getString(
+                PROFILE_ENCRYPTED_TITLE,
+                () -> mContext.getString(R.string.profile_encrypted_title));
+    }
+
+    private String getEncryptionNotificationDetail() {
+        return mInjector.getDevicePolicyManager().getString(
+                PROFILE_ENCRYPTED_DETAIL,
+                () -> mContext.getString(R.string.profile_encrypted_detail));
+    }
+
+    private String getEncryptionNotificationMessage() {
+        return mInjector.getDevicePolicyManager().getString(
+                PROFILE_ENCRYPTED_MESSAGE,
+                () -> mContext.getString(R.string.profile_encrypted_message));
     }
 
     private void showEncryptionNotification(UserHandle user, CharSequence title,

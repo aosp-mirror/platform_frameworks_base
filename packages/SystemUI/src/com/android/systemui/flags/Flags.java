@@ -85,7 +85,7 @@ public class Flags {
             new BooleanFlag(400, true);
 
     public static final BooleanFlag SMARTSPACE_SHARED_ELEMENT_TRANSITION_ENABLED =
-            new BooleanFlag(401, false);
+            new BooleanFlag(401, true);
 
     public static final ResourceBooleanFlag SMARTSPACE =
             new ResourceBooleanFlag(402, R.bool.flag_smartspace);

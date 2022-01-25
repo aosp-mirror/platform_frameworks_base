@@ -21,8 +21,6 @@ import android.content.Context;
 import android.view.WindowManager;
 
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Background;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
@@ -33,10 +31,8 @@ import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerR
 import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender;
 import com.android.systemui.media.taptotransfer.sender.MediaTttSenderService;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
-import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.Optional;
-import java.util.concurrent.Executor;
 
 import javax.inject.Named;
 
@@ -89,14 +85,11 @@ public interface MediaModule {
     static Optional<MediaTttChipControllerSender> providesMediaTttChipControllerSender(
             MediaTttFlags mediaTttFlags,
             Context context,
-            WindowManager windowManager,
-            @Main Executor mainExecutor,
-            @Background Executor backgroundExecutor) {
+            WindowManager windowManager) {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
         }
-        return Optional.of(new MediaTttChipControllerSender(
-                context, windowManager, mainExecutor, backgroundExecutor));
+        return Optional.of(new MediaTttChipControllerSender(context, windowManager));
     }
 
     /** */
@@ -119,9 +112,7 @@ public interface MediaModule {
             MediaTttFlags mediaTttFlags,
             CommandRegistry commandRegistry,
             Context context,
-            MediaTttChipControllerSender mediaTttChipControllerSender,
-            MediaTttChipControllerReceiver mediaTttChipControllerReceiver,
-            @Main DelayableExecutor mainExecutor) {
+            MediaTttChipControllerReceiver mediaTttChipControllerReceiver) {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
         }
@@ -129,9 +120,7 @@ public interface MediaModule {
                 new MediaTttCommandLineHelper(
                         commandRegistry,
                         context,
-                        mediaTttChipControllerSender,
-                        mediaTttChipControllerReceiver,
-                        mainExecutor));
+                        mediaTttChipControllerReceiver));
     }
 
     /** Inject into MediaTttSenderService. */

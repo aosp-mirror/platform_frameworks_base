@@ -33,9 +33,19 @@ import static android.hardware.usb.UsbPortStatus.MODE_DFP;
 import static android.hardware.usb.UsbPortStatus.MODE_DUAL;
 import static android.hardware.usb.UsbPortStatus.MODE_NONE;
 import static android.hardware.usb.UsbPortStatus.MODE_UFP;
+import static android.hardware.usb.UsbPortStatus.POWER_BRICK_STATUS_DISCONNECTED;
+import static android.hardware.usb.UsbPortStatus.POWER_BRICK_STATUS_UNKNOWN;
+import static android.hardware.usb.UsbPortStatus.POWER_BRICK_STATUS_CONNECTED;
 import static android.hardware.usb.UsbPortStatus.POWER_ROLE_NONE;
 import static android.hardware.usb.UsbPortStatus.POWER_ROLE_SINK;
 import static android.hardware.usb.UsbPortStatus.POWER_ROLE_SOURCE;
+import static android.hardware.usb.UsbPortStatus.USB_DATA_STATUS_UNKNOWN;
+import static android.hardware.usb.UsbPortStatus.USB_DATA_STATUS_ENABLED;
+import static android.hardware.usb.UsbPortStatus.USB_DATA_STATUS_DISABLED_OVERHEAT;
+import static android.hardware.usb.UsbPortStatus.USB_DATA_STATUS_DISABLED_CONTAMINANT;
+import static android.hardware.usb.UsbPortStatus.USB_DATA_STATUS_DISABLED_DOCK;
+import static android.hardware.usb.UsbPortStatus.USB_DATA_STATUS_DISABLED_FORCE;
+import static android.hardware.usb.UsbPortStatus.USB_DATA_STATUS_DISABLED_DEBUG;
 
 import android.Manifest;
 import android.annotation.CheckResult;
@@ -153,6 +163,48 @@ public final class UsbPort {
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface EnableLimitPowerTransferStatus{}
+
+    /**
+     * The {@link #enableUsbDataWhileDocked} request was successfully completed.
+     */
+    public static final int ENABLE_USB_DATA_WHILE_DOCKED_SUCCESS = 0;
+
+    /**
+     * The {@link #enableUsbDataWhileDocked} request failed due to internal error.
+     */
+    public static final int ENABLE_USB_DATA_WHILE_DOCKED_ERROR_INTERNAL = 1;
+
+    /**
+     * The {@link #enableUsbDataWhileDocked} request failed as it's not supported.
+     */
+    public static final int ENABLE_USB_DATA_WHILE_DOCKED_ERROR_NOT_SUPPORTED = 2;
+
+    /**
+     * The {@link #enableUsbDataWhileDocked} request failed as port id mismatched.
+     */
+    public static final int ENABLE_USB_DATA_WHILE_DOCKED_ERROR_PORT_MISMATCH = 3;
+
+    /**
+     * The {@link #enableUsbDataWhileDocked} request failed as data is still enabled.
+     */
+    public static final int ENABLE_USB_DATA_WHILE_DOCKED_ERROR_DATA_ENABLED = 4;
+
+    /**
+     * The {@link #enableUsbDataWhileDocked} request failed due to other reasons.
+     */
+    public static final int ENABLE_USB_DATA_WHILE_DOCKED_ERROR_OTHER = 5;
+
+    /** @hide */
+    @IntDef(prefix = { "ENABLE_USB_DATA_WHILE_DOCKED_" }, value = {
+            ENABLE_USB_DATA_WHILE_DOCKED_SUCCESS,
+            ENABLE_USB_DATA_WHILE_DOCKED_ERROR_INTERNAL,
+            ENABLE_USB_DATA_WHILE_DOCKED_ERROR_NOT_SUPPORTED,
+            ENABLE_USB_DATA_WHILE_DOCKED_ERROR_PORT_MISMATCH,
+            ENABLE_USB_DATA_WHILE_DOCKED_ERROR_DATA_ENABLED,
+            ENABLE_USB_DATA_WHILE_DOCKED_ERROR_OTHER
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface EnableUsbDataWhileDockedStatus{}
 
     /** @hide */
     public UsbPort(@NonNull UsbManager usbManager, @NonNull String id, int supportedModes,
@@ -308,6 +360,51 @@ public final class UsbPort {
     }
 
     /**
+     * Enables Usb data when disabled due to {@link UsbPort#USB_DATA_STATUS_DISABLED_DOCK}
+     *
+     * @return {@link #ENABLE_USB_DATA_WHILE_DOCKED_SUCCESS} when request completes successfully or
+     *         {@link #ENABLE_USB_DATA_WHILE_DOCKED_ERROR_INTERNAL} when request fails due to
+     *         internal error or
+     *         {@link ENABLE_USB_DATA_WHILE_DOCKED_ERROR_NOT_SUPPORTED} when not supported or
+     *         {@link ENABLE_USB_DATA_WHILE_DOCKED_ERROR_PORT_MISMATCH} when request fails due to
+     *         port id mismatch or
+     *         {@link ENABLE_USB_DATA_WHILE_DOCKED_ERROR_DATA_ENABLED} when request fails as data
+     *         is still enabled or
+     *         {@link ENABLE_USB_DATA_WHILE_DOCKED_ERROR_OTHER} when fails due to other reasons.
+     */
+    @CheckResult
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public @EnableUsbDataWhileDockedStatus int enableUsbDataWhileDocked() {
+        // UID is added To minimize operationID overlap between two different packages.
+        int operationId = sUsbOperationCount.incrementAndGet() + Binder.getCallingUid();
+        Log.i(TAG, "enableUsbData opId:" + operationId
+                + " callingUid:" + Binder.getCallingUid());
+        UsbPortStatus portStatus = getStatus();
+        if (portStatus != null &&
+                !usbDataStatusToString(portStatus.getUsbDataStatus()).contains("disabled-dock")) {
+            return ENABLE_USB_DATA_WHILE_DOCKED_ERROR_DATA_ENABLED;
+        }
+
+        UsbOperationInternal opCallback =
+                new UsbOperationInternal(operationId, mId);
+        mUsbManager.enableUsbDataWhileDocked(this, operationId, opCallback);
+                opCallback.waitForOperationComplete();
+        int result = opCallback.getStatus();
+        switch (result) {
+            case USB_OPERATION_SUCCESS:
+                return ENABLE_USB_DATA_WHILE_DOCKED_SUCCESS;
+            case USB_OPERATION_ERROR_INTERNAL:
+                return ENABLE_USB_DATA_WHILE_DOCKED_ERROR_INTERNAL;
+            case USB_OPERATION_ERROR_NOT_SUPPORTED:
+                return ENABLE_USB_DATA_WHILE_DOCKED_ERROR_NOT_SUPPORTED;
+            case USB_OPERATION_ERROR_PORT_MISMATCH:
+                return ENABLE_USB_DATA_WHILE_DOCKED_ERROR_PORT_MISMATCH;
+            default:
+                return ENABLE_USB_DATA_WHILE_DOCKED_ERROR_OTHER;
+        }
+    }
+
+    /**
      * Limits power transfer In and out of the port.
      * <p>
      * Disables charging and limits sourcing power(when permitted by the USB spec) until
@@ -442,6 +539,57 @@ public final class UsbPort {
                 return "not detected";
             default:
                 return Integer.toString(contaminantPresenceStatus);
+        }
+    }
+
+    /** @hide */
+    public static String usbDataStatusToString(int usbDataStatus) {
+        switch (usbDataStatus) {
+            case USB_DATA_STATUS_UNKNOWN:
+                return "unknown";
+            case USB_DATA_STATUS_ENABLED:
+                return "enabled";
+            case USB_DATA_STATUS_DISABLED_OVERHEAT:
+                return "disabled-overheat";
+            case USB_DATA_STATUS_DISABLED_CONTAMINANT:
+                return "disabled-contaminant";
+            case USB_DATA_STATUS_DISABLED_DOCK:
+                return "disabled-dock";
+            case USB_DATA_STATUS_DISABLED_FORCE:
+                return "disabled-force";
+            case USB_DATA_STATUS_DISABLED_DEBUG:
+                return "disabled-debug";
+            default:
+                return Integer.toString(usbDataStatus);
+        }
+    }
+
+    /** @hide */
+    public static String usbDataStatusToString(int[] usbDataStatus) {
+        StringBuilder modeString = new StringBuilder();
+        if (usbDataStatus == null) {
+            return "unknown";
+        }
+        for (int i = 0; i < usbDataStatus.length; i++) {
+            modeString.append(usbDataStatusToString(usbDataStatus[i]));
+            if (i < usbDataStatus.length - 1) {
+                modeString.append(", ");
+            }
+        }
+        return modeString.toString();
+    }
+
+    /** @hide */
+    public static String powerBrickStatusToString(int powerBrickStatus) {
+        switch (powerBrickStatus) {
+            case POWER_BRICK_STATUS_UNKNOWN:
+                return "unknown";
+            case POWER_BRICK_STATUS_CONNECTED:
+                return "connected";
+            case POWER_BRICK_STATUS_DISCONNECTED:
+                return "disconnected";
+            default:
+                return Integer.toString(powerBrickStatus);
         }
     }
 

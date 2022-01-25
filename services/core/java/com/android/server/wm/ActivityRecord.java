@@ -7364,10 +7364,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @VisibleForTesting
     void clearSizeCompatMode() {
+        final float lastSizeCompatScale = mSizeCompatScale;
         mInSizeCompatModeForBounds = false;
         mSizeCompatScale = 1f;
         mSizeCompatBounds = null;
         mCompatDisplayInsets = null;
+        if (mSizeCompatScale != lastSizeCompatScale) {
+            forAllWindows(WindowState::updateGlobalScale, false /* traverseTopToBottom */);
+        }
 
         // Clear config override in #updateCompatDisplayInsets().
         onRequestedOverrideConfigurationChanged(EMPTY);
@@ -7925,6 +7929,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final int contentH = resolvedAppBounds.height();
         final int viewportW = containerAppBounds.width();
         final int viewportH = containerAppBounds.height();
+        final float lastSizeCompatScale = mSizeCompatScale;
         // Only allow to scale down.
         mSizeCompatScale = (contentW <= viewportW && contentH <= viewportH)
                 ? 1f : Math.min((float) viewportW / contentW, (float) viewportH / contentH);
@@ -7942,6 +7947,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mSizeCompatBounds.bottom += containerTopInset;
         } else {
             mSizeCompatBounds = null;
+        }
+        if (mSizeCompatScale != lastSizeCompatScale) {
+            forAllWindows(WindowState::updateGlobalScale, false /* traverseTopToBottom */);
         }
 
         // Vertically center within parent (bounds) - this is a UX choice and exclude the horizontal

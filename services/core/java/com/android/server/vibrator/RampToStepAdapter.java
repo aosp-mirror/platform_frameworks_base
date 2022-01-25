@@ -94,6 +94,6 @@ final class RampToStepAdapter implements VibrationEffectAdapters.SegmentsAdapter
     }
 
     private static float fillEmptyFrequency(VibratorInfo info, float frequencyHz) {
-        return frequencyHz == 0 ? info.getResonantFrequency() : frequencyHz;
+        return frequencyHz == 0 ? info.getResonantFrequencyHz() : frequencyHz;
     }
 }

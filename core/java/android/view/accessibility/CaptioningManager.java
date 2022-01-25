@@ -254,7 +254,13 @@ public class CaptioningManager {
      * Returns true if system wide call captioning is enabled for this device.
      */
     public boolean isCallCaptioningEnabled() {
-        return mResources.getBoolean(R.bool.config_systemCaptionsServiceCallsEnabled);
+        try {
+            return mResources.getBoolean(
+                R.bool.config_systemCaptionsServiceCallsEnabled);
+        } catch (Resources.NotFoundException e) {
+            // The resource may not be defined, return false in that case
+            return false;
+        }
     }
 
     private void notifyEnabledChanged() {
