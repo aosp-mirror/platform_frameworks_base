@@ -36,6 +36,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.SystemServerClassLoaderFactory;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService.TargetUser;
+import com.android.server.SystemService.UserCompletedEventType;
 import com.android.server.am.EventLogTags;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
@@ -73,6 +74,7 @@ public final class SystemServiceManager implements Dumpable {
     private static final String USER_SWITCHING = "Switch"; // Logged as onSwitchUser
     private static final String USER_STOPPING = "Stop"; // Logged as onStopUser
     private static final String USER_STOPPED = "Cleanup"; // Logged as onCleanupUser
+    private static final String USER_COMPLETED_EVENT = "CompletedEvent"; // onCompletedEventUser
 
     // Whether to use multiple threads to run user lifecycle phases in parallel.
     private static boolean sUseLifecycleThreadPool = true;
@@ -404,6 +406,26 @@ public final class SystemServiceManager implements Dumpable {
         }
     }
 
+    /**
+     * Called some time <i>after</i> an onUser... event has completed, for the events delineated in
+     * {@link UserCompletedEventType}.
+     *
+     * @param eventFlags the events that completed, per {@link UserCompletedEventType}, or 0.
+     * @see SystemService#onUserCompletedEvent
+     */
+    public void onUserCompletedEvent(@UserIdInt int userId,
+            @UserCompletedEventType.EventTypesFlag int eventFlags) {
+        EventLog.writeEvent(EventLogTags.SSM_USER_COMPLETED_EVENT, userId, eventFlags);
+        if (eventFlags == 0) {
+            return;
+        }
+        onUser(TimingsTraceAndSlog.newAsyncLog(),
+                USER_COMPLETED_EVENT,
+                /* prevUser= */ null,
+                getTargetUser(userId),
+                new UserCompletedEventType(eventFlags));
+    }
+
     private void onUser(@NonNull String onWhat, @UserIdInt int userId) {
         onUser(TimingsTraceAndSlog.newAsyncLog(), onWhat, /* prevUser= */ null,
                 getTargetUser(userId));
@@ -411,19 +433,23 @@ public final class SystemServiceManager implements Dumpable {
 
     private void onUser(@NonNull TimingsTraceAndSlog t, @NonNull String onWhat,
             @Nullable TargetUser prevUser, @NonNull TargetUser curUser) {
+        onUser(t, onWhat, prevUser, curUser, /* completedEventType=*/ null);
+    }
+
+    private void onUser(@NonNull TimingsTraceAndSlog t, @NonNull String onWhat,
+            @Nullable TargetUser prevUser, @NonNull TargetUser curUser,
+            @Nullable UserCompletedEventType completedEventType) {
         final int curUserId = curUser.getUserIdentifier();
         // NOTE: do not change label below, or it might break performance tests that rely on it.
         t.traceBegin("ssm." + onWhat + "User-" + curUserId);
         Slog.i(TAG, "Calling on" + onWhat + "User " + curUserId
                 + (prevUser != null ? " (from " + prevUser + ")" : ""));
-        final int serviceLen = mServices.size();
-        // Limit the lifecycle parallelization to all users other than the system user
-        // and only for the user start lifecycle phase for now.
-        final boolean useThreadPool = sUseLifecycleThreadPool
-                && curUserId != UserHandle.USER_SYSTEM
-                && onWhat.equals(USER_STARTING);
+
+        final boolean useThreadPool = useThreadPool(curUserId, onWhat);
         final ExecutorService threadPool =
                 useThreadPool ? Executors.newFixedThreadPool(mNumUserPoolThreads) : null;
+
+        final int serviceLen = mServices.size();
         for (int i = 0; i < serviceLen; i++) {
             final SystemService service = mServices.get(i);
             final String serviceName = service.getClass().getName();
@@ -446,8 +472,7 @@ public final class SystemServiceManager implements Dumpable {
                 }
                 continue;
             }
-            // Only submit this service to the thread pool if it's in the "other" category.
-            final boolean submitToThreadPool = useThreadPool && i >= sOtherServicesStartIndex;
+            final boolean submitToThreadPool = useThreadPool && useThreadPoolForService(onWhat, i);
             if (!submitToThreadPool) {
                 t.traceBegin("ssm.on" + onWhat + "User-" + curUserId + "_" + serviceName);
             }
@@ -459,7 +484,7 @@ public final class SystemServiceManager implements Dumpable {
                         break;
                     case USER_STARTING:
                         if (submitToThreadPool) {
-                            threadPool.submit(getOnStartUserRunnable(t, service, curUser));
+                            threadPool.submit(getOnUserStartingRunnable(t, service, curUser));
                         } else {
                             service.onUserStarting(curUser);
                         }
@@ -475,6 +500,10 @@ public final class SystemServiceManager implements Dumpable {
                         break;
                     case USER_STOPPED:
                         service.onUserStopped(curUser);
+                        break;
+                    case USER_COMPLETED_EVENT:
+                        threadPool.submit(getOnUserCompletedEventRunnable(
+                                t, service, serviceName, curUser, completedEventType));
                         break;
                     default:
                         throw new IllegalArgumentException(onWhat + " what?");
@@ -498,9 +527,11 @@ public final class SystemServiceManager implements Dumpable {
             } catch (InterruptedException e) {
                 Slog.wtf(TAG, "User lifecycle thread pool was interrupted while awaiting completion"
                         + " of " + onWhat + " of user " + curUser, e);
-                Slog.e(TAG, "Couldn't terminate, disabling thread pool. "
-                        + "Please capture a bug report.");
-                sUseLifecycleThreadPool = false;
+                if (!onWhat.equals(USER_COMPLETED_EVENT)) {
+                    Slog.e(TAG, "Couldn't terminate, disabling thread pool. "
+                            + "Please capture a bug report.");
+                    sUseLifecycleThreadPool = false;
+                }
             }
             if (!terminated) {
                 Slog.wtf(TAG, "User lifecycle thread pool was not terminated.");
@@ -509,7 +540,38 @@ public final class SystemServiceManager implements Dumpable {
         t.traceEnd(); // main entry
     }
 
-    private Runnable getOnStartUserRunnable(TimingsTraceAndSlog oldTrace, SystemService service,
+    /**
+     * Whether the given onWhat should use a thread pool.
+     * IMPORTANT: changing the logic to return true won't necessarily make it multi-threaded.
+     *            There needs to be a corresponding logic change in onUser() to actually submit
+     *            to a threadPool for the given onWhat.
+     */
+    private boolean useThreadPool(int userId, @NonNull String onWhat) {
+        switch (onWhat) {
+            case USER_STARTING:
+                // Limit the lifecycle parallelization to all users other than the system user
+                // and only for the user start lifecycle phase for now.
+                return sUseLifecycleThreadPool && userId != UserHandle.USER_SYSTEM;
+            case USER_COMPLETED_EVENT:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private boolean useThreadPoolForService(@NonNull String onWhat, int serviceIndex) {
+        switch (onWhat) {
+            case USER_STARTING:
+                // Only submit this service to the thread pool if it's in the "other" category.
+                return serviceIndex >= sOtherServicesStartIndex;
+            case USER_COMPLETED_EVENT:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private Runnable getOnUserStartingRunnable(TimingsTraceAndSlog oldTrace, SystemService service,
             TargetUser curUser) {
         return () -> {
             final TimingsTraceAndSlog t = new TimingsTraceAndSlog(oldTrace);
@@ -528,6 +590,22 @@ public final class SystemServiceManager implements Dumpable {
                 Slog.e(TAG, "Disabling thread pool - please capture a bug report.");
                 sUseLifecycleThreadPool = false;
             }
+        };
+    }
+
+    private Runnable getOnUserCompletedEventRunnable(TimingsTraceAndSlog oldTrace,
+            SystemService service, String serviceName, TargetUser curUser,
+            UserCompletedEventType eventType) {
+        return () -> {
+            final TimingsTraceAndSlog t = new TimingsTraceAndSlog(oldTrace);
+            final int curUserId = curUser.getUserIdentifier();
+            t.traceBegin("ssm.on" + USER_COMPLETED_EVENT + "User-" + curUserId
+                    + "_" + eventType + "_" + serviceName);
+            long time = SystemClock.elapsedRealtime();
+            service.onUserCompletedEvent(curUser, eventType);
+            warnIfTooLong(SystemClock.elapsedRealtime() - time, service,
+                    "on" + USER_COMPLETED_EVENT + "User-" + curUserId);
+            t.traceEnd();
         };
     }
 

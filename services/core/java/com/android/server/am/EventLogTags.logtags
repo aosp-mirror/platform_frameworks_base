@@ -115,3 +115,4 @@ option java_package com.android.server.am
 30085 ssm_user_unlocked (userId|1|5)
 30086 ssm_user_stopping (userId|1|5)
 30087 ssm_user_stopped (userId|1|5)
+30088 ssm_user_completed_event (userId|1|5),(eventFlag|1|5)
