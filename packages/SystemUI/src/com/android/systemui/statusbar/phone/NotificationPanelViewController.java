@@ -3896,6 +3896,15 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardStatusViewController.animateFoldToAod();
     }
 
+    /**
+     * Cancels fold to AOD transition and resets view state
+     */
+    public void cancelFoldToAodAnimation() {
+        cancelAnimation();
+        resetAlpha();
+        resetTranslation();
+    }
+
     /** */
     public void setImportantForAccessibility(int mode) {
         mView.setImportantForAccessibility(mode);
@@ -4012,6 +4021,10 @@ public class NotificationPanelViewController extends PanelViewController {
 
     public void resetTranslation() {
         mView.setTranslationX(0f);
+    }
+
+    public void resetAlpha() {
+        mView.setAlpha(1f);
     }
 
     public ViewPropertyAnimator fadeOut(long startDelayMs, long durationMs, Runnable endAction) {
