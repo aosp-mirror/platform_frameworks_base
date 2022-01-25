@@ -10632,6 +10632,15 @@ public final class Settings {
         public static final String FAST_PAIR_SCAN_ENABLED = "fast_pair_scan_enabled";
 
         /**
+         * Setting to store denylisted system languages by the CEC {@code <Set Menu Language>}
+         * confirmation dialog.
+         *
+         * @hide
+         */
+        public static final String HDMI_CEC_SET_MENU_LANGUAGE_DENYLIST =
+                "hdmi_cec_set_menu_language_denylist";
+
+        /**
          * These entries are considered common between the personal and the managed profile,
          * since the managed profile doesn't get to change them.
          */

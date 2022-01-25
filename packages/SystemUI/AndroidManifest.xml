@@ -302,6 +302,9 @@
     <!-- For clipboard overlay -->
     <uses-permission android:name="android.permission.READ_CLIPBOARD_IN_BACKGROUND" />
 
+    <!-- To change system language (HDMI CEC) -->
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
+
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settings.flashlight.action.FLASHLIGHT_CHANGED" />
@@ -483,6 +486,16 @@
             android:theme="@style/Theme.SystemUI.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true">
+        </activity>
+
+        <!-- started from HdmiCecLocalDevicePlayback -->
+        <activity android:name=".hdmi.HdmiCecSetMenuLanguageActivity"
+                  android:exported="true"
+                  android:launchMode="singleTop"
+                  android:permission="android.permission.CHANGE_CONFIGURATION"
+                  android:theme="@style/BottomSheet"
+                  android:finishOnCloseSystemDialogs="true"
+                  android:excludeFromRecents="true">
         </activity>
 
         <!-- started from SensoryPrivacyService -->

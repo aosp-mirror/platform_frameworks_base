@@ -375,6 +375,7 @@
   <java-symbol type="string" name="config_usbConfirmActivity" />
   <java-symbol type="string" name="config_usbResolverActivity" />
   <java-symbol type="string" name="config_sensorUseStartedActivity" />
+  <java-symbol type="string" name="config_hdmiCecSetMenuLanguageActivity" />
   <java-symbol type="integer" name="config_minNumVisibleRecentTasks_lowRam" />
   <java-symbol type="integer" name="config_maxNumVisibleRecentTasks_lowRam" />
   <java-symbol type="integer" name="config_minNumVisibleRecentTasks_grid" />

@@ -74,5 +74,6 @@
         <permission name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
         <permission name="android.permission.FORCE_STOP_PACKAGES" />
         <permission name="android.permission.ACCESS_FPS_COUNTER" />
+        <permission name="android.permission.CHANGE_CONFIGURATION" />
     </privapp-permissions>
 </permissions>
