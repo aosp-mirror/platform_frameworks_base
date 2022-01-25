@@ -3604,6 +3604,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             mOverlayHost = new OverlayHost(mWmService);
         }
         mOverlayHost.addOverlay(overlay, mSurfaceControl);
+
+        // Emit an initial onConfigurationChanged to ensure the overlay
+        // can receive any changes between their creation time and
+        // attach time.
+        try {
+            overlay.getRemoteInterface().onConfigurationChanged(getConfiguration());
+        } catch (Exception e) {
+            Slog.e(TAG, "Error sending initial configuration change to WindowContainer overlay");
+            removeOverlay(overlay);
+        }
     }
 
     void removeOverlay(SurfaceControlViewHost.SurfacePackage overlay) {
