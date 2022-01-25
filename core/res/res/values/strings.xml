@@ -197,7 +197,7 @@
     <string name="ThreeWCMmi">Three way calling</string>
     <string name="RuacMmi">Rejection of undesired annoying calls</string>
     <string name="CndMmi">Calling number delivery</string>
-    <string name="DndMmi">Do not disturb</string>
+    <string name="DndMmi" translatable="false">Priority mode</string>
 
     <!-- Displayed to confirm to the user that caller ID will be restricted on the next call as usual. -->
     <string name="CLIRDefaultOnNextCallOn">Caller ID defaults to restricted. Next call: Restricted</string>
@@ -2029,9 +2029,9 @@
     <string name="permdesc_bindCarrierServices">Allows the holder to bind to carrier services. Should never be needed for normal apps.</string>
 
     <!-- Title of an application permission, for applications that wish to access notification policy. -->
-    <string name="permlab_access_notification_policy">access Do Not Disturb</string>
+    <string name="permlab_access_notification_policy" translatable="false">access Priority mode</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_access_notification_policy">Allows the app to read and write Do Not Disturb configuration.</string>
+    <string name="permdesc_access_notification_policy" translatable="false">Allows the app to read and write Priority mode configuration.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_startViewPermissionUsage">start view permission usage</string>
@@ -5294,7 +5294,7 @@
     <string name="zen_mode_forever">Until you turn off</string>
 
     <!-- Zen mode condition: no exit criteria, includes the name of the feature for emphasis. [CHAR LIMIT=NONE] -->
-    <string name="zen_mode_forever_dnd">Until you turn off Do Not Disturb</string>
+    <string name="zen_mode_forever_dnd" translatable="false">Until you turn off Priority mode</string>
 
     <!-- Zen mode active automatic rule name separator. [CHAR LIMIT=NONE] -->
     <string name="zen_mode_rule_name_combination"><xliff:g id="first" example="Weeknights">%1$s</xliff:g> / <xliff:g id="rest" example="Meetings">%2$s</xliff:g></string>
@@ -5303,7 +5303,7 @@
     <string name="toolbar_collapse_description">Collapse</string>
 
     <!-- Zen mode - feature name. [CHAR LIMIT=40] -->
-    <string name="zen_mode_feature_name">Do not disturb</string>
+    <string name="zen_mode_feature_name" translatable="false">Priority mode</string>
 
     <!-- Zen mode - downtime legacy feature name. [CHAR LIMIT=40] -->
     <string name="zen_mode_downtime_feature_name">Downtime</string>
@@ -5719,14 +5719,14 @@
 
     <!-- Title for the notification channel notifying user of settings system changes. [CHAR LIMIT=NONE] -->
     <string name="notification_channel_system_changes">System changes</string>
-    <!-- Title for the notification channel notifying user of do not disturb system changes (i.e. Do Not Disturb has changed). [CHAR LIMIT=NONE] -->
-    <string name="notification_channel_do_not_disturb">Do Not Disturb</string>
-    <!-- Title of notification indicating do not disturb visual interruption settings have changed when upgrading to P -->
-    <string name="zen_upgrade_notification_visd_title">New: Do Not Disturb is hiding notifications</string>
+    <!-- Title for the notification channel notifying user of priority mode system changes (i.e. Priority mode has changed). [CHAR LIMIT=NONE] -->
+    <string name="notification_channel_do_not_disturb" translatable="false">Priority mode</string>
+    <!-- Title of notification indicating Priority mode visual interruption settings have changed when upgrading to P -->
+    <string name="zen_upgrade_notification_visd_title" translatable="false">New: Priority mode is hiding notifications</string>
     <!-- Content of notification indicating users can tap on the notification to go to dnd behavior settings -->
     <string name="zen_upgrade_notification_visd_content">Tap to learn more and change.</string>
-    <!-- Title of notification indicating do not disturb settings have changed when upgrading to P -->
-    <string name="zen_upgrade_notification_title">Do Not Disturb has changed</string>
+    <!-- Title of notification indicating priority mode settings have changed when upgrading to P -->
+    <string name="zen_upgrade_notification_title" translatable="false">Priority mode has changed</string>
     <!-- Content of notification indicating users can tap on the notification to go to dnd behavior settings -->
     <string name="zen_upgrade_notification_content">Tap to check what\'s blocked.</string>
 
@@ -5767,7 +5767,7 @@
     <!-- Label of notification action button to learn more about the enhanced notifications [CHAR LIMIT=20] -->
     <string name="nas_upgrade_notification_learn_more_action">Learn more</string>
     <!-- Content of notification learn more dialog about the enhanced notifications [CHAR LIMIT=NONE] -->
-    <string name="nas_upgrade_notification_learn_more_content">Enhanced notifications replaced Android Adaptive Notifications in Android 12. This feature shows suggested actions and replies, and organizes your notifications.\n\nEnhanced notifications can access notification content, including personal information like contact names and messages. This feature can also dismiss or respond to notifications, such as answering phone calls, and control Do Not Disturb.</string>
+    <string name="nas_upgrade_notification_learn_more_content" translatable="false">Enhanced notifications replaced Android Adaptive Notifications in Android 12. This feature shows suggested actions and replies, and organizes your notifications.\n\nEnhanced notifications can access notification content, including personal information like contact names and messages. This feature can also dismiss or respond to notifications, such as answering phone calls, and control Priority mode.</string>
 
 
     <!-- Dynamic mode battery saver strings -->
