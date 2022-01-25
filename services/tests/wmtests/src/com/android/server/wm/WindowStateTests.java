@@ -899,7 +899,7 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(mDisplayContent.shouldImeAttachedToApp());
         controller.getImeSourceProvider().scheduleShowImePostLayout(app);
         controller.getImeSourceProvider().getSource().setVisible(true);
-        controller.updateAboveInsetsState(imeWindow, false);
+        controller.updateAboveInsetsState(false);
 
         // Expect all app windows behind IME can receive IME insets visible.
         assertTrue(app.getInsetsState().getSource(ITYPE_IME).isVisible());

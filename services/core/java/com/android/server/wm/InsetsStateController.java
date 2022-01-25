@@ -35,7 +35,6 @@ import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
-import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
@@ -56,7 +55,8 @@ class InsetsStateController {
     private final InsetsState mState = new InsetsState();
     private final DisplayContent mDisplayContent;
 
-    private final ArrayMap<Integer, InsetsSourceProvider> mProviders = new ArrayMap<>();
+    private final ArrayMap<Integer, WindowContainerInsetsSourceProvider> mProviders =
+            new ArrayMap<>();
     private final ArrayMap<InsetsControlTarget, ArrayList<Integer>> mControlTargetTypeMap =
             new ArrayMap<>();
     private final SparseArray<InsetsControlTarget> mTypeControlTargetMap = new SparseArray<>();
@@ -108,21 +108,22 @@ class InsetsStateController {
         return result;
     }
 
-    ArrayMap<Integer, InsetsSourceProvider> getSourceProviders() {
+    ArrayMap<Integer, WindowContainerInsetsSourceProvider> getSourceProviders() {
         return mProviders;
     }
 
     /**
      * @return The provider of a specific type.
      */
-    InsetsSourceProvider getSourceProvider(@InternalInsetsType int type) {
+    WindowContainerInsetsSourceProvider getSourceProvider(@InternalInsetsType int type) {
         if (type == ITYPE_IME) {
             return mProviders.computeIfAbsent(type,
                     key -> new ImeInsetsSourceProvider(
                             mState.getSource(key), this, mDisplayContent));
         } else {
             return mProviders.computeIfAbsent(type,
-                    key -> new InsetsSourceProvider(mState.getSource(key), this, mDisplayContent));
+                    key -> new WindowContainerInsetsSourceProvider(mState.getSource(key), this,
+                            mDisplayContent));
         }
     }
 
@@ -133,7 +134,8 @@ class InsetsStateController {
     /**
      * @return The provider of a specific type or null if we don't have it.
      */
-    @Nullable InsetsSourceProvider peekSourceProvider(@InternalInsetsType int type) {
+    @Nullable
+    WindowContainerInsetsSourceProvider peekSourceProvider(@InternalInsetsType int type) {
         return mProviders.get(type);
     }
 
@@ -153,58 +155,25 @@ class InsetsStateController {
     }
 
     /**
-     * Updates {@link WindowState#mAboveInsetsState} for all windows in the display while the
-     * z-order of a window is changed.
+     * Updates {@link WindowState#mAboveInsetsState} for all windows in the display.
      *
-     * @param win The window whose z-order has changed.
      * @param notifyInsetsChange {@code true} if the clients should be notified about the change.
      */
-    void updateAboveInsetsState(WindowState win, boolean notifyInsetsChange) {
-        if (win == null || win.getDisplayContent() != mDisplayContent) {
-            return;
-        }
-        final boolean[] aboveWin = { true };
+    void updateAboveInsetsState(boolean notifyInsetsChange) {
         final InsetsState aboveInsetsState = new InsetsState();
         aboveInsetsState.set(mState,
                 displayCutout() | systemGestures() | mandatorySystemGestures());
-        final SparseArray<InsetsSource> winProvidedSources = win.getProvidedInsetsSources();
-        final ArrayList<WindowState> insetsChangedWindows = new ArrayList<>();
-        mDisplayContent.forAllWindows(w -> {
-            if (aboveWin[0]) {
-                if (w == win) {
-                    aboveWin[0] = false;
-                    if (!win.mAboveInsetsState.equals(aboveInsetsState)) {
-                        win.mAboveInsetsState.set(aboveInsetsState);
-                        insetsChangedWindows.add(win);
-                    }
-                    return winProvidedSources.size() == 0;
-                } else {
-                    final SparseArray<InsetsSource> providedSources = w.getProvidedInsetsSources();
-                    for (int i = providedSources.size() - 1; i >= 0; i--) {
-                        aboveInsetsState.addSource(providedSources.valueAt(i));
-                    }
-                    if (winProvidedSources.size() == 0) {
-                        return false;
-                    }
-                    boolean changed = false;
-                    for (int i = winProvidedSources.size() - 1; i >= 0; i--) {
-                        changed |= w.mAboveInsetsState.removeSource(winProvidedSources.keyAt(i));
-                    }
-                    if (changed) {
-                        insetsChangedWindows.add(w);
-                    }
-                }
-            } else {
-                for (int i = winProvidedSources.size() - 1; i >= 0; i--) {
-                    w.mAboveInsetsState.addSource(winProvidedSources.valueAt(i));
-                }
-                insetsChangedWindows.add(w);
-            }
-            return false;
-        }, true /* traverseTopToBottom */);
+        final ArraySet<WindowState> insetsChangedWindows = new ArraySet<>();
+        final SparseArray<InsetsSourceProvider>
+                localInsetsSourceProvidersFromParent = new SparseArray<>();
+        // This method will iterate on the entire hierarchy in top to bottom z-order manner. The
+        // aboveInsetsState will be modified as per the insets provided by the WindowState being
+        // visited.
+        mDisplayContent.updateAboveInsetsState(aboveInsetsState,
+                localInsetsSourceProvidersFromParent, insetsChangedWindows);
         if (notifyInsetsChange) {
             for (int i = insetsChangedWindows.size() - 1; i >= 0; i--) {
-                mDispatchInsetsChanged.accept(insetsChangedWindows.get(i));
+                mDispatchInsetsChanged.accept(insetsChangedWindows.valueAt(i));
             }
         }
     }
@@ -245,7 +214,7 @@ class InsetsStateController {
     void computeSimulatedState(WindowState win, DisplayFrames displayFrames, Rect winFrame) {
         final InsetsState state = displayFrames.mInsetsState;
         for (int i = mProviders.size() - 1; i >= 0; i--) {
-            final InsetsSourceProvider provider = mProviders.valueAt(i);
+            final WindowContainerInsetsSourceProvider provider = mProviders.valueAt(i);
             if (provider.mWindowContainer == win) {
                 state.addSource(provider.createSimulatedSource(displayFrames, winFrame));
             }
@@ -302,7 +271,7 @@ class InsetsStateController {
         if (target == previous) {
             return;
         }
-        final InsetsSourceProvider provider = mProviders.get(type);
+        final WindowContainerInsetsSourceProvider provider = mProviders.get(type);
         if (provider == null) {
             return;
         }
@@ -333,7 +302,7 @@ class InsetsStateController {
         if (fakeTarget == previous) {
             return;
         }
-        final InsetsSourceProvider provider = mProviders.get(type);
+        final WindowContainerInsetsSourceProvider provider = mProviders.get(type);
         if (provider == null) {
             return;
         }
@@ -388,7 +357,7 @@ class InsetsStateController {
         }
         mDisplayContent.mWmService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
             for (int i = mProviders.size() - 1; i >= 0; i--) {
-                final InsetsSourceProvider provider = mProviders.valueAt(i);
+                final WindowContainerInsetsSourceProvider provider = mProviders.valueAt(i);
                 provider.onSurfaceTransactionApplied();
             }
             final ArraySet<InsetsControlTarget> newControlTargets = new ArraySet<>();

@@ -57,6 +57,7 @@ import static com.android.server.wm.WindowContainerProto.ORIENTATION;
 import static com.android.server.wm.WindowContainerProto.SURFACE_ANIMATOR;
 import static com.android.server.wm.WindowContainerProto.SURFACE_CONTROL;
 import static com.android.server.wm.WindowContainerProto.VISIBLE;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -85,6 +86,7 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.InsetsSource;
+import android.view.InsetsState;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
@@ -148,12 +150,24 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     // onParentChanged() notification.
     boolean mReparenting;
 
-    protected @Nullable InsetsSourceProvider mControllableInsetProvider;
+    /**
+     * Map of {@link InsetsState.InternalInsetsType} to the {@link InsetsSourceProvider} that
+     * provides local insets for all children of the current {@link WindowContainer}.
+     *
+     * Note that these InsetsSourceProviders are not part of the {@link InsetsStateController} and
+     * live here. These are supposed to provide insets only to the subtree of the current
+     * {@link WindowContainer}.
+     */
+    @Nullable
+    SparseArray<InsetsSourceProvider> mLocalInsetsSourceProviders = null;
+
+    @Nullable
+    protected InsetsSourceProvider mControllableInsetProvider;
 
     /**
      * The insets sources provided by this windowContainer.
      */
-    private SparseArray<InsetsSource> mProvidedInsetsSources = null;
+    protected SparseArray<InsetsSource> mProvidedInsetsSources = null;
 
     // List of children for this window container. List is in z-order as the children appear on
     // screen with the top-most window container at the tail of the list.
@@ -340,14 +354,135 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
-     * Set's an {@link InsetsSourceProvider} to be associated with this window, but only if the
-     * provider itself is controllable, as one window can be the provider of more than one inset
-     * type (i.e. gesture insets). If this window is controllable, all its animations must be
-     * controlled by its control target, and the visibility of this window should be taken account
-     * into the state of the control target.
+     * Updates the {@link WindowState#mAboveInsetsState} and
+     * {@link WindowState#mMergedLocalInsetsSources} by visiting the entire hierarchy.
+     *
+     * {@link WindowState#mAboveInsetsState} is updated by visiting all the windows in z-order
+     * top-to-bottom manner and considering the {@link WindowContainer#mProvidedInsetsSources}
+     * provided by the {@link WindowState}s at the top.
+     * {@link WindowState#updateAboveInsetsState(InsetsState, SparseArray, ArraySet)} visits the
+     * IME container in the correct order to make sure the IME insets are passed correctly to the
+     * {@link WindowState}s below it.
+     *
+     * {@link WindowState#mMergedLocalInsetsSources} is updated by considering
+     * {@link WindowContainer#mLocalInsetsSourceProviders} provided by all the parents of the
+     * window.
+     * A given insetsType can be provided as a LocalInsetsSourceProvider only once in a
+     * Parent-to-leaf path.
+     *
+     * Examples: Please take a look at
+     * {@link WindowContainerTests#testAddLocalInsetsSourceProvider()}
+     * {@link
+     * WindowContainerTests#testAddLocalInsetsSourceProvider_windowSkippedIfProvidingOnParent()}
+     * {@link WindowContainerTests#testRemoveLocalInsetsSourceProvider()}.
+     *
+     * @param aboveInsetsState The InsetsState of all the Windows above the current container.
+     * @param localInsetsSourceProvidersFromParent The local InsetsSourceProviders provided by all
+     *                                             the parents in the hierarchy of the current
+     *                                             container.
+     * @param insetsChangedWindows The windows which the insets changed have changed for.
+     */
+    void updateAboveInsetsState(InsetsState aboveInsetsState,
+            SparseArray<InsetsSourceProvider> localInsetsSourceProvidersFromParent,
+            ArraySet<WindowState> insetsChangedWindows) {
+        SparseArray<InsetsSourceProvider> mergedLocalInsetsSourceProviders =
+                localInsetsSourceProvidersFromParent;
+        if (mLocalInsetsSourceProviders != null && mLocalInsetsSourceProviders.size() != 0) {
+            mergedLocalInsetsSourceProviders = createShallowCopy(mergedLocalInsetsSourceProviders);
+            for (int i = 0; i < mLocalInsetsSourceProviders.size(); i++) {
+                mergedLocalInsetsSourceProviders.put(
+                        mLocalInsetsSourceProviders.keyAt(i),
+                        mLocalInsetsSourceProviders.valueAt(i));
+            }
+        }
+
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            mChildren.get(i).updateAboveInsetsState(aboveInsetsState,
+                    mergedLocalInsetsSourceProviders, insetsChangedWindows);
+        }
+    }
+
+    static <T> SparseArray<T> createShallowCopy(SparseArray<T> inputArray) {
+        SparseArray<T> copyOfInput = new SparseArray<>(inputArray.size());
+        for (int i = 0; i < inputArray.size(); i++) {
+            copyOfInput.append(inputArray.keyAt(i), inputArray.valueAt(i));
+        }
+        return copyOfInput;
+    }
+
+    /**
+     * Sets the given {@code providerFrame} as one of the insets provider for this window
+     * container. These insets are only passed to the subtree of the current WindowContainer.
+     * For a given WindowContainer-to-Leaf path, one insetsType can't be overridden more than once.
+     * If that happens, only the latest one will be chosen.
+     *
+     * @param providerFrame the frame that will act as one of the insets providers for this window
+     *                      container
+     * @param insetsTypes the insets type which the providerFrame provides
+     */
+    void addLocalRectInsetsSourceProvider(Rect providerFrame,
+            @InsetsState.InternalInsetsType int[] insetsTypes) {
+        if (insetsTypes == null || insetsTypes.length == 0) {
+            throw new IllegalArgumentException("Insets type not specified.");
+        }
+        if (mLocalInsetsSourceProviders == null) {
+            mLocalInsetsSourceProviders = new SparseArray<>();
+        }
+        for (int i = 0; i < insetsTypes.length; i++) {
+            InsetsSourceProvider insetsSourceProvider =
+                    mLocalInsetsSourceProviders.get(insetsTypes[i]);
+            if (insetsSourceProvider != null) {
+                if (DEBUG) {
+                    Slog.d(TAG, "The local insets provider for this type " + insetsTypes[i]
+                            + " already exists. Overwriting");
+                }
+            }
+            if (insetsSourceProvider == null
+                    || !(insetsSourceProvider instanceof RectInsetsSourceProvider)) {
+                insetsSourceProvider =
+                        new RectInsetsSourceProvider(
+                                new InsetsSource(insetsTypes[i]),
+                                mDisplayContent.getInsetsStateController(),
+                                mDisplayContent);
+                mLocalInsetsSourceProviders.put(insetsTypes[i], insetsSourceProvider);
+            }
+            ((RectInsetsSourceProvider) insetsSourceProvider).setRect(providerFrame);
+        }
+        mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
+    }
+
+    void removeLocalInsetsSourceProvider(@InsetsState.InternalInsetsType int[] insetsTypes) {
+        if (insetsTypes == null || insetsTypes.length == 0) {
+            throw new IllegalArgumentException("Insets type not specified.");
+        }
+        if (mLocalInsetsSourceProviders == null) {
+            return;
+        }
+
+        for (int i = 0; i < insetsTypes.length; i++) {
+            InsetsSourceProvider insetsSourceProvider =
+                    mLocalInsetsSourceProviders.get(insetsTypes[i]);
+            if (insetsSourceProvider == null) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Given insets type " + insetsTypes[i] + " doesn't have a "
+                            + "local insetsSourceProvider.");
+                }
+                continue;
+            }
+            mLocalInsetsSourceProviders.remove(insetsTypes[i]);
+        }
+        mDisplayContent.getInsetsStateController().updateAboveInsetsState(true);
+    }
+
+    /**
+     * Sets an {@link InsetsSourceProvider} to be associated with this {@code WindowContainer},
+     * but only if the provider itself is controllable, as one window can be the provider of more
+     * than one inset type (i.e. gesture insets). If this {code WindowContainer} is controllable,
+     * all its animations must be controlled by its control target, and the visibility of this
+     * {code WindowContainer} should be taken account into the state of the control target.
      *
      * @param insetProvider the provider which should not be visible to the client.
-     * @see #getInsetsState()
+     * @see WindowState#getInsetsState()
      */
     void setControllableInsetProvider(InsetsSourceProvider insetProvider) {
         mControllableInsetProvider = insetProvider;
@@ -3682,8 +3817,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                     new ArrayList<>(insetTypes.size());
 
             for (int insetType : insetTypes) {
-                InsetsSourceProvider insetProvider = getDisplayContent().getInsetsStateController()
-                        .getSourceProvider(insetType);
+                WindowContainerInsetsSourceProvider insetProvider = getDisplayContent()
+                        .getInsetsStateController().getSourceProvider(insetType);
 
                 // Will apply it immediately to current leash and to all future inset animations
                 // until we disable it.

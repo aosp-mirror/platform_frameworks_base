@@ -214,9 +214,11 @@ import android.os.Trace;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -678,6 +680,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * The insets state of sources provided by windows above the current window.
      */
     final InsetsState mAboveInsetsState = new InsetsState();
+
+    /**
+     * The insets state of sources provided by the overrides set on any parent up the hierarchy.
+     */
+    SparseArray<InsetsSource> mMergedLocalInsetsSources = null;
 
     /**
      * Surface insets from the previous call to relayout(), used to track
@@ -1662,18 +1669,30 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return insetsPolicy.adjustInsetsForWindow(this, rotatedState);
         }
         final InsetsSourceProvider provider = getControllableInsetProvider();
-        final InsetsStateController insetsStateController = getDisplayContent()
-                .getInsetsStateController();
         final @InternalInsetsType int insetTypeProvidedByWindow = provider != null
                 ? provider.getSource().getType() : ITYPE_INVALID;
-        final InsetsState rawInsetsState = getFrozenInsetsState() != null
-                ? getFrozenInsetsState() : (mAttrs.receiveInsetsIgnoringZOrder
-                ? insetsStateController.getRawInsetsState() : mAboveInsetsState);
+        final InsetsState rawInsetsState =
+                mFrozenInsetsState != null ? mFrozenInsetsState : getMergedInsetsState();
         final InsetsState insetsStateForWindow = insetsPolicy
                 .enforceInsetsPolicyForTarget(insetTypeProvidedByWindow,
                         getWindowingMode(), isAlwaysOnTop(), rawInsetsState);
         return insetsPolicy.adjustInsetsForWindow(this, insetsStateForWindow,
                 includeTransient);
+    }
+
+    private InsetsState getMergedInsetsState() {
+        final InsetsState globalInsetsState = mAttrs.receiveInsetsIgnoringZOrder
+                ? getDisplayContent().getInsetsStateController().getRawInsetsState()
+                : mAboveInsetsState;
+        if (mMergedLocalInsetsSources == null) {
+            return globalInsetsState;
+        }
+
+        final InsetsState mergedInsetsState = new InsetsState(globalInsetsState);
+        for (int i = 0; i < mMergedLocalInsetsSources.size(); i++) {
+            mergedInsetsState.addSource(mMergedLocalInsetsSources.valueAt(i));
+        }
+        return mergedInsetsState;
     }
 
     /**
@@ -4723,6 +4742,58 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         return false;
+    }
+
+    @Override
+    void updateAboveInsetsState(InsetsState aboveInsetsState,
+            SparseArray<InsetsSourceProvider> localInsetsSourceProvidersFromParent,
+            ArraySet<WindowState> insetsChangedWindows) {
+        SparseArray<InsetsSourceProvider> mergedLocalInsetsSourceProviders =
+                localInsetsSourceProvidersFromParent;
+        if (mLocalInsetsSourceProviders != null && mLocalInsetsSourceProviders.size() != 0) {
+            mergedLocalInsetsSourceProviders = createShallowCopy(mergedLocalInsetsSourceProviders);
+            for (int i = 0; i < mLocalInsetsSourceProviders.size(); i++) {
+                mergedLocalInsetsSourceProviders.put(
+                        mLocalInsetsSourceProviders.keyAt(i),
+                        mLocalInsetsSourceProviders.valueAt(i));
+            }
+        }
+        final SparseArray<InsetsSource> mergedLocalInsetsSourcesFromParent =
+                toInsetsSources(mergedLocalInsetsSourceProviders);
+
+        // Insets provided by the IME window can effect all the windows below it and hence it needs
+        // to be visited in the correct order. Because of which updateAboveInsetsState() can't be
+        // used here and instead forAllWindows() is used.
+        forAllWindows(w -> {
+            if (!w.mAboveInsetsState.equals(aboveInsetsState)) {
+                w.mAboveInsetsState.set(aboveInsetsState);
+                insetsChangedWindows.add(w);
+            }
+
+            if (!mergedLocalInsetsSourcesFromParent.contentEquals(w.mMergedLocalInsetsSources)) {
+                w.mMergedLocalInsetsSources = createShallowCopy(
+                        mergedLocalInsetsSourcesFromParent);
+                insetsChangedWindows.add(w);
+            }
+
+            final SparseArray<InsetsSource> providedSources = w.mProvidedInsetsSources;
+            if (providedSources != null) {
+                for (int i = providedSources.size() - 1; i >= 0; i--) {
+                    aboveInsetsState.addSource(providedSources.valueAt(i));
+                }
+            }
+        }, true /* traverseTopToBottom */);
+    }
+
+    private static SparseArray<InsetsSource> toInsetsSources(
+            SparseArray<InsetsSourceProvider> insetsSourceProviders) {
+        final SparseArray<InsetsSource> insetsSources = new SparseArray<>(
+                insetsSourceProviders.size());
+        for (int i = 0; i < insetsSourceProviders.size(); i++) {
+            insetsSources.append(insetsSourceProviders.keyAt(i),
+                    insetsSourceProviders.valueAt(i).getSource());
+        }
+        return insetsSources;
     }
 
     private boolean forAllWindowTopToBottom(ToBooleanFunction<WindowState> callback) {

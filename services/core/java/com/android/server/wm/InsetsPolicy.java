@@ -176,7 +176,8 @@ class InsetsPolicy {
     }
 
     boolean isHidden(@InternalInsetsType int type) {
-        final InsetsSourceProvider provider =  mStateController.peekSourceProvider(type);
+        final WindowContainerInsetsSourceProvider provider = mStateController
+                .peekSourceProvider(type);
         return provider != null && provider.hasWindowContainer()
                 && !provider.getSource().isVisible();
     }
@@ -358,10 +359,10 @@ class InsetsPolicy {
 
             // IME needs different frames for certain cases (e.g. navigation bar in gesture nav).
             if (type == ITYPE_IME) {
-                ArrayMap<Integer, InsetsSourceProvider> providers = mStateController
+                ArrayMap<Integer, WindowContainerInsetsSourceProvider> providers = mStateController
                         .getSourceProviders();
                 for (int i = providers.size() - 1; i >= 0; i--) {
-                    InsetsSourceProvider otherProvider = providers.valueAt(i);
+                    WindowContainerInsetsSourceProvider otherProvider = providers.valueAt(i);
                     if (otherProvider.overridesImeFrame()) {
                         InsetsSource override =
                                 new InsetsSource(
@@ -662,7 +663,7 @@ class InsetsPolicy {
         final IntArray showingTransientTypes = mShowingTransientTypes;
         for (int i = showingTransientTypes.size() - 1; i >= 0; i--) {
             final @InternalInsetsType int type = showingTransientTypes.get(i);
-            InsetsSourceProvider provider = mStateController.getSourceProvider(type);
+            WindowContainerInsetsSourceProvider provider = mStateController.getSourceProvider(type);
             InsetsSourceControl control = provider.getControl(mDummyControlTarget);
             if (control == null || control.getLeash() == null) {
                 continue;

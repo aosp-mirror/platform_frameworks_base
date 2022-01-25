@@ -274,7 +274,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         // IME cannot be the IME target.
         ime.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
 
-        InsetsSourceProvider statusBarProvider =
+        WindowContainerInsetsSourceProvider statusBarProvider =
                 getController().getSourceProvider(ITYPE_STATUS_BAR);
         statusBarProvider.setWindowContainer(statusBar, null, ((displayFrames, windowState, rect) ->
                 rect.set(0, 1, 2, 3)));
@@ -336,7 +336,8 @@ public class InsetsStateControllerTest extends WindowTestsBase {
     public void testTransientVisibilityOfFixedRotationState() {
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
-        final InsetsSourceProvider provider = getController().getSourceProvider(ITYPE_STATUS_BAR);
+        final WindowContainerInsetsSourceProvider provider = getController()
+                .getSourceProvider(ITYPE_STATUS_BAR);
         provider.setWindowContainer(statusBar, null, null);
 
         final InsetsState rotatedState = new InsetsState(app.getInsetsState(),
@@ -366,7 +367,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertNull(statusBar.mAboveInsetsState.peekSource(ITYPE_STATUS_BAR));
         assertNull(navBar.mAboveInsetsState.peekSource(ITYPE_STATUS_BAR));
 
-        getController().updateAboveInsetsState(statusBar, true /* notifyInsetsChange */);
+        getController().updateAboveInsetsState(true /* notifyInsetsChange */);
 
         assertNotNull(app.mAboveInsetsState.peekSource(ITYPE_STATUS_BAR));
         assertNull(statusBar.mAboveInsetsState.peekSource(ITYPE_STATUS_BAR));
@@ -389,7 +390,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertNull(app.mAboveInsetsState.peekSource(ITYPE_STATUS_BAR));
         assertNull(app.mAboveInsetsState.peekSource(ITYPE_NAVIGATION_BAR));
 
-        getController().updateAboveInsetsState(app, true /* notifyInsetsChange */);
+        getController().updateAboveInsetsState(true /* notifyInsetsChange */);
 
         assertNotNull(app.mAboveInsetsState.peekSource(ITYPE_STATUS_BAR));
         assertNotNull(app.mAboveInsetsState.peekSource(ITYPE_NAVIGATION_BAR));
@@ -410,9 +411,8 @@ public class InsetsStateControllerTest extends WindowTestsBase {
                 null);
         getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindowContainer(navBar, null,
                 null);
-        getController().updateAboveInsetsState(ime, false /* notifyInsetsChange */);
-        getController().updateAboveInsetsState(statusBar, false /* notifyInsetsChange */);
-        getController().updateAboveInsetsState(navBar, false /* notifyInsetsChange */);
+
+        getController().updateAboveInsetsState(false /* notifyInsetsChange */);
 
         // ime is below others.
         assertNull(app.mAboveInsetsState.peekSource(ITYPE_IME));
@@ -422,7 +422,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         assertNotNull(ime.mAboveInsetsState.peekSource(ITYPE_NAVIGATION_BAR));
 
         ime.getParent().positionChildAt(POSITION_TOP, ime, true /* includingParents */);
-        getController().updateAboveInsetsState(ime, true /* notifyInsetsChange */);
+        getController().updateAboveInsetsState(true /* notifyInsetsChange */);
 
         // ime is above others.
         assertNotNull(app.mAboveInsetsState.peekSource(ITYPE_IME));
