@@ -1524,8 +1524,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void onUserUnlocking(@NonNull TargetUser user) {
             // Called on ActivityManager thread.
-            mService.mHandler.sendMessage(mService.mHandler.obtainMessage(MSG_SYSTEM_UNLOCK_USER,
-                    /* arg1= */ user.getUserIdentifier(), /* arg2= */ 0));
+            mService.mHandler.obtainMessage(MSG_SYSTEM_UNLOCK_USER, user.getUserIdentifier(), 0)
+                    .sendToTarget();
         }
     }
 
@@ -2221,7 +2221,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
              // We probably should create a simple wrapper of IInputMethodClient as the first step
              // to get rid of executeOrSendMessage() then should prohibit system_server to be the
              // IME client for long term.
-             mHandler.sendMessage(msg);
+             msg.sendToTarget();
          } else {
              handleMessage(msg);
              msg.recycle();
@@ -3652,9 +3652,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             // Always call subtype picker, because subtype picker is a superset of input method
             // picker.
-            mHandler.sendMessage(mHandler.obtainMessage(
-                    MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode,
-                    (mCurClient != null) ? mCurClient.selfReportedDisplayId : DEFAULT_DISPLAY));
+            final int displayId =
+                    (mCurClient != null) ? mCurClient.selfReportedDisplayId : DEFAULT_DISPLAY;
+            mHandler.obtainMessage(MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode, displayId)
+                    .sendToTarget();
         }
     }
 
@@ -3669,8 +3670,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
         // Always call subtype picker, because subtype picker is a superset of input method
         // picker.
-        mHandler.sendMessage(mHandler.obtainMessage(
-                MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode, displayId));
+        mHandler.obtainMessage(MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode, displayId)
+                .sendToTarget();
     }
 
     /**
@@ -3927,7 +3928,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public void removeImeSurface() {
         mContext.enforceCallingPermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW, null);
-        mHandler.sendMessage(mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE));
+        mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE).sendToTarget();
     }
 
     @Override
@@ -4959,14 +4960,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override
         public void removeImeSurface() {
-            mService.mHandler.sendMessage(mService.mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE));
+            mService.mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE).sendToTarget();
         }
 
         @Override
         public void updateImeWindowStatus(boolean disableImeIcon) {
-            mService.mHandler.sendMessage(
-                    mService.mHandler.obtainMessage(MSG_UPDATE_IME_WINDOW_STATUS,
-                            disableImeIcon ? 1 : 0, 0));
+            mService.mHandler.obtainMessage(MSG_UPDATE_IME_WINDOW_STATUS, disableImeIcon ? 1 : 0, 0)
+                    .sendToTarget();
         }
     }
 
