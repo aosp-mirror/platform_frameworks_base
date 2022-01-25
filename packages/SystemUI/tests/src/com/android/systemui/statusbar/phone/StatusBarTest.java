@@ -129,7 +129,6 @@ import com.android.systemui.statusbar.notification.collection.legacy.VisualStabi
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
-import com.android.systemui.statusbar.notification.interruption.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLoggerFake;
@@ -226,7 +225,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotificationMediaManager mNotificationMediaManager;
     @Mock private NavigationBarController mNavigationBarController;
     @Mock private AccessibilityFloatingMenuController mAccessibilityFloatingMenuController;
-    @Mock private BypassHeadsUpNotifier mBypassHeadsUpNotifier;
     @Mock private SysuiColorExtractor mColorExtractor;
     @Mock private ColorExtractor.GradientColors mGradientColors;
     @Mock private PulseExpansionHandler mPulseExpansionHandler;
@@ -394,7 +392,6 @@ public class StatusBarTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mHeadsUpManager,
                 mDynamicPrivacyController,
-                mBypassHeadsUpNotifier,
                 new FalsingManagerFake(),
                 new FalsingCollectorFake(),
                 mBroadcastDispatcher,

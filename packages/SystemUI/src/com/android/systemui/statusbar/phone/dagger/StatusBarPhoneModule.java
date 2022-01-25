@@ -71,7 +71,6 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
-import com.android.systemui.statusbar.notification.interruption.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -152,7 +151,6 @@ public interface StatusBarPhoneModule {
             KeyguardStateController keyguardStateController,
             HeadsUpManagerPhone headsUpManagerPhone,
             DynamicPrivacyController dynamicPrivacyController,
-            BypassHeadsUpNotifier bypassHeadsUpNotifier,
             FalsingManager falsingManager,
             FalsingCollector falsingCollector,
             BroadcastDispatcher broadcastDispatcher,
@@ -250,7 +248,6 @@ public interface StatusBarPhoneModule {
                 keyguardStateController,
                 headsUpManagerPhone,
                 dynamicPrivacyController,
-                bypassHeadsUpNotifier,
                 falsingManager,
                 falsingCollector,
                 broadcastDispatcher,
