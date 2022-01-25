@@ -32,6 +32,7 @@ import android.app.admin.DeviceAdminInfo;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.PasswordPolicy;
+import android.app.admin.PreferentialNetworkServiceConfig;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.PersistableBundle;
@@ -306,6 +307,8 @@ class ActiveAdmin {
     public boolean mAdminCanGrantSensorsPermissions;
     public boolean mPreferentialNetworkServiceEnabled =
             DevicePolicyManager.PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT;
+    public PreferentialNetworkServiceConfig mPreferentialNetworkServiceConfig =
+            PreferentialNetworkServiceConfig.DEFAULT;
 
     private static final boolean USB_DATA_SIGNALING_ENABLED_DEFAULT = true;
     boolean mUsbDataSignalingEnabled = USB_DATA_SIGNALING_ENABLED_DEFAULT;
