@@ -149,8 +149,6 @@ func createMergedStubsSrcjar(ctx android.LoadHookContext, modules []string) {
 // This produces the same annotations.zip as framework-doc-stubs, but by using
 // outputs from individual modules instead of all the source code.
 func createMergedAnnotations(ctx android.LoadHookContext, modules []string) {
-	// Conscrypt and i18n currently do not enable annotations
-	modules = removeAll(modules, []string{conscrypt, i18n})
 	props := genruleProps{}
 	props.Name = proptools.StringPtr("sdk-annotations.zip")
 	props.Tools = []string{"merge_annotation_zips", "soong_zip"}
