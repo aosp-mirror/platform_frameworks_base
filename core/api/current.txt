@@ -9532,18 +9532,54 @@ package android.bluetooth {
     field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_LE_AUDIO_CONNECTION_STATE_CHANGED = "android.bluetooth.action.LE_AUDIO_CONNECTION_STATE_CHANGED";
   }
 
-  public final class BluetoothLeAudioCodecConfig {
+  public final class BluetoothLeAudioCodecConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getBitsPerSample();
+    method public int getChannelMode();
     method @NonNull public String getCodecName();
+    method public int getCodecPriority();
     method public int getCodecType();
+    method public int getFrameDuration();
     method public static int getMaxCodecType();
+    method public int getOctetsPerFrame();
+    method public int getSampleRate();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int BITS_PER_SAMPLE_16 = 1; // 0x1
+    field public static final int BITS_PER_SAMPLE_24 = 2; // 0x2
+    field public static final int BITS_PER_SAMPLE_32 = 3; // 0x3
+    field public static final int BITS_PER_SAMPLE_NONE = 0; // 0x0
+    field public static final int CHANNEL_MODE_MONO = 1; // 0x1
+    field public static final int CHANNEL_MODE_NONE = 0; // 0x0
+    field public static final int CHANNEL_MODE_STEREO = 2; // 0x2
+    field public static final int CODEC_PRIORITY_DEFAULT = 0; // 0x0
+    field public static final int CODEC_PRIORITY_DISABLED = -1; // 0xffffffff
+    field public static final int CODEC_PRIORITY_HIGHEST = 1000000; // 0xf4240
+    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.BluetoothLeAudioCodecConfig> CREATOR;
+    field public static final int FRAME_DURATION_10000 = 2; // 0x2
+    field public static final int FRAME_DURATION_7500 = 1; // 0x1
+    field public static final int FRAME_DURATION_NONE = 0; // 0x0
+    field public static final int SAMPLE_RATE_16000 = 2; // 0x2
+    field public static final int SAMPLE_RATE_24000 = 3; // 0x3
+    field public static final int SAMPLE_RATE_32000 = 4; // 0x4
+    field public static final int SAMPLE_RATE_44100 = 5; // 0x5
+    field public static final int SAMPLE_RATE_48000 = 6; // 0x6
+    field public static final int SAMPLE_RATE_8000 = 1; // 0x1
+    field public static final int SAMPLE_RATE_NONE = 0; // 0x0
     field public static final int SOURCE_CODEC_TYPE_INVALID = 1000000; // 0xf4240
     field public static final int SOURCE_CODEC_TYPE_LC3 = 0; // 0x0
   }
 
   public static final class BluetoothLeAudioCodecConfig.Builder {
     ctor public BluetoothLeAudioCodecConfig.Builder();
+    ctor public BluetoothLeAudioCodecConfig.Builder(@NonNull android.bluetooth.BluetoothLeAudioCodecConfig);
     method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig build();
+    method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig.Builder setBitsPerSample(int);
+    method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig.Builder setChannelMode(int);
+    method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig.Builder setCodecPriority(int);
     method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig.Builder setCodecType(int);
+    method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig.Builder setFrameDuration(int);
+    method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig.Builder setOctetsPerFrame(int);
+    method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig.Builder setSampleRate(int);
   }
 
   public final class BluetoothManager {
