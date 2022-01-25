@@ -136,7 +136,6 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
 
         final IntSupplier mViewVisibility;
 
-        int mFrameNumber;
         int mFlags;
 
         RelayoutRunner(Activity activity, IWindow window, IntSupplier visibilitySupplier) {
@@ -153,7 +152,7 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase
             final IWindowSession session = WindowManagerGlobal.getWindowSession();
             while (state.keepRunning()) {
                 session.relayout(mWindow, mParams, mWidth, mHeight,
-                        mViewVisibility.getAsInt(), mFlags, mFrameNumber, mOutFrames,
+                        mViewVisibility.getAsInt(), mFlags, mOutFrames,
                         mOutMergedConfiguration, mOutSurfaceControl, mOutInsetsState, mOutControls);
             }
         }

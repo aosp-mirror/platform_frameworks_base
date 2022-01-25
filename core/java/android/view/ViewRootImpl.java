@@ -7933,14 +7933,9 @@ public final class ViewRootImpl implements ViewParent,
         final int requestedWidth = (int) (mView.getMeasuredWidth() * appScale + 0.5f);
         final int requestedHeight = (int) (mView.getMeasuredHeight() * appScale + 0.5f);
 
-        long frameNumber = -1;
-        if (mSurface.isValid()) {
-            frameNumber = mSurface.getNextFrameNumber();
-        }
-
         int relayoutResult = mWindowSession.relayout(mWindow, params,
                 requestedWidth, requestedHeight, viewVisibility,
-                insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, frameNumber,
+                insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0,
                 mTmpFrames, mPendingMergedConfiguration, mSurfaceControl, mTempInsets,
                 mTempControls);
 

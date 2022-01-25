@@ -263,7 +263,7 @@ public class WindowlessWindowManager implements IWindowSession {
 
     @Override
     public int relayout(IWindow window, WindowManager.LayoutParams inAttrs,
-            int requestedWidth, int requestedHeight, int viewFlags, int flags, long frameNumber,
+            int requestedWidth, int requestedHeight, int viewFlags, int flags,
             ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls) {

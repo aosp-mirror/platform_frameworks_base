@@ -74,7 +74,6 @@ interface IWindowSession {
      * @param viewVisibility Window root view's visibility.
      * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING},
      * {@link WindowManagerGlobal#RELAYOUT_DEFER_SURFACE_DESTROY}.
-     * @param frameNumber A frame number in which changes requested in this layout will be rendered.
      * @param outFrame Rect in which is placed the new position/size on
      * screen.
      * @param outContentInsets Rect in which is placed the offsets from
@@ -103,7 +102,7 @@ interface IWindowSession {
      */
     int relayout(IWindow window, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,
-            int flags, long frameNumber, out ClientWindowFrames outFrames,
+            int flags, out ClientWindowFrames outFrames,
             out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
             out InsetsState insetsState, out InsetsSourceControl[] activeControls);
 
