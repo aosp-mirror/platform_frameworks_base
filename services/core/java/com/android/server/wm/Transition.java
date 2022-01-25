@@ -510,10 +510,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             dc.getInputMonitor().setActiveRecents(null /* activity */, null /* layer */);
         }
 
-        final FadeRotationAnimationController fadeRotationController =
-                mTargetDisplay.getFadeRotationAnimationController();
-        if (fadeRotationController != null) {
-            fadeRotationController.onTransitionFinished();
+        final AsyncRotationController asyncRotationController =
+                mTargetDisplay.getAsyncRotationController();
+        if (asyncRotationController != null) {
+            asyncRotationController.onTransitionFinished();
         }
         // Transient-launch activities cannot be IME target (WindowState#canBeImeTarget),
         // so re-compute in case the IME target is changed after transition.
@@ -655,7 +655,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
 
         // This is non-null only if display has changes. It handles the visible windows that don't
         // need to be participated in the transition.
-        final FadeRotationAnimationController controller = dc.getFadeRotationAnimationController();
+        final AsyncRotationController controller = dc.getAsyncRotationController();
         if (controller != null) {
             controller.setupStartTransaction(transaction);
         }
@@ -745,7 +745,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
 
         if (!dc.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()
                 // Skip the case where the nav bar is controlled by fade rotation.
-                || dc.getFadeRotationAnimationController() != null) {
+                || dc.getAsyncRotationController() != null) {
             return;
         }
 

@@ -35,7 +35,7 @@ import java.util.ArrayList;
  * both fixed rotation and normal rotation to hide some non-activity windows. The caller should show
  * the windows until they are drawn with the new rotation.
  */
-public class FadeRotationAnimationController extends FadeAnimationController {
+public class AsyncRotationController extends FadeAnimationController {
 
     /** The map of window token to its animation leash. */
     private final ArrayMap<WindowToken, SurfaceControl> mTargetWindowTokens = new ArrayMap<>();
@@ -70,7 +70,7 @@ public class FadeRotationAnimationController extends FadeAnimationController {
     private final int mOriginalRotation;
     private final boolean mHasScreenRotationAnimation;
 
-    public FadeRotationAnimationController(DisplayContent displayContent) {
+    public AsyncRotationController(DisplayContent displayContent) {
         super(displayContent);
         mService = displayContent.mWmService;
         mOriginalRotation = displayContent.getWindowConfiguration().getRotation();
@@ -81,7 +81,7 @@ public class FadeRotationAnimationController extends FadeAnimationController {
         mIsStartTransactionCommitted = !mIsChangeTransition;
         mTimeoutRunnable = displayContent.inTransition() ? () -> {
             synchronized (mService.mGlobalLock) {
-                displayContent.finishFadeRotationAnimationIfPossible();
+                displayContent.finishAsyncRotationIfPossible();
                 mService.mWindowPlacerLocked.performSurfacePlacement();
             }
         } : null;
@@ -277,7 +277,7 @@ public class FadeRotationAnimationController extends FadeAnimationController {
                 mIsStartTransactionCommitted = true;
                 if (mPendingShowTokens == null) return;
                 for (int i = mPendingShowTokens.size() - 1; i >= 0; i--) {
-                    mDisplayContent.finishFadeRotationAnimation(mPendingShowTokens.get(i));
+                    mDisplayContent.finishAsyncRotation(mPendingShowTokens.get(i));
                 }
                 mPendingShowTokens = null;
             }
@@ -298,7 +298,7 @@ public class FadeRotationAnimationController extends FadeAnimationController {
                 // Only fade in the drawn windows. If the remaining windows are drawn later,
                 // show(WindowToken) will be called to fade in them.
                 if (token.getChildAt(j).isDrawFinishedLw()) {
-                    mDisplayContent.finishFadeRotationAnimation(token);
+                    mDisplayContent.finishAsyncRotation(token);
                     break;
                 }
             }
@@ -320,7 +320,7 @@ public class FadeRotationAnimationController extends FadeAnimationController {
             }
             return true;
         }
-        mDisplayContent.finishFadeRotationAnimation(w.mToken);
+        mDisplayContent.finishAsyncRotation(w.mToken);
         return false;
     }
 

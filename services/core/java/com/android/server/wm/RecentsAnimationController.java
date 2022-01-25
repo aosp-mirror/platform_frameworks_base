@@ -614,7 +614,7 @@ public class RecentsAnimationController implements DeathRecipient {
     private void attachNavigationBarToApp() {
         if (!mShouldAttachNavBarToAppDuringTransition
                 // Skip the case where the nav bar is controlled by fade rotation.
-                || mDisplayContent.getFadeRotationAnimationController() != null) {
+                || mDisplayContent.getAsyncRotationController() != null) {
             return;
         }
         boolean shouldTranslateNavBar = false;
@@ -701,7 +701,7 @@ public class RecentsAnimationController implements DeathRecipient {
     void animateNavigationBarForAppLaunch(long duration) {
         if (!mShouldAttachNavBarToAppDuringTransition
                 // Skip the case where the nav bar is controlled by fade rotation.
-                || mDisplayContent.getFadeRotationAnimationController() != null
+                || mDisplayContent.getAsyncRotationController() != null
                 || mNavigationBarAttachedToApp
                 || mNavBarAttachedApp == null) {
             return;

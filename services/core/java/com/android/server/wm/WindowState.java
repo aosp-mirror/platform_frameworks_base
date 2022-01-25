@@ -1563,7 +1563,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         } else {
             // The orientation change is completed. If it was hidden by the animation, reshow it.
-            mDisplayContent.finishFadeRotationAnimation(mToken);
+            mDisplayContent.finishAsyncRotation(mToken);
         }
     }
 
@@ -5820,10 +5820,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         boolean skipLayout = false;
         // Control the timing to switch the appearance of window with different rotations.
-        final FadeRotationAnimationController fadeRotationController =
-                mDisplayContent.getFadeRotationAnimationController();
-        if (fadeRotationController != null
-                && fadeRotationController.handleFinishDrawing(this, postDrawTransaction)) {
+        final AsyncRotationController asyncRotationController =
+                mDisplayContent.getAsyncRotationController();
+        if (asyncRotationController != null
+                && asyncRotationController.handleFinishDrawing(this, postDrawTransaction)) {
             // Consume the transaction because the controller will apply it with fade animation.
             // Layout is not needed because the window will be hidden by the fade leash. Clear
             // sync state because its sync transaction doesn't need to be merged to sync group.

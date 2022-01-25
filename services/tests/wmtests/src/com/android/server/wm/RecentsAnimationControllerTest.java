@@ -621,9 +621,9 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testNotAttachNavigationBar_controlledByFadeRotationAnimation() {
         setupForShouldAttachNavBarDuringTransition();
-        FadeRotationAnimationController mockController =
-                mock(FadeRotationAnimationController.class);
-        doReturn(mockController).when(mDefaultDisplay).getFadeRotationAnimationController();
+        AsyncRotationController mockController =
+                mock(AsyncRotationController.class);
+        doReturn(mockController).when(mDefaultDisplay).getAsyncRotationController();
         final ActivityRecord homeActivity = createHomeActivity();
         initializeRecentsAnimationController(mController, homeActivity);
         assertFalse(mController.isNavigationBarAttachedToApp());
