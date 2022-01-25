@@ -103,6 +103,8 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.am.BatteryStatsService;
 
+import dalvik.annotation.optimization.NeverCompile;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -2879,6 +2881,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    @NeverCompile // Avoid size overhead of debugging code.
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
