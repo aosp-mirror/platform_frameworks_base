@@ -319,6 +319,12 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
     },
+    "-1764792832": {
+      "message": "Start collecting in Transition: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
     "-1750384749": {
       "message": "Launch on display check: allow launch on public display",
       "level": "DEBUG",
@@ -2791,6 +2797,12 @@
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
+    "800698875": {
+      "message": "SyncGroup %d: Started when there is other active SyncGroup",
+      "level": "WARN",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
+    },
     "806891543": {
       "message": "Setting mOrientationChangeComplete=true because wtoken %s numInteresting=%d numDrawn=%d",
       "level": "INFO",
@@ -3204,6 +3216,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "1333520287": {
+      "message": "Creating PendingTransition: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
     },
     "1337596507": {
       "message": "Sending to proc %s new compat %s",
@@ -3822,6 +3840,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "2034988903": {
+      "message": "PendingStartTransaction found",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/WindowOrganizerController.java"
     },
     "2039056415": {
       "message": "Found matching affinity candidate!",

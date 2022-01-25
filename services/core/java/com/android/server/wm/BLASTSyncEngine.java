@@ -64,6 +64,11 @@ class BLASTSyncEngine {
         void onTransactionReady(int mSyncId, SurfaceControl.Transaction transaction);
     }
 
+    interface SyncEngineListener {
+        /** Called when there is no more active sync set. */
+        void onSyncEngineFree();
+    }
+
     /**
      * Holds state associated with a single synchronous set of operations.
      */
@@ -137,6 +142,9 @@ class BLASTSyncEngine {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             mActiveSyncs.remove(mSyncId);
             mWm.mH.removeCallbacks(mOnTimeout);
+            if (mSyncEngineListener != null && mActiveSyncs.size() == 0) {
+                mSyncEngineListener.onSyncEngineFree();
+            }
         }
 
         private void setReady(boolean ready) {
@@ -175,9 +183,23 @@ class BLASTSyncEngine {
     private final WindowManagerService mWm;
     private int mNextSyncId = 0;
     private final SparseArray<SyncGroup> mActiveSyncs = new SparseArray<>();
+    private SyncEngineListener mSyncEngineListener;
 
     BLASTSyncEngine(WindowManagerService wms) {
         mWm = wms;
+    }
+
+    /** Sets listener listening to whether the sync engine is free. */
+    void setSyncEngineListener(SyncEngineListener listener) {
+        mSyncEngineListener = listener;
+    }
+
+    /**
+     * Prepares a {@link SyncGroup} that is not active yet. Caller must call {@link #startSyncSet}
+     * before calling {@link #addToSyncSet(int, WindowContainer)} on any {@link WindowContainer}.
+     */
+    SyncGroup prepareSyncSet(TransactionReadyListener listener, String name) {
+        return new SyncGroup(listener, mNextSyncId++, name);
     }
 
     int startSyncSet(TransactionReadyListener listener) {
@@ -185,12 +207,30 @@ class BLASTSyncEngine {
     }
 
     int startSyncSet(TransactionReadyListener listener, long timeoutMs, String name) {
-        final int id = mNextSyncId++;
-        final SyncGroup s = new SyncGroup(listener, id, name);
-        mActiveSyncs.put(id, s);
-        ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Started for listener: %s", id, listener);
+        final SyncGroup s = prepareSyncSet(listener, name);
+        startSyncSet(s, timeoutMs);
+        return s.mSyncId;
+    }
+
+    void startSyncSet(SyncGroup s) {
+        startSyncSet(s, WindowState.BLAST_TIMEOUT_DURATION);
+    }
+
+    void startSyncSet(SyncGroup s, long timeoutMs) {
+        if (mActiveSyncs.size() != 0) {
+            // We currently only support one sync at a time, so start a new SyncGroup when there is
+            // another may cause issue.
+            ProtoLog.w(WM_DEBUG_SYNC_ENGINE,
+                    "SyncGroup %d: Started when there is other active SyncGroup", s.mSyncId);
+        }
+        mActiveSyncs.put(s.mSyncId, s);
+        ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Started for listener: %s",
+                s.mSyncId, s.mListener);
         scheduleTimeout(s, timeoutMs);
-        return id;
+    }
+
+    boolean hasActiveSync() {
+        return mActiveSyncs.size() != 0;
     }
 
     @VisibleForTesting
@@ -199,11 +239,11 @@ class BLASTSyncEngine {
     }
 
     void addToSyncSet(int id, WindowContainer wc) {
-        mActiveSyncs.get(id).addToSync(wc);
+        getSyncGroup(id).addToSync(wc);
     }
 
     void setReady(int id, boolean ready) {
-        mActiveSyncs.get(id).setReady(ready);
+        getSyncGroup(id).setReady(ready);
     }
 
     void setReady(int id) {
@@ -211,14 +251,22 @@ class BLASTSyncEngine {
     }
 
     boolean isReady(int id) {
-        return mActiveSyncs.get(id).mReady;
+        return getSyncGroup(id).mReady;
     }
 
     /**
      * Aborts the sync (ie. it doesn't wait for ready or anything to finish)
      */
     void abort(int id) {
-        mActiveSyncs.get(id).finishNow();
+        getSyncGroup(id).finishNow();
+    }
+
+    private SyncGroup getSyncGroup(int id) {
+        final SyncGroup syncGroup = mActiveSyncs.get(id);
+        if (syncGroup == null) {
+            throw new IllegalStateException("SyncGroup is not started yet id=" + id);
+        }
+        return syncGroup;
     }
 
     void onSurfacePlacement() {

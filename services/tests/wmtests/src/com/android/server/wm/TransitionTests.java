@@ -75,7 +75,9 @@ public class TransitionTests extends WindowTestsBase {
     private Transition createTestTransition(int transitType) {
         TransitionController controller = mock(TransitionController.class);
         final BLASTSyncEngine sync = createTestBLASTSyncEngine();
-        return new Transition(transitType, 0 /* flags */, 0 /* timeoutMs */, controller, sync);
+        final Transition t = new Transition(transitType, 0 /* flags */, controller, sync);
+        t.startCollecting(0 /* timeoutMs */);
+        return t;
     }
 
     @Test
@@ -466,12 +468,13 @@ public class TransitionTests extends WindowTestsBase {
         final BLASTSyncEngine sync = new BLASTSyncEngine(mWm);
         final CountDownLatch latch = new CountDownLatch(1);
         // When the timeout is reached, it will finish the sync-group and notify transaction ready.
-        new Transition(TRANSIT_OPEN, 0 /* flags */, 10 /* timeoutMs */, controller, sync) {
+        final Transition t = new Transition(TRANSIT_OPEN, 0 /* flags */, controller, sync) {
             @Override
             public void onTransactionReady(int syncId, SurfaceControl.Transaction transaction) {
                 latch.countDown();
             }
         };
+        t.startCollecting(10 /* timeoutMs */);
         assertTrue(awaitInWmLock(() -> latch.await(3, TimeUnit.SECONDS)));
     }
 

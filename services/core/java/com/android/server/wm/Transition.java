@@ -101,6 +101,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     /** The default package for resources */
     private static final String DEFAULT_PACKAGE = "android";
 
+    /** The transition has been created but isn't collecting yet. */
+    private static final int STATE_PENDING = -1;
+
     /** The transition has been created and is collecting, but hasn't formally started. */
     private static final int STATE_COLLECTING = 0;
 
@@ -122,6 +125,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private static final int STATE_ABORT = 3;
 
     @IntDef(prefix = { "STATE_" }, value = {
+            STATE_PENDING,
             STATE_COLLECTING,
             STATE_STARTED,
             STATE_PLAYING,
@@ -131,7 +135,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     @interface TransitionState {}
 
     final @TransitionType int mType;
-    private int mSyncId;
+    private int mSyncId = -1;
     private @TransitionFlags int mFlags;
     private final TransitionController mController;
     private final BLASTSyncEngine mSyncEngine;
@@ -171,7 +175,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private IRemoteCallback mClientAnimationStartCallback = null;
     private IRemoteCallback mClientAnimationFinishCallback = null;
 
-    private @TransitionState int mState = STATE_COLLECTING;
+    private @TransitionState int mState = STATE_PENDING;
     private final ReadyTracker mReadyTracker = new ReadyTracker();
 
     // TODO(b/188595497): remove when not needed.
@@ -179,13 +183,12 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     private boolean mNavBarAttachedToApp = false;
     private int mRecentsDisplayId = INVALID_DISPLAY;
 
-    Transition(@TransitionType int type, @TransitionFlags int flags, long timeoutMs,
+    Transition(@TransitionType int type, @TransitionFlags int flags,
             TransitionController controller, BLASTSyncEngine syncEngine) {
         mType = type;
         mFlags = flags;
         mController = controller;
         mSyncEngine = syncEngine;
-        mSyncId = mSyncEngine.startSyncSet(this, timeoutMs, TAG);
     }
 
     void addFlag(int flag) {
@@ -216,13 +219,24 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         return mFlags;
     }
 
+    /** Starts collecting phase. Once this starts, all relevant surface operations are sync. */
+    void startCollecting(long timeoutMs) {
+        if (mState != STATE_PENDING) {
+            throw new IllegalStateException("Attempting to re-use a transition");
+        }
+        mState = STATE_COLLECTING;
+        mSyncId = mSyncEngine.startSyncSet(this, timeoutMs, TAG);
+    }
+
     /**
      * Formally starts the transition. Participants can be collected before this is started,
      * but this won't consider itself ready until started -- even if all the participants have
      * drawn.
      */
     void start() {
-        if (mState >= STATE_STARTED) {
+        if (mState < STATE_COLLECTING) {
+            throw new IllegalStateException("Can't start Transition which isn't collecting.");
+        } else if (mState >= STATE_STARTED) {
             Slog.w(TAG, "Transition already started: " + mSyncId);
         }
         mState = STATE_STARTED;
@@ -235,6 +249,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
      * Adds wc to set of WindowContainers participating in this transition.
      */
     void collect(@NonNull WindowContainer wc) {
+        if (mState < STATE_COLLECTING) {
+            throw new IllegalStateException("Transition hasn't started collecting.");
+        }
         if (mSyncId < 0) return;
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Collecting in transition %d: %s",
                 mSyncId, wc);

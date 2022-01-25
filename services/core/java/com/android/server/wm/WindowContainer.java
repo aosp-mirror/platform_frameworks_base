@@ -85,8 +85,8 @@ import android.view.MagnificationSpec;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
-import android.view.SurfaceControlViewHost;
 import android.view.SurfaceControl.Builder;
+import android.view.SurfaceControlViewHost;
 import android.view.SurfaceSession;
 import android.view.TaskTransitionSpec;
 import android.view.WindowManager;
@@ -3331,7 +3331,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "setSyncGroup #%d on %s", group.mSyncId, this);
         if (group != null) {
             if (mSyncGroup != null && mSyncGroup != group) {
-                throw new IllegalStateException("Can't sync on 2 engines simultaneously");
+                // This can still happen if WMCore starts a new transition when there is ongoing
+                // sync transaction from Shell. Please file a bug if it happens.
+                throw new IllegalStateException("Can't sync on 2 engines simultaneously"
+                        + " currentSyncId=" + mSyncGroup.mSyncId + " newSyncId=" + group.mSyncId);
             }
         }
         mSyncGroup = group;
