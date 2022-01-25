@@ -78,7 +78,9 @@ static bool shouldFilterRect(const SkMatrix& matrix, const SkRect& srcRect, cons
 
 static sk_sp<SkShader> createLinearEffectShader(sk_sp<SkShader> shader,
                                                 const shaders::LinearEffect& linearEffect,
-                                                float maxDisplayLuminance, float maxLuminance) {
+                                                float maxDisplayLuminance,
+                                                float currentDisplayLuminanceNits,
+                                                float maxLuminance) {
     auto shaderString = SkString(shaders::buildLinearEffectSkSL(linearEffect));
     auto [runtimeEffect, error] = SkRuntimeEffect::MakeForShader(std::move(shaderString));
     if (!runtimeEffect) {
@@ -89,8 +91,8 @@ static sk_sp<SkShader> createLinearEffectShader(sk_sp<SkShader> shader,
 
     effectBuilder.child("child") = std::move(shader);
 
-    const auto uniforms = shaders::buildLinearEffectUniforms(linearEffect, mat4(),
-                                                             maxDisplayLuminance, maxLuminance);
+    const auto uniforms = shaders::buildLinearEffectUniforms(
+            linearEffect, mat4(), maxDisplayLuminance, currentDisplayLuminanceNits, maxLuminance);
 
     for (const auto& uniform : uniforms) {
         effectBuilder.uniform(uniform.name.c_str()).set(uniform.value.data(), uniform.value.size());
@@ -201,7 +203,9 @@ bool LayerDrawable::DrawLayer(GrRecordingContext* context,
             auto shader = layerImage->makeShader(sampling,
                                                  SkMatrix::RectToRect(skiaSrcRect, skiaDestRect));
             constexpr float kMaxDisplayBrightess = 1000.f;
+            constexpr float kCurrentDisplayBrightness = 500.f;
             shader = createLinearEffectShader(std::move(shader), effect, kMaxDisplayBrightess,
+                                              kCurrentDisplayBrightness,
                                               layer->getMaxLuminanceNits());
             paint.setShader(shader);
             canvas->drawRect(skiaDestRect, paint);
