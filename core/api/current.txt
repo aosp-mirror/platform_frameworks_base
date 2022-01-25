@@ -7296,10 +7296,10 @@ package android.app.admin {
     method @Nullable public java.util.List<java.lang.String> getDelegatePackages(@NonNull android.content.ComponentName, @NonNull String);
     method @NonNull public java.util.List<java.lang.String> getDelegatedScopes(@Nullable android.content.ComponentName, @NonNull String);
     method public CharSequence getDeviceOwnerLockScreenInfo();
-    method @NonNull public android.graphics.drawable.Drawable getDrawable(int, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
-    method @NonNull public android.graphics.drawable.Drawable getDrawable(int, int, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
-    method @NonNull public android.graphics.drawable.Drawable getDrawableForDensity(int, int, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
-    method @NonNull public android.graphics.drawable.Drawable getDrawableForDensity(int, int, int, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @NonNull public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @NonNull public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull String, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @NonNull public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @NonNull public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
     method public CharSequence getEndUserSessionMessage(@NonNull android.content.ComponentName);
     method @NonNull public String getEnrollmentSpecificId();
     method @Nullable public android.app.admin.FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(@Nullable android.content.ComponentName);
@@ -7710,29 +7710,29 @@ package android.app.admin {
     ctor public DevicePolicyResources();
   }
 
-  public static final class DevicePolicyResources.Drawable {
-    field public static final int INVALID_ID = -1; // 0xffffffff
-    field public static final int WORK_PROFILE_ICON = 1; // 0x1
-    field public static final int WORK_PROFILE_ICON_BADGE = 0; // 0x0
-    field public static final int WORK_PROFILE_OFF_ICON = 2; // 0x2
-    field public static final int WORK_PROFILE_USER_ICON = 3; // 0x3
+  public static final class DevicePolicyResources.Drawables {
+    field public static final String UNDEFINED = "UNDEFINED";
+    field public static final String WORK_PROFILE_ICON = "WORK_PROFILE_ICON";
+    field public static final String WORK_PROFILE_ICON_BADGE = "WORK_PROFILE_ICON_BADGE";
+    field public static final String WORK_PROFILE_OFF_ICON = "WORK_PROFILE_OFF_ICON";
+    field public static final String WORK_PROFILE_USER_ICON = "WORK_PROFILE_USER_ICON";
   }
 
-  public static final class DevicePolicyResources.Drawable.Source {
-    field public static final int HOME_WIDGET = 2; // 0x2
-    field public static final int LAUNCHER_OFF_BUTTON = 3; // 0x3
-    field public static final int NOTIFICATION = 0; // 0x0
-    field public static final int PROFILE_SWITCH_ANIMATION = 1; // 0x1
-    field public static final int QUICK_SETTINGS = 4; // 0x4
-    field public static final int STATUS_BAR = 5; // 0x5
-    field public static final int UNDEFINED = -1; // 0xffffffff
+  public static final class DevicePolicyResources.Drawables.Source {
+    field public static final String HOME_WIDGET = "HOME_WIDGET";
+    field public static final String LAUNCHER_OFF_BUTTON = "LAUNCHER_OFF_BUTTON";
+    field public static final String NOTIFICATION = "NOTIFICATION";
+    field public static final String PROFILE_SWITCH_ANIMATION = "PROFILE_SWITCH_ANIMATION";
+    field public static final String QUICK_SETTINGS = "QUICK_SETTINGS";
+    field public static final String STATUS_BAR = "STATUS_BAR";
+    field public static final String UNDEFINED = "UNDEFINED";
   }
 
-  public static final class DevicePolicyResources.Drawable.Style {
-    field public static final int DEFAULT = -1; // 0xffffffff
-    field public static final int OUTLINE = 2; // 0x2
-    field public static final int SOLID_COLORED = 0; // 0x0
-    field public static final int SOLID_NOT_COLORED = 1; // 0x1
+  public static final class DevicePolicyResources.Drawables.Style {
+    field public static final String DEFAULT = "DEFAULT";
+    field public static final String OUTLINE = "OUTLINE";
+    field public static final String SOLID_COLORED = "SOLID_COLORED";
+    field public static final String SOLID_NOT_COLORED = "SOLID_NOT_COLORED";
   }
 
   public final class DnsEvent extends android.app.admin.NetworkEvent implements android.os.Parcelable {

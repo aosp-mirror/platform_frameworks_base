@@ -16,9 +16,6 @@
 
 package android.app.admin;
 
-import static android.app.admin.DevicePolicyResources.Drawable.INVALID_ID;
-import static android.app.admin.DevicePolicyResources.Drawable.Source.UNDEFINED;
-
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.Manifest.permission;
@@ -42,6 +39,7 @@ import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.IServiceConnection;
 import android.app.KeyguardManager;
+import android.app.admin.DevicePolicyResources.Drawables;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -14738,17 +14736,17 @@ public class DevicePolicyManager {
     /**
      * For each {@link DevicePolicyDrawableResource} item in {@code drawables}, if
      * {@link DevicePolicyDrawableResource#getDrawableSource()} is not set or is set to
-     * {@link DevicePolicyResources.Drawable.Source#UNDEFINED}, it updates the drawable resource for
+     * {@link DevicePolicyResources.Drawables.Source#UNDEFINED}, it updates the drawable resource for
      * the combination of {@link DevicePolicyDrawableResource#getDrawableId()} and
      * {@link DevicePolicyDrawableResource#getDrawableStyle()}, (see
-     * {@link DevicePolicyResources.Drawable} and {@link DevicePolicyResources.Drawable.Style}) to
+     * {@link DevicePolicyResources.Drawables} and {@link DevicePolicyResources.Drawables.Style}) to
      * the drawable with ID {@link DevicePolicyDrawableResource#getCallingPackageResourceId()},
      * meaning any system UI surface calling {@link #getDrawable}
      * with {@code drawableId} and {@code drawableStyle} will get the new resource after this API
      * is called.
      *
      * <p>Otherwise, if {@link DevicePolicyDrawableResource#getDrawableSource()} is set (see
-     * {@link DevicePolicyResources.Drawable.Source}, it overrides any drawables that was set for
+     * {@link DevicePolicyResources.Drawables.Source}, it overrides any drawables that was set for
      * the same {@code drawableId} and {@code drawableStyle} for the provided source.
      *
      * <p>Sends a broadcast with action {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to
@@ -14784,10 +14782,10 @@ public class DevicePolicyManager {
 
     /**
      * Removes all updated drawables for the list of {@code drawableIds} (see
-     * {@link DevicePolicyResources.Drawable} that was previously set by calling
+     * {@link DevicePolicyResources.Drawables} that was previously set by calling
      * {@link #setDrawables}, meaning any subsequent calls to {@link #getDrawable} for the provided
-     * IDs with any {@link DevicePolicyResources.Drawable.Style} and any
-     * {@link DevicePolicyResources.Drawable.Source} will return the default drawable from
+     * IDs with any {@link DevicePolicyResources.Drawables.Style} and any
+     * {@link DevicePolicyResources.Drawables.Source} will return the default drawable from
      * {@code defaultDrawableLoader}.
      *
      * <p>Sends a broadcast with action {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to
@@ -14799,7 +14797,7 @@ public class DevicePolicyManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_MANAGEMENT_RESOURCES)
-    public void resetDrawables(@NonNull int[] drawableIds) {
+    public void resetDrawables(@NonNull String[] drawableIds) {
         if (mService != null) {
             try {
                 mService.resetDrawables(drawableIds);
@@ -14811,19 +14809,19 @@ public class DevicePolicyManager {
 
     /**
      * Returns the appropriate updated drawable for the {@code drawableId}
-     * (see {@link DevicePolicyResources.Drawable}), with style {@code drawableStyle}
-     * (see {@link DevicePolicyResources.Drawable.Style}) if one was set using
+     * (see {@link DevicePolicyResources.Drawables}), with style {@code drawableStyle}
+     * (see {@link DevicePolicyResources.Drawables.Style}) if one was set using
      * {@code setDrawables}, otherwise returns the drawable from {@code defaultDrawableLoader}.
      *
      * <p>Also returns the drawable from {@code defaultDrawableLoader} if
-     * {@link DevicePolicyResources.Drawable#INVALID_ID} was passed.
+     * {@link DevicePolicyResources.Drawables#UNDEFINED} was passed.
      *
      * <p>{@code defaultDrawableLoader} must return a non {@code null} {@link Drawable}, otherwise a
      * {@link NullPointerException} is thrown.
      *
      * <p>This API uses the screen density returned from {@link Resources#getConfiguration()}, to
      * set a different value use
-     * {@link #getDrawableForDensity(int, int, int, Callable)}.
+     * {@link #getDrawableForDensity(String, String, int, Callable)}.
      *
      * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
      * notified when a resource has been updated.
@@ -14838,16 +14836,18 @@ public class DevicePolicyManager {
      */
     @NonNull
     public Drawable getDrawable(
-            @DevicePolicyResources.UpdatableDrawableId int drawableId,
-            @DevicePolicyResources.UpdatableDrawableStyle int drawableStyle,
+            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
+            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
             @NonNull Callable<Drawable> defaultDrawableLoader) {
-        return getDrawable(drawableId, drawableStyle, UNDEFINED, defaultDrawableLoader);
+        return getDrawable(
+                drawableId, drawableStyle, Drawables.Source.UNDEFINED, defaultDrawableLoader);
     }
 
     /**
-     * Similar to {@link #getDrawable(int, int, Callable)}, but also accepts
-     * a {@code drawableSource} (see {@link DevicePolicyResources.Drawable.Source}) which
-     * could result in returning a different drawable than {@link #getDrawable(int, int, Callable)}
+     * Similar to {@link #getDrawable(String, String, Callable)}, but also accepts
+     * a {@code drawableSource} (see {@link DevicePolicyResources.Drawables.Source}) which
+     * could result in returning a different drawable than
+     * {@link #getDrawable(String, String, Callable)}
      * if an override was set for that specific source.
      *
      * <p>{@code defaultDrawableLoader} must return a non {@code null} {@link Drawable}, otherwise a
@@ -14864,12 +14864,17 @@ public class DevicePolicyManager {
      */
     @NonNull
     public Drawable getDrawable(
-            @DevicePolicyResources.UpdatableDrawableId int drawableId,
-            @DevicePolicyResources.UpdatableDrawableStyle int drawableStyle,
-            @DevicePolicyResources.UpdatableDrawableSource int drawableSource,
+            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
+            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
+            @NonNull @DevicePolicyResources.UpdatableDrawableSource String drawableSource,
             @NonNull Callable<Drawable> defaultDrawableLoader) {
+
+        Objects.requireNonNull(drawableId, "drawableId can't be null");
+        Objects.requireNonNull(drawableStyle, "drawableStyle can't be null");
+        Objects.requireNonNull(drawableSource, "drawableSource can't be null");
         Objects.requireNonNull(defaultDrawableLoader, "defaultDrawableLoader can't be null");
-        if (drawableId == INVALID_ID) {
+
+        if (Drawables.UNDEFINED.equals(drawableId)) {
             return ParcelableResource.loadDefaultDrawable(defaultDrawableLoader);
         }
         if (mService != null) {
@@ -14897,7 +14902,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Similar to {@link #getDrawable(int, int, Callable)}, but also accepts
+     * Similar to {@link #getDrawable(String, String, Callable)}, but also accepts
      * {@code density}. See {@link Resources#getDrawableForDensity(int, int, Resources.Theme)}.
      *
      * <p>{@code defaultDrawableLoader} must return a non {@code null} {@link Drawable}, otherwise a
@@ -14916,20 +14921,20 @@ public class DevicePolicyManager {
      */
     @NonNull
     public Drawable getDrawableForDensity(
-            @DevicePolicyResources.UpdatableDrawableId int drawableId,
-            @DevicePolicyResources.UpdatableDrawableStyle int drawableStyle,
+            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
+            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
             int density,
             @NonNull Callable<Drawable> defaultDrawableLoader) {
         return getDrawableForDensity(
                 drawableId,
                 drawableStyle,
-                UNDEFINED,
+                Drawables.Source.UNDEFINED,
                 density,
                 defaultDrawableLoader);
     }
 
      /**
-     * Similar to {@link #getDrawable(int, int, int, Callable)}, but also accepts
+     * Similar to {@link #getDrawable(String, String, String, Callable)}, but also accepts
      * {@code density}. See {@link Resources#getDrawableForDensity(int, int, Resources.Theme)}.
      *
      * <p>{@code defaultDrawableLoader} must return a non {@code null} {@link Drawable}, otherwise a
@@ -14949,13 +14954,18 @@ public class DevicePolicyManager {
      */
     @NonNull
     public Drawable getDrawableForDensity(
-            @DevicePolicyResources.UpdatableDrawableId int drawableId,
-            @DevicePolicyResources.UpdatableDrawableStyle int drawableStyle,
-            @DevicePolicyResources.UpdatableDrawableSource int drawableSource,
+            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
+            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
+            @NonNull @DevicePolicyResources.UpdatableDrawableSource String drawableSource,
             int density,
             @NonNull Callable<Drawable> defaultDrawableLoader) {
+
+        Objects.requireNonNull(drawableId, "drawableId can't be null");
+        Objects.requireNonNull(drawableStyle, "drawableStyle can't be null");
+        Objects.requireNonNull(drawableSource, "drawableSource can't be null");
         Objects.requireNonNull(defaultDrawableLoader, "defaultDrawableLoader can't be null");
-        if (drawableId == INVALID_ID) {
+
+        if (Drawables.UNDEFINED.equals(drawableId)) {
             return ParcelableResource.loadDefaultDrawable(defaultDrawableLoader);
         }
         if (mService != null) {

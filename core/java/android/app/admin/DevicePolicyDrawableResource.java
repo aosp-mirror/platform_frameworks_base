@@ -20,6 +20,7 @@ import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.app.admin.DevicePolicyResources.Drawables;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -34,9 +35,9 @@ import java.util.Objects;
  */
 @SystemApi
 public final class DevicePolicyDrawableResource implements Parcelable {
-    private final @DevicePolicyResources.UpdatableDrawableId int mDrawableId;
-    private final @DevicePolicyResources.UpdatableDrawableStyle int mDrawableStyle;
-    private final @DevicePolicyResources.UpdatableDrawableSource int mDrawableSource;
+    @NonNull private final @DevicePolicyResources.UpdatableDrawableId String mDrawableId;
+    @NonNull private final @DevicePolicyResources.UpdatableDrawableStyle String mDrawableStyle;
+    @NonNull private final @DevicePolicyResources.UpdatableDrawableSource String mDrawableSource;
     private final @DrawableRes int mCallingPackageResourceId;
     @NonNull private ParcelableResource mResource;
 
@@ -59,9 +60,9 @@ public final class DevicePolicyDrawableResource implements Parcelable {
      */
     public DevicePolicyDrawableResource(
             @NonNull Context context,
-            @DevicePolicyResources.UpdatableDrawableId int drawableId,
-            @DevicePolicyResources.UpdatableDrawableStyle int drawableStyle,
-            @DevicePolicyResources.UpdatableDrawableSource int drawableSource,
+            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
+            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
+            @NonNull @DevicePolicyResources.UpdatableDrawableSource String drawableSource,
             @DrawableRes int callingPackageResourceId) {
         this(drawableId, drawableStyle, drawableSource, callingPackageResourceId,
                 new ParcelableResource(context, callingPackageResourceId,
@@ -69,11 +70,17 @@ public final class DevicePolicyDrawableResource implements Parcelable {
     }
 
     private DevicePolicyDrawableResource(
-            @DevicePolicyResources.UpdatableDrawableId int drawableId,
-            @DevicePolicyResources.UpdatableDrawableStyle int drawableStyle,
-            @DevicePolicyResources.UpdatableDrawableSource int drawableSource,
+            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
+            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
+            @NonNull @DevicePolicyResources.UpdatableDrawableSource String drawableSource,
             @DrawableRes int callingPackageResourceId,
             @NonNull ParcelableResource resource) {
+
+        Objects.requireNonNull(drawableId);
+        Objects.requireNonNull(drawableStyle);
+        Objects.requireNonNull(drawableSource);
+        Objects.requireNonNull(resource);
+
         this.mDrawableId = drawableId;
         this.mDrawableStyle = drawableStyle;
         this.mDrawableSource = drawableSource;
@@ -98,34 +105,37 @@ public final class DevicePolicyDrawableResource implements Parcelable {
      */
     public DevicePolicyDrawableResource(
             @NonNull Context context,
-            @DevicePolicyResources.UpdatableDrawableId int drawableId,
-            @DevicePolicyResources.UpdatableDrawableStyle int drawableStyle,
+            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
+            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
             @DrawableRes int callingPackageResourceId) {
-       this(context, drawableId, drawableStyle, DevicePolicyResources.Drawable.Source.UNDEFINED,
+       this(context, drawableId, drawableStyle, Drawables.Source.UNDEFINED,
                callingPackageResourceId);
     }
 
     /**
      * Returns the ID of the drawable to update.
      */
+    @NonNull
     @DevicePolicyResources.UpdatableDrawableId
-    public int getDrawableId() {
+    public String getDrawableId() {
         return mDrawableId;
     }
 
     /**
      * Returns the style of the drawable to update
      */
+    @NonNull
     @DevicePolicyResources.UpdatableDrawableStyle
-    public int getDrawableStyle() {
+    public String getDrawableStyle() {
         return mDrawableStyle;
     }
 
     /**
      * Returns the source of the drawable to update.
      */
+    @NonNull
     @DevicePolicyResources.UpdatableDrawableSource
-    public int getDrawableSource() {
+    public String getDrawableSource() {
         return mDrawableSource;
     }
 
@@ -153,9 +163,9 @@ public final class DevicePolicyDrawableResource implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DevicePolicyDrawableResource other = (DevicePolicyDrawableResource) o;
-        return mDrawableId == other.mDrawableId
-                && mDrawableStyle == other.mDrawableStyle
-                && mDrawableSource == other.mDrawableSource
+        return mDrawableId.equals(other.mDrawableId)
+                && mDrawableStyle.equals(other.mDrawableStyle)
+                && mDrawableSource.equals(other.mDrawableSource)
                 && mCallingPackageResourceId == other.mCallingPackageResourceId
                 && mResource.equals(other.mResource);
     }
@@ -173,9 +183,9 @@ public final class DevicePolicyDrawableResource implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeInt(mDrawableId);
-        dest.writeInt(mDrawableStyle);
-        dest.writeInt(mDrawableSource);
+        dest.writeString(mDrawableId);
+        dest.writeString(mDrawableStyle);
+        dest.writeString(mDrawableSource);
         dest.writeInt(mCallingPackageResourceId);
         dest.writeTypedObject(mResource, flags);
     }
@@ -184,9 +194,9 @@ public final class DevicePolicyDrawableResource implements Parcelable {
             new Creator<DevicePolicyDrawableResource>() {
                 @Override
                 public DevicePolicyDrawableResource createFromParcel(Parcel in) {
-                    int drawableId = in.readInt();
-                    int drawableStyle = in.readInt();
-                    int drawableSource = in.readInt();
+                    String drawableId = in.readString();
+                    String drawableStyle = in.readString();
+                    String drawableSource = in.readString();
                     int callingPackageResourceId = in.readInt();
                     ParcelableResource resource = in.readTypedObject(ParcelableResource.CREATOR);
 
