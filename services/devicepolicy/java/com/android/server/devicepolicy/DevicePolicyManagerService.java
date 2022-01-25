@@ -245,6 +245,7 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.hardware.usb.UsbManager;
+import android.location.Location;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.media.IAudioService;
@@ -260,6 +261,7 @@ import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -325,6 +327,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.LocalePicker;
+import com.android.internal.infra.AndroidFuture;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.net.NetworkUtilsInternal;
@@ -403,6 +406,8 @@ import java.util.stream.Collectors;
 public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     protected static final String LOG_TAG = "DevicePolicyManager";
+
+    private static final String ATTRIBUTION_TAG = "DevicePolicyManagerService";
 
     static final boolean VERBOSE_LOG = false; // DO NOT SUBMIT WITH TRUE
 
@@ -1772,7 +1777,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * Instantiates the service.
      */
     public DevicePolicyManagerService(Context context) {
-        this(new Injector(context));
+        this(new Injector(context.createAttributionContext(ATTRIBUTION_TAG)));
     }
 
     @VisibleForTesting
@@ -7207,6 +7212,64 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean isFactoryResetProtectionPolicySupported() {
         return getFrpManagementAgentUid() != -1;
+    }
+
+    @Override
+    public void sendLostModeLocationUpdate(AndroidFuture<Boolean> future) {
+        if (!mHasFeature) {
+            future.complete(false);
+            return;
+        }
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(permission.SEND_LOST_MODE_LOCATION_UPDATES));
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
+                    UserHandle.USER_SYSTEM);
+            Preconditions.checkState(admin != null,
+                    "Lost mode location updates can only be sent on an organization-owned device.");
+            mInjector.binderWithCleanCallingIdentity(() -> {
+                final List<String> providers =
+                        mInjector.getLocationManager().getAllProviders().stream()
+                                .filter(mInjector.getLocationManager()::isProviderEnabled)
+                                .collect(Collectors.toList());
+                if (providers.isEmpty()) {
+                    future.complete(false);
+                    return;
+                }
+
+                final CancellationSignal cancellationSignal = new CancellationSignal();
+                List<String> providersWithNullLocation = new ArrayList<String>();
+                for (String provider : providers) {
+                    mInjector.getLocationManager().getCurrentLocation(provider, cancellationSignal,
+                            mContext.getMainExecutor(), location -> {
+                                if (cancellationSignal.isCanceled()) {
+                                    return;
+                                } else if (location != null) {
+                                    sendLostModeLocationUpdate(admin, location);
+                                    cancellationSignal.cancel();
+                                    future.complete(true);
+                                } else {
+                                    // location == null, provider wasn't able to get location, see
+                                    // if there are more providers
+                                    providersWithNullLocation.add(provider);
+                                    if (providers.size() == providersWithNullLocation.size()) {
+                                        future.complete(false);
+                                    }
+                                }
+                            }
+                    );
+                }
+            });
+        }
+    }
+
+    private void sendLostModeLocationUpdate(ActiveAdmin admin, Location location) {
+        final Intent intent = new Intent(
+                DevicePolicyManager.ACTION_LOST_MODE_LOCATION_UPDATE);
+        intent.putExtra(DevicePolicyManager.EXTRA_LOST_MODE_LOCATION, location);
+        intent.setPackage(admin.info.getPackageName());
+        mContext.sendBroadcastAsUser(intent, admin.getUserHandle());
     }
 
     /**

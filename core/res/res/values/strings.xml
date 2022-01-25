@@ -521,6 +521,8 @@
     <string name="twilight_service">Twilight Service</string>
     <!-- Attribution for Gnss Time Update service. [CHAR LIMIT=NONE]-->
     <string name="gnss_time_update_service">GNSS Time Update Service</string>
+    <!-- Attribution for Device Policy Manager service. [CHAR LIMIT=NONE]-->
+    <string name="device_policy_manager_service">Device Policy Manager Service</string>
 
     <!-- Attribution for MusicRecognitionManagerService. [CHAR LIMIT=NONE]-->
     <string name="music_recognition_manager_service">Music Recognition Manager Service</string>
