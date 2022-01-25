@@ -17,7 +17,9 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.UiThread;
+import android.graphics.Region;
 import android.hardware.HardwareBuffer;
 
 /**
@@ -123,5 +125,17 @@ public interface AttachedSurfaceControl {
      */
     default void removeOnBufferTransformHintChangedListener(
             @NonNull OnBufferTransformHintChangedListener listener) {
+    }
+
+    /**
+     * Sets the touchable region for this SurfaceControl, expressed in surface local
+     * coordinates. By default the touchable region is the entire Layer, indicating
+     * that if the layer is otherwise eligible to receive touch it receives touch
+     * on the entire surface. Setting the touchable region allows the SurfaceControl
+     * to receive touch in some regions, while allowing for pass-through in others.
+     *
+     * @param r The region to use or null to use the entire Layer bounds
+     */
+    default void setTouchableRegion(@Nullable Region r) {
     }
 }

@@ -2105,6 +2105,19 @@ public class WindowManagerService extends IWindowManager.Stub
         Slog.i(tag, s, e);
     }
 
+    void clearTouchableRegion(Session session, IWindow client) {
+        int uid = Binder.getCallingUid();
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                WindowState w = windowForClientLocked(session, client, false);
+                w.clearClientTouchableRegion();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
     void setInsetsWindow(Session session, IWindow client, int touchableInsets, Rect contentInsets,
             Rect visibleInsets, Region touchableRegion) {
         int uid = Binder.getCallingUid();
@@ -2130,6 +2143,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     w.setDisplayLayoutNeeded();
                     mWindowPlacerLocked.performSurfacePlacement();
+                    w.getDisplayContent().getInputMonitor().updateInputWindowsLw(true);
 
                     // We need to report touchable region changes to accessibility.
                     if (mAccessibilityController.hasCallbacks()) {
