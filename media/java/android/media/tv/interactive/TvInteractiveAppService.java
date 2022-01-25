@@ -223,11 +223,12 @@ public abstract class TvInteractiveAppService extends Service {
     }
 
     /**
-     * Sends App link info.
+     * Called when app link command is received.
+     *
+     * @see android.media.tv.interactive.TvInteractiveAppManager#sendAppLinkCommand(String, Bundle)
      * @hide
      */
-    public void onAppLinkCommand(Bundle command) {
-        // TODO: make it abstract when unhide
+    public void onAppLinkCommand(@NonNull Bundle command) {
     }
 
 
@@ -551,7 +552,7 @@ public abstract class TvInteractiveAppService extends Service {
          * Called when an advertisement response is received.
          * @hide
          */
-        public void onAdResponse(AdResponse response) {
+        public void onAdResponse(@NonNull AdResponse response) {
         }
 
         /**
@@ -859,8 +860,9 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
-         * requests an advertisement request to be processed by the related TV input.
-         * @param request advertisement request
+         * Sends an advertisement request to be processed by the related TV input.
+         *
+         * @param request The advertisement request
          * @hide
          */
         public void requestAd(@NonNull final AdRequest request) {

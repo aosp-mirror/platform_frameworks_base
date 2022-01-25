@@ -788,10 +788,12 @@ public class TvInteractiveAppManagerService extends SystemService {
                                 componentName, tiasId, resolvedUserId);
                         serviceState.addPendingAppLinkCommand(command);
                         userState.mServiceStateMap.put(componentName, serviceState);
+                        updateServiceConnectionLocked(componentName, resolvedUserId);
                     } else if (serviceState.mService != null) {
                         serviceState.mService.sendAppLinkCommand(command);
                     } else {
                         serviceState.addPendingAppLinkCommand(command);
+                        updateServiceConnectionLocked(componentName, resolvedUserId);
                     }
                 }
             } catch (RemoteException e) {
@@ -1673,7 +1675,8 @@ public class TvInteractiveAppManagerService extends SystemService {
 
         boolean shouldBind = (!serviceState.mSessionTokens.isEmpty())
                 || (serviceState.mPendingPrepare)
-                || (!serviceState.mPendingAppLinkInfo.isEmpty());
+                || (!serviceState.mPendingAppLinkInfo.isEmpty())
+                || (!serviceState.mPendingAppLinkCommand.isEmpty());
 
         if (serviceState.mService == null && shouldBind) {
             // This means that the service is not yet connected but its state indicates that we

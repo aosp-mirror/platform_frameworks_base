@@ -28,6 +28,7 @@ import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvContentRating;
+import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvTrackInfo;
 import android.net.Uri;
@@ -768,9 +769,13 @@ public final class TvInteractiveAppManager {
 
     /**
      * Sends app link command.
+     *
+     * @param tvIAppServiceId The ID of TV interactive service which the command to be sent to. The
+     *                        ID can be found in {@link TvInputInfo#getId()}.
+     * @param command The command to be sent.
      * @hide
      */
-    public void sendAppLinkCommand(String tvIAppServiceId, Bundle command) {
+    public void sendAppLinkCommand(@NonNull String tvIAppServiceId, @NonNull Bundle command) {
         try {
             mService.sendAppLinkCommand(tvIAppServiceId, command, mUserId);
         } catch (RemoteException e) {

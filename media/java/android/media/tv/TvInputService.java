@@ -895,6 +895,7 @@ public abstract class TvInputService extends Service {
          * Notifies response for advertisement.
          *
          * @param response advertisement response.
+         * @see android.media.tv.interactive.TvInteractiveAppService.Session#requestAd(AdRequest)
          * @hide
          */
         public void notifyAdResponse(@NonNull final AdResponse response) {
@@ -1124,9 +1125,9 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * called when advertisement is requested.
+         * Called when advertisement request is received.
          *
-         * @param request advertisement request
+         * @param request advertisement request received
          * @hide
          */
         public void onRequestAd(@NonNull AdRequest request) {
