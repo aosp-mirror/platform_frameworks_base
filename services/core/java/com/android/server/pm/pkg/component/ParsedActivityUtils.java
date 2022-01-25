@@ -18,8 +18,9 @@ package com.android.server.pm.pkg.component;
 
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE_PER_TASK;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-import static com.android.server.pm.pkg.parsing.ParsingUtils.NOT_SET;
+
 import static com.android.server.pm.pkg.component.ComponentParseUtils.flag;
+import static com.android.server.pm.pkg.parsing.ParsingUtils.NOT_SET;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -27,9 +28,6 @@ import android.app.ActivityTaskManager;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
-import com.android.server.pm.pkg.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseInput.DeferredError;
 import android.content.pm.parsing.result.ParseResult;
@@ -49,6 +47,9 @@ import android.view.WindowManager;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
+import com.android.server.pm.pkg.parsing.ParsingUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -353,10 +354,10 @@ public class ParsedActivityUtils {
 
             final ParseResult result;
             if (parser.getName().equals("intent-filter")) {
-                ParseResult<ParsedIntentInfo> intentResult = parseIntentFilter(pkg, activity,
+                ParseResult<ParsedIntentInfoImpl> intentResult = parseIntentFilter(pkg, activity,
                         !isReceiver, visibleToEphemeral, resources, parser, input);
                 if (intentResult.isSuccess()) {
-                    ParsedIntentInfo intentInfo = intentResult.getResult();
+                    ParsedIntentInfoImpl intentInfo = intentResult.getResult();
                     if (intentInfo != null) {
                         IntentFilter intentFilter = intentInfo.getIntentFilter();
                         activity.setOrder(Math.max(intentFilter.getOrder(), activity.getOrder()));
@@ -386,11 +387,11 @@ public class ParsedActivityUtils {
             } else if (parser.getName().equals("property")) {
                 result = ParsedComponentUtils.addProperty(activity, pkg, resources, parser, input);
             } else if (!isReceiver && !isAlias && parser.getName().equals("preferred")) {
-                ParseResult<ParsedIntentInfo> intentResult = parseIntentFilter(pkg, activity,
+                ParseResult<ParsedIntentInfoImpl> intentResult = parseIntentFilter(pkg, activity,
                         true /*allowImplicitEphemeralVisibility*/, visibleToEphemeral,
                         resources, parser, input);
                 if (intentResult.isSuccess()) {
-                    ParsedIntentInfo intent = intentResult.getResult();
+                    ParsedIntentInfoImpl intent = intentResult.getResult();
                     if (intent != null) {
                         pkg.addPreferredActivityFilter(activity.getClassName(), intent);
                     }
@@ -413,7 +414,7 @@ public class ParsedActivityUtils {
         }
 
         if (!isAlias && activity.getLaunchMode() != LAUNCH_SINGLE_INSTANCE_PER_TASK
-                && activity.getMetaData() != null && activity.getMetaData().containsKey(
+                && activity.getMetaData().containsKey(
                 ParsingPackageUtils.METADATA_ACTIVITY_LAUNCH_MODE)) {
             final String launchMode = activity.getMetaData().getString(
                     ParsingPackageUtils.METADATA_ACTIVITY_LAUNCH_MODE);
@@ -427,7 +428,7 @@ public class ParsedActivityUtils {
             // set to false.
             boolean canDisplayOnRemoteDevices = array.getBoolean(
                     R.styleable.AndroidManifestActivity_canDisplayOnRemoteDevices, true);
-            if (activity.getMetaData() != null && !activity.getMetaData().getBoolean(
+            if (!activity.getMetaData().getBoolean(
                     ParsingPackageUtils.METADATA_CAN_DISPLAY_ON_REMOTE_DEVICES, true)) {
                 canDisplayOnRemoteDevices = false;
             }
@@ -463,11 +464,11 @@ public class ParsedActivityUtils {
     }
 
     @NonNull
-    private static ParseResult<ParsedIntentInfo> parseIntentFilter(ParsingPackage pkg,
+    private static ParseResult<ParsedIntentInfoImpl> parseIntentFilter(ParsingPackage pkg,
             ParsedActivityImpl activity, boolean allowImplicitEphemeralVisibility,
             boolean visibleToEphemeral, Resources resources, XmlResourceParser parser,
             ParseInput input) throws IOException, XmlPullParserException {
-        ParseResult<ParsedIntentInfo> result = ParsedMainComponentUtils.parseIntentFilter(activity,
+        ParseResult<ParsedIntentInfoImpl> result = ParsedMainComponentUtils.parseIntentFilter(activity,
                 pkg, resources, parser, visibleToEphemeral, true /*allowGlobs*/,
                 true /*allowAutoVerify*/, allowImplicitEphemeralVisibility,
                 true /*failOnNoActions*/, input);
@@ -475,7 +476,7 @@ public class ParsedActivityUtils {
             return input.error(result);
         }
 
-        ParsedIntentInfo intent = result.getResult();
+        ParsedIntentInfoImpl intent = result.getResult();
         if (intent != null) {
             final IntentFilter intentFilter = intent.getIntentFilter();
             if (intentFilter.isVisibleToInstantApp()) {
@@ -574,7 +575,7 @@ public class ParsedActivityUtils {
     private static ParseResult<ActivityInfo.WindowLayout> resolveActivityWindowLayout(
             ParsedActivity activity, ParseInput input) {
         // There isn't a metadata for us to fall back. Whatever is in layout is correct.
-        if (activity.getMetaData() == null || !activity.getMetaData().containsKey(
+        if (!activity.getMetaData().containsKey(
                 ParsingPackageUtils.METADATA_ACTIVITY_WINDOW_LAYOUT_AFFINITY)) {
             return input.success(activity.getWindowLayout());
         }

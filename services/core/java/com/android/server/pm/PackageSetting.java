@@ -295,14 +295,12 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
             proto.write(PackageProto.SplitProto.REVISION_CODE, pkg.getBaseRevisionCode());
             proto.end(splitToken);
 
-            if (pkg.getSplitNames() != null) {
-                for (int i = 0; i < pkg.getSplitNames().length; i++) {
-                    splitToken = proto.start(PackageProto.SPLITS);
-                    proto.write(PackageProto.SplitProto.NAME, pkg.getSplitNames()[i]);
-                    proto.write(PackageProto.SplitProto.REVISION_CODE,
-                            pkg.getSplitRevisionCodes()[i]);
-                    proto.end(splitToken);
-                }
+            for (int i = 0; i < pkg.getSplitNames().length; i++) {
+                splitToken = proto.start(PackageProto.SPLITS);
+                proto.write(PackageProto.SplitProto.NAME, pkg.getSplitNames()[i]);
+                proto.write(PackageProto.SplitProto.REVISION_CODE,
+                        pkg.getSplitRevisionCodes()[i]);
+                proto.end(splitToken);
             }
 
             long sourceToken = proto.start(PackageProto.INSTALL_SOURCE);
@@ -1263,8 +1261,8 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
 
     @Nullable
     @Override
-    public Integer getSharedUserId() {
-        return sharedUser == null ? null : sharedUser.userId;
+    public int getSharedUserId() {
+        return sharedUser == null ? -1 : sharedUser.userId;
     }
 
     @NonNull

@@ -16,11 +16,15 @@
 
 package com.android.server.pm.pkg.component;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.PathPermission;
 import android.os.PatternMatcher;
 
+import java.util.List;
+
 /** @hide **/
+//@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public interface ParsedProvider extends ParsedMainComponent {
 
     @Nullable
@@ -30,13 +34,17 @@ public interface ParsedProvider extends ParsedMainComponent {
 
     boolean isMultiProcess();
 
-    @Nullable PathPermission[] getPathPermissions();
+    @NonNull
+    List<PathPermission> getPathPermissions();
 
-    @Nullable String getReadPermission();
+    @Nullable
+    String getReadPermission();
 
-    @Nullable PatternMatcher[] getUriPermissionPatterns();
+    @NonNull
+    List<PatternMatcher> getUriPermissionPatterns();
 
-    @Nullable String getWritePermission();
+    @Nullable
+    String getWritePermission();
 
     boolean isForceUriPermissions();
 

@@ -69,7 +69,7 @@ import com.android.server.integrity.model.RuleMetadata;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
-import com.android.server.pm.pkg.PackageUserState;
+import com.android.server.pm.pkg.PackageUserStateInternal;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -598,7 +598,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                     0,
                     0,
                     null,
-                    PackageUserState.DEFAULT,
+                    PackageUserStateInternal.DEFAULT,
                     UserHandle.getCallingUserId(),
                     null);
         } catch (Exception e) {

@@ -28,13 +28,22 @@ import android.os.PatternMatcher;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 
-/** @hide **/
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * @hide
+ **/
 @DataClass(genSetters = true, genGetters = true, genParcelable = false, genBuilder = false)
+@DataClass.Suppress({"setUriPermissionPatterns", "setPathPermissions"})
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-public class ParsedProviderImpl extends ParsedMainComponentImpl implements ParsedProvider {
+public class ParsedProviderImpl extends ParsedMainComponentImpl implements ParsedProvider,
+        Parcelable {
 
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
@@ -50,10 +59,10 @@ public class ParsedProviderImpl extends ParsedMainComponentImpl implements Parse
     private boolean forceUriPermissions;
     private boolean multiProcess;
     private int initOrder;
-    @Nullable
-    private PatternMatcher[] uriPermissionPatterns;
-    @Nullable
-    private PathPermission[] pathPermissions;
+    @NonNull
+    private List<PatternMatcher> uriPermissionPatterns = Collections.emptyList();
+    @NonNull
+    private List<PathPermission> pathPermissions = Collections.emptyList();
 
     public ParsedProviderImpl(ParsedProvider other) {
         super(other);
@@ -66,8 +75,8 @@ public class ParsedProviderImpl extends ParsedMainComponentImpl implements Parse
         this.forceUriPermissions = other.isForceUriPermissions();
         this.multiProcess = other.isMultiProcess();
         this.initOrder = other.getInitOrder();
-        this.uriPermissionPatterns = other.getUriPermissionPatterns();
-        this.pathPermissions = other.getPathPermissions();
+        this.uriPermissionPatterns = new ArrayList<>(other.getUriPermissionPatterns());
+        this.pathPermissions = new ArrayList<>(other.getPathPermissions());
     }
 
     public ParsedProviderImpl setReadPermission(String readPermission) {
@@ -81,6 +90,18 @@ public class ParsedProviderImpl extends ParsedMainComponentImpl implements Parse
         // Empty string must be converted to null
         this.writePermission = TextUtils.isEmpty(writePermission)
                 ? null : writePermission.intern();
+        return this;
+    }
+
+    @NonNull
+    public ParsedProviderImpl addUriPermissionPattern(@NonNull PatternMatcher value) {
+        uriPermissionPatterns = CollectionUtils.add(uriPermissionPatterns, value);
+        return this;
+    }
+
+    @NonNull
+    public ParsedProviderImpl addPathPermission(@NonNull PathPermission value) {
+        pathPermissions = CollectionUtils.add(pathPermissions, value);
         return this;
     }
 
@@ -110,8 +131,8 @@ public class ParsedProviderImpl extends ParsedMainComponentImpl implements Parse
         dest.writeBoolean(this.forceUriPermissions);
         dest.writeBoolean(this.multiProcess);
         dest.writeInt(this.initOrder);
-        dest.writeTypedArray(this.uriPermissionPatterns, flags);
-        dest.writeTypedArray(this.pathPermissions, flags);
+        dest.writeTypedList(this.uriPermissionPatterns, flags);
+        dest.writeTypedList(this.pathPermissions, flags);
     }
 
     public ParsedProviderImpl() {
@@ -127,8 +148,8 @@ public class ParsedProviderImpl extends ParsedMainComponentImpl implements Parse
         this.forceUriPermissions = in.readBoolean();
         this.multiProcess = in.readBoolean();
         this.initOrder = in.readInt();
-        this.uriPermissionPatterns = in.createTypedArray(PatternMatcher.CREATOR);
-        this.pathPermissions = in.createTypedArray(PathPermission.CREATOR);
+        this.uriPermissionPatterns = in.createTypedArrayList(PatternMatcher.CREATOR);
+        this.pathPermissions = in.createTypedArrayList(PathPermission.CREATOR);
     }
 
     @NonNull
@@ -153,7 +174,7 @@ public class ParsedProviderImpl extends ParsedMainComponentImpl implements Parse
     // CHECKSTYLE:OFF Generated code
     //
     // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/parsing/component/ParsedProviderImpl.java
+    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/services/core/java/com/android/server/pm/pkg/component/ParsedProviderImpl.java
     //
     // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
     //   Settings > Editor > Code Style > Formatter Control
@@ -170,8 +191,8 @@ public class ParsedProviderImpl extends ParsedMainComponentImpl implements Parse
             boolean forceUriPermissions,
             boolean multiProcess,
             int initOrder,
-            @Nullable PatternMatcher[] uriPermissionPatterns,
-            @Nullable PathPermission[] pathPermissions) {
+            @NonNull List<PatternMatcher> uriPermissionPatterns,
+            @NonNull List<PathPermission> pathPermissions) {
         this.authority = authority;
         this.syncable = syncable;
         this.readPermission = readPermission;
@@ -181,7 +202,11 @@ public class ParsedProviderImpl extends ParsedMainComponentImpl implements Parse
         this.multiProcess = multiProcess;
         this.initOrder = initOrder;
         this.uriPermissionPatterns = uriPermissionPatterns;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, uriPermissionPatterns);
         this.pathPermissions = pathPermissions;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, pathPermissions);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -227,12 +252,12 @@ public class ParsedProviderImpl extends ParsedMainComponentImpl implements Parse
     }
 
     @DataClass.Generated.Member
-    public @Nullable PatternMatcher[] getUriPermissionPatterns() {
+    public @NonNull List<PatternMatcher> getUriPermissionPatterns() {
         return uriPermissionPatterns;
     }
 
     @DataClass.Generated.Member
-    public @Nullable PathPermission[] getPathPermissions() {
+    public @NonNull List<PathPermission> getPathPermissions() {
         return pathPermissions;
     }
 
@@ -272,23 +297,11 @@ public class ParsedProviderImpl extends ParsedMainComponentImpl implements Parse
         return this;
     }
 
-    @DataClass.Generated.Member
-    public @NonNull ParsedProviderImpl setUriPermissionPatterns(@NonNull PatternMatcher... value) {
-        uriPermissionPatterns = value;
-        return this;
-    }
-
-    @DataClass.Generated.Member
-    public @NonNull ParsedProviderImpl setPathPermissions(@NonNull PathPermission... value) {
-        pathPermissions = value;
-        return this;
-    }
-
     @DataClass.Generated(
-            time = 1627590522169L,
+            time = 1642560323360L,
             codegenVersion = "1.0.23",
-            sourceFile = "frameworks/base/core/java/android/content/pm/parsing/component/ParsedProviderImpl.java",
-            inputSignatures = "private @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String authority\nprivate  boolean syncable\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String readPermission\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String writePermission\nprivate  boolean grantUriPermissions\nprivate  boolean forceUriPermissions\nprivate  boolean multiProcess\nprivate  int initOrder\nprivate @android.annotation.Nullable android.os.PatternMatcher[] uriPermissionPatterns\nprivate @android.annotation.Nullable android.content.pm.PathPermission[] pathPermissions\npublic static final @android.annotation.NonNull android.os.Parcelable.Creator<android.content.pm.parsing.component.ParsedProviderImpl> CREATOR\npublic  android.content.pm.parsing.component.ParsedProviderImpl setReadPermission(java.lang.String)\npublic  android.content.pm.parsing.component.ParsedProviderImpl setWritePermission(java.lang.String)\npublic  java.lang.String toString()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass ParsedProviderImpl extends android.content.pm.parsing.component.ParsedMainComponentImpl implements [android.content.pm.parsing.component.ParsedProvider]\n@com.android.internal.util.DataClass(genSetters=true, genGetters=true, genParcelable=false, genBuilder=false)")
+            sourceFile = "frameworks/base/services/core/java/com/android/server/pm/pkg/component/ParsedProviderImpl.java",
+            inputSignatures = "private @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String authority\nprivate  boolean syncable\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String readPermission\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String writePermission\nprivate  boolean grantUriPermissions\nprivate  boolean forceUriPermissions\nprivate  boolean multiProcess\nprivate  int initOrder\nprivate @android.annotation.NonNull java.util.List<android.os.PatternMatcher> uriPermissionPatterns\nprivate @android.annotation.NonNull java.util.List<android.content.pm.PathPermission> pathPermissions\npublic static final @android.annotation.NonNull android.os.Parcelable.Creator<com.android.server.pm.pkg.component.ParsedProviderImpl> CREATOR\npublic  com.android.server.pm.pkg.component.ParsedProviderImpl setReadPermission(java.lang.String)\npublic  com.android.server.pm.pkg.component.ParsedProviderImpl setWritePermission(java.lang.String)\npublic @android.annotation.NonNull com.android.server.pm.pkg.component.ParsedProviderImpl addUriPermissionPattern(android.os.PatternMatcher)\npublic @android.annotation.NonNull com.android.server.pm.pkg.component.ParsedProviderImpl addPathPermission(android.content.pm.PathPermission)\npublic  java.lang.String toString()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass ParsedProviderImpl extends com.android.server.pm.pkg.component.ParsedMainComponentImpl implements [com.android.server.pm.pkg.component.ParsedProvider, android.os.Parcelable]\n@com.android.internal.util.DataClass(genSetters=true, genGetters=true, genParcelable=false, genBuilder=false)")
     @Deprecated
     private void __metadata() {}
 

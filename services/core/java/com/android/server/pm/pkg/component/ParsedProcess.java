@@ -17,14 +17,15 @@
 package com.android.server.pm.pkg.component;
 
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.content.pm.ApplicationInfo;
-import android.os.Parcelable;
 import android.util.ArrayMap;
 
 import java.util.Set;
 
 /** @hide */
-public interface ParsedProcess extends Parcelable {
+//@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+public interface ParsedProcess {
 
     @NonNull
     Set<String> getDeniedPermissions();
@@ -44,6 +45,7 @@ public interface ParsedProcess extends Parcelable {
      * It's a map, because in shared processes, different packages can have different application
      * classes.
      */
+    @SuppressLint("ConcreteCollection")
     @NonNull
     ArrayMap<String, String> getAppClassNamesByPackage();
 

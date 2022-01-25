@@ -16,11 +16,13 @@
 
 package com.android.server.pm.pkg.component;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import java.util.Set;
 
 /** @hide */
+//@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public interface ParsedPermission extends ParsedComponent {
 
     @Nullable
@@ -29,7 +31,7 @@ public interface ParsedPermission extends ParsedComponent {
     @Nullable
     String getGroup();
 
-    @Nullable
+    @NonNull
     Set<String> getKnownCerts();
 
     @Nullable

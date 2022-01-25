@@ -18,8 +18,6 @@ package com.android.server.pm.pkg.component;
 
 import android.annotation.NonNull;
 import android.content.pm.ApplicationInfo;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
-import com.android.server.pm.pkg.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
@@ -31,6 +29,8 @@ import android.util.ArraySet;
 import com.android.internal.R;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.XmlUtils;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
+import com.android.server.pm.pkg.parsing.ParsingUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

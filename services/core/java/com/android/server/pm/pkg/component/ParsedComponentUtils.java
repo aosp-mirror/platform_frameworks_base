@@ -21,9 +21,6 @@ import static com.android.server.pm.pkg.parsing.ParsingUtils.NOT_SET;
 import android.annotation.NonNull;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.Property;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
-import com.android.server.pm.pkg.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
@@ -34,6 +31,9 @@ import android.text.TextUtils;
 import android.util.TypedValue;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
+import com.android.server.pm.pkg.parsing.ParsingUtils;
 
 /** @hide */
 class ParsedComponentUtils {

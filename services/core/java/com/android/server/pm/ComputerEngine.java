@@ -823,7 +823,7 @@ public class ComputerEngine implements Computer {
         }
         if (resolveComponentName().equals(component)) {
             return PackageInfoWithoutStateUtils.generateDelegateActivityInfo(mResolveActivity,
-                    flags, PackageUserState.DEFAULT, userId);
+                    flags, PackageUserStateInternal.DEFAULT, userId);
         }
         return null;
     }
@@ -1547,7 +1547,7 @@ public class ComputerEngine implements Computer {
             flags |= MATCH_ANY_USER;
         }
 
-        final PackageUserState state = ps.getUserStateOrDefault(userId);
+        final PackageUserStateInternal state = ps.getUserStateOrDefault(userId);
         AndroidPackage p = ps.getPkg();
         if (p != null) {
             // Compute GIDs only if requested
@@ -3548,7 +3548,7 @@ public class ComputerEngine implements Computer {
             if (shouldFilterApplication(ps, callingUid, userId)) {
                 return false;
             }
-            final PackageUserState state = ps.getUserStateOrDefault(userId);
+            final PackageUserStateInternal state = ps.getUserStateOrDefault(userId);
             if (state != null) {
                 return PackageUserStateUtils.isAvailable(state, 0);
             }
@@ -4011,7 +4011,7 @@ public class ComputerEngine implements Computer {
                     ps, callingUid, component, TYPE_PROVIDER, userId)) {
                 return null;
             }
-            PackageUserState state = ps.getUserStateOrDefault(userId);
+            PackageUserStateInternal state = ps.getUserStateOrDefault(userId);
             final ApplicationInfo appInfo =
                     PackageInfoUtils.generateApplicationInfo(ps.getPkg(), flags, state, userId, ps);
             if (appInfo == null) {

@@ -232,7 +232,7 @@ import com.android.server.pm.pkg.AndroidPackageApi;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
-import com.android.server.pm.pkg.PackageUserState;
+import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.component.ParsedInstrumentation;
 import com.android.server.pm.pkg.component.ParsedMainComponent;
 import com.android.server.pm.pkg.mutate.PackageStateMutator;
@@ -8765,7 +8765,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // The instance created in PackageManagerService is special cased to be non-user
             // specific, so initialize all the needed fields here.
             ApplicationInfo appInfo = PackageInfoUtils.generateApplicationInfo(pkg, 0,
-                    PackageUserState.DEFAULT, UserHandle.USER_SYSTEM, pkgSetting);
+                    PackageUserStateInternal.DEFAULT, UserHandle.USER_SYSTEM, pkgSetting);
 
             // Set up information for custom user intent resolution activity.
             mResolveActivity.applicationInfo = appInfo;
@@ -8797,7 +8797,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // The instance stored in PackageManagerService is special cased to be non-user
             // specific, so initialize all the needed fields here.
             mAndroidApplication = PackageInfoUtils.generateApplicationInfo(pkg, 0,
-                    PackageUserState.DEFAULT, UserHandle.USER_SYSTEM, pkgSetting);
+                    PackageUserStateInternal.DEFAULT, UserHandle.USER_SYSTEM, pkgSetting);
 
             if (!mResolverReplaced) {
                 mResolveActivity.applicationInfo = mAndroidApplication;

@@ -14,24 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.server.pm.pkg.component;
-
-import android.annotation.NonNull;
-import android.annotation.Nullable;
-
-/** @hide */
-//@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-public interface ParsedApexSystemService {
-
-    @NonNull
-    String getName();
-
-    @Nullable
-    String getJarPath();
-
-    @Nullable
-    String getMinSdkVersion();
-
-    @Nullable
-    String getMaxSdkVersion();
-}
+/**
+ * @hide
+ * TODO(b/146466118) remove this javadoc tag
+ */
+@android.annotation.Hide
+package com.android.server.pm;

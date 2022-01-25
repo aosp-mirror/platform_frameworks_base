@@ -31,9 +31,9 @@ class ParsedPermissionGroupTest : ParsedComponentTest(
     override val creator = ParsedPermissionGroupImpl.CREATOR
 
     override val subclassBaseParams = listOf(
-        ParsedPermissionGroup::getRequestDetailResourceId,
-        ParsedPermissionGroup::getBackgroundRequestDetailResourceId,
-        ParsedPermissionGroup::getBackgroundRequestResourceId,
+        ParsedPermissionGroup::getRequestDetailRes,
+        ParsedPermissionGroup::getBackgroundRequestDetailRes,
+        ParsedPermissionGroup::getBackgroundRequestRes,
         ParsedPermissionGroup::getRequestRes,
         ParsedPermissionGroup::getPriority,
     )

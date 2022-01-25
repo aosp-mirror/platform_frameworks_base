@@ -18,7 +18,6 @@ package com.android.server.pm.pkg.component;
 
 import android.annotation.NonNull;
 import android.annotation.StringRes;
-import android.os.Parcelable;
 
 import java.util.List;
 
@@ -28,7 +27,8 @@ import java.util.List;
  *
  * @hide
  */
-public interface ParsedAttribution extends Parcelable {
+//@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+public interface ParsedAttribution {
 
     /**
      * Maximum length of attribution tag

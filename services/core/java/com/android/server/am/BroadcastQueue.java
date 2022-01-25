@@ -67,6 +67,7 @@ import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
 
 import java.io.FileDescriptor;
@@ -1832,7 +1833,7 @@ public final class BroadcastQueue {
 
     private boolean noteOpForManifestReceiver(int appOp, BroadcastRecord r, ResolveInfo info,
             ComponentName component) {
-        if (info.activityInfo.attributionTags == null) {
+        if (ArrayUtils.isEmpty(info.activityInfo.attributionTags)) {
             return noteOpForManifestReceiverInner(appOp, r, info, component, null);
         } else {
             // Attribution tags provided, noteOp each tag
