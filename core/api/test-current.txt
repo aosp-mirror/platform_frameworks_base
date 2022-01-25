@@ -356,6 +356,32 @@ package android.app {
     ctor public PictureInPictureUiState(boolean);
   }
 
+  public class PropertyInvalidatedCache<Query, Result> {
+    ctor public PropertyInvalidatedCache(int, int, @NonNull String, @NonNull String, @NonNull android.app.PropertyInvalidatedCache.QueryHandler<Query,Result>);
+    method @NonNull public static String createPropertyName(int, @NonNull String);
+    method public final void disableForCurrentProcess();
+    method public static void disableForTestMode();
+    method public final void disableInstance();
+    method public final void disableSystemWide();
+    method public final void forgetDisableLocal();
+    method public boolean getDisabledState();
+    method public final void invalidateCache();
+    method public static void invalidateCache(int, @NonNull String);
+    method public final boolean isDisabled();
+    method @Nullable public final Result query(@NonNull Query);
+    method public static void setTestMode(boolean);
+    method public void testPropertyName();
+    field public static final int MODULE_BLUETOOTH = 2; // 0x2
+    field public static final int MODULE_SYSTEM = 1; // 0x1
+    field public static final int MODULE_TEST = 0; // 0x0
+  }
+
+  public abstract static class PropertyInvalidatedCache.QueryHandler<Q, R> {
+    ctor public PropertyInvalidatedCache.QueryHandler();
+    method @Nullable public abstract R apply(@NonNull Q);
+    method public boolean shouldBypassCache(@NonNull Q);
+  }
+
   public class StatusBarManager {
     method public void cancelRequestAddTile(@NonNull String);
     method public void clickNotification(@Nullable String, int, int, boolean);

@@ -54,6 +54,21 @@ package android.app {
     method public void onCanceled(@NonNull android.app.PendingIntent);
   }
 
+  public class PropertyInvalidatedCache<Query, Result> {
+    ctor public PropertyInvalidatedCache(int, int, @NonNull String, @NonNull String, @NonNull android.app.PropertyInvalidatedCache.QueryHandler<Query,Result>);
+    method public final void disableForCurrentProcess();
+    method public final void invalidateCache();
+    method public static void invalidateCache(int, @NonNull String);
+    method @Nullable public final Result query(@NonNull Query);
+    field public static final int MODULE_BLUETOOTH = 2; // 0x2
+  }
+
+  public abstract static class PropertyInvalidatedCache.QueryHandler<Q, R> {
+    ctor public PropertyInvalidatedCache.QueryHandler();
+    method @Nullable public abstract R apply(@NonNull Q);
+    method public boolean shouldBypassCache(@NonNull Q);
+  }
+
   public class StatusBarManager {
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
   }
