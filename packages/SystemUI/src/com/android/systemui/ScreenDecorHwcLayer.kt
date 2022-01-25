@@ -26,11 +26,22 @@ import android.graphics.PixelFormat
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.PorterDuffXfermode
+import android.graphics.Rect
+import android.graphics.Region
 import android.graphics.drawable.Drawable
 import android.hardware.graphics.common.AlphaInterpretation
 import android.hardware.graphics.common.DisplayDecorationSupport
+import android.view.DisplayCutout.BOUNDS_POSITION_BOTTOM
+import android.view.DisplayCutout.BOUNDS_POSITION_LEFT
+import android.view.DisplayCutout.BOUNDS_POSITION_LENGTH
+import android.view.DisplayCutout.BOUNDS_POSITION_TOP
+import android.view.DisplayCutout.BOUNDS_POSITION_RIGHT
 import android.view.RoundedCorner
 import android.view.RoundedCorners
+import android.view.Surface
+import androidx.annotation.VisibleForTesting
+import kotlin.math.ceil
+import kotlin.math.floor
 
 /**
  * When the HWC of the device supports Composition.DISPLAY_DECORATON, we use this layer to draw
@@ -38,13 +49,16 @@ import android.view.RoundedCorners
  */
 class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDecorationSupport)
     : DisplayCutoutBaseView(context) {
-    public val colorMode: Int
+    val colorMode: Int
     private val useInvertedAlphaColor: Boolean
     private val color: Int
     private val bgColor: Int
     private val cornerFilter: ColorFilter
     private val cornerBgFilter: ColorFilter
     private val clearPaint: Paint
+    @JvmField val transparentRect: Rect = Rect()
+    private val debugTransparentRegionPaint: Paint?
+    private val tempRect: Rect = Rect()
 
     private var roundedCornerTopSize = 0
     private var roundedCornerBottomSize = 0
@@ -61,6 +75,10 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
             bgColor = Color.TRANSPARENT
             colorMode = ActivityInfo.COLOR_MODE_DEFAULT
             useInvertedAlphaColor = false
+            debugTransparentRegionPaint = Paint().apply {
+                color = 0x2f00ff00 // semi-transparent green
+                style = Paint.Style.FILL
+            }
         } else {
             colorMode = ActivityInfo.COLOR_MODE_A8
             useInvertedAlphaColor = displayDecorationSupport.alphaInterpretation ==
@@ -72,6 +90,7 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
                 color = Color.BLACK
                 bgColor = Color.TRANSPARENT
             }
+            debugTransparentRegionPaint = null
         }
         cornerFilter = PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN)
         cornerBgFilter = PorterDuffColorFilter(bgColor, PorterDuff.Mode.SRC_OUT)
@@ -82,6 +101,9 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        if (!DEBUG_COLOR) {
+            parent.requestTransparentRegion(this)
+        }
         viewRootImpl.setDisplayDecoration(true)
 
         if (useInvertedAlphaColor) {
@@ -93,12 +115,172 @@ class ScreenDecorHwcLayer(context: Context, displayDecorationSupport: DisplayDec
     }
 
     override fun onDraw(canvas: Canvas) {
+        // If updating onDraw, also update gatherTransparentRegion
         if (useInvertedAlphaColor) {
             canvas.drawColor(bgColor)
         }
         // Cutouts are drawn in DisplayCutoutBaseView.onDraw()
         super.onDraw(canvas)
         drawRoundedCorners(canvas)
+
+        debugTransparentRegionPaint?.let {
+            calculateTransparentRect()
+            canvas.drawRect(transparentRect, it)
+        }
+    }
+
+    override fun gatherTransparentRegion(region: Region?): Boolean {
+        region?.let {
+            calculateTransparentRect()
+            region.op(transparentRect, Region.Op.INTERSECT)
+        }
+        // Always return false - views underneath this should always be visible.
+        return false
+    }
+
+    /**
+     * The transparent rect is calculated by subtracting the regions of cutouts, cutout protect and
+     * rounded corners from the region with fullscreen display size.
+     */
+    @VisibleForTesting
+    fun calculateTransparentRect() {
+        transparentRect.set(0, 0, width, height)
+
+        // Remove cutout region.
+        removeCutoutFromTransparentRegion()
+
+        // Remove cutout protection region.
+        removeCutoutProtectionFromTransparentRegion()
+
+        // Remove rounded corner region.
+        removeRoundedCornersFromTransparentRegion()
+    }
+
+    private fun removeCutoutFromTransparentRegion() {
+        displayInfo.displayCutout?.let {
+                cutout ->
+            if (!cutout.boundingRectLeft.isEmpty) {
+                transparentRect.left =
+                    cutout.boundingRectLeft.right.coerceAtLeast(transparentRect.left)
+            }
+            if (!cutout.boundingRectTop.isEmpty) {
+                transparentRect.top =
+                    cutout.boundingRectTop.bottom.coerceAtLeast(transparentRect.top)
+            }
+            if (!cutout.boundingRectRight.isEmpty) {
+                transparentRect.right =
+                    cutout.boundingRectRight.left.coerceAtMost(transparentRect.right)
+            }
+            if (!cutout.boundingRectBottom.isEmpty) {
+                transparentRect.bottom =
+                    cutout.boundingRectBottom.top.coerceAtMost(transparentRect.bottom)
+            }
+        }
+    }
+
+    private fun removeCutoutProtectionFromTransparentRegion() {
+        if (protectionRect.isEmpty) {
+            return
+        }
+
+        val centerX = protectionRect.centerX()
+        val centerY = protectionRect.centerY()
+        val scaledDistanceX = (centerX - protectionRect.left) * cameraProtectionProgress
+        val scaledDistanceY = (centerY - protectionRect.top) * cameraProtectionProgress
+        tempRect.set(
+            floor(centerX - scaledDistanceX).toInt(),
+            floor(centerY - scaledDistanceY).toInt(),
+            ceil(centerX + scaledDistanceX).toInt(),
+            ceil(centerY + scaledDistanceY).toInt()
+        )
+
+        // Find out which edge the protectionRect belongs and remove that edge from the transparent
+        // region.
+        val leftDistance = tempRect.left
+        val topDistance = tempRect.top
+        val rightDistance = width - tempRect.right
+        val bottomDistance = height - tempRect.bottom
+        val minDistance = minOf(leftDistance, topDistance, rightDistance, bottomDistance)
+        when (minDistance) {
+            leftDistance -> {
+                transparentRect.left = tempRect.right.coerceAtLeast(transparentRect.left)
+            }
+            topDistance -> {
+                transparentRect.top = tempRect.bottom.coerceAtLeast(transparentRect.top)
+            }
+            rightDistance -> {
+                transparentRect.right = tempRect.left.coerceAtMost(transparentRect.right)
+            }
+            bottomDistance -> {
+                transparentRect.bottom = tempRect.top.coerceAtMost(transparentRect.bottom)
+            }
+        }
+    }
+
+    private fun removeRoundedCornersFromTransparentRegion() {
+        var hasTopOrBottomCutouts = false
+        var hasLeftOrRightCutouts = false
+        displayInfo.displayCutout?.let {
+                cutout ->
+            hasTopOrBottomCutouts = !cutout.boundingRectTop.isEmpty ||
+                    !cutout.boundingRectBottom.isEmpty
+            hasLeftOrRightCutouts = !cutout.boundingRectLeft.isEmpty ||
+                    !cutout.boundingRectRight.isEmpty
+        }
+        // The goal is to remove the rounded corner areas as small as possible so that we can have a
+        // larger transparent region. Therefore, we should always remove from the short edge sides
+        // if possible.
+        val isShortEdgeTopBottom = width < height
+        if (isShortEdgeTopBottom) {
+            // Short edges on top & bottom.
+            if (!hasTopOrBottomCutouts && hasLeftOrRightCutouts) {
+                // If there are cutouts only on left or right edges, remove left and right sides
+                // for rounded corners.
+                transparentRect.left = getRoundedCornerSizeByPosition(BOUNDS_POSITION_LEFT)
+                    .coerceAtLeast(transparentRect.left)
+                transparentRect.right =
+                    (width - getRoundedCornerSizeByPosition(BOUNDS_POSITION_RIGHT))
+                        .coerceAtMost(transparentRect.right)
+            } else {
+                // If there are cutouts on top or bottom edges or no cutout at all, remove top
+                // and bottom sides for rounded corners.
+                transparentRect.top = getRoundedCornerSizeByPosition(BOUNDS_POSITION_TOP)
+                    .coerceAtLeast(transparentRect.top)
+                transparentRect.bottom =
+                    (height - getRoundedCornerSizeByPosition(BOUNDS_POSITION_BOTTOM))
+                        .coerceAtMost(transparentRect.bottom)
+            }
+        } else {
+            // Short edges on left & right.
+            if (hasTopOrBottomCutouts && !hasLeftOrRightCutouts) {
+                // If there are cutouts only on top or bottom edges, remove top and bottom sides
+                // for rounded corners.
+                transparentRect.top = getRoundedCornerSizeByPosition(BOUNDS_POSITION_TOP)
+                    .coerceAtLeast(transparentRect.top)
+                transparentRect.bottom =
+                    (height - getRoundedCornerSizeByPosition(BOUNDS_POSITION_BOTTOM))
+                        .coerceAtMost(transparentRect.bottom)
+            } else {
+                // If there are cutouts on left or right edges or no cutout at all, remove left
+                // and right sides for rounded corners.
+                transparentRect.left = getRoundedCornerSizeByPosition(BOUNDS_POSITION_LEFT)
+                    .coerceAtLeast(transparentRect.left)
+                transparentRect.right =
+                    (width - getRoundedCornerSizeByPosition(BOUNDS_POSITION_RIGHT))
+                        .coerceAtMost(transparentRect.right)
+            }
+        }
+    }
+
+    private fun getRoundedCornerSizeByPosition(position: Int): Int {
+        val delta = displayRotation - Surface.ROTATION_0
+        return when ((position + delta) % BOUNDS_POSITION_LENGTH) {
+            BOUNDS_POSITION_LEFT -> roundedCornerTopSize.coerceAtLeast(roundedCornerBottomSize)
+            BOUNDS_POSITION_TOP -> roundedCornerTopSize
+            BOUNDS_POSITION_RIGHT -> roundedCornerTopSize.coerceAtLeast(roundedCornerBottomSize)
+            BOUNDS_POSITION_BOTTOM -> roundedCornerBottomSize
+            else -> throw IllegalArgumentException("Incorrect position: $position")
+        }
     }
 
     private fun drawRoundedCorners(canvas: Canvas) {
