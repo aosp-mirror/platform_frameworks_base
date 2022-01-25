@@ -4667,4 +4667,6 @@
   <java-symbol type="bool" name="config_enableSafetyCenter" />
 
   <java-symbol type="string" name="config_deviceManagerUpdater" />
+
+  <java-symbol type="string" name="config_deviceSpecificDeviceStatePolicyProvider" />
 </resources>

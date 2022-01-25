@@ -27,12 +27,11 @@ import com.android.server.devicestate.DeviceStateProvider;
  *
  * @see DeviceStateProviderImpl
  */
-public final class DeviceStatePolicyImpl implements DeviceStatePolicy {
-    private final Context mContext;
+public final class DeviceStatePolicyImpl extends DeviceStatePolicy {
     private final DeviceStateProvider mProvider;
 
-    public DeviceStatePolicyImpl(Context context) {
-        mContext = context;
+    public DeviceStatePolicyImpl(@NonNull Context context) {
+        super(context);
         mProvider = DeviceStateProviderImpl.create(mContext);
     }
 

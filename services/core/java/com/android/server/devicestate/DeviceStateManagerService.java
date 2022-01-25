@@ -51,7 +51,6 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.policy.DeviceStatePolicyImpl;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowProcessController;
 
@@ -142,7 +141,9 @@ public final class DeviceStateManagerService extends SystemService {
     private final SparseArray<ProcessRecord> mProcessRecords = new SparseArray<>();
 
     public DeviceStateManagerService(@NonNull Context context) {
-        this(context, new DeviceStatePolicyImpl(context));
+        this(context, DeviceStatePolicy.Provider
+                .fromResources(context.getResources())
+                .instantiate(context));
     }
 
     @VisibleForTesting
