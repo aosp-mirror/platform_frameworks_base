@@ -4787,33 +4787,6 @@ public class UserManager {
     }
 
     /**
-     * Immediately removes the user or, if the user cannot be removed, such as when the user is
-     * the current user, then set the user as ephemeral so that it will be removed when it is
-     * stopped.
-     *
-     * @param evenWhenDisallowed when {@code true}, user is removed even if the caller has the
-     * {@link #DISALLOW_REMOVE_USER} or {@link #DISALLOW_REMOVE_MANAGED_PROFILE} restriction
-     *
-     * @return the {@link RemoveResult} code
-     *
-     * @deprecated  TODO(b/199446770): remove this call after converting all calls to
-     * removeUserWhenPossible(UserHandle, boolean)
-     *
-     * @hide
-     */
-    @Deprecated
-    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
-            Manifest.permission.CREATE_USERS})
-    public @RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId,
-            boolean evenWhenDisallowed) {
-        try {
-            return mService.removeUserWhenPossible(userId, evenWhenDisallowed);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Updates the user's name.
      *
      * @param userId the user's integer id
