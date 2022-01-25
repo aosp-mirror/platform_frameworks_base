@@ -51,6 +51,7 @@ import static android.net.NetworkPolicyManager.uidRulesToString;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.net.NetworkStats.METERED_NO;
 import static android.net.NetworkStats.METERED_YES;
+import static android.net.NetworkTemplate.MATCH_MOBILE;
 import static android.net.NetworkTemplate.buildTemplateCarrierMetered;
 import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.TrafficStats.MB_IN_BYTES;
@@ -71,7 +72,6 @@ import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT_SNOO
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_RAPID;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_WARNING;
 import static com.android.server.net.NetworkPolicyManagerService.UidBlockedState.getEffectiveBlockedReasons;
-import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_UPDATED;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -95,6 +95,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -495,8 +496,14 @@ public class NetworkPolicyManagerServiceTest {
         verify(mNetworkManager).registerObserver(networkObserver.capture());
         mNetworkObserver = networkObserver.getValue();
 
-        // Simulate NetworkStatsService broadcast stats updated to signal its readiness.
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_UPDATED));
+        // Catch UsageCallback during systemReady(). Simulate NetworkStatsService triggered
+        // stats updated callback to signal its readiness.
+        final ArgumentCaptor<NetworkStatsManager.UsageCallback> usageObserver =
+                ArgumentCaptor.forClass(NetworkStatsManager.UsageCallback.class);
+        verify(mStatsManager, times(2))
+                .registerUsageCallback(any(), anyLong(), any(), usageObserver.capture());
+        usageObserver.getValue().onThresholdReached(
+                new NetworkTemplate.Builder(MATCH_MOBILE).build());
 
         NetworkPolicy defaultPolicy = mService.buildDefaultCarrierPolicy(0, "");
         mDefaultWarningBytes = defaultPolicy.warningBytes;
