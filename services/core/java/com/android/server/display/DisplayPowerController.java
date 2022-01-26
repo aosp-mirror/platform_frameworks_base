@@ -897,7 +897,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mDisplayDeviceConfig);
         if (isIdleScreenBrightnessEnabled) {
             mIdleModeBrightnessMapper = BrightnessMappingStrategy.createForIdleMode(resources,
-                    mDisplayDeviceConfig);
+                    mDisplayDeviceConfig, mDisplayWhiteBalanceController);
         }
 
         if (mInteractiveModeBrightnessMapper != null) {
