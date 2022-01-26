@@ -2077,7 +2077,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         final UserInfo userInfo = mUserManager.getUserInfo(userId);
         final long callingId = Binder.clearCallingIdentity();
         try {
-            mStorageManager.clearUserKeyAuth(userId, userInfo.serialNumber, null, secret);
+            mStorageManager.clearUserKeyAuth(userId, userInfo.serialNumber, secret);
         } catch (RemoteException e) {
             throw new IllegalStateException("clearUserKeyAuth failed user=" + userId);
         } finally {
