@@ -2067,9 +2067,9 @@ public class LockSettingsService extends ILockSettings.Stub {
         mStorage.writeChildProfileLock(userId, outputStream.toByteArray());
     }
 
-    private void setAuthlessUserKeyProtection(int userId, byte[] key) {
-        if (DEBUG) Slog.d(TAG, "setAuthlessUserKeyProtectiond: user=" + userId);
-        addUserKeyAuth(userId, null, key);
+    private void setUserKeyProtection(int userId, byte[] key) {
+        if (DEBUG) Slog.d(TAG, "setUserKeyProtection: user=" + userId);
+        addUserKeyAuth(userId, key);
     }
 
     private void clearUserKeyProtection(int userId, byte[] secret) {
@@ -2120,11 +2120,11 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
     }
 
-    private void addUserKeyAuth(int userId, byte[] token, byte[] secret) {
+    private void addUserKeyAuth(int userId, byte[] secret) {
         final UserInfo userInfo = mUserManager.getUserInfo(userId);
         final long callingId = Binder.clearCallingIdentity();
         try {
-            mStorageManager.addUserKeyAuth(userId, userInfo.serialNumber, token, secret);
+            mStorageManager.addUserKeyAuth(userId, userInfo.serialNumber, secret);
         } catch (RemoteException e) {
             throw new IllegalStateException("Failed to add new key to vold " + userId, e);
         } finally {
@@ -2901,7 +2901,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 mSpManager.newSidForUser(getGateKeeperService(), auth, userId);
             }
             mSpManager.verifyChallenge(getGateKeeperService(), auth, 0L, userId);
-            setAuthlessUserKeyProtection(userId, auth.deriveDiskEncryptionKey());
+            setUserKeyProtection(userId, auth.deriveDiskEncryptionKey());
             setKeystorePassword(auth.deriveKeyStorePassword(), userId);
         } else {
             clearUserKeyProtection(userId, null);
@@ -3104,7 +3104,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 // a new SID, and re-add keys to vold and keystore.
                 mSpManager.newSidForUser(getGateKeeperService(), auth, userId);
                 mSpManager.verifyChallenge(getGateKeeperService(), auth, 0L, userId);
-                setAuthlessUserKeyProtection(userId, auth.deriveDiskEncryptionKey());
+                setUserKeyProtection(userId, auth.deriveDiskEncryptionKey());
                 fixateNewestUserKeyAuth(userId);
                 setKeystorePassword(auth.deriveKeyStorePassword(), userId);
             }

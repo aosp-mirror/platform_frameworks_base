@@ -3470,18 +3470,19 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     /*
-     * Add this token/secret pair to the set of ways we can recover a disk encryption key.
-     * Changing the token/secret for a disk encryption key is done in two phases: first, adding
-     * a new token/secret pair with this call, then delting all other pairs with
-     * fixateNewestUserKeyAuth. This allows other places where a credential is used, such as
-     * Gatekeeper, to be updated between the two calls.
+     * Add this secret to the set of ways we can recover a user's disk
+     * encryption key.  Changing the secret for a disk encryption key is done in
+     * two phases.  First, this method is called to add the new secret binding.
+     * Second, fixateNewestUserKeyAuth is called to delete all other bindings.
+     * This allows other places where a credential is used, such as Gatekeeper,
+     * to be updated between the two calls.
      */
     @Override
-    public void addUserKeyAuth(int userId, int serialNumber, byte[] token, byte[] secret) {
+    public void addUserKeyAuth(int userId, int serialNumber, byte[] secret) {
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
         try {
-            mVold.addUserKeyAuth(userId, serialNumber, encodeBytes(token), encodeBytes(secret));
+            mVold.addUserKeyAuth(userId, serialNumber, encodeBytes(secret));
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }

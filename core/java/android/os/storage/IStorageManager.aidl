@@ -179,7 +179,7 @@ interface IStorageManager {
     void prepareUserStorage(in String volumeUuid, int userId, int serialNumber, int flags) = 66;
     void destroyUserStorage(in String volumeUuid, int userId, int flags) = 67;
     boolean isConvertibleToFBE() = 68;
-    void addUserKeyAuth(int userId, int serialNumber, in byte[] token, in byte[] secret) = 70;
+    void addUserKeyAuth(int userId, int serialNumber, in byte[] secret) = 70;
     void fixateNewestUserKeyAuth(int userId) = 71;
     void fstrim(int flags, IVoldTaskListener listener) = 72;
     AppFuseMount mountProxyFileDescriptorBridge() = 73;
