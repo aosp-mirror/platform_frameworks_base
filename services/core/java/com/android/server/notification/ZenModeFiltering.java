@@ -33,6 +33,7 @@ import android.telecom.TelecomManager;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.messages.nano.SystemMessageProto;
@@ -140,7 +141,7 @@ public class ZenModeFiltering {
     }
 
     protected void recordCall(NotificationRecord record) {
-        REPEAT_CALLERS.recordCall(mContext, extras(record));
+        REPEAT_CALLERS.recordCall(mContext, extras(record), record.getPhoneNumbers());
     }
 
     /**
@@ -351,7 +352,8 @@ public class ZenModeFiltering {
         private final ArrayMap<String, Long> mOtherCalls = new ArrayMap<>();
         private int mThresholdMinutes;
 
-        private synchronized void recordCall(Context context, Bundle extras) {
+        private synchronized void recordCall(Context context, Bundle extras,
+                ArraySet<String> phoneNumbers) {
             setThresholdMinutes(context);
             if (mThresholdMinutes <= 0 || extras == null) return;
             final String[] extraPeople = ValidateNotificationPeople.getExtraPeople(extras);
@@ -359,7 +361,7 @@ public class ZenModeFiltering {
             final long now = System.currentTimeMillis();
             cleanUp(mTelCalls, now);
             cleanUp(mOtherCalls, now);
-            recordCallers(extraPeople, now);
+            recordCallers(extraPeople, phoneNumbers, now);
         }
 
         private synchronized boolean isRepeat(Context context, Bundle extras) {
@@ -407,7 +409,8 @@ public class ZenModeFiltering {
             }
         }
 
-        private synchronized void recordCallers(String[] people, long now) {
+        private synchronized void recordCallers(String[] people, ArraySet<String> phoneNumbers,
+                long now) {
             for (int i = 0; i < people.length; i++) {
                 String person = people[i];
                 if (person == null) continue;
@@ -426,6 +429,14 @@ public class ZenModeFiltering {
                 } else {
                     // for non-tel calls, store the entire string, uri-component and all
                     mOtherCalls.put(person, now);
+                }
+            }
+
+            // record any additional numbers from the notification record if
+            // provided; these are in the format of just a phone number string
+            if (phoneNumbers != null) {
+                for (String num : phoneNumbers) {
+                    mTelCalls.put(num, now);
                 }
             }
         }
