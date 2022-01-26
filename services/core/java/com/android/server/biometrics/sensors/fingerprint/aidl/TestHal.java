@@ -212,6 +212,11 @@ public class TestHal extends IFingerprint.Stub {
             public void onPointerUpWithContext(PointerContext context) {
                 onPointerUp(context.pointerId);
             }
+
+            @Override
+            public void onContextChanged(OperationContext context) {
+                Slog.w(TAG, "onContextChanged");
+            }
         };
     }
 }
