@@ -266,32 +266,48 @@ final class NavigationBarController {
                 }
                 final boolean insetChanged = !Objects.equals(systemInsets, mLastInsets);
                 if (zOrderChanged || insetChanged) {
-                    final NavigationBarFrame that = mNavigationBarFrame;
-                    that.post(() -> {
-                        if (!that.isAttachedToWindow()) {
-                            return;
-                        }
-                        final Insets currentSystemInsets = getSystemInsets();
-                        if (!Objects.equals(currentSystemInsets, mLastInsets)) {
-                            that.setLayoutParams(
-                                    new FrameLayout.LayoutParams(
-                                            ViewGroup.LayoutParams.MATCH_PARENT,
-                                            currentSystemInsets.bottom, Gravity.BOTTOM));
-                            mLastInsets = currentSystemInsets;
-                        }
-                        if (decor instanceof ViewGroup) {
-                            ViewGroup decorGroup = (ViewGroup) decor;
-                            final View navbarBackgroundView =
-                                    window.getNavigationBarBackgroundView();
-                            if (navbarBackgroundView != null
-                                    && decorGroup.indexOfChild(navbarBackgroundView)
-                                    > decorGroup.indexOfChild(that)) {
-                                decorGroup.bringChildToFront(that);
-                            }
-                        }
-                    });
+                    scheduleRelayout();
                 }
             }
+        }
+
+        private void scheduleRelayout() {
+            // Capture the current frame object in case the object is replaced or cleared later.
+            final NavigationBarFrame frame = mNavigationBarFrame;
+            frame.post(() -> {
+                if (mDestroyed) {
+                    return;
+                }
+                if (!frame.isAttachedToWindow()) {
+                    return;
+                }
+                final Window window = mService.mWindow.getWindow();
+                if (window == null) {
+                    return;
+                }
+                final View decor = window.peekDecorView();
+                if (decor == null) {
+                    return;
+                }
+                if (!(decor instanceof ViewGroup)) {
+                    return;
+                }
+                final ViewGroup decorGroup = (ViewGroup) decor;
+                final Insets currentSystemInsets = getSystemInsets();
+                if (!Objects.equals(currentSystemInsets, mLastInsets)) {
+                    frame.setLayoutParams(new FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            currentSystemInsets.bottom, Gravity.BOTTOM));
+                    mLastInsets = currentSystemInsets;
+                }
+                final View navbarBackgroundView =
+                        window.getNavigationBarBackgroundView();
+                if (navbarBackgroundView != null
+                        && decorGroup.indexOfChild(navbarBackgroundView)
+                        > decorGroup.indexOfChild(frame)) {
+                    decorGroup.bringChildToFront(frame);
+                }
+            });
         }
 
         private boolean isGesturalNavigationEnabled() {
