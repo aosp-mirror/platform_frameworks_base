@@ -3043,13 +3043,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mTouchExcludeRegion.op(mTmpRegion, Region.Op.UNION);
         }
         amendWindowTapExcludeRegion(mTouchExcludeRegion);
-        // TODO(multi-display): Support docked root tasks on secondary displays & task containers.
-        if (mDisplayId == DEFAULT_DISPLAY
-                && getDefaultTaskDisplayArea().isSplitScreenModeActivated()) {
-            mDividerControllerLocked.getTouchRegion(mTmpRect);
-            mTmpRegion.set(mTmpRect);
-            mTouchExcludeRegion.op(mTmpRegion, Op.UNION);
-        }
         mTapDetector.setTouchExcludeRegion(mTouchExcludeRegion);
     }
 
@@ -3439,12 +3432,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         final Task rootPinnedTask = getDefaultTaskDisplayArea().getRootPinnedTask();
         if (rootPinnedTask != null) {
             pw.println(prefix + "rootPinnedTask=" + rootPinnedTask.getName());
-        }
-        final Task rootSplitScreenPrimaryTask = getDefaultTaskDisplayArea()
-                .getRootSplitScreenPrimaryTask();
-        if (rootSplitScreenPrimaryTask != null) {
-            pw.println(
-                    prefix + "rootSplitScreenPrimaryTask=" + rootSplitScreenPrimaryTask.getName());
         }
         // TODO: Support recents on non-default task containers
         final Task rootRecentsTask = getDefaultTaskDisplayArea().getRootTask(
@@ -4849,13 +4836,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
 
         private static boolean skipImeWindowsDuringTraversal(DisplayContent dc) {
-            // We skip IME windows so they're processed just above their target, except
-            // in split-screen mode where we process the IME containers above the docked divider.
+            // We skip IME windows so they're processed just above their target.
             // Note that this method check should align with {@link
             // WindowState#applyImeWindowsIfNeeded} in case of any state mismatch.
             return dc.mImeLayeringTarget != null
-                    && (!dc.getDefaultTaskDisplayArea().isSplitScreenModeActivated()
-                             || dc.mImeLayeringTarget.getTask() == null)
                     // Make sure that the IME window won't be skipped to report that it has
                     // completed the orientation change.
                     && !dc.mWmService.mDisplayFrozen;

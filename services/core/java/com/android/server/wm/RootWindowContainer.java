@@ -1907,10 +1907,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final Task topFocusedRootTask = getTopDisplayFocusedRootTask();
         final int focusRootTaskId = topFocusedRootTask != null
                 ? topFocusedRootTask.getRootTaskId() : INVALID_TASK_ID;
-        // We dismiss the docked root task whenever we switch users.
-        if (getDefaultTaskDisplayArea().isSplitScreenModeActivated()) {
-            getDefaultTaskDisplayArea().onSplitScreenModeDismissed();
-        }
         // Also dismiss the pinned root task whenever we switch users. Removing the pinned root task
         // will also cause all tasks to be moved to the fullscreen root task at a position that is
         // appropriate.
@@ -2866,8 +2862,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             container = rootTask.getDisplayArea();
             if (container != null && canLaunchOnDisplay(r, container.mDisplayContent.mDisplayId)) {
                 if (windowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
-                    windowingMode = container.resolveWindowingMode(r, options, candidateTask,
-                            activityType);
+                    windowingMode = container.resolveWindowingMode(r, options, candidateTask);
                 }
                 // Always allow organized tasks that created by organizer since the activity type
                 // of an organized task is decided by the activity type of its top child, which
@@ -2883,8 +2878,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 || !canLaunchOnDisplay(r, container.mDisplayContent.mDisplayId)) {
             container = getDefaultTaskDisplayArea();
             if (windowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
-                windowingMode = container.resolveWindowingMode(r, options, candidateTask,
-                        activityType);
+                windowingMode = container.resolveWindowingMode(r, options, candidateTask);
             }
         }
 
@@ -2946,8 +2940,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             windowingMode = options != null ? options.getLaunchWindowingMode()
                     : r.getWindowingMode();
         }
-        windowingMode = taskDisplayArea.validateWindowingMode(windowingMode, r, candidateTask,
-                r.getActivityType());
+        windowingMode = taskDisplayArea.validateWindowingMode(windowingMode, r, candidateTask);
 
         // Return the topmost valid root task on the display.
         final int targetWindowingMode = windowingMode;
