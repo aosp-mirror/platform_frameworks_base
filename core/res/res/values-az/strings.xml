@@ -1187,6 +1187,10 @@
     <string name="deleteText" msgid="4200807474529938112">"Sil"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Daxiletmə metodu"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Mətn əməliyyatları"</string>
+    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
+    <skip />
+    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Yaddaş yeri bitir"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Bəzi sistem funksiyaları işləməyə bilər"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Sistem üçün yetərincə yaddaş ehtiyatı yoxdur. 250 MB yaddaş ehtiyatının olmasına əmin olun və yenidən başladın."</string>
@@ -1491,6 +1495,8 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Tatareya optimallaşdırılmasını o tətbiq üçün iqnor edilməsinə icazə vermək məqsədilə soruşmağa tətbiqə icazə verilir."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"bütün paketlər üçün sorğu göndərin"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Tətbiqə bütün quraşdırılmış paketləri görmək icazəsi verir."</string>
+    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApis\'ə giriş"</string>
+    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Tətbiqə SupplementalApis\'ə giriş icazəsi verir."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Zoom kontrolu üçün iki dəfə toxunun"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Widget əlavə edilə bilmədi."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Get"</string>

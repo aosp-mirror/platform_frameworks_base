@@ -1227,6 +1227,10 @@
     <string name="deleteText" msgid="4200807474529938112">"Ištrinti"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Įvesties būdas"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Teksto veiksmai"</string>
+    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
+    <skip />
+    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Mažėja laisvos saugyklos vietos"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Kai kurios sistemos funkcijos gali neveikti"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Sistemos saugykloje nepakanka vietos. Įsitikinkite, kad yra 250 MB laisvos vietos, ir paleiskite iš naujo."</string>
@@ -1531,6 +1535,8 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Programai leidžiama prašyti leidimo nepaisyti tai programai skirto akumuliatoriaus optimizavimo nustatymų."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"Teikti visų paketų užklausą"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Programai leidžiama peržiūrėti visus įdiegtus paketus."</string>
+    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"pasiekti papildomas API"</string>
+    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Leidžiama programai pasiekti papildomas API."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Bakstelėkite du kartus, kad valdytumėte mastelio keitimą"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Nepavyko pridėti."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Pradėti"</string>

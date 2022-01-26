@@ -1187,6 +1187,10 @@
     <string name="deleteText" msgid="4200807474529938112">"删除"</string>
     <string name="inputMethod" msgid="1784759500516314751">"输入法"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"文字操作"</string>
+    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
+    <skip />
+    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"存储空间不足"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"某些系统功能可能无法正常使用"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"系统存储空间不足。请确保您有250MB的可用空间，然后重新启动。"</string>
@@ -1491,6 +1495,8 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"允许应用请求相应的权限，以便忽略针对该应用的电池优化。"</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"查询所有软件包"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"允许应用查看所有已安装的软件包。"</string>
+    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"访问 SupplementalApis"</string>
+    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"允许应用访问 SupplementalApis。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"双击可以进行缩放控制"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"无法添加微件。"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"开始"</string>

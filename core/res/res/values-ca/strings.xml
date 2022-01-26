@@ -1187,6 +1187,10 @@
     <string name="deleteText" msgid="4200807474529938112">"Suprimeix"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Mètode d\'introducció de text"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Accions de text"</string>
+    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
+    <skip />
+    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"L\'espai d\'emmagatzematge s\'està esgotant"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"És possible que algunes funcions del sistema no funcionin"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"No hi ha prou espai d\'emmagatzematge per al sistema. Comprova que tinguis 250 MB d\'espai lliure i reinicia."</string>
@@ -1491,6 +1495,8 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Permet que una aplicació demani permís per ignorar les optimitzacions de bateria per a l\'aplicació."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"consultar tots els paquets"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Permet que una aplicació vegi els paquets instal·lats."</string>
+    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"accedir a SupplementalApis"</string>
+    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Permet que una aplicació accedeixi a SupplementalApis."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Piqueu dos cops per controlar el zoom"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"No s\'ha pogut afegir el widget."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Ves"</string>

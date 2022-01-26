@@ -1187,6 +1187,10 @@
     <string name="deleteText" msgid="4200807474529938112">"刪除"</string>
     <string name="inputMethod" msgid="1784759500516314751">"輸入法"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"文字操作"</string>
+    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
+    <skip />
+    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"儲存空間即將用盡"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"部分系統功能可能無法運作"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"系統儲存空間不足。請確認裝置有 250 MB 的可用空間，然後重新啟動。"</string>
@@ -1491,6 +1495,8 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"允許應用程式要求就該應用程式忽略電池優化。"</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"查詢所有套件"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"允許應用程式查看所有已安裝的套件。"</string>
+    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"存取 SupplementalApis"</string>
+    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"允許應用程式存取 SupplementalApis。"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"輕觸兩下控制縮放"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"無法新增小工具。"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"開始"</string>
