@@ -25,8 +25,10 @@ namespace android::gnss {
 using android::hardware::hidl_vec;
 using android::hardware::Return;
 using android::hardware::Void;
+using binder::Status;
 
-using IGnssAntennaInfoCallback = android::hardware::gnss::V2_1::IGnssAntennaInfoCallback;
+using IGnssAntennaInfoCallbackAidl = android::hardware::gnss::IGnssAntennaInfoCallback;
+using IGnssAntennaInfoCallback_V2_1 = android::hardware::gnss::V2_1::IGnssAntennaInfoCallback;
 
 namespace {
 jclass class_gnssAntennaInfoBuilder;
@@ -92,14 +94,21 @@ void GnssAntennaInfo_class_init_once(JNIEnv* env, jclass& clazz) {
     class_doubleArray = (jclass)env->NewGlobalRef(doubleArrayClass);
 }
 
-Return<void> GnssAntennaInfoCallback::gnssAntennaInfoCb(
-        const hidl_vec<IGnssAntennaInfoCallback::GnssAntennaInfo>& gnssAntennaInfos) {
-    translateAndReportGnssAntennaInfo(gnssAntennaInfos);
+binder::Status GnssAntennaInfoCallbackAidl::gnssAntennaInfoCb(
+        const std::vector<IGnssAntennaInfoCallbackAidl::GnssAntennaInfo>& gnssAntennaInfos) {
+    GnssAntennaInfoCallbackUtil::translateAndReportGnssAntennaInfo(gnssAntennaInfos);
+    return Status::ok();
+}
+
+Return<void> GnssAntennaInfoCallback_V2_1::gnssAntennaInfoCb(
+        const hidl_vec<IGnssAntennaInfoCallback_V2_1::GnssAntennaInfo>& gnssAntennaInfos) {
+    GnssAntennaInfoCallbackUtil::translateAndReportGnssAntennaInfo(gnssAntennaInfos);
     return Void();
 }
 
-jobjectArray GnssAntennaInfoCallback::translate2dDoubleArray(
-        JNIEnv* env, const hidl_vec<IGnssAntennaInfoCallback::Row>& array) {
+template <template <class...> class T_vector, class T_info>
+jobjectArray GnssAntennaInfoCallbackUtil::translate2dDoubleArray(JNIEnv* env,
+                                                                 const T_vector<T_info>& array) {
     jsize numRows = array.size();
     if (numRows == 0) {
         // Empty array
@@ -124,8 +133,9 @@ jobjectArray GnssAntennaInfoCallback::translate2dDoubleArray(
     return returnArray;
 }
 
-jobject GnssAntennaInfoCallback::translateAllGnssAntennaInfos(
-        JNIEnv* env, const hidl_vec<IGnssAntennaInfoCallback::GnssAntennaInfo>& gnssAntennaInfos) {
+template <template <class...> class T_vector, class T_info>
+jobject GnssAntennaInfoCallbackUtil::translateAllGnssAntennaInfos(
+        JNIEnv* env, const T_vector<T_info>& gnssAntennaInfos) {
     jobject arrayList = env->NewObject(class_arrayList,
                                        method_arrayListCtor); // Create new ArrayList instance
 
@@ -141,8 +151,9 @@ jobject GnssAntennaInfoCallback::translateAllGnssAntennaInfos(
     return arrayList;
 }
 
-jobject GnssAntennaInfoCallback::translatePhaseCenterOffset(
-        JNIEnv* env, const IGnssAntennaInfoCallback::GnssAntennaInfo& gnssAntennaInfo) {
+template <class T>
+jobject GnssAntennaInfoCallbackUtil::translatePhaseCenterOffset(JNIEnv* env,
+                                                                const T& gnssAntennaInfo) {
     jobject phaseCenterOffset =
             env->NewObject(class_phaseCenterOffset, method_phaseCenterOffsetCtor,
                            gnssAntennaInfo.phaseCenterOffsetCoordinateMillimeters.x,
@@ -155,10 +166,11 @@ jobject GnssAntennaInfoCallback::translatePhaseCenterOffset(
     return phaseCenterOffset;
 }
 
-jobject GnssAntennaInfoCallback::translatePhaseCenterVariationCorrections(
-        JNIEnv* env, const IGnssAntennaInfoCallback::GnssAntennaInfo& gnssAntennaInfo) {
-    if (gnssAntennaInfo.phaseCenterVariationCorrectionMillimeters == NULL ||
-        gnssAntennaInfo.phaseCenterVariationCorrectionUncertaintyMillimeters == NULL) {
+template <>
+jobject GnssAntennaInfoCallbackUtil::translatePhaseCenterVariationCorrections(
+        JNIEnv* env, const IGnssAntennaInfoCallbackAidl::GnssAntennaInfo& gnssAntennaInfo) {
+    if (gnssAntennaInfo.phaseCenterVariationCorrectionMillimeters.empty() ||
+        gnssAntennaInfo.phaseCenterVariationCorrectionUncertaintyMillimeters.empty()) {
         return NULL;
     }
 
@@ -171,6 +183,8 @@ jobject GnssAntennaInfoCallback::translatePhaseCenterVariationCorrections(
 
     if (phaseCenterVariationCorrectionsArray == NULL ||
         phaseCenterVariationCorrectionsUncertaintiesArray == NULL) {
+        env->DeleteLocalRef(phaseCenterVariationCorrectionsArray);
+        env->DeleteLocalRef(phaseCenterVariationCorrectionsUncertaintiesArray);
         return NULL;
     }
 
@@ -185,10 +199,44 @@ jobject GnssAntennaInfoCallback::translatePhaseCenterVariationCorrections(
     return phaseCenterVariationCorrections;
 }
 
-jobject GnssAntennaInfoCallback::translateSignalGainCorrections(
-        JNIEnv* env, const IGnssAntennaInfoCallback::GnssAntennaInfo& gnssAntennaInfo) {
-    if (gnssAntennaInfo.signalGainCorrectionDbi == NULL ||
-        gnssAntennaInfo.signalGainCorrectionUncertaintyDbi == NULL) {
+template <>
+jobject GnssAntennaInfoCallbackUtil::translatePhaseCenterVariationCorrections(
+        JNIEnv* env, const IGnssAntennaInfoCallback_V2_1::GnssAntennaInfo& gnssAntennaInfo) {
+    if (gnssAntennaInfo.phaseCenterVariationCorrectionMillimeters == NULL ||
+        gnssAntennaInfo.phaseCenterVariationCorrectionUncertaintyMillimeters == NULL) {
+        return NULL;
+    }
+
+    jobjectArray phaseCenterVariationCorrectionsArray =
+            translate2dDoubleArray(env, gnssAntennaInfo.phaseCenterVariationCorrectionMillimeters);
+    jobjectArray phaseCenterVariationCorrectionsUncertaintiesArray =
+            translate2dDoubleArray(env,
+                                   gnssAntennaInfo
+                                           .phaseCenterVariationCorrectionUncertaintyMillimeters);
+
+    if (phaseCenterVariationCorrectionsArray == NULL ||
+        phaseCenterVariationCorrectionsUncertaintiesArray == NULL) {
+        env->DeleteLocalRef(phaseCenterVariationCorrectionsArray);
+        env->DeleteLocalRef(phaseCenterVariationCorrectionsUncertaintiesArray);
+        return NULL;
+    }
+
+    jobject phaseCenterVariationCorrections =
+            env->NewObject(class_sphericalCorrections, method_sphericalCorrectionsCtor,
+                           phaseCenterVariationCorrectionsArray,
+                           phaseCenterVariationCorrectionsUncertaintiesArray);
+
+    env->DeleteLocalRef(phaseCenterVariationCorrectionsArray);
+    env->DeleteLocalRef(phaseCenterVariationCorrectionsUncertaintiesArray);
+
+    return phaseCenterVariationCorrections;
+}
+
+template <>
+jobject GnssAntennaInfoCallbackUtil::translateSignalGainCorrections(
+        JNIEnv* env, const IGnssAntennaInfoCallbackAidl::GnssAntennaInfo& gnssAntennaInfo) {
+    if (gnssAntennaInfo.signalGainCorrectionDbi.empty() ||
+        gnssAntennaInfo.signalGainCorrectionUncertaintyDbi.empty()) {
         return NULL;
     }
     jobjectArray signalGainCorrectionsArray =
@@ -197,6 +245,8 @@ jobject GnssAntennaInfoCallback::translateSignalGainCorrections(
             translate2dDoubleArray(env, gnssAntennaInfo.signalGainCorrectionUncertaintyDbi);
 
     if (signalGainCorrectionsArray == NULL || signalGainCorrectionsUncertaintiesArray == NULL) {
+        env->DeleteLocalRef(signalGainCorrectionsArray);
+        env->DeleteLocalRef(signalGainCorrectionsUncertaintiesArray);
         return NULL;
     }
 
@@ -210,8 +260,37 @@ jobject GnssAntennaInfoCallback::translateSignalGainCorrections(
     return signalGainCorrections;
 }
 
-jobject GnssAntennaInfoCallback::translateSingleGnssAntennaInfo(
-        JNIEnv* env, const IGnssAntennaInfoCallback::GnssAntennaInfo& gnssAntennaInfo) {
+template <>
+jobject GnssAntennaInfoCallbackUtil::translateSignalGainCorrections(
+        JNIEnv* env, const IGnssAntennaInfoCallback_V2_1::GnssAntennaInfo& gnssAntennaInfo) {
+    if (gnssAntennaInfo.signalGainCorrectionDbi == NULL ||
+        gnssAntennaInfo.signalGainCorrectionUncertaintyDbi == NULL) {
+        return NULL;
+    }
+    jobjectArray signalGainCorrectionsArray =
+            translate2dDoubleArray(env, gnssAntennaInfo.signalGainCorrectionDbi);
+    jobjectArray signalGainCorrectionsUncertaintiesArray =
+            translate2dDoubleArray(env, gnssAntennaInfo.signalGainCorrectionUncertaintyDbi);
+
+    if (signalGainCorrectionsArray == NULL || signalGainCorrectionsUncertaintiesArray == NULL) {
+        env->DeleteLocalRef(signalGainCorrectionsArray);
+        env->DeleteLocalRef(signalGainCorrectionsUncertaintiesArray);
+        return NULL;
+    }
+
+    jobject signalGainCorrections =
+            env->NewObject(class_sphericalCorrections, method_sphericalCorrectionsCtor,
+                           signalGainCorrectionsArray, signalGainCorrectionsUncertaintiesArray);
+
+    env->DeleteLocalRef(signalGainCorrectionsArray);
+    env->DeleteLocalRef(signalGainCorrectionsUncertaintiesArray);
+
+    return signalGainCorrections;
+}
+
+template <class T>
+jobject GnssAntennaInfoCallbackUtil::translateSingleGnssAntennaInfo(JNIEnv* env,
+                                                                    const T& gnssAntennaInfo) {
     jobject phaseCenterOffset = translatePhaseCenterOffset(env, gnssAntennaInfo);
 
     // Nullable
@@ -228,7 +307,7 @@ jobject GnssAntennaInfoCallback::translateSingleGnssAntennaInfo(
     // Set fields
     callObjectMethodIgnoringResult(env, gnssAntennaInfoBuilderObject,
                                    method_gnssAntennaInfoBuilderSetCarrierFrequencyMHz,
-                                   gnssAntennaInfo.carrierFrequencyMHz);
+                                   getCarrierFrequencyMHz(gnssAntennaInfo));
     callObjectMethodIgnoringResult(env, gnssAntennaInfoBuilderObject,
                                    method_gnssAntennaInfoBuilderSetPhaseCenterOffset,
                                    phaseCenterOffset);
@@ -251,8 +330,9 @@ jobject GnssAntennaInfoCallback::translateSingleGnssAntennaInfo(
     return gnssAntennaInfoObject;
 }
 
-void GnssAntennaInfoCallback::translateAndReportGnssAntennaInfo(
-        const hidl_vec<IGnssAntennaInfoCallback::GnssAntennaInfo>& gnssAntennaInfos) {
+template <template <class...> class T_vector, class T_info>
+void GnssAntennaInfoCallbackUtil::translateAndReportGnssAntennaInfo(
+        const T_vector<T_info>& gnssAntennaInfos) {
     JNIEnv* env = getJniEnv();
 
     jobject arrayList = translateAllGnssAntennaInfos(env, gnssAntennaInfos);
@@ -262,7 +342,7 @@ void GnssAntennaInfoCallback::translateAndReportGnssAntennaInfo(
     env->DeleteLocalRef(arrayList);
 }
 
-void GnssAntennaInfoCallback::reportAntennaInfo(JNIEnv* env, const jobject antennaInfosArray) {
+void GnssAntennaInfoCallbackUtil::reportAntennaInfo(JNIEnv* env, const jobject antennaInfosArray) {
     env->CallVoidMethod(mCallbacksObj, method_reportAntennaInfo, antennaInfosArray);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }

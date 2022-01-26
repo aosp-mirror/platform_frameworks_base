@@ -27,6 +27,7 @@ cc_library_shared {
         "AGnssCallback.cpp",
         "AGnssRil.cpp",
         "AGnssRilCallback.cpp",
+        "GnssAntennaInfo.cpp",
         "GnssAntennaInfoCallback.cpp",
         "GnssBatching.cpp",
         "GnssBatchingCallback.cpp",

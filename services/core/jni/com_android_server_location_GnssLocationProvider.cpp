@@ -28,6 +28,7 @@
 #include <android/hardware/gnss/2.1/IGnssAntennaInfo.h>
 #include <android/hardware/gnss/2.1/IGnssMeasurement.h>
 #include <android/hardware/gnss/BnGnss.h>
+#include <android/hardware/gnss/BnGnssAntennaInfo.h>
 #include <android/hardware/gnss/BnGnssCallback.h>
 #include <android/hardware/gnss/BnGnssDebug.h>
 #include <android/hardware/gnss/BnGnssGeofence.h>
@@ -51,6 +52,7 @@
 #include "android_runtime/Log.h"
 #include "gnss/AGnss.h"
 #include "gnss/AGnssRil.h"
+#include "gnss/GnssAntennaInfo.h"
 #include "gnss/GnssAntennaInfoCallback.h"
 #include "gnss/GnssBatching.h"
 #include "gnss/GnssConfiguration.h"
@@ -155,7 +157,6 @@ using IGnss_V2_1 = android::hardware::gnss::V2_1::IGnss;
 using IGnssCallback_V1_0 = android::hardware::gnss::V1_0::IGnssCallback;
 using IGnssCallback_V2_0 = android::hardware::gnss::V2_0::IGnssCallback;
 using IGnssCallback_V2_1 = android::hardware::gnss::V2_1::IGnssCallback;
-using IGnssAntennaInfo = android::hardware::gnss::V2_1::IGnssAntennaInfo;
 
 using IMeasurementCorrections_V1_0 = android::hardware::gnss::measurement_corrections::V1_0::IMeasurementCorrections;
 using IMeasurementCorrections_V1_1 = android::hardware::gnss::measurement_corrections::V1_1::IMeasurementCorrections;
@@ -179,6 +180,7 @@ using IGnssPsdsAidl = android::hardware::gnss::IGnssPsds;
 using IGnssPsdsCallbackAidl = android::hardware::gnss::IGnssPsdsCallback;
 using IGnssConfigurationAidl = android::hardware::gnss::IGnssConfiguration;
 using GnssLocationAidl = android::hardware::gnss::GnssLocation;
+using IGnssAntennaInfoAidl = android::hardware::gnss::IGnssAntennaInfo;
 
 struct GnssDeathRecipient : virtual public hidl_death_recipient
 {
@@ -207,7 +209,6 @@ sp<IGnssNi> gnssNiIface = nullptr;
 sp<IGnssPowerIndication> gnssPowerIndicationIface = nullptr;
 sp<IMeasurementCorrections_V1_0> gnssCorrectionsIface_V1_0 = nullptr;
 sp<IMeasurementCorrections_V1_1> gnssCorrectionsIface_V1_1 = nullptr;
-sp<IGnssAntennaInfo> gnssAntennaInfoIface = nullptr;
 
 std::unique_ptr<GnssConfigurationInterface> gnssConfigurationIface = nullptr;
 std::unique_ptr<android::gnss::GnssMeasurementInterface> gnssMeasurementIface = nullptr;
@@ -218,6 +219,7 @@ std::unique_ptr<android::gnss::AGnssInterface> agnssIface = nullptr;
 std::unique_ptr<android::gnss::GnssDebugInterface> gnssDebugIface = nullptr;
 std::unique_ptr<android::gnss::AGnssRilInterface> agnssRilIface = nullptr;
 std::unique_ptr<android::gnss::GnssVisibilityControlInterface> gnssVisibilityControlIface = nullptr;
+std::unique_ptr<android::gnss::GnssAntennaInfoInterface> gnssAntennaInfoIface = nullptr;
 
 #define WAKE_LOCK_NAME  "GPS"
 
@@ -1163,12 +1165,18 @@ static void android_location_gnss_hal_GnssNative_init_once(JNIEnv* env, jobject 
         }
     }
 
-    if (gnssHal_V2_1 != nullptr) {
-        auto gnssAntennaInfo = gnssHal_V2_1->getExtensionGnssAntennaInfo();
-        if (!gnssAntennaInfo.isOk()) {
-            ALOGD("Unable to get a handle to GnssAntennaInfo");
-        } else {
-            gnssAntennaInfoIface = gnssAntennaInfo;
+    if (gnssHalAidl != nullptr && gnssHalAidl->getInterfaceVersion() >= 2) {
+        sp<IGnssAntennaInfoAidl> gnssAntennaInfoAidl;
+        auto status = gnssHalAidl->getExtensionGnssAntennaInfo(&gnssAntennaInfoAidl);
+        if (checkAidlStatus(status, "Unable to get a handle to GnssAntennaInfo interface.")) {
+            gnssAntennaInfoIface = std::make_unique<gnss::GnssAntennaInfoAidl>(gnssAntennaInfoAidl);
+        }
+    } else if (gnssHal_V2_1 != nullptr) {
+        auto gnssAntennaInfo_V2_1 = gnssHal_V2_1->getExtensionGnssAntennaInfo();
+        if (checkHidlReturn(gnssAntennaInfo_V2_1,
+                            "Unable to get a handle to GnssAntennaInfo_V2_1")) {
+            gnssAntennaInfoIface =
+                    std::make_unique<gnss::GnssAntennaInfo_V2_1>(gnssAntennaInfo_V2_1);
         }
     }
 
@@ -1933,25 +1941,7 @@ static jboolean android_location_gnss_hal_GnssNative_start_antenna_info_listenin
         ALOGE("%s: IGnssAntennaInfo interface not available.", __func__);
         return JNI_FALSE;
     }
-
-    sp<gnss::GnssAntennaInfoCallback> cbIface = new gnss::GnssAntennaInfoCallback(mCallbacksObj);
-
-    auto result = gnssAntennaInfoIface->setCallback(cbIface);
-
-    if (!checkHidlReturn(result, "IGnssAntennaInfo setCallback() failed.")) {
-        return JNI_FALSE;
-    }
-
-    IGnssAntennaInfo::GnssAntennaInfoStatus initRet = result;
-    if (initRet != IGnssAntennaInfo::GnssAntennaInfoStatus::SUCCESS) {
-        ALOGE("An error has been found on GnssAntennaInfoInterface::init, status=%d",
-              static_cast<int32_t>(initRet));
-        return JNI_FALSE;
-    } else {
-        ALOGD("gnss antenna info has been enabled");
-    }
-
-    return JNI_TRUE;
+    return gnssAntennaInfoIface->setCallback(std::make_unique<gnss::GnssAntennaInfoCallback>());
 }
 
 static jboolean android_location_gnss_hal_GnssNative_stop_antenna_info_listening(JNIEnv* /* env */,
@@ -1960,9 +1950,7 @@ static jboolean android_location_gnss_hal_GnssNative_stop_antenna_info_listening
         ALOGE("%s: IGnssAntennaInfo interface not available.", __func__);
         return JNI_FALSE;
     }
-
-    auto result = gnssAntennaInfoIface->close();
-    return checkHidlReturn(result, "IGnssAntennaInfo close() failed.");
+    return gnssAntennaInfoIface->close();
 }
 
 static jboolean android_location_gnss_hal_GnssNative_is_measurement_supported(JNIEnv* env, jclass) {
