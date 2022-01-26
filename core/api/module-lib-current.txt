@@ -63,8 +63,8 @@ package android.app.admin {
 
   public class DevicePolicyManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void acknowledgeNewUserDisclaimer();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void clearLogoutUser();
-    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.os.UserHandle getLogoutUser();
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public android.os.UserHandle getLogoutUser();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public int logoutUser();
     field public static final String ACTION_SHOW_NEW_USER_DISCLAIMER = "android.app.action.SHOW_NEW_USER_DISCLAIMER";
   }
 

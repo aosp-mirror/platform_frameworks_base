@@ -10091,36 +10091,35 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Same as {@link #logoutUser(ComponentName)}, but called by system (like Settings), not admin.
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS})
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public @UserOperationResult int logoutUser() {
+        // TODO(b/214336184): add CTS test
+        try {
+            return mService.logoutUserInternal();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+    /**
      * Gets the user a {@link #logoutUser(ComponentName)} call would switch to,
      * or {@code null} if the current user is not in a session.
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public @Nullable UserHandle getLogoutUser() {
         // TODO(b/214336184): add CTS test
         try {
             int userId = mService.getLogoutUserId();
             return userId == UserHandle.USER_NULL ? null : UserHandle.of(userId);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Clears the user that {@link #logoutUser(ComponentName)} would switch to.
-     *
-     * <p>Typically used by system UI after it logout a session.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public void clearLogoutUser() {
-        // TODO(b/214336184): add CTS test
-        try {
-            mService.clearLogoutUser();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
