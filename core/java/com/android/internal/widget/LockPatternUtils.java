@@ -770,17 +770,6 @@ public class LockPatternUtils {
     }
 
     /**
-     * Clears the encryption password.
-     */
-    public void clearEncryptionPassword() {
-        try {
-            getLockSettings().updateEncryptionPassword(StorageManager.CRYPT_TYPE_DEFAULT, null);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Couldn't clear encryption password");
-        }
-    }
-
-    /**
      * Retrieves the quality mode for {@code userHandle}.
      * @see DevicePolicyManager#getPasswordQuality(android.content.ComponentName)
      *
