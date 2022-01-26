@@ -18572,7 +18572,6 @@ package android.inputmethodservice {
   public abstract class AbstractInputMethodService extends android.app.Service implements android.view.KeyEvent.Callback {
     ctor public AbstractInputMethodService();
     method public android.view.KeyEvent.DispatcherState getKeyDispatcherState();
-    method public final boolean isUiContext();
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract android.inputmethodservice.AbstractInputMethodService.AbstractInputMethodImpl onCreateInputMethodInterface();
     method public abstract android.inputmethodservice.AbstractInputMethodService.AbstractInputMethodSessionImpl onCreateInputMethodSessionInterface();
