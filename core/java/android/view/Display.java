@@ -576,7 +576,8 @@ public final class Display {
      * @see com.android.service.display.DisplayDevice#hasStableUniqueId().
      * @hide
      */
-    public String getUniqueId() {
+    @TestApi
+    public @Nullable String getUniqueId() {
         return mDisplayInfo.uniqueId;
     }
 
