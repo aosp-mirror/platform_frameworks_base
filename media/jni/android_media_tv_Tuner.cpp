@@ -4147,6 +4147,7 @@ static jint android_media_tv_Tuner_close_filter(JNIEnv *env, jobject filter) {
 
     Result r = filterClient->close();
     filterClient->decStrong(filter);
+    filterClient = nullptr;
     if (shared) {
         env->SetLongField(filter, gFields.sharedFilterContext, 0);
     } else {
