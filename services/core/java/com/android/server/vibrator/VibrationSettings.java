@@ -179,7 +179,7 @@ final class VibrationSettings {
         try {
             ActivityManager.getService().registerUidObserver(mUidObserver,
                     ActivityManager.UID_OBSERVER_PROCSTATE | ActivityManager.UID_OBSERVER_GONE,
-                    ActivityManager.PROCESS_STATE_UNKNOWN, mContext.getOpPackageName());
+                    ActivityManager.PROCESS_STATE_UNKNOWN, null);
         } catch (RemoteException e) {
             // ignored; both services live in system_server
         }
