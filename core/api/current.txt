@@ -21264,6 +21264,7 @@ package android.media {
     field public static final String FEATURE_DynamicTimestamp = "dynamic-timestamp";
     field public static final String FEATURE_EncodingStatistics = "encoding-statistics";
     field public static final String FEATURE_FrameParsing = "frame-parsing";
+    field public static final String FEATURE_HdrEditing = "hdr-editing";
     field public static final String FEATURE_IntraRefresh = "intra-refresh";
     field public static final String FEATURE_LowLatency = "low-latency";
     field public static final String FEATURE_MultipleFrames = "multiple-frames";
