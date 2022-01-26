@@ -556,6 +556,26 @@ package android.provider {
     field public static final String NAMESPACE_DEVICE_IDLE = "device_idle";
   }
 
+  public static final class Settings.Global extends android.provider.Settings.NameValueTable {
+    field public static final String BLE_SCAN_ALWAYS_AVAILABLE = "ble_scan_always_enabled";
+    field public static final String BLE_SCAN_BACKGROUND_MODE = "ble_scan_background_mode";
+    field public static final String BLE_SCAN_BALANCED_INTERVAL_MS = "ble_scan_balanced_interval_ms";
+    field public static final String BLE_SCAN_BALANCED_WINDOW_MS = "ble_scan_balanced_window_ms";
+    field public static final String BLE_SCAN_LOW_LATENCY_INTERVAL_MS = "ble_scan_low_latency_interval_ms";
+    field public static final String BLE_SCAN_LOW_LATENCY_WINDOW_MS = "ble_scan_low_latency_window_ms";
+    field public static final String BLE_SCAN_LOW_POWER_INTERVAL_MS = "ble_scan_low_power_interval_ms";
+    field public static final String BLE_SCAN_LOW_POWER_WINDOW_MS = "ble_scan_low_power_window_ms";
+    field public static final String BLUETOOTH_BTSNOOP_DEFAULT_MODE = "bluetooth_btsnoop_default_mode";
+    field public static final String BLUETOOTH_CLASS_OF_DEVICE = "bluetooth_class_of_device";
+    field public static final String BLUETOOTH_DISABLED_PROFILES = "bluetooth_disabled_profiles";
+  }
+
+  public static final class Settings.Secure extends android.provider.Settings.NameValueTable {
+    field public static final String BLUETOOTH_ADDRESS = "bluetooth_address";
+    field public static final String BLUETOOTH_ADDR_VALID = "bluetooth_addr_valid";
+    field public static final String BLUETOOTH_NAME = "bluetooth_name";
+  }
+
 }
 
 package android.telephony {

@@ -6574,6 +6574,8 @@ public final class Settings {
          * @hide
          */
         @Readable(maxTargetSdk = Build.VERSION_CODES.S)
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLUETOOTH_NAME = "bluetooth_name";
 
         /**
@@ -6581,6 +6583,8 @@ public final class Settings {
          * @hide
          */
         @Readable(maxTargetSdk = Build.VERSION_CODES.S)
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLUETOOTH_ADDRESS = "bluetooth_address";
 
         /**
@@ -6588,6 +6592,8 @@ public final class Settings {
          * @hide
          */
         @Readable(maxTargetSdk = Build.VERSION_CODES.S)
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLUETOOTH_ADDR_VALID = "bluetooth_addr_valid";
 
         /**
@@ -10826,6 +10832,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLUETOOTH_CLASS_OF_DEVICE = "bluetooth_class_of_device";
 
         /**
@@ -10834,6 +10842,8 @@ public final class Settings {
          * {@hide}
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLUETOOTH_DISABLED_PROFILES = "bluetooth_disabled_profiles";
 
         /**
@@ -12371,6 +12381,8 @@ public final class Settings {
         * @hide
         */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_ALWAYS_AVAILABLE = "ble_scan_always_enabled";
 
         /**
@@ -12378,6 +12390,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_LOW_POWER_WINDOW_MS = "ble_scan_low_power_window_ms";
 
         /**
@@ -12385,6 +12399,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_BALANCED_WINDOW_MS = "ble_scan_balanced_window_ms";
 
         /**
@@ -12392,6 +12408,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_LOW_LATENCY_WINDOW_MS =
                 "ble_scan_low_latency_window_ms";
 
@@ -12400,6 +12418,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_LOW_POWER_INTERVAL_MS =
                 "ble_scan_low_power_interval_ms";
 
@@ -12408,6 +12428,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_BALANCED_INTERVAL_MS =
                 "ble_scan_balanced_interval_ms";
 
@@ -12416,6 +12438,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_LOW_LATENCY_INTERVAL_MS =
                 "ble_scan_low_latency_interval_ms";
 
@@ -12424,6 +12448,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_BACKGROUND_MODE = "ble_scan_background_mode";
 
         /**
@@ -13156,6 +13182,8 @@ public final class Settings {
 
         /** {@hide} */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String
                 BLUETOOTH_BTSNOOP_DEFAULT_MODE = "bluetooth_btsnoop_default_mode";
         /** {@hide} */
