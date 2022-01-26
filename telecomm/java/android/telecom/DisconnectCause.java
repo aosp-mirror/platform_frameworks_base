@@ -111,22 +111,6 @@ public final class DisconnectCause implements Parcelable {
      */
     public static final String REASON_EMERGENCY_CALL_PLACED = "REASON_EMERGENCY_CALL_PLACED";
 
-    /**
-     * This reason is set when an call is ended due to {@link CallEndpoint} rejection.
-     * This reason string should only be associated with the {@link #LOCAL} disconnect code returned
-     * from {@link #getCode()}.
-     */
-    public static final String REASON_ENDPOINT_REJECTED = "REASON_ENDPOINT_REJECTED";
-
-    /**
-     * This reason is set when a call is ended due to {@link CallEndpoint} deactivated by
-     * call disconnection or user terminated streaming.
-     * This reason string should only be associated with the {@link #LOCAL} disconnect code returned
-     * from {@link #getCode()}
-     */
-    public static final String REASON_ENDPOINT_SESSION_DEACTIVATED =
-            "REASON_ENDPOINT_SESSION_DEACTIVATED";
-
     private int mDisconnectCode;
     private CharSequence mDisconnectLabel;
     private CharSequence mDisconnectDescription;
