@@ -592,15 +592,14 @@ public final class DeviceStateManagerService extends SystemService {
         }
     }
 
-    private void cancelRequestInternal(int callingPid, @NonNull IBinder token) {
+    private void cancelStateRequestInternal(int callingPid) {
         synchronized (mLock) {
             final ProcessRecord processRecord = mProcessRecords.get(callingPid);
             if (processRecord == null) {
                 throw new IllegalStateException("Process " + callingPid
                         + " has no registered callback.");
             }
-
-            mOverrideRequestController.cancelRequest(token);
+            mActiveOverride.ifPresent(mOverrideRequestController::cancelRequest);
         }
     }
 
@@ -622,6 +621,23 @@ public final class DeviceStateManagerService extends SystemService {
             }
 
             mOverrideRequestController.dumpInternal(pw);
+        }
+    }
+
+    /**
+     * Allow top processes to request or cancel a device state change. If the calling process ID is
+     * not the top app, then check if this process holds the CONTROL_DEVICE_STATE permission.
+     * @param callingPid
+     */
+    private void checkCanControlDeviceState(int callingPid) {
+        // Allow top processes to request a device state change
+        // If the calling process ID is not the top app, then we check if this process
+        // holds a permission to CONTROL_DEVICE_STATE
+        final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
+        if (topApp == null || topApp.getPid() != callingPid) {
+            getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
+                    "Permission required to request device state, "
+                            + "or the call must come from the top focused app.");
         }
     }
 
@@ -761,12 +777,7 @@ public final class DeviceStateManagerService extends SystemService {
             // Allow top processes to request a device state change
             // If the calling process ID is not the top app, then we check if this process
             // holds a permission to CONTROL_DEVICE_STATE
-            final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
-            if (topApp.getPid() != callingPid) {
-                getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
-                        "Permission required to request device state, "
-                                + "or the call must come from the top focused app.");
-            }
+            checkCanControlDeviceState(callingPid);
 
             if (token == null) {
                 throw new IllegalArgumentException("Request token must not be null.");
@@ -781,25 +792,16 @@ public final class DeviceStateManagerService extends SystemService {
         }
 
         @Override // Binder call
-        public void cancelRequest(IBinder token) {
+        public void cancelStateRequest() {
             final int callingPid = Binder.getCallingPid();
             // Allow top processes to cancel a device state change
             // If the calling process ID is not the top app, then we check if this process
             // holds a permission to CONTROL_DEVICE_STATE
-            final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
-            if (topApp.getPid() != callingPid) {
-                getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
-                        "Permission required to cancel device state, "
-                                + "or the call must come from the top focused app.");
-            }
-
-            if (token == null) {
-                throw new IllegalArgumentException("Request token must not be null.");
-            }
+            checkCanControlDeviceState(callingPid);
 
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
-                cancelRequestInternal(callingPid, token);
+                cancelStateRequestInternal(callingPid);
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }

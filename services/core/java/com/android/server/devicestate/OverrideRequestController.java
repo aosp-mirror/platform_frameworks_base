@@ -34,7 +34,7 @@ import java.lang.annotation.RetentionPolicy;
  * <ul>
  *     <li>A new request is added with {@link #addRequest(OverrideRequest)}, in which case the
  *     request will become suspended.</li>
- *     <li>The request is cancelled with {@link #cancelRequest(IBinder)} or as a side effect
+ *     <li>The request is cancelled with {@link #cancelRequest} or as a side effect
  *     of other methods calls, such as {@link #handleProcessDied(int)}.</li>
  * </ul>
  */
@@ -115,9 +115,9 @@ final class OverrideRequestController {
      * Cancels the request with the specified {@code token} and notifies the listener of all changes
      * to request status as a result of this operation.
      */
-    void cancelRequest(@NonNull IBinder token) {
-        // Either don't have an active request or attempting to cancel an already cancelled request
-        if (!hasRequest(token)) {
+    void cancelRequest(@NonNull OverrideRequest request) {
+        // Either don't have a current request or attempting to cancel an already cancelled request
+        if (!hasRequest(request.getToken())) {
             return;
         }
         cancelCurrentRequestLocked();
@@ -136,7 +136,7 @@ final class OverrideRequestController {
     }
 
     /**
-     * Cancels all override requests, this could be due to the device being put
+     * Cancels the current override request, this could be due to the device being put
      * into a hardware state that declares the flag "FLAG_CANCEL_OVERRIDE_REQUESTS"
      */
     void cancelOverrideRequest() {

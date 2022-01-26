@@ -151,20 +151,14 @@ public final class DeviceStateManagerGlobal {
      * Cancels a {@link DeviceStateRequest request} previously submitted with a call to
      * {@link #requestState(DeviceStateRequest, Executor, DeviceStateRequest.Callback)}.
      *
-     * @see DeviceStateManager#cancelRequest(DeviceStateRequest)
+     * @see DeviceStateManager#cancelStateRequest
      */
-    public void cancelRequest(@NonNull DeviceStateRequest request) {
+    public void cancelStateRequest() {
         synchronized (mLock) {
             registerCallbackIfNeededLocked();
 
-            final IBinder token = findRequestTokenLocked(request);
-            if (token == null) {
-                // This request has not been submitted.
-                return;
-            }
-
             try {
-                mDeviceStateManager.cancelRequest(token);
+                mDeviceStateManager.cancelStateRequest();
             } catch (RemoteException ex) {
                 throw ex.rethrowFromSystemServer();
             }

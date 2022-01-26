@@ -91,7 +91,7 @@ public final class OverrideRequestControllerTest {
 
         assertEquals(mStatusListener.getLastStatus(firstRequest).intValue(), STATUS_ACTIVE);
 
-        mController.cancelRequest(firstRequest.getToken());
+        mController.cancelOverrideRequest();
 
         assertEquals(mStatusListener.getLastStatus(firstRequest).intValue(), STATUS_CANCELED);
     }
