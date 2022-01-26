@@ -16,6 +16,8 @@
 
 package com.android.server.usage;
 
+import static com.android.server.usage.UsageStatsService.DEBUG_RESPONSE_STATS;
+
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -23,9 +25,11 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.usage.BroadcastResponseStats;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
@@ -69,6 +73,12 @@ class BroadcastResponseStatsTracker {
     void reportBroadcastDispatchEvent(int sourceUid, @NonNull String targetPackage,
             UserHandle targetUser, long idForResponseEvent,
             @ElapsedRealtimeLong long timestampMs) {
+        if (DEBUG_RESPONSE_STATS) {
+            Slog.d(TAG, TextUtils.formatSimple(
+                    "reportBroadcastDispatchEvent; srcUid=%d, tgtPkg=%s, tgtUsr=%d, id=%d, ts=%s",
+                    sourceUid, targetPackage, targetUser, idForResponseEvent,
+                    TimeUtils.formatDuration(timestampMs)));
+        }
         synchronized (mLock) {
             final LongSparseArray<BroadcastEvent> broadcastEvents =
                     getOrCreateBroadcastEventsLocked(targetPackage, targetUser);
@@ -99,6 +109,12 @@ class BroadcastResponseStatsTracker {
 
     private void reportNotificationEvent(@NotificationEvent int event,
             @NonNull String packageName, UserHandle user, @ElapsedRealtimeLong long timestampMs) {
+        if (DEBUG_RESPONSE_STATS) {
+            Slog.d(TAG, TextUtils.formatSimple(
+                    "reportNotificationEvent; event=<%s>, pkg=%s, usr=%d, ts=%s",
+                    notificationEventToString(event), packageName, user.getIdentifier(),
+                    TimeUtils.formatDuration(timestampMs)));
+        }
         // TODO (206518114): Store last N events to dump for debugging purposes.
         synchronized (mLock) {
             final LongSparseArray<BroadcastEvent> broadcastEvents =
@@ -286,6 +302,20 @@ class BroadcastResponseStatsTracker {
             userResponseStatsForUid.put(broadcastEvent.getTargetUserId(), userResponseStats);
         }
         return userResponseStats.getOrCreateBroadcastResponseStats(broadcastEvent);
+    }
+
+    @NonNull
+    private String notificationEventToString(@NotificationEvent int event) {
+        switch (event) {
+            case NOTIFICATION_EVENT_POSTED:
+                return "posted";
+            case NOTIFICATION_EVENT_UPDATED:
+                return "updated";
+            case NOTIFICATION_EVENT_CANCELLED:
+                return "cancelled";
+            default:
+                return String.valueOf(event);
+        }
     }
 
     void dump(@NonNull IndentingPrintWriter ipw) {
