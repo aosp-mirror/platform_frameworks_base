@@ -252,8 +252,6 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private final RebootEscrowManager mRebootEscrowManager;
 
-    private boolean mFirstCallToVold;
-
     // Current password metric for all users on the device. Updated when user unlocks
     // the device or changes password. Removed when user is stopped.
     @GuardedBy("this")
@@ -596,8 +594,6 @@ public class LockSettingsService extends ILockSettings.Stub {
         mHandler = injector.getHandler(injector.getServiceThread());
         mStrongAuth = injector.getStrongAuth();
         mActivityManager = injector.getActivityManager();
-
-        mFirstCallToVold = true;
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_ADDED);
@@ -2517,77 +2513,6 @@ public class LockSettingsService extends ILockSettings.Stub {
                     userId);
             LocalServices.getService(WindowManagerInternal.class).reportPasswordChanged(userId);
         });
-    }
-
-    private LockscreenCredential createPattern(String patternString) {
-        final byte[] patternBytes = patternString.getBytes();
-        LockscreenCredential pattern = LockscreenCredential.createPattern(
-                LockPatternUtils.byteArrayToPattern(patternBytes));
-        Arrays.fill(patternBytes, (byte) 0);
-        return pattern;
-    }
-
-    @Override
-    public boolean checkVoldPassword(int userId) {
-        if (!mFirstCallToVold) {
-            return false;
-        }
-        mFirstCallToVold = false;
-
-        checkPasswordReadPermission();
-
-        // There's no guarantee that this will safely connect, but if it fails
-        // we will simply show the lock screen when we shouldn't, so relatively
-        // benign. There is an outside chance something nasty would happen if
-        // this service restarted before vold stales out the password in this
-        // case. The nastiness is limited to not showing the lock screen when
-        // we should, within the first minute of decrypting the phone if this
-        // service can't connect to vold, it restarts, and then the new instance
-        // does successfully connect.
-        final IStorageManager service = mInjector.getStorageManager();
-        // TODO(b/120484642): Update vold to return a password as a byte array
-        String password;
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            password = service.getPassword();
-            service.clearPassword();
-        } catch (RemoteException e) {
-            Slog.w(TAG, "vold getPassword() failed", e);
-            return false;
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-        if (TextUtils.isEmpty(password)) {
-            return false;
-        }
-
-        try {
-            final LockscreenCredential credential;
-            switch (getCredentialTypeInternal(userId)) {
-                case CREDENTIAL_TYPE_PATTERN:
-                    credential = createPattern(password);
-                    break;
-                case CREDENTIAL_TYPE_PIN:
-                    credential = LockscreenCredential.createPin(password);
-                    break;
-                case CREDENTIAL_TYPE_PASSWORD:
-                    credential = LockscreenCredential.createPassword(password);
-                    break;
-                default:
-                    credential = null;
-                    Slog.e(TAG, "Unknown credential type");
-            }
-
-            if (credential != null
-                    && checkCredential(credential, userId, null /* progressCallback */)
-                                .getResponseCode() == GateKeeperResponse.RESPONSE_OK) {
-                return true;
-            }
-        } catch (Exception e) {
-            Slog.e(TAG, "checkVoldPassword failed: ", e);
-        }
-
-        return false;
     }
 
     private void removeUser(int userId, boolean unknownUser) {

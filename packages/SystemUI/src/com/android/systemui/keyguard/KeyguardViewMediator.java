@@ -1701,14 +1701,6 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 if (DEBUG) Log.d(TAG, "doKeyguard: not showing because lockscreen is off");
                 return;
             }
-
-            if (mLockPatternUtils.checkVoldPassword(KeyguardUpdateMonitor.getCurrentUser())) {
-                if (DEBUG) Log.d(TAG, "Not showing lock screen since just decrypted");
-                // Without this, settings is not enabled until the lock screen first appears
-                setShowingLocked(false);
-                hideLocked();
-                return;
-            }
         }
 
         if (DEBUG) Log.d(TAG, "doKeyguard: showing the lock screen");
