@@ -22,7 +22,6 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -76,7 +75,6 @@ public class WindowlessWindowManager implements IWindowSession {
     private final Configuration mConfiguration;
     private final IWindowSession mRealWm;
     private final IBinder mHostInputToken;
-    private final IBinder mFocusGrantToken = new Binder();
 
     private int mForceHeight = -1;
     private int mForceWidth = -1;
@@ -91,10 +89,6 @@ public class WindowlessWindowManager implements IWindowSession {
 
     public void setConfiguration(Configuration configuration) {
         mConfiguration.setTo(configuration);
-    }
-
-    IBinder getFocusGrantToken() {
-        return mFocusGrantToken;
     }
 
     /**
@@ -159,10 +153,10 @@ public class WindowlessWindowManager implements IWindowSession {
                     mRealWm.grantInputChannel(displayId,
                         new SurfaceControl(sc, "WindowlessWindowManager.addToDisplay"),
                         window, mHostInputToken, attrs.flags, attrs.privateFlags, attrs.type,
-                        mFocusGrantToken, outInputChannel);
+                        outInputChannel);
                 } else {
                     mRealWm.grantInputChannel(displayId, sc, window, mHostInputToken, attrs.flags,
-                        attrs.privateFlags, attrs.type, mFocusGrantToken, outInputChannel);
+                        attrs.privateFlags, attrs.type, outInputChannel);
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to grant input to surface: ", e);
@@ -466,7 +460,7 @@ public class WindowlessWindowManager implements IWindowSession {
 
     @Override
     public void grantInputChannel(int displayId, SurfaceControl surface, IWindow window,
-            IBinder hostInputToken, int flags, int privateFlags, int type, IBinder focusGrantToken,
+            IBinder hostInputToken, int flags, int privateFlags, int type,
             InputChannel outInputChannel) {
     }
 
