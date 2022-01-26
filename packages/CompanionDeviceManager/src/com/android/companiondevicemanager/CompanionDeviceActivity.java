@@ -18,6 +18,7 @@ package com.android.companiondevicemanager;
 
 import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_COMPUTER;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
@@ -315,6 +316,12 @@ public class CompanionDeviceActivity extends Activity {
                 title = getHtmlFromResources(this, R.string.title_automotive_projection, appLabel);
                 summary = getHtmlFromResources(
                         this, R.string.summary_automotive_projection, appLabel, deviceName);
+                break;
+
+            case DEVICE_PROFILE_COMPUTER:
+                title = getHtmlFromResources(this, R.string.title_computer, appLabel);
+                summary = getHtmlFromResources(
+                        this, R.string.summary_computer, appLabel, deviceName);
                 break;
 
             default:
