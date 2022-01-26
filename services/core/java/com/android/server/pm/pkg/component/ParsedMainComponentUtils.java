@@ -21,8 +21,6 @@ import static com.android.server.pm.pkg.parsing.ParsingUtils.NOT_SET;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.IntentFilter;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
-import com.android.server.pm.pkg.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Configuration;
@@ -33,6 +31,8 @@ import android.os.Build;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
+import com.android.server.pm.pkg.parsing.ParsingUtils;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -110,13 +110,13 @@ class ParsedMainComponentUtils {
         return input.success(component);
     }
 
-    static ParseResult<ParsedIntentInfo> parseIntentFilter(
+    static ParseResult<ParsedIntentInfoImpl> parseIntentFilter(
             ParsedMainComponent mainComponent,
             ParsingPackage pkg, Resources resources, XmlResourceParser parser,
             boolean visibleToEphemeral, boolean allowGlobs, boolean allowAutoVerify,
             boolean allowImplicitEphemeralVisibility, boolean failOnNoActions,
             ParseInput input) throws IOException, XmlPullParserException {
-        ParseResult<ParsedIntentInfo> intentResult = ParsedIntentInfoUtils.parseIntentInfo(
+        ParseResult<ParsedIntentInfoImpl> intentResult = ParsedIntentInfoUtils.parseIntentInfo(
                 mainComponent.getName(), pkg, resources, parser, allowGlobs,
                 allowAutoVerify, input);
         if (intentResult.isError()) {

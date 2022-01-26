@@ -211,7 +211,6 @@ import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator
 import com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
-import com.android.systemui.statusbar.notification.interruption.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -482,7 +481,6 @@ public class StatusBar extends CoreStartable implements
     private final HeadsUpManagerPhone mHeadsUpManager;
     private final StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
     private final DynamicPrivacyController mDynamicPrivacyController;
-    private final BypassHeadsUpNotifier mBypassHeadsUpNotifier;
     private final FalsingCollector mFalsingCollector;
     private final FalsingManager mFalsingManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
@@ -703,7 +701,6 @@ public class StatusBar extends CoreStartable implements
             KeyguardStateController keyguardStateController,
             HeadsUpManagerPhone headsUpManagerPhone,
             DynamicPrivacyController dynamicPrivacyController,
-            BypassHeadsUpNotifier bypassHeadsUpNotifier,
             FalsingManager falsingManager,
             FalsingCollector falsingCollector,
             BroadcastDispatcher broadcastDispatcher,
@@ -800,7 +797,6 @@ public class StatusBar extends CoreStartable implements
         mKeyguardIndicationController = keyguardIndicationController;
         mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
         mDynamicPrivacyController = dynamicPrivacyController;
-        mBypassHeadsUpNotifier = bypassHeadsUpNotifier;
         mFalsingCollector = falsingCollector;
         mFalsingManager = falsingManager;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -917,7 +913,6 @@ public class StatusBar extends CoreStartable implements
         mScreenLifecycle.addObserver(mScreenObserver);
         mWakefulnessLifecycle.addObserver(mWakefulnessObserver);
         mUiModeManager = mContext.getSystemService(UiModeManager.class);
-        mBypassHeadsUpNotifier.setUp();
         if (mBubblesOptional.isPresent()) {
             mBubblesOptional.get().setExpandListener(mBubbleExpandListener);
         }
@@ -3581,7 +3576,6 @@ public class StatusBar extends CoreStartable implements
             maybeEscalateHeadsUp();
             dismissVolumeDialog();
             mWakeUpCoordinator.setFullyAwake(false);
-            mBypassHeadsUpNotifier.setFullyAwake(false);
             mKeyguardBypassController.onStartedGoingToSleep();
 
             // The unlocked screen off and fold to aod animations might use our LightRevealScrim -
@@ -3623,7 +3617,6 @@ public class StatusBar extends CoreStartable implements
         @Override
         public void onFinishedWakingUp() {
             mWakeUpCoordinator.setFullyAwake(true);
-            mBypassHeadsUpNotifier.setFullyAwake(true);
             mWakeUpCoordinator.setWakingUp(false);
             if (mLaunchCameraWhenFinishedWaking) {
                 mNotificationPanelViewController.launchCamera(

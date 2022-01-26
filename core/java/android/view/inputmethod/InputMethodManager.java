@@ -18,6 +18,8 @@ package android.view.inputmethod;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
+import static android.view.inputmethod.InputConnection.CURSOR_UPDATE_IMMEDIATE;
+import static android.view.inputmethod.InputConnection.CURSOR_UPDATE_MONITOR;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.DISPLAY_ID;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.EDITOR_INFO;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_INSETS_SOURCE_CONSUMER;
@@ -1793,6 +1795,14 @@ public final class InputMethodManager {
                 Log.w(TAG, "Ignoring startStylusHandwriting: View's window does not have focus.");
                 return;
             }
+            if (mServedInputConnection != null && getDelegate().hasActiveConnection(view)) {
+                // TODO (b/210039666): optimize CURSOR_UPDATE_IMMEDIATE.
+                // TODO (b/215533103): Introduce new modes in requestCursorUpdates().
+                // TODO (b/210039666): Pipe IME displayId from InputBindResult and use it here.
+                //  instead of mDisplayId.
+                mServedInputConnection.requestCursorUpdatesFromImm(
+                        CURSOR_UPDATE_IMMEDIATE | CURSOR_UPDATE_MONITOR, mDisplayId);
+            }
 
             try {
                 mService.startStylusHandwriting(mClient);
@@ -2419,9 +2429,9 @@ public final class InputMethodManager {
     public boolean isCursorAnchorInfoEnabled() {
         synchronized (mH) {
             final boolean isImmediate = (mRequestUpdateCursorAnchorInfoMonitorMode &
-                    InputConnection.CURSOR_UPDATE_IMMEDIATE) != 0;
+                    CURSOR_UPDATE_IMMEDIATE) != 0;
             final boolean isMonitoring = (mRequestUpdateCursorAnchorInfoMonitorMode &
-                    InputConnection.CURSOR_UPDATE_MONITOR) != 0;
+                    CURSOR_UPDATE_MONITOR) != 0;
             return isImmediate || isMonitoring;
         }
     }
@@ -2493,7 +2503,7 @@ public final class InputMethodManager {
             // If immediate bit is set, we will call updateCursorAnchorInfo() even when the data has
             // not been changed from the previous call.
             final boolean isImmediate = (mRequestUpdateCursorAnchorInfoMonitorMode &
-                    InputConnection.CURSOR_UPDATE_IMMEDIATE) != 0;
+                    CURSOR_UPDATE_IMMEDIATE) != 0;
             if (!isImmediate && Objects.equals(mCursorAnchorInfo, cursorAnchorInfo)) {
                 // TODO: Consider always emitting this message once we have addressed redundant
                 // calls of this method from android.widget.Editor.
@@ -2507,7 +2517,7 @@ public final class InputMethodManager {
             mCurrentInputMethodSession.updateCursorAnchorInfo(cursorAnchorInfo);
             mCursorAnchorInfo = cursorAnchorInfo;
             // Clear immediate bit (if any).
-            mRequestUpdateCursorAnchorInfoMonitorMode &= ~InputConnection.CURSOR_UPDATE_IMMEDIATE;
+            mRequestUpdateCursorAnchorInfoMonitorMode &= ~CURSOR_UPDATE_IMMEDIATE;
         }
     }
 

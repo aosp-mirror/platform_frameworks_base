@@ -23,7 +23,6 @@ import android.os.Parcelable;
 
 /**
  * AIT (Application Information Table) info.
- * @hide
  */
 public final class AitInfo implements Parcelable {
     static final String TAG = "AitInfo";

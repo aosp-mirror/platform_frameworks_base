@@ -24,12 +24,10 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.wm.shell.flicker.APP_PAIR_SPLIT_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appPairsDividerIsVisibleAtEnd
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import com.android.wm.shell.flicker.helpers.AppPairsHelper.Companion.waitAppsShown
-import org.junit.Assume.assumeFalse
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -69,11 +67,7 @@ class AppPairsTestPairPrimaryAndSecondaryApps(
 
     @FlakyTest(bugId = 206753786)
     @Test
-    override fun statusBarLayerRotatesScales() {
-        // This test doesn't work in shell transitions because of b/206753786
-        assumeFalse(isShellTransitionsEnabled)
-        super.statusBarLayerRotatesScales()
-    }
+    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
     @Presubmit
     @Test

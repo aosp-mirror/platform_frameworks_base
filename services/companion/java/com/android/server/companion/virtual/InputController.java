@@ -27,6 +27,7 @@ import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
 import android.hardware.input.VirtualTouchEvent;
 import android.os.IBinder;
+import android.os.IInputConstants;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -126,6 +127,7 @@ class InputController {
             final InputManagerInternal inputManagerInternal =
                     LocalServices.getService(InputManagerInternal.class);
             inputManagerInternal.setVirtualMousePointerDisplayId(displayId);
+            inputManagerInternal.setPointerAcceleration(1);
             mActivePointerDisplayId = displayId;
         }
         try {
@@ -210,6 +212,8 @@ class InputController {
         final InputManagerInternal inputManagerInternal =
                 LocalServices.getService(InputManagerInternal.class);
         inputManagerInternal.setVirtualMousePointerDisplayId(Display.INVALID_DISPLAY);
+        inputManagerInternal.setPointerAcceleration(
+                IInputConstants.DEFAULT_POINTER_ACCELERATION);
         mActivePointerDisplayId = Display.INVALID_DISPLAY;
     }
 

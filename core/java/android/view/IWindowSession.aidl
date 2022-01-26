@@ -74,7 +74,6 @@ interface IWindowSession {
      * @param viewVisibility Window root view's visibility.
      * @param flags Request flags: {@link WindowManagerGlobal#RELAYOUT_INSETS_PENDING},
      * {@link WindowManagerGlobal#RELAYOUT_DEFER_SURFACE_DESTROY}.
-     * @param frameNumber A frame number in which changes requested in this layout will be rendered.
      * @param outFrame Rect in which is placed the new position/size on
      * screen.
      * @param outContentInsets Rect in which is placed the offsets from
@@ -97,17 +96,15 @@ interface IWindowSession {
      * since it was last displayed.
      * @param outSurface Object in which is placed the new display surface.
      * @param insetsState The current insets state in the system.
-     * @param outSurfaceSize The width and height of the surface control
      *
      * @return int Result flags: {@link WindowManagerGlobal#RELAYOUT_SHOW_FOCUS},
      * {@link WindowManagerGlobal#RELAYOUT_FIRST_TIME}.
      */
     int relayout(IWindow window, in WindowManager.LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility,
-            int flags, long frameNumber, out ClientWindowFrames outFrames,
+            int flags, out ClientWindowFrames outFrames,
             out MergedConfiguration outMergedConfiguration, out SurfaceControl outSurfaceControl,
-            out InsetsState insetsState, out InsetsSourceControl[] activeControls,
-            out Point outSurfaceSize);
+            out InsetsState insetsState, out InsetsSourceControl[] activeControls);
 
     /*
      * Notify the window manager that an application is relaunching and

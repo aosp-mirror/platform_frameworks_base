@@ -18,6 +18,8 @@ package com.android.server.pm.pkg;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.content.pm.PackageManager;
 import android.content.pm.overlay.OverlayPaths;
 import android.os.UserHandle;
@@ -30,15 +32,20 @@ import java.util.Set;
  *
  * The parent of this class is {@link PackageState}, which handles non-user state, exposing this
  * interface for per-user state.
+ *
+ * @hide
  */
 // TODO(b/173807334): Expose API
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public interface PackageUserState {
 
+    /** @hide */
+    @NonNull
     PackageUserState DEFAULT = PackageUserStateInternal.DEFAULT;
 
     /**
      * Combination of {@link #getOverlayPaths()} and {@link #getSharedLibraryOverlayPaths()}
+     * @hide
      */
     @Nullable
     OverlayPaths getAllOverlayPaths();
@@ -84,9 +91,11 @@ public interface PackageUserState {
     @Nullable
     String getLastDisableAppCaller();
 
+    /** @hide */
     @Nullable
     OverlayPaths getOverlayPaths();
 
+    /** @hide */
     @NonNull
     Map<String, OverlayPaths> getSharedLibraryOverlayPaths();
 

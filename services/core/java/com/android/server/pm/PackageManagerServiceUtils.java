@@ -228,11 +228,9 @@ public class PackageManagerServiceUtils {
         }
         final File baseFile = new File(pkg.getBaseApkPath());
         long maxModifiedTime = baseFile.lastModified();
-        if (pkg.getSplitCodePaths() != null) {
-            for (int i = pkg.getSplitCodePaths().length - 1; i >=0; --i) {
-                final File splitFile = new File(pkg.getSplitCodePaths()[i]);
-                maxModifiedTime = Math.max(maxModifiedTime, splitFile.lastModified());
-            }
+        for (int i = pkg.getSplitCodePaths().length - 1; i >=0; --i) {
+            final File splitFile = new File(pkg.getSplitCodePaths()[i]);
+            maxModifiedTime = Math.max(maxModifiedTime, splitFile.lastModified());
         }
         return maxModifiedTime;
     }

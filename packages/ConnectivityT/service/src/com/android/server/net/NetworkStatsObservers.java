@@ -26,13 +26,12 @@ import android.net.NetworkStatsAccess;
 import android.net.NetworkStatsCollection;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
-import android.os.Bundle;
+import android.net.netstats.IUsageCallback;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Messenger;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.ArrayMap;
@@ -75,10 +74,10 @@ class NetworkStatsObservers {
      *
      * @return the normalized request wrapped within {@link RequestInfo}.
      */
-    public DataUsageRequest register(DataUsageRequest inputRequest, Messenger messenger,
-                IBinder binder, int callingUid, @NetworkStatsAccess.Level int accessLevel) {
-        DataUsageRequest request = buildRequest(inputRequest);
-        RequestInfo requestInfo = buildRequestInfo(request, messenger, binder, callingUid,
+    public DataUsageRequest register(DataUsageRequest inputRequest, IUsageCallback callback,
+            int callingUid, @NetworkStatsAccess.Level int accessLevel) {
+        DataUsageRequest request = buildRequest(inputRequest, callingUid);
+        RequestInfo requestInfo = buildRequestInfo(request, callback, callingUid,
                 accessLevel);
 
         if (LOGV) Log.v(TAG, "Registering observer for " + request);
@@ -195,10 +194,12 @@ class NetworkStatsObservers {
         }
     }
 
-    private DataUsageRequest buildRequest(DataUsageRequest request) {
-        // Cap the minimum threshold to a safe default to avoid too many callbacks
-        long thresholdInBytes = Math.max(MIN_THRESHOLD_BYTES, request.thresholdInBytes);
-        if (thresholdInBytes < request.thresholdInBytes) {
+    private DataUsageRequest buildRequest(DataUsageRequest request, int callingUid) {
+        // For non-system uid, cap the minimum threshold to a safe default to avoid too
+        // many callbacks.
+        long thresholdInBytes = (callingUid == Process.SYSTEM_UID ? request.thresholdInBytes
+                : Math.max(MIN_THRESHOLD_BYTES, request.thresholdInBytes));
+        if (thresholdInBytes > request.thresholdInBytes) {
             Log.w(TAG, "Threshold was too low for " + request
                     + ". Overriding to a safer default of " + thresholdInBytes + " bytes");
         }
@@ -206,11 +207,10 @@ class NetworkStatsObservers {
                 request.template, thresholdInBytes);
     }
 
-    private RequestInfo buildRequestInfo(DataUsageRequest request,
-                Messenger messenger, IBinder binder, int callingUid,
-                @NetworkStatsAccess.Level int accessLevel) {
+    private RequestInfo buildRequestInfo(DataUsageRequest request, IUsageCallback callback,
+            int callingUid, @NetworkStatsAccess.Level int accessLevel) {
         if (accessLevel <= NetworkStatsAccess.Level.USER) {
-            return new UserUsageRequestInfo(this, request, messenger, binder, callingUid,
+            return new UserUsageRequestInfo(this, request, callback, callingUid,
                     accessLevel);
         } else {
             // Safety check in case a new access level is added and we forgot to update this
@@ -218,7 +218,7 @@ class NetworkStatsObservers {
                 throw new IllegalArgumentException(
                         "accessLevel " + accessLevel + " is less than DEVICESUMMARY.");
             }
-            return new NetworkUsageRequestInfo(this, request, messenger, binder, callingUid,
+            return new NetworkUsageRequestInfo(this, request, callback, callingUid,
                     accessLevel);
         }
     }
@@ -230,25 +230,23 @@ class NetworkStatsObservers {
     private abstract static class RequestInfo implements IBinder.DeathRecipient {
         private final NetworkStatsObservers mStatsObserver;
         protected final DataUsageRequest mRequest;
-        private final Messenger mMessenger;
-        private final IBinder mBinder;
+        private final IUsageCallback mCallback;
         protected final int mCallingUid;
         protected final @NetworkStatsAccess.Level int mAccessLevel;
         protected NetworkStatsRecorder mRecorder;
         protected NetworkStatsCollection mCollection;
 
         RequestInfo(NetworkStatsObservers statsObserver, DataUsageRequest request,
-                    Messenger messenger, IBinder binder, int callingUid,
+                IUsageCallback callback, int callingUid,
                     @NetworkStatsAccess.Level int accessLevel) {
             mStatsObserver = statsObserver;
             mRequest = request;
-            mMessenger = messenger;
-            mBinder = binder;
+            mCallback = callback;
             mCallingUid = callingUid;
             mAccessLevel = accessLevel;
 
             try {
-                mBinder.linkToDeath(this, 0);
+                mCallback.asBinder().linkToDeath(this, 0);
             } catch (RemoteException e) {
                 binderDied();
             }
@@ -257,7 +255,7 @@ class NetworkStatsObservers {
         @Override
         public void binderDied() {
             if (LOGV) {
-                Log.v(TAG, "RequestInfo binderDied(" + mRequest + ", " + mBinder + ")");
+                Log.v(TAG, "RequestInfo binderDied(" + mRequest + ", " + mCallback + ")");
             }
             mStatsObserver.unregister(mRequest, Process.SYSTEM_UID);
             callCallback(NetworkStatsManager.CALLBACK_RELEASED);
@@ -270,9 +268,7 @@ class NetworkStatsObservers {
         }
 
         private void unlinkDeathRecipient() {
-            if (mBinder != null) {
-                mBinder.unlinkToDeath(this, 0);
-            }
+            mCallback.asBinder().unlinkToDeath(this, 0);
         }
 
         /**
@@ -294,17 +290,19 @@ class NetworkStatsObservers {
         }
 
         private void callCallback(int callbackType) {
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(DataUsageRequest.PARCELABLE_KEY, mRequest);
-            Message msg = Message.obtain();
-            msg.what = callbackType;
-            msg.setData(bundle);
             try {
                 if (LOGV) {
                     Log.v(TAG, "sending notification " + callbackTypeToName(callbackType)
                             + " for " + mRequest);
                 }
-                mMessenger.send(msg);
+                switch (callbackType) {
+                    case NetworkStatsManager.CALLBACK_LIMIT_REACHED:
+                        mCallback.onThresholdReached(mRequest);
+                        break;
+                    case NetworkStatsManager.CALLBACK_RELEASED:
+                        mCallback.onCallbackReleased(mRequest);
+                        break;
+                }
             } catch (RemoteException e) {
                 // May occur naturally in the race of binder death.
                 Log.w(TAG, "RemoteException caught trying to send a callback msg for " + mRequest);
@@ -334,9 +332,9 @@ class NetworkStatsObservers {
 
     private static class NetworkUsageRequestInfo extends RequestInfo {
         NetworkUsageRequestInfo(NetworkStatsObservers statsObserver, DataUsageRequest request,
-                    Messenger messenger, IBinder binder, int callingUid,
+                IUsageCallback callback, int callingUid,
                     @NetworkStatsAccess.Level int accessLevel) {
-            super(statsObserver, request, messenger, binder, callingUid, accessLevel);
+            super(statsObserver, request, callback, callingUid, accessLevel);
         }
 
         @Override
@@ -376,9 +374,9 @@ class NetworkStatsObservers {
 
     private static class UserUsageRequestInfo extends RequestInfo {
         UserUsageRequestInfo(NetworkStatsObservers statsObserver, DataUsageRequest request,
-                    Messenger messenger, IBinder binder, int callingUid,
+                    IUsageCallback callback, int callingUid,
                     @NetworkStatsAccess.Level int accessLevel) {
-            super(statsObserver, request, messenger, binder, callingUid, accessLevel);
+            super(statsObserver, request, callback, callingUid, accessLevel);
         }
 
         @Override

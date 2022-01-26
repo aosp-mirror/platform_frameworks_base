@@ -286,7 +286,6 @@ java_library_with_nonpublic_deps {
     soong_config_variables: {
         include_nonpublic_framework_api: {
             libs: [
-                "framework-auxiliary.stubs",
                 "framework-supplementalapi.stubs",
             ],
         },
@@ -304,7 +303,6 @@ java_library_with_nonpublic_deps {
     soong_config_variables: {
         include_nonpublic_framework_api: {
             libs: [
-                "framework-auxiliary.stubs",
                 "framework-supplementalapi.stubs",
             ],
         },
@@ -337,7 +335,6 @@ java_library_with_nonpublic_deps {
     soong_config_variables: {
         include_nonpublic_framework_api: {
             libs: [
-                "framework-auxiliary.stubs",
                 "framework-supplementalapi.stubs",
             ],
         },
@@ -366,7 +363,6 @@ java_library_with_nonpublic_deps {
     soong_config_variables: {
         include_nonpublic_framework_api: {
             static_libs: [
-                "framework-auxiliary.stubs",
                 "framework-supplementalapi.stubs",
             ],
         },
@@ -383,7 +379,6 @@ java_library_with_nonpublic_deps {
     soong_config_variables: {
         include_nonpublic_framework_api: {
             static_libs: [
-                "framework-auxiliary.stubs",
                 "framework-supplementalapi.stubs",
             ],
         },
@@ -416,7 +411,6 @@ java_library_with_nonpublic_deps {
     soong_config_variables: {
         include_nonpublic_framework_api: {
             static_libs: [
-                "framework-auxiliary.stubs",
                 "framework-supplementalapi.stubs",
             ],
         },

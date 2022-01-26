@@ -63,20 +63,20 @@
         android:id="@+id/screenshot_preview_border"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="@dimen/screenshot_offset_x"
-        android:layout_marginBottom="@dimen/screenshot_offset_y"
-        android:elevation="@dimen/screenshot_preview_elevation"
+        android:layout_marginStart="@dimen/overlay_offset_x"
+        android:layout_marginBottom="@dimen/overlay_offset_y"
+        android:elevation="@dimen/overlay_preview_elevation"
         android:alpha="0"
-        android:background="@drawable/screenshot_border"
+        android:background="@drawable/overlay_border"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/screenshot_preview_end"
-        app:layout_constraintTop_toTopOf="@+id/screenshot_preview_top"/>
+        app:layout_constraintEnd_toEndOf="@id/screenshot_preview_end"
+        app:layout_constraintTop_toTopOf="@id/screenshot_preview_top"/>
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/screenshot_preview_end"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:barrierMargin="4dp"
+        app:barrierMargin="@dimen/overlay_border_width"
         app:barrierDirection="end"
         app:constraint_referenced_ids="screenshot_preview"/>
     <androidx.constraintlayout.widget.Barrier
@@ -84,30 +84,30 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="top"
-        app:barrierMargin="-4dp"
+        app:barrierMargin="@dimen/overlay_border_width_neg"
         app:constraint_referenced_ids="screenshot_preview"/>
     <ImageView
         android:id="@+id/screenshot_preview"
         android:visibility="invisible"
         android:layout_width="@dimen/screenshot_x_scale"
-        android:layout_margin="4dp"
+        android:layout_margin="@dimen/overlay_border_width"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:elevation="@dimen/screenshot_preview_elevation"
+        android:elevation="@dimen/overlay_preview_elevation"
         android:contentDescription="@string/screenshot_edit_description"
         android:scaleType="fitEnd"
-        android:background="@drawable/screenshot_preview_background"
+        android:background="@drawable/overlay_preview_background"
         android:adjustViewBounds="true"
-        app:layout_constraintBottom_toBottomOf="@+id/screenshot_preview_border"
-        app:layout_constraintStart_toStartOf="@+id/screenshot_preview_border"
-        app:layout_constraintEnd_toEndOf="@+id/screenshot_preview_border"
-        app:layout_constraintTop_toTopOf="@+id/screenshot_preview_border">
+        app:layout_constraintBottom_toBottomOf="@id/screenshot_preview_border"
+        app:layout_constraintStart_toStartOf="@id/screenshot_preview_border"
+        app:layout_constraintEnd_toEndOf="@id/screenshot_preview_border"
+        app:layout_constraintTop_toTopOf="@id/screenshot_preview_border">
     </ImageView>
     <FrameLayout
         android:id="@+id/screenshot_dismiss_button"
-        android:layout_width="@dimen/screenshot_dismiss_button_tappable_size"
-        android:layout_height="@dimen/screenshot_dismiss_button_tappable_size"
-        android:elevation="7dp"
+        android:layout_width="@dimen/overlay_dismiss_button_tappable_size"
+        android:layout_height="@dimen/overlay_dismiss_button_tappable_size"
+        android:elevation="@dimen/overlay_dismiss_button_elevation"
         android:visibility="gone"
         app:layout_constraintStart_toEndOf="@id/screenshot_preview"
         app:layout_constraintEnd_toEndOf="@id/screenshot_preview"
@@ -118,8 +118,8 @@
             android:id="@+id/screenshot_dismiss_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="@dimen/screenshot_dismiss_button_margin"
-            android:src="@drawable/screenshot_cancel"/>
+            android:layout_margin="@dimen/overlay_dismiss_button_margin"
+            android:src="@drawable/overlay_cancel"/>
     </FrameLayout>
     <ImageView
         android:id="@+id/screenshot_scrollable_preview"
@@ -129,5 +129,5 @@
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="@id/screenshot_preview"
         app:layout_constraintTop_toTopOf="@id/screenshot_preview"
-        android:elevation="@dimen/screenshot_preview_elevation"/>
+        android:elevation="@dimen/overlay_preview_elevation"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -24,10 +24,13 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleRegistry;
+import androidx.lifecycle.ViewModelStore;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.PhoneWindow;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dreams.complication.Complication;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 
 import java.util.concurrent.Executor;
@@ -47,8 +50,6 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private final Context mContext;
     // The Executor ensures actions and ui updates happen on the same thread.
     private final Executor mExecutor;
-    // The state controller informs the service of updates to the complications present.
-    private final DreamOverlayStateController mStateController;
     // A controller for the dream overlay container view (which contains both the status bar and the
     // content area).
     private final DreamOverlayContainerViewController mDreamOverlayContainerViewController;
@@ -56,47 +57,51 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     // A reference to the {@link Window} used to hold the dream overlay.
     private Window mWindow;
 
-    private final DreamOverlayStateController.Callback mOverlayStateCallback =
-            new DreamOverlayStateController.Callback() {
-                @Override
-                public void onComplicationsChanged() {
-                    mExecutor.execute(() -> reloadComplicationsLocked());
-                }
-            };
+    private final Complication.Host mHost = new Complication.Host() {
+        @Override
+        public void requestExitDream() {
+            mExecutor.execute(DreamOverlayService.this::requestExit);
+        }
+    };
+
+    private final LifecycleRegistry mLifecycleRegistry;
+
+    private ViewModelStore mViewModelStore = new ViewModelStore();
 
     @Inject
     public DreamOverlayService(
             Context context,
             @Main Executor executor,
-            DreamOverlayStateController overlayStateController,
             DreamOverlayComponent.Factory dreamOverlayComponentFactory) {
         mContext = context;
         mExecutor = executor;
-        mStateController = overlayStateController;
-        mDreamOverlayContainerViewController =
-                dreamOverlayComponentFactory.create().getDreamOverlayContainerViewController();
 
-        mStateController.addCallback(mOverlayStateCallback);
+        final DreamOverlayComponent component =
+                dreamOverlayComponentFactory.create(mViewModelStore, mHost);
+        mDreamOverlayContainerViewController = component.getDreamOverlayContainerViewController();
+        setCurrentState(Lifecycle.State.CREATED);
+        mLifecycleRegistry = component.getLifecycleRegistry();
+    }
+
+    private void setCurrentState(Lifecycle.State state) {
+        mExecutor.execute(() -> mLifecycleRegistry.setCurrentState(state));
     }
 
     @Override
     public void onDestroy() {
+        setCurrentState(Lifecycle.State.DESTROYED);
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
         windowManager.removeView(mWindow.getDecorView());
-        mStateController.removeCallback(mOverlayStateCallback);
         super.onDestroy();
     }
 
     @Override
     public void onStartDream(@NonNull WindowManager.LayoutParams layoutParams) {
-        mExecutor.execute(() -> addOverlayWindowLocked(layoutParams));
-    }
-
-    private void reloadComplicationsLocked() {
-        mDreamOverlayContainerViewController.removeAllOverlays();
-        for (ComplicationProvider overlayProvider : mStateController.getComplications()) {
-            addComplication(overlayProvider);
-        }
+        setCurrentState(Lifecycle.State.STARTED);
+        mExecutor.execute(() -> {
+            addOverlayWindowLocked(layoutParams);
+            setCurrentState(Lifecycle.State.RESUMED);
+        });
     }
 
     /**
@@ -129,20 +134,5 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
         windowManager.addView(mWindow.getDecorView(), mWindow.getAttributes());
-        mExecutor.execute(this::reloadComplicationsLocked);
-    }
-
-    @VisibleForTesting
-    protected void addComplication(ComplicationProvider provider) {
-        provider.onCreateComplication(mContext,
-                (view, layoutParams) -> {
-                    // Always move UI related work to the main thread.
-                    mExecutor.execute(() -> mDreamOverlayContainerViewController
-                            .addOverlay(view, layoutParams));
-                },
-                () -> {
-                    // The Callback is set on the main thread.
-                    mExecutor.execute(this::requestExit);
-                });
     }
 }

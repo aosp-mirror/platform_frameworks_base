@@ -27,15 +27,15 @@ import static org.mockito.Mockito.when;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dreams.complication.ComplicationHostViewController;
+import com.android.systemui.dreams.complication.dagger.ComplicationHostViewComponent;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -64,6 +64,15 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     DreamOverlayContainerView mDreamOverlayContainerView;
 
     @Mock
+    ComplicationHostViewController mComplicationHostViewController;
+
+    @Mock
+    ComplicationHostViewComponent.Factory mComplicationHostViewComponentFactory;
+
+    @Mock
+    ComplicationHostViewComponent mComplicationHostViewComponent;
+
+    @Mock
     ViewGroup mDreamOverlayContentView;
 
     @Mock
@@ -80,9 +89,14 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                         DREAM_OVERLAY_NOTIFICATIONS_DRAG_AREA_HEIGHT);
         when(mDreamOverlayContainerView.getResources()).thenReturn(mResources);
         when(mDreamOverlayContainerView.getViewTreeObserver()).thenReturn(mViewTreeObserver);
+        when(mComplicationHostViewComponentFactory.create())
+                .thenReturn(mComplicationHostViewComponent);
+        when(mComplicationHostViewComponent.getController())
+                .thenReturn(mComplicationHostViewController);
 
         mController = new DreamOverlayContainerViewController(
                 mDreamOverlayContainerView,
+                mComplicationHostViewComponentFactory,
                 mDreamOverlayContentView,
                 mDreamOverlayStatusBarViewController,
                 mHandler,
@@ -101,20 +115,6 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
         assertEquals(
                 mController.getDreamOverlayNotificationsDragAreaHeight(),
                 DREAM_OVERLAY_NOTIFICATIONS_DRAG_AREA_HEIGHT);
-    }
-
-    @Test
-    public void testAddOverlayAddsOverlayToContentView() {
-        View overlay = new View(getContext());
-        ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(100, 100);
-        mController.addOverlay(overlay, layoutParams);
-        verify(mDreamOverlayContentView).addView(overlay, layoutParams);
-    }
-
-    @Test
-    public void testRemoveAllOverlaysRemovesOverlaysFromContentView() {
-        mController.removeAllOverlays();
-        verify(mDreamOverlayContentView).removeAllViews();
     }
 
     @Test

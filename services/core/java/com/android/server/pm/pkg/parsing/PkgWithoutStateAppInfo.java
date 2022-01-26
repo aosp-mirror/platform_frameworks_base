@@ -324,13 +324,13 @@ public interface PkgWithoutStateAppInfo {
      * @see ApplicationInfo#splitSourceDirs
      * @see ApplicationInfo#getSplitCodePaths
      */
-    @Nullable
+    @NonNull
     String[] getSplitCodePaths();
 
     /**
      * @see ApplicationInfo#splitDependencies
      */
-    @Nullable
+    @NonNull
     SparseArray<int[]> getSplitDependencies();
 
     /**

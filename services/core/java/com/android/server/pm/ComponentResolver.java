@@ -36,14 +36,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import com.android.server.pm.pkg.component.ComponentMutateUtils;
-import com.android.server.pm.pkg.component.ParsedActivity;
-import com.android.server.pm.pkg.component.ParsedComponent;
-import com.android.server.pm.pkg.component.ParsedIntentInfo;
-import com.android.server.pm.pkg.component.ParsedMainComponent;
-import com.android.server.pm.pkg.component.ParsedProvider;
-import com.android.server.pm.pkg.component.ParsedProviderImpl;
-import com.android.server.pm.pkg.component.ParsedService;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -62,7 +54,15 @@ import com.android.server.pm.parsing.PackageInfoUtils.CachedApplicationInfoGener
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.PackageStateInternal;
-import com.android.server.pm.pkg.PackageUserState;
+import com.android.server.pm.pkg.PackageUserStateInternal;
+import com.android.server.pm.pkg.component.ComponentMutateUtils;
+import com.android.server.pm.pkg.component.ParsedActivity;
+import com.android.server.pm.pkg.component.ParsedComponent;
+import com.android.server.pm.pkg.component.ParsedIntentInfo;
+import com.android.server.pm.pkg.component.ParsedMainComponent;
+import com.android.server.pm.pkg.component.ParsedProvider;
+import com.android.server.pm.pkg.component.ParsedProviderImpl;
+import com.android.server.pm.pkg.component.ParsedService;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.WatchableImpl;
@@ -380,14 +380,13 @@ public class ComponentResolver
                     continue;
                 }
                 // See PM.queryContentProviders()'s javadoc for why we have the metaData parameter.
-                if (metaDataKey != null
-                        && (p.getMetaData() == null || !p.getMetaData().containsKey(metaDataKey))) {
+                if (metaDataKey != null && !p.getMetaData().containsKey(metaDataKey)) {
                     continue;
                 }
                 if (appInfoGenerator == null) {
                     appInfoGenerator = new CachedApplicationInfoGenerator();
                 }
-                final PackageUserState state = ps.getUserStateOrDefault(userId);
+                final PackageUserStateInternal state = ps.getUserStateOrDefault(userId);
                 final ApplicationInfo appInfo =
                         appInfoGenerator.generate(pkg, flags, state, userId, ps);
                 if (appInfo == null) {
@@ -424,7 +423,7 @@ public class ComponentResolver
             if (pkg == null) {
                 return null;
             }
-            final PackageUserState state = ps.getUserStateOrDefault(userId);
+            final PackageUserStateInternal state = ps.getUserStateOrDefault(userId);
             ApplicationInfo appInfo = PackageInfoUtils.generateApplicationInfo(
                     pkg, flags, state, userId, ps);
             if (appInfo == null) {
@@ -461,7 +460,7 @@ public class ComponentResolver
                 if (appInfoGenerator == null) {
                     appInfoGenerator = new CachedApplicationInfoGenerator();
                 }
-                final PackageUserState state = ps.getUserStateOrDefault(userId);
+                final PackageUserStateInternal state = ps.getUserStateOrDefault(userId);
                 final ApplicationInfo appInfo =
                         appInfoGenerator.generate(pkg, 0, state, userId, ps);
                 if (appInfo == null) {
@@ -1537,7 +1536,7 @@ public class ComponentResolver
                 }
                 return null;
             }
-            final PackageUserState userState = ps.getUserStateOrDefault(userId);
+            final PackageUserStateInternal userState = ps.getUserStateOrDefault(userId);
             ActivityInfo ai = PackageInfoUtils.generateActivityInfo(pkg, activity, mFlags,
                     userState, userId, ps);
             if (ai == null) {
@@ -1854,7 +1853,7 @@ public class ComponentResolver
             if (ps == null) {
                 return null;
             }
-            final PackageUserState userState = ps.getUserStateOrDefault(userId);
+            final PackageUserStateInternal userState = ps.getUserStateOrDefault(userId);
             final boolean matchVisibleToInstantApp = (mFlags
                     & PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY) != 0;
             final boolean isInstantApp = (mFlags & PackageManager.MATCH_INSTANT) != 0;
@@ -2099,7 +2098,7 @@ public class ComponentResolver
             if (ps == null) {
                 return null;
             }
-            final PackageUserState userState = ps.getUserStateOrDefault(userId);
+            final PackageUserStateInternal userState = ps.getUserStateOrDefault(userId);
             ServiceInfo si = PackageInfoUtils.generateServiceInfo(pkg, service, mFlags,
                     userState, userId, ps);
             if (si == null) {

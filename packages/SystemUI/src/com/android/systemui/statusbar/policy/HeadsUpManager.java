@@ -378,10 +378,6 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
     public void onDensityOrFontScaleChanged() {
     }
 
-    public boolean isEntryAutoHeadsUpped(String key) {
-        return false;
-    }
-
     /**
      * Determines if the notification is for a critical call that must display on top of an active
      * input notification.

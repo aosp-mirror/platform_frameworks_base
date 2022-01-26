@@ -54,7 +54,6 @@ import java.util.Set;
  *
  * @hide
  */
-// TODO(b/173807334): Expose API
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public interface PackageState {
 
@@ -163,10 +162,9 @@ public interface PackageState {
      * Retrieves the shared user ID. Note that the actual shared user data is not available here and
      * must be queried separately.
      *
-     * @return the shared user this package is a part of, or null if it's not part of a shared user.
+     * @return the shared user this package is a part of, or -1 if it's not part of a shared user.
      */
-    @Nullable
-    Integer getSharedUserId();
+    int getSharedUserId();
 
     @NonNull
     SigningInfo getSigningInfo();

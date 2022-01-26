@@ -1517,6 +1517,12 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
+    /**
+     * @deprecated As RemoteViews may be reapplied frequently, it is preferable to call
+     * {@link #setDisplayedChild(int, int)} to ensure that the adapter index does not change
+     * unexpectedly.
+     */
+    @Deprecated
     private final class ViewContentNavigation extends Action {
         final boolean mNext;
 
@@ -4121,7 +4127,11 @@ public class RemoteViews implements Parcelable, Filter {
      * Equivalent to calling {@link AdapterViewAnimator#showNext()}
      *
      * @param viewId The id of the view on which to call {@link AdapterViewAnimator#showNext()}
+     * @deprecated As RemoteViews may be reapplied frequently, it is preferable to call
+     * {@link #setDisplayedChild(int, int)} to ensure that the adapter index does not change
+     * unexpectedly.
      */
+    @Deprecated
     public void showNext(@IdRes int viewId) {
         addAction(new ViewContentNavigation(viewId, true /* next */));
     }
@@ -4130,7 +4140,11 @@ public class RemoteViews implements Parcelable, Filter {
      * Equivalent to calling {@link AdapterViewAnimator#showPrevious()}
      *
      * @param viewId The id of the view on which to call {@link AdapterViewAnimator#showPrevious()}
+     * @deprecated As RemoteViews may be reapplied frequently, it is preferable to call
+     * {@link #setDisplayedChild(int, int)} to ensure that the adapter index does not change
+     * unexpectedly.
      */
+    @Deprecated
     public void showPrevious(@IdRes int viewId) {
         addAction(new ViewContentNavigation(viewId, false /* next */));
     }

@@ -83,6 +83,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
+import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED;
+import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_FREEFORM;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_FOCUS_CONTROLLER;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
@@ -2868,9 +2870,9 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 relayoutResult = relayoutWindow(params, viewVisibility, insetsPending);
                 final boolean freeformResizing = (relayoutResult
-                        & WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_FREEFORM) != 0;
+                        & RELAYOUT_RES_DRAG_RESIZING_FREEFORM) != 0;
                 final boolean dockedResizing = (relayoutResult
-                        & WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED) != 0;
+                        & RELAYOUT_RES_DRAG_RESIZING_DOCKED) != 0;
                 final boolean dragResizing = freeformResizing || dockedResizing;
                 if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_BLAST_SYNC) != 0) {
                     if (DEBUG_BLAST) {
@@ -7928,21 +7930,24 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        long frameNumber = -1;
-        if (mSurface.isValid()) {
-            frameNumber = mSurface.getNextFrameNumber();
-        }
+        final int requestedWidth = (int) (mView.getMeasuredWidth() * appScale + 0.5f);
+        final int requestedHeight = (int) (mView.getMeasuredHeight() * appScale + 0.5f);
 
         int relayoutResult = mWindowSession.relayout(mWindow, params,
-                (int) (mView.getMeasuredWidth() * appScale + 0.5f),
-                (int) (mView.getMeasuredHeight() * appScale + 0.5f), viewVisibility,
-                insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0, frameNumber,
+                requestedWidth, requestedHeight, viewVisibility,
+                insetsPending ? WindowManagerGlobal.RELAYOUT_INSETS_PENDING : 0,
                 mTmpFrames, mPendingMergedConfiguration, mSurfaceControl, mTempInsets,
-                mTempControls, mSurfaceSize);
+                mTempControls);
 
         final int transformHint = SurfaceControl.rotationToBufferTransform(
                 (mDisplayInstallOrientation + mDisplay.getRotation()) % 4);
         mSurfaceControl.setTransformHint(transformHint);
+
+        final WindowConfiguration winConfig = getConfiguration().windowConfiguration;
+        final boolean dragResizing = (relayoutResult
+                & (RELAYOUT_RES_DRAG_RESIZING_DOCKED | RELAYOUT_RES_DRAG_RESIZING_FREEFORM)) != 0;
+        WindowLayout.computeSurfaceSize(mWindowAttributes, winConfig.getMaxBounds(), requestedWidth,
+                requestedHeight, mTmpFrames.frame, dragResizing, mSurfaceSize);
 
         if (mAttachInfo.mContentCaptureManager != null) {
             MainContentCaptureSession mainSession = mAttachInfo.mContentCaptureManager

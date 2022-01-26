@@ -19,11 +19,13 @@ package com.android.server.companion.virtual;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.hardware.input.InputManagerInternal;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.IInputConstants;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 
@@ -64,9 +66,13 @@ public class InputControllerTest {
         final IBinder deviceToken = new Binder();
         mInputController.createMouse("name", /*vendorId= */ 1, /*productId= */ 1, deviceToken,
                 /* displayId= */ 1);
+        verify(mInputManagerInternalMock).setVirtualMousePointerDisplayId(eq(1));
+        verify(mInputManagerInternalMock).setPointerAcceleration(eq(1f));
         mInputController.unregisterInputDevice(deviceToken);
         verify(mInputManagerInternalMock).setVirtualMousePointerDisplayId(
                 eq(Display.INVALID_DISPLAY));
+        verify(mInputManagerInternalMock).setPointerAcceleration(
+                eq((float) IInputConstants.DEFAULT_POINTER_ACCELERATION));
     }
 
     @Test
@@ -75,10 +81,14 @@ public class InputControllerTest {
         mInputController.createMouse("name", /*vendorId= */ 1, /*productId= */ 1, deviceToken,
                 /* displayId= */ 1);
         verify(mInputManagerInternalMock).setVirtualMousePointerDisplayId(eq(1));
-        mInputController.createMouse("name", /*vendorId= */ 1, /*productId= */ 1, deviceToken,
+        verify(mInputManagerInternalMock).setPointerAcceleration(eq(1f));
+        final IBinder deviceToken2 = new Binder();
+        mInputController.createMouse("name", /*vendorId= */ 1, /*productId= */ 1, deviceToken2,
                 /* displayId= */ 2);
         verify(mInputManagerInternalMock).setVirtualMousePointerDisplayId(eq(2));
         mInputController.unregisterInputDevice(deviceToken);
         verify(mInputManagerInternalMock).setVirtualMousePointerDisplayId(eq(1));
+        verify(mInputManagerInternalMock, times(0)).setPointerAcceleration(
+                eq((float) IInputConstants.DEFAULT_POINTER_ACCELERATION));
     }
 }

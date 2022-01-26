@@ -319,6 +319,12 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
     },
+    "-1764792832": {
+      "message": "Start collecting in Transition: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
     "-1750384749": {
       "message": "Launch on display check: allow launch on public display",
       "level": "DEBUG",
@@ -348,6 +354,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotation.java"
+    },
+    "-1728919185": {
+      "message": "        unrelated invisible sibling %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "-1715268616": {
       "message": "Last window, removing starting window %s",
@@ -444,12 +456,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
-    },
-    "-1587921395": {
-      "message": "  Top targets: %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "-1585311008": {
       "message": "Bring to front target: %s from %s",
@@ -702,12 +708,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
-    },
-    "-1375751630": {
-      "message": "  --- Start combine pass ---",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "-1364754753": {
       "message": "Task vanished taskId=%d",
@@ -1171,12 +1171,6 @@
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
     },
-    "-855366859": {
-      "message": "        merging children in from %s: %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/Transition.java"
-    },
     "-853404763": {
       "message": "\twallpaper=%s",
       "level": "DEBUG",
@@ -1233,6 +1227,12 @@
     },
     "-779535710": {
       "message": "Transition %d: Set %s as transient-launch",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
+    "-779095785": {
+      "message": "        sibling is a participant with mode %s",
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
@@ -1549,12 +1549,6 @@
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
-    "-446752714": {
-      "message": "        SKIP: sibling contains top target %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/Transition.java"
-    },
     "-445944810": {
       "message": "finish(%b): mCanceled=%b",
       "level": "DEBUG",
@@ -1722,12 +1716,6 @@
       "level": "WARN",
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
-    },
-    "-302335479": {
-      "message": "        remove from topTargets %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "-292790591": {
       "message": "Attempted to set IME policy to a display that does not exist: %d",
@@ -2071,6 +2059,12 @@
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "112145970": {
+      "message": "      SKIP: its sibling was rejected",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "114070759": {
       "message": "New wallpaper target: %s prevTarget: %s caller=%s",
       "level": "VERBOSE",
@@ -2407,6 +2401,12 @@
       "group": "WM_SHOW_SURFACE_ALLOC",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "405146734": {
+      "message": "  Final targets: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
+    },
     "416924848": {
       "message": "InsetsSource Control %s for target %s",
       "level": "DEBUG",
@@ -2430,12 +2430,6 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "430260320": {
-      "message": "        sibling is a top target with mode %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "431715812": {
       "message": "Launch on display check: allow launch any on display",
@@ -2755,12 +2749,6 @@
       "group": "WM_SHOW_SURFACE_ALLOC",
       "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
     },
-    "751854538": {
-      "message": "DisplayArea keep clear rects changed name =%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_WINDOW_ORGANIZER",
-      "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
-    },
     "765395228": {
       "message": "onAnimationFinished(): controller=%s reorderMode=%d",
       "level": "DEBUG",
@@ -2790,6 +2778,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
+    },
+    "800698875": {
+      "message": "SyncGroup %d: Started when there is other active SyncGroup",
+      "level": "WARN",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
     },
     "806891543": {
       "message": "Setting mOrientationChangeComplete=true because wtoken %s numInteresting=%d numDrawn=%d",
@@ -3085,12 +3079,6 @@
       "group": "WM_DEBUG_WALLPAPER",
       "at": "com\/android\/server\/wm\/WallpaperController.java"
     },
-    "1186730970": {
-      "message": "          no common mode yet, so set it",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/Transition.java"
-    },
     "1191587912": {
       "message": "Moved rootTask=%s behind rootTask=%s",
       "level": "DEBUG",
@@ -3204,6 +3192,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "1333520287": {
+      "message": "Creating PendingTransition: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
     },
     "1337596507": {
       "message": "Sending to proc %s new compat %s",
@@ -3822,6 +3816,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "2034988903": {
+      "message": "PendingStartTransaction found",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/WindowOrganizerController.java"
     },
     "2039056415": {
       "message": "Found matching affinity candidate!",

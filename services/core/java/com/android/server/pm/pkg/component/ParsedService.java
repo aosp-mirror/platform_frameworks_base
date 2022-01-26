@@ -19,6 +19,7 @@ package com.android.server.pm.pkg.component;
 import android.annotation.Nullable;
 
 /** @hide **/
+//@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public interface ParsedService extends ParsedMainComponent {
 
     int getForegroundServiceType();

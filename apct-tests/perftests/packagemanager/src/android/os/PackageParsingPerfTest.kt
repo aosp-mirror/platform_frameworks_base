@@ -218,7 +218,7 @@ public class PackageParsingPerfTest {
             })
 
         override fun parseImpl(file: File) =
-                parser.parsePackage(input.get()!!.reset(), file, 0).result
+                parser.parsePackage(input.get()!!.reset(), file, 0, null).result
                         as ParsingPackageImpl
     }
 

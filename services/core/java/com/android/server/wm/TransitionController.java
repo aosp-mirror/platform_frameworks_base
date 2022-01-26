@@ -128,16 +128,46 @@ class TransitionController {
             throw new IllegalStateException("Shell Transitions not enabled");
         }
         if (mCollectingTransition != null) {
-            throw new IllegalStateException("Simultaneous transitions not supported yet.");
+            throw new IllegalStateException("Simultaneous transition collection not supported"
+                    + " yet. Use {@link #createPendingTransition} for explicit queueing.");
         }
+        Transition transit = new Transition(type, flags, this, mAtm.mWindowManager.mSyncEngine);
+        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Creating Transition: %s", transit);
+        moveToCollecting(transit);
+        return transit;
+    }
+
+    /** Starts Collecting */
+    private void moveToCollecting(@NonNull Transition transition) {
+        if (mCollectingTransition != null) {
+            throw new IllegalStateException("Simultaneous transition collection not supported.");
+        }
+        mCollectingTransition = transition;
         // Distinguish change type because the response time is usually expected to be not too long.
-        final long timeoutMs = type == TRANSIT_CHANGE ? CHANGE_TIMEOUT_MS : DEFAULT_TIMEOUT_MS;
-        mCollectingTransition = new Transition(type, flags, timeoutMs, this,
-                mAtm.mWindowManager.mSyncEngine);
-        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Creating Transition: %s",
+        final long timeoutMs =
+                transition.mType == TRANSIT_CHANGE ? CHANGE_TIMEOUT_MS : DEFAULT_TIMEOUT_MS;
+        mCollectingTransition.startCollecting(timeoutMs);
+        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Start collecting in Transition: %s",
                 mCollectingTransition);
         dispatchLegacyAppTransitionPending();
-        return mCollectingTransition;
+    }
+
+    /** Creates a transition representation but doesn't start collecting. */
+    @NonNull
+    PendingStartTransition createPendingTransition(@WindowManager.TransitionType int type) {
+        if (mTransitionPlayer == null) {
+            throw new IllegalStateException("Shell Transitions not enabled");
+        }
+        final PendingStartTransition out = new PendingStartTransition(new Transition(type,
+                0 /* flags */, this, mAtm.mWindowManager.mSyncEngine));
+        // We want to start collecting immediately when the engine is free, otherwise it may
+        // be busy again.
+        out.setStartSync(() -> {
+            moveToCollecting(out.mTransition);
+        });
+        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Creating PendingTransition: %s",
+                out.mTransition);
+        return out;
     }
 
     void registerTransitionPlayer(@Nullable ITransitionPlayer player,
@@ -505,6 +535,15 @@ class TransitionController {
         }
         proto.write(AppTransitionProto.APP_TRANSITION_STATE, state);
         proto.end(token);
+    }
+
+    /** Represents a startTransition call made while there is other active BLAST SyncGroup. */
+    class PendingStartTransition extends WindowOrganizerController.PendingTransaction {
+        final Transition mTransition;
+
+        PendingStartTransition(Transition transition) {
+            mTransition = transition;
+        }
     }
 
     static class TransitionMetricsReporter extends ITransitionMetricsReporter.Stub {

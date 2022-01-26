@@ -268,6 +268,13 @@ public class RcsUceAdapter {
     @SystemApi
     public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_ENABLED = 11;
 
+    /**
+     * A capability update has been requested due to IMS being registered over INTERNET PDN.
+     * @hide
+     */
+    @SystemApi
+    public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_INTERNET_PDN = 12;
+
     /**@hide*/
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "ERROR_", value = {
@@ -282,7 +289,8 @@ public class RcsUceAdapter {
             CAPABILITY_UPDATE_TRIGGER_MOVE_TO_WLAN,
             CAPABILITY_UPDATE_TRIGGER_MOVE_TO_IWLAN,
             CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_DISABLED,
-            CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_ENABLED
+            CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_ENABLED,
+            CAPABILITY_UPDATE_TRIGGER_MOVE_TO_INTERNET_PDN
     })
     public @interface StackPublishTriggerType {}
 

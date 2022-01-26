@@ -22,9 +22,6 @@ import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
-import com.android.server.pm.pkg.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
@@ -41,6 +38,9 @@ import com.android.server.pm.PackageManagerException;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
+import com.android.server.pm.pkg.parsing.ParsingUtils;
 
 import java.io.File;
 import java.util.List;
@@ -147,6 +147,15 @@ public class PackageParser2 implements AutoCloseable {
     @AnyThread
     public ParsedPackage parsePackage(File packageFile, int flags, boolean useCaches)
             throws PackageManagerException {
+        return parsePackage(packageFile, flags, useCaches, /* frameworkSplits= */ null);
+    }
+
+    /**
+     * TODO(b/135203078): Document new package parsing
+     */
+    @AnyThread
+    public ParsedPackage parsePackage(File packageFile, int flags, boolean useCaches,
+            List<File> frameworkSplits) throws PackageManagerException {
         if (useCaches && mCacher != null) {
             ParsedPackage parsed = mCacher.getCachedResult(packageFile, flags);
             if (parsed != null) {
@@ -156,7 +165,8 @@ public class PackageParser2 implements AutoCloseable {
 
         long parseTime = LOG_PARSE_TIMINGS ? SystemClock.uptimeMillis() : 0;
         ParseInput input = mSharedResult.get().reset();
-        ParseResult<ParsingPackage> result = parsingUtils.parsePackage(input, packageFile, flags);
+        ParseResult<ParsingPackage> result = parsingUtils.parsePackage(input, packageFile, flags,
+                frameworkSplits);
         if (result.isError()) {
             throw new PackageManagerException(result.getErrorCode(), result.getErrorMessage(),
                     result.getException());

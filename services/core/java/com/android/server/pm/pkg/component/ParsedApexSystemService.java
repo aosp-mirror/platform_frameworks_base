@@ -18,10 +18,10 @@ package com.android.server.pm.pkg.component;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.Parcelable;
 
 /** @hide */
-public interface ParsedApexSystemService extends Parcelable {
+//@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+public interface ParsedApexSystemService {
 
     @NonNull
     String getName();
@@ -34,5 +34,4 @@ public interface ParsedApexSystemService extends Parcelable {
 
     @Nullable
     String getMaxSdkVersion();
-
 }

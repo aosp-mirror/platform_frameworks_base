@@ -32,7 +32,7 @@ import com.android.internal.util.DataClass;
         genBuilder = false, genConstructor = false)
 @DataClass.Suppress({"setIntentFilter"})
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-public class ParsedIntentInfoImpl implements ParsedIntentInfo {
+public class ParsedIntentInfoImpl implements ParsedIntentInfo, Parcelable {
 
     private boolean mHasDefault;
     private int mLabelRes;
@@ -169,10 +169,10 @@ public class ParsedIntentInfoImpl implements ParsedIntentInfo {
     };
 
     @DataClass.Generated(
-            time = 1627691925408L,
+            time = 1641431952314L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/component/ParsedIntentInfoImpl.java",
-            inputSignatures = "private  boolean mHasDefault\nprivate  int mLabelRes\nprivate @android.annotation.Nullable java.lang.CharSequence mNonLocalizedLabel\nprivate  int mIcon\nprivate @android.annotation.NonNull android.content.IntentFilter mIntentFilter\nclass ParsedIntentInfoImpl extends java.lang.Object implements [android.content.pm.parsing.component.ParsedIntentInfo]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genParcelable=true, genAidl=false, genBuilder=false, genConstructor=false)")
+            inputSignatures = "private  boolean mHasDefault\nprivate  int mLabelRes\nprivate @android.annotation.Nullable java.lang.CharSequence mNonLocalizedLabel\nprivate  int mIcon\nprivate @android.annotation.NonNull android.content.IntentFilter mIntentFilter\nclass ParsedIntentInfoImpl extends java.lang.Object implements [android.content.pm.parsing.component.ParsedIntentInfo, android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genParcelable=true, genAidl=false, genBuilder=false, genConstructor=false)")
     @Deprecated
     private void __metadata() {}
 

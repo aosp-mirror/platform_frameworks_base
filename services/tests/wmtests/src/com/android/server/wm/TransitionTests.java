@@ -50,6 +50,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.view.SurfaceControl;
 import android.view.TransactionCommittedListener;
+import android.window.IDisplayAreaOrganizer;
 import android.window.ITaskOrganizer;
 import android.window.ITransitionPlayer;
 import android.window.TransitionInfo;
@@ -60,6 +61,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -75,7 +78,9 @@ public class TransitionTests extends WindowTestsBase {
     private Transition createTestTransition(int transitType) {
         TransitionController controller = mock(TransitionController.class);
         final BLASTSyncEngine sync = createTestBLASTSyncEngine();
-        return new Transition(transitType, 0 /* flags */, 0 /* timeoutMs */, controller, sync);
+        final Transition t = new Transition(transitType, 0 /* flags */, controller, sync);
+        t.startCollecting(0 /* timeoutMs */);
+        return t;
     }
 
     @Test
@@ -104,7 +109,7 @@ public class TransitionTests extends WindowTestsBase {
         // Check basic both tasks participating
         participants.add(oldTask);
         participants.add(newTask);
-        ArraySet<WindowContainer> targets = Transition.calculateTargets(participants, changes);
+        ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
         TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
         assertEquals(2, info.getChanges().size());
         assertEquals(transit, info.getType());
@@ -169,7 +174,7 @@ public class TransitionTests extends WindowTestsBase {
         participants.add(oldTask);
         participants.add(opening);
         participants.add(opening2);
-        ArraySet<WindowContainer> targets = Transition.calculateTargets(participants, changes);
+        ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
         TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
         assertEquals(2, info.getChanges().size());
         assertEquals(transit, info.getType());
@@ -215,15 +220,14 @@ public class TransitionTests extends WindowTestsBase {
         // Check promotion to DisplayArea
         participants.add(showing);
         participants.add(showing2);
-        ArraySet<WindowContainer> targets = Transition.calculateTargets(participants, changes);
+        ArrayList<WindowContainer> targets = Transition.calculateTargets(participants, changes);
         TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
         assertEquals(1, info.getChanges().size());
         assertEquals(transit, info.getType());
         assertNotNull(info.getChange(tda.mRemoteToken.toWindowContainerToken()));
 
-        ITaskOrganizer mockOrg = mock(ITaskOrganizer.class);
         // Check that organized tasks get reported even if not top
-        showTask.mTaskOrganizer = mockOrg;
+        makeTaskOrganized(showTask);
         targets = Transition.calculateTargets(participants, changes);
         info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
         assertEquals(2, info.getChanges().size());
@@ -253,7 +257,7 @@ public class TransitionTests extends WindowTestsBase {
         opening.mVisibleRequested = true;
         closing.mVisibleRequested = false;
 
-        ArraySet<WindowContainer> targets = Transition.calculateTargets(
+        ArrayList<WindowContainer> targets = Transition.calculateTargets(
                 transition.mParticipants, transition.mChanges);
         TransitionInfo info = Transition.calculateTransitionInfo(
                 0, 0, targets, transition.mChanges);
@@ -290,7 +294,7 @@ public class TransitionTests extends WindowTestsBase {
             tasks[i].getTopMostActivity().mVisibleRequested = (i % 2) != 0;
         }
 
-        ArraySet<WindowContainer> targets = Transition.calculateTargets(
+        ArrayList<WindowContainer> targets = Transition.calculateTargets(
                 transition.mParticipants, transition.mChanges);
         TransitionInfo info = Transition.calculateTransitionInfo(
                 0, 0, targets, transition.mChanges);
@@ -339,7 +343,7 @@ public class TransitionTests extends WindowTestsBase {
             tasks[i].getTopMostActivity().mVisibleRequested = (i % 2) != 0;
         }
 
-        ArraySet<WindowContainer> targets = Transition.calculateTargets(
+        ArrayList<WindowContainer> targets = Transition.calculateTargets(
                 transition.mParticipants, transition.mChanges);
         TransitionInfo info = Transition.calculateTransitionInfo(
                 0, 0, targets, transition.mChanges);
@@ -361,13 +365,7 @@ public class TransitionTests extends WindowTestsBase {
                 mock(IBinder.class), true, mDisplayContent, true /* ownerCanManageAppTokens */);
         // Make DA organized so we can check that they don't get included.
         WindowContainer parent = wallpaperWindowToken.getParent();
-        while (parent != null && parent != mDisplayContent) {
-            if (parent.asDisplayArea() != null) {
-                parent.asDisplayArea().setOrganizer(
-                        mock(android.window.IDisplayAreaOrganizer.class), true /* skipAppear */);
-            }
-            parent = parent.getParent();
-        }
+        makeDisplayAreaOrganized(parent, mDisplayContent);
         final WindowState wallpaperWindow = createWindow(null, TYPE_WALLPAPER, wallpaperWindowToken,
                 "wallpaperWindow");
         wallpaperWindowToken.setVisibleRequested(false);
@@ -379,7 +377,7 @@ public class TransitionTests extends WindowTestsBase {
         mDisplayContent.getWindowConfiguration().setRotation(
                 (mDisplayContent.getWindowConfiguration().getRotation() + 1) % 4);
 
-        ArraySet<WindowContainer> targets = Transition.calculateTargets(
+        ArrayList<WindowContainer> targets = Transition.calculateTargets(
                 transition.mParticipants, transition.mChanges);
         TransitionInfo info = Transition.calculateTransitionInfo(
                 0, 0, targets, transition.mChanges);
@@ -392,11 +390,37 @@ public class TransitionTests extends WindowTestsBase {
     }
 
     @Test
+    public void testOpenActivityInTheSameTaskWithDisplayChange() {
+        final ActivityRecord closing = createActivityRecord(mDisplayContent);
+        closing.mVisibleRequested = true;
+        final Task task = closing.getTask();
+        makeTaskOrganized(task);
+        final ActivityRecord opening = createActivityRecord(task);
+        opening.mVisibleRequested = false;
+        makeDisplayAreaOrganized(mDisplayContent.getDefaultTaskDisplayArea(), mDisplayContent);
+        final WindowContainer<?>[] wcs = { closing, opening, task, mDisplayContent };
+        final Transition transition = createTestTransition(TRANSIT_OPEN);
+        for (WindowContainer<?> wc : wcs) {
+            transition.collect(wc);
+        }
+        closing.mVisibleRequested = false;
+        opening.mVisibleRequested = true;
+        final int newRotation = mDisplayContent.getWindowConfiguration().getRotation() + 1;
+        for (WindowContainer<?> wc : wcs) {
+            wc.getWindowConfiguration().setRotation(newRotation);
+        }
+
+        final ArrayList<WindowContainer> targets = Transition.calculateTargets(
+                transition.mParticipants, transition.mChanges);
+        // Especially the activities must be in the targets.
+        assertTrue(targets.containsAll(Arrays.asList(wcs)));
+    }
+
+    @Test
     public void testIndependent() {
         final Transition transition = createTestTransition(TRANSIT_OPEN);
         ArrayMap<WindowContainer, Transition.ChangeInfo> changes = transition.mChanges;
         ArraySet<WindowContainer> participants = transition.mParticipants;
-        ITaskOrganizer mockOrg = mock(ITaskOrganizer.class);
 
         final Task openTask = createTask(mDisplayContent);
         final Task openInOpenTask = createTaskInRootTask(openTask, 0);
@@ -408,10 +432,8 @@ public class TransitionTests extends WindowTestsBase {
         final ActivityRecord changeInChange = createActivityRecord(changeInChangeTask);
         final ActivityRecord openInChange = createActivityRecord(openInChangeTask);
         // set organizer for everything so that they all get added to transition info
-        for (Task t : new Task[]{
-                openTask, openInOpenTask, changeTask, changeInChangeTask, openInChangeTask}) {
-            t.mTaskOrganizer = mockOrg;
-        }
+        makeTaskOrganized(openTask, openInOpenTask, changeTask, changeInChangeTask,
+                openInChangeTask);
 
         // Start states.
         changes.put(openTask, new Transition.ChangeInfo(false /* vis */, true /* exChg */));
@@ -438,7 +460,8 @@ public class TransitionTests extends WindowTestsBase {
         participants.add(openInChange);
         // Explicitly add changeTask (to test independence with parents)
         participants.add(changeTask);
-        ArraySet<WindowContainer> targets = Transition.calculateTargets(participants, changes);
+        final ArrayList<WindowContainer> targets =
+                Transition.calculateTargets(participants, changes);
         TransitionInfo info = Transition.calculateTransitionInfo(transit, flags, targets, changes);
         // Root changes should always be considered independent
         assertTrue(isIndependent(
@@ -466,12 +489,13 @@ public class TransitionTests extends WindowTestsBase {
         final BLASTSyncEngine sync = new BLASTSyncEngine(mWm);
         final CountDownLatch latch = new CountDownLatch(1);
         // When the timeout is reached, it will finish the sync-group and notify transaction ready.
-        new Transition(TRANSIT_OPEN, 0 /* flags */, 10 /* timeoutMs */, controller, sync) {
+        final Transition t = new Transition(TRANSIT_OPEN, 0 /* flags */, controller, sync) {
             @Override
             public void onTransactionReady(int syncId, SurfaceControl.Transaction transaction) {
                 latch.countDown();
             }
         };
+        t.startCollecting(10 /* timeoutMs */);
         assertTrue(awaitInWmLock(() -> latch.await(3, TimeUnit.SECONDS)));
     }
 
@@ -491,9 +515,9 @@ public class TransitionTests extends WindowTestsBase {
         mDisplayContent.setLastHasContent();
         mDisplayContent.requestChangeTransitionIfNeeded(1 /* any changes */,
                 null /* displayChange */);
-        final FadeRotationAnimationController fadeController =
-                mDisplayContent.getFadeRotationAnimationController();
-        assertNotNull(fadeController);
+        final AsyncRotationController asyncRotationController =
+                mDisplayContent.getAsyncRotationController();
+        assertNotNull(asyncRotationController);
         for (WindowState w : windows) {
             w.setOrientationChanging(true);
         }
@@ -506,7 +530,7 @@ public class TransitionTests extends WindowTestsBase {
         // Status bar finishes drawing before the start transaction. Its fade-in animation will be
         // executed until the transaction is committed, so it is still in target tokens.
         statusBar.setOrientationChanging(false);
-        assertTrue(fadeController.isTargetToken(statusBar.mToken));
+        assertTrue(asyncRotationController.isTargetToken(statusBar.mToken));
 
         final SurfaceControl.Transaction startTransaction = mock(SurfaceControl.Transaction.class);
         final ArgumentCaptor<TransactionCommittedListener> listenerCaptor =
@@ -516,13 +540,13 @@ public class TransitionTests extends WindowTestsBase {
         verify(startTransaction).addTransactionCommittedListener(any(), listenerCaptor.capture());
         // The transaction is committed, so fade-in animation for status bar is consumed.
         listenerCaptor.getValue().onTransactionCommitted();
-        assertFalse(fadeController.isTargetToken(statusBar.mToken));
+        assertFalse(asyncRotationController.isTargetToken(statusBar.mToken));
 
         // Status bar finishes drawing after the start transaction, so its fade-in animation can
         // execute directly.
         navBar.setOrientationChanging(false);
-        assertFalse(fadeController.isTargetToken(navBar.mToken));
-        assertNull(mDisplayContent.getFadeRotationAnimationController());
+        assertFalse(asyncRotationController.isTargetToken(navBar.mToken));
+        assertNull(mDisplayContent.getAsyncRotationController());
     }
 
     @Test
@@ -540,10 +564,10 @@ public class TransitionTests extends WindowTestsBase {
         mDisplayContent.setLastHasContent();
         mDisplayContent.requestChangeTransitionIfNeeded(anyChanges, null /* displayChange */);
         transition.setKnownConfigChanges(mDisplayContent, anyChanges);
-        final FadeRotationAnimationController fadeController =
-                mDisplayContent.getFadeRotationAnimationController();
-        assertNotNull(fadeController);
-        assertTrue(fadeController.shouldFreezeInsetsPosition(statusBar));
+        final AsyncRotationController asyncRotationController =
+                mDisplayContent.getAsyncRotationController();
+        assertNotNull(asyncRotationController);
+        assertTrue(asyncRotationController.shouldFreezeInsetsPosition(statusBar));
 
         statusBar.setOrientationChanging(true);
         player.startTransition();
@@ -569,7 +593,7 @@ public class TransitionTests extends WindowTestsBase {
         // The controller should capture the draw transaction and merge it when preparing to run
         // fade-in animation.
         verify(mDisplayContent.getPendingTransaction()).merge(eq(postDrawTransaction));
-        assertNull(mDisplayContent.getFadeRotationAnimationController());
+        assertNull(mDisplayContent.getAsyncRotationController());
     }
 
     @Test
@@ -578,17 +602,15 @@ public class TransitionTests extends WindowTestsBase {
         final TransitionController controller = new TransitionController(mAtm, snapshotController);
         final ITransitionPlayer player = new ITransitionPlayer.Default();
         controller.registerTransitionPlayer(player, null /* appThread */);
-        ITaskOrganizer mockOrg = mock(ITaskOrganizer.class);
         final Transition openTransition = controller.createTransition(TRANSIT_OPEN);
 
         // Start out with task2 visible and set up a transition that closes task2 and opens task1
         final Task task1 = createTask(mDisplayContent);
-        task1.mTaskOrganizer = mockOrg;
         final ActivityRecord activity1 = createActivityRecord(task1);
         activity1.mVisibleRequested = false;
         activity1.setVisible(false);
         final Task task2 = createTask(mDisplayContent);
-        task2.mTaskOrganizer = mockOrg;
+        makeTaskOrganized(task1, task2);
         final ActivityRecord activity2 = createActivityRecord(task1);
         activity2.mVisibleRequested = true;
         activity2.setVisible(true);
@@ -644,17 +666,15 @@ public class TransitionTests extends WindowTestsBase {
         final TransitionController controller = new TransitionController(mAtm, snapshotController);
         final ITransitionPlayer player = new ITransitionPlayer.Default();
         controller.registerTransitionPlayer(player, null /* appThread */);
-        ITaskOrganizer mockOrg = mock(ITaskOrganizer.class);
         final Transition openTransition = controller.createTransition(TRANSIT_OPEN);
 
         // Start out with task2 visible and set up a transition that closes task2 and opens task1
         final Task task1 = createTask(mDisplayContent);
-        task1.mTaskOrganizer = mockOrg;
         final ActivityRecord activity1 = createActivityRecord(task1);
         activity1.mVisibleRequested = false;
         activity1.setVisible(false);
         final Task task2 = createTask(mDisplayContent);
-        task2.mTaskOrganizer = mockOrg;
+        makeTaskOrganized(task1, task2);
         final ActivityRecord activity2 = createActivityRecord(task2);
         activity2.mVisibleRequested = true;
         activity2.setVisible(true);
@@ -701,6 +721,24 @@ public class TransitionTests extends WindowTestsBase {
         closeTransition.finishTransition();
 
         verify(snapshotController, times(1)).recordTaskSnapshot(eq(task1), eq(false));
+    }
+
+    private static void makeTaskOrganized(Task... tasks) {
+        final ITaskOrganizer organizer = mock(ITaskOrganizer.class);
+        for (Task t : tasks) {
+            t.mTaskOrganizer = organizer;
+        }
+    }
+
+    private static void makeDisplayAreaOrganized(WindowContainer<?> from,
+            WindowContainer<?> end) {
+        final IDisplayAreaOrganizer organizer = mock(IDisplayAreaOrganizer.class);
+        while (from != null && from != end) {
+            if (from.asDisplayArea() != null) {
+                from.asDisplayArea().mOrganizer = organizer;
+            }
+            from = from.getParent();
+        }
     }
 
     /** Fill the change map with all the parents of top. Change maps are usually fully populated */

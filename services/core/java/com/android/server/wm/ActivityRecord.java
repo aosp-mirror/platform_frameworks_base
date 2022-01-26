@@ -95,6 +95,7 @@ import static android.content.res.Configuration.UI_MODE_TYPE_MASK;
 import static android.content.res.Configuration.UI_MODE_TYPE_VR_HEADSET;
 import static android.os.Build.VERSION_CODES.HONEYCOMB;
 import static android.os.Build.VERSION_CODES.O;
+import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.COLOR_MODE_DEFAULT;
@@ -635,7 +636,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private boolean mOccludesParent;
 
     // The input dispatching timeout for this application token in milliseconds.
-    long mInputDispatchingTimeoutMillis;
+    long mInputDispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 
     private boolean mShowWhenLocked;
     private boolean mInheritShownWhenLocked;
@@ -1443,7 +1444,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (oldParent == null && newParent != null) {
             // First time we are adding the activity to the system.
             mVoiceInteraction = newTask.voiceSession != null;
-            mInputDispatchingTimeoutMillis = getInputDispatchingTimeoutMillisLocked(this);
 
             // TODO(b/36505427): Maybe this call should be moved inside
             // updateOverrideConfiguration()
@@ -1995,6 +1995,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             task.setRootProcess(proc);
         }
         proc.addActivityIfNeeded(this);
+        mInputDispatchingTimeoutMillis = getInputDispatchingTimeoutMillisLocked(this);
 
         // Update the associated task fragment after setting the process, since it's required for
         // filtering to only report activities that belong to the same process.
@@ -3578,6 +3579,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             app.removeActivity(this, false /* keepAssociation */);
         }
         app = null;
+        mInputDispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
     }
 
     void makeFinishingLocked() {

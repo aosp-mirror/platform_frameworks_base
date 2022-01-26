@@ -36,6 +36,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import android.app.WindowConfiguration;
 import android.app.WindowConfiguration.WindowingMode;
 import android.graphics.Insets;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
 
@@ -258,6 +259,7 @@ public class WindowLayout {
                 + " outFrame=" + outFrame.toShortString()
                 + " outParentFrame=" + outParentFrame.toShortString()
                 + " outDisplayFrame=" + outDisplayFrame.toShortString()
+                + " windowBounds=" + windowBounds.toShortString()
                 + " attachedWindowFrame=" + (attachedWindowFrame != null
                         ? attachedWindowFrame.toShortString()
                         : "null")
@@ -271,5 +273,46 @@ public class WindowLayout {
                 + " requestedVisibilities=" + requestedVisibilities);
 
         return clippedByDisplayCutout;
+    }
+
+    public static void computeSurfaceSize(WindowManager.LayoutParams attrs, Rect maxBounds,
+            int requestedWidth, int requestedHeight, Rect winFrame, boolean dragResizing,
+            Point outSurfaceSize) {
+        int width;
+        int height;
+        if ((attrs.flags & WindowManager.LayoutParams.FLAG_SCALED) != 0) {
+            // For a scaled surface, we always want the requested size.
+            width = requestedWidth;
+            height = requestedHeight;
+        } else {
+            // When we're doing a drag-resizing, request a surface that's fullscreen size,
+            // so that we don't need to reallocate during the process. This also prevents
+            // buffer drops due to size mismatch.
+            if (dragResizing) {
+                // The maxBounds should match the display size which applies fixed-rotation
+                // transformation if there is any.
+                width = maxBounds.width();
+                height = maxBounds.height();
+            } else {
+                width = winFrame.width();
+                height = winFrame.height();
+            }
+        }
+
+        // This doesn't necessarily mean that there is an error in the system. The sizes might be
+        // incorrect, because it is before the first layout or draw.
+        if (width < 1) {
+            width = 1;
+        }
+        if (height < 1) {
+            height = 1;
+        }
+
+        // Adjust for surface insets.
+        final Rect surfaceInsets = attrs.surfaceInsets;
+        width += surfaceInsets.left + surfaceInsets.right;
+        height += surfaceInsets.top + surfaceInsets.bottom;
+
+        outSurfaceSize.set(width, height);
     }
 }

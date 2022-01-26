@@ -59,6 +59,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -1793,5 +1794,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
             }
         }
         return null;
+    }
+
+    UUID getDeviceSensorUuid(AudioDeviceAttributes device) {
+        synchronized (mDeviceStateLock) {
+            return mDeviceInventory.getDeviceSensorUuid(device);
+        }
     }
 }

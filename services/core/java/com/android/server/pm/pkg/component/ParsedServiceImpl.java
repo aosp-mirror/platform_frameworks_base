@@ -32,7 +32,8 @@ import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 /** @hide **/
 @DataClass(genSetters = true, genGetters = true, genParcelable = false, genBuilder = false)
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-public class ParsedServiceImpl extends ParsedMainComponentImpl implements ParsedService {
+public class ParsedServiceImpl extends ParsedMainComponentImpl implements ParsedService,
+        Parcelable {
 
     private int foregroundServiceType;
     @Nullable
@@ -138,10 +139,10 @@ public class ParsedServiceImpl extends ParsedMainComponentImpl implements Parsed
     }
 
     @DataClass.Generated(
-            time = 1627592563052L,
+            time = 1641431954479L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/component/ParsedServiceImpl.java",
-            inputSignatures = "private  int foregroundServiceType\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String permission\npublic static final @android.annotation.NonNull android.os.Parcelable.Creator<android.content.pm.parsing.component.ParsedServiceImpl> CREATOR\npublic  android.content.pm.parsing.component.ParsedMainComponent setPermission(java.lang.String)\npublic  java.lang.String toString()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass ParsedServiceImpl extends android.content.pm.parsing.component.ParsedMainComponentImpl implements [android.content.pm.parsing.component.ParsedService]\n@com.android.internal.util.DataClass(genSetters=true, genGetters=true, genParcelable=false, genBuilder=false)")
+            inputSignatures = "private  int foregroundServiceType\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String permission\npublic static final @android.annotation.NonNull android.os.Parcelable.Creator<android.content.pm.parsing.component.ParsedServiceImpl> CREATOR\npublic  android.content.pm.parsing.component.ParsedMainComponent setPermission(java.lang.String)\npublic  java.lang.String toString()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass ParsedServiceImpl extends android.content.pm.parsing.component.ParsedMainComponentImpl implements [android.content.pm.parsing.component.ParsedService, android.os.Parcelable]\n@com.android.internal.util.DataClass(genSetters=true, genGetters=true, genParcelable=false, genBuilder=false)")
     @Deprecated
     private void __metadata() {}
 

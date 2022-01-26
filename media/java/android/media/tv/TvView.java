@@ -493,7 +493,6 @@ public class TvView extends ViewGroup {
      *
      * @see TvInputService.Session#notifyAitInfoUpdated(android.media.tv.AitInfo)
      * @see android.media.tv.interactive.TvInteractiveAppView#setTvView(TvView)
-     * @hide
      */
     public void setInteractiveAppNotificationEnabled(boolean enabled) {
         if (mSession != null) {
@@ -1074,7 +1073,6 @@ public class TvView extends ViewGroup {
          * This is called when the AIT (Application Information Table) info has been updated.
          *
          * @param aitInfo The current AIT info.
-         * @hide
          */
         public void onAitInfoUpdated(@NonNull String inputId, @NonNull AitInfo aitInfo) {
         }

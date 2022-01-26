@@ -516,6 +516,8 @@ class AccessibilityUserState {
                 .append(String.valueOf(mMagnificationCapabilities));
         pw.append(", audioDescriptionByDefaultEnabled=")
                 .append(String.valueOf(mIsAudioDescriptionByDefaultRequested));
+        pw.append(", magnificationFollowTypingEnabled=")
+                .append(String.valueOf(mMagnificationFollowTypingEnabled));
         pw.append("}");
         pw.println();
         pw.append("     shortcut key:{");

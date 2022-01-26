@@ -7962,6 +7962,51 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 () -> WifiSsidPolicy.createDenylistPolicy(ssids));
     }
 
+    @Test
+    public void testSendLostModeLocationUpdate_noPermission() {
+        assertThrows(SecurityException.class, () -> dpm.sendLostModeLocationUpdate(
+                getServices().executor, /* empty callback */ result -> {}));
+    }
+
+    @Test
+    public void testSendLostModeLocationUpdate_notOrganizationOwnedDevice() {
+        mContext.callerPermissions.add(permission.SEND_LOST_MODE_LOCATION_UPDATES);
+        assertThrows(IllegalStateException.class, () -> dpm.sendLostModeLocationUpdate(
+                getServices().executor, /* empty callback */ result -> {}));
+    }
+
+    @Test
+    public void testSendLostModeLocationUpdate_asDeviceOwner() throws Exception {
+        final String TEST_PROVIDER = "network";
+        mContext.callerPermissions.add(permission.SEND_LOST_MODE_LOCATION_UPDATES);
+        setDeviceOwner();
+        when(getServices().locationManager.getAllProviders()).thenReturn(List.of(TEST_PROVIDER));
+        when(getServices().locationManager.isProviderEnabled(TEST_PROVIDER)).thenReturn(true);
+
+        dpm.sendLostModeLocationUpdate(getServices().executor, /* empty callback */ result -> {});
+
+        verify(getServices().locationManager, times(1)).getCurrentLocation(
+                eq(TEST_PROVIDER), any(), eq(getServices().executor), any());
+    }
+
+    @Test
+    public void testSendLostModeLocationUpdate_asProfileOwnerOfOrgOwnedDevice() throws Exception {
+        final String TEST_PROVIDER = "network";
+        final int MANAGED_PROFILE_ADMIN_UID =
+                UserHandle.getUid(CALLER_USER_HANDLE, DpmMockContext.SYSTEM_UID);
+        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
+        mContext.callerPermissions.add(permission.SEND_LOST_MODE_LOCATION_UPDATES);
+        addManagedProfile(admin1, MANAGED_PROFILE_ADMIN_UID, admin1);
+        configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
+        when(getServices().locationManager.getAllProviders()).thenReturn(List.of(TEST_PROVIDER));
+        when(getServices().locationManager.isProviderEnabled(TEST_PROVIDER)).thenReturn(true);
+
+        dpm.sendLostModeLocationUpdate(getServices().executor, /* empty callback */ result -> {});
+
+        verify(getServices().locationManager, times(1)).getCurrentLocation(
+                eq(TEST_PROVIDER), any(), eq(getServices().executor), any());
+    }
+
     private void setupVpnAuthorization(String userVpnPackage, int userVpnUid) {
         final AppOpsManager.PackageOps vpnOp = new AppOpsManager.PackageOps(userVpnPackage,
                 userVpnUid, List.of(new AppOpsManager.OpEntry(

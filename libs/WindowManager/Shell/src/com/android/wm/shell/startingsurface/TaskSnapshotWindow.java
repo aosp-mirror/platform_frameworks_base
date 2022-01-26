@@ -126,9 +126,6 @@ public class TaskSnapshotWindow {
      */
     private static final long MAX_DELAY_REMOVAL_TIME_IME_VISIBLE = 600;
 
-    //tmp vars for unused relayout params
-    private static final Point TMP_SURFACE_SIZE = new Point();
-
     private final Window mWindow;
     private final Runnable mClearWindowHandler;
     private final ShellExecutor mSplashScreenExecutor;
@@ -244,9 +241,9 @@ public class TaskSnapshotWindow {
         window.setOuter(snapshotSurface);
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "TaskSnapshot#relayout");
-            session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0, -1,
+            session.relayout(window, layoutParams, -1, -1, View.VISIBLE, 0,
                     tmpFrames, tmpMergedConfiguration, surfaceControl, tmpInsetsState,
-                    tmpControls, TMP_SURFACE_SIZE);
+                    tmpControls);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         } catch (RemoteException e) {
             snapshotSurface.clearWindowSynced();

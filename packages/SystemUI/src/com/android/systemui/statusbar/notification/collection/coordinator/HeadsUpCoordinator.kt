@@ -100,7 +100,7 @@ class HeadsUpCoordinator @Inject constructor(
             if (wasHeadsUp) {
                 if (shouldHeadsUp) {
                     mHeadsUpManager.updateNotification(entry.key, hunAgain)
-                } else if (!mHeadsUpManager.isEntryAutoHeadsUpped(entry.key)) {
+                } else {
                     // We don't want this to be interrupting anymore, let's remove it
                     mHeadsUpManager.removeNotification(
                         entry.key, false /* removeImmediately */

@@ -21,9 +21,6 @@ import static com.android.server.pm.pkg.parsing.ParsingUtils.ANDROID_RES_NAMESPA
 import android.annotation.NonNull;
 import android.content.Intent;
 import android.content.IntentFilter;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
-import com.android.server.pm.pkg.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
@@ -34,6 +31,9 @@ import android.util.Slog;
 import android.util.TypedValue;
 
 import com.android.internal.R;
+import com.android.server.pm.pkg.parsing.ParsingPackage;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
+import com.android.server.pm.pkg.parsing.ParsingUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -49,7 +49,7 @@ public class ParsedIntentInfoUtils {
     public static final boolean DEBUG = false;
 
     @NonNull
-    public static ParseResult<ParsedIntentInfo> parseIntentInfo(String className,
+    public static ParseResult<ParsedIntentInfoImpl> parseIntentInfo(String className,
             ParsingPackage pkg, Resources res, XmlResourceParser parser, boolean allowGlobs,
             boolean allowAutoVerify, ParseInput input)
             throws XmlPullParserException, IOException {

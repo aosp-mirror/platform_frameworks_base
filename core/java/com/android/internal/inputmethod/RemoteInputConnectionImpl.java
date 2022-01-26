@@ -932,6 +932,24 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
         });
     }
 
+    /**
+     * Dispatches {@link InputConnection#requestCursorUpdates(int)}.
+     *
+     * <p>This method is intended to be called only from {@link InputMethodManager}.</p>
+     * @param cursorUpdateMode the mode for {@link InputConnection#requestCursorUpdates(int)}
+     * @param imeDisplayId displayId on which IME is displayed.
+     */
+    @Dispatching(cancellable = true)
+    public void requestCursorUpdatesFromImm(int cursorUpdateMode, int imeDisplayId) {
+        final int currentSessionId = mCurrentSessionId.get();
+        dispatchWithTracing("requestCursorUpdatesFromImm", () -> {
+            if (currentSessionId != mCurrentSessionId.get()) {
+                return;  // cancelled
+            }
+            requestCursorUpdatesInternal(cursorUpdateMode, imeDisplayId);
+        });
+    }
+
     @Dispatching(cancellable = true)
     @Override
     public void requestCursorUpdates(InputConnectionCommandHeader header, int cursorUpdateMode,
@@ -940,22 +958,26 @@ public final class RemoteInputConnectionImpl extends IInputContext.Stub {
             if (header.mSessionId != mCurrentSessionId.get()) {
                 return false;  // cancelled
             }
-            final InputConnection ic = getInputConnection();
-            if (ic == null || !isActive()) {
-                Log.w(TAG, "requestCursorAnchorInfo on inactive InputConnection");
-                return false;
-            }
-            if (mParentInputMethodManager.getDisplayId() != imeDisplayId) {
-                // requestCursorUpdates() is not currently supported across displays.
-                return false;
-            }
-            try {
-                return ic.requestCursorUpdates(cursorUpdateMode);
-            } catch (AbstractMethodError ignored) {
-                // TODO(b/199934664): See if we can remove this by providing a default impl.
-                return false;
-            }
+            return requestCursorUpdatesInternal(cursorUpdateMode, imeDisplayId);
         });
+    }
+
+    private boolean requestCursorUpdatesInternal(int cursorUpdateMode, int imeDisplayId) {
+        final InputConnection ic = getInputConnection();
+        if (ic == null || !isActive()) {
+            Log.w(TAG, "requestCursorAnchorInfo on inactive InputConnection");
+            return false;
+        }
+        if (mParentInputMethodManager.getDisplayId() != imeDisplayId) {
+            // requestCursorUpdates() is not currently supported across displays.
+            return false;
+        }
+        try {
+            return ic.requestCursorUpdates(cursorUpdateMode);
+        } catch (AbstractMethodError ignored) {
+            // TODO(b/199934664): See if we can remove this by providing a default impl.
+            return false;
+        }
     }
 
     @Dispatching(cancellable = true)

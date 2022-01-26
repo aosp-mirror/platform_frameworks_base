@@ -2180,9 +2180,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public int relayoutWindow(Session session, IWindow client, LayoutParams attrs,
             int requestedWidth, int requestedHeight, int viewVisibility, int flags,
-            long frameNumber, ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
+            ClientWindowFrames outFrames, MergedConfiguration mergedConfiguration,
             SurfaceControl outSurfaceControl, InsetsState outInsetsState,
-            InsetsSourceControl[] outActiveControls, Point outSurfaceSize) {
+            InsetsSourceControl[] outActiveControls) {
         Arrays.fill(outActiveControls, null);
         int result = 0;
         boolean configChanged;
@@ -2202,14 +2202,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 win.setRequestedSize(requestedWidth, requestedHeight);
             }
 
-            win.setFrameNumber(frameNumber);
-
             int attrChanges = 0;
             int flagChanges = 0;
             int privateFlagChanges = 0;
             if (attrs != null) {
                 displayPolicy.adjustWindowParamsLw(win, attrs);
-                win.mToken.adjustWindowParams(win, attrs);
                 attrs.flags = sanitizeFlagSlippery(attrs.flags, win.getName(), uid, pid);
                 attrs.inputFeatures = sanitizeSpyWindow(attrs.inputFeatures, win.getName(), uid,
                         pid);
@@ -2497,11 +2494,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 displayContent.sendNewConfiguration();
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             }
-            if (winAnimator.mSurfaceController != null) {
-                win.calculateSurfaceBounds(win.getLayoutingAttrs(
-                        win.getWindowConfiguration().getRotation()), mTmpRect);
-                outSurfaceSize.set(mTmpRect.width(), mTmpRect.height());
-            }
             getInsetsSourceControls(win, outActiveControls);
         }
 
@@ -2580,7 +2572,7 @@ public class WindowManagerService extends IWindowManager.Stub
         WindowSurfaceController surfaceController;
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "createSurfaceControl");
-            surfaceController = winAnimator.createSurfaceLocked(win.mAttrs.type);
+            surfaceController = winAnimator.createSurfaceLocked();
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
@@ -6420,7 +6412,6 @@ public class WindowManagerService extends IWindowManager.Stub
         pw.print("  mGlobalConfiguration="); pw.println(mRoot.getConfiguration());
         pw.print("  mHasPermanentDpad="); pw.println(mHasPermanentDpad);
         mRoot.dumpTopFocusedDisplayId(pw);
-        mRoot.dumpDefaultMinSizeOfResizableTask(pw);
         mRoot.forAllDisplays(dc -> {
             final int displayId = dc.getDisplayId();
             final InsetsControlTarget imeLayeringTarget = dc.getImeTarget(IME_TARGET_LAYERING);
@@ -6438,6 +6429,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.print("  imeControlTarget in display# "); pw.print(displayId);
                 pw.print(' '); pw.println(imeControlTarget);
             }
+            pw.print("  Minimum task size of display#"); pw.print(displayId);
+            pw.print(' '); pw.print(dc.mMinSizeOfResizeableTaskDp);
         });
         pw.print("  mInTouchMode="); pw.println(mInTouchMode);
         pw.print("  mBlurEnabled="); pw.println(mBlurController.getBlurEnabled());
