@@ -2765,8 +2765,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     Task getLaunchRootTask(@Nullable ActivityRecord r, @Nullable ActivityOptions options,
             @Nullable Task candidateTask, boolean onTop) {
         return getLaunchRootTask(r, options, candidateTask, null /* sourceTask */, onTop,
-                null /* launchParams */, 0 /* launchFlags */, -1 /* no realCallingPid */,
-                -1 /* no realCallingUid */);
+                null /* launchParams */, 0 /* launchFlags */);
     }
 
     /**
@@ -2785,8 +2784,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     Task getLaunchRootTask(@Nullable ActivityRecord r,
             @Nullable ActivityOptions options, @Nullable Task candidateTask,
             @Nullable Task sourceTask, boolean onTop,
-            @Nullable LaunchParamsController.LaunchParams launchParams, int launchFlags,
-            int realCallingPid, int realCallingUid) {
+            @Nullable LaunchParamsController.LaunchParams launchParams, int launchFlags) {
         int taskId = INVALID_TASK_ID;
         int displayId = INVALID_DISPLAY;
         TaskDisplayArea taskDisplayArea = null;
@@ -2835,11 +2833,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         if (taskDisplayArea != null) {
             final int tdaDisplayId = taskDisplayArea.getDisplayId();
-            final boolean canLaunchOnDisplayFromStartRequest =
-                    realCallingPid != 0 && realCallingUid > 0 && r != null
-                            && mTaskSupervisor.canPlaceEntityOnDisplay(tdaDisplayId,
-                            realCallingPid, realCallingUid, r.info);
-            if (canLaunchOnDisplayFromStartRequest || canLaunchOnDisplay(r, tdaDisplayId)) {
+            if (canLaunchOnDisplay(r, tdaDisplayId)) {
                 if (r != null) {
                     final Task result = getValidLaunchRootTaskInTaskDisplayArea(
                             taskDisplayArea, r, candidateTask, options, launchParams);
