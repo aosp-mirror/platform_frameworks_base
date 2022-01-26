@@ -16,7 +16,6 @@
 
 package com.android.settingslib.net;
 
-import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.telephony.TelephonyManager.SIM_STATE_READY;
 import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
 import static android.text.format.DateUtils.FORMAT_SHOW_DATE;
@@ -49,6 +48,7 @@ public class DataUsageController {
     private static final StringBuilder PERIOD_BUILDER = new StringBuilder(50);
     private static final java.util.Formatter PERIOD_FORMATTER = new java.util.Formatter(
             PERIOD_BUILDER, Locale.getDefault());
+    private static final long MB_IN_BYTES = 1024 * 1024;
 
     private final Context mContext;
     private final NetworkPolicyManager mPolicyManager;
@@ -237,10 +237,8 @@ public class DataUsageController {
         final int matchRule = networkTemplate.getMatchRule();
         switch (matchRule) {
             case NetworkTemplate.MATCH_MOBILE:
-            case NetworkTemplate.MATCH_MOBILE_WILDCARD:
                 return ConnectivityManager.TYPE_MOBILE;
             case NetworkTemplate.MATCH_WIFI:
-            case NetworkTemplate.MATCH_WIFI_WILDCARD:
                 return  ConnectivityManager.TYPE_WIFI;
             case NetworkTemplate.MATCH_ETHERNET:
                 return  ConnectivityManager.TYPE_ETHERNET;
