@@ -44,6 +44,7 @@ import com.android.internal.statusbar.NotificationVisibility;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -212,6 +213,34 @@ public class StatusBarManager {
     public static final int CAMERA_LAUNCH_SOURCE_POWER_DOUBLE_TAP = 1;
     /** @hide */
     public static final int CAMERA_LAUNCH_SOURCE_LIFT_TRIGGER = 2;
+
+    /**
+     * Session flag for {@link #registerSessionListener} indicating the listener
+     * is interested in sessions on the keygaurd
+     * @hide
+     */
+    public static final int SESSION_KEYGUARD = 1 << 0;
+
+    /**
+     * Session flag for {@link #registerSessionListener} indicating the current session
+     * is interested in session on the biometric prompt.
+     * @hide
+     */
+    public static final int SESSION_BIOMETRIC_PROMPT = 1 << 1;
+
+    /** @hide */
+    public static final Set<Integer> ALL_SESSIONS = Set.of(
+            SESSION_KEYGUARD,
+            SESSION_BIOMETRIC_PROMPT
+    );
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "SESSION_KEYGUARD" }, value = {
+            SESSION_KEYGUARD,
+            SESSION_BIOMETRIC_PROMPT,
+    })
+    public @interface SessionFlags {}
 
     /**
      * Response indicating that the tile was not added.

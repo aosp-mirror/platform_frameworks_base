@@ -628,6 +628,34 @@ public class AuthControllerTest extends SysuiTestCase {
         verify(mDisplayManager).unregisterDisplayListener(any());
     }
 
+    @Test
+    public void testOnBiometricPromptShownCallback() {
+        // GIVEN a callback is registered
+        AuthController.Callback callback = mock(AuthController.Callback.class);
+        mAuthController.addCallback(callback);
+
+        // WHEN dialog is shown
+        showDialog(new int[]{1} /* sensorIds */, false /* credentialAllowed */);
+
+        // THEN callback should be received
+        verify(callback).onBiometricPromptShown();
+    }
+
+    @Test
+    public void testOnBiometricPromptDismissedCallback() {
+        // GIVEN a callback is registered
+        AuthController.Callback callback = mock(AuthController.Callback.class);
+        mAuthController.addCallback(callback);
+
+        // WHEN dialog is shown and then dismissed
+        showDialog(new int[]{1} /* sensorIds */, false /* credentialAllowed */);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_USER_CANCELED,
+                null /* credentialAttestation */);
+
+        // THEN callback should be received
+        verify(callback).onBiometricPromptDismissed();
+    }
+
     // Helpers
 
     private void showDialog(int[] sensorIds, boolean credentialAllowed) {
