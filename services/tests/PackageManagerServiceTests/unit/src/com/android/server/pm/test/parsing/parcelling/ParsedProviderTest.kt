@@ -43,10 +43,9 @@ class ParsedProviderTest : ParsedMainComponentTest(ParsedProvider::class, Parsed
     override fun mainComponentSubclassExtraParams() = listOf(
         getSetByValue(
             ParsedProvider::getUriPermissionPatterns,
-            ParsedProviderImpl::setUriPermissionPatterns,
+            ParsedProviderImpl::addUriPermissionPattern,
             PatternMatcher("testPattern", PatternMatcher.PATTERN_LITERAL),
-            transformGet = { it?.singleOrNull() },
-            transformSet = { arrayOf(it) },
+            transformGet = { it.singleOrNull() },
             compare = { first, second ->
                 equalBy(
                     first, second,
@@ -57,15 +56,14 @@ class ParsedProviderTest : ParsedMainComponentTest(ParsedProvider::class, Parsed
         ),
         getSetByValue(
             ParsedProvider::getPathPermissions,
-            ParsedProviderImpl::setPathPermissions,
+            ParsedProviderImpl::addPathPermission,
             PathPermission(
                 "testPermissionPattern",
                 PatternMatcher.PATTERN_LITERAL,
                 "test.READ_PERMISSION",
                 "test.WRITE_PERMISSION"
             ),
-            transformGet = { it?.singleOrNull() },
-            transformSet = { arrayOf(it) },
+            transformGet = { it.singleOrNull() },
             compare = { first, second ->
                 equalBy(
                     first, second,

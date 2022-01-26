@@ -769,6 +769,10 @@ public class FullScreenMagnificationController implements
         mMagnificationFollowTypingEnabled = enabled;
     }
 
+    boolean isMagnificationFollowTypingEnabled() {
+        return mMagnificationFollowTypingEnabled;
+    }
+
     /**
      * Remove the display magnification with given id.
      *

@@ -25,11 +25,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
-import androidx.constraintlayout.widget.ConstraintLayout;
-
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dreams.complication.ComplicationHostViewController;
+import com.android.systemui.dreams.complication.dagger.ComplicationHostViewComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayModule;
 import com.android.systemui.util.ViewController;
@@ -46,6 +46,8 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
     // notifications shade.
     private final int mDreamOverlayNotificationsDragAreaHeight;
     private final DreamOverlayStatusBarViewController mStatusBarViewController;
+
+    private final ComplicationHostViewController mComplicationHostViewController;
 
     // The dream overlay's content view, which is located below the status bar (in z-order) and is
     // the space into which widgets are placed.
@@ -74,6 +76,13 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
                     final int childCount = mDreamOverlayContentView.getChildCount();
                     for (int i = 0; i < childCount; i++) {
                         View child = mDreamOverlayContentView.getChildAt(i);
+
+                        if (mComplicationHostViewController.getView() == child) {
+                            region.op(mComplicationHostViewController.getTouchRegions(),
+                                    Region.Op.UNION);
+                            continue;
+                        }
+
                         if (child.getGlobalVisibleRect(rect)) {
                             region.op(rect, Region.Op.UNION);
                         }
@@ -93,6 +102,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
     @Inject
     public DreamOverlayContainerViewController(
             DreamOverlayContainerView containerView,
+            ComplicationHostViewComponent.Factory complicationHostViewFactory,
             @Named(DreamOverlayModule.DREAM_OVERLAY_CONTENT_VIEW) ViewGroup contentView,
             DreamOverlayStatusBarViewController statusBarViewController,
             @Main Handler handler,
@@ -106,6 +116,13 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
                 mView.getResources().getDimensionPixelSize(
                         R.dimen.dream_overlay_notifications_drag_area_height);
 
+        mComplicationHostViewController = complicationHostViewFactory.create().getController();
+        final View view = mComplicationHostViewController.getView();
+
+        mDreamOverlayContentView.addView(view,
+                new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT));
+
         mHandler = handler;
         mMaxBurnInOffset = maxBurnInOffset;
         mBurnInProtectionUpdateInterval = burnInProtectionUpdateInterval;
@@ -114,6 +131,7 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
     @Override
     protected void onInit() {
         mStatusBarViewController.init();
+        mComplicationHostViewController.init();
     }
 
     @Override
@@ -130,16 +148,8 @@ public class DreamOverlayContainerViewController extends ViewController<DreamOve
                 .removeOnComputeInternalInsetsListener(mOnComputeInternalInsetsListener);
     }
 
-    void addOverlay(View overlayView, ConstraintLayout.LayoutParams layoutParams) {
-        mDreamOverlayContentView.addView(overlayView, layoutParams);
-    }
-
     View getContainerView() {
         return mView;
-    }
-
-    void removeAllOverlays() {
-        mDreamOverlayContentView.removeAllViews();
     }
 
     @VisibleForTesting

@@ -638,22 +638,6 @@ public final class NotificationEntry extends ListEntry {
         if (row != null) row.setHeadsUpAnimatingAway(animatingAway);
     }
 
-    /**
-     * Set that this notification was automatically heads upped. This happens for example when
-     * the user bypasses the lockscreen and media is playing.
-     */
-    public void setAutoHeadsUp(boolean autoHeadsUp) {
-        mAutoHeadsUp = autoHeadsUp;
-    }
-
-    /**
-     * @return if this notification was automatically heads upped. This happens for example when
-     *      * the user bypasses the lockscreen and media is playing.
-     */
-    public boolean isAutoHeadsUp() {
-        return mAutoHeadsUp;
-    }
-
     public boolean mustStayOnScreen() {
         return row != null && row.mustStayOnScreen();
     }

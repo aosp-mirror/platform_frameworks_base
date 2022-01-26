@@ -60,16 +60,14 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
     private final KeyguardBypassController mBypassController;
     private final GroupMembershipManager mGroupMembershipManager;
     private final List<OnHeadsUpPhoneListenerChange> mHeadsUpPhoneListeners = new ArrayList<>();
-    private final int mAutoHeadsUpNotificationDecay;
     // TODO (b/162832756): remove visual stability manager when migrating to new pipeline
     private VisualStabilityManager mVisualStabilityManager;
     private boolean mReleaseOnExpandFinish;
 
     private boolean mTrackingHeadsUp;
-    private HashSet<String> mSwipedOutKeys = new HashSet<>();
-    private HashSet<NotificationEntry> mEntriesToRemoveAfterExpand = new HashSet<>();
-    private HashSet<String> mKeysToRemoveWhenLeavingKeyguard = new HashSet<>();
-    private ArraySet<NotificationEntry> mEntriesToRemoveWhenReorderingAllowed
+    private final HashSet<String> mSwipedOutKeys = new HashSet<>();
+    private final HashSet<NotificationEntry> mEntriesToRemoveAfterExpand = new HashSet<>();
+    private final ArraySet<NotificationEntry> mEntriesToRemoveWhenReorderingAllowed
             = new ArraySet<>();
     private boolean mIsExpanded;
     private boolean mHeadsUpGoingAway;
@@ -110,8 +108,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         super(context, logger);
         Resources resources = mContext.getResources();
         mExtensionTime = resources.getInteger(R.integer.ambient_notification_extension_time);
-        mAutoHeadsUpNotificationDecay = resources.getInteger(
-                R.integer.auto_heads_up_notification_decay);
         statusBarStateController.addCallback(mStatusBarStateListener);
         mBypassController = bypassController;
         mGroupMembershipManager = groupMembershipManager;
@@ -232,15 +228,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
                 mHeadsUpGoingAway = false;
             }
         }
-    }
-
-    @Override
-    public boolean isEntryAutoHeadsUpped(String key) {
-        HeadsUpEntryPhone headsUpEntryPhone = getHeadsUpEntryPhone(key);
-        if (headsUpEntryPhone == null) {
-            return false;
-        }
-        return headsUpEntryPhone.isAutoHeadsUp();
     }
 
     /**
@@ -375,7 +362,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
 
     @Override
     protected void onAlertEntryRemoved(AlertEntry alertEntry) {
-        mKeysToRemoveWhenLeavingKeyguard.remove(alertEntry.mEntry.getKey());
         super.onAlertEntryRemoved(alertEntry);
         mEntryPool.release((HeadsUpEntryPhone) alertEntry);
     }
@@ -437,11 +423,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
          */
         private boolean extended;
 
-        /**
-         * Was this entry received while on keyguard
-         */
-        private boolean mIsAutoHeadsUp;
-
 
         @Override
         public boolean isSticky() {
@@ -459,8 +440,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
                             false  /* persistent */);
                 } else if (mTrackingHeadsUp) {
                     mEntriesToRemoveAfterExpand.add(entry);
-                } else if (mIsAutoHeadsUp && mStatusBarState == StatusBarState.KEYGUARD) {
-                    mKeysToRemoveWhenLeavingKeyguard.add(entry.getKey());
                 } else {
                     removeAlertEntry(entry.getKey());
                 }
@@ -471,7 +450,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
 
         @Override
         public void updateEntry(boolean updatePostTime) {
-            mIsAutoHeadsUp = mEntry.isAutoHeadsUp();
             super.updateEntry(updatePostTime);
 
             if (mEntriesToRemoveAfterExpand.contains(mEntry)) {
@@ -480,7 +458,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             if (mEntriesToRemoveWhenReorderingAllowed.contains(mEntry)) {
                 mEntriesToRemoveWhenReorderingAllowed.remove(mEntry);
             }
-            mKeysToRemoveWhenLeavingKeyguard.remove(mEntry.getKey());
         }
 
         @Override
@@ -515,7 +492,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             super.reset();
             mMenuShownPinned = false;
             extended = false;
-            mIsAutoHeadsUp = false;
         }
 
         private void extendPulse() {
@@ -526,33 +502,8 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
         }
 
         @Override
-        public int compareTo(AlertEntry alertEntry) {
-            HeadsUpEntryPhone headsUpEntry = (HeadsUpEntryPhone) alertEntry;
-            boolean autoShown = isAutoHeadsUp();
-            boolean otherAutoShown = headsUpEntry.isAutoHeadsUp();
-            if (autoShown && !otherAutoShown) {
-                return 1;
-            } else if (!autoShown && otherAutoShown) {
-                return -1;
-            }
-            return super.compareTo(alertEntry);
-        }
-
-        @Override
         protected long calculateFinishTime() {
-            return mPostTime + getDecayDuration() + (extended ? mExtensionTime : 0);
-        }
-
-        private int getDecayDuration() {
-            if (isAutoHeadsUp()) {
-                return getRecommendedHeadsUpTimeoutMs(mAutoHeadsUpNotificationDecay);
-            } else {
-                return getRecommendedHeadsUpTimeoutMs(mAutoDismissNotificationDecay);
-            }
-        }
-
-        private boolean isAutoHeadsUp() {
-            return mIsAutoHeadsUp;
+            return super.calculateFinishTime() + (extended ? mExtensionTime : 0);
         }
     }
 
@@ -577,13 +528,6 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             boolean wasKeyguard = mStatusBarState == StatusBarState.KEYGUARD;
             boolean isKeyguard = newState == StatusBarState.KEYGUARD;
             mStatusBarState = newState;
-            if (wasKeyguard && !isKeyguard && mKeysToRemoveWhenLeavingKeyguard.size() != 0) {
-                String[] keys = mKeysToRemoveWhenLeavingKeyguard.toArray(new String[0]);
-                for (String key : keys) {
-                    removeAlertEntry(key);
-                }
-                mKeysToRemoveWhenLeavingKeyguard.clear();
-            }
             if (wasKeyguard && !isKeyguard && mBypassController.getBypassEnabled()) {
                 ArrayList<String> keysToRemove = new ArrayList<>();
                 for (AlertEntry entry : mAlertEntries.values()) {

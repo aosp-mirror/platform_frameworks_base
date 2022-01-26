@@ -19,6 +19,7 @@ package com.android.server.pm.pkg;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
+import android.content.pm.pkg.FrameworkPackageUserState;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -28,7 +29,7 @@ import android.util.Pair;
  * still read-only and should be used inside system server code when possible over the
  * implementation.
  */
-public interface PackageUserStateInternal extends PackageUserState {
+public interface PackageUserStateInternal extends PackageUserState, FrameworkPackageUserState {
 
     PackageUserStateInternal DEFAULT = new PackageUserStateDefault();
 

@@ -34,6 +34,7 @@ import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvContentRating;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvTrackInfo;
+import android.media.tv.TvView;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -65,7 +66,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The TvInteractiveAppService class represents a TV interactive applications RTE.
+ * A TV interactive application service is a service that provides runtime environment and runs TV
+ * interactive applications.
  */
 public abstract class TvInteractiveAppService extends Service {
     private static final boolean DEBUG = false;
@@ -201,10 +203,8 @@ public abstract class TvInteractiveAppService extends Service {
 
     /**
      * Prepares TV Interactive App service for the given type.
-     * @hide
      */
-    public void onPrepare(@TvInteractiveAppInfo.InteractiveAppType int type) {
-    }
+    public abstract void onPrepare(@TvInteractiveAppInfo.InteractiveAppType int type);
 
     /**
      * Registers App link info.
@@ -239,14 +239,11 @@ public abstract class TvInteractiveAppService extends Service {
      *
      * @param iAppServiceId The ID of the TV Interactive App associated with the session.
      * @param type The type of the TV Interactive App associated with the session.
-     * @hide
      */
     @Nullable
-    public Session onCreateSession(
+    public abstract Session onCreateSession(
             @NonNull String iAppServiceId,
-            @TvInteractiveAppInfo.InteractiveAppType int type) {
-        return null;
-    }
+            @TvInteractiveAppInfo.InteractiveAppType int type);
 
     /**
      * Notifies the system when the state of the interactive app RTE has been changed.
@@ -256,7 +253,6 @@ public abstract class TvInteractiveAppService extends Service {
      * @param error the error code for error state. {@link TvInteractiveAppManager#ERROR_NONE} is
      *              used when the state is not
      *              {@link TvInteractiveAppManager#SERVICE_STATE_ERROR}.
-     * @hide
      */
     public final void notifyStateChanged(
             @TvInteractiveAppInfo.InteractiveAppType int type,
@@ -272,7 +268,12 @@ public abstract class TvInteractiveAppService extends Service {
 
     /**
      * Base class for derived classes to implement to provide a TV interactive app session.
-     * @hide
+     *
+     * <p>A session is associated with a {@link TvInteractiveAppView} instance and handles
+     * corresponding communications. It also handles the communications with
+     * {@link android.media.tv.TvInputService.Session} if connected.
+     *
+     * @see TvInteractiveAppView#setTvView(TvView)
      */
     public abstract static class Session implements KeyEvent.Callback {
         private final KeyEvent.DispatcherState mDispatcherState = new KeyEvent.DispatcherState();
@@ -359,8 +360,11 @@ public abstract class TvInteractiveAppService extends Service {
         /**
          * Creates broadcast-independent(BI) interactive application.
          *
+         * <p>The implementation should call {@link #notifyBiInteractiveAppCreated(Uri, String)},
+         * no matter if it's created successfully or not.
+         *
+         * @see #notifyBiInteractiveAppCreated(Uri, String)
          * @see #onDestroyBiInteractiveApp(String)
-         * @hide
          */
         public void onCreateBiInteractiveApp(@NonNull Uri biIAppUri, @Nullable Bundle params) {
         }
@@ -370,10 +374,9 @@ public abstract class TvInteractiveAppService extends Service {
          * Destroys broadcast-independent(BI) interactive application.
          *
          * @param biIAppId the BI interactive app ID from
-         *        {@link #createBiInteractiveApp(Uri, Bundle)}
+         *                 {@link #onCreateBiInteractiveApp(Uri, Bundle)}}
          *
          * @see #onCreateBiInteractiveApp(Uri, Bundle)
-         * @hide
          */
         public void onDestroyBiInteractiveApp(@NonNull String biIAppId) {
         }
@@ -482,7 +485,8 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Called when the corresponding TV input tuned to a channel.
-         * @hide
+         *
+         * @param channelUri The tuned channel URI.
          */
         public void onTuned(@NonNull Uri channelUri) {
         }
@@ -1046,11 +1050,14 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Notifies the broadcast-independent(BI) interactive application has been created.
+         *
          * @param biIAppId BI interactive app ID, which can be used to destroy the BI interactive
-         *                 app.
-         * @hide
+         *                 app. {@code null} if it's not created successfully.
+         *
+         * @see #onCreateBiInteractiveApp(Uri, Bundle)
          */
-        public final void notifyBiInteractiveAppCreated(Uri biIAppUri, String biIAppId) {
+        public final void notifyBiInteractiveAppCreated(
+                @NonNull Uri biIAppUri, @Nullable String biIAppId) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override

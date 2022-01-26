@@ -58,7 +58,7 @@ public class PackageStateUtils {
             ComponentInfo componentInfo, long flags, int userId) {
         if (packageState == null) return false;
 
-        final PackageUserState userState = packageState.getUserStateOrDefault(userId);
+        final PackageUserStateInternal userState = packageState.getUserStateOrDefault(userId);
         return PackageUserStateUtils.isMatch(userState, componentInfo, flags);
     }
 
@@ -72,7 +72,7 @@ public class PackageStateUtils {
         if (pkg == null) {
             return false;
         }
-        final PackageUserState userState = packageState.getUserStateOrDefault(userId);
+        final PackageUserStateInternal userState = packageState.getUserStateOrDefault(userId);
         return PackageUserStateUtils.isMatch(userState, packageState.isSystem(),
                 pkg.isEnabled(), component, flags);
     }

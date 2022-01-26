@@ -1046,6 +1046,16 @@ public class ContentProviderHelper {
             userId = UserHandle.getCallingUserId();
         }
 
+        if (isAuthorityRedirectedForCloneProfile(authority)) {
+            UserManagerInternal umInternal = LocalServices.getService(UserManagerInternal.class);
+            UserInfo userInfo = umInternal.getUserInfo(userId);
+
+            if (userInfo != null && userInfo.isCloneProfile()) {
+                userId = umInternal.getProfileParentId(userId);
+                checkUser = false;
+            }
+        }
+
         ProviderInfo cpi = null;
         try {
             cpi = AppGlobals.getPackageManager().resolveContentProvider(authority,
@@ -1055,32 +1065,11 @@ public class ContentProviderHelper {
                             | PackageManager.MATCH_DIRECT_BOOT_AWARE
                             | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                     userId);
-            if (cpi == null && isAuthorityRedirectedForCloneProfile(authority)) {
-                // This might be a provider that's running only in the system user that's
-                // also serving clone profiles
-                cpi = AppGlobals.getPackageManager().resolveContentProvider(authority,
-                        ActivityManagerService.STOCK_PM_FLAGS
-                                | PackageManager.GET_URI_PERMISSION_PATTERNS
-                                | PackageManager.MATCH_DISABLED_COMPONENTS
-                                | PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                        UserHandle.USER_SYSTEM);
-            }
         } catch (RemoteException ignored) {
         }
         if (cpi == null) {
             return "Failed to find provider " + authority + " for user " + userId
                     + "; expected to find a valid ContentProvider for this authority";
-        }
-
-        if (isAuthorityRedirectedForCloneProfile(authority)) {
-            UserManagerInternal umInternal = LocalServices.getService(UserManagerInternal.class);
-            UserInfo userInfo = umInternal.getUserInfo(userId);
-
-            if (userInfo != null && userInfo.isCloneProfile()) {
-                userId = umInternal.getProfileParentId(userId);
-                checkUser = false;
-            }
         }
 
         final int callingPid = Binder.getCallingPid();

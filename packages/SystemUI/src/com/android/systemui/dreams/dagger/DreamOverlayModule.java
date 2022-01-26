@@ -22,6 +22,9 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleRegistry;
+
 import com.android.internal.util.Preconditions;
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
@@ -36,6 +39,7 @@ import com.android.systemui.tuner.TunerService;
 
 import javax.inject.Named;
 
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
@@ -123,5 +127,17 @@ public abstract class DreamOverlayModule {
     static long providesBurnInProtectionUpdateInterval(@Main Resources resources) {
         return resources.getInteger(
                 R.integer.config_dreamOverlayBurnInProtectionUpdateIntervalMillis);
+    }
+
+    @Provides
+    @DreamOverlayComponent.DreamOverlayScope
+    static LifecycleOwner providesLifecycleOwner(Lazy<LifecycleRegistry> lifecycleRegistryLazy) {
+        return () -> lifecycleRegistryLazy.get();
+    }
+
+    @Provides
+    @DreamOverlayComponent.DreamOverlayScope
+    static LifecycleRegistry providesLifecycleRegistry(LifecycleOwner lifecycleOwner) {
+        return new LifecycleRegistry(lifecycleOwner);
     }
 }

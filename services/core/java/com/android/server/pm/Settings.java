@@ -4245,7 +4245,7 @@ public final class Settings implements Watchable, Snappable {
         final PackageSetting ps = mPackages.get(componentInfo.packageName);
         if (ps == null) return false;
 
-        final PackageUserState userState = ps.readUserState(userId);
+        final PackageUserStateInternal userState = ps.readUserState(userId);
         return PackageUserStateUtils.isMatch(userState, componentInfo, flags);
     }
 
@@ -4255,7 +4255,7 @@ public final class Settings implements Watchable, Snappable {
         final PackageSetting ps = mPackages.get(component.getPackageName());
         if (ps == null) return false;
 
-        final PackageUserState userState = ps.readUserState(userId);
+        final PackageUserStateInternal userState = ps.readUserState(userId);
         return PackageUserStateUtils.isMatch(userState, pkg.isSystem(), pkg.isEnabled(), component,
                 flags);
     }
@@ -4497,13 +4497,11 @@ public final class Settings implements Watchable, Snappable {
                 pw.print(checkinTag); pw.print("-"); pw.print("splt,");
                 pw.print("base,");
                 pw.println(pkg.getBaseRevisionCode());
-                if (pkg.getSplitNames() != null) {
-                    int[] splitRevisionCodes = pkg.getSplitRevisionCodes();
-                    for (int i = 0; i < pkg.getSplitNames().length; i++) {
-                        pw.print(checkinTag); pw.print("-"); pw.print("splt,");
-                        pw.print(pkg.getSplitNames()[i]); pw.print(",");
-                        pw.println(splitRevisionCodes[i]);
-                    }
+                int[] splitRevisionCodes = pkg.getSplitRevisionCodes();
+                for (int i = 0; i < pkg.getSplitNames().length; i++) {
+                    pw.print(checkinTag); pw.print("-"); pw.print("splt,");
+                    pw.print(pkg.getSplitNames()[i]); pw.print(",");
+                    pw.println(splitRevisionCodes[i]);
                 }
             }
             for (UserInfo user : users) {
@@ -5169,13 +5167,11 @@ public final class Settings implements Watchable, Snappable {
             }
             String[] splitNames = pkg.getSplitNames();
             int[] splitRevisionCodes = pkg.getSplitRevisionCodes();
-            if (splitNames != null) {
-                for (int i = 0; i < splitNames.length; i++) {
-                    pw.print(", ");
-                    pw.print(splitNames[i]);
-                    if (splitRevisionCodes[i] != 0) {
-                        pw.print(":"); pw.print(splitRevisionCodes[i]);
-                    }
+            for (int i = 0; i < splitNames.length; i++) {
+                pw.print(", ");
+                pw.print(splitNames[i]);
+                if (splitRevisionCodes[i] != 0) {
+                    pw.print(":"); pw.print(splitRevisionCodes[i]);
                 }
             }
             pw.print("]");

@@ -33,7 +33,7 @@ import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 @DataClass(genGetters = true, genSetters = true, genBuilder = false, genParcelable = false)
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public class ParsedInstrumentationImpl extends ParsedComponentImpl implements
-        ParsedInstrumentation {
+        ParsedInstrumentation, Parcelable {
 
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
@@ -165,10 +165,10 @@ public class ParsedInstrumentationImpl extends ParsedComponentImpl implements
     }
 
     @DataClass.Generated(
-            time = 1627595809880L,
+            time = 1641431951575L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/component/ParsedInstrumentationImpl.java",
-            inputSignatures = "private @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String targetPackage\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String targetProcesses\nprivate  boolean handleProfiling\nprivate  boolean functionalTest\npublic static final @android.annotation.NonNull android.os.Parcelable.Creator<android.content.pm.parsing.component.ParsedInstrumentationImpl> CREATOR\npublic  android.content.pm.parsing.component.ParsedInstrumentationImpl setTargetPackage(java.lang.String)\npublic  android.content.pm.parsing.component.ParsedInstrumentationImpl setTargetProcesses(java.lang.String)\npublic  java.lang.String toString()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass ParsedInstrumentationImpl extends android.content.pm.parsing.component.ParsedComponentImpl implements [android.content.pm.parsing.component.ParsedInstrumentation]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genBuilder=false, genParcelable=false)")
+            inputSignatures = "private @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String targetPackage\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String targetProcesses\nprivate  boolean handleProfiling\nprivate  boolean functionalTest\npublic static final @android.annotation.NonNull android.os.Parcelable.Creator<android.content.pm.parsing.component.ParsedInstrumentationImpl> CREATOR\npublic  android.content.pm.parsing.component.ParsedInstrumentationImpl setTargetPackage(java.lang.String)\npublic  android.content.pm.parsing.component.ParsedInstrumentationImpl setTargetProcesses(java.lang.String)\npublic  java.lang.String toString()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass ParsedInstrumentationImpl extends android.content.pm.parsing.component.ParsedComponentImpl implements [android.content.pm.parsing.component.ParsedInstrumentation, android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genBuilder=false, genParcelable=false)")
     @Deprecated
     private void __metadata() {}
 

@@ -309,7 +309,7 @@ public final class UserManagerTest {
 
     @MediumTest
     @Test
-    public void testRemoveUserOrSetEphemeral_restrictedReturnsError() throws Exception {
+    public void testRemoveUserWhenPossible_restrictedReturnsError() throws Exception {
         final int currentUser = ActivityManager.getCurrentUser();
         final UserInfo user1 = createUser("User 1", /* flags= */ 0);
         mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_USER, /* value= */ true,
@@ -328,7 +328,7 @@ public final class UserManagerTest {
 
     @MediumTest
     @Test
-    public void testRemoveUserOrSetEphemeral_evenWhenRestricted() throws Exception {
+    public void testRemoveUserWhenPossible_evenWhenRestricted() throws Exception {
         final int currentUser = ActivityManager.getCurrentUser();
         final UserInfo user1 = createUser("User 1", /* flags= */ 0);
         mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_USER, /* value= */ true,
@@ -351,7 +351,7 @@ public final class UserManagerTest {
 
     @MediumTest
     @Test
-    public void testRemoveUserOrSetEphemeral_systemUserReturnsError() throws Exception {
+    public void testRemoveUserWhenPossible_systemUserReturnsError() throws Exception {
         assertThat(mUserManager.removeUserWhenPossible(UserHandle.SYSTEM,
                 /* overrideDevicePolicy= */ false)).isEqualTo(UserManager.REMOVE_RESULT_ERROR);
 
@@ -360,7 +360,7 @@ public final class UserManagerTest {
 
     @MediumTest
     @Test
-    public void testRemoveUserOrSetEphemeral_invalidUserReturnsError() throws Exception {
+    public void testRemoveUserWhenPossible_invalidUserReturnsError() throws Exception {
         assertThat(hasUser(Integer.MAX_VALUE)).isFalse();
         assertThat(mUserManager.removeUserWhenPossible(UserHandle.of(Integer.MAX_VALUE),
                 /* overrideDevicePolicy= */ false)).isEqualTo(UserManager.REMOVE_RESULT_ERROR);
@@ -368,7 +368,7 @@ public final class UserManagerTest {
 
     @MediumTest
     @Test
-    public void testRemoveUserOrSetEphemeral_currentUserSetEphemeral() throws Exception {
+    public void testRemoveUserWhenPossible_currentUserSetEphemeral() throws Exception {
         final int startUser = ActivityManager.getCurrentUser();
         final UserInfo user1 = createUser("User 1", /* flags= */ 0);
         // Switch to the user just created.
@@ -392,7 +392,7 @@ public final class UserManagerTest {
 
     @MediumTest
     @Test
-    public void testRemoveUserOrSetEphemeral_nonCurrentUserRemoved() throws Exception {
+    public void testRemoveUserWhenPossible_nonCurrentUserRemoved() throws Exception {
         final UserInfo user1 = createUser("User 1", /* flags= */ 0);
         synchronized (mUserRemoveLock) {
             assertThat(mUserManager.removeUserWhenPossible(user1.getUserHandle(),

@@ -59,6 +59,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -91,6 +92,7 @@ public class ClipboardOverlayController {
     private final WindowManager.LayoutParams mWindowLayoutParams;
     private final PhoneWindow mWindow;
     private final TimeoutHandler mTimeoutHandler;
+    private final AccessibilityManager mAccessibilityManager;
 
     private final DraggableConstraintLayout mView;
     private final ImageView mImagePreview;
@@ -98,6 +100,7 @@ public class ClipboardOverlayController {
     private final ScreenshotActionChip mEditChip;
     private final ScreenshotActionChip mRemoteCopyChip;
     private final View mActionContainerBackground;
+    private final View mDismissButton;
 
     private Runnable mOnSessionCompleteListener;
 
@@ -112,6 +115,8 @@ public class ClipboardOverlayController {
         mDisplayManager = requireNonNull(context.getSystemService(DisplayManager.class));
         final Context displayContext = context.createDisplayContext(getDefaultDisplay());
         mContext = displayContext.createWindowContext(TYPE_SCREENSHOT, null);
+
+        mAccessibilityManager = AccessibilityManager.getInstance(mContext);
 
         mWindowManager = mContext.getSystemService(WindowManager.class);
 
@@ -135,9 +140,12 @@ public class ClipboardOverlayController {
         mTextPreview = requireNonNull(mView.findViewById(R.id.text_preview));
         mEditChip = requireNonNull(mView.findViewById(R.id.edit_chip));
         mRemoteCopyChip = requireNonNull(mView.findViewById(R.id.remote_copy_chip));
+        mDismissButton = requireNonNull(mView.findViewById(R.id.dismiss_button));
 
         mView.setOnDismissCallback(this::hideImmediate);
         mView.setOnInteractionCallback(() -> mTimeoutHandler.resetTimeout());
+
+        mDismissButton.setOnClickListener(view -> animateOut());
 
         mEditChip.setIcon(Icon.createWithResource(mContext, R.drawable.ic_screenshot_edit), true);
         mRemoteCopyChip.setIcon(
@@ -158,10 +166,10 @@ public class ClipboardOverlayController {
         withWindowAttached(() -> {
             mWindow.setContentView(mView);
             updateInsets(mWindowManager.getCurrentWindowMetrics().getWindowInsets());
-            getEnterAnimation().start();
+            mView.post(() -> getEnterAnimation().start());
         });
 
-        mTimeoutHandler.setOnTimeoutRunnable(() -> animateOut());
+        mTimeoutHandler.setOnTimeoutRunnable(this::animateOut);
 
         mCloseDialogsReceiver = new BroadcastReceiver() {
             @Override
@@ -226,8 +234,8 @@ public class ClipboardOverlayController {
                         mView.getLocationOnScreen(pt);
                         Rect rect = new Rect(pt[0], pt[1], pt[0] + mView.getWidth(),
                                 pt[1] + mView.getHeight());
-                        if (!rect.contains((int) motionEvent.getRawX(),
-                                (int) motionEvent.getRawY())) {
+                        if (!rect.contains(
+                                (int) motionEvent.getRawX(), (int) motionEvent.getRawY())) {
                             animateOut();
                         }
                     }
@@ -311,11 +319,15 @@ public class ClipboardOverlayController {
         ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
 
         mView.setAlpha(0);
+        mDismissButton.setVisibility(View.GONE);
         final View previewBorder = requireNonNull(mView.findViewById(R.id.preview_border));
         final View actionBackground = requireNonNull(
                 mView.findViewById(R.id.actions_container_background));
         mImagePreview.setVisibility(View.VISIBLE);
         mActionContainerBackground.setVisibility(View.VISIBLE);
+        if (mAccessibilityManager.isEnabled()) {
+            mDismissButton.setVisibility(View.VISIBLE);
+        }
 
         anim.addUpdateListener(animation -> {
             mView.setAlpha(animation.getAnimatedFraction());
@@ -385,7 +397,7 @@ public class ClipboardOverlayController {
 
     private void reset() {
         mView.setTranslationX(0);
-        mView.setAlpha(1);
+        mView.setAlpha(0);
         mTimeoutHandler.cancelTimeout();
     }
 

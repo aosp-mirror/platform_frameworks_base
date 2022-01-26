@@ -25,28 +25,31 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.PackageManager.Property;
-import com.android.server.pm.pkg.parsing.ParsingUtils;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DataClass;
-import com.android.internal.util.Parcelling;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
+import com.android.server.pm.pkg.parsing.ParsingUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-/** @hide */
-@DataClass(genGetters = true, genSetters = true, genConstructor = false, genBuilder = false)
+/**
+ * @hide
+ */
+@DataClass(genGetters = true, genSetters = true, genConstructor = false, genBuilder = false,
+        genParcelable = false)
 @DataClass.Suppress({"setComponentName", "setProperties", "setIntents"})
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-public abstract class ParsedComponentImpl implements ParsedComponent {
+public abstract class ParsedComponentImpl implements ParsedComponent, Parcelable {
 
     @NonNull
     @DataClass.ParcelWith(ForInternedString.class)
@@ -68,7 +71,7 @@ public abstract class ParsedComponentImpl implements ParsedComponent {
 
     @NonNull
     @DataClass.PluralOf("intent")
-    private List<ParsedIntentInfo> intents = Collections.emptyList();
+    private List<ParsedIntentInfoImpl> intents = Collections.emptyList();
 
     @Nullable
     private ComponentName componentName;
@@ -95,16 +98,18 @@ public abstract class ParsedComponentImpl implements ParsedComponent {
         this.flags = other.getFlags();
         this.packageName = other.getPackageName();
         this.componentName = other.getComponentName();
-        this.intents = new ArrayList<>(other.getIntents());
+        this.intents = new ArrayList<>(((ParsedComponentImpl) other).intents);
         this.mProperties = new ArrayMap<>();
         this.mProperties.putAll(other.getProperties());
     }
 
-    public void addIntent(ParsedIntentInfo intent) {
+    public void addIntent(ParsedIntentInfoImpl intent) {
         this.intents = CollectionUtils.add(this.intents, intent);
     }
 
-    /** Add a property to the component */
+    /**
+     * Add a property to the component
+     */
     public void addProperty(@NonNull Property property) {
         this.mProperties = CollectionUtils.add(this.mProperties, property.getName(), property);
     }
@@ -133,6 +138,18 @@ public abstract class ParsedComponentImpl implements ParsedComponent {
         return componentName;
     }
 
+    @NonNull
+    @Override
+    public Bundle getMetaData() {
+        return metaData == null ? Bundle.EMPTY : metaData;
+    }
+
+    @NonNull
+    @Override
+    public List<ParsedIntentInfo> getIntents() {
+        return new ArrayList<>(intents);
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -149,7 +166,7 @@ public abstract class ParsedComponentImpl implements ParsedComponent {
         dest.writeInt(this.getDescriptionRes());
         dest.writeInt(this.getFlags());
         sForInternedString.parcel(this.packageName, dest, flags);
-        dest.writeTypedList(this.getIntents());
+        dest.writeTypedList(this.intents);
         dest.writeBundle(this.metaData);
         dest.writeMap(this.mProperties);
     }
@@ -234,16 +251,6 @@ public abstract class ParsedComponentImpl implements ParsedComponent {
     }
 
     @DataClass.Generated.Member
-    public @NonNull List<ParsedIntentInfo> getIntents() {
-        return intents;
-    }
-
-    @DataClass.Generated.Member
-    public @Nullable Bundle getMetaData() {
-        return metaData;
-    }
-
-    @DataClass.Generated.Member
     public @NonNull Map<String,Property> getProperties() {
         return mProperties;
     }
@@ -297,10 +304,10 @@ public abstract class ParsedComponentImpl implements ParsedComponent {
     }
 
     @DataClass.Generated(
-            time = 1627680195484L,
+            time = 1641414207885L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/component/ParsedComponentImpl.java",
-            inputSignatures = "private @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String name\nprivate  int icon\nprivate  int labelRes\nprivate @android.annotation.Nullable java.lang.CharSequence nonLocalizedLabel\nprivate  int logo\nprivate  int banner\nprivate  int descriptionRes\nprivate  int flags\nprivate @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String packageName\nprivate @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"intent\") java.util.List<android.content.pm.parsing.component.ParsedIntentInfo> intents\nprivate @android.annotation.Nullable android.content.ComponentName componentName\nprivate @android.annotation.Nullable android.os.Bundle metaData\nprivate @android.annotation.NonNull java.util.Map<java.lang.String,android.content.pm.PackageManager.Property> mProperties\npublic  void addIntent(android.content.pm.parsing.component.ParsedIntentInfo)\npublic  void addProperty(android.content.pm.PackageManager.Property)\npublic  android.content.pm.parsing.component.ParsedComponentImpl setName(java.lang.String)\npublic @android.annotation.CallSuper void setPackageName(java.lang.String)\npublic @java.lang.Override @android.annotation.NonNull android.content.ComponentName getComponentName()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass ParsedComponentImpl extends java.lang.Object implements [android.content.pm.parsing.component.ParsedComponent]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genConstructor=false, genBuilder=false)")
+            inputSignatures = "private @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String name\nprivate  int icon\nprivate  int labelRes\nprivate @android.annotation.Nullable java.lang.CharSequence nonLocalizedLabel\nprivate  int logo\nprivate  int banner\nprivate  int descriptionRes\nprivate  int flags\nprivate @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String packageName\nprivate @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"intent\") java.util.List<android.content.pm.parsing.component.ParsedIntentInfoImpl> intents\nprivate @android.annotation.Nullable android.content.ComponentName componentName\nprivate @android.annotation.Nullable android.os.Bundle metaData\nprivate @android.annotation.NonNull java.util.Map<java.lang.String,android.content.pm.PackageManager.Property> mProperties\n  void addIntent(android.content.pm.parsing.component.ParsedIntentInfoImpl)\n  void addProperty(android.content.pm.PackageManager.Property)\npublic  android.content.pm.parsing.component.ParsedComponentImpl setName(java.lang.String)\npublic @android.annotation.CallSuper void setPackageName(java.lang.String)\npublic @java.lang.Override @android.annotation.NonNull android.content.ComponentName getComponentName()\npublic @android.annotation.NonNull @java.lang.Override android.os.Bundle getMetaData()\npublic @android.annotation.NonNull @java.lang.Override java.util.List<android.content.pm.parsing.component.ParsedIntentInfo> getIntents()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass ParsedComponentImpl extends java.lang.Object implements [android.content.pm.parsing.component.ParsedComponent, android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genConstructor=false, genBuilder=false, genParcelable=false)")
     @Deprecated
     private void __metadata() {}
 

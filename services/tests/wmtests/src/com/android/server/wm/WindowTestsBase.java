@@ -883,7 +883,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     /** Sets the default minimum task size to 1 so that tests can use small task sizes */
     public void removeGlobalMinSizeRestriction() {
-        mAtm.mRootWindowContainer.mDefaultMinSizeOfResizeableTaskDp = 1;
+        mAtm.mRootWindowContainer.forAllDisplays(
+                displayContent -> displayContent.mMinSizeOfResizeableTaskDp = 1);
     }
 
     /** Mocks the behavior of taking a snapshot. */

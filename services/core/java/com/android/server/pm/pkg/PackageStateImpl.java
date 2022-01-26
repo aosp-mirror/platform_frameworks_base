@@ -127,7 +127,7 @@ public class PackageStateImpl implements PackageState {
     @Nullable
     private final String mSecondaryCpuAbi;
     @Nullable
-    private final Integer mSharedUserId;
+    private final int mSharedUserId;
     @NonNull
     private final String[] mUsesSdkLibraries;
     @NonNull
@@ -615,7 +615,7 @@ public class PackageStateImpl implements PackageState {
     }
 
     @DataClass.Generated.Member
-    public @Nullable Integer getSharedUserId() {
+    public @Nullable int getSharedUserId() {
         return mSharedUserId;
     }
 

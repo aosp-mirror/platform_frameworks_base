@@ -32,6 +32,7 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PathPermission;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
@@ -41,6 +42,7 @@ import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
 import android.content.pm.overlay.OverlayPaths;
 import android.os.Environment;
+import android.os.PatternMatcher;
 import android.os.UserHandle;
 
 import com.android.internal.util.ArrayUtils;
@@ -651,8 +653,8 @@ public class PackageInfoWithoutStateUtils {
         pi.forceUriPermissions = p.isForceUriPermissions();
         pi.multiprocess = p.isMultiProcess();
         pi.initOrder = p.getInitOrder();
-        pi.uriPermissionPatterns = p.getUriPermissionPatterns();
-        pi.pathPermissions = p.getPathPermissions();
+        pi.uriPermissionPatterns = p.getUriPermissionPatterns().toArray(new PatternMatcher[0]);
+        pi.pathPermissions = p.getPathPermissions().toArray(new PathPermission[0]);
         if ((flags & PackageManager.GET_URI_PERMISSION_PATTERNS) == 0) {
             pi.uriPermissionPatterns = null;
         }
@@ -690,9 +692,11 @@ public class PackageInfoWithoutStateUtils {
         ii.sourceDir = pkg.getBaseApkPath();
         ii.publicSourceDir = pkg.getBaseApkPath();
         ii.splitNames = pkg.getSplitNames();
-        ii.splitSourceDirs = pkg.getSplitCodePaths();
-        ii.splitPublicSourceDirs = pkg.getSplitCodePaths();
-        ii.splitDependencies = pkg.getSplitDependencies();
+        ii.splitSourceDirs = pkg.getSplitCodePaths().length == 0 ? null : pkg.getSplitCodePaths();
+        ii.splitPublicSourceDirs = pkg.getSplitCodePaths().length == 0
+                ? null : pkg.getSplitCodePaths();
+        ii.splitDependencies = pkg.getSplitDependencies().size() == 0
+                ? null : pkg.getSplitDependencies();
 
         if (assignUserFields) {
             assignUserFields(pkg, ii, userId);
@@ -734,9 +738,9 @@ public class PackageInfoWithoutStateUtils {
         if (pg == null) return null;
 
         PermissionGroupInfo pgi = new PermissionGroupInfo(
-                pg.getRequestDetailResourceId(),
-                pg.getBackgroundRequestResourceId(),
-                pg.getBackgroundRequestDetailResourceId()
+                pg.getRequestDetailRes(),
+                pg.getBackgroundRequestRes(),
+                pg.getBackgroundRequestDetailRes()
         );
 
         assignSharedFieldsForPackageItemInfo(pgi, pg);

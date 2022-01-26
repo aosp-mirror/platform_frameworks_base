@@ -19,7 +19,6 @@ package com.android.server.pm.pkg.component;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.content.pm.PackageInfo;
-import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -30,7 +29,8 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
-public interface ParsedUsesPermission extends Parcelable {
+//@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+public interface ParsedUsesPermission {
 
     /**
      * Strong assertion by a developer that they will never use this permission to derive the

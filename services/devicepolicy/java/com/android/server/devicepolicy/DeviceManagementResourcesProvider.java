@@ -16,10 +16,10 @@
 
 package com.android.server.devicepolicy;
 
-import static android.app.admin.DevicePolicyResources.Drawable.Source.UPDATABLE_DRAWABLE_SOURCES;
-import static android.app.admin.DevicePolicyResources.Drawable.Style;
-import static android.app.admin.DevicePolicyResources.Drawable.Style.UPDATABLE_DRAWABLE_STYLES;
-import static android.app.admin.DevicePolicyResources.Drawable.UPDATABLE_DRAWABLE_IDS;
+import static android.app.admin.DevicePolicyResources.Drawables.Source.UPDATABLE_DRAWABLE_SOURCES;
+import static android.app.admin.DevicePolicyResources.Drawables.Style;
+import static android.app.admin.DevicePolicyResources.Drawables.Style.UPDATABLE_DRAWABLE_STYLES;
+import static android.app.admin.DevicePolicyResources.Drawables.UPDATABLE_DRAWABLE_IDS;
 import static android.app.admin.DevicePolicyResources.Strings.UPDATABLE_STRING_IDS;
 
 import static java.util.Objects.requireNonNull;
@@ -27,7 +27,7 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.admin.DevicePolicyDrawableResource;
-import android.app.admin.DevicePolicyResources;
+import android.app.admin.DevicePolicyResources.Drawables;
 import android.app.admin.DevicePolicyStringResource;
 import android.app.admin.ParcelableResource;
 import android.os.Environment;
@@ -72,13 +72,13 @@ class DeviceManagementResourcesProvider {
     /**
      * Map of <drawable_id, <style_id, resource_value>>
      */
-    private final Map<Integer, Map<Integer, ParcelableResource>>
+    private final Map<String, Map<String, ParcelableResource>>
             mUpdatedDrawablesForStyle = new HashMap<>();
 
     /**
      * Map of <drawable_id, <source_id, resource_value>>
      */
-    private final Map<Integer, Map<Integer, ParcelableResource>>
+    private final Map<String, Map<String, ParcelableResource>>
             mUpdatedDrawablesForSource = new HashMap<>();
 
     /**
@@ -103,14 +103,17 @@ class DeviceManagementResourcesProvider {
     boolean updateDrawables(@NonNull List<DevicePolicyDrawableResource> drawables) {
         boolean updated = false;
         for (int i = 0; i < drawables.size(); i++) {
-            int drawableId = drawables.get(i).getDrawableId();
-            int drawableStyle = drawables.get(i).getDrawableStyle();
-            int drawableSource = drawables.get(i).getDrawableSource();
+            String drawableId = drawables.get(i).getDrawableId();
+            String drawableStyle = drawables.get(i).getDrawableStyle();
+            String drawableSource = drawables.get(i).getDrawableSource();
             ParcelableResource resource = drawables.get(i).getResource();
 
+            Objects.requireNonNull(drawableId, "drawableId must be provided.");
+            Objects.requireNonNull(drawableStyle, "drawableStyle must be provided.");
+            Objects.requireNonNull(drawableSource, "drawableSource must be provided.");
             Objects.requireNonNull(resource, "ParcelableResource must be provided.");
 
-            if (drawableSource == DevicePolicyResources.Drawable.Source.UNDEFINED) {
+            if (Drawables.Source.UNDEFINED.equals(drawableSource)) {
                 updated |= updateDrawable(drawableId, drawableStyle, resource);
             } else {
                 updated |= updateDrawableForSource(drawableId, drawableSource, resource);
@@ -126,7 +129,7 @@ class DeviceManagementResourcesProvider {
     }
 
     private boolean updateDrawable(
-            int drawableId, int drawableStyle, ParcelableResource updatableResource) {
+            String drawableId, String drawableStyle, ParcelableResource updatableResource) {
         if (!UPDATABLE_DRAWABLE_IDS.contains(drawableId)) {
             Log.w(TAG, "Updating a resource for an unknown drawable id " + drawableId);
         }
@@ -149,7 +152,7 @@ class DeviceManagementResourcesProvider {
 
     // TODO(b/214576716): change this to respect style
     private boolean updateDrawableForSource(
-            int drawableId, int drawableSource, ParcelableResource updatableResource) {
+            String drawableId, String drawableSource, ParcelableResource updatableResource) {
         if (!UPDATABLE_DRAWABLE_IDS.contains(drawableId)) {
             Log.w(TAG, "Updating a resource for an unknown drawable id " + drawableId);
         }
@@ -173,11 +176,11 @@ class DeviceManagementResourcesProvider {
     /**
      * Returns {@code false} if no resources were removed.
      */
-    boolean removeDrawables(@NonNull int[] drawableIds) {
+    boolean removeDrawables(@NonNull String[] drawableIds) {
         synchronized (mLock) {
             boolean removed = false;
             for (int i = 0; i < drawableIds.length; i++) {
-                int drawableId = drawableIds[i];
+                String drawableId = drawableIds[i];
                 removed |= mUpdatedDrawablesForStyle.remove(drawableId) != null
                         || mUpdatedDrawablesForSource.remove(drawableId) != null;
             }
@@ -191,7 +194,7 @@ class DeviceManagementResourcesProvider {
 
     @Nullable
     ParcelableResource getDrawable(
-            int drawableId, int drawableStyle, int drawableSource) {
+            String drawableId, String drawableStyle, String drawableSource) {
         if (!UPDATABLE_DRAWABLE_IDS.contains(drawableId)) {
             Log.w(TAG, "Getting an updated resource for an unknown drawable id " + drawableId);
         }
@@ -231,7 +234,9 @@ class DeviceManagementResourcesProvider {
             String stringId = strings.get(i).getStringId();
             ParcelableResource resource = strings.get(i).getResource();
 
+            Objects.requireNonNull(stringId, "stringId must be provided.");
             Objects.requireNonNull(resource, "ParcelableResource must be provided.");
+
             updated |= updateString(stringId, resource);
         }
         if (!updated) {
@@ -392,19 +397,19 @@ class DeviceManagementResourcesProvider {
 
         void writeInner(TypedXmlSerializer out) throws IOException {
             if (mUpdatedDrawablesForStyle != null && !mUpdatedDrawablesForStyle.isEmpty()) {
-                for (Map.Entry<Integer, Map<Integer, ParcelableResource>> drawableEntry
+                for (Map.Entry<String, Map<String, ParcelableResource>> drawableEntry
                         : mUpdatedDrawablesForStyle.entrySet()) {
                     out.startTag(/* namespace= */ null, TAG_DRAWABLE_STYLE_ENTRY);
-                    out.attributeInt(
+                    out.attribute(
                             /* namespace= */ null, ATTR_DRAWABLE_ID, drawableEntry.getKey());
                     out.attributeInt(
                             /* namespace= */ null,
                             ATTR_DRAWABLE_STYLE_SIZE,
                             drawableEntry.getValue().size());
                     int counter = 0;
-                    for (Map.Entry<Integer, ParcelableResource> styleEntry
+                    for (Map.Entry<String, ParcelableResource> styleEntry
                             : drawableEntry.getValue().entrySet()) {
-                        out.attributeInt(
+                        out.attribute(
                                 /* namespace= */ null,
                                 ATTR_DRAWABLE_STYLE + (counter++),
                                 styleEntry.getKey());
@@ -414,19 +419,19 @@ class DeviceManagementResourcesProvider {
                 }
             }
             if (mUpdatedDrawablesForSource != null && !mUpdatedDrawablesForSource.isEmpty()) {
-                for (Map.Entry<Integer, Map<Integer, ParcelableResource>> drawableEntry
+                for (Map.Entry<String, Map<String, ParcelableResource>> drawableEntry
                         : mUpdatedDrawablesForSource.entrySet()) {
                     out.startTag(/* namespace= */ null, TAG_DRAWABLE_SOURCE_ENTRY);
-                    out.attributeInt(
+                    out.attribute(
                             /* namespace= */ null, ATTR_DRAWABLE_ID, drawableEntry.getKey());
                     out.attributeInt(
                             /* namespace= */ null,
                             ATTR_DRAWABLE_SOURCE_SIZE,
                             drawableEntry.getValue().size());
                     int counter = 0;
-                    for (Map.Entry<Integer, ParcelableResource> sourceEntry
+                    for (Map.Entry<String, ParcelableResource> sourceEntry
                             : drawableEntry.getValue().entrySet()) {
-                        out.attributeInt(
+                        out.attribute(
                                 /* namespace= */ null,
                                 ATTR_DRAWABLE_SOURCE + (counter++),
                                 sourceEntry.getKey());
@@ -457,7 +462,7 @@ class DeviceManagementResourcesProvider {
             }
             switch (tag) {
                 case TAG_DRAWABLE_STYLE_ENTRY:
-                    int drawableId = parser.getAttributeInt(
+                    String drawableId = parser.getAttributeValue(
                             /* namespace= */ null, ATTR_DRAWABLE_ID);
                     mUpdatedDrawablesForStyle.put(
                             drawableId,
@@ -465,7 +470,7 @@ class DeviceManagementResourcesProvider {
                     int size = parser.getAttributeInt(
                             /* namespace= */ null, ATTR_DRAWABLE_STYLE_SIZE);
                     for (int i = 0; i < size; i++) {
-                        int style = parser.getAttributeInt(
+                        String style = parser.getAttributeValue(
                                 /* namespace= */ null, ATTR_DRAWABLE_STYLE + i);
                         mUpdatedDrawablesForStyle.get(drawableId).put(
                                 style,
@@ -473,13 +478,13 @@ class DeviceManagementResourcesProvider {
                     }
                     break;
                 case TAG_DRAWABLE_SOURCE_ENTRY:
-                    drawableId = parser.getAttributeInt(
+                    drawableId = parser.getAttributeValue(
                             /* namespace= */ null, ATTR_DRAWABLE_ID);
                     mUpdatedDrawablesForSource.put(drawableId, new HashMap<>());
                     size = parser.getAttributeInt(
                             /* namespace= */ null, ATTR_DRAWABLE_SOURCE_SIZE);
                     for (int i = 0; i < size; i++) {
-                        int source = parser.getAttributeInt(
+                        String source = parser.getAttributeValue(
                                 /* namespace= */ null, ATTR_DRAWABLE_SOURCE + i);
                         mUpdatedDrawablesForSource.get(drawableId).put(
                                 source,

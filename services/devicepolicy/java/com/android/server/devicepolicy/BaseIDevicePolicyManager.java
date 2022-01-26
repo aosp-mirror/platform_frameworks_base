@@ -171,11 +171,11 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public void setDrawables(@NonNull List<DevicePolicyDrawableResource> drawables){}
 
     @Override
-    public void resetDrawables(@NonNull int[] drawableIds){}
+    public void resetDrawables(@NonNull String[] drawableIds){}
 
     @Override
     public ParcelableResource getDrawable(
-            int drawableId, int drawableStyle, int drawableSource) {
+            String drawableId, String drawableStyle, String drawableSource) {
         return null;
     }
 

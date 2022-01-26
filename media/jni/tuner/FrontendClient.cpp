@@ -152,6 +152,16 @@ Result FrontendClient::removeOutputPid(int32_t pid) {
     return Result::INVALID_STATE;
 }
 
+vector<FrontendStatusReadiness> FrontendClient::getStatusReadiness(
+        const std::vector<FrontendStatusType>& statusTypes) {
+    vector<FrontendStatusReadiness> readiness;
+    if (mTunerFrontend != nullptr) {
+        mTunerFrontend->getFrontendStatusReadiness(statusTypes, &readiness);
+    }
+
+    return readiness;
+}
+
 shared_ptr<ITunerFrontend> FrontendClient::getAidlFrontend() {
     return mTunerFrontend;
 }

@@ -35,7 +35,7 @@ import java.util.List;
  */
 @DataClass(genAidl = false, genSetters = true, genBuilder = false, genParcelable = true)
 @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-public class ParsedAttributionImpl implements ParsedAttribution {
+public class ParsedAttributionImpl implements ParsedAttribution, Parcelable {
 
     /** Maximum amount of attributions per package */
     static final int MAX_NUM_ATTRIBUTIONS = 10000;
@@ -206,10 +206,10 @@ public class ParsedAttributionImpl implements ParsedAttribution {
     };
 
     @DataClass.Generated(
-            time = 1627594502974L,
+            time = 1641431950829L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/component/ParsedAttributionImpl.java",
-            inputSignatures = "static final  int MAX_NUM_ATTRIBUTIONS\nprivate @android.annotation.NonNull java.lang.String tag\nprivate @android.annotation.StringRes int label\nprivate @android.annotation.NonNull java.util.List<java.lang.String> inheritFrom\nclass ParsedAttributionImpl extends java.lang.Object implements [android.content.pm.parsing.component.ParsedAttribution]\n@com.android.internal.util.DataClass(genAidl=false, genSetters=true, genBuilder=false, genParcelable=true)")
+            inputSignatures = "static final  int MAX_NUM_ATTRIBUTIONS\nprivate @android.annotation.NonNull java.lang.String tag\nprivate @android.annotation.StringRes int label\nprivate @android.annotation.NonNull java.util.List<java.lang.String> inheritFrom\nclass ParsedAttributionImpl extends java.lang.Object implements [android.content.pm.parsing.component.ParsedAttribution, android.os.Parcelable]\n@com.android.internal.util.DataClass(genAidl=false, genSetters=true, genBuilder=false, genParcelable=true)")
     @Deprecated
     private void __metadata() {}
 

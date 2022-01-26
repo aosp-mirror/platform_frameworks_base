@@ -24,7 +24,6 @@ import static android.Manifest.permission.MANAGE_SUBSCRIPTION_PLANS;
 import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.Manifest.permission.NETWORK_STACK;
 import static android.Manifest.permission.OBSERVE_NETWORK_POLICY;
-import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
@@ -130,7 +129,6 @@ import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static com.android.net.module.util.NetworkStatsUtils.LIMIT_GLOBAL_ALERT;
-import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_UPDATED;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
@@ -1010,10 +1008,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             userFilter.addAction(ACTION_USER_REMOVED);
             mContext.registerReceiver(mUserReceiver, userFilter, null, mHandler);
 
-            // listen for stats update events
-            final IntentFilter statsFilter = new IntentFilter(ACTION_NETWORK_STATS_UPDATED);
-            mContext.registerReceiver(
-                    mStatsReceiver, statsFilter, READ_NETWORK_USAGE_HISTORY, mHandler);
+            // listen for stats updated callbacks for interested network types.
+            mNetworkStats.registerUsageCallback(new NetworkTemplate.Builder(MATCH_MOBILE).build(),
+                    0 /* thresholdBytes */, new HandlerExecutor(mHandler), mStatsCallback);
+            mNetworkStats.registerUsageCallback(new NetworkTemplate.Builder(MATCH_WIFI).build(),
+                    0 /* thresholdBytes */, new HandlerExecutor(mHandler), mStatsCallback);
 
             // Listen for snooze from notifications
             mContext.registerReceiver(mSnoozeReceiver,
@@ -1214,19 +1213,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     };
 
     /**
-     * Receiver that watches for {@link NetworkStatsManager} updates, which we
-     * use to check against {@link NetworkPolicy#warningBytes}.
+     * Listener that watches for {@link NetworkStatsManager} updates, which
+     * NetworkPolicyManagerService uses to check against {@link NetworkPolicy#warningBytes}.
      */
-    private final NetworkStatsBroadcastReceiver mStatsReceiver =
-            new NetworkStatsBroadcastReceiver();
-    private class NetworkStatsBroadcastReceiver extends BroadcastReceiver {
-        private boolean mIsAnyIntentReceived = false;
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // on background handler thread, and verified
-            // READ_NETWORK_USAGE_HISTORY permission above.
+    private final StatsCallback mStatsCallback = new StatsCallback();
+    private class StatsCallback extends NetworkStatsManager.UsageCallback {
+        private boolean mIsAnyCallbackReceived = false;
 
-            mIsAnyIntentReceived = true;
+        @Override
+        public void onThresholdReached(int networkType, String subscriberId) {
+            mIsAnyCallbackReceived = true;
 
             synchronized (mNetworkPoliciesSecondLock) {
                 updateNetworkRulesNL();
@@ -1236,11 +1232,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         /**
-         * Return whether any {@code ACTION_NETWORK_STATS_UPDATED} intent is received.
+         * Return whether any callback is received.
          * Used to determine if NetworkStatsService is ready.
          */
-        public boolean isAnyIntentReceived() {
-            return mIsAnyIntentReceived;
+        public boolean isAnyCallbackReceived() {
+            return mIsAnyCallbackReceived;
         }
     };
 
@@ -1453,7 +1449,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // Skip if not ready. NetworkStatsService will block public API calls until it is
         // ready. To prevent NPMS be blocked on that, skip and fail fast instead.
-        if (!mStatsReceiver.isAnyIntentReceived()) return null;
+        if (!mStatsCallback.isAnyCallbackReceived()) return null;
 
         final List<NetworkStats.Bucket> stats = mDeps.getNetworkUidBytes(template, start, end);
         for (final NetworkStats.Bucket entry : stats) {
@@ -5450,7 +5446,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private long getTotalBytes(NetworkTemplate template, long start, long end) {
         // Skip if not ready. NetworkStatsService will block public API calls until it is
         // ready. To prevent NPMS be blocked on that, skip and fail fast instead.
-        if (!mStatsReceiver.isAnyIntentReceived()) return 0;
+        if (!mStatsCallback.isAnyCallbackReceived()) return 0;
         return mDeps.getNetworkTotalBytes(template, start, end);
     }
 

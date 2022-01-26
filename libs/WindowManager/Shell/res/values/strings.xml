@@ -171,4 +171,28 @@
          compatibility control. [CHAR LIMIT=NONE] -->
     <string name="camera_compat_dismiss_button_description">No camera issues? Tap to dismiss.</string>
 
+    <!-- The title of the letterbox education dialog. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_education_dialog_title">Get the most out of <xliff:g id="app_name" example="YouTube">%s</xliff:g></string>
+
+    <!-- The title of the letterbox education toast. [CHAR LIMIT=60] -->
+    <string name="letterbox_education_toast_title">Rotate your device for a full-screen view</string>
+
+    <!-- Description of the rotate screen into portrait action. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_education_screen_rotation_portrait_text">Rotate your screen to portrait</string>
+
+    <!-- Description of the rotate screen into landscape action. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_education_screen_rotation_landscape_text">Rotate your screen to landscape</string>
+
+    <!-- Description of the put app in split-screen action. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_education_split_screen_text">Drag in another app to use split screen</string>
+
+    <!-- Description of the reposition app action. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_education_reposition_text">Double tap to reposition</string>
+
+    <!-- Button text for dismissing the letterbox education dialog. [CHAR LIMIT=20] -->
+    <string name="letterbox_education_got_it">Got it</string>
+
+    <!-- Accessibility description of the letterbox education toast expand to dialog button. [CHAR LIMIT=NONE] -->
+    <string name="letterbox_education_expand_button_description">Expand for more information.</string>
+
 </resources>

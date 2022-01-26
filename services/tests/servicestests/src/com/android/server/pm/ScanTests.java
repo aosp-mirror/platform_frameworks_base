@@ -574,7 +574,7 @@ public class ScanTests {
         assertBasicPackageSetting(scanResult, packageName, isInstant, pkgSetting);
 
         final ApplicationInfo applicationInfo = PackageInfoUtils.generateApplicationInfo(
-                pkgSetting.getPkg(), 0, pkgSetting.readUserState(0), 0, pkgSetting);
+                pkgSetting.getPkg(), 0, pkgSetting.getUserStateOrDefault(0), 0, pkgSetting);
         assertBasicApplicationInfo(scanResult, applicationInfo);
     }
 
@@ -612,7 +612,7 @@ public class ScanTests {
     private static void assertAbiAndPathssDerived(ScanResult scanResult) {
         PackageSetting pkgSetting = scanResult.mPkgSetting;
         final ApplicationInfo applicationInfo = PackageInfoUtils.generateApplicationInfo(
-                pkgSetting.getPkg(), 0, pkgSetting.readUserState(0), 0, pkgSetting);
+                pkgSetting.getPkg(), 0, pkgSetting.getUserStateOrDefault(0), 0, pkgSetting);
         assertThat(applicationInfo.primaryCpuAbi, is("derivedPrimary"));
         assertThat(applicationInfo.secondaryCpuAbi, is("derivedSecondary"));
 
@@ -626,7 +626,7 @@ public class ScanTests {
     private static void assertPathsNotDerived(ScanResult scanResult) {
         PackageSetting pkgSetting = scanResult.mPkgSetting;
         final ApplicationInfo applicationInfo = PackageInfoUtils.generateApplicationInfo(
-                pkgSetting.getPkg(), 0, pkgSetting.readUserState(0), 0, pkgSetting);
+                pkgSetting.getPkg(), 0, pkgSetting.getUserStateOrDefault(0), 0, pkgSetting);
         assertThat(applicationInfo.nativeLibraryRootDir, is("getRootDir"));
         assertThat(pkgSetting.getLegacyNativeLibraryPath(), is("getRootDir"));
         assertThat(applicationInfo.nativeLibraryRootRequiresIsa, is(true));

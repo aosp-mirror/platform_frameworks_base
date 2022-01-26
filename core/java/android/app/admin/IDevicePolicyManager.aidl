@@ -47,6 +47,7 @@ import android.os.UserHandle;
 import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 import android.telephony.data.ApnSetting;
+import com.android.internal.infra.AndroidFuture;
 
 import java.util.List;
 
@@ -118,6 +119,8 @@ interface IDevicePolicyManager {
     void setFactoryResetProtectionPolicy(in ComponentName who, in FactoryResetProtectionPolicy policy);
     FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(in ComponentName who);
     boolean isFactoryResetProtectionPolicySupported();
+
+    void sendLostModeLocationUpdate(in AndroidFuture<boolean> future);
 
     ComponentName setGlobalProxy(in ComponentName admin, String proxySpec, String exclusionList);
     ComponentName getGlobalProxyAdmin(int userHandle);
@@ -543,8 +546,8 @@ interface IDevicePolicyManager {
 
     List<UserHandle> listForegroundAffiliatedUsers();
     void setDrawables(in List<DevicePolicyDrawableResource> drawables);
-    void resetDrawables(in int[] drawableIds);
-    ParcelableResource getDrawable(int drawableId, int drawableStyle, int drawableSource);
+    void resetDrawables(in String[] drawableIds);
+    ParcelableResource getDrawable(String drawableId, String drawableStyle, String drawableSource);
 
     void setStrings(in List<DevicePolicyStringResource> strings);
     void resetStrings(in String[] stringIds);

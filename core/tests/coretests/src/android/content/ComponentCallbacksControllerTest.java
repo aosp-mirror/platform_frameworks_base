@@ -116,25 +116,4 @@ public class ComponentCallbacksControllerTest {
         @Override
         public void onLowMemory() {}
     }
-
-    private static class TestComponentCallbacks2 implements ComponentCallbacks2 {
-        private Configuration mConfiguration;
-        private boolean mLowMemoryCalled;
-        private int mLevel;
-
-        @Override
-        public void onConfigurationChanged(@NonNull Configuration newConfig) {
-            mConfiguration = newConfig;
-        }
-
-        @Override
-        public void onLowMemory() {
-            mLowMemoryCalled = true;
-        }
-
-        @Override
-        public void onTrimMemory(int level) {
-            mLevel = level;
-        }
-    }
 }

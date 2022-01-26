@@ -387,7 +387,6 @@ public class TvInteractiveAppView extends ViewGroup {
      *                      {@link TvInteractiveAppInfo#getId()}.
      *
      * @see android.media.tv.interactive.TvInteractiveAppManager#getTvInteractiveAppServiceList()
-     * @hide
      */
     public void prepareInteractiveApp(
             @NonNull String iAppServiceId,
@@ -416,7 +415,6 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /**
      * Stops the interactive application.
-     * @hide
      */
     public void stopInteractiveApp() {
         if (DEBUG) {
@@ -524,8 +522,10 @@ public class TvInteractiveAppView extends ViewGroup {
     /**
      * Creates broadcast-independent(BI) interactive application.
      *
-     * @see #destroyBiInteractiveApp(String)
-     * @hide
+     * <p>{@link TvInteractiveAppCallback#onBiInteractiveAppCreated(String, Uri, String)} will be
+     * called for the result.
+     *
+     * @see TvInteractiveAppCallback#onBiInteractiveAppCreated(String, Uri, String)
      */
     public void createBiInteractiveApp(@NonNull Uri biIAppUri, @Nullable Bundle params) {
         if (DEBUG) {
@@ -542,7 +542,6 @@ public class TvInteractiveAppView extends ViewGroup {
      * @param biIAppId the BI interactive app ID from {@link #createBiInteractiveApp(Uri, Bundle)}
      *
      * @see #createBiInteractiveApp(Uri, Bundle)
-     * @hide
      */
     public void destroyBiInteractiveApp(@NonNull String biIAppId) {
         if (DEBUG) {
@@ -564,7 +563,6 @@ public class TvInteractiveAppView extends ViewGroup {
      *
      * @param tvView the TvView to be linked to this TvInteractiveAppView via linking of Sessions.
      * @return The result of the operation.
-     * @hide
      */
     public int setTvView(@Nullable TvView tvView) {
         if (tvView == null) {
@@ -623,14 +621,13 @@ public class TvInteractiveAppView extends ViewGroup {
         }
 
         /**
-         * This is called when the session state is changed.
+         * This is called when the state of corresponding interactive app is changed.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
          * @param state the current state.
          * @param err the error code for error state. {@link TvInteractiveAppManager#ERROR_NONE}
          *              is used when the state is not
          *              {@link TvInteractiveAppManager#INTERACTIVE_APP_STATE_ERROR}.
-         * @hide
          */
         public void onStateChanged(
                 @NonNull String iAppServiceId,
@@ -643,10 +640,12 @@ public class TvInteractiveAppView extends ViewGroup {
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
          * @param biIAppUri URI associated this BI interactive app. This is the same URI in
-         *                  {@link Session#createBiInteractiveApp(Uri, Bundle)}
+         *                  {@link #createBiInteractiveApp(Uri, Bundle)}
          * @param biIAppId BI interactive app ID, which can be used to destroy the BI interactive
-         *                 app.
-         * @hide
+         *                 app. {@code null} if it's not created successfully.
+         *
+         * @see #createBiInteractiveApp(Uri, Bundle)
+         * @see #destroyBiInteractiveApp(String)
          */
         public void onBiInteractiveAppCreated(@NonNull String iAppServiceId, @NonNull Uri biIAppUri,
                 @Nullable String biIAppId) {

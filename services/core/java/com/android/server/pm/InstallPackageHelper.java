@@ -1806,10 +1806,8 @@ final class InstallPackageHelper {
                 final PackageSetting ps = mPm.mSettings.getPackageLPr(pkg.getPackageName());
                 if (ps != null && ps.isPrivileged()) {
                     fsverityCandidates.put(pkg.getBaseApkPath(), null);
-                    if (pkg.getSplitCodePaths() != null) {
-                        for (String splitPath : pkg.getSplitCodePaths()) {
-                            fsverityCandidates.put(splitPath, null);
-                        }
+                    for (String splitPath : pkg.getSplitCodePaths()) {
+                        fsverityCandidates.put(splitPath, null);
                     }
                 }
             }
@@ -1825,15 +1823,13 @@ final class InstallPackageHelper {
                 fsverityCandidates.put(dmPath, VerityUtils.getFsveritySignatureFilePath(dmPath));
             }
 
-            if (pkg.getSplitCodePaths() != null) {
-                for (String path : pkg.getSplitCodePaths()) {
-                    fsverityCandidates.put(path, VerityUtils.getFsveritySignatureFilePath(path));
+            for (String path : pkg.getSplitCodePaths()) {
+                fsverityCandidates.put(path, VerityUtils.getFsveritySignatureFilePath(path));
 
-                    final String splitDmPath = DexMetadataHelper.buildDexMetadataPathForApk(path);
-                    if (new File(splitDmPath).exists()) {
-                        fsverityCandidates.put(splitDmPath,
-                                VerityUtils.getFsveritySignatureFilePath(splitDmPath));
-                    }
+                final String splitDmPath = DexMetadataHelper.buildDexMetadataPathForApk(path);
+                if (new File(splitDmPath).exists()) {
+                    fsverityCandidates.put(splitDmPath,
+                            VerityUtils.getFsveritySignatureFilePath(splitDmPath));
                 }
             }
         }
@@ -1989,9 +1985,7 @@ final class InstallPackageHelper {
                             oldCodePaths = new ArraySet<>();
                         }
                         Collections.addAll(oldCodePaths, oldPackage.getBaseApkPath());
-                        if (oldPackage.getSplitCodePaths() != null) {
-                            Collections.addAll(oldCodePaths, oldPackage.getSplitCodePaths());
-                        }
+                        Collections.addAll(oldCodePaths, oldPackage.getSplitCodePaths());
                         ps1.setOldCodePaths(oldCodePaths);
                     } else {
                         ps1.setOldCodePaths(null);
@@ -3412,8 +3406,9 @@ final class InstallPackageHelper {
     }
 
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
-    public void installPackagesFromDir(File scanDir, int parseFlags, int scanFlags,
-            long currentTime, PackageParser2 packageParser, ExecutorService executorService) {
+    public void installPackagesFromDir(File scanDir, List<File> frameworkSplits, int parseFlags,
+            int scanFlags, long currentTime, PackageParser2 packageParser,
+            ExecutorService executorService) {
         final File[] files = scanDir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
             Log.d(TAG, "No files in app dir " + scanDir);
@@ -3425,7 +3420,7 @@ final class InstallPackageHelper {
                     + " flags=0x" + Integer.toHexString(parseFlags));
         }
         ParallelPackageParser parallelPackageParser =
-                new ParallelPackageParser(packageParser, executorService);
+                new ParallelPackageParser(packageParser, executorService, frameworkSplits);
 
         // Submit files for parsing in parallel
         int fileCount = 0;

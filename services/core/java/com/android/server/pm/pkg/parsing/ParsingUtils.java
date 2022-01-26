@@ -20,8 +20,6 @@ import static com.android.server.pm.pkg.parsing.ParsingPackageUtils.RIGID_PARSER
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import com.android.server.pm.pkg.component.ParsedIntentInfo;
-import com.android.server.pm.pkg.component.ParsedIntentInfoImpl;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.res.XmlResourceParser;
@@ -32,6 +30,8 @@ import android.util.Slog;
 
 import com.android.internal.util.Parcelling;
 import com.android.internal.util.XmlUtils;
+import com.android.server.pm.pkg.component.ParsedIntentInfo;
+import com.android.server.pm.pkg.component.ParsedIntentInfoImpl;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -84,7 +84,8 @@ public class ParsingUtils {
     }
 
     /**
-     * Use with {@link Parcel#writeTypedList(List)}
+     * Use with {@link Parcel#writeTypedList(List)} or
+     * {@link #writeInterfaceAsImplList(Parcel, List)}
      *
      * @see Parcel#createTypedArrayList(Parcelable.Creator)
      */
@@ -101,6 +102,29 @@ public class ParsingUtils {
             size--;
         }
         return list;
+    }
+
+    /**
+     * Use with {@link #createTypedInterfaceList(Parcel, Parcelable.Creator)}.
+     *
+     * Writes a list that can be cast as Parcelable types at runtime.
+     * TODO: Remove with ImmutableList multi-casting support
+     *
+     * @see Parcel#writeTypedList(List)
+     */
+    @NonNull
+    public static void writeParcelableList(@NonNull Parcel parcel, List<?> list) {
+        if (list == null) {
+            parcel.writeInt(-1);
+            return;
+        }
+        int size = list.size();
+        int index = 0;
+        parcel.writeInt(size);
+        while (index < size) {
+            parcel.writeTypedObject((Parcelable) list.get(index), 0);
+            index++;
+        }
     }
 
     public static class StringPairListParceler implements
@@ -120,7 +144,7 @@ public class ParsingUtils {
             for (int index = 0; index < size; index++) {
                 Pair<String, ParsedIntentInfo> pair = item.get(index);
                 dest.writeString(pair.first);
-                dest.writeParcelable(pair.second, parcelFlags);
+                dest.writeParcelable((Parcelable) pair.second, parcelFlags);
             }
         }
 

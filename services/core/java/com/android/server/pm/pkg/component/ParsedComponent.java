@@ -21,13 +21,13 @@ import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.pm.PackageManager.Property;
 import android.os.Bundle;
-import android.os.Parcelable;
 
 import java.util.List;
 import java.util.Map;
 
 /** @hide */
-public interface ParsedComponent extends Parcelable {
+//@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+public interface ParsedComponent {
 
     int getBanner();
 
@@ -47,7 +47,7 @@ public interface ParsedComponent extends Parcelable {
 
     int getLogo();
 
-    @Nullable
+    @NonNull
     Bundle getMetaData();
 
     @NonNull

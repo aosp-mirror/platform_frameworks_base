@@ -35,6 +35,7 @@ using ::aidl::android::hardware::tv::tuner::FrontendScanMessageType;
 using ::aidl::android::hardware::tv::tuner::FrontendScanType;
 using ::aidl::android::hardware::tv::tuner::FrontendSettings;
 using ::aidl::android::hardware::tv::tuner::FrontendStatus;
+using ::aidl::android::hardware::tv::tuner::FrontendStatusReadiness;
 using ::aidl::android::hardware::tv::tuner::FrontendStatusType;
 using ::aidl::android::hardware::tv::tuner::FrontendType;
 using ::aidl::android::hardware::tv::tuner::Result;
@@ -124,6 +125,12 @@ public:
      * Filter out unnecessary PID from frontend output.
      */
     Result removeOutputPid(int32_t pid);
+
+    /**
+     * Gets Frontend Status Readiness statuses for given status types.
+     */
+    vector<FrontendStatusReadiness> getStatusReadiness(
+            const std::vector<FrontendStatusType>& types);
 
     int32_t getId();
 

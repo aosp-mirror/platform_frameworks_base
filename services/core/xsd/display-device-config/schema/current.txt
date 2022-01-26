@@ -1,6 +1,12 @@
 // Signature format: 2.0
 package com.android.server.display.config {
 
+  public class BrightnessThresholds {
+    ctor public BrightnessThresholds();
+    method @NonNull public final java.math.BigDecimal getMinimum();
+    method public final void setMinimum(@NonNull java.math.BigDecimal);
+  }
+
   public class Density {
     ctor public Density();
     method @NonNull public final java.math.BigInteger getDensity();
@@ -18,9 +24,11 @@ package com.android.server.display.config {
 
   public class DisplayConfiguration {
     ctor public DisplayConfiguration();
+    method @NonNull public final com.android.server.display.config.Thresholds getAmbientBrightnessChangeThresholds();
     method public final java.math.BigInteger getAmbientLightHorizonLong();
     method public final java.math.BigInteger getAmbientLightHorizonShort();
     method @Nullable public final com.android.server.display.config.DensityMap getDensityMap();
+    method @NonNull public final com.android.server.display.config.Thresholds getDisplayBrightnessChangeThresholds();
     method public com.android.server.display.config.HighBrightnessMode getHighBrightnessMode();
     method public final com.android.server.display.config.SensorDetails getLightSensor();
     method public final com.android.server.display.config.SensorDetails getProxSensor();
@@ -31,9 +39,11 @@ package com.android.server.display.config {
     method public final java.math.BigDecimal getScreenBrightnessRampFastIncrease();
     method public final java.math.BigDecimal getScreenBrightnessRampSlowDecrease();
     method public final java.math.BigDecimal getScreenBrightnessRampSlowIncrease();
+    method public final void setAmbientBrightnessChangeThresholds(@NonNull com.android.server.display.config.Thresholds);
     method public final void setAmbientLightHorizonLong(java.math.BigInteger);
     method public final void setAmbientLightHorizonShort(java.math.BigInteger);
     method public final void setDensityMap(@Nullable com.android.server.display.config.DensityMap);
+    method public final void setDisplayBrightnessChangeThresholds(@NonNull com.android.server.display.config.Thresholds);
     method public void setHighBrightnessMode(com.android.server.display.config.HighBrightnessMode);
     method public final void setLightSensor(com.android.server.display.config.SensorDetails);
     method public final void setProxSensor(com.android.server.display.config.SensorDetails);
@@ -119,6 +129,14 @@ package com.android.server.display.config {
     enum_constant public static final com.android.server.display.config.ThermalStatus none;
     enum_constant public static final com.android.server.display.config.ThermalStatus severe;
     enum_constant public static final com.android.server.display.config.ThermalStatus shutdown;
+  }
+
+  public class Thresholds {
+    ctor public Thresholds();
+    method @NonNull public final com.android.server.display.config.BrightnessThresholds getBrighteningThresholds();
+    method @NonNull public final com.android.server.display.config.BrightnessThresholds getDarkeningThresholds();
+    method public final void setBrighteningThresholds(@NonNull com.android.server.display.config.BrightnessThresholds);
+    method public final void setDarkeningThresholds(@NonNull com.android.server.display.config.BrightnessThresholds);
   }
 
   public class XmlParser {

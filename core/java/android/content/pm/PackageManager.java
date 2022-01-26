@@ -329,7 +329,8 @@ public abstract class PackageManager {
          * @hide
          */
         public Bundle toBundle(Bundle outBundle) {
-            final Bundle b = outBundle == null ? new Bundle() : outBundle;
+            final Bundle b = outBundle == null || outBundle == Bundle.EMPTY
+                    ? new Bundle() : outBundle;
             if (mType == TYPE_BOOLEAN) {
                 b.putBoolean(mName, mBooleanValue);
             } else if (mType == TYPE_FLOAT) {
