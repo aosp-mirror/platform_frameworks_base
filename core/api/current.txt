@@ -19859,6 +19859,7 @@ package android.media {
     method @Nullable public android.media.AudioDeviceInfo getCommunicationDevice();
     method public android.media.AudioDeviceInfo[] getDevices(int);
     method public static int getDirectPlaybackSupport(@NonNull android.media.AudioFormat, @NonNull android.media.AudioAttributes);
+    method @NonNull public java.util.List<android.media.AudioProfile> getDirectProfilesForAttributes(@NonNull android.media.AudioAttributes);
     method public int getEncodedSurroundMode();
     method public java.util.List<android.media.MicrophoneInfo> getMicrophones() throws java.io.IOException;
     method public int getMode();

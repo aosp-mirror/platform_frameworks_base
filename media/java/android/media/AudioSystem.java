@@ -2115,6 +2115,15 @@ public class AudioSystem
                                               AudioFormat format,
                                               AudioDeviceAttributes[] devices);
 
+    /**
+     * @hide
+     * @param attributes audio attributes describing the playback use case
+     * @param audioProfilesList the list of AudioProfiles that can be played as direct output
+     * @return {@link #SUCCESS} if the list of AudioProfiles was successfully created (can be empty)
+     */
+    public static native int getDirectProfilesForAttributes(@NonNull AudioAttributes attributes,
+            @NonNull ArrayList<AudioProfile> audioProfilesList);
+
     // Items shared with audio service
 
     /**
