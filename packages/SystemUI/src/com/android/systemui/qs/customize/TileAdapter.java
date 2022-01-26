@@ -181,6 +181,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     }
 
     private void clearAccessibilityState() {
+        mNeedsFocus = false;
         if (mAccessibilityAction == ACTION_ADD) {
             // Remove blank tile from last spot
             mTiles.remove(--mEditIndex);
@@ -415,9 +416,6 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                         int oldLeft, int oldTop, int oldRight, int oldBottom) {
                     holder.mTileView.removeOnLayoutChangeListener(this);
                     holder.mTileView.requestAccessibilityFocus();
-                    if (mAccessibilityAction == ACTION_NONE) {
-                        holder.mTileView.clearAccessibilityFocus();
-                    }
                 }
             });
             mNeedsFocus = false;
