@@ -242,8 +242,14 @@ class OngoingCallController @Inject constructor(
      * Sets up an [IUidObserver] to monitor the status of the application managing the ongoing call.
      */
     private fun setUpUidObserver(currentCallNotificationInfo: CallNotificationInfo) {
-        isCallAppVisible = isProcessVisibleToUser(
-                iActivityManager.getUidProcessState(currentCallNotificationInfo.uid, null))
+        try {
+            isCallAppVisible = isProcessVisibleToUser(
+                    iActivityManager.getUidProcessState(currentCallNotificationInfo.uid, null)
+            )
+        } catch (se: SecurityException) {
+            Log.e(TAG, "Security exception when trying to get process state: $se")
+            return
+        }
 
         if (uidObserver != null) {
             iActivityManager.unregisterUidObserver(uidObserver)
@@ -275,12 +281,17 @@ class OngoingCallController @Inject constructor(
             override fun onUidCachedChanged(uid: Int, cached: Boolean) {}
         }
 
-        iActivityManager.registerUidObserver(
+        try {
+            iActivityManager.registerUidObserver(
                 uidObserver,
                 ActivityManager.UID_OBSERVER_PROCSTATE,
                 ActivityManager.PROCESS_STATE_UNKNOWN,
                 null
-        )
+            )
+        } catch (se: SecurityException) {
+            Log.e(TAG, "Security exception when trying to register uid observer: $se")
+            return
+        }
     }
 
     /** Returns true if the given [procState] represents a process that's visible to the user. */

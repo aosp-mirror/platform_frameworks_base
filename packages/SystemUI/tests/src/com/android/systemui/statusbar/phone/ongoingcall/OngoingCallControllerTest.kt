@@ -217,6 +217,27 @@ class OngoingCallControllerTest : SysuiTestCase() {
         verify(mockIActivityManager, times(numCalls - 1)).unregisterUidObserver(any())
     }
 
+    /** Regression test for b/216248574. */
+    @Test
+    fun entryUpdated_getUidProcessStateThrowsException_noCrash() {
+        `when`(mockIActivityManager.getUidProcessState(eq(CALL_UID), nullable(String::class.java)))
+                .thenThrow(SecurityException())
+
+        // No assert required, just check no crash
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+    }
+
+    /** Regression test for b/216248574. */
+    @Test
+    fun entryUpdated_registerUidObserverThrowsException_noCrash() {
+        `when`(mockIActivityManager.registerUidObserver(
+            any(), any(), any(), nullable(String::class.java)
+        )).thenThrow(SecurityException())
+
+        // No assert required, just check no crash
+        notifCollectionListener.onEntryUpdated(createOngoingCallNotifEntry())
+    }
+
     /**
      * If a call notification is never added before #onEntryRemoved is called, then the listener
      * should never be notified.
