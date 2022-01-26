@@ -19,7 +19,6 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.fingerprint.ISession;
 import android.os.RemoteException;
 import android.util.Slog;
 
@@ -28,15 +27,16 @@ import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
-class FingerprintGetAuthenticatorIdClient extends HalClientMonitor<ISession> {
+class FingerprintGetAuthenticatorIdClient extends HalClientMonitor<AidlSession> {
 
     private static final String TAG = "FingerprintGetAuthenticatorIdClient";
 
     private final Map<Integer, Long> mAuthenticatorIds;
 
     FingerprintGetAuthenticatorIdClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, int userId, @NonNull String owner,
+            @NonNull Supplier<AidlSession> lazyDaemon, int userId, @NonNull String owner,
             int sensorId, Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
                 0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_FINGERPRINT,
@@ -57,7 +57,7 @@ class FingerprintGetAuthenticatorIdClient extends HalClientMonitor<ISession> {
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().getAuthenticatorId();
+            getFreshDaemon().getSession().getAuthenticatorId();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }

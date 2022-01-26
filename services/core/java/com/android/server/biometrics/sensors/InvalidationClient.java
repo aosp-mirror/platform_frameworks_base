@@ -27,6 +27,7 @@ import android.util.Slog;
 import com.android.server.biometrics.BiometricsProto;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * ClientMonitor subclass for requesting authenticatorId invalidation. See
@@ -40,7 +41,7 @@ public abstract class InvalidationClient<S extends BiometricAuthenticator.Identi
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
     @NonNull private final IInvalidationCallback mInvalidationCallback;
 
-    public InvalidationClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+    public InvalidationClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             int userId, int sensorId, @NonNull Map<Integer, Long> authenticatorIds,
             @NonNull IInvalidationCallback callback) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId,

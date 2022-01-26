@@ -27,8 +27,9 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
+import android.hardware.biometrics.common.OperationContext;
+import android.hardware.biometrics.common.OperationReason;
 import android.hardware.biometrics.face.IFace;
-import android.hardware.biometrics.face.ISession;
 import android.hardware.face.FaceAuthenticationFrame;
 import android.hardware.face.FaceManager;
 import android.os.IBinder;
@@ -48,11 +49,13 @@ import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.face.UsageStats;
 
 import java.util.ArrayList;
+import java.util.function.Supplier;
 
 /**
  * Face-specific authentication client for the {@link IFace} AIDL HAL interface.
  */
-class FaceAuthenticationClient extends AuthenticationClient<ISession> implements LockoutConsumer {
+class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
+        implements LockoutConsumer {
     private static final String TAG = "FaceAuthenticationClient";
 
     @NonNull private final UsageStats mUsageStats;
@@ -69,7 +72,7 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
     @FaceManager.FaceAcquired private int mLastAcquire = FaceManager.FACE_ACQUIRED_UNKNOWN;
 
     FaceAuthenticationClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon,
+            @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
@@ -122,12 +125,28 @@ class FaceAuthenticationClient extends AuthenticationClient<ISession> implements
                         0 /* vendorCode */);
                 mCallback.onClientFinished(this, false /* success */);
             } else {
-                mCancellationSignal = getFreshDaemon().authenticate(mOperationId);
+                mCancellationSignal = doAuthenticate();
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting auth", e);
             onError(BiometricFaceConstants.FACE_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
             mCallback.onClientFinished(this, false /* success */);
+        }
+    }
+
+    private ICancellationSignal doAuthenticate() throws RemoteException {
+        final AidlSession session = getFreshDaemon();
+
+        if (session.hasContextMethods()) {
+            final OperationContext context = new OperationContext();
+            // TODO: add reason, id, and isAoD
+            context.id = 0;
+            context.reason = OperationReason.UNKNOWN;
+            context.isAoD = false;
+            context.isCrypto = isCryptoOperation();
+            return session.getSession().authenticateWithContext(mOperationId, context);
+        } else {
+            return session.getSession().authenticate(mOperationId);
         }
     }
 

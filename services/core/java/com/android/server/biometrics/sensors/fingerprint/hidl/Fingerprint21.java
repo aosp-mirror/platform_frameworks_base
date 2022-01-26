@@ -67,7 +67,6 @@ import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.ClientMonitorCompositeCallback;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
 import com.android.server.biometrics.sensors.ErrorConsumer;
-import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.PerformanceTracker;
@@ -90,6 +89,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 
 /**
  * Supports a single instance of the {@link android.hardware.biometrics.fingerprint.V2_1} or
@@ -111,7 +111,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     private final LockoutResetDispatcher mLockoutResetDispatcher;
     private final LockoutFrameworkImpl mLockoutTracker;
     private final BiometricTaskStackListener mTaskStackListener;
-    private final HalClientMonitor.LazyDaemon<IBiometricsFingerprint> mLazyDaemon;
+    private final Supplier<IBiometricsFingerprint> mLazyDaemon;
     private final Map<Integer, Long> mAuthenticatorIds;
 
     @Nullable private IBiometricsFingerprint mDaemon;

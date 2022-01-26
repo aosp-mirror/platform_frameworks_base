@@ -24,12 +24,15 @@ import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants.FingerprintAcquired;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
-import android.hardware.biometrics.fingerprint.ISession;
+import android.hardware.biometrics.common.OperationContext;
+import android.hardware.biometrics.common.OperationReason;
+import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
+import android.hardware.keymaster.HardwareAuthToken;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -46,7 +49,9 @@ import com.android.server.biometrics.sensors.fingerprint.FingerprintUtils;
 import com.android.server.biometrics.sensors.fingerprint.Udfps;
 import com.android.server.biometrics.sensors.fingerprint.UdfpsHelper;
 
-class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
+import java.util.function.Supplier;
+
+class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps {
 
     private static final String TAG = "FingerprintEnrollClient";
 
@@ -59,7 +64,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
     private boolean mIsPointerDown;
 
     FingerprintEnrollClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, @NonNull IBinder token, long requestId,
+            @NonNull Supplier<AidlSession> lazyDaemon, @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner,
             @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
@@ -156,8 +161,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
 
         BiometricNotificationUtils.cancelBadCalibrationNotification(getContext());
         try {
-            mCancellationSignal = getFreshDaemon().enroll(
-                    HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken));
+            mCancellationSignal = doEnroll();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting enroll", e);
             onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_UNABLE_TO_PROCESS,
@@ -166,11 +170,42 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
         }
     }
 
+    private ICancellationSignal doEnroll() throws RemoteException {
+        final AidlSession session = getFreshDaemon();
+        final HardwareAuthToken hat =
+                HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken);
+
+        if (session.hasContextMethods()) {
+            final OperationContext context = new OperationContext();
+            // TODO: add reason, id, and isAoD
+            context.id = 0;
+            context.reason = OperationReason.UNKNOWN;
+            context.isAoD = false;
+            context.isCrypto = isCryptoOperation();
+            return session.getSession().enrollWithContext(hat, context);
+        } else {
+            return session.getSession().enroll(hat);
+        }
+    }
+
     @Override
     public void onPointerDown(int x, int y, float minor, float major) {
         try {
             mIsPointerDown = true;
-            getFreshDaemon().onPointerDown(0 /* pointerId */, x, y, minor, major);
+
+            final AidlSession session = getFreshDaemon();
+            if (session.hasContextMethods()) {
+                final PointerContext context = new PointerContext();
+                context.pointerId = 0;
+                context.x = x;
+                context.y = y;
+                context.minor = minor;
+                context.major = major;
+                context.isAoD = false;
+                session.getSession().onPointerDownWithContext(context);
+            } else {
+                session.getSession().onPointerDown(0 /* pointerId */, x, y, minor, major);
+            }
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to send pointer down", e);
         }
@@ -180,7 +215,15 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
     public void onPointerUp() {
         try {
             mIsPointerDown = false;
-            getFreshDaemon().onPointerUp(0 /* pointerId */);
+
+            final AidlSession session = getFreshDaemon();
+            if (session.hasContextMethods()) {
+                final PointerContext context = new PointerContext();
+                context.pointerId = 0;
+                session.getSession().onPointerUpWithContext(context);
+            } else {
+                session.getSession().onPointerUp(0 /* pointerId */);
+            }
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to send pointer up", e);
         }
@@ -194,7 +237,7 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
     @Override
     public void onUiReady() {
         try {
-            getFreshDaemon().onUiReady();
+            getFreshDaemon().getSession().onUiReady();
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to send UI ready", e);
         }

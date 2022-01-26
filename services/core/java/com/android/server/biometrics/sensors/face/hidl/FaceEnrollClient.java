@@ -40,6 +40,7 @@ import com.android.server.biometrics.sensors.EnrollClient;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 /**
  * Face-specific enroll client supporting the {@link android.hardware.biometrics.face.V1_0} HIDL
@@ -53,7 +54,7 @@ public class FaceEnrollClient extends EnrollClient<IBiometricsFace> {
     @NonNull private final int[] mEnrollIgnoreList;
     @NonNull private final int[] mEnrollIgnoreListVendor;
 
-    FaceEnrollClient(@NonNull Context context, @NonNull LazyDaemon<IBiometricsFace> lazyDaemon,
+    FaceEnrollClient(@NonNull Context context, @NonNull Supplier<IBiometricsFace> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner, long requestId,
             @NonNull BiometricUtils<Face> utils, @NonNull int[] disabledFeatures, int timeoutSec,

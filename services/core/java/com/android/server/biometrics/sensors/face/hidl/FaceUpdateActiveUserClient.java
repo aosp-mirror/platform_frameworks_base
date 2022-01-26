@@ -30,6 +30,7 @@ import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.io.File;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class FaceUpdateActiveUserClient extends HalClientMonitor<IBiometricsFace> {
     private static final String TAG = "FaceUpdateActiveUserClient";
@@ -39,7 +40,7 @@ public class FaceUpdateActiveUserClient extends HalClientMonitor<IBiometricsFace
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
 
     FaceUpdateActiveUserClient(@NonNull Context context,
-            @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, int userId, @NonNull String owner,
+            @NonNull Supplier<IBiometricsFace> lazyDaemon, int userId, @NonNull String owner,
             int sensorId, boolean hasEnrolledBiometrics,
             @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,

@@ -41,6 +41,8 @@ import com.android.server.biometrics.sensors.SensorOverlays;
 import com.android.server.biometrics.sensors.fingerprint.Udfps;
 import com.android.server.biometrics.sensors.fingerprint.UdfpsHelper;
 
+import java.util.function.Supplier;
+
 /**
  * Fingerprint-specific enroll client supporting the
  * {@link android.hardware.biometrics.fingerprint.V2_1} and
@@ -56,7 +58,7 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
     private boolean mIsPointerDown;
 
     FingerprintEnrollClient(@NonNull Context context,
-            @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
+            @NonNull Supplier<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
             long requestId, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner,
             @NonNull BiometricUtils<Fingerprint> utils, int timeoutSec, int sensorId,

@@ -27,6 +27,7 @@ import android.util.Slog;
 import com.android.server.biometrics.BiometricsProto;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * A class to keep track of the remove state for a given client.
@@ -40,7 +41,7 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
     private final Map<Integer, Long> mAuthenticatorIds;
     private final boolean mHasEnrollmentsBeforeStarting;
 
-    public RemovalClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+    public RemovalClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
             int userId, @NonNull String owner, @NonNull BiometricUtils<S> utils, int sensorId,
             @NonNull Map<Integer, Long> authenticatorIds, int statsModality) {

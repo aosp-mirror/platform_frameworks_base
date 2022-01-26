@@ -49,7 +49,7 @@ public class FingerprintUpdateActiveUserClient extends HalClientMonitor<IBiometr
     private File mDirectory;
 
     FingerprintUpdateActiveUserClient(@NonNull Context context,
-            @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, int userId,
+            @NonNull Supplier<IBiometricsFingerprint> lazyDaemon, int userId,
             @NonNull String owner, int sensorId, Supplier<Integer> currentUserId,
             boolean hasEnrolledBiometrics, @NonNull Map<Integer, Long> authenticatorIds,
             boolean forceUpdateAuthenticatorId) {

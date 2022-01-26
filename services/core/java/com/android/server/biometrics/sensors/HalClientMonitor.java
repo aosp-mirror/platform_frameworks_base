@@ -22,35 +22,16 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 
+import java.util.function.Supplier;
+
 /**
  * Abstract {@link BaseClientMonitor} implementation that supports HAL operations.
  * @param <T> HAL template
  */
 public abstract class HalClientMonitor<T> extends BaseClientMonitor {
-    /**
-     * Interface that allows ClientMonitor subclasses to retrieve a fresh instance to the HAL.
-     */
-    public interface LazyDaemon<T> {
-        /**
-         * @return A fresh instance to the biometric HAL
-         */
-        T getDaemon();
-    }
-
-    /**
-     * Starts the HAL operation specific to the ClientMonitor subclass.
-     */
-    protected abstract void startHalOperation();
-
-    /**
-     * Invoked if the scheduler is unable to start the ClientMonitor (for example the HAL is null).
-     * If such a problem is detected, the scheduler will not invoke
-     * {@link #start(ClientMonitorCallback)}.
-     */
-    public abstract void unableToStart();
-
+    
     @NonNull
-    protected final LazyDaemon<T> mLazyDaemon;
+    protected final Supplier<T> mLazyDaemon;
 
     /**
      * @param context    system_server context
@@ -65,7 +46,7 @@ public abstract class HalClientMonitor<T> extends BaseClientMonitor {
      * @param statsAction   One of {@link BiometricsProtoEnums} ACTION_* constants
      * @param statsClient   One of {@link BiometricsProtoEnums} CLIENT_* constants
      */
-    public HalClientMonitor(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+    public HalClientMonitor(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @Nullable IBinder token, @Nullable ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int cookie, int sensorId, int statsModality, int statsAction,
             int statsClient) {
@@ -76,6 +57,18 @@ public abstract class HalClientMonitor<T> extends BaseClientMonitor {
 
     @Nullable
     public T getFreshDaemon() {
-        return mLazyDaemon.getDaemon();
+        return mLazyDaemon.get();
     }
+
+    /**
+     * Starts the HAL operation specific to the ClientMonitor subclass.
+     */
+    protected abstract void startHalOperation();
+
+    /**
+     * Invoked if the scheduler is unable to start the ClientMonitor (for example the HAL is null).
+     * If such a problem is detected, the scheduler will not invoke
+     * {@link #start(ClientMonitorCallback)}.
+     */
+    public abstract void unableToStart();
 }

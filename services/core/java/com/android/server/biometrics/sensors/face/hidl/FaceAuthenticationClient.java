@@ -41,6 +41,7 @@ import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.face.UsageStats;
 
 import java.util.ArrayList;
+import java.util.function.Supplier;
 
 /**
  * Face-specific authentication client supporting the {@link android.hardware.biometrics.face.V1_0}
@@ -61,7 +62,7 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
     private SensorPrivacyManager mSensorPrivacyManager;
 
     FaceAuthenticationClient(@NonNull Context context,
-            @NonNull LazyDaemon<IBiometricsFace> lazyDaemon,
+            @NonNull Supplier<IBiometricsFace> lazyDaemon,
             @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,

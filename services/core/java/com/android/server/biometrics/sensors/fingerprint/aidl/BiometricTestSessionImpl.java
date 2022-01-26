@@ -157,7 +157,7 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
         }
 
         mEnrollmentIds.add(nextRandomId);
-        mSensor.getSessionForUser(userId).mHalSessionCallback
+        mSensor.getSessionForUser(userId).getHalSessionCallback()
                 .onEnrollmentProgress(nextRandomId, 0 /* remaining */);
     }
 
@@ -173,7 +173,7 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
             return;
         }
         final int fid = fingerprints.get(0).getBiometricId();
-        mSensor.getSessionForUser(userId).mHalSessionCallback.onAuthenticationSucceeded(fid,
+        mSensor.getSessionForUser(userId).getHalSessionCallback().onAuthenticationSucceeded(fid,
                 HardwareAuthTokenUtils.toHardwareAuthToken(new byte[69]));
     }
 
@@ -181,14 +181,14 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
     public void rejectAuthentication(int userId)  {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        mSensor.getSessionForUser(userId).mHalSessionCallback.onAuthenticationFailed();
+        mSensor.getSessionForUser(userId).getHalSessionCallback().onAuthenticationFailed();
     }
 
     @Override
     public void notifyAcquired(int userId, int acquireInfo)  {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        mSensor.getSessionForUser(userId).mHalSessionCallback
+        mSensor.getSessionForUser(userId).getHalSessionCallback()
                 .onAcquired((byte) acquireInfo, 0 /* vendorCode */);
     }
 
@@ -196,7 +196,7 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
     public void notifyError(int userId, int errorCode)  {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        mSensor.getSessionForUser(userId).mHalSessionCallback.onError((byte) errorCode,
+        mSensor.getSessionForUser(userId).getHalSessionCallback().onError((byte) errorCode,
                 0 /* vendorCode */);
     }
 

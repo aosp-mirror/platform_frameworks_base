@@ -22,7 +22,8 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricOverlayConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
-import android.hardware.biometrics.fingerprint.ISession;
+import android.hardware.biometrics.common.OperationContext;
+import android.hardware.biometrics.common.OperationReason;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -35,11 +36,13 @@ import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.DetectionConsumer;
 import com.android.server.biometrics.sensors.SensorOverlays;
 
+import java.util.function.Supplier;
+
 /**
  * Performs fingerprint detection without exposing any matching information (e.g. accept/reject
  * have the same haptic, lockout counter is not increased).
  */
-class FingerprintDetectClient extends AcquisitionClient<ISession> implements DetectionConsumer {
+class FingerprintDetectClient extends AcquisitionClient<AidlSession> implements DetectionConsumer {
 
     private static final String TAG = "FingerprintDetectClient";
 
@@ -47,7 +50,7 @@ class FingerprintDetectClient extends AcquisitionClient<ISession> implements Det
     @NonNull private final SensorOverlays mSensorOverlays;
     @Nullable private ICancellationSignal mCancellationSignal;
 
-    FingerprintDetectClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
+    FingerprintDetectClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int sensorId,
@@ -84,11 +87,27 @@ class FingerprintDetectClient extends AcquisitionClient<ISession> implements Det
         mSensorOverlays.show(getSensorId(), BiometricOverlayConstants.REASON_AUTH_KEYGUARD, this);
 
         try {
-            mCancellationSignal = getFreshDaemon().detectInteraction();
+            mCancellationSignal = doDetectInteraction();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting finger detect", e);
             mSensorOverlays.hide(getSensorId());
             mCallback.onClientFinished(this, false /* success */);
+        }
+    }
+
+    private ICancellationSignal doDetectInteraction() throws RemoteException {
+        final AidlSession session = getFreshDaemon();
+
+        if (session.hasContextMethods()) {
+            final OperationContext context = new OperationContext();
+            // TODO: add reason, id, and isAoD
+            context.id = 0;
+            context.reason = OperationReason.UNKNOWN;
+            context.isAoD = false;
+            context.isCrypto = isCryptoOperation();
+            return session.getSession().detectInteractionWithContext(context);
+        } else {
+            return session.getSession().detectInteraction();
         }
     }
 

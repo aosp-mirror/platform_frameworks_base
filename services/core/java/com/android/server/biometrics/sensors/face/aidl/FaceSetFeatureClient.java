@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.IFace;
-import android.hardware.biometrics.face.ISession;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -33,10 +32,12 @@ import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
+import java.util.function.Supplier;
+
 /**
  * Face-specific get feature client for the {@link IFace} AIDL HAL interface.
  */
-public class FaceSetFeatureClient extends HalClientMonitor<ISession> implements ErrorConsumer {
+public class FaceSetFeatureClient extends HalClientMonitor<AidlSession> implements ErrorConsumer {
 
     private static final String TAG = "FaceSetFeatureClient";
 
@@ -44,7 +45,7 @@ public class FaceSetFeatureClient extends HalClientMonitor<ISession> implements 
     private final boolean mEnabled;
     private final HardwareAuthToken mHardwareAuthToken;
 
-    FaceSetFeatureClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
+    FaceSetFeatureClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int sensorId, int feature, boolean enabled,
             byte[] hardwareAuthToken) {
@@ -74,8 +75,7 @@ public class FaceSetFeatureClient extends HalClientMonitor<ISession> implements 
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon()
-                    .setFeature(mHardwareAuthToken,
+            getFreshDaemon().getSession().setFeature(mHardwareAuthToken,
                     AidlConversionUtils.convertFrameworkToAidlFeature(mFeature), mEnabled);
         } catch (RemoteException | IllegalArgumentException e) {
             Slog.e(TAG, "Unable to set feature: " + mFeature + " to enabled: " + mEnabled, e);
