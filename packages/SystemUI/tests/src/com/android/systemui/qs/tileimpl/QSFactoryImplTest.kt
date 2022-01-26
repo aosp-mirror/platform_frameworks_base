@@ -34,7 +34,6 @@ import com.android.systemui.qs.tiles.ColorInversionTile
 import com.android.systemui.qs.tiles.DataSaverTile
 import com.android.systemui.qs.tiles.DeviceControlsTile
 import com.android.systemui.qs.tiles.DndTile
-import com.android.systemui.qs.tiles.FgsManagerTile
 import com.android.systemui.qs.tiles.FlashlightTile
 import com.android.systemui.qs.tiles.HotspotTile
 import com.android.systemui.qs.tiles.InternetTile
@@ -92,7 +91,6 @@ private val specMap = mapOf(
         "wallet" to QuickAccessWalletTile::class.java,
         "qr_code_scanner" to QRCodeScannerTile::class.java,
         "onehanded" to OneHandedModeTile::class.java,
-        "fgsmanager" to FgsManagerTile::class.java,
         "color_correction" to ColorCorrectionTile::class.java
 )
 
@@ -133,7 +131,6 @@ class QSFactoryImplTest : SysuiTestCase() {
     @Mock private lateinit var quickAccessWalletTile: QuickAccessWalletTile
     @Mock private lateinit var qrCodeScannerTile: QRCodeScannerTile
     @Mock private lateinit var oneHandedModeTile: OneHandedModeTile
-    @Mock private lateinit var fgsManagerTile: FgsManagerTile
     @Mock private lateinit var colorCorrectionTile: ColorCorrectionTile
 
     private lateinit var factory: QSFactoryImpl
@@ -178,7 +175,6 @@ class QSFactoryImplTest : SysuiTestCase() {
                 { quickAccessWalletTile },
                 { qrCodeScannerTile },
                 { oneHandedModeTile },
-                { fgsManagerTile },
                 { colorCorrectionTile }
         )
         // When adding/removing tiles, fix also [specMap]
