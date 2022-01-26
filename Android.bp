@@ -255,6 +255,7 @@ filegroup {
         ":framework_native_aidl",
         ":gatekeeper_aidl",
         ":gsiservice_aidl",
+        ":guiconstants_aidl",
         ":incidentcompanion_aidl",
         ":installd_aidl",
         ":keystore_aidl",
