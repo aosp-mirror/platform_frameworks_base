@@ -29,6 +29,7 @@ import android.location.LocationManager;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
+import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -46,6 +47,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.LocationController.LocationChangeCallback;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
+import com.android.systemui.util.settings.SecureSettings;
 
 import com.google.common.collect.ImmutableList;
 
@@ -67,6 +69,7 @@ public class LocationControllerImplTest extends SysuiTestCase {
 
     @Mock private AppOpsController mAppOpsController;
     @Mock private UserTracker mUserTracker;
+    @Mock private SecureSettings mSecureSettings;
 
     @Before
     public void setup() {
@@ -88,7 +91,8 @@ public class LocationControllerImplTest extends SysuiTestCase {
                 mock(BootCompleteCache.class),
                 mUserTracker,
                 mContext.getPackageManager(),
-                mUiEventLogger);
+                mUiEventLogger,
+                mSecureSettings);
 
         mTestableLooper.processAllMessages();
     }
@@ -204,7 +208,7 @@ public class LocationControllerImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testCallbackNotified_additionalOps_shouldShowSystem() {
+    public void testCallbackNotified_additionalOps_shouldNotShowSystem() {
         LocationChangeCallback callback = mock(LocationChangeCallback.class);
         mLocationController.addCallback(callback);
         mDeviceConfigProxy.setProperty(
@@ -229,7 +233,9 @@ public class LocationControllerImplTest extends SysuiTestCase {
 
 
     @Test
-    public void testCallbackNotified_additionalOps_shouldNotShowSystem() {
+    public void testCallbackNotified_additionalOps_shouldShowSystem() {
+        when(mSecureSettings.getInt(Settings.Secure.LOCATION_SHOW_SYSTEM_OPS, 0))
+                .thenReturn(1);
         LocationChangeCallback callback = mock(LocationChangeCallback.class);
         mLocationController.addCallback(callback);
         mDeviceConfigProxy.setProperty(
@@ -261,6 +267,16 @@ public class LocationControllerImplTest extends SysuiTestCase {
         mTestableLooper.processAllMessages();
 
         verify(callback, times(1)).onLocationActiveChanged(false);
+
+        when(mSecureSettings.getInt(Settings.Secure.LOCATION_SHOW_SYSTEM_OPS, 0))
+                .thenReturn(0);
+        mLocationController.onActiveStateChanged(AppOpsManager.OP_FINE_LOCATION, 0,
+                "com.google.android.gms", true);
+
+        mTestableLooper.processAllMessages();
+
+        // onLocationActive(true) was not called again because the setting is disabled.
+        verify(callback, times(1)).onLocationActiveChanged(true);
     }
 
     @Test
