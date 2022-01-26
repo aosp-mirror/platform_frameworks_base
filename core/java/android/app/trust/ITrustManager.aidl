@@ -33,8 +33,8 @@ interface ITrustManager {
     void unregisterTrustListener(in ITrustListener trustListener);
     void reportKeyguardShowingChanged();
     void setDeviceLockedForUser(int userId, boolean locked);
-    boolean isDeviceLocked(int userId);
-    boolean isDeviceSecure(int userId);
+    boolean isDeviceLocked(int userId, int displayId);
+    boolean isDeviceSecure(int userId, int displayId);
     boolean isTrustUsuallyManaged(int userId);
     void unlockedByBiometricForUser(int userId, in BiometricSourceType source);
     void clearAllBiometricRecognized(in BiometricSourceType target, int unlockedUser);

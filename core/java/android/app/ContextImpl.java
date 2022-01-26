@@ -2900,6 +2900,14 @@ class ContextImpl extends Context {
         }
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public int getAssociatedDisplayId()  {
+        return isAssociatedWithDisplay() ? getDisplayId() : Display.INVALID_DISPLAY;
+    }
+
     @Override
     public Display getDisplayNoVerify() {
         if (mDisplay == null) {

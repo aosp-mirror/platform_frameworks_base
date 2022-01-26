@@ -7075,6 +7075,18 @@ public abstract class Context {
     public abstract int getDisplayId();
 
     /**
+     * @return Returns the id of the Display object associated with this Context or
+     * {@link Display#INVALID_DISPLAY} if no Display has been associated.
+     * @see #getDisplay()
+     * @see #getDisplayId()
+     *
+     * @hide
+     */
+    public int getAssociatedDisplayId() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * @hide
      */
     @SuppressWarnings("HiddenAbstractMethod")

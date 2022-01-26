@@ -235,7 +235,8 @@ public class BiometricServiceTest {
     @Test
     public void testAuthenticate_credentialAllowedButNotSetup_returnsNoDeviceCredential()
             throws Exception {
-        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(false);
+        when(mTrustManager.isDeviceSecure(anyInt(), anyInt()))
+                .thenReturn(false);
 
         mBiometricService = new BiometricService(mContext, mInjector);
         mBiometricService.onStart();
@@ -254,7 +255,8 @@ public class BiometricServiceTest {
         // When no biometrics are enrolled, but credentials are set up, status bar should be
         // invoked right away with showAuthenticationDialog
 
-        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
+        when(mTrustManager.isDeviceSecure(anyInt(), anyInt()))
+                .thenReturn(true);
 
         mBiometricService = new BiometricService(mContext, mInjector);
         mBiometricService.onStart();
@@ -532,7 +534,8 @@ public class BiometricServiceTest {
     public void testAuthenticate_noBiometrics_credentialAllowed() throws Exception {
         setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
         when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(false);
-        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
+        when(mTrustManager.isDeviceSecure(anyInt(), anyInt()))
+                .thenReturn(true);
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1,
                 true /* requireConfirmation */,
                 Authenticators.DEVICE_CREDENTIAL | Authenticators.BIOMETRIC_WEAK);
@@ -601,7 +604,8 @@ public class BiometricServiceTest {
     public void testAuthenticate_no_Biometrics_noCredential() throws Exception {
         setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
         when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(false);
-        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(false);
+        when(mTrustManager.isDeviceSecure(anyInt(), anyInt()))
+                .thenReturn(false);
 
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1,
                 true /* requireConfirmation */,
@@ -872,7 +876,8 @@ public class BiometricServiceTest {
     @Test
     public void testBiometricOrCredentialAuth_whenBiometricLockout_showsCredential()
             throws Exception {
-        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
+        when(mTrustManager.isDeviceSecure(anyInt(), anyInt()))
+                .thenReturn(true);
         setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
         when(mFingerprintAuthenticator.getLockoutModeForUser(anyInt()))
                 .thenReturn(LockoutTracker.LOCKOUT_PERMANENT);
@@ -1168,13 +1173,15 @@ public class BiometricServiceTest {
         setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_WEAK);
 
         // When only biometric is requested, and sensor is not strong enough
-        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(false);
+        when(mTrustManager.isDeviceSecure(anyInt(), anyInt()))
+                .thenReturn(false);
         int authenticators = Authenticators.BIOMETRIC_STRONG;
         assertEquals(BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE,
                 invokeCanAuthenticate(mBiometricService, authenticators));
 
         // When credential and biometric are requested, and sensor is not strong enough
-        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
+        when(mTrustManager.isDeviceSecure(anyInt(), anyInt()))
+                .thenReturn(true);
         authenticators = Authenticators.BIOMETRIC_STRONG | Authenticators.DEVICE_CREDENTIAL;
         assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
                 invokeCanAuthenticate(mBiometricService, authenticators));
@@ -1186,12 +1193,14 @@ public class BiometricServiceTest {
         mBiometricService.onStart();
 
         // Credential requested but not set up
-        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(false);
+        when(mTrustManager.isDeviceSecure(anyInt(), anyInt()))
+                .thenReturn(false);
         assertEquals(BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED,
                 invokeCanAuthenticate(mBiometricService, Authenticators.DEVICE_CREDENTIAL));
 
         // Credential requested and set up
-        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
+        when(mTrustManager.isDeviceSecure(anyInt(), anyInt()))
+                .thenReturn(true);
         assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
                 invokeCanAuthenticate(mBiometricService, Authenticators.DEVICE_CREDENTIAL));
     }
@@ -1199,7 +1208,8 @@ public class BiometricServiceTest {
     @Test
     public void testCanAuthenticate_whenNoBiometricsEnrolled() throws Exception {
         // With credential set up, test the following.
-        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
+        when(mTrustManager.isDeviceSecure(anyInt(), anyInt()))
+                .thenReturn(true);
         setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG,
                 false /* enrolled */);
 
@@ -1218,7 +1228,8 @@ public class BiometricServiceTest {
     public void testCanAuthenticate_whenBiometricsNotEnabledForApps() throws Exception {
         setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
         when(mBiometricService.mSettingObserver.getEnabledForApps(anyInt())).thenReturn(false);
-        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
+        when(mTrustManager.isDeviceSecure(anyInt(), anyInt()))
+                .thenReturn(true);
 
         // When only biometric is requested
         int authenticators = Authenticators.BIOMETRIC_STRONG;
@@ -1247,7 +1258,8 @@ public class BiometricServiceTest {
                 invokeCanAuthenticate(mBiometricService, authenticators));
 
         // When credential and biometric are requested, and credential is set up
-        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
+        when(mTrustManager.isDeviceSecure(anyInt(), anyInt()))
+                .thenReturn(true);
         assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
                 invokeCanAuthenticate(mBiometricService, authenticators));
     }
@@ -1394,7 +1406,8 @@ public class BiometricServiceTest {
         // Requesting strong and credential, when credential is setup
         resetReceivers();
         authenticators = Authenticators.BIOMETRIC_STRONG | Authenticators.DEVICE_CREDENTIAL;
-        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
+        when(mTrustManager.isDeviceSecure(anyInt(), anyInt()))
+                .thenReturn(true);
         assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
                 invokeCanAuthenticate(mBiometricService, authenticators));
         requestId = invokeAuthenticate(mBiometricService.mImpl, mReceiver1,
@@ -1527,7 +1540,8 @@ public class BiometricServiceTest {
     public void testWorkAuthentication_fingerprintFailsIfDisabledByDevicePolicyManager()
             throws Exception {
         setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
-        when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
+        when(mTrustManager.isDeviceSecure(anyInt(), anyInt()))
+                .thenReturn(true);
         when(mDevicePolicyManager
                 .getKeyguardDisabledFeatures(any() /* admin */, anyInt() /* userHandle */))
                 .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_FINGERPRINT);

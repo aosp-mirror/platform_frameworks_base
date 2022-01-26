@@ -606,6 +606,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
     }
 
+    boolean isDisplayOwnedByVirtualDevice(int displayId) {
+        return mVirtualDisplayIds.contains(displayId);
+    }
+
     interface OnDeviceCloseListener {
         void onClose(int associationId);
     }
