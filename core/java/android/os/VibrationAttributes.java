@@ -105,20 +105,28 @@ public final class VibrationAttributes implements Parcelable {
     public static final int USAGE_NOTIFICATION = 0x30 | USAGE_CLASS_ALARM;
     /**
      * Usage value to use for vibrations which mean a request to enter/end a
-     * communication, such as a VoIP communication or video-conference.
+     * communication with the user, such as a voice prompt.
      */
     public static final int USAGE_COMMUNICATION_REQUEST = 0x40 | USAGE_CLASS_ALARM;
     /**
      * Usage value to use for touch vibrations.
+     *
+     * <p>Most typical haptic feedback should be classed as <em>touch</em> feedback. Examples
+     * include vibrations for tap, long press, drag and scroll.
      */
     public static final int USAGE_TOUCH = 0x10 | USAGE_CLASS_FEEDBACK;
     /**
-     * Usage value to use for vibrations which emulate physical effects, such as edge squeeze.
+     * Usage value to use for vibrations which emulate physical hardware reactions,
+     * such as edge squeeze.
+     *
+     * <p>Note that normal screen-touch feedback "click" effects would typically be
+     * classed as {@link #USAGE_TOUCH}, and that on-screen "physical" animations
+     * like bouncing would be {@link #USAGE_MEDIA}.
      */
     public static final int USAGE_PHYSICAL_EMULATION = 0x20 | USAGE_CLASS_FEEDBACK;
     /**
-     * Usage value to use for vibrations which provide a feedback for hardware interaction,
-     * such as a fingerprint sensor.
+     * Usage value to use for vibrations which provide a feedback for hardware
+     * component interaction, such as a fingerprint sensor.
      */
     public static final int USAGE_HARDWARE_FEEDBACK = 0x30 | USAGE_CLASS_FEEDBACK;
     /**
@@ -182,7 +190,6 @@ public final class VibrationAttributes implements Parcelable {
 
     /**
      * Return the vibration usage class.
-     * @return USAGE_CLASS_ALARM, USAGE_CLASS_FEEDBACK or USAGE_CLASS_UNKNOWN
      */
     @UsageClass
     public int getUsageClass() {
@@ -191,7 +198,6 @@ public final class VibrationAttributes implements Parcelable {
 
     /**
      * Return the vibration usage.
-     * @return one of the values that can be set in {@link Builder#setUsage(int)}
      */
     @Usage
     public int getUsage() {
@@ -428,16 +434,8 @@ public final class VibrationAttributes implements Parcelable {
         }
 
         /**
-         * Sets the attribute describing the type of corresponding vibration.
-         * @param usage one of {@link VibrationAttributes#USAGE_ALARM},
-         * {@link VibrationAttributes#USAGE_RINGTONE},
-         * {@link VibrationAttributes#USAGE_NOTIFICATION},
-         * {@link VibrationAttributes#USAGE_COMMUNICATION_REQUEST},
-         * {@link VibrationAttributes#USAGE_TOUCH},
-         * {@link VibrationAttributes#USAGE_PHYSICAL_EMULATION},
-         * {@link VibrationAttributes#USAGE_HARDWARE_FEEDBACK}.
-         * {@link VibrationAttributes#USAGE_ACCESSIBILITY}.
-         * {@link VibrationAttributes#USAGE_MEDIA}.
+         * Sets the attribute describing the type of the corresponding vibration.
+         * @param usage The type of usage for the vibration
          * @return the same Builder instance.
          */
         public @NonNull Builder setUsage(@Usage int usage) {
@@ -459,4 +457,3 @@ public final class VibrationAttributes implements Parcelable {
         }
     }
 }
-
