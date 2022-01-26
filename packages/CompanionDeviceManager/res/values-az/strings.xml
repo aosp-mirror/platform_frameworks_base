@@ -32,4 +32,8 @@
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"İcazə verin"</string>
     <string name="consent_no" msgid="2640796915611404382">"İcazə verməyin"</string>
+    <!-- no translation found for permission_sync_confirmation_title (667074294393493186) -->
+    <skip />
+    <!-- no translation found for permission_sync_summary (8873391306499120778) -->
+    <skip />
 </resources>
