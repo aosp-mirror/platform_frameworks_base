@@ -51,6 +51,7 @@ import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
@@ -67,6 +68,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import dagger.Lazy;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -94,6 +97,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock ScreenOffAnimationController mScreenOffAnimationController;
     private @Mock InteractionJankMonitor mInteractionJankMonitor;
     private @Mock ScreenOnCoordinator mScreenOnCoordinator;
+    private @Mock Lazy<NotificationShadeWindowController> mNotificationShadeWindowControllerLazy;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -197,7 +201,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mScreenOffAnimationController,
                 () -> mNotificationShadeDepthController,
                 mScreenOnCoordinator,
-                mInteractionJankMonitor);
+                mInteractionJankMonitor,
+                mNotificationShadeWindowControllerLazy);
         mViewMediator.start();
     }
 }
