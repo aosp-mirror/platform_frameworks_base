@@ -22028,6 +22028,7 @@ package android.media {
     field @Deprecated public static final int COLOR_FormatYUV422SemiPlanar = 24; // 0x18
     field public static final int COLOR_FormatYUV444Flexible = 2135181448; // 0x7f444888
     field @Deprecated public static final int COLOR_FormatYUV444Interleaved = 29; // 0x1d
+    field public static final int COLOR_FormatYUVP010 = 54; // 0x36
     field @Deprecated public static final int COLOR_QCOM_FormatYUV420SemiPlanar = 2141391872; // 0x7fa30c00
     field @Deprecated public static final int COLOR_TI_FormatYUV420PackedSemiPlanar = 2130706688; // 0x7f000100
     field public static final String FEATURE_AdaptivePlayback = "adaptive-playback";
