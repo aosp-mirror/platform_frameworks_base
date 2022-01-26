@@ -426,10 +426,30 @@ public final class MediaCodecInfo {
         /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format24BitABGR6666           = 43;
 
-        /** @hide
-         * P010 is a 4:2:0 YCbCr semiplanar format comprised of a WxH Y plane
-         * followed by a Wx(H/2) CbCr plane. Each sample is represented by a 16-bit
-         * little-endian value, with the lower 6 bits set to zero. */
+        /**
+         * P010 is 10-bit-per component 4:2:0 YCbCr semiplanar format.
+         * <p>
+         * This format uses 24 allocated bits per pixel with 15 bits of
+         * data per pixel. Chroma planes are subsampled by 2 both
+         * horizontally and vertically. Each chroma and luma component
+         * has 16 allocated bits in little-endian configuration with 10
+         * MSB of actual data.
+         *
+         * <pre>
+         *            byte                   byte
+         *  <--------- i --------> | <------ i + 1 ------>
+         * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+         * |     UNUSED      |      Y/Cb/Cr                |
+         * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+         *  0               5 6   7 0                    7
+         * bit
+         * </pre>
+         *
+         * Use this format with {@link Image}. This format corresponds
+         * to {@link android.graphics.ImageFormat#YCBCR_P010}.
+         * <p>
+         */
+        @SuppressLint("AllUpper")
         public static final int COLOR_FormatYUVP010                 = 54;
 
         /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
