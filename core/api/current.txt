@@ -8339,62 +8339,6 @@ package android.app.usage {
     field @NonNull public static final android.os.Parcelable.Creator<android.app.usage.ExternalStorageStats> CREATOR;
   }
 
-  public final class NetworkStats implements java.lang.AutoCloseable {
-    method public void close();
-    method public boolean getNextBucket(android.app.usage.NetworkStats.Bucket);
-    method public boolean hasNextBucket();
-  }
-
-  public static class NetworkStats.Bucket {
-    ctor public NetworkStats.Bucket();
-    method public int getDefaultNetworkStatus();
-    method public long getEndTimeStamp();
-    method public int getMetered();
-    method public int getRoaming();
-    method public long getRxBytes();
-    method public long getRxPackets();
-    method public long getStartTimeStamp();
-    method public int getState();
-    method public int getTag();
-    method public long getTxBytes();
-    method public long getTxPackets();
-    method public int getUid();
-    field public static final int DEFAULT_NETWORK_ALL = -1; // 0xffffffff
-    field public static final int DEFAULT_NETWORK_NO = 1; // 0x1
-    field public static final int DEFAULT_NETWORK_YES = 2; // 0x2
-    field public static final int METERED_ALL = -1; // 0xffffffff
-    field public static final int METERED_NO = 1; // 0x1
-    field public static final int METERED_YES = 2; // 0x2
-    field public static final int ROAMING_ALL = -1; // 0xffffffff
-    field public static final int ROAMING_NO = 1; // 0x1
-    field public static final int ROAMING_YES = 2; // 0x2
-    field public static final int STATE_ALL = -1; // 0xffffffff
-    field public static final int STATE_DEFAULT = 1; // 0x1
-    field public static final int STATE_FOREGROUND = 2; // 0x2
-    field public static final int TAG_NONE = 0; // 0x0
-    field public static final int UID_ALL = -1; // 0xffffffff
-    field public static final int UID_REMOVED = -4; // 0xfffffffc
-    field public static final int UID_TETHERING = -5; // 0xfffffffb
-  }
-
-  public class NetworkStatsManager {
-    method @WorkerThread public android.app.usage.NetworkStats queryDetails(int, String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
-    method @WorkerThread public android.app.usage.NetworkStats queryDetailsForUid(int, String, long, long, int) throws java.lang.SecurityException;
-    method @WorkerThread public android.app.usage.NetworkStats queryDetailsForUidTag(int, String, long, long, int, int) throws java.lang.SecurityException;
-    method @WorkerThread public android.app.usage.NetworkStats queryDetailsForUidTagState(int, String, long, long, int, int, int) throws java.lang.SecurityException;
-    method @WorkerThread public android.app.usage.NetworkStats querySummary(int, String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
-    method @WorkerThread public android.app.usage.NetworkStats.Bucket querySummaryForDevice(int, String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
-    method @WorkerThread public android.app.usage.NetworkStats.Bucket querySummaryForUser(int, String, long, long) throws android.os.RemoteException, java.lang.SecurityException;
-    method public void registerUsageCallback(int, String, long, android.app.usage.NetworkStatsManager.UsageCallback);
-    method public void registerUsageCallback(int, String, long, android.app.usage.NetworkStatsManager.UsageCallback, @Nullable android.os.Handler);
-    method public void unregisterUsageCallback(android.app.usage.NetworkStatsManager.UsageCallback);
-  }
-
-  public abstract static class NetworkStatsManager.UsageCallback {
-    ctor public NetworkStatsManager.UsageCallback();
-    method public abstract void onThresholdReached(int, String);
-  }
-
   public final class StorageStats implements android.os.Parcelable {
     method public int describeContents();
     method public long getAppBytes();
@@ -25364,50 +25308,6 @@ package android.net {
     ctor public TelephonyNetworkSpecifier.Builder();
     method @NonNull public android.net.TelephonyNetworkSpecifier build();
     method @NonNull public android.net.TelephonyNetworkSpecifier.Builder setSubscriptionId(int);
-  }
-
-  public class TrafficStats {
-    ctor public TrafficStats();
-    method public static void clearThreadStatsTag();
-    method public static void clearThreadStatsUid();
-    method public static int getAndSetThreadStatsTag(int);
-    method public static long getMobileRxBytes();
-    method public static long getMobileRxPackets();
-    method public static long getMobileTxBytes();
-    method public static long getMobileTxPackets();
-    method public static long getRxBytes(@NonNull String);
-    method public static long getRxPackets(@NonNull String);
-    method public static int getThreadStatsTag();
-    method public static int getThreadStatsUid();
-    method public static long getTotalRxBytes();
-    method public static long getTotalRxPackets();
-    method public static long getTotalTxBytes();
-    method public static long getTotalTxPackets();
-    method public static long getTxBytes(@NonNull String);
-    method public static long getTxPackets(@NonNull String);
-    method public static long getUidRxBytes(int);
-    method public static long getUidRxPackets(int);
-    method @Deprecated public static long getUidTcpRxBytes(int);
-    method @Deprecated public static long getUidTcpRxSegments(int);
-    method @Deprecated public static long getUidTcpTxBytes(int);
-    method @Deprecated public static long getUidTcpTxSegments(int);
-    method public static long getUidTxBytes(int);
-    method public static long getUidTxPackets(int);
-    method @Deprecated public static long getUidUdpRxBytes(int);
-    method @Deprecated public static long getUidUdpRxPackets(int);
-    method @Deprecated public static long getUidUdpTxBytes(int);
-    method @Deprecated public static long getUidUdpTxPackets(int);
-    method public static void incrementOperationCount(int);
-    method public static void incrementOperationCount(int, int);
-    method public static void setThreadStatsTag(int);
-    method public static void setThreadStatsUid(int);
-    method public static void tagDatagramSocket(java.net.DatagramSocket) throws java.net.SocketException;
-    method public static void tagFileDescriptor(java.io.FileDescriptor) throws java.io.IOException;
-    method public static void tagSocket(java.net.Socket) throws java.net.SocketException;
-    method public static void untagDatagramSocket(java.net.DatagramSocket) throws java.net.SocketException;
-    method public static void untagFileDescriptor(java.io.FileDescriptor) throws java.io.IOException;
-    method public static void untagSocket(java.net.Socket) throws java.net.SocketException;
-    field public static final int UNSUPPORTED = -1; // 0xffffffff
   }
 
   public abstract class Uri implements java.lang.Comparable<android.net.Uri> android.os.Parcelable {
