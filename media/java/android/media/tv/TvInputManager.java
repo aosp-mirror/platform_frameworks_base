@@ -394,17 +394,14 @@ public final class TvInputManager {
 
     /**
      * Signal lost.
-     * @hide
      */
     public static final int SIGNAL_STRENGTH_LOST = 1;
     /**
      * Weak signal.
-     * @hide
      */
     public static final int SIGNAL_STRENGTH_WEAK = 2;
     /**
      * Strong signal.
-     * @hide
      */
     public static final int SIGNAL_STRENGTH_STRONG = 3;
 

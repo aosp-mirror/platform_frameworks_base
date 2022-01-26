@@ -29,7 +29,6 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * An advertisement request which can be sent to TV input to request AD operations.
- * @hide
  */
 public final class AdRequest implements Parcelable {
     /** @hide */

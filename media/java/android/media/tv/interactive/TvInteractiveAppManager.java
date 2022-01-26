@@ -174,18 +174,15 @@ public final class TvInteractiveAppManager {
     public @interface TeletextAppState {}
 
     /**
-     * Show state of Teletext app.
-     * @hide
+     * State of Teletext app: show
      */
     public static final int TELETEXT_APP_STATE_SHOW = 1;
     /**
-     * Hide state of Teletext app.
-     * @hide
+     * State of Teletext app: hide
      */
     public static final int TELETEXT_APP_STATE_HIDE = 2;
     /**
-     * Error state of Teletext app.
-     * @hide
+     * State of Teletext app: error
      */
     public static final int TELETEXT_APP_STATE_ERROR = 3;
 
@@ -193,9 +190,7 @@ public final class TvInteractiveAppManager {
      * Key for package name in app link.
      * <p>Type: String
      *
-     * @see #registerAppLinkInfo(String, Bundle)
      * @see #sendAppLinkCommand(String, Bundle)
-     * @hide
      */
     public static final String KEY_PACKAGE_NAME = "package_name";
 
@@ -203,45 +198,15 @@ public final class TvInteractiveAppManager {
      * Key for class name in app link.
      * <p>Type: String
      *
-     * @see #registerAppLinkInfo(String, Bundle)
      * @see #sendAppLinkCommand(String, Bundle)
-     * @hide
      */
     public static final String KEY_CLASS_NAME = "class_name";
-
-    /**
-     * Key for URI scheme in app link.
-     * <p>Type: String
-     *
-     * @see #registerAppLinkInfo(String, Bundle)
-     * @hide
-     */
-    public static final String KEY_URI_SCHEME = "uri_scheme";
-
-    /**
-     * Key for URI host in app link.
-     * <p>Type: String
-     *
-     * @see #registerAppLinkInfo(String, Bundle)
-     * @hide
-     */
-    public static final String KEY_URI_HOST = "uri_host";
-
-    /**
-     * Key for URI prefix in app link.
-     * <p>Type: String
-     *
-     * @see #registerAppLinkInfo(String, Bundle)
-     * @hide
-     */
-    public static final String KEY_URI_PREFIX = "uri_prefix";
 
     /**
      * Key for command type in app link command.
      * <p>Type: String
      *
      * @see #sendAppLinkCommand(String, Bundle)
-     * @hide
      */
     public static final String KEY_COMMAND_TYPE = "command_type";
 
@@ -250,7 +215,6 @@ public final class TvInteractiveAppManager {
      * <p>Type: String
      *
      * @see #sendAppLinkCommand(String, Bundle)
-     * @hide
      */
     public static final String KEY_SERVICE_ID = "service_id";
 
@@ -259,9 +223,67 @@ public final class TvInteractiveAppManager {
      * <p>Type: String
      *
      * @see #sendAppLinkCommand(String, Bundle)
-     * @hide
      */
     public static final String KEY_BACK_URI = "back_uri";
+
+    /**
+     * Broadcast intent action to send app command to TV app.
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     */
+    public static final String ACTION_APP_LINK_COMMAND =
+            "android.media.tv.interactive.action.APP_LINK_COMMAND";
+
+    /**
+     * Intent key for TV input ID. It's used to send app command to TV app.
+     * <p>Type: String
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @see #ACTION_APP_LINK_COMMAND
+     */
+    public static final String INTENT_KEY_TV_INPUT_ID = "tv_input_id";
+
+    /**
+     * Intent key for TV interactive app ID. It's used to send app command to TV app.
+     * <p>Type: String
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @see #ACTION_APP_LINK_COMMAND
+     * @see android.media.tv.interactive.TvInteractiveAppInfo#getId()
+     */
+    public static final String INTENT_KEY_INTERACTIVE_APP_SERVICE_ID = "interactive_app_id";
+
+    /**
+     * Intent key for TV channel URI. It's used to send app command to TV app.
+     * <p>Type: android.net.Uri
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @see #ACTION_APP_LINK_COMMAND
+     */
+    public static final String INTENT_KEY_CHANNEL_URI = "channel_uri";
+
+    /**
+     * Intent key for broadcast-independent(BI) interactive app type. It's used to send app command
+     * to TV app.
+     * <p>Type: int
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @see #ACTION_APP_LINK_COMMAND
+     * @see android.media.tv.interactive.TvInteractiveAppInfo#getSupportedTypes()
+     * @see android.media.tv.interactive.TvInteractiveAppView#createBiInteractiveApp(Uri, Bundle)
+     */
+    public static final String INTENT_KEY_BI_INTERACTIVE_APP_TYPE = "bi_interactive_app_type";
+
+    /**
+     * Intent key for broadcast-independent(BI) interactive app URI. It's used to send app command
+     * to TV app.
+     * <p>Type: android.net.Uri
+     *
+     * @see #sendAppLinkCommand(String, Bundle)
+     * @see #ACTION_APP_LINK_COMMAND
+     * @see android.media.tv.interactive.TvInteractiveAppView#createBiInteractiveApp(Uri, Bundle)
+     */
+    public static final String INTENT_KEY_BI_INTERACTIVE_APP_URI = "bi_interactive_app_uri";
 
     private final ITvInteractiveAppManager mService;
     private final int mUserId;
@@ -358,7 +380,7 @@ public final class TvInteractiveAppManager {
 
             @Override
             public void onCommandRequest(
-                    @TvInteractiveAppService.InteractiveAppServiceCommandType String cmdType,
+                    @TvInteractiveAppService.PlaybackCommandType String cmdType,
                     Bundle parameters,
                     int seq) {
                 synchronized (mSessionCallbackRecordMap) {
@@ -559,7 +581,6 @@ public final class TvInteractiveAppManager {
          * that implements {@link TvInteractiveAppService} interface.
          *
          * @param iAppServiceId The ID of the TV Interactive App service.
-         * @hide
          */
         public void onInteractiveAppServiceAdded(@NonNull String iAppServiceId) {
         }
@@ -571,7 +592,6 @@ public final class TvInteractiveAppManager {
          * App service package.
          *
          * @param iAppServiceId The ID of the TV Interactive App service.
-         * @hide
          */
         public void onInteractiveAppServiceRemoved(@NonNull String iAppServiceId) {
         }
@@ -583,7 +603,6 @@ public final class TvInteractiveAppManager {
          * re-installed or a newer version of the package exists becomes available/unavailable.
          *
          * @param iAppServiceId The ID of the TV Interactive App service.
-         * @hide
          */
         public void onInteractiveAppServiceUpdated(@NonNull String iAppServiceId) {
         }
@@ -730,8 +749,7 @@ public final class TvInteractiveAppManager {
     }
 
     /**
-     * Prepares TV Interactive App service for the given type.
-     * @hide
+     * Prepares TV Interactive App service environment for the given type.
      */
     public void prepare(@NonNull String tvIAppServiceId, int type) {
         try {
@@ -773,7 +791,6 @@ public final class TvInteractiveAppManager {
      * @param tvIAppServiceId The ID of TV interactive service which the command to be sent to. The
      *                        ID can be found in {@link TvInputInfo#getId()}.
      * @param command The command to be sent.
-     * @hide
      */
     public void sendAppLinkCommand(@NonNull String tvIAppServiceId, @NonNull Bundle command) {
         try {
@@ -1565,7 +1582,7 @@ public final class TvInteractiveAppManager {
         }
 
         void postCommandRequest(
-                final @TvInteractiveAppService.InteractiveAppServiceCommandType String cmdType,
+                final @TvInteractiveAppService.PlaybackCommandType String cmdType,
                 final Bundle parameters) {
             mHandler.post(new Runnable() {
                 @Override
@@ -1713,7 +1730,7 @@ public final class TvInteractiveAppManager {
          */
         public void onCommandRequest(
                 Session session,
-                @TvInteractiveAppService.InteractiveAppServiceCommandType String cmdType,
+                @TvInteractiveAppService.PlaybackCommandType String cmdType,
                 Bundle parameters) {
         }
 
