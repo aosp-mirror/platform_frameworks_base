@@ -114,6 +114,7 @@ import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON
 import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
 import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
+import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
@@ -8860,5 +8861,28 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         mTaskFpsCallbackController.unregisterCallback(listener);
+    }
+
+    @Override
+    public Bitmap snapshotTaskForRecents(int taskId) {
+        if (!checkCallingPermission(READ_FRAME_BUFFER, "snapshotTaskForRecents()")) {
+            throw new SecurityException("Requires READ_FRAME_BUFFER permission");
+        }
+
+        TaskSnapshot taskSnapshot;
+        synchronized (mGlobalLock) {
+            Task task = mRoot.anyTaskForId(taskId, MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
+            if (task == null) {
+                throw new IllegalArgumentException(
+                        "Failed to find matching task for taskId=" + taskId);
+            }
+            taskSnapshot = mTaskSnapshotController.captureTaskSnapshot(task, false);
+        }
+
+        if (taskSnapshot == null || taskSnapshot.getHardwareBuffer() == null) {
+            return null;
+        }
+        return Bitmap.wrapHardwareBuffer(taskSnapshot.getHardwareBuffer(),
+                taskSnapshot.getColorSpace());
     }
 }

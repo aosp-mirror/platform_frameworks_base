@@ -752,7 +752,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // Last visibility state we reported to the app token.
     boolean reportedVisible;
 
-    boolean mDisablePreviewScreenshots;
+    boolean mEnablePreviewScreenshots = true;
 
     // Information about an application starting window if displayed.
     // Note: these are de-referenced before the starting window animates away.
@@ -5100,22 +5100,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * See {@link Activity#setDisablePreviewScreenshots}.
+     * See {@link Activity#setRecentsScreenshotEnabled}.
      */
-    void setDisablePreviewScreenshots(boolean disable) {
-        mDisablePreviewScreenshots = disable;
+    void setRecentsScreenshotEnabled(boolean enabled) {
+        mEnablePreviewScreenshots = enabled;
     }
 
     /**
      * Retrieves whether we'd like to generate a snapshot that's based solely on the theme. This is
-     * the case when preview screenshots are disabled {@link #setDisablePreviewScreenshots} or when
+     * the case when preview screenshots are disabled {@link #setRecentsScreenshotEnabled} or when
      * we can't take a snapshot for other reasons, for example, if we have a secure window.
      *
      * @return True if we need to generate an app theme snapshot, false if we'd like to take a real
      *         screenshot.
      */
     boolean shouldUseAppThemeSnapshot() {
-        return mDisablePreviewScreenshots || forAllWindows(WindowState::isSecureLocked,
+        return !mEnablePreviewScreenshots || forAllWindows(WindowState::isSecureLocked,
                 true /* topToBottom */);
     }
 

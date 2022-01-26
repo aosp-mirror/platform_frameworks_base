@@ -4221,6 +4221,7 @@ package android.app {
     method @Deprecated public final void setProgressBarIndeterminate(boolean);
     method @Deprecated public final void setProgressBarIndeterminateVisibility(boolean);
     method @Deprecated public final void setProgressBarVisibility(boolean);
+    method public void setRecentsScreenshotEnabled(boolean);
     method public void setRequestedOrientation(int);
     method public final void setResult(int);
     method public final void setResult(int, android.content.Intent);
