@@ -1565,9 +1565,9 @@ public class Tuner implements AutoCloseable  {
     }
 
     /**
-     * Filter out unnecessary PID (packet identifier) from frontend output.
+     * Remove PID (packet identifier) from frontend output.
      *
-     * <p>It is used by the client to remove some video or audio PIDs of other program to reduce the
+     * <p>It is used by the client to remove a video or audio PID of other program to reduce the
      * total amount of recorded TS.
      *
      * <p>This API is only supported by Tuner HAL 2.0 or higher. Unsupported version would cause
