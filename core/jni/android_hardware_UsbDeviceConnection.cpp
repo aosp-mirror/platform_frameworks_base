@@ -16,20 +16,19 @@
 
 #define LOG_TAG "UsbDeviceConnectionJNI"
 
-#include "utils/Log.h"
-
-#include "jni.h"
+#include <fcntl.h>
 #include <nativehelper/JNIPlatformHelp.h>
-#include "core_jni_helpers.h"
-
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <usbhost/usbhost.h>
+#include <usbhost/usbhost_jni.h>
 
 #include <chrono>
 
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
+#include "core_jni_helpers.h"
+#include "jni.h"
+#include "utils/Log.h"
 
 using namespace android;
 using namespace std::chrono;
@@ -91,22 +90,8 @@ android_hardware_UsbDeviceConnection_get_fd(JNIEnv *env, jobject thiz)
 static jbyteArray
 android_hardware_UsbDeviceConnection_get_desc(JNIEnv *env, jobject thiz)
 {
-    char buffer[16384];
     int fd = android_hardware_UsbDeviceConnection_get_fd(env, thiz);
-    if (fd < 0) return NULL;
-    lseek(fd, 0, SEEK_SET);
-    int length = read(fd, buffer, sizeof(buffer));
-    if (length < 0) return NULL;
-
-    jbyteArray ret = env->NewByteArray(length);
-    if (ret) {
-        jbyte* bytes = (jbyte*)env->GetPrimitiveArrayCritical(ret, 0);
-        if (bytes) {
-            memcpy(bytes, buffer, length);
-            env->ReleasePrimitiveArrayCritical(ret, bytes, 0);
-        }
-    }
-    return ret;
+    return usb_jni_read_descriptors(env, fd);
 }
 
 static jboolean
