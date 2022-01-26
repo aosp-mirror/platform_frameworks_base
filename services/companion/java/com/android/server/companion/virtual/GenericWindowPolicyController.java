@@ -39,6 +39,7 @@ import android.window.DisplayWindowPolicyController;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 
 /**
@@ -61,6 +62,7 @@ class GenericWindowPolicyController extends DisplayWindowPolicyController {
     private final ArraySet<ComponentName> mAllowedActivities;
     @Nullable
     private final ArraySet<ComponentName> mBlockedActivities;
+    private Consumer<ActivityInfo> mActivityBlockedCallback;
 
     @NonNull
     final ArraySet<Integer> mRunningUids = new ArraySet<>();
@@ -81,10 +83,12 @@ class GenericWindowPolicyController extends DisplayWindowPolicyController {
             @NonNull ArraySet<UserHandle> allowedUsers,
             @Nullable Set<ComponentName> allowedActivities,
             @Nullable Set<ComponentName> blockedActivities,
-            @NonNull ActivityListener activityListener) {
+            @NonNull ActivityListener activityListener,
+            @NonNull Consumer<ActivityInfo> activityBlockedCallback) {
         mAllowedUsers = allowedUsers;
         mAllowedActivities = allowedActivities == null ? null : new ArraySet<>(allowedActivities);
         mBlockedActivities = blockedActivities == null ? null : new ArraySet<>(blockedActivities);
+        mActivityBlockedCallback = activityBlockedCallback;
         setInterestedWindowFlags(windowFlags, systemWindowFlags);
         mActivityListener = activityListener;
     }
@@ -96,6 +100,7 @@ class GenericWindowPolicyController extends DisplayWindowPolicyController {
         for (int i = 0; i < activityCount; i++) {
             final ActivityInfo aInfo = activities.get(i);
             if (!canContainActivity(aInfo, /* windowFlags= */ 0, /* systemWindowFlags= */ 0)) {
+                mActivityBlockedCallback.accept(aInfo);
                 return false;
             }
         }
@@ -105,7 +110,11 @@ class GenericWindowPolicyController extends DisplayWindowPolicyController {
     @Override
     public boolean keepActivityOnWindowFlagsChanged(ActivityInfo activityInfo, int windowFlags,
             int systemWindowFlags) {
-        return canContainActivity(activityInfo, windowFlags, systemWindowFlags);
+        if (!canContainActivity(activityInfo, windowFlags, systemWindowFlags)) {
+            mActivityBlockedCallback.accept(activityInfo);
+            return false;
+        }
+        return true;
     }
 
     @Override
