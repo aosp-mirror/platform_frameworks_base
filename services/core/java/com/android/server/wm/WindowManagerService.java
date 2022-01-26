@@ -114,7 +114,6 @@ import static com.android.server.LockGuard.installLock;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON_CHANGE_DISPLAY;
 import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
-import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
@@ -5018,6 +5017,15 @@ public class WindowManagerService extends IWindowManager.Stub
         return null;
     }
 
+    @Nullable InputTarget getInputTargetFromWindowTokenLocked(IBinder windowToken) {
+        InputTarget window = mWindowMap.get(windowToken);
+        if (window != null) {
+            return window;
+        }
+        window = mEmbeddedWindowController.getByWindowToken(windowToken);
+        return window;
+    }
+
     void reportFocusChanged(IBinder oldToken, IBinder newToken) {
         InputTarget lastTarget;
         InputTarget newTarget;
@@ -6455,7 +6463,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mRoot.forAllDisplays(dc -> {
             final int displayId = dc.getDisplayId();
             final InsetsControlTarget imeLayeringTarget = dc.getImeTarget(IME_TARGET_LAYERING);
-            final InsetsControlTarget imeInputTarget = dc.getImeTarget(IME_TARGET_INPUT);
+            final InputTarget imeInputTarget = dc.getImeInputTarget();
             final InsetsControlTarget imeControlTarget = dc.getImeTarget(IME_TARGET_CONTROL);
             if (imeLayeringTarget != null) {
                 pw.print("  imeLayeringTarget in display# "); pw.print(displayId);
@@ -7663,7 +7671,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         + " imeTargetWindowToken=" + imeTargetWindowToken);
             }
             synchronized (mGlobalLock) {
-                final WindowState imeTarget = mWindowMap.get(imeTargetWindowToken);
+                InputTarget imeTarget =
+                    getInputTargetFromWindowTokenLocked(imeTargetWindowToken);
                 if (imeTarget != null) {
                     imeTarget.getDisplayContent().updateImeInputAndControlTarget(imeTarget);
                 }
@@ -7743,11 +7752,11 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             synchronized (mGlobalLock) {
                 final DisplayContent displayContent = mRoot.getTopFocusedDisplayContent();
-                final WindowState window = mWindowMap.get(windowToken);
-                if (window == null) {
+                InputTarget target = getInputTargetFromWindowTokenLocked(windowToken);
+                if (target == null) {
                     return ImeClientFocusResult.NOT_IME_TARGET_WINDOW;
                 }
-                final int tokenDisplayId = window.getDisplayContent().getDisplayId();
+                final int tokenDisplayId = target.getDisplayContent().getDisplayId();
                 if (tokenDisplayId != displayId) {
                     Slog.e(TAG, "isInputMethodClientFocus: display ID mismatch."
                             + " from client: " + displayId
@@ -7760,7 +7769,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     return ImeClientFocusResult.INVALID_DISPLAY_ID;
                 }
 
-                if (displayContent.isInputMethodClientFocus(uid, pid)) {
+                if (target.isInputMethodClientFocus(uid, pid)) {
                     return ImeClientFocusResult.HAS_IME_FOCUS;
                 }
                 // Okay, how about this...  what is the current focus?
@@ -7784,7 +7793,7 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public void showImePostLayout(IBinder imeTargetWindowToken) {
             synchronized (mGlobalLock) {
-                WindowState imeTarget = mWindowMap.get(imeTargetWindowToken);
+                InputTarget imeTarget = getInputTargetFromWindowTokenLocked(imeTargetWindowToken);
                 if (imeTarget == null) {
                     return;
                 }

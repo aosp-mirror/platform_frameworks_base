@@ -1029,7 +1029,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return mProvidedInsetsSources;
     }
 
-    DisplayContent getDisplayContent() {
+    public DisplayContent getDisplayContent() {
         return mDisplayContent;
     }
 
