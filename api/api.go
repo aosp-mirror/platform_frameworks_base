@@ -27,6 +27,7 @@ import (
 const art = "art.module.public.api"
 const conscrypt = "conscrypt.module.public.api"
 const i18n = "i18n.module.public.api"
+var modules_with_only_public_scope = []string{i18n, conscrypt}
 
 // The intention behind this soong plugin is to generate a number of "merged"
 // API-related modules that would otherwise require a large amount of very
@@ -183,6 +184,27 @@ func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
 	ctx.CreateModule(genrule.GenRuleFactory, &props)
 }
 
+func createMergedPublicStubs(ctx android.LoadHookContext, modules []string) {
+	props := libraryProps{}
+	props.Name = proptools.StringPtr("all-modules-public-stubs")
+	props.Static_libs = transformArray(modules, "", ".stubs")
+	props.Sdk_version = proptools.StringPtr("module_current")
+	props.Visibility = []string{"//frameworks/base"}
+	ctx.CreateModule(java.LibraryFactory, &props)
+}
+
+func createMergedSystemStubs(ctx android.LoadHookContext, modules []string) {
+	props := libraryProps{}
+	modules_with_system_stubs := removeAll(modules, modules_with_only_public_scope)
+	props.Name = proptools.StringPtr("all-modules-system-stubs")
+	props.Static_libs = append(
+		transformArray(modules_with_only_public_scope, "", ".stubs"),
+		transformArray(modules_with_system_stubs, "", ".stubs.system")...)
+	props.Sdk_version = proptools.StringPtr("module_current")
+	props.Visibility = []string{"//frameworks/base"}
+	ctx.CreateModule(java.LibraryFactory, &props)
+}
+
 func createMergedModuleLibStubs(ctx android.LoadHookContext, modules []string) {
 	// The user of this module compiles against the "core" SDK, so remove core libraries to avoid dupes.
 	modules = removeAll(modules, []string{art, conscrypt, i18n})
@@ -205,7 +227,7 @@ func createPublicStubsSourceFilegroup(ctx android.LoadHookContext, modules []str
 func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_classpath []string) {
 	var textFiles []MergedTxtDefinition
 	// Two module libraries currently do not support @SystemApi so only have the public scope.
-	bcpWithSystemApi := removeAll(bootclasspath, []string{conscrypt, i18n})
+	bcpWithSystemApi := removeAll(bootclasspath, modules_with_only_public_scope)
 
 	tagSuffix := []string{".api.txt}", ".removed-api.txt}"}
 	for i, f := range []string{"current.txt", "removed.txt"} {
@@ -253,6 +275,8 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 
 	createMergedStubsSrcjar(ctx, bootclasspath)
 
+	createMergedPublicStubs(ctx, bootclasspath)
+	createMergedSystemStubs(ctx, bootclasspath)
 	createMergedModuleLibStubs(ctx, bootclasspath)
 
 	createMergedAnnotations(ctx, bootclasspath)
