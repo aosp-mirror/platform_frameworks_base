@@ -18,13 +18,19 @@ package android.app.ambientcontext;
 
 import android.app.PendingIntent;
 import android.app.ambientcontext.AmbientContextEventRequest;
+import android.os.RemoteCallback;
 
 /**
- * Interface for an AmbientContextEventManager that provides access to AmbientContextEvents.
+ * Interface for an AmbientContextManager that provides access to AmbientContextEvents.
  *
  * @hide
  */
-oneway interface IAmbientContextEventObserver {
-    void registerObserver(in AmbientContextEventRequest request, in PendingIntent pendingIntent);
+oneway interface IAmbientContextManager {
+    void registerObserver(in AmbientContextEventRequest request,
+        in PendingIntent resultPendingIntent,
+        in RemoteCallback statusCallback);
     void unregisterObserver(in String callingPackage);
+    void queryServiceStatus(in int[] eventTypes, in String callingPackage,
+        in RemoteCallback statusCallback);
+    void startConsentActivity(in int[] eventTypes, in String callingPackage);
 }
