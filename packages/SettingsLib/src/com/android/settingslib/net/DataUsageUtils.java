@@ -63,14 +63,32 @@ public class DataUsageUtils {
     private static NetworkTemplate getNormalizedMobileTemplate(
             TelephonyManager telephonyManager, int subId) {
         final NetworkTemplate mobileTemplate = getMobileTemplateForSubId(telephonyManager, subId);
-        final String[] mergedSubscriberIds = telephonyManager
-                .createForSubscriptionId(subId).getMergedImsisFromGroup();
+        final Set<String> mergedSubscriberIds = Set.of(telephonyManager
+                .createForSubscriptionId(subId).getMergedImsisFromGroup());
         if (ArrayUtils.isEmpty(mergedSubscriberIds)) {
             Log.i(TAG, "mergedSubscriberIds is null.");
             return mobileTemplate;
         }
 
-        return NetworkTemplate.normalize(mobileTemplate, mergedSubscriberIds);
+        return normalizeMobileTemplate(mobileTemplate, mergedSubscriberIds);
+    }
+
+    private static NetworkTemplate normalizeMobileTemplate(
+            NetworkTemplate template, Set<String> mergedSet) {
+        if (template.getSubscriberIds().isEmpty()) return template;
+        // The input template should have at most 1 subscriberId.
+        final String subscriberId = template.getSubscriberIds().iterator().next();
+
+        if (mergedSet.contains(subscriberId)) {
+            // Requested template subscriber is part of the merge group; return
+            // a template that matches all merged subscribers.
+            return new NetworkTemplate.Builder(template.getMatchRule())
+                    .setSubscriberIds(mergedSet)
+                    .setWifiNetworkKeys(template.getWifiNetworkKeys())
+                    .setMeteredness(NetworkStats.METERED_YES).build();
+        }
+
+        return template;
     }
 
     private static NetworkTemplate getMobileTemplateForSubId(
