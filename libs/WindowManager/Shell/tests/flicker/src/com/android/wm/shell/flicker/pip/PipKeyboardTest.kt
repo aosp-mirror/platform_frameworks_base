@@ -31,6 +31,7 @@ import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.traces.common.FlickerComponentName
 import com.android.wm.shell.flicker.helpers.ImeAppHelper
 import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -79,6 +80,13 @@ class PipKeyboardTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
     override fun statusBarLayerRotatesScales() {
         // This test doesn't work in shell transitions because of b/206753786
         assumeFalse(isShellTransitionsEnabled)
+        super.statusBarLayerRotatesScales()
+    }
+
+    @FlakyTest(bugId = 214452854)
+    @Test
+    fun statusBarLayerRotatesScales_shellTransit() {
+        assumeTrue(isShellTransitionsEnabled)
         super.statusBarLayerRotatesScales()
     }
 
