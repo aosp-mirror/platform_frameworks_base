@@ -434,7 +434,8 @@ public class NetworkIdentity {
         @NonNull
         public Builder setRatType(@Annotation.NetworkType int ratType) {
             if (!CollectionUtils.contains(TelephonyManager.getAllNetworkTypes(), ratType)
-                    && ratType != TelephonyManager.NETWORK_TYPE_UNKNOWN) {
+                    && ratType != TelephonyManager.NETWORK_TYPE_UNKNOWN
+                    && ratType != NetworkTemplate.NETWORK_TYPE_5G_NSA) {
                 throw new IllegalArgumentException("Invalid ratType " + ratType);
             }
             mRatType = ratType;
