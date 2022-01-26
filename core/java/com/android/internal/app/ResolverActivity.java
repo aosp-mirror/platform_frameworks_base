@@ -1011,7 +1011,9 @@ public class ResolverActivity extends Activity implements
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         ViewPager viewPager = findViewById(R.id.profile_pager);
-        outState.putInt(LAST_SHOWN_TAB_KEY, viewPager.getCurrentItem());
+        if (viewPager != null) {
+            outState.putInt(LAST_SHOWN_TAB_KEY, viewPager.getCurrentItem());
+        }
     }
 
     @Override
@@ -1019,7 +1021,9 @@ public class ResolverActivity extends Activity implements
         super.onRestoreInstanceState(savedInstanceState);
         resetButtonBar();
         ViewPager viewPager = findViewById(R.id.profile_pager);
-        viewPager.setCurrentItem(savedInstanceState.getInt(LAST_SHOWN_TAB_KEY));
+        if (viewPager != null) {
+            viewPager.setCurrentItem(savedInstanceState.getInt(LAST_SHOWN_TAB_KEY));
+        }
         mMultiProfilePagerAdapter.clearInactiveProfileCache();
     }
 
@@ -1568,6 +1572,11 @@ public class ResolverActivity extends Activity implements
             rebuildCompleted = rebuildCompleted && rebuildInactiveCompleted;
         }
 
+        if (shouldUseMiniResolver()) {
+            configureMiniResolverContent();
+            return false;
+        }
+
         if (useLayoutWithDefault()) {
             mLayoutId = R.layout.resolver_list_with_default;
         } else {
@@ -1576,6 +1585,72 @@ public class ResolverActivity extends Activity implements
         setContentView(mLayoutId);
         mMultiProfilePagerAdapter.setupViewPager(findViewById(R.id.profile_pager));
         return postRebuildList(rebuildCompleted);
+    }
+
+    private void configureMiniResolverContent() {
+        mLayoutId = R.layout.miniresolver;
+        setContentView(mLayoutId);
+
+        DisplayResolveInfo sameProfileResolveInfo =
+                mMultiProfilePagerAdapter.getActiveListAdapter().mDisplayList.get(0);
+        boolean inWorkProfile = getCurrentProfile() == PROFILE_WORK;
+
+        DisplayResolveInfo otherProfileResolveInfo =
+                mMultiProfilePagerAdapter.getInactiveListAdapter().mDisplayList.get(0);
+        ImageView icon = findViewById(R.id.icon);
+        // TODO: Set icon drawable to app icon.
+
+        ((TextView) findViewById(R.id.open_cross_profile)).setText(
+                getResources().getString(
+                        inWorkProfile ? R.string.miniresolver_open_in_personal
+                                : R.string.miniresolver_open_in_work,
+                        otherProfileResolveInfo.getDisplayLabel()));
+        ((Button) findViewById(R.id.use_same_profile_browser)).setText(
+                inWorkProfile ? R.string.miniresolver_use_work_browser
+                        : R.string.miniresolver_use_personal_browser);
+
+        findViewById(R.id.use_same_profile_browser).setOnClickListener(
+                v -> safelyStartActivity(sameProfileResolveInfo));
+
+        findViewById(R.id.button_open).setOnClickListener(v -> {
+            Intent intent = otherProfileResolveInfo.getResolvedIntent();
+            if (intent != null) {
+                prepareIntentForCrossProfileLaunch(intent);
+            }
+            safelyStartActivityInternal(otherProfileResolveInfo,
+                    mMultiProfilePagerAdapter.getInactiveListAdapter().mResolverListController
+                            .getUserHandle());
+        });
+    }
+
+    private boolean shouldUseMiniResolver() {
+        if (mMultiProfilePagerAdapter.getActiveListAdapter() == null
+                || mMultiProfilePagerAdapter.getInactiveListAdapter() == null) {
+            return false;
+        }
+        List<DisplayResolveInfo> sameProfileList =
+                mMultiProfilePagerAdapter.getActiveListAdapter().mDisplayList;
+        List<DisplayResolveInfo> otherProfileList =
+                mMultiProfilePagerAdapter.getInactiveListAdapter().mDisplayList;
+
+        if (otherProfileList.size() != 1) {
+            Log.d(TAG, "Found " + otherProfileList.size() + " resolvers in the other profile");
+            return false;
+        }
+
+        if (otherProfileList.get(0).getResolveInfo().handleAllWebDataURI) {
+            Log.d(TAG, "Other profile is a web browser");
+            return false;
+        }
+
+        for (DisplayResolveInfo info : sameProfileList) {
+            if (!info.getResolveInfo().handleAllWebDataURI) {
+                Log.d(TAG, "Non-browser found in this profile");
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
