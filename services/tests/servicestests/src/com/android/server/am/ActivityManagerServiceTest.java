@@ -541,14 +541,11 @@ public class ActivityManagerServiceTest {
                     | ActivityManager.UID_OBSERVER_CAPABILITY
         };
         final IUidObserver[] observers = new IUidObserver.Stub[changesToObserve.length];
-        doReturn(Process.myUid()).when(sPackageManagerInternal)
-                .getPackageUid(mContext.getOpPackageName(), 0 /* flags */, mContext.getUserId());
         for (int i = 0; i < observers.length; ++i) {
             observers[i] = mock(IUidObserver.Stub.class);
             when(observers[i].asBinder()).thenReturn((IBinder) observers[i]);
             mAms.registerUidObserver(observers[i], changesToObserve[i] /* which */,
-                    ActivityManager.PROCESS_STATE_UNKNOWN /* cutpoint */,
-                    mContext.getOpPackageName());
+                    ActivityManager.PROCESS_STATE_UNKNOWN /* cutpoint */, null /* caller */);
 
             // When we invoke AMS.registerUidObserver, there are some interactions with observers[i]
             // mock in RemoteCallbackList class. We don't want to test those interactions and
@@ -677,12 +674,10 @@ public class ActivityManagerServiceTest {
         mockNoteOperation();
 
         final IUidObserver observer = mock(IUidObserver.Stub.class);
+
         when(observer.asBinder()).thenReturn((IBinder) observer);
-        doReturn(Process.myUid()).when(sPackageManagerInternal)
-                .getPackageUid(mContext.getOpPackageName(), 0 /* flags */, mContext.getUserId());
         mAms.registerUidObserver(observer, ActivityManager.UID_OBSERVER_PROCSTATE /* which */,
-                ActivityManager.PROCESS_STATE_SERVICE /* cutpoint */,
-                mContext.getOpPackageName());
+                ActivityManager.PROCESS_STATE_SERVICE /* cutpoint */, null /* callingPackage */);
         // When we invoke AMS.registerUidObserver, there are some interactions with observer
         // mock in RemoteCallbackList class. We don't want to test those interactions and
         // at the same time, we don't want those to interfere with verifyNoMoreInteractions.
@@ -776,9 +771,7 @@ public class ActivityManagerServiceTest {
 
         final IUidObserver observer = mock(IUidObserver.Stub.class);
         when(observer.asBinder()).thenReturn((IBinder) observer);
-        doReturn(Process.myUid()).when(sPackageManagerInternal)
-                .getPackageUid(mContext.getOpPackageName(), 0 /* flags */, mContext.getUserId());
-        mAms.registerUidObserver(observer, 0, 0, mContext.getOpPackageName());
+        mAms.registerUidObserver(observer, 0, 0, null);
         // Verify that when observers are registered, then validateUids is correctly updated.
         addPendingUidChanges(pendingItemsForUids);
         mAms.mUidObserverController.dispatchUidsChanged();
