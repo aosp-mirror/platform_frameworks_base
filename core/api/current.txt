@@ -21951,9 +21951,11 @@ package android.media {
     field public static final int COLOR_Format24bitBGR888 = 12; // 0xc
     field @Deprecated public static final int COLOR_Format24bitRGB888 = 11; // 0xb
     field @Deprecated public static final int COLOR_Format25bitARGB1888 = 14; // 0xe
+    field public static final int COLOR_Format32bitABGR2101010 = 2130750114; // 0x7f00aaa2
     field public static final int COLOR_Format32bitABGR8888 = 2130747392; // 0x7f00a000
     field @Deprecated public static final int COLOR_Format32bitARGB8888 = 16; // 0x10
     field @Deprecated public static final int COLOR_Format32bitBGRA8888 = 15; // 0xf
+    field public static final int COLOR_Format64bitABGRFloat = 2130710294; // 0x7f000f16
     field @Deprecated public static final int COLOR_Format8bitRGB332 = 2; // 0x2
     field @Deprecated public static final int COLOR_FormatCbYCrY = 27; // 0x1b
     field @Deprecated public static final int COLOR_FormatCrYCbY = 28; // 0x1c

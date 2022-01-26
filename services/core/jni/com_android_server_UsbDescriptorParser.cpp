@@ -15,16 +15,14 @@
  */
 
 #define LOG_TAG "UsbHostManagerJNI"
-#include "utils/Log.h"
-
+#include <nativehelper/JNIHelp.h>
 #include <stdlib.h>
+#include <usbhost/usbhost.h>
+#include <usbhost/usbhost_jni.h>
 
 #include "jni.h"
-#include <nativehelper/JNIHelp.h>
+#include "utils/Log.h"
 
-#include <usbhost/usbhost.h>
-
-#define MAX_DESCRIPTORS_LENGTH 4096
 static const int USB_CONTROL_TRANSFER_TIMEOUT_MS = 200;
 
 // com.android.server.usb.descriptors
@@ -41,26 +39,9 @@ jbyteArray JNICALL Java_com_android_server_usb_descriptors_UsbDescriptorParser_g
     }
 
     int fd = usb_device_get_fd(device);
-    if (fd < 0) {
-        usb_device_close(device);
-        return NULL;
-    }
-
-    // from android_hardware_UsbDeviceConnection_get_desc()
-    jbyte buffer[MAX_DESCRIPTORS_LENGTH];
-    lseek(fd, 0, SEEK_SET);
-    int numBytes = read(fd, buffer, sizeof(buffer));
-    jbyteArray ret = NULL;
+    jbyteArray descriptors = usb_jni_read_descriptors(env, fd);
     usb_device_close(device);
-
-    if (numBytes > 0) {
-        ret = env->NewByteArray(numBytes);
-        env->SetByteArrayRegion(ret, 0, numBytes, buffer);
-    } else {
-        ALOGE("error reading descriptors\n");
-    }
-
-    return ret;
+    return descriptors;
 }
 
 jstring JNICALL Java_com_android_server_usb_descriptors_UsbDescriptorParser_getDescriptorString_1native(
