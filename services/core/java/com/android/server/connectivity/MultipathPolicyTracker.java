@@ -24,7 +24,6 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
-import static android.net.NetworkTemplate.OEM_MANAGED_ALL;
 import static android.provider.Settings.Global.NETWORK_DEFAULT_DAILY_MULTIPATH_QUOTA_BYTES;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
@@ -94,6 +93,7 @@ public class MultipathPolicyTracker {
     private static String TAG = MultipathPolicyTracker.class.getSimpleName();
 
     private static final boolean DBG = false;
+    private static final long MIN_THRESHOLD_BYTES = 2 * 1_048_576L; // 2MiB
 
     // This context is for the current user.
     private final Context mContext;
@@ -278,15 +278,11 @@ public class MultipathPolicyTracker {
         }
 
         private NetworkIdentity getTemplateMatchingNetworkIdentity(NetworkCapabilities nc) {
-            return new NetworkIdentity(
-                    ConnectivityManager.TYPE_MOBILE,
-                    0 /* subType, unused for template matching */,
-                    subscriberId,
-                    null /* networkId, unused for matching mobile networks */,
-                    !nc.hasCapability(NET_CAPABILITY_NOT_ROAMING),
-                    !nc.hasCapability(NET_CAPABILITY_NOT_METERED),
-                    false /* defaultNetwork, templates should have DEFAULT_NETWORK_ALL */,
-                    OEM_MANAGED_ALL);
+            return new NetworkIdentity.Builder().setType(ConnectivityManager.TYPE_MOBILE)
+                    .setSubscriberId(subscriberId)
+                    .setRoaming(!nc.hasCapability(NET_CAPABILITY_NOT_ROAMING))
+                    .setMetered(!nc.hasCapability(NET_CAPABILITY_NOT_METERED))
+                    .build();
         }
 
         private long getRemainingDailyBudget(long limitBytes,
@@ -375,7 +371,7 @@ public class MultipathPolicyTracker {
             // This will only be called if the total quota for the day changed, not if usage changed
             // since last time, so even if this is called very often the budget will not snap to 0
             // as soon as there are less than 2MB left for today.
-            if (budget > NetworkStatsManager.MIN_THRESHOLD_BYTES) {
+            if (budget > MIN_THRESHOLD_BYTES) {
                 if (DBG) {
                     Log.d(TAG, "Setting callback for " + budget + " bytes on network " + network);
                 }
