@@ -99,6 +99,7 @@ import android.net.TetheringManager;
 import android.net.TrafficStats;
 import android.net.UnderlyingNetworkInfo;
 import android.net.Uri;
+import android.net.netstats.IUsageCallback;
 import android.net.netstats.provider.INetworkStatsProvider;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.net.netstats.provider.NetworkStatsProvider;
@@ -110,7 +111,6 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -357,6 +357,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @NonNull
     private final LocationPermissionChecker mLocationPermissionChecker;
 
+    @NonNull
+    private final BpfInterfaceMapUpdater mInterfaceMapUpdater;
+
     private static @NonNull File getDefaultSystemDir() {
         return new File(Environment.getDataDirectory(), "system");
     }
@@ -419,7 +422,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final NetworkStatsService service = new NetworkStatsService(context,
                 INetd.Stub.asInterface((IBinder) context.getSystemService(Context.NETD_SERVICE)),
                 alarmManager, wakeLock, getDefaultClock(),
-                new DefaultNetworkStatsSettings(), new NetworkStatsFactory(netd),
+                new DefaultNetworkStatsSettings(), new NetworkStatsFactory(context),
                 new NetworkStatsObservers(), getDefaultSystemDir(), getDefaultBaseDir(),
                 new Dependencies());
 
@@ -454,6 +457,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mContentObserver = mDeps.makeContentObserver(mHandler, mSettings,
                 mNetworkStatsSubscriptionsMonitor);
         mLocationPermissionChecker = mDeps.makeLocationPermissionChecker(mContext);
+        mInterfaceMapUpdater = mDeps.makeBpfInterfaceMapUpdater(mContext, mHandler);
+        mInterfaceMapUpdater.start();
     }
 
     /**
@@ -507,6 +512,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
          */
         public LocationPermissionChecker makeLocationPermissionChecker(final Context context) {
             return new LocationPermissionChecker(context);
+        }
+
+        /** Create BpfInterfaceMapUpdater to update bpf interface map. */
+        @NonNull
+        public BpfInterfaceMapUpdater makeBpfInterfaceMapUpdater(
+                @NonNull Context ctx, @NonNull Handler handler) {
+            return new BpfInterfaceMapUpdater(ctx, handler);
         }
     }
 
@@ -988,8 +1000,17 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         // TODO: switch to data layer stats once kernel exports
-        // for now, read network layer stats and flatten across all ifaces
-        final NetworkStats networkLayer = readNetworkStatsUidDetail(uid, INTERFACES_ALL, TAG_ALL);
+        // for now, read network layer stats and flatten across all ifaces.
+        // This function is used to query NeworkStats for calle's uid. The only caller method
+        // TrafficStats#getDataLayerSnapshotForUid alrady claim no special permission to query
+        // its own NetworkStats.
+        final long ident = Binder.clearCallingIdentity();
+        final NetworkStats networkLayer;
+        try {
+            networkLayer = readNetworkStatsUidDetail(uid, INTERFACES_ALL, TAG_ALL);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
 
         // splice in operation counts
         networkLayer.spliceOperationsFrom(mUidOperations);
@@ -1136,21 +1157,20 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @Override
-    public DataUsageRequest registerUsageCallback(String callingPackage,
-                DataUsageRequest request, Messenger messenger, IBinder binder) {
+    public DataUsageRequest registerUsageCallback(@NonNull String callingPackage,
+                @NonNull DataUsageRequest request, @NonNull IUsageCallback callback) {
         Objects.requireNonNull(callingPackage, "calling package is null");
         Objects.requireNonNull(request, "DataUsageRequest is null");
         Objects.requireNonNull(request.template, "NetworkTemplate is null");
-        Objects.requireNonNull(messenger, "messenger is null");
-        Objects.requireNonNull(binder, "binder is null");
+        Objects.requireNonNull(callback, "callback is null");
 
         int callingUid = Binder.getCallingUid();
         @NetworkStatsAccess.Level int accessLevel = checkAccessLevel(callingPackage);
         DataUsageRequest normalizedRequest;
         final long token = Binder.clearCallingIdentity();
         try {
-            normalizedRequest = mStatsObservers.register(request, messenger, binder,
-                    callingUid, accessLevel);
+            normalizedRequest = mStatsObservers.register(
+                    request, callback, callingUid, accessLevel);
         } finally {
             Binder.restoreCallingIdentity(token);
         }

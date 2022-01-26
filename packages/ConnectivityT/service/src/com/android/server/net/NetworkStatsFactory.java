@@ -26,10 +26,10 @@ import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.net.INetd;
+import android.content.Context;
+import android.net.ConnectivityManager;
 import android.net.NetworkStats;
 import android.net.UnderlyingNetworkInfo;
-import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.SystemClock;
 
@@ -70,7 +70,7 @@ public class NetworkStatsFactory {
 
     private final boolean mUseBpfStats;
 
-    private final INetd mNetd;
+    private final Context mContext;
 
     /**
      * Guards persistent data access in this class
@@ -158,12 +158,12 @@ public class NetworkStatsFactory {
         NetworkStats.apply464xlatAdjustments(baseTraffic, stackedTraffic, mStackedIfaces);
     }
 
-    public NetworkStatsFactory(@NonNull INetd netd) {
-        this(new File("/proc/"), true, netd);
+    public NetworkStatsFactory(@NonNull Context ctx) {
+        this(ctx, new File("/proc/"), true);
     }
 
     @VisibleForTesting
-    public NetworkStatsFactory(File procRoot, boolean useBpfStats, @NonNull INetd netd) {
+    public NetworkStatsFactory(@NonNull Context ctx, File procRoot, boolean useBpfStats) {
         mStatsXtIfaceAll = new File(procRoot, "net/xt_qtaguid/iface_stat_all");
         mStatsXtIfaceFmt = new File(procRoot, "net/xt_qtaguid/iface_stat_fmt");
         mStatsXtUid = new File(procRoot, "net/xt_qtaguid/stats");
@@ -172,7 +172,7 @@ public class NetworkStatsFactory {
             mPersistSnapshot = new NetworkStats(SystemClock.elapsedRealtime(), -1);
             mTunAnd464xlatAdjustedStats = new NetworkStats(SystemClock.elapsedRealtime(), -1);
         }
-        mNetd = netd;
+        mContext = ctx;
     }
 
     public NetworkStats readBpfNetworkStatsDev() throws IOException {
@@ -295,11 +295,12 @@ public class NetworkStatsFactory {
     }
 
     @GuardedBy("mPersistentDataLock")
-    private void requestSwapActiveStatsMapLocked() throws RemoteException {
-        // Ask netd to do a active map stats swap. When the binder call successfully returns,
+    private void requestSwapActiveStatsMapLocked() {
+        // Do a active map stats swap. When the binder call successfully returns,
         // the system server should be able to safely read and clean the inactive map
         // without race problem.
-        mNetd.trafficSwapActiveStatsMap();
+        final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
+        cm.swapActiveStatsMap();
     }
 
     /**
@@ -327,7 +328,7 @@ public class NetworkStatsFactory {
                 if (mUseBpfStats) {
                     try {
                         requestSwapActiveStatsMapLocked();
-                    } catch (RemoteException e) {
+                    } catch (RuntimeException e) {
                         throw new IOException(e);
                     }
                     // Stats are always read from the inactive map, so they must be read after the

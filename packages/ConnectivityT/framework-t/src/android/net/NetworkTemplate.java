@@ -652,7 +652,9 @@ public final class NetworkTemplate implements Parcelable {
      *
      * @hide
      */
-    public boolean matches(NetworkIdentity ident) {
+    @SystemApi(client = MODULE_LIBRARIES)
+    public boolean matches(@NonNull NetworkIdentity ident) {
+        Objects.requireNonNull(ident);
         if (!matchesMetered(ident)) return false;
         if (!matchesRoaming(ident)) return false;
         if (!matchesDefaultNetwork(ident)) return false;
