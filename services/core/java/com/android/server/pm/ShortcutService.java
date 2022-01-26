@@ -41,7 +41,6 @@ import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
 import android.content.LocusId;
 import android.content.pm.ActivityInfo;
-import android.content.pm.AppSearchShortcutInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
 import android.content.pm.IPackageManager;
@@ -2803,28 +2802,6 @@ public class ShortcutService extends IShortcutService.Stub {
                     cleanUpPackageLocked(packageName, user.getUserId(), packageUserId,
                             appStillExists));
         }
-    }
-
-    private String createQuery(final boolean matchDynamic, final boolean matchPinned,
-            final boolean matchManifest, final boolean matchCached) {
-
-        final List<String> queries = new ArrayList<>(1);
-        if (matchDynamic) {
-            queries.add(AppSearchShortcutInfo.QUERY_IS_DYNAMIC);
-        }
-        if (matchPinned) {
-            queries.add(AppSearchShortcutInfo.QUERY_IS_PINNED);
-        }
-        if (matchManifest) {
-            queries.add(AppSearchShortcutInfo.QUERY_IS_MANIFEST);
-        }
-        if (matchCached) {
-            queries.add(AppSearchShortcutInfo.QUERY_IS_CACHED);
-        }
-        if (queries.isEmpty()) {
-            return "";
-        }
-        return "(" + String.join(" OR ", queries) + ")";
     }
 
     /**
