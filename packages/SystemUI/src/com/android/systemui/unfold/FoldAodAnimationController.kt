@@ -16,8 +16,10 @@
 
 package com.android.systemui.unfold
 
+import android.os.Handler
 import android.os.PowerManager
 import android.provider.Settings
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.statusbar.LightRevealScrim
@@ -37,6 +39,7 @@ import javax.inject.Inject
 class FoldAodAnimationController
 @Inject
 constructor(
+    @Main private val handler: Handler,
     private val keyguardViewMediatorLazy: Lazy<KeyguardViewMediator>,
     private val wakefulnessLifecycle: WakefulnessLifecycle,
     private val globalSettings: GlobalSettings
@@ -49,6 +52,14 @@ constructor(
 
     private var shouldPlayAnimation = false
     private val statusListeners = arrayListOf<FoldAodAnimationStatus>()
+
+    private val startAnimationRunnable = Runnable {
+        statusBar.notificationPanelViewController.startFoldToAodAnimation {
+            // End action
+            isAnimationPlaying = false
+            keyguardViewMediatorLazy.get().maybeHandlePendingLock()
+        }
+    }
 
     private var isAnimationPlaying = false
 
@@ -79,6 +90,11 @@ constructor(
         }
 
     override fun onStartedWakingUp() {
+        if (isAnimationPlaying) {
+            handler.removeCallbacks(startAnimationRunnable)
+            statusBar.notificationPanelViewController.cancelFoldToAodAnimation();
+        }
+
         shouldPlayAnimation = false
         isAnimationPlaying = false
     }
@@ -115,11 +131,10 @@ constructor(
 
     fun onScreenTurnedOn() {
         if (shouldPlayAnimation) {
-            statusBar.notificationPanelViewController.startFoldToAodAnimation {
-                // End action
-                isAnimationPlaying = false
-                keyguardViewMediatorLazy.get().maybeHandlePendingLock()
-            }
+            handler.removeCallbacks(startAnimationRunnable)
+
+            // Post starting the animation to the next frame to avoid junk due to inset changes
+            handler.post(startAnimationRunnable)
             shouldPlayAnimation = false
         }
     }

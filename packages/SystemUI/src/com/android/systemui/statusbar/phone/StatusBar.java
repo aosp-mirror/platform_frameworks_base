@@ -2998,7 +2998,7 @@ public class StatusBar extends CoreStartable implements
     }
 
     private void onLaunchTransitionFadingEnded() {
-        mNotificationPanelViewController.setAlpha(1.0f);
+        mNotificationPanelViewController.resetAlpha();
         mNotificationPanelViewController.onAffordanceLaunchEnded();
         releaseGestureWakeLock();
         runLaunchTransitionEndRunnable();
@@ -3029,7 +3029,7 @@ public class StatusBar extends CoreStartable implements
             }
             updateScrimController();
             mPresenter.updateMediaMetaData(false, true);
-            mNotificationPanelViewController.setAlpha(1);
+            mNotificationPanelViewController.resetAlpha();
             mNotificationPanelViewController.fadeOut(
                     FADE_KEYGUARD_START_DELAY, FADE_KEYGUARD_DURATION,
                     this::onLaunchTransitionFadingEnded);
@@ -3130,7 +3130,7 @@ public class StatusBar extends CoreStartable implements
         releaseGestureWakeLock();
         mNotificationPanelViewController.onAffordanceLaunchEnded();
         mNotificationPanelViewController.cancelAnimation();
-        mNotificationPanelViewController.setAlpha(1f);
+        mNotificationPanelViewController.resetAlpha();
         mNotificationPanelViewController.resetTranslation();
         mNotificationPanelViewController.resetViewGroupFade();
         updateDozingState();
