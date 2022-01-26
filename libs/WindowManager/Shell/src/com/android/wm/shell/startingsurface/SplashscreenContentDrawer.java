@@ -54,6 +54,7 @@ import android.view.ContextThemeWrapper;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.window.SplashScreenView;
+import android.window.StartingWindowInfo;
 import android.window.StartingWindowInfo.StartingWindowType;
 
 import com.android.internal.R;
@@ -138,8 +139,8 @@ public class SplashscreenContentDrawer {
      *                                 executed on splash screen thread. Note that the view can be
      *                                 null if failed.
      */
-    void createContentView(Context context, @StartingWindowType int suggestType, ActivityInfo info,
-            int taskId, Consumer<SplashScreenView> splashScreenViewConsumer,
+    void createContentView(Context context, @StartingWindowType int suggestType,
+            StartingWindowInfo info, Consumer<SplashScreenView> splashScreenViewConsumer,
             Consumer<Runnable> uiThreadInitConsumer) {
         mSplashscreenWorkerHandler.post(() -> {
             SplashScreenView contentView;
@@ -150,7 +151,7 @@ public class SplashscreenContentDrawer {
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             } catch (RuntimeException e) {
                 Slog.w(TAG, "failed creating starting window content at taskId: "
-                        + taskId, e);
+                        + info.taskInfo.taskId, e);
                 contentView = null;
             }
             splashScreenViewConsumer.accept(contentView);
@@ -241,7 +242,7 @@ public class SplashscreenContentDrawer {
         return null;
     }
 
-    private SplashScreenView makeSplashScreenContentView(Context context, ActivityInfo ai,
+    private SplashScreenView makeSplashScreenContentView(Context context, StartingWindowInfo info,
             @StartingWindowType int suggestType, Consumer<Runnable> uiThreadInitConsumer) {
         updateDensity();
 
@@ -250,6 +251,9 @@ public class SplashscreenContentDrawer {
 
         final Drawable legacyDrawable = suggestType == STARTING_WINDOW_TYPE_LEGACY_SPLASH_SCREEN
                 ? peekLegacySplashscreenContent(context, mTmpAttrs) : null;
+        final ActivityInfo ai = info.targetActivityInfo != null
+                ? info.targetActivityInfo
+                : info.taskInfo.topActivityInfo;
         final int themeBGColor = legacyDrawable != null
                 ? getBGColorFromCache(ai, () -> estimateWindowBGColor(legacyDrawable))
                 : getBGColorFromCache(ai, () -> peekWindowBGColor(context, mTmpAttrs));
@@ -258,6 +262,7 @@ public class SplashscreenContentDrawer {
                 .overlayDrawable(legacyDrawable)
                 .chooseStyle(suggestType)
                 .setUiThreadInitConsumer(uiThreadInitConsumer)
+                .setAllowHandleEmpty(info.allowHandleEmptySplashScreen())
                 .build();
     }
 
@@ -327,6 +332,7 @@ public class SplashscreenContentDrawer {
         private Drawable[] mFinalIconDrawables;
         private int mFinalIconSize = mIconSize;
         private Consumer<Runnable> mUiThreadInitTask;
+        private boolean mAllowHandleEmpty;
 
         StartingWindowViewBuilder(@NonNull Context context, @NonNull ActivityInfo aInfo) {
             mContext = context;
@@ -350,6 +356,11 @@ public class SplashscreenContentDrawer {
 
         StartingWindowViewBuilder setUiThreadInitConsumer(Consumer<Runnable> uiThreadInitTask) {
             mUiThreadInitTask = uiThreadInitTask;
+            return this;
+        }
+
+        StartingWindowViewBuilder setAllowHandleEmpty(boolean allowHandleEmpty) {
+            mAllowHandleEmpty = allowHandleEmpty;
             return this;
         }
 
@@ -491,7 +502,8 @@ public class SplashscreenContentDrawer {
                     .setIconBackground(background)
                     .setCenterViewDrawable(foreground)
                     .setAnimationDurationMillis(animationDuration)
-                    .setUiThreadInitConsumer(uiThreadInitTask);
+                    .setUiThreadInitConsumer(uiThreadInitTask)
+                    .setAllowHandleEmpty(mAllowHandleEmpty);
 
             if (mSuggestType == STARTING_WINDOW_TYPE_SPLASH_SCREEN
                     && mTmpAttrs.mBrandingImage != null) {
