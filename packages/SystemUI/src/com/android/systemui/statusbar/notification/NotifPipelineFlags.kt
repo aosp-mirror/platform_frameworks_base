@@ -21,6 +21,7 @@ import android.util.Log
 import android.widget.Toast
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.util.Compile
 import javax.inject.Inject
 
 class NotifPipelineFlags @Inject constructor(
@@ -31,8 +32,16 @@ class NotifPipelineFlags @Inject constructor(
         if (!isNewPipelineEnabled()) {
             return true
         }
-        Log.d("NotifPipeline", "Old pipeline code running w/ new pipeline enabled", Exception())
-        Toast.makeText(context, "Old pipeline code running!", Toast.LENGTH_SHORT).show()
+
+        if (Compile.IS_DEBUG) {
+            Toast.makeText(context, "Old pipeline code running!", Toast.LENGTH_SHORT).show()
+        }
+        if (featureFlags.isEnabled(Flags.NEW_PIPELINE_CRASH_ON_CALL_TO_OLD_PIPELINE)) {
+            throw RuntimeException("Old pipeline code running with new pipeline enabled")
+        } else {
+            Log.d("NotifPipeline", "Old pipeline code running with new pipeline enabled",
+                    Exception())
+        }
         return false
     }
 
