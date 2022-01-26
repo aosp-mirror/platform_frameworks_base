@@ -439,6 +439,25 @@ public final class MediaCodecInfo {
         public static final int COLOR_FormatSurface                   = 0x7F000789;
 
         /**
+         * 64 bits per pixel RGBA color format, with 16-bit signed
+         * floating point red, green, blue, and alpha components.
+         * <p>
+         *
+         * <pre>
+         *         byte              byte             byte              byte
+         *  <-- i -->|<- i+1 ->|<- i+2 ->|<- i+3 ->|<- i+4 ->|<- i+5 ->|<- i+6 ->|<- i+7 ->
+         * +---------+---------+-------------------+---------+---------+---------+---------+
+         * |        RED        |       GREEN       |       BLUE        |       ALPHA       |
+         * +---------+---------+-------------------+---------+---------+---------+---------+
+         *  0       7 0       7 0       7 0       7 0       7 0       7 0       7 0       7
+         * </pre>
+         *
+         * This corresponds to {@link android.graphics.PixelFormat#RGBA_F16}.
+         */
+        @SuppressLint("AllUpper")
+        public static final int COLOR_Format64bitABGRFloat            = 0x7F000F16;
+
+        /**
          * 32 bits per pixel RGBA color format, with 8-bit red, green, blue, and alpha components.
          * <p>
          * Using 32-bit little-endian representation, colors stored as Red 7:0, Green 15:8,
@@ -454,6 +473,26 @@ public final class MediaCodecInfo {
          * This corresponds to {@link android.graphics.PixelFormat#RGBA_8888}.
          */
         public static final int COLOR_Format32bitABGR8888             = 0x7F00A000;
+
+        /**
+         * 32 bits per pixel RGBA color format, with 10-bit red, green,
+         * blue, and 2-bit alpha components.
+         * <p>
+         * Using 32-bit little-endian representation, colors stored as
+         * Red 9:0, Green 19:10, Blue 29:20, and Alpha 31:30.
+         * <pre>
+         *         byte              byte             byte              byte
+         *  <------ i -----> | <---- i+1 ----> | <---- i+2 ----> | <---- i+3 ----->
+         * +-----------------+---+-------------+-------+---------+-----------+-----+
+         * |       RED           |      GREEN          |       BLUE          |ALPHA|
+         * +-----------------+---+-------------+-------+---------+-----------+-----+
+         *  0               7 0 1 2           7 0     3 4       7 0         5 6   7
+         * </pre>
+         *
+         * This corresponds to {@link android.graphics.PixelFormat#RGBA_1010102}.
+         */
+        @SuppressLint("AllUpper")
+        public static final int COLOR_Format32bitABGR2101010          = 0x7F00AAA2;
 
         /**
          * Flexible 12 bits per pixel, subsampled YUV color format with 8-bit chroma and luma
