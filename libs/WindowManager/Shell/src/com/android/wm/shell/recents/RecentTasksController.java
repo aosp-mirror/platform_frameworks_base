@@ -17,6 +17,7 @@
 package com.android.wm.shell.recents;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.content.pm.PackageManager.FEATURE_PC;
 
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 
@@ -63,8 +64,9 @@ public class RecentTasksController implements TaskStackListenerCallback,
     private final ShellExecutor mMainExecutor;
     private final TaskStackListenerImpl mTaskStackListener;
     private final RecentTasks mImpl = new RecentTasksImpl();
+    private IRecentTasksListener mListener;
+    private final boolean mIsDesktopMode;
 
-    private final ArrayList<Runnable> mCallbacks = new ArrayList<>();
     // Mapping of split task ids, mappings are symmetrical (ie. if t1 is the taskid of a task in a
     // pair, then mSplitTasks[t1] = t2, and mSplitTasks[t2] = t1)
     private final SparseIntArray mSplitTasks = new SparseIntArray();
@@ -95,6 +97,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
     RecentTasksController(Context context, TaskStackListenerImpl taskStackListener,
             ShellExecutor mainExecutor) {
         mContext = context;
+        mIsDesktopMode = mContext.getPackageManager().hasSystemFeature(FEATURE_PC);
         mTaskStackListener = taskStackListener;
         mMainExecutor = mainExecutor;
     }
@@ -176,10 +179,15 @@ public class RecentTasksController implements TaskStackListenerCallback,
         notifyRecentTasksChanged();
     }
 
-    public void onTaskRemoved(TaskInfo taskInfo) {
+    public void onTaskAdded(ActivityManager.RunningTaskInfo taskInfo) {
+        notifyRunningTaskAppeared(taskInfo);
+    }
+
+    public void onTaskRemoved(ActivityManager.RunningTaskInfo taskInfo) {
         // Remove any split pairs associated with this task
         removeSplitPair(taskInfo.taskId);
         notifyRecentTasksChanged();
+        notifyRunningTaskVanished(taskInfo);
     }
 
     public void onTaskWindowingModeChanged(TaskInfo taskInfo) {
@@ -189,19 +197,50 @@ public class RecentTasksController implements TaskStackListenerCallback,
     @VisibleForTesting
     void notifyRecentTasksChanged() {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENT_TASKS, "Notify recent tasks changed");
-        for (int i = 0; i < mCallbacks.size(); i++) {
-            mCallbacks.get(i).run();
+        if (mListener == null) {
+            return;
+        }
+        try {
+            mListener.onRecentTasksChanged();
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed call notifyRecentTasksChanged", e);
         }
     }
 
-    private void registerRecentTasksListener(Runnable listener) {
-        if (!mCallbacks.contains(listener)) {
-            mCallbacks.add(listener);
+    /**
+     * Notify the running task listener that a task appeared on desktop environment.
+     */
+    private void notifyRunningTaskAppeared(ActivityManager.RunningTaskInfo taskInfo) {
+        if (mListener == null || !mIsDesktopMode || taskInfo.realActivity == null) {
+            return;
+        }
+        try {
+            mListener.onRunningTaskAppeared(taskInfo);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed call onRunningTaskAppeared", e);
         }
     }
 
-    private void unregisterRecentTasksListener(Runnable listener) {
-        mCallbacks.remove(listener);
+    /**
+     * Notify the running task listener that a task was removed on desktop environment.
+     */
+    private void notifyRunningTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
+        if (mListener == null || !mIsDesktopMode || taskInfo.realActivity == null) {
+            return;
+        }
+        try {
+            mListener.onRunningTaskVanished(taskInfo);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed call onRunningTaskVanished", e);
+        }
+    }
+
+    private void registerRecentTasksListener(IRecentTasksListener listener) {
+        mListener = listener;
+    }
+
+    private void unregisterRecentTasksListener() {
+        mListener = null;
     }
 
     @VisibleForTesting
@@ -280,19 +319,28 @@ public class RecentTasksController implements TaskStackListenerCallback,
         private RecentTasksController mController;
         private final SingleInstanceRemoteListener<RecentTasksController,
                 IRecentTasksListener> mListener;
-        private final Runnable mRecentTasksListener =
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        mListener.call(l -> l.onRecentTasksChanged());
-                    }
-                };
+        private final IRecentTasksListener mRecentTasksListener = new IRecentTasksListener.Stub() {
+            @Override
+            public void onRecentTasksChanged() throws RemoteException {
+                mListener.call(l -> l.onRecentTasksChanged());
+            }
+
+            @Override
+            public void onRunningTaskAppeared(ActivityManager.RunningTaskInfo taskInfo) {
+                mListener.call(l -> l.onRunningTaskAppeared(taskInfo));
+            }
+
+            @Override
+            public void onRunningTaskVanished(ActivityManager.RunningTaskInfo taskInfo) {
+                mListener.call(l -> l.onRunningTaskVanished(taskInfo));
+            }
+        };
 
         public IRecentTasksImpl(RecentTasksController controller) {
             mController = controller;
             mListener = new SingleInstanceRemoteListener<>(controller,
                     c -> c.registerRecentTasksListener(mRecentTasksListener),
-                    c -> c.unregisterRecentTasksListener(mRecentTasksListener));
+                    c -> c.unregisterRecentTasksListener());
         }
 
         /**
@@ -330,6 +378,17 @@ public class RecentTasksController implements TaskStackListenerCallback,
                             .toArray(new GroupedRecentTaskInfo[0]),
                     true /* blocking */);
             return out[0];
+        }
+
+        @Override
+        public ActivityManager.RunningTaskInfo[] getRunningTasks(int maxNum) {
+            final ActivityManager.RunningTaskInfo[][] tasks =
+                    new ActivityManager.RunningTaskInfo[][] {null};
+            executeRemoteCallWithTaskPermission(mController, "getRunningTasks",
+                    (controller) -> tasks[0] = ActivityTaskManager.getInstance().getTasks(maxNum)
+                            .toArray(new ActivityManager.RunningTaskInfo[0]),
+                    true /* blocking */);
+            return tasks[0];
         }
     }
 }
