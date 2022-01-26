@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.os.Parcel;
@@ -106,11 +107,13 @@ public final class VirtualDeviceParams implements Parcelable {
     }
 
     /**
-     * Returns the set of activities allowed to be streamed, or {@code null} if this is not set.
+     * Returns the set of activities allowed to be streamed, or {@code null} if all activities are
+     * allowed, except the ones explicitly blocked.
      *
      * @see Builder#setAllowedActivities(Set)
-     * @hide  // TODO(b/194949534): Unhide this API
      */
+    // Null and empty have different semantics - Null allows all activities to be streamed
+    @SuppressLint("NullableCollection")
     @Nullable
     public Set<ComponentName> getAllowedActivities() {
         if (mAllowedActivities == null) {
@@ -120,12 +123,13 @@ public final class VirtualDeviceParams implements Parcelable {
     }
 
     /**
-     * Returns the set of activities that are blocked from streaming, or {@code null} if this is not
-     * set.
+     * Returns the set of activities that are blocked from streaming, or {@code null} to indicate
+     * that all activities in {@link #getAllowedActivities} are allowed.
      *
      * @see Builder#setBlockedActivities(Set)
-     * @hide  // TODO(b/194949534): Unhide this API
      */
+    // Allowing null to enforce that at most one of allowed / blocked activities can be non-null
+    @SuppressLint("NullableCollection")
     @Nullable
     public Set<ComponentName> getBlockedActivities() {
         if (mBlockedActivities == null) {
@@ -255,8 +259,10 @@ public final class VirtualDeviceParams implements Parcelable {
          *
          * @param allowedActivities A set of activity {@link ComponentName} allowed to be launched
          *   in the virtual device.
-         * @hide  // TODO(b/194949534): Unhide this API
          */
+        // Null and empty have different semantics - Null allows all activities to be streamed
+        @SuppressLint("NullableCollection")
+        @NonNull
         public Builder setAllowedActivities(@Nullable Set<ComponentName> allowedActivities) {
             if (mBlockedActivities != null && allowedActivities != null) {
                 throw new IllegalArgumentException(
@@ -279,8 +285,10 @@ public final class VirtualDeviceParams implements Parcelable {
          *
          * @param blockedActivities A set of {@link ComponentName} to be blocked launching from
          *   virtual device.
-         * @hide  // TODO(b/194949534): Unhide this API
          */
+        // Allowing null to enforce that at most one of allowed / blocked activities can be non-null
+        @SuppressLint("NullableCollection")
+        @NonNull
         public Builder setBlockedActivities(@Nullable Set<ComponentName> blockedActivities) {
             if (mAllowedActivities != null && blockedActivities != null) {
                 throw new IllegalArgumentException(
