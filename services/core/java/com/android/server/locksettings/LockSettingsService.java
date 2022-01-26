@@ -2216,9 +2216,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             setUserPasswordMetrics(credential, userId);
             unlockKeystore(credential.getCredential(), userId);
 
-            Slog.i(TAG, "Unlocking user " + userId + " with token length "
-                    + response.getGatekeeperHAT().length);
-            unlockUser(userId, response.getGatekeeperHAT(), secretFromCredential(credential));
+            Slog.i(TAG, "Unlocking user " + userId);
+            unlockUser(userId, null, secretFromCredential(credential));
 
             if (isManagedProfileWithSeparatedLock(userId)) {
                 setDeviceUnlockedForUser(userId);
