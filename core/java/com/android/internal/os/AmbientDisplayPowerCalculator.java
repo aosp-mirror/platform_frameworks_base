@@ -33,6 +33,11 @@ import java.util.List;
 public class AmbientDisplayPowerCalculator extends PowerCalculator {
     private final UsageBasedPowerEstimator[] mPowerEstimators;
 
+    @Override
+    public boolean isPowerComponentSupported(@BatteryConsumer.PowerComponent int powerComponent) {
+        return powerComponent == BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY;
+    }
+
     public AmbientDisplayPowerCalculator(PowerProfile powerProfile) {
         final int numDisplays = powerProfile.getNumDisplays();
         mPowerEstimators = new UsageBasedPowerEstimator[numDisplays];

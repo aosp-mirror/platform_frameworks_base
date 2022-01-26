@@ -50,19 +50,75 @@ import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@SuppressWarnings("GuardedBy")
 public class BatteryUsageStatsProviderTest {
     private static final int APP_UID = Process.FIRST_APPLICATION_UID + 42;
     private static final long MINUTE_IN_MS = 60 * 1000;
+    private static final double PRECISION = 0.00001;
 
     private final File mHistoryDir =
             TestIoUtils.createTemporaryDirectory(getClass().getSimpleName());
     @Rule
     public final BatteryUsageStatsRule mStatsRule =
             new BatteryUsageStatsRule(12345, mHistoryDir)
-                    .setAveragePower(PowerProfile.POWER_FLASHLIGHT, 360.0);
+                    .setAveragePower(PowerProfile.POWER_FLASHLIGHT, 360.0)
+                    .setAveragePower(PowerProfile.POWER_AUDIO, 720.0);
 
     @Test
     public void test_getBatteryUsageStats() {
+        BatteryStatsImpl batteryStats = prepareBatteryStats();
+
+        Context context = InstrumentationRegistry.getContext();
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, batteryStats);
+
+        final BatteryUsageStats batteryUsageStats =
+                provider.getBatteryUsageStats(BatteryUsageStatsQuery.DEFAULT);
+
+        final List<UidBatteryConsumer> uidBatteryConsumers =
+                batteryUsageStats.getUidBatteryConsumers();
+        final UidBatteryConsumer uidBatteryConsumer = uidBatteryConsumers.get(0);
+        assertThat(uidBatteryConsumer.getTimeInStateMs(UidBatteryConsumer.STATE_FOREGROUND))
+                .isEqualTo(60 * MINUTE_IN_MS);
+        assertThat(uidBatteryConsumer.getTimeInStateMs(UidBatteryConsumer.STATE_BACKGROUND))
+                .isEqualTo(10 * MINUTE_IN_MS);
+        assertThat(uidBatteryConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_AUDIO))
+                .isWithin(PRECISION).of(2.0);
+        assertThat(
+                uidBatteryConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT))
+                .isWithin(PRECISION).of(0.4);
+
+        assertThat(batteryUsageStats.getStatsStartTimestamp()).isEqualTo(12345);
+        assertThat(batteryUsageStats.getStatsEndTimestamp()).isEqualTo(54321);
+    }
+
+    @Test
+    public void test_selectPowerComponents() {
+        BatteryStatsImpl batteryStats = prepareBatteryStats();
+
+        Context context = InstrumentationRegistry.getContext();
+        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, batteryStats);
+
+        final BatteryUsageStats batteryUsageStats =
+                provider.getBatteryUsageStats(
+                        new BatteryUsageStatsQuery.Builder()
+                                .includePowerComponents(
+                                        new int[]{BatteryConsumer.POWER_COMPONENT_AUDIO})
+                                .build()
+                );
+
+        final List<UidBatteryConsumer> uidBatteryConsumers =
+                batteryUsageStats.getUidBatteryConsumers();
+        final UidBatteryConsumer uidBatteryConsumer = uidBatteryConsumers.get(0);
+        assertThat(uidBatteryConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_AUDIO))
+                .isWithin(PRECISION).of(2.0);
+
+        // FLASHLIGHT power estimation not requested, so the returned value is 0
+        assertThat(
+                uidBatteryConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT))
+                .isEqualTo(0);
+    }
+
+    private BatteryStatsImpl prepareBatteryStats() {
         BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
 
         batteryStats.noteActivityResumedLocked(APP_UID,
@@ -82,24 +138,14 @@ public class BatteryUsageStatsProviderTest {
         batteryStats.noteUidProcessStateLocked(APP_UID, ActivityManager.PROCESS_STATE_CACHED_EMPTY,
                 80 * MINUTE_IN_MS, 80 * MINUTE_IN_MS);
 
+        batteryStats.noteFlashlightOnLocked(APP_UID, 1000, 1000);
+        batteryStats.noteFlashlightOffLocked(APP_UID, 5000, 5000);
+
+        batteryStats.noteAudioOnLocked(APP_UID, 10000, 10000);
+        batteryStats.noteAudioOffLocked(APP_UID, 20000, 20000);
+
         mStatsRule.setCurrentTime(54321);
-
-        Context context = InstrumentationRegistry.getContext();
-        BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, batteryStats);
-
-        final BatteryUsageStats batteryUsageStats =
-                provider.getBatteryUsageStats(BatteryUsageStatsQuery.DEFAULT);
-
-        final List<UidBatteryConsumer> uidBatteryConsumers =
-                batteryUsageStats.getUidBatteryConsumers();
-        final UidBatteryConsumer uidBatteryConsumer = uidBatteryConsumers.get(0);
-        assertThat(uidBatteryConsumer.getTimeInStateMs(UidBatteryConsumer.STATE_FOREGROUND))
-                .isEqualTo(60 * MINUTE_IN_MS);
-        assertThat(uidBatteryConsumer.getTimeInStateMs(UidBatteryConsumer.STATE_BACKGROUND))
-                .isEqualTo(10 * MINUTE_IN_MS);
-
-        assertThat(batteryUsageStats.getStatsStartTimestamp()).isEqualTo(12345);
-        assertThat(batteryUsageStats.getStatsEndTimestamp()).isEqualTo(54321);
+        return batteryStats;
     }
 
     @Test

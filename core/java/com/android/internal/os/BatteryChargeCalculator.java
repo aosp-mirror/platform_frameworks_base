@@ -16,6 +16,7 @@
 
 package com.android.internal.os;
 
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
@@ -28,6 +29,12 @@ import java.util.List;
  * Estimates the battery discharge amounts.
  */
 public class BatteryChargeCalculator extends PowerCalculator {
+
+    @Override
+    public boolean isPowerComponentSupported(@BatteryConsumer.PowerComponent int powerComponent) {
+        // Always apply this power calculator, no matter what power components were requested
+        return true;
+    }
 
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
