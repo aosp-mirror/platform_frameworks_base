@@ -369,6 +369,13 @@
     <!-- The top margin of the panel that holds the list of notifications. -->
     <dimen name="notification_panel_margin_top">0dp</dimen>
 
+    <!-- The minimum content height for the split shade NSSL.
+         It is used because if the height is too small, the expansion motion is too fast.
+         Note that the value of 256dp is more or less a random value and can be changed to tweak
+         the expansion motion.
+    -->
+    <dimen name="nssl_split_shade_min_content_height">256dp</dimen>
+
     <!-- The bottom margin of the panel that holds the list of notifications. -->
     <dimen name="notification_panel_margin_bottom">0dp</dimen>
 

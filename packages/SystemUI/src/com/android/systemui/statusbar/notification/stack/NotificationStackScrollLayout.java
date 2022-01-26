@@ -202,6 +202,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private int mBottomMargin;
     private int mBottomInset = 0;
     private float mQsExpansionFraction;
+    private final int mSplitShadeMinContentHeight;
 
     /**
      * The algorithm which calculates the properties for our children
@@ -583,6 +584,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 .getDefaultColor();
         int minHeight = res.getDimensionPixelSize(R.dimen.notification_min_height);
         int maxHeight = res.getDimensionPixelSize(R.dimen.notification_max_height);
+        mSplitShadeMinContentHeight = res.getDimensionPixelSize(
+                R.dimen.nssl_split_shade_min_content_height);
         mExpandHelper = new ExpandHelper(getContext(), mExpandHelperCallback,
                 minHeight, maxHeight);
         mExpandHelper.setEventSource(this);
@@ -3886,7 +3889,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     int getEmptyBottomMargin() {
-        return Math.max(mMaxLayoutHeight - mContentHeight, 0);
+        int contentHeight;
+        if (mShouldUseSplitNotificationShade) {
+            // When in split shade and there are no notifications, the height can be too low, as
+            // it is based on notifications bottom, which is lower on split shade.
+            // Here we prefer to use at least a minimum height defined for split shade.
+            // Otherwise the expansion motion is too fast.
+            contentHeight = Math.max(mSplitShadeMinContentHeight, mContentHeight);
+        } else {
+            contentHeight = mContentHeight;
+        }
+        return Math.max(mMaxLayoutHeight - contentHeight, 0);
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
