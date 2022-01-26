@@ -554,6 +554,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private void updateControlsVisibility() {
         if (mControlsComponent == null) return;
 
+        mControlsButton.setImageResource(mControlsComponent.getTileImageId());
+        mControlsButton.setContentDescription(getContext()
+                .getString(mControlsComponent.getTileTitleId()));
+
         boolean hasFavorites = mControlsComponent.getControlsController()
                 .map(c -> c.getFavorites().size() > 0)
                 .orElse(false);

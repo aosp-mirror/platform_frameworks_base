@@ -28,6 +28,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.classifier.FalsingManagerFake
@@ -41,6 +42,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
@@ -151,6 +153,9 @@ class DeviceControlsTileTest : SysuiTestCase() {
                 Optional.empty()
             }
         }
+
+        `when`(controlsComponent.getTileTitleId()).thenReturn(R.string.quick_controls_title)
+        `when`(controlsComponent.getTileTitleId()).thenReturn(R.drawable.controls_icon)
     }
 
     @Test
@@ -314,6 +319,20 @@ class DeviceControlsTileTest : SysuiTestCase() {
                 nullable(ActivityLaunchAnimator.Controller::class.java),
                 eq(false) /* showOverLockscreenWhenLocked */)
         assertThat(intentCaptor.value.component?.className).isEqualTo(CONTROLS_ACTIVITY_CLASS_NAME)
+    }
+
+    @Test
+    fun verifyTileEqualsResourceFromComponent() {
+        assertThat(tile.tileLabel)
+            .isEqualTo(
+                context.getText(
+                    controlsComponent.getTileTitleId()))
+    }
+
+    @Test
+    fun verifyTileImageEqualsResourceFromComponent() {
+        assertThat(tile.icon)
+            .isEqualTo(QSTileImpl.ResourceIcon.get(controlsComponent.getTileImageId()))
     }
 
     private fun createTile(): DeviceControlsTile {
