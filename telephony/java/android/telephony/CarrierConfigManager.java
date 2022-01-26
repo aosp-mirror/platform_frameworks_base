@@ -4608,6 +4608,15 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "enable_presence_group_subscribe_bool";
 
         /**
+         * Flag indicating whether or not to use SIP URI when send a presence subscribe.
+         * When {@code true}, the device sets the To and Contact header to be SIP URI using
+         * the TelephonyManager#getIsimDomain" API.
+         * If {@code false}, the device uses a TEL URI.
+         */
+        public static final String KEY_USE_SIP_URI_FOR_PRESENCE_SUBSCRIBE_BOOL =
+                KEY_PREFIX + "use_sip_uri_for_presence_subscribe_bool";
+
+        /**
          * An integer key associated with the period of time in seconds the non-rcs capability
          * information of each contact is cached on the device.
          * <p>
@@ -4750,6 +4759,7 @@ public class CarrierConfigManager {
             defaults.putBoolean(KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL, false);
             defaults.putBoolean(KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL, false);
             defaults.putBoolean(KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL, false);
+            defaults.putBoolean(KEY_USE_SIP_URI_FOR_PRESENCE_SUBSCRIBE_BOOL, false);
             defaults.putInt(KEY_NON_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC_INT, 30 * 24 * 60 * 60);
             defaults.putBoolean(KEY_RCS_REQUEST_FORBIDDEN_BY_SIP_489_BOOL, false);
             defaults.putLong(KEY_RCS_REQUEST_RETRY_INTERVAL_MILLIS_LONG, 20 * 60 * 1000);
