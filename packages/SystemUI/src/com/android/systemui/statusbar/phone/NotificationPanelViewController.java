@@ -2442,7 +2442,6 @@ public class NotificationPanelViewController extends PanelViewController {
         mSplitShadeHeaderController.setShadeExpandedFraction(shadeExpandedFraction);
         mSplitShadeHeaderController.setQsExpandedFraction(qsExpansionFraction);
         mSplitShadeHeaderController.setShadeExpanded(mQsVisible);
-        mKeyguardStatusBarViewController.updateViewState();
 
         if (mCommunalViewController != null) {
             mCommunalViewController.updateQsExpansion(qsExpansionFraction);
