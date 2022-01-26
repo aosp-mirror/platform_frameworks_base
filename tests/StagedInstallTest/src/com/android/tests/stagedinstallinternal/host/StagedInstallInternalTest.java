@@ -62,6 +62,7 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
     private static final String APK_A = "TestAppAv1.apk";
     private static final String APK_IN_APEX_TESTAPEX_NAME = "com.android.apex.apkrollback.test";
     private static final String APEXD_TEST_APEX = "apex.apexd_test.apex";
+    private static final String FAKE_APEX_SYSTEM_SERVER_APEX = "test_com.android.server.apex";
 
     private static final String TEST_VENDOR_APEX_ALLOW_LIST =
             "/vendor/etc/sysconfig/test-vendor-apex-allow-list.xml";
@@ -510,6 +511,18 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         getDevice().reboot();
 
         runPhase("testGetStagedApexInfo");
+    }
+
+    @Test
+    @LargeTest
+    public void testGetAppInfo_flagTestOnlyIsSet() throws Exception {
+        assumeTrue("Device does not support updating APEX",
+                mHostUtils.isApexUpdateSupported());
+
+        pushTestApex(FAKE_APEX_SYSTEM_SERVER_APEX);
+        getDevice().reboot();
+
+        runPhase("testGetAppInfo_flagTestOnlyIsSet");
     }
 
     @Test
