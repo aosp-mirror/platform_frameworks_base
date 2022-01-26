@@ -17,7 +17,6 @@ import com.android.systemui.R
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.globalactions.GlobalActionsDialogLite
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.qs.FooterActionsController.ExpansionState
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.MultiUserSwitchController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
@@ -54,6 +53,8 @@ class FooterActionsControllerTest : LeakCheckedTest() {
     @Mock
     private lateinit var userInfoController: UserInfoController
     @Mock
+    private lateinit var multiUserSwitchControllerFactory: MultiUserSwitchController.Factory
+    @Mock
     private lateinit var multiUserSwitchController: MultiUserSwitchController
     @Mock
     private lateinit var globalActionsDialog: GlobalActionsDialogLite
@@ -76,14 +77,16 @@ class FooterActionsControllerTest : LeakCheckedTest() {
         injectLeakCheckedDependencies(*LeakCheckedTest.ALL_SUPPORTED_CLASSES)
         val fakeTunerService = Dependency.get(TunerService::class.java) as FakeTunerService
 
+        whenever(multiUserSwitchControllerFactory.create(any()))
+                .thenReturn(multiUserSwitchController)
+
         view = LayoutInflater.from(context)
                 .inflate(R.layout.footer_actions, null) as FooterActionsView
 
-        controller = FooterActionsController(view, activityStarter,
-                userManager, userTracker, userInfoController, multiUserSwitchController,
+        controller = FooterActionsController(view, multiUserSwitchControllerFactory,
+                activityStarter, userManager, userTracker, userInfoController,
                 deviceProvisionedController, falsingManager, metricsLogger, fakeTunerService,
-                globalActionsDialog, uiEventLogger, showPMLiteButton = true,
-                buttonsVisibleState = ExpansionState.EXPANDED, fakeSettings,
+                globalActionsDialog, uiEventLogger, showPMLiteButton = true, fakeSettings,
                 Handler(testableLooper.looper))
         controller.init()
         ViewUtils.attachView(view)

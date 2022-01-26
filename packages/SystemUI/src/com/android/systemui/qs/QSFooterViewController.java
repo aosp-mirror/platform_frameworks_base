@@ -16,8 +16,6 @@
 
 package com.android.systemui.qs;
 
-import static com.android.systemui.qs.dagger.QSFragmentModule.QS_FOOTER;
-
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.text.TextUtils;
@@ -33,7 +31,6 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * Controller for {@link QSFooterView}.
@@ -58,7 +55,7 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
             ActivityStarter activityStarter,
             QSPanelController qsPanelController,
             QuickQSPanelController quickQSPanelController,
-            @Named(QS_FOOTER) FooterActionsController footerActionsController) {
+            FooterActionsController footerActionsController) {
         super(view);
         mUserTracker = userTracker;
         mQsPanelController = qsPanelController;
