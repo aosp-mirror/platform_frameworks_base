@@ -3855,14 +3855,20 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * Generates and returns an up-to-date {@link Bitmap} for the specified taskId. The returned
-     * bitmap will be full size and will not include any secure content.
+     * Generates and returns an up-to-date {@link Bitmap} for the specified taskId.
      *
-     * @param taskId The task ID of the task for which a snapshot is requested.
+     * @param taskId                  The task ID of the task for which a Bitmap is requested.
+     * @param layerCaptureArgsBuilder A {@link SurfaceControl.LayerCaptureArgs.Builder} with
+     *                                arguments for how to capture the Bitmap. The caller can
+     *                                specify any arguments, but this method will ensure that the
+     *                                specified task's SurfaceControl is used and the crop is set to
+     *                                the bounds of that task.
      * @return The Bitmap, or null if no task with the specified ID can be found or the bitmap could
      * not be generated.
      */
-    @Nullable public Bitmap captureTaskBitmap(int taskId) {
+    @Nullable
+    public Bitmap captureTaskBitmap(int taskId,
+            @NonNull SurfaceControl.LayerCaptureArgs.Builder layerCaptureArgsBuilder) {
         if (mTaskSnapshotController.shouldDisableSnapshots()) {
             return null;
         }
@@ -3876,9 +3882,7 @@ public class WindowManagerService extends IWindowManager.Stub
             task.getBounds(mTmpRect);
             final SurfaceControl sc = task.getSurfaceControl();
             final SurfaceControl.ScreenshotHardwareBuffer buffer = SurfaceControl.captureLayers(
-                    new SurfaceControl.LayerCaptureArgs.Builder(sc)
-                            .setSourceCrop(mTmpRect)
-                            .build());
+                    layerCaptureArgsBuilder.setLayer(sc).setSourceCrop(mTmpRect).build());
             if (buffer == null) {
                 Slog.w(TAG, "Could not get screenshot buffer for taskId: " + taskId);
                 return null;

@@ -60,6 +60,7 @@ import android.service.games.IGameServiceController;
 import android.service.games.IGameSession;
 import android.service.games.IGameSessionController;
 import android.service.games.IGameSessionService;
+import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost.SurfacePackage;
 
 import androidx.test.filters.SmallTest;
@@ -746,6 +747,11 @@ public final class GameServiceProviderInstanceImplTest {
         mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockOverlaySurfacePackage = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockOverlaySurfacePackage));
+
         IGameSessionController gameSessionController = getOnlyElement(
                 mFakeGameSessionService.getCapturedCreateInvocations()).mGameSessionController;
         AndroidFuture<GameScreenshotResult> resultFuture = new AndroidFuture<>();
@@ -754,17 +760,27 @@ public final class GameServiceProviderInstanceImplTest {
         GameScreenshotResult result = resultFuture.get();
         assertEquals(GameScreenshotResult.GAME_SCREENSHOT_ERROR_INTERNAL_ERROR,
                 result.getStatus());
-        verify(mMockWindowManagerService).captureTaskBitmap(10);
+
+        verify(mMockWindowManagerService).captureTaskBitmap(eq(10), any());
     }
 
     @Test
     public void takeScreenshot_success() throws Exception {
-        when(mMockWindowManagerService.captureTaskBitmap(10)).thenReturn(TEST_BITMAP);
+        SurfaceControl mockOverlaySurfaceControl = Mockito.mock(SurfaceControl.class);
+        SurfaceControl[] excludeLayers = new SurfaceControl[1];
+        excludeLayers[0] = mockOverlaySurfaceControl;
+        when(mMockWindowManagerService.captureTaskBitmap(eq(10), any())).thenReturn(TEST_BITMAP);
 
         mGameServiceProviderInstance.start();
         startTask(10, GAME_A_MAIN_ACTIVITY);
         mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
+
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockOverlaySurfacePackage = Mockito.mock(SurfacePackage.class);
+        when(mockOverlaySurfacePackage.getSurfaceControl()).thenReturn(mockOverlaySurfaceControl);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockOverlaySurfacePackage));
 
         IGameSessionController gameSessionController = getOnlyElement(
                 mFakeGameSessionService.getCapturedCreateInvocations()).mGameSessionController;

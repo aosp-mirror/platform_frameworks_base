@@ -43,6 +43,7 @@ import android.service.games.IGameSession;
 import android.service.games.IGameSessionController;
 import android.service.games.IGameSessionService;
 import android.util.Slog;
+import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost.SurfacePackage;
 
 import com.android.internal.annotations.GuardedBy;
@@ -237,7 +238,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                 mTaskSystemBarsVisibilityListener);
 
         for (GameSessionRecord gameSessionRecord : mGameSessions.values()) {
-            destroyGameSessionFromRecord(gameSessionRecord);
+            destroyGameSessionFromRecordLocked(gameSessionRecord);
         }
         mGameSessions.clear();
 
@@ -510,10 +511,11 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
             }
             return;
         }
-        destroyGameSessionFromRecord(gameSessionRecord);
+        destroyGameSessionFromRecordLocked(gameSessionRecord);
     }
 
-    private void destroyGameSessionFromRecord(@NonNull GameSessionRecord gameSessionRecord) {
+    @GuardedBy("mLock")
+    private void destroyGameSessionFromRecordLocked(@NonNull GameSessionRecord gameSessionRecord) {
         SurfacePackage surfacePackage = gameSessionRecord.getSurfacePackage();
         if (surfacePackage != null) {
             try {
@@ -586,17 +588,29 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
 
     @VisibleForTesting
     void takeScreenshot(int taskId, @NonNull AndroidFuture callback) {
+        GameSessionRecord gameSessionRecord;
         synchronized (mLock) {
-            boolean isTaskAssociatedWithGameSession = mGameSessions.containsKey(taskId);
-            if (!isTaskAssociatedWithGameSession) {
+            gameSessionRecord = mGameSessions.get(taskId);
+            if (gameSessionRecord == null) {
                 Slog.w(TAG, "No game session found for id: " + taskId);
                 callback.complete(GameScreenshotResult.createInternalErrorResult());
                 return;
             }
         }
 
+        final SurfacePackage overlaySurfacePackage = gameSessionRecord.getSurfacePackage();
+        final SurfaceControl overlaySurfaceControl =
+                overlaySurfacePackage != null ? overlaySurfacePackage.getSurfaceControl() : null;
         mBackgroundExecutor.execute(() -> {
-            final Bitmap bitmap = mWindowManagerService.captureTaskBitmap(taskId);
+            final SurfaceControl.LayerCaptureArgs.Builder layerCaptureArgsBuilder =
+                    new SurfaceControl.LayerCaptureArgs.Builder(/* layer */ null);
+            if (overlaySurfaceControl != null) {
+                SurfaceControl[] excludeLayers = new SurfaceControl[1];
+                excludeLayers[0] = overlaySurfaceControl;
+                layerCaptureArgsBuilder.setExcludeLayers(excludeLayers);
+            }
+            final Bitmap bitmap = mWindowManagerService.captureTaskBitmap(taskId,
+                    layerCaptureArgsBuilder);
             if (bitmap == null) {
                 Slog.w(TAG, "Could not get bitmap for id: " + taskId);
                 callback.complete(GameScreenshotResult.createInternalErrorResult());
