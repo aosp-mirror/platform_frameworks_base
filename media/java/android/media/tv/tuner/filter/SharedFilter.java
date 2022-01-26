@@ -92,9 +92,21 @@ public final class SharedFilter implements AutoCloseable {
                     synchronized (mCallbackLock) {
                         if (mCallback != null) {
                             mCallback.onFilterEvent(this, events);
+                        } else {
+                            for (FilterEvent event : events) {
+                                if (event instanceof MediaEvent) {
+                                    ((MediaEvent)event).release();
+                                }
+                            }
                         }
                     }
                 });
+            } else {
+                for (FilterEvent event : events) {
+                    if (event instanceof MediaEvent) {
+                        ((MediaEvent)event).release();
+                    }
+                }
             }
         }
     }
@@ -187,6 +199,8 @@ public final class SharedFilter implements AutoCloseable {
             if (mIsClosed) {
                 return;
             }
+            mCallback = null;
+            mExecutor = null;
             nativeSharedClose();
             mIsClosed = true;
          }
