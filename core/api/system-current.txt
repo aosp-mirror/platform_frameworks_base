@@ -12409,6 +12409,7 @@ package android.telephony {
   }
 
   public static class TelephonyManager.ModemActivityInfoException extends java.lang.Exception {
+    ctor public TelephonyManager.ModemActivityInfoException(int);
     method public int getErrorCode();
     field public static final int ERROR_INVALID_INFO_RECEIVED = 2; // 0x2
     field public static final int ERROR_MODEM_RESPONSE_ERROR = 3; // 0x3

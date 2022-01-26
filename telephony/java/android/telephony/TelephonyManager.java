@@ -11487,7 +11487,11 @@ public class TelephonyManager {
 
         private final int mErrorCode;
 
-        /** @hide */
+        /**
+         * An exception with ModemActivityInfo specific error codes.
+         *
+         * @param errorCode a ModemActivityInfoError code.
+         */
         public ModemActivityInfoException(@ModemActivityInfoError int errorCode) {
             mErrorCode = errorCode;
         }
