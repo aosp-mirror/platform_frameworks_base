@@ -173,7 +173,7 @@ interface IStorageManager {
     void setDebugFlags(int flags, int mask) = 60;
     void createUserKey(int userId, int serialNumber, boolean ephemeral) = 61;
     void destroyUserKey(int userId) = 62;
-    void unlockUserKey(int userId, int serialNumber, in byte[] token, in byte[] secret) = 63;
+    void unlockUserKey(int userId, int serialNumber, in byte[] secret) = 63;
     void lockUserKey(int userId) = 64;
     boolean isUserKeyUnlocked(int userId) = 65;
     void prepareUserStorage(in String volumeUuid, int userId, int serialNumber, int flags) = 66;

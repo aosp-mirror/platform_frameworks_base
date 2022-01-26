@@ -1127,8 +1127,7 @@ class StorageManagerService extends IStorageManager.Stub
                     if (initLocked) {
                         mVold.lockUserKey(user.id);
                     } else {
-                        mVold.unlockUserKey(user.id, user.serialNumber, encodeBytes(null),
-                                encodeBytes(null));
+                        mVold.unlockUserKey(user.id, user.serialNumber, encodeBytes(null));
                     }
                 } catch (Exception e) {
                     Slog.wtf(TAG, e);
@@ -3522,11 +3521,10 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     @Override
-    public void unlockUserKey(int userId, int serialNumber, byte[] token, byte[] secret) {
+    public void unlockUserKey(int userId, int serialNumber, byte[] secret) {
         boolean isFsEncrypted = StorageManager.isFileEncryptedNativeOrEmulated();
         Slog.d(TAG, "unlockUserKey: " + userId
                 + " isFileEncryptedNativeOrEmulated: " + isFsEncrypted
-                + " hasToken: " + (token != null)
                 + " hasSecret: " + (secret != null));
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
@@ -3546,8 +3544,7 @@ class StorageManagerService extends IStorageManager.Stub
                 return;
             }
             try {
-                mVold.unlockUserKey(userId, serialNumber, encodeBytes(token),
-                        encodeBytes(secret));
+                mVold.unlockUserKey(userId, serialNumber, encodeBytes(secret));
             } catch (Exception e) {
                 Slog.wtf(TAG, e);
                 return;

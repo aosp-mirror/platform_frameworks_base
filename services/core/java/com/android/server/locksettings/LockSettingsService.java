@@ -1406,7 +1406,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      * can end up calling into other system services to process user unlock request (via
      * {@link com.android.server.SystemServiceManager#unlockUser} </em>
      */
-    private void unlockUser(int userId, byte[] token, byte[] secret) {
+    private void unlockUser(int userId, byte[] secret) {
         Slog.i(TAG, "Unlocking user " + userId + " with secret only, length "
                 + (secret != null ? secret.length : 0));
         // TODO: make this method fully async so we can update UI with progress strings
@@ -1431,7 +1431,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         };
 
         try {
-            mActivityManager.unlockUser(userId, token, secret, listener);
+            mActivityManager.unlockUser(userId, null, secret, listener);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
@@ -2110,10 +2110,10 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     /** Unlock disk encryption */
-    private void unlockUserKey(int userId, byte[] token, byte[] secret) {
+    private void unlockUserKey(int userId, byte[] secret) {
         final UserInfo userInfo = mUserManager.getUserInfo(userId);
         try {
-            mStorageManager.unlockUserKey(userId, userInfo.serialNumber, token, secret);
+            mStorageManager.unlockUserKey(userId, userInfo.serialNumber, secret);
         } catch (RemoteException e) {
             throw new IllegalStateException("Failed to unlock user key " + userId, e);
 
@@ -2393,7 +2393,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             unlockKeystore(credential.getCredential(), userId);
 
             Slog.i(TAG, "Unlocking user " + userId);
-            unlockUser(userId, null, secretFromCredential(credential));
+            unlockUser(userId, secretFromCredential(credential));
 
             if (isManagedProfileWithSeparatedLock(userId)) {
                 setDeviceUnlockedForUser(userId);
@@ -3053,7 +3053,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         {
             final byte[] secret = authToken.deriveDiskEncryptionKey();
-            unlockUser(userId, null, secret);
+            unlockUser(userId, secret);
             Arrays.fill(secret, (byte) 0);
         }
         activateEscrowTokens(authToken, userId);
@@ -3119,7 +3119,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             // Clear key from vold so ActivityManager can just unlock the user with empty secret
             // during boot. Vold storage needs to be unlocked before manipulation of the keys can
             // succeed.
-            unlockUserKey(userId, null, auth.deriveDiskEncryptionKey());
+            unlockUserKey(userId, auth.deriveDiskEncryptionKey());
             clearUserKeyProtection(userId, auth.deriveDiskEncryptionKey());
             fixateNewestUserKeyAuth(userId);
             unlockKeystore(auth.deriveKeyStorePassword(), userId);
@@ -3394,7 +3394,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 // If clearing credential, unlock the user manually in order to progress user start
                 // Call unlockUser() on a handler thread so no lock is held (either by LSS or by
                 // the caller like DPMS), otherwise it can lead to deadlock.
-                mHandler.post(() -> unlockUser(userId, null, null));
+                mHandler.post(() -> unlockUser(userId, null));
             }
             notifyPasswordChanged(userId);
             notifySeparateProfileChallengeChanged(userId);
