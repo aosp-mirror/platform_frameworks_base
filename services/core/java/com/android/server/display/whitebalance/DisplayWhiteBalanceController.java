@@ -21,7 +21,6 @@ import android.util.Slog;
 import android.util.Spline;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.display.color.ColorDisplayService.ColorDisplayServiceInternal;
 import com.android.server.display.utils.AmbientFilter;
@@ -453,6 +452,22 @@ public class DisplayWhiteBalanceController implements
         mColorDisplayServiceInternal.setDisplayWhiteBalanceColorTemperature(
                 (int) mAmbientColorTemperature);
         mLastAmbientColorTemperature = mAmbientColorTemperature;
+    }
+
+    /**
+     * Calculate the adjusted brightness, in nits, due to the DWB color adaptation
+     *
+     * @param requestedBrightnessNits brightness the framework requires to be output
+     * @return the adjusted brightness the framework needs to output to counter the drop in
+     *         brightness due to DWB, or the requestedBrightnessNits if an adjustment cannot be made
+     */
+    public float calculateAdjustedBrightnessNits(float requestedBrightnessNits) {
+        float luminance = mColorDisplayServiceInternal.getDisplayWhiteBalanceLuminance();
+        if (luminance == -1) {
+            return requestedBrightnessNits;
+        }
+        float effectiveBrightness = requestedBrightnessNits * luminance;
+        return (requestedBrightnessNits - effectiveBrightness) + requestedBrightnessNits;
     }
 
     /**
