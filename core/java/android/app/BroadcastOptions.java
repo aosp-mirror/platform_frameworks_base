@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -52,6 +53,7 @@ public class BroadcastOptions extends ComponentOptions {
     private String[] mRequireNoneOfPermissions;
     private long mRequireCompatChangeId = CHANGE_INVALID;
     private boolean mRequireCompatChangeEnabled = true;
+    private long mIdForResponseEvent;
 
     /**
      * Change ID which is invalid.
@@ -164,6 +166,12 @@ public class BroadcastOptions extends ComponentOptions {
     public static final int TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED =
             PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED;
 
+    /**
+     * Corresponds to {@link #recordResponseEventWhileInBackground(long)}.
+     */
+    private static final String KEY_ID_FOR_RESPONSE_EVENT =
+            "android:broadcast.idForResponseEvent";
+
     public static BroadcastOptions makeBasic() {
         BroadcastOptions opts = new BroadcastOptions();
         return opts;
@@ -198,6 +206,7 @@ public class BroadcastOptions extends ComponentOptions {
         mRequireNoneOfPermissions = opts.getStringArray(KEY_REQUIRE_NONE_OF_PERMISSIONS);
         mRequireCompatChangeId = opts.getLong(KEY_REQUIRE_COMPAT_CHANGE_ID, CHANGE_INVALID);
         mRequireCompatChangeEnabled = opts.getBoolean(KEY_REQUIRE_COMPAT_CHANGE_ENABLED, true);
+        mIdForResponseEvent = opts.getLong(KEY_ID_FOR_RESPONSE_EVENT);
     }
 
     /**
@@ -511,6 +520,28 @@ public class BroadcastOptions extends ComponentOptions {
     }
 
     /**
+     * Sets whether events (such as posting a notification) originating from an app after it
+     * receives the broadcast while in background should be recorded as responses to the broadcast.
+     *
+     * @param id ID to be used for the response events corresponding to this broadcast. If the
+     *           value is {@code 0} (default), then response events will not be recorded. Otherwise,
+     *           they will be recorded with the ID provided.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    public void recordResponseEventWhileInBackground(@IntRange(from = 0) long id) {
+        mIdForResponseEvent = id;
+    }
+
+    /** @hide */
+    @IntRange(from = 0)
+    public long getIdForResponseEvent() {
+        return mIdForResponseEvent;
+    }
+
+    /**
      * Returns the created options as a Bundle, which can be passed to
      * {@link android.content.Context#sendBroadcast(android.content.Intent)
      * Context.sendBroadcast(Intent)} and related methods.
@@ -548,6 +579,9 @@ public class BroadcastOptions extends ComponentOptions {
         if (mRequireCompatChangeId != CHANGE_INVALID) {
             b.putLong(KEY_REQUIRE_COMPAT_CHANGE_ID, mRequireCompatChangeId);
             b.putBoolean(KEY_REQUIRE_COMPAT_CHANGE_ENABLED, mRequireCompatChangeEnabled);
+        }
+        if (mIdForResponseEvent != 0) {
+            b.putLong(KEY_ID_FOR_RESPONSE_EVENT, mIdForResponseEvent);
         }
         return b.isEmpty() ? null : b;
     }

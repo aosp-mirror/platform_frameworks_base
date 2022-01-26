@@ -28,6 +28,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_MU;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
@@ -37,6 +38,7 @@ import android.app.IApplicationThread;
 import android.app.PendingIntent;
 import android.app.RemoteServiceException.CannotDeliverBroadcastException;
 import android.app.usage.UsageEvents.Event;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.IIntentReceiver;
@@ -69,6 +71,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -325,6 +328,7 @@ public final class BroadcastQueue {
         mService.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_START_RECEIVER);
 
         // Tell the application to launch this receiver.
+        maybeReportBroadcastDispatchedEventLocked(r);
         r.intent.setComponent(r.curComponent);
 
         boolean started = false;
@@ -917,6 +921,7 @@ public final class BroadcastQueue {
                 r.receiverTime = SystemClock.uptimeMillis();
                 maybeAddAllowBackgroundActivityStartsToken(filter.receiverList.app, r);
                 maybeScheduleTempAllowlistLocked(filter.owningUid, r, r.options);
+                maybeReportBroadcastDispatchedEventLocked(r);
                 performReceiveLocked(filter.receiverList.app, filter.receiverList.receiver,
                         new Intent(r.intent), r.resultCode, r.resultData,
                         r.resultExtras, r.ordered, r.initialSticky, r.userId);
@@ -1829,6 +1834,45 @@ public final class BroadcastQueue {
         maybeAddAllowBackgroundActivityStartsToken(r.curApp, r);
         mPendingBroadcast = r;
         mPendingBroadcastRecvIndex = recIdx;
+    }
+
+
+    @Nullable
+    private String getTargetPackage(BroadcastRecord r) {
+        if (r.intent == null) {
+            return null;
+        }
+        if (r.intent.getPackage() != null) {
+            return r.intent.getPackage();
+        } else if (r.intent.getComponent() != null) {
+            return r.intent.getComponent().getPackageName();
+        }
+        return null;
+    }
+
+    private void maybeReportBroadcastDispatchedEventLocked(BroadcastRecord r) {
+        final String targetPackage = getTargetPackage(r);
+        // Ignore non-explicit broadcasts
+        if (targetPackage == null) {
+            return;
+        }
+        // TODO (206518114): Only allow apps with ACCESS_PACKAGE_USAGE_STATS to set
+        // getIdForResponseEvent.
+        if (r.options == null || r.options.getIdForResponseEvent() <= 0) {
+            return;
+        }
+        // TODO (206518114): Only report this event when the broadcast is dispatched while the app
+        // is in the background state.
+        getUsageStatsManagerInternal().reportBroadcastDispatched(
+                r.callingUid, targetPackage, UserHandle.of(r.userId),
+                r.options.getIdForResponseEvent(), SystemClock.elapsedRealtime());
+    }
+
+    @NonNull
+    private UsageStatsManagerInternal getUsageStatsManagerInternal() {
+        final UsageStatsManagerInternal usageStatsManagerInternal =
+                LocalServices.getService(UsageStatsManagerInternal.class);
+        return usageStatsManagerInternal;
     }
 
     private boolean noteOpForManifestReceiver(int appOp, BroadcastRecord r, ResolveInfo info,
