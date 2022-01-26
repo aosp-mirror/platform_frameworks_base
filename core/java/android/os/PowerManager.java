@@ -704,6 +704,21 @@ public final class PowerManager {
         public long wakeTime;
         public @WakeReason int wakeReason;
         public long sleepDuration;
+
+        @Override
+        public boolean equals(@Nullable Object o) {
+            if (o instanceof WakeData) {
+                final WakeData other = (WakeData) o;
+                return wakeTime == other.wakeTime && wakeReason == other.wakeReason
+                        && sleepDuration == other.sleepDuration;
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(wakeTime, wakeReason, sleepDuration);
+        }
     }
 
     /**
