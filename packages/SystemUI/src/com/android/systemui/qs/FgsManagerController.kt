@@ -109,7 +109,7 @@ class FgsManagerController @Inject constructor(
             }
 
             isAvailable = deviceConfigProxy
-                    .getBoolean(NAMESPACE_SYSTEMUI, TASK_MANAGER_ENABLED, false)
+                    .getBoolean(NAMESPACE_SYSTEMUI, TASK_MANAGER_ENABLED, true)
 
             initialized = true
         }
