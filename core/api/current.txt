@@ -30288,6 +30288,7 @@ package android.os {
     field public static final int BATTERY_HEALTH_UNKNOWN = 1; // 0x1
     field public static final int BATTERY_HEALTH_UNSPECIFIED_FAILURE = 6; // 0x6
     field public static final int BATTERY_PLUGGED_AC = 1; // 0x1
+    field public static final int BATTERY_PLUGGED_DOCK = 8; // 0x8
     field public static final int BATTERY_PLUGGED_USB = 2; // 0x2
     field public static final int BATTERY_PLUGGED_WIRELESS = 4; // 0x4
     field public static final int BATTERY_PROPERTY_CAPACITY = 4; // 0x4
