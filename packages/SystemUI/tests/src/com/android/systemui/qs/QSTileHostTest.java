@@ -34,6 +34,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -50,13 +51,13 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.external.CustomTileStatePersister;
+import com.android.systemui.qs.external.TileLifecycleManager;
 import com.android.systemui.qs.external.TileServiceKey;
 import com.android.systemui.qs.external.TileServiceRequestController;
 import com.android.systemui.qs.logging.QSLogger;
@@ -127,6 +128,10 @@ public class QSTileHostTest extends SysuiTestCase {
     private TileServiceRequestController.Builder mTileServiceRequestControllerBuilder;
     @Mock
     private TileServiceRequestController mTileServiceRequestController;
+    @Mock
+    private TileLifecycleManager.Factory mTileLifecycleManagerFactory;
+    @Mock
+    private TileLifecycleManager mTileLifecycleManager;
 
     private Handler mHandler;
     private TestableLooper mLooper;
@@ -139,6 +144,8 @@ public class QSTileHostTest extends SysuiTestCase {
         mHandler = new Handler(mLooper.getLooper());
         when(mTileServiceRequestControllerBuilder.create(any()))
                 .thenReturn(mTileServiceRequestController);
+        when(mTileLifecycleManagerFactory.create(any(Intent.class), any(UserHandle.class)))
+                .thenReturn(mTileLifecycleManager);
 
         mSecureSettings = new FakeSettings();
         mSecureSettings.putStringForUser(
@@ -146,7 +153,8 @@ public class QSTileHostTest extends SysuiTestCase {
         mQSTileHost = new TestQSTileHost(mContext, mIconController, mDefaultFactory, mHandler,
                 mLooper.getLooper(), mPluginManager, mTunerService, mAutoTiles, mDumpManager,
                 mBroadcastDispatcher, mStatusBar, mQSLogger, mUiEventLogger, mUserTracker,
-                mSecureSettings, mCustomTileStatePersister, mTileServiceRequestControllerBuilder);
+                mSecureSettings, mCustomTileStatePersister, mTileServiceRequestControllerBuilder,
+                mTileLifecycleManagerFactory);
         setUpTileFactory();
     }
 
@@ -432,11 +440,13 @@ public class QSTileHostTest extends SysuiTestCase {
                 BroadcastDispatcher broadcastDispatcher, StatusBar statusBar, QSLogger qsLogger,
                 UiEventLogger uiEventLogger, UserTracker userTracker,
                 SecureSettings secureSettings, CustomTileStatePersister customTileStatePersister,
-                TileServiceRequestController.Builder tileServiceRequestControllerBuilder) {
+                TileServiceRequestController.Builder tileServiceRequestControllerBuilder,
+                TileLifecycleManager.Factory tileLifecycleManagerFactory) {
             super(context, iconController, defaultFactory, mainHandler, bgLooper, pluginManager,
                     tunerService, autoTiles, dumpManager, broadcastDispatcher,
                     Optional.of(statusBar), qsLogger, uiEventLogger, userTracker, secureSettings,
-                    customTileStatePersister, tileServiceRequestControllerBuilder);
+                    customTileStatePersister, tileServiceRequestControllerBuilder,
+                    tileLifecycleManagerFactory);
         }
 
         @Override
