@@ -192,7 +192,7 @@ public final class TvInteractiveAppManager {
      *
      * @see #sendAppLinkCommand(String, Bundle)
      */
-    public static final String KEY_PACKAGE_NAME = "package_name";
+    public static final String APP_LINK_KEY_PACKAGE_NAME = "package_name";
 
     /**
      * Key for class name in app link.
@@ -200,7 +200,7 @@ public final class TvInteractiveAppManager {
      *
      * @see #sendAppLinkCommand(String, Bundle)
      */
-    public static final String KEY_CLASS_NAME = "class_name";
+    public static final String APP_LINK_KEY_CLASS_NAME = "class_name";
 
     /**
      * Key for command type in app link command.
@@ -208,7 +208,7 @@ public final class TvInteractiveAppManager {
      *
      * @see #sendAppLinkCommand(String, Bundle)
      */
-    public static final String KEY_COMMAND_TYPE = "command_type";
+    public static final String APP_LINK_KEY_COMMAND_TYPE = "command_type";
 
     /**
      * Key for service ID in app link command.
@@ -216,7 +216,7 @@ public final class TvInteractiveAppManager {
      *
      * @see #sendAppLinkCommand(String, Bundle)
      */
-    public static final String KEY_SERVICE_ID = "service_id";
+    public static final String APP_LINK_KEY_SERVICE_ID = "service_id";
 
     /**
      * Key for back URI in app link command.
@@ -224,7 +224,7 @@ public final class TvInteractiveAppManager {
      *
      * @see #sendAppLinkCommand(String, Bundle)
      */
-    public static final String KEY_BACK_URI = "back_uri";
+    public static final String APP_LINK_KEY_BACK_URI = "back_uri";
 
     /**
      * Broadcast intent action to send app command to TV app.
@@ -761,7 +761,6 @@ public final class TvInteractiveAppManager {
 
     /**
      * Registers app link info.
-     * @hide
      */
     public void registerAppLinkInfo(
             @NonNull String tvIAppServiceId, @NonNull AppLinkInfo appLinkInfo) {
@@ -774,7 +773,6 @@ public final class TvInteractiveAppManager {
 
     /**
      * Unregisters app link info.
-     * @hide
      */
     public void unregisterAppLinkInfo(
             @NonNull String tvIAppServiceId, @NonNull AppLinkInfo appLinkInfo) {

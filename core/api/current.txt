@@ -25679,6 +25679,27 @@ package android.media.tv {
 
 package android.media.tv.interactive {
 
+  public final class AppLinkInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public String getClassName();
+    method @NonNull public String getPackageName();
+    method @Nullable public String getUriHost();
+    method @Nullable public String getUriPrefix();
+    method @Nullable public String getUriScheme();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.interactive.AppLinkInfo> CREATOR;
+  }
+
+  public static final class AppLinkInfo.Builder {
+    ctor public AppLinkInfo.Builder(@NonNull String, @NonNull String);
+    method @NonNull public android.media.tv.interactive.AppLinkInfo build();
+    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setClassName(@NonNull String);
+    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setPackageName(@NonNull String);
+    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriHost(@Nullable String);
+    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriPrefix(@Nullable String);
+    method @NonNull public android.media.tv.interactive.AppLinkInfo.Builder setUriScheme(@Nullable String);
+  }
+
   public final class TvInteractiveAppInfo implements android.os.Parcelable {
     ctor public TvInteractiveAppInfo(@NonNull android.content.Context, @NonNull android.content.ComponentName);
     method public int describeContents();
@@ -25695,10 +25716,17 @@ package android.media.tv.interactive {
   public final class TvInteractiveAppManager {
     method @NonNull public java.util.List<android.media.tv.interactive.TvInteractiveAppInfo> getTvInteractiveAppServiceList();
     method public void prepare(@NonNull String, int);
+    method public void registerAppLinkInfo(@NonNull String, @NonNull android.media.tv.interactive.AppLinkInfo);
     method public void registerCallback(@NonNull android.media.tv.interactive.TvInteractiveAppManager.TvInteractiveAppCallback, @NonNull java.util.concurrent.Executor);
     method public void sendAppLinkCommand(@NonNull String, @NonNull android.os.Bundle);
+    method public void unregisterAppLinkInfo(@NonNull String, @NonNull android.media.tv.interactive.AppLinkInfo);
     method public void unregisterCallback(@NonNull android.media.tv.interactive.TvInteractiveAppManager.TvInteractiveAppCallback);
     field public static final String ACTION_APP_LINK_COMMAND = "android.media.tv.interactive.action.APP_LINK_COMMAND";
+    field public static final String APP_LINK_KEY_BACK_URI = "back_uri";
+    field public static final String APP_LINK_KEY_CLASS_NAME = "class_name";
+    field public static final String APP_LINK_KEY_COMMAND_TYPE = "command_type";
+    field public static final String APP_LINK_KEY_PACKAGE_NAME = "package_name";
+    field public static final String APP_LINK_KEY_SERVICE_ID = "service_id";
     field public static final int ERROR_BLOCKED = 5; // 0x5
     field public static final int ERROR_ENCRYPTED = 6; // 0x6
     field public static final int ERROR_NONE = 0; // 0x0
@@ -25715,11 +25743,6 @@ package android.media.tv.interactive {
     field public static final int INTERACTIVE_APP_STATE_ERROR = 3; // 0x3
     field public static final int INTERACTIVE_APP_STATE_RUNNING = 2; // 0x2
     field public static final int INTERACTIVE_APP_STATE_STOPPED = 1; // 0x1
-    field public static final String KEY_BACK_URI = "back_uri";
-    field public static final String KEY_CLASS_NAME = "class_name";
-    field public static final String KEY_COMMAND_TYPE = "command_type";
-    field public static final String KEY_PACKAGE_NAME = "package_name";
-    field public static final String KEY_SERVICE_ID = "service_id";
     field public static final int SERVICE_STATE_ERROR = 4; // 0x4
     field public static final int SERVICE_STATE_PREPARING = 2; // 0x2
     field public static final int SERVICE_STATE_READY = 3; // 0x3
@@ -25744,6 +25767,8 @@ package android.media.tv.interactive {
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @Nullable public abstract android.media.tv.interactive.TvInteractiveAppService.Session onCreateSession(@NonNull String, int);
     method public abstract void onPrepare(int);
+    method public void onRegisterAppLinkInfo(@NonNull android.media.tv.interactive.AppLinkInfo);
+    method public void onUnregisterAppLinkInfo(@NonNull android.media.tv.interactive.AppLinkInfo);
     field public static final String COMMAND_PARAMETER_KEY_CHANGE_CHANNEL_QUIETLY = "command_change_channel_quietly";
     field public static final String COMMAND_PARAMETER_KEY_CHANNEL_URI = "command_channel_uri";
     field public static final String COMMAND_PARAMETER_KEY_INPUT_ID = "command_input_id";
