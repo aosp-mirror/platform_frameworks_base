@@ -17,7 +17,9 @@
 package android.inputmethodservice;
 
 import static android.content.Intent.ACTION_OVERLAY_CHANGED;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 
+import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.StatusBarManager;
@@ -40,6 +42,7 @@ import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowInsets;
+import android.view.WindowInsetsController.Appearance;
 import android.view.WindowManagerPolicyConstants;
 import android.widget.FrameLayout;
 
@@ -66,6 +69,9 @@ final class NavigationBarController {
         }
 
         default void onDestroy() {
+        }
+
+        default void onSystemBarAppearanceChanged(@Appearance int appearance) {
         }
 
         default String toDebugString() {
@@ -100,6 +106,10 @@ final class NavigationBarController {
         mImpl.onDestroy();
     }
 
+    void onSystemBarAppearanceChanged(@Appearance int appearance) {
+        mImpl.onSystemBarAppearanceChanged(appearance);
+    }
+
     String toDebugString() {
         return mImpl.toDebugString();
     }
@@ -119,6 +129,9 @@ final class NavigationBarController {
 
         @Nullable
         private BroadcastReceiver mSystemOverlayChangedReceiver;
+
+        @Appearance
+        private int mAppearance;
 
         Impl(@NonNull InputMethodService inputMethodService) {
             mService = inputMethodService;
@@ -187,6 +200,8 @@ final class NavigationBarController {
             }
 
             mNavigationBarFrame.setBackground(null);
+
+            setIconTintInternal(calculateTargetDarkIntensity(mAppearance));
         }
 
         private void uninstallNavigationBarFrameIfNecessary() {
@@ -389,9 +404,41 @@ final class NavigationBarController {
         }
 
         @Override
+        public void onSystemBarAppearanceChanged(@Appearance int appearance) {
+            if (mDestroyed) {
+                return;
+            }
+
+            mAppearance = appearance;
+
+            if (mNavigationBarFrame == null) {
+                return;
+            }
+
+            final float targetDarkIntensity = calculateTargetDarkIntensity(mAppearance);
+            setIconTintInternal(targetDarkIntensity);
+        }
+
+        private void setIconTintInternal(float darkIntensity) {
+            final NavigationBarView navigationBarView =
+                    mNavigationBarFrame.findViewByPredicate(NavigationBarView.class::isInstance);
+            if (navigationBarView == null) {
+                return;
+            }
+            navigationBarView.setDarkIntensity(darkIntensity);
+        }
+
+        @FloatRange(from = 0.0f, to = 1.0f)
+        private static float calculateTargetDarkIntensity(@Appearance int appearance) {
+            final boolean lightNavBar = (appearance & APPEARANCE_LIGHT_NAVIGATION_BARS) != 0;
+            return lightNavBar ? 1.0f : 0.0f;
+        }
+
+        @Override
         public String toDebugString() {
             return "{mRenderGesturalNavButtons=" + mRenderGesturalNavButtons
                     + " mNavigationBarFrame=" + mNavigationBarFrame
+                    + " mAppearance=0x" + Integer.toHexString(mAppearance)
                     + "}";
         }
     }
