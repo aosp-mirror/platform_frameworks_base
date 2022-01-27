@@ -603,7 +603,6 @@ public class AudioService extends IAudioService.Stub
 
     // Devices for which the volume is fixed (volume is either max or muted)
     Set<Integer> mFixedVolumeDevices = new HashSet<>(Arrays.asList(
-            AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET,
             AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET,
             AudioSystem.DEVICE_OUT_AUX_LINE));
     // Devices for which the volume is always max, no volume panel

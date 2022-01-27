@@ -1207,7 +1207,6 @@ public class AudioDeviceInventory {
         BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_WIRED_HEADPHONE);
         BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_HDMI);
         BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET);
-        BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET);
         BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_LINE);
         BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_HEARING_AID);
         BECOMING_NOISY_INTENT_DEVICES_SET.add(AudioSystem.DEVICE_OUT_BLE_HEADSET);
@@ -1375,6 +1374,9 @@ public class AudioDeviceInventory {
             case AudioSystem.DEVICE_OUT_USB_DEVICE:
             case AudioSystem.DEVICE_OUT_USB_HEADSET:
                 connType = AudioRoutesInfo.MAIN_USB;
+                break;
+            case AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET:
+                connType = AudioRoutesInfo.MAIN_DOCK_SPEAKERS;
                 break;
         }
 
