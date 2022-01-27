@@ -489,7 +489,18 @@ public class DreamBackend {
         if (flattenedString.indexOf('/') < 0) {
             flattenedString = serviceInfo.packageName + "/" + flattenedString;
         }
-        return ComponentName.unflattenFromString(flattenedString);
+
+        ComponentName cn = ComponentName.unflattenFromString(flattenedString);
+
+        if (cn == null) return null;
+        if (!cn.getPackageName().equals(serviceInfo.packageName)) {
+            Log.w(TAG,
+                    "Inconsistent package name in component: " + cn.getPackageName()
+                            + ", should be: " + serviceInfo.packageName);
+            return null;
+        }
+
+        return cn;
     }
 
     private static DreamMetadata getDreamMetadata(PackageManager pm, ResolveInfo resolveInfo) {
