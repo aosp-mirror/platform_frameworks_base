@@ -18,6 +18,7 @@ package com.android.server.pm.pkg.mutate;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.overlay.OverlayPaths;
 
@@ -60,4 +61,11 @@ public interface PackageUserStateWrite {
 
     @NonNull
     PackageUserStateWrite setHarmfulAppWarning(@Nullable String warning);
+
+    @NonNull
+    PackageUserStateWrite setSplashScreenTheme(@Nullable String theme);
+
+    @NonNull
+    PackageUserStateWrite setComponentLabelIcon(@NonNull ComponentName componentName,
+            @Nullable String nonLocalizedLabel, @Nullable Integer icon);
 }

@@ -616,98 +616,113 @@ public class ComponentResolver
     }
 
     void dumpActivityResolvers(PrintWriter pw, DumpState dumpState, String packageName) {
-        if (mActivities.dump(pw, dumpState.getTitlePrinted() ? "\nActivity Resolver Table:"
-                : "Activity Resolver Table:", "  ", packageName,
-                dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
-            dumpState.setTitlePrinted(true);
+        synchronized (mLock) {
+            if (mActivities.dump(pw, dumpState.getTitlePrinted() ? "\nActivity Resolver Table:"
+                            : "Activity Resolver Table:", "  ", packageName,
+                    dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
+                dumpState.setTitlePrinted(true);
+            }
         }
     }
 
     void dumpProviderResolvers(PrintWriter pw, DumpState dumpState, String packageName) {
-        if (mProviders.dump(pw, dumpState.getTitlePrinted() ? "\nProvider Resolver Table:"
-                : "Provider Resolver Table:", "  ", packageName,
-                dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
-            dumpState.setTitlePrinted(true);
+        synchronized (mLock) {
+            if (mProviders.dump(pw, dumpState.getTitlePrinted() ? "\nProvider Resolver Table:"
+                            : "Provider Resolver Table:", "  ", packageName,
+                    dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
+                dumpState.setTitlePrinted(true);
+            }
         }
     }
 
     void dumpReceiverResolvers(PrintWriter pw, DumpState dumpState, String packageName) {
-        if (mReceivers.dump(pw, dumpState.getTitlePrinted() ? "\nReceiver Resolver Table:"
-                : "Receiver Resolver Table:", "  ", packageName,
-                dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
-            dumpState.setTitlePrinted(true);
+        synchronized (mLock) {
+            if (mReceivers.dump(pw, dumpState.getTitlePrinted() ? "\nReceiver Resolver Table:"
+                            : "Receiver Resolver Table:", "  ", packageName,
+                    dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
+                dumpState.setTitlePrinted(true);
+            }
         }
     }
 
     void dumpServiceResolvers(PrintWriter pw, DumpState dumpState, String packageName) {
-        if (mServices.dump(pw, dumpState.getTitlePrinted() ? "\nService Resolver Table:"
-                : "Service Resolver Table:", "  ", packageName,
-                dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
-            dumpState.setTitlePrinted(true);
+        synchronized (mLock) {
+            if (mServices.dump(pw, dumpState.getTitlePrinted() ? "\nService Resolver Table:"
+                            : "Service Resolver Table:", "  ", packageName,
+                    dumpState.isOptionEnabled(DumpState.OPTION_SHOW_FILTERS), true)) {
+                dumpState.setTitlePrinted(true);
+            }
         }
     }
 
     void dumpContentProviders(PrintWriter pw, DumpState dumpState, String packageName) {
-        boolean printedSomething = false;
-        for (ParsedProvider p : mProviders.mProviders.values()) {
-            if (packageName != null && !packageName.equals(p.getPackageName())) {
-                continue;
-            }
-            if (!printedSomething) {
-                if (dumpState.onTitlePrinted()) {
-                    pw.println();
+        synchronized (mLock) {
+            boolean printedSomething = false;
+            for (ParsedProvider p : mProviders.mProviders.values()) {
+                if (packageName != null && !packageName.equals(p.getPackageName())) {
+                    continue;
                 }
-                pw.println("Registered ContentProviders:");
-                printedSomething = true;
-            }
-            pw.print("  ");
-            ComponentName.printShortString(pw, p.getPackageName(), p.getName());
-            pw.println(":");
-            pw.print("    ");
-            pw.println(p.toString());
-        }
-        printedSomething = false;
-        for (Map.Entry<String, ParsedProvider> entry :
-                mProvidersByAuthority.entrySet()) {
-            ParsedProvider p = entry.getValue();
-            if (packageName != null && !packageName.equals(p.getPackageName())) {
-                continue;
-            }
-            if (!printedSomething) {
-                if (dumpState.onTitlePrinted()) {
-                    pw.println();
+                if (!printedSomething) {
+                    if (dumpState.onTitlePrinted()) {
+                        pw.println();
+                    }
+                    pw.println("Registered ContentProviders:");
+                    printedSomething = true;
                 }
-                pw.println("ContentProvider Authorities:");
-                printedSomething = true;
+                pw.print("  ");
+                ComponentName.printShortString(pw, p.getPackageName(), p.getName());
+                pw.println(":");
+                pw.print("    ");
+                pw.println(p.toString());
             }
-            pw.print("  ["); pw.print(entry.getKey()); pw.println("]:");
-            pw.print("    "); pw.println(p.toString());
+            printedSomething = false;
+            for (Map.Entry<String, ParsedProvider> entry :
+                    mProvidersByAuthority.entrySet()) {
+                ParsedProvider p = entry.getValue();
+                if (packageName != null && !packageName.equals(p.getPackageName())) {
+                    continue;
+                }
+                if (!printedSomething) {
+                    if (dumpState.onTitlePrinted()) {
+                        pw.println();
+                    }
+                    pw.println("ContentProvider Authorities:");
+                    printedSomething = true;
+                }
+                pw.print("  [");
+                pw.print(entry.getKey());
+                pw.println("]:");
+                pw.print("    ");
+                pw.println(p.toString());
 
-            AndroidPackage pkg = sPackageManagerInternal.getPackage(p.getPackageName());
+                AndroidPackage pkg = sPackageManagerInternal.getPackage(p.getPackageName());
 
-            if (pkg != null) {
-                pw.print("      applicationInfo=");
-                pw.println(AndroidPackageUtils.generateAppInfoWithoutState(pkg));
+                if (pkg != null) {
+                    pw.print("      applicationInfo=");
+                    pw.println(AndroidPackageUtils.generateAppInfoWithoutState(pkg));
+                }
             }
         }
     }
 
     void dumpServicePermissions(PrintWriter pw, DumpState dumpState) {
-        if (dumpState.onTitlePrinted()) pw.println();
-        pw.println("Service permissions:");
+        synchronized (mLock) {
+            if (dumpState.onTitlePrinted()) pw.println();
+            pw.println("Service permissions:");
 
-        final Iterator<Pair<ParsedService, ParsedIntentInfo>> filterIterator =
-                mServices.filterIterator();
-        while (filterIterator.hasNext()) {
-            final Pair<ParsedService, ParsedIntentInfo> pair = filterIterator.next();
-            ParsedService service = pair.first;
+            final Iterator<Pair<ParsedService, ParsedIntentInfo>> filterIterator =
+                    mServices.filterIterator();
+            while (filterIterator.hasNext()) {
+                final Pair<ParsedService, ParsedIntentInfo> pair = filterIterator.next();
+                ParsedService service = pair.first;
 
-            final String permission = service.getPermission();
-            if (permission != null) {
-                pw.print("    ");
-                pw.print(service.getComponentName().flattenToShortString());
-                pw.print(": ");
-                pw.println(permission);
+                final String permission = service.getPermission();
+                if (permission != null) {
+                    pw.print("    ");
+                    pw.print(service.getComponentName().flattenToShortString());
+                    pw.print(": ");
+                    pw.println(permission);
+                }
             }
         }
     }

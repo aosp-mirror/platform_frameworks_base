@@ -169,24 +169,6 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
             mSettingsMap.putAll(mPreExistingSettings)
             !mPreExistingSettings.isEmpty()
         }
-        whenever(mocks.settings.setPackageStoppedStateLPw(any(), any(), anyBoolean(), anyInt())) {
-            val pm: PackageManagerService = getArgument(0)
-            val pkgSetting = mSettingsMap[getArgument(1)]!!
-            val stopped: Boolean = getArgument(2)
-            val userId: Int = getArgument(3)
-            return@whenever if (pkgSetting.getStopped(userId) != stopped) {
-                pkgSetting.setStopped(stopped, userId)
-                if (pkgSetting.getNotLaunched(userId)) {
-                    pkgSetting.installSource.installerPackageName?.let {
-                        pm.notifyFirstLaunch(pkgSetting.packageName, it, userId)
-                    }
-                    pkgSetting.setNotLaunched(false, userId)
-                }
-                true
-            } else {
-                false
-            }
-        }
     }
 
     /** Collection of mocks used for PackageManagerService tests. */
@@ -210,7 +192,9 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         val packageParser: PackageParser2 = mock()
         val keySetManagerService: KeySetManagerService = mock()
         val packageAbiHelper: PackageAbiHelper = mock()
-        val appsFilter: AppsFilter = mock()
+        val appsFilter: AppsFilter = mock {
+            whenever(snapshot()) { this@mock }
+        }
         val dexManager: DexManager = mock()
         val installer: Installer = mock()
         val displayMetrics: DisplayMetrics = mock()

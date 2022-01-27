@@ -102,9 +102,7 @@ final class PreferredActivityHelper {
             if (DEBUG_PREFERRED) {
                 Slog.v(TAG, "Preferred activity bookkeeping changed; writing restrictions");
             }
-            synchronized (mPm.mLock) {
-                mPm.scheduleWritePackageRestrictionsLocked(userId);
-            }
+            mPm.scheduleWritePackageRestrictions(userId);
         }
         if ((DEBUG_PREFERRED || debug) && body.mPreferredResolveInfo == null) {
             Slog.v(TAG, "No preferred activity to return");
@@ -121,9 +119,7 @@ final class PreferredActivityHelper {
         if (changedUsers.size() > 0) {
             updateDefaultHomeNotLocked(changedUsers);
             mPm.postPreferredActivityChangedBroadcast(userId);
-            synchronized (mPm.mLock) {
-                mPm.scheduleWritePackageRestrictionsLocked(userId);
-            }
+            mPm.scheduleWritePackageRestrictions(userId);
         }
     }
 
@@ -214,7 +210,7 @@ final class PreferredActivityHelper {
                 Settings.removeFilters(pir, filter, existing);
             }
             pir.addFilter(new PreferredActivity(filter, match, set, activity, always));
-            mPm.scheduleWritePackageRestrictionsLocked(userId);
+            mPm.scheduleWritePackageRestrictions(userId);
         }
         if (!(isHomeFilter(filter) && updateDefaultHomeNotLocked(userId))) {
             mPm.postPreferredActivityChangedBroadcast(userId);
@@ -399,7 +395,7 @@ final class PreferredActivityHelper {
         synchronized (mPm.mLock) {
             mPm.mSettings.editPersistentPreferredActivitiesLPw(userId).addFilter(
                     new PersistentPreferredActivity(filter, activity, true));
-            mPm.scheduleWritePackageRestrictionsLocked(userId);
+            mPm.scheduleWritePackageRestrictions(userId);
         }
         if (isHomeFilter(filter)) {
             updateDefaultHomeNotLocked(userId);
@@ -420,9 +416,7 @@ final class PreferredActivityHelper {
         if (changed) {
             updateDefaultHomeNotLocked(userId);
             mPm.postPreferredActivityChangedBroadcast(userId);
-            synchronized (mPm.mLock) {
-                mPm.scheduleWritePackageRestrictionsLocked(userId);
-            }
+            mPm.scheduleWritePackageRestrictions(userId);
         }
     }
 
@@ -603,9 +597,7 @@ final class PreferredActivityHelper {
             }
             updateDefaultHomeNotLocked(userId);
             resetNetworkPolicies(userId);
-            synchronized (mPm.mLock) {
-                mPm.scheduleWritePackageRestrictionsLocked(userId);
-            }
+            mPm.scheduleWritePackageRestrictions(userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

@@ -68,10 +68,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 /**
  * Settings data for a particular package we know about.
+ *
  * @hide
  */
 @DataClass(genGetters = true, genConstructor = false, genSetters = false, genBuilder = false)
@@ -189,7 +189,7 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     private boolean forceQueryableOverride;
 
     @NonNull
-    private PackageStateUnserialized pkgState = new PackageStateUnserialized();
+    private final PackageStateUnserialized pkgState = new PackageStateUnserialized(this);
 
     @NonNull
     private UUID mDomainSetId;
@@ -722,10 +722,6 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return readUserState(userId).getEnabledState();
     }
 
-    String getLastDisabledAppCaller(int userId) {
-        return readUserState(userId).getLastDisableAppCaller();
-    }
-
     void setInstalled(boolean inst, int userId) {
         modifyUserState(userId).setInstalled(inst);
         onChanged();
@@ -753,14 +749,6 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         onChanged();
     }
 
-    boolean setOverlayPaths(OverlayPaths overlayPaths, int userId) {
-        boolean changed = modifyUserState(userId).setOverlayPaths(overlayPaths);
-        if (changed) {
-            onChanged();
-        }
-        return changed;
-    }
-
     @NonNull
     OverlayPaths getOverlayPaths(int userId) {
         return readUserState(userId).getOverlayPaths();
@@ -771,11 +759,6 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
                 .setSharedLibraryOverlayPaths(libName, overlayPaths);
         onChanged();
         return changed;
-    }
-
-    @NonNull
-    Map<String, OverlayPaths> getOverlayPathsForLibrary(int userId) {
-        return readUserState(userId).getSharedLibraryOverlayPaths();
     }
 
     boolean isAnyInstalled(int[] users) {
@@ -847,55 +830,6 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
 
     void setDistractionFlags(int distractionFlags, int userId) {
         modifyUserState(userId).setDistractionFlags(distractionFlags);
-        onChanged();
-    }
-
-    boolean getSuspended(int userId) {
-        return readUserState(userId).isSuspended();
-    }
-
-    boolean addOrUpdateSuspension(String suspendingPackage, SuspendDialogInfo dialogInfo,
-            PersistableBundle appExtras, PersistableBundle launcherExtras, int userId) {
-        final PackageUserStateImpl existingUserState = modifyUserState(userId);
-        final SuspendParams newSuspendParams = SuspendParams.getInstanceOrNull(dialogInfo,
-                appExtras, launcherExtras);
-        if (existingUserState.getSuspendParams() == null) {
-            existingUserState.setSuspendParams(new ArrayMap<>());
-        }
-        final SuspendParams oldSuspendParams =
-                existingUserState.getSuspendParams().put(suspendingPackage, newSuspendParams);
-        onChanged();
-        return !Objects.equals(oldSuspendParams, newSuspendParams);
-    }
-
-    boolean removeSuspension(String suspendingPackage, int userId) {
-        boolean wasModified = false;
-        final PackageUserStateImpl existingUserState = modifyUserState(userId);
-        if (existingUserState.getSuspendParams() != null) {
-            if (existingUserState.getSuspendParams().remove(suspendingPackage) != null) {
-                wasModified = true;
-            }
-            if (existingUserState.getSuspendParams().size() == 0) {
-                existingUserState.setSuspendParams(null);
-            }
-        }
-        onChanged();
-        return wasModified;
-    }
-
-    void removeSuspension(Predicate<String> suspendingPackagePredicate, int userId) {
-        final PackageUserStateImpl existingUserState = modifyUserState(userId);
-        if (existingUserState.getSuspendParams() != null) {
-            for (int i = existingUserState.getSuspendParams().size() - 1; i >= 0; i--) {
-                final String suspendingPackage = existingUserState.getSuspendParams().keyAt(i);
-                if (suspendingPackagePredicate.test(suspendingPackage)) {
-                    existingUserState.getSuspendParams().removeAt(i);
-                }
-            }
-            if (existingUserState.getSuspendParams().size() == 0) {
-                existingUserState.setSuspendParams(null);
-            }
-        }
         onChanged();
     }
 
@@ -1095,8 +1029,8 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     }
 
     /**
-     * TODO (b/170263003) refactor to dump to permissiongr proto
-     * Dumps the permissions that are granted to users for this package.
+     * TODO (b/170263003) refactor to dump to permissiongr proto Dumps the permissions that are
+     * granted to users for this package.
      */
     void writePackageUserPermissionsProto(ProtoOutputStream proto, long fieldId,
             List<UserInfo> users, LegacyPermissionDataProvider dataProvider) {
@@ -1154,16 +1088,6 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         }
     }
 
-    void setHarmfulAppWarning(int userId, String harmfulAppWarning) {
-        modifyUserState(userId).setHarmfulAppWarning(harmfulAppWarning);
-        onChanged();
-    }
-
-    String getHarmfulAppWarning(int userId) {
-        PackageUserState userState = readUserState(userId);
-        return userState.getHarmfulAppWarning();
-    }
-
     /**
      * @see #mPath
      */
@@ -1175,9 +1099,8 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     }
 
     /**
-     * @see PackageUserStateImpl#overrideLabelAndIcon(ComponentName, String, Integer)
-     *
      * @param userId the specific user to change the label/icon for
+     * @see PackageUserStateImpl#overrideLabelAndIcon(ComponentName, String, Integer)
      */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public boolean overrideNonLocalizedLabelAndIcon(@NonNull ComponentName component,
@@ -1188,9 +1111,8 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     }
 
     /**
-     * @see PackageUserStateImpl#resetOverrideComponentLabelIcon()
-     *
      * @param userId the specific user to reset
+     * @see PackageUserStateImpl#resetOverrideComponentLabelIcon()
      */
     public void resetOverrideComponentLabelIcon(@UserIdInt int userId) {
         modifyUserState(userId).resetOverrideComponentLabelIcon();
@@ -1198,19 +1120,9 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     }
 
     /**
-     * @param userId    the specified user to modify the theme for
-     * @param themeName the theme name to persist
-     * @see android.window.SplashScreen#setSplashScreenTheme(int)
-     */
-    public void setSplashScreenTheme(@UserIdInt int userId, @Nullable String themeName) {
-        modifyUserState(userId).setSplashScreenTheme(themeName);
-        onChanged();
-    }
-
-    /**
      * @param userId the specified user to get the theme setting from
-     * @return the theme name previously persisted for the user or null
-     * if no splashscreen theme is persisted.
+     * @return the theme name previously persisted for the user or null if no splashscreen theme is
+     * persisted.
      * @see android.window.SplashScreen#setSplashScreenTheme(int)
      */
     @Nullable

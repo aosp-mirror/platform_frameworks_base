@@ -57,6 +57,7 @@ public final class PackageManagerServiceTestParams {
     public IncrementalManager incrementalManager;
     public PackageInstallerService installerService;
     public InstantAppRegistry instantAppRegistry;
+    public ChangedPackagesTracker changedPackagesTracker = new ChangedPackagesTracker();
     public InstantAppResolverConnection instantAppResolverConnection;
     public ComponentName instantAppResolverSettingsComponent;
     public boolean isPreNmr1Upgrade;

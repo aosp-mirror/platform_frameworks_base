@@ -347,7 +347,7 @@ final class InstallPackageHelper {
         commitPackageSettings(pkg, oldPkg, pkgSetting, oldPkgSetting, scanFlags,
                 (parseFlags & ParsingPackageUtils.PARSE_CHATTY) != 0 /*chatty*/, reconciledPkg);
         if (pkgSetting.getInstantApp(userId)) {
-            mPm.mInstantAppRegistry.addInstantAppLPw(userId, pkgSetting.getAppId());
+            mPm.mInstantAppRegistry.addInstantApp(userId, pkgSetting.getAppId());
         }
 
         if (!IncrementalManager.isIncrementalPath(pkgSetting.getPathString())) {
@@ -2614,9 +2614,7 @@ final class InstallPackageHelper {
                                     ? res.mRemovedInfo.mInstallerPackageName
                                     : null;
 
-            synchronized (mPm.mLock) {
-                mPm.mInstantAppRegistry.onPackageInstalledLPw(res.mPkg, res.mNewUsers);
-            }
+            mPm.notifyInstantAppPackageInstalled(res.mPkg.getPackageName(), res.mNewUsers);
 
             // Determine the set of users who are adding this package for
             // the first time vs. those who are seeing an update.

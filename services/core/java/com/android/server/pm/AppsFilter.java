@@ -1237,21 +1237,25 @@ public class AppsFilter implements Watchable, Snappable {
             // NOTE: this must come after all removals from data structures but before we update the
             //       cache
             if (setting.getSharedUser() != null) {
-                for (int i = setting.getSharedUser().packages.size() - 1; i >= 0; i--) {
-                    if (setting.getSharedUser().packages.valueAt(i) == setting) {
+                final ArraySet<? extends PackageStateInternal> sharedUserPackages =
+                        setting.getSharedUser().getPackageStates();
+                for (int i = sharedUserPackages.size() - 1; i >= 0; i--) {
+                    if (sharedUserPackages.valueAt(i) == setting) {
                         continue;
                     }
                     addPackageInternal(
-                            setting.getSharedUser().packages.valueAt(i), settings);
+                            sharedUserPackages.valueAt(i), settings);
                 }
             }
 
             synchronized (mCacheLock) {
                 removeAppIdFromVisibilityCache(setting.getAppId());
                 if (mShouldFilterCache != null && setting.getSharedUser() != null) {
-                    for (int i = setting.getSharedUser().packages.size() - 1; i >= 0; i--) {
+                    final ArraySet<? extends PackageStateInternal> sharedUserPackages =
+                            setting.getSharedUser().getPackageStates();
+                    for (int i = sharedUserPackages.size() - 1; i >= 0; i--) {
                         PackageStateInternal siblingSetting =
-                                setting.getSharedUser().packages.valueAt(i);
+                                sharedUserPackages.valueAt(i);
                         if (siblingSetting == setting) {
                             continue;
                         }
@@ -1368,8 +1372,8 @@ public class AppsFilter implements Watchable, Snappable {
                     callingSharedPkgSettings = null;
                 } else {
                     callingPkgSetting = null;
-                    callingSharedPkgSettings =
-                            ((PackageStateInternal) callingSetting).getSharedUser().packages;
+                    callingSharedPkgSettings = ((PackageStateInternal) callingSetting)
+                            .getSharedUser().getPackageStates();
                 }
             } else {
                 callingPkgSetting = null;

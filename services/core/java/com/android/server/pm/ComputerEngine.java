@@ -133,9 +133,9 @@ import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateImpl;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageStateUtils;
-import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
 import com.android.server.pm.pkg.PackageUserStateUtils;
+import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.pkg.component.ParsedInstrumentation;
 import com.android.server.pm.pkg.component.ParsedIntentInfo;
@@ -297,11 +297,6 @@ public class ComputerEngine implements Computer {
         @NonNull
         public Collection<SharedUserSetting> getAllSharedUsers() {
             return mSettings.getAllSharedUsersLPw();
-        }
-
-        @Nullable
-        public String getHarmfulAppWarning(@NonNull String packageName, @UserIdInt int userId) {
-            return mSettings.getHarmfulAppWarningLPr(packageName, userId);
         }
     }
 
@@ -829,7 +824,7 @@ public class ComputerEngine implements Computer {
     }
 
     public AndroidPackage getPackage(String packageName) {
-        packageName = resolveInternalPackageNameLPr(
+        packageName = resolveInternalPackageName(
                 packageName, PackageManager.VERSION_CODE_HIGHEST);
         return mPackages.get(packageName);
     }
@@ -903,7 +898,7 @@ public class ComputerEngine implements Computer {
             int filterCallingUid, int userId) {
         // writer
         // Normalize package name to handle renamed packages and static libs
-        packageName = resolveInternalPackageNameLPr(packageName,
+        packageName = resolveInternalPackageName(packageName,
                 PackageManager.VERSION_CODE_HIGHEST);
 
         AndroidPackage p = mPackages.get(packageName);
@@ -1575,7 +1570,7 @@ public class ComputerEngine implements Computer {
             PackageInfo pi = new PackageInfo();
             pi.packageName = ps.getPackageName();
             pi.setLongVersionCode(ps.getVersionCode());
-            pi.sharedUserId = (ps.getSharedUser() != null) ? ps.getSharedUser().name : null;
+            pi.sharedUserId = (ps.getSharedUser() != null) ? ps.getSharedUser().getName() : null;
             pi.firstInstallTime = state.getFirstInstallTime();
             pi.lastUpdateTime = ps.getLastUpdateTime();
 
@@ -1627,7 +1622,7 @@ public class ComputerEngine implements Computer {
             long flags, int filterCallingUid, int userId) {
         // reader
         // Normalize package name to handle renamed packages and static libs
-        packageName = resolveInternalPackageNameLPr(packageName, versionCode);
+        packageName = resolveInternalPackageName(packageName, versionCode);
 
         final boolean matchFactoryOnly = (flags & MATCH_FACTORY_ONLY) != 0;
         if (matchFactoryOnly) {
@@ -2111,7 +2106,7 @@ public class ComputerEngine implements Computer {
         return packageName;
     }
 
-    public final String resolveInternalPackageNameLPr(String packageName, long versionCode) {
+    public final String resolveInternalPackageName(String packageName, long versionCode) {
         final int callingUid = Binder.getCallingUid();
         return resolveInternalPackageNameInternalLocked(packageName, versionCode,
                 callingUid);
@@ -3489,7 +3484,9 @@ public class ComputerEngine implements Computer {
         return mSettings.getRenamedPackageLPr(packageName);
     }
 
-    private WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>
+    @NonNull
+    @Override
+    public WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>
             getSharedLibraries() {
         return mSharedLibraries.getAll();
     }
@@ -4070,10 +4067,13 @@ public class ComputerEngine implements Computer {
     }
 
     @Override
-    public boolean isPackageStateAvailableAndVisible(@NonNull String packageName, int callingUid,
+    public PackageStateInternal getPackageStateFiltered(@NonNull String packageName, int callingUid,
             @UserIdInt int userId) {
-        final PackageStateInternal ps = getPackageStateInternal(packageName);
-        return ps != null && !shouldFilterApplication(ps, callingUid, userId);
+        final PackageStateInternal packageState = getPackageStateInternal(packageName);
+        if (packageState == null || shouldFilterApplication(packageState, callingUid, userId)) {
+            return null;
+        }
+        return packageState;
     }
 
     @Override
@@ -4576,9 +4576,9 @@ public class ComputerEngine implements Computer {
             }
         } else {
             list = new ArrayList<>(mPackages.size());
-            for (AndroidPackage p : mPackages.values()) {
-                final PackageStateInternal packageState = packageStates.get(p.getPackageName());
-                if (packageState == null) {
+            for (PackageStateInternal packageState : packageStates.values()) {
+                final AndroidPackage pkg = packageState.getPkg();
+                if (pkg == null) {
                     continue;
                 }
                 if (filterSharedLibPackage(packageState, Binder.getCallingUid(), userId, flags)) {
@@ -4587,10 +4587,10 @@ public class ComputerEngine implements Computer {
                 if (shouldFilterApplication(packageState, callingUid, userId)) {
                     continue;
                 }
-                ApplicationInfo ai = PackageInfoUtils.generateApplicationInfo(p, flags,
+                ApplicationInfo ai = PackageInfoUtils.generateApplicationInfo(pkg, flags,
                         packageState.getUserStateOrDefault(userId), userId, packageState);
                 if (ai != null) {
-                    ai.packageName = resolveExternalPackageName(p);
+                    ai.packageName = resolveExternalPackageName(pkg);
                     list.add(ai);
                 }
             }
@@ -5421,13 +5421,14 @@ public class ComputerEngine implements Computer {
             return EmptyArray.STRING;
         }
 
-        ArraySet<PackageSetting> packages = packageSetting.getSharedUser().packages;
+        ArraySet<? extends PackageStateInternal> packages =
+                packageSetting.getSharedUser().getPackageStates();
         final int numPackages = packages.size();
         String[] res = new String[numPackages];
         int i = 0;
         for (int index = 0; index < numPackages; index++) {
-            final PackageSetting ps = packages.valueAt(index);
-            if (ps.getInstalled(userId)) {
+            final PackageStateInternal ps = packages.valueAt(index);
+            if (ps.getUserStateOrDefault(userId).isInstalled()) {
                 res[i++] = ps.getPackageName();
             }
         }
@@ -5476,7 +5477,11 @@ public class ComputerEngine implements Computer {
                     + SET_HARMFUL_APP_WARNINGS + " permission.");
         }
 
-        return mSettings.getHarmfulAppWarning(packageName, userId);
+        final PackageStateInternal packageState = getPackageStateInternal(packageName);
+        if (packageState == null) {
+            throw new IllegalArgumentException("Unknown package: " + packageName);
+        }
+        return packageState.getUserStateOrDefault(userId).getHarmfulAppWarning();
     }
 
     /**
@@ -5570,5 +5575,23 @@ public class ComputerEngine implements Computer {
             return PackageInfoUtils.generateProcessInfo(ps.getPkg().getProcesses(), 0);
         }
         return null;
+    }
+
+    @Override
+    public boolean getBlockUninstall(@UserIdInt int userId, @NonNull String packageName) {
+        return mSettings.getBlockUninstall(userId, packageName);
+    }
+
+    @Nullable
+    @Override
+    public Pair<PackageStateInternal, SharedUserApi> getPackageOrSharedUser(int appId) {
+        final SettingBase settingBase = mSettings.getSettingBase(appId);
+        if (settingBase instanceof SharedUserSetting) {
+            return Pair.create(null, (SharedUserApi) settingBase);
+        } else if (settingBase instanceof PackageSetting) {
+            return Pair.create((PackageStateInternal) settingBase, null);
+        } else {
+            return null;
+        }
     }
 }
