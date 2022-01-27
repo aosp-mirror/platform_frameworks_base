@@ -3872,6 +3872,11 @@
     <!-- Message of notification shown when serial console is enabled. [CHAR LIMIT=NONE] -->
     <string name="console_running_notification_message">Performance is impacted. To disable, check bootloader.</string>
 
+    <!-- Title of notification shown when MTE status override is enabled. [CHAR LIMIT=NONE] -->
+    <string name="mte_override_notification_title">Experimental MTE enabled</string>
+    <!-- Message of notification shown when MTE status override is enabled. [CHAR LIMIT=NONE] -->
+    <string name="mte_override_notification_message">Performance and stability might be impacted. Reboot to disable. If enabled using arm64.memtag.bootctl, set it to "none" beforehand.</string>
+
     <!-- Title of notification shown when contaminant is detected on the USB port. [CHAR LIMIT=NONE] -->
     <string name="usb_contaminant_detected_title">Liquid or debris in USB port</string>
     <!-- Message of notification shown when contaminant is detected on the USB port. [CHAR LIMIT=NONE] -->

@@ -2080,6 +2080,8 @@
   <java-symbol type="string" name="test_harness_mode_notification_message" />
   <java-symbol type="string" name="console_running_notification_title" />
   <java-symbol type="string" name="console_running_notification_message" />
+  <java-symbol type="string" name="mte_override_notification_title" />
+  <java-symbol type="string" name="mte_override_notification_message" />
   <java-symbol type="string" name="taking_remote_bugreport_notification_title" />
   <java-symbol type="string" name="share_remote_bugreport_notification_title" />
   <java-symbol type="string" name="sharing_remote_bugreport_notification_title" />

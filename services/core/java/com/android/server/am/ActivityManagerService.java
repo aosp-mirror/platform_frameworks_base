@@ -5014,6 +5014,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         // UART is on if init's console service is running, send a warning notification.
         showConsoleNotificationIfActive();
+        showMteOverrideNotificationIfActive();
 
         t.traceEnd();
     }
@@ -5046,6 +5047,35 @@ public class ActivityManagerService extends IActivityManager.Stub
         notificationManager.notifyAsUser(
                 null, SystemMessage.NOTE_SERIAL_CONSOLE_ENABLED, notification, UserHandle.ALL);
 
+    }
+
+    private void showMteOverrideNotificationIfActive() {
+        if (!SystemProperties.getBoolean("ro.arm64.memtag.bootctl_supported", false)
+            || !com.android.internal.os.Zygote.nativeSupportsMemoryTagging()) {
+            return;
+        }
+        String title = mContext
+                .getString(com.android.internal.R.string.mte_override_notification_title);
+        String message = mContext
+                .getString(com.android.internal.R.string.mte_override_notification_message);
+        Notification notification =
+                new Notification.Builder(mContext, SystemNotificationChannels.DEVELOPER)
+                        .setSmallIcon(com.android.internal.R.drawable.stat_sys_adb)
+                        .setOngoing(true)
+                        .setTicker(title)
+                        .setDefaults(0)  // please be quiet
+                        .setColor(mContext.getColor(
+                                com.android.internal.R.color
+                                        .system_notification_accent_color))
+                        .setContentTitle(title)
+                        .setContentText(message)
+                        .setVisibility(Notification.VISIBILITY_PUBLIC)
+                        .build();
+
+        NotificationManager notificationManager =
+                mContext.getSystemService(NotificationManager.class);
+        notificationManager.notifyAsUser(
+                null, SystemMessage.NOTE_MTE_OVERRIDE_ENABLED, notification, UserHandle.ALL);
     }
 
     @Override
