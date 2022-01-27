@@ -15,6 +15,7 @@
  */
 package com.android.internal.os;
 
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 
 /**
@@ -30,6 +31,12 @@ public class MediaPowerCalculator extends PowerCalculator {
     public MediaPowerCalculator(PowerProfile profile) {
         mAudioAveragePowerMa = profile.getAveragePower(PowerProfile.POWER_AUDIO);
         mVideoAveragePowerMa = profile.getAveragePower(PowerProfile.POWER_VIDEO);
+    }
+
+    @Override
+    public boolean isPowerComponentSupported(@BatteryConsumer.PowerComponent int powerComponent) {
+        return powerComponent == BatteryConsumer.POWER_COMPONENT_VIDEO
+                || powerComponent == BatteryConsumer.POWER_COMPONENT_AUDIO;
     }
 
     @Override
