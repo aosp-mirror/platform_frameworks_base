@@ -48,7 +48,6 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Annotation.NetworkType;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
@@ -59,9 +58,7 @@ import com.android.net.module.util.NetworkStatsUtils;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -703,7 +700,8 @@ public final class NetworkTemplate implements Parcelable {
 
     private boolean matchesCollapsedRatType(NetworkIdentity ident) {
         return mRatType == NETWORK_TYPE_ALL
-                || getCollapsedRatType(mRatType) == getCollapsedRatType(ident.mRatType);
+                || NetworkStatsManager.getCollapsedRatType(mRatType)
+                == NetworkStatsManager.getCollapsedRatType(ident.mRatType);
     }
 
     /**
@@ -744,86 +742,6 @@ public final class NetworkTemplate implements Parcelable {
                     && CollectionUtils.contains(mMatchSubscriberIds, ident.mSubscriberId)
                     && matchesCollapsedRatType(ident);
         }
-    }
-
-    /**
-     * Get a Radio Access Technology(RAT) type that is representative of a group of RAT types.
-     * The mapping is corresponding to {@code TelephonyManager#NETWORK_CLASS_BIT_MASK_*}.
-     *
-     * @param ratType An integer defined in {@code TelephonyManager#NETWORK_TYPE_*}.
-     *
-     * @hide
-     */
-    // TODO: 1. Consider move this to TelephonyManager if used by other modules.
-    //       2. Consider make this configurable.
-    //       3. Use TelephonyManager APIs when available.
-    // TODO: @SystemApi when ready.
-    public static int getCollapsedRatType(int ratType) {
-        switch (ratType) {
-            case TelephonyManager.NETWORK_TYPE_GPRS:
-            case TelephonyManager.NETWORK_TYPE_GSM:
-            case TelephonyManager.NETWORK_TYPE_EDGE:
-            case TelephonyManager.NETWORK_TYPE_IDEN:
-            case TelephonyManager.NETWORK_TYPE_CDMA:
-            case TelephonyManager.NETWORK_TYPE_1xRTT:
-                return TelephonyManager.NETWORK_TYPE_GSM;
-            case TelephonyManager.NETWORK_TYPE_EVDO_0:
-            case TelephonyManager.NETWORK_TYPE_EVDO_A:
-            case TelephonyManager.NETWORK_TYPE_EVDO_B:
-            case TelephonyManager.NETWORK_TYPE_EHRPD:
-            case TelephonyManager.NETWORK_TYPE_UMTS:
-            case TelephonyManager.NETWORK_TYPE_HSDPA:
-            case TelephonyManager.NETWORK_TYPE_HSUPA:
-            case TelephonyManager.NETWORK_TYPE_HSPA:
-            case TelephonyManager.NETWORK_TYPE_HSPAP:
-            case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
-                return TelephonyManager.NETWORK_TYPE_UMTS;
-            case TelephonyManager.NETWORK_TYPE_LTE:
-            case TelephonyManager.NETWORK_TYPE_IWLAN:
-                return TelephonyManager.NETWORK_TYPE_LTE;
-            case TelephonyManager.NETWORK_TYPE_NR:
-                return TelephonyManager.NETWORK_TYPE_NR;
-            // Virtual RAT type for 5G NSA mode, see
-            // {@link NetworkStatsManager#NETWORK_TYPE_5G_NSA}.
-            case NetworkStatsManager.NETWORK_TYPE_5G_NSA:
-                return NetworkStatsManager.NETWORK_TYPE_5G_NSA;
-            default:
-                return TelephonyManager.NETWORK_TYPE_UNKNOWN;
-        }
-    }
-
-    /**
-     * Return all supported collapsed RAT types that could be returned by
-     * {@link #getCollapsedRatType(int)}.
-     *
-     * @hide
-     */
-    // TODO: @SystemApi when ready.
-    @NonNull
-    public static final int[] getAllCollapsedRatTypes() {
-        final int[] ratTypes = TelephonyManager.getAllNetworkTypes();
-        final HashSet<Integer> collapsedRatTypes = new HashSet<>();
-        for (final int ratType : ratTypes) {
-            collapsedRatTypes.add(NetworkTemplate.getCollapsedRatType(ratType));
-        }
-        // Add NETWORK_TYPE_5G_NSA to the returned list since 5G NSA is a virtual RAT type and
-        // it is not in TelephonyManager#NETWORK_TYPE_* constants.
-        // See {@link NetworkStatsManager#NETWORK_TYPE_5G_NSA}.
-        collapsedRatTypes.add(
-                NetworkTemplate.getCollapsedRatType(NetworkStatsManager.NETWORK_TYPE_5G_NSA));
-        // Ensure that unknown type is returned.
-        collapsedRatTypes.add(TelephonyManager.NETWORK_TYPE_UNKNOWN);
-        return toIntArray(collapsedRatTypes);
-    }
-
-    @NonNull
-    private static int[] toIntArray(@NonNull Collection<Integer> list) {
-        final int[] array = new int[list.size()];
-        int i = 0;
-        for (final Integer item : list) {
-            array[i++] = item;
-        }
-        return array;
     }
 
     /**
