@@ -3517,6 +3517,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                   1              PFLAG4_DETACHED
      *                  1               PFLAG4_HAS_TRANSLATION_TRANSIENT_STATE
      *                 1                PFLAG4_DRAG_A11Y_STARTED
+     *                1                 PFLAG4_AUTO_HANDWRITING_INITIATION_ENABLED
      * |-------|-------|-------|-------|
      */
 
@@ -3593,6 +3594,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private static final int PFLAG4_DRAG_A11Y_STARTED = 0x000008000;
 
+    /**
+     * Indicates that the view enables auto handwriting initiation.
+     */
+    private static final int PFLAG4_AUTO_HANDWRITING_ENABLED = 0x000010000;
     /* End of masks for mPrivateFlags4 */
 
     /** @hide */
@@ -5321,6 +5326,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 (TEXT_ALIGNMENT_DEFAULT << PFLAG2_TEXT_ALIGNMENT_MASK_SHIFT) |
                 (PFLAG2_TEXT_ALIGNMENT_RESOLVED_DEFAULT) |
                 (IMPORTANT_FOR_ACCESSIBILITY_DEFAULT << PFLAG2_IMPORTANT_FOR_ACCESSIBILITY_SHIFT);
+        mPrivateFlags4 = PFLAG4_AUTO_HANDWRITING_ENABLED;
 
         final ViewConfiguration configuration = ViewConfiguration.get(context);
         mTouchSlop = configuration.getScaledTouchSlop();
@@ -6033,6 +6039,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 case R.styleable.View_preferKeepClear:
                     setPreferKeepClear(a.getBoolean(attr, false));
+                    break;
+                case R.styleable.View_autoHandwritingEnabled:
+                    setAutoHandwritingEnabled(a.getBoolean(attr, true));
                     break;
             }
         }
@@ -31115,6 +31124,42 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             mPrivateFlags4 &= ~PFLAG4_DETACHED;
         }
+    }
+
+    /**
+     * Set whether this view enables automatic handwriting initiation.
+     *
+     * For a view with an active {@link InputConnection}, if auto handwriting is enabled then
+     * stylus movement within its view boundary will automatically trigger the handwriting mode.
+     * Check {@link android.view.inputmethod.InputMethodManager#startStylusHandwriting(View)} for
+     * more details about handwriting mode.
+     *
+     * If the View wants to initiate handwriting mode by itself, it can set this field to
+     * {@code false} and call
+     * {@link android.view.inputmethod.InputMethodManager#startStylusHandwriting(View)} when there
+     * is stylus movement detected.
+     *
+     * @see #onCreateInputConnection(EditorInfo)
+     * @see android.view.inputmethod.InputMethodManager#startStylusHandwriting(View)
+     * @param enabled whether auto handwriting initiation is enabled for this view.
+     * @attr ref android.R.styleable#View_autoHandwritingEnabled
+     */
+    public void setAutoHandwritingEnabled(boolean enabled) {
+        if (enabled) {
+            mPrivateFlags4 |= PFLAG4_AUTO_HANDWRITING_ENABLED;
+        } else {
+            mPrivateFlags4 &= ~PFLAG4_AUTO_HANDWRITING_ENABLED;
+        }
+    }
+
+    /**
+     * Return whether the View allows automatic handwriting initiation. Returns true if automatic
+     * handwriting initiation is enabled, and verse visa.
+     * @see #setAutoHandwritingEnabled(boolean)
+     */
+    public boolean isAutoHandwritingEnabled() {
+        return (mPrivateFlags4 & PFLAG4_AUTO_HANDWRITING_ENABLED)
+                == PFLAG4_AUTO_HANDWRITING_ENABLED;
     }
 
     /**
