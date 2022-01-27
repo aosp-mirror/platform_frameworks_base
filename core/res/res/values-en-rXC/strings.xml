@@ -1187,6 +1187,8 @@
     <string name="deleteText" msgid="4200807474529938112">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‎‎‏‎‎‏‏‎‎‎‏‎‎‎‏‎‎‎‎‏‎‎‏‎‎‎‎‏‎‏‎‎‏‎‎‏‎‏‎‎‏‏‎‏‎‏‎‏‎‏‏‎‎‎‎‎‎‎Delete‎‏‎‎‏‎"</string>
     <string name="inputMethod" msgid="1784759500516314751">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‎‏‏‎‎‎‏‎‎‏‎‏‏‏‏‎‏‎‏‎‎‏‏‏‏‎‏‎‎‎‏‎‏‏‏‎‎‎‏‏‏‎‏‎‎‏‏‏‎‎‏‏‏‏‏‏‏‎Input method‎‏‎‎‏‎"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‏‏‏‎‎‏‏‏‎‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‏‏‏‏‎‏‎‏‏‏‎‎‎‏‏‎‏‏‏‏‏‏‏‏‎‎‎‎‎‎‎‎‎Text actions‎‏‎‎‏‎"</string>
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‎‏‎‏‏‏‏‎‎‎‎‏‎‎‏‏‎‎‎‎‎‎‎‏‏‎‏‏‏‎‎‏‎‎‏‏‏‏‏‏‏‎‎‏‎‎‎‎‏‏‎‎‎‏‎‏‏‎Back‎‏‎‎‏‎"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‏‏‏‏‏‏‎‏‎‎‎‏‎‎‏‏‎‏‎‏‎‏‎‏‏‎‎‏‎‏‏‏‏‎‎‎‏‎‏‎‏‎‏‏‏‏‏‏‎‎‏‏‎‎‏‎‏‎Switch input method‎‏‎‎‏‎"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‏‎‎‏‏‏‏‎‎‏‎‎‎‏‏‎‎‎‎‎‏‎‏‎‏‏‏‏‏‎‏‎‏‏‎‎‎‎‎‏‎‎‎‏‏‎‎‎‏‎‎‏‏‎‏‏‎‎Storage space running out‎‏‎‎‏‎"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‏‏‎‏‎‎‏‎‏‎‏‏‏‏‎‎‏‎‏‎‏‏‏‎‏‏‎‏‎‎‏‏‎‏‏‏‏‎‏‏‏‏‏‎‏‎‎‎‎‏‎‏‎‏‏‎Some system functions may not work‎‏‎‎‏‎"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‎‏‏‎‎‎‎‎‎‎‏‎‎‎‏‏‎‏‎‏‎‎‏‎‏‎‎‏‎‏‎‎‏‎‎‏‎‎‏‏‎‎‎Not enough storage for the system. Make sure you have 250MB of free space and restart.‎‏‎‎‏‎"</string>
@@ -1491,6 +1493,8 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‎‏‏‎‎‏‏‎‏‎‏‎‏‏‎‎‎‏‎‏‏‎‏‎‎‏‏‏‏‏‏‏‎‏‎‎‏‏‎‎‎‏‎‎‎‎‏‏‎‏‎‏‏‎‏‎‎‎Allows an app to ask for permission to ignore battery optimizations for that app.‎‏‎‎‏‎"</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‎‏‎‏‎‎‎‏‏‏‏‏‏‎‎‏‎‎‏‎‎‏‏‏‏‎‎‏‏‎‎‎‎‏‎‏‎‎‎‏‏‎‎‎‎‎‎‎‏‎‏‏‏‎‎‏‎‎query all packages‎‏‎‎‏‎"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‎‎‎‎‏‏‎‎‎‎‎‏‎‏‏‏‏‏‎‏‏‏‏‏‎‏‏‏‏‏‎‎‏‎‏‎‏‎‎‏‏‎‎‏‏‏‎‏‎‏‎‏‎‏‎‏‎‎Allows an app to see all installed packages.‎‏‎‎‏‎"</string>
+    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‏‎‎‏‏‎‎‎‏‎‎‏‎‏‎‎‎‏‎‏‏‏‎‎‏‏‏‏‎‎‎‎‏‏‎‏‎‎‎‏‏‏‏‎‎‏‏‎‏‎‎‎‏‎‎‏‏‎access SupplementalApis‎‏‎‎‏‎"</string>
+    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎‏‎‎‎‏‏‎‎‏‎‏‏‏‏‏‏‏‎‎‎‏‏‎‎‏‏‏‎‏‎‎‏‎‎‏‎‏‏‎‏‎‏‏‎‏‏‎‏‏‎‏‎‎‎‏‎‎Allows an application to access SupplementalApis.‎‏‎‎‏‎"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‏‏‎‎‏‎‎‏‏‎‎‏‏‎‎‏‎‏‎‏‏‏‏‎‏‏‎‎‎‎‏‏‏‎‏‎‎‏‎‏‎‎‎‎‎‏‎‎‎‏‏‏‎‎‏‏‎‎Tap twice for zoom control‎‏‎‎‏‎"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‎‎‎‎‎‎‎‎‎‎‎‎‎‎‎‏‏‎‎‎‏‎‏‏‎‎‎‎‎‏‎‏‎‏‏‎‏‎‎‎‏‎‎‏‏‏‏‏‎‎‎‎‎‎‎‎‎‎Couldn\'t add widget.‎‏‎‎‏‎"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‎‏‏‎‏‎‏‏‎‎‏‏‏‎‏‏‏‏‏‎‏‎‏‎‎‎‏‏‏‎‏‏‏‏‏‎‏‏‏‏‏‎‏‎‎‎‎‎‎‏‏‎‎‏‏‎‎‎Go‎‏‎‎‏‎"</string>

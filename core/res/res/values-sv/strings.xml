@@ -1187,6 +1187,10 @@
     <string name="deleteText" msgid="4200807474529938112">"Ta bort"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Indatametod"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Textåtgärder"</string>
+    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
+    <skip />
+    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Lagringsutrymmet börjar ta slut"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Det kan hända att vissa systemfunktioner inte fungerar"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Det finns inte tillräckligt med utrymme för systemet. Kontrollera att du har ett lagringsutrymme på minst 250 MB och starta om."</string>
@@ -1491,6 +1495,8 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Appen får be om tillstånd att ignorera batterioptimering."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"fråga alla paket"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Tillåter att en app ser alla installerade paket."</string>
+    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"åtkomst till SupplementalApis"</string>
+    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Tillåter att en app får åtkomst till SupplementalApis."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Peka två gånger för zoomkontroll"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Det gick inte att lägga till widgeten."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Kör"</string>

@@ -1187,6 +1187,10 @@
     <string name="deleteText" msgid="4200807474529938112">"Löschen"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Eingabemethode"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Textaktionen"</string>
+    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
+    <skip />
+    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Der Speicherplatz wird knapp"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Einige Systemfunktionen funktionieren eventuell nicht."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Der Speicherplatz reicht nicht für das System aus. Stelle sicher, dass 250 MB freier Speicherplatz vorhanden sind, und starte das Gerät dann neu."</string>
@@ -1491,6 +1495,10 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Erlaubt einer App, nach der Berechtigung zum Ignorieren der Akku-Leistungsoptimierungen zu fragen."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"Alle Pakete abfragen"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Ermöglicht der App, alle installierten Pakete zu sehen."</string>
+    <!-- no translation found for permlab_accessSupplementalApi (3544659160536960275) -->
+    <skip />
+    <!-- no translation found for permdesc_accessSupplementalApi (8974758769370951074) -->
+    <skip />
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Für Zoomeinstellung zweimal berühren"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Widget konnte nicht hinzugefügt werden."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Los"</string>

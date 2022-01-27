@@ -1207,6 +1207,10 @@
     <string name="deleteText" msgid="4200807474529938112">"Ștergeți"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Metodă de intrare"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Acțiuni pentru text"</string>
+    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
+    <skip />
+    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Spațiul de stocare aproape ocupat"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Este posibil ca unele funcții de sistem să nu funcționeze"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Spațiu de stocare insuficient pentru sistem. Asigurați-vă că aveți 250 MB de spațiu liber și reporniți."</string>
@@ -1511,6 +1515,8 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Permite unei aplicații să solicite permisiunea de a ignora optimizările bateriei pentru aplicația respectivă."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"să interogheze toate pachetele"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Permite unei aplicații să vadă toate pachetele instalate."</string>
+    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"să acceseze SupplementalApis"</string>
+    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Permite unei aplicații să acceseze SupplementalApis."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Apăsați de două ori pentru a controla mărirea/micșorarea"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Nu s-a putut adăuga widgetul."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Accesați"</string>

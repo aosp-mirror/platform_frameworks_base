@@ -1187,6 +1187,10 @@
     <string name="deleteText" msgid="4200807474529938112">"Vee uit"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Invoermetode"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Teksaksies"</string>
+    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
+    <skip />
+    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Bergingspasie word min"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Sommige stelselfunksies werk moontlik nie"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Nie genoeg berging vir die stelsel nie. Maak seker jy het 250 MB spasie beskikbaar en herbegin."</string>
@@ -1491,6 +1495,8 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Laat \'n program toe om toestemming te vra om batteryoptimerings vir daardie program ignoreer."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"navraag oor alle pakkette"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Laat \'n program toe om alle geïnstalleerde pakette te sien."</string>
+    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"verkry toegang tot SupplementalApis"</string>
+    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Gee \'n program toegang tot SupplementalApis."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Klop twee keer vir zoembeheer"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Kon nie legstuk byvoeg nie."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Gaan"</string>
