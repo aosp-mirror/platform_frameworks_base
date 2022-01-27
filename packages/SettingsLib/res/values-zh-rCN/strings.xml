@@ -526,10 +526,8 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"未注册"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"无法获取"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC 已随机化"</string>
-    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="other">已连接 %1$d 个设备</item>
-      <item quantity="one">已连接 %1$d 个设备</item>
-    </plurals>
+    <!-- no translation found for wifi_tether_connected_summary (5282919920463340158) -->
+    <skip />
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"增加时间。"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"减少时间。"</string>
     <string name="cancel" msgid="5665114069455378395">"取消"</string>
