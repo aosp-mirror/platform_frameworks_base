@@ -1345,6 +1345,16 @@
          shade. -->
     <dimen name="dream_overlay_notifications_drag_area_height">100dp</dimen>
 
+    <!-- Dream overlay complications related dimensions -->
+    <dimen name="dream_overlay_complication_clock_time_padding_left">50dp</dimen>
+    <dimen name="dream_overlay_complication_clock_time_text_size">72sp</dimen>
+    <dimen name="dream_overlay_complication_clock_date_padding_left">60dp</dimen>
+    <dimen name="dream_overlay_complication_clock_date_padding_bottom">50dp</dimen>
+    <dimen name="dream_overlay_complication_clock_date_text_size">18sp</dimen>
+    <dimen name="dream_overlay_complication_weather_padding_left">20dp</dimen>
+    <dimen name="dream_overlay_complication_weather_padding_bottom">50dp</dimen>
+    <dimen name="dream_overlay_complication_weather_text_size">18sp</dimen>
+
     <!-- The position of the end guide, which dream overlay complications can align their start with
          if their end is aligned with the parent end. Represented as the percentage over from the
          start of the parent container. -->

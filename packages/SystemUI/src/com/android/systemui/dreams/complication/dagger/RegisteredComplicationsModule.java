@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.dreams.dagger;
+package com.android.systemui.dreams.complication.dagger;
 
-import com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule;
-import com.android.systemui.dreams.touch.dagger.DreamTouchModule;
+import com.android.systemui.dagger.SystemUIBinder;
 
 import dagger.Module;
 
 /**
- * Dagger Module providing Communal-related functionality.
+ * Module for all components with corresponding dream layer complications registered in
+ * {@link SystemUIBinder}.
  */
-@Module(includes = {
-            DreamTouchModule.class,
-            RegisteredComplicationsModule.class,
-        },
-        subcomponents = {
-            DreamOverlayComponent.class,
-        })
-public interface DreamModule {
+@Module(subcomponents = {
+        DreamClockTimeComplicationComponent.class,
+        DreamClockDateComplicationComponent.class,
+        DreamWeatherComplicationComponent.class,
+})
+public interface RegisteredComplicationsModule {
 }
