@@ -25216,6 +25216,7 @@ package android.net {
 
   public static final class Ikev2VpnProfile.Builder {
     ctor public Ikev2VpnProfile.Builder(@NonNull String, @NonNull String);
+    ctor public Ikev2VpnProfile.Builder(@NonNull android.net.ipsec.ike.IkeTunnelConnectionParams);
     method @NonNull public android.net.Ikev2VpnProfile build();
     method @NonNull public android.net.Ikev2VpnProfile.Builder setAllowedAlgorithms(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setAuthDigitalSignature(@NonNull java.security.cert.X509Certificate, @NonNull java.security.PrivateKey, @Nullable java.security.cert.X509Certificate);
