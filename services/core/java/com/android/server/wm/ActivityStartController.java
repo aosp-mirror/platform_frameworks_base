@@ -484,7 +484,8 @@ public class ActivityStartController {
                         }
                     }
                 } finally {
-                    mService.mWindowManager.mStartingSurfaceController.endDeferAddStartingWindow();
+                    mService.mWindowManager.mStartingSurfaceController.endDeferAddStartingWindow(
+                            options != null ? options.getOriginalOptions() : null);
                     mService.continueWindowLayout();
                 }
             }
