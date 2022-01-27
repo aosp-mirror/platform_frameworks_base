@@ -607,6 +607,17 @@ public abstract class Window {
          * @param hasCapture True if the window has pointer capture.
          */
         default public void onPointerCaptureChanged(boolean hasCapture) { };
+
+        /**
+         * Called from
+         * {@link com.android.internal.policy.DecorView#onSystemBarAppearanceChanged(int)}.
+         *
+         * @param appearance The newly applied appearance.
+         * @hide
+         */
+        default void onSystemBarAppearanceChanged(
+                @WindowInsetsController.Appearance int appearance) {
+        }
     }
 
     /** @hide */

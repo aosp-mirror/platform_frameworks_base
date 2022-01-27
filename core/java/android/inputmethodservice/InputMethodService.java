@@ -475,7 +475,7 @@ public class InputMethodService extends AbstractInputMethodService {
     private InputMethodPrivilegedOperations mPrivOps = new InputMethodPrivilegedOperations();
 
     @NonNull
-    private final NavigationBarController mNavigationBarController =
+    final NavigationBarController mNavigationBarController =
             new NavigationBarController(this);
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
