@@ -97,7 +97,7 @@ public final class CachedAppOptimizerTest {
 
     @Before
     public void setUp() {
-        System.loadLibrary("activitymanagermockingservicestestjni");
+        System.loadLibrary("mockingservicestestjni");
         mHandlerThread = new HandlerThread("");
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
