@@ -16,7 +16,7 @@
 
 package com.android.server.net;
 
-import static android.net.NetworkTemplate.NETWORK_TYPE_5G_NSA;
+import static android.app.usage.NetworkStatsManager.NETWORK_TYPE_5G_NSA;
 import static android.net.NetworkTemplate.getCollapsedRatType;
 import static android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_ADVANCED;
 import static android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA;
