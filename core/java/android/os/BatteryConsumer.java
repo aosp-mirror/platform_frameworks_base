@@ -673,6 +673,7 @@ public abstract class BatteryConsumer {
         public final int firstCustomConsumedPowerColumn;
         public final int firstCustomUsageDurationColumn;
         public final int columnCount;
+        public final Key[][] processStateKeys;
 
         private BatteryConsumerDataLayout(int firstColumn, String[] customPowerComponentNames,
                 boolean powerModelsIncluded, boolean includeProcessStateData) {
@@ -726,6 +727,28 @@ public abstract class BatteryConsumer {
                 }
 
                 keys[componentId] = perComponentKeys.toArray(KEY_ARRAY);
+            }
+
+            if (includeProcessStateData) {
+                processStateKeys = new Key[BatteryConsumer.PROCESS_STATE_COUNT][];
+                ArrayList<Key> perProcStateKeys = new ArrayList<>();
+                for (int processState = 0; processState < PROCESS_STATE_COUNT; processState++) {
+                    if (processState == PROCESS_STATE_UNSPECIFIED) {
+                        continue;
+                    }
+
+                    perProcStateKeys.clear();
+                    for (int i = 0; i < keys.length; i++) {
+                        for (int j = 0; j < keys[i].length; j++) {
+                            if (keys[i][j].processState == processState) {
+                                perProcStateKeys.add(keys[i][j]);
+                            }
+                        }
+                    }
+                    processStateKeys[processState] = perProcStateKeys.toArray(KEY_ARRAY);
+                }
+            } else {
+                processStateKeys = null;
             }
 
             firstCustomConsumedPowerColumn = columnIndex;
