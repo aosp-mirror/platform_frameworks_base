@@ -4675,6 +4675,8 @@
 
   <java-symbol type="string" name="config_deviceSpecificDeviceStatePolicyProvider" />
 
+  <java-symbol type="array" name="config_dockExtconStateMapping" />
+
   <java-symbol type="string" name="notification_channel_abusive_bg_apps"/>
   <java-symbol type="string" name="notification_title_abusive_bg_apps"/>
   <java-symbol type="string" name="notification_content_abusive_bg_apps"/>
