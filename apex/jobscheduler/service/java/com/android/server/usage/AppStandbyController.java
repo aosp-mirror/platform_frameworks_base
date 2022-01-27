@@ -347,6 +347,14 @@ public class AppStandbyController
      */
     boolean mLinkCrossProfileApps =
             ConstantsObserver.DEFAULT_CROSS_PROFILE_APPS_SHARE_STANDBY_BUCKETS;
+
+    /**
+     * Duration (in millis) for the window where events occurring will be considered as
+     * broadcast response, starting from the point when an app receives a broadcast.
+     */
+    volatile long mBroadcastResponseWindowDurationMillis =
+            ConstantsObserver.DEFAULT_BROADCAST_RESPONSE_WINDOW_DURATION_MS;
+
     /**
      * Whether we should allow apps into the
      * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED} bucket or not.
@@ -1774,6 +1782,10 @@ public class AppStandbyController
         }
     }
 
+    @Override
+    public long getBroadcastResponseWindowDurationMs() {
+        return mBroadcastResponseWindowDurationMillis;
+    }
 
     @Override
     public void flushToDisk() {
@@ -2040,6 +2052,10 @@ public class AppStandbyController
 
         pw.print("  mSystemUpdateUsageTimeoutMillis=");
         TimeUtils.formatDuration(mSystemUpdateUsageTimeoutMillis, pw);
+        pw.println();
+
+        pw.print("  mBroadcastResponseWindowDurationMillis=");
+        TimeUtils.formatDuration(mBroadcastResponseWindowDurationMillis, pw);
         pw.println();
 
         pw.println();
@@ -2473,6 +2489,8 @@ public class AppStandbyController
                 KEY_PREFIX_ELAPSED_TIME_THRESHOLD + "rare",
                 KEY_PREFIX_ELAPSED_TIME_THRESHOLD + "restricted"
         };
+        private static final String KEY_BROADCAST_RESPONSE_WINDOW_DURATION_MS =
+                "broadcast_response_window_timeout_ms";
         public static final long DEFAULT_CHECK_IDLE_INTERVAL_MS =
                 COMPRESS_TIME ? ONE_MINUTE : 4 * ONE_HOUR;
         public static final long DEFAULT_STRONG_USAGE_TIMEOUT =
@@ -2502,6 +2520,8 @@ public class AppStandbyController
         public static final long DEFAULT_AUTO_RESTRICTED_BUCKET_DELAY_MS =
                 COMPRESS_TIME ? ONE_MINUTE : ONE_DAY;
         public static final boolean DEFAULT_CROSS_PROFILE_APPS_SHARE_STANDBY_BUCKETS = true;
+        public static final long DEFAULT_BROADCAST_RESPONSE_WINDOW_DURATION_MS =
+                2 * ONE_MINUTE;
 
         ConstantsObserver(Handler handler) {
             super(handler);
@@ -2618,6 +2638,11 @@ public class AppStandbyController
                             mUnexemptedSyncScheduledTimeoutMillis = properties.getLong(
                                     KEY_UNEXEMPTED_SYNC_SCHEDULED_HOLD_DURATION,
                                     DEFAULT_UNEXEMPTED_SYNC_SCHEDULED_TIMEOUT);
+                            break;
+                        case KEY_BROADCAST_RESPONSE_WINDOW_DURATION_MS:
+                            mBroadcastResponseWindowDurationMillis = properties.getLong(
+                                    KEY_BROADCAST_RESPONSE_WINDOW_DURATION_MS,
+                                    DEFAULT_BROADCAST_RESPONSE_WINDOW_DURATION_MS);
                             break;
                         default:
                             if (!timeThresholdsUpdated

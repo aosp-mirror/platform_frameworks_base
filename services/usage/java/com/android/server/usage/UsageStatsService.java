@@ -281,7 +281,7 @@ public class UsageStatsService extends SystemService implements
         mHandler = new H(BackgroundThread.get().getLooper());
 
         mAppStandby = mInjector.getAppStandbyController(getContext());
-        mResponseStatsTracker = new BroadcastResponseStatsTracker();
+        mResponseStatsTracker = new BroadcastResponseStatsTracker(mAppStandby);
 
         mAppTimeLimit = new AppTimeLimitController(getContext(),
                 new AppTimeLimitController.TimeLimitCallbackListener() {

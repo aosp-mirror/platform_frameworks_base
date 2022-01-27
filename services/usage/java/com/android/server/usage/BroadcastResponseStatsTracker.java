@@ -69,6 +69,12 @@ class BroadcastResponseStatsTracker {
     private SparseArray<SparseArray<UserBroadcastResponseStats>> mUserResponseStats =
             new SparseArray<>();
 
+    private AppStandbyInternal mAppStandby;
+
+    BroadcastResponseStatsTracker(@NonNull AppStandbyInternal appStandby) {
+        mAppStandby = appStandby;
+    }
+
     // TODO (206518114): Move all callbacks handling to a handler thread.
     void reportBroadcastDispatchEvent(int sourceUid, @NonNull String targetPackage,
             UserHandle targetUser, long idForResponseEvent,
@@ -132,8 +138,7 @@ class BroadcastResponseStatsTracker {
                 if (dispatchTimestampMs >= timestampMs) {
                     continue;
                 }
-                // TODO (206518114): Make the constant configurable.
-                if (elapsedDurationMs <= 2 * 60 * 1000) {
+                if (elapsedDurationMs <= mAppStandby.getBroadcastResponseWindowDurationMs()) {
                     final BroadcastEvent broadcastEvent = broadcastEvents.valueAt(i);
                     final BroadcastResponseStats responseStats =
                             getBroadcastResponseStats(broadcastEvent);
