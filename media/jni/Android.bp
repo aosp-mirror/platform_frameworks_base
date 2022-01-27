@@ -86,6 +86,7 @@ cc_library_shared {
         "android.hardware.drm@1.4",
         "android.hidl.memory@1.0",
         "android.hidl.token@1.0-utils",
+        "android.hardware.drm-V1-ndk",
     ],
 
     header_libs: [
