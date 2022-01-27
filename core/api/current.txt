@@ -21662,9 +21662,9 @@ package android.media {
     method @NonNull public byte[] getPropertyByteArray(String);
     method @NonNull public String getPropertyString(@NonNull String);
     method @NonNull public android.media.MediaDrm.ProvisionRequest getProvisionRequest();
-    method @NonNull public byte[] getSecureStop(@NonNull byte[]);
-    method @NonNull public java.util.List<byte[]> getSecureStopIds();
-    method @NonNull public java.util.List<byte[]> getSecureStops();
+    method @Deprecated @NonNull public byte[] getSecureStop(@NonNull byte[]);
+    method @Deprecated @NonNull public java.util.List<byte[]> getSecureStopIds();
+    method @Deprecated @NonNull public java.util.List<byte[]> getSecureStops();
     method @android.media.MediaDrm.SecurityLevel public int getSecurityLevel(@NonNull byte[]);
     method @NonNull public static java.util.List<java.util.UUID> getSupportedCryptoSchemes();
     method public static boolean isCryptoSchemeSupported(@NonNull java.util.UUID);
@@ -21677,11 +21677,11 @@ package android.media {
     method @NonNull public java.util.HashMap<java.lang.String,java.lang.String> queryKeyStatus(@NonNull byte[]);
     method @Deprecated public void release();
     method @Deprecated public void releaseAllSecureStops();
-    method public void releaseSecureStops(@NonNull byte[]);
-    method public void removeAllSecureStops();
+    method @Deprecated public void releaseSecureStops(@NonNull byte[]);
+    method @Deprecated public void removeAllSecureStops();
     method public void removeKeys(@NonNull byte[]);
     method public void removeOfflineLicense(@NonNull byte[]);
-    method public void removeSecureStop(@NonNull byte[]);
+    method @Deprecated public void removeSecureStop(@NonNull byte[]);
     method public boolean requiresSecureDecoder(@NonNull String);
     method public boolean requiresSecureDecoder(@NonNull String, @android.media.MediaDrm.SecurityLevel int);
     method public void restoreKeys(@NonNull byte[], @NonNull byte[]);
