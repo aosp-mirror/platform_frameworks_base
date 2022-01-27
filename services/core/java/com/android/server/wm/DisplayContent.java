@@ -170,7 +170,6 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.ColorSpace;
-import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -1684,9 +1683,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // adjustments of previous rotated activity should be cleared earlier. Otherwise if
             // the current top is in the same process, it may get the rotated state. The transform
             // will be cleared later with transition callback to ensure smooth animation.
-            if (hasTopFixedRotationLaunchingApp()) {
-                mFixedRotationLaunchingApp.notifyFixedRotationTransform(false /* enabled */);
-            }
             return false;
         }
         if (!r.getDisplayArea().matchParentBounds()) {
@@ -2191,8 +2187,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         outConfig.compatScreenHeightDp = (int) (outConfig.screenHeightDp / mCompatibleScreenScale);
 
         final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
-        outConfig.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated, uiMode, dw,
-                dh);
+        outConfig.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated, uiMode, dw, dh);
+        outConfig.windowConfiguration.setDisplayRotation(rotation);
     }
 
     /**
