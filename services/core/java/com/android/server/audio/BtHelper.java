@@ -490,9 +490,7 @@ public class BtHelper {
             return;
         }
         final BluetoothDevice btDevice = deviceList.get(0);
-        final @BluetoothProfile.BtProfileState int state =
-                proxy.getConnectionState(btDevice);
-        if (state == BluetoothProfile.STATE_CONNECTED) {
+        if (proxy.getConnectionState(btDevice) == BluetoothProfile.STATE_CONNECTED) {
             mDeviceBroker.queueOnBluetoothActiveDeviceChanged(
                     new AudioDeviceBroker.BtDeviceChangedData(btDevice, null,
                         new BluetoothProfileConnectionInfo(profile),
