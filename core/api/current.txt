@@ -7930,11 +7930,11 @@ package android.app.admin {
   }
 
   public final class WifiSsidPolicy implements android.os.Parcelable {
-    method @NonNull public static android.app.admin.WifiSsidPolicy createAllowlistPolicy(@NonNull java.util.Set<java.lang.String>);
-    method @NonNull public static android.app.admin.WifiSsidPolicy createDenylistPolicy(@NonNull java.util.Set<java.lang.String>);
+    method @NonNull public static android.app.admin.WifiSsidPolicy createAllowlistPolicy(@NonNull java.util.Set<android.net.wifi.WifiSsid>);
+    method @NonNull public static android.app.admin.WifiSsidPolicy createDenylistPolicy(@NonNull java.util.Set<android.net.wifi.WifiSsid>);
     method public int describeContents();
     method public int getPolicyType();
-    method @NonNull public java.util.Set<java.lang.String> getSsids();
+    method @NonNull public java.util.Set<android.net.wifi.WifiSsid> getSsids();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.WifiSsidPolicy> CREATOR;
     field public static final int WIFI_SSID_POLICY_TYPE_ALLOWLIST = 0; // 0x0

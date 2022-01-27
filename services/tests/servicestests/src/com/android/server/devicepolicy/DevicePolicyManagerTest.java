@@ -120,6 +120,7 @@ import android.graphics.Color;
 import android.hardware.usb.UsbManager;
 import android.net.ProfileNetworkPreference;
 import android.net.Uri;
+import android.net.wifi.WifiSsid;
 import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
@@ -164,6 +165,7 @@ import org.mockito.stubbing.Answer;
 import java.io.File;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -8334,7 +8336,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     @Test
     public void testSetSsidAllowlist_noDeviceOwnerOrPoOfOrgOwnedDevice() {
-        final Set<String> ssids = Collections.singleton("ssid1");
+        final Set<WifiSsid> ssids = new ArraySet<>(
+                Arrays.asList(WifiSsid.fromBytes("ssid1".getBytes(StandardCharsets.UTF_8))));
         WifiSsidPolicy policy = WifiSsidPolicy.createAllowlistPolicy(ssids);
         assertThrows(SecurityException.class, () -> dpm.setWifiSsidPolicy(policy));
     }
@@ -8343,7 +8346,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSetSsidAllowlist_asDeviceOwner() throws Exception {
         setDeviceOwner();
 
-        final Set<String> ssids = Collections.singleton("ssid1");
+        final Set<WifiSsid> ssids = new ArraySet<>(
+                Arrays.asList(WifiSsid.fromBytes("ssid1".getBytes(StandardCharsets.UTF_8))));
         WifiSsidPolicy policy = WifiSsidPolicy.createAllowlistPolicy(ssids);
         dpm.setWifiSsidPolicy(policy);
         assertThat(dpm.getWifiSsidPolicy().getSsids()).isEqualTo(ssids);
@@ -8359,7 +8363,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         configureProfileOwnerOfOrgOwnedDevice(admin1, managedProfileUserId);
         mContext.binder.callingUid = managedProfileAdminUid;
 
-        final Set<String> ssids = new ArraySet<>(Arrays.asList("ssid1", "ssid2", "ssid3"));
+        final Set<WifiSsid> ssids = new ArraySet<>(
+                Arrays.asList(WifiSsid.fromBytes("ssid1".getBytes(StandardCharsets.UTF_8)),
+                        WifiSsid.fromBytes("ssid2".getBytes(StandardCharsets.UTF_8)),
+                        WifiSsid.fromBytes("ssid3".getBytes(StandardCharsets.UTF_8))));
         WifiSsidPolicy policy = WifiSsidPolicy.createAllowlistPolicy(ssids);
         dpm.setWifiSsidPolicy(policy);
         assertThat(dpm.getWifiSsidPolicy().getSsids()).isEqualTo(ssids);
@@ -8371,14 +8378,15 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSetSsidAllowlist_emptyList() throws Exception {
         setDeviceOwner();
 
-        final Set<String> ssids = new ArraySet<>();
+        final Set<WifiSsid> ssids = new ArraySet<>();
         assertThrows(IllegalArgumentException.class,
                 () -> WifiSsidPolicy.createAllowlistPolicy(ssids));
     }
 
     @Test
     public void testSetSsidDenylist_noDeviceOwnerOrPoOfOrgOwnedDevice() {
-        final Set<String> ssids = Collections.singleton("ssid1");
+        final Set<WifiSsid> ssids = new ArraySet<>(
+                Arrays.asList(WifiSsid.fromBytes("ssid1".getBytes(StandardCharsets.UTF_8))));
         WifiSsidPolicy policy = WifiSsidPolicy.createDenylistPolicy(ssids);
         assertThrows(SecurityException.class, () -> dpm.setWifiSsidPolicy(policy));
     }
@@ -8387,7 +8395,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSetSsidDenylist_asDeviceOwner() throws Exception {
         setDeviceOwner();
 
-        final Set<String> ssids = Collections.singleton("ssid1");
+        final Set<WifiSsid> ssids = new ArraySet<>(
+                Arrays.asList(WifiSsid.fromBytes("ssid1".getBytes(StandardCharsets.UTF_8))));
         WifiSsidPolicy policy = WifiSsidPolicy.createDenylistPolicy(ssids);
         dpm.setWifiSsidPolicy(policy);
         assertThat(dpm.getWifiSsidPolicy().getSsids()).isEqualTo(ssids);
@@ -8403,7 +8412,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         configureProfileOwnerOfOrgOwnedDevice(admin1, managedProfileUserId);
         mContext.binder.callingUid = managedProfileAdminUid;
 
-        final Set<String> ssids = new ArraySet<>(Arrays.asList("ssid1", "ssid2", "ssid3"));
+        final Set<WifiSsid> ssids = new ArraySet<>(
+                Arrays.asList(WifiSsid.fromBytes("ssid1".getBytes(StandardCharsets.UTF_8)),
+                        WifiSsid.fromBytes("ssid2".getBytes(StandardCharsets.UTF_8)),
+                        WifiSsid.fromBytes("ssid3".getBytes(StandardCharsets.UTF_8))));
         WifiSsidPolicy policy = WifiSsidPolicy.createDenylistPolicy(ssids);
         dpm.setWifiSsidPolicy(policy);
         assertThat(dpm.getWifiSsidPolicy().getSsids()).isEqualTo(ssids);
@@ -8415,7 +8427,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSetSsidDenylist_emptyList() throws Exception {
         setDeviceOwner();
 
-        final Set<String> ssids = new ArraySet<>();
+        final Set<WifiSsid> ssids = new ArraySet<>();
         assertThrows(IllegalArgumentException.class,
                 () -> WifiSsidPolicy.createDenylistPolicy(ssids));
     }
