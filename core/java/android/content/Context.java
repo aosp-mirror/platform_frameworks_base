@@ -4987,10 +4987,8 @@ public abstract class Context {
      * @hide
      * @see #getSystemService(String)
      */
-    // TODO(216507592): Change cloudsearch_service to cloudsearch.
     @SystemApi
-    @SuppressLint("ServiceName")
-    public static final String CLOUDSEARCH_SERVICE = "cloudsearch_service";
+    public static final String CLOUDSEARCH_SERVICE = "cloudsearch";
 
     /**
      * Use with {@link #getSystemService(String)} to access the
