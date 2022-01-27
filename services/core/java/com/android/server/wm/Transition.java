@@ -1080,6 +1080,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             for (WindowContainer<?> p = wc.getParent(); p != null; p = p.getParent()) {
                 final ChangeInfo parentChange = changes.get(p);
                 if (parentChange == null || !parentChange.hasChanged(p)) break;
+                if (p.mRemoteToken == null) {
+                    // Intermediate parents must be those that has window to be managed by Shell.
+                    continue;
+                }
                 if (parentChange.mParent != null && !skipIntermediateReports) {
                     changes.get(wc).mParent = p;
                     // The chain above the parent was processed.
