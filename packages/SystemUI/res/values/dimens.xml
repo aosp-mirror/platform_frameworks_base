@@ -432,7 +432,9 @@
     <!-- The maximum width of the navigation bar ripples. -->
     <dimen name="key_button_ripple_max_width">95dp</dimen>
 
-    <dimen name="rounded_corner_content_padding">0dp</dimen>
+    <dimen name="rounded_corner_content_padding">
+        @*android:dimen/rounded_corner_content_padding
+    </dimen>
 
     <dimen name="navigation_key_padding">0dp</dimen>
 
