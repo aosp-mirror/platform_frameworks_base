@@ -204,7 +204,6 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.CREATE_USERS" />
     <uses-permission android:name="android.permission.QUERY_USERS" />
-    <uses-permission android:name="android.permission.CREATE_VIRTUAL_DEVICE" />
     <uses-permission android:name="android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
     <uses-permission android:name="android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS" />
@@ -629,6 +628,11 @@
     <uses-permission android:name="android.permission.SEND_SAFETY_CENTER_UPDATE" />
     <uses-permission android:name="android.permission.READ_SAFETY_CENTER_STATUS" />
     <uses-permission android:name="android.permission.MANAGE_SAFETY_CENTER" />
+
+    <!-- Permissions required for CTS test - CtsVirtualDevicesTestCases -->
+    <uses-permission android:name="android.permission.CREATE_VIRTUAL_DEVICE" />
+    <uses-permission android:name="android.permission.ADD_TRUSTED_DISPLAY" />
+    <uses-permission android:name="android.permission.ADD_ALWAYS_UNLOCKED_DISPLAY" />
 
 
     <!-- Permission required for CTS test - Notification test suite -->

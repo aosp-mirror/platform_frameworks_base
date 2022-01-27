@@ -6090,13 +6090,13 @@
     <permission android:name="android.permission.ACCESS_TV_SHARED_FILTER"
         android:protectionLevel="signature|privileged|vendorPrivileged" />
 
-    <!-- Allows an application to create trusted displays. @hide -->
+    <!-- Allows an application to create trusted displays. @hide @SystemApi -->
     <permission android:name="android.permission.ADD_TRUSTED_DISPLAY"
-                android:protectionLevel="signature" />
+                android:protectionLevel="signature|role" />
 
-    <!-- Allows an application to create always-unlocked displays. @hide -->
+    <!-- Allows an application to create always-unlocked displays. @hide @SystemApi -->
     <permission android:name="android.permission.ADD_ALWAYS_UNLOCKED_DISPLAY"
-                android:protectionLevel="signature"/>
+                android:protectionLevel="signature|role"/>
 
     <!-- @hide @SystemApi Allows an application to access locusId events in the usage stats. -->
     <permission android:name="android.permission.ACCESS_LOCUS_ID_USAGE_STATS"
