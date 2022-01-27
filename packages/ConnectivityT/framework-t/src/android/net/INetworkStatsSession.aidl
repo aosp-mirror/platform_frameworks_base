@@ -32,6 +32,11 @@ interface INetworkStatsSession {
     /** Return historical network layer stats for traffic that matches template. */
     @UnsupportedAppUsage
     NetworkStatsHistory getHistoryForNetwork(in NetworkTemplate template, int fields);
+    /**
+     * Return historical network layer stats for traffic that matches template, start and end
+     * timestamp.
+     */
+    NetworkStatsHistory getHistoryIntervalForNetwork(in NetworkTemplate template, int fields, long start, long end);
 
     /**
      * Return network layer usage summary per UID for traffic that matches template.

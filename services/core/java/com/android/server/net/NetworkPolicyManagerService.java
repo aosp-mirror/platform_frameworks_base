@@ -24,7 +24,6 @@ import static android.Manifest.permission.MANAGE_SUBSCRIPTION_PLANS;
 import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.Manifest.permission.NETWORK_STACK;
 import static android.Manifest.permission.OBSERVE_NETWORK_POLICY;
-import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
@@ -63,7 +62,6 @@ import static android.net.INetd.FIREWALL_RULE_DENY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
-import static android.net.NetworkIdentity.OEM_NONE;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
@@ -102,7 +100,6 @@ import static android.net.NetworkTemplate.MATCH_MOBILE;
 import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.net.NetworkTemplate.buildTemplateCarrierMetered;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
-import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.net.netstats.provider.NetworkStatsProvider.QUOTA_UNLIMITED;
 import static android.os.Trace.TRACE_TAG_NETWORK;
 import static android.provider.Settings.Global.NETPOLICY_OVERRIDE_ENABLED;
@@ -131,7 +128,6 @@ import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static com.android.net.module.util.NetworkStatsUtils.LIMIT_GLOBAL_ALERT;
-import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_UPDATED;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
@@ -185,7 +181,6 @@ import android.net.NetworkStack;
 import android.net.NetworkStateSnapshot;
 import android.net.NetworkTemplate;
 import android.net.TelephonyNetworkSpecifier;
-import android.net.TrafficStats;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.BestClock;
@@ -1013,10 +1008,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             userFilter.addAction(ACTION_USER_REMOVED);
             mContext.registerReceiver(mUserReceiver, userFilter, null, mHandler);
 
-            // listen for stats update events
-            final IntentFilter statsFilter = new IntentFilter(ACTION_NETWORK_STATS_UPDATED);
-            mContext.registerReceiver(
-                    mStatsReceiver, statsFilter, READ_NETWORK_USAGE_HISTORY, mHandler);
+            // listen for stats updated callbacks for interested network types.
+            mNetworkStats.registerUsageCallback(new NetworkTemplate.Builder(MATCH_MOBILE).build(),
+                    0 /* thresholdBytes */, new HandlerExecutor(mHandler), mStatsCallback);
+            mNetworkStats.registerUsageCallback(new NetworkTemplate.Builder(MATCH_WIFI).build(),
+                    0 /* thresholdBytes */, new HandlerExecutor(mHandler), mStatsCallback);
 
             // listen for restrict background changes from notifications
             final IntentFilter allowFilter = new IntentFilter(ACTION_ALLOW_BACKGROUND);
@@ -1221,19 +1217,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     };
 
     /**
-     * Receiver that watches for {@link NetworkStatsManager} updates, which we
-     * use to check against {@link NetworkPolicy#warningBytes}.
+     * Listener that watches for {@link NetworkStatsManager} updates, which
+     * NetworkPolicyManagerService uses to check against {@link NetworkPolicy#warningBytes}.
      */
-    private final NetworkStatsBroadcastReceiver mStatsReceiver =
-            new NetworkStatsBroadcastReceiver();
-    private class NetworkStatsBroadcastReceiver extends BroadcastReceiver {
-        private boolean mIsAnyIntentReceived = false;
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // on background handler thread, and verified
-            // READ_NETWORK_USAGE_HISTORY permission above.
+    private final StatsCallback mStatsCallback = new StatsCallback();
+    private class StatsCallback extends NetworkStatsManager.UsageCallback {
+        private boolean mIsAnyCallbackReceived = false;
 
-            mIsAnyIntentReceived = true;
+        @Override
+        public void onThresholdReached(int networkType, String subscriberId) {
+            mIsAnyCallbackReceived = true;
 
             synchronized (mNetworkPoliciesSecondLock) {
                 updateNetworkRulesNL();
@@ -1243,11 +1236,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         /**
-         * Return whether any {@code ACTION_NETWORK_STATS_UPDATED} intent is received.
+         * Return whether any callback is received.
          * Used to determine if NetworkStatsService is ready.
          */
-        public boolean isAnyIntentReceived() {
-            return mIsAnyIntentReceived;
+        public boolean isAnyCallbackReceived() {
+            return mIsAnyCallbackReceived;
         }
     };
 
@@ -1474,7 +1467,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // Skip if not ready. NetworkStatsService will block public API calls until it is
         // ready. To prevent NPMS be blocked on that, skip and fail fast instead.
-        if (!mStatsReceiver.isAnyIntentReceived()) return null;
+        if (!mStatsCallback.isAnyCallbackReceived()) return null;
 
         final List<NetworkStats.Bucket> stats = mDeps.getNetworkUidBytes(template, start, end);
         for (final NetworkStats.Bucket entry : stats) {
@@ -1518,13 +1511,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         for (int i = 0; i < mSubIdToSubscriberId.size(); i++) {
             final int subId = mSubIdToSubscriberId.keyAt(i);
             final String subscriberId = mSubIdToSubscriberId.valueAt(i);
-            final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                    TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true,
-                    true, OEM_NONE);
-            /* While OEM_NONE indicates "any non OEM managed network", OEM_NONE is meant to be a
-             * placeholder value here. The probeIdent is matched against a NetworkTemplate which
-             * should have its OEM managed value set to OEM_MANAGED_ALL, which will cause the
-             * template to match probeIdent without regard to OEM managed status. */
+            final NetworkIdentity probeIdent = new NetworkIdentity.Builder()
+                    .setType(TYPE_MOBILE)
+                    .setSubscriberId(subscriberId)
+                    .setMetered(true)
+                    .setDefaultNetwork(true).build();
             if (template.matches(probeIdent)) {
                 return subId;
             }
@@ -1757,9 +1748,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // find and update the carrier NetworkPolicy for this subscriber id
         boolean policyUpdated = false;
-        final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true, true,
-                OEM_NONE);
+        final NetworkIdentity probeIdent = new NetworkIdentity.Builder()
+                .setType(TYPE_MOBILE)
+                .setSubscriberId(subscriberId)
+                .setMetered(true)
+                .setDefaultNetwork(true).build();
         for (int i = mNetworkPolicy.size() - 1; i >= 0; i--) {
             final NetworkTemplate template = mNetworkPolicy.keyAt(i);
             if (template.matches(probeIdent)) {
@@ -1987,10 +1980,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 for (int i = 0; i < mSubIdToSubscriberId.size(); i++) {
                     final int subId = mSubIdToSubscriberId.keyAt(i);
                     final String subscriberId = mSubIdToSubscriberId.valueAt(i);
-
-                    final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                            TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true,
-                            true, OEM_NONE);
+                    final NetworkIdentity probeIdent = new NetworkIdentity.Builder()
+                            .setType(TYPE_MOBILE)
+                            .setSubscriberId(subscriberId)
+                            .setMetered(true)
+                            .setDefaultNetwork(true).build();
                     // Template is matched when subscriber id matches.
                     if (template.matches(probeIdent)) {
                         matchingSubIds.add(subId);
@@ -2094,11 +2088,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         for (final NetworkStateSnapshot snapshot : snapshots) {
             mNetIdToSubId.put(snapshot.getNetwork().getNetId(), parseSubId(snapshot));
 
-            // Policies matched by NPMS only match by subscriber ID or by network ID. Thus subtype
-            // in the object created here is never used and its value doesn't matter, so use
-            // NETWORK_TYPE_UNKNOWN.
-            final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, snapshot,
-                    true, TelephonyManager.NETWORK_TYPE_UNKNOWN /* subType */);
+            // Policies matched by NPMS only match by subscriber ID or by network ID.
+            final NetworkIdentity ident = new NetworkIdentity.Builder()
+                    .setNetworkStateSnapshot(snapshot).setDefaultNetwork(true).build();
             identified.put(snapshot, ident);
         }
 
@@ -2295,9 +2287,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @GuardedBy("mNetworkPoliciesSecondLock")
     private boolean ensureActiveCarrierPolicyAL(int subId, String subscriberId) {
         // Poke around to see if we already have a policy
-        final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true, true,
-                OEM_NONE);
+        final NetworkIdentity probeIdent = new NetworkIdentity.Builder()
+                .setType(TYPE_MOBILE)
+                .setSubscriberId(subscriberId)
+                .setMetered(true)
+                .setDefaultNetwork(true).build();
         for (int i = mNetworkPolicy.size() - 1; i >= 0; i--) {
             final NetworkTemplate template = mNetworkPolicy.keyAt(i);
             if (template.matches(probeIdent)) {
@@ -2323,7 +2317,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (dataWarningConfig == WARNING_DISABLED) {
             return WARNING_DISABLED;
         } else {
-            return dataWarningConfig * MB_IN_BYTES;
+            return DataUnit.MEBIBYTES.toBytes(dataWarningConfig);
         }
     }
 
@@ -2707,7 +2701,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final List<WifiConfiguration> configs = wm.getConfiguredNetworks();
         for (int i = 0; i < configs.size(); ++i) {
             final WifiConfiguration config = configs.get(i);
-            for (String key : config.getAllPersistableNetworkKeys()) {
+            for (String key : config.getAllNetworkKeys()) {
                 final Boolean metered = wifiNetworkKeys.get(key);
                 if (metered != null) {
                     Slog.d(TAG, "Found network " + key + "; upgrading metered hint");
@@ -3492,9 +3486,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2007-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_BILLED)
-                        .setDataUsage(1 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(1),
                                 ZonedDateTime.now().minusHours(36).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
@@ -3502,15 +3496,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         .setTitle("G-Mobile Happy")
                         .setDataLimit(SubscriptionPlan.BYTES_UNLIMITED,
                                 SubscriptionPlan.LIMIT_BEHAVIOR_BILLED)
-                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(5),
                                 ZonedDateTime.now().minusHours(36).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2017-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile, Charged after limit")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_BILLED)
-                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(5),
                                 ZonedDateTime.now().minusHours(36).toInstant().toEpochMilli())
                         .build());
             } else if ("month_soft".equals(fake)) {
@@ -3519,25 +3513,25 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         .setTitle("G-Mobile is the carriers name who this plan belongs to")
                         .setSummary("Crazy unlimited bandwidth plan with incredibly long title "
                                 + "that should be cut off to prevent UI from looking terrible")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(1 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(1),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2017-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile, Throttled after limit")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(5),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2017-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile, No data connection after limit")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_DISABLED)
-                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(5),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
 
@@ -3545,25 +3539,25 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2007-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile is the carriers name who this plan belongs to")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(6 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(6),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2017-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile, Throttled after limit")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(5),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
                         .createRecurringMonthly(ZonedDateTime.parse("2017-03-14T00:00:00.000Z"))
                         .setTitle("G-Mobile, No data connection after limit")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_DISABLED)
-                        .setDataUsage(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataUsage(DataUnit.GIBIBYTES.toBytes(5),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
 
@@ -3577,9 +3571,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         .createNonrecurring(ZonedDateTime.now().minusDays(20),
                                 ZonedDateTime.now().plusDays(10))
                         .setTitle("G-Mobile")
-                        .setDataLimit(512 * TrafficStats.MB_IN_BYTES,
+                        .setDataLimit(DataUnit.MEBIBYTES.toBytes(512),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_DISABLED)
-                        .setDataUsage(100 * TrafficStats.MB_IN_BYTES,
+                        .setDataUsage(DataUnit.MEBIBYTES.toBytes(100),
                                 ZonedDateTime.now().minusHours(3).toInstant().toEpochMilli())
                         .build());
             } else if ("prepaid_crazy".equals(fake)) {
@@ -3587,9 +3581,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         .createNonrecurring(ZonedDateTime.now().minusDays(20),
                                 ZonedDateTime.now().plusDays(10))
                         .setTitle("G-Mobile Anytime")
-                        .setDataLimit(512 * TrafficStats.MB_IN_BYTES,
+                        .setDataLimit(DataUnit.MEBIBYTES.toBytes(512),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_DISABLED)
-                        .setDataUsage(100 * TrafficStats.MB_IN_BYTES,
+                        .setDataUsage(DataUnit.MEBIBYTES.toBytes(100),
                                 ZonedDateTime.now().minusHours(3).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
@@ -3597,9 +3591,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                                 ZonedDateTime.now().plusDays(20))
                         .setTitle("G-Mobile Nickel Nights")
                         .setSummary("5¢/GB between 1-5AM")
-                        .setDataLimit(5 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(5),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(15 * TrafficStats.MB_IN_BYTES,
+                        .setDataUsage(DataUnit.MEBIBYTES.toBytes(15),
                                 ZonedDateTime.now().minusHours(30).toInstant().toEpochMilli())
                         .build());
                 plans.add(SubscriptionPlan.Builder
@@ -3607,9 +3601,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                                 ZonedDateTime.now().plusDays(20))
                         .setTitle("G-Mobile Bonus 3G")
                         .setSummary("Unlimited 3G data")
-                        .setDataLimit(1 * TrafficStats.GB_IN_BYTES,
+                        .setDataLimit(DataUnit.GIBIBYTES.toBytes(1),
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(300 * TrafficStats.MB_IN_BYTES,
+                        .setDataUsage(DataUnit.MEBIBYTES.toBytes(300),
                                 ZonedDateTime.now().minusHours(1).toInstant().toEpochMilli())
                         .build());
             } else if ("unlimited".equals(fake)) {
@@ -3619,7 +3613,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         .setTitle("G-Mobile Awesome")
                         .setDataLimit(SubscriptionPlan.BYTES_UNLIMITED,
                                 SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED)
-                        .setDataUsage(50 * TrafficStats.MB_IN_BYTES,
+                        .setDataUsage(DataUnit.MEBIBYTES.toBytes(50),
                                 ZonedDateTime.now().minusHours(3).toInstant().toEpochMilli())
                         .build());
             }
@@ -5470,7 +5464,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private long getTotalBytes(NetworkTemplate template, long start, long end) {
         // Skip if not ready. NetworkStatsService will block public API calls until it is
         // ready. To prevent NPMS be blocked on that, skip and fail fast instead.
-        if (!mStatsReceiver.isAnyIntentReceived()) return 0;
+        if (!mStatsCallback.isAnyCallbackReceived()) return 0;
         return mDeps.getNetworkTotalBytes(template, start, end);
     }
 

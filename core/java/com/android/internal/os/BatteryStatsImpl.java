@@ -83,7 +83,6 @@ import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.LongSparseLongArray;
 import android.util.MutableInt;
-import android.util.Pools;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
@@ -136,9 +135,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
@@ -1203,12 +1200,21 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public BatteryStatsImpl(Clocks clocks) {
+        this(clocks, (File) null);
+    }
+
+    public BatteryStatsImpl(Clocks clocks, File historyDirectory) {
         init(clocks);
         mStartClockTimeMs = clocks.currentTimeMillis();
-        mStatsFile = null;
         mCheckinFile = null;
         mDailyFile = null;
-        mBatteryStatsHistory = new BatteryStatsHistory(mHistoryBuffer);
+        if (historyDirectory == null) {
+            mStatsFile = null;
+            mBatteryStatsHistory = new BatteryStatsHistory(mHistoryBuffer);
+        } else {
+            mStatsFile = new AtomicFile(new File(historyDirectory, "batterystats.bin"));
+            mBatteryStatsHistory = new BatteryStatsHistory(this, historyDirectory, mHistoryBuffer);
+        }
         mHandler = null;
         mPlatformIdleStateCallback = null;
         mMeasuredEnergyRetriever = null;
@@ -11522,8 +11528,6 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    private final Pools.Pool<NetworkStats> mNetworkStatsPool = new Pools.SynchronizedPool<>(6);
-
     private final Object mWifiNetworkLock = new Object();
 
     @GuardedBy("mWifiNetworkLock")
@@ -11541,13 +11545,15 @@ public class BatteryStatsImpl extends BatteryStats {
     private NetworkStats mLastModemNetworkStats = new NetworkStats(0, -1);
 
     @VisibleForTesting
-    protected NetworkStats readNetworkStatsLocked(@NonNull NetworkStatsManager networkStatsManager,
-            String[] ifaces) {
-        Objects.requireNonNull(networkStatsManager);
-        if (!ArrayUtils.isEmpty(ifaces)) {
-            return networkStatsManager.getDetailedUidStats(Set.of(ifaces));
-        }
-        return null;
+    protected NetworkStats readMobileNetworkStatsLocked(
+            @NonNull NetworkStatsManager networkStatsManager) {
+        return networkStatsManager.getMobileUidStats();
+    }
+
+    @VisibleForTesting
+    protected NetworkStats readWifiNetworkStatsLocked(
+            @NonNull NetworkStatsManager networkStatsManager) {
+        return networkStatsManager.getWifiUidStats();
     }
 
     /**
@@ -11564,21 +11570,15 @@ public class BatteryStatsImpl extends BatteryStats {
         // Grab a separate lock to acquire the network stats, which may do I/O.
         NetworkStats delta = null;
         synchronized (mWifiNetworkLock) {
-            final NetworkStats latestStats = readNetworkStatsLocked(networkStatsManager,
-                    mWifiIfaces);
+            final NetworkStats latestStats = readWifiNetworkStatsLocked(networkStatsManager);
             if (latestStats != null) {
-                delta = NetworkStats.subtract(latestStats, mLastWifiNetworkStats, null, null,
-                        mNetworkStatsPool.acquire());
-                mNetworkStatsPool.release(mLastWifiNetworkStats);
+                delta = latestStats.subtract(mLastWifiNetworkStats);
                 mLastWifiNetworkStats = latestStats;
             }
         }
 
         synchronized (this) {
             if (!mOnBatteryInternal || mIgnoreNextExternalStats) {
-                if (delta != null) {
-                    mNetworkStatsPool.release(delta);
-                }
                 if (mIgnoreNextExternalStats) {
                     // TODO: Strictly speaking, we should re-mark all 5 timers for each uid (and the
                     //  global one) here like we do for display. But I'm not sure it's worth the
@@ -11599,61 +11599,60 @@ public class BatteryStatsImpl extends BatteryStats {
             long totalTxPackets = 0;
             long totalRxPackets = 0;
             if (delta != null) {
-                NetworkStats.Entry entry = new NetworkStats.Entry();
-                final int size = delta.size();
-                for (int i = 0; i < size; i++) {
-                    entry = delta.getValues(i, entry);
-
+                for (NetworkStats.Entry entry : delta) {
                     if (DEBUG_ENERGY) {
-                        Slog.d(TAG, "Wifi uid " + entry.uid + ": delta rx=" + entry.rxBytes
-                                + " tx=" + entry.txBytes + " rxPackets=" + entry.rxPackets
-                                + " txPackets=" + entry.txPackets);
+                        Slog.d(TAG, "Wifi uid " + entry.getUid()
+                                + ": delta rx=" + entry.getRxBytes()
+                                + " tx=" + entry.getTxBytes()
+                                + " rxPackets=" + entry.getRxPackets()
+                                + " txPackets=" + entry.getTxPackets());
                     }
 
-                    if (entry.rxBytes == 0 && entry.txBytes == 0) {
+                    if (entry.getRxBytes() == 0 && entry.getTxBytes() == 0) {
                         // Skip the lookup below since there is no work to do.
                         continue;
                     }
 
-                    final Uid u = getUidStatsLocked(mapUid(entry.uid), elapsedRealtimeMs, uptimeMs);
-                    if (entry.rxBytes != 0) {
-                        u.noteNetworkActivityLocked(NETWORK_WIFI_RX_DATA, entry.rxBytes,
-                                entry.rxPackets);
-                        if (entry.set == NetworkStats.SET_DEFAULT) { // Background transfers
-                            u.noteNetworkActivityLocked(NETWORK_WIFI_BG_RX_DATA, entry.rxBytes,
-                                    entry.rxPackets);
+                    final Uid u = getUidStatsLocked(mapUid(entry.getUid()),
+                            elapsedRealtimeMs, uptimeMs);
+                    if (entry.getRxBytes() != 0) {
+                        u.noteNetworkActivityLocked(NETWORK_WIFI_RX_DATA, entry.getRxBytes(),
+                                entry.getRxPackets());
+                        if (entry.getSet() == NetworkStats.SET_DEFAULT) { // Background transfers
+                            u.noteNetworkActivityLocked(NETWORK_WIFI_BG_RX_DATA, entry.getRxBytes(),
+                                    entry.getRxPackets());
                         }
                         mNetworkByteActivityCounters[NETWORK_WIFI_RX_DATA].addCountLocked(
-                                entry.rxBytes);
+                                entry.getRxBytes());
                         mNetworkPacketActivityCounters[NETWORK_WIFI_RX_DATA].addCountLocked(
-                                entry.rxPackets);
+                                entry.getRxPackets());
 
                         // TODO(b/182845426): What if u was a mapped isolated uid? Shouldn't we sum?
-                        rxPackets.put(u.getUid(), entry.rxPackets);
+                        rxPackets.put(u.getUid(), entry.getRxPackets());
 
                         // Sum the total number of packets so that the Rx Power can
                         // be evenly distributed amongst the apps.
-                        totalRxPackets += entry.rxPackets;
+                        totalRxPackets += entry.getRxPackets();
                     }
 
-                    if (entry.txBytes != 0) {
-                        u.noteNetworkActivityLocked(NETWORK_WIFI_TX_DATA, entry.txBytes,
-                                entry.txPackets);
-                        if (entry.set == NetworkStats.SET_DEFAULT) { // Background transfers
-                            u.noteNetworkActivityLocked(NETWORK_WIFI_BG_TX_DATA, entry.txBytes,
-                                    entry.txPackets);
+                    if (entry.getTxBytes() != 0) {
+                        u.noteNetworkActivityLocked(NETWORK_WIFI_TX_DATA, entry.getTxBytes(),
+                                entry.getTxPackets());
+                        if (entry.getSet() == NetworkStats.SET_DEFAULT) { // Background transfers
+                            u.noteNetworkActivityLocked(NETWORK_WIFI_BG_TX_DATA, entry.getTxBytes(),
+                                    entry.getTxPackets());
                         }
                         mNetworkByteActivityCounters[NETWORK_WIFI_TX_DATA].addCountLocked(
-                                entry.txBytes);
+                                entry.getTxBytes());
                         mNetworkPacketActivityCounters[NETWORK_WIFI_TX_DATA].addCountLocked(
-                                entry.txPackets);
+                                entry.getTxPackets());
 
                         // TODO(b/182845426): What if u was a mapped isolated uid? Shouldn't we sum?
-                        txPackets.put(u.getUid(), entry.txPackets);
+                        txPackets.put(u.getUid(), entry.getTxPackets());
 
                         // Sum the total number of packets so that the Tx Power can
                         // be evenly distributed amongst the apps.
-                        totalTxPackets += entry.txPackets;
+                        totalTxPackets += entry.getTxPackets();
                     }
 
                     // Calculate consumed energy for this uid. Only do so if WifiReporting isn't
@@ -11681,11 +11680,10 @@ public class BatteryStatsImpl extends BatteryStats {
 
                         uidEstimatedConsumptionMah.add(u.getUid(),
                                 mWifiPowerCalculator.calcPowerWithoutControllerDataMah(
-                                        entry.rxPackets, entry.txPackets,
+                                        entry.getRxPackets(), entry.getTxPackets(),
                                         uidRunningMs, uidScanMs, uidBatchScanMs));
                     }
                 }
-                mNetworkStatsPool.release(delta);
                 delta = null;
             }
 
@@ -11932,21 +11930,15 @@ public class BatteryStatsImpl extends BatteryStats {
         // Grab a separate lock to acquire the network stats, which may do I/O.
         NetworkStats delta = null;
         synchronized (mModemNetworkLock) {
-            final NetworkStats latestStats = readNetworkStatsLocked(networkStatsManager,
-                    mModemIfaces);
+            final NetworkStats latestStats = readMobileNetworkStatsLocked(networkStatsManager);
             if (latestStats != null) {
-                delta = NetworkStats.subtract(latestStats, mLastModemNetworkStats, null, null,
-                        mNetworkStatsPool.acquire());
-                mNetworkStatsPool.release(mLastModemNetworkStats);
+                delta = latestStats.subtract(mLastModemNetworkStats);
                 mLastModemNetworkStats = latestStats;
             }
         }
 
         synchronized (this) {
             if (!mOnBatteryInternal || mIgnoreNextExternalStats) {
-                if (delta != null) {
-                    mNetworkStatsPool.release(delta);
-                }
                 return;
             }
 
@@ -12148,7 +12140,6 @@ public class BatteryStatsImpl extends BatteryStats {
                             totalEstimatedConsumptionMah);
                 }
 
-                mNetworkStatsPool.release(delta);
                 delta = null;
             }
         }

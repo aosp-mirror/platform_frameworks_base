@@ -26,21 +26,37 @@ import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+/**
+ * This class provides APIs to do a delayed data write to a given {@link OutputStream}.
+ */
 public class DelayedDiskWrite {
+    private static final String TAG = "DelayedDiskWrite";
+
     private HandlerThread mDiskWriteHandlerThread;
     private Handler mDiskWriteHandler;
     /* Tracks multiple writes on the same thread */
     private int mWriteSequence = 0;
-    private final String TAG = "DelayedDiskWrite";
 
+    /**
+     * Used to do a delayed data write to a given {@link OutputStream}.
+     */
     public interface Writer {
-        public void onWriteCalled(DataOutputStream out) throws IOException;
+        /**
+         * write data to a given {@link OutputStream}.
+         */
+        void onWriteCalled(DataOutputStream out) throws IOException;
     }
 
+    /**
+     * Do a delayed data write to a given output stream opened from filePath.
+     */
     public void write(final String filePath, final Writer w) {
         write(filePath, w, true);
     }
 
+    /**
+     * Do a delayed data write to a given output stream opened from filePath.
+     */
     public void write(final String filePath, final Writer w, final boolean open) {
         if (TextUtils.isEmpty(filePath)) {
             throw new IllegalArgumentException("empty file path");
@@ -77,7 +93,7 @@ public class DelayedDiskWrite {
             if (out != null) {
                 try {
                     out.close();
-                } catch (Exception e) {}
+                } catch (Exception e) { }
             }
 
             // Quit if no more writes sent

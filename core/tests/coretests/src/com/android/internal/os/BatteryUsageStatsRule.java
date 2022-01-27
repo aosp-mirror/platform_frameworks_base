@@ -40,6 +40,7 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.mockito.stubbing.Answer;
 
+import java.io.File;
 import java.util.Arrays;
 
 public class BatteryUsageStatsRule implements TestRule {
@@ -57,14 +58,18 @@ public class BatteryUsageStatsRule implements TestRule {
     private boolean mScreenOn;
 
     public BatteryUsageStatsRule() {
-        this(0);
+        this(0, null);
     }
 
     public BatteryUsageStatsRule(long currentTime) {
+        this(currentTime, null);
+    }
+
+    public BatteryUsageStatsRule(long currentTime, File historyDir) {
         Context context = InstrumentationRegistry.getContext();
         mPowerProfile = spy(new PowerProfile(context, true /* forTest */));
         mMockClocks.currentTime = currentTime;
-        mBatteryStats = new MockBatteryStatsImpl(mMockClocks);
+        mBatteryStats = new MockBatteryStatsImpl(mMockClocks, historyDir);
         mBatteryStats.setPowerProfile(mPowerProfile);
         mBatteryStats.onSystemReady();
     }

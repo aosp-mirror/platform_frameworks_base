@@ -160,6 +160,11 @@ public class BatteryStatsHistory {
         mHistoryDir = null;
         mHistoryBuffer = historyBuffer;
     }
+
+    public File getHistoryDirectory() {
+        return mHistoryDir;
+    }
+
     /**
      * Set the active file that mHistoryBuffer is backed up into.
      *
@@ -375,12 +380,24 @@ public class BatteryStatsHistory {
     }
 
     /**
-     * Read all history files and serialize into a big Parcel. This is to send history files to
-     * Settings app since Settings app can not access /data/system directory.
-     * Checkin file also call this method.
+     * Read all history files and serialize into a big Parcel.
+     * Checkin file calls this method.
      * @param out the output parcel
      */
     public void writeToParcel(Parcel out) {
+        writeToParcel(out, false /* useBlobs */);
+    }
+
+    /**
+     * Read all history files and serialize into a big Parcel. This is to send history files to
+     * Settings app since Settings app can not access /data/system directory.
+     * @param out the output parcel
+     */
+    public void writeToBatteryUsageStatsParcel(Parcel out) {
+        writeToParcel(out, true /* useBlobs */);
+    }
+
+    private void writeToParcel(Parcel out, boolean useBlobs) {
         final long start = SystemClock.uptimeMillis();
         out.writeInt(mFileNumbers.size() - 1);
         for(int i = 0;  i < mFileNumbers.size() - 1; i++) {
@@ -391,7 +408,12 @@ public class BatteryStatsHistory {
             } catch(Exception e) {
                 Slog.e(TAG, "Error reading file "+ file.getBaseFile().getPath(), e);
             }
-            out.writeByteArray(raw);
+            if (useBlobs) {
+                out.writeBlob(raw);
+            } else {
+                // Avoiding blobs in the check-in file for compatibility
+                out.writeByteArray(raw);
+            }
         }
         if (DEBUG) {
             Slog.d(TAG, "writeToParcel duration ms:" + (SystemClock.uptimeMillis() - start));
@@ -399,18 +421,29 @@ public class BatteryStatsHistory {
     }
 
     /**
-     * This is for Settings app, when Settings app receives big history parcel, it call
-     * this method to parse it into list of parcels.
-     * Checkin file also call this method.
+     * This is for the check-in file, which has all history files embedded.
      * @param in the input parcel.
      */
     public void readFromParcel(Parcel in) {
+        readFromParcel(in, false /* useBlobs */);
+    }
+
+    /**
+     * This is for Settings app, when Settings app receives big history parcel, it calls
+     * this method to parse it into list of parcels.
+     * @param in the input parcel.
+     */
+    public void readFromBatteryUsageStatsParcel(Parcel in) {
+        readFromParcel(in, true /* useBlobs */);
+    }
+
+    private void readFromParcel(Parcel in, boolean useBlobs) {
         final long start = SystemClock.uptimeMillis();
         mHistoryParcels = new ArrayList<>();
         final int count = in.readInt();
         for(int i = 0; i < count; i++) {
-            byte[] temp = in.createByteArray();
-            if (temp.length == 0) {
+            byte[] temp = useBlobs ? in.readBlob() : in.createByteArray();
+            if (temp == null || temp.length == 0) {
                 continue;
             }
             Parcel p = Parcel.obtain();

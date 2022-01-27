@@ -39,6 +39,8 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import libcore.testing.io.TestIoUtils;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,8 +54,11 @@ public class BatteryUsageStatsProviderTest {
     private static final int APP_UID = Process.FIRST_APPLICATION_UID + 42;
     private static final long MINUTE_IN_MS = 60 * 1000;
 
+    private final File mHistoryDir =
+            TestIoUtils.createTemporaryDirectory(getClass().getSimpleName());
+
     @Rule
-    public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule(12345)
+    public final BatteryUsageStatsRule mStatsRule = new BatteryUsageStatsRule(12345, mHistoryDir)
             .setAveragePower(PowerProfile.POWER_FLASHLIGHT, 360.0);
 
     @Test
