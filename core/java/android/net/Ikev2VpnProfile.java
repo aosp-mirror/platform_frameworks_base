@@ -1071,8 +1071,6 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
          *
          * Note that because the local traffic will always bypass the VPN,
          * it is not possible to set this flag on a non-bypassable VPN.
-         *
-         * @hide TODO(184750836): unhide once the implementation is completed
          */
         @NonNull
         @RequiresFeature(PackageManager.FEATURE_IPSEC_TUNNELS)
