@@ -18,6 +18,7 @@ package android.app.usage;
 
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -26,6 +27,7 @@ import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UserHandleAware;
 import android.app.Activity;
+import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -1386,6 +1388,67 @@ public final class UsageStatsManager {
     public long getLastTimeAnyComponentUsed(@NonNull String packageName) {
         try {
             return mService.getLastTimeAnyComponentUsed(packageName, mContext.getOpPackageName());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the broadcast response stats since the last boot corresponding to
+     * {@code packageName} and {@code id}.
+     *
+     * <p>Broadcast response stats will include the aggregated data of what actions an app took upon
+     * receiving a broadcast. This data will consider the broadcasts that the caller sent to
+     * {@code packageName} and explicitly requested to record the response events using
+     * {@link BroadcastOptions#recordResponseEventWhileInBackground(long)}.
+     *
+     * @param packageName The name of the package that the caller wants to query for.
+     * @param id The ID corresponding to the broadcasts that the caller wants to query for. This is
+     *           the ID the caller specifies when requesting a broadcast response event to be
+     *           recorded using {@link BroadcastOptions#recordResponseEventWhileInBackground(long)}.
+     *
+     * @return the broadcast response stats corresponding to {@code packageName} and {@code id}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    @UserHandleAware
+    @NonNull
+    public BroadcastResponseStats queryBroadcastResponseStats(
+            @NonNull String packageName, @IntRange(from = 1) long id) {
+        try {
+            return mService.queryBroadcastResponseStats(packageName, id,
+                    mContext.getOpPackageName(), mContext.getUserId());
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Clears the broadcast response stats corresponding to {@code packageName} and {@code id}.
+     *
+     * When a caller uses this API, stats related to the events occurring till that point will be
+     * cleared and subsequent calls to {@link #queryBroadcastResponseStats(String, long)} will
+     * return stats related to events occurring after this.
+     *
+     * @param packageName The name of the package that the caller wants to clear the data for.
+     * @param id The ID corresponding to the broadcasts that the caller wants to clear the data for.
+     *           This is the ID the caller specifies when requesting a broadcast response event
+     *           to be recorded using
+     *           {@link BroadcastOptions#recordResponseEventWhileInBackground(long)}.
+     *
+     * @see #queryBroadcastResponseStats(String, long)
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS)
+    @UserHandleAware
+    public void clearBroadcastResponseStats(@NonNull String packageName,
+            @IntRange(from = 1) long id) {
+        try {
+            mService.clearBroadcastResponseStats(packageName, id,
+                    mContext.getOpPackageName(), mContext.getUserId());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
