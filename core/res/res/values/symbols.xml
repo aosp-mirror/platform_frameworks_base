@@ -4450,6 +4450,12 @@
   <java-symbol type="bool" name="config_cecTvSendStandbyOnSleepDisabled_allowed" />
   <java-symbol type="bool" name="config_cecTvSendStandbyOnSleepDisabled_default" />
 
+  <java-symbol type="bool" name="config_cecSetMenuLanguage_userConfigurable" />
+  <java-symbol type="bool" name="config_cecSetMenuLanguageEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecSetMenuLanguageEnabled_default" />
+  <java-symbol type="bool" name="config_cecSetMenuLanguageDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecSetMenuLanguageDisabled_default" />
+
   <java-symbol type="bool" name="config_cecRcProfileTv_userConfigurable" />
   <java-symbol type="bool" name="config_cecRcProfileTvNone_allowed" />
   <java-symbol type="bool" name="config_cecRcProfileTvNone_default" />

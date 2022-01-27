@@ -165,6 +165,17 @@ final class FakeHdmiCecConfig extends HdmiCecConfig {
                 R.bool.config_cecTvSendStandbyOnSleepDisabled_default);
 
         doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSetMenuLanguage_userConfigurable);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSetMenuLanguageEnabled_allowed);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSetMenuLanguageEnabled_default);
+        doReturn(true).when(resources).getBoolean(
+                R.bool.config_cecSetMenuLanguageDisabled_allowed);
+        doReturn(false).when(resources).getBoolean(
+                R.bool.config_cecSetMenuLanguageDisabled_default);
+
+        doReturn(true).when(resources).getBoolean(
                 R.bool.config_cecRcProfileTv_userConfigurable);
         doReturn(true).when(resources).getBoolean(
                 R.bool.config_cecRcProfileTvNone_allowed);
