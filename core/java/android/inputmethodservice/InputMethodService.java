@@ -2216,10 +2216,12 @@ public class InputMethodService extends AbstractInputMethodService {
     }
     
     /**
-     * Called by the framework to create the layout for showing extacted text.
+     * Called by the framework to create the layout for showing extracted text.
      * Only called when in fullscreen mode.  The returned view hierarchy must
      * have an {@link ExtractEditText} whose ID is 
-     * {@link android.R.id#inputExtractEditText}.
+     * {@link android.R.id#inputExtractEditText}, with action ID
+     * {@link android.R.id#inputExtractAction} and accessories ID
+     * {@link android.R.id#inputExtractAccessories}.
      */
     public View onCreateExtractTextView() {
         return mInflater.inflate(

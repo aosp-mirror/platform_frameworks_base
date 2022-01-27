@@ -2108,6 +2108,8 @@ package android {
     field public static final int icon_frame = 16908350; // 0x102003e
     field public static final int input = 16908297; // 0x1020009
     field public static final int inputArea = 16908318; // 0x102001e
+    field public static final int inputExtractAccessories;
+    field public static final int inputExtractAction;
     field public static final int inputExtractEditText = 16908325; // 0x1020025
     field @Deprecated public static final int keyboardView = 16908326; // 0x1020026
     field public static final int list = 16908298; // 0x102000a

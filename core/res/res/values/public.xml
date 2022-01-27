@@ -3268,6 +3268,8 @@
     <public name="accessibilityActionSwipeUp" />
     <public name="accessibilityActionSwipeDown" />
     <public name="accessibilityActionShowSuggestions" />
+    <public name="inputExtractAction" />
+    <public name="inputExtractAccessories" />
   </staging-public-group>
 
   <staging-public-group type="style" first-id="0x01dd0000">
