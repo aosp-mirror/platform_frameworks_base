@@ -110,6 +110,7 @@ combined_apis {
         "art.module.public.api",
         "conscrypt.module.public.api",
         "framework-appsearch",
+        "framework-bluetooth",
         "framework-connectivity",
         "framework-connectivity-tiramisu",
         "framework-graphics",
