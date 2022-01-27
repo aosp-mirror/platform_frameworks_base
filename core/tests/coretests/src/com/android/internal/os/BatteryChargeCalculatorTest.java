@@ -54,6 +54,7 @@ public class BatteryChargeCalculatorTest {
                 /* plugType */ 0, 80, 72, 3700, 2_400_000, 4_000_000, 0,
                 2_000_000, 2_000_000, 2_000_000);
 
+        mStatsRule.setTime(5_000_000, 5_000_000);
         BatteryChargeCalculator calculator = new BatteryChargeCalculator();
         BatteryUsageStats batteryUsageStats = mStatsRule.apply(calculator);
 
@@ -64,6 +65,8 @@ public class BatteryChargeCalculatorTest {
                 .isWithin(PRECISION).of(360.0);
         assertThat(batteryUsageStats.getDischargedPowerRange().getUpper())
                 .isWithin(PRECISION).of(400.0);
+        // 5_000_000 (current time) - 1_000_000 (started discharging)
+        assertThat(batteryUsageStats.getDischargeDurationMs()).isEqualTo(4_000_000);
         assertThat(batteryUsageStats.getBatteryTimeRemainingMs()).isEqualTo(8_000_000);
         assertThat(batteryUsageStats.getChargeTimeRemainingMs()).isEqualTo(-1);
 

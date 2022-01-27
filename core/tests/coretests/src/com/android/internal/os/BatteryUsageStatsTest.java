@@ -183,7 +183,7 @@ public class BatteryUsageStatsTest {
                         .add(stats2)
                         .build();
 
-        assertBatteryUsageStats(sum, 42345, 50, 2234, 4345, 1000, 5000, 5000);
+        assertBatteryUsageStats(sum, 42345, 50, 2234, 4345, 1234, 1000, 5000, 5000);
 
         final List<UidBatteryConsumer> uidBatteryConsumers =
                 sum.getUidBatteryConsumers();
@@ -259,6 +259,7 @@ public class BatteryUsageStatsTest {
                         .setBatteryCapacity(4000)
                         .setDischargePercentage(20)
                         .setDischargedPowerRange(1000, 2000)
+                        .setDischargeDurationMs(1234)
                         .setStatsStartTimestamp(1000)
                         .setStatsEndTimestamp(3000);
 
@@ -420,7 +421,7 @@ public class BatteryUsageStatsTest {
 
     public void assertBatteryUsageStats1(BatteryUsageStats batteryUsageStats,
             boolean includesUserBatteryConsumers) {
-        assertBatteryUsageStats(batteryUsageStats, 30000, 20, 1000, 2000, 1000, 3000, 2000);
+        assertBatteryUsageStats(batteryUsageStats, 30000, 20, 1000, 2000, 1234, 1000, 3000, 2000);
 
         final List<UidBatteryConsumer> uidBatteryConsumers =
                 batteryUsageStats.getUidBatteryConsumers();
@@ -463,13 +464,15 @@ public class BatteryUsageStatsTest {
 
     private void assertBatteryUsageStats(BatteryUsageStats batteryUsageStats, int consumedPower,
             int dischargePercentage, int dischagePowerLower, int dischargePowerUpper,
-            int statsStartTimestamp, int statsEndTimestamp, int statsDuration) {
+            int dischargeDuration, int statsStartTimestamp, int statsEndTimestamp,
+            int statsDuration) {
         assertThat(batteryUsageStats.getConsumedPower()).isEqualTo(consumedPower);
         assertThat(batteryUsageStats.getDischargePercentage()).isEqualTo(dischargePercentage);
         assertThat(batteryUsageStats.getDischargedPowerRange().getLower()).isEqualTo(
                 dischagePowerLower);
         assertThat(batteryUsageStats.getDischargedPowerRange().getUpper()).isEqualTo(
                 dischargePowerUpper);
+        assertThat(batteryUsageStats.getDischargeDurationMs()).isEqualTo(dischargeDuration);
         assertThat(batteryUsageStats.getStatsStartTimestamp()).isEqualTo(statsStartTimestamp);
         assertThat(batteryUsageStats.getStatsEndTimestamp()).isEqualTo(statsEndTimestamp);
         assertThat(batteryUsageStats.getStatsDuration()).isEqualTo(statsDuration);

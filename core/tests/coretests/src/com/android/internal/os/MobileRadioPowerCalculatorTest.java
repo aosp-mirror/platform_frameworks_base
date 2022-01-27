@@ -102,7 +102,7 @@ public class MobileRadioPowerCalculatorTest {
         stats.noteModemControllerActivity(mai, POWER_DATA_UNAVAILABLE, 10000, 10000,
                 mNetworkStatsManager);
 
-        mStatsRule.setTime(12_000_000, 12_000_000);
+        mStatsRule.setTime(12_000, 12_000);
 
         MobileRadioPowerCalculator calculator =
                 new MobileRadioPowerCalculator(mStatsRule.getPowerProfile());
@@ -248,7 +248,7 @@ public class MobileRadioPowerCalculatorTest {
                 new int[]{100, 200, 300, 400, 500}, 600);
         stats.noteModemControllerActivity(mai, 10_000_000, 10000, 10000, mNetworkStatsManager);
 
-        mStatsRule.setTime(12_000_000, 12_000_000);
+        mStatsRule.setTime(12_000, 12_000);
 
         MobileRadioPowerCalculator calculator =
                 new MobileRadioPowerCalculator(mStatsRule.getPowerProfile());
