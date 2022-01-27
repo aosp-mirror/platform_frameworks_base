@@ -14767,6 +14767,11 @@ public class DevicePolicyManager {
      * The device may not connect to networks that do not meet the minimum security level.
      * If the current network does not meet the minimum security level set, it will be disconnected.
      *
+     * The following shows the Wi-Fi security levels from the lowest to the highest security level:
+     * {@link #WIFI_SECURITY_OPEN}
+     * {@link #WIFI_SECURITY_PERSONAL}
+     * {@link #WIFI_SECURITY_ENTERPRISE_EAP}
+     * {@link #WIFI_SECURITY_ENTERPRISE_192}
      *
      * @param level minimum security level
      * @throws SecurityException if the caller is not a device owner or a profile owner on
