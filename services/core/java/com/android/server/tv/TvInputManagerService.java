@@ -43,6 +43,7 @@ import android.content.pm.UserInfo;
 import android.graphics.Rect;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.media.AudioPresentation;
 import android.media.PlaybackParams;
 import android.media.tv.AdBuffer;
 import android.media.tv.AdRequest;
@@ -1836,6 +1837,28 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
+        public void selectAudioPresentation(IBinder sessionToken, int presentationId,
+                                            int programId, int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "selectAudioPresentation");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        getSessionLocked(sessionToken, callingUid,
+                                        resolvedUserId).selectAudioPresentation(
+                                        presentationId, programId);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in selectAudioPresentation", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+       @Override
         public void selectTrack(IBinder sessionToken, int type, String trackId, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
@@ -3355,6 +3378,43 @@ public final class TvInputManagerService extends SystemService {
                     }
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onChannelRetuned", e);
+                }
+            }
+        }
+
+        @Override
+        public void onAudioPresentationsChanged(List<AudioPresentation> audioPresentations) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "onAudioPresentationChanged(" + audioPresentations + ")");
+                }
+                if (mSessionState.session == null || mSessionState.client == null) {
+                    return;
+                }
+                try {
+                    mSessionState.client.onAudioPresentationsChanged(audioPresentations,
+                                                                     mSessionState.seq);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in onAudioPresentationsChanged", e);
+                }
+            }
+        }
+
+        @Override
+        public void onAudioPresentationSelected(int presentationId, int programId) {
+            synchronized (mLock) {
+                if (DEBUG) {
+                    Slog.d(TAG, "onAudioPresentationSelected(presentationId=" + presentationId
+                                                            + ", programId=" + programId + ")");
+                }
+                if (mSessionState.session == null || mSessionState.client == null) {
+                    return;
+                }
+                try {
+                    mSessionState.client.onAudioPresentationSelected(presentationId, programId,
+                                                                     mSessionState.seq);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "error in onAudioPresentationSelected", e);
                 }
             }
         }

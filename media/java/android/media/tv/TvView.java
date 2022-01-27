@@ -30,6 +30,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.media.AudioPresentation;
 import android.media.PlaybackParams;
 import android.media.tv.TvInputManager.Session;
 import android.media.tv.TvInputManager.Session.FinishedInputEventCallback;
@@ -54,6 +55,7 @@ import android.view.ViewRootImpl;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 
@@ -431,6 +433,35 @@ public class TvView extends ViewGroup {
         if (mSession != null) {
             mSession.setCaptionEnabled(enabled);
         }
+    }
+
+    /**
+     * Selects an audio presentation.
+     *
+     * @param presentationId The ID of the audio presentation to select.
+     * @param programId The ID of the program providing the selected audio presentation.
+     * @see #getAudioPresentations
+     */
+    public void selectAudioPresentation(int presentationId, int programId) {
+        if (mSession != null) {
+            mSession.selectAudioPresentation(presentationId, programId);
+        }
+    }
+
+    /**
+     * Returns the list of audio presentations from the selected track of type
+     * {@link TvTrackInfo#TYPE_AUDIO}.
+     *
+     * @return the list of audio presentations from the selected audio track, or an empty list if no
+     * audio presentations are available.
+     * @see #selectAudioPresentation
+     */
+    @NonNull
+    public List<AudioPresentation> getAudioPresentations() {
+        if (mSession == null) {
+            return new ArrayList<AudioPresentation>();
+        }
+        return mSession.getAudioPresentations();
     }
 
     /**
@@ -977,6 +1008,27 @@ public class TvView extends ViewGroup {
         }
 
         /**
+         * This is called when the audio presentation information has been changed.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param audioPresentations A list of updated audio presentation information.
+         */
+        public void onAudioPresentationsChanged(@NonNull String inputId,
+                @NonNull List<AudioPresentation> audioPresentations) {
+        }
+
+        /**
+         * This is called when audio presentation selection has changed.
+         *
+         * @param inputId The ID of the TV input bound to this view.
+         * @param presentationId The ID of the audio presentation selected.
+         * @param programId The ID of the program providing the selected audio presentation.
+         */
+        public void onAudioPresentationSelected(@NonNull String inputId, int presentationId,
+                int programId) {
+        }
+
+        /**
          * This is called when the track information has been changed.
          *
          * @param inputId The ID of the TV input bound to this view.
@@ -1238,6 +1290,37 @@ public class TvView extends ViewGroup {
             }
             if (mCallback != null) {
                 mCallback.onChannelRetuned(mInputId, channelUri);
+            }
+        }
+
+        @Override
+        public void onAudioPresentationsChanged(Session session,
+                List<AudioPresentation> audioPresentations) {
+            if (DEBUG) {
+                Log.d(TAG, "onAudioPresentationsChanged(" + audioPresentations + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onAudioPresentationsChanged - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onAudioPresentationsChanged(mInputId, audioPresentations);
+            }
+        }
+
+        @Override
+        public void onAudioPresentationSelected(Session session, int presentationId,
+                int programId) {
+            if (DEBUG) {
+                Log.d(TAG, "onAudioPresentationSelected(presentationId=" + presentationId
+                            + ", programId=" + programId + ")");
+            }
+            if (this != mSessionCallback) {
+                Log.w(TAG, "onAudioPresentationSelected - session not created");
+                return;
+            }
+            if (mCallback != null) {
+                mCallback.onAudioPresentationSelected(mInputId, presentationId, programId);
             }
         }
 

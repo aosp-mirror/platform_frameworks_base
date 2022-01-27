@@ -21369,7 +21369,8 @@ package android.media {
     field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioPlaybackConfiguration> CREATOR;
   }
 
-  public final class AudioPresentation {
+  public final class AudioPresentation implements android.os.Parcelable {
+    method public int describeContents();
     method public java.util.Map<java.util.Locale,java.lang.String> getLabels();
     method public java.util.Locale getLocale();
     method public int getMasteringIndication();
@@ -21378,6 +21379,7 @@ package android.media {
     method public boolean hasAudioDescription();
     method public boolean hasDialogueEnhancement();
     method public boolean hasSpokenSubtitles();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int CONTENT_COMMENTARY = 5; // 0x5
     field public static final int CONTENT_DIALOG = 4; // 0x4
     field public static final int CONTENT_EMERGENCY = 6; // 0x6
@@ -21387,11 +21389,14 @@ package android.media {
     field public static final int CONTENT_UNKNOWN = -1; // 0xffffffff
     field public static final int CONTENT_VISUALLY_IMPAIRED = 2; // 0x2
     field public static final int CONTENT_VOICEOVER = 7; // 0x7
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioPresentation> CREATOR;
     field public static final int MASTERED_FOR_3D = 3; // 0x3
     field public static final int MASTERED_FOR_HEADPHONE = 4; // 0x4
     field public static final int MASTERED_FOR_STEREO = 1; // 0x1
     field public static final int MASTERED_FOR_SURROUND = 2; // 0x2
     field public static final int MASTERING_NOT_INDICATED = 0; // 0x0
+    field public static final int PRESENTATION_ID_UNKNOWN = -1; // 0xffffffff
+    field public static final int PROGRAM_ID_UNKNOWN = -1; // 0xffffffff
   }
 
   public static final class AudioPresentation.Builder {
@@ -27062,6 +27067,8 @@ package android.media.tv {
     method public void layoutSurface(int, int, int, int);
     method public void notifyAdResponse(@NonNull android.media.tv.AdResponse);
     method public void notifyAitInfoUpdated(@NonNull android.media.tv.AitInfo);
+    method public void notifyAudioPresentationChanged(@NonNull java.util.List<android.media.AudioPresentation>);
+    method public void notifyAudioPresentationSelected(int, int);
     method public void notifyBroadcastInfoResponse(@NonNull android.media.tv.BroadcastInfoResponse);
     method public void notifyChannelRetuned(android.net.Uri);
     method public void notifyContentAllowed();
@@ -27085,6 +27092,7 @@ package android.media.tv {
     method public void onRemoveBroadcastInfo(int);
     method public void onRequestAd(@NonNull android.media.tv.AdRequest);
     method public void onRequestBroadcastInfo(@NonNull android.media.tv.BroadcastInfoRequest);
+    method public boolean onSelectAudioPresentation(int, int);
     method public boolean onSelectTrack(int, @Nullable String);
     method public abstract void onSetCaptionEnabled(boolean);
     method public void onSetInteractiveAppNotificationEnabled(boolean);
@@ -27181,10 +27189,12 @@ package android.media.tv {
     ctor public TvView(android.content.Context, android.util.AttributeSet);
     ctor public TvView(android.content.Context, android.util.AttributeSet, int);
     method public boolean dispatchUnhandledInputEvent(android.view.InputEvent);
+    method @NonNull public java.util.List<android.media.AudioPresentation> getAudioPresentations();
     method public String getSelectedTrack(int);
     method public java.util.List<android.media.tv.TvTrackInfo> getTracks(int);
     method public boolean onUnhandledInputEvent(android.view.InputEvent);
     method public void reset();
+    method public void selectAudioPresentation(int, int);
     method public void selectTrack(int, String);
     method public void sendAppPrivateCommand(@NonNull String, android.os.Bundle);
     method public void setCallback(@Nullable android.media.tv.TvView.TvInputCallback);
@@ -27217,6 +27227,8 @@ package android.media.tv {
   public abstract static class TvView.TvInputCallback {
     ctor public TvView.TvInputCallback();
     method public void onAitInfoUpdated(@NonNull String, @NonNull android.media.tv.AitInfo);
+    method public void onAudioPresentationSelected(@NonNull String, int, int);
+    method public void onAudioPresentationsChanged(@NonNull String, @NonNull java.util.List<android.media.AudioPresentation>);
     method public void onChannelRetuned(String, android.net.Uri);
     method public void onConnectionFailed(String);
     method public void onContentAllowed(String);
