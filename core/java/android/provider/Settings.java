@@ -10281,6 +10281,15 @@ public final class Settings {
         public static final String NEARBY_SHARING_SLICE_URI = "nearby_sharing_slice_uri";
 
         /**
+         * Current provider of Fast Pair saved devices page.
+         * Default value in @string/config_defaultNearbyFastPairSettingsDevicesComponent.
+         * No VALIDATOR as this setting will not be backed up.
+         * @hide
+         */
+        public static final String NEARBY_FAST_PAIR_SETTINGS_DEVICES_COMPONENT =
+                "nearby_fast_pair_settings_devices_component";
+
+        /**
          * Controls whether aware is enabled.
          * @hide
          */
