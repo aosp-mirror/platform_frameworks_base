@@ -38,6 +38,10 @@
                     <xs:annotation name="nonnull"/>
                     <xs:annotation name="final"/>
                 </xs:element>
+                <xs:element type="thermalThrottling" name="thermalThrottling">
+                    <xs:annotation name="nonnull"/>
+                    <xs:annotation name="final"/>
+                </xs:element>
                 <xs:element type="highBrightnessMode" name="highBrightnessMode" minOccurs="0"
                             maxOccurs="1"/>
                 <xs:element type="displayQuirks" name="quirks" minOccurs="0" maxOccurs="1" />
@@ -153,6 +157,37 @@
             <xs:enumeration value="shutdown"/>
         </xs:restriction>
     </xs:simpleType>
+
+    <xs:complexType name="thermalThrottling">
+        <xs:complexType>
+            <xs:element type="brightnessThrottlingMap" name="brightnessThrottlingMap">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:complexType>
+    </xs:complexType>
+
+    <xs:complexType name="brightnessThrottlingMap">
+        <xs:sequence>
+            <xs:element name="brightnessThrottlingPoint" type="brightnessThrottlingPoint" maxOccurs="unbounded" minOccurs="1">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="brightnessThrottlingPoint">
+        <xs:sequence>
+            <xs:element type="thermalStatus" name="thermalStatus">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="nonNegativeDecimal" name="brightness">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
 
     <xs:complexType name="nitsMap">
         <xs:sequence>
