@@ -1159,6 +1159,17 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 : Integer.compare(a.transactionCode, b.transactionCode);
     }
 
+    /** @hide */
+    public static void startForBluetooth(Context context) {
+        new BinderCallsStats.SettingsObserver(
+                    context,
+                    new BinderCallsStats(
+                            new BinderCallsStats.Injector(),
+                              com.android.internal.os.BinderLatencyProto.Dims.BLUETOOTH));
+
+    }
+
+
 
     /**
      * Settings observer for other processes (not system_server).
