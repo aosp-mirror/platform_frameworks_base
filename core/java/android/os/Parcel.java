@@ -3711,10 +3711,10 @@ public final class Parcel {
         final int m = list.size();
         int i = 0;
         for (; i < m && i < n; i++) {
-            list.set(i, readParcelableInternal(cl, clazz));
+            list.set(i, (T) readParcelableInternal(cl, clazz));
         }
         for (; i < n; i++) {
-            list.add(readParcelableInternal(cl, clazz));
+            list.add((T) readParcelableInternal(cl, clazz));
         }
         for (; i < m; i++) {
             list.remove(n);
@@ -4217,8 +4217,7 @@ public final class Parcel {
      * trying to instantiate an element.
      */
     @Nullable
-    public <T extends Parcelable> T readParcelable(@Nullable ClassLoader loader,
-            @NonNull Class<? super T> clazz) {
+    public <T> T readParcelable(@Nullable ClassLoader loader, @NonNull Class<T> clazz) {
         Objects.requireNonNull(clazz);
         return readParcelableInternal(loader, clazz);
     }
@@ -4228,8 +4227,7 @@ public final class Parcel {
      */
     @SuppressWarnings("unchecked")
     @Nullable
-    private <T extends Parcelable> T readParcelableInternal(@Nullable ClassLoader loader,
-            @Nullable Class<? super T> clazz) {
+    private <T> T readParcelableInternal(@Nullable ClassLoader loader, @Nullable Class<T> clazz) {
         Parcelable.Creator<?> creator = readParcelableCreatorInternal(loader, clazz);
         if (creator == null) {
             return null;
@@ -4465,8 +4463,7 @@ public final class Parcel {
      * deserializing the object.
      */
     @Nullable
-    public <T extends Serializable> T readSerializable(@Nullable ClassLoader loader,
-            @NonNull Class<? super T> clazz) {
+    public <T> T readSerializable(@Nullable ClassLoader loader, @NonNull Class<T> clazz) {
         Objects.requireNonNull(clazz);
         return readSerializableInternal(
                 loader == null ? getClass().getClassLoader() : loader, clazz);
@@ -4476,8 +4473,8 @@ public final class Parcel {
      * @param clazz The type of the serializable expected or {@code null} for performing no checks
      */
     @Nullable
-    private <T extends Serializable> T readSerializableInternal(@Nullable final ClassLoader loader,
-            @Nullable Class<? super T> clazz) {
+    private <T> T readSerializableInternal(@Nullable final ClassLoader loader,
+            @Nullable Class<T> clazz) {
         String name = readString();
         if (name == null) {
             // For some reason we were unable to read the name of the Serializable (either there
