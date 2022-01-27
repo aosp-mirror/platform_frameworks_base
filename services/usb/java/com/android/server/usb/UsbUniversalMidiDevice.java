@@ -218,14 +218,13 @@ public final class UsbUniversalMidiDevice implements Closeable {
             if (doesInterfaceContainInput
                     && doesInterfaceContainOutput) {
                 UsbDeviceConnection connection = manager.openDevice(mUsbDevice);
-                if (!connection.claimInterface(interfaceDescriptor.toAndroid(mParser), true)) {
-                    Log.d(TAG, "Can't claim control interface");
-                    continue;
-                }
-                int defaultMidiProtocol = mMidiBlockParser.calculateMidiType(connection,
-                        interfaceDescriptor.getInterfaceNumber(),
-                        interfaceDescriptor.getAlternateSetting());
 
+                // The ALSA does not handle switching to the MIDI 2.0 interface correctly
+                // and stops exposing /dev/snd/midiC1D0 after calling connection.setInterface().
+                // Thus, simply use the control interface (interface zero).
+                int defaultMidiProtocol = mMidiBlockParser.calculateMidiType(connection,
+                        0,
+                        interfaceDescriptor.getAlternateSetting());
                 connection.close();
                 return defaultMidiProtocol;
             }
