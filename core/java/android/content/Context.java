@@ -5107,6 +5107,16 @@ public abstract class Context {
     public static final String DROPBOX_SERVICE = "dropbox";
 
     /**
+     * System service name for BinaryTransparencyService. This is used to retrieve measurements
+     * pertaining to various pre-installed and system binaries on device for the purposes of
+     * providing transparency to the user.
+     *
+     * @hide
+     */
+    @SuppressLint("ServiceName")
+    public static final String BINARY_TRANSPARENCY_SERVICE = "transparency";
+
+    /**
      * System service name for the DeviceIdleManager.
      * @see #getSystemService(String)
      * @hide

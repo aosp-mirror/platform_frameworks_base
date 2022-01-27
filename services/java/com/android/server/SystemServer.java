@@ -1454,6 +1454,10 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(KeyChainSystemService.class);
             t.traceEnd();
 
+            t.traceBegin("StartBinaryTransparencyService");
+            mSystemServiceManager.startService(BinaryTransparencyService.class);
+            t.traceEnd();
+
             t.traceBegin("StartSchedulingPolicyService");
             ServiceManager.addService("scheduling_policy", new SchedulingPolicyService());
             t.traceEnd();
