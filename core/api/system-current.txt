@@ -1187,6 +1187,15 @@ package android.app.admin {
     field public static final String WORK_PROFILE_PAUSED_TITLE = "MediaProvider.WORK_PROFILE_PAUSED_TITLE";
   }
 
+  public static final class DevicePolicyResources.Strings.PermissionController {
+    field public static final String BACKGROUND_ACCESS_DISABLED_BY_ADMIN_MESSAGE = "PermissionController.BACKGROUND_ACCESS_DISABLED_BY_ADMIN_MESSAGE";
+    field public static final String BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE = "PermissionController.BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE";
+    field public static final String FOREGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE = "PermissionController.FOREGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE";
+    field public static final String HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE = "PermissionController.HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE";
+    field public static final String LOCATION_AUTO_GRANTED_MESSAGE = "PermissionController.LOCATION_AUTO_GRANTED_MESSAGE";
+    field public static final String WORK_PROFILE_DEFAULT_APPS_TITLE = "PermissionController.WORK_PROFILE_DEFAULT_APPS_TITLE";
+  }
+
   public final class DevicePolicyStringResource implements android.os.Parcelable {
     ctor public DevicePolicyStringResource(@NonNull android.content.Context, @NonNull String, @StringRes int);
     method public int describeContents();
