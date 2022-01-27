@@ -2224,25 +2224,9 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             return;
         }
 
-        if (!task.supportsSplitScreenWindowingMode() || forceNonResizable) {
-            if (task.mTransitionController.isShellTransitionsEnabled()) return;
-            // Dismiss docked root task. If task appeared to be in docked root task but is not
-            // resizable - we need to move it to top of fullscreen root task, otherwise it will
-            // be covered.
-            final TaskDisplayArea taskDisplayArea = task.getDisplayArea();
-            if (taskDisplayArea.isSplitScreenModeActivated()) {
-                // Display a warning toast that we tried to put an app that doesn't support
-                // split-screen in split-screen.
-                mService.getTaskChangeNotificationController()
-                        .notifyActivityDismissingDockedRootTask();
-                taskDisplayArea.onSplitScreenModeDismissed(task);
-                taskDisplayArea.mDisplayContent.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
-                        true /* notifyClients */);
-            }
-            return;
+        if (!forceNonResizable) {
+            handleForcedResizableTaskIfNeeded(task, FORCED_RESIZEABLE_REASON_SPLIT_SCREEN);
         }
-
-        handleForcedResizableTaskIfNeeded(task, FORCED_RESIZEABLE_REASON_SPLIT_SCREEN);
     }
 
     /** Notifies that the top activity of the task is forced to be resizeable. */

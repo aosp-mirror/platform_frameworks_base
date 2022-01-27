@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.IFingerprint;
-import android.hardware.biometrics.fingerprint.ISession;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -34,12 +33,14 @@ import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
+import java.util.function.Supplier;
+
 /**
  * Fingerprint-specific resetLockout client for the {@link IFingerprint} AIDL HAL interface.
  * Updates the framework's lockout cache and notifies clients such as Keyguard when lockout is
  * cleared.
  */
-class FingerprintResetLockoutClient extends HalClientMonitor<ISession> implements ErrorConsumer {
+class FingerprintResetLockoutClient extends HalClientMonitor<AidlSession> implements ErrorConsumer {
 
     private static final String TAG = "FingerprintResetLockoutClient";
 
@@ -48,7 +49,7 @@ class FingerprintResetLockoutClient extends HalClientMonitor<ISession> implement
     private final LockoutResetDispatcher mLockoutResetDispatcher;
 
     FingerprintResetLockoutClient(@NonNull Context context,
-            @NonNull LazyDaemon<ISession> lazyDaemon, int userId, String owner, int sensorId,
+            @NonNull Supplier<AidlSession> lazyDaemon, int userId, String owner, int sensorId,
             @NonNull byte[] hardwareAuthToken, @NonNull LockoutCache lockoutTracker,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
@@ -73,7 +74,7 @@ class FingerprintResetLockoutClient extends HalClientMonitor<ISession> implement
     @Override
     protected void startHalOperation() {
         try {
-            getFreshDaemon().resetLockout(mHardwareAuthToken);
+            getFreshDaemon().getSession().resetLockout(mHardwareAuthToken);
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to reset lockout", e);
             mCallback.onClientFinished(this, false /* success */);

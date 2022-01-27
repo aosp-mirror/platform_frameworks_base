@@ -136,6 +136,9 @@ interface IUsbManager
     /* Resets the USB gadget. */
     void resetUsbGadget();
 
+    /* Resets the USB port. */
+    boolean resetUsbPort(in String portId, int operationId, in IUsbOperationInternal callback);
+
     /* Set USB data on or off */
     boolean enableUsbData(in String portId, boolean enable, int operationId, in IUsbOperationInternal callback);
 

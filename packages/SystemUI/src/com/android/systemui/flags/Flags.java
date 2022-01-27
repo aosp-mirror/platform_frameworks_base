@@ -55,6 +55,9 @@ public class Flags {
     public static final BooleanFlag NSSL_DEBUG_REMOVE_ANIMATION =
             new BooleanFlag(106, false);
 
+    public static final BooleanFlag NEW_PIPELINE_CRASH_ON_CALL_TO_OLD_PIPELINE =
+            new BooleanFlag(107, false);
+
     /***************************************/
     // 200 - keyguard/lockscreen
 

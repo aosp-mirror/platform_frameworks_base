@@ -25,6 +25,8 @@ import android.os.IBinder;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.BiometricsProto;
 
+import java.util.function.Supplier;
+
 /**
  * Abstract class for stopping a user.
  * @param <T> Interface for stopping the user.
@@ -43,7 +45,7 @@ public abstract class StopUserClient<T> extends HalClientMonitor<T> {
         getCallback().onClientFinished(this, true /* success */);
     }
 
-    public StopUserClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+    public StopUserClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @Nullable IBinder token, int userId, int sensorId,
             @NonNull UserStoppedCallback callback) {
         super(context, lazyDaemon, token, null /* listener */, userId, context.getOpPackageName(),

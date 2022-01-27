@@ -18,6 +18,8 @@ package com.android.server.app;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.app.GameServiceProviderInstanceImplTest.FakeGameService.GameServiceState;
 
 import static com.google.common.collect.Iterables.getOnlyElement;
@@ -28,16 +30,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
+import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.app.ITaskStackListener;
 import android.content.ComponentName;
+import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
@@ -57,6 +62,7 @@ import android.service.games.IGameSessionService;
 import android.view.SurfaceControlViewHost.SurfacePackage;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.infra.AndroidFuture;
@@ -99,6 +105,10 @@ public final class GameServiceProviderInstanceImplTest {
     private static final ComponentName GAME_A_MAIN_ACTIVITY =
             new ComponentName(GAME_A_PACKAGE, "com.package.game.a.MainActivity");
 
+    private static final String GAME_B_PACKAGE = "com.package.game.b";
+    private static final ComponentName GAME_B_MAIN_ACTIVITY =
+            new ComponentName(GAME_B_PACKAGE, "com.package.game.b.MainActivity");
+
     private static final Bitmap TEST_BITMAP = Bitmap.createBitmap(32, 32, Bitmap.Config.ARGB_8888);
 
     private MockitoSession mMockingSession;
@@ -109,6 +119,9 @@ public final class GameServiceProviderInstanceImplTest {
     private WindowManagerService mMockWindowManagerService;
     @Mock
     private WindowManagerInternal mMockWindowManagerInternal;
+    @Mock
+    private IActivityManager mMockActivityManager;
+    private FakeContext mFakeContext;
     private FakeGameClassifier mFakeGameClassifier;
     private FakeGameService mFakeGameService;
     private FakeServiceConnector<IGameService> mFakeGameServiceConnector;
@@ -117,6 +130,9 @@ public final class GameServiceProviderInstanceImplTest {
     private ArrayList<ITaskStackListener> mTaskStackListeners;
     private ArrayList<RunningTaskInfo> mRunningTaskInfos;
 
+    @Mock
+    private PackageManager mMockPackageManager;
+
     @Before
     public void setUp() throws PackageManager.NameNotFoundException, RemoteException {
         mMockingSession = mockitoSession()
@@ -124,8 +140,11 @@ public final class GameServiceProviderInstanceImplTest {
                 .strictness(Strictness.LENIENT)
                 .startMocking();
 
+        mFakeContext = new FakeContext(InstrumentationRegistry.getInstrumentation().getContext());
+
         mFakeGameClassifier = new FakeGameClassifier();
         mFakeGameClassifier.recordGamePackage(GAME_A_PACKAGE);
+        mFakeGameClassifier.recordGamePackage(GAME_B_PACKAGE);
 
         mFakeGameService = new FakeGameService();
         mFakeGameServiceConnector = new FakeServiceConnector<>(mFakeGameService);
@@ -150,7 +169,9 @@ public final class GameServiceProviderInstanceImplTest {
         mGameServiceProviderInstance = new GameServiceProviderInstanceImpl(
                 new UserHandle(USER_ID),
                 ConcurrentUtils.DIRECT_EXECUTOR,
+                mFakeContext,
                 mFakeGameClassifier,
+                mMockActivityManager,
                 mMockActivityTaskManager,
                 mMockWindowManagerService,
                 mMockWindowManagerInternal,
@@ -660,6 +681,58 @@ public final class GameServiceProviderInstanceImplTest {
         assertEquals(TEST_BITMAP, result.getBitmap());
     }
 
+    @Test
+    public void restartGame_taskIdAssociatedWithGame_restartsTargetGame() throws Exception {
+        Intent launchIntent = new Intent("com.test.ACTION_LAUNCH_GAME_PACKAGE")
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        when(mMockPackageManager.getLaunchIntentForPackage(GAME_A_PACKAGE))
+                .thenReturn(launchIntent);
+
+        mGameServiceProviderInstance.start();
+
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
+        startTask(11, GAME_B_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(11);
+
+        FakeGameSession gameSession11 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage11 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(11)
+                .complete(new CreateGameSessionResult(gameSession11, mockSurfacePackage11));
+
+        mFakeGameSessionService.getCapturedCreateInvocations().get(0)
+                .mGameSessionController.restartGame(10);
+
+        verify(mMockActivityManager).forceStopPackage(GAME_A_PACKAGE, UserHandle.USER_CURRENT);
+        assertThat(mFakeContext.getLastStartedIntent()).isEqualTo(launchIntent);
+    }
+
+    @Test
+    public void restartGame_taskIdNotAssociatedWithGame_noOp() throws Exception {
+        mGameServiceProviderInstance.start();
+
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
+        getOnlyElement(
+                mFakeGameSessionService.getCapturedCreateInvocations())
+                .mGameSessionController.restartGame(11);
+
+        verifyZeroInteractions(mMockActivityManager);
+        assertThat(mFakeContext.getLastStartedIntent()).isNull();
+    }
+
     private void startTask(int taskId, ComponentName componentName) {
         RunningTaskInfo runningTaskInfo = new RunningTaskInfo();
         runningTaskInfo.taskId = taskId;
@@ -826,4 +899,32 @@ public final class GameServiceProviderInstanceImplTest {
             mIsFocused = focused;
         }
     }
+
+    private final class FakeContext extends ContextWrapper {
+        private Intent mLastStartedIntent;
+
+        FakeContext(Context base) {
+            super(base);
+        }
+
+        @Override
+        public PackageManager getPackageManager() {
+            return mMockPackageManager;
+        }
+
+        @Override
+        public void startActivity(Intent intent) {
+            mLastStartedIntent = intent;
+        }
+
+        @Override
+        public void enforceCallingPermission(String permission, @Nullable String message) {
+            // Do nothing.
+        }
+
+        Intent getLastStartedIntent() {
+            return mLastStartedIntent;
+        }
+    }
+
 }

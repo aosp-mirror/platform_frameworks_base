@@ -10091,36 +10091,35 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Same as {@link #logoutUser(ComponentName)}, but called by system (like Settings), not admin.
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.CREATE_USERS})
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public @UserOperationResult int logoutUser() {
+        // TODO(b/214336184): add CTS test
+        try {
+            return mService.logoutUserInternal();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+    /**
      * Gets the user a {@link #logoutUser(ComponentName)} call would switch to,
      * or {@code null} if the current user is not in a session.
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public @Nullable UserHandle getLogoutUser() {
         // TODO(b/214336184): add CTS test
         try {
             int userId = mService.getLogoutUserId();
             return userId == UserHandle.USER_NULL ? null : UserHandle.of(userId);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Clears the user that {@link #logoutUser(ComponentName)} would switch to.
-     *
-     * <p>Typically used by system UI after it logout a session.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    public void clearLogoutUser() {
-        // TODO(b/214336184): add CTS test
-        try {
-            mService.clearLogoutUser();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -10755,6 +10754,9 @@ public class DevicePolicyManager {
      * On fully-managed devices this method is unsupported because all traffic is considered
      * work traffic.
      *
+     * <p> This method enables preferential network service with a default configuration.
+     * To fine-tune the configuration, use {@link #setPreferentialNetworkServiceConfig) instead.
+     *
      * <p>This method can only be called by the profile owner of a managed profile.
      * @param enabled whether preferential network service should be enabled.
      * @throws SecurityException if the caller is not the profile owner.
@@ -10787,6 +10789,56 @@ public class DevicePolicyManager {
         }
         try {
             return mService.isPreferentialNetworkServiceEnabled(myUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets preferential network configuration on the work profile.
+     * {@see PreferentialNetworkServiceConfig}
+     *
+     * An example of a supported preferential network service is the Enterprise
+     * slice on 5G networks.
+     *
+     * By default, preferential network service is disabled on the work profile on supported
+     * carriers and devices. Admins can explicitly enable it with this API.
+     * On fully-managed devices this method is unsupported because all traffic is considered
+     * work traffic.
+     *
+     * <p>This method can only be called by the profile owner of a managed profile.
+     * @param preferentialNetworkServiceConfig preferential network configuration.
+     * @throws SecurityException if the caller is not the profile owner.
+     **/
+    public void setPreferentialNetworkServiceConfig(
+            @NonNull PreferentialNetworkServiceConfig preferentialNetworkServiceConfig) {
+        throwIfParentInstance("setPreferentialNetworkServiceConfig");
+        if (mService == null) {
+            return;
+        }
+        try {
+            mService.setPreferentialNetworkServiceConfig(preferentialNetworkServiceConfig);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get preferential network configuration
+     * {@see PreferentialNetworkServiceConfig}
+     *
+     * <p>This method can be called by the profile owner of a managed profile.
+     *
+     * @return preferential network configuration.
+     * @throws SecurityException if the caller is not the profile owner.
+     */
+    public @NonNull PreferentialNetworkServiceConfig getPreferentialNetworkServiceConfig() {
+        throwIfParentInstance("getPreferentialNetworkServiceConfig");
+        if (mService == null) {
+            return PreferentialNetworkServiceConfig.DEFAULT;
+        }
+        try {
+            return mService.getPreferentialNetworkServiceConfig();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -45,10 +45,12 @@ import android.hardware.input.VirtualMouseScrollEvent;
 import android.hardware.input.VirtualTouchEvent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -59,6 +61,7 @@ import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -78,6 +81,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final OnDeviceCloseListener mListener;
     private final IBinder mAppToken;
     private final VirtualDeviceParams mParams;
+    private final Map<Integer, PowerManager.WakeLock> mPerDisplayWakelocks = new ArrayMap<>();
     private final IVirtualDeviceActivityListener mActivityListener;
 
     private ActivityListener createListenerAdapter(int displayId) {
@@ -206,6 +210,16 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override // Binder call
     public void close() {
+        synchronized (mVirtualDeviceLock) {
+            if (!mPerDisplayWakelocks.isEmpty()) {
+                mPerDisplayWakelocks.forEach((displayId, wakeLock) -> {
+                    Slog.w(TAG, "VirtualDisplay " + displayId + " owned by UID " + mOwnerUid
+                            + " was not properly released");
+                    wakeLock.release();
+                });
+                mPerDisplayWakelocks.clear();
+            }
+        }
         mListener.onClose(mAssociationInfo.getId());
         mAppToken.unlinkToDeath(this, 0);
         mInputController.close();
@@ -383,22 +397,48 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     DisplayWindowPolicyController onVirtualDisplayCreatedLocked(int displayId) {
-        if (mVirtualDisplayIds.contains(displayId)) {
-            throw new IllegalStateException(
-                    "Virtual device already have a virtual display with ID " + displayId);
+        synchronized (mVirtualDeviceLock) {
+            if (mVirtualDisplayIds.contains(displayId)) {
+                throw new IllegalStateException(
+                        "Virtual device already have a virtual display with ID " + displayId);
+            }
+            mVirtualDisplayIds.add(displayId);
+
+            // Since we're being called in the middle of the display being created, we post a
+            // task to grab the wakelock instead of doing it synchronously here, to avoid
+            // reentrancy  problems.
+            mContext.getMainThreadHandler().post(() -> addWakeLockForDisplay(displayId));
+
+            LocalServices.getService(
+                    InputManagerInternal.class).setDisplayEligibilityForPointerCapture(displayId,
+                    false);
+            final GenericWindowPolicyController dwpc =
+                    new GenericWindowPolicyController(FLAG_SECURE,
+                            SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                            getAllowedUserHandles(),
+                            mParams.getAllowedActivities(),
+                            mParams.getBlockedActivities(),
+                            createListenerAdapter(displayId));
+            mWindowPolicyControllers.put(displayId, dwpc);
+            return dwpc;
         }
-        mVirtualDisplayIds.add(displayId);
-        LocalServices.getService(InputManagerInternal.class).setDisplayEligibilityForPointerCapture(
-                displayId, false);
-        final GenericWindowPolicyController dwpc =
-                new GenericWindowPolicyController(FLAG_SECURE,
-                        SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
-                        getAllowedUserHandles(),
-                        mParams.getAllowedActivities(),
-                        mParams.getBlockedActivities(),
-                        createListenerAdapter(displayId));
-        mWindowPolicyControllers.put(displayId, dwpc);
-        return dwpc;
+    }
+
+    void addWakeLockForDisplay(int displayId) {
+        synchronized (mVirtualDeviceLock) {
+            if (!mVirtualDisplayIds.contains(displayId)
+                    || mPerDisplayWakelocks.containsKey(displayId)) {
+                Slog.e(TAG, "Not creating wakelock for displayId " + displayId);
+                return;
+            }
+            PowerManager powerManager = mContext.getSystemService(PowerManager.class);
+            PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
+                    PowerManager.SCREEN_BRIGHT_WAKE_LOCK
+                            | PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                    TAG + ":" + displayId, displayId);
+            wakeLock.acquire();
+            mPerDisplayWakelocks.put(displayId, wakeLock);
+        }
     }
 
     private ArraySet<UserHandle> getAllowedUserHandles() {
@@ -420,14 +460,22 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     void onVirtualDisplayRemovedLocked(int displayId) {
-        if (!mVirtualDisplayIds.contains(displayId)) {
-            throw new IllegalStateException(
-                    "Virtual device doesn't have a virtual display with ID " + displayId);
+        synchronized (mVirtualDeviceLock) {
+            if (!mVirtualDisplayIds.contains(displayId)) {
+                throw new IllegalStateException(
+                        "Virtual device doesn't have a virtual display with ID " + displayId);
+            }
+            PowerManager.WakeLock wakeLock = mPerDisplayWakelocks.get(displayId);
+            if (wakeLock != null) {
+                wakeLock.release();
+                mPerDisplayWakelocks.remove(displayId);
+            }
+            mVirtualDisplayIds.remove(displayId);
+            LocalServices.getService(
+                    InputManagerInternal.class).setDisplayEligibilityForPointerCapture(
+                    displayId, true);
+            mWindowPolicyControllers.remove(displayId);
         }
-        mVirtualDisplayIds.remove(displayId);
-        LocalServices.getService(InputManagerInternal.class).setDisplayEligibilityForPointerCapture(
-                displayId, true);
-        mWindowPolicyControllers.remove(displayId);
     }
 
     int getOwnerUid() {

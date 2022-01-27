@@ -1324,6 +1324,43 @@ public class UsbManager {
     }
 
     /**
+     * Should only be called by {@link UsbPort#resetUsbPort}.
+     * <p>
+     * Disable and then re-enable USB data signaling.
+     *
+     * Reset USB first port..
+     * It will force to stop and restart USB data signaling.
+     * Call UsbPort API if the device has more than one UsbPort.
+     * </p>
+     *
+     * @param port reset the USB Port
+     * @return true enable or disable USB data successfully
+     *         false if something wrong
+     *
+     * Should only be called by {@link UsbPort#resetUsbPort}.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    boolean resetUsbPort(@NonNull UsbPort port, int operationId,
+            IUsbOperationInternal callback) {
+        Objects.requireNonNull(port, "resetUsbPort: port must not be null. opId:" + operationId);
+        try {
+            return mService.resetUsbPort(port.getId(), operationId, callback);
+        } catch (RemoteException e) {
+            Log.e(TAG, "resetUsbPort: failed. ", e);
+            try {
+                callback.onOperationComplete(UsbOperationInternal.USB_OPERATION_ERROR_INTERNAL);
+            } catch (RemoteException r) {
+                Log.e(TAG, "resetUsbPort: failed to call onOperationComplete. opId:"
+                        + operationId, r);
+            }
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Should only be called by {@link UsbPort#enableUsbData}.
      * <p>
      * Enables or disables USB data on the specific port.

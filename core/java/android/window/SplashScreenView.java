@@ -151,6 +151,7 @@ public final class SplashScreenView extends FrameLayout {
         private Instant mIconAnimationStart;
         private Duration mIconAnimationDuration;
         private Consumer<Runnable> mUiThreadInitTask;
+        private boolean mAllowHandleEmpty = true;
 
         public Builder(@NonNull Context context) {
             mContext = context;
@@ -258,6 +259,15 @@ public final class SplashScreenView extends FrameLayout {
         }
 
         /**
+         * Sets whether this view can be copied and transferred to the client if the view is
+         * empty style splash screen.
+         */
+        public Builder setAllowHandleEmpty(boolean allowHandleEmpty) {
+            mAllowHandleEmpty = allowHandleEmpty;
+            return this;
+        }
+
+        /**
          * Create SplashScreenWindowView object from materials.
          */
         public SplashScreenView build() {
@@ -303,7 +313,7 @@ public final class SplashScreenView extends FrameLayout {
                 }
                 view.mIconView = imageView;
             }
-            if (mOverlayDrawable != null || mIconDrawable == null) {
+            if (mOverlayDrawable != null || (view.mIconView == null && !mAllowHandleEmpty)) {
                 view.setNotCopyable();
             }
 
@@ -720,13 +730,15 @@ public final class SplashScreenView extends FrameLayout {
         private RemoteCallback mClientCallback;
 
         public SplashScreenViewParcelable(SplashScreenView view) {
-            mIconSize = view.mIconView.getWidth();
+            final View iconView = view.getIconView();
+            mIconSize = iconView != null ? iconView.getWidth() : 0;
             mBackgroundColor = view.getInitBackgroundColor();
-            mIconBackground = copyDrawable(view.getIconView().getBackground());
+            mIconBackground = iconView != null ? copyDrawable(iconView.getBackground()) : null;
             mSurfacePackage = view.mSurfacePackageCopy;
             if (mSurfacePackage == null) {
                 // We only need to copy the drawable if we are not using a SurfaceView
-                mIconBitmap = copyDrawable(((ImageView) view.getIconView()).getDrawable());
+                mIconBitmap = iconView != null
+                        ? copyDrawable(((ImageView) view.getIconView()).getDrawable()) : null;
             }
             mBrandingBitmap = copyDrawable(view.getBrandingView().getBackground());
 

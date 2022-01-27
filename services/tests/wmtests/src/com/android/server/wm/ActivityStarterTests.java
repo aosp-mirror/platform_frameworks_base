@@ -340,7 +340,7 @@ public class ActivityStarterTests extends WindowTestsBase {
             doReturn(stack).when(mRootWindowContainer)
                     .getLaunchRootTask(any(), any(), any(), anyBoolean());
             doReturn(stack).when(mRootWindowContainer).getLaunchRootTask(any(), any(), any(), any(),
-                    anyBoolean(), any(), anyInt(), anyInt(), anyInt());
+                    anyBoolean(), any(), anyInt());
         }
 
         // Set up mock package manager internal and make sure no unmocked methods are called

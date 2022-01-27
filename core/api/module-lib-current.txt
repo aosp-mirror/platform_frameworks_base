@@ -63,8 +63,8 @@ package android.app.admin {
 
   public class DevicePolicyManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void acknowledgeNewUserDisclaimer();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public void clearLogoutUser();
-    method @Nullable @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.os.UserHandle getLogoutUser();
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public android.os.UserHandle getLogoutUser();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public int logoutUser();
     field public static final String ACTION_SHOW_NEW_USER_DISCLAIMER = "android.app.action.SHOW_NEW_USER_DISCLAIMER";
   }
 
@@ -89,19 +89,6 @@ package android.app.usage {
 
   public abstract static class NetworkStatsManager.UsageCallback {
     method public void onThresholdReached(@NonNull android.net.NetworkTemplate);
-  }
-
-}
-
-package android.bluetooth {
-
-  public class BluetoothFrameworkInitializer {
-    method public static void registerServiceWrappers();
-    method public static void setBluetoothServiceManager(@NonNull android.os.BluetoothServiceManager);
-  }
-
-  public final class BluetoothPan implements android.bluetooth.BluetoothProfile {
-    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED, android.Manifest.permission.TETHER_PRIVILEGED}) public android.net.TetheringManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull java.util.concurrent.Executor, @NonNull android.net.TetheringManager.TetheredInterfaceCallback);
   }
 
 }
@@ -278,6 +265,10 @@ package android.net {
     method public int getResourceId();
   }
 
+  public class LocalSocket implements java.io.Closeable {
+    ctor public LocalSocket(@NonNull java.io.FileDescriptor);
+  }
+
   public class NetworkIdentity {
     method public int getOemManaged();
     method public int getRatType();
@@ -331,6 +322,20 @@ package android.net {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkStateSnapshot> CREATOR;
   }
 
+  public class NetworkStatsCollection {
+    method @NonNull public java.util.Map<android.net.NetworkStatsCollection.Key,android.net.NetworkStatsHistory> getEntries();
+  }
+
+  public static final class NetworkStatsCollection.Builder {
+    ctor public NetworkStatsCollection.Builder(long);
+    method @NonNull public android.net.NetworkStatsCollection.Builder addEntry(@NonNull android.net.NetworkStatsCollection.Key, @NonNull android.net.NetworkStatsHistory);
+    method @NonNull public android.net.NetworkStatsCollection build();
+  }
+
+  public static class NetworkStatsCollection.Key {
+    ctor public NetworkStatsCollection.Key(@NonNull java.util.Set<android.net.NetworkIdentity>, int, int, int);
+  }
+
   public final class NetworkStatsHistory implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public java.util.List<android.net.NetworkStatsHistory.Entry> getEntries();
@@ -365,6 +370,7 @@ package android.net {
     method public int getRoaming();
     method @NonNull public java.util.Set<java.lang.String> getSubscriberIds();
     method @NonNull public java.util.Set<java.lang.String> getWifiNetworkKeys();
+    method public boolean matches(@NonNull android.net.NetworkIdentity);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkTemplate> CREATOR;
     field public static final int MATCH_BLUETOOTH = 8; // 0x8

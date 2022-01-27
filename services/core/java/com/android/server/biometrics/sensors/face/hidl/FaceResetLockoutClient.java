@@ -28,6 +28,7 @@ import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.util.ArrayList;
+import java.util.function.Supplier;
 
 /**
  * Face-specific resetLockout client supporting the {@link android.hardware.biometrics.face.V1_0}
@@ -40,7 +41,7 @@ public class FaceResetLockoutClient extends HalClientMonitor<IBiometricsFace> {
     private final ArrayList<Byte> mHardwareAuthToken;
 
     FaceResetLockoutClient(@NonNull Context context,
-            @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, int userId, String owner, int sensorId,
+            @NonNull Supplier<IBiometricsFace> lazyDaemon, int userId, String owner, int sensorId,
             @NonNull byte[] hardwareAuthToken) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
                 0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,

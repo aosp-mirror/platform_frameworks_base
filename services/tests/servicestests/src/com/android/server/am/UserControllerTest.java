@@ -33,6 +33,7 @@ import static com.android.server.am.UserController.CONTINUE_USER_SWITCH_MSG;
 import static com.android.server.am.UserController.REPORT_LOCKED_BOOT_COMPLETE_MSG;
 import static com.android.server.am.UserController.REPORT_USER_SWITCH_COMPLETE_MSG;
 import static com.android.server.am.UserController.REPORT_USER_SWITCH_MSG;
+import static com.android.server.am.UserController.USER_COMPLETED_EVENT_MSG;
 import static com.android.server.am.UserController.USER_CURRENT_MSG;
 import static com.android.server.am.UserController.USER_START_MSG;
 import static com.android.server.am.UserController.USER_SWITCH_TIMEOUT_MSG;
@@ -45,6 +46,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
@@ -91,6 +93,7 @@ import android.util.Log;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.FgThread;
+import com.android.server.SystemService;
 import com.android.server.am.UserState.KeyEvictedCallback;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
@@ -167,6 +170,8 @@ public class UserControllerTest {
             doReturn(false).when(mInjector).taskSupervisorSwitchUser(anyInt(), any());
             doNothing().when(mInjector).taskSupervisorResumeFocusedStackTopActivity();
             doNothing().when(mInjector).systemServiceManagerOnUserStopped(anyInt());
+            doNothing().when(mInjector).systemServiceManagerOnUserCompletedEvent(
+                    anyInt(), anyInt());
             doNothing().when(mInjector).activityManagerForceStopPackage(anyInt(), anyString());
             doNothing().when(mInjector).activityManagerOnUserStopped(anyInt());
             doNothing().when(mInjector).clearBroadcastQueueForUser(anyInt());
@@ -719,6 +724,54 @@ public class UserControllerTest {
         }
     }
 
+    @Test
+    public void testScheduleOnUserCompletedEvent() throws Exception {
+        // user1 is starting, switching, and unlocked, but not scheduled unlocked yet
+        // user2 is starting and had unlocked but isn't unlocked anymore for whatever reason
+
+        final int user1 = 101;
+        final int user2 = 102;
+        setUpUser(user1, 0);
+        setUpUser(user2, 0);
+
+        mUserController.startUser(user1, /* foreground= */ true);
+        mUserController.getStartedUserState(user1).setState(UserState.STATE_RUNNING_UNLOCKED);
+
+        mUserController.startUser(user2, /* foreground= */ false);
+        mUserController.getStartedUserState(user2).setState(UserState.STATE_RUNNING_LOCKED);
+
+        final int event1a = SystemService.UserCompletedEventType.EVENT_TYPE_USER_STARTING;
+        final int event1b = SystemService.UserCompletedEventType.EVENT_TYPE_USER_SWITCHING;
+
+        final int event2a = SystemService.UserCompletedEventType.EVENT_TYPE_USER_STARTING;
+        final int event2b = SystemService.UserCompletedEventType.EVENT_TYPE_USER_UNLOCKED;
+
+
+        mUserController.scheduleOnUserCompletedEvent(user1, event1a, 2000);
+        assertNotNull(mInjector.mHandler.getMessageForCode(USER_COMPLETED_EVENT_MSG, user1));
+        assertNull(mInjector.mHandler.getMessageForCode(USER_COMPLETED_EVENT_MSG, user2));
+
+        mUserController.scheduleOnUserCompletedEvent(user2, event2a, 2000);
+        assertNotNull(mInjector.mHandler.getMessageForCode(USER_COMPLETED_EVENT_MSG, user1));
+        assertNotNull(mInjector.mHandler.getMessageForCode(USER_COMPLETED_EVENT_MSG, user2));
+
+        mUserController.scheduleOnUserCompletedEvent(user2, event2b, 2000);
+        mUserController.scheduleOnUserCompletedEvent(user1, event1b, 2000);
+        mUserController.scheduleOnUserCompletedEvent(user1, 0, 2000);
+
+        assertNotNull(mInjector.mHandler.getMessageForCode(USER_COMPLETED_EVENT_MSG, user1));
+        assertNotNull(mInjector.mHandler.getMessageForCode(USER_COMPLETED_EVENT_MSG, user2));
+
+        mUserController.reportOnUserCompletedEvent(user1);
+        verify(mInjector, times(1))
+                .systemServiceManagerOnUserCompletedEvent(eq(user1), eq(event1a | event1b));
+        verify(mInjector, never()).systemServiceManagerOnUserCompletedEvent(eq(user2), anyInt());
+
+        mUserController.reportOnUserCompletedEvent(user2);
+        verify(mInjector, times(1))
+                .systemServiceManagerOnUserCompletedEvent(eq(user2), eq(event2a));
+    }
+
     private void setUpAndStartUserInBackground(int userId) throws Exception {
         setUpUser(userId, 0);
         mUserController.startUser(userId, /* foreground= */ false);
@@ -969,8 +1022,12 @@ public class UserControllerTest {
         }
 
         Message getMessageForCode(int what) {
+            return getMessageForCode(what, null);
+        }
+
+        Message getMessageForCode(int what, Object obj) {
             for (Message msg : mMessages) {
-                if (msg.what == what) {
+                if (msg.what == what && (obj == null || obj.equals(msg.obj))) {
                     return msg;
                 }
             }

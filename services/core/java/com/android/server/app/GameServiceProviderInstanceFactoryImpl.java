@@ -17,6 +17,7 @@
 package com.android.server.app;
 
 import android.annotation.NonNull;
+import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.Intent;
@@ -36,17 +37,19 @@ final class GameServiceProviderInstanceFactoryImpl implements GameServiceProvide
     private final Context mContext;
 
     GameServiceProviderInstanceFactoryImpl(@NonNull Context context) {
-        this.mContext = context;
+        mContext = context;
     }
 
     @NonNull
     @Override
-    public GameServiceProviderInstance create(@NonNull
-            GameServiceProviderConfiguration gameServiceProviderConfiguration) {
+    public GameServiceProviderInstance create(
+            @NonNull GameServiceProviderConfiguration gameServiceProviderConfiguration) {
         return new GameServiceProviderInstanceImpl(
                 gameServiceProviderConfiguration.getUserHandle(),
                 BackgroundThread.getExecutor(),
+                mContext,
                 new GameClassifierImpl(mContext.getPackageManager()),
+                ActivityManager.getService(),
                 ActivityTaskManager.getService(),
                 (WindowManagerService) ServiceManager.getService(Context.WINDOW_SERVICE),
                 LocalServices.getService(WindowManagerInternal.class),

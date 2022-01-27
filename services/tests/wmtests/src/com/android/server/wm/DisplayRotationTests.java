@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
 import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_DISABLED;
@@ -544,6 +545,80 @@ public class DisplayRotationTests {
 
         assertEquals(Surface.ROTATION_270, mTarget.rotationForOrientation(
                 SCREEN_ORIENTATION_UNSPECIFIED, Surface.ROTATION_0));
+    }
+
+    @Test
+    public void testReturnsSensorRotation_180degrees_allRotationsAllowed()
+            throws Exception {
+        mBuilder.build();
+        when(mMockRes.getBoolean(com.android.internal.R.bool.config_allowAllRotations))
+                .thenReturn(true);
+        configureDisplayRotation(SCREEN_ORIENTATION_PORTRAIT, false, false);
+        enableOrientationSensor();
+        mOrientationSensorListener.onSensorChanged(createSensorEvent(Surface.ROTATION_180));
+
+        assertEquals(Surface.ROTATION_180, mTarget.rotationForOrientation(
+                SCREEN_ORIENTATION_SENSOR, Surface.ROTATION_0));
+    }
+
+    @Test
+    public void testReturnLastRotation_sensor180_allRotationsNotAllowed()
+            throws Exception {
+        mBuilder.build();
+        when(mMockRes.getBoolean(com.android.internal.R.bool.config_allowAllRotations))
+                .thenReturn(false);
+        configureDisplayRotation(SCREEN_ORIENTATION_PORTRAIT, false, false);
+        enableOrientationSensor();
+        mOrientationSensorListener.onSensorChanged(createSensorEvent(Surface.ROTATION_180));
+
+        assertEquals(Surface.ROTATION_0, mTarget.rotationForOrientation(
+                SCREEN_ORIENTATION_SENSOR, Surface.ROTATION_0));
+    }
+
+    @Test
+    public void testAllowRotationsIsCached()
+            throws Exception {
+        mBuilder.build();
+        configureDisplayRotation(SCREEN_ORIENTATION_PORTRAIT, false, false);
+        enableOrientationSensor();
+
+        // Rotate once to read the resource
+        when(mMockRes.getBoolean(com.android.internal.R.bool.config_allowAllRotations))
+                .thenReturn(true);
+        mOrientationSensorListener.onSensorChanged(createSensorEvent(Surface.ROTATION_180));
+        mTarget.rotationForOrientation(SCREEN_ORIENTATION_SENSOR, Surface.ROTATION_0);
+
+        // Change resource to disallow all rotations.
+        // Rotate again and 180 degrees rotation should still be returned even if "disallowed".
+        when(mMockRes.getBoolean(com.android.internal.R.bool.config_allowAllRotations))
+                .thenReturn(false);
+        mOrientationSensorListener.onSensorChanged(createSensorEvent(Surface.ROTATION_180));
+        assertEquals(Surface.ROTATION_180, mTarget.rotationForOrientation(
+                SCREEN_ORIENTATION_SENSOR, Surface.ROTATION_0));
+    }
+
+    @Test
+    public void testResetAllowRotations()
+            throws Exception {
+        mBuilder.build();
+        configureDisplayRotation(SCREEN_ORIENTATION_PORTRAIT, false, false);
+        enableOrientationSensor();
+
+        // Rotate once to read the resource
+        when(mMockRes.getBoolean(com.android.internal.R.bool.config_allowAllRotations))
+                .thenReturn(true);
+        mOrientationSensorListener.onSensorChanged(createSensorEvent(Surface.ROTATION_180));
+        mTarget.rotationForOrientation(SCREEN_ORIENTATION_SENSOR, Surface.ROTATION_0);
+
+        // Change resource to disallow all rotations.
+        // Reset "allowAllRotations".
+        // Rotate again and 180 degrees rotation should not be allowed anymore.
+        when(mMockRes.getBoolean(com.android.internal.R.bool.config_allowAllRotations))
+                .thenReturn(false);
+        mTarget.resetAllowAllRotations();
+        mOrientationSensorListener.onSensorChanged(createSensorEvent(Surface.ROTATION_180));
+        assertEquals(Surface.ROTATION_0, mTarget.rotationForOrientation(
+                SCREEN_ORIENTATION_SENSOR, Surface.ROTATION_0));
     }
 
     // =================================

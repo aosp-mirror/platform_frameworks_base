@@ -86,6 +86,8 @@ public class QSPanel extends LinearLayout implements Tunable {
             new ArrayList<>();
 
     @Nullable
+    protected View mFgsManagerFooter;
+    @Nullable
     protected View mSecurityFooter;
 
     @Nullable
@@ -448,7 +450,12 @@ public class QSPanel extends LinearLayout implements Tunable {
             switchToParent(mSecurityFooter, mHeaderContainer, 0);
         } else {
             // Add after the footer
-            int index = indexOfChild(mFooter);
+            int index;
+            if (mFgsManagerFooter != null) {
+                index = indexOfChild(mFgsManagerFooter);
+            } else {
+                index = indexOfChild(mFooter);
+            }
             switchToParent(mSecurityFooter, this, index + 1);
         }
     }
@@ -720,6 +727,17 @@ public class QSPanel extends LinearLayout implements Tunable {
     public void setSecurityFooter(View view, boolean shouldUseSplitNotificationShade) {
         mSecurityFooter = view;
         switchSecurityFooter(shouldUseSplitNotificationShade);
+    }
+
+    /**
+     * Set the fgs manager footer view and switch it into the right place
+     * @param view the view in question
+     */
+    public void setFgsManagerFooter(View view) {
+        mFgsManagerFooter = view;
+        // Add after the footer
+        int index = indexOfChild(mFooter);
+        switchToParent(mFgsManagerFooter, this, index + 1);
     }
 
     protected void setPageMargin(int pageMargin) {

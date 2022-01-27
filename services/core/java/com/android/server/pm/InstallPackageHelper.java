@@ -168,10 +168,7 @@ import com.android.server.utils.WatchedLongSparseArray;
 
 import dalvik.system.VMRuntime;
 
-import libcore.io.IoUtils;
-
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.DigestException;
@@ -1788,9 +1785,7 @@ final class InstallPackageHelper {
      */
     private void setUpFsVerityIfPossible(AndroidPackage pkg) throws Installer.InstallerException,
             PrepareFailure, IOException, DigestException, NoSuchAlgorithmException {
-        final boolean standardMode = PackageManagerServiceUtils.isApkVerityEnabled();
-        final boolean legacyMode = PackageManagerServiceUtils.isLegacyApkVerityEnabled();
-        if (!standardMode && !legacyMode) {
+        if (!PackageManagerServiceUtils.isApkVerityEnabled()) {
             return;
         }
 
@@ -1801,36 +1796,24 @@ final class InstallPackageHelper {
 
         // Collect files we care for fs-verity setup.
         ArrayMap<String, String> fsverityCandidates = new ArrayMap<>();
-        if (legacyMode) {
-            synchronized (mPm.mLock) {
-                final PackageSetting ps = mPm.mSettings.getPackageLPr(pkg.getPackageName());
-                if (ps != null && ps.isPrivileged()) {
-                    fsverityCandidates.put(pkg.getBaseApkPath(), null);
-                    for (String splitPath : pkg.getSplitCodePaths()) {
-                        fsverityCandidates.put(splitPath, null);
-                    }
-                }
-            }
-        } else {
-            // NB: These files will become only accessible if the signing key is loaded in kernel's
-            // .fs-verity keyring.
-            fsverityCandidates.put(pkg.getBaseApkPath(),
-                    VerityUtils.getFsveritySignatureFilePath(pkg.getBaseApkPath()));
+        // NB: These files will become only accessible if the signing key is loaded in kernel's
+        // .fs-verity keyring.
+        fsverityCandidates.put(pkg.getBaseApkPath(),
+                VerityUtils.getFsveritySignatureFilePath(pkg.getBaseApkPath()));
 
-            final String dmPath = DexMetadataHelper.buildDexMetadataPathForApk(
-                    pkg.getBaseApkPath());
-            if (new File(dmPath).exists()) {
-                fsverityCandidates.put(dmPath, VerityUtils.getFsveritySignatureFilePath(dmPath));
-            }
+        final String dmPath = DexMetadataHelper.buildDexMetadataPathForApk(
+                pkg.getBaseApkPath());
+        if (new File(dmPath).exists()) {
+            fsverityCandidates.put(dmPath, VerityUtils.getFsveritySignatureFilePath(dmPath));
+        }
 
-            for (String path : pkg.getSplitCodePaths()) {
-                fsverityCandidates.put(path, VerityUtils.getFsveritySignatureFilePath(path));
+        for (String path : pkg.getSplitCodePaths()) {
+            fsverityCandidates.put(path, VerityUtils.getFsveritySignatureFilePath(path));
 
-                final String splitDmPath = DexMetadataHelper.buildDexMetadataPathForApk(path);
-                if (new File(splitDmPath).exists()) {
-                    fsverityCandidates.put(splitDmPath,
-                            VerityUtils.getFsveritySignatureFilePath(splitDmPath));
-                }
+            final String splitDmPath = DexMetadataHelper.buildDexMetadataPathForApk(path);
+            if (new File(splitDmPath).exists()) {
+                fsverityCandidates.put(splitDmPath,
+                        VerityUtils.getFsveritySignatureFilePath(splitDmPath));
             }
         }
 
@@ -1839,43 +1822,14 @@ final class InstallPackageHelper {
             final String filePath = entry.getKey();
             final String signaturePath = entry.getValue();
 
-            if (!legacyMode) {
-                // fs-verity is optional for now.  Only set up if signature is provided.
-                if (new File(signaturePath).exists() && !VerityUtils.hasFsverity(filePath)) {
-                    try {
-                        VerityUtils.setUpFsverity(filePath, signaturePath);
-                    } catch (IOException e) {
-                        throw new PrepareFailure(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
-                                "Failed to enable fs-verity: " + e);
-                    }
-                }
-                continue;
-            }
-
-            // In legacy mode, fs-verity can only be enabled by process with CAP_SYS_ADMIN.
-            final VerityUtils.SetupResult result = VerityUtils.generateApkVeritySetupData(filePath);
-            if (result.isOk()) {
-                if (Build.IS_DEBUGGABLE) Slog.i(TAG, "Enabling verity to " + filePath);
-                final FileDescriptor fd = result.getUnownedFileDescriptor();
+            // fs-verity is optional for now.  Only set up if signature is provided.
+            if (new File(signaturePath).exists() && !VerityUtils.hasFsverity(filePath)) {
                 try {
-                    final byte[] rootHash = VerityUtils.generateApkVerityRootHash(filePath);
-                    try {
-                        // A file may already have fs-verity, e.g. when reused during a split
-                        // install. If the measurement succeeds, no need to attempt to set up.
-                        mPm.mInstaller.assertFsverityRootHashMatches(packageName, filePath,
-                                rootHash);
-                    } catch (Installer.InstallerException e) {
-                        mPm.mInstaller.installApkVerity(packageName, filePath, fd,
-                                result.getContentSize());
-                        mPm.mInstaller.assertFsverityRootHashMatches(packageName, filePath,
-                                rootHash);
-                    }
-                } finally {
-                    IoUtils.closeQuietly(fd);
+                    VerityUtils.setUpFsverity(filePath, signaturePath);
+                } catch (IOException e) {
+                    throw new PrepareFailure(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
+                            "Failed to enable fs-verity: " + e);
                 }
-            } else if (result.isFailed()) {
-                throw new PrepareFailure(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
-                        "Failed to generate verity");
             }
         }
     }
@@ -3959,47 +3913,19 @@ final class InstallPackageHelper {
      */
     private boolean canSkipForcedPackageVerification(AndroidPackage pkg) {
         final String packageName = pkg.getPackageName();
-        if (!canSkipForcedApkVerification(packageName, pkg.getBaseApkPath())) {
+        if (!VerityUtils.hasFsverity(pkg.getBaseApkPath())) {
             return false;
         }
         // TODO: Allow base and splits to be verified individually.
         String[] splitCodePaths = pkg.getSplitCodePaths();
         if (!ArrayUtils.isEmpty(splitCodePaths)) {
             for (int i = 0; i < splitCodePaths.length; i++) {
-                if (!canSkipForcedApkVerification(packageName, splitCodePaths[i])) {
+                if (!VerityUtils.hasFsverity(splitCodePaths[i])) {
                     return false;
                 }
             }
         }
         return true;
-    }
-
-    /**
-     * Returns if forced apk verification can be skipped, depending on current FSVerity setup and
-     * whether the apk contains signed root hash.  Note that the signer's certificate still needs to
-     * match one in a trusted source, and should be done separately.
-     */
-    private boolean canSkipForcedApkVerification(String packageName, String apkPath) {
-        if (!PackageManagerServiceUtils.isLegacyApkVerityEnabled()) {
-            return VerityUtils.hasFsverity(apkPath);
-        }
-
-        try {
-            final byte[] rootHashObserved = VerityUtils.generateApkVerityRootHash(apkPath);
-            if (rootHashObserved == null) {
-                return false;  // APK does not contain Merkle tree root hash.
-            }
-            synchronized (mPm.mInstallLock) {
-                // Returns whether the observed root hash matches what kernel has.
-                mPm.mInstaller.assertFsverityRootHashMatches(packageName, apkPath,
-                        rootHashObserved);
-                return true;
-            }
-        } catch (Installer.InstallerException | IOException | DigestException
-                | NoSuchAlgorithmException e) {
-            Slog.w(TAG, "Error in fsverity check. Fallback to full apk verification.", e);
-        }
-        return false;
     }
 
     /**

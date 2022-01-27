@@ -35,8 +35,8 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.LocusId;
-import android.content.pm.AppSearchPerson;
 import android.content.pm.AppSearchShortcutInfo;
+import android.content.pm.AppSearchShortcutPerson;
 import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
@@ -965,7 +965,7 @@ class ShortcutPackage extends ShortcutPackageItem {
      */
     public ArraySet<String> getUsedBitmapFiles() {
         final ArraySet<String> usedFiles = new ArraySet<>(1);
-        forEachShortcut(AppSearchShortcutInfo.QUERY_HAS_BITMAP_PATH, si -> {
+        forEachShortcut(si -> {
             if (si.getBitmapPath() != null) {
                 usedFiles.add(getFileName(si.getBitmapPath()));
             }
@@ -1176,7 +1176,7 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         // Keep the previous IDs.
         final ArraySet<String> toDisableList = new ArraySet<>(1);
-        forEachShortcut(AppSearchShortcutInfo.QUERY_IS_MANIFEST, si -> {
+        forEachShortcut(si -> {
             if (si.isManifestShortcut()) {
                 toDisableList.add(si.getId());
             }
@@ -1319,7 +1319,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     private ArrayMap<ComponentName, ArrayList<ShortcutInfo>> sortShortcutsToActivities() {
         final ArrayMap<ComponentName, ArrayList<ShortcutInfo>> activitiesToShortcuts
                 = new ArrayMap<>();
-        forEachShortcut(AppSearchShortcutInfo.QUERY_IS_NOT_FLOATING, si -> {
+        forEachShortcut(si -> {
             if (si.isFloating()) {
                 return; // Ignore floating shortcuts, which are not tied to any activities.
             }
@@ -1369,14 +1369,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         // (If it's for update, then don't count dynamic shortcuts, since they'll be replaced
         // anyway.)
         final ArrayMap<ComponentName, Integer> counts = new ArrayMap<>(4);
-        final String query;
-        if (operation != ShortcutService.OPERATION_SET) {
-            query = AppSearchShortcutInfo.QUERY_IS_MANIFEST + " OR "
-                    + AppSearchShortcutInfo.QUERY_IS_DYNAMIC;
-        } else {
-            query = AppSearchShortcutInfo.QUERY_IS_MANIFEST;
-        }
-        forEachShortcut(query, shortcut -> {
+        forEachShortcut(shortcut -> {
             if (shortcut.isManifestShortcut()) {
                 incrementCountForActivity(counts, shortcut.getActivity(), 1);
             } else if (shortcut.isDynamic() && (operation != ShortcutService.OPERATION_SET)) {
@@ -1539,7 +1532,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     /** @return true if there's any shortcuts that are not manifest shortcuts. */
     public boolean hasNonManifestShortcuts() {
         final boolean[] condition = new boolean[1];
-        forEachShortcutStopWhen(AppSearchShortcutInfo.QUERY_IS_NOT_MANIFEST, si -> {
+        forEachShortcutStopWhen(si -> {
             if (!si.isDeclaredInManifest()) {
                 condition[0] = true;
                 return true;
@@ -2287,12 +2280,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     }
 
     private void forEachShortcut(@NonNull final Consumer<ShortcutInfo> cb) {
-        forEachShortcut("", cb);
-    }
-
-    private void forEachShortcut(
-            @NonNull final String query, @NonNull final Consumer<ShortcutInfo> cb) {
-        forEachShortcutStopWhen(query, si -> {
+        forEachShortcutStopWhen(si -> {
             cb.accept(si);
             return false;
         });
@@ -2307,11 +2295,6 @@ class ShortcutPackage extends ShortcutPackageItem {
 
     private void forEachShortcutStopWhen(
             @NonNull final Function<ShortcutInfo, Boolean> cb) {
-        forEachShortcutStopWhen("", cb);
-    }
-
-    private void forEachShortcutStopWhen(
-            @NonNull final String query, @NonNull final Function<ShortcutInfo, Boolean> cb) {
         for (int i = mShortcuts.size() - 1; i >= 0; i--) {
             final ShortcutInfo si = mShortcuts.valueAt(i);
             if (cb.apply(si)) {
@@ -2328,12 +2311,12 @@ class ShortcutPackage extends ShortcutPackageItem {
                     + " pkg=" + getPackageName());
         }
         SetSchemaRequest.Builder schemaBuilder = new SetSchemaRequest.Builder()
-                .addSchemas(AppSearchPerson.SCHEMA, AppSearchShortcutInfo.SCHEMA)
+                .addSchemas(AppSearchShortcutPerson.SCHEMA, AppSearchShortcutInfo.SCHEMA)
                 .setForceOverride(true);
         for (PackageIdentifier pi : mPackageIdentifiers.values()) {
             schemaBuilder = schemaBuilder
                     .setSchemaTypeVisibilityForPackage(
-                            AppSearchPerson.SCHEMA_TYPE, true, pi)
+                            AppSearchShortcutPerson.SCHEMA_TYPE, true, pi)
                     .setSchemaTypeVisibilityForPackage(
                             AppSearchShortcutInfo.SCHEMA_TYPE, true, pi);
         }
@@ -2403,8 +2386,8 @@ class ShortcutPackage extends ShortcutPackageItem {
                     .addIds(ids).build(), mShortcutUser.mExecutor, result -> {
                     final List<ShortcutInfo> ret = result.getSuccesses().values()
                             .stream().map(doc ->
-                                    new AppSearchShortcutInfo(doc)
-                                            .toShortcutInfo(mShortcutUser.getUserId()))
+                                    ShortcutInfo.createFromGenericDocument(
+                                            mShortcutUser.getUserId(), doc))
                             .collect(Collectors.toList());
                     cb.accept(ret);
                 });
@@ -2480,8 +2463,8 @@ class ShortcutPackage extends ShortcutPackageItem {
                 }
                 cb.complete(results.getResultValue().stream()
                         .map(SearchResult::getGenericDocument)
-                        .map(AppSearchShortcutInfo::new)
-                        .map(si -> si.toShortcutInfo(mShortcutUser.getUserId()))
+                        .map(doc -> ShortcutInfo.createFromGenericDocument(
+                                mShortcutUser.getUserId(), doc))
                         .collect(Collectors.toList()));
             });
         }));

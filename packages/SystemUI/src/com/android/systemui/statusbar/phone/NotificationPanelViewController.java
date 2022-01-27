@@ -162,6 +162,7 @@ import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
+import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.QsFrameTranslateController;
@@ -741,6 +742,7 @@ public class NotificationPanelViewController extends PanelViewController {
             KeyguardStateController keyguardStateController,
             StatusBarStateController statusBarStateController,
             StatusBarWindowStateController statusBarWindowStateController,
+            NotificationShadeWindowController notificationShadeWindowController,
             DozeLog dozeLog,
             DozeParameters dozeParameters, CommandQueue commandQueue, VibratorHelper vibratorHelper,
             LatencyTracker latencyTracker, PowerManager powerManager,
@@ -800,6 +802,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 dozeLog,
                 keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController,
+                notificationShadeWindowController,
                 vibratorHelper,
                 statusBarKeyguardViewManager,
                 latencyTracker,
@@ -3928,6 +3931,15 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardStatusViewController.animateFoldToAod();
     }
 
+    /**
+     * Cancels fold to AOD transition and resets view state
+     */
+    public void cancelFoldToAodAnimation() {
+        cancelAnimation();
+        resetAlpha();
+        resetTranslation();
+    }
+
     /** */
     public void setImportantForAccessibility(int mode) {
         mView.setImportantForAccessibility(mode);
@@ -4044,6 +4056,10 @@ public class NotificationPanelViewController extends PanelViewController {
 
     public void resetTranslation() {
         mView.setTranslationX(0f);
+    }
+
+    public void resetAlpha() {
+        mView.setAlpha(1f);
     }
 
     public ViewPropertyAnimator fadeOut(long startDelayMs, long durationMs, Runnable endAction) {

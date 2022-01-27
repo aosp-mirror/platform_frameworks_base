@@ -101,8 +101,8 @@ public class SensorTest {
         mLockoutCache.setLockoutModeForUser(USER_ID, LockoutTracker.LOCKOUT_TIMED);
 
         mScheduler.scheduleClientMonitor(new FingerprintResetLockoutClient(mContext,
-                () -> mSession, USER_ID, TAG, SENSOR_ID, HAT, mLockoutCache,
-                mLockoutResetDispatcher));
+                () -> new AidlSession(1, mSession, USER_ID, mHalCallback),
+                USER_ID, TAG, SENSOR_ID, HAT, mLockoutCache, mLockoutResetDispatcher));
         mLooper.dispatchAll();
 
         verifyNotLocked();

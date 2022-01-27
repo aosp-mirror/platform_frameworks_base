@@ -125,6 +125,7 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_DEFAULT;
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE;
+import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK;
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
@@ -199,6 +200,7 @@ import android.app.admin.ParcelableGranteeMap;
 import android.app.admin.ParcelableResource;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.PasswordPolicy;
+import android.app.admin.PreferentialNetworkServiceConfig;
 import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
 import android.app.admin.StartInstallingUpdateCallback;
@@ -3362,14 +3364,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         updatePermissionPolicyCache(userId);
         updateAdminCanGrantSensorsPermissionCache(userId);
 
-        final boolean preferentialNetworkServiceEnabled;
+        final PreferentialNetworkServiceConfig preferentialNetworkServiceConfig;
         synchronized (getLockObject()) {
             ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
-            preferentialNetworkServiceEnabled = owner != null
-                    ? owner.mPreferentialNetworkServiceEnabled
-                             : DevicePolicyManager.PREFERENTIAL_NETWORK_SERVICE_ENABLED_DEFAULT;
+            preferentialNetworkServiceConfig = owner != null
+                    ? owner.mPreferentialNetworkServiceConfig
+                    : PreferentialNetworkServiceConfig.DEFAULT;
         }
-        updateNetworkPreferenceForUser(userId, preferentialNetworkServiceEnabled);
+        updateNetworkPreferenceForUser(userId, preferentialNetworkServiceConfig);
 
         startOwnerService(userId, "start-user");
     }
@@ -3386,7 +3388,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     void handleStopUser(int userId) {
-        updateNetworkPreferenceForUser(userId, false);
+        updateNetworkPreferenceForUser(userId, PreferentialNetworkServiceConfig.DEFAULT);
         stopOwnerService(userId, "stop-user");
     }
 
@@ -11040,7 +11042,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public int getLogoutUserId() {
-        Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity()));
+        Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity())
+                || hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS));
 
         return getLogoutUserIdUnchecked();
     }
@@ -11055,16 +11058,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    @Override
-    public void clearLogoutUser() {
-        CallerIdentity caller = getCallerIdentity();
-        Preconditions.checkCallAuthorization(canManageUsers(caller));
-
-        Slogf.i(LOG_TAG, "Clearing logout user as requested by %s", caller);
-        clearLogoutUserUnchecked();
-    }
-
-    private void clearLogoutUserUnchecked() {
+    private void clearLogoutUser() {
         if (!mInjector.userManagerIsHeadlessSystemUserMode()) return; // ignore
 
         synchronized (getLockObject()) {
@@ -11165,6 +11159,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return stopUserUnchecked(callingUserId);
         }
 
+        return logoutUserUnchecked(/* userIdToStop= */ callingUserId);
+    }
+
+    @Override
+    public int logoutUserInternal() {
+        CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(
+                canManageUsers(caller) || hasCallingOrSelfPermission(permission.CREATE_USERS));
+
+        int result = logoutUserUnchecked(getCurrentForegroundUserId());
+        Slogf.d(LOG_TAG, "logout called by uid %d. Result: %d", caller.getUid(), result);
+        return result;
+    }
+
+    private int logoutUserUnchecked(@UserIdInt int userIdToStop) {
         int logoutUserId = getLogoutUserIdUnchecked();
         if (logoutUserId == UserHandle.USER_NULL) {
             // Could happen on devices using headless system user mode when called before calling
@@ -11180,7 +11189,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 // This should never happen as target user is determined by getPreviousUserId()
                 return UserManager.USER_OPERATION_ERROR_UNKNOWN;
             }
-            clearLogoutUserUnchecked();
+            clearLogoutUser();
         } catch (RemoteException e) {
             // Same process, should not happen.
             return UserManager.USER_OPERATION_ERROR_UNKNOWN;
@@ -11188,7 +11197,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             mInjector.binderRestoreCallingIdentity(id);
         }
 
-        return stopUserUnchecked(callingUserId);
+        return stopUserUnchecked(userIdToStop);
     }
 
     private int stopUserUnchecked(@UserIdInt int userId) {
@@ -12168,7 +12177,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(isProfileOwner(caller),
                 "Caller is not profile owner;"
-                        + " only profile owner may control the preferntial network service");
+                        + " only profile owner may control the preferential network service");
         synchronized (getLockObject()) {
             final ActiveAdmin requiredAdmin = getProfileOwnerAdminLocked(
                     caller.getUserId());
@@ -12201,6 +12210,47 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             } else {
                 return false;
             }
+        }
+    }
+
+    @Override
+    public void setPreferentialNetworkServiceConfig(
+            PreferentialNetworkServiceConfig preferentialNetworkServiceConfig) {
+        if (!mHasFeature) {
+            return;
+        }
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(isProfileOwner(caller),
+                "Caller is not profile owner;"
+                        + " only profile owner may control the preferential network service");
+        synchronized (getLockObject()) {
+            final ActiveAdmin requiredAdmin = getProfileOwnerAdminLocked(
+                    caller.getUserId());
+            if (!requiredAdmin.mPreferentialNetworkServiceConfig.equals(
+                    preferentialNetworkServiceConfig)) {
+                requiredAdmin.mPreferentialNetworkServiceConfig = preferentialNetworkServiceConfig;
+                saveSettingsLocked(caller.getUserId());
+            }
+        }
+        updateNetworkPreferenceForUser(caller.getUserId(), preferentialNetworkServiceConfig);
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_PREFERENTIAL_NETWORK_SERVICE_ENABLED)
+                .setBoolean(preferentialNetworkServiceConfig.isEnabled())
+                .write();
+    }
+
+    @Override
+    public PreferentialNetworkServiceConfig getPreferentialNetworkServiceConfig() {
+        if (!mHasFeature) {
+            return PreferentialNetworkServiceConfig.DEFAULT;
+        }
+
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(isProfileOwner(caller),
+                "Caller is not profile owner");
+        synchronized (getLockObject()) {
+            final ActiveAdmin requiredAdmin = getProfileOwnerAdminLocked(caller.getUserId());
+            return requiredAdmin.mPreferentialNetworkServiceConfig;
         }
     }
 
@@ -18027,8 +18077,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (!isManagedProfile(userId)) {
             return;
         }
-        int networkPreference = preferentialNetworkServiceEnabled
-                ? PROFILE_NETWORK_PREFERENCE_ENTERPRISE : PROFILE_NETWORK_PREFERENCE_DEFAULT;
         ProfileNetworkPreference.Builder preferenceBuilder =
                 new ProfileNetworkPreference.Builder();
         if (preferentialNetworkServiceEnabled) {
@@ -18037,6 +18085,40 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         } else {
             preferenceBuilder.setPreference(PROFILE_NETWORK_PREFERENCE_DEFAULT);
         }
+        List<ProfileNetworkPreference> preferences = new ArrayList<>();
+        preferences.add(preferenceBuilder.build());
+        mInjector.binderWithCleanCallingIdentity(() ->
+                mInjector.getConnectivityManager().setProfileNetworkPreferences(
+                        UserHandle.of(userId), preferences,
+                        null /* executor */, null /* listener */));
+    }
+
+    private void updateNetworkPreferenceForUser(int userId,
+            PreferentialNetworkServiceConfig preferentialNetworkServiceConfig) {
+        if (!isManagedProfile(userId)) {
+            return;
+        }
+        ProfileNetworkPreference.Builder preferenceBuilder =
+                new ProfileNetworkPreference.Builder();
+        if (preferentialNetworkServiceConfig.isEnabled()) {
+            if (preferentialNetworkServiceConfig.isFallbackToDefaultConnectionAllowed()) {
+                preferenceBuilder.setPreference(PROFILE_NETWORK_PREFERENCE_ENTERPRISE);
+            } else {
+                preferenceBuilder.setPreference(PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK);
+            }
+        } else {
+            preferenceBuilder.setPreference(PROFILE_NETWORK_PREFERENCE_DEFAULT);
+        }
+        List<Integer> allowedUids = Arrays.stream(
+                preferentialNetworkServiceConfig.getIncludedUids()).boxed().collect(
+                        Collectors.toList());
+        List<Integer> excludedUids = Arrays.stream(
+                preferentialNetworkServiceConfig.getExcludedUids()).boxed().collect(
+                Collectors.toList());
+        preferenceBuilder.setIncludedUids(allowedUids);
+        preferenceBuilder.setExcludedUids(excludedUids);
+        preferenceBuilder.setPreferenceEnterpriseId(
+                preferentialNetworkServiceConfig.getNetworkId());
         List<ProfileNetworkPreference> preferences = new ArrayList<>();
         preferences.add(preferenceBuilder.build());
         mInjector.binderWithCleanCallingIdentity(() ->

@@ -963,7 +963,7 @@ public class ImageReader implements AutoCloseable {
          *
          * @see HardwareBuffer
          */
-        public @NonNull Builder setUsage(long usage) {
+        public @NonNull Builder setUsage(@Usage long usage) {
             mUsage = usage;
             return this;
         }

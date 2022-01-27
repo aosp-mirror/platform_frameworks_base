@@ -22,14 +22,16 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
+import android.hardware.biometrics.common.OperationContext;
+import android.hardware.biometrics.common.OperationReason;
 import android.hardware.biometrics.face.EnrollmentType;
 import android.hardware.biometrics.face.Feature;
 import android.hardware.biometrics.face.IFace;
-import android.hardware.biometrics.face.ISession;
 import android.hardware.common.NativeHandle;
 import android.hardware.face.Face;
 import android.hardware.face.FaceEnrollFrame;
 import android.hardware.face.FaceManager;
+import android.hardware.keymaster.HardwareAuthToken;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -51,11 +53,12 @@ import com.android.server.biometrics.sensors.face.FaceUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Face-specific enroll client for the {@link IFace} AIDL HAL interface.
  */
-public class FaceEnrollClient extends EnrollClient<ISession> {
+public class FaceEnrollClient extends EnrollClient<AidlSession> {
 
     private static final String TAG = "FaceEnrollClient";
 
@@ -82,7 +85,7 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
                 }
             };
 
-    FaceEnrollClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
+    FaceEnrollClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String opPackageName, long requestId,
             @NonNull BiometricUtils<Face> utils, @NonNull int[] disabledFeatures, int timeoutSec,
@@ -177,18 +180,36 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
                 featureList.add(Feature.REQUIRE_DIVERSE_POSES);
             }
 
-            byte[] features = new byte[featureList.size()];
+            final byte[] features = new byte[featureList.size()];
             for (int i = 0; i < featureList.size(); i++) {
                 features[i] = featureList.get(i);
             }
 
-            mCancellationSignal = getFreshDaemon().enroll(
-                    HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken),
-                    EnrollmentType.DEFAULT, features, mHwPreviewHandle);
+            mCancellationSignal = doEnroll(features);
         } catch (RemoteException | IllegalArgumentException e) {
             Slog.e(TAG, "Exception when requesting enroll", e);
             onError(BiometricFaceConstants.FACE_ERROR_UNABLE_TO_PROCESS, 0 /* vendorCode */);
             mCallback.onClientFinished(this, false /* success */);
+        }
+    }
+
+    private ICancellationSignal doEnroll(byte[] features) throws RemoteException {
+        final AidlSession session = getFreshDaemon();
+        final HardwareAuthToken hat =
+                HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken);
+
+        if (session.hasContextMethods()) {
+            final OperationContext context = new OperationContext();
+            // TODO: add reason, id, and isAoD
+            context.id = 0;
+            context.reason = OperationReason.UNKNOWN;
+            context.isAoD = false;
+            context.isCrypto = isCryptoOperation();
+            return session.getSession().enrollWithContext(
+                    hat, EnrollmentType.DEFAULT, features, mHwPreviewHandle, context);
+        } else {
+            return session.getSession().enroll(hat, EnrollmentType.DEFAULT, features,
+                    mHwPreviewHandle);
         }
     }
 

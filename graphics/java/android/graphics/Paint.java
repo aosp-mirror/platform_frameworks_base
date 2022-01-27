@@ -2184,9 +2184,13 @@ public class Paint {
                     contextCount, isRtl, outMetrics);
         } else {
             char[] buf = TemporaryBuffer.obtain(contextCount);
-            TextUtils.getChars(text, contextStart, contextStart + contextCount, buf, 0);
-            nGetFontMetricsIntForText(mNativePaint, buf, start - contextStart, count, 0,
-                    contextCount, isRtl, outMetrics);
+            try {
+                TextUtils.getChars(text, contextStart, contextStart + contextCount, buf, 0);
+                nGetFontMetricsIntForText(mNativePaint, buf, start - contextStart, count, 0,
+                        contextCount, isRtl, outMetrics);
+            } finally {
+                TemporaryBuffer.recycle(buf);
+            }
         }
 
     }

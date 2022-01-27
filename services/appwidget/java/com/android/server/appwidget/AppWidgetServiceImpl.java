@@ -89,6 +89,7 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.AttributeSet;
 import android.util.IntArray;
+import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Pair;
 import android.util.Slog;
@@ -1935,6 +1936,14 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private void scheduleNotifyUpdateAppWidgetLocked(Widget widget, RemoteViews updateViews) {
         long requestId = UPDATE_COUNTER.incrementAndGet();
         if (widget != null) {
+            if (widget.trackingUpdate) {
+                // This is the first update, end the trace
+                widget.trackingUpdate = false;
+                Log.i(TAG, "Widget update received " + widget.toString());
+                Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        "appwidget update-intent " + widget.provider.id.toString(),
+                        widget.appWidgetId);
+            }
             widget.updateSequenceNos.put(ID_VIEWS_UPDATE, requestId);
         }
         if (widget == null || widget.provider == null || widget.provider.zombie
@@ -2011,6 +2020,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private void scheduleNotifyAppWidgetRemovedLocked(Widget widget) {
         long requestId = UPDATE_COUNTER.incrementAndGet();
         if (widget != null) {
+            if (widget.trackingUpdate) {
+                // Widget is being removed without any update, end the trace
+                widget.trackingUpdate = false;
+                Log.i(TAG, "Widget removed " + widget.toString());
+                Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                        "appwidget update-intent " + widget.provider.id.toString(),
+                        widget.appWidgetId);
+            }
+
             widget.updateSequenceNos.clear();
         }
         if (widget == null || widget.provider == null || widget.provider.zombie
@@ -2724,6 +2742,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                             "appwidget init " + provider.id.componentName.getPackageName());
                     sendEnableIntentLocked(provider);
+                    provider.widgets.forEach(widget -> {
+                        widget.trackingUpdate = true;
+                        Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                                "appwidget update-intent " + provider.id.toString(),
+                                widget.appWidgetId);
+                        Log.i(TAG, "Widget update scheduled on unlock " + widget.toString());
+                    });
                     int[] appWidgetIds = getWidgetIds(provider.widgets);
                     sendUpdateIntentLocked(provider, appWidgetIds);
                     registerForBroadcastsLocked(provider, appWidgetIds);
@@ -4249,6 +4274,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         Host host;
         // Map of request type to updateSequenceNo.
         SparseLongArray updateSequenceNos = new SparseLongArray(2);
+        boolean trackingUpdate = false;
 
         @Override
         public String toString() {

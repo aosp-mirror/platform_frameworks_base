@@ -165,7 +165,7 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
         }
 
         mEnrollmentIds.add(nextRandomId);
-        mSensor.getSessionForUser(userId).mHalSessionCallback
+        mSensor.getSessionForUser(userId).getHalSessionCallback()
                 .onEnrollmentProgress(nextRandomId, 0 /* remaining */);
     }
 
@@ -181,7 +181,7 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
             return;
         }
         final int fid = faces.get(0).getBiometricId();
-        mSensor.getSessionForUser(userId).mHalSessionCallback.onAuthenticationSucceeded(fid,
+        mSensor.getSessionForUser(userId).getHalSessionCallback().onAuthenticationSucceeded(fid,
                 HardwareAuthTokenUtils.toHardwareAuthToken(new byte[69]));
     }
 
@@ -189,7 +189,7 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
     public void rejectAuthentication(int userId)  {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        mSensor.getSessionForUser(userId).mHalSessionCallback.onAuthenticationFailed();
+        mSensor.getSessionForUser(userId).getHalSessionCallback().onAuthenticationFailed();
     }
 
     // TODO(b/178414967): replace with notifyAuthenticationFrame and notifyEnrollmentFrame.
@@ -205,7 +205,7 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
 
         // TODO(b/178414967): Currently onAuthenticationFrame and onEnrollmentFrame are the same.
         // This will need to call the correct callback once the onAcquired callback is removed.
-        mSensor.getSessionForUser(userId).mHalSessionCallback.onAuthenticationFrame(
+        mSensor.getSessionForUser(userId).getHalSessionCallback().onAuthenticationFrame(
                 authenticationFrame);
     }
 
@@ -213,7 +213,7 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
     public void notifyError(int userId, int errorCode)  {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        mSensor.getSessionForUser(userId).mHalSessionCallback.onError((byte) errorCode,
+        mSensor.getSessionForUser(userId).getHalSessionCallback().onError((byte) errorCode,
                 0 /* vendorCode */);
     }
 

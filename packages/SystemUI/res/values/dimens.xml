@@ -1052,6 +1052,9 @@
     <dimen name="controls_setup_subtitle">14sp</dimen>
     <dimen name="controls_setup_vertical_padding">52dp</dimen>
     <dimen name="controls_detail_dialog_header_height">52dp</dimen>
+    <!-- Limit the TaskView to this percentage of the overall screen width (0.0 - 1.0) -->
+    <item name="controls_task_view_width_percentage" translatable="false" format="float" type="dimen">1.0</item>
+    <dimen name="controls_task_view_right_margin">0dp</dimen>
 
     <!-- Home Controls activity view detail panel-->
     <dimen name="controls_activity_view_corner_radius">@*android:dimen/config_bottomDialogCornerRadius</dimen>

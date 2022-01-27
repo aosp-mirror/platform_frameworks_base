@@ -134,7 +134,12 @@ public class TvInteractiveAppManagerService extends SystemService {
 
         for (ResolveInfo ri : services) {
             ServiceInfo si = ri.serviceInfo;
-            // TODO: add BIND_TV_INTERACTIVE_APP permission and check it here
+            if (!android.Manifest.permission.BIND_TV_INTERACTIVE_APP.equals(si.permission)) {
+                Slog.w(TAG, "Skipping TV interactiva app service " + si.name
+                        + ": it does not require the permission "
+                        + android.Manifest.permission.BIND_TV_INTERACTIVE_APP);
+                continue;
+            }
 
             ComponentName component = new ComponentName(si.packageName, si.name);
             try {
@@ -788,10 +793,12 @@ public class TvInteractiveAppManagerService extends SystemService {
                                 componentName, tiasId, resolvedUserId);
                         serviceState.addPendingAppLinkCommand(command);
                         userState.mServiceStateMap.put(componentName, serviceState);
+                        updateServiceConnectionLocked(componentName, resolvedUserId);
                     } else if (serviceState.mService != null) {
                         serviceState.mService.sendAppLinkCommand(command);
                     } else {
                         serviceState.addPendingAppLinkCommand(command);
+                        updateServiceConnectionLocked(componentName, resolvedUserId);
                     }
                 }
             } catch (RemoteException e) {
@@ -1673,7 +1680,8 @@ public class TvInteractiveAppManagerService extends SystemService {
 
         boolean shouldBind = (!serviceState.mSessionTokens.isEmpty())
                 || (serviceState.mPendingPrepare)
-                || (!serviceState.mPendingAppLinkInfo.isEmpty());
+                || (!serviceState.mPendingAppLinkInfo.isEmpty())
+                || (!serviceState.mPendingAppLinkCommand.isEmpty());
 
         if (serviceState.mService == null && shouldBind) {
             // This means that the service is not yet connected but its state indicates that we
@@ -2092,7 +2100,7 @@ public class TvInteractiveAppManagerService extends SystemService {
 
         @Override
         public void onCommandRequest(
-                @TvInteractiveAppService.InteractiveAppServiceCommandType String cmdType,
+                @TvInteractiveAppService.PlaybackCommandType String cmdType,
                 Bundle parameters) {
             synchronized (mLock) {
                 if (DEBUG) {

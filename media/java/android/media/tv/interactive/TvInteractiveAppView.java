@@ -170,23 +170,20 @@ public class TvInteractiveAppView extends ViewGroup {
         }
     }
 
-    /** @hide */
     @Override
-    protected void onAttachedToWindow() {
+    public void onAttachedToWindow() {
         super.onAttachedToWindow();
         createSessionMediaView();
     }
 
-    /** @hide */
     @Override
-    protected void onDetachedFromWindow() {
+    public void onDetachedFromWindow() {
         removeSessionMediaView();
         super.onDetachedFromWindow();
     }
 
-    /** @hide */
     @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+    public void onLayout(boolean changed, int left, int top, int right, int bottom) {
         if (DEBUG) {
             Log.d(TAG, "onLayout (left=" + left + ", top=" + top + ", right=" + right
                     + ", bottom=" + bottom + ",)");
@@ -199,9 +196,8 @@ public class TvInteractiveAppView extends ViewGroup {
         }
     }
 
-    /** @hide */
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         mSurfaceView.measure(widthMeasureSpec, heightMeasureSpec);
         int width = mSurfaceView.getMeasuredWidth();
         int height = mSurfaceView.getMeasuredHeight();
@@ -211,9 +207,8 @@ public class TvInteractiveAppView extends ViewGroup {
                         childState << MEASURED_HEIGHT_STATE_SHIFT));
     }
 
-    /** @hide */
     @Override
-    protected void onVisibilityChanged(View changedView, int visibility) {
+    public void onVisibilityChanged(@NonNull View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         mSurfaceView.setVisibility(visibility);
         if (visibility == View.VISIBLE) {
@@ -244,7 +239,6 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /**
      * Resets this TvInteractiveAppView.
-     * @hide
      */
     public void reset() {
         if (DEBUG) Log.d(TAG, "reset()");
@@ -330,7 +324,11 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /**
      * Dispatches an unhandled input event to the next receiver.
-     * @hide
+     *
+     * It gives the host application a chance to dispatch the unhandled input events.
+     *
+     * @param event The input event.
+     * @return {@code true} if the event was handled by the view, {@code false} otherwise.
      */
     public boolean dispatchUnhandledInputEvent(@NonNull InputEvent event) {
         if (mOnUnhandledInputEventListener != null) {
@@ -349,21 +347,28 @@ public class TvInteractiveAppView extends ViewGroup {
      * @param event The input event.
      * @return If you handled the event, return {@code true}. If you want to allow the event to be
      *         handled by the next receiver, return {@code false}.
-     * @hide
      */
     public boolean onUnhandledInputEvent(@NonNull InputEvent event) {
         return false;
     }
 
     /**
-     * Registers a callback to be invoked when an input event is not handled
+     * Sets a listener to be invoked when an input event is not handled
      * by the TV Interactive App.
      *
      * @param listener The callback to be invoked when the unhandled input event is received.
-     * @hide
      */
-    public void setOnUnhandledInputEventListener(@NonNull OnUnhandledInputEventListener listener) {
+    public void setOnUnhandledInputEventListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnUnhandledInputEventListener listener) {
         mOnUnhandledInputEventListener = listener;
+        // TODO: handle CallbackExecutor
+    }
+    /**
+     * Clears the {@link OnUnhandledInputEventListener}.
+     */
+    public void clearOnUnhandledInputEventListener() {
+        mOnUnhandledInputEventListener = null;
     }
 
     @Override
@@ -427,7 +432,6 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /**
      * Resets the interactive application.
-     * @hide
      */
     public void resetInteractiveApp() {
         if (DEBUG) {
@@ -440,9 +444,11 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /**
      * Sends current channel URI to related TV interactive app.
-     * @hide
+     *
+     * @param channelUri The current channel URI; {@code null} if there is no currently tuned
+     *                   channel.
      */
-    public void sendCurrentChannelUri(Uri channelUri) {
+    public void sendCurrentChannelUri(@Nullable Uri channelUri) {
         if (DEBUG) {
             Log.d(TAG, "sendCurrentChannelUri");
         }
@@ -453,7 +459,6 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /**
      * Sends current channel logical channel number (LCN) to related TV interactive app.
-     * @hide
      */
     public void sendCurrentChannelLcn(int lcn) {
         if (DEBUG) {
@@ -466,7 +471,6 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /**
      * Sends stream volume to related TV interactive app.
-     * @hide
      */
     public void sendStreamVolume(float volume) {
         if (DEBUG) {
@@ -479,9 +483,8 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /**
      * Sends track info list to related TV interactive app.
-     * @hide
      */
-    public void sendTrackInfoList(List<TvTrackInfo> tracks) {
+    public void sendTrackInfoList(@Nullable List<TvTrackInfo> tracks) {
         if (DEBUG) {
             Log.d(TAG, "sendTrackInfoList");
         }
@@ -496,7 +499,6 @@ public class TvInteractiveAppView extends ViewGroup {
      * @param inputId The current TV input ID whose channel is tuned. {@code null} if no channel is
      *                tuned.
      * @see android.media.tv.TvInputInfo
-     * @hide
      */
     public void sendCurrentTvInputId(@Nullable String inputId) {
         if (DEBUG) {
@@ -588,8 +590,11 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /**
      * To toggle Digital Teletext Application if there is one in AIT app list.
-     * @param enable
-     * @hide
+     *
+     * <p>A Teletext Application is a broadcast-related application to display text and basic
+     * graphics.
+     *
+     * @param enable {@code true} to enable Teletext app; {@code false} to disable it.
      */
     public void setTeletextAppEnabled(boolean enable) {
         if (DEBUG) {
@@ -607,17 +612,17 @@ public class TvInteractiveAppView extends ViewGroup {
         // TODO: unhide the following public APIs
 
         /**
-         * This is called when a command is requested to be processed by the related TV input.
+         * This is called when a playback command is requested to be processed by the related TV
+         * input.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
          * @param cmdType type of the command
          * @param parameters parameters of the command
-         * @hide
          */
-        public void onCommandRequest(
+        public void onPlaybackCommandRequest(
                 @NonNull String iAppServiceId,
-                @NonNull @TvInteractiveAppService.InteractiveAppServiceCommandType String cmdType,
-                @Nullable Bundle parameters) {
+                @NonNull @TvInteractiveAppService.PlaybackCommandType String cmdType,
+                @NonNull Bundle parameters) {
         }
 
         /**
@@ -656,7 +661,6 @@ public class TvInteractiveAppView extends ViewGroup {
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
          * @param state digital teletext app current state.
-         * @hide
          */
         public void onTeletextAppStateChanged(
                 @NonNull String iAppServiceId,
@@ -664,59 +668,55 @@ public class TvInteractiveAppView extends ViewGroup {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#SetVideoBounds} is called.
+         * This is called when {@link TvInteractiveAppService.Session#setVideoBounds(Rect)} is
+         * called.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
-         * @hide
          */
         public void onSetVideoBounds(@NonNull String iAppServiceId, @NonNull Rect rect) {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestCurrentChannelUri} is
+         * This is called when {@link TvInteractiveAppService.Session#requestCurrentChannelUri()} is
          * called.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
-         * @hide
          */
         public void onRequestCurrentChannelUri(@NonNull String iAppServiceId) {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestCurrentChannelLcn} is
+         * This is called when {@link TvInteractiveAppService.Session#requestCurrentChannelLcn()} is
          * called.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
-         * @hide
          */
         public void onRequestCurrentChannelLcn(@NonNull String iAppServiceId) {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestStreamVolume} is
+         * This is called when {@link TvInteractiveAppService.Session#requestStreamVolume()} is
          * called.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
-         * @hide
          */
         public void onRequestStreamVolume(@NonNull String iAppServiceId) {
         }
 
         /**
-         * This is called when {@link TvInteractiveAppService.Session#RequestTrackInfoList} is
+         * This is called when {@link TvInteractiveAppService.Session#requestTrackInfoList()} is
          * called.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
-         * @hide
          */
         public void onRequestTrackInfoList(@NonNull String iAppServiceId) {
         }
 
         /**
-         * This is called when {@link TvIAppService.Session#RequestCurrentTvInputId} is called.
+         * This is called when {@link TvInteractiveAppService.Session#requestCurrentTvInputId()} is
+         * called.
          *
          * @param iAppServiceId The ID of the TV interactive app service bound to this view.
-         * @hide
          */
         public void onRequestCurrentTvInputId(@NonNull String iAppServiceId) {
         }
@@ -725,7 +725,6 @@ public class TvInteractiveAppView extends ViewGroup {
 
     /**
      * Interface definition for a callback to be invoked when the unhandled input event is received.
-     * @hide
      */
     public interface OnUnhandledInputEventListener {
         /**
@@ -818,7 +817,7 @@ public class TvInteractiveAppView extends ViewGroup {
         @Override
         public void onCommandRequest(
                 Session session,
-                @TvInteractiveAppService.InteractiveAppServiceCommandType String cmdType,
+                @TvInteractiveAppService.PlaybackCommandType String cmdType,
                 Bundle parameters) {
             if (DEBUG) {
                 Log.d(TAG, "onCommandRequest (cmdType=" + cmdType + ", parameters="
@@ -833,7 +832,8 @@ public class TvInteractiveAppView extends ViewGroup {
                     mCallbackExecutor.execute(() -> {
                         synchronized (mCallbackLock) {
                             if (mCallback != null) {
-                                mCallback.onCommandRequest(mIAppServiceId, cmdType, parameters);
+                                mCallback.onPlaybackCommandRequest(
+                                        mIAppServiceId, cmdType, parameters);
                             }
                         }
                     });

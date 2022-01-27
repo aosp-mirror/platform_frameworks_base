@@ -16,22 +16,19 @@
 
 package com.android.server.inputmethod;
 
-import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.server.inputmethod.InputMethodManagerService.DEBUG;
 import static com.android.server.inputmethod.InputMethodUtils.NOT_A_SUBTYPE_ID;
 
-import android.app.ActivityThread;
+import android.annotation.Nullable;
 import android.app.AlertDialog;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
-import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Slog;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,7 +42,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.inputmethod.InputMethodSubtypeSwitchingController.ImeSubtypeListItem;
 import com.android.server.wm.WindowManagerInternal;
@@ -53,8 +49,7 @@ import com.android.server.wm.WindowManagerInternal;
 import java.util.List;
 
 /** A controller to show/hide the input method menu */
-@VisibleForTesting(visibility = PACKAGE)
-public class InputMethodMenuController {
+final class InputMethodMenuController {
     private static final String TAG = InputMethodMenuController.class.getSimpleName();
 
     private final InputMethodManagerService mService;
@@ -64,17 +59,18 @@ public class InputMethodMenuController {
     private final KeyguardManager mKeyguardManager;
     private final WindowManagerInternal mWindowManagerInternal;
 
-    private Context mSettingsContext;
     private AlertDialog.Builder mDialogBuilder;
     private AlertDialog mSwitchingDialog;
-    private IBinder mSwitchingDialogToken;
     private View mSwitchingDialogTitleView;
     private InputMethodInfo[] mIms;
     private int[] mSubtypeIds;
 
     private boolean mShowImeWithHardKeyboard;
 
-    @VisibleForTesting(visibility = PACKAGE)
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    private InputMethodDialogWindowContext mDialogWindowContext;
+
     public InputMethodMenuController(InputMethodManagerService service) {
         mService = service;
         mSettings = mService.mSettings;
@@ -132,8 +128,11 @@ public class InputMethodMenuController {
                 }
             }
 
-            final Context settingsContext = getSettingsContext(displayId);
-            mDialogBuilder = new AlertDialog.Builder(settingsContext);
+            if (mDialogWindowContext == null) {
+                mDialogWindowContext = new InputMethodDialogWindowContext();
+            }
+            final Context dialogWindowContext = mDialogWindowContext.get(displayId);
+            mDialogBuilder = new AlertDialog.Builder(dialogWindowContext);
             mDialogBuilder.setOnCancelListener(dialog -> hideInputMethodMenu());
 
             final Context dialogContext = mDialogBuilder.getContext();
@@ -199,34 +198,13 @@ public class InputMethodMenuController {
             // Use an alternate token for the dialog for that window manager can group the token
             // with other IME windows based on type vs. grouping based on whichever token happens
             // to get selected by the system later on.
-            attrs.token = mSwitchingDialogToken;
+            attrs.token = dialogWindowContext.getWindowContextToken();
             attrs.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
             attrs.setTitle("Select input method");
             w.setAttributes(attrs);
             mService.updateSystemUiLocked();
             mSwitchingDialog.show();
         }
-    }
-
-    /**
-     * Returns the window context for IME switch dialogs to receive configuration changes.
-     *
-     * This method initializes the window context if it was not initialized. This method also moves
-     * the context to the targeted display if the current display of context is different than
-     * the display specified by {@code displayId}.
-     */
-    @VisibleForTesting
-    public Context getSettingsContext(int displayId) {
-        if (mSettingsContext == null || mSettingsContext.getDisplayId() != displayId) {
-            final Context systemUiContext = ActivityThread.currentActivityThread()
-                    .getSystemUiContext(displayId);
-            final Context windowContext = systemUiContext.createWindowContext(
-                    WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG, null /* options */);
-            mSettingsContext = new ContextThemeWrapper(
-                    windowContext, com.android.internal.R.style.Theme_DeviceDefault_Settings);
-            mSwitchingDialogToken = mSettingsContext.getWindowContextToken();
-        }
-        return mSettingsContext;
     }
 
     private boolean isScreenLocked() {

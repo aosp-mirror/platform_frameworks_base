@@ -25,7 +25,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.Display.TYPE_VIRTUAL;
 import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
@@ -933,39 +932,6 @@ public class RootWindowContainerTests extends WindowTestsBase {
         assertEquals(infoFake1.activityInfo.applicationInfo.packageName,
                 resolvedInfo.first.applicationInfo.packageName);
         assertEquals(infoFake1.activityInfo.name, resolvedInfo.first.name);
-    }
-
-    /**
-     * Test that {@link RootWindowContainer#getLaunchRootTask} with the real caller id will get the
-     * expected root task when requesting the activity launch on the secondary display.
-     */
-    @Test
-    public void testGetLaunchRootTaskWithRealCallerId() {
-        // Create a non-system owned virtual display.
-        final TestDisplayContent secondaryDisplay =
-                new TestDisplayContent.Builder(mAtm, 1000, 1500)
-                        .setType(TYPE_VIRTUAL).setOwnerUid(100).build();
-
-        // Create an activity with specify the original launch pid / uid.
-        final ActivityRecord r = new ActivityBuilder(mAtm).setLaunchedFromPid(200)
-                .setLaunchedFromUid(200).build();
-
-        // Simulate ActivityStarter to find a launch root task for requesting the activity to launch
-        // on the secondary display with realCallerId.
-        final ActivityOptions options = ActivityOptions.makeBasic();
-        options.setLaunchDisplayId(secondaryDisplay.mDisplayId);
-        options.setLaunchWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        doReturn(true).when(mSupervisor).canPlaceEntityOnDisplay(secondaryDisplay.mDisplayId,
-                300 /* test realCallerPid */, 300 /* test realCallerUid */, r.info);
-        final Task result = mRootWindowContainer.getLaunchRootTask(r, options,
-                null /* task */, null /* sourceTask */, true /* onTop */, null /* launchParams */,
-                0 /* launchFlags */, 300 /* test realCallerPid */,
-                300 /* test realCallerUid */);
-
-        // Assert that the root task is returned as expected.
-        assertNotNull(result);
-        assertEquals("The display ID of the root task should same as secondary display ",
-                secondaryDisplay.mDisplayId, result.getDisplayId());
     }
 
     @Test

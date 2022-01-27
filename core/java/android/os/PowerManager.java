@@ -44,6 +44,7 @@ import com.android.internal.util.Preconditions;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.time.Duration;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -612,7 +613,7 @@ public final class PowerManager {
     public static final int WAKE_REASON_PLUGGED_IN = 3;
 
     /**
-     * Wake up reason code: Waking up due to a user performed gesture (e.g. douple tapping on the
+     * Wake up reason code: Waking up due to a user performed gesture (e.g. double tapping on the
      * screen).
      * @hide
      */
@@ -703,6 +704,21 @@ public final class PowerManager {
         public long wakeTime;
         public @WakeReason int wakeReason;
         public long sleepDuration;
+
+        @Override
+        public boolean equals(@Nullable Object o) {
+            if (o instanceof WakeData) {
+                final WakeData other = (WakeData) o;
+                return wakeTime == other.wakeTime && wakeReason == other.wakeReason
+                        && sleepDuration == other.sleepDuration;
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(wakeTime, wakeReason, sleepDuration);
+        }
     }
 
     /**
@@ -1013,7 +1029,7 @@ public final class PowerManager {
 
     private static final int MAX_CACHE_ENTRIES = 1;
 
-    private PropertyInvalidatedCache<Void, Boolean> mPowerSaveModeCache =
+    private final PropertyInvalidatedCache<Void, Boolean> mPowerSaveModeCache =
             new PropertyInvalidatedCache<Void, Boolean>(MAX_CACHE_ENTRIES,
                 CACHE_KEY_IS_POWER_SAVE_MODE_PROPERTY) {
                 @Override
@@ -1026,7 +1042,7 @@ public final class PowerManager {
                 }
             };
 
-    private PropertyInvalidatedCache<Void, Boolean> mInteractiveCache =
+    private final PropertyInvalidatedCache<Void, Boolean> mInteractiveCache =
             new PropertyInvalidatedCache<Void, Boolean>(MAX_CACHE_ENTRIES,
                 CACHE_KEY_IS_INTERACTIVE_PROPERTY) {
                 @Override
@@ -1047,7 +1063,7 @@ public final class PowerManager {
     final IThermalService mThermalService;
 
     /** We lazily initialize it.*/
-    private PowerWhitelistManager mPowerWhitelistManager;
+    private PowerExemptionManager mPowerExemptionManager;
 
     private final ArrayMap<OnThermalStatusChangedListener, IThermalStatusListener>
             mListenerMap = new ArrayMap<>();
@@ -1063,12 +1079,12 @@ public final class PowerManager {
         mHandler = handler;
     }
 
-    private PowerWhitelistManager getPowerWhitelistManager() {
-        if (mPowerWhitelistManager == null) {
+    private PowerExemptionManager getPowerExemptionManager() {
+        if (mPowerExemptionManager == null) {
             // No need for synchronization; getSystemService() will return the same object anyway.
-            mPowerWhitelistManager = mContext.getSystemService(PowerWhitelistManager.class);
+            mPowerExemptionManager = mContext.getSystemService(PowerExemptionManager.class);
         }
-        return mPowerWhitelistManager;
+        return mPowerExemptionManager;
     }
 
     /**
@@ -1339,12 +1355,12 @@ public final class PowerManager {
     }
 
     /**
-     * Forces the {@link com.android.server.display.DisplayGroup#DEFAULT default display group}
+     * Forces the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group}
      * to turn off.
      *
-     * <p>If the {@link com.android.server.display.DisplayGroup#DEFAULT default display group} is
+     * <p>If the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group} is
      * turned on it will be turned off. If all displays are off as a result of this action the
-     * device will be put to sleep. If the {@link com.android.server.display.DisplayGroup#DEFAULT
+     * device will be put to sleep. If the {@link android.view.Display#DEFAULT_DISPLAY_GROUP
      * default display group} is already off then nothing will happen.
      *
      * <p>If the device is an Android TV playback device and the current active source on the
@@ -1372,12 +1388,12 @@ public final class PowerManager {
     }
 
     /**
-     * Forces the {@link com.android.server.display.DisplayGroup#DEFAULT default display group}
+     * Forces the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group}
      * to turn off.
      *
-     * <p>If the {@link com.android.server.display.DisplayGroup#DEFAULT default display group} is
+     * <p>If the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group} is
      * turned on it will be turned off. If all displays are off as a result of this action the
-     * device will be put to sleep. If the {@link com.android.server.display.DisplayGroup#DEFAULT
+     * device will be put to sleep. If the {@link android.view.Display#DEFAULT_DISPLAY_GROUP
      * default display group} is already off then nothing will happen.
      *
      * <p>
@@ -1409,12 +1425,12 @@ public final class PowerManager {
     }
 
     /**
-     * Forces the {@link com.android.server.display.DisplayGroup#DEFAULT default display group}
+     * Forces the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group}
      * to turn on.
      *
-     * <p>If the {@link com.android.server.display.DisplayGroup#DEFAULT default display group} is
+     * <p>If the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group} is
      * turned off it will be turned on. Additionally, if the device is asleep it will be awoken. If
-     * the {@link com.android.server.display.DisplayGroup#DEFAULT default display group} is already
+     * the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group} is already
      * on then nothing will happen.
      *
      * <p>
@@ -1440,12 +1456,12 @@ public final class PowerManager {
     }
 
     /**
-     * Forces the {@link com.android.server.display.DisplayGroup#DEFAULT default display group}
+     * Forces the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group}
      * to turn on.
      *
-     * <p>If the {@link com.android.server.display.DisplayGroup#DEFAULT default display group} is
+     * <p>If the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group} is
      * turned off it will be turned on. Additionally, if the device is asleep it will be awoken. If
-     * the {@link com.android.server.display.DisplayGroup#DEFAULT default display group} is already
+     * the {@link android.view.Display#DEFAULT_DISPLAY_GROUP default display group} is already
      * on then nothing will happen.
      *
      * <p>
@@ -2144,7 +2160,7 @@ public final class PowerManager {
      * features to the app. Guardrails for extreme cases may still be applied.
      */
     public boolean isIgnoringBatteryOptimizations(String packageName) {
-        return getPowerWhitelistManager().isWhitelisted(packageName, true);
+        return getPowerExemptionManager().isAllowListed(packageName, true);
     }
 
     /**
@@ -2270,8 +2286,8 @@ public final class PowerManager {
      * @param listener listener to be added,
      */
     public void addThermalStatusListener(@NonNull OnThermalStatusChangedListener listener) {
-        Preconditions.checkNotNull(listener, "listener cannot be null");
-        this.addThermalStatusListener(mContext.getMainExecutor(), listener);
+        Objects.requireNonNull(listener, "listener cannot be null");
+        addThermalStatusListener(mContext.getMainExecutor(), listener);
     }
 
     /**
@@ -2282,8 +2298,8 @@ public final class PowerManager {
      */
     public void addThermalStatusListener(@NonNull @CallbackExecutor Executor executor,
             @NonNull OnThermalStatusChangedListener listener) {
-        Preconditions.checkNotNull(listener, "listener cannot be null");
-        Preconditions.checkNotNull(executor, "executor cannot be null");
+        Objects.requireNonNull(listener, "listener cannot be null");
+        Objects.requireNonNull(executor, "executor cannot be null");
         Preconditions.checkArgument(!mListenerMap.containsKey(listener),
                 "Listener already registered: %s", listener);
         IThermalStatusListener internalListener = new IThermalStatusListener.Stub() {
@@ -2291,9 +2307,7 @@ public final class PowerManager {
             public void onStatusChange(int status) {
                 final long token = Binder.clearCallingIdentity();
                 try {
-                    executor.execute(() -> {
-                        listener.onThermalStatusChanged(status);
-                    });
+                    executor.execute(() -> listener.onThermalStatusChanged(status));
                 } finally {
                     Binder.restoreCallingIdentity(token);
                 }
@@ -2316,7 +2330,7 @@ public final class PowerManager {
      * @param listener listener to be removed
      */
     public void removeThermalStatusListener(@NonNull OnThermalStatusChangedListener listener) {
-        Preconditions.checkNotNull(listener, "listener cannot be null");
+        Objects.requireNonNull(listener, "listener cannot be null");
         IThermalStatusListener internalListener = mListenerMap.get(listener);
         Preconditions.checkArgument(internalListener != null, "Listener was not added");
         try {
@@ -2945,6 +2959,7 @@ public final class PowerManager {
          *
          * @hide
          */
+        @SuppressLint("WakelockTimeout")
         public Runnable wrap(Runnable r) {
             acquire();
             return () -> {

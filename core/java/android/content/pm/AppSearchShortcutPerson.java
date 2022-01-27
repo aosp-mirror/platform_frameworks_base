@@ -21,28 +21,38 @@ import android.annotation.Nullable;
 import android.app.Person;
 import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.GenericDocument;
+import android.graphics.drawable.Icon;
 import android.net.UriCodec;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.UUID;
 
 /**
+ * A {@link GenericDocument} representation of {@link Person} object.
+ *
  * @hide
  */
-public class AppSearchPerson extends GenericDocument {
+public class AppSearchShortcutPerson extends GenericDocument {
 
-    /** The name of the schema type for {@link Person} documents.*/
-    public static final String SCHEMA_TYPE = "Person";
+    /**
+     * The name of the schema type for {@link Person} documents.
+     * @hide
+     */
+    public static final String SCHEMA_TYPE = "ShortcutPerson";
 
-    public static final String KEY_NAME = "name";
-    public static final String KEY_KEY = "key";
-    public static final String KEY_IS_BOT = "isBot";
-    public static final String KEY_IS_IMPORTANT = "isImportant";
+    private static final String KEY_NAME = "name";
+    private static final String KEY_KEY = "key";
+    private static final String KEY_IS_BOT = "isBot";
+    private static final String KEY_IS_IMPORTANT = "isImportant";
+    private static final String KEY_ICON = "icon";
 
-    public AppSearchPerson(@NonNull GenericDocument document) {
+    public AppSearchShortcutPerson(@NonNull GenericDocument document) {
         super(document);
     }
 
@@ -67,11 +77,15 @@ public class AppSearchPerson extends GenericDocument {
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_REQUIRED)
                     .build()
 
+            ).addProperty(new AppSearchSchema.BytesPropertyConfig.Builder(KEY_ICON)
+                    .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
+                    .build()
+
             ).build();
 
-    /** hide */
+    /** @hide */
     @NonNull
-    public static AppSearchPerson instance(@NonNull final Person person) {
+    public static AppSearchShortcutPerson instance(@NonNull final Person person) {
         Objects.requireNonNull(person);
         final String id;
         if (person.getUri() != null) {
@@ -82,10 +96,13 @@ public class AppSearchPerson extends GenericDocument {
         }
         return new Builder(id).setName(person.getName())
                 .setKey(person.getKey()).setIsBot(person.isBot())
-                .setIsImportant(person.isImportant()).build();
+                .setIsImportant(person.isImportant())
+                .setIcon(transformToByteArray(person.getIcon())).build();
     }
 
-    /** hide */
+    /**
+     * Convert this {@link GenericDocument} into {@link Person}.
+     */
     @NonNull
     public Person toPerson() {
         String uri;
@@ -99,7 +116,9 @@ public class AppSearchPerson extends GenericDocument {
         return new Person.Builder().setName(getPropertyString(KEY_NAME))
                 .setUri(uri).setKey(getPropertyString(KEY_KEY))
                 .setBot(getPropertyBoolean(KEY_IS_BOT))
-                .setImportant(getPropertyBoolean(KEY_IS_IMPORTANT)).build();
+                .setImportant(getPropertyBoolean(KEY_IS_IMPORTANT))
+                .setIcon(transformToIcon(getPropertyBytes(KEY_ICON)))
+                .build();
     }
 
     /** @hide */
@@ -142,10 +161,51 @@ public class AppSearchPerson extends GenericDocument {
             return this;
         }
 
+        /** @hide */
+        @NonNull
+        public Builder setIcon(@Nullable final byte[] icon) {
+            if (icon != null) {
+                setPropertyBytes(KEY_ICON, icon);
+            }
+            return this;
+        }
+
+        /** @hide */
         @NonNull
         @Override
-        public AppSearchPerson build() {
-            return new AppSearchPerson(super.build());
+        public AppSearchShortcutPerson build() {
+            return new AppSearchShortcutPerson(super.build());
+        }
+    }
+
+    /**
+     * Convert {@link Icon} into byte[].
+     */
+    @Nullable
+    private static byte[] transformToByteArray(@Nullable final Icon icon) {
+        if (icon == null) {
+            return null;
+        }
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            icon.writeToStream(baos);
+            return baos.toByteArray();
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Convert byte[] into {@link Icon}.
+     */
+    @Nullable
+    private Icon transformToIcon(@Nullable final byte[] icon) {
+        if (icon == null) {
+            return null;
+        }
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(icon)) {
+            return Icon.createFromStream(bais);
+        } catch (IOException e) {
+            return null;
         }
     }
 }

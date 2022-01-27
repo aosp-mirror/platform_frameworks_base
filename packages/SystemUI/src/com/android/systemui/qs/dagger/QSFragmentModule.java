@@ -53,6 +53,7 @@ import dagger.Provides;
  */
 @Module
 public interface QSFragmentModule {
+    String QS_FGS_MANAGER_FOOTER_VIEW = "qs_fgs_manager_footer";
     String QS_SECURITY_FOOTER_VIEW = "qs_security_footer";
     String QQS_FOOTER = "qqs_footer";
     String QS_FOOTER = "qs_footer";
@@ -204,5 +205,16 @@ public interface QSFragmentModule {
     @QSScope
     static StatusIconContainer providesStatusIconContainer(QuickStatusBarHeader qsHeader) {
         return qsHeader.findViewById(R.id.statusIcons);
+    }
+
+    /** */
+    @Provides
+    @QSScope
+    @Named(QS_FGS_MANAGER_FOOTER_VIEW)
+    static View providesQSFgsManagerFooterView(
+            @QSThemedContext LayoutInflater layoutInflater,
+            QSPanel qsPanel
+    ) {
+        return layoutInflater.inflate(R.layout.quick_settings_security_footer, qsPanel, false);
     }
 }

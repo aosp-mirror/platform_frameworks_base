@@ -24,6 +24,7 @@ import android.app.admin.NetworkEvent;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.admin.ParcelableGranteeMap;
+import android.app.admin.PreferentialNetworkServiceConfig;
 import android.app.admin.StartInstallingUpdateCallback;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
@@ -267,8 +268,8 @@ interface IDevicePolicyManager {
     int startUserInBackground(in ComponentName who, in UserHandle userHandle);
     int stopUser(in ComponentName who, in UserHandle userHandle);
     int logoutUser(in ComponentName who);
+    int logoutUserInternal(); // AIDL doesn't allow overloading name (logoutUser())
     int getLogoutUserId();
-    void clearLogoutUser();
     List<UserHandle> getSecondaryUsers(in ComponentName who);
     void acknowledgeNewUserDisclaimer();
 
@@ -285,6 +286,10 @@ interface IDevicePolicyManager {
 
     void setPreferentialNetworkServiceEnabled(in boolean enabled);
     boolean isPreferentialNetworkServiceEnabled(int userHandle);
+
+    void setPreferentialNetworkServiceConfig(
+            in PreferentialNetworkServiceConfig preferentialNetworkServiceConfig);
+    PreferentialNetworkServiceConfig getPreferentialNetworkServiceConfig();
 
     void setLockTaskPackages(in ComponentName who, in String[] packages);
     String[] getLockTaskPackages(in ComponentName who);

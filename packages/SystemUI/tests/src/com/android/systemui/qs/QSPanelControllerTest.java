@@ -80,6 +80,8 @@ public class QSPanelControllerTest extends SysuiTestCase {
     @Mock
     private TunerService mTunerService;
     @Mock
+    private QSFgsManagerFooter mQSFgsManagerFooter;
+    @Mock
     private QSSecurityFooter mQSSecurityFooter;
     @Mock
     private QSLogger mQSLogger;
@@ -127,8 +129,8 @@ public class QSPanelControllerTest extends SysuiTestCase {
                 .thenReturn(mQSTileRevealController);
         when(mMediaHost.getDisappearParameters()).thenReturn(new DisappearParameters());
 
-        mController = new QSPanelController(mQSPanel, mQSSecurityFooter, mTunerService,
-                mQSTileHost, mQSCustomizerController, true, mMediaHost,
+        mController = new QSPanelController(mQSPanel, mQSFgsManagerFooter, mQSSecurityFooter,
+                mTunerService, mQSTileHost, mQSCustomizerController, true, mMediaHost,
                 mQSTileRevealControllerFactory, mDumpManager, mMetricsLogger, mUiEventLogger,
                 mQSLogger, mBrightnessControllerFactory, mToggleSliderViewControllerFactory,
                 mFalsingManager, mCommandQueue

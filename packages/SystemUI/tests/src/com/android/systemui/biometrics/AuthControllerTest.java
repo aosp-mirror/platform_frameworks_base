@@ -69,6 +69,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.concurrency.FakeExecution;
@@ -117,6 +118,8 @@ public class AuthControllerTest extends SysuiTestCase {
     private SidefpsController mSidefpsController;
     @Mock
     private DisplayManager mDisplayManager;
+    @Mock
+    private WakefulnessLifecycle mWakefulnessLifecycle;
     @Captor
     ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mAuthenticatorsRegisteredCaptor;
     @Captor
@@ -677,14 +680,15 @@ public class AuthControllerTest extends SysuiTestCase {
                 Provider<SidefpsController> sidefpsControllerFactory) {
             super(context, execution, commandQueue, activityTaskManager, windowManager,
                     fingerprintManager, faceManager, udfpsControllerFactory,
-                    sidefpsControllerFactory, mDisplayManager, mHandler);
+                    sidefpsControllerFactory, mDisplayManager, mWakefulnessLifecycle, mHandler);
         }
 
         @Override
         protected AuthDialog buildDialog(PromptInfo promptInfo,
                 boolean requireConfirmation, int userId, int[] sensorIds, boolean credentialAllowed,
                 String opPackageName, boolean skipIntro, long operationId, long requestId,
-                @BiometricManager.BiometricMultiSensorMode int multiSensorConfig) {
+                @BiometricManager.BiometricMultiSensorMode int multiSensorConfig,
+                WakefulnessLifecycle wakefulnessLifecycle) {
 
             mLastBiometricPromptInfo = promptInfo;
 

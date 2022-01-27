@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_CREATED;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ACTIVITY_DRAWN;
+import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_HANDLE_EMPTY_SCREEN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_ALLOW_TASK_SNAPSHOT;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_LEGACY_SPLASH_SCREEN;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_NEW_TASK;
@@ -25,12 +26,17 @@ import static android.window.StartingWindowInfo.TYPE_PARAMETER_PROCESS_RUNNING;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_TASK_SWITCH;
 import static android.window.StartingWindowInfo.TYPE_PARAMETER_USE_EMPTY_SPLASH_SCREEN;
 
+import static com.android.server.wm.ActivityRecord.STARTING_WINDOW_TYPE_SPLASH_SCREEN;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.pm.ApplicationInfo;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.window.TaskSnapshot;
 
@@ -43,6 +49,14 @@ import java.util.function.Supplier;
 public class StartingSurfaceController {
     private static final String TAG = TAG_WITH_CLASS_NAME
             ? StartingSurfaceController.class.getSimpleName() : TAG_WM;
+    /**
+     * Allow the empty style splash screen view can be copy and transfer to another process if
+     * the app targeting to {@link android.os.Build.VERSION_CODES#TIRAMISU} or higher.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = android.os.Build.VERSION_CODES.TIRAMISU)
+    private static final long ALLOW_COPY_EMPTY_VIEW = 205907456L;
+
     private final WindowManagerService mService;
     private final SplashScreenExceptionList mSplashScreenExceptionsList;
 
@@ -81,7 +95,8 @@ public class StartingSurfaceController {
 
     static int makeStartingWindowTypeParameter(boolean newTask, boolean taskSwitch,
             boolean processRunning, boolean allowTaskSnapshot, boolean activityCreated,
-            boolean useEmpty, boolean useLegacy, boolean activityDrawn) {
+            boolean useEmpty, boolean useLegacy, boolean activityDrawn, int startingWindowType,
+            String packageName, int userId) {
         int parameter = 0;
         if (newTask) {
             parameter |= TYPE_PARAMETER_NEW_TASK;
@@ -106,6 +121,11 @@ public class StartingSurfaceController {
         }
         if (activityDrawn) {
             parameter |= TYPE_PARAMETER_ACTIVITY_DRAWN;
+        }
+        if (startingWindowType == STARTING_WINDOW_TYPE_SPLASH_SCREEN
+                && CompatChanges.isChangeEnabled(ALLOW_COPY_EMPTY_VIEW, packageName,
+                UserHandle.of(userId))) {
+            parameter |= TYPE_PARAMETER_ALLOW_HANDLE_EMPTY_SCREEN;
         }
         return parameter;
     }
