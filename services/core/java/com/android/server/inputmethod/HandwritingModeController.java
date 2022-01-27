@@ -56,6 +56,7 @@ final class HandwritingModeController {
 
     private List<MotionEvent> mHandwritingBuffer;
     private InputEventReceiver mHandwritingEventReceiver;
+    private Runnable mInkWindowInitRunnable;
     private boolean mRecordingGesture;
     private int mCurrentDisplayId;
 
@@ -64,12 +65,13 @@ final class HandwritingModeController {
     private int mCurrentRequestId;
 
     @AnyThread
-    HandwritingModeController(Looper uiThreadLooper) {
+    HandwritingModeController(Looper uiThreadLooper, Runnable inkWindowInitRunnable) {
         mLooper = uiThreadLooper;
         mCurrentDisplayId = Display.INVALID_DISPLAY;
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mCurrentRequestId = 0;
+        mInkWindowInitRunnable = inkWindowInitRunnable;
     }
 
     // TODO(b/210039666): Consider moving this to MotionEvent
@@ -221,6 +223,14 @@ final class HandwritingModeController {
 
     private void onStylusEvent(MotionEvent event) {
         final int action = event.getActionMasked();
+
+        if (mInkWindowInitRunnable != null && (action == MotionEvent.ACTION_HOVER_ENTER
+                || event.getAction() == MotionEvent.ACTION_HOVER_ENTER)) {
+            // Ask IMMS to make ink window ready.
+            mInkWindowInitRunnable.run();
+            mInkWindowInitRunnable = null;
+        }
+
         if (action == MotionEvent.ACTION_UP) {
             mRecordingGesture = false;
             mHandwritingBuffer.clear();

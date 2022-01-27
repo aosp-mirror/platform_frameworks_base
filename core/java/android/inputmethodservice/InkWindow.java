@@ -59,15 +59,26 @@ final class InkWindow extends PhoneWindow {
     }
 
     /**
+     * Initialize InkWindow if we only want to create and draw surface but not show it.
+     */
+    void initOnly() {
+        show(true /* keepInvisible */);
+    }
+
+    /**
      * Method to show InkWindow on screen.
      * Emulates internal behavior similar to Dialog.show().
      */
     void show() {
+        show(false /* keepInvisible */);
+    }
+
+    private void show(boolean keepInvisible) {
         if (getDecorView() == null) {
             Slog.i(InputMethodService.TAG, "DecorView is not set for InkWindow. show() failed.");
             return;
         }
-        getDecorView().setVisibility(View.VISIBLE);
+        getDecorView().setVisibility(keepInvisible ? View.INVISIBLE : View.VISIBLE);
         if (!mIsViewAdded) {
             mWindowManager.addView(getDecorView(), getAttributes());
             mIsViewAdded = true;
@@ -90,5 +101,12 @@ final class InkWindow extends PhoneWindow {
         WindowManager.LayoutParams lp = getAttributes();
         lp.token = token;
         setAttributes(lp);
+    }
+
+    /**
+     * Returns {@code true} if Window was created and added to WM.
+     */
+    boolean isInitialized() {
+        return mIsViewAdded;
     }
 }

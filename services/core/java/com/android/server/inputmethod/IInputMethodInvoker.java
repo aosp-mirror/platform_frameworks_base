@@ -223,4 +223,13 @@ final class IInputMethodInvoker {
         }
         return true;
     }
+
+    @AnyThread
+    void initInkWindow() {
+        try {
+            mTarget.initInkWindow();
+        } catch (RemoteException e) {
+            logRemoteException(e);
+        }
+    }
 }

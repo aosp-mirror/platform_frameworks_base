@@ -742,6 +742,10 @@ public class InputMethodService extends AbstractInputMethodService {
             onUnbindInput();
             mInputBinding = null;
             mInputConnection = null;
+            // free-up cached InkWindow surface on detaching from current client.
+            if (mInkWindow != null) {
+                mInkWindow.hide(true /* remove */);
+            }
         }
 
         /**
@@ -902,6 +906,10 @@ public class InputMethodService extends AbstractInputMethodService {
                 Log.d(TAG, "Input should have started before starting Stylus handwriting.");
                 return;
             }
+            if (!mInkWindow.isInitialized()) {
+                // prepare hasn't been called by Stylus HOVER.
+                onPrepareStylusHandwriting();
+            }
             if (onStartStylusHandwriting()) {
                 mPrivOps.onStylusHandwritingReady(requestId);
             } else {
@@ -946,6 +954,16 @@ public class InputMethodService extends AbstractInputMethodService {
                     });
         }
 
+
+        /**
+         * {@inheritDoc}
+         * @hide
+         */
+        @Override
+        public void initInkWindow() {
+            mInkWindow.initOnly();
+            onPrepareStylusHandwriting();
+        }
 
         /**
          * {@inheritDoc}
@@ -2318,7 +2336,19 @@ public class InputMethodService extends AbstractInputMethodService {
             }
         }
     }
-    
+
+    /**
+     * Called to prepare stylus handwriting.
+     * The system calls this before the first {@link #onStartStylusHandwriting} request.
+     *
+     * <p>Note: The system tries to call this as early as possible, when it detects that
+     * handwriting stylus input is imminent. However, that a subsequent call to
+     * {@link #onStartStylusHandwriting} actually happens is not guaranteed.</p>
+     */
+    public void onPrepareStylusHandwriting() {
+        // Intentionally empty
+    }
+
     /**
      * Called when an app requests stylus handwriting
      * {@link InputMethodManager#startStylusHandwriting(View)}.
