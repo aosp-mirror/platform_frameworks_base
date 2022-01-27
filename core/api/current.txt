@@ -7185,6 +7185,7 @@ package android.app.admin {
     method @Nullable public java.util.List<java.lang.String> getPermittedCrossProfileNotificationListeners(@NonNull android.content.ComponentName);
     method @Nullable public java.util.List<java.lang.String> getPermittedInputMethods(@NonNull android.content.ComponentName);
     method public int getPersonalAppsSuspendedReasons(@NonNull android.content.ComponentName);
+    method @NonNull public android.app.admin.PreferentialNetworkServiceConfig getPreferentialNetworkServiceConfig();
     method public int getRequiredPasswordComplexity();
     method public long getRequiredStrongAuthTimeout(@Nullable android.content.ComponentName);
     method public boolean getScreenCaptureDisabled(@Nullable android.content.ComponentName);
@@ -7327,6 +7328,7 @@ package android.app.admin {
     method public boolean setPermittedCrossProfileNotificationListeners(@NonNull android.content.ComponentName, @Nullable java.util.List<java.lang.String>);
     method public boolean setPermittedInputMethods(@NonNull android.content.ComponentName, java.util.List<java.lang.String>);
     method public void setPersonalAppsSuspended(@NonNull android.content.ComponentName, boolean);
+    method public void setPreferentialNetworkServiceConfig(@NonNull android.app.admin.PreferentialNetworkServiceConfig);
     method public void setPreferentialNetworkServiceEnabled(boolean);
     method public void setProfileEnabled(@NonNull android.content.ComponentName);
     method public void setProfileName(@NonNull android.content.ComponentName, String);
@@ -7570,6 +7572,32 @@ package android.app.admin {
     method public String getPackageName();
     method public long getTimestamp();
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.NetworkEvent> CREATOR;
+  }
+
+  public final class PreferentialNetworkServiceConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public int[] getExcludedUids();
+    method @NonNull public int[] getIncludedUids();
+    method public int getNetworkId();
+    method public boolean isEnabled();
+    method public boolean isFallbackToDefaultConnectionAllowed();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.PreferentialNetworkServiceConfig> CREATOR;
+    field public static final int PREFERENTIAL_NETWORK_ID_1 = 1; // 0x1
+    field public static final int PREFERENTIAL_NETWORK_ID_2 = 2; // 0x2
+    field public static final int PREFERENTIAL_NETWORK_ID_3 = 3; // 0x3
+    field public static final int PREFERENTIAL_NETWORK_ID_4 = 4; // 0x4
+    field public static final int PREFERENTIAL_NETWORK_ID_5 = 5; // 0x5
+  }
+
+  public static final class PreferentialNetworkServiceConfig.Builder {
+    ctor public PreferentialNetworkServiceConfig.Builder();
+    method @NonNull public android.app.admin.PreferentialNetworkServiceConfig build();
+    method @NonNull public android.app.admin.PreferentialNetworkServiceConfig.Builder setEnabled(boolean);
+    method @NonNull public android.app.admin.PreferentialNetworkServiceConfig.Builder setExcludedUids(@NonNull int[]);
+    method @NonNull public android.app.admin.PreferentialNetworkServiceConfig.Builder setFallbackToDefaultConnectionAllowed(boolean);
+    method @NonNull public android.app.admin.PreferentialNetworkServiceConfig.Builder setIncludedUids(@NonNull int[]);
+    method @NonNull public android.app.admin.PreferentialNetworkServiceConfig.Builder setNetworkId(int);
   }
 
   public class SecurityLog {
@@ -8642,6 +8670,7 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public java.util.Set<android.bluetooth.BluetoothDevice> getBondedDevices();
     method @Deprecated public static android.bluetooth.BluetoothAdapter getDefaultAdapter();
     method public int getLeMaximumAdvertisingDataLength();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int getMaxConnectedAudioDevices();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public String getName();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int getProfileConnectionState(int);
     method public boolean getProfileProxy(android.content.Context, android.bluetooth.BluetoothProfile.ServiceListener, int);
@@ -8652,11 +8681,12 @@ package android.bluetooth {
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_SCAN) public boolean isDiscovering();
     method public boolean isEnabled();
     method public boolean isLe2MPhySupported();
+    method public int isLeAudioBroadcastAssistantSupported();
+    method public int isLeAudioBroadcastSourceSupported();
     method public int isLeAudioSupported();
     method public boolean isLeCodedPhySupported();
     method public boolean isLeExtendedAdvertisingSupported();
     method public boolean isLePeriodicAdvertisingSupported();
-    method public int isLePeriodicAdvertisingSyncTransferSenderSupported();
     method public boolean isMultipleAdvertisementSupported();
     method public boolean isOffloadedFilteringSupported();
     method public boolean isOffloadedScanBatchingSupported();
@@ -9061,6 +9091,7 @@ package android.bluetooth {
     field public static final int SOURCE_CODEC_TYPE_APTX = 2; // 0x2
     field public static final int SOURCE_CODEC_TYPE_APTX_HD = 3; // 0x3
     field public static final int SOURCE_CODEC_TYPE_INVALID = 1000000; // 0xf4240
+    field public static final int SOURCE_CODEC_TYPE_LC3 = 5; // 0x5
     field public static final int SOURCE_CODEC_TYPE_LDAC = 4; // 0x4
     field public static final int SOURCE_CODEC_TYPE_SBC = 0; // 0x0
   }
@@ -9153,6 +9184,7 @@ package android.bluetooth {
     field public static final String EXTRA_PAIRING_VARIANT = "android.bluetooth.device.extra.PAIRING_VARIANT";
     field public static final String EXTRA_PREVIOUS_BOND_STATE = "android.bluetooth.device.extra.PREVIOUS_BOND_STATE";
     field public static final String EXTRA_RSSI = "android.bluetooth.device.extra.RSSI";
+    field public static final String EXTRA_TRANSPORT = "android.bluetooth.device.extra.TRANSPORT";
     field public static final String EXTRA_UUID = "android.bluetooth.device.extra.UUID";
     field public static final int PAIRING_VARIANT_PASSKEY_CONFIRMATION = 2; // 0x2
     field public static final int PAIRING_VARIANT_PIN = 0; // 0x0
@@ -9515,24 +9547,61 @@ package android.bluetooth {
     method public void close();
     method protected void finalize();
     method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method @Nullable @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public android.bluetooth.BluetoothDevice getConnectedGroupLeadDevice(int);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int getConnectionState(@NonNull android.bluetooth.BluetoothDevice);
     method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public java.util.List<android.bluetooth.BluetoothDevice> getDevicesMatchingConnectionStates(@NonNull int[]);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public int getGroupId(@NonNull android.bluetooth.BluetoothDevice);
     field @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT) public static final String ACTION_LE_AUDIO_CONNECTION_STATE_CHANGED = "android.bluetooth.action.LE_AUDIO_CONNECTION_STATE_CHANGED";
   }
 
-  public final class BluetoothLeAudioCodecConfig {
+  public final class BluetoothLeAudioCodecConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getBitsPerSample();
+    method public int getChannelMode();
     method @NonNull public String getCodecName();
+    method public int getCodecPriority();
     method public int getCodecType();
+    method public int getFrameDuration();
     method public static int getMaxCodecType();
+    method public int getOctetsPerFrame();
+    method public int getSampleRate();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int BITS_PER_SAMPLE_16 = 1; // 0x1
+    field public static final int BITS_PER_SAMPLE_24 = 2; // 0x2
+    field public static final int BITS_PER_SAMPLE_32 = 3; // 0x3
+    field public static final int BITS_PER_SAMPLE_NONE = 0; // 0x0
+    field public static final int CHANNEL_MODE_MONO = 1; // 0x1
+    field public static final int CHANNEL_MODE_NONE = 0; // 0x0
+    field public static final int CHANNEL_MODE_STEREO = 2; // 0x2
+    field public static final int CODEC_PRIORITY_DEFAULT = 0; // 0x0
+    field public static final int CODEC_PRIORITY_DISABLED = -1; // 0xffffffff
+    field public static final int CODEC_PRIORITY_HIGHEST = 1000000; // 0xf4240
+    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.BluetoothLeAudioCodecConfig> CREATOR;
+    field public static final int FRAME_DURATION_10000 = 2; // 0x2
+    field public static final int FRAME_DURATION_7500 = 1; // 0x1
+    field public static final int FRAME_DURATION_NONE = 0; // 0x0
+    field public static final int SAMPLE_RATE_16000 = 2; // 0x2
+    field public static final int SAMPLE_RATE_24000 = 3; // 0x3
+    field public static final int SAMPLE_RATE_32000 = 4; // 0x4
+    field public static final int SAMPLE_RATE_44100 = 5; // 0x5
+    field public static final int SAMPLE_RATE_48000 = 6; // 0x6
+    field public static final int SAMPLE_RATE_8000 = 1; // 0x1
+    field public static final int SAMPLE_RATE_NONE = 0; // 0x0
     field public static final int SOURCE_CODEC_TYPE_INVALID = 1000000; // 0xf4240
     field public static final int SOURCE_CODEC_TYPE_LC3 = 0; // 0x0
   }
 
   public static final class BluetoothLeAudioCodecConfig.Builder {
     ctor public BluetoothLeAudioCodecConfig.Builder();
+    ctor public BluetoothLeAudioCodecConfig.Builder(@NonNull android.bluetooth.BluetoothLeAudioCodecConfig);
     method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig build();
+    method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig.Builder setBitsPerSample(int);
+    method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig.Builder setChannelMode(int);
+    method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig.Builder setCodecPriority(int);
     method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig.Builder setCodecType(int);
+    method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig.Builder setFrameDuration(int);
+    method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig.Builder setOctetsPerFrame(int);
+    method @NonNull public android.bluetooth.BluetoothLeAudioCodecConfig.Builder setSampleRate(int);
   }
 
   public final class BluetoothManager {
@@ -9553,6 +9622,7 @@ package android.bluetooth {
     field public static final String EXTRA_STATE = "android.bluetooth.profile.extra.STATE";
     field public static final int GATT = 7; // 0x7
     field public static final int GATT_SERVER = 8; // 0x8
+    field public static final int HAP_CLIENT = 28; // 0x1c
     field public static final int HEADSET = 1; // 0x1
     field @Deprecated public static final int HEALTH = 3; // 0x3
     field public static final int HEARING_AID = 21; // 0x15
@@ -21881,9 +21951,11 @@ package android.media {
     field public static final int COLOR_Format24bitBGR888 = 12; // 0xc
     field @Deprecated public static final int COLOR_Format24bitRGB888 = 11; // 0xb
     field @Deprecated public static final int COLOR_Format25bitARGB1888 = 14; // 0xe
+    field public static final int COLOR_Format32bitABGR2101010 = 2130750114; // 0x7f00aaa2
     field public static final int COLOR_Format32bitABGR8888 = 2130747392; // 0x7f00a000
     field @Deprecated public static final int COLOR_Format32bitARGB8888 = 16; // 0x10
     field @Deprecated public static final int COLOR_Format32bitBGRA8888 = 15; // 0xf
+    field public static final int COLOR_Format64bitABGRFloat = 2130710294; // 0x7f000f16
     field @Deprecated public static final int COLOR_Format8bitRGB332 = 2; // 0x2
     field @Deprecated public static final int COLOR_FormatCbYCrY = 27; // 0x1b
     field @Deprecated public static final int COLOR_FormatCrYCbY = 28; // 0x1c
@@ -21916,10 +21988,12 @@ package android.media {
     field @Deprecated public static final int COLOR_FormatYUV422SemiPlanar = 24; // 0x18
     field public static final int COLOR_FormatYUV444Flexible = 2135181448; // 0x7f444888
     field @Deprecated public static final int COLOR_FormatYUV444Interleaved = 29; // 0x1d
+    field public static final int COLOR_FormatYUVP010 = 54; // 0x36
     field @Deprecated public static final int COLOR_QCOM_FormatYUV420SemiPlanar = 2141391872; // 0x7fa30c00
     field @Deprecated public static final int COLOR_TI_FormatYUV420PackedSemiPlanar = 2130706688; // 0x7f000100
     field public static final String FEATURE_AdaptivePlayback = "adaptive-playback";
     field public static final String FEATURE_DynamicTimestamp = "dynamic-timestamp";
+    field public static final String FEATURE_EncodingStatistics = "encoding-statistics";
     field public static final String FEATURE_FrameParsing = "frame-parsing";
     field public static final String FEATURE_IntraRefresh = "intra-refresh";
     field public static final String FEATURE_LowLatency = "low-latency";
@@ -22693,6 +22767,7 @@ package android.media {
     field public static final String KEY_OPERATING_RATE = "operating-rate";
     field public static final String KEY_OUTPUT_REORDER_DEPTH = "output-reorder-depth";
     field public static final String KEY_PCM_ENCODING = "pcm-encoding";
+    field public static final String KEY_PICTURE_TYPE = "picture-type";
     field public static final String KEY_PIXEL_ASPECT_RATIO_HEIGHT = "sar-height";
     field public static final String KEY_PIXEL_ASPECT_RATIO_WIDTH = "sar-width";
     field public static final String KEY_PREPEND_HEADER_TO_SYNC_FRAMES = "prepend-sps-pps-to-idr-frames";
@@ -22710,6 +22785,8 @@ package android.media {
     field public static final String KEY_TILE_HEIGHT = "tile-height";
     field public static final String KEY_TILE_WIDTH = "tile-width";
     field public static final String KEY_TRACK_ID = "track-id";
+    field public static final String KEY_VIDEO_ENCODING_STATISTICS_LEVEL = "video-encoding-statistics-level";
+    field public static final String KEY_VIDEO_QP_AVERAGE = "video-qp-average";
     field public static final String KEY_VIDEO_QP_B_MAX = "video-qp-b-max";
     field public static final String KEY_VIDEO_QP_B_MIN = "video-qp-b-min";
     field public static final String KEY_VIDEO_QP_I_MAX = "video-qp-i-max";
@@ -22754,12 +22831,18 @@ package android.media {
     field public static final String MIMETYPE_VIDEO_SCRAMBLED = "video/scrambled";
     field public static final String MIMETYPE_VIDEO_VP8 = "video/x-vnd.on2.vp8";
     field public static final String MIMETYPE_VIDEO_VP9 = "video/x-vnd.on2.vp9";
+    field public static final int PICTURE_TYPE_B = 3; // 0x3
+    field public static final int PICTURE_TYPE_I = 1; // 0x1
+    field public static final int PICTURE_TYPE_P = 2; // 0x2
+    field public static final int PICTURE_TYPE_UNKNOWN = 0; // 0x0
     field public static final int TYPE_BYTE_BUFFER = 5; // 0x5
     field public static final int TYPE_FLOAT = 3; // 0x3
     field public static final int TYPE_INTEGER = 1; // 0x1
     field public static final int TYPE_LONG = 2; // 0x2
     field public static final int TYPE_NULL = 0; // 0x0
     field public static final int TYPE_STRING = 4; // 0x4
+    field public static final int VIDEO_ENCODING_STATISTICS_LEVEL_1 = 1; // 0x1
+    field public static final int VIDEO_ENCODING_STATISTICS_LEVEL_NONE = 0; // 0x0
   }
 
   public final class MediaMetadata implements android.os.Parcelable {
@@ -26980,65 +27063,6 @@ package android.net.http {
     method public java.util.List<java.security.cert.X509Certificate> checkServerTrusted(java.security.cert.X509Certificate[], String, String) throws java.security.cert.CertificateException;
     method public boolean isSameTrustConfiguration(String, String);
     method public boolean isUserAddedCertificate(java.security.cert.X509Certificate);
-  }
-
-}
-
-package android.net.nsd {
-
-  public final class NsdManager {
-    method public void discoverServices(String, int, android.net.nsd.NsdManager.DiscoveryListener);
-    method public void registerService(android.net.nsd.NsdServiceInfo, int, android.net.nsd.NsdManager.RegistrationListener);
-    method public void resolveService(android.net.nsd.NsdServiceInfo, android.net.nsd.NsdManager.ResolveListener);
-    method public void stopServiceDiscovery(android.net.nsd.NsdManager.DiscoveryListener);
-    method public void unregisterService(android.net.nsd.NsdManager.RegistrationListener);
-    field public static final String ACTION_NSD_STATE_CHANGED = "android.net.nsd.STATE_CHANGED";
-    field public static final String EXTRA_NSD_STATE = "nsd_state";
-    field public static final int FAILURE_ALREADY_ACTIVE = 3; // 0x3
-    field public static final int FAILURE_INTERNAL_ERROR = 0; // 0x0
-    field public static final int FAILURE_MAX_LIMIT = 4; // 0x4
-    field public static final int NSD_STATE_DISABLED = 1; // 0x1
-    field public static final int NSD_STATE_ENABLED = 2; // 0x2
-    field public static final int PROTOCOL_DNS_SD = 1; // 0x1
-  }
-
-  public static interface NsdManager.DiscoveryListener {
-    method public void onDiscoveryStarted(String);
-    method public void onDiscoveryStopped(String);
-    method public void onServiceFound(android.net.nsd.NsdServiceInfo);
-    method public void onServiceLost(android.net.nsd.NsdServiceInfo);
-    method public void onStartDiscoveryFailed(String, int);
-    method public void onStopDiscoveryFailed(String, int);
-  }
-
-  public static interface NsdManager.RegistrationListener {
-    method public void onRegistrationFailed(android.net.nsd.NsdServiceInfo, int);
-    method public void onServiceRegistered(android.net.nsd.NsdServiceInfo);
-    method public void onServiceUnregistered(android.net.nsd.NsdServiceInfo);
-    method public void onUnregistrationFailed(android.net.nsd.NsdServiceInfo, int);
-  }
-
-  public static interface NsdManager.ResolveListener {
-    method public void onResolveFailed(android.net.nsd.NsdServiceInfo, int);
-    method public void onServiceResolved(android.net.nsd.NsdServiceInfo);
-  }
-
-  public final class NsdServiceInfo implements android.os.Parcelable {
-    ctor public NsdServiceInfo();
-    method public int describeContents();
-    method public java.util.Map<java.lang.String,byte[]> getAttributes();
-    method public java.net.InetAddress getHost();
-    method public int getPort();
-    method public String getServiceName();
-    method public String getServiceType();
-    method public void removeAttribute(String);
-    method public void setAttribute(String, String);
-    method public void setHost(java.net.InetAddress);
-    method public void setPort(int);
-    method public void setServiceName(String);
-    method public void setServiceType(String);
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.nsd.NsdServiceInfo> CREATOR;
   }
 
 }
@@ -31647,7 +31671,7 @@ package android.os {
     method @Deprecated public void readMap(@NonNull java.util.Map, @Nullable ClassLoader);
     method public <K, V> void readMap(@NonNull java.util.Map<? super K,? super V>, @Nullable ClassLoader, @NonNull Class<K>, @NonNull Class<V>);
     method @Deprecated @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader);
-    method @Nullable public <T> T readParcelable(@Nullable ClassLoader, @NonNull Class<T>);
+    method @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader, @NonNull Class<? super T>);
     method @Deprecated @Nullable public android.os.Parcelable[] readParcelableArray(@Nullable ClassLoader);
     method @Nullable public <T> T[] readParcelableArray(@Nullable ClassLoader, @NonNull Class<T>);
     method @Deprecated @Nullable public android.os.Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader);
@@ -31657,7 +31681,7 @@ package android.os {
     method @Nullable public android.os.PersistableBundle readPersistableBundle();
     method @Nullable public android.os.PersistableBundle readPersistableBundle(@Nullable ClassLoader);
     method @Deprecated @Nullable public java.io.Serializable readSerializable();
-    method @Nullable public <T> T readSerializable(@Nullable ClassLoader, @NonNull Class<T>);
+    method @Nullable public <T extends java.io.Serializable> T readSerializable(@Nullable ClassLoader, @NonNull Class<? super T>);
     method @NonNull public android.util.Size readSize();
     method @NonNull public android.util.SizeF readSizeF();
     method @Deprecated @Nullable public <T> android.util.SparseArray<T> readSparseArray(@Nullable ClassLoader);
@@ -41349,6 +41373,7 @@ package android.telephony {
     field public static final String KEY_SUPPORTED_IKE_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY = "iwlan.supported_ike_session_encryption_algorithms_int_array";
     field public static final String KEY_SUPPORTED_INTEGRITY_ALGORITHMS_INT_ARRAY = "iwlan.supported_integrity_algorithms_int_array";
     field public static final String KEY_SUPPORTED_PRF_ALGORITHMS_INT_ARRAY = "iwlan.supported_prf_algorithms_int_array";
+    field public static final String KEY_SUPPORTS_EAP_AKA_FAST_REAUTH_BOOL = "iwlan.supports_eap_aka_fast_reauth_bool";
   }
 
   public abstract class CellIdentity implements android.os.Parcelable {

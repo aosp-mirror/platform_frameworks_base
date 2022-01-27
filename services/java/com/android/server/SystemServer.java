@@ -54,6 +54,7 @@ import android.hardware.display.DisplayManagerInternal;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityModuleConnector;
 import android.net.NetworkStackClient;
+import android.net.TrafficStats;
 import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Build;
@@ -1338,7 +1339,6 @@ public final class SystemServer implements Dumpable {
         VcnManagementService vcnManagement = null;
         NetworkStatsService networkStats = null;
         NetworkPolicyManagerService networkPolicy = null;
-        NsdService serviceDiscovery = null;
         WindowManagerService wm = null;
         SerialService serial = null;
         NetworkTimeUpdateService networkTimeUpdater = null;
@@ -1839,6 +1839,7 @@ public final class SystemServer implements Dumpable {
             try {
                 networkStats = NetworkStatsService.create(context);
                 ServiceManager.addService(Context.NETWORK_STATS_SERVICE, networkStats);
+                TrafficStats.init(context);
             } catch (Throwable e) {
                 reportWtf("starting NetworkStats Service", e);
             }
@@ -1938,16 +1939,6 @@ public final class SystemServer implements Dumpable {
                 ServiceManager.addService(Context.VCN_MANAGEMENT_SERVICE, vcnManagement);
             } catch (Throwable e) {
                 reportWtf("starting VCN Management Service", e);
-            }
-            t.traceEnd();
-
-            t.traceBegin("StartNsdService");
-            try {
-                serviceDiscovery = NsdService.create(context);
-                ServiceManager.addService(
-                        Context.NSD_SERVICE, serviceDiscovery);
-            } catch (Throwable e) {
-                reportWtf("starting Service Discovery Service", e);
             }
             t.traceEnd();
 

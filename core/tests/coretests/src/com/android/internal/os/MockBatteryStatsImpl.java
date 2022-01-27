@@ -29,6 +29,7 @@ import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
 import com.android.internal.power.MeasuredEnergyStats;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Queue;
@@ -40,10 +41,16 @@ import java.util.concurrent.Future;
 public class MockBatteryStatsImpl extends BatteryStatsImpl {
     public BatteryStatsImpl.Clocks clocks;
     public boolean mForceOnBattery;
+    // The mNetworkStats will be used for both wifi and mobile categories
     private NetworkStats mNetworkStats;
 
     MockBatteryStatsImpl(Clocks clocks) {
-        super(clocks);
+        this(clocks, null);
+    }
+
+    MockBatteryStatsImpl(Clocks clocks, File historyDirectory) {
+        super(clocks, historyDirectory);
+
         this.clocks = mClocks;
         initTimersAndCounters();
 
@@ -107,11 +114,16 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     }
 
     @Override
-    protected NetworkStats readNetworkStatsLocked(@NonNull NetworkStatsManager networkStatsManager,
-            String[] ifaces) {
+    protected NetworkStats readMobileNetworkStatsLocked(
+            @NonNull NetworkStatsManager networkStatsManager) {
         return mNetworkStats;
     }
 
+    @Override
+    protected NetworkStats readWifiNetworkStatsLocked(
+            @NonNull NetworkStatsManager networkStatsManager) {
+        return mNetworkStats;
+    }
     public MockBatteryStatsImpl setPowerProfile(PowerProfile powerProfile) {
         mPowerProfile = powerProfile;
         return this;

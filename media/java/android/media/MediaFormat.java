@@ -1102,6 +1102,76 @@ public final class MediaFormat {
     public static final String KEY_VIDEO_QP_B_MIN = "video-qp-b-min";
 
     /**
+     * A key describing the level of encoding statistics information emitted from video encoder.
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_VIDEO_ENCODING_STATISTICS_LEVEL =
+            "video-encoding-statistics-level";
+
+    /**
+     * Encoding Statistics Level None.
+     * Encoder generates no information about Encoding statistics.
+     */
+    public static final int VIDEO_ENCODING_STATISTICS_LEVEL_NONE = 0;
+
+    /**
+     * Encoding Statistics Level 1.
+     * Encoder generates {@link MediaFormat#KEY_PICTURE_TYPE} and
+     * {@link MediaFormat#KEY_VIDEO_QP_AVERAGE} for each frame.
+     */
+    public static final int VIDEO_ENCODING_STATISTICS_LEVEL_1 = 1;
+
+    /** @hide */
+    @IntDef({
+        VIDEO_ENCODING_STATISTICS_LEVEL_NONE,
+        VIDEO_ENCODING_STATISTICS_LEVEL_1,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface VideoEncodingStatisticsLevel {}
+
+    /**
+     * A key describing the per-frame average block QP (Quantization Parameter).
+     * This is a part of a video 'Encoding Statistics' export feature.
+     * This value is emitted from video encoder for a video frame.
+     * The average value is rounded down (using floor()) to integer value.
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_VIDEO_QP_AVERAGE = "video-qp-average";
+
+    /**
+     * A key describing the picture type of the encoded frame.
+     * This is a part of a video 'Encoding Statistics' export feature.
+     * This value is emitted from video encoder for a video frame.
+     *
+     * The associated value is an integer.
+     */
+    public static final String KEY_PICTURE_TYPE = "picture-type";
+
+    /** Picture Type is unknown. */
+    public static final int PICTURE_TYPE_UNKNOWN = 0;
+
+    /** Picture Type is I Frame. */
+    public static final int PICTURE_TYPE_I = 1;
+
+    /** Picture Type is P Frame. */
+    public static final int PICTURE_TYPE_P = 2;
+
+    /** Picture Type is B Frame. */
+    public static final int PICTURE_TYPE_B = 3;
+
+    /** @hide */
+    @IntDef({
+        PICTURE_TYPE_UNKNOWN,
+        PICTURE_TYPE_I,
+        PICTURE_TYPE_P,
+        PICTURE_TYPE_B,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PictureType {}
+
+    /**
      * A key describing the audio session ID of the AudioTrack associated
      * to a tunneled video codec.
      * The associated value is an integer.

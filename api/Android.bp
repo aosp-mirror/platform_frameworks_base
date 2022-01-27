@@ -111,6 +111,7 @@ combined_apis {
         "conscrypt.module.public.api",
         "framework-appsearch",
         "framework-connectivity",
+        "framework-connectivity-tiramisu",
         "framework-graphics",
         "framework-media",
         "framework-mediaprovider",
