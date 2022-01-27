@@ -1584,6 +1584,7 @@ public final class TvInputManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.TIS_EXTENSION_INTERFACE)
     @NonNull
     public List<String> getAvailableExtensionInterfaceNames(@NonNull String inputId) {
         Preconditions.checkNotNull(inputId);
@@ -1609,6 +1610,7 @@ public final class TvInputManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.TIS_EXTENSION_INTERFACE)
     @Nullable
     public IBinder getExtensionInterface(@NonNull String inputId, @NonNull String name) {
         Preconditions.checkNotNull(inputId);

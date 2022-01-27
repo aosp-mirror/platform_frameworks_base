@@ -1183,6 +1183,7 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public List<String> getAvailableExtensionInterfaceNames(String inputId, int userId) {
+            ensureTisExtensionInterfacePermission();
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int resolvedUserId = resolveCallingUserId(callingPid, callingUid,
@@ -1228,6 +1229,7 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public IBinder getExtensionInterface(String inputId, String name, int userId) {
+            ensureTisExtensionInterfacePermission();
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int resolvedUserId = resolveCallingUserId(callingPid, callingUid,
@@ -2625,6 +2627,14 @@ public final class TvInputManagerService extends SystemService {
                     android.Manifest.permission.TUNER_RESOURCE_ACCESS)
                     != PackageManager.PERMISSION_GRANTED) {
                 throw new SecurityException("Requires TUNER_RESOURCE_ACCESS permission");
+            }
+        }
+
+        private void ensureTisExtensionInterfacePermission() {
+            if (mContext.checkCallingPermission(
+                    android.Manifest.permission.TIS_EXTENSION_INTERFACE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Requires TIS_EXTENSION_INTERFACE permission");
             }
         }
 
