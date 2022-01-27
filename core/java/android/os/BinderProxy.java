@@ -125,7 +125,7 @@ public final class BinderProxy implements IBinder {
             for (ArrayList<WeakReference<BinderProxy>> a : mMainIndexValues) {
                 if (a != null) {
                     for (WeakReference<BinderProxy> ref : a) {
-                        if (ref.get() != null) {
+                        if (!ref.refersTo(null)) {
                             ++size;
                         }
                     }
@@ -196,7 +196,7 @@ public final class BinderProxy implements IBinder {
             // This ensures that ArrayList size is bounded by the maximum occupancy of
             // that bucket.
             for (int i = 0; i < size; ++i) {
-                if (valueArray.get(i).get() == null) {
+                if (valueArray.get(i).refersTo(null)) {
                     valueArray.set(i, newWr);
                     Long[] keyArray = mMainIndexKeys[myHash];
                     keyArray[i] = key;
@@ -204,7 +204,7 @@ public final class BinderProxy implements IBinder {
                         // "Randomly" check one of the remaining entries in [i+1, size), so that
                         // needlessly long buckets are eventually pruned.
                         int rnd = Math.floorMod(++mRandom, size - (i + 1));
-                        if (valueArray.get(i + 1 + rnd).get() == null) {
+                        if (valueArray.get(i + 1 + rnd).refersTo(null)) {
                             remove(myHash, i + 1 + rnd);
                         }
                     }
