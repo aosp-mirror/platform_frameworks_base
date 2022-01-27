@@ -2443,9 +2443,15 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private void updateQsExpansion() {
         if (mQs == null) return;
-        final float squishiness =
-                mQsExpandImmediate || mQsExpanded ? 1f : mNotificationStackScrollLayoutController
-                        .getNotificationSquishinessFraction();
+        final float squishiness;
+        if (mQsExpandImmediate || mQsExpanded) {
+            squishiness = 1;
+        } else if (mLockscreenShadeTransitionController.getQSDragProgress() > 0) {
+            squishiness = mLockscreenShadeTransitionController.getQSDragProgress();
+        } else {
+            squishiness = mNotificationStackScrollLayoutController
+                    .getNotificationSquishinessFraction();
+        }
         final float qsExpansionFraction = computeQsExpansionFraction();
         final float adjustedExpansionFraction = mShouldUseSplitNotificationShade
                 ? 1f : computeQsExpansionFraction();
