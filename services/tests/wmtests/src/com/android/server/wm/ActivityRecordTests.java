@@ -85,7 +85,6 @@ import static com.android.server.wm.ActivityRecord.State.STARTED;
 import static com.android.server.wm.ActivityRecord.State.STOPPED;
 import static com.android.server.wm.ActivityRecord.State.STOPPING;
 import static com.android.server.wm.ActivityTaskManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MILLIS;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_INVISIBLE;
 import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE;
 import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
@@ -3114,7 +3113,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
-    public void testInClosingAnimation_doNotHideSurface() {
+    public void testInClosingAnimation_visibilityNotCommitted_doNotHideSurface() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         makeWindowVisibleAndDrawn(app);
 
@@ -3123,16 +3122,45 @@ public class ActivityRecordTests extends WindowTestsBase {
         mDisplayContent.mClosingApps.add(app.mActivityRecord);
         mDisplayContent.prepareAppTransition(TRANSIT_CLOSE);
 
-        // Update visibility and call to remove window
-        app.mActivityRecord.commitVisibility(false, false);
+        // Remove window during transition, so it is requested to hide, but won't be committed until
+        // the transition is finished.
+        app.mActivityRecord.onRemovedFromDisplay();
+
+        assertTrue(mDisplayContent.mClosingApps.contains(app.mActivityRecord));
+        assertFalse(app.mActivityRecord.isVisibleRequested());
+        assertTrue(app.mActivityRecord.isVisible());
+        assertTrue(app.mActivityRecord.isSurfaceShowing());
+
+        // Start transition.
         app.mActivityRecord.prepareSurfaces();
 
         // Because the app is waiting for transition, it should not hide the surface.
         assertTrue(app.mActivityRecord.isSurfaceShowing());
+    }
 
-        // Ensure onAnimationFinished will callback when the closing animation is finished.
-        verify(app.mActivityRecord).onAnimationFinished(eq(ANIMATION_TYPE_APP_TRANSITION),
-                eq(null));
+    @Test
+    public void testInClosingAnimation_visibilityCommitted_hideSurface() {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        makeWindowVisibleAndDrawn(app);
+
+        // Put the activity in close transition.
+        mDisplayContent.mOpeningApps.clear();
+        mDisplayContent.mClosingApps.add(app.mActivityRecord);
+        mDisplayContent.prepareAppTransition(TRANSIT_CLOSE);
+
+        // Commit visibility before start transition.
+        app.mActivityRecord.commitVisibility(false, false);
+
+        assertFalse(app.mActivityRecord.isVisibleRequested());
+        assertFalse(app.mActivityRecord.isVisible());
+        assertTrue(app.mActivityRecord.isSurfaceShowing());
+
+        // Start transition.
+        app.mActivityRecord.prepareSurfaces();
+
+        // Because the app visibility has been committed before the transition start, it should hide
+        // the surface.
+        assertFalse(app.mActivityRecord.isSurfaceShowing());
     }
 
     @Test
