@@ -9324,6 +9324,8 @@ package android.os {
     method @NonNull public java.util.List<android.os.UserHandle> getAllProfiles();
     method @NonNull public java.util.List<android.os.UserHandle> getEnabledProfiles();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public android.os.UserHandle getProfileParent(@NonNull android.os.UserHandle);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public int getRemainingCreatableProfileCount(@NonNull String, boolean);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public int getRemainingCreatableUserCount(@NonNull String);
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public android.os.UserHandle getRestrictedProfileParent();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public String getSeedAccountName();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.os.PersistableBundle getSeedAccountOptions();
