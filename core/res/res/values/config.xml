@@ -2612,6 +2612,10 @@
          will be locked. -->
     <bool name="config_multiuserDelayUserDataLocking">false</bool>
 
+    <!-- Whether to automatically switch a non-primary user back to the primary user after a
+         timeout when the device is docked.  -->
+    <bool name="config_enableTimeoutToUserZeroWhenDocked">false</bool>
+
     <!-- Whether to only install system packages on a user if they're allowlisted for that user
          type. These are flags and can be freely combined.
          0  - disable allowlist (install all system packages; no logging)
