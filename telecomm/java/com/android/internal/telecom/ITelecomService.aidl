@@ -100,22 +100,22 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#getSimCallManager
      */
-    PhoneAccountHandle getSimCallManager(int subId);
+    PhoneAccountHandle getSimCallManager(int subId, String callingPackage);
 
     /**
      * @see TelecomServiceImpl#getSimCallManagerForUser
      */
-    PhoneAccountHandle getSimCallManagerForUser(int userId);
+    PhoneAccountHandle getSimCallManagerForUser(int userId, String callingPackage);
 
     /**
      * @see TelecomServiceImpl#registerPhoneAccount
      */
-    void registerPhoneAccount(in PhoneAccount metadata);
+    void registerPhoneAccount(in PhoneAccount metadata, String callingPackage);
 
     /**
      * @see TelecomServiceImpl#unregisterPhoneAccount
      */
-    void unregisterPhoneAccount(in PhoneAccountHandle account);
+    void unregisterPhoneAccount(in PhoneAccountHandle account, String callingPackage);
 
     /**
      * @see TelecomServiceImpl#clearAccounts
@@ -148,7 +148,7 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#getDefaultDialerPackage
      */
-    String getDefaultDialerPackage();
+    String getDefaultDialerPackage(String callingPackage);
 
     /**
      * @see TelecomServiceImpl#getDefaultDialerPackage
@@ -158,7 +158,7 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#getSystemDialerPackage
      */
-    String getSystemDialerPackage();
+    String getSystemDialerPackage(String callingPackage);
 
     /**
     * @see TelecomServiceImpl#dumpCallAnalytics
@@ -256,12 +256,15 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#addNewIncomingCall
      */
-    void addNewIncomingCall(in PhoneAccountHandle phoneAccount, in Bundle extras);
+    void addNewIncomingCall(in PhoneAccountHandle phoneAccount, in Bundle extras,
+            String callingPackage);
 
     /**
      * @see TelecomServiceImpl#addNewIncomingConference
      */
-    void addNewIncomingConference(in PhoneAccountHandle phoneAccount, in Bundle extras);
+    void addNewIncomingConference(in PhoneAccountHandle phoneAccount, in Bundle extras,
+            String callingPackage);
+
 
     /**
      * @see TelecomServiceImpl#addNewUnknownCall
@@ -297,7 +300,7 @@ interface ITelecomService {
     /**
     * @see TelecomServiceImpl#createManageBlockedNumbersIntent
     **/
-    Intent createManageBlockedNumbersIntent();
+    Intent createManageBlockedNumbersIntent(String callingPackage);
 
    /**
     * @see TelecomServiceImpl#createLaunchEmergencyDialerIntent
@@ -324,7 +327,8 @@ interface ITelecomService {
     /**
      * @see TelecomServiceImpl#acceptHandover
      */
-    void acceptHandover(in Uri srcAddr, int videoState, in PhoneAccountHandle destAcct);
+    void acceptHandover(in Uri srcAddr, int videoState, in PhoneAccountHandle destAcct,
+                String callingPackage);
 
     /**
      * @see TelecomServiceImpl#setTestEmergencyPhoneAccountPackageNameFilter
