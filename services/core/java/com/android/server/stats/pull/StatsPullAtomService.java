@@ -30,7 +30,6 @@ import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.net.NetworkTemplate.OEM_MANAGED_ALL;
 import static android.net.NetworkTemplate.OEM_MANAGED_PAID;
 import static android.net.NetworkTemplate.OEM_MANAGED_PRIVATE;
-import static android.net.NetworkTemplate.getAllCollapsedRatTypes;
 import static android.os.Debug.getIonHeapsSizeKb;
 import static android.os.Process.LAST_SHARED_APPLICATION_GID;
 import static android.os.Process.getUidForPid;
@@ -1409,6 +1408,27 @@ public class StatsPullAtomService extends SystemService {
             }
         }
         return ret;
+    }
+
+    /**
+     * Return all supported collapsed RAT types that could be returned by
+     * {@link android.app.usage.NetworkStatsManager#getCollapsedRatType(int)}.
+     */
+    @NonNull
+    private static int[] getAllCollapsedRatTypes() {
+        final int[] ratTypes = TelephonyManager.getAllNetworkTypes();
+        final HashSet<Integer> collapsedRatTypes = new HashSet<>();
+        for (final int ratType : ratTypes) {
+            collapsedRatTypes.add(NetworkStatsManager.getCollapsedRatType(ratType));
+        }
+        // Add NETWORK_TYPE_5G_NSA to the returned list since 5G NSA is a virtual RAT type and
+        // it is not in TelephonyManager#NETWORK_TYPE_* constants.
+        // See {@link NetworkStatsManager#NETWORK_TYPE_5G_NSA}.
+        collapsedRatTypes.add(
+                NetworkStatsManager.getCollapsedRatType(NetworkStatsManager.NETWORK_TYPE_5G_NSA));
+        // Ensure that unknown type is returned.
+        collapsedRatTypes.add(TelephonyManager.NETWORK_TYPE_UNKNOWN);
+        return com.android.net.module.util.CollectionUtils.toIntArray(collapsedRatTypes);
     }
 
     @NonNull private NetworkStats sliceNetworkStatsByUid(@NonNull NetworkStats stats) {
