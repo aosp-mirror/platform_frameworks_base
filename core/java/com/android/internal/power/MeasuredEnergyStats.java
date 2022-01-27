@@ -438,10 +438,16 @@ public class MeasuredEnergyStats {
         mState = state;
         mStateChangeTimestampMs = timestampMs;
         if (mAccumulatedMultiStateChargeMicroCoulomb == null) {
-            return;
+            mAccumulatedMultiStateChargeMicroCoulomb =
+                    new LongMultiStateCounter[mAccumulatedChargeMicroCoulomb.length];
         }
         for (int i = 0; i < mAccumulatedMultiStateChargeMicroCoulomb.length; i++) {
             LongMultiStateCounter counter = mAccumulatedMultiStateChargeMicroCoulomb[i];
+            if (counter == null && mConfig.isSupportedMultiStateBucket(i)) {
+                counter = new LongMultiStateCounter(mConfig.mStateNames.length);
+                counter.updateValue(0, timestampMs);
+                mAccumulatedMultiStateChargeMicroCoulomb[i] = counter;
+            }
             if (counter != null) {
                 counter.setState(state, timestampMs);
             }

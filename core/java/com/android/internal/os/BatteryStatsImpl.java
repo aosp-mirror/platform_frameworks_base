@@ -607,10 +607,14 @@ public class BatteryStatsImpl extends BatteryStats {
         int UPDATE_BT = 0x08;
         int UPDATE_RPM = 0x10;
         int UPDATE_DISPLAY = 0x20;
+        int RESET = 0x40;
+
         int UPDATE_ALL =
                 UPDATE_CPU | UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT | UPDATE_RPM | UPDATE_DISPLAY;
 
         int UPDATE_ON_PROC_STATE_CHANGE = UPDATE_WIFI | UPDATE_RADIO | UPDATE_BT;
+
+        int UPDATE_ON_RESET = UPDATE_ALL | RESET;
 
         @IntDef(flag = true, prefix = "UPDATE_", value = {
                 UPDATE_CPU,
@@ -12909,7 +12913,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         // Flush external data, gathering snapshots, but don't process it since it is pre-reset data
         mIgnoreNextExternalStats = true;
-        mExternalSync.scheduleSync("reset", ExternalStatsSync.UPDATE_ALL);
+        mExternalSync.scheduleSync("reset", ExternalStatsSync.UPDATE_ON_RESET);
 
         mHandler.sendEmptyMessage(MSG_REPORT_RESET_STATS);
     }

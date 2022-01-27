@@ -451,7 +451,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 mUidsToRemove.clear();
                 mCurrentFuture = null;
                 mUseLatestStates = true;
-                if (updateFlags == UPDATE_ALL) {
+                if ((updateFlags & UPDATE_ALL) == UPDATE_ALL) {
                     cancelSyncDueToBatteryLevelChangeLocked();
                 }
                 if ((updateFlags & UPDATE_CPU) != 0) {
@@ -496,7 +496,11 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 Slog.wtf(TAG, "Error updating external stats: ", e);
             }
 
-            if ((updateFlags & UPDATE_ALL) == UPDATE_ALL) {
+            if ((updateFlags & RESET) != 0) {
+                synchronized (BatteryExternalStatsWorker.this) {
+                    mLastCollectionTimeStamp = 0;
+                }
+            } else if ((updateFlags & UPDATE_ALL) == UPDATE_ALL) {
                 synchronized (BatteryExternalStatsWorker.this) {
                     mLastCollectionTimeStamp = SystemClock.elapsedRealtime();
                 }
@@ -658,7 +662,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 mStats.updateCpuTimeLocked(onBattery, onBatteryScreenOff, cpuClusterChargeUC);
             }
 
-            if (updateFlags == UPDATE_ALL) {
+            if ((updateFlags & UPDATE_ALL) == UPDATE_ALL) {
                 mStats.updateKernelWakelocksLocked(elapsedRealtimeUs);
                 mStats.updateKernelMemoryBandwidthLocked(elapsedRealtimeUs);
             }
@@ -731,7 +735,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                     uptime, networkStatsManager);
         }
 
-        if (updateFlags == UPDATE_ALL) {
+        if ((updateFlags & UPDATE_ALL) == UPDATE_ALL) {
             // This helps mStats deal with ignoring data from prior to resets.
             mStats.informThatAllExternalStatsAreFlushed();
         }
