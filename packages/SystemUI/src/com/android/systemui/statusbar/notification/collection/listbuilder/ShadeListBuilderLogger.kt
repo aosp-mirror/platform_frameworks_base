@@ -306,6 +306,9 @@ class ShadeListBuilderLogger @Inject constructor(
             }
         }
     }
+
+    fun logPipelineRunSuppressed() =
+            buffer.log(TAG, INFO, {}) { "Suppressing pipeline run during animation." }
 }
 
 private const val TAG = "ShadeListBuilder"

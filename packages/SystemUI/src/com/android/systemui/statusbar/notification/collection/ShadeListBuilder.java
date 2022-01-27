@@ -359,6 +359,13 @@ public class ShadeListBuilder implements Dumpable {
     private void buildList() {
         Trace.beginSection("ShadeListBuilder.buildList");
         mPipelineState.requireIsBefore(STATE_BUILD_STARTED);
+
+        if (!mNotifStabilityManager.isPipelineRunAllowed()) {
+            mLogger.logPipelineRunSuppressed();
+            Trace.endSection();
+            return;
+        }
+
         mPipelineState.setState(STATE_BUILD_STARTED);
 
         // Step 1: Reset notification states

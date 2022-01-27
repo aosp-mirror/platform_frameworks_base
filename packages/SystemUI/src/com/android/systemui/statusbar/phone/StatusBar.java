@@ -1544,6 +1544,12 @@ public class StatusBar extends CoreStartable implements
     }
 
     private void inflateStatusBarWindow() {
+        if (mStatusBarComponent != null) {
+            // Tear down
+            for (StatusBarComponent.Startable startable : mStatusBarComponent.getStartables()) {
+                startable.stop();
+            }
+        }
         mStatusBarComponent = mStatusBarComponentFactory.create();
         mFragmentService.addFragmentInstantiationProvider(mStatusBarComponent);
 
@@ -1572,6 +1578,11 @@ public class StatusBar extends CoreStartable implements
         mCommandQueueCallbacks = mStatusBarComponent.getStatusBarCommandQueueCallbacks();
         // Connect in to the status bar manager service
         mCommandQueue.addCallback(mCommandQueueCallbacks);
+
+        // Perform all other initialization for StatusBarScope
+        for (StatusBarComponent.Startable startable : mStatusBarComponent.getStartables()) {
+            startable.start();
+        }
     }
 
     protected void startKeyguard() {

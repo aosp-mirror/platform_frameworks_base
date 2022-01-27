@@ -27,6 +27,16 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
  */
 abstract class NotifStabilityManager protected constructor(name: String) :
     Pluggable<NotifStabilityManager>(name) {
+
+    /**
+     * Called prior to running the pipeline to suppress any visual changes. Ex: collapse animation
+     * is playing, moving stuff around simultaneously will look janky.
+     *
+     * Note: this is invoked *before* [onBeginRun], so that implementors can reference state
+     * maintained from a previous run.
+     */
+    abstract fun isPipelineRunAllowed(): Boolean
+
     /**
      * Called at the beginning of every pipeline run to perform any necessary cleanup from the
      * previous run.
@@ -76,6 +86,7 @@ abstract class NotifStabilityManager protected constructor(name: String) :
 
 /** The default, no-op instance of the stability manager which always allows all changes */
 object DefaultNotifStabilityManager : NotifStabilityManager("DefaultNotifStabilityManager") {
+    override fun isPipelineRunAllowed(): Boolean = true
     override fun onBeginRun() {}
     override fun isGroupChangeAllowed(entry: NotificationEntry): Boolean = true
     override fun isSectionChangeAllowed(entry: NotificationEntry): Boolean = true

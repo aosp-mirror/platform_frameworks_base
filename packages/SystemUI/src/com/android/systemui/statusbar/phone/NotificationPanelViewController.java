@@ -181,6 +181,7 @@ import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.render.NotifPanelEventSource;
 import com.android.systemui.statusbar.notification.collection.render.ShadeViewManager;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -204,6 +205,7 @@ import com.android.systemui.statusbar.policy.KeyguardUserSwitcherView;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
+import com.android.systemui.util.ListenerSet;
 import com.android.systemui.util.Utils;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
@@ -225,7 +227,8 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 @StatusBarComponent.StatusBarScope
-public class NotificationPanelViewController extends PanelViewController {
+public class NotificationPanelViewController extends PanelViewController
+        implements NotifPanelEventSource {
 
     private static final boolean DEBUG = false;
 
@@ -666,6 +669,8 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean mStatusViewCentered = true;
 
     private Optional<KeyguardUnfoldTransition> mKeyguardUnfoldTransition;
+
+    private final ListenerSet<Callbacks> mNotifEventSourceCallbacks = new ListenerSet<>();
 
     private View.AccessibilityDelegate mAccessibilityDelegate = new View.AccessibilityDelegate() {
         @Override
@@ -3435,6 +3440,28 @@ public class NotificationPanelViewController extends PanelViewController {
         return mIsLaunchTransitionRunning;
     }
 
+    @Override
+    public void setIsLaunchAnimationRunning(boolean running) {
+        boolean wasRunning = isLaunchTransitionRunning();
+        super.setIsLaunchAnimationRunning(running);
+        if (wasRunning != isLaunchTransitionRunning()) {
+            for (Callbacks cb : mNotifEventSourceCallbacks) {
+                cb.onLaunchingActivityChanged(running);
+            }
+        }
+    }
+
+    @Override
+    protected void setIsClosing(boolean isClosing) {
+        boolean wasClosing = isClosing();
+        super.setIsClosing(isClosing);
+        if (wasClosing != isClosing) {
+            for (Callbacks cb : mNotifEventSourceCallbacks) {
+                cb.onPanelCollapsingChanged(isClosing);
+            }
+        }
+    }
+
     public void setLaunchTransitionEndRunnable(Runnable r) {
         mLaunchAnimationEndRunnable = r;
     }
@@ -4331,6 +4358,16 @@ public class NotificationPanelViewController extends PanelViewController {
                 isFullyExpanded() && !isInSettings())
                 .setFlag(SYSUI_STATE_QUICK_SETTINGS_EXPANDED, isInSettings())
                 .commitUpdate(mDisplayId);
+    }
+
+    @Override
+    public void registerCallbacks(Callbacks callbacks) {
+        mNotifEventSourceCallbacks.addIfAbsent(callbacks);
+    }
+
+    @Override
+    public void unregisterCallbacks(Callbacks callbacks) {
+        mNotifEventSourceCallbacks.remove(callbacks);
     }
 
     private class OnHeightChangedListener implements ExpandableView.OnHeightChangedListener {

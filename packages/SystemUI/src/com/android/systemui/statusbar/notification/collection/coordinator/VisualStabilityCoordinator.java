@@ -32,6 +32,7 @@ import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
+import com.android.systemui.statusbar.notification.collection.render.NotifPanelEventSource;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -56,17 +57,23 @@ import javax.inject.Inject;
  */
 // TODO(b/204468557): Move to @CoordinatorScope
 @SysUISingleton
-public class VisualStabilityCoordinator implements Coordinator, Dumpable {
+public class VisualStabilityCoordinator implements Coordinator, Dumpable,
+        NotifPanelEventSource.Callbacks {
     private final DelayableExecutor mDelayableExecutor;
-    private final WakefulnessLifecycle mWakefulnessLifecycle;
-    private final StatusBarStateController mStatusBarStateController;
     private final HeadsUpManager mHeadsUpManager;
+    private final NotifPanelEventSource mNotifPanelEventSource;
+    private final StatusBarStateController mStatusBarStateController;
+    private final WakefulnessLifecycle mWakefulnessLifecycle;
 
     private boolean mScreenOn;
     private boolean mPanelExpanded;
     private boolean mPulsing;
+    private boolean mNotifPanelCollapsing;
+    private boolean mNotifPanelLaunchingActivity;
 
+    private boolean mPipelineRunAllowed;
     private boolean mReorderingAllowed;
+    private boolean mIsSuppressingPipelineRun = false;
     private boolean mIsSuppressingGroupChange = false;
     private final Set<String> mEntriesWithSuppressedSectionChange = new HashSet<>();
     private boolean mIsSuppressingEntryReorder = false;
@@ -81,16 +88,17 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
 
     @Inject
     public VisualStabilityCoordinator(
+            DelayableExecutor delayableExecutor,
             DumpManager dumpManager,
             HeadsUpManager headsUpManager,
-            WakefulnessLifecycle wakefulnessLifecycle,
+            NotifPanelEventSource notifPanelEventSource,
             StatusBarStateController statusBarStateController,
-            DelayableExecutor delayableExecutor
-    ) {
+            WakefulnessLifecycle wakefulnessLifecycle) {
         mHeadsUpManager = headsUpManager;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mStatusBarStateController = statusBarStateController;
         mDelayableExecutor = delayableExecutor;
+        mNotifPanelEventSource = notifPanelEventSource;
 
         dumpManager.registerDumpable(this);
     }
@@ -103,6 +111,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
 
         mStatusBarStateController.addCallback(mStatusBarStateControllerListener);
         mPulsing = mStatusBarStateController.isPulsing();
+        mNotifPanelEventSource.registerCallbacks(this);
 
         pipeline.setVisualStabilityManager(mNotifStabilityManager);
     }
@@ -112,9 +121,16 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
             new NotifStabilityManager("VisualStabilityCoordinator") {
                 @Override
                 public void onBeginRun() {
+                    mIsSuppressingPipelineRun = false;
                     mIsSuppressingGroupChange = false;
                     mEntriesWithSuppressedSectionChange.clear();
                     mIsSuppressingEntryReorder = false;
+                }
+
+                @Override
+                public boolean isPipelineRunAllowed() {
+                    mIsSuppressingPipelineRun |= !mPipelineRunAllowed;
+                    return mPipelineRunAllowed;
                 }
 
                 @Override
@@ -154,15 +170,22 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
             };
 
     private void updateAllowedStates() {
+        mPipelineRunAllowed = !isPanelCollapsingOrLaunchingActivity();
         mReorderingAllowed = isReorderingAllowed();
-        if (mReorderingAllowed && (mIsSuppressingGroupChange || isSuppressingSectionChange()
-                || mIsSuppressingEntryReorder)) {
+        if ((mPipelineRunAllowed && mIsSuppressingPipelineRun)
+                || (mReorderingAllowed && (mIsSuppressingGroupChange
+                        || isSuppressingSectionChange()
+                        || mIsSuppressingEntryReorder))) {
             mNotifStabilityManager.invalidateList();
         }
     }
 
     private boolean isSuppressingSectionChange() {
         return !mEntriesWithSuppressedSectionChange.isEmpty();
+    }
+
+    private boolean isPanelCollapsingOrLaunchingActivity() {
+        return mNotifPanelCollapsing || mNotifPanelLaunchingActivity;
     }
 
     private boolean isReorderingAllowed() {
@@ -247,5 +270,17 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable {
         for (String key : mEntriesThatCanChangeSection.keySet()) {
             pw.println("  " + key);
         }
+    }
+
+    @Override
+    public void onPanelCollapsingChanged(boolean isCollapsing) {
+        mNotifPanelCollapsing = isCollapsing;
+        updateAllowedStates();
+    }
+
+    @Override
+    public void onLaunchingActivityChanged(boolean isLaunchingActivity) {
+        mNotifPanelLaunchingActivity = isLaunchingActivity;
+        updateAllowedStates();
     }
 }
