@@ -16,8 +16,11 @@
 
 package com.android.server.biometrics.sensors.fingerprint.aidl;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -42,6 +45,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -82,6 +86,8 @@ public class FingerprintDetectClientTest {
     @Before
     public void setup() {
         when(mBiometricContext.isAoD()).thenReturn(HAS_AOD);
+        when(mBiometricContext.updateContext(any(), anyBoolean())).thenAnswer(
+                i -> i.getArgument(0));
     }
 
     @Test
@@ -100,7 +106,10 @@ public class FingerprintDetectClientTest {
 
         client.start(mCallback);
 
-        verify(mHal).detectInteractionWithContext(mOperationContextCaptor.capture());
+        InOrder order = inOrder(mHal, mBiometricContext);
+        order.verify(mBiometricContext).updateContext(
+                mOperationContextCaptor.capture(), anyBoolean());
+        order.verify(mHal).detectInteractionWithContext(same(mOperationContextCaptor.getValue()));
         verify(mHal, never()).detectInteraction();
     }
 

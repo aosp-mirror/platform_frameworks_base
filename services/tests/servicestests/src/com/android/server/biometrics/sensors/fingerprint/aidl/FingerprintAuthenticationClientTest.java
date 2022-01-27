@@ -24,7 +24,9 @@ import static org.mockito.Mockito.anyFloat;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,6 +58,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -68,7 +71,6 @@ public class FingerprintAuthenticationClientTest {
 
     private static final int USER_ID = 8;
     private static final long OP_ID = 7;
-    private static final boolean HAS_AOD = true;
     private static final int POINTER_ID = 0;
     private static final int TOUCH_X = 8;
     private static final int TOUCH_Y = 20;
@@ -115,7 +117,8 @@ public class FingerprintAuthenticationClientTest {
     public void setup() {
         when(mBiometricLogger.createALSCallback(anyBoolean())).thenAnswer(i ->
                 new CallbackWithProbe<>(mLuxProbe, i.getArgument(0)));
-        when(mBiometricContext.isAoD()).thenReturn(HAS_AOD);
+        when(mBiometricContext.updateContext(any(), anyBoolean())).thenAnswer(
+                i -> i.getArgument(0));
     }
 
     @Test
@@ -132,11 +135,12 @@ public class FingerprintAuthenticationClientTest {
         final FingerprintAuthenticationClient client = createClient(2);
         client.start(mCallback);
 
-        verify(mHal).authenticateWithContext(eq(OP_ID), mOperationContextCaptor.capture());
+        InOrder order = inOrder(mHal, mBiometricContext);
+        order.verify(mBiometricContext).updateContext(
+                mOperationContextCaptor.capture(), anyBoolean());
+        order.verify(mHal).authenticateWithContext(
+                eq(OP_ID), same(mOperationContextCaptor.getValue()));
         verify(mHal, never()).authenticate(anyLong());
-
-        final OperationContext opContext = mOperationContextCaptor.getValue();
-        assertThat(opContext.isAoD).isEqualTo(HAS_AOD);
     }
 
     @Test

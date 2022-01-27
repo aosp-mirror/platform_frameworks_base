@@ -24,7 +24,6 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants.FingerprintAcquired;
 import android.hardware.biometrics.common.ICancellationSignal;
-import android.hardware.biometrics.common.OperationReason;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
@@ -178,12 +177,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession> 
         final AidlSession session = getFreshDaemon();
 
         if (session.hasContextMethods()) {
-            // TODO: add reason, id
-            mOperationContext.id = 0;
-            mOperationContext.reason = OperationReason.UNKNOWN;
-            mOperationContext.isAoD = getBiometricContext().isAoD();
-            mOperationContext.isCrypto = isCryptoOperation();
-            return session.getSession().authenticateWithContext(mOperationId, mOperationContext);
+            return session.getSession().authenticateWithContext(
+                    mOperationId, getOperationContext());
         } else {
             return session.getSession().authenticate(mOperationId);
         }
@@ -279,8 +274,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession> 
         mLockoutCache.setLockoutModeForUser(getTargetUserId(), LockoutTracker.LOCKOUT_TIMED);
         // Lockout metrics are logged as an error code.
         final int error = BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT;
-        getLogger().logOnError(getContext(), error, 0 /* vendorCode */,
-                isCryptoOperation(), getTargetUserId());
+        getLogger().logOnError(getContext(), getOperationContext(),
+                error, 0 /* vendorCode */, getTargetUserId());
 
         try {
             getListener().onError(getSensorId(), getCookie(), error, 0 /* vendorCode */);
@@ -298,8 +293,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession> 
         mLockoutCache.setLockoutModeForUser(getTargetUserId(), LockoutTracker.LOCKOUT_PERMANENT);
         // Lockout metrics are logged as an error code.
         final int error = BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT_PERMANENT;
-        getLogger().logOnError(getContext(), error, 0 /* vendorCode */,
-                isCryptoOperation(), getTargetUserId());
+        getLogger().logOnError(getContext(), getOperationContext(),
+                error, 0 /* vendorCode */, getTargetUserId());
 
         try {
             getListener().onError(getSensorId(), getCookie(), error, 0 /* vendorCode */);

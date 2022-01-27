@@ -18,11 +18,14 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,10 +51,12 @@ import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -104,6 +109,12 @@ public class FingerprintEnrollClientTest {
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
 
+    @Before
+    public void setup() {
+        when(mBiometricContext.updateContext(any(), anyBoolean())).thenAnswer(
+                i -> i.getArgument(0));
+    }
+
     @Test
     public void enrollNoContext_v1() throws RemoteException {
         final FingerprintEnrollClient client = createClient(1);
@@ -120,7 +131,10 @@ public class FingerprintEnrollClientTest {
 
         client.start(mCallback);
 
-        verify(mHal).enrollWithContext(any(), mOperationContextCaptor.capture());
+        InOrder order = inOrder(mHal, mBiometricContext);
+        order.verify(mBiometricContext).updateContext(
+                mOperationContextCaptor.capture(), anyBoolean());
+        order.verify(mHal).enrollWithContext(any(), same(mOperationContextCaptor.getValue()));
         verify(mHal, never()).enroll(any());
     }
 

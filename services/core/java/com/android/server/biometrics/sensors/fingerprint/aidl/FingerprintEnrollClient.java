@@ -23,8 +23,6 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants.FingerprintAcquired;
 import android.hardware.biometrics.common.ICancellationSignal;
-import android.hardware.biometrics.common.OperationContext;
-import android.hardware.biometrics.common.OperationReason;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
@@ -178,13 +176,7 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
                 HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken);
 
         if (session.hasContextMethods()) {
-            final OperationContext context = new OperationContext();
-            // TODO: add reason, id
-            context.id = 0;
-            context.reason = OperationReason.UNKNOWN;
-            context.isAoD = getBiometricContext().isAoD();
-            context.isCrypto = isCryptoOperation();
-            return session.getSession().enrollWithContext(hat, context);
+            return session.getSession().enrollWithContext(hat, getOperationContext());
         } else {
             return session.getSession().enroll(hat);
         }

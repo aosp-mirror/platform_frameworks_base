@@ -476,7 +476,8 @@ public class Sensor {
 
     Sensor(@NonNull String tag, @NonNull FaceProvider provider, @NonNull Context context,
             @NonNull Handler handler, @NonNull FaceSensorPropertiesInternal sensorProperties,
-            @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
+            @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+            @NonNull BiometricContext biometricContext) {
         mTag = tag;
         mProvider = provider;
         mContext = context;
@@ -492,7 +493,7 @@ public class Sensor {
                     public StopUserClient<?> getStopUserClient(int userId) {
                         return new FaceStopUserClient(mContext, mLazySession, mToken, userId,
                                 mSensorProperties.sensorId,
-                                BiometricLogger.ofUnknown(mContext), BiometricContext.getInstance(),
+                                BiometricLogger.ofUnknown(mContext), biometricContext,
                                 () -> mCurrentSession = null);
                     }
 
@@ -529,7 +530,7 @@ public class Sensor {
 
                         return new FaceStartUserClient(mContext, provider::getHalInstance,
                                 mToken, newUserId, mSensorProperties.sensorId,
-                                BiometricLogger.ofUnknown(mContext), BiometricContext.getInstance(),
+                                BiometricLogger.ofUnknown(mContext), biometricContext,
                                 resultController, userStartedCallback);
                     }
                 });

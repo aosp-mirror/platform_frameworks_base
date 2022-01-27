@@ -37,7 +37,7 @@ public abstract class HalClientMonitor<T> extends BaseClientMonitor {
     protected final Supplier<T> mLazyDaemon;
 
     @NonNull
-    protected final OperationContext mOperationContext = new OperationContext();
+    private final OperationContext mOperationContext = new OperationContext();
 
     /**
      * @param context    system_server context
@@ -83,5 +83,9 @@ public abstract class HalClientMonitor<T> extends BaseClientMonitor {
 
         // subclasses should do this earlier in most cases, but ensure it happens now
         getBiometricContext().unsubscribe(mOperationContext);
+    }
+
+    protected OperationContext getOperationContext() {
+        return getBiometricContext().updateContext(mOperationContext, isCryptoOperation());
     }
 }
