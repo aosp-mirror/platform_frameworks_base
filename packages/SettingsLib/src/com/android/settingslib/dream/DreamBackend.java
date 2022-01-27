@@ -116,6 +116,7 @@ public class DreamBackend {
     private final boolean mDreamsEnabledByDefault;
     private final boolean mDreamsActivatedOnSleepByDefault;
     private final boolean mDreamsActivatedOnDockByDefault;
+    private final Set<ComponentName> mDisabledDreams;
     private final Set<Integer> mSupportedComplications;
     private final Set<Integer> mDefaultEnabledComplications;
 
@@ -143,6 +144,10 @@ public class DreamBackend {
                 com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault);
         mDreamPreviewDefault = resources.getDrawable(
                 com.android.internal.R.drawable.default_dream_preview);
+        mDisabledDreams = Arrays.stream(resources.getStringArray(
+                        com.android.internal.R.array.config_disabledDreamComponents))
+                .map(ComponentName::unflattenFromString)
+                .collect(Collectors.toSet());
 
         mSupportedComplications =
                 Arrays.stream(resources.getIntArray(R.array.config_supportedDreamComplications))
@@ -166,14 +171,16 @@ public class DreamBackend {
                 PackageManager.GET_META_DATA);
         List<DreamInfo> dreamInfos = new ArrayList<>(resolveInfos.size());
         for (ResolveInfo resolveInfo : resolveInfos) {
-            if (resolveInfo.serviceInfo == null) {
+            final ComponentName componentName = getDreamComponentName(resolveInfo);
+            if (componentName == null || mDisabledDreams.contains(componentName)) {
                 continue;
             }
+
             DreamInfo dreamInfo = new DreamInfo();
             dreamInfo.caption = resolveInfo.loadLabel(pm);
             dreamInfo.icon = resolveInfo.loadIcon(pm);
             dreamInfo.description = getDescription(resolveInfo, pm);
-            dreamInfo.componentName = getDreamComponentName(resolveInfo);
+            dreamInfo.componentName = componentName;
             dreamInfo.isActive = dreamInfo.componentName.equals(activeDream);
 
             final DreamMetadata dreamMetadata = getDreamMetadata(pm, resolveInfo);
