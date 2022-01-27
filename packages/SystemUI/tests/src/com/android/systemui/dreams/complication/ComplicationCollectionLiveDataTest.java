@@ -85,7 +85,9 @@ public class ComplicationCollectionLiveDataTest extends SysuiTestCase {
 
         verify(observer).onChanged(collectionCaptor.capture());
 
-        assertThat(collectionCaptor.getValue().equals(targetCollection)).isTrue();
+        final Collection collection =  collectionCaptor.getValue();
+        assertThat(collection.containsAll(targetCollection)
+                && targetCollection.containsAll(collection)).isTrue();
         Mockito.clearInvocations(observer);
     }
 }
