@@ -20571,13 +20571,24 @@ package android.media {
   }
 
   public static final class EncoderProfiles.VideoProfile {
+    method public int getBitDepth();
     method public int getBitrate();
+    method public int getChromaSubsampling();
     method public int getCodec();
     method public int getFrameRate();
+    method public int getHdrFormat();
     method public int getHeight();
     method @NonNull public String getMediaType();
     method public int getProfile();
     method public int getWidth();
+    field public static final int HDR_DOLBY_VISION = 4; // 0x4
+    field public static final int HDR_HDR10 = 2; // 0x2
+    field public static final int HDR_HDR10PLUS = 3; // 0x3
+    field public static final int HDR_HLG = 1; // 0x1
+    field public static final int HDR_NONE = 0; // 0x0
+    field public static final int YUV_420 = 0; // 0x0
+    field public static final int YUV_422 = 1; // 0x1
+    field public static final int YUV_444 = 2; // 0x2
   }
 
   public class ExifInterface {
@@ -22686,12 +22697,15 @@ package android.media {
   }
 
   public final class MediaRecorder.VideoEncoder {
+    field public static final int AV1 = 8; // 0x8
     field public static final int DEFAULT = 0; // 0x0
+    field public static final int DOLBY_VISION = 7; // 0x7
     field public static final int H263 = 1; // 0x1
     field public static final int H264 = 2; // 0x2
     field public static final int HEVC = 5; // 0x5
     field public static final int MPEG_4_SP = 3; // 0x3
     field public static final int VP8 = 4; // 0x4
+    field public static final int VP9 = 6; // 0x6
   }
 
   public final class MediaRecorder.VideoSource {
