@@ -308,7 +308,8 @@ public class CameraServiceProxy extends SystemService
         public void onFixedRotationFinished(int displayId) { }
 
         @Override
-        public void onKeepClearAreasChanged(int displayId, List<Rect> keepClearArea) { }
+        public void onKeepClearAreasChanged(int displayId, List<Rect> restricted,
+                List<Rect> unrestricted) { }
     }
 
 

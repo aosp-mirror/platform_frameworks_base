@@ -245,7 +245,8 @@ public class DisplayController {
         }
     }
 
-    private void onKeepClearAreasChanged(int displayId, List<Rect> keepClearAreas) {
+    private void onKeepClearAreasChanged(int displayId, List<Rect> restricted,
+            List<Rect> unrestricted) {
         synchronized (mDisplays) {
             if (mDisplays.get(displayId) == null || getDisplay(displayId) == null) {
                 Slog.w(TAG, "Skipping onKeepClearAreasChanged on unknown"
@@ -253,7 +254,8 @@ public class DisplayController {
                 return;
             }
             for (int i = mDisplayChangedListeners.size() - 1; i >= 0; --i) {
-                mDisplayChangedListeners.get(i).onKeepClearAreasChanged(displayId, keepClearAreas);
+                mDisplayChangedListeners.get(i)
+                    .onKeepClearAreasChanged(displayId, restricted, unrestricted);
             }
         }
     }
@@ -318,9 +320,10 @@ public class DisplayController {
         }
 
         @Override
-        public void onKeepClearAreasChanged(int displayId, List<Rect> keepClearAreas) {
+        public void onKeepClearAreasChanged(int displayId, List<Rect> restricted,
+                List<Rect> unrestricted) {
             mMainExecutor.execute(() -> {
-                DisplayController.this.onKeepClearAreasChanged(displayId, keepClearAreas);
+                DisplayController.this.onKeepClearAreasChanged(displayId, restricted, unrestricted);
             });
         }
     }
@@ -361,6 +364,7 @@ public class DisplayController {
         /**
          * Called when keep-clear areas on a display have changed.
          */
-        default void onKeepClearAreasChanged(int displayId, List<Rect> keepClearAreas) {}
+        default void onKeepClearAreasChanged(int displayId, List<Rect> restricted,
+                List<Rect> unrestricted) {}
     }
 }

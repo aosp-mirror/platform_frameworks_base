@@ -301,6 +301,7 @@ package android {
     field public static final String SET_POINTER_SPEED = "android.permission.SET_POINTER_SPEED";
     field public static final String SET_SCREEN_COMPATIBILITY = "android.permission.SET_SCREEN_COMPATIBILITY";
     field public static final String SET_SYSTEM_AUDIO_CAPTION = "android.permission.SET_SYSTEM_AUDIO_CAPTION";
+    field public static final String SET_UNRESTRICTED_KEEP_CLEAR_AREAS = "android.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS";
     field public static final String SET_VOLUME_KEY_LONG_PRESS_LISTENER = "android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER";
     field public static final String SET_WALLPAPER_COMPONENT = "android.permission.SET_WALLPAPER_COMPONENT";
     field public static final String SET_WALLPAPER_DIM_AMOUNT = "android.permission.SET_WALLPAPER_DIM_AMOUNT";
