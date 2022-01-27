@@ -457,6 +457,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final WindowManagerConstants mConstants;
 
     final WindowTracing mWindowTracing;
+    final TransitionTracer mTransitionTracer;
 
     private final DisplayAreaPolicy.Provider mDisplayAreaPolicyProvider;
 
@@ -1244,6 +1245,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mWindowTracing = WindowTracing.createDefaultAndStartLooper(this,
                 Choreographer.getInstance());
+        mTransitionTracer = new TransitionTracer();
 
         LocalServices.addService(WindowManagerPolicy.class, mPolicy);
 
@@ -5884,6 +5886,21 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public boolean isWindowTraceEnabled() {
         return mWindowTracing.isEnabled();
+    }
+
+    @Override
+    public void startTransitionTrace() {
+        mTransitionTracer.startTrace(null /* printwriter */);
+    }
+
+    @Override
+    public void stopTransitionTrace() {
+        mTransitionTracer.stopTrace(null /* printwriter */);
+    }
+
+    @Override
+    public boolean isTransitionTraceEnabled() {
+        return mTransitionTracer.isEnabled();
     }
 
     @Override
