@@ -244,7 +244,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         /**
          * When enabled, all mobile data is reported under {@link NetworkTemplate#NETWORK_TYPE_ALL}.
          * When disabled, mobile data is broken down by a granular ratType representative of the
-         * actual ratType. {@see NetworkTemplate#getCollapsedRatType}.
+         * actual ratType. {@see android.app.usage.NetworkStatsManager#getCollapsedRatType}.
          * Enabling this decreases the level of detail but saves performance, disk space and
          * amount of data logged.
          */
