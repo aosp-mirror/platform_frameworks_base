@@ -380,8 +380,11 @@ class RecentTasks {
         final ComponentName cn = ComponentName.unflattenFromString(rawRecentsComponent);
         if (cn != null) {
             try {
-                final ApplicationInfo appInfo = AppGlobals.getPackageManager()
-                        .getApplicationInfo(cn.getPackageName(), 0, mService.mContext.getUserId());
+                final ApplicationInfo appInfo = AppGlobals.getPackageManager().getApplicationInfo(
+                        cn.getPackageName(),
+                        PackageManager.MATCH_UNINSTALLED_PACKAGES
+                                | PackageManager.MATCH_DISABLED_COMPONENTS,
+                        mService.mContext.getUserId());
                 if (appInfo != null) {
                     mRecentsUid = appInfo.uid;
                     mRecentsComponent = cn;
