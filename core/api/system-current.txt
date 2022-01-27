@@ -157,6 +157,7 @@ package android {
     field public static final String MANAGE_BLUETOOTH_WHEN_WIRELESS_CONSENT_REQUIRED = "android.permission.MANAGE_BLUETOOTH_WHEN_WIRELESS_CONSENT_REQUIRED";
     field public static final String MANAGE_CARRIER_OEM_UNLOCK_STATE = "android.permission.MANAGE_CARRIER_OEM_UNLOCK_STATE";
     field public static final String MANAGE_CA_CERTIFICATES = "android.permission.MANAGE_CA_CERTIFICATES";
+    field public static final String MANAGE_CLOUDSEARCH = "android.permission.MANAGE_CLOUDSEARCH";
     field public static final String MANAGE_CONTENT_CAPTURE = "android.permission.MANAGE_CONTENT_CAPTURE";
     field public static final String MANAGE_CONTENT_SUGGESTIONS = "android.permission.MANAGE_CONTENT_SUGGESTIONS";
     field public static final String MANAGE_DEBUGGING = "android.permission.MANAGE_DEBUGGING";
@@ -1581,6 +1582,99 @@ package android.app.backup {
 
 }
 
+package android.app.cloudsearch {
+
+  public class CloudSearchManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_CLOUDSEARCH) public void search(@NonNull android.app.cloudsearch.SearchRequest, @NonNull java.util.concurrent.Executor, @NonNull android.app.cloudsearch.CloudSearchManager.CallBack);
+  }
+
+  public static interface CloudSearchManager.CallBack {
+    method public void onSearchFailed(@NonNull android.app.cloudsearch.SearchRequest, @NonNull android.app.cloudsearch.SearchResponse);
+    method public void onSearchSucceeded(@NonNull android.app.cloudsearch.SearchRequest, @NonNull android.app.cloudsearch.SearchResponse);
+  }
+
+  public final class SearchRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public float getMaxLatencyMillis();
+    method @NonNull public String getQuery();
+    method @NonNull public String getRequestId();
+    method public int getResultNumber();
+    method public int getResultOffset();
+    method @NonNull public android.os.Bundle getSearchConstraints();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final String CONSTRAINT_IS_PRESUBMIT_SUGGESTION = "IS_PRESUBMIT_SUGGESTION";
+    field public static final String CONSTRAINT_SEARCH_PROVIDER_FILTER = "SEARCH_PROVIDER_FILTER";
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.cloudsearch.SearchRequest> CREATOR;
+  }
+
+  public static final class SearchRequest.Builder {
+    ctor public SearchRequest.Builder(@NonNull String);
+    method @NonNull public android.app.cloudsearch.SearchRequest build();
+    method @NonNull public android.app.cloudsearch.SearchRequest.Builder setMaxLatencyMillis(float);
+    method @NonNull public android.app.cloudsearch.SearchRequest.Builder setQuery(@NonNull String);
+    method @NonNull public android.app.cloudsearch.SearchRequest.Builder setResultNumber(int);
+    method @NonNull public android.app.cloudsearch.SearchRequest.Builder setResultOffset(int);
+    method @NonNull public android.app.cloudsearch.SearchRequest.Builder setSearchConstraints(@Nullable android.os.Bundle);
+  }
+
+  public final class SearchResponse implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.app.cloudsearch.SearchResult> getSearchResults();
+    method @NonNull public String getSource();
+    method public int getStatusCode();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.cloudsearch.SearchResponse> CREATOR;
+    field public static final int SEARCH_STATUS_NO_INTERNET = 2; // 0x2
+    field public static final int SEARCH_STATUS_OK = 0; // 0x0
+    field public static final int SEARCH_STATUS_TIME_OUT = 1; // 0x1
+    field public static final int SEARCH_STATUS_UNKNOWN = -1; // 0xffffffff
+  }
+
+  public static final class SearchResponse.Builder {
+    ctor public SearchResponse.Builder(int);
+    method @NonNull public android.app.cloudsearch.SearchResponse build();
+    method @NonNull public android.app.cloudsearch.SearchResponse.Builder setSearchResults(@NonNull java.util.List<android.app.cloudsearch.SearchResult>);
+    method @NonNull public android.app.cloudsearch.SearchResponse.Builder setStatusCode(int);
+  }
+
+  public final class SearchResult implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.os.Bundle getExtraInfos();
+    method public float getScore();
+    method @NonNull public String getSnippet();
+    method @NonNull public String getTitle();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.cloudsearch.SearchResult> CREATOR;
+    field public static final String EXTRAINFO_ACTION_BUTTON_IMAGE_PREREGISTERING = "ACTION_BUTTON_IMAGE";
+    field public static final String EXTRAINFO_ACTION_BUTTON_TEXT_PREREGISTERING = "ACTION_BUTTON_TEXT";
+    field public static final String EXTRAINFO_APP_BADGES = "APP_BADGES";
+    field public static final String EXTRAINFO_APP_CONTAINS_ADS_DISCLAIMER = "APP_CONTAINS_ADS_DISCLAIMER";
+    field public static final String EXTRAINFO_APP_CONTAINS_IAP_DISCLAIMER = "APP_CONTAINS_IAP_DISCLAIMER";
+    field public static final String EXTRAINFO_APP_DEVELOPER_NAME = "APP_DEVELOPER_NAME";
+    field public static final String EXTRAINFO_APP_DOMAIN_URL = "APP_DOMAIN_URL";
+    field public static final String EXTRAINFO_APP_IARC = "APP_IARC";
+    field public static final String EXTRAINFO_APP_ICON = "APP_ICON";
+    field public static final String EXTRAINFO_APP_REVIEW_COUNT = "APP_REVIEW_COUNT";
+    field public static final String EXTRAINFO_APP_SIZE_BYTES = "APP_SIZE_BYTES";
+    field public static final String EXTRAINFO_APP_STAR_RATING = "APP_STAR_RATING";
+    field public static final String EXTRAINFO_LONG_DESCRIPTION = "LONG_DESCRIPTION";
+    field public static final String EXTRAINFO_SCREENSHOTS = "SCREENSHOTS";
+    field public static final String EXTRAINFO_SHORT_DESCRIPTION = "SHORT_DESCRIPTION";
+    field public static final String EXTRAINFO_WEB_ICON = "WEB_ICON";
+    field public static final String EXTRAINFO_WEB_URL = "WEB_URL";
+  }
+
+  public static final class SearchResult.Builder {
+    ctor public SearchResult.Builder(@NonNull String, @NonNull android.os.Bundle);
+    method @NonNull public android.app.cloudsearch.SearchResult build();
+    method @NonNull public android.app.cloudsearch.SearchResult.Builder setExtraInfos(@NonNull android.os.Bundle);
+    method @NonNull public android.app.cloudsearch.SearchResult.Builder setScore(float);
+    method @NonNull public android.app.cloudsearch.SearchResult.Builder setSnippet(@NonNull String);
+    method @NonNull public android.app.cloudsearch.SearchResult.Builder setTitle(@NonNull String);
+  }
+
+}
+
 package android.app.compat {
 
   public final class CompatChanges {
@@ -2387,6 +2481,7 @@ package android.content {
     field public static final String BATTERY_STATS_SERVICE = "batterystats";
     field @Deprecated public static final int BIND_ALLOW_BACKGROUND_ACTIVITY_STARTS = 1048576; // 0x100000
     field public static final int BIND_ALLOW_FOREGROUND_SERVICE_STARTS_FROM_BACKGROUND = 262144; // 0x40000
+    field public static final String CLOUDSEARCH_SERVICE = "cloudsearch_service";
     field public static final String CONTENT_SUGGESTIONS_SERVICE = "content_suggestions";
     field public static final String CONTEXTHUB_SERVICE = "contexthub";
     field public static final String ETHERNET_SERVICE = "ethernet";
@@ -10442,6 +10537,17 @@ package android.service.carrier {
     method public default void onSendMmsComplete(int, @Nullable byte[]);
     method public default void onSendMultipartSmsComplete(int, @Nullable int[]);
     method public default void onSendSmsComplete(int, int);
+  }
+
+}
+
+package android.service.cloudsearch {
+
+  public abstract class CloudSearchService extends android.app.Service {
+    ctor public CloudSearchService();
+    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public abstract void onSearch(@NonNull android.app.cloudsearch.SearchRequest);
+    method public final void returnResults(@NonNull String, @NonNull android.app.cloudsearch.SearchResponse);
   }
 
 }

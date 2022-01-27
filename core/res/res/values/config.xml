@@ -4097,6 +4097,15 @@
     -->
     <string name="config_defaultAugmentedAutofillService" translatable="false"></string>
 
+    <!-- The package name list for the system's cloudsearch service.
+          This service returns cloudsearch results.
+          This service must be trusted, as it can be activated without explicit consent of the user.
+          If no service with the specified name exists on the device, cloudsearch will be disabled.
+          Example: "com.android.intelligence/.CloudSearchService"
+          config_defaultCloudSearchService is for the single provider case.
+    -->
+    <string name="config_defaultCloudSearchService" translatable="false"></string>
+
     <!-- The package name for the system's translation service.
      This service must be trusted, as it can be activated without explicit consent of the user.
      If no service with the specified name exists on the device, translation wil be
