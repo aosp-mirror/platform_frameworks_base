@@ -1694,15 +1694,6 @@ class ShortcutPackage extends ShortcutPackageItem {
             for (int j = 0; j < shareTargetSize; j++) {
                 mShareTargets.get(j).saveToXml(out);
             }
-            synchronized (mLock) {
-                final Map<String, ShortcutInfo> copy = mShortcuts;
-                if (!mTransientShortcuts.isEmpty()) {
-                    copy.putAll(mTransientShortcuts);
-                    mTransientShortcuts.clear();
-                }
-                saveShortcutsAsync(copy.values().stream().filter(ShortcutInfo::usesQuota).collect(
-                        Collectors.toList()));
-            }
         }
 
         out.endTag(null, TAG_ROOT);
@@ -2418,6 +2409,18 @@ class ShortcutPackage extends ShortcutPackageItem {
                         })));
     }
 
+    void persistsAllShortcutsAsync() {
+        synchronized (mLock) {
+            final Map<String, ShortcutInfo> copy = mShortcuts;
+            if (!mTransientShortcuts.isEmpty()) {
+                copy.putAll(mTransientShortcuts);
+                mTransientShortcuts.clear();
+            }
+            saveShortcutsAsync(copy.values().stream().filter(ShortcutInfo::usesQuota).collect(
+                    Collectors.toList()));
+        }
+    }
+
     private void saveShortcutsAsync(
             @NonNull final Collection<ShortcutInfo> shortcuts) {
         Objects.requireNonNull(shortcuts);
@@ -2489,7 +2492,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                 mIsAppSearchSchemaUpToDate = true;
             }
         } catch (Exception e) {
-            Slog.e(TAG, "Failed to invoke app search pkg="
+            Slog.e(TAG, "Failed to create app search session. pkg="
                     + getPackageName() + " user=" + mShortcutUser.getUserId(), e);
             Objects.requireNonNull(future).completeExceptionally(e);
         } finally {
