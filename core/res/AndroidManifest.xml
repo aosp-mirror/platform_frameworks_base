@@ -6140,6 +6140,11 @@
     <permission android:name="android.permission.MANAGE_GAME_MODE"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- @TestApi Allows setting the game service provider, meant for tests only.
+     @hide -->
+    <permission android:name="android.permission.SET_GAME_SERVICE"
+                android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows accessing the frame rate per second of a given application
      @hide -->
     <permission android:name="android.permission.ACCESS_FPS_COUNTER"

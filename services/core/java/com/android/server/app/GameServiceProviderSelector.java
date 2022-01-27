@@ -30,5 +30,6 @@ interface GameServiceProviderSelector {
      * Service provider for the given user or {@code null} if none should be used.
      */
     @Nullable
-    GameServiceProviderConfiguration get(@Nullable SystemService.TargetUser user);
+    GameServiceProviderConfiguration get(@Nullable SystemService.TargetUser user,
+            @Nullable String packageNameOverride);
 }

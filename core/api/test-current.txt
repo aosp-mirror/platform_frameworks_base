@@ -38,6 +38,7 @@ package android {
     field public static final String RESET_APP_ERRORS = "android.permission.RESET_APP_ERRORS";
     field public static final String REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL = "android.permission.REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL";
     field public static final String SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS = "android.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS";
+    field public static final String SET_GAME_SERVICE = "android.permission.SET_GAME_SERVICE";
     field public static final String SET_KEYBOARD_LAYOUT = "android.permission.SET_KEYBOARD_LAYOUT";
     field public static final String START_TASKS_FROM_RECENTS = "android.permission.START_TASKS_FROM_RECENTS";
     field public static final String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
@@ -273,6 +274,10 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void setDreamOverlay(@Nullable android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void startDream(@NonNull android.content.ComponentName);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void stopDream();
+  }
+
+  public final class GameManager {
+    method public void setGameServiceProvider(@Nullable String);
   }
 
   public abstract class HomeVisibilityListener {
