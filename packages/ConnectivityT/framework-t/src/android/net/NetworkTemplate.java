@@ -41,6 +41,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.app.usage.NetworkStatsManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.wifi.WifiInfo;
 import android.os.Build;
@@ -136,15 +137,6 @@ public final class NetworkTemplate implements Parcelable {
      * {@code TelephonyManager.NETWORK_TYPE_*} constants, and thus needs to stay in sync.
      */
     public static final int NETWORK_TYPE_ALL = -1;
-    /**
-     * Virtual RAT type to represent 5G NSA (Non Stand Alone) mode, where the primary cell is
-     * still LTE and network allocates a secondary 5G cell so telephony reports RAT = LTE along
-     * with NR state as connected. This should not be overlapped with any of the
-     * {@code TelephonyManager.NETWORK_TYPE_*} constants.
-     *
-     * @hide
-     */
-    public static final int NETWORK_TYPE_5G_NSA = -2;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -791,9 +783,10 @@ public final class NetworkTemplate implements Parcelable {
                 return TelephonyManager.NETWORK_TYPE_LTE;
             case TelephonyManager.NETWORK_TYPE_NR:
                 return TelephonyManager.NETWORK_TYPE_NR;
-            // Virtual RAT type for 5G NSA mode, see {@link NetworkTemplate#NETWORK_TYPE_5G_NSA}.
-            case NetworkTemplate.NETWORK_TYPE_5G_NSA:
-                return NetworkTemplate.NETWORK_TYPE_5G_NSA;
+            // Virtual RAT type for 5G NSA mode, see
+            // {@link NetworkStatsManager#NETWORK_TYPE_5G_NSA}.
+            case NetworkStatsManager.NETWORK_TYPE_5G_NSA:
+                return NetworkStatsManager.NETWORK_TYPE_5G_NSA;
             default:
                 return TelephonyManager.NETWORK_TYPE_UNKNOWN;
         }
@@ -815,8 +808,9 @@ public final class NetworkTemplate implements Parcelable {
         }
         // Add NETWORK_TYPE_5G_NSA to the returned list since 5G NSA is a virtual RAT type and
         // it is not in TelephonyManager#NETWORK_TYPE_* constants.
-        // See {@link NetworkTemplate#NETWORK_TYPE_5G_NSA}.
-        collapsedRatTypes.add(NetworkTemplate.getCollapsedRatType(NETWORK_TYPE_5G_NSA));
+        // See {@link NetworkStatsManager#NETWORK_TYPE_5G_NSA}.
+        collapsedRatTypes.add(
+                NetworkTemplate.getCollapsedRatType(NetworkStatsManager.NETWORK_TYPE_5G_NSA));
         // Ensure that unknown type is returned.
         collapsedRatTypes.add(TelephonyManager.NETWORK_TYPE_UNKNOWN);
         return toIntArray(collapsedRatTypes);

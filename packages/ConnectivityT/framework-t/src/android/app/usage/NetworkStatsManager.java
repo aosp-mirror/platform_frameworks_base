@@ -145,6 +145,18 @@ public class NetworkStatsManager {
     /** @hide */
     public static final int FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN = 1 << 2;
 
+    /**
+     * Virtual RAT type to represent 5G NSA (Non Stand Alone) mode, where the primary cell is
+     * still LTE and network allocates a secondary 5G cell so telephony reports RAT = LTE along
+     * with NR state as connected. This is a concept added by NetworkStats on top of the telephony
+     * constants for backward compatibility of metrics so this should not be overlapped with any of
+     * the {@code TelephonyManager.NETWORK_TYPE_*} constants.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static final int NETWORK_TYPE_5G_NSA = -2;
+
     private int mFlags;
 
     /** @hide */

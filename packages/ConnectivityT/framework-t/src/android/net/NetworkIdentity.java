@@ -26,6 +26,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.service.NetworkIdentityProto;
@@ -435,7 +436,7 @@ public class NetworkIdentity {
         public Builder setRatType(@Annotation.NetworkType int ratType) {
             if (!CollectionUtils.contains(TelephonyManager.getAllNetworkTypes(), ratType)
                     && ratType != TelephonyManager.NETWORK_TYPE_UNKNOWN
-                    && ratType != NetworkTemplate.NETWORK_TYPE_5G_NSA) {
+                    && ratType != NetworkStatsManager.NETWORK_TYPE_5G_NSA) {
                 throw new IllegalArgumentException("Invalid ratType " + ratType);
             }
             mRatType = ratType;
