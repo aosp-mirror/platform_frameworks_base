@@ -17,6 +17,8 @@
 package android.view;
 
 import android.content.res.Configuration;
+import android.graphics.Rect;
+import android.view.InsetsState;
 
 /**
  * API from content embedder back to embedded content in SurfaceControlViewHost
@@ -25,4 +27,5 @@ import android.content.res.Configuration;
 oneway interface ISurfaceControlViewHost {
     void onConfigurationChanged(in Configuration newConfig);
     void onDispatchDetachedFromWindow();
+    void onInsetsChanged(in InsetsState state, in Rect insetFrame);
 }
