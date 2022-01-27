@@ -113,14 +113,16 @@ class ScreenOffAnimationController @Inject constructor(
      * the animation ends
      */
     fun shouldDelayKeyguardShow(): Boolean =
-        animations.any { it.shouldPlayAnimation() }
+        animations.any { it.shouldDelayKeyguardShow() }
 
     /**
      * Return true while we want to ignore requests to show keyguard, we need to handle pending
      * keyguard lock requests manually
+     *
+     * @see [com.android.systemui.keyguard.KeyguardViewMediator.maybeHandlePendingLock]
      */
     fun isKeyguardShowDelayed(): Boolean =
-        animations.any { it.isAnimationPlaying() }
+        animations.any { it.isKeyguardShowDelayed() }
 
     /**
      * Return true to ignore requests to hide keyguard
@@ -211,6 +213,8 @@ interface ScreenOffAnimation {
     fun shouldAnimateInKeyguard(): Boolean = false
     fun animateInKeyguard(keyguardView: View, after: Runnable) = after.run()
 
+    fun shouldDelayKeyguardShow(): Boolean = false
+    fun isKeyguardShowDelayed(): Boolean = false
     fun isKeyguardHideDelayed(): Boolean = false
     fun shouldHideScrimOnWakeUp(): Boolean = false
     fun overrideNotificationsDozeAmount(): Boolean = false
