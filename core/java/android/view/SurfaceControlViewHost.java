@@ -26,6 +26,7 @@ import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
 import android.view.accessibility.IAccessibilityEmbeddedConnection;
 import android.view.InsetsState;
 
@@ -178,6 +179,36 @@ public class SurfaceControlViewHost {
          */
         public ISurfaceControlViewHost getRemoteInterface() {
             return mRemoteInterface;
+        }
+
+        /**
+         * Forward a configuration to the remote SurfaceControlViewHost.
+         * This will cause View#onConfigurationChanged to be invoked on the remote
+         * end. This does not automatically cause the SurfaceControlViewHost
+         * to be resized. The root View of a SurfaceControlViewHost
+         * is more akin to a PopupWindow in that the size is user specified
+         * independent of configuration width and height.
+         *
+         * @param c The configuration to forward
+         */
+        public void notifyConfigurationChanged(@NonNull Configuration c) {
+            try {
+                getRemoteInterface().onConfigurationChanged(c);
+            } catch (RemoteException e) {
+                e.rethrowAsRuntimeException();
+            }
+        }
+
+        /**
+         * Tear down the remote SurfaceControlViewHost and cause
+         * View#onDetachedFromWindow to be invoked on the other side.
+         */
+        public void notifyDetachedFromWindow() {
+            try {
+                getRemoteInterface().onDispatchDetachedFromWindow();
+            } catch (RemoteException e) {
+                e.rethrowAsRuntimeException();
+            }
         }
 
         @Override
