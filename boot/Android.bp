@@ -56,6 +56,10 @@ platform_bootclasspath {
             module: "art-bootclasspath-fragment",
         },
         {
+            apex: "com.android.auxiliary",
+            module: "com.android.auxiliary-bootclasspath-fragment",
+        },
+        {
             apex: "com.android.conscrypt",
             module: "com.android.conscrypt-bootclasspath-fragment",
         },

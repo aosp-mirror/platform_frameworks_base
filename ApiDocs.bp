@@ -80,6 +80,7 @@ stubs_defaults {
         ":i18n.module.public.api{.public.stubs.source}",
 
         ":framework-appsearch-sources",
+        ":framework-auxiliary-sources",
         ":framework-connectivity-sources",
         ":framework-bluetooth-sources",
         ":framework-connectivity-tiramisu-updatable-sources",
