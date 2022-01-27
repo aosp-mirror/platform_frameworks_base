@@ -305,7 +305,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             return true;
         }
     };
-
+    private NotificationStackScrollLogger mLogger;
     private StatusBar mStatusBar;
     private int[] mTempInt2 = new int[2];
     private boolean mGenerateChildOrderChangedEvent;
@@ -658,6 +658,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return 0f;
     }
 
+    protected void setLogger(NotificationStackScrollLogger logger) {
+        mLogger = logger;
+    }
+
     public float getNotificationSquishinessFraction() {
         return mStackScrollAlgorithm.getNotificationSquishinessFraction(mAmbientState);
     }
@@ -734,6 +738,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mDebugLines) {
             onDrawDebug(canvas);
         }
+    }
+
+    private void logHunSkippedForUnexpectedState(String key, boolean expected, boolean actual) {
+        if (mLogger == null) return;
+        mLogger.hunSkippedForUnexpectedState(key, expected, actual);
+    }
+
+    private void logHunAnimationSkipped(String key, String reason) {
+        if (mLogger == null) return;
+        mLogger.hunAnimationSkipped(key, reason);
+    }
+
+    private void logHunAnimationEventAdded(String key, int type) {
+        if (mLogger == null) return;
+        mLogger.hunAnimationEventAdded(key, type);
     }
 
     private void onDrawDebug(Canvas canvas) {
@@ -3100,10 +3119,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void generateHeadsUpAnimationEvents() {
         for (Pair<ExpandableNotificationRow, Boolean> eventPair : mHeadsUpChangeAnimations) {
             ExpandableNotificationRow row = eventPair.first;
+            String key = row.getEntry().getKey();
             boolean isHeadsUp = eventPair.second;
             if (isHeadsUp != row.isHeadsUp()) {
                 // For cases where we have a heads up showing and appearing again we shouldn't
                 // do the animations at all.
+                logHunSkippedForUnexpectedState(key, isHeadsUp, row.isHeadsUp());
                 continue;
             }
             int type = AnimationEvent.ANIMATION_TYPE_HEADS_UP_OTHER;
@@ -3121,6 +3142,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 if (row.isChildInGroup()) {
                     // We can otherwise get stuck in there if it was just isolated
                     row.setHeadsUpAnimatingAway(false);
+                    logHunAnimationSkipped(key, "row is child in group");
                     continue;
                 }
             } else {
@@ -3128,6 +3150,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 if (viewState == null) {
                     // A view state was never generated for this view, so we don't need to animate
                     // this. This may happen with notification children.
+                    logHunAnimationSkipped(key, "row has no viewState");
                     continue;
                 }
                 if (isHeadsUp && (mAddedHeadsUpChildren.contains(row) || pinnedAndClosed)) {
@@ -3151,6 +3174,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                         + " onBottom=" + onBottom
                         + " row=" + row.getEntry().getKey());
             }
+            logHunAnimationEventAdded(key, type);
         }
         mHeadsUpChangeAnimations.clear();
         mAddedHeadsUpChildren.clear();
@@ -4699,6 +4723,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 if (SPEW) {
                     Log.v(TAG, "generateHeadsUpAnimation: previous hun appear animation cancelled");
                 }
+                logHunAnimationSkipped(row.getEntry().getKey(),
+                        "previous hun appear animation cancelled");
                 return;
             }
             mHeadsUpChangeAnimations.add(new Pair<>(row, isHeadsUp));
