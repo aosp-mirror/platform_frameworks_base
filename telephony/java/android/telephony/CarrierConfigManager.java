@@ -7525,7 +7525,7 @@ public class CarrierConfigManager {
          * {@link Ims#PREFERRED_TRANSPORT_TCP} will apply.
          */
         public static final String KEY_BSF_TRANSPORT_TYPE_INT =
-                KEY_PREFIX + "bsf_transport type_int";
+                KEY_PREFIX + "bsf_transport_type_int";
 
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
