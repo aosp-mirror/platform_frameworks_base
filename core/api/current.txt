@@ -20724,11 +20724,14 @@ package android.media {
     field public static final int AVCProfileHigh422 = 32; // 0x20
     field public static final int AVCProfileHigh444 = 64; // 0x40
     field public static final int AVCProfileMain = 2; // 0x2
+    field public static final int DolbyVisionLevel8k30 = 1024; // 0x400
+    field public static final int DolbyVisionLevel8k60 = 2048; // 0x800
     field public static final int DolbyVisionLevelFhd24 = 4; // 0x4
     field public static final int DolbyVisionLevelFhd30 = 8; // 0x8
     field public static final int DolbyVisionLevelFhd60 = 16; // 0x10
     field public static final int DolbyVisionLevelHd24 = 1; // 0x1
     field public static final int DolbyVisionLevelHd30 = 2; // 0x2
+    field public static final int DolbyVisionLevelUhd120 = 512; // 0x200
     field public static final int DolbyVisionLevelUhd24 = 32; // 0x20
     field public static final int DolbyVisionLevelUhd30 = 64; // 0x40
     field public static final int DolbyVisionLevelUhd48 = 128; // 0x80
