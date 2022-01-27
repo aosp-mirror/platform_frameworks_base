@@ -1019,15 +1019,14 @@ public final class SystemServiceRegistry {
             }});
 
         registerService(Context.PERSISTENT_DATA_BLOCK_SERVICE, PersistentDataBlockManager.class,
-                new CachedServiceFetcher<PersistentDataBlockManager>() {
+                new StaticServiceFetcher<PersistentDataBlockManager>() {
             @Override
-            public PersistentDataBlockManager createService(ContextImpl ctx)
-                    throws ServiceNotFoundException {
+            public PersistentDataBlockManager createService() throws ServiceNotFoundException {
                 IBinder b = ServiceManager.getServiceOrThrow(Context.PERSISTENT_DATA_BLOCK_SERVICE);
                 IPersistentDataBlockService persistentDataBlockService =
                         IPersistentDataBlockService.Stub.asInterface(b);
                 if (persistentDataBlockService != null) {
-                    return new PersistentDataBlockManager(ctx, persistentDataBlockService);
+                    return new PersistentDataBlockManager(persistentDataBlockService);
                 } else {
                     // not supported
                     return null;

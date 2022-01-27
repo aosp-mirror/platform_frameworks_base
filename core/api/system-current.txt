@@ -10880,7 +10880,7 @@ package android.service.persistentdata {
     method @android.service.persistentdata.PersistentDataBlockManager.FlashLockState @RequiresPermission(anyOf={android.Manifest.permission.READ_OEM_UNLOCK_STATE, "android.permission.OEM_UNLOCK_STATE"}) public int getFlashLockState();
     method public long getMaximumDataBlockSize();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_OEM_UNLOCK_STATE, "android.permission.OEM_UNLOCK_STATE"}) public boolean getOemUnlockEnabled();
-    method @NonNull public String getPersistentDataPackageName();
+    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_PDB_STATE) public String getPersistentDataPackageName();
     method public byte[] read();
     method @Deprecated @RequiresPermission("android.permission.OEM_UNLOCK_STATE") public void setOemUnlockEnabled(boolean);
     method @RequiresPermission("android.permission.OEM_UNLOCK_STATE") public void wipe();
