@@ -571,7 +571,7 @@ public class ClipboardService extends SystemService {
                         final boolean canCopyIntoProfile = !hasRestriction(
                                 UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE, id);
                         if (canCopyIntoProfile) {
-                            setPrimaryClipInternalLocked(
+                            setPrimaryClipInternalNoClassifyLocked(
                                     getClipboardLocked(id), clip, uid, sourcePackage);
                         }
                     }
