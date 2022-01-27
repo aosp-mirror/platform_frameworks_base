@@ -2975,7 +2975,19 @@ public final class ActiveServices {
             Binder.restoreCallingIdentity(origId);
         }
 
+        notifyBindingServiceEventLocked(callerApp, callingPackage);
+
         return 1;
+    }
+
+    @GuardedBy("mAm")
+    private void notifyBindingServiceEventLocked(ProcessRecord callerApp, String callingPackage) {
+        final ApplicationInfo ai = callerApp.info;
+        final String callerPackage = ai != null ? ai.packageName : callingPackage;
+        if (callerPackage != null) {
+            mAm.mHandler.obtainMessage(ActivityManagerService.DISPATCH_BINDING_SERVICE_EVENT,
+                    callerApp.uid, 0, callerPackage).sendToTarget();
+        }
     }
 
     private void maybeLogBindCrossProfileService(

@@ -5057,6 +5057,17 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION =
             "android.intent.action.PACKAGE_NEEDS_INTEGRITY_VERIFICATION";
 
+    /**
+     * Broadcast Action: Start the foreground service manager.
+     *
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
+     * </p>
+     *
+     * @hide
+     */
+    public static final String ACTION_SHOW_FOREGROUND_SERVICE_MANAGER =
+            "android.intent.action.SHOW_FOREGROUND_SERVICE_MANAGER";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------

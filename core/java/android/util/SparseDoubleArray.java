@@ -124,6 +124,15 @@ public class SparseDoubleArray implements Cloneable {
     }
 
     /**
+     * Returns the index for which {@link #keyAt} would return the
+     * specified key, or a negative number if the specified
+     * key is not mapped.
+     */
+    public int indexOfKey(int key) {
+        return mValues.indexOfKey(key);
+    }
+
+    /**
      * Given an index in the range <code>0...size()-1</code>, returns
      * the key from the <code>index</code>th key-value mapping that this
      * SparseDoubleArray stores.
@@ -143,6 +152,34 @@ public class SparseDoubleArray implements Cloneable {
      */
     public double valueAt(int index) {
         return Double.longBitsToDouble(mValues.valueAt(index));
+    }
+
+    /**
+     * Given an index in the range <code>0...size()-1</code>, sets a new
+     * value for the <code>index</code>th key-value mapping that this
+     * SparseDoubleArray stores.
+     *
+     * <p>For indices outside of the range <code>0...size()-1</code>, the behavior is undefined for
+     * apps targeting {@link android.os.Build.VERSION_CODES#P} and earlier, and an
+     * {@link ArrayIndexOutOfBoundsException} is thrown for apps targeting
+     * {@link android.os.Build.VERSION_CODES#Q} and later.</p>
+     */
+    public void setValueAt(int index, double value) {
+        mValues.setValueAt(index, Double.doubleToRawLongBits(value));
+    }
+
+    /**
+     * Removes the mapping at the given index.
+     */
+    public void removeAt(int index) {
+        mValues.removeAt(index);
+    }
+
+    /**
+     * Removes the mapping from the specified key, if there was any.
+     */
+    public void delete(int key) {
+        mValues.delete(key);
     }
 
     /**

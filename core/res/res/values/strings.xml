@@ -6226,4 +6226,19 @@ ul.</string>
     <string name="ui_translation_accessibility_translated_text"><xliff:g id="message" example="Hello">%1$s</xliff:g> Translated.</string>
     <!-- Accessibility message announced to notify the user when the system has finished translating the content displayed on the screen to a different language after the user requested translation. [CHAR LIMIT=NONE] -->
     <string name="ui_translation_accessibility_translation_finished">Message translated from <xliff:g id="from_language" example="English">%1$s</xliff:g> to <xliff:g id="to_language" example="French">%2$s</xliff:g>.</string>
+
+    <!-- Title for the notification channel notifying user of abusive background apps. [CHAR LIMIT=NONE] -->
+    <string name="notification_channel_abusive_bg_apps">Background Activity</string>
+    <!-- Title of notification indicating abusive background apps. [CHAR LIMIT=NONE] -->
+    <string name="notification_title_abusive_bg_apps">Background Activity</string>
+    <!-- Content of notification indicating abusive background apps. [CHAR LIMIT=NONE] -->
+    <string name="notification_content_abusive_bg_apps">
+        <xliff:g id="app" example="Gmail">%1$s</xliff:g> is running in the background and draining battery. Tap to review.
+    </string>
+    <!-- Content of notification indicating long running foreground service. [CHAR LIMIT=NONE] -->
+    <string name="notification_content_long_running_fgs">
+        <xliff:g id="app" example="Gmail">%1$s</xliff:g> is running in the background for a long time. Tap to review.
+    </string>
+    <!-- Action label of notification for user to check background apps. [CHAR LIMIT=NONE]  -->
+    <string name="notification_action_check_bg_apps">Check active apps</string>
 </resources>

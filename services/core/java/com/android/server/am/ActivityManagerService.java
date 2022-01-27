@@ -153,8 +153,12 @@ import android.app.ActivityClient;
 import android.app.ActivityManager;
 import android.app.ActivityManager.PendingIntentInfo;
 import android.app.ActivityManager.ProcessCapability;
+import android.app.ActivityManager.RestrictionLevel;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerInternal.BindServiceEventListener;
+import android.app.ActivityManagerInternal.BroadcastEventListener;
+import android.app.ActivityManagerInternal.ForegroundServiceStateListener;
 import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.ActivityThread;
 import android.app.AnrController;
@@ -186,7 +190,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
-import android.app.PropertyInvalidatedCache;
 import android.app.SyncNotedAppOp;
 import android.app.WaitResult;
 import android.app.backup.BackupManager.OperationType;
@@ -233,11 +236,9 @@ import android.content.pm.ProcessInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ProviderInfoList;
 import android.content.pm.ResolveInfo;
-import com.android.server.pm.pkg.SELinuxUtil;
 import android.content.pm.ServiceInfo;
 import android.content.pm.TestUtilityService;
 import android.content.pm.UserInfo;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -396,6 +397,8 @@ import com.android.server.pm.Installer;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.pm.pkg.SELinuxUtil;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.uri.GrantUri;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -438,6 +441,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -1373,6 +1377,25 @@ public class ActivityManagerService extends IActivityManager.Stub
             = new ProcessMap<ArrayList<ProcessRecord>>();
 
     /**
+     * The list of foreground service state change listeners.
+     */
+    @GuardedBy("this")
+    final ArrayList<ForegroundServiceStateListener> mForegroundServiceStateListeners =
+            new ArrayList<>();
+
+    /**
+     * The list of broadcast event listeners.
+     */
+    final CopyOnWriteArrayList<BroadcastEventListener> mBroadcastEventListeners =
+            new CopyOnWriteArrayList<>();
+
+    /**
+     * The list of bind service event listeners.
+     */
+    final CopyOnWriteArrayList<BindServiceEventListener> mBindServiceEventListeners =
+            new CopyOnWriteArrayList<>();
+
+    /**
      * Set if the systemServer made a call to enterSafeMode.
      */
     @GuardedBy("this")
@@ -1456,6 +1479,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final UidObserverController mUidObserverController;
 
+    final AppRestrictionController mAppRestrictionController;
+
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
         final ProcessRecord mApp;
         final int mPid;
@@ -1512,6 +1537,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int KILL_APP_ZYGOTE_MSG = 71;
     static final int BINDER_HEAVYHITTER_AUTOSAMPLER_TIMEOUT_MSG = 72;
     static final int WAIT_FOR_CONTENT_PROVIDER_TIMEOUT_MSG = 73;
+    static final int DISPATCH_SENDING_BROADCAST_EVENT = 74;
+    static final int DISPATCH_BINDING_SERVICE_EVENT = 75;
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
 
@@ -1828,6 +1855,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     synchronized (ActivityManagerService.this) {
                         ((ContentProviderRecord) msg.obj).onProviderPublishStatusLocked(false);
                     }
+                } break;
+                case DISPATCH_SENDING_BROADCAST_EVENT: {
+                    mBroadcastEventListeners.forEach(l ->
+                            l.onSendingBroadcast((String) msg.obj, msg.arg1));
+                } break;
+                case DISPATCH_BINDING_SERVICE_EVENT: {
+                    mBindServiceEventListeners.forEach(l ->
+                            l.onBindingService((String) msg.obj, msg.arg1));
                 } break;
             }
         }
@@ -2269,6 +2304,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPendingIntentController = hasHandlerThread
                 ? new PendingIntentController(handlerThread.getLooper(), mUserController,
                         mConstants) : null;
+        mAppRestrictionController = new AppRestrictionController(mContext, this);
         mProcStartHandlerThread = null;
         mProcStartHandler = null;
         mHiddenApiBlacklist = null;
@@ -2377,6 +2413,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mPendingIntentController = new PendingIntentController(
                 mHandlerThread.getLooper(), mUserController, mConstants);
+
+        mAppRestrictionController = new AppRestrictionController(mContext, this);
 
         mUseFifoUiScheduling = SystemProperties.getInt("sys.use_fifo_ui", 0) != 0;
 
@@ -7722,6 +7760,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mUserController.onSystemReady();
             mAppOpsService.systemReady();
             mProcessList.onSystemReady();
+            mAppRestrictionController.onSystemReady();
             mSystemReady = true;
             t.traceEnd();
         }
@@ -9004,6 +9043,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("-------------------------------------------------------------------------------");
             }
             mComponentAliasResolver.dump(pw);
+        }
+        if (dumpAll) {
+            pw.println("-------------------------------------------------------------------------------");
+            mAppRestrictionController.dump(pw, "");
         }
     }
 
@@ -14807,8 +14850,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     final void updateProcessForegroundLocked(ProcessRecord proc, boolean isForeground,
             int fgServiceTypes, boolean oomAdj) {
         final ProcessServiceRecord psr = proc.mServices;
-        if (isForeground != psr.hasForegroundServices()
+        final boolean foregroundStateChanged = isForeground != psr.hasForegroundServices();
+        if (foregroundStateChanged
                 || psr.getForegroundServiceTypes() != fgServiceTypes) {
+            if (foregroundStateChanged) {
+                // Notify internal listeners.
+                for (int i = mForegroundServiceStateListeners.size() - 1; i >= 0; i--) {
+                    mForegroundServiceStateListeners.get(i).onForegroundServiceStateChanged(
+                            proc.info.packageName, proc.info.uid, proc.getPid(), isForeground);
+                }
+            }
             psr.setHasForegroundServices(isForeground, fgServiceTypes);
             ArrayList<ProcessRecord> curProcs = mForegroundPackages.get(proc.info.packageName,
                     proc.info.uid);
@@ -15807,6 +15858,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 synchronized (mProcLock) {
                     mDeviceIdleAllowlist = allAppids;
                     mDeviceIdleExceptIdleAllowlist = exceptIdleAppids;
+                    mAppRestrictionController.setDeviceIdleAllowlist(allAppids, exceptIdleAppids);
                 }
             }
         }
@@ -16794,6 +16846,47 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void setStopUserOnSwitch(int value) {
             ActivityManagerService.this.setStopUserOnSwitch(value);
         }
+
+        @Override
+        public @RestrictionLevel int getRestrictionLevel(int uid) {
+            return mAppRestrictionController.getRestrictionLevel(uid);
+        }
+
+        @Override
+        public @RestrictionLevel int getRestrictionLevel(String pkg, @UserIdInt int userId) {
+            return mAppRestrictionController.getRestrictionLevel(pkg, userId);
+        }
+
+        @Override
+        public boolean isBgAutoRestrictedBucketFeatureFlagEnabled() {
+            return mAppRestrictionController.isBgAutoRestrictedBucketFeatureFlagEnabled();
+        }
+
+        @Override
+        public void addAppBackgroundRestrictionListener(
+                @NonNull ActivityManagerInternal.AppBackgroundRestrictionListener listener) {
+            mAppRestrictionController.addAppBackgroundRestrictionListener(listener);
+        }
+
+        @Override
+        public void addForegroundServiceStateListener(
+                @NonNull ForegroundServiceStateListener listener) {
+            synchronized (ActivityManagerService.this) {
+                mForegroundServiceStateListeners.add(listener);
+            }
+        }
+
+        @Override
+        public void addBroadcastEventListener(@NonNull BroadcastEventListener listener) {
+            // It's a CopyOnWriteArrayList, so no lock is needed.
+            mBroadcastEventListeners.add(listener);
+        }
+
+        @Override
+        public void addBindServiceEventListener(@NonNull BindServiceEventListener listener) {
+            // It's a CopyOnWriteArrayList, so no lock is needed.
+            mBindServiceEventListeners.add(listener);
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, String reason) {
@@ -16959,6 +17052,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 SystemClock.sleep(1000);
             }
         }
+    }
+
+    @Override
+    @ReasonCode
+    public int getBackgroundRestrictionExemptionReason(int uid) {
+        enforceCallingPermission(android.Manifest.permission.DEVICE_POWER,
+                "getBackgroundRestrictionExemptionReason()");
+        return mAppRestrictionController.getBackgroundRestrictionExemptionReason(uid);
     }
 
     /**
