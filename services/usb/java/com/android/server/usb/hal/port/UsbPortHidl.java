@@ -318,6 +318,19 @@ public final class UsbPortHidl implements UsbPortHal {
     }
 
     @Override
+    public boolean resetUsbPort(String portName, long transactionId,
+            IUsbOperationInternal callback) {
+        try {
+            callback.onOperationComplete(USB_OPERATION_ERROR_NOT_SUPPORTED);
+        } catch (RemoteException e) {
+            logAndPrintException(mPw, "Failed to call onOperationComplete. opID:"
+                    + transactionId
+                    + " portId:" + portName, e);
+        }
+        return false;
+    }
+
+    @Override
     public boolean enableUsbData(String portName, boolean enable, long transactionId,
             IUsbOperationInternal callback) {
         int halVersion;

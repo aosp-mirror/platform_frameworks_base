@@ -73,11 +73,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.SigningDetails;
-import com.android.server.pm.pkg.component.ComponentMutateUtils;
-import com.android.server.pm.pkg.component.ParsedPermission;
-import com.android.server.pm.pkg.component.ParsedPermissionGroup;
-import com.android.server.pm.pkg.component.ParsedPermissionUtils;
-
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.metrics.LogMaker;
 import android.os.AsyncTask;
@@ -136,6 +131,10 @@ import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.component.ComponentMutateUtils;
+import com.android.server.pm.pkg.component.ParsedPermission;
+import com.android.server.pm.pkg.component.ParsedPermissionGroup;
+import com.android.server.pm.pkg.component.ParsedPermissionUtils;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.SoftRestrictedPermissionPolicy;
 
@@ -3172,18 +3171,17 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 }
             } else if (NOTIFICATION_PERMISSIONS.contains(newPerm)) {
                 //&& (origPs.getPermissionState(newPerm) == null) {
-                // TODO(b/205888750): add back line about origPs once propagated through droidfood
+                // TODO(b/205888750): add back line about origPs once all TODO sections below are
+                //  propagated through droidfood
                 Permission bp = mRegistry.getPermission(newPerm);
                 if (bp == null) {
                     throw new IllegalStateException("Unknown new permission " + newPerm);
                 }
-                // TODO(b/205888750): remove the line for REVOKE_WHEN_REQUESTED once propagated
-                //  through droidfood
                 if (!isUserSetOrPregrantedOrFixed(ps.getPermissionFlags(newPerm))) {
                     updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
-                    ps.updatePermissionFlags(bp, PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED
-                                    | FLAG_PERMISSION_REVOKE_WHEN_REQUESTED,
-                            PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED);
+                    int setFlag = ps.isPermissionGranted(newPerm)
+                            ? 0 : FLAG_PERMISSION_REVIEW_REQUIRED;
+                    ps.updatePermissionFlags(bp, FLAG_PERMISSION_REVIEW_REQUIRED, setFlag);
                     // TODO(b/205888750): remove if/else block once propagated through droidfood
                     if (ps.isPermissionGranted(newPerm)
                             && pkg.getTargetSdkVersion() >= Build.VERSION_CODES.M) {
@@ -3192,6 +3190,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                             && pkg.getTargetSdkVersion() < Build.VERSION_CODES.M) {
                         ps.grantPermission(bp);
                     }
+                } else {
+                    // TODO(b/205888750): remove once propagated through droidfood
+                    ps.updatePermissionFlags(bp, FLAG_PERMISSION_REVOKE_WHEN_REQUESTED
+                            | FLAG_PERMISSION_REVIEW_REQUIRED, 0);
                 }
             }
         }
@@ -4779,9 +4781,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
         // Handle REVIEW_REQUIRED
         if ((newFlags & priorityFixedMask) == 0) {
-            if (NOTIFICATION_PERMISSIONS.contains(srcState.getName())) {
+            if ((newFlags & (defaultGrantMask | userSettableMask)) == 0
+                    && NOTIFICATION_PERMISSIONS.contains(srcState.getName())) {
                 // For notification permissions, inherit from both states
-                // if no priority FIXED flags are set
+                // if no priority FIXED or DEFAULT_GRANT or USER_SET flags are set
                 newFlags |= (combinedFlags & FLAG_PERMISSION_REVIEW_REQUIRED);
             } else if ((newFlags & priorityMask) == 0) {
                 // Else inherit from destState if no priority flags are set

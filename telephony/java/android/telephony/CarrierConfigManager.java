@@ -5186,6 +5186,20 @@ public class CarrierConfigManager {
         public static final int E911_RTP_INACTIVITY_ON_CONNECTED = 4;
 
         /**
+         * List of different RAT technologies on which IMS
+         * is supported.
+         *
+         * <p>Possible values are,
+         * {@link AccessNetworkConstants.AccessNetworkType#NGRAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#EUTRAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#IWLAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#UTRAN}
+         * {@link AccessNetworkConstants.AccessNetworkType#GERAN}
+         */
+        public static final String KEY_SUPPORTED_RATS_INT_ARRAY =
+                KEY_PREFIX + "supported_rats_int_array";
+
+        /**
          * A bundle which specifies the MMTEL capability and registration technology
          * that requires provisioning. If a tuple is not present, the
          * framework will not require that the tuple requires provisioning before
@@ -5375,6 +5389,13 @@ public class CarrierConfigManager {
                     new int[] {
                         GEOLOCATION_PIDF_FOR_EMERGENCY_ON_WIFI
                     });
+            defaults.putIntArray(
+                    KEY_SUPPORTED_RATS_INT_ARRAY,
+                    new int[] {
+                        AccessNetworkType.NGRAN,
+                        AccessNetworkType.EUTRAN,
+                        AccessNetworkType.IWLAN
+                    });
 
             defaults.putString(KEY_PHONE_CONTEXT_DOMAIN_NAME_STRING, "");
             defaults.putString(KEY_IMS_USER_AGENT_STRING,
@@ -5498,6 +5519,44 @@ public class CarrierConfigManager {
          */
         public static final String KEY_SESSION_REFRESHER_TYPE_INT =
                 KEY_PREFIX + "session_refresher_type_int";
+
+
+        /** @hide */
+        @IntDef({
+            SESSION_PRIVACY_TYPE_HEADER,
+            SESSION_PRIVACY_TYPE_NONE,
+            SESSION_PRIVACY_TYPE_ID
+        })
+
+        public @interface SessionPrivacyType {}
+
+        /**
+         * Session privacy type is HEADER as per RFC 3323 Section 4.2.
+         */
+        public static final int SESSION_PRIVACY_TYPE_HEADER = 0;
+
+        /**
+         * Session privacy type is NONE as per RFC 3323 Section 4.2.
+         */
+        public static final int SESSION_PRIVACY_TYPE_NONE = 1;
+
+        /**
+         * Session privacy type is ID as per RFC 3325 Section 9.3.
+         */
+        public static final int SESSION_PRIVACY_TYPE_ID = 2;
+
+        /**
+         * Specify the session privacy type.
+         *
+         * <p>Reference: RFC 3323 Section 4.2, RFC 3325 Section 9.3.
+         *
+         * <p>Possible values are,
+         * {@link #SESSION_PRIVACY_TYPE_HEADER},
+         * {@link #SESSION_PRIVACY_TYPE_NONE},
+         * {@link #SESSION_PRIVACY_TYPE_ID}
+         */
+        public static final String KEY_SESSION_PRIVACY_TYPE_INT =
+                KEY_PREFIX + "session_privacy_type_int";
 
         /**
          * Flag indicating whether PRACK must be enabled for all 18x messages.
@@ -6320,6 +6379,7 @@ public class CarrierConfigManager {
             defaults.putBoolean(KEY_VOICE_ON_DEFAULT_BEARER_SUPPORTED_BOOL, false);
 
             defaults.putInt(KEY_SESSION_REFRESHER_TYPE_INT, SESSION_REFRESHER_TYPE_UNKNOWN);
+            defaults.putInt(KEY_SESSION_PRIVACY_TYPE_INT, SESSION_PRIVACY_TYPE_HEADER);
             defaults.putInt(KEY_SESSION_REFRESH_METHOD_INT,
                             SESSION_REFRESH_METHOD_UPDATE_PREFERRED);
             defaults.putInt(KEY_CONFERENCE_SUBSCRIBE_TYPE_INT,
@@ -6567,22 +6627,6 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "text_rr_bandwidth_bps_int";
 
         /**
-         * List of various reasons for RTT call to end due to
-         * media inactivity.
-         *
-         * <p>Possible values are,
-         * <UL>
-         *     <LI>{@link Ims#RTCP_INACTIVITY_ON_HOLD}</LI>
-         *     <LI>{@link Ims#RTCP_INACTIVITY_ON_CONNECTED}</LI>
-         *     <LI>{@link Ims#RTP_INACTIVITY_ON_CONNECTED}</LI>
-         *     <LI>{@link Ims#E911_RTCP_INACTIVITY_ON_CONNECTED}</LI>
-         *     <LI>{@link Ims#E911_RTP_INACTIVITY_ON_CONNECTED}</LI>
-         * </UL>
-         */
-        public static final String KEY_TEXT_INACTIVITY_CALL_END_REASONS_INT_ARRAY =
-                KEY_PREFIX + "text_inactivity_call_end_reasons_int_array";
-
-        /**
          * Specifies the Text Codec capability.
          *
          * <p>Possible keys in this bundle are,
@@ -6616,13 +6660,6 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_TEXT_AS_BANDWIDTH_KBPS_INT, 4);
             defaults.putInt(KEY_TEXT_RS_BANDWIDTH_BPS_INT, 100);
             defaults.putInt(KEY_TEXT_RR_BANDWIDTH_BPS_INT, 300);
-
-            defaults.putIntArray(
-                    KEY_TEXT_INACTIVITY_CALL_END_REASONS_INT_ARRAY,
-                    new int[] {
-                        Ims.RTCP_INACTIVITY_ON_CONNECTED,
-                        Ims.RTP_INACTIVITY_ON_CONNECTED
-                    });
 
             PersistableBundle text_codec_capability_payload_types = new PersistableBundle();
 
@@ -6707,6 +6744,13 @@ public class CarrierConfigManager {
         public static final String KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT =
                 KEY_PREFIX + "emergency_registration_timer_millis_int";
 
+        /**
+         * This setting will be specify the wait time for refreshing
+         * geolocation information before dialing emergency call.
+         */
+        public static final String KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT =
+                KEY_PREFIX + "refresh_geolocation_timeout_millis_int";
+
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putBoolean(KEY_RETRY_EMERGENCY_ON_IMS_PDN_BOOL, false);
@@ -6721,6 +6765,7 @@ public class CarrierConfigManager {
                     });
 
             defaults.putInt(KEY_EMERGENCY_REGISTRATION_TIMER_MILLIS_INT, 20000);
+            defaults.putInt(KEY_REFRESH_GEOLOCATION_TIMEOUT_MILLIS_INT, 5000);
 
             return defaults;
         }
@@ -7033,6 +7078,17 @@ public class CarrierConfigManager {
          */
         public static final String KEY_UT_REQUIRES_IMS_REGISTRATION_BOOL =
                 KEY_PREFIX + "ut_requires_ims_registration_bool";
+
+        /**
+         * Flag that controls whether XCAP over UT is supported
+         * when on roaming network.
+         *
+         * <p>If {@code true}: XCAP over UT is supported when on
+         * roaming network.
+         * {@code false} otherwise.
+         */
+        public static final String KEY_UT_SUPPORTED_WHEN_ROAMING_BOOL =
+                KEY_PREFIX + "ut_supported_when_roaming_bool";
 
         /**
          * Flag that controls whether Circuit Switched Fallback (CSFB)
@@ -7385,6 +7441,7 @@ public class CarrierConfigManager {
             defaults.putBoolean(KEY_USE_CSFB_ON_XCAP_OVER_UT_FAILURE_BOOL, true);
             defaults.putBoolean(KEY_UT_SUPPORTED_WHEN_PS_DATA_OFF_BOOL, true);
             defaults.putBoolean(KEY_NETWORK_INITIATED_USSD_OVER_IMS_SUPPORTED_BOOL, true);
+            defaults.putBoolean(KEY_UT_SUPPORTED_WHEN_ROAMING_BOOL, true);
 
             defaults.putInt(KEY_UT_IPTYPE_HOME_INT, ApnSetting.PROTOCOL_IPV4V6);
             defaults.putInt(KEY_UT_IPTYPE_ROAMING_INT, ApnSetting.PROTOCOL_IPV4V6);

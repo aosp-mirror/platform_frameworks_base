@@ -30,13 +30,15 @@ import android.util.Slog;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.StartUserClient;
 
+import java.util.function.Supplier;
+
 public class FingerprintStartUserClient extends StartUserClient<IFingerprint, ISession> {
     private static final String TAG = "FingerprintStartUserClient";
 
     @NonNull private final ISessionCallback mSessionCallback;
 
     public FingerprintStartUserClient(@NonNull Context context,
-            @NonNull LazyDaemon<IFingerprint> lazyDaemon,
+            @NonNull Supplier<IFingerprint> lazyDaemon,
             @Nullable IBinder token, int userId, int sensorId,
             @NonNull ISessionCallback sessionCallback,
             @NonNull UserStartedCallback<ISession> callback) {
@@ -53,10 +55,12 @@ public class FingerprintStartUserClient extends StartUserClient<IFingerprint, IS
     @Override
     protected void startHalOperation() {
         try {
-            final ISession newSession = getFreshDaemon().createSession(getSensorId(),
+            final IFingerprint hal = getFreshDaemon();
+            final int version = hal.getInterfaceVersion();
+            final ISession newSession = hal.createSession(getSensorId(),
                     getTargetUserId(), mSessionCallback);
             Binder.allowBlocking(newSession.asBinder());
-            mUserStartedCallback.onUserStarted(getTargetUserId(), newSession);
+            mUserStartedCallback.onUserStarted(getTargetUserId(), newSession, version);
             getCallback().onClientFinished(this, true /* success */);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
@@ -66,6 +70,5 @@ public class FingerprintStartUserClient extends StartUserClient<IFingerprint, IS
 
     @Override
     public void unableToStart() {
-
     }
 }

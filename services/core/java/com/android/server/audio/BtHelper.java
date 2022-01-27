@@ -371,7 +371,7 @@ public class BtHelper {
      * @return false if SCO isn't connected
      */
     /*package*/ synchronized boolean isBluetoothScoOn() {
-        if (mBluetoothHeadset == null) {
+        if (mBluetoothHeadset == null || mBluetoothHeadsetDevice == null) {
             return false;
         }
         return mBluetoothHeadset.getAudioState(mBluetoothHeadsetDevice)
@@ -505,7 +505,7 @@ public class BtHelper {
         // Discard timeout message
         mDeviceBroker.handleCancelFailureToConnectToBtHeadsetService();
         mBluetoothHeadset = headset;
-        setBtScoActiveDevice(mBluetoothHeadset.getActiveDevice());
+        setBtScoActiveDevice(headset != null ? headset.getActiveDevice() : null);
         // Refresh SCO audio state
         checkScoAudioState();
         if (mScoAudioState != SCO_STATE_ACTIVATE_REQ
@@ -513,7 +513,7 @@ public class BtHelper {
             return;
         }
         boolean status = false;
-        if (mBluetoothHeadsetDevice != null) {
+        if (mBluetoothHeadset != null && mBluetoothHeadsetDevice != null) {
             switch (mScoAudioState) {
                 case SCO_STATE_ACTIVATE_REQ:
                     status = connectBluetoothScoAudioHelper(
@@ -552,6 +552,9 @@ public class BtHelper {
     }
 
     private AudioDeviceAttributes btHeadsetDeviceToAudioDevice(BluetoothDevice btDevice) {
+        if (btDevice == null) {
+            return new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_BLUETOOTH_SCO, "");
+        }
         String address = btDevice.getAddress();
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             address = "";

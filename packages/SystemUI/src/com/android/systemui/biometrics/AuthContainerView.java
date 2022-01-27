@@ -52,7 +52,6 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -106,7 +105,7 @@ public class AuthContainerView extends LinearLayout
 
     private final float mTranslationY;
 
-    @VisibleForTesting final WakefulnessLifecycle mWakefulnessLifecycle;
+    private final WakefulnessLifecycle mWakefulnessLifecycle;
 
     @VisibleForTesting @ContainerState int mContainerState = STATE_UNKNOWN;
 
@@ -187,10 +186,12 @@ public class AuthContainerView extends LinearLayout
 
         public AuthContainerView build(int[] sensorIds, boolean credentialAllowed,
                 @Nullable List<FingerprintSensorPropertiesInternal> fpProps,
-                @Nullable List<FaceSensorPropertiesInternal> faceProps) {
+                @Nullable List<FaceSensorPropertiesInternal> faceProps,
+                WakefulnessLifecycle wakefulnessLifecycle) {
             mConfig.mSensorIds = sensorIds;
             mConfig.mCredentialAllowed = credentialAllowed;
-            return new AuthContainerView(mConfig, new Injector(), fpProps, faceProps);
+            return new AuthContainerView(
+                    mConfig, new Injector(), fpProps, faceProps, wakefulnessLifecycle);
         }
     }
 
@@ -276,7 +277,8 @@ public class AuthContainerView extends LinearLayout
     @VisibleForTesting
     AuthContainerView(Config config, Injector injector,
             @Nullable List<FingerprintSensorPropertiesInternal> fpProps,
-            @Nullable List<FaceSensorPropertiesInternal> faceProps) {
+            @Nullable List<FaceSensorPropertiesInternal> faceProps,
+            WakefulnessLifecycle wakefulnessLifecycle) {
         super(config.mContext);
 
         mConfig = config;
@@ -289,7 +291,7 @@ public class AuthContainerView extends LinearLayout
 
         mHandler = new Handler(Looper.getMainLooper());
         mWindowManager = mContext.getSystemService(WindowManager.class);
-        mWakefulnessLifecycle = Dependency.get(WakefulnessLifecycle.class);
+        mWakefulnessLifecycle = wakefulnessLifecycle;
 
         mTranslationY = getResources()
                 .getDimension(R.dimen.biometric_dialog_animation_translation_offset);

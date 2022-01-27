@@ -61,6 +61,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.function.Supplier;
+
 @Presubmit
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -93,7 +95,7 @@ public class BiometricSchedulerTest {
 
     @Test
     public void testClientDuplicateFinish_ignoredBySchedulerAndDoesNotCrash() {
-        final HalClientMonitor.LazyDaemon<Object> nonNullDaemon = () -> mock(Object.class);
+        final Supplier<Object> nonNullDaemon = () -> mock(Object.class);
 
         final HalClientMonitor<Object> client1 =
                 new TestHalClientMonitor(mContext, mToken, nonNullDaemon);
@@ -184,7 +186,7 @@ public class BiometricSchedulerTest {
 
     @Test
     public void testCancelNotInvoked_whenOperationWaitingForCookie() {
-        final HalClientMonitor.LazyDaemon<Object> lazyDaemon1 = () -> mock(Object.class);
+        final Supplier<Object> lazyDaemon1 = () -> mock(Object.class);
         final TestAuthenticationClient client1 = new TestAuthenticationClient(mContext,
                 lazyDaemon1, mToken, mock(ClientMonitorCallbackConverter.class));
         final ClientMonitorCallback callback1 = mock(ClientMonitorCallback.class);
@@ -296,7 +298,7 @@ public class BiometricSchedulerTest {
 
     @Test
     public void testCancelPendingAuth() throws RemoteException {
-        final HalClientMonitor.LazyDaemon<Object> lazyDaemon = () -> mock(Object.class);
+        final Supplier<Object> lazyDaemon = () -> mock(Object.class);
         final TestHalClientMonitor client1 = new TestHalClientMonitor(mContext, mToken, lazyDaemon);
         final ClientMonitorCallbackConverter callback = mock(ClientMonitorCallbackConverter.class);
         final TestAuthenticationClient client2 = new TestAuthenticationClient(mContext, lazyDaemon,
@@ -360,7 +362,7 @@ public class BiometricSchedulerTest {
 
     private void testCancelsAuthDetectWhenRequestId(@Nullable Long requestId, long cancelRequestId,
             boolean started) {
-        final HalClientMonitor.LazyDaemon<Object> lazyDaemon = () -> mock(Object.class);
+        final Supplier<Object> lazyDaemon = () -> mock(Object.class);
         final ClientMonitorCallbackConverter callback = mock(ClientMonitorCallbackConverter.class);
         testCancelsWhenRequestId(requestId, cancelRequestId, started,
                 new TestAuthenticationClient(mContext, lazyDaemon, mToken, callback));
@@ -383,7 +385,7 @@ public class BiometricSchedulerTest {
 
     private void testCancelsEnrollWhenRequestId(@Nullable Long requestId, long cancelRequestId,
             boolean started) {
-        final HalClientMonitor.LazyDaemon<Object> lazyDaemon = () -> mock(Object.class);
+        final Supplier<Object> lazyDaemon = () -> mock(Object.class);
         final ClientMonitorCallbackConverter callback = mock(ClientMonitorCallbackConverter.class);
         testCancelsWhenRequestId(requestId, cancelRequestId, started,
                 new TestEnrollClient(mContext, lazyDaemon, mToken, callback));
@@ -441,7 +443,7 @@ public class BiometricSchedulerTest {
     public void testCancelsPending_whenAuthRequestIdsSet() {
         final long requestId1 = 10;
         final long requestId2 = 20;
-        final HalClientMonitor.LazyDaemon<Object> lazyDaemon = () -> mock(Object.class);
+        final Supplier<Object> lazyDaemon = () -> mock(Object.class);
         final ClientMonitorCallbackConverter callback = mock(ClientMonitorCallbackConverter.class);
         final TestAuthenticationClient client1 = new TestAuthenticationClient(
                 mContext, lazyDaemon, mToken, callback);
@@ -500,7 +502,7 @@ public class BiometricSchedulerTest {
 
     @Test
     public void testClientDestroyed_afterFinish() {
-        final HalClientMonitor.LazyDaemon<Object> nonNullDaemon = () -> mock(Object.class);
+        final Supplier<Object> nonNullDaemon = () -> mock(Object.class);
         final TestHalClientMonitor client =
                 new TestHalClientMonitor(mContext, mToken, nonNullDaemon);
         mScheduler.scheduleClientMonitor(client);
@@ -520,7 +522,7 @@ public class BiometricSchedulerTest {
         int mNumCancels = 0;
 
         public TestAuthenticationClient(@NonNull Context context,
-                @NonNull LazyDaemon<Object> lazyDaemon, @NonNull IBinder token,
+                @NonNull Supplier<Object> lazyDaemon, @NonNull IBinder token,
                 @NonNull ClientMonitorCallbackConverter listener) {
             super(context, lazyDaemon, token, listener, 0 /* targetUserId */, 0 /* operationId */,
                     false /* restricted */, TAG, 1 /* cookie */, false /* requireConfirmation */,
@@ -567,7 +569,7 @@ public class BiometricSchedulerTest {
         int mNumCancels = 0;
 
         TestEnrollClient(@NonNull Context context,
-                @NonNull LazyDaemon<Object> lazyDaemon, @NonNull IBinder token,
+                @NonNull Supplier<Object> lazyDaemon, @NonNull IBinder token,
                 @NonNull ClientMonitorCallbackConverter listener) {
             super(context, lazyDaemon, token, listener, 0 /* userId */, new byte[69],
                     "test" /* owner */, mock(BiometricUtils.class),
@@ -604,12 +606,12 @@ public class BiometricSchedulerTest {
         private boolean mDestroyed;
 
         TestHalClientMonitor(@NonNull Context context, @NonNull IBinder token,
-                @NonNull LazyDaemon<Object> lazyDaemon) {
+                @NonNull Supplier<Object> lazyDaemon) {
             this(context, token, lazyDaemon, 0 /* cookie */, BiometricsProto.CM_UPDATE_ACTIVE_USER);
         }
 
         TestHalClientMonitor(@NonNull Context context, @NonNull IBinder token,
-                @NonNull LazyDaemon<Object> lazyDaemon, int cookie, int protoEnum) {
+                @NonNull Supplier<Object> lazyDaemon, int cookie, int protoEnum) {
             super(context, lazyDaemon, token /* token */, null /* listener */, 0 /* userId */,
                     TAG, cookie, TEST_SENSOR_ID, 0 /* statsModality */,
                     0 /* statsAction */, 0 /* statsClient */);

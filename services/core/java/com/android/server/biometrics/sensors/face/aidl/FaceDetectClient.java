@@ -23,7 +23,8 @@ import android.hardware.SensorPrivacyManager;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
-import android.hardware.biometrics.face.ISession;
+import android.hardware.biometrics.common.OperationContext;
+import android.hardware.biometrics.common.OperationReason;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -34,11 +35,13 @@ import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.DetectionConsumer;
 
+import java.util.function.Supplier;
+
 /**
  * Performs face detection without exposing any matching information (e.g. accept/reject have the
  * same haptic, lockout counter is not increased).
  */
-public class FaceDetectClient extends AcquisitionClient<ISession> implements DetectionConsumer {
+public class FaceDetectClient extends AcquisitionClient<AidlSession> implements DetectionConsumer {
 
     private static final String TAG = "FaceDetectClient";
 
@@ -46,7 +49,7 @@ public class FaceDetectClient extends AcquisitionClient<ISession> implements Det
     @Nullable private ICancellationSignal mCancellationSignal;
     @Nullable private SensorPrivacyManager mSensorPrivacyManager;
 
-    public FaceDetectClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
+    FaceDetectClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int sensorId, boolean isStrongBiometric, int statsClient) {
@@ -87,10 +90,26 @@ public class FaceDetectClient extends AcquisitionClient<ISession> implements Det
         }
 
         try {
-            mCancellationSignal = getFreshDaemon().detectInteraction();
+            mCancellationSignal = doDetectInteraction();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting face detect", e);
             mCallback.onClientFinished(this, false /* success */);
+        }
+    }
+
+    private ICancellationSignal doDetectInteraction() throws RemoteException {
+        final AidlSession session = getFreshDaemon();
+
+        if (session.hasContextMethods()) {
+            final OperationContext context = new OperationContext();
+            // TODO: add reason, id, and isAoD
+            context.id = 0;
+            context.reason = OperationReason.UNKNOWN;
+            context.isAoD = false;
+            context.isCrypto = isCryptoOperation();
+            return session.getSession().detectInteractionWithContext(context);
+        } else {
+            return session.getSession().detectInteraction();
         }
     }
 

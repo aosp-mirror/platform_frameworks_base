@@ -320,7 +320,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
          * @param updatePostTime whether or not to refresh the post time
          */
         public void updateEntry(boolean updatePostTime) {
-            mLogger.logUpdateEntry(updatePostTime);
+            mLogger.logUpdateEntry(mEntry.getKey(), updatePostTime);
 
             long currentTime = mClock.currentTimeMillis();
             mEarliestRemovaltime = currentTime + mMinimumDisplayTime;

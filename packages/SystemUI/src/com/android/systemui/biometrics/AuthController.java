@@ -63,6 +63,7 @@ import com.android.systemui.assist.ui.DisplayUtils;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
+import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.util.concurrency.Execution;
 
@@ -130,6 +131,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
 
     @NonNull private final SparseBooleanArray mUdfpsEnrolledForUser;
     private SensorPrivacyManager mSensorPrivacyManager;
+    private final WakefulnessLifecycle mWakefulnessLifecycle;
 
     private class BiometricTaskStackListener extends TaskStackListener {
         @Override
@@ -479,9 +481,11 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
             Provider<UdfpsController> udfpsControllerFactory,
             Provider<SidefpsController> sidefpsControllerFactory,
             @NonNull DisplayManager displayManager,
+            WakefulnessLifecycle wakefulnessLifecycle,
             @Main Handler handler) {
         super(context);
         mExecution = execution;
+        mWakefulnessLifecycle = wakefulnessLifecycle;
         mHandler = handler;
         mCommandQueue = commandQueue;
         mActivityTaskManager = activityTaskManager;
@@ -788,7 +792,8 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                 skipAnimation,
                 operationId,
                 requestId,
-                multiSensorConfig);
+                multiSensorConfig,
+                mWakefulnessLifecycle);
 
         if (newDialog == null) {
             Log.e(TAG, "Unsupported type configuration");
@@ -868,7 +873,8 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     protected AuthDialog buildDialog(PromptInfo promptInfo, boolean requireConfirmation,
             int userId, int[] sensorIds, boolean credentialAllowed, String opPackageName,
             boolean skipIntro, long operationId, long requestId,
-            @BiometricMultiSensorMode int multiSensorConfig) {
+            @BiometricMultiSensorMode int multiSensorConfig,
+            WakefulnessLifecycle wakefulnessLifecycle) {
         return new AuthContainerView.Builder(mContext)
                 .setCallback(this)
                 .setPromptInfo(promptInfo)
@@ -879,7 +885,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                 .setOperationId(operationId)
                 .setRequestId(requestId)
                 .setMultiSensorConfig(multiSensorConfig)
-                .build(sensorIds, credentialAllowed, mFpProps, mFaceProps);
+                .build(sensorIds, credentialAllowed, mFpProps, mFaceProps, wakefulnessLifecycle);
     }
 
     /**

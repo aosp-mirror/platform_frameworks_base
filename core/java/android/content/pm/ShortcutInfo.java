@@ -24,6 +24,7 @@ import android.annotation.UserIdInt;
 import android.app.Notification;
 import android.app.Person;
 import android.app.TaskStackBuilder;
+import android.app.appsearch.GenericDocument;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -653,6 +654,28 @@ public final class ShortcutInfo implements Parcelable {
         }
         mCapabilityBindings = source.mCapabilityBindings;
         mStartingThemeResName = source.mStartingThemeResName;
+    }
+
+    /**
+     * Convert a {@link GenericDocument} into a ShortcutInfo.
+     *
+     * @param context Client context
+     * @param document An instance of {@link GenericDocument} that represents the shortcut.
+     */
+    @NonNull
+    public static ShortcutInfo createFromGenericDocument(@NonNull final Context context,
+            @NonNull final GenericDocument document) {
+        Objects.requireNonNull(context);
+        Objects.requireNonNull(document);
+        return createFromGenericDocument(context.getUserId(), document);
+    }
+
+    /**
+     * @hide
+     */
+    public static ShortcutInfo createFromGenericDocument(
+            final int userId, @NonNull final GenericDocument document) {
+        return new AppSearchShortcutInfo(document).toShortcutInfo(userId);
     }
 
     /**

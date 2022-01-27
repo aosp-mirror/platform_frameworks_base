@@ -746,7 +746,7 @@
      <style name="Theme.SystemUI.Dialog.Control.DetailPanel" parent="@android:style/Theme.DeviceDefault.Dialog.NoActionBar">
       <item name="android:windowFullscreen">false</item>
       <item name="android:windowIsFloating">false</item>
-      <item name="android:windowBackground">@android:color/black</item>
+      <item name="android:windowBackground">@color/controls_task_view_bg</item>
       <item name="android:backgroundDimEnabled">false</item>
       <item name="android:windowAnimationStyle">@android:style/Animation.Dialog</item>
     </style>

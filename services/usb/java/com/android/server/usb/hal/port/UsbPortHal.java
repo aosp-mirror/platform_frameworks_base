@@ -193,4 +193,18 @@ public interface UsbPortHal {
      */
     public void enableLimitPowerTransfer(String portName, boolean limit, long transactionId,
             IUsbOperationInternal callback);
+
+    /**
+     * Invoked to reset UsbData on the specified port.
+     *
+     * @param portName Port Identifier.
+     * @param transactionId Used for tracking the current request and is passed down to the HAL
+     *                      implementation as needed.
+     * @param callback callback object to be invoked to invoke the status of the operation upon
+     *                 completion.
+     * @param callback callback object to be invoked to invoke the status of the operation upon
+     *                 completion.
+     */
+    public boolean resetUsbPort(String portName, long transactionId,
+            IUsbOperationInternal callback);
 }

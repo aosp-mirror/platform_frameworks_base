@@ -16,19 +16,21 @@
 
 package android.media.tv;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.annotation.StringDef;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-/** @hide */
+/**
+ * An advertisement request which can be sent to TV interactive App service to inform AD status.
+ */
 public final class AdResponse implements Parcelable {
+    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef(prefix = "RESPONSE_TYPE_", value = {
+    @IntDef(prefix = "RESPONSE_TYPE_", value = {
             RESPONSE_TYPE_PLAYING,
             RESPONSE_TYPE_FINISHED,
             RESPONSE_TYPE_STOPPED,
@@ -36,10 +38,10 @@ public final class AdResponse implements Parcelable {
     })
     public @interface ResponseType {}
 
-    public static final String RESPONSE_TYPE_PLAYING = "PLAYING";
-    public static final String RESPONSE_TYPE_FINISHED = "FINISHED";
-    public static final String RESPONSE_TYPE_STOPPED = "STOPPED";
-    public static final String RESPONSE_TYPE_ERROR = "ERROR";
+    public static final int RESPONSE_TYPE_PLAYING = 1;
+    public static final int RESPONSE_TYPE_FINISHED = 2;
+    public static final int RESPONSE_TYPE_STOPPED = 3;
+    public static final int RESPONSE_TYPE_ERROR = 4;
 
     public static final @NonNull Parcelable.Creator<AdResponse> CREATOR =
             new Parcelable.Creator<AdResponse>() {
@@ -55,10 +57,10 @@ public final class AdResponse implements Parcelable {
             };
 
     private final int mId;
-    private final @ResponseType String mResponseType;
-    private final Long mElapsedTime;
+    private final @ResponseType int mResponseType;
+    private final long mElapsedTime;
 
-    public AdResponse(int id, @ResponseType String responseType, @Nullable Long elapsedTime) {
+    public AdResponse(int id, @ResponseType int responseType, long elapsedTime) {
         mId = id;
         mResponseType = responseType;
         mElapsedTime = elapsedTime;
@@ -66,19 +68,31 @@ public final class AdResponse implements Parcelable {
 
     private AdResponse(Parcel source) {
         mId = source.readInt();
-        mResponseType = source.readString();
-        mElapsedTime = (Long) source.readValue(Long.class.getClassLoader());
+        mResponseType = source.readInt();
+        mElapsedTime = source.readLong();
     }
 
+    /**
+     * Gets the ID of AD response.
+     */
     public int getId() {
         return mId;
     }
 
-    public @ResponseType String getResponseType() {
+    /**
+     * Gets the response type.
+     */
+    @ResponseType
+    public int getResponseType() {
         return mResponseType;
     }
 
-    public Long getElapsedTime() {
+    /**
+     * Gets the playback elapsed time in milliseconds.
+     *
+     * @return The playback elapsed time. -1 if no valid elapsed time.
+     */
+    public long getElapsedTimeMillis() {
         return mElapsedTime;
     }
 
@@ -90,7 +104,7 @@ public final class AdResponse implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mId);
-        dest.writeString(mResponseType);
-        dest.writeValue(mElapsedTime);
+        dest.writeInt(mResponseType);
+        dest.writeLong(mElapsedTime);
     }
 }

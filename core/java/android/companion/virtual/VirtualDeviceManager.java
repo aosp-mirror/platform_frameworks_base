@@ -164,8 +164,6 @@ public final class VirtualDeviceManager {
          * @param executor The executor to run {@code launchCallback} on.
          * @param launchCallback Callback that is called when the pending intent launching is
          *   complete.
-         *
-         * @hide
          */
         public void launchPendingIntent(
                 int displayId,
@@ -196,9 +194,7 @@ public final class VirtualDeviceManager {
 
         /**
          * Creates a virtual display for this virtual device. All displays created on the same
-         * device belongs to the same display group. Requires the ADD_TRUSTED_DISPLAY permission
-         * to create a virtual display which is not in the default DisplayGroup, and to create
-         * trusted displays.
+         * device belongs to the same display group.
          *
          * @param width The width of the virtual display in pixels, must be greater than 0.
          * @param height The height of the virtual display in pixels, must be greater than 0.
@@ -369,9 +365,7 @@ public final class VirtualDeviceManager {
          *
          * @param listener The listener to add.
          * @see #removeActivityListener(ActivityListener)
-         * @hide
          */
-        // TODO(b/194949534): Unhide this API
         public void addActivityListener(@NonNull ActivityListener listener) {
             addActivityListener(listener, mContext.getMainExecutor());
         }
@@ -383,9 +377,7 @@ public final class VirtualDeviceManager {
          * @param listener The listener to add.
          * @param executor The executor where the callback is executed on.
          * @see #removeActivityListener(ActivityListener)
-         * @hide
          */
-        // TODO(b/194949534): Unhide this API
         public void addActivityListener(
                 @NonNull ActivityListener listener, @NonNull Executor executor) {
             mActivityListeners.put(listener, new ActivityListenerDelegate(listener, executor));
@@ -397,9 +389,7 @@ public final class VirtualDeviceManager {
          *
          * @param listener The listener to remove.
          * @see #addActivityListener(ActivityListener, Executor)
-         * @hide
          */
-        // TODO(b/194949534): Unhide this API
         public void removeActivityListener(@NonNull ActivityListener listener) {
             mActivityListeners.remove(listener);
         }
@@ -407,10 +397,7 @@ public final class VirtualDeviceManager {
 
     /**
      * Callback for launching pending intents on the virtual device.
-     *
-     * @hide
      */
-    // TODO(b/194949534): Unhide this API
     public interface LaunchCallback {
         /**
          * Called when the pending intent launched successfully.
@@ -425,10 +412,7 @@ public final class VirtualDeviceManager {
 
     /**
      * Listener for activity changes in this virtual device.
-     *
-     * @hide
      */
-    // TODO(b/194949534): Unhide this API
     public interface ActivityListener {
 
         /**

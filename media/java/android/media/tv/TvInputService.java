@@ -895,7 +895,7 @@ public abstract class TvInputService extends Service {
          * Notifies response for advertisement.
          *
          * @param response advertisement response.
-         * @hide
+         * @see android.media.tv.interactive.TvInteractiveAppService.Session#requestAd(AdRequest)
          */
         public void notifyAdResponse(@NonNull final AdResponse response) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -976,7 +976,6 @@ public abstract class TvInputService extends Service {
 
         /**
          * Notifies signal strength.
-         * @hide
          */
         public void notifySignalStrength(@TvInputManager.SignalStrength final int strength) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -1124,10 +1123,9 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * called when advertisement is requested.
+         * Called when advertisement request is received.
          *
-         * @param request advertisement request
-         * @hide
+         * @param request advertisement request received
          */
         public void onRequestAd(@NonNull AdRequest request) {
         }

@@ -32,6 +32,7 @@ import android.media.tv.AdResponse;
 import android.media.tv.BroadcastInfoRequest;
 import android.media.tv.BroadcastInfoResponse;
 import android.media.tv.TvContentRating;
+import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputManager;
 import android.media.tv.TvTrackInfo;
 import android.media.tv.TvView;
@@ -97,46 +98,82 @@ public abstract class TvInteractiveAppService extends Service {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @StringDef(prefix = "INTERACTIVE_APP_SERVICE_COMMAND_TYPE_", value = {
-            INTERACTIVE_APP_SERVICE_COMMAND_TYPE_TUNE,
-            INTERACTIVE_APP_SERVICE_COMMAND_TYPE_TUNE_NEXT,
-            INTERACTIVE_APP_SERVICE_COMMAND_TYPE_TUNE_PREV,
-            INTERACTIVE_APP_SERVICE_COMMAND_TYPE_STOP,
-            INTERACTIVE_APP_SERVICE_COMMAND_TYPE_SET_STREAM_VOLUME,
-            INTERACTIVE_APP_SERVICE_COMMAND_TYPE_SELECT_TRACK
+    @StringDef(prefix = "PLAYBACK_COMMAND_TYPE_", value = {
+            PLAYBACK_COMMAND_TYPE_TUNE,
+            PLAYBACK_COMMAND_TYPE_TUNE_NEXT,
+            PLAYBACK_COMMAND_TYPE_TUNE_PREV,
+            PLAYBACK_COMMAND_TYPE_STOP,
+            PLAYBACK_COMMAND_TYPE_SET_STREAM_VOLUME,
+            PLAYBACK_COMMAND_TYPE_SELECT_TRACK
     })
-    public @interface InteractiveAppServiceCommandType {}
+    public @interface PlaybackCommandType {}
 
-    /** @hide */
-    public static final String INTERACTIVE_APP_SERVICE_COMMAND_TYPE_TUNE = "tune";
-    /** @hide */
-    public static final String INTERACTIVE_APP_SERVICE_COMMAND_TYPE_TUNE_NEXT = "tune_next";
-    /** @hide */
-    public static final String INTERACTIVE_APP_SERVICE_COMMAND_TYPE_TUNE_PREV = "tune_previous";
-    /** @hide */
-    public static final String INTERACTIVE_APP_SERVICE_COMMAND_TYPE_STOP = "stop";
-    /** @hide */
-    public static final String INTERACTIVE_APP_SERVICE_COMMAND_TYPE_SET_STREAM_VOLUME =
+    /**
+     * Playback command type: tune to the given channel.
+     * @see #COMMAND_PARAMETER_KEY_CHANNEL_URI
+     */
+    public static final String PLAYBACK_COMMAND_TYPE_TUNE = "tune";
+    /**
+     * Playback command type: tune to the next channel.
+     */
+    public static final String PLAYBACK_COMMAND_TYPE_TUNE_NEXT = "tune_next";
+    /**
+     * Playback command type: tune to the previous channel.
+     */
+    public static final String PLAYBACK_COMMAND_TYPE_TUNE_PREV = "tune_previous";
+    /**
+     * Playback command type: stop the playback.
+     */
+    public static final String PLAYBACK_COMMAND_TYPE_STOP = "stop";
+    /**
+     * Playback command type: set the volume.
+     */
+    public static final String PLAYBACK_COMMAND_TYPE_SET_STREAM_VOLUME =
             "set_stream_volume";
-    /** @hide */
-    public static final String INTERACTIVE_APP_SERVICE_COMMAND_TYPE_SELECT_TRACK = "select_track";
-    /** @hide */
+    /**
+     * Playback command type: select the given track.
+     */
+    public static final String PLAYBACK_COMMAND_TYPE_SELECT_TRACK = "select_track";
+    /**
+     * Playback command parameter: channel URI.
+     * <p>Type: android.net.Uri
+     *
+     * @see #PLAYBACK_COMMAND_TYPE_TUNE
+     */
     public static final String COMMAND_PARAMETER_KEY_CHANNEL_URI = "command_channel_uri";
-    /** @hide */
+    /**
+     * Playback command parameter: TV input ID.
+     * <p>Type: String
+     *
+     * @see TvInputInfo#getId()
+     */
     public static final String COMMAND_PARAMETER_KEY_INPUT_ID = "command_input_id";
-    /** @hide */
+    /**
+     * Playback command parameter: stream volume.
+     * <p>Type: float
+     *
+     * @see #PLAYBACK_COMMAND_TYPE_SET_STREAM_VOLUME
+     */
     public static final String COMMAND_PARAMETER_KEY_VOLUME = "command_volume";
-    /** @hide */
+    /**
+     * Playback command parameter: track type.
+     * <p>Type: int
+     *
+     * @see #PLAYBACK_COMMAND_TYPE_SELECT_TRACK
+     * @see TvTrackInfo#getType()
+     */
     public static final String COMMAND_PARAMETER_KEY_TRACK_TYPE = "command_track_type";
-    /** @hide */
+    /**
+     * Playback command parameter: track ID.
+     * <p>Type: String
+     *
+     * @see #PLAYBACK_COMMAND_TYPE_SELECT_TRACK
+     * @see TvTrackInfo#getId()
+     */
     public static final String COMMAND_PARAMETER_KEY_TRACK_ID = "command_track_id";
-    /** @hide */
-    public static final String COMMAND_PARAMETER_KEY_TRACK_SELECT_MODE =
-            "command_track_select_mode";
     /**
      * Command to quiet channel change. No channel banner or channel info is shown.
      * <p>Refer to HbbTV Spec 2.0.4 chapter A.2.4.3.
-     * @hide
      */
     public static final String COMMAND_PARAMETER_KEY_CHANGE_CHANNEL_QUIETLY =
             "command_change_channel_quietly";
@@ -145,9 +182,9 @@ public abstract class TvInteractiveAppService extends Service {
     private final RemoteCallbackList<ITvInteractiveAppServiceCallback> mCallbacks =
             new RemoteCallbackList<>();
 
-    /** @hide */
     @Override
-    public final IBinder onBind(Intent intent) {
+    @Nullable
+    public final IBinder onBind(@NonNull Intent intent) {
         ITvInteractiveAppService.Stub tvIAppServiceBinder = new ITvInteractiveAppService.Stub() {
             @Override
             public void registerCallback(ITvInteractiveAppServiceCallback cb) {
@@ -208,26 +245,22 @@ public abstract class TvInteractiveAppService extends Service {
 
     /**
      * Registers App link info.
-     * @hide
      */
-    public void onRegisterAppLinkInfo(AppLinkInfo appLinkInfo) {
-        // TODO: make it abstract when unhide
+    public void onRegisterAppLinkInfo(@NonNull AppLinkInfo appLinkInfo) {
     }
 
     /**
      * Unregisters App link info.
-     * @hide
      */
-    public void onUnregisterAppLinkInfo(AppLinkInfo appLinkInfo) {
-        // TODO: make it abstract when unhide
+    public void onUnregisterAppLinkInfo(@NonNull AppLinkInfo appLinkInfo) {
     }
 
     /**
-     * Sends App link info.
-     * @hide
+     * Called when app link command is received.
+     *
+     * @see android.media.tv.interactive.TvInteractiveAppManager#sendAppLinkCommand(String, Bundle)
      */
-    public void onAppLinkCommand(Bundle command) {
-        // TODO: make it abstract when unhide
+    public void onAppLinkCommand(@NonNull Bundle command) {
     }
 
 
@@ -317,7 +350,6 @@ public abstract class TvInteractiveAppService extends Service {
          *
          * @param enable {@code true} if you want to enable the media view. {@code false}
          *            otherwise.
-         * @hide
          */
         public void setMediaViewEnabled(final boolean enable) {
             mHandler.post(new Runnable() {
@@ -352,7 +384,6 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Resets TvIAppService session.
-         * @hide
          */
         public void onResetInteractiveApp() {
         }
@@ -383,43 +414,37 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * To toggle Digital Teletext Application if there is one in AIT app list.
-         * @param enable
-         * @hide
+         * @param enable {@code true} to enable teletext app; {@code false} otherwise.
          */
         public void onSetTeletextAppEnabled(boolean enable) {
         }
 
         /**
          * Receives current channel URI.
-         * @hide
          */
         public void onCurrentChannelUri(@Nullable Uri channelUri) {
         }
 
         /**
          * Receives logical channel number (LCN) of current channel.
-         * @hide
          */
         public void onCurrentChannelLcn(int lcn) {
         }
 
         /**
-         * Receives stream volume.
-         * @hide
+         * Receives current stream volume.
          */
         public void onStreamVolume(float volume) {
         }
 
         /**
          * Receives track list.
-         * @hide
          */
         public void onTrackInfoList(@NonNull List<TvTrackInfo> tracks) {
         }
 
         /**
          * Receives current TV input ID.
-         * @hide
          */
         public void onCurrentTvInputId(@Nullable String inputId) {
         }
@@ -459,7 +484,6 @@ public abstract class TvInteractiveAppService extends Service {
          *
          * @param width The width of the media view.
          * @param height The height of the media view.
-         * @hide
          */
         public void onMediaViewSizeChanged(int width, int height) {
         }
@@ -469,7 +493,6 @@ public abstract class TvInteractiveAppService extends Service {
          * implementation can override this method and return its own view.
          *
          * @return a view attached to the media window
-         * @hide
          */
         @Nullable
         public View onCreateMediaView() {
@@ -478,10 +501,8 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Releases TvInteractiveAppService session.
-         * @hide
          */
-        public void onRelease() {
-        }
+        public abstract void onRelease();
 
         /**
          * Called when the corresponding TV input tuned to a channel.
@@ -493,49 +514,42 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Called when the corresponding TV input selected to a track.
-         * @hide
          */
-        public void onTrackSelected(int type, String trackId) {
+        public void onTrackSelected(@TvTrackInfo.Type int type, @NonNull String trackId) {
         }
 
         /**
          * Called when the tracks are changed.
-         * @hide
          */
-        public void onTracksChanged(List<TvTrackInfo> tracks) {
+        public void onTracksChanged(@NonNull List<TvTrackInfo> tracks) {
         }
 
         /**
          * Called when video is available.
-         * @hide
          */
         public void onVideoAvailable() {
         }
 
         /**
          * Called when video is unavailable.
-         * @hide
          */
-        public void onVideoUnavailable(int reason) {
+        public void onVideoUnavailable(@TvInputManager.VideoUnavailableReason int reason) {
         }
 
         /**
          * Called when content is allowed.
-         * @hide
          */
         public void onContentAllowed() {
         }
 
         /**
          * Called when content is blocked.
-         * @hide
          */
-        public void onContentBlocked(TvContentRating rating) {
+        public void onContentBlocked(@NonNull TvContentRating rating) {
         }
 
         /**
          * Called when signal strength is changed.
-         * @hide
          */
         public void onSignalStrength(@TvInputManager.SignalStrength int strength) {
         }
@@ -549,60 +563,61 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Called when an advertisement response is received.
-         * @hide
          */
-        public void onAdResponse(AdResponse response) {
+        public void onAdResponse(@NonNull AdResponse response) {
         }
 
-        /**
-         * TODO: JavaDoc of APIs related to input events.
-         * @hide
-         */
         @Override
         public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
             return false;
         }
 
-        /**
-         * @hide
-         */
         @Override
         public boolean onKeyLongPress(int keyCode, @NonNull KeyEvent event) {
             return false;
         }
 
-        /**
-         * @hide
-         */
         @Override
         public boolean onKeyMultiple(int keyCode, int count, @NonNull KeyEvent event) {
             return false;
         }
 
-        /**
-         * @hide
-         */
         @Override
         public boolean onKeyUp(int keyCode, @NonNull KeyEvent event) {
             return false;
         }
 
         /**
-         * @hide
+         * Implement this method to handle touch screen motion events on the current session.
+         *
+         * @param event The motion event being received.
+         * @return If you handled the event, return {@code true}. If you want to allow the event to
+         *         be handled by the next receiver, return {@code false}.
+         * @see View#onTouchEvent
          */
         public boolean onTouchEvent(@NonNull MotionEvent event) {
             return false;
         }
 
         /**
-         * @hide
+         * Implement this method to handle trackball events on the current session.
+         *
+         * @param event The motion event being received.
+         * @return If you handled the event, return {@code true}. If you want to allow the event to
+         *         be handled by the next receiver, return {@code false}.
+         * @see View#onTrackballEvent
          */
         public boolean onTrackballEvent(@NonNull MotionEvent event) {
             return false;
         }
 
         /**
-         * @hide
+         * Implement this method to handle generic motion events on the current session.
+         *
+         * @param event The motion event being received.
+         * @return If you handled the event, return {@code true}. If you want to allow the event to
+         *         be handled by the next receiver, return {@code false}.
+         * @see View#onGenericMotionEvent
          */
         public boolean onGenericMotionEvent(@NonNull MotionEvent event) {
             return false;
@@ -692,13 +707,13 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
-         * requests a specific command to be processed by the related TV input.
+         * Sends a specific playback command to be processed by the related TV input.
+         *
          * @param cmdType type of the specific command
          * @param parameters parameters of the specific command
-         * @hide
          */
-        public void requestCommand(
-                @InteractiveAppServiceCommandType String cmdType, Bundle parameters) {
+        public void sendPlaybackCommandRequest(
+                @PlaybackCommandType @NonNull String cmdType, @Nullable Bundle parameters) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override
@@ -720,9 +735,8 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Sets broadcast video bounds.
-         * @hide
          */
-        public void setVideoBounds(Rect rect) {
+        public void setVideoBounds(@NonNull Rect rect) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
                 @Override
@@ -743,7 +757,6 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Requests the URI of the current channel.
-         * @hide
          */
         public void requestCurrentChannelUri() {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -766,7 +779,6 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Requests the logic channel number (LCN) of the current channel.
-         * @hide
          */
         public void requestCurrentChannelLcn() {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -789,7 +801,6 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Requests stream volume.
-         * @hide
          */
         public void requestStreamVolume() {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -812,7 +823,6 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Requests the list of {@link TvTrackInfo}.
-         * @hide
          */
         public void requestTrackInfoList() {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -837,7 +847,6 @@ public abstract class TvInteractiveAppService extends Service {
          * Requests current TV input ID.
          *
          * @see android.media.tv.TvInputInfo
-         * @hide
          */
         public void requestCurrentTvInputId() {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -859,9 +868,9 @@ public abstract class TvInteractiveAppService extends Service {
         }
 
         /**
-         * requests an advertisement request to be processed by the related TV input.
-         * @param request advertisement request
-         * @hide
+         * Sends an advertisement request to be processed by the related TV input.
+         *
+         * @param request The advertisement request
          */
         public void requestAd(@NonNull final AdRequest request) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -1080,7 +1089,6 @@ public abstract class TvInteractiveAppService extends Service {
         /**
          * Notifies when the digital teletext app state is changed.
          * @param state the current state.
-         * @hide
          */
         public final void notifyTeletextAppStateChanged(
                 @TvInteractiveAppManager.TeletextAppState int state) {

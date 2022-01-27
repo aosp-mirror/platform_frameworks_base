@@ -24,9 +24,6 @@ import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.wm.shell.flicker.helpers.BaseAppHelper
-import org.junit.Assume
-import org.junit.Before
 import org.junit.runner.RunWith
 import org.junit.Test
 import org.junit.runners.Parameterized
@@ -61,12 +58,6 @@ class ExpandBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(test
                 showBubble?.run { showBubble.click() } ?: error("Bubble notify not found")
             }
         }
-
-    @Before
-    fun setup() {
-        // This test doesn't work in shell transitions because of b/205288792
-        Assume.assumeFalse(BaseAppHelper.isShellTransitionsEnabled())
-    }
 
     @Presubmit
     @Test

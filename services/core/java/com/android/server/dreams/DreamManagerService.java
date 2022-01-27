@@ -484,14 +484,15 @@ public final class DreamManagerService extends SystemService {
     }
 
     private static String componentsToString(ComponentName[] componentNames) {
+        if (componentNames == null) {
+            return null;
+        }
         StringBuilder names = new StringBuilder();
-        if (componentNames != null) {
-            for (ComponentName componentName : componentNames) {
-                if (names.length() > 0) {
-                    names.append(',');
-                }
-                names.append(componentName.flattenToString());
+        for (ComponentName componentName : componentNames) {
+            if (names.length() > 0) {
+                names.append(',');
             }
+            names.append(componentName.flattenToString());
         }
         return names.toString();
     }

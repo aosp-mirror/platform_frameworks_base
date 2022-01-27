@@ -128,6 +128,9 @@ public final class UsbPort {
     @Retention(RetentionPolicy.SOURCE)
     @interface EnableUsbDataStatus{}
 
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ResetUsbPortStatus{}
+
     /**
      * The {@link #enableLimitPowerTransfer} request was successfully completed.
      */
@@ -316,6 +319,43 @@ public final class UsbPort {
         UsbPort.checkRoles(powerRole, dataRole);
 
         mUsbManager.setPortRoles(this, powerRole, dataRole);
+    }
+
+    /**
+     * Reset Usb data on the port.
+     *
+     * @return       {@link #ENABLE_USB_DATA_SUCCESS} when request completes successfully or
+     *               {@link #ENABLE_USB_DATA_ERROR_INTERNAL} when request fails due to internal
+     *               error or
+     *               {@link ENABLE_USB_DATA_ERROR_NOT_SUPPORTED} when not supported or
+     *               {@link ENABLE_USB_DATA_ERROR_PORT_MISMATCH} when request fails due to port id
+     *               mismatch or
+     *               {@link ENABLE_USB_DATA_ERROR_OTHER} when fails due to other reasons.
+     */
+    @CheckResult
+    @RequiresPermission(Manifest.permission.MANAGE_USB)
+    public @ResetUsbPortStatus int resetUsbPort() {
+        // UID is added To minimize operationID overlap between two different packages.
+        int operationId = sUsbOperationCount.incrementAndGet() + Binder.getCallingUid();
+        Log.i(TAG, "resetUsbData opId:" + operationId);
+        UsbOperationInternal opCallback =
+                new UsbOperationInternal(operationId, mId);
+        if (mUsbManager.resetUsbPort(this, operationId, opCallback) == true) {
+            opCallback.waitForOperationComplete();
+        }
+        int result = opCallback.getStatus();
+        switch (result) {
+            case USB_OPERATION_SUCCESS:
+                return ENABLE_USB_DATA_SUCCESS;
+            case USB_OPERATION_ERROR_INTERNAL:
+                return ENABLE_USB_DATA_ERROR_INTERNAL;
+            case USB_OPERATION_ERROR_NOT_SUPPORTED:
+                return ENABLE_USB_DATA_ERROR_NOT_SUPPORTED;
+            case USB_OPERATION_ERROR_PORT_MISMATCH:
+                return ENABLE_USB_DATA_ERROR_PORT_MISMATCH;
+            default:
+                return ENABLE_USB_DATA_ERROR_OTHER;
+        }
     }
 
     /**

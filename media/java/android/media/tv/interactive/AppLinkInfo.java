@@ -23,7 +23,6 @@ import android.os.Parcelable;
 
 /**
  * App link information used by TV interactive app to launch Android apps.
- * @hide
  */
 public final class AppLinkInfo implements Parcelable {
     private @NonNull String mPackageName;

@@ -16,6 +16,9 @@
 
 package android.os;
 
+import static android.os.VibrationEffect.VibrationParameter.targetAmplitude;
+import static android.os.VibrationEffect.VibrationParameter.targetFrequency;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -32,6 +35,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.os.VibrationEffect.Composition.UnreachableAfterRepeatingIndefinitelyException;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.StepSegment;
@@ -42,6 +46,8 @@ import com.android.internal.R;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import java.time.Duration;
 
 @Presubmit
 @RunWith(MockitoJUnitRunner.class)
@@ -122,16 +128,7 @@ public class VibrationEffectTest {
         VibrationEffect.createWaveform(TEST_TIMINGS, TEST_AMPLITUDES, -1).validate();
         VibrationEffect.createWaveform(new long[]{10, 10}, new int[] {0, 0}, -1).validate();
         VibrationEffect.createWaveform(TEST_TIMINGS, TEST_AMPLITUDES, 0).validate();
-        VibrationEffect.startWaveform()
-                .addStep(/* amplitude= */ 1, /* duration= */ 10)
-                .addRamp(/* amplitude= */ 0, /* duration= */ 20)
-                .addStep(/* amplitude= */ 1, /* frequencyHz= */ 1, /* duration= */ 100)
-                .addRamp(/* amplitude= */ 0.5f, /* frequencyHz= */ 100, /* duration= */ 50)
-                .build()
-                .validate();
 
-        assertThrows(IllegalStateException.class,
-                () -> VibrationEffect.startWaveform().build().validate());
         assertThrows(IllegalArgumentException.class,
                 () -> VibrationEffect.createWaveform(new long[0], new int[0], -1).validate());
         assertThrows(IllegalArgumentException.class,
@@ -145,27 +142,31 @@ public class VibrationEffectTest {
         assertThrows(IllegalArgumentException.class,
                 () -> VibrationEffect.createWaveform(
                         TEST_TIMINGS, TEST_AMPLITUDES, TEST_TIMINGS.length).validate());
+    }
+
+    @Test
+    public void testValidateWaveformBuilder() {
+        VibrationEffect.startWaveform(targetAmplitude(1))
+                .addTransition(Duration.ofSeconds(1), targetAmplitude(0.5f), targetFrequency(100))
+                .addTransition(Duration.ZERO, targetAmplitude(0f), targetFrequency(200))
+                .addSustain(Duration.ofMinutes(2))
+                .addTransition(Duration.ofMillis(10), targetAmplitude(1f), targetFrequency(50))
+                .addSustain(Duration.ofMillis(1))
+                .addTransition(Duration.ZERO, targetFrequency(150))
+                .addSustain(Duration.ofMillis(2))
+                .addTransition(Duration.ofSeconds(15), targetAmplitude(1))
+                .build()
+                .validate();
+
+        assertThrows(IllegalStateException.class,
+                () -> VibrationEffect.startWaveform().build().validate());
+        assertThrows(IllegalArgumentException.class, () -> targetAmplitude(-2));
+        assertThrows(IllegalArgumentException.class, () -> targetFrequency(0));
         assertThrows(IllegalArgumentException.class,
-                () -> VibrationEffect.startWaveform()
-                        .addStep(/* amplitude= */ -2, 10).build().validate());
+                () -> VibrationEffect.startWaveform().addTransition(
+                        Duration.ofMillis(-10), targetAmplitude(1)).build().validate());
         assertThrows(IllegalArgumentException.class,
-                () -> VibrationEffect.startWaveform()
-                        .addStep(1, /* frequencyHz= */ -1f, 10).build().validate());
-        assertThrows(IllegalArgumentException.class,
-                () -> VibrationEffect.startWaveform()
-                        .addStep(1, /* duration= */ -1).build().validate());
-        assertThrows(IllegalArgumentException.class,
-                () -> VibrationEffect.startWaveform()
-                        .addStep(1, 100f, /* duration= */ -1).build().validate());
-        assertThrows(IllegalArgumentException.class,
-                () -> VibrationEffect.startWaveform()
-                        .addRamp(/* amplitude= */ -3, 10).build().validate());
-        assertThrows(IllegalArgumentException.class,
-                () -> VibrationEffect.startWaveform()
-                        .addRamp(1, /* frequencyHz= */ 0, 10).build().validate());
-        assertThrows(IllegalArgumentException.class,
-                () -> VibrationEffect.startWaveform()
-                        .addRamp(1, 10f, /* duration= */ -3).build().validate());
+                () -> VibrationEffect.startWaveform().addSustain(Duration.ZERO).build().validate());
     }
 
     @Test
@@ -174,14 +175,24 @@ public class VibrationEffectTest {
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
                 .addEffect(TEST_ONE_SHOT)
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f)
-                .addEffect(TEST_WAVEFORM, 100)
+                .addOffDuration(Duration.ofMillis(100))
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.5f, 10)
                 .addEffect(VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
                 .compose()
                 .validate();
 
+        VibrationEffect.startComposition()
+                .repeatEffectIndefinitely(TEST_ONE_SHOT)
+                .compose()
+                .validate();
+
         assertThrows(IllegalStateException.class,
                 () -> VibrationEffect.startComposition().compose().validate());
+        assertThrows(IllegalStateException.class,
+                () -> VibrationEffect.startComposition()
+                        .addOffDuration(Duration.ofSeconds(0))
+                        .compose()
+                        .validate());
         assertThrows(IllegalArgumentException.class,
                 () -> VibrationEffect.startComposition().addPrimitive(-1).compose().validate());
         assertThrows(IllegalArgumentException.class,
@@ -196,12 +207,27 @@ public class VibrationEffectTest {
                         .validate());
         assertThrows(IllegalArgumentException.class,
                 () -> VibrationEffect.startComposition()
-                        .addEffect(TEST_ONE_SHOT, /* delay= */ -10)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f, -1)
                         .compose()
                         .validate());
         assertThrows(IllegalArgumentException.class,
                 () -> VibrationEffect.startComposition()
-                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f, -1)
+                        .repeatEffectIndefinitely(
+                                // Repeating waveform.
+                                VibrationEffect.createWaveform(
+                                        new long[] { 10 }, new int[] { 100}, 0))
+                        .compose()
+                        .validate());
+        assertThrows(UnreachableAfterRepeatingIndefinitelyException.class,
+                () -> VibrationEffect.startComposition()
+                        .repeatEffectIndefinitely(TEST_WAVEFORM)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
+                        .compose()
+                        .validate());
+        assertThrows(UnreachableAfterRepeatingIndefinitelyException.class,
+                () -> VibrationEffect.startComposition()
+                        .repeatEffectIndefinitely(TEST_WAVEFORM)
+                        .addEffect(TEST_ONE_SHOT)
                         .compose()
                         .validate());
     }
@@ -354,9 +380,9 @@ public class VibrationEffectTest {
         assertFalse(VibrationEffect.createWaveform(
                 new long[]{200, 200, 700}, new int[]{1, 2, 3}, -1).isHapticFeedbackCandidate());
         assertFalse(VibrationEffect.startWaveform()
-                .addRamp(1, 500)
-                .addStep(1, 200)
-                .addRamp(0, 500)
+                .addTransition(Duration.ofMillis(500), targetAmplitude(1))
+                .addTransition(Duration.ofMillis(200), targetAmplitude(0.5f))
+                .addTransition(Duration.ofMillis(500), targetAmplitude(0))
                 .build()
                 .isHapticFeedbackCandidate());
     }
@@ -367,9 +393,9 @@ public class VibrationEffectTest {
         assertTrue(VibrationEffect.createWaveform(
                 new long[]{100, 200, 300}, new int[]{1, 2, 3}, -1).isHapticFeedbackCandidate());
         assertTrue(VibrationEffect.startWaveform()
-                .addRamp(1, 300)
-                .addStep(1, 200)
-                .addRamp(0, 300)
+                .addTransition(Duration.ofMillis(300), targetAmplitude(1))
+                .addTransition(Duration.ofMillis(200), targetAmplitude(0.5f))
+                .addTransition(Duration.ofMillis(300), targetAmplitude(0))
                 .build()
                 .isHapticFeedbackCandidate());
     }

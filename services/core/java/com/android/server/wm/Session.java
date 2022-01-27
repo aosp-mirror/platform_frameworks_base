@@ -251,6 +251,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
+    public void clearTouchableRegion(IWindow window) {
+        mService.clearTouchableRegion(this, window);
+    }
+
+    @Override
     public void finishDrawing(IWindow window,
             @Nullable SurfaceControl.Transaction postDrawTransaction) {
         if (DEBUG) Slog.v(TAG_WM, "IWindow finishDrawing called for " + window);

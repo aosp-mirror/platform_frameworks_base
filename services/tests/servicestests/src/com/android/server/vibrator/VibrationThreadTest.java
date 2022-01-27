@@ -16,6 +16,9 @@
 
 package com.android.server.vibrator;
 
+import static android.os.VibrationEffect.VibrationParameter.targetAmplitude;
+import static android.os.VibrationEffect.VibrationParameter.targetFrequency;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -69,6 +72,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -525,7 +529,8 @@ public class VibrationThreadTest {
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f)
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 0.5f)
                 .addEffect(VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
-                .addEffect(VibrationEffect.get(VibrationEffect.EFFECT_CLICK), /* delay= */ 100)
+                .addOffDuration(Duration.ofMillis(100))
+                .addEffect(VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
                 .compose();
         VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
         waitForCompletion(thread);
@@ -558,11 +563,12 @@ public class VibrationThreadTest {
                 0.5f /* 100Hz*/, 1 /* 150Hz */, 0.6f /* 200Hz */);
 
         long vibrationId = 1;
-        VibrationEffect effect = VibrationEffect.startWaveform()
-                .addStep(1, 10)
-                .addRamp(0, 20)
-                .addStep(0.8f, 100, 30)
-                .addRamp(0.6f, 200, 40)
+        VibrationEffect effect = VibrationEffect.startWaveform(targetAmplitude(1))
+                .addSustain(Duration.ofMillis(10))
+                .addTransition(Duration.ofMillis(20), targetAmplitude(0))
+                .addTransition(Duration.ZERO, targetAmplitude(0.8f), targetFrequency(100))
+                .addSustain(Duration.ofMillis(30))
+                .addTransition(Duration.ofMillis(40), targetAmplitude(0.6f), targetFrequency(200))
                 .build();
         VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
         waitForCompletion(thread);
@@ -595,11 +601,12 @@ public class VibrationThreadTest {
         fakeVibrator.setPwleSizeMax(2);
 
         long vibrationId = 1;
-        VibrationEffect effect = VibrationEffect.startWaveform()
-                .addStep(1, 10)
-                .addRamp(0, 20)
-                .addStep(0.8f, 10, 30)
-                .addRamp(0.6f, 100, 40)
+        VibrationEffect effect = VibrationEffect.startWaveform(targetAmplitude(1))
+                .addSustain(Duration.ofMillis(10))
+                .addTransition(Duration.ofMillis(20), targetAmplitude(0))
+                .addTransition(Duration.ZERO, targetAmplitude(0.8f), targetFrequency(100))
+                .addSustain(Duration.ofMillis(30))
+                .addTransition(Duration.ofMillis(40), targetAmplitude(0.6f), targetFrequency(200))
                 .build();
         VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
         waitForCompletion(thread);
@@ -1261,7 +1268,9 @@ public class VibrationThreadTest {
         fakeVibrator.setPwleSizeMax(2);
 
         long vibrationId = 1;
-        VibrationEffect effect = VibrationEffect.startWaveform().addRamp(1, 1).build();
+        VibrationEffect effect = VibrationEffect.startWaveform()
+                .addTransition(Duration.ofMillis(1), targetAmplitude(1))
+                .build();
         VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
         waitForCompletion(thread);
 

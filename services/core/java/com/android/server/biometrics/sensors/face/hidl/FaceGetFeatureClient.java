@@ -32,6 +32,8 @@ import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
+import java.util.function.Supplier;
+
 /**
  * Face-specific getFeature client supporting the {@link android.hardware.biometrics.face.V1_0}
  * HIDL interface.
@@ -44,7 +46,7 @@ public class FaceGetFeatureClient extends HalClientMonitor<IBiometricsFace> {
     private final int mFaceId;
     private boolean mValue;
 
-    FaceGetFeatureClient(@NonNull Context context, @NonNull LazyDaemon<IBiometricsFace> lazyDaemon,
+    FaceGetFeatureClient(@NonNull Context context, @NonNull Supplier<IBiometricsFace> lazyDaemon,
             @NonNull IBinder token, @Nullable ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int sensorId, int feature, int faceId) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,

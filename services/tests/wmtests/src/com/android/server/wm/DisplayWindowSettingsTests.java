@@ -20,10 +20,10 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_DEFAULT;
 import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_DISABLED;
 import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_ENABLED;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
+import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_DESTROY;
 import static android.view.WindowManager.REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY;
-import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
-import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -257,6 +257,17 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         mWm.setForcedDisplayScalingMode(mSecondaryDisplay.getDisplayId(),
                 DisplayContent.FORCE_SCALING_MODE_AUTO);
         assertFalse(mSecondaryDisplay.mDisplayScalingDisabled);
+    }
+
+    @Test
+    public void testResetAllowAllRotations() {
+        final DisplayRotation displayRotation = mock(DisplayRotation.class);
+        spyOn(mPrimaryDisplay);
+        doReturn(displayRotation).when(mPrimaryDisplay).getDisplayRotation();
+
+        mDisplayWindowSettings.applyRotationSettingsToDisplayLocked(mPrimaryDisplay);
+
+        verify(displayRotation).resetAllowAllRotations();
     }
 
     @Test

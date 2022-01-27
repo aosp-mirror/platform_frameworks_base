@@ -24,7 +24,7 @@ import android.platform.test.annotations.Presubmit;
 import org.junit.Test;
 
 @Presubmit
-public class AppSearchPersonTest {
+public class AppSearchShortcutPersonTest {
 
     @Test
     public void testBuildPersonAndGetValue() {
@@ -32,7 +32,7 @@ public class AppSearchPersonTest {
         final String key = "key";
         final String uri = "name:name";
 
-        final Person person = new AppSearchPerson.Builder(uri)
+        final Person person = new AppSearchShortcutPerson.Builder(uri)
                 .setName(name)
                 .setKey(key)
                 .setIsBot(true)

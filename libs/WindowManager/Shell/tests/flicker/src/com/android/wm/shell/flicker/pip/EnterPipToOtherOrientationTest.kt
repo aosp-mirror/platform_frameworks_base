@@ -204,7 +204,6 @@ class EnterPipToOtherOrientationTest(
     @Presubmit
     @Test
     fun testAppPlusPipLayerCoversFullScreenOnEnd() {
-        // This test doesn't work in shell transitions because of b/206669574
         testSpec.assertLayersEnd {
             val pipRegion = visibleRegion(pipApp.component).region
             visibleRegion(testApp.component)

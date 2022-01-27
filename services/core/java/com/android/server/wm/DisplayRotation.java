@@ -1103,6 +1103,21 @@ public class DisplayRotation {
         return oldRotation != rotation;
     }
 
+
+    /**
+     * Resets whether the screen can be rotated via the accelerometer in all 4 rotations as the
+     * default behavior.
+     *
+     * To be called if there is potential that the value changed. For example if the active display
+     * changed.
+     *
+     * At the moment it is called from
+     * {@link DisplayWindowSettings#applyRotationSettingsToDisplayLocked}.
+     */
+    void resetAllowAllRotations() {
+        mAllowAllRotations = ALLOW_ALL_ROTATIONS_UNDEFINED;
+    }
+
     /**
      * Given an orientation constant, returns the appropriate surface rotation, taking into account
      * sensors, docking mode, rotation lock, and other factors.

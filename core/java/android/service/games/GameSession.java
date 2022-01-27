@@ -20,6 +20,7 @@ import android.annotation.Hide;
 import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -268,6 +269,25 @@ public abstract class GameSession {
             @NonNull ViewGroup.LayoutParams layoutParams) {
         mGameSessionRootView.removeAllViews();
         mGameSessionRootView.addView(view, layoutParams);
+    }
+
+    /**
+     * Attempts to force stop and relaunch the game associated with the current session. This may
+     * be useful, for example, after applying settings that will not take effect until the game is
+     * restarted.
+     *
+     * @return {@code true} if the game was successfully restarted; otherwise, {@code false}.
+     */
+    @RequiresPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
+    public final boolean restartGame() {
+        try {
+            mGameSessionController.restartGame(mTaskId);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to restart game", e);
+            return false;
+        }
+
+        return true;
     }
 
     /**

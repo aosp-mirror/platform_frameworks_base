@@ -39,6 +39,7 @@ import android.content.Intent;
 import android.content.LocusId;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
@@ -501,6 +502,22 @@ public class NotificationTest {
         assertContrastIsWithinRange(result, background, 1.3, 1.5);
         assertThat(ContrastColorUtil.calculateLuminance(result))
                 .isGreaterThan(ContrastColorUtil.calculateLuminance(background));
+    }
+
+    @Test
+    public void testBuild_ensureSmallIconIsNotTooBig_resizesIcon() {
+        Icon hugeIcon = Icon.createWithBitmap(
+                Bitmap.createBitmap(3000, 3000, Bitmap.Config.ARGB_8888));
+        Notification notification = new Notification.Builder(mContext, "Channel").setSmallIcon(
+                hugeIcon).build();
+
+        Bitmap smallNotificationIcon = notification.getSmallIcon().getBitmap();
+        assertThat(smallNotificationIcon.getWidth()).isEqualTo(
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_small_icon_size));
+        assertThat(smallNotificationIcon.getHeight()).isEqualTo(
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.notification_small_icon_size));
     }
 
     @Test

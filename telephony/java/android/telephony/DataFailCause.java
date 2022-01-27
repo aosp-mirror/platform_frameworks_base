@@ -1083,6 +1083,13 @@ public final class DataFailCause {
      */
     public static final int REQUEST_NOT_SUPPORTED = 0x1000A;
 
+    /**
+     * An internal setup data error initiated by telephony that no retry should be performed.
+     *
+     * @hide
+     */
+    public static final int NO_RETRY_FAILURE = 0x1000B;
+
     private static final Map<Integer, String> sFailCauseMap;
     static {
         sFailCauseMap = new HashMap<>();
@@ -1515,6 +1522,8 @@ public final class DataFailCause {
         sFailCauseMap.put(DUPLICATE_CID, "DUPLICATE_CID");
         sFailCauseMap.put(NO_DEFAULT_DATA, "NO_DEFAULT_DATA");
         sFailCauseMap.put(SERVICE_TEMPORARILY_UNAVAILABLE, "SERVICE_TEMPORARILY_UNAVAILABLE");
+        sFailCauseMap.put(REQUEST_NOT_SUPPORTED, "REQUEST_NOT_SUPPORTED");
+        sFailCauseMap.put(NO_RETRY_FAILURE, "NO_RETRY_FAILURE");
     }
 
     private DataFailCause() {
@@ -1565,6 +1574,7 @@ public final class DataFailCause {
     }
 
     /** @hide */
+    // TODO: Migrated to DataConfigManager
     public static boolean isPermanentFailure(@NonNull Context context,
                                              @DataFailureCause int failCause,
                                              int subId) {
@@ -1621,6 +1631,7 @@ public final class DataFailCause {
                     };
                 }
 
+                permanentFailureSet.add(NO_RETRY_FAILURE);
                 sPermanentFailureCache.put(subId, permanentFailureSet);
             }
 

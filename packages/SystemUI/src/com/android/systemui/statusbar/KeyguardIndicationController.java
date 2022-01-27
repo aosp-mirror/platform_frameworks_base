@@ -151,6 +151,7 @@ public class KeyguardIndicationController {
     private boolean mPowerPluggedIn;
     private boolean mPowerPluggedInWired;
     private boolean mPowerPluggedInWireless;
+    private boolean mPowerPluggedInDock;
     private boolean mPowerCharged;
     private boolean mBatteryOverheated;
     private boolean mEnableBatteryDefender;
@@ -786,6 +787,10 @@ public class KeyguardIndicationController {
             chargingId = hasChargingTime
                     ? R.string.keyguard_indication_charging_time_wireless
                     : R.string.keyguard_plugged_in_wireless;
+        } else if (mPowerPluggedInDock) {
+            chargingId = hasChargingTime
+                    ? R.string.keyguard_indication_charging_time_dock
+                    : R.string.keyguard_plugged_in_dock;
         } else {
             chargingId = hasChargingTime
                     ? R.string.keyguard_indication_charging_time
@@ -911,6 +916,7 @@ public class KeyguardIndicationController {
             boolean wasPluggedIn = mPowerPluggedIn;
             mPowerPluggedInWired = status.isPluggedInWired() && isChargingOrFull;
             mPowerPluggedInWireless = status.isPluggedInWireless() && isChargingOrFull;
+            mPowerPluggedInDock = status.isPluggedInDock() && isChargingOrFull;
             mPowerPluggedIn = status.isPluggedIn() && isChargingOrFull;
             mPowerCharged = status.isCharged();
             mChargingWattage = status.maxChargingWattage;

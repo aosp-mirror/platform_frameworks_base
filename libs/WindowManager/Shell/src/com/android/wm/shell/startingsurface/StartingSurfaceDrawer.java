@@ -328,7 +328,7 @@ public class StartingSurfaceDrawer {
         if (mSysuiProxy != null) {
             mSysuiProxy.requestTopUi(true, TAG);
         }
-        mSplashscreenContentDrawer.createContentView(context, suggestType, activityInfo, taskId,
+        mSplashscreenContentDrawer.createContentView(context, suggestType, windowInfo,
                 viewSupplier::setView, viewSupplier::setUiThreadInitTask);
         try {
             if (addWindow(taskId, appToken, rootLayout, display, params, suggestType)) {

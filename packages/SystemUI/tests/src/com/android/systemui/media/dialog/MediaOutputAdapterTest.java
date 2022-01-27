@@ -100,7 +100,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     public void getItemCount_zeroMode_containExtraOneForPairNew() {
         when(mMediaOutputController.isZeroMode()).thenReturn(true);
 
-        assertThat(mMediaOutputAdapter.getItemCount()).isEqualTo(mMediaDevices.size());
+        assertThat(mMediaOutputAdapter.getItemCount()).isEqualTo(mMediaDevices.size() + 1);
     }
 
     @Test

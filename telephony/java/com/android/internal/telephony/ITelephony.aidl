@@ -2543,4 +2543,10 @@ interface ITelephony {
      * registration technology specified, false if it is not required.
      */
     boolean isRcsProvisioningRequiredForCapability(int subId, int capability, int tech);
+
+    /**
+     * Sets a voice service state from telecom based on the current PhoneAccounts registered. See
+     * PhoneAccount#CAPABILITY_VOICE_CALLING_AVAILABLE.
+     */
+    void setVoiceServiceStateOverride(int subId, boolean hasService, String callingPackage);
 }

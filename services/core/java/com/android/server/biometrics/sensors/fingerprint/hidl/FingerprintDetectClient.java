@@ -40,6 +40,7 @@ import com.android.server.biometrics.sensors.fingerprint.Udfps;
 import com.android.server.biometrics.sensors.fingerprint.UdfpsHelper;
 
 import java.util.ArrayList;
+import java.util.function.Supplier;
 
 /**
  * Performs fingerprint detection without exposing any matching information (e.g. accept/reject
@@ -55,7 +56,7 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
     private boolean mIsPointerDown;
 
     public FingerprintDetectClient(@NonNull Context context,
-            @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon,
+            @NonNull Supplier<IBiometricsFingerprint> lazyDaemon,
             @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int userId, @NonNull String owner,
             int sensorId, @Nullable IUdfpsOverlayController udfpsOverlayController,

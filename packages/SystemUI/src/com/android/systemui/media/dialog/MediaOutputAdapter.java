@@ -77,6 +77,10 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
 
     @Override
     public int getItemCount() {
+        if (mController.isZeroMode()) {
+            // Add extra one for "pair new" or dynamic group
+            return mController.getMediaDevices().size() + 1;
+        }
         return mController.getMediaDevices().size();
     }
 

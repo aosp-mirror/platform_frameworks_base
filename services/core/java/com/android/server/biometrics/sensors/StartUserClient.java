@@ -25,6 +25,8 @@ import android.os.IBinder;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.BiometricsProto;
 
+import java.util.function.Supplier;
+
 /**
  * Abstract class for starting a new user.
  * @param <T> Interface to request a new user.
@@ -37,13 +39,13 @@ public abstract class StartUserClient<T, U>  extends HalClientMonitor<T> {
      * @param <U> New user object.
      */
     public interface UserStartedCallback<U> {
-        void onUserStarted(int newUserId, U newUser);
+        void onUserStarted(int newUserId, U newUser, int halInterfaceVersion);
     }
 
     @NonNull @VisibleForTesting
     protected final UserStartedCallback<U> mUserStartedCallback;
 
-    public StartUserClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
+    public StartUserClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @Nullable IBinder token, int userId, int sensorId,
             @NonNull UserStartedCallback<U> callback) {
         super(context, lazyDaemon, token, null /* listener */, userId, context.getOpPackageName(),

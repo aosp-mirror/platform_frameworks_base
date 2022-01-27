@@ -2998,7 +2998,7 @@ public class StatusBar extends CoreStartable implements
     }
 
     private void onLaunchTransitionFadingEnded() {
-        mNotificationPanelViewController.setAlpha(1.0f);
+        mNotificationPanelViewController.resetAlpha();
         mNotificationPanelViewController.onAffordanceLaunchEnded();
         releaseGestureWakeLock();
         runLaunchTransitionEndRunnable();
@@ -3029,7 +3029,7 @@ public class StatusBar extends CoreStartable implements
             }
             updateScrimController();
             mPresenter.updateMediaMetaData(false, true);
-            mNotificationPanelViewController.setAlpha(1);
+            mNotificationPanelViewController.resetAlpha();
             mNotificationPanelViewController.fadeOut(
                     FADE_KEYGUARD_START_DELAY, FADE_KEYGUARD_DURATION,
                     this::onLaunchTransitionFadingEnded);
@@ -3130,7 +3130,7 @@ public class StatusBar extends CoreStartable implements
         releaseGestureWakeLock();
         mNotificationPanelViewController.onAffordanceLaunchEnded();
         mNotificationPanelViewController.cancelAnimation();
-        mNotificationPanelViewController.setAlpha(1f);
+        mNotificationPanelViewController.resetAlpha();
         mNotificationPanelViewController.resetTranslation();
         mNotificationPanelViewController.resetViewGroupFade();
         updateDozingState();
@@ -3591,26 +3591,28 @@ public class StatusBar extends CoreStartable implements
         public void onStartedWakingUp() {
             String tag = "StatusBar#onStartedWakingUp";
             DejankUtils.startDetectingBlockingIpcs(tag);
-            mDeviceInteractive = true;
-            mWakeUpCoordinator.setWakingUp(true);
-            if (!mKeyguardBypassController.getBypassEnabled()) {
-                mHeadsUpManager.releaseAllImmediately();
-            }
-            updateVisibleToUser();
-            updateIsKeyguard();
-            mDozeServiceHost.stopDozing();
-            // This is intentionally below the stopDozing call above, since it avoids that we're
-            // unnecessarily animating the wakeUp transition. Animations should only be enabled
-            // once we fully woke up.
-            updateRevealEffect(true /* wakingUp */);
-            updateNotificationPanelTouchState();
+            mNotificationShadeWindowController.batchApplyWindowLayoutParams(()-> {
+                mDeviceInteractive = true;
+                mWakeUpCoordinator.setWakingUp(true);
+                if (!mKeyguardBypassController.getBypassEnabled()) {
+                    mHeadsUpManager.releaseAllImmediately();
+                }
+                updateVisibleToUser();
+                updateIsKeyguard();
+                mDozeServiceHost.stopDozing();
+                // This is intentionally below the stopDozing call above, since it avoids that we're
+                // unnecessarily animating the wakeUp transition. Animations should only be enabled
+                // once we fully woke up.
+                updateRevealEffect(true /* wakingUp */);
+                updateNotificationPanelTouchState();
 
-            // If we are waking up during the screen off animation, we should undo making the
-            // expanded visible (we did that so the LightRevealScrim would be visible).
-            if (mScreenOffAnimationController.shouldHideLightRevealScrimOnWakeUp()) {
-                makeExpandedInvisible();
-            }
+                // If we are waking up during the screen off animation, we should undo making the
+                // expanded visible (we did that so the LightRevealScrim would be visible).
+                if (mScreenOffAnimationController.shouldHideLightRevealScrimOnWakeUp()) {
+                    makeExpandedInvisible();
+                }
 
+            });
             DejankUtils.stopDetectingBlockingIpcs(tag);
         }
 

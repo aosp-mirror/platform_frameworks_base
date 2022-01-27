@@ -92,11 +92,7 @@ class PipLegacySplitScreenTest(testSpec: FlickerTestParameter) : PipTransition(t
     /** {@inheritDoc}  */
     @FlakyTest(bugId = 206753786)
     @Test
-    override fun statusBarLayerRotatesScales() {
-        // This test doesn't work in shell transitions because of b/206753786
-        assumeFalse(com.android.server.wm.flicker.helpers.isShellTransitionsEnabled)
-        super.statusBarLayerRotatesScales()
-    }
+    override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
     @FlakyTest(bugId = 161435597)
     @Test

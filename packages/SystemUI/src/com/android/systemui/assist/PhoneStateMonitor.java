@@ -28,7 +28,6 @@ import android.content.pm.ResolveInfo;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.BootCompleteCache;
-import com.android.systemui.Dependency;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -78,10 +77,11 @@ public final class PhoneStateMonitor {
 
     @Inject
     PhoneStateMonitor(Context context, BroadcastDispatcher broadcastDispatcher,
-            Lazy<Optional<StatusBar>> statusBarOptionalLazy, BootCompleteCache bootCompleteCache) {
+            Lazy<Optional<StatusBar>> statusBarOptionalLazy, BootCompleteCache bootCompleteCache,
+            StatusBarStateController statusBarStateController) {
         mContext = context;
         mStatusBarOptionalLazy = statusBarOptionalLazy;
-        mStatusBarStateController = Dependency.get(StatusBarStateController.class);
+        mStatusBarStateController = statusBarStateController;
 
         mDefaultHome = getCurrentDefaultHome();
         bootCompleteCache.addListener(() -> mDefaultHome = getCurrentDefaultHome());

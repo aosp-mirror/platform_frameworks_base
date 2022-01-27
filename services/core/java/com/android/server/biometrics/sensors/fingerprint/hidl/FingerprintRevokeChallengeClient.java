@@ -25,6 +25,8 @@ import android.util.Slog;
 
 import com.android.server.biometrics.sensors.RevokeChallengeClient;
 
+import java.util.function.Supplier;
+
 /**
  * Fingerprint-specific revokeChallenge client supporting the
  * {@link android.hardware.biometrics.fingerprint.V2_1} and
@@ -36,7 +38,7 @@ public class FingerprintRevokeChallengeClient
     private static final String TAG = "FingerprintRevokeChallengeClient";
 
     FingerprintRevokeChallengeClient(@NonNull Context context,
-            @NonNull LazyDaemon<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
+            @NonNull Supplier<IBiometricsFingerprint> lazyDaemon, @NonNull IBinder token,
             int userId, @NonNull String owner, int sensorId) {
         super(context, lazyDaemon, token, userId, owner, sensorId);
     }

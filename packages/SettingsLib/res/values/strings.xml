@@ -1306,8 +1306,8 @@
 
     <!--  Do not disturb: Label for button in enable zen dialog that will turn on zen mode. [CHAR LIMIT=30] -->
     <string name="zen_mode_enable_dialog_turn_on">Turn on</string>
-    <!-- Do not disturb: Title for the Do not Disturb dialog to turn on Do not disturb. [CHAR LIMIT=50]-->
-    <string name="zen_mode_settings_turn_on_dialog_title">Turn on Do Not Disturb</string>
+    <!-- Priority mode: Title for the Priority mode dialog to turn on Priority mode. [CHAR LIMIT=50]-->
+    <string name="zen_mode_settings_turn_on_dialog_title" translatable="false">Turn on Priority mode</string>
     <!-- Sound: Summary for the Do not Disturb option when there is no automatic rules turned on. [CHAR LIMIT=NONE]-->
     <string name="zen_mode_settings_summary_off">Never</string>
     <!--[CHAR LIMIT=40] Zen Interruption level: Priority.  -->

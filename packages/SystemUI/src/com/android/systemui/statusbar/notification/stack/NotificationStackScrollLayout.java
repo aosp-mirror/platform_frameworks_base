@@ -5658,6 +5658,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
+    protected void setLogger(StackStateLogger logger) {
+        mStateAnimator.setLogger(logger);
+    }
+
     /**
      * A listener that is notified when the empty space below the notifications is clicked on
      */

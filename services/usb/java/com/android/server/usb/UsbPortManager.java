@@ -503,6 +503,49 @@ public class UsbPortManager {
             return HAL_MODE_DFP;
     }
 
+    /**
+     * Reset USB port.
+     *
+     * @param portId port identifier.
+     */
+    public boolean resetUsbPort(@NonNull String portId, int transactionId,
+            @NonNull IUsbOperationInternal callback, IndentingPrintWriter pw) {
+        synchronized (mLock) {
+            Objects.requireNonNull(callback);
+            Objects.requireNonNull(portId);
+            final PortInfo portInfo = mPorts.get(portId);
+            if (portInfo == null) {
+                logAndPrint(Log.ERROR, pw, "resetUsbPort: No such port: " + portId
+                    + " opId:" + transactionId);
+                try {
+                    callback.onOperationComplete(
+                            USB_OPERATION_ERROR_PORT_MISMATCH);
+                } catch (RemoteException e) {
+                    logAndPrintException(pw,
+                            "resetUsbPort: Failed to call OperationComplete. opId:"
+                            + transactionId, e);
+                }
+                return false;
+            }
+
+            try {
+                try {
+                    return mUsbPortHal.resetUsbPort(portId, transactionId, callback);
+                } catch (Exception e) {
+                    logAndPrintException(pw,
+                        "reseetUsbPort: Failed to resetUsbPort. opId:"
+                        + transactionId , e);
+                    callback.onOperationComplete(USB_OPERATION_ERROR_INTERNAL);
+                }
+            } catch (RemoteException e) {
+                logAndPrintException(pw,
+                        "resetUsbPort: Failed to call onOperationComplete. opId:"
+                        + transactionId, e);
+            }
+            return false;
+        }
+    }
+
     public void setPortRoles(String portId, int newPowerRole, int newDataRole,
             IndentingPrintWriter pw) {
         synchronized (mLock) {

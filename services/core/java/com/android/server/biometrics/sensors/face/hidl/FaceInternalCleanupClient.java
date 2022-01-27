@@ -30,6 +30,7 @@ import com.android.server.biometrics.sensors.RemovalClient;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Face-specific internal cleanup client supporting the
@@ -38,7 +39,7 @@ import java.util.Map;
 class FaceInternalCleanupClient extends InternalCleanupClient<Face, IBiometricsFace> {
 
     FaceInternalCleanupClient(@NonNull Context context,
-            @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, int userId, @NonNull String owner,
+            @NonNull Supplier<IBiometricsFace> lazyDaemon, int userId, @NonNull String owner,
             int sensorId, @NonNull List<Face> enrolledList, @NonNull BiometricUtils<Face> utils,
             @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, userId, owner, sensorId, BiometricsProtoEnums.MODALITY_FACE,
@@ -47,7 +48,7 @@ class FaceInternalCleanupClient extends InternalCleanupClient<Face, IBiometricsF
 
     @Override
     protected InternalEnumerateClient<IBiometricsFace> getEnumerateClient(Context context,
-            LazyDaemon<IBiometricsFace> lazyDaemon, IBinder token, int userId, String owner,
+            Supplier<IBiometricsFace> lazyDaemon, IBinder token, int userId, String owner,
             List<Face> enrolledList, BiometricUtils<Face> utils, int sensorId) {
         return new FaceInternalEnumerateClient(context, lazyDaemon, token, userId, owner,
                 enrolledList, utils, sensorId);
@@ -55,7 +56,7 @@ class FaceInternalCleanupClient extends InternalCleanupClient<Face, IBiometricsF
 
     @Override
     protected RemovalClient<Face, IBiometricsFace> getRemovalClient(Context context,
-            LazyDaemon<IBiometricsFace> lazyDaemon, IBinder token,
+            Supplier<IBiometricsFace> lazyDaemon, IBinder token,
             int biometricId, int userId, String owner, BiometricUtils<Face> utils, int sensorId,
             Map<Integer, Long> authenticatorIds) {
         // Internal remove does not need to send results to anyone. Cleanup (enumerate + remove)

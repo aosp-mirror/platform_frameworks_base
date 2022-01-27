@@ -7098,6 +7098,7 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @TestApi
     public final boolean addDumpable(@NonNull Dumpable dumpable) {
         if (mDumpableContainer == null) {
             mDumpableContainer = new DumpableContainerImpl();

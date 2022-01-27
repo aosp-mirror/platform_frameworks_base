@@ -220,8 +220,10 @@ public class KeyguardCoordinator implements Coordinator {
     }
 
     private void invalidateListFromFilter(String reason) {
-        mSectionHeaderVisibilityProvider.setSectionHeadersVisible(
-                mStatusBarStateController.getState() != StatusBarState.KEYGUARD);
+        boolean onKeyguard = mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
+        boolean neverShowSections = mSectionHeaderVisibilityProvider.getNeverShowSectionHeaders();
+        boolean showSections = !onKeyguard && !neverShowSections;
+        mSectionHeaderVisibilityProvider.setSectionHeadersVisible(showSections);
         mNotifFilter.invalidateList();
     }
 

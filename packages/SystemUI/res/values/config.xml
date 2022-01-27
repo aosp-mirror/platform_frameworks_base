@@ -82,7 +82,7 @@
 
     <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
     <string name="quick_settings_tiles_stock" translatable="false">
-        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness,qr_code_scanner,onehanded,fgsmanager,color_correction
+        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness,qr_code_scanner,onehanded,color_correction
     </string>
 
     <!-- The tiles to display in QuickSettings -->
@@ -580,6 +580,9 @@
 
     <!-- Whether to use the split 2-column notification shade -->
     <bool name="config_use_split_notification_shade">false</bool>
+
+    <!-- Whether notification header should never show section headers. -->
+    <bool name="config_notification_never_show_section_headers">false</bool>
 
     <!-- Default udfps icon. Same path as ic_fingerprint.xml -->
     <string name="config_udfpsIcon" translatable="false">

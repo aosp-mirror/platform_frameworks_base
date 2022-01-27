@@ -323,13 +323,20 @@ public final class BatteryService extends SystemService {
         if (mHealthInfo.batteryStatus == BatteryManager.BATTERY_STATUS_UNKNOWN) {
             return true;
         }
-        if ((plugTypeSet & BatteryManager.BATTERY_PLUGGED_AC) != 0 && mHealthInfo.chargerAcOnline) {
+        if ((plugTypeSet & BatteryManager.BATTERY_PLUGGED_AC) != 0
+                && mHealthInfo.chargerAcOnline) {
             return true;
         }
-        if ((plugTypeSet & BatteryManager.BATTERY_PLUGGED_USB) != 0 && mHealthInfo.chargerUsbOnline) {
+        if ((plugTypeSet & BatteryManager.BATTERY_PLUGGED_USB) != 0
+                && mHealthInfo.chargerUsbOnline) {
             return true;
         }
-        if ((plugTypeSet & BatteryManager.BATTERY_PLUGGED_WIRELESS) != 0 && mHealthInfo.chargerWirelessOnline) {
+        if ((plugTypeSet & BatteryManager.BATTERY_PLUGGED_WIRELESS) != 0
+                && mHealthInfo.chargerWirelessOnline) {
+            return true;
+        }
+        if ((plugTypeSet & BatteryManager.BATTERY_PLUGGED_DOCK) != 0
+                && mHealthInfo.chargerDockOnline) {
             return true;
         }
         return false;
@@ -442,6 +449,8 @@ public final class BatteryService extends SystemService {
             return BatteryManager.BATTERY_PLUGGED_USB;
         } else if (healthInfo.chargerWirelessOnline) {
             return BatteryManager.BATTERY_PLUGGED_WIRELESS;
+        } else if (healthInfo.chargerDockOnline) {
+            return BatteryManager.BATTERY_PLUGGED_DOCK;
         } else {
             return BATTERY_PLUGGED_NONE;
         }
@@ -1118,6 +1127,8 @@ public final class BatteryService extends SystemService {
                 batteryPluggedValue = OsProtoEnums.BATTERY_PLUGGED_USB;
             } else if (mHealthInfo.chargerWirelessOnline) {
                 batteryPluggedValue = OsProtoEnums.BATTERY_PLUGGED_WIRELESS;
+            } else if (mHealthInfo.chargerDockOnline) {
+                batteryPluggedValue = OsProtoEnums.BATTERY_PLUGGED_DOCK;
             }
             proto.write(BatteryServiceDumpProto.PLUGGED, batteryPluggedValue);
             proto.write(

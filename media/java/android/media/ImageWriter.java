@@ -102,11 +102,10 @@ public class ImageWriter implements AutoCloseable {
     private int mWidth;
     private int mHeight;
     private final int mMaxImages;
-    private @Usage long mUsage = HardwareBuffer.USAGE_CPU_WRITE_OFTEN;
+    private long mUsage = HardwareBuffer.USAGE_CPU_WRITE_OFTEN;
     private @HardwareBuffer.Format int mHardwareBufferFormat;
     private @NamedDataSpace long mDataSpace;
     private boolean mUseLegacyImageFormat;
-    private boolean mUseSurfaceImageFormatInfo;
 
     // Field below is used by native code, do not access or modify.
     private int mWriterFormat;
@@ -255,35 +254,38 @@ public class ImageWriter implements AutoCloseable {
                 + ", maxImages: " + maxImages);
         }
 
-        mUseSurfaceImageFormatInfo = useSurfaceImageFormatInfo;
         mUseLegacyImageFormat = useLegacyImageFormat;
         // Note that the underlying BufferQueue is working in synchronous mode
         // to avoid dropping any buffers.
         mNativeContext = nativeInit(new WeakReference<>(this), surface, maxImages, width, height,
             useSurfaceImageFormatInfo, hardwareBufferFormat, dataSpace, usage);
 
+        // if useSurfaceImageFormatInfo is true, imageformat should be read from the surface.
         if (useSurfaceImageFormatInfo) {
             // nativeInit internally overrides UNKNOWN format. So does surface format query after
             // nativeInit and before getEstimatedNativeAllocBytes().
             imageFormat = SurfaceUtils.getSurfaceFormat(surface);
-            // Several public formats use the same native HAL_PIXEL_FORMAT_BLOB. The native
-            // allocation estimation sequence depends on the public formats values. To avoid
-            // possible errors, convert where necessary.
-            if (imageFormat == StreamConfigurationMap.HAL_PIXEL_FORMAT_BLOB) {
-                int surfaceDataspace = SurfaceUtils.getSurfaceDataspace(surface);
-                switch (surfaceDataspace) {
-                    case StreamConfigurationMap.HAL_DATASPACE_DEPTH:
-                        imageFormat = ImageFormat.DEPTH_POINT_CLOUD;
-                        break;
-                    case StreamConfigurationMap.HAL_DATASPACE_DYNAMIC_DEPTH:
-                        imageFormat = ImageFormat.DEPTH_JPEG;
-                        break;
-                    case StreamConfigurationMap.HAL_DATASPACE_HEIF:
-                        imageFormat = ImageFormat.HEIC;
-                        break;
-                    default:
-                        imageFormat = ImageFormat.JPEG;
-                }
+            mHardwareBufferFormat = PublicFormatUtils.getHalFormat(imageFormat);
+            mDataSpace = PublicFormatUtils.getHalDataspace(imageFormat);
+        }
+
+        // Several public formats use the same native HAL_PIXEL_FORMAT_BLOB. The native
+        // allocation estimation sequence depends on the public formats values. To avoid
+        // possible errors, convert where necessary.
+        if (imageFormat == StreamConfigurationMap.HAL_PIXEL_FORMAT_BLOB) {
+            int surfaceDataspace = SurfaceUtils.getSurfaceDataspace(surface);
+            switch (surfaceDataspace) {
+                case StreamConfigurationMap.HAL_DATASPACE_DEPTH:
+                    imageFormat = ImageFormat.DEPTH_POINT_CLOUD;
+                    break;
+                case StreamConfigurationMap.HAL_DATASPACE_DYNAMIC_DEPTH:
+                    imageFormat = ImageFormat.DEPTH_JPEG;
+                    break;
+                case StreamConfigurationMap.HAL_DATASPACE_HEIF:
+                    imageFormat = ImageFormat.HEIC;
+                    break;
+                default:
+                    imageFormat = ImageFormat.JPEG;
             }
             mHardwareBufferFormat = PublicFormatUtils.getHalFormat(imageFormat);
             mDataSpace = PublicFormatUtils.getHalDataspace(imageFormat);
@@ -307,7 +309,6 @@ public class ImageWriter implements AutoCloseable {
     private ImageWriter(Surface surface, int maxImages, boolean useSurfaceImageFormatInfo,
             int imageFormat, int width, int height) {
         mMaxImages = maxImages;
-        // update hal format and dataspace only if image format is overridden by producer.
         mHardwareBufferFormat = PublicFormatUtils.getHalFormat(imageFormat);
         mDataSpace = PublicFormatUtils.getHalDataspace(imageFormat);
 
@@ -565,6 +566,9 @@ public class ImageWriter implements AutoCloseable {
 
     /**
      * Get the ImageWriter usage flag.
+     *
+     * <p>It is not recommended to use this function if {@link Builder#setUsage} is not called.
+     * Invalid usage value will be returned if so.</p>
      *
      * @return The ImageWriter usage flag.
      */
@@ -873,7 +877,7 @@ public class ImageWriter implements AutoCloseable {
         private int mHeight = -1;
         private int mMaxImages = 1;
         private int mImageFormat = ImageFormat.UNKNOWN;
-        private @Usage long mUsage = HardwareBuffer.USAGE_CPU_WRITE_OFTEN;
+        private long mUsage = -1;
         private @HardwareBuffer.Format int mHardwareBufferFormat = HardwareBuffer.RGBA_8888;
         private @NamedDataSpace long mDataSpace = DataSpace.DATASPACE_UNKNOWN;
         private boolean mUseSurfaceImageFormatInfo = true;
@@ -885,10 +889,19 @@ public class ImageWriter implements AutoCloseable {
         /**
          * Constructs a new builder for {@link ImageWriter}.
          *
+         * <p>Uses {@code surface} input parameter to retrieve image format, hal format
+         * and hal dataspace value for default. </p>
+         *
          * @param surface The destination Surface this writer produces Image data into.
+         *
+         * @throws IllegalArgumentException if the surface is already abandoned.
          */
         public Builder(@NonNull Surface surface) {
             mSurface = surface;
+            // retrieve format from surface
+            mImageFormat = SurfaceUtils.getSurfaceFormat(surface);
+            mDataSpace = SurfaceUtils.getSurfaceDataspace(surface);
+            mHardwareBufferFormat = PublicFormatUtils.getHalFormat(mImageFormat);
         }
 
         /**
@@ -926,6 +939,8 @@ public class ImageWriter implements AutoCloseable {
          * @param imageFormat The format of the {@link ImageWriter}. It can be any valid specified
          *                    by {@link ImageFormat} or {@link PixelFormat}.
          * @return the Builder instance with customized image format.
+         *
+         * @throws IllegalArgumentException if {@code imageFormat} is invalid.
          */
         @SuppressLint("MissingGetterMatchingBuilder")
         public @NonNull Builder setImageFormat(@Format int imageFormat) {
@@ -985,12 +1000,16 @@ public class ImageWriter implements AutoCloseable {
 
         /**
          * Set the usage flag of this ImageWriter.
-         * Default value is {@link HardwareBuffer#USAGE_CPU_WRITE_OFTEN}.
+         *
+         * <p>If this function is not called, usage bit will be set
+         * to {@link HardwareBuffer#USAGE_CPU_WRITE_OFTEN} if the image format is not
+         * {@link ImageFormat#PRIVATE PRIVATE}.</p>
          *
          * @param usage The intended usage of the images produced by this ImageWriter.
          * @return the Builder instance with customized usage flag.
          *
          * @see HardwareBuffer
+         * @see #getUsage
          */
         public @NonNull Builder setUsage(@Usage long usage) {
             mUsage = usage;
@@ -1022,6 +1041,7 @@ public class ImageWriter implements AutoCloseable {
         private int mHeight = -1;
         private int mWidth = -1;
         private int mFormat = -1;
+        private @NamedDataSpace long mDataSpace = DataSpace.DATASPACE_UNKNOWN;
         // When this default timestamp is used, timestamp for the input Image
         // will be generated automatically when queueInputBuffer is called.
         private final long DEFAULT_TIMESTAMP = Long.MIN_VALUE;
@@ -1034,19 +1054,34 @@ public class ImageWriter implements AutoCloseable {
             mOwner = writer;
             mWidth = writer.mWidth;
             mHeight = writer.mHeight;
+            mDataSpace = writer.mDataSpace;
 
-            if (!writer.mUseLegacyImageFormat) {
+            if (!mOwner.mUseLegacyImageFormat) {
                 mFormat = PublicFormatUtils.getPublicFormat(
-                        writer.mHardwareBufferFormat, writer.mDataSpace);
+                    mOwner.mHardwareBufferFormat, mDataSpace);
             }
+        }
+
+        @Override
+        public @NamedDataSpace long getDataSpace() {
+            throwISEIfImageIsInvalid();
+
+            return mDataSpace;
+        }
+
+        @Override
+        public void setDataSpace(@NamedDataSpace long dataSpace) {
+            throwISEIfImageIsInvalid();
+
+            mDataSpace = dataSpace;
         }
 
         @Override
         public int getFormat() {
             throwISEIfImageIsInvalid();
 
-            if (mFormat == -1) {
-                mFormat = nativeGetFormat();
+            if (mOwner.mUseLegacyImageFormat && mFormat == -1) {
+                mFormat = nativeGetFormat(mDataSpace);
             }
             return mFormat;
         }
@@ -1114,7 +1149,8 @@ public class ImageWriter implements AutoCloseable {
 
             if (mPlanes == null) {
                 int numPlanes = ImageUtils.getNumPlanesForFormat(getFormat());
-                mPlanes = nativeCreatePlanes(numPlanes, getOwner().getFormat());
+                mPlanes = nativeCreatePlanes(numPlanes, getOwner().getFormat(),
+                        getOwner().getDataSpace());
             }
 
             return mPlanes.clone();
@@ -1222,13 +1258,14 @@ public class ImageWriter implements AutoCloseable {
         }
 
         // Create the SurfacePlane object and fill the information
-        private synchronized native SurfacePlane[] nativeCreatePlanes(int numPlanes, int writerFmt);
+        private synchronized native SurfacePlane[] nativeCreatePlanes(int numPlanes, int writerFmt,
+                long dataSpace);
 
         private synchronized native int nativeGetWidth();
 
         private synchronized native int nativeGetHeight();
 
-        private synchronized native int nativeGetFormat();
+        private synchronized native int nativeGetFormat(long dataSpace);
 
         private synchronized native HardwareBuffer nativeGetHardwareBuffer();
     }

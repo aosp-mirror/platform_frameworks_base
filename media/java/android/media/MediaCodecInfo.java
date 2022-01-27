@@ -426,10 +426,30 @@ public final class MediaCodecInfo {
         /** @deprecated Use {@link #COLOR_Format32bitABGR8888}. */
         public static final int COLOR_Format24BitABGR6666           = 43;
 
-        /** @hide
-         * P010 is a 4:2:0 YCbCr semiplanar format comprised of a WxH Y plane
-         * followed by a Wx(H/2) CbCr plane. Each sample is represented by a 16-bit
-         * little-endian value, with the lower 6 bits set to zero. */
+        /**
+         * P010 is 10-bit-per component 4:2:0 YCbCr semiplanar format.
+         * <p>
+         * This format uses 24 allocated bits per pixel with 15 bits of
+         * data per pixel. Chroma planes are subsampled by 2 both
+         * horizontally and vertically. Each chroma and luma component
+         * has 16 allocated bits in little-endian configuration with 10
+         * MSB of actual data.
+         *
+         * <pre>
+         *            byte                   byte
+         *  <--------- i --------> | <------ i + 1 ------>
+         * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+         * |     UNUSED      |      Y/Cb/Cr                |
+         * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+         *  0               5 6   7 0                    7
+         * bit
+         * </pre>
+         *
+         * Use this format with {@link Image}. This format corresponds
+         * to {@link android.graphics.ImageFormat#YCBCR_P010}.
+         * <p>
+         */
+        @SuppressLint("AllUpper")
         public static final int COLOR_FormatYUVP010                 = 54;
 
         /** @deprecated Use {@link #COLOR_FormatYUV420Flexible}. */
@@ -437,6 +457,25 @@ public final class MediaCodecInfo {
         // COLOR_FormatSurface indicates that the data will be a GraphicBuffer metadata reference.
         // Note: in OMX this is called OMX_COLOR_FormatAndroidOpaque.
         public static final int COLOR_FormatSurface                   = 0x7F000789;
+
+        /**
+         * 64 bits per pixel RGBA color format, with 16-bit signed
+         * floating point red, green, blue, and alpha components.
+         * <p>
+         *
+         * <pre>
+         *         byte              byte             byte              byte
+         *  <-- i -->|<- i+1 ->|<- i+2 ->|<- i+3 ->|<- i+4 ->|<- i+5 ->|<- i+6 ->|<- i+7 ->
+         * +---------+---------+-------------------+---------+---------+---------+---------+
+         * |        RED        |       GREEN       |       BLUE        |       ALPHA       |
+         * +---------+---------+-------------------+---------+---------+---------+---------+
+         *  0       7 0       7 0       7 0       7 0       7 0       7 0       7 0       7
+         * </pre>
+         *
+         * This corresponds to {@link android.graphics.PixelFormat#RGBA_F16}.
+         */
+        @SuppressLint("AllUpper")
+        public static final int COLOR_Format64bitABGRFloat            = 0x7F000F16;
 
         /**
          * 32 bits per pixel RGBA color format, with 8-bit red, green, blue, and alpha components.
@@ -454,6 +493,26 @@ public final class MediaCodecInfo {
          * This corresponds to {@link android.graphics.PixelFormat#RGBA_8888}.
          */
         public static final int COLOR_Format32bitABGR8888             = 0x7F00A000;
+
+        /**
+         * 32 bits per pixel RGBA color format, with 10-bit red, green,
+         * blue, and 2-bit alpha components.
+         * <p>
+         * Using 32-bit little-endian representation, colors stored as
+         * Red 9:0, Green 19:10, Blue 29:20, and Alpha 31:30.
+         * <pre>
+         *         byte              byte             byte              byte
+         *  <------ i -----> | <---- i+1 ----> | <---- i+2 ----> | <---- i+3 ----->
+         * +-----------------+---+-------------+-------+---------+-----------+-----+
+         * |       RED           |      GREEN          |       BLUE          |ALPHA|
+         * +-----------------+---+-------------+-------+---------+-----------+-----+
+         *  0               7 0 1 2           7 0     3 4       7 0         5 6   7
+         * </pre>
+         *
+         * This corresponds to {@link android.graphics.PixelFormat#RGBA_1010102}.
+         */
+        @SuppressLint("AllUpper")
+        public static final int COLOR_Format32bitABGR2101010          = 0x7F00AAA2;
 
         /**
          * Flexible 12 bits per pixel, subsampled YUV color format with 8-bit chroma and luma
@@ -615,6 +674,24 @@ public final class MediaCodecInfo {
         public static final String FEATURE_EncodingStatistics = "encoding-statistics";
 
         /**
+         * <b>video encoder only</b>: codec supports HDR editing.
+         * <p>
+         * HDR editing support means that the codec accepts 10-bit HDR
+         * input surface, and it is capable of generating any HDR
+         * metadata required from both YUV and RGB input when the
+         * metadata is not present. This feature is only meaningful when
+         * using an HDR capable profile (and 10-bit HDR input).
+         * <p>
+         * This feature implies that the codec is capable of encoding at
+         * least one HDR format, and that it supports RGBA_1010102 as
+         * well as P010, and optionally RGBA_FP16 input formats, and
+         * that the encoder can generate HDR metadata for all supported
+         * HDR input formats.
+         */
+        @SuppressLint("AllUpper")
+        public static final String FEATURE_HdrEditing = "hdr-editing";
+
+        /**
          * Query codec feature capabilities.
          * <p>
          * These features are supported to be used by the codec.  These
@@ -654,6 +731,7 @@ public final class MediaCodecInfo {
             new Feature(FEATURE_DynamicTimestamp, (1 << 2), false),
             new Feature(FEATURE_QpBounds, (1 << 3), false),
             new Feature(FEATURE_EncodingStatistics, (1 << 4), false),
+            new Feature(FEATURE_HdrEditing, (1 << 5), false),
             // feature to exclude codec from REGULAR codec list
             new Feature(FEATURE_SpecialCodec,     (1 << 30), false, true),
         };

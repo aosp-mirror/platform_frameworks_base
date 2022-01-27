@@ -39,6 +39,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.function.Supplier;
+
 @Presubmit
 @SmallTest
 public class AcquisitionClientTest {
@@ -87,7 +89,7 @@ public class AcquisitionClientTest {
         boolean mHalOperationRunning;
 
         public TestAcquisitionClient(@NonNull Context context,
-                @NonNull LazyDaemon<Object> lazyDaemon, @NonNull IBinder token,
+                @NonNull Supplier<Object> lazyDaemon, @NonNull IBinder token,
                 @NonNull ClientMonitorCallbackConverter callback) {
             super(context, lazyDaemon, token, callback, 0 /* userId */, "Test", 0 /* cookie */,
                     TEST_SENSOR_ID /* sensorId */, true /* shouldVibrate */, 0 /* statsModality */,
