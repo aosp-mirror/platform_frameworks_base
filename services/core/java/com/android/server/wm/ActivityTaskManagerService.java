@@ -6629,9 +6629,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public void notifyWakingUp() {
-            // Start a transition for waking. This is needed for showWhenLocked activities.
-            getTransitionController().requestTransitionIfNeeded(TRANSIT_WAKE, 0 /* flags */,
-                    null /* trigger */, mRootWindowContainer.getDefaultDisplay());
+            synchronized (mGlobalLock) {
+                // Start a transition for waking. This is needed for showWhenLocked activities.
+                getTransitionController().requestTransitionIfNeeded(TRANSIT_WAKE, 0 /* flags */,
+                        null /* trigger */, mRootWindowContainer.getDefaultDisplay());
+            }
         }
 
         @Override
