@@ -1180,13 +1180,14 @@ public class StatsPullAtomService extends SystemService {
                 Slog.e(TAG, "baseline is null for " + atomTag + ", return.");
                 return StatsManager.PULL_SKIP;
             }
+
             final NetworkStatsExt diff = new NetworkStatsExt(
-                    item.stats.subtract(baseline.stats).removeEmptyEntries(), item.transports,
+                    removeEmptyEntries(item.stats.subtract(baseline.stats)), item.transports,
                     item.slicedByFgbg, item.slicedByTag, item.slicedByMetered, item.ratType,
                     item.subInfo, item.oemManaged);
 
             // If no diff, skip.
-            if (diff.stats.size() == 0) continue;
+            if (!diff.stats.iterator().hasNext()) continue;
 
             switch (atomTag) {
                 case FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED:
@@ -1203,6 +1204,17 @@ public class StatsPullAtomService extends SystemService {
             }
         }
         return StatsManager.PULL_SUCCESS;
+    }
+
+    @NonNull private static NetworkStats removeEmptyEntries(NetworkStats stats) {
+        NetworkStats ret = new NetworkStats(0, 1);
+        for (NetworkStats.Entry e : stats) {
+            if (e.getRxBytes() != 0 || e.getRxPackets() != 0 || e.getTxBytes() != 0
+                    || e.getTxPackets() != 0 || e.getOperations() != 0) {
+                ret = ret.addEntry(e);
+            }
+        }
+        return ret;
     }
 
     private void addNetworkStats(int atomTag, @NonNull List<StatsEvent> ret,
@@ -1456,12 +1468,8 @@ public class StatsPullAtomService extends SystemService {
     @NonNull private NetworkStats sliceNetworkStats(@NonNull NetworkStats stats,
             @NonNull Function<NetworkStats.Entry, NetworkStats.Entry> slicer) {
         NetworkStats ret = new NetworkStats(0, 1);
-        NetworkStats.Entry entry = new NetworkStats.Entry();
         for (NetworkStats.Entry e : stats) {
-            if (slicer != null) {
-                entry = slicer.apply(e);
-            }
-            ret = ret.addEntry(entry);
+            ret = ret.addEntry(slicer.apply(e));
         }
         return ret;
     }
