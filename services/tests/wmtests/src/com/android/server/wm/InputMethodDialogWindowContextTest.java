@@ -30,8 +30,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityThread;
@@ -70,6 +71,8 @@ public class InputMethodDialogWindowContextTest extends WindowTestsBase {
 
     private IWindowManager mIWindowManager;
     private DisplayManagerGlobal mDisplayManagerGlobal;
+
+    private static final int WAIT_TIMEOUT_MS = 1000;
 
     @Before
     public void setUp() throws Exception {
@@ -142,19 +145,22 @@ public class InputMethodDialogWindowContextTest extends WindowTestsBase {
 
         mSecondaryDisplay.mFirstRoot.placeImeContainer(imeContainer);
 
-        verify(imeContainer, atLeastOnce()).onConfigurationChanged(
+        verify(imeContainer, timeout(WAIT_TIMEOUT_MS)).onConfigurationChanged(
                 eq(mSecondaryDisplay.mFirstRoot.getConfiguration()));
-        verify(tokenClient, atLeastOnce()).onConfigurationChanged(
+        verify(tokenClient, timeout(WAIT_TIMEOUT_MS)).onConfigurationChanged(
                 eq(mSecondaryDisplay.mFirstRoot.getConfiguration()),
                 eq(mSecondaryDisplay.mDisplayId));
         assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mSecondaryDisplay.mFirstRoot);
         assertImeSwitchContextMetricsValidity(context, mSecondaryDisplay);
 
+        // Clear the previous invocation histories in case we may count the previous
+        // onConfigurationChanged invocation into the next verification.
+        clearInvocations(tokenClient, imeContainer);
         mSecondaryDisplay.mSecondRoot.placeImeContainer(imeContainer);
 
-        verify(imeContainer, atLeastOnce()).onConfigurationChanged(
+        verify(imeContainer, timeout(WAIT_TIMEOUT_MS)).onConfigurationChanged(
                 eq(mSecondaryDisplay.mSecondRoot.getConfiguration()));
-        verify(tokenClient, atLeastOnce()).onConfigurationChanged(
+        verify(tokenClient, timeout(WAIT_TIMEOUT_MS)).onConfigurationChanged(
                 eq(mSecondaryDisplay.mSecondRoot.getConfiguration()),
                 eq(mSecondaryDisplay.mDisplayId));
         assertThat(imeContainer.getRootDisplayArea()).isEqualTo(mSecondaryDisplay.mSecondRoot);
