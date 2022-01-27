@@ -278,7 +278,7 @@ public abstract class GameSession {
      *
      * @return {@code true} if the game was successfully restarted; otherwise, {@code false}.
      */
-    @RequiresPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
+    @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY)
     public final boolean restartGame() {
         try {
             mGameSessionController.restartGame(mTaskId);

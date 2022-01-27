@@ -165,6 +165,7 @@ package android {
     field public static final String MANAGE_DEBUGGING = "android.permission.MANAGE_DEBUGGING";
     field public static final String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
     field public static final String MANAGE_FACTORY_RESET_PROTECTION = "android.permission.MANAGE_FACTORY_RESET_PROTECTION";
+    field public static final String MANAGE_GAME_ACTIVITY = "android.permission.MANAGE_GAME_ACTIVITY";
     field public static final String MANAGE_GAME_MODE = "android.permission.MANAGE_GAME_MODE";
     field public static final String MANAGE_HOTWORD_DETECTION = "android.permission.MANAGE_HOTWORD_DETECTION";
     field public static final String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
@@ -10855,7 +10856,7 @@ package android.service.games {
     method public void onCreate();
     method public void onDestroy();
     method public void onGameTaskFocusChanged(boolean);
-    method @RequiresPermission(android.Manifest.permission.FORCE_STOP_PACKAGES) public final boolean restartGame();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY) public final boolean restartGame();
     method public void setTaskOverlayView(@NonNull android.view.View, @NonNull android.view.ViewGroup.LayoutParams);
     method public void takeScreenshot(@NonNull java.util.concurrent.Executor, @NonNull android.service.games.GameSession.ScreenshotCallback);
   }
