@@ -2899,14 +2899,29 @@ public class ActivityManagerService extends IActivityManager.Stub
         mActivityTaskManager.setPackageScreenCompatMode(packageName, mode);
     }
 
-    private boolean hasUsageStatsPermission(String callingPackage) {
+    private boolean hasUsageStatsPermission(String callingPackage, int callingUid, int callingPid) {
         final int mode = mAppOpsService.noteOperation(AppOpsManager.OP_GET_USAGE_STATS,
-                Binder.getCallingUid(), callingPackage, null, false, "", false).getOpMode();
+                callingUid, callingPackage, null, false, "", false).getOpMode();
         if (mode == AppOpsManager.MODE_DEFAULT) {
-            return checkCallingPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+            return checkPermission(Manifest.permission.PACKAGE_USAGE_STATS, callingPid, callingUid)
                     == PackageManager.PERMISSION_GRANTED;
         }
         return mode == AppOpsManager.MODE_ALLOWED;
+    }
+
+    private boolean hasUsageStatsPermission(String callingPackage) {
+        return hasUsageStatsPermission(callingPackage,
+                Binder.getCallingUid(), Binder.getCallingPid());
+    }
+
+    private void enforceUsageStatsPermission(String callingPackage,
+            int callingUid, int callingPid, String operation) {
+        if (!hasUsageStatsPermission(callingPackage, callingUid, callingPid)) {
+            final String errorMsg = "Permission denial for <" + operation + "> from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                    + " which requires PACKAGE_USAGE_STATS permission";
+            throw new SecurityException(errorMsg);
+        }
     }
 
     @Override
@@ -13330,6 +13345,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // We set the token to null since if it wasn't for it we'd allow anyway here
                     backgroundActivityStartsToken = null;
                 }
+            }
+
+            // TODO (206518114): We need to use the "real" package name which sent the broadcast,
+            // in case the broadcast is sent via PendingIntent.
+            if (brOptions.getIdForResponseEvent() > 0) {
+                enforceUsageStatsPermission(callerPackage, realCallingUid, realCallingPid,
+                        "recordResponseEventWhileInBackground()");
             }
         }
 
