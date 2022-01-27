@@ -55,25 +55,9 @@ framework_docs_only_libs = [
     "android-support-multidex-instrumentation",
 ]
 
+// These defaults enable doc-stub generation, api lint database generation and sdk value generation.
 stubs_defaults {
     name: "android-non-updatable-doc-stubs-defaults",
-    defaults: [
-        "android-non-updatable-stubs-defaults",
-        "module-classpath-stubs-defaults",
-    ],
-    srcs: [
-        // No longer part of the stubs, but are included in the docs.
-        ":android-test-base-sources",
-        ":android-test-mock-sources",
-        ":android-test-runner-sources",
-    ],
-    libs: framework_docs_only_libs,
-    create_doc_stubs: true,
-    write_sdk_values: true,
-}
-
-stubs_defaults {
-    name: "framework-doc-stubs-default",
     defaults: ["android-non-updatable-stubs-defaults"],
     srcs: [
         // No longer part of the stubs, but are included in the docs.
@@ -83,18 +67,13 @@ stubs_defaults {
     ],
     libs: framework_docs_only_libs,
     create_doc_stubs: true,
-    api_levels_annotations_enabled: true,
-    api_levels_annotations_dirs: [
-        "sdk-dir",
-        "api-versions-jars-dir",
-    ],
     write_sdk_values: true,
 }
 
 // Defaults module for doc-stubs targets that use module source code as input.
 stubs_defaults {
     name: "framework-doc-stubs-sources-default",
-    defaults: ["framework-doc-stubs-default"],
+    defaults: ["android-non-updatable-doc-stubs-defaults"],
     srcs: [
         ":art.module.public.api{.public.stubs.source}",
         ":conscrypt.module.public.api{.public.stubs.source}",
@@ -123,13 +102,19 @@ stubs_defaults {
 
 droidstubs {
     name: "android-non-updatable-doc-stubs",
-    defaults: ["android-non-updatable-doc-stubs-defaults"],
+    defaults: [
+        "android-non-updatable-doc-stubs-defaults",
+        "module-classpath-stubs-defaults",
+    ],
     args: metalava_framework_docs_args,
 }
 
 droidstubs {
     name: "android-non-updatable-doc-stubs-system",
-    defaults: ["android-non-updatable-doc-stubs-defaults"],
+    defaults: [
+        "android-non-updatable-doc-stubs-defaults",
+        "module-classpath-stubs-defaults",
+    ],
     args: metalava_framework_docs_args +
         " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) ",
 }
@@ -139,14 +124,24 @@ droidstubs {
     defaults: ["framework-doc-stubs-sources-default"],
     args: metalava_framework_docs_args +
         " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.PRIVILEGED_APPS\\) ",
+    api_levels_annotations_enabled: true,
+    api_levels_annotations_dirs: [
+        "sdk-dir",
+        "api-versions-jars-dir",
+    ],
     api_levels_sdk_type: "system",
 }
 
 droidstubs {
     name: "framework-doc-stubs",
-    defaults: ["framework-doc-stubs-default"],
+    defaults: ["android-non-updatable-doc-stubs-defaults"],
     srcs: [":all-modules-public-stubs-source"],
     args: metalava_framework_docs_args,
+    api_levels_annotations_enabled: true,
+    api_levels_annotations_dirs: [
+        "sdk-dir",
+        "api-versions-jars-dir",
+    ],
     aidl: {
         local_include_dirs: [
             "apex/media/aidl/stable",
