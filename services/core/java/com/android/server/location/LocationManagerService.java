@@ -1239,29 +1239,29 @@ public class LocationManagerService extends ILocationManager.Stub implements
     }
 
     @Override
-    @RequiresPermission(android.Manifest.permission.AUTOMOTIVE_GNSS_CONTROLS)
-    public void setAutoGnssSuspended(boolean suspended) {
-        mContext.enforceCallingPermission(permission.AUTOMOTIVE_GNSS_CONTROLS, null);
+    @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS)
+    public void setAutomotiveGnssSuspended(boolean suspended) {
+        mContext.enforceCallingPermission(permission.CONTROL_AUTOMOTIVE_GNSS, null);
 
         if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
             throw new IllegalStateException(
-                    "setAutoGnssSuspended only allowed on automotive devices");
+                    "setAutomotiveGnssSuspended only allowed on automotive devices");
         }
 
-        mGnssManagerService.setAutoGnssSuspended(suspended);
+        mGnssManagerService.setAutomotiveGnssSuspended(suspended);
     }
 
     @Override
-    @RequiresPermission(android.Manifest.permission.AUTOMOTIVE_GNSS_CONTROLS)
-    public boolean isAutoGnssSuspended() {
-        mContext.enforceCallingPermission(permission.AUTOMOTIVE_GNSS_CONTROLS, null);
+    @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS)
+    public boolean isAutomotiveGnssSuspended() {
+        mContext.enforceCallingPermission(permission.CONTROL_AUTOMOTIVE_GNSS, null);
 
         if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
             throw new IllegalStateException(
-                    "isAutoGnssSuspended only allowed on automotive devices");
+                    "isAutomotiveGnssSuspended only allowed on automotive devices");
         }
 
-        return mGnssManagerService.isAutoGnssSuspended();
+        return mGnssManagerService.isAutomotiveGnssSuspended();
     }
 
     @Override
