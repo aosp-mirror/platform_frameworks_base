@@ -108,7 +108,7 @@ class RunningFgsControllerImpl @Inject constructor(
     override fun stopFgs(userId: Int, packageName: String) {
         init()
         try {
-            activityManager.makeServicesNonForeground(packageName, userId)
+            activityManager.stopAppForUser(packageName, userId)
         } catch (e: RemoteException) {
             e.rethrowFromSystemServer()
         }

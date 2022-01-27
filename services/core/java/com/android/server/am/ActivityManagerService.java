@@ -3820,10 +3820,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void makeServicesNonForeground(final String packageName, int userId) {
+    public void stopAppForUser(final String packageName, int userId) {
         if (checkCallingPermission(MANAGE_ACTIVITY_TASKS)
                 != PackageManager.PERMISSION_GRANTED) {
-            String msg = "Permission Denial: makeServicesNonForeground() from pid="
+            String msg = "Permission Denial: stopAppForUser() from pid="
                     + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid()
                     + " requires " + MANAGE_ACTIVITY_TASKS;
@@ -3833,10 +3833,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         final int callingPid = Binder.getCallingPid();
         userId = mUserController.handleIncomingUser(callingPid, Binder.getCallingUid(),
-                userId, true, ALLOW_FULL_ONLY, "makeServicesNonForeground", null);
+                userId, true, ALLOW_FULL_ONLY, "stopAppForUser", null);
         final long callingId = Binder.clearCallingIdentity();
         try {
-            makeServicesNonForegroundUnchecked(packageName, userId);
+            stopAppForUserInternal(packageName, userId);
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
@@ -4171,13 +4171,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private void makeServicesNonForegroundUnchecked(final String packageName,
-            final @UserIdInt int userId) {
-        synchronized (this) {
-            mServices.makeServicesNonForegroundLocked(packageName, userId);
-        }
-    }
-
     @GuardedBy("this")
     private void forceStopPackageLocked(final String packageName, int uid, String reason) {
         forceStopPackageLocked(packageName, UserHandle.getAppId(uid), false,
@@ -4302,6 +4295,41 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         mProcessList.killAppZygotesLocked(packageName, appId, userId, true /* force */);
+    }
+
+    void stopAppForUserInternal(final String packageName, @UserIdInt final int userId) {
+        final int uid = getPackageManagerInternal().getPackageUid(packageName,
+                MATCH_DEBUG_TRIAGED_MISSING | MATCH_ANY_USER, userId);
+        if (uid < 0) {
+            Slog.w(TAG, "Asked to stop " + packageName + "/u" + userId
+                    + " but does not exist in that user");
+            return;
+        }
+        Slog.i(TAG, "Stopping app for user: " + packageName + "/" + userId);
+
+        // A specific subset of the work done in forceStopPackageLocked(), because we are
+        // intentionally not rendering the app nonfunctional; we're just halting its current
+        // execution.
+        final int appId = UserHandle.getAppId(uid);
+        synchronized (this) {
+            synchronized (mProcLock) {
+                mAtmInternal.onForceStopPackage(packageName, true, false, userId);
+
+                mProcessList.killPackageProcessesLSP(packageName, appId, userId,
+                        ProcessList.INVALID_ADJ, true, false, true,
+                        false, true /* setRemoved */, false,
+                        ApplicationExitInfo.REASON_USER_REQUESTED,
+                        ApplicationExitInfo.SUBREASON_UNKNOWN,
+                        "fully stop " + packageName + "/" + userId + " by user request");
+            }
+
+            mServices.bringDownDisabledPackageServicesLocked(
+                    packageName, null, userId, false, true);
+
+            if (mBooted) {
+                mAtmInternal.resumeTopActivities(true);
+            }
+        }
     }
 
     @GuardedBy("this")
@@ -16619,8 +16647,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void makeServicesNonForeground(String pkg, int userId) {
-            ActivityManagerService.this.makeServicesNonForegroundUnchecked(pkg, userId);
+        public void stopAppForUser(String pkg, @UserIdInt int userId) {
+            ActivityManagerService.this.stopAppForUserInternal(pkg, userId);
         }
 
         @Override

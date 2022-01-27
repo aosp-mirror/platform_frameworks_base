@@ -240,8 +240,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runBugReport(pw);
                 case "force-stop":
                     return runForceStop(pw);
-                case "stop-fgs":
-                    return runStopForegroundServices(pw);
+                case "stop-app":
+                    return runStopApp(pw);
                 case "fgs-notification-rate-limit":
                     return runFgsNotificationRateLimit(pw);
                 case "crash":
@@ -1130,7 +1130,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    int runStopForegroundServices(PrintWriter pw) throws RemoteException {
+    int runStopApp(PrintWriter pw) throws RemoteException {
         int userId = UserHandle.USER_SYSTEM;
 
         String opt;
@@ -1142,7 +1142,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 return -1;
             }
         }
-        mInterface.makeServicesNonForeground(getNextArgRequired(), userId);
+        mInterface.stopAppForUser(getNextArgRequired(), userId);
         return 0;
     }
 
