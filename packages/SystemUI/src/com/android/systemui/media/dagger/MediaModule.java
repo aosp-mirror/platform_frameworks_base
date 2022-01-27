@@ -25,6 +25,7 @@ import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.media.MediaHostStatesManager;
+import com.android.systemui.media.dream.dagger.MediaComplicationComponent;
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.MediaTttFlags;
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver;
@@ -43,11 +44,14 @@ import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 
 /** Dagger module for the media package. */
-@Module
+@Module(subcomponents = {
+        MediaComplicationComponent.class,
+})
 public interface MediaModule {
     String QS_PANEL = "media_qs_panel";
     String QUICK_QS_PANEL = "media_quick_qs_panel";
     String KEYGUARD = "media_keyguard";
+    String DREAM = "dream";
 
     /** */
     @Provides
@@ -74,6 +78,16 @@ public interface MediaModule {
     @SysUISingleton
     @Named(KEYGUARD)
     static MediaHost providesKeyguardMediaHost(MediaHost.MediaHostStateHolder stateHolder,
+            MediaHierarchyManager hierarchyManager, MediaDataManager dataManager,
+            MediaHostStatesManager statesManager) {
+        return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager);
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    @Named(DREAM)
+    static MediaHost providesDreamMediaHost(MediaHost.MediaHostStateHolder stateHolder,
             MediaHierarchyManager hierarchyManager, MediaDataManager dataManager,
             MediaHostStatesManager statesManager) {
         return new MediaHost(stateHolder, hierarchyManager, dataManager, statesManager);

@@ -25,6 +25,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
+import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
@@ -85,6 +86,8 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     private lateinit var configurationController: ConfigurationController
     @Mock
     private lateinit var uniqueObjectHostView: UniqueObjectHostView
+    @Mock
+    private lateinit var dreamOverlayStateController: DreamOverlayStateController
     @Captor
     private lateinit var wakefullnessObserver: ArgumentCaptor<(WakefulnessLifecycle.Observer)>
     @Captor
@@ -110,7 +113,8 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 notificationLockscreenUserManager,
                 configurationController,
                 wakefulnessLifecycle,
-                statusBarKeyguardViewManager)
+                statusBarKeyguardViewManager,
+                dreamOverlayStateController)
         verify(wakefulnessLifecycle).addObserver(wakefullnessObserver.capture())
         verify(statusBarStateController).addCallback(statusBarCallback.capture())
         setupHost(lockHost, MediaHierarchyManager.LOCATION_LOCKSCREEN)
