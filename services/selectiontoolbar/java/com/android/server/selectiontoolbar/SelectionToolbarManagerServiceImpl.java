@@ -23,12 +23,17 @@ import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.hardware.input.InputManagerInternal;
+import android.os.Binder;
+import android.os.IBinder;
 import android.os.RemoteException;
+import android.service.selectiontoolbar.ISelectionToolbarRenderServiceCallback;
 import android.util.Slog;
 import android.view.selectiontoolbar.ISelectionToolbarCallback;
 import android.view.selectiontoolbar.ShowInfo;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.LocalServices;
 import com.android.server.infra.AbstractPerUserSystemService;
 
 final class SelectionToolbarManagerServiceImpl extends
@@ -41,9 +46,14 @@ final class SelectionToolbarManagerServiceImpl extends
     @Nullable
     private RemoteSelectionToolbarRenderService mRemoteService;
 
+    InputManagerInternal mInputManagerInternal;
+    private final SelectionToolbarRenderServiceRemoteCallback mRemoteServiceCallback =
+            new SelectionToolbarRenderServiceRemoteCallback();
+
     protected SelectionToolbarManagerServiceImpl(@NonNull SelectionToolbarManagerService master,
             @NonNull Object lock, int userId) {
         super(master, lock, userId);
+        mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         updateRemoteServiceLocked();
     }
 
@@ -78,7 +88,7 @@ final class SelectionToolbarManagerServiceImpl extends
     void showToolbar(ShowInfo showInfo, ISelectionToolbarCallback callback) {
         final RemoteSelectionToolbarRenderService remoteService = ensureRemoteServiceLocked();
         if (remoteService != null) {
-            remoteService.onShow(showInfo, callback);
+            remoteService.onShow(Binder.getCallingUid(), showInfo, callback);
         }
     }
 
@@ -94,7 +104,7 @@ final class SelectionToolbarManagerServiceImpl extends
     void dismissToolbar(long widgetToken) {
         final RemoteSelectionToolbarRenderService remoteService = ensureRemoteServiceLocked();
         if (remoteService != null) {
-            remoteService.onDismiss(widgetToken);
+            remoteService.onDismiss(Binder.getCallingUid(), widgetToken);
         }
     }
 
@@ -105,7 +115,7 @@ final class SelectionToolbarManagerServiceImpl extends
             final String serviceName = getComponentNameLocked();
             final ComponentName serviceComponent = ComponentName.unflattenFromString(serviceName);
             mRemoteService = new RemoteSelectionToolbarRenderService(getContext(), serviceComponent,
-                    mUserId);
+                    mUserId, mRemoteServiceCallback);
         }
         return mRemoteService;
     }
@@ -124,5 +134,18 @@ final class SelectionToolbarManagerServiceImpl extends
                     + comp.flattenToShortString());
         }
         return si;
+    }
+
+    private void transferTouchFocus(IBinder source, IBinder target) {
+        mInputManagerInternal.transferTouchFocus(source, target);
+    }
+
+    private final class SelectionToolbarRenderServiceRemoteCallback extends
+            ISelectionToolbarRenderServiceCallback.Stub {
+
+        @Override
+        public void transferTouch(IBinder source, IBinder target) {
+            transferTouchFocus(source, target);
+        }
     }
 }

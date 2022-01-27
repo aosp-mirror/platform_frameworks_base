@@ -17,7 +17,10 @@
 package android.view.selectiontoolbar;
 
 import android.annotation.NonNull;
+import android.graphics.Rect;
+import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.SurfaceControlViewHost;
 
 import com.android.internal.util.DataClass;
 
@@ -35,7 +38,18 @@ public final class WidgetInfo implements Parcelable {
      */
     private final long mWidgetToken;
 
-    // TODO: add members when the code really uses it
+    /**
+     * A Rect that defines the size and positioning of the remote view with respect to
+     * its host window.
+     */
+    @NonNull
+    private final Rect mContentRect;
+
+    /**
+     * The SurfacePackage pointing to the remote view.
+     */
+    @NonNull
+    private final SurfaceControlViewHost.SurfacePackage mSurfacePackage;
 
 
 
@@ -57,11 +71,24 @@ public final class WidgetInfo implements Parcelable {
      *
      * @param widgetToken
      *   The token that is used to identify the selection toolbar.
+     * @param contentRect
+     *   A Rect that defines the size and positioning of the remote view with respect to
+     *   its host window.
+     * @param surfacePackage
+     *   The SurfacePackage pointing to the remote view.
      */
     @DataClass.Generated.Member
     public WidgetInfo(
-            long widgetToken) {
+            long widgetToken,
+            @NonNull Rect contentRect,
+            @NonNull SurfaceControlViewHost.SurfacePackage surfacePackage) {
         this.mWidgetToken = widgetToken;
+        this.mContentRect = contentRect;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mContentRect);
+        this.mSurfacePackage = surfacePackage;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mSurfacePackage);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -74,6 +101,23 @@ public final class WidgetInfo implements Parcelable {
         return mWidgetToken;
     }
 
+    /**
+     * A Rect that defines the size and positioning of the remote view with respect to
+     * its host window.
+     */
+    @DataClass.Generated.Member
+    public @NonNull Rect getContentRect() {
+        return mContentRect;
+    }
+
+    /**
+     * The SurfacePackage pointing to the remote view.
+     */
+    @DataClass.Generated.Member
+    public @NonNull SurfaceControlViewHost.SurfacePackage getSurfacePackage() {
+        return mSurfacePackage;
+    }
+
     @Override
     @DataClass.Generated.Member
     public String toString() {
@@ -81,7 +125,9 @@ public final class WidgetInfo implements Parcelable {
         // String fieldNameToString() { ... }
 
         return "WidgetInfo { " +
-                "widgetToken = " + mWidgetToken +
+                "widgetToken = " + mWidgetToken + ", " +
+                "contentRect = " + mContentRect + ", " +
+                "surfacePackage = " + mSurfacePackage +
         " }";
     }
 
@@ -98,7 +144,9 @@ public final class WidgetInfo implements Parcelable {
         WidgetInfo that = (WidgetInfo) o;
         //noinspection PointlessBooleanExpression
         return true
-                && mWidgetToken == that.mWidgetToken;
+                && mWidgetToken == that.mWidgetToken
+                && java.util.Objects.equals(mContentRect, that.mContentRect)
+                && java.util.Objects.equals(mSurfacePackage, that.mSurfacePackage);
     }
 
     @Override
@@ -109,16 +157,20 @@ public final class WidgetInfo implements Parcelable {
 
         int _hash = 1;
         _hash = 31 * _hash + Long.hashCode(mWidgetToken);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mContentRect);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mSurfacePackage);
         return _hash;
     }
 
     @Override
     @DataClass.Generated.Member
-    public void writeToParcel(@NonNull android.os.Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
         dest.writeLong(mWidgetToken);
+        dest.writeTypedObject(mContentRect, flags);
+        dest.writeTypedObject(mSurfacePackage, flags);
     }
 
     @Override
@@ -128,13 +180,21 @@ public final class WidgetInfo implements Parcelable {
     /** @hide */
     @SuppressWarnings({"unchecked", "RedundantCast"})
     @DataClass.Generated.Member
-    /* package-private */ WidgetInfo(@NonNull android.os.Parcel in) {
+    /* package-private */ WidgetInfo(@NonNull Parcel in) {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
         long widgetToken = in.readLong();
+        Rect contentRect = (Rect) in.readTypedObject(Rect.CREATOR);
+        SurfaceControlViewHost.SurfacePackage surfacePackage = (SurfaceControlViewHost.SurfacePackage) in.readTypedObject(SurfaceControlViewHost.SurfacePackage.CREATOR);
 
         this.mWidgetToken = widgetToken;
+        this.mContentRect = contentRect;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mContentRect);
+        this.mSurfacePackage = surfacePackage;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mSurfacePackage);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -148,16 +208,16 @@ public final class WidgetInfo implements Parcelable {
         }
 
         @Override
-        public WidgetInfo createFromParcel(@NonNull android.os.Parcel in) {
+        public WidgetInfo createFromParcel(@NonNull Parcel in) {
             return new WidgetInfo(in);
         }
     };
 
     @DataClass.Generated(
-            time = 1639488254020L,
+            time = 1643281495056L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/selectiontoolbar/WidgetInfo.java",
-            inputSignatures = "private final  long mWidgetToken\nclass WidgetInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genEqualsHashCode=true)")
+            inputSignatures = "private final  long mWidgetToken\nprivate final @android.annotation.NonNull android.graphics.Rect mContentRect\nprivate final @android.annotation.NonNull android.view.SurfaceControlViewHost.SurfacePackage mSurfacePackage\nclass WidgetInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genEqualsHashCode=true)")
     @Deprecated
     private void __metadata() {}
 

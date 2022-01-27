@@ -47,6 +47,16 @@ public final class SelectionToolbarManager {
     private static final String REMOTE_SELECTION_TOOLBAR_ENABLED =
             "remote_selection_toolbar_enabled";
 
+    /**
+     * Used to mark a toolbar that has no toolbar token id.
+     */
+    public static final long NO_TOOLBAR_ID = 0;
+
+    /**
+     * The error code that do not allow to create multiple toolbar.
+     */
+    public static final int ERROR_DO_NOT_ALLOW_MULTIPLE_TOOL_BAR = 1;
+
     @NonNull
     private final Context mContext;
     private final ISelectionToolbarManager mService;
