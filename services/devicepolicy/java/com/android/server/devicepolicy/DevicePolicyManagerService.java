@@ -10765,10 +10765,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public void acknowledgeNewUserDisclaimer() {
         CallerIdentity callerIdentity = getCallerIdentity();
-        canManageUsers(callerIdentity);
+        Preconditions.checkCallAuthorization(canManageUsers(callerIdentity)
+                || hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS));
 
         setShowNewUserDisclaimer(callerIdentity.getUserId(),
-                DevicePolicyData.NEW_USER_DISCLAIMER_SHOWN);
+                DevicePolicyData.NEW_USER_DISCLAIMER_ACKNOWLEDGED);
     }
 
     private void setShowNewUserDisclaimer(@UserIdInt int userId, String value) {
@@ -10798,6 +10799,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // TODO(b/172691310): add CTS tests to make sure disclaimer is shown
         Slogf.i(LOG_TAG, "Dispatching ACTION_SHOW_NEW_USER_DISCLAIMER intent");
         mContext.sendBroadcastAsUser(intent, UserHandle.of(userId));
+    }
+
+    @Override
+    public boolean isNewUserDisclaimerAcknowledged() {
+        CallerIdentity callerIdentity = getCallerIdentity();
+        Preconditions.checkCallAuthorization(canManageUsers(callerIdentity)
+                || hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS));
+        int userId = callerIdentity.getUserId();
+        synchronized (getLockObject()) {
+            DevicePolicyData policyData = getUserData(userId);
+            return policyData.isNewUserDisclaimerAcknowledged();
+        }
     }
 
     @Override
