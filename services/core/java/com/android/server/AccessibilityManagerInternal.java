@@ -18,6 +18,7 @@ package com.android.server;
 
 import android.annotation.NonNull;
 import android.os.IBinder;
+import android.util.ArraySet;
 import android.util.SparseArray;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
@@ -39,8 +40,11 @@ public abstract class AccessibilityManagerInternal {
     /** Bind input for all accessibility services which require ime capabilities. */
     public abstract void bindInput(InputBinding binding);
 
-    /** Request input session from all accessibility services which require ime capabilities. */
-    public abstract void createImeSession();
+    /**
+     * Request input session from all accessibility services which require ime capabilities and
+     * whose id is not in the ignoreSet.
+     */
+    public abstract void createImeSession(ArraySet<Integer> ignoreSet);
 
     /** Start input for all accessibility services which require ime capabilities. */
     public abstract void startInput(IBinder startInputToken, IInputContext inputContext,
@@ -61,7 +65,7 @@ public abstract class AccessibilityManagerInternal {
         }
 
         @Override
-        public void createImeSession() {
+        public void createImeSession(ArraySet<Integer> ignoreSet) {
         }
 
         @Override

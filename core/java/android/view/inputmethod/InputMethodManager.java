@@ -930,23 +930,26 @@ public final class InputMethodManager {
                         // Since IMM can start inputting text before a11y sessions are back,
                         // we send a notification so that the a11y service knows the session is
                         // registered and update the a11y service with the current cursor positions.
-                        InputMethodSessionWrapper wrapper =
-                                InputMethodSessionWrapper.createOrNull(res.method);
-                        if (wrapper != null) {
-                            mAccessibilityInputMethodSession.put(id, wrapper);
-                            if (mServedInputConnection != null) {
-                                wrapper.updateSelection(mInitialSelStart, mInitialSelEnd,
-                                        mCursorSelStart, mCursorSelEnd, mCursorCandStart,
-                                        mCursorCandEnd);
-                            } else {
-                                // If an a11y service binds before input starts, we should still
-                                // send a notification because the a11y service doesn't know it
-                                // binds before or after input starts, it may wonder if it binds
-                                // after input starts, why it doesn't receive a notification of
-                                // the current cursor positions.
-                                wrapper.updateSelection(-1, -1,
-                                        -1, -1, -1,
-                                        -1);
+                        if (res.accessibilitySessions != null) {
+                            InputMethodSessionWrapper wrapper =
+                                    InputMethodSessionWrapper.createOrNull(
+                                            res.accessibilitySessions.get(id));
+                            if (wrapper != null) {
+                                mAccessibilityInputMethodSession.put(id, wrapper);
+                                if (mServedInputConnection != null) {
+                                    wrapper.updateSelection(mInitialSelStart, mInitialSelEnd,
+                                            mCursorSelStart, mCursorSelEnd, mCursorCandStart,
+                                            mCursorCandEnd);
+                                } else {
+                                    // If an a11y service binds before input starts, we should still
+                                    // send a notification because the a11y service doesn't know it
+                                    // binds before or after input starts, it may wonder if it binds
+                                    // after input starts, why it doesn't receive a notification of
+                                    // the current cursor positions.
+                                    wrapper.updateSelection(-1, -1,
+                                            -1, -1, -1,
+                                            -1);
+                                }
                             }
                         }
                         mBindSequence = res.sequence;
@@ -1508,6 +1511,7 @@ public final class InputMethodManager {
     /**
      * Reset all of the state associated with being bound to an input method.
      */
+    @GuardedBy("mH")
     void clearBindingLocked() {
         if (DEBUG) Log.v(TAG, "Clearing binding!");
         clearConnectionLocked();
@@ -2235,14 +2239,21 @@ public final class InputMethodManager {
             }
             mIsInputMethodSuppressingSpellChecker = res.isInputMethodSuppressingSpellChecker;
             if (res.id != null) {
-                // we might need to put a11y sessions and channels into res and restore them here.
-                // Currently we have a workaround to request a11y session after each client
-                // switching, even when the new client is opened before and is in memory (has
-                // existing a11y sessions).
                 setInputChannelLocked(res.channel);
                 mBindSequence = res.sequence;
                 mCurMethod = res.method; // for @UnsupportedAppUsage
                 mCurrentInputMethodSession = InputMethodSessionWrapper.createOrNull(res.method);
+                mAccessibilityInputMethodSession.clear();
+                if (res.accessibilitySessions != null) {
+                    for (int i = 0; i < res.accessibilitySessions.size(); i++) {
+                        InputMethodSessionWrapper wrapper = InputMethodSessionWrapper.createOrNull(
+                                res.accessibilitySessions.valueAt(i));
+                        if (wrapper != null) {
+                            mAccessibilityInputMethodSession.append(
+                                    res.accessibilitySessions.keyAt(i), wrapper);
+                        }
+                    }
+                }
                 mCurId = res.id;
             } else if (res.channel != null && res.channel != mCurChannel) {
                 res.channel.dispose();

@@ -2408,8 +2408,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         final InputMethodInfo curInputMethodInfo = mMethodMap.get(curId);
         final boolean suppressesSpellChecker =
                 curInputMethodInfo != null && curInputMethodInfo.suppressesSpellChecker();
+        final SparseArray<IInputMethodSession> accessibilityInputMethodSessions =
+                createAccessibilityInputMethodSessions(mCurClient.mAccessibilitySessions);
         return new InputBindResult(InputBindResult.ResultCode.SUCCESS_WITH_IME_SESSION,
-                session.session, (session.channel != null ? session.channel.dup() : null),
+                session.session, accessibilityInputMethodSessions,
+                (session.channel != null ? session.channel.dup() : null),
                 curId, getSequenceNumberLocked(), suppressesSpellChecker);
     }
 
@@ -2437,12 +2440,29 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         if (accessibilitySession != null) {
+            final SessionState session = mCurClient.curSession;
+            IInputMethodSession imeSession = session == null ? null : session.session;
+            final SparseArray<IInputMethodSession> accessibilityInputMethodSessions =
+                    createAccessibilityInputMethodSessions(mCurClient.mAccessibilitySessions);
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_WITH_ACCESSIBILITY_SESSION,
-                    accessibilitySession.mSession, null,
+                    imeSession, accessibilityInputMethodSessions, null,
                     getCurIdLocked(), getSequenceNumberLocked(), false);
         }
         return null;
+    }
+
+    private SparseArray<IInputMethodSession> createAccessibilityInputMethodSessions(
+            SparseArray<AccessibilitySessionState> accessibilitySessions) {
+        final SparseArray<IInputMethodSession> accessibilityInputMethodSessions =
+                new SparseArray<>();
+        if (accessibilitySessions != null) {
+            for (int i = 0; i < accessibilitySessions.size(); i++) {
+                accessibilityInputMethodSessions.append(accessibilitySessions.keyAt(i),
+                        accessibilitySessions.valueAt(i).mSession);
+            }
+        }
+        return accessibilityInputMethodSessions;
     }
 
     /**
@@ -2470,7 +2490,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             // party code.
             return new InputBindResult(
                     InputBindResult.ResultCode.ERROR_SYSTEM_NOT_READY,
-                    null, null, selectedMethodId, getSequenceNumberLocked(), false);
+                    null, null, null, selectedMethodId, getSequenceNumberLocked(), false);
         }
 
         if (!InputMethodUtils.checkIfPackageBelongsToUid(mAppOpsManager, cs.uid,
@@ -2519,18 +2539,18 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // We expect the caller has already verified that the client is allowed to access this
         // display ID.
         if (isSelectedMethodBoundLocked()) {
-            // TODO(b/187453053): this doesn't mean a11y sessions are there. When a11y service is
-            //  enabled while this client is switched out, this client doesn't have the session. We
-            //  need to remove disabled sessions and add new sessions and pass them to imm through
-            //  the input result.
             if (cs.curSession != null) {
                 // Fast case: if we are already connected to the input method,
                 // then just return it.
-                // we can always attach to accessibility because AccessibilityManagerService is
-                // always on.
-                // This is a workaround to the method describe above
+                // This doesn't mean a11y sessions are there. When a11y service is
+                // enabled while this client is switched out, this client doesn't have the session.
+                // A11yManagerService will only request missing sessions (will not request existing
+                // sessions again). Note when an a11y service is disabled, it will clear its
+                // session from all clients, so we don't need to worry about disabled a11y services.
                 cs.mSessionRequestedForAccessibility = false;
                 requestClientSessionForAccessibilityLocked(cs);
+                // we can always attach to accessibility because AccessibilityManagerService is
+                // always on.
                 attachNewAccessibilityLocked(startInputReason,
                         (startInputFlags & StartInputFlags.INITIAL_CONNECTION) != 0, -1);
                 return attachNewInputLocked(startInputReason,
@@ -2578,7 +2598,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 requestClientSessionForAccessibilityLocked(cs);
                 return new InputBindResult(
                         InputBindResult.ResultCode.SUCCESS_WAITING_IME_SESSION,
-                        null, null, getCurIdLocked(), getSequenceNumberLocked(), false);
+                        null, null, null, getCurIdLocked(), getSequenceNumberLocked(), false);
             } else {
                 long bindingDuration = SystemClock.uptimeMillis() - getLastBindTimeLocked();
                 if (bindingDuration < TIME_TO_RECONNECT) {
@@ -2591,7 +2611,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     // to see if we can get back in touch with the service.
                     return new InputBindResult(
                             InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
-                            null, null, getCurIdLocked(), getSequenceNumberLocked(), false);
+                            null, null, null, getCurIdLocked(), getSequenceNumberLocked(), false);
                 } else {
                     EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME,
                             getSelectedMethodIdLocked(), bindingDuration, 0);
@@ -2766,7 +2786,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         if (!cs.mSessionRequestedForAccessibility) {
             if (DEBUG) Slog.v(TAG, "Creating new accessibility sessions for client " + cs);
             cs.mSessionRequestedForAccessibility = true;
-            AccessibilityManagerInternal.get().createImeSession();
+            ArraySet<Integer> ignoreSet = new ArraySet<>();
+            for (int i = 0; i < cs.mAccessibilitySessions.size(); i++) {
+                ignoreSet.add(cs.mAccessibilitySessions.keyAt(i));
+            }
+            AccessibilityManagerInternal.get().createImeSession(ignoreSet);
         }
     }
 
@@ -3617,7 +3641,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_REPORT_WINDOW_FOCUS_ONLY,
-                    null, null, null, -1, false);
+                    null, null, null, null, -1, false);
         }
 
         mCurFocusedWindow = windowToken;
@@ -5275,11 +5299,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     InputBindResult res = attachNewAccessibilityLocked(
                             StartInputReason.SESSION_CREATED_BY_ACCESSIBILITY, true,
                             accessibilityConnectionId);
-                    if ((res != null) && (res.method != null)) {
-                        executeOrSendMessage(mCurClient.client, obtainMessageOOO(
-                                MSG_BIND_ACCESSIBILITY_SERVICE, mCurClient.client, res,
-                                accessibilityConnectionId));
-                    }
+                    executeOrSendMessage(mCurClient.client, obtainMessageOOO(
+                            MSG_BIND_ACCESSIBILITY_SERVICE, mCurClient.client, res,
+                            accessibilityConnectionId));
                 }
             }
         }
@@ -5299,6 +5321,21 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     executeOrSendMessage(mCurClient.client, obtainMessageIIOO(
                             MSG_UNBIND_ACCESSIBILITY_SERVICE, getSequenceNumberLocked(),
                             unbindClientReason, mCurClient.client, accessibilityConnectionId));
+                }
+                // We only have sessions when we bound to an input method. Remove this session
+                // from all clients.
+                if (getCurMethodLocked() != null) {
+                    final int numClients = mClients.size();
+                    for (int i = 0; i < numClients; ++i) {
+                        clearClientSessionForAccessibilityLocked(mClients.valueAt(i),
+                                accessibilityConnectionId);
+                    }
+                    AccessibilitySessionState session = mEnabledAccessibilitySessions.get(
+                            accessibilityConnectionId);
+                    if (session != null) {
+                        finishSessionForAccessibilityLocked(session);
+                        mEnabledAccessibilitySessions.remove(accessibilityConnectionId);
+                    }
                 }
             }
         }

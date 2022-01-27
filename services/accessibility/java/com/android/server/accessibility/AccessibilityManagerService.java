@@ -336,8 +336,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         @Override
-        public void createImeSession() {
-            mService.createImeSession();
+        public void createImeSession(ArraySet<Integer> ignoreSet) {
+            mService.createImeSession(ignoreSet);
         }
 
         @Override
@@ -4419,16 +4419,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     /**
-     * Request input sessions from all accessibility services which request ime capabilities.
+     * Request input sessions from all accessibility services which request ime capabilities and
+     * whose id is not in the ignoreSet
      */
-    public void createImeSession() {
+    public void createImeSession(ArraySet<Integer> ignoreSet) {
         AccessibilityUserState userState;
         synchronized (mLock) {
             mInputSessionRequested = true;
             userState = getCurrentUserStateLocked();
             for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
                 final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
-                if (service.requestImeApis()) {
+                if ((!ignoreSet.contains(service.mId)) && service.requestImeApis()) {
                     service.createImeSessionLocked();
                 }
             }
