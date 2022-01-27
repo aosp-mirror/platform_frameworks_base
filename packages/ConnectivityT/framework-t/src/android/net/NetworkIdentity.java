@@ -30,7 +30,6 @@ import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.service.NetworkIdentityProto;
-import android.telephony.Annotation;
 import android.telephony.TelephonyManager;
 import android.util.proto.ProtoOutputStream;
 
@@ -275,8 +274,7 @@ public class NetworkIdentity {
     @Deprecated
     @NonNull
     public static NetworkIdentity buildNetworkIdentity(Context context,
-            @NonNull NetworkStateSnapshot snapshot,
-            boolean defaultNetwork, @Annotation.NetworkType int ratType) {
+            @NonNull NetworkStateSnapshot snapshot, boolean defaultNetwork, int ratType) {
         final NetworkIdentity.Builder builder = new NetworkIdentity.Builder()
                 .setNetworkStateSnapshot(snapshot).setDefaultNetwork(defaultNetwork);
         if (snapshot.getLegacyType() == TYPE_MOBILE && ratType != NETWORK_TYPE_ALL) {
@@ -433,7 +431,7 @@ public class NetworkIdentity {
          * @return this builder.
          */
         @NonNull
-        public Builder setRatType(@Annotation.NetworkType int ratType) {
+        public Builder setRatType(int ratType) {
             if (!CollectionUtils.contains(TelephonyManager.getAllNetworkTypes(), ratType)
                     && ratType != TelephonyManager.NETWORK_TYPE_UNKNOWN
                     && ratType != NetworkStatsManager.NETWORK_TYPE_5G_NSA) {
