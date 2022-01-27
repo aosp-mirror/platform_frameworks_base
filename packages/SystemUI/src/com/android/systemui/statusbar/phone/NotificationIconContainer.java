@@ -135,7 +135,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         }
     }.setDuration(CONTENT_FADE_DURATION);
 
-    private static final int MAX_ICONS_ON_AOD = 5;
+    private static final int MAX_ICONS_ON_AOD = 3;
     public static final int MAX_ICONS_ON_LOCKSCREEN = 3;
     public static final int MAX_STATIC_ICONS = 4;
     private static final int MAX_DOTS = 1;
