@@ -282,6 +282,14 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         mIsAutomotive = mContext.getPackageManager()
                 .hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+
+        final String TEST_STRING = "{count, plural,\n"
+                + "        =1    {Test for exactly 1 cert out of 4}\n"
+                + "        other {Test for exactly # certs out of 4}\n"
+                + "}";
+        doReturn(TEST_STRING)
+                .when(mContext.resources)
+                .getString(R.string.ssl_ca_cert_warning);
     }
 
     private TransferOwnershipMetadataManager getMockTransferMetadataManager() {
@@ -1784,9 +1792,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         StringParceledListSlice oneCert = asSlice(new String[] {"1"});
         StringParceledListSlice fourCerts = asSlice(new String[] {"1", "2", "3", "4"});
 
-        final String TEST_STRING = "Test for exactly 2 certs out of 4";
-        doReturn(TEST_STRING).when(mContext.resources).getQuantityText(anyInt(), eq(2));
-
         // Given that we have exactly one certificate installed,
         when(getServices().keyChainConnection.getService().getUserCaAliases()).thenReturn(oneCert);
         // when that certificate is approved,
@@ -1802,9 +1807,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         dpms.approveCaCert(fourCerts.getList().get(0), userId, true);
         dpms.approveCaCert(fourCerts.getList().get(1), userId, true);
         // a notification should be shown saying that there are two certificates left to approve.
+        final String TEST_STRING_RESULT = "Test for exactly 2 certs out of 4";
         verify(getServices().notificationManager, timeout(1000))
                 .notifyAsUser(anyString(), anyInt(), argThat(hasExtra(EXTRA_TITLE,
-                        TEST_STRING
+                        TEST_STRING_RESULT
                 )), eq(user));
     }
 

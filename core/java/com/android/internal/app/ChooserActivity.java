@@ -90,6 +90,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.HashedStringCache;
 import android.util.Log;
+import android.util.PluralsMessageFormatter;
 import android.util.Size;
 import android.util.Slog;
 import android.view.LayoutInflater;
@@ -215,6 +216,9 @@ public class ChooserActivity extends ResolverActivity implements
     private static final String SHORTCUT_TARGET = "shortcut_target";
     private static final int APP_PREDICTION_SHARE_TARGET_QUERY_PACKAGE_LIMIT = 20;
     public static final String APP_PREDICTION_INTENT_FILTER_KEY = "intent_filter";
+
+    private static final String PLURALS_COUNT = "count";
+    private static final String PLURALS_FILE_NAME = "file_name";
 
     @VisibleForTesting
     public static final int LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS = 250;
@@ -1551,8 +1555,13 @@ public class ChooserActivity extends ResolverActivity implements
             } else {
                 FileInfo fileInfo = extractFileInfo(uris.get(0), getContentResolver());
                 int remUriCount = uriCount - 1;
-                String fileName = getResources().getQuantityString(R.plurals.file_count,
-                        remUriCount, fileInfo.name, remUriCount);
+                Map<String, Object> arguments = new HashMap<>();
+                arguments.put(PLURALS_COUNT, remUriCount);
+                arguments.put(PLURALS_FILE_NAME, fileInfo.name);
+                String fileName = PluralsMessageFormatter.format(
+                        getResources(),
+                        arguments,
+                        R.string.file_count);
 
                 TextView fileNameView = contentPreviewLayout.findViewById(
                         R.id.content_preview_filename);
