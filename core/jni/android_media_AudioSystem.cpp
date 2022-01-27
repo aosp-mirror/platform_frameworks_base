@@ -2538,6 +2538,10 @@ android_media_AudioSystem_isHapticPlaybackSupported(JNIEnv *env, jobject thiz)
     return AudioSystem::isHapticPlaybackSupported();
 }
 
+static jboolean android_media_AudioSystem_isUltrasoundSupported(JNIEnv *env, jobject thiz) {
+    return AudioSystem::isUltrasoundSupported();
+}
+
 static jint android_media_AudioSystem_setSupportedSystemUsages(JNIEnv *env, jobject thiz,
                                                                jintArray systemUsages) {
     std::vector<audio_usage_t> nativeSystemUsagesVector;
@@ -3018,6 +3022,7 @@ static const JNINativeMethod gMethods[] =
          {"setA11yServicesUids", "([I)I", (void *)android_media_AudioSystem_setA11yServicesUids},
          {"isHapticPlaybackSupported", "()Z",
           (void *)android_media_AudioSystem_isHapticPlaybackSupported},
+         {"isUltrasoundSupported", "()Z", (void *)android_media_AudioSystem_isUltrasoundSupported},
          {"getHwOffloadFormatsSupportedForBluetoothMedia", "(ILjava/util/ArrayList;)I",
           (void *)android_media_AudioSystem_getHwOffloadFormatsSupportedForBluetoothMedia},
          {"setSupportedSystemUsages", "([I)I",
