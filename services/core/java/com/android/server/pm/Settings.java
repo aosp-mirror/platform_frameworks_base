@@ -4869,6 +4869,9 @@ public final class Settings implements Watchable, Snappable {
             date.setTime(pus.getFirstInstallTime());
             pw.println(sdf.format(date));
 
+            pw.print("      uninstallReason=");
+            pw.println(userState.getUninstallReason());
+
             if (userState.isSuspended()) {
                 pw.print(prefix);
                 pw.println("  Suspend params:");
