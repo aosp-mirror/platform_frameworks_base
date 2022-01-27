@@ -82,6 +82,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -95,8 +96,11 @@ import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.proto.ProtoOutputStream;
+import android.view.BatchedInputEventReceiver.SimpleBatchedInputEventReceiver;
+import android.view.Choreographer;
 import android.view.Gravity;
 import android.view.InputChannel;
+import android.view.InputEventReceiver;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -148,6 +152,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.OptionalInt;
 
 /**
  * InputMethodService provides a standard implementation of an InputMethod,
@@ -567,7 +572,8 @@ public class InputMethodService extends AbstractInputMethodService {
 
     private boolean mAutomotiveHideNavBarForKeyboard;
     private boolean mIsAutomotive;
-    private boolean mHandwritingStarted;
+    private @NonNull OptionalInt mHandwritingRequestId = OptionalInt.empty();
+    private InputEventReceiver mHandwritingEventReceiver;
     private Handler mHandler;
     private boolean mImeSurfaceScheduledForRemoval;
     private ImsConfigurationTracker mConfigTracker = new ImsConfigurationTracker();
@@ -888,7 +894,7 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public void canStartStylusHandwriting(int requestId) {
             if (DEBUG) Log.v(TAG, "canStartStylusHandwriting()");
-            if (mHandwritingStarted) {
+            if (mHandwritingRequestId.isPresent()) {
                 Log.d(TAG, "There is an ongoing Handwriting session. ignoring.");
                 return;
             }
@@ -900,6 +906,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 mPrivOps.onStylusHandwritingReady(requestId);
             } else {
                 Log.i(TAG, "IME is not ready. Can't start Stylus Handwriting");
+                // TODO(b/210039666): see if it's valuable to propagate this back to IMM.
             }
         }
 
@@ -910,19 +917,35 @@ public class InputMethodService extends AbstractInputMethodService {
         @MainThread
         @Override
         public void startStylusHandwriting(
-                @NonNull InputChannel channel, @Nullable List<MotionEvent> stylusEvents) {
+                int requestId, @NonNull InputChannel channel,
+                @NonNull List<MotionEvent> stylusEvents) {
             if (DEBUG) Log.v(TAG, "startStylusHandwriting()");
-            if (mHandwritingStarted) {
+            Objects.requireNonNull(channel);
+            Objects.requireNonNull(stylusEvents);
+
+            if (mHandwritingRequestId.isPresent()) {
                 return;
             }
 
-            mHandwritingStarted = true;
+            mHandwritingRequestId = OptionalInt.of(requestId);
             mShowInputRequested = false;
 
             mInkWindow.show();
-            // TODO: deliver previous @param stylusEvents
-            // TODO: create spy receiver for @param channel
+
+            // deliver previous @param stylusEvents
+            stylusEvents.forEach(mInkWindow.getDecorView()::dispatchTouchEvent);
+            // create receiver for channel
+            mHandwritingEventReceiver = new SimpleBatchedInputEventReceiver(
+                    channel,
+                    Looper.getMainLooper(), Choreographer.getInstance(),
+                    event -> {
+                        if (!(event instanceof MotionEvent)) {
+                            return false;
+                        }
+                        return mInkWindow.getDecorView().dispatchTouchEvent((MotionEvent) event);
+                    });
         }
+
 
         /**
          * {@inheritDoc}
@@ -2358,12 +2381,18 @@ public class InputMethodService extends AbstractInputMethodService {
         if (mInkWindow == null) {
             return;
         }
-        if (!mHandwritingStarted) {
+        if (!mHandwritingRequestId.isPresent()) {
             return;
         }
 
-        mHandwritingStarted = false;
+        final int requestId = mHandwritingRequestId.getAsInt();
+        mHandwritingRequestId = OptionalInt.empty();
+
+        mHandwritingEventReceiver.dispose();
+        mHandwritingEventReceiver = null;
         mInkWindow.hide(false /* remove */);
+
+        mPrivOps.finishStylusHandwriting(requestId);
         onFinishStylusHandwriting();
     }
 

@@ -39,6 +39,7 @@ import com.android.internal.policy.PhoneWindow;
 final class InkWindow extends PhoneWindow {
 
     private final WindowManager mWindowManager;
+    private boolean mIsViewAdded;
 
     public InkWindow(@NonNull Context context) {
         super(context);
@@ -47,6 +48,7 @@ final class InkWindow extends PhoneWindow {
         final LayoutParams attrs = getAttributes();
         attrs.layoutInDisplayCutoutMode = LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         attrs.setFitInsetsTypes(0);
+        // TODO(b/210039666): use INPUT_FEATURE_NO_INPUT_CHANNEL once b/216179339 is fixed.
         setAttributes(attrs);
         // Ink window is not touchable with finger.
         addFlags(FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_NO_LIMITS | FLAG_NOT_TOUCHABLE
@@ -66,7 +68,10 @@ final class InkWindow extends PhoneWindow {
             return;
         }
         getDecorView().setVisibility(View.VISIBLE);
-        mWindowManager.addView(getDecorView(), getAttributes());
+        if (!mIsViewAdded) {
+            mWindowManager.addView(getDecorView(), getAttributes());
+            mIsViewAdded = true;
+        }
     }
 
     /**
@@ -78,6 +83,7 @@ final class InkWindow extends PhoneWindow {
         if (getDecorView() != null) {
             getDecorView().setVisibility(remove ? View.GONE : View.INVISIBLE);
         }
+        //TODO(b/210039666): remove window from WM after a delay. Delay amount TBD.
     }
 
     void setToken(@NonNull IBinder token) {

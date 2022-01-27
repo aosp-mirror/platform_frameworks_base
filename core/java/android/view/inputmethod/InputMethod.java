@@ -405,7 +405,7 @@ public interface InputMethod {
      * @hide
      */
     default void startStylusHandwriting(
-            @NonNull InputChannel channel, @Nullable List<MotionEvent> events) {
+            int requestId, @NonNull InputChannel channel, @Nullable List<MotionEvent> events) {
         // intentionally empty
     }
 
