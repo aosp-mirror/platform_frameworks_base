@@ -24,11 +24,14 @@ import android.os.Parcelable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-/** @hide */
+/**
+ * A request for Table from broadcast signal.
+ */
 public final class TableRequest extends BroadcastInfoRequest implements Parcelable {
-    public static final @TvInputManager.BroadcastInfoType int requestType =
+    private static final @TvInputManager.BroadcastInfoType int REQUEST_TYPE =
             TvInputManager.BROADCAST_INFO_TYPE_TABLE;
 
+    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({TABLE_NAME_PAT, TABLE_NAME_PMT})
     public @interface TableName {}
@@ -54,35 +57,49 @@ public final class TableRequest extends BroadcastInfoRequest implements Parcelab
     private final @TableName int mTableName;
     private final int mVersion;
 
-    public static TableRequest createFromParcelBody(Parcel in) {
+    static TableRequest createFromParcelBody(Parcel in) {
         return new TableRequest(in);
     }
 
     public TableRequest(int requestId, @RequestOption int option, int tableId,
             @TableName int tableName, int version) {
-        super(requestType, requestId, option);
+        super(REQUEST_TYPE, requestId, option);
         mTableId = tableId;
         mTableName = tableName;
         mVersion = version;
     }
 
-    protected TableRequest(Parcel source) {
-        super(requestType, source);
+    TableRequest(Parcel source) {
+        super(REQUEST_TYPE, source);
         mTableId = source.readInt();
         mTableName = source.readInt();
         mVersion = source.readInt();
     }
 
+    /**
+     * Gets the ID of requested table.
+     */
     public int getTableId() {
         return mTableId;
     }
 
+    /**
+     * Gets the name of requested table.
+     */
     public @TableName int getTableName() {
         return mTableName;
     }
 
+    /**
+     * Gets the version number of requested table.
+     */
     public int getVersion() {
         return mVersion;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     @Override

@@ -17,12 +17,15 @@
 package android.media.tv;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/** @hide */
+/**
+ * A response for TS (transport stream) from broadcast signal.
+ */
 public final class TsResponse extends BroadcastInfoResponse implements Parcelable {
-    public static final @TvInputManager.BroadcastInfoType int responseType =
+    private static final @TvInputManager.BroadcastInfoType int RESPONSE_TYPE =
             TvInputManager.BROADCAST_INFO_TYPE_TS;
 
     public static final @NonNull Parcelable.Creator<TsResponse> CREATOR =
@@ -41,23 +44,34 @@ public final class TsResponse extends BroadcastInfoResponse implements Parcelabl
 
     private final String mSharedFilterToken;
 
-    public static TsResponse createFromParcelBody(Parcel in) {
+    static TsResponse createFromParcelBody(@NonNull Parcel in) {
         return new TsResponse(in);
     }
 
     public TsResponse(int requestId, int sequence, @ResponseResult int responseResult,
-            String sharedFilterToken) {
-        super(responseType, requestId, sequence, responseResult);
+            @Nullable String sharedFilterToken) {
+        super(RESPONSE_TYPE, requestId, sequence, responseResult);
         this.mSharedFilterToken = sharedFilterToken;
     }
 
-    protected TsResponse(Parcel source) {
-        super(responseType, source);
+    TsResponse(Parcel source) {
+        super(RESPONSE_TYPE, source);
         mSharedFilterToken = source.readString();
     }
 
+    /**
+     * Gets a token of SharedFilter.
+     *
+     * <p>The token can be used to retrieve the transport stream from the filter.
+     */
+    @Nullable
     public String getSharedFilterToken() {
         return mSharedFilterToken;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     @Override

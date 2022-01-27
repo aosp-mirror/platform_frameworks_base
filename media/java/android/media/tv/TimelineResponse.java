@@ -17,10 +17,13 @@
 package android.media.tv;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/** @hide */
+/**
+ * A response for Timeline from broadcast signal.
+ */
 public final class TimelineResponse extends BroadcastInfoResponse implements Parcelable {
     private static final @TvInputManager.BroadcastInfoType int RESPONSE_TYPE =
             TvInputManager.BROADCAST_INFO_TYPE_TIMELINE;
@@ -50,7 +53,7 @@ public final class TimelineResponse extends BroadcastInfoResponse implements Par
     }
 
     public TimelineResponse(int requestId, int sequence,
-            @ResponseResult int responseResult, String selector, int unitsPerTick,
+            @ResponseResult int responseResult, @Nullable String selector, int unitsPerTick,
             int unitsPerSecond, long wallClock, long ticks) {
         super(RESPONSE_TYPE, requestId, sequence, responseResult);
         mSelector = selector;
@@ -60,7 +63,7 @@ public final class TimelineResponse extends BroadcastInfoResponse implements Par
         mTicks = ticks;
     }
 
-    protected TimelineResponse(Parcel source) {
+    TimelineResponse(Parcel source) {
         super(RESPONSE_TYPE, source);
         mSelector = source.readString();
         mUnitsPerTick = source.readInt();
@@ -69,22 +72,43 @@ public final class TimelineResponse extends BroadcastInfoResponse implements Par
         mTicks = source.readLong();
     }
 
+    /**
+     * Gets the Timeline Selector of the response.
+     * The Timeline Selector is a URI that specifies the source of a Timeline
+     * by indicating its type and information needed to locate the signalling
+     * that conveys Time Values on it.
+     */
+    @Nullable
     public String getSelector() {
         return mSelector;
     }
 
+    /**
+     * Gets the UnitsPerTick of the response.
+     */
     public int getUnitsPerTick() {
         return mUnitsPerTick;
     }
 
+    /**
+     * Gets the UnitsPerSecond of the response.
+     */
     public int getUnitsPerSecond() {
         return mUnitsPerSecond;
     }
 
+    /**
+     * Gets the System time (UTC) of the response.
+     */
     public long getWallClock() {
         return mWallClock;
     }
 
+    /**
+     * Gets the Ticks of the response.
+     * A Time Value is a measure of a moment in time for a particular Timeline.
+     * Time Values are represented by an integer number of ticks (positive or negative).
+     */
     public long getTicks() {
         return mTicks;
     }

@@ -18,19 +18,34 @@ package android.media.tv;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-/** @hide */
+/**
+ * A request for the information retrieved from broadcast signal.
+ */
+@SuppressLint("ParcelNotFinal")
 public abstract class BroadcastInfoRequest implements Parcelable {
+    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({REQUEST_OPTION_REPEAT, REQUEST_OPTION_AUTO_UPDATE})
     public @interface RequestOption {}
 
+    /**
+     * Request option: repeat.
+     * <p>With this option, a response is sent when related broadcast information is detected,
+     * even if the same information has been sent previously.
+     */
     public static final int REQUEST_OPTION_REPEAT = 0;
+    /**
+     * Request option: auto update.
+     * <p>With this option, a response is sent only when broadcast information is detected for the
+     * first time, new values are detected.
+     */
     public static final int REQUEST_OPTION_AUTO_UPDATE = 1;
 
     public static final @NonNull Parcelable.Creator<BroadcastInfoRequest> CREATOR =
@@ -66,32 +81,54 @@ public abstract class BroadcastInfoRequest implements Parcelable {
                 }
             };
 
-    protected final @TvInputManager.BroadcastInfoType int mType;
-    protected final int mRequestId;
-    protected final @RequestOption int mOption;
+    private final @TvInputManager.BroadcastInfoType int mType;
+    private final int mRequestId;
+    private final @RequestOption int mOption;
 
-    protected BroadcastInfoRequest(@TvInputManager.BroadcastInfoType int type,
+    BroadcastInfoRequest(@TvInputManager.BroadcastInfoType int type,
             int requestId, @RequestOption int option) {
         mType = type;
         mRequestId = requestId;
         mOption = option;
     }
 
-    protected BroadcastInfoRequest(@TvInputManager.BroadcastInfoType int type, Parcel source) {
+    BroadcastInfoRequest(@TvInputManager.BroadcastInfoType int type, Parcel source) {
         mType = type;
         mRequestId = source.readInt();
         mOption = source.readInt();
     }
 
-    public @TvInputManager.BroadcastInfoType int getType() {
+    /**
+     * Gets the broadcast info type.
+     *
+     * <p>The type indicates what broadcast information is requested, such as broadcast table,
+     * PES (packetized Elementary Stream), TS (transport stream), etc. The type of the
+     * request and the related responses should be the same.
+     */
+    @TvInputManager.BroadcastInfoType
+    public int getType() {
         return mType;
     }
 
+    /**
+     * Gets the ID of the request.
+     *
+     * <p>The ID is used to associate the response with the request.
+     *
+     * @see android.media.tv.BroadcastInfoResponse#getRequestId()
+     */
     public int getRequestId() {
         return mRequestId;
     }
 
-    public @RequestOption int getOption() {
+    /**
+     * Gets the request option of the request.
+     *
+     * @see #REQUEST_OPTION_REPEAT
+     * @see #REQUEST_OPTION_AUTO_UPDATE
+     */
+    @RequestOption
+    public int getOption() {
         return mOption;
     }
 

@@ -17,13 +17,16 @@
 package android.media.tv;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/** @hide */
+/**
+ * A response for Table from broadcast signal.
+ */
 public final class TableResponse extends BroadcastInfoResponse implements Parcelable {
-    public static final @TvInputManager.BroadcastInfoType int responseType =
+    private static final @TvInputManager.BroadcastInfoType int RESPONSE_TYPE =
             TvInputManager.BROADCAST_INFO_TYPE_TABLE;
 
     public static final @NonNull Parcelable.Creator<TableResponse> CREATOR =
@@ -44,36 +47,51 @@ public final class TableResponse extends BroadcastInfoResponse implements Parcel
     private final int mVersion;
     private final int mSize;
 
-    public static TableResponse createFromParcelBody(Parcel in) {
+    static TableResponse createFromParcelBody(Parcel in) {
         return new TableResponse(in);
     }
 
     public TableResponse(int requestId, int sequence, @ResponseResult int responseResult,
-            Uri tableUri, int version, int size) {
-        super(responseType, requestId, sequence, responseResult);
+            @Nullable Uri tableUri, int version, int size) {
+        super(RESPONSE_TYPE, requestId, sequence, responseResult);
         mTableUri = tableUri;
         mVersion = version;
         mSize = size;
     }
 
-    protected TableResponse(Parcel source) {
-        super(responseType, source);
+    TableResponse(Parcel source) {
+        super(RESPONSE_TYPE, source);
         String uriString = source.readString();
         mTableUri = uriString == null ? null : Uri.parse(uriString);
         mVersion = source.readInt();
         mSize = source.readInt();
     }
 
+    /**
+     * Gets the URI in TvProvider database.
+     */
+    @Nullable
     public Uri getTableUri() {
         return mTableUri;
     }
 
+    /**
+     * Gets the Version number of table.
+     */
     public int getVersion() {
         return mVersion;
     }
 
+    /**
+     * Gets the Size number of table.
+     */
     public int getSize() {
         return mSize;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     @Override
