@@ -54297,7 +54297,6 @@ package android.webkit {
   public abstract class WebSettings {
     ctor public WebSettings();
     method @Deprecated public abstract boolean enableSmoothTransition();
-    method public boolean getAllowAlgorithmicDarkening();
     method public abstract boolean getAllowContentAccess();
     method public abstract boolean getAllowFileAccess();
     method public abstract boolean getAllowFileAccessFromFileURLs();
@@ -54342,7 +54341,8 @@ package android.webkit {
     method public abstract int getTextZoom();
     method public abstract boolean getUseWideViewPort();
     method public abstract String getUserAgentString();
-    method public void setAllowAlgorithmicDarkening(boolean);
+    method public boolean isAlgorithmicDarkeningAllowed();
+    method public void setAlgorithmicDarkeningAllowed(boolean);
     method public abstract void setAllowContentAccess(boolean);
     method public abstract void setAllowFileAccess(boolean);
     method @Deprecated public abstract void setAllowFileAccessFromFileURLs(boolean);
