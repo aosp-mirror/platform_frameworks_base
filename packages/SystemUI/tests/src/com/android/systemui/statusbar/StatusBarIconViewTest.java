@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
@@ -37,6 +39,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
@@ -130,7 +133,12 @@ public class StatusBarIconViewTest extends SysuiTestCase {
         Icon icon = Icon.createWithBitmap(largeBitmap);
         StatusBarIcon largeIcon = new StatusBarIcon(UserHandle.ALL, "mockPackage",
                 icon, 0, 0, "");
-        assertFalse(mIconView.set(largeIcon));
+        assertTrue(mIconView.set(largeIcon));
+
+        // The view should downscale the bitmap.
+        BitmapDrawable drawable = (BitmapDrawable) mIconView.getDrawable();
+        assertThat(drawable.getBitmap().getWidth()).isLessThan(1000);
+        assertThat(drawable.getBitmap().getHeight()).isLessThan(1000);
     }
 
     @Test
