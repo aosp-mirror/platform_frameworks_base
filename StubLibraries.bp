@@ -212,6 +212,7 @@ modules_public_stubs = [
     "art.module.public.api.stubs",
     "conscrypt.module.public.api.stubs",
     "framework-appsearch.stubs",
+    "framework-bluetooth.stubs",
     "framework-connectivity.stubs",
     "framework-connectivity-tiramisu.stubs",
     "framework-graphics.stubs",
@@ -232,6 +233,7 @@ modules_system_stubs = [
     "art.module.public.api.stubs.system",
     "conscrypt.module.public.api.stubs", // Only has public stubs
     "framework-appsearch.stubs.system",
+    "framework-bluetooth.stubs.system",
     "framework-connectivity.stubs.system",
     "framework-connectivity-tiramisu.stubs.system",
     "framework-graphics.stubs.system",
@@ -290,6 +292,8 @@ java_library {
     srcs: [":module-lib-api-stubs-docs-non-updatable"],
     libs: [
         "sdk_module-lib_current_framework-tethering",
+        "sdk_public_current_framework-bluetooth",
+        // NOTE: The below can be removed once the prebuilt stub contains bluetooth.
         "sdk_system_current_android",
         // NOTE: The below can be removed once the prebuilt stub contains IKE.
         "sdk_system_current_android.net.ipsec.ike",
