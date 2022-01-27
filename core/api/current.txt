@@ -25223,6 +25223,7 @@ package android.net {
     method @NonNull public android.net.Ikev2VpnProfile.Builder setAuthPsk(@NonNull byte[]);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setAuthUsernamePassword(@NonNull String, @NonNull String, @Nullable java.security.cert.X509Certificate);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setBypassable(boolean);
+    method @NonNull public android.net.Ikev2VpnProfile.Builder setExcludeLocalRoutes(boolean);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setMaxMtu(int);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setMetered(boolean);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setProxy(@Nullable android.net.ProxyInfo);
@@ -25368,6 +25369,7 @@ package android.net {
   }
 
   public abstract class PlatformVpnProfile {
+    method public final boolean getExcludeLocalRoutes();
     method public final int getType();
     method @NonNull public final String getTypeString();
     field public static final int TYPE_IKEV2_IPSEC_PSK = 7; // 0x7
