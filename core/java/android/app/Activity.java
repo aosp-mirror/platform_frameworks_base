@@ -6139,6 +6139,10 @@ public class Activity extends ContextThemeWrapper
      * you to specify a custom animation even when starting an activity from
      * outside the context of the current top activity.
      *
+     * <p>Af of {@link android.os.Build.VERSION_CODES#S} application can only specify
+     * a transition animation when the transition happens within the same task. System
+     * default animation is used for cross-task transition animations.
+     *
      * @param enterAnim A resource ID of the animation resource to use for
      * the incoming activity.  Use 0 for no animation.
      * @param exitAnim A resource ID of the animation resource to use for
