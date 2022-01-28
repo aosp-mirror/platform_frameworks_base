@@ -23,7 +23,6 @@ import android.hardware.SensorPrivacyManager;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFaceConstants;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.face.FaceManager;
 import android.os.IBinder;
@@ -32,6 +31,8 @@ import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
@@ -66,12 +67,13 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
             @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
-            boolean isStrongBiometric, int statsClient, @NonNull LockoutTracker lockoutTracker,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+            boolean isStrongBiometric, @NonNull LockoutTracker lockoutTracker,
             @NonNull UsageStats usageStats, boolean allowBackgroundAuthentication,
             boolean isKeyguardBypassEnabled) {
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
-                owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
-                BiometricsProtoEnums.MODALITY_FACE, statsClient, null /* taskStackListener */,
+                owner, cookie, requireConfirmation, sensorId, logger, biometricContext,
+                isStrongBiometric, null /* taskStackListener */,
                 lockoutTracker, allowBackgroundAuthentication, true /* shouldVibrate */,
                 isKeyguardBypassEnabled);
         setRequestId(requestId);

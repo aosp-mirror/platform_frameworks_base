@@ -47,6 +47,7 @@ import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Icon;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
+import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
@@ -888,6 +889,17 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         if (mBar != null) {
             try {
                 mBar.hideAuthenticationDialog();
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void setBiometicContextListener(IBiometricContextListener listener) {
+        enforceStatusBarService();
+        if (mBar != null) {
+            try {
+                mBar.setBiometicContextListener(listener);
             } catch (RemoteException ex) {
             }
         }

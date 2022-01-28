@@ -23,9 +23,7 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants.FingerprintAcquired;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
-import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.common.OperationReason;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -35,6 +33,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.log.CallbackWithProbe;
 import com.android.server.biometrics.log.Probe;
 import com.android.server.biometrics.sensors.AuthenticationClient;
@@ -72,15 +72,18 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession> 
             @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, @NonNull String owner, int cookie, boolean requireConfirmation,
-            int sensorId, boolean isStrongBiometric, int statsClient,
+            int sensorId,
+            @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
+            boolean isStrongBiometric,
             @Nullable TaskStackListener taskStackListener, @NonNull LockoutCache lockoutCache,
             @Nullable IUdfpsOverlayController udfpsOverlayController,
             @Nullable ISidefpsController sidefpsController,
             boolean allowBackgroundAuthentication,
             @NonNull FingerprintSensorPropertiesInternal sensorProps) {
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted, owner,
-                cookie, requireConfirmation, sensorId, isStrongBiometric,
-                BiometricsProtoEnums.MODALITY_FINGERPRINT, statsClient, taskStackListener,
+                cookie, requireConfirmation, sensorId,
+                biometricLogger, biometricContext,
+                isStrongBiometric, taskStackListener,
                 lockoutCache, allowBackgroundAuthentication, true /* shouldVibrate */,
                 false /* isKeyguardBypassEnabled */);
         setRequestId(requestId);
@@ -175,13 +178,12 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession> 
         final AidlSession session = getFreshDaemon();
 
         if (session.hasContextMethods()) {
-            final OperationContext context = new OperationContext();
-            // TODO: add reason, id, and isAoD
-            context.id = 0;
-            context.reason = OperationReason.UNKNOWN;
-            context.isAoD = false;
-            context.isCrypto = isCryptoOperation();
-            return session.getSession().authenticateWithContext(mOperationId, context);
+            // TODO: add reason, id
+            mOperationContext.id = 0;
+            mOperationContext.reason = OperationReason.UNKNOWN;
+            mOperationContext.isAoD = getBiometricContext().isAoD();
+            mOperationContext.isCrypto = isCryptoOperation();
+            return session.getSession().authenticateWithContext(mOperationId, mOperationContext);
         } else {
             return session.getSession().authenticate(mOperationId);
         }

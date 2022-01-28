@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricFaceConstants;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.common.OperationReason;
@@ -40,6 +39,8 @@ import android.view.Surface;
 import com.android.internal.R;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.BiometricUtils;
@@ -89,11 +90,11 @@ public class FaceEnrollClient extends EnrollClient<AidlSession> {
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String opPackageName, long requestId,
             @NonNull BiometricUtils<Face> utils, @NonNull int[] disabledFeatures, int timeoutSec,
-            @Nullable Surface previewSurface, int sensorId, int maxTemplatesPerUser,
-            boolean debugConsent) {
+            @Nullable Surface previewSurface, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+            int maxTemplatesPerUser, boolean debugConsent) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, opPackageName, utils,
-                timeoutSec, BiometricsProtoEnums.MODALITY_FACE, sensorId,
-                false /* shouldVibrate */);
+                timeoutSec, sensorId, false /* shouldVibrate */, logger, biometricContext);
         setRequestId(requestId);
         mEnrollIgnoreList = getContext().getResources()
                 .getIntArray(R.array.config_face_acquire_enroll_ignorelist);
@@ -200,10 +201,10 @@ public class FaceEnrollClient extends EnrollClient<AidlSession> {
 
         if (session.hasContextMethods()) {
             final OperationContext context = new OperationContext();
-            // TODO: add reason, id, and isAoD
+            // TODO: add reason, id
             context.id = 0;
             context.reason = OperationReason.UNKNOWN;
-            context.isAoD = false;
+            context.isAoD = getBiometricContext().isAoD();
             context.isCrypto = isCryptoOperation();
             return session.getSession().enrollWithContext(
                     hat, EnrollmentType.DEFAULT, features, mHwPreviewHandle, context);

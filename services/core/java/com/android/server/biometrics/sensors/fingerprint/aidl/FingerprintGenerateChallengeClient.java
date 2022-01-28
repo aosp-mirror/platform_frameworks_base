@@ -23,6 +23,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.GenerateChallengeClient;
 
@@ -38,8 +40,10 @@ class FingerprintGenerateChallengeClient extends GenerateChallengeClient<AidlSes
             @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener,
-            int userId, @NonNull String owner, int sensorId) {
-        super(context, lazyDaemon, token, listener, userId, owner, sensorId);
+            int userId, @NonNull String owner, int sensorId,
+            @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext) {
+        super(context, lazyDaemon, token, listener, userId, owner, sensorId,
+                biometricLogger, biometricContext);
     }
 
     @Override

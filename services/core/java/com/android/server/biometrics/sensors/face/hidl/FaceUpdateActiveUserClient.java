@@ -18,13 +18,14 @@ package com.android.server.biometrics.sensors.face.hidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.os.Environment;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
@@ -41,11 +42,11 @@ public class FaceUpdateActiveUserClient extends HalClientMonitor<IBiometricsFace
 
     FaceUpdateActiveUserClient(@NonNull Context context,
             @NonNull Supplier<IBiometricsFace> lazyDaemon, int userId, @NonNull String owner,
-            int sensorId, boolean hasEnrolledBiometrics,
+            int sensorId, @NonNull BiometricLogger logger,
+            @NonNull BiometricContext biometricContext, boolean hasEnrolledBiometrics,
             @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
-                0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
-                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
+                0 /* cookie */, sensorId, logger, biometricContext);
         mHasEnrolledBiometrics = hasEnrolledBiometrics;
         mAuthenticatorIds = authenticatorIds;
     }

@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricFaceConstants;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.IFace;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -28,6 +27,8 @@ import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.ErrorConsumer;
@@ -48,10 +49,10 @@ public class FaceGetFeatureClient extends HalClientMonitor<AidlSession> implemen
 
     FaceGetFeatureClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, @Nullable ClientMonitorCallbackConverter listener, int userId,
-            @NonNull String owner, int sensorId) {
+            @NonNull String owner, int sensorId, @NonNull BiometricLogger logger,
+            @NonNull BiometricContext biometricContext) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
-                BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
-                BiometricsProtoEnums.CLIENT_UNKNOWN);
+                logger, biometricContext);
         mUserId = userId;
     }
 

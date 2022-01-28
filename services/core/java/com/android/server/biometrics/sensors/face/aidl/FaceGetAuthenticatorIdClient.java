@@ -18,11 +18,12 @@ package com.android.server.biometrics.sensors.face.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
@@ -38,10 +39,10 @@ class FaceGetAuthenticatorIdClient extends HalClientMonitor<AidlSession> {
     FaceGetAuthenticatorIdClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon,
             int userId, @NonNull String opPackageName, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, opPackageName,
-                0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_FACE,
-                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
+                0 /* cookie */, sensorId, logger, biometricContext);
         mAuthenticatorIds = authenticatorIds;
     }
 

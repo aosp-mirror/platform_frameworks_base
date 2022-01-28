@@ -37,6 +37,7 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
 import android.hardware.biometrics.BiometricPrompt;
+import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
@@ -64,6 +65,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.util.concurrency.Execution;
 
@@ -96,6 +98,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     private final Handler mHandler;
     private final Execution mExecution;
     private final CommandQueue mCommandQueue;
+    private final StatusBarStateController mStatusBarStateController;
     private final ActivityTaskManager mActivityTaskManager;
     @Nullable
     private final FingerprintManager mFingerprintManager;
@@ -118,6 +121,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     @Nullable private UdfpsController mUdfpsController;
     @Nullable private IUdfpsHbmListener mUdfpsHbmListener;
     @Nullable private SidefpsController mSidefpsController;
+    @Nullable private IBiometricContextListener mBiometricContextListener;
     @VisibleForTesting
     TaskStackListener mTaskStackListener;
     @VisibleForTesting
@@ -130,7 +134,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     @Nullable private List<FingerprintSensorPropertiesInternal> mSidefpsProps;
 
     @NonNull private final SparseBooleanArray mUdfpsEnrolledForUser;
-    private SensorPrivacyManager mSensorPrivacyManager;
+    @NonNull private final SensorPrivacyManager mSensorPrivacyManager;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
 
     private class BiometricTaskStackListener extends TaskStackListener {
@@ -491,6 +495,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
             Provider<SidefpsController> sidefpsControllerFactory,
             @NonNull DisplayManager displayManager,
             WakefulnessLifecycle wakefulnessLifecycle,
+            @NonNull StatusBarStateController statusBarStateController,
             @Main Handler handler) {
         super(context);
         mExecution = execution;
@@ -504,6 +509,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         mSidefpsControllerFactory = sidefpsControllerFactory;
         mWindowManager = windowManager;
         mUdfpsEnrolledForUser = new SparseBooleanArray();
+
         mOrientationListener = new BiometricDisplayListener(
                 context,
                 displayManager,
@@ -513,6 +519,14 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
                     onOrientationChanged();
                     return Unit.INSTANCE;
                 });
+
+        mStatusBarStateController = statusBarStateController;
+        mStatusBarStateController.addCallback(new StatusBarStateController.StateListener() {
+            @Override
+            public void onDozingChanged(boolean isDozing) {
+                notifyDozeChanged(isDozing);
+            }
+        });
 
         mFaceProps = mFaceManager != null ? mFaceManager.getSensorPropertiesInternal() : null;
 
@@ -562,6 +576,22 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
 
         mTaskStackListener = new BiometricTaskStackListener();
         mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
+    }
+
+    @Override
+    public void setBiometicContextListener(IBiometricContextListener listener) {
+        mBiometricContextListener = listener;
+        notifyDozeChanged(mStatusBarStateController.isDozing());
+    }
+
+    private void notifyDozeChanged(boolean isDozing) {
+        if (mBiometricContextListener != null) {
+            try {
+                mBiometricContextListener.onDozeChanged(isDozing);
+            } catch (RemoteException e) {
+                Log.w(TAG, "failed to notify initial doze state");
+            }
+        }
     }
 
     /**

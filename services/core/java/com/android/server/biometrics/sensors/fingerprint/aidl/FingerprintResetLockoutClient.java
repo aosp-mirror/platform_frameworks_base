@@ -18,7 +18,6 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.os.RemoteException;
@@ -26,6 +25,8 @@ import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ErrorConsumer;
 import com.android.server.biometrics.sensors.HalClientMonitor;
@@ -50,11 +51,11 @@ class FingerprintResetLockoutClient extends HalClientMonitor<AidlSession> implem
 
     FingerprintResetLockoutClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon, int userId, String owner, int sensorId,
+            @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
             @NonNull byte[] hardwareAuthToken, @NonNull LockoutCache lockoutTracker,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
-                0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
-                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
+                0 /* cookie */, sensorId, biometricLogger, biometricContext);
         mHardwareAuthToken = HardwareAuthTokenUtils.toHardwareAuthToken(hardwareAuthToken);
         mLockoutCache = lockoutTracker;
         mLockoutResetDispatcher = lockoutResetDispatcher;

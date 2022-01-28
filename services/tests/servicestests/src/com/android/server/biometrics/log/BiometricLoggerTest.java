@@ -44,7 +44,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 @Presubmit
 @SmallTest
@@ -53,6 +54,9 @@ public class BiometricLoggerTest {
     private static final int DEFAULT_MODALITY = BiometricsProtoEnums.MODALITY_FINGERPRINT;
     private static final int DEFAULT_ACTION = BiometricsProtoEnums.ACTION_AUTHENTICATE;
     private static final int DEFAULT_CLIENT = BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT;
+
+    @Rule
+    public final MockitoRule mockito = MockitoJUnit.rule();
 
     @Rule
     public TestableContext mContext = new TestableContext(
@@ -68,8 +72,6 @@ public class BiometricLoggerTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
         mContext.addMockSystemService(SensorManager.class, mSensorManager);
         when(mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)).thenReturn(
                 new Sensor(new InputSensorInfo("", "", 0, 0, Sensor.TYPE_LIGHT, 0, 0, 0, 0, 0, 0,

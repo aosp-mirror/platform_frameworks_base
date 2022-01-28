@@ -29,6 +29,9 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Slog;
 
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
+
 import java.util.function.Supplier;
 
 /**
@@ -57,9 +60,9 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
     public AcquisitionClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull String owner, int cookie, int sensorId, boolean shouldVibrate,
-            int statsModality, int statsAction, int statsClient) {
-        super(context, lazyDaemon, token, listener, userId, owner, cookie, sensorId, statsModality,
-                statsAction, statsClient);
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext) {
+        super(context, lazyDaemon, token, listener, userId, owner, cookie, sensorId,
+                logger, biometricContext);
         mPowerManager = context.getSystemService(PowerManager.class);
         mShouldVibrate = shouldVibrate;
     }

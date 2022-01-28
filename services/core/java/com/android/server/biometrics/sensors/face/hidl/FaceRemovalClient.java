@@ -18,13 +18,14 @@ package com.android.server.biometrics.sensors.face.hidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.face.Face;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.RemovalClient;
@@ -44,9 +45,11 @@ class FaceRemovalClient extends RemovalClient<Face, IBiometricsFace> {
     FaceRemovalClient(@NonNull Context context, @NonNull Supplier<IBiometricsFace> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
             int biometricId, int userId, @NonNull String owner, @NonNull BiometricUtils<Face> utils,
-            int sensorId, @NonNull Map<Integer, Long> authenticatorIds) {
-        super(context, lazyDaemon, token, listener, userId, owner, utils, sensorId,
-                authenticatorIds, BiometricsProtoEnums.MODALITY_FACE);
+            int sensorId, @NonNull BiometricLogger logger,
+            @NonNull BiometricContext biometricContext,
+            @NonNull Map<Integer, Long> authenticatorIds) {
+        super(context, lazyDaemon, token, listener, userId, owner, utils, sensorId, logger,
+                biometricContext, authenticatorIds);
         mBiometricId = biometricId;
     }
 
