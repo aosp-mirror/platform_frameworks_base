@@ -66,6 +66,7 @@ per-file com_android_internal_net_* = file:/services/core/java/com/android/serve
 
 ### Graphics ###
 per-file android_graphics_* = file:/graphics/java/android/graphics/OWNERS
+per-file android_hardware_HardwareBuffer.cpp = file:/graphics/java/android/graphics/OWNERS
 
 ### Text ###
 per-file android_text_* = file:/core/java/android/text/OWNERS
