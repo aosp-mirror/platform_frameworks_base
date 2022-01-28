@@ -131,11 +131,16 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
      *
      * @param name The name of the cursor window, or null if none.
      * @param windowSizeBytes Size of cursor window in bytes.
+     * @throws IllegalArgumentException if {@code windowSizeBytes} is less than 0
+     * @throws AssertionError if created window pointer is 0
      * <p><strong>Note:</strong> Memory is dynamically allocated as data rows are added to the
      * window. Depending on the amount of data stored, the actual amount of memory allocated can be
      * lower than specified size, but cannot exceed it.
      */
     public CursorWindow(String name, @BytesLong long windowSizeBytes) {
+        if (windowSizeBytes < 0) {
+            throw new IllegalArgumentException("Window size cannot be less than 0");
+        }
         mStartPos = 0;
         mName = name != null && name.length() != 0 ? name : "<unnamed>";
         mWindowPtr = nativeCreate(mName, (int) windowSizeBytes);
