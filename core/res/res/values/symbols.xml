@@ -3510,6 +3510,7 @@
   <java-symbol type="layout" name="autofill_dataset_picker"/>
   <java-symbol type="layout" name="autofill_dataset_picker_fullscreen"/>
   <java-symbol type="layout" name="autofill_dataset_picker_header_footer"/>
+  <java-symbol type="layout" name="autofill_fill_dialog"/>
   <java-symbol type="id" name="autofill" />
   <java-symbol type="id" name="autofill_dataset_footer"/>
   <java-symbol type="id" name="autofill_dataset_header"/>
@@ -3522,6 +3523,13 @@
   <java-symbol type="id" name="autofill_save_no" />
   <java-symbol type="id" name="autofill_save_title" />
   <java-symbol type="id" name="autofill_save_yes" />
+  <java-symbol type="id" name="autofill_service_icon" />
+  <java-symbol type="id" name="autofill_dialog_picker"/>
+  <java-symbol type="id" name="autofill_dialog_header"/>
+  <java-symbol type="id" name="autofill_dialog_container"/>
+  <java-symbol type="id" name="autofill_dialog_list"/>
+  <java-symbol type="id" name="autofill_dialog_no" />
+  <java-symbol type="id" name="autofill_dialog_yes" />
   <java-symbol type="string" name="autofill_error_cannot_autofill" />
   <java-symbol type="string" name="autofill_picker_no_suggestions" />
   <java-symbol type="string" name="autofill_picker_some_suggestions" />

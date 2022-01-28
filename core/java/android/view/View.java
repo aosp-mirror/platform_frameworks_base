@@ -8178,9 +8178,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         // to User. Ideally View should handle the event when isVisibleToUser()
                         // becomes true where it should issue notifyViewEntered().
                         afm.notifyViewEntered(this);
+                    } else {
+                        afm.enableFillRequestActivityStarted();
                     }
                 } else if (!enter && !isFocused()) {
                     afm.notifyViewExited(this);
+                } else if (enter) {
+                    afm.enableFillRequestActivityStarted();
                 }
             }
         }
