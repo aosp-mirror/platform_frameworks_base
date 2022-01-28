@@ -107,9 +107,11 @@ final class IInputMethodInvoker {
 
     @AnyThread
     void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privOps,
-            int configChanges, boolean stylusHwSupported) {
+            int configChanges, boolean stylusHwSupported,
+            boolean shouldShowImeSwitcherWhenImeIsShown) {
         try {
-            mTarget.initializeInternal(token, privOps, configChanges, stylusHwSupported);
+            mTarget.initializeInternal(token, privOps, configChanges, stylusHwSupported,
+                    shouldShowImeSwitcherWhenImeIsShown);
         } catch (RemoteException e) {
             logRemoteException(e);
         }
@@ -145,9 +147,20 @@ final class IInputMethodInvoker {
 
     @AnyThread
     void startInput(IBinder startInputToken, IInputContext inputContext, EditorInfo attribute,
-            boolean restarting) {
+            boolean restarting, boolean shouldShowImeSwitcherWhenImeIsShown) {
         try {
-            mTarget.startInput(startInputToken, inputContext, attribute, restarting);
+            mTarget.startInput(startInputToken, inputContext, attribute, restarting,
+                    shouldShowImeSwitcherWhenImeIsShown);
+        } catch (RemoteException e) {
+            logRemoteException(e);
+        }
+    }
+
+    @AnyThread
+    void onShouldShowImeSwitcherWhenImeIsShownChanged(boolean shouldShowImeSwitcherWhenImeIsShown) {
+        try {
+            mTarget.onShouldShowImeSwitcherWhenImeIsShownChanged(
+                    shouldShowImeSwitcherWhenImeIsShown);
         } catch (RemoteException e) {
             logRemoteException(e);
         }

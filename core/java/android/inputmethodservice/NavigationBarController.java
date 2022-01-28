@@ -74,6 +74,10 @@ final class NavigationBarController {
         default void onDestroy() {
         }
 
+        default void setShouldShowImeSwitcherWhenImeIsShown(
+                boolean shouldShowImeSwitcherWhenImeIsShown) {
+        }
+
         default void onSystemBarAppearanceChanged(@Appearance int appearance) {
         }
 
@@ -109,6 +113,10 @@ final class NavigationBarController {
         mImpl.onDestroy();
     }
 
+    void setShouldShowImeSwitcherWhenImeIsShown(boolean shouldShowImeSwitcherWhenImeIsShown) {
+        mImpl.setShouldShowImeSwitcherWhenImeIsShown(shouldShowImeSwitcherWhenImeIsShown);
+    }
+
     void onSystemBarAppearanceChanged(@Appearance int appearance) {
         mImpl.onSystemBarAppearanceChanged(appearance);
     }
@@ -138,6 +146,8 @@ final class NavigationBarController {
 
         @Nullable
         private BroadcastReceiver mSystemOverlayChangedReceiver;
+
+        private boolean mShouldShowImeSwitcherWhenImeIsShown;
 
         @Appearance
         private int mAppearance;
@@ -205,7 +215,9 @@ final class NavigationBarController {
                     // TODO(b/213337792): Support InputMethodService#setBackDisposition().
                     // TODO(b/213337792): Set NAVIGATION_HINT_IME_SHOWN only when necessary.
                     final int hints = StatusBarManager.NAVIGATION_HINT_BACK_ALT
-                            | StatusBarManager.NAVIGATION_HINT_IME_SHOWN;
+                            | (mShouldShowImeSwitcherWhenImeIsShown
+                                    ? StatusBarManager.NAVIGATION_HINT_IME_SHOWN
+                                    : 0);
                     navigationBarView.setNavigationIconHints(hints);
                 }
             } else {
@@ -423,6 +435,31 @@ final class NavigationBarController {
         }
 
         @Override
+        public void setShouldShowImeSwitcherWhenImeIsShown(
+                boolean shouldShowImeSwitcherWhenImeIsShown) {
+            if (mDestroyed) {
+                return;
+            }
+            if (mShouldShowImeSwitcherWhenImeIsShown == shouldShowImeSwitcherWhenImeIsShown) {
+                return;
+            }
+            mShouldShowImeSwitcherWhenImeIsShown = shouldShowImeSwitcherWhenImeIsShown;
+
+            if (mNavigationBarFrame == null) {
+                return;
+            }
+            final NavigationBarView navigationBarView =
+                    mNavigationBarFrame.findViewByPredicate(NavigationBarView.class::isInstance);
+            if (navigationBarView == null) {
+                return;
+            }
+            final int hints = StatusBarManager.NAVIGATION_HINT_BACK_ALT
+                    | (shouldShowImeSwitcherWhenImeIsShown
+                    ? StatusBarManager.NAVIGATION_HINT_IME_SHOWN : 0);
+            navigationBarView.setNavigationIconHints(hints);
+        }
+
+        @Override
         public void onSystemBarAppearanceChanged(@Appearance int appearance) {
             if (mDestroyed) {
                 return;
@@ -471,6 +508,7 @@ final class NavigationBarController {
         public String toDebugString() {
             return "{mRenderGesturalNavButtons=" + mRenderGesturalNavButtons
                     + " mNavigationBarFrame=" + mNavigationBarFrame
+                    + " mShouldShowImeSwitcherWhenImeIsShown" + mShouldShowImeSwitcherWhenImeIsShown
                     + " mAppearance=0x" + Integer.toHexString(mAppearance)
                     + " mDarkIntensity=" + mDarkIntensity
                     + "}";
