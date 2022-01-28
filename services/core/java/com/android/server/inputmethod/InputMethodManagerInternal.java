@@ -162,28 +162,30 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
-                public List<InputMethodInfo> getInputMethodListAsUser(int userId) {
+                public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
                     return Collections.emptyList();
                 }
 
                 @Override
-                public List<InputMethodInfo> getEnabledInputMethodListAsUser(int userId) {
+                public List<InputMethodInfo> getEnabledInputMethodListAsUser(
+                        @UserIdInt int userId) {
                     return Collections.emptyList();
                 }
 
                 @Override
-                public void onCreateInlineSuggestionsRequest(int userId,
+                public void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
                         InlineSuggestionsRequestInfo requestInfo,
                         IInlineSuggestionsRequestCallback cb) {
                 }
 
                 @Override
-                public boolean switchToInputMethod(String imeId, int userId) {
+                public boolean switchToInputMethod(String imeId, @UserIdInt int userId) {
                     return false;
                 }
 
                 @Override
-                public boolean setInputMethodEnabled(String imeId, boolean enabled, int userId) {
+                public boolean setInputMethodEnabled(String imeId, boolean enabled,
+                        @UserIdInt int userId) {
                     return false;
                 }
 

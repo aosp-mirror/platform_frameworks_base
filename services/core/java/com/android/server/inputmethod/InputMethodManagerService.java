@@ -4977,28 +4977,28 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         @Override
-        public List<InputMethodInfo> getInputMethodListAsUser(int userId) {
+        public List<InputMethodInfo> getInputMethodListAsUser(@UserIdInt int userId) {
             return mService.getInputMethodListAsUser(userId);
         }
 
         @Override
-        public List<InputMethodInfo> getEnabledInputMethodListAsUser(int userId) {
+        public List<InputMethodInfo> getEnabledInputMethodListAsUser(@UserIdInt int userId) {
             return mService.getEnabledInputMethodListAsUser(userId);
         }
 
         @Override
-        public void onCreateInlineSuggestionsRequest(int userId,
+        public void onCreateInlineSuggestionsRequest(@UserIdInt int userId,
                 InlineSuggestionsRequestInfo requestInfo, IInlineSuggestionsRequestCallback cb) {
             mService.onCreateInlineSuggestionsRequest(userId, requestInfo, cb);
         }
 
         @Override
-        public boolean switchToInputMethod(String imeId, int userId) {
+        public boolean switchToInputMethod(String imeId, @UserIdInt int userId) {
             return mService.switchToInputMethod(imeId, userId);
         }
 
         @Override
-        public boolean setInputMethodEnabled(String imeId, boolean enabled, int userId) {
+        public boolean setInputMethodEnabled(String imeId, boolean enabled, @UserIdInt int userId) {
             return mService.setInputMethodEnabled(imeId, enabled, userId);
         }
 
