@@ -73,6 +73,10 @@ import java.io.PrintWriter;
 public abstract class PanelViewController {
     public static final boolean DEBUG = PanelView.DEBUG;
     public static final String TAG = PanelView.class.getSimpleName();
+    public static final float FLING_MAX_LENGTH_SECONDS = 0.6f;
+    public static final float FLING_SPEED_UP_FACTOR = 0.6f;
+    public static final float FLING_CLOSING_MAX_LENGTH_SECONDS = 0.6f;
+    public static final float FLING_CLOSING_SPEED_UP_FACTOR = 0.6f;
     private static final int NO_FIXED_DURATION = -1;
     private static final long SHADE_OPEN_SPRING_OUT_DURATION = 350L;
     private static final long SHADE_OPEN_SPRING_BACK_DURATION = 400L;
@@ -269,13 +273,13 @@ public abstract class PanelViewController {
         mNotificationShadeWindowController = notificationShadeWindowController;
         mFlingAnimationUtils = flingAnimationUtilsBuilder
                 .reset()
-                .setMaxLengthSeconds(0.6f)
-                .setSpeedUpFactor(0.6f)
+                .setMaxLengthSeconds(FLING_MAX_LENGTH_SECONDS)
+                .setSpeedUpFactor(FLING_SPEED_UP_FACTOR)
                 .build();
         mFlingAnimationUtilsClosing = flingAnimationUtilsBuilder
                 .reset()
-                .setMaxLengthSeconds(0.5f)
-                .setSpeedUpFactor(0.6f)
+                .setMaxLengthSeconds(FLING_CLOSING_MAX_LENGTH_SECONDS)
+                .setSpeedUpFactor(FLING_CLOSING_SPEED_UP_FACTOR)
                 .build();
         mFlingAnimationUtilsDismissing = flingAnimationUtilsBuilder
                 .reset()

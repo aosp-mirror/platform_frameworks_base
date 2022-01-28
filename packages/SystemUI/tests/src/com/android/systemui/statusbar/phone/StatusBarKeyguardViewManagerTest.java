@@ -43,6 +43,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -97,6 +98,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     private KeyguardMessageArea mKeyguardMessageArea;
     @Mock
     private ShadeController mShadeController;
+    @Mock
+    private DreamOverlayStateController mDreamOverlayStateController;
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
@@ -116,6 +119,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mStatusBarStateController,
                 mock(ConfigurationController.class),
                 mKeyguardUpdateMonitor,
+                mDreamOverlayStateController,
                 mock(NavigationModeController.class),
                 mock(DockManager.class),
                 mock(NotificationShadeWindowController.class),

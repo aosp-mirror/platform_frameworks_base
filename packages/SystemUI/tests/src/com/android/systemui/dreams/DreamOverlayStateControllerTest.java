@@ -16,9 +16,12 @@
 
 package com.android.systemui.dreams;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -35,6 +38,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Collection;
@@ -56,7 +60,29 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testCallback() throws Exception {
+    public void testStateChange() {
+        final DreamOverlayStateController stateController = new DreamOverlayStateController(
+                mExecutor);
+        stateController.addCallback(mCallback);
+        stateController.setOverlayActive(true);
+        mExecutor.runAllReady();
+
+        verify(mCallback).onStateChanged();
+        assertThat(stateController.isOverlayActive()).isTrue();
+
+        Mockito.clearInvocations(mCallback);
+        stateController.setOverlayActive(true);
+        mExecutor.runAllReady();
+        verify(mCallback, never()).onStateChanged();
+
+        stateController.setOverlayActive(false);
+        mExecutor.runAllReady();
+        verify(mCallback).onStateChanged();
+        assertThat(stateController.isOverlayActive()).isFalse();
+    }
+
+    @Test
+    public void testCallback() {
         final DreamOverlayStateController stateController = new DreamOverlayStateController(
                 mExecutor);
         stateController.addCallback(mCallback);

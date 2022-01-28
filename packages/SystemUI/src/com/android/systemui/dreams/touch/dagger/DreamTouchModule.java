@@ -21,8 +21,10 @@ import dagger.Module;
 /**
  * {@link DreamTouchModule} encapsulates dream touch-related components.
  */
-@Module(subcomponents = {
-        InputSessionComponent.class,
+@Module(includes = {
+            BouncerSwipeModule.class,
+        }, subcomponents = {
+            InputSessionComponent.class,
 })
 public interface DreamTouchModule {
     String INPUT_SESSION_NAME = "INPUT_SESSION_NAME";

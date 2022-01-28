@@ -87,6 +87,7 @@ import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentService;
@@ -285,6 +286,7 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotifLiveDataStore mNotifLiveDataStore;
     @Mock private InteractionJankMonitor mJankMonitor;
     @Mock private DeviceStateManager mDeviceStateManager;
+    @Mock private DreamOverlayStateController mDreamOverlayStateController;
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
@@ -474,7 +476,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mActivityLaunchAnimator,
                 mNotifPipelineFlags,
                 mJankMonitor,
-                mDeviceStateManager);
+                mDeviceStateManager,
+                mDreamOverlayStateController);
         when(mKeyguardViewMediator.registerStatusBar(
                 any(StatusBar.class),
                 any(NotificationPanelViewController.class),

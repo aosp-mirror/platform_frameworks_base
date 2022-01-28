@@ -34,7 +34,6 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayContainerView;
 import com.android.systemui.dreams.DreamOverlayStatusBarView;
-import com.android.systemui.dreams.touch.DreamTouchHandler;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
@@ -44,7 +43,6 @@ import javax.inject.Named;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
-import dagger.multibindings.IntoSet;
 
 /** Dagger module for {@link DreamOverlayComponent}. */
 @Module
@@ -148,13 +146,5 @@ public abstract class DreamOverlayModule {
     @DreamOverlayComponent.DreamOverlayScope
     static Lifecycle providesLifecycle(LifecycleOwner lifecycleOwner) {
         return lifecycleOwner.getLifecycle();
-    }
-
-    // TODO: This stub should be removed once there is a {@link DreamTouchHandler}
-    // implementation present.
-    @Provides
-    @IntoSet
-    static DreamTouchHandler provideDreamTouchHandler() {
-        return session -> { };
     }
 }

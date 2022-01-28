@@ -150,6 +150,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.emergency.EmergencyGesture;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
@@ -338,6 +339,7 @@ public class StatusBar extends CoreStartable implements
     }
 
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
+    private final DreamOverlayStateController mDreamOverlayStateController;
     private StatusBarCommandQueueCallbacks mCommandQueueCallbacks;
 
     void onStatusBarWindowStateChanged(@WindowVisibleState int state) {
@@ -781,7 +783,8 @@ public class StatusBar extends CoreStartable implements
             ActivityLaunchAnimator activityLaunchAnimator,
             NotifPipelineFlags notifPipelineFlags,
             InteractionJankMonitor jankMonitor,
-            DeviceStateManager deviceStateManager) {
+            DeviceStateManager deviceStateManager,
+            DreamOverlayStateController dreamOverlayStateController) {
         super(context);
         mNotificationsController = notificationsController;
         mFragmentService = fragmentService;
@@ -869,6 +872,7 @@ public class StatusBar extends CoreStartable implements
         mMessageRouter = messageRouter;
         mWallpaperManager = wallpaperManager;
         mJankMonitor = jankMonitor;
+        mDreamOverlayStateController = dreamOverlayStateController;
 
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mStartingSurfaceOptional = startingSurfaceOptional;
@@ -4142,6 +4146,10 @@ public class StatusBar extends CoreStartable implements
      */
     public boolean isBouncerShowingScrimmed() {
         return isBouncerShowing() && mStatusBarKeyguardViewManager.bouncerNeedsScrimming();
+    }
+
+    public boolean isBouncerShowingOverDream() {
+        return isBouncerShowing() && mDreamOverlayStateController.isOverlayActive();
     }
 
     /**

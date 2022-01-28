@@ -20,6 +20,30 @@
     android:id="@+id/dream_overlay_complications_layer"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <androidx.constraintlayout.widget.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/complication_top_guide"
+        app:layout_constraintGuide_percent="@dimen/dream_overlay_complication_guide_top_percent"
+        android:orientation="horizontal"/>
+    <androidx.constraintlayout.widget.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/complication_end_guide"
+        app:layout_constraintGuide_percent="@dimen/dream_overlay_complication_guide_end_percent"
+        android:orientation="vertical"/>
+    <androidx.constraintlayout.widget.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/complication_bottom_guide"
+        app:layout_constraintGuide_percent="@dimen/dream_overlay_complication_guide_bottom_percent"
+        android:orientation="horizontal"/>
+    <androidx.constraintlayout.widget.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/complication_start_guide"
+        app:layout_constraintGuide_percent="@dimen/dream_overlay_complication_guide_start_percent"
+        android:orientation="vertical"/>
     <TextClock
         android:id="@+id/time_view"
         android:layout_width="wrap_content"

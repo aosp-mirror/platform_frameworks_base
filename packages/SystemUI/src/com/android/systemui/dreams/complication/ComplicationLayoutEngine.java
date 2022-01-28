@@ -25,10 +25,13 @@ import android.view.ViewGroup;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Constraints;
 
+import com.android.systemui.R;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -102,6 +105,8 @@ public class ComplicationLayoutEngine  {
 
             final int direction = getLayoutParams().getDirection();
 
+            final boolean snapsToGuide = getLayoutParams().snapsToGuide();
+
             // If no parent, view is the anchor. In this case, it is given the highest priority for
             // alignment. All alignment preferences are done in relation to the parent container.
             final boolean isRoot = head == mView;
@@ -125,12 +130,22 @@ public class ComplicationLayoutEngine  {
                         } else {
                             params.startToEnd = head.getId();
                         }
+                        if (snapsToGuide
+                                && (direction == ComplicationLayoutParams.DIRECTION_DOWN
+                                || direction == ComplicationLayoutParams.DIRECTION_UP)) {
+                            params.endToStart = R.id.complication_start_guide;
+                        }
                         break;
                     case ComplicationLayoutParams.POSITION_TOP:
                         if (isRoot || direction != ComplicationLayoutParams.DIRECTION_DOWN) {
                             params.topToTop = ConstraintLayout.LayoutParams.PARENT_ID;
                         } else {
                             params.topToBottom = head.getId();
+                        }
+                        if (snapsToGuide
+                                && (direction == ComplicationLayoutParams.DIRECTION_END
+                                || direction == ComplicationLayoutParams.DIRECTION_START)) {
+                            params.endToStart = R.id.complication_top_guide;
                         }
                         break;
                     case ComplicationLayoutParams.POSITION_BOTTOM:
@@ -139,6 +154,11 @@ public class ComplicationLayoutEngine  {
                         } else {
                             params.bottomToTop = head.getId();
                         }
+                        if (snapsToGuide
+                                && (direction == ComplicationLayoutParams.DIRECTION_END
+                                || direction == ComplicationLayoutParams.DIRECTION_START)) {
+                            params.topToBottom = R.id.complication_bottom_guide;
+                        }
                         break;
                     case ComplicationLayoutParams.POSITION_END:
                         if (isRoot || direction != ComplicationLayoutParams.DIRECTION_START) {
@@ -146,11 +166,26 @@ public class ComplicationLayoutEngine  {
                         } else {
                             params.endToStart = head.getId();
                         }
+                        if (snapsToGuide
+                                && (direction == ComplicationLayoutParams.DIRECTION_UP
+                                || direction == ComplicationLayoutParams.DIRECTION_DOWN)) {
+                            params.startToEnd = R.id.complication_end_guide;
+                        }
                         break;
                 }
             });
 
             mView.setLayoutParams(params);
+        }
+
+        private void setGuide(ConstraintLayout.LayoutParams lp, int validDirections,
+                Consumer<ConstraintLayout.LayoutParams> consumer) {
+            final ComplicationLayoutParams layoutParams = getLayoutParams();
+            if (!layoutParams.snapsToGuide()) {
+                return;
+            }
+
+            consumer.accept(lp);
         }
 
         /**

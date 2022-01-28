@@ -91,6 +91,9 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     @Mock
     DreamOverlayTouchMonitor mDreamOverlayTouchMonitor;
 
+    @Mock
+    DreamOverlayStateController mStateController;
+
 
     DreamOverlayService mService;
 
@@ -115,6 +118,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
         mService = new DreamOverlayService(mContext, mMainExecutor,
                 mDreamOverlayComponentFactory,
+                mStateController,
                 mKeyguardUpdateMonitor);
         final IBinder proxy = mService.onBind(new Intent());
         final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);

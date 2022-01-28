@@ -106,6 +106,7 @@ import com.android.systemui.animation.Interpolators;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.navigationbar.NavigationModeController;
@@ -233,6 +234,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
      * keyguard to show even if it is disabled for the current user.
      */
     public static final String OPTION_FORCE_SHOW = "force_show";
+    private final DreamOverlayStateController mDreamOverlayStateController;
 
     /** The stream type that the lock sounds are tied to. */
     private int mUiSoundsStreamType;
@@ -290,6 +292,9 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
     // AOD is enabled and status bar is in AOD state.
     private boolean mAodShowing;
+
+    // Dream overlay is visible.
+    private boolean mDreamOverlayShowing;
 
     /** Cached value of #isInputRestricted */
     private boolean mInputRestricted;
@@ -469,6 +474,14 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 }
             }
     };
+
+    private final DreamOverlayStateController.Callback mDreamOverlayStateCallback =
+            new DreamOverlayStateController.Callback() {
+                @Override
+                public void onStateChanged() {
+                    mDreamOverlayShowing = mDreamOverlayStateController.isOverlayActive();
+                }
+            };
 
     KeyguardUpdateMonitorCallback mUpdateCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -836,6 +849,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             Lazy<NotificationShadeDepthController> notificationShadeDepthController,
             ScreenOnCoordinator screenOnCoordinator,
             InteractionJankMonitor interactionJankMonitor,
+            DreamOverlayStateController dreamOverlayStateController,
             Lazy<NotificationShadeWindowController> notificationShadeWindowControllerLazy) {
         super(context);
         mFalsingCollector = falsingCollector;
@@ -875,6 +889,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         mKeyguardUnlockAnimationControllerLazy = keyguardUnlockAnimationControllerLazy;
         mScreenOffAnimationController = screenOffAnimationController;
         mInteractionJankMonitor = interactionJankMonitor;
+        mDreamOverlayStateController = dreamOverlayStateController;
     }
 
     public void userActivity() {
@@ -980,6 +995,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             mSystemReady = true;
             doKeyguardLocked(null);
             mUpdateMonitor.registerCallback(mUpdateCallback);
+            mDreamOverlayStateController.addCallback(mDreamOverlayStateCallback);
         }
         // Most services aren't available until the system reaches the ready state, so we
         // send it here when the device first boots.
@@ -2123,7 +2139,7 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         Trace.beginSection("KeyguardViewMediator#handleHide");
 
         // It's possible that the device was unlocked in a dream state. It's time to wake up.
-        if (mAodShowing) {
+        if (mAodShowing || mDreamOverlayShowing) {
             PowerManager pm = mContext.getSystemService(PowerManager.class);
             pm.wakeUp(SystemClock.uptimeMillis(), PowerManager.WAKE_REASON_GESTURE,
                     "com.android.systemui:BOUNCER_DOZING");
