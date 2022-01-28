@@ -64,6 +64,20 @@ public class FooterPreferenceTest {
     }
 
     @Test
+    public void setLearnMoreText_shouldSetAsTextInLearnMore() {
+        final PreferenceViewHolder holder = PreferenceViewHolder.createInstanceForTests(
+                LayoutInflater.from(mContext).inflate(R.layout.preference_footer, null));
+        mFooterPreference.setLearnMoreText("Custom learn more");
+        mFooterPreference.setLearnMoreAction(view -> { /* do nothing */ } /* listener */);
+
+        mFooterPreference.onBindViewHolder(holder);
+
+        assertThat(((TextView) holder.findViewById(
+                        R.id.settingslib_learn_more)).getText().toString())
+                .isEqualTo("Custom learn more");
+    }
+
+    @Test
     public void setContentDescription_contentSet_shouldGetSameContentDescription() {
         mFooterPreference.setContentDescription("test");
 
