@@ -1314,7 +1314,7 @@ public final class AppRestrictionController {
         void onSystemReady() {
             mContext.registerReceiverForAllUsers(mActionButtonReceiver,
                     new IntentFilter(ACTION_FGS_MANAGER_TRAMPOLINE),
-                    MANAGE_ACTIVITY_TASKS, mBgController.mBgHandler);
+                    MANAGE_ACTIVITY_TASKS, mBgController.mBgHandler, Context.RECEIVER_NOT_EXPORTED);
         }
 
         void postRequestBgRestrictedIfNecessary(String packageName, int uid) {
