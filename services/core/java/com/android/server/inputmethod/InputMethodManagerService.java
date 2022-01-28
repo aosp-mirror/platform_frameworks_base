@@ -160,6 +160,7 @@ import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.DumpUtils;
@@ -273,6 +274,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     final WindowManagerInternal mWindowManagerInternal;
     final PackageManagerInternal mPackageManagerInternal;
     final InputManagerInternal mInputManagerInternal;
+    private final HandlerCaller mCaller;
     final boolean mHasFeature;
     private final ArrayMap<String, List<InputMethodSubtype>> mAdditionalSubtypeMap =
             new ArrayMap<>();
@@ -1585,6 +1587,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mImeDisplayValidator = mWindowManagerInternal::getDisplayImePolicy;
+        mCaller = new HandlerCaller(context, thread.getLooper(), this::handleMessage,
+                true /*asyncHandler*/);
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         mUserManager = mContext.getSystemService(UserManager.class);
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
@@ -2208,24 +2212,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @NonNull
-    private Message obtainMessageOO(int what, Object arg1, Object arg2) {
-        final SomeArgs args = SomeArgs.obtain();
-        args.arg1 = arg1;
-        args.arg2 = arg2;
-        return mHandler.obtainMessage(what, 0, 0, args);
-    }
-
-    @NonNull
-    private Message obtainMessageIIIO(int what, int argi1, int argi2, int argi3, Object arg1) {
-        final SomeArgs args = SomeArgs.obtain();
-        args.arg1 = arg1;
-        args.argi1 = argi1;
-        args.argi2 = argi2;
-        args.argi3 = argi3;
-        return mHandler.obtainMessage(what, 0, 0, args);
-    }
-
     private void executeOrSendMessage(IInputMethodClient target, Message msg) {
          if (target.asBinder() instanceof Binder) {
              // This is supposed to be emulating the one-way semantics when the IME client is
@@ -2234,7 +2220,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
              // We probably should create a simple wrapper of IInputMethodClient as the first step
              // to get rid of executeOrSendMessage() then should prohibit system_server to be the
              // IME client for long term.
-             mHandler.sendMessage(msg);
+             mCaller.sendMessage(msg);
          } else {
              handleMessage(msg);
              msg.recycle();
@@ -2256,7 +2242,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
             scheduleSetActiveToClient(mCurClient, false /* active */, false /* fullscreen */,
                     false /* reportToImeController */);
-            executeOrSendMessage(mCurClient.client, mHandler.obtainMessage(
+            executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIIO(
                     MSG_UNBIND_CLIENT, getSequenceNumberLocked(), unbindClientReason,
                     mCurClient.client));
             mCurClient.sessionRequested = false;
@@ -2538,9 +2524,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     @AnyThread
     void scheduleNotifyImeUidToAudioService(int uid) {
-        mHandler.removeMessages(MSG_NOTIFY_IME_UID_TO_AUDIO_SERVICE);
-        mHandler.obtainMessage(MSG_NOTIFY_IME_UID_TO_AUDIO_SERVICE, uid, 0 /* unused */)
-                .sendToTarget();
+        mCaller.removeMessages(MSG_NOTIFY_IME_UID_TO_AUDIO_SERVICE);
+        mCaller.obtainMessageI(MSG_NOTIFY_IME_UID_TO_AUDIO_SERVICE, uid).sendToTarget();
     }
 
     @BinderThread
@@ -2565,7 +2550,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         InputBindResult res = attachNewInputLocked(
                                 StartInputReason.SESSION_CREATED_BY_IME, true);
                         if (res.method != null) {
-                            executeOrSendMessage(mCurClient.client, obtainMessageOO(
+                            executeOrSendMessage(mCurClient.client, mCaller.obtainMessageOO(
                                     MSG_BIND_CLIENT, mCurClient.client, res));
                         }
                         return;
@@ -3674,7 +3659,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
             // Always call subtype picker, because subtype picker is a superset of input method
             // picker.
-            mHandler.sendMessage(mHandler.obtainMessage(
+            mHandler.sendMessage(mCaller.obtainMessageII(
                     MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode,
                     (mCurClient != null) ? mCurClient.selfReportedDisplayId : DEFAULT_DISPLAY));
         }
@@ -3691,7 +3676,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
         // Always call subtype picker, because subtype picker is a superset of input method
         // picker.
-        mHandler.sendMessage(mHandler.obtainMessage(
+        mHandler.sendMessage(mCaller.obtainMessageII(
                 MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode, displayId));
     }
 
@@ -4455,8 +4440,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     private void scheduleSetActiveToClient(ClientState state, boolean active, boolean fullscreen,
             boolean reportToImeController) {
-        executeOrSendMessage(state.client, obtainMessageIIIO(MSG_SET_ACTIVE,
-                active ? 1 : 0, fullscreen ? 1 : 0, reportToImeController ? 1 : 0, state));
+        executeOrSendMessage(state.client, mCaller.obtainMessageIIIIO(MSG_SET_ACTIVE,
+                active ? 1 : 0, fullscreen ? 1 : 0, reportToImeController ? 1 : 0, 0, state));
     }
 
     @GuardedBy("ImfLock.class")
@@ -5092,9 +5077,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
             if (mCurClient != null && mCurClient.client != null) {
                 mInFullscreenMode = fullscreen;
-                executeOrSendMessage(mCurClient.client, mHandler.obtainMessage(
-                        MSG_REPORT_FULLSCREEN_MODE, fullscreen ? 1 : 0, 0 /* unused */,
-                        mCurClient));
+                executeOrSendMessage(mCurClient.client, mCaller.obtainMessageIO(
+                        MSG_REPORT_FULLSCREEN_MODE, fullscreen ? 1 : 0, mCurClient));
             }
         }
     }
