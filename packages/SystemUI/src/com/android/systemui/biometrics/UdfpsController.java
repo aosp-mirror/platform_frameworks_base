@@ -42,7 +42,6 @@ import android.os.Process;
 import android.os.Trace;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -64,6 +63,7 @@ import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
@@ -117,7 +117,7 @@ public class UdfpsController implements DozeReceiver {
     @NonNull private final DumpManager mDumpManager;
     @NonNull private final SystemUIDialogManager mDialogManager;
     @NonNull private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @Nullable private final Vibrator mVibrator;
+    @NonNull private final VibratorHelper mVibrator;
     @NonNull private final FalsingManager mFalsingManager;
     @NonNull private final PowerManager mPowerManager;
     @NonNull private final AccessibilityManager mAccessibilityManager;
@@ -506,7 +506,7 @@ public class UdfpsController implements DozeReceiver {
             @NonNull AccessibilityManager accessibilityManager,
             @NonNull LockscreenShadeTransitionController lockscreenShadeTransitionController,
             @NonNull ScreenLifecycle screenLifecycle,
-            @Nullable Vibrator vibrator,
+            @NonNull VibratorHelper vibrator,
             @NonNull UdfpsHapticsSimulator udfpsHapticsSimulator,
             @NonNull Optional<UdfpsHbmProvider> hbmProvider,
             @NonNull KeyguardStateController keyguardStateController,
@@ -577,14 +577,12 @@ public class UdfpsController implements DozeReceiver {
      */
     @VisibleForTesting
     public void playStartHaptic() {
-        if (mVibrator != null) {
-            mVibrator.vibrate(
-                    Process.myUid(),
-                    mContext.getOpPackageName(),
-                    EFFECT_CLICK,
-                    "udfps-onStart-click",
-                    VIBRATION_ATTRIBUTES);
-        }
+        mVibrator.vibrate(
+                Process.myUid(),
+                mContext.getOpPackageName(),
+                EFFECT_CLICK,
+                "udfps-onStart-click",
+                VIBRATION_ATTRIBUTES);
     }
 
     @Nullable
