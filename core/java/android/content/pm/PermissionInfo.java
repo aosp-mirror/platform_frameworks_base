@@ -363,6 +363,9 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
     /**
      * The group this permission is a part of, as per
      * {@link android.R.attr#permissionGroup}.
+     * <p>
+     * The actual grouping of platform-defined runtime permissions is subject to change and can be
+     * queried with {@link PackageManager#getGroupOfPlatformPermission}.
      */
     public @Nullable String group;
 
