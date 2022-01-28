@@ -27,6 +27,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,6 +45,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.MathUtils;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
@@ -162,6 +164,47 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         doNothing().when(mGroupExpansionManager).collapseGroups();
         doNothing().when(mExpandHelper).cancelImmediately();
         doNothing().when(mNotificationShelf).setAnimationsEnabled(anyBoolean());
+    }
+
+    @Test
+    public void testUpdateStackEndHeight_forEndOfStackHeightAnimation() {
+        final float nsslHeight = 10f;
+        final float bottomMargin = 1f;
+        final float topPadding = 1f;
+
+        mStackScroller.updateStackEndHeight(nsslHeight, bottomMargin, topPadding);
+        final float stackEndHeight = nsslHeight - bottomMargin - topPadding;
+        assertTrue(mAmbientState.getStackEndHeight() == stackEndHeight);
+    }
+
+    @Test
+    public void testUpdateStackHeight_withDozeAmount_whenDozeChanging() {
+        final float dozeAmount = 0.5f;
+        mAmbientState.setDozeAmount(dozeAmount);
+
+        final float endHeight = 8f;
+        final float expansionFraction = 1f;
+        float expected = MathUtils.lerp(
+                endHeight * StackScrollAlgorithm.START_FRACTION,
+                endHeight, dozeAmount);
+
+        mStackScroller.updateStackHeight(endHeight, expansionFraction);
+        assertTrue(mAmbientState.getStackHeight() == expected);
+    }
+
+    @Test
+    public void testUpdateStackHeight_withExpansionAmount_whenDozeNotChanging() {
+        final float dozeAmount = 1f;
+        mAmbientState.setDozeAmount(dozeAmount);
+
+        final float endHeight = 8f;
+        final float expansionFraction = 0.5f;
+        final float expected = MathUtils.lerp(
+                endHeight * StackScrollAlgorithm.START_FRACTION,
+                endHeight, expansionFraction);
+
+        mStackScroller.updateStackHeight(endHeight, expansionFraction);
+        assertTrue(mAmbientState.getStackHeight() == expected);
     }
 
     @Test

@@ -1273,8 +1273,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @param listenerNeedsAnimation does the listener need to animate?
      */
     private void updateStackPosition(boolean listenerNeedsAnimation) {
-        // Consider interpolating from an mExpansionStartY for use on lockscreen and AOD
-        float endTopPosition = mTopPadding + mExtraTopInsetForFullShadeTransition
+        final float endTopPosition = mTopPadding + mExtraTopInsetForFullShadeTransition
                 + mAmbientState.getOverExpansion()
                 - getCurrentOverScrollAmount(false /* top */);
         final float fraction = mAmbientState.getExpansionFraction();
@@ -1284,13 +1283,29 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mOnStackYChanged.accept(listenerNeedsAnimation);
         }
         if (mQsExpansionFraction <= 0) {
-            final float stackEndHeight = Math.max(0f,
-                    getHeight() - getEmptyBottomMargin() - mTopPadding);
-            mAmbientState.setStackEndHeight(stackEndHeight);
-            mAmbientState.setStackHeight(
-                    MathUtils.lerp(stackEndHeight * StackScrollAlgorithm.START_FRACTION,
-                            stackEndHeight, fraction));
+            final float endHeight = updateStackEndHeight(
+                    getHeight(), getEmptyBottomMargin(), mTopPadding);
+            updateStackHeight(endHeight, fraction);
         }
+    }
+
+    public float updateStackEndHeight(float height, float bottomMargin, float topPadding) {
+        final float stackEndHeight = Math.max(0f, height - bottomMargin - topPadding);
+        mAmbientState.setStackEndHeight(stackEndHeight);
+        return stackEndHeight;
+    }
+
+    public void updateStackHeight(float endHeight, float fraction) {
+        // During the (AOD<=>LS) transition where dozeAmount is changing,
+        // apply dozeAmount to stack height instead of expansionFraction
+        // to unfurl notifications on AOD=>LS wakeup (and furl up on LS=>AOD sleep)
+        final float dozeAmount = mAmbientState.getDozeAmount();
+        if (0f < dozeAmount && dozeAmount < 1f) {
+            fraction = 1f - dozeAmount;
+        }
+        mAmbientState.setStackHeight(
+                MathUtils.lerp(endHeight * StackScrollAlgorithm.START_FRACTION,
+                        endHeight, fraction));
     }
 
     /**
