@@ -285,6 +285,19 @@ public class UserRestrictionsUtils {
     );
 
     /**
+     * User restrictions available to a device owner whose type is
+     * {@link android.app.admin.DevicePolicyManager#DEVICE_OWNER_TYPE_FINANCED}.
+     */
+    private static final Set<String> FINANCED_DEVICE_OWNER_RESTRICTIONS = Sets.newArraySet(
+            UserManager.DISALLOW_ADD_USER,
+            UserManager.DISALLOW_DEBUGGING_FEATURES,
+            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
+            UserManager.DISALLOW_SAFE_BOOT,
+            UserManager.DISALLOW_CONFIG_DATE_TIME,
+            UserManager.DISALLOW_OUTGOING_CALLS
+    );
+
+    /**
      * Returns whether the given restriction name is valid (and logs it if it isn't).
      */
     public static boolean isValidRestriction(@NonNull String restriction) {
@@ -455,6 +468,15 @@ public class UserRestrictionsUtils {
      */
     public static @NonNull Set<String> getDefaultEnabledForManagedProfiles() {
         return DEFAULT_ENABLED_FOR_MANAGED_PROFILES;
+    }
+
+    /**
+     * @return {@code true} only if the restriction is allowed for financed devices and can be set
+     * by a device owner. Otherwise, {@code false} would be returned.
+     */
+    public static boolean canFinancedDeviceOwnerChange(String restriction) {
+        return FINANCED_DEVICE_OWNER_RESTRICTIONS.contains(restriction)
+                && canDeviceOwnerChange(restriction);
     }
 
     /**

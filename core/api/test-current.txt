@@ -463,6 +463,7 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS) public long forceSecurityLogs();
     method public void forceUpdateUserSetupComplete(int);
     method @NonNull public java.util.Set<java.lang.String> getDefaultCrossProfilePackages();
+    method public int getDeviceOwnerType(@NonNull android.content.ComponentName);
     method @NonNull public java.util.Set<java.lang.String> getDisallowedSystemApps(@NonNull android.content.ComponentName, int, @NonNull String);
     method public long getLastBugReportRequestTime();
     method public long getLastNetworkLogRetrievalTime();
@@ -478,6 +479,7 @@ package android.app.admin {
     method @RequiresPermission(allOf={android.Manifest.permission.MANAGE_DEVICE_ADMINS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public void setActiveAdmin(@NonNull android.content.ComponentName, boolean, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public boolean setDeviceOwner(@NonNull android.content.ComponentName, @Nullable String, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public boolean setDeviceOwnerOnly(@NonNull android.content.ComponentName, @Nullable String, int);
+    method public void setDeviceOwnerType(@NonNull android.content.ComponentName, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS) public void setNextOperationSafety(int, int);
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
     field public static final String ACTION_DEVICE_POLICY_CONSTANTS_CHANGED = "android.app.action.DEVICE_POLICY_CONSTANTS_CHANGED";
