@@ -368,6 +368,50 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
+    public void testGroupsWhoLoseAllChildrenToPromotionSuppressSummary() {
+        // GIVEN a group with two children
+        addGroupChild(0, PACKAGE_2, GROUP_1);
+        addGroupSummary(1, PACKAGE_2, GROUP_1);
+        addGroupChild(2, PACKAGE_2, GROUP_1);
+
+        // GIVEN a promoter that will promote one of children to top level
+        mListBuilder.addPromoter(new IdPromoter(0, 2));
+
+        // WHEN we build the list
+        dispatchBuild();
+
+        // THEN both children end up at top level (because group is now too small)
+        verifyBuiltList(
+                notif(0),
+                notif(2)
+        );
+
+        // THEN the summary is discarded
+        assertNull(mEntrySet.get(1).getParent());
+    }
+
+    @Test
+    public void testGroupsWhoLoseOnlyChildToPromotionSuppressSummary() {
+        // GIVEN a group with two children
+        addGroupChild(0, PACKAGE_2, GROUP_1);
+        addGroupSummary(1, PACKAGE_2, GROUP_1);
+
+        // GIVEN a promoter that will promote one of children to top level
+        mListBuilder.addPromoter(new IdPromoter(0));
+
+        // WHEN we build the list
+        dispatchBuild();
+
+        // THEN both children end up at top level (because group is now too small)
+        verifyBuiltList(
+                notif(0)
+        );
+
+        // THEN the summary is discarded
+        assertNull(mEntrySet.get(1).getParent());
+    }
+
+    @Test
     public void testPreviousParentsAreSetProperly() {
         // GIVEN a notification that is initially added to the list
         PackageFilter filter = new PackageFilter(PACKAGE_2);

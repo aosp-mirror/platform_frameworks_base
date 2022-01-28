@@ -674,6 +674,12 @@ public class ShadeListBuilder implements Dumpable {
         //  having its summary promoted, regardless of how many children it has
         Set<String> groupsWithChildrenLostToStability =
                 getGroupsWithChildrenLostToStability(shadeList);
+        // Like groups which lost a child to stability, any group which lost a child to promotion
+        //  is exempt from having its summary promoted when it has no attached children.
+        Set<String> groupsWithChildrenLostToPromotionOrStability =
+                getGroupsWithChildrenLostToPromotion(shadeList);
+        groupsWithChildrenLostToPromotionOrStability.addAll(groupsWithChildrenLostToStability);
+
         for (int i = 0; i < shadeList.size(); i++) {
             final ListEntry tle = shadeList.get(i);
 
@@ -683,9 +689,9 @@ public class ShadeListBuilder implements Dumpable {
                 final boolean hasSummary = group.getSummary() != null;
 
                 if (hasSummary && children.size() == 0) {
-                    if (groupsWithChildrenLostToStability.contains(group.getKey())) {
-                        // This group lost a child on this run to stability, so it is exempt from
-                        //  having its summary promoted to the top level, so prune it.
+                    if (groupsWithChildrenLostToPromotionOrStability.contains(group.getKey())) {
+                        // This group lost a child on this run to promotion or stability, so it is
+                        //  exempt from having its summary promoted to the top level, so prune it.
                         //  It has no children, so it will just vanish.
                         pruneGroupAtIndexAndPromoteAnyChildren(shadeList, group, i);
                     } else {
@@ -823,6 +829,26 @@ public class ShadeListBuilder implements Dumpable {
             }
         }
         return groupsWithChildrenLostToStability;
+    }
+
+    /**
+     * Collect the keys of any groups which have already lost a child to a {@link NotifPromoter}
+     * this run.
+     *
+     * These groups will be exempt from appearing without any children.
+     */
+    @NonNull
+    private Set<String> getGroupsWithChildrenLostToPromotion(List<ListEntry> shadeList) {
+        ArraySet<String> groupsWithChildrenLostToPromotion = new ArraySet<>();
+        for (int i = 0; i < shadeList.size(); i++) {
+            final ListEntry tle = shadeList.get(i);
+            if (tle.getAttachState().getPromoter() != null) {
+                // This top-level-entry was part of a group, but was promoted out of it.
+                final String groupKey = tle.getRepresentativeEntry().getSbn().getGroupKey();
+                groupsWithChildrenLostToPromotion.add(groupKey);
+            }
+        }
+        return groupsWithChildrenLostToPromotion;
     }
 
     /**
