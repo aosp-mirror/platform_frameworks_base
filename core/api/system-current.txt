@@ -2610,6 +2610,8 @@ package android.companion.virtual {
 
   public final class VirtualDeviceParams implements android.os.Parcelable {
     method public int describeContents();
+    method @Nullable public java.util.Set<android.content.ComponentName> getAllowedActivities();
+    method @Nullable public java.util.Set<android.content.ComponentName> getBlockedActivities();
     method public int getLockState();
     method @NonNull public java.util.Set<android.os.UserHandle> getUsersWithMatchingAccounts();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -2621,6 +2623,8 @@ package android.companion.virtual {
   public static final class VirtualDeviceParams.Builder {
     ctor public VirtualDeviceParams.Builder();
     method @NonNull public android.companion.virtual.VirtualDeviceParams build();
+    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setAllowedActivities(@Nullable java.util.Set<android.content.ComponentName>);
+    method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedActivities(@Nullable java.util.Set<android.content.ComponentName>);
     method @NonNull @RequiresPermission(value=android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY, conditional=true) public android.companion.virtual.VirtualDeviceParams.Builder setLockState(int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setUsersWithMatchingAccounts(@NonNull java.util.Set<android.os.UserHandle>);
   }
