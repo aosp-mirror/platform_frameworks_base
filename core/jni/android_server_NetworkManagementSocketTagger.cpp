@@ -61,27 +61,9 @@ static jint untagSocketFd(JNIEnv* env, jclass, jobject fileDescriptor) {
   return (jint)res;
 }
 
-static jint setCounterSet(JNIEnv* env, jclass, jint setNum, jint uid) {
-  int res = qtaguid_setCounterSet(setNum, uid);
-  if (res < 0) {
-    return (jint)-errno;
-  }
-  return (jint)res;
-}
-
-static jint deleteTagData(JNIEnv* env, jclass, jint tagNum, jint uid) {
-  int res = qtaguid_deleteTagData(tagNum, uid);
-  if (res < 0) {
-    return (jint)-errno;
-  }
-  return (jint)res;
-}
-
 static const JNINativeMethod gQTagUidMethods[] = {
   { "native_tagSocketFd", "(Ljava/io/FileDescriptor;II)I", (void*)tagSocketFd},
   { "native_untagSocketFd", "(Ljava/io/FileDescriptor;)I", (void*)untagSocketFd},
-  { "native_setCounterSet", "(II)I", (void*)setCounterSet},
-  { "native_deleteTagData", "(II)I", (void*)deleteTagData},
 };
 
 int register_android_server_NetworkManagementSocketTagger(JNIEnv* env) {
