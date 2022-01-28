@@ -1875,6 +1875,7 @@ public final class TvInputManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
     public int getClientPriority(@TvInputService.PriorityHintUseCaseType int useCase,
             @Nullable String sessionId) {
         return getClientPriorityInternal(useCase, sessionId);
