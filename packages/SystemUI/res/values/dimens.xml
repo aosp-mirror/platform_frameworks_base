@@ -1035,6 +1035,7 @@
     <dimen name="controls_header_bottom_margin">24dp</dimen>
     <dimen name="controls_header_app_icon_size">24dp</dimen>
     <dimen name="controls_top_margin">48dp</dimen>
+    <dimen name="controls_padding_horizontal">0dp</dimen>
     <dimen name="control_header_text_size">20sp</dimen>
     <dimen name="control_item_text_size">16sp</dimen>
     <dimen name="control_menu_item_text_size">16sp</dimen>
