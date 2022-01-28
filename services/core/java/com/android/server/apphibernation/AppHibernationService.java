@@ -38,6 +38,7 @@ import android.app.StatsManager.StatsPullAtomCallback;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.UsageEventListener;
+import android.apphibernation.HibernationStats;
 import android.apphibernation.IAppHibernationService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -221,7 +222,7 @@ public final class AppHibernationService extends SystemService {
         }
         getContext().enforceCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_APP_HIBERNATION,
-                "Caller does not have MANAGE_APP_HIBERNATION permission.");
+                "Caller did not have permission while calling " + methodName);
         userId = handleIncomingUser(userId, methodName);
         synchronized (mLock) {
             if (!checkUserStatesExist(userId, methodName)) {
@@ -377,6 +378,46 @@ public final class AppHibernationService extends SystemService {
             }
             return hibernatingPackages;
         }
+    }
+
+    /**
+     * Return the stats from app hibernation for each package provided.
+     *
+     * @param packageNames the set of packages to return stats for. Returns all if null
+     * @return map from package to stats for that package
+     */
+    public Map<String, HibernationStats> getHibernationStatsForUser(
+            @Nullable Set<String> packageNames, int userId) {
+        Map<String, HibernationStats> statsMap = new ArrayMap<>();
+        String methodName = "getHibernationStatsForUser";
+        getContext().enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_APP_HIBERNATION,
+                "Caller does not have MANAGE_APP_HIBERNATION permission.");
+        userId = handleIncomingUser(userId, methodName);
+        synchronized (mLock) {
+            if (!checkUserStatesExist(userId, methodName)) {
+                return statsMap;
+            }
+            final Map<String, UserLevelState> userPackageStates = mUserStates.get(userId);
+            Set<String> pkgs = packageNames != null ? packageNames : userPackageStates.keySet();
+            for (String pkgName : pkgs) {
+                if (!mPackageManagerInternal.canQueryPackage(Binder.getCallingUid(), pkgName)) {
+                    // Package not visible to caller
+                    continue;
+                }
+                if (!mGlobalHibernationStates.containsKey(pkgName)
+                        || !userPackageStates.containsKey(pkgName)) {
+                    Slog.w(TAG, String.format(
+                            "No hibernation state associated with package %s user %d. Maybe"
+                                    + "the package was uninstalled? ", pkgName, userId));
+                    continue;
+                }
+                HibernationStats stats = new HibernationStats(
+                        mGlobalHibernationStates.get(pkgName).savedByte);
+                statsMap.put(pkgName, stats);
+            }
+        }
+        return statsMap;
     }
 
     /**
@@ -785,6 +826,13 @@ public final class AppHibernationService extends SystemService {
         @Override
         public List<String> getHibernatingPackagesForUser(int userId) {
             return mService.getHibernatingPackagesForUser(userId);
+        }
+
+        @Override
+        public Map<String, HibernationStats> getHibernationStatsForUser(
+                @Nullable List<String> packageNames, int userId) {
+            Set<String> pkgsSet = packageNames != null ? new ArraySet<>(packageNames) : null;
+            return mService.getHibernationStatsForUser(pkgsSet, userId);
         }
 
         @Override
