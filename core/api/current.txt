@@ -4183,6 +4183,7 @@ package android.app {
     method public void openContextMenu(android.view.View);
     method public void openOptionsMenu();
     method public void overridePendingTransition(int, int);
+    method public void overridePendingTransition(int, int, int);
     method public void postponeEnterTransition();
     method public void recreate();
     method public void registerActivityLifecycleCallbacks(@NonNull android.app.Application.ActivityLifecycleCallbacks);
@@ -4486,6 +4487,7 @@ package android.app {
     method public static android.app.ActivityOptions makeBasic();
     method public static android.app.ActivityOptions makeClipRevealAnimation(android.view.View, int, int, int, int);
     method public static android.app.ActivityOptions makeCustomAnimation(android.content.Context, int, int);
+    method @NonNull public static android.app.ActivityOptions makeCustomAnimation(@NonNull android.content.Context, int, int, int);
     method public static android.app.ActivityOptions makeScaleUpAnimation(android.view.View, int, int, int, int);
     method public static android.app.ActivityOptions makeSceneTransitionAnimation(android.app.Activity, android.view.View, String);
     method @java.lang.SafeVarargs public static android.app.ActivityOptions makeSceneTransitionAnimation(android.app.Activity, android.util.Pair<android.view.View,java.lang.String>...);
