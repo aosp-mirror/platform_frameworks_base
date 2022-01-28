@@ -1292,31 +1292,22 @@ public class TelecomManager {
     }
 
     /**
-     * Returns a list of {@link PhoneAccountHandle}s for self-managed {@link ConnectionService}s.
+     * Returns a list of {@link PhoneAccountHandle}s for all self-managed
+     * {@link ConnectionService}s owned by the calling {@link UserHandle}.
      * <p>
      * Self-Managed {@link ConnectionService}s have a {@link PhoneAccount} with
      * {@link PhoneAccount#CAPABILITY_SELF_MANAGED}.
      * <p>
      * Requires permission {@link android.Manifest.permission#READ_PHONE_STATE}, or that the caller
-     * is the default dialer app to get all phone account handles.
-     * <P>
-     * If the caller doesn't meet any of the above requirements and has {@link
-     * android.Manifest.permission#MANAGE_OWN_CALLS}, the caller can get only the phone account
-     * handles they have registered.
+     * is the default dialer app.
      * <p>
-     * A {@link SecurityException} will be thrown if the caller is not the default dialer
-     * or the caller does not have at least one of the following permissions:
-     * {@link android.Manifest.permission#READ_PHONE_STATE} permission,
-     * {@link android.Manifest.permission#MANAGE_OWN_CALLS} permission
+     * A {@link SecurityException} will be thrown if a called is not the default dialer, or lacks
+     * the {@link android.Manifest.permission#READ_PHONE_STATE} permission.
      *
      * @return A list of {@code PhoneAccountHandle} objects.
      */
-    @RequiresPermission(anyOf = {
-            READ_PRIVILEGED_PHONE_STATE,
-            android.Manifest.permission.READ_PHONE_STATE,
-            android.Manifest.permission.MANAGE_OWN_CALLS
-    })
-    public List<PhoneAccountHandle> getSelfManagedPhoneAccounts() {
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    public @NonNull List<PhoneAccountHandle> getSelfManagedPhoneAccounts() {
         ITelecomService service = getTelecomService();
         if (service != null) {
             try {
@@ -1327,6 +1318,34 @@ public class TelecomManager {
             }
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * Returns a list of {@link PhoneAccountHandle}s owned by the calling self-managed
+     * {@link ConnectionService}.
+     * <p>
+     * Self-Managed {@link ConnectionService}s have a {@link PhoneAccount} with
+     * {@link PhoneAccount#CAPABILITY_SELF_MANAGED}.
+     * <p>
+     * Requires permission {@link android.Manifest.permission#MANAGE_OWN_CALLS}
+     * <p>
+     * A {@link SecurityException} will be thrown if a caller lacks the
+     * {@link android.Manifest.permission#MANAGE_OWN_CALLS} permission.
+     *
+     * @return A list of {@code PhoneAccountHandle} objects.
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_OWN_CALLS)
+    public @NonNull List<PhoneAccountHandle> getOwnSelfManagedPhoneAccounts() {
+        ITelecomService service = getTelecomService();
+        if (service != null) {
+            try {
+                return service.getOwnSelfManagedPhoneAccounts(mContext.getOpPackageName(),
+                        mContext.getAttributionTag());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        throw new IllegalStateException("Telecom is not available");
     }
 
     /**
