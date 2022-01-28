@@ -225,6 +225,9 @@ public final class PlaybackActivityMonitor
             AudioAttributes.FLAG_BYPASS_MUTE;
 
     private void checkVolumeForPrivilegedAlarm(AudioPlaybackConfiguration apc, int event) {
+        if (event == AudioPlaybackConfiguration.PLAYER_UPDATE_DEVICE_ID) {
+            return;
+        }
         if (event == AudioPlaybackConfiguration.PLAYER_STATE_STARTED ||
                 apc.getPlayerState() == AudioPlaybackConfiguration.PLAYER_STATE_STARTED) {
             if ((apc.getAudioAttributes().getAllFlags() & FLAGS_FOR_SILENCE_OVERRIDE)
