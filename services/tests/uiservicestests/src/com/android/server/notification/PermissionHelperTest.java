@@ -20,8 +20,8 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
-import static android.permission.PermissionManager.PERMISSION_GRANTED;
-import static android.permission.PermissionManager.PERMISSION_SOFT_DENIED;
+import static android.content.pm.PackageManager.PERMISSION_DENIED;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -130,13 +130,13 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
     @Test
     public void testHasPermission() throws Exception {
-        when(mPmi.checkUidPermission(anyInt(), eq(Manifest.permission.POST_NOTIFICATIONS)))
+        when(mPmi.checkPostNotificationsPermissionGrantedOrLegacyAccess(anyInt()))
                 .thenReturn(PERMISSION_GRANTED);
 
         assertThat(mPermissionHelper.hasPermission(1)).isTrue();
 
-        when(mPmi.checkUidPermission(anyInt(), eq(Manifest.permission.POST_NOTIFICATIONS)))
-                .thenReturn(PERMISSION_SOFT_DENIED);
+        when(mPmi.checkPostNotificationsPermissionGrantedOrLegacyAccess(anyInt()))
+                .thenReturn(PERMISSION_DENIED);
 
         assertThat(mPermissionHelper.hasPermission(1)).isFalse();
     }
