@@ -16,6 +16,8 @@
 
 package com.android.systemui.dreams;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -30,6 +32,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -41,6 +44,16 @@ import javax.inject.Inject;
 @SysUISingleton
 public class DreamOverlayStateController implements
         CallbackController<DreamOverlayStateController.Callback> {
+    private static final String TAG = "DreamOverlayStateCtlr";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
+    public static final int STATE_DREAM_OVERLAY_ACTIVE = 1 << 0;
+
+    private static final int OP_CLEAR_STATE = 1;
+    private static final int OP_SET_STATE = 2;
+
+    private int mState;
+
     /**
      * Callback for dream overlay events.
      */
@@ -49,6 +62,12 @@ public class DreamOverlayStateController implements
          * Called when the composition of complications changes.
          */
         default void onComplicationsChanged() {
+        }
+
+        /**
+         * Called when the dream overlay state changes.
+         */
+        default void onStateChanged() {
         }
     }
 
@@ -92,6 +111,14 @@ public class DreamOverlayStateController implements
         return Collections.unmodifiableCollection(mComplications);
     }
 
+    private void notifyCallbacks(Consumer<Callback> callbackConsumer) {
+        mExecutor.execute(() -> {
+            for (Callback callback : mCallbacks) {
+                callbackConsumer.accept(callback);
+            }
+        });
+    }
+
     @Override
     public void addCallback(@NonNull Callback callback) {
         mExecutor.execute(() -> {
@@ -116,5 +143,41 @@ public class DreamOverlayStateController implements
             Objects.requireNonNull(callback, "Callback must not be null. b/128895449");
             mCallbacks.remove(callback);
         });
+    }
+
+    /**
+     * Returns whether the overlay is active.
+     * @return {@code true} if overlay is active, {@code false} otherwise.
+     */
+    public boolean isOverlayActive() {
+        return containsState(STATE_DREAM_OVERLAY_ACTIVE);
+    }
+
+    private boolean containsState(int state) {
+        return (mState & state) != 0;
+    }
+
+    private void modifyState(int op, int state) {
+        final int existingState = mState;
+        switch (op) {
+            case OP_CLEAR_STATE:
+                mState &= ~state;
+                break;
+            case OP_SET_STATE:
+                mState |= state;
+                break;
+        }
+
+        if (existingState != mState) {
+            notifyCallbacks(callback -> callback.onStateChanged());
+        }
+    }
+
+    /**
+     * Sets whether the overlay is active.
+     * @param active {@code true} if overlay is active, {@code false} otherwise.
+     */
+    public void setOverlayActive(boolean active) {
+        modifyState(active ? OP_SET_STATE : OP_CLEAR_STATE, STATE_DREAM_OVERLAY_ACTIVE);
     }
 }

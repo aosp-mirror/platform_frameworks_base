@@ -88,16 +88,20 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                 }
             };
 
+    private DreamOverlayStateController mStateController;
+
     @Inject
     public DreamOverlayService(
             Context context,
             @Main Executor executor,
             DreamOverlayComponent.Factory dreamOverlayComponentFactory,
+            DreamOverlayStateController stateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor) {
         mContext = context;
         mExecutor = executor;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardUpdateMonitor.registerCallback(mKeyguardCallback);
+        mStateController = stateController;
 
         final DreamOverlayComponent component =
                 dreamOverlayComponentFactory.create(mViewModelStore, mHost);
@@ -118,6 +122,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         setCurrentState(Lifecycle.State.DESTROYED);
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
         windowManager.removeView(mWindow.getDecorView());
+        mStateController.setOverlayActive(false);
         super.onDestroy();
     }
 
@@ -127,6 +132,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mExecutor.execute(() -> {
             addOverlayWindowLocked(layoutParams);
             setCurrentState(Lifecycle.State.RESUMED);
+            mStateController.setOverlayActive(true);
         });
     }
 
