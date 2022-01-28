@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static android.app.StatusBarManager.SESSION_KEYGUARD;
+
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_BIOMETRIC;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_EXTENDED_ACCESS;
 import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_NONE_SECURITY;
@@ -36,7 +38,10 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.MotionEvent;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -53,6 +58,7 @@ import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -86,6 +92,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final UserSwitcherController mUserSwitcherController;
     private final GlobalSettings mGlobalSettings;
     private final FeatureFlags mFeatureFlags;
+    private final SessionTracker mSessionTracker;
 
     private int mLastOrientation = Configuration.ORIENTATION_UNDEFINED;
 
@@ -191,7 +198,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             mMetricsLogger.write(new LogMaker(MetricsEvent.BOUNCER)
                     .setType(success ? MetricsEvent.TYPE_SUCCESS : MetricsEvent.TYPE_FAILURE));
             mUiEventLogger.log(success ? BouncerUiEvent.BOUNCER_PASSWORD_SUCCESS
-                    : BouncerUiEvent.BOUNCER_PASSWORD_FAILURE);
+                            : BouncerUiEvent.BOUNCER_PASSWORD_FAILURE, getSessionId());
         }
 
         public void reset() {
@@ -242,7 +249,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             FalsingManager falsingManager,
             UserSwitcherController userSwitcherController,
             FeatureFlags featureFlags,
-            GlobalSettings globalSettings) {
+            GlobalSettings globalSettings,
+            SessionTracker sessionTracker) {
         super(view);
         mLockPatternUtils = lockPatternUtils;
         mUpdateMonitor = keyguardUpdateMonitor;
@@ -261,6 +269,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mUserSwitcherController = userSwitcherController;
         mFeatureFlags = featureFlags;
         mGlobalSettings = globalSettings;
+        mSessionTracker = sessionTracker;
     }
 
     @Override
@@ -456,7 +465,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     .setType(MetricsProto.MetricsEvent.TYPE_DISMISS).setSubtype(eventSubtype));
         }
         if (uiEvent != BouncerUiEvent.UNKNOWN) {
-            mUiEventLogger.log(uiEvent);
+            mUiEventLogger.log(uiEvent, getSessionId());
         }
         if (finish) {
             mSecurityCallback.finish(strongAuth, targetUserId);
@@ -599,6 +608,10 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         }
     }
 
+    private @Nullable InstanceId getSessionId() {
+        return mSessionTracker.getSessionId(SESSION_KEYGUARD);
+    }
+
     /** Update keyguard position based on a tapped X coordinate. */
     public void updateKeyguardPosition(float x) {
         mView.updatePositionByTouchX(x);
@@ -622,6 +635,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         private final GlobalSettings mGlobalSettings;
         private final FeatureFlags mFeatureFlags;
         private final UserSwitcherController mUserSwitcherController;
+        private final SessionTracker mSessionTracker;
 
         @Inject
         Factory(KeyguardSecurityContainer view,
@@ -639,7 +653,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 FalsingManager falsingManager,
                 UserSwitcherController userSwitcherController,
                 FeatureFlags featureFlags,
-                GlobalSettings globalSettings) {
+                GlobalSettings globalSettings,
+                SessionTracker sessionTracker) {
             mView = view;
             mAdminSecondaryLockScreenControllerFactory = adminSecondaryLockScreenControllerFactory;
             mLockPatternUtils = lockPatternUtils;
@@ -655,6 +670,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             mFeatureFlags = featureFlags;
             mGlobalSettings = globalSettings;
             mUserSwitcherController = userSwitcherController;
+            mSessionTracker = sessionTracker;
         }
 
         public KeyguardSecurityContainerController create(
@@ -664,7 +680,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     mKeyguardUpdateMonitor, mKeyguardSecurityModel, mMetricsLogger, mUiEventLogger,
                     mKeyguardStateController, securityCallback, mSecurityViewFlipperController,
                     mConfigurationController, mFalsingCollector, mFalsingManager,
-                    mUserSwitcherController, mFeatureFlags, mGlobalSettings);
+                    mUserSwitcherController, mFeatureFlags, mGlobalSettings, mSessionTracker);
         }
     }
 }
