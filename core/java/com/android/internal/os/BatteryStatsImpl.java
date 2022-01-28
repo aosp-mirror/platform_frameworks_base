@@ -1853,23 +1853,34 @@ public class BatteryStatsImpl extends BatteryStats {
         private final TimeBase mTimeBase;
         private final LongArrayMultiStateCounter mCounter;
 
-        private TimeInFreqMultiStateCounter(TimeBase timeBase, Parcel in, long timestampMs) {
-            mTimeBase = timeBase;
-            mCounter = LongArrayMultiStateCounter.CREATOR.createFromParcel(in);
-            mCounter.setEnabled(mTimeBase.isRunning(), timestampMs);
-            timeBase.add(this);
-        }
-
         private TimeInFreqMultiStateCounter(TimeBase timeBase, int stateCount, int cpuFreqCount,
                 long timestampMs) {
+            this(timeBase, new LongArrayMultiStateCounter(stateCount, cpuFreqCount), timestampMs);
+        }
+
+        private TimeInFreqMultiStateCounter(TimeBase timeBase, LongArrayMultiStateCounter counter,
+                long timestampMs) {
             mTimeBase = timeBase;
-            mCounter = new LongArrayMultiStateCounter(stateCount, cpuFreqCount);
+            mCounter = counter;
             mCounter.setEnabled(mTimeBase.isRunning(), timestampMs);
             timeBase.add(this);
         }
 
         private void writeToParcel(Parcel out) {
             mCounter.writeToParcel(out, 0);
+        }
+
+        @Nullable
+        private static TimeInFreqMultiStateCounter readFromParcel(Parcel in, TimeBase timeBase,
+                int stateCount, int cpuFreqCount, long timestampMs) {
+            // Read the object from the Parcel, whether it's usable or not
+            LongArrayMultiStateCounter counter =
+                    LongArrayMultiStateCounter.CREATOR.createFromParcel(in);
+            if (counter.getStateCount() != stateCount
+                    || counter.getArrayLength() != cpuFreqCount) {
+                return null;
+            }
+            return new TimeInFreqMultiStateCounter(timeBase, counter, timestampMs);
         }
 
         @Override
@@ -10492,25 +10503,18 @@ public class BatteryStatsImpl extends BatteryStats {
 
             stateCount = in.readInt();
             if (stateCount != 0) {
-                // Read the object from the Parcel, whether it's usable or not
-                TimeInFreqMultiStateCounter counter = new TimeInFreqMultiStateCounter(
-                        mBsi.mOnBatteryTimeBase, in, timestampMs);
-                if (stateCount == PROC_STATE_TIME_COUNTER_STATE_COUNT) {
-                    mProcStateTimeMs = counter;
-                }
+                mProcStateTimeMs = TimeInFreqMultiStateCounter.readFromParcel(in,
+                        mBsi.mOnBatteryTimeBase, PROC_STATE_TIME_COUNTER_STATE_COUNT,
+                        mBsi.getCpuFreqCount(), mBsi.mClock.elapsedRealtime());
             } else {
                 mProcStateTimeMs = null;
             }
 
             stateCount = in.readInt();
             if (stateCount != 0) {
-                // Read the object from the Parcel, whether it's usable or not
-                TimeInFreqMultiStateCounter counter =
-                        new TimeInFreqMultiStateCounter(
-                                mBsi.mOnBatteryScreenOffTimeBase, in, timestampMs);
-                if (stateCount == PROC_STATE_TIME_COUNTER_STATE_COUNT) {
-                    mProcStateScreenOffTimeMs = counter;
-                }
+                mProcStateScreenOffTimeMs = TimeInFreqMultiStateCounter.readFromParcel(in,
+                        mBsi.mOnBatteryScreenOffTimeBase, PROC_STATE_TIME_COUNTER_STATE_COUNT,
+                        mBsi.getCpuFreqCount(), mBsi.mClock.elapsedRealtime());
             } else {
                 mProcStateScreenOffTimeMs = null;
             }
@@ -16867,12 +16871,10 @@ public class BatteryStatsImpl extends BatteryStats {
 
             stateCount = in.readInt();
             if (stateCount != 0) {
-                // Read the object from the Parcel, whether it's usable or not
-                TimeInFreqMultiStateCounter counter = new TimeInFreqMultiStateCounter(
-                        mOnBatteryTimeBase, in, mClock.elapsedRealtime());
-                if (stateCount == PROC_STATE_TIME_COUNTER_STATE_COUNT) {
-                    u.mProcStateTimeMs = counter;
-                }
+                detachIfNotNull(u.mProcStateTimeMs);
+                u.mProcStateTimeMs = TimeInFreqMultiStateCounter.readFromParcel(in,
+                        mOnBatteryTimeBase, PROC_STATE_TIME_COUNTER_STATE_COUNT,
+                        getCpuFreqCount(), mClock.elapsedRealtime());
             }
 
             detachIfNotNull(u.mProcStateScreenOffTimeMs);
@@ -16881,13 +16883,9 @@ public class BatteryStatsImpl extends BatteryStats {
             stateCount = in.readInt();
             if (stateCount != 0) {
                 detachIfNotNull(u.mProcStateScreenOffTimeMs);
-                // Read the object from the Parcel, whether it's usable or not
-                TimeInFreqMultiStateCounter counter =
-                        new TimeInFreqMultiStateCounter(
-                                mOnBatteryScreenOffTimeBase, in, mClock.elapsedRealtime());
-                if (stateCount == PROC_STATE_TIME_COUNTER_STATE_COUNT) {
-                    u.mProcStateScreenOffTimeMs = counter;
-                }
+                u.mProcStateScreenOffTimeMs = TimeInFreqMultiStateCounter.readFromParcel(in,
+                        mOnBatteryScreenOffTimeBase, PROC_STATE_TIME_COUNTER_STATE_COUNT,
+                        getCpuFreqCount(), mClock.elapsedRealtime());
             }
 
             if (in.readInt() != 0) {
