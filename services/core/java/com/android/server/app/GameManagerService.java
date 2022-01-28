@@ -85,6 +85,7 @@ import com.android.server.SystemService;
 import com.android.server.SystemService.TargetUser;
 
 import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.List;
 
 /**
@@ -157,6 +158,29 @@ public final class GameManagerService extends IGameManagerService.Stub {
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
             String[] args, ShellCallback callback, ResultReceiver result) {
         new GameManagerShellCommand().exec(this, in, out, err, args, callback, result);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+            writer.println("Permission Denial: can't dump GameManagerService from from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                    + " without permission " + android.Manifest.permission.DUMP);
+            return;
+        }
+        if (args == null || args.length == 0) {
+            writer.println("*Dump GameManagerService*");
+            dumpAllGameConfigs(writer);
+        }
+    }
+
+    private void dumpAllGameConfigs(PrintWriter pw) {
+        final int userId = ActivityManager.getCurrentUser();
+        String[] packageList = getInstalledGamePackageNames(userId);
+        for (final String packageName : packageList) {
+            pw.println(getInterventionList(packageName));
+        }
     }
 
     class SettingsHandler extends Handler {
@@ -1266,8 +1290,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     .append(packageName);
             return listStrSb.toString();
         }
-        listStrSb.append("\nPackage name: ")
-                .append(packageName)
+        listStrSb.append("\n")
                 .append(packageConfig.toString());
         return listStrSb.toString();
     }
