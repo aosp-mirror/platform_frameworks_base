@@ -34,6 +34,7 @@ import android.server.ServerProtoEnums;
 import android.service.batterystats.BatteryStatsServiceDumpHistoryProto;
 import android.service.batterystats.BatteryStatsServiceDumpProto;
 import android.telephony.CellSignalStrength;
+import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
@@ -2654,6 +2655,46 @@ public abstract class BatteryStats implements Parcelable {
      */
     public abstract Timer getPhoneDataConnectionTimer(int dataType);
 
+    /** @hide */
+    public static final int RADIO_ACCESS_TECHNOLOGY_OTHER = 0;
+    /** @hide */
+    public static final int RADIO_ACCESS_TECHNOLOGY_LTE = 1;
+    /** @hide */
+    public static final int RADIO_ACCESS_TECHNOLOGY_NR = 2;
+    /** @hide */
+    public static final int RADIO_ACCESS_TECHNOLOGY_COUNT = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "RADIO_ACCESS_TECHNOLOGY_",
+            value = {RADIO_ACCESS_TECHNOLOGY_OTHER, RADIO_ACCESS_TECHNOLOGY_LTE,
+                    RADIO_ACCESS_TECHNOLOGY_NR})
+    public @interface RadioAccessTechnology {
+    }
+
+    /** @hide */
+    public static final String[] RADIO_ACCESS_TECHNOLOGY_NAMES = {"Other", "LTE", "NR"};
+
+    /**
+     * Returns the time in microseconds that the mobile radio has been active on a
+     * given Radio Access Technology (RAT), at a given frequency (NR RAT only), for a given
+     * transmission power level.
+     *
+     * @param rat            Radio Access Technology {@see RadioAccessTechnology}
+     * @param frequencyRange frequency range {@see ServiceState.FrequencyRange}, only needed for
+     *                       RADIO_ACCESS_TECHNOLOGY_NR. Use
+     *                       {@link ServiceState.FREQUENCY_RANGE_UNKNOWN} for other Radio Access
+     *                       Technologies.
+     * @param signalStrength the cellular signal strength. {@see CellSignalStrength#getLevel()}
+     * @param elapsedRealtimeMs current elapsed realtime
+     * @return time (in milliseconds) the mobile radio spent active in the specified state,
+     *         while on battery.
+     * @hide
+     */
+    public abstract long getActiveRadioDurationMs(@RadioAccessTechnology int rat,
+            @ServiceState.FrequencyRange int frequencyRange, int signalStrength,
+            long elapsedRealtimeMs);
+
     static final String[] WIFI_SUPPL_STATE_NAMES = {
         "invalid", "disconn", "disabled", "inactive", "scanning",
         "authenticating", "associating", "associated", "4-way-handshake",
@@ -3997,6 +4038,89 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
+    private void printCellularPerRatBreakdown(PrintWriter pw, StringBuilder sb, String prefix,
+            long rawRealtimeMs) {
+        final String allFrequenciesHeader =
+                "    All frequencies:\n";
+        final String[] nrFrequencyRangeDescription = new String[]{
+                "    Unknown frequency:\n",
+                "    Low frequency (less than 1GHz):\n",
+                "    Middle frequency (1GHz to 3GHz):\n",
+                "    High frequency (3GHz to 6GHz):\n",
+                "    Mmwave frequency (greater than 6GHz):\n"};
+        final String signalStrengthHeader =
+                "      Signal Strength Time:\n";
+        final String[] signalStrengthDescription = new String[]{
+                "        unknown:  ",
+                "        poor:     ",
+                "        moderate: ",
+                "        good:     ",
+                "        great:    "};
+
+        final long totalActiveTimesMs = getMobileRadioActiveTime(rawRealtimeMs * 1000,
+                STATS_SINCE_CHARGED) / 1000;
+
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("Active Cellular Radio Access Technology Breakdown:");
+        pw.println(sb);
+
+        boolean hasData = false;
+        final int numSignalStrength = CellSignalStrength.getNumSignalStrengthLevels();
+        for (int rat = RADIO_ACCESS_TECHNOLOGY_COUNT - 1; rat >= 0; rat--) {
+            sb.setLength(0);
+            sb.append(prefix);
+            sb.append("  ");
+            sb.append(RADIO_ACCESS_TECHNOLOGY_NAMES[rat]);
+            sb.append(":\n");
+            sb.append(prefix);
+
+            final int numFreqLvl =
+                    rat == RADIO_ACCESS_TECHNOLOGY_NR ? nrFrequencyRangeDescription.length : 1;
+            for (int freqLvl = numFreqLvl - 1; freqLvl >= 0; freqLvl--) {
+                final int freqDescriptionStart = sb.length();
+                boolean hasFreqData = false;
+                if (rat == RADIO_ACCESS_TECHNOLOGY_NR) {
+                    sb.append(nrFrequencyRangeDescription[freqLvl]);
+                } else {
+                    sb.append(allFrequenciesHeader);
+                }
+
+                sb.append(prefix);
+                sb.append(signalStrengthHeader);
+                for (int strength = 0; strength < numSignalStrength; strength++) {
+                    final long timeMs = getActiveRadioDurationMs(rat, freqLvl, strength,
+                            rawRealtimeMs);
+                    if (timeMs <= 0) continue;
+                    hasFreqData = true;
+                    sb.append(prefix);
+                    sb.append(signalStrengthDescription[strength]);
+                    formatTimeMs(sb, timeMs);
+                    sb.append("(");
+                    sb.append(formatRatioLocked(timeMs, totalActiveTimesMs));
+                    sb.append(")\n");
+                }
+
+                if (hasFreqData) {
+                    hasData = true;
+                    pw.print(sb);
+                    sb.setLength(0);
+                    sb.append(prefix);
+                } else {
+                    // No useful data was printed, rewind sb to before the start of this frequency.
+                    sb.setLength(freqDescriptionStart);
+                }
+            }
+        }
+
+        if (!hasData) {
+            sb.setLength(0);
+            sb.append(prefix);
+            sb.append("  (no activity)");
+            pw.println(sb);
+        }
+    }
+
     /**
      * Temporary for settings.
      */
@@ -5268,6 +5392,8 @@ public abstract class BatteryStats implements Parcelable {
 
         printControllerActivity(pw, sb, prefix, CELLULAR_CONTROLLER_NAME,
                 getModemControllerActivity(), which);
+
+        printCellularPerRatBreakdown(pw, sb, prefix + "     ", rawRealtimeMs);
 
         pw.print("     Cellular data received: "); pw.println(formatBytesLocked(mobileRxTotalBytes));
         pw.print("     Cellular data sent: "); pw.println(formatBytesLocked(mobileTxTotalBytes));
