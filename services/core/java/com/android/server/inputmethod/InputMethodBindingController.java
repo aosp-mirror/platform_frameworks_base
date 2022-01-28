@@ -315,9 +315,10 @@ final class InputMethodBindingController {
                     mService.reRequestCurrentClientSessionLocked();
                 }
 
-                if (mSupportsStylusHw) {
-                    // TODO init Handwriting spy.
-                }
+                // reset Handwriting event receiver.
+                // always call this as it handles changes in mSupportsStylusHw. It is a noop
+                // if unchanged.
+                mService.scheduleResetStylusHandwriting();
             }
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }

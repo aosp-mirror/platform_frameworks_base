@@ -279,7 +279,7 @@ interface IActivityManager {
     List<ActivityManager.ProcessErrorStateInfo> getProcessesInErrorState();
     boolean clearApplicationUserData(in String packageName, boolean keepState,
             in IPackageDataObserver observer, int userId);
-    void makeServicesNonForeground(in String packageName, int userId);
+    void stopAppForUser(in String packageName, int userId);
     /** Returns {@code false} if the callback could not be registered, {@true} otherwise. */
     boolean registerForegroundServiceObserver(in IForegroundServiceObserver callback);
     @UnsupportedAppUsage
@@ -743,4 +743,14 @@ interface IActivityManager {
 
     /** Blocks until all broadcast queues become idle. */
     void waitForBroadcastIdle();
+
+    /**
+     * @return The reason code of whether or not the given UID should be exempted from background
+     * restrictions here.
+     *
+     * <p>
+     * Note: Call it with caution as it'll try to acquire locks in other services.
+     * </p>
+     */
+    int getBackgroundRestrictionExemptionReason(int uid);
 }

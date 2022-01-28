@@ -207,6 +207,9 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 .thenReturn(DEVICE_OWNER_COMPONENT);
         when(mDevicePolicyManager.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_DEFAULT);
+        when(mDevicePolicyManager.getString(anyString(), any())).thenReturn(mDisclosureGeneric);
+        when(mDevicePolicyManager.getString(anyString(), any(), anyString()))
+                .thenReturn(mDisclosureWithOrganization);
 
         mWakeLock = new WakeLockFake();
         mWakeLockBuilder = new WakeLockFake.Builder(mContext);

@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard;
 
 import static android.app.ActivityManager.TaskDescription;
+import static android.app.admin.DevicePolicyResources.Strings.SystemUi.WORK_LOCK_ACCESSIBILITY;
 
 import android.annotation.ColorInt;
 import android.annotation.UserIdInt;
@@ -92,8 +93,11 @@ public class WorkLockActivity extends Activity {
 
         // Blank out the activity. When it is on-screen it will look like a Recents thumbnail with
         // redaction switched on.
+        final DevicePolicyManager dpm = getSystemService(DevicePolicyManager.class);
+        String contentDescription = dpm.getString(
+                WORK_LOCK_ACCESSIBILITY, () -> getString(R.string.accessibility_desc_work_lock));
         final View blankView = new View(this);
-        blankView.setContentDescription(getString(R.string.accessibility_desc_work_lock));
+        blankView.setContentDescription(contentDescription);
         blankView.setBackgroundColor(getPrimaryColor());
         setContentView(blankView);
     }

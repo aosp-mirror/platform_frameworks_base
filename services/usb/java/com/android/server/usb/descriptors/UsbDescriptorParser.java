@@ -870,4 +870,35 @@ public final class UsbDescriptorParser {
         return getOutputHeadsetProbability() >= OUT_HEADSET_TRIGGER;
     }
 
+    /**
+     * isDock() indicates if the connected USB output peripheral is a docking station with
+     * audio output.
+     * A valid audio dock must declare only one audio output control terminal of type
+     * TERMINAL_EXTERN_DIGITAL.
+     */
+    public boolean isDock() {
+        if (hasMIDIInterface() || hasHIDInterface()) {
+            return false;
+        }
+
+        ArrayList<UsbDescriptor> acDescriptors =
+                getACInterfaceDescriptors(UsbACInterface.ACI_OUTPUT_TERMINAL,
+                        UsbACInterface.AUDIO_AUDIOCONTROL);
+
+        if (acDescriptors.size() != 1) {
+            return false;
+        }
+
+        if (acDescriptors.get(0) instanceof UsbACTerminal) {
+            UsbACTerminal outDescr = (UsbACTerminal) acDescriptors.get(0);
+            if (outDescr.getTerminalType() == UsbTerminalTypes.TERMINAL_EXTERN_DIGITAL) {
+                return true;
+            }
+        } else {
+            Log.w(TAG, "Undefined Audio Output terminal l: " + acDescriptors.get(0).getLength()
+                    + " t:0x" + Integer.toHexString(acDescriptors.get(0).getType()));
+        }
+        return false;
+    }
+
 }

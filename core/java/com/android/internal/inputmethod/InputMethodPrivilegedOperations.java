@@ -410,4 +410,21 @@ public final class InputMethodPrivilegedOperations {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * IME notifies that the current handwriting session should be closed.
+     * @param requestId
+     */
+    @AnyThread
+    public void finishStylusHandwriting(int requestId) {
+        final IInputMethodPrivilegedOperations ops = mOps.getAndWarnIfNull();
+        if (ops == null) {
+            return;
+        }
+        try {
+            ops.finishStylusHandwriting(requestId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

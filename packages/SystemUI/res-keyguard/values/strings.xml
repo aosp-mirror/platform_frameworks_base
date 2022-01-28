@@ -120,10 +120,11 @@
     <!-- Message shown when user enters wrong PIN -->
     <string name="kg_wrong_pin">Wrong PIN</string>
     <!-- Countdown message shown after too many failed unlock attempts -->
-    <plurals name="kg_too_many_failed_attempts_countdown">
-        <item quantity="one">Try again in 1 second.</item>
-        <item quantity="other">Try again in <xliff:g id="number">%d</xliff:g> seconds.</item>
-    </plurals>
+    <string name="kg_too_many_failed_attempts_countdown">{count, plural,
+        =1 {Try again in # second.}
+        other {Try again in # seconds.}
+    }
+    </string>
     <!-- Instructions for using the SIM PIN unlock screen -->
     <string name="kg_sim_pin_instructions">Enter SIM PIN.</string>
     <!-- Instructions for using the SIM PIN unlock screen when there's more than one SIM -->

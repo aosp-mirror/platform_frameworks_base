@@ -23,6 +23,7 @@ import android.content.res.ColorStateList;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
+import android.util.PluralsMessageFormatter;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -40,7 +41,9 @@ import com.android.systemui.classifier.FalsingClassifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class KeyguardPatternViewController
         extends KeyguardInputViewController<KeyguardPatternView> {
@@ -366,9 +369,13 @@ public class KeyguardPatternViewController
             @Override
             public void onTick(long millisUntilFinished) {
                 final int secondsRemaining = (int) Math.round(millisUntilFinished / 1000.0);
-                mMessageAreaController.setMessage(mView.getResources().getQuantityString(
-                        R.plurals.kg_too_many_failed_attempts_countdown,
-                        secondsRemaining, secondsRemaining));
+                Map<String, Object> arguments = new HashMap<>();
+                arguments.put("count", secondsRemaining);
+
+                mMessageAreaController.setMessage(PluralsMessageFormatter.format(
+                        mView.getResources(),
+                        arguments,
+                        R.string.kg_too_many_failed_attempts_countdown));
             }
 
             @Override

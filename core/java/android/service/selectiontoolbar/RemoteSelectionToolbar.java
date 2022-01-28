@@ -21,72 +21,63 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.Region;
 import android.graphics.drawable.AnimatedVectorDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.IBinder;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Size;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.SurfaceControlViewHost;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.Transformation;
+import android.view.selectiontoolbar.ShowInfo;
+import android.view.selectiontoolbar.ToolbarMenuItem;
+import android.view.selectiontoolbar.WidgetInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.android.internal.R;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
-import com.android.internal.widget.floatingtoolbar.FloatingToolbarPopup;
+import com.android.internal.widget.floatingtoolbar.FloatingToolbar;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
- * A popup window used by the floating toolbar to render menu items in the local app process.
+ * This class is responsible for rendering/animation of the selection toolbar in the remote
+ * system process. It holds 2 panels (i.e. main panel and overflow panel) and an overflow
+ * button to transition between panels.
  *
- * This class is responsible for the rendering/animation of the floating toolbar.
- * It holds 2 panels (i.e. main panel and overflow panel) and an overflow button
- * to transition between panels.
+ *  @hide
  */
-
-final class RemoteSelectionToolbar implements FloatingToolbarPopup {
+// TODO(b/215497659): share code with LocalFloatingToolbarPopup
+final class RemoteSelectionToolbar {
+    private static final String TAG = "RemoteSelectionToolbar";
 
     /* Minimum and maximum number of items allowed in the overflow. */
     private static final int MIN_OVERFLOW_SIZE = 2;
     private static final int MAX_OVERFLOW_SIZE = 4;
 
     private final Context mContext;
-    private final View mParent;  // Parent for the popup window.
-    private final PopupWindow mPopupWindow;
 
     /* Margins between the popup window and its content. */
     private final int mMarginHorizontal;
@@ -121,22 +112,21 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
     private final Animation.AnimationListener mOverflowAnimationListener;
 
     private final Rect mViewPortOnScreen = new Rect();  // portion of screen we can draw in.
-    private final Point mCoordsOnWindow = new Point();  // popup window coordinates.
-    /* Temporary data holders. Reset values before using. */
-    private final int[] mTmpCoords = new int[2];
-
-    private final Region mTouchableRegion = new Region();
-    private final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer =
-            info -> {
-                info.contentInsets.setEmpty();
-                info.visibleInsets.setEmpty();
-                info.touchableRegion.set(mTouchableRegion);
-                info.setTouchableInsets(
-                        ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
-            };
 
     private final int mLineHeight;
     private final int mIconTextSpacing;
+
+    private final long mSelectionToolbarToken;
+    private IBinder mHostInputToken;
+    private final SelectionToolbarRenderService.RemoteCallbackWrapper mCallbackWrapper;
+    private final SelectionToolbarRenderService.TransferTouchListener mTransferTouchListener;
+    private int mPopupWidth;
+    private int mPopupHeight;
+    // Coordinates to show the toolbar relative to the specified view port
+    private final Point mRelativeCoordsForToolbar = new Point();
+    private List<ToolbarMenuItem> mMenuItems;
+    private SurfaceControlViewHost mSurfaceControlViewHost;
+    private SurfaceControlViewHost.SurfacePackage mSurfacePackage;
 
     /**
      * @see OverflowPanelViewHelper#preparePopupContent().
@@ -145,7 +135,6 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
         @Override
         public void run() {
             setPanelsStatesAtRestingPosition();
-            setContentAreaAsTouchableSurface();
             mContentContainer.setAlpha(1);
         }
     };
@@ -159,26 +148,7 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
     private Size mMainPanelSize;
 
     /* Menu items and click listeners */
-    private final Map<MenuItemRepr, MenuItem> mMenuItems = new LinkedHashMap<>();
-    private MenuItem.OnMenuItemClickListener mOnMenuItemClickListener;
-    private final View.OnClickListener mMenuItemButtonOnClickListener =
-            new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mOnMenuItemClickListener == null) {
-                        return;
-                    }
-                    final Object tag = v.getTag();
-                    if (!(tag instanceof MenuItemRepr)) {
-                        return;
-                    }
-                    final MenuItem menuItem = mMenuItems.get((MenuItemRepr) tag);
-                    if (menuItem == null) {
-                        return;
-                    }
-                    mOnMenuItemClickListener.onMenuItemClick(menuItem);
-                }
-            };
+    private final View.OnClickListener mMenuItemButtonOnClickListener;
 
     private boolean mOpenOverflowUpwards;  // Whether the overflow opens upwards or downwards.
     private boolean mIsOverflowOpen;
@@ -186,27 +156,28 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
     private int mTransitionDurationScale;  // Used to scale the toolbar transition duration.
 
     private final Rect mPreviousContentRect = new Rect();
-    private int mSuggestedWidth;
-    private boolean mWidthChanged = true;
 
-    /**
-     * Initializes a new floating toolbar popup.
-     *
-     * @param parent  A parent view to get the {@link android.view.View#getWindowToken()} token
-     *      from.
-     */
-    RemoteSelectionToolbar(Context context, View parent) {
-        mParent = Objects.requireNonNull(parent);
+    private final Rect mTempContentRect = new Rect();
+    private final Rect mTempContentRectForRoot = new Rect();
+    private final int[] mTempCoords = new int[2];
+
+    RemoteSelectionToolbar(Context context, long selectionToolbarToken, IBinder hostInputToken,
+            SelectionToolbarRenderService.RemoteCallbackWrapper callbackWrapper,
+            SelectionToolbarRenderService.TransferTouchListener transferTouchListener) {
         mContext = applyDefaultTheme(context);
+        mSelectionToolbarToken = selectionToolbarToken;
+        mCallbackWrapper = callbackWrapper;
+        mTransferTouchListener = transferTouchListener;
+        mHostInputToken = hostInputToken;
+
         mContentContainer = createContentContainer(mContext);
-        mPopupWindow = createPopupWindow(mContentContainer);
-        mMarginHorizontal = parent.getResources()
+        mMarginHorizontal = mContext.getResources()
                 .getDimensionPixelSize(R.dimen.floating_toolbar_horizontal_margin);
-        mMarginVertical = parent.getResources()
+        mMarginVertical = mContext.getResources()
                 .getDimensionPixelSize(R.dimen.floating_toolbar_vertical_margin);
-        mLineHeight = context.getResources()
+        mLineHeight = mContext.getResources()
                 .getDimensionPixelSize(R.dimen.floating_toolbar_height);
-        mIconTextSpacing = context.getResources()
+        mIconTextSpacing = mContext.getResources()
                 .getDimensionPixelSize(R.dimen.floating_toolbar_icon_text_spacing);
 
         // Interpolators
@@ -245,53 +216,81 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
         mOpenOverflowAnimation.setAnimationListener(mOverflowAnimationListener);
         mCloseOverflowAnimation = new AnimationSet(true);
         mCloseOverflowAnimation.setAnimationListener(mOverflowAnimationListener);
-        mShowAnimation = createEnterAnimation(mContentContainer);
+        mShowAnimation = createEnterAnimation(mContentContainer,
+                new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        updateFloatingToolbarRootContentRect();
+                    }
+                });
         mDismissAnimation = createExitAnimation(
                 mContentContainer,
                 150,  // startDelay
                 new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        mPopupWindow.dismiss();
+                        // TODO(b/215497659): should dismiss window after animation
                         mContentContainer.removeAllViews();
+                        mSurfaceControlViewHost.release();
+                        mSurfaceControlViewHost = null;
+                        mSurfacePackage = null;
                     }
                 });
         mHideAnimation = createExitAnimation(
                 mContentContainer,
                 0,  // startDelay
-                new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mPopupWindow.dismiss();
-                    }
-                });
+                null); // TODO(b/215497659): should handle hide after animation
+        mMenuItemButtonOnClickListener = v -> {
+            Object tag = v.getTag();
+            if (!(tag instanceof ToolbarMenuItem)) {
+                return;
+            }
+            mCallbackWrapper.onMenuItemClicked((ToolbarMenuItem) tag);
+        };
     }
 
-    @Override
-    public boolean setOutsideTouchable(
-            boolean outsideTouchable, @Nullable PopupWindow.OnDismissListener onDismiss) {
-        boolean ret = false;
-        if (mPopupWindow.isOutsideTouchable() ^ outsideTouchable) {
-            mPopupWindow.setOutsideTouchable(outsideTouchable);
-            mPopupWindow.setFocusable(!outsideTouchable);
-            mPopupWindow.update();
-            ret = true;
+    private void updateFloatingToolbarRootContentRect() {
+        if (mSurfaceControlViewHost == null) {
+            return;
         }
-        mPopupWindow.setOnDismissListener(onDismiss);
-        return ret;
+        final FloatingToolbarRoot root = (FloatingToolbarRoot) mSurfaceControlViewHost.getView();
+        mContentContainer.getLocationOnScreen(mTempCoords);
+        int contentLeft = mTempCoords[0];
+        int contentTop = mTempCoords[1];
+        mTempContentRectForRoot.set(contentLeft, contentTop,
+                contentLeft + mContentContainer.getWidth(),
+                contentTop + mContentContainer.getHeight());
+        root.setContentRect(mTempContentRectForRoot);
     }
 
-    /**
-     * Lays out buttons for the specified menu items.
-     * Requires a subsequent call to {@link FloatingToolbar#show()} to show the items.
-     */
+    private WidgetInfo createWidgetInfo() {
+        mTempContentRect.set(mRelativeCoordsForToolbar.x, mRelativeCoordsForToolbar.y,
+                mRelativeCoordsForToolbar.x + mPopupWidth,
+                mRelativeCoordsForToolbar.y + mPopupHeight);
+        return new WidgetInfo(mSelectionToolbarToken, mTempContentRect, getSurfacePackage());
+    }
+
+    private SurfaceControlViewHost.SurfacePackage getSurfacePackage() {
+        if (mSurfaceControlViewHost == null) {
+            final FloatingToolbarRoot contentHolder = new FloatingToolbarRoot(mContext,
+                    mHostInputToken, mTransferTouchListener);
+            contentHolder.addView(mContentContainer);
+            mSurfaceControlViewHost = new SurfaceControlViewHost(mContext, mContext.getDisplay(),
+                    mHostInputToken);
+            mSurfaceControlViewHost.setView(contentHolder, mPopupWidth, mPopupHeight);
+        }
+        if (mSurfacePackage == null) {
+            mSurfacePackage = mSurfaceControlViewHost.getSurfacePackage();
+        }
+        return mSurfacePackage;
+    }
+
     private void layoutMenuItems(
-            List<MenuItem> menuItems,
-            MenuItem.OnMenuItemClickListener menuItemClickListener,
+            List<ToolbarMenuItem> menuItems,
             int suggestedWidth) {
         cancelOverflowAnimations();
         clearPanels();
-        updateMenuItems(menuItems, menuItemClickListener);
+
         menuItems = layoutMainPanelItems(menuItems, getAdjustedToolbarWidth(suggestedWidth));
         if (!menuItems.isEmpty()) {
             // Add remaining items to the overflow.
@@ -300,148 +299,98 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
         updatePopupSize();
     }
 
-    /**
-     * Updates the popup's menu items without rebuilding the widget.
-     * Use in place of layoutMenuItems() when the popup's views need not be reconstructed.
-     *
-     * @see #isLayoutRequired(List<MenuItem>)
-     */
-    private void updateMenuItems(
-            List<MenuItem> menuItems, MenuItem.OnMenuItemClickListener menuItemClickListener) {
-        mMenuItems.clear();
-        for (MenuItem menuItem : menuItems) {
-            mMenuItems.put(MenuItemRepr.of(menuItem), menuItem);
-        }
-        mOnMenuItemClickListener = menuItemClickListener;
+    public void onToolbarShowTimeout() {
+        mCallbackWrapper.onToolbarShowTimeout();
     }
 
     /**
-     * Returns true if this popup needs a relayout to properly render the specified menu items.
+     * Show the specified selection toolbar.
      */
-    private boolean isLayoutRequired(List<MenuItem> menuItems) {
-        return !MenuItemRepr.reprEquals(menuItems, mMenuItems.values());
-    }
+    public void show(ShowInfo showInfo) {
+        debugLog("show() for " + showInfo);
 
-    @Override
-    public void setWidthChanged(boolean widthChanged) {
-        mWidthChanged = widthChanged;
-    }
+        mMenuItems = showInfo.getMenuItems();
+        mViewPortOnScreen.set(showInfo.getViewPortOnScreen());
 
-    @Override
-    public void setSuggestedWidth(int suggestedWidth) {
-        // Check if there's been a substantial width spec change.
-        int difference = Math.abs(suggestedWidth - mSuggestedWidth);
-        mWidthChanged = difference > (mSuggestedWidth * 0.2);
-        mSuggestedWidth = suggestedWidth;
-    }
-
-    @Override
-    public void show(List<MenuItem> menuItems,
-            MenuItem.OnMenuItemClickListener menuItemClickListener, Rect contentRect) {
-        if (isLayoutRequired(menuItems) || mWidthChanged) {
-            dismiss();
-            layoutMenuItems(menuItems, menuItemClickListener, mSuggestedWidth);
-        } else {
-            updateMenuItems(menuItems, menuItemClickListener);
+        debugLog("show(): layoutRequired=" + showInfo.isLayoutRequired());
+        if (showInfo.isLayoutRequired()) {
+            layoutMenuItems(mMenuItems, showInfo.getSuggestedWidth());
         }
+        Rect contentRect = showInfo.getContentRect();
         if (!isShowing()) {
             show(contentRect);
         } else if (!mPreviousContentRect.equals(contentRect)) {
             updateCoordinates(contentRect);
         }
-        mWidthChanged = false;
         mPreviousContentRect.set(contentRect);
     }
 
     private void show(Rect contentRectOnScreen) {
         Objects.requireNonNull(contentRectOnScreen);
 
-        if (isShowing()) {
-            return;
-        }
-
         mHidden = false;
         mDismissed = false;
         cancelDismissAndHideAnimations();
         cancelOverflowAnimations();
-
         refreshCoordinatesAndOverflowDirection(contentRectOnScreen);
         preparePopupContent();
-        // We need to specify the position in window coordinates.
-        // TODO: Consider to use PopupWindow.setIsLaidOutInScreen(true) so that we can
-        // specify the popup position in screen coordinates.
-        mPopupWindow.showAtLocation(
-                mParent, Gravity.NO_GRAVITY, mCoordsOnWindow.x, mCoordsOnWindow.y);
-        setTouchableSurfaceInsetsComputer();
-        runShowAnimation();
+        mCallbackWrapper.onShown(createWidgetInfo());
+        // TODO(b/215681595): Use Choreographer to coordinate for show between different thread
+        mShowAnimation.start();
     }
 
-    @Override
-    public void dismiss() {
+    /**
+     * Dismiss the specified selection toolbar.
+     */
+    public void dismiss(long floatingToolbarToken) {
+        debugLog("dismiss for " + floatingToolbarToken);
         if (mDismissed) {
             return;
         }
-
         mHidden = false;
         mDismissed = true;
-        mHideAnimation.cancel();
 
-        runDismissAnimation();
-        setZeroTouchableSurface();
+        mHideAnimation.cancel();
+        mDismissAnimation.start();
     }
 
-    @Override
-    public void hide() {
+    /**
+     * Hide the specified selection toolbar.
+     */
+    public void hide(long floatingToolbarToken) {
+        debugLog("hide for " + floatingToolbarToken);
         if (!isShowing()) {
             return;
         }
 
         mHidden = true;
-        runHideAnimation();
-        setZeroTouchableSurface();
+        mHideAnimation.start();
     }
 
-    @Override
     public boolean isShowing() {
         return !mDismissed && !mHidden;
     }
 
-    @Override
-    public boolean isHidden() {
-        return mHidden;
-    }
-
-    /**
-     * Updates the coordinates of this popup.
-     * The specified coordinates may be adjusted to make sure the popup is entirely on-screen.
-     * This is a no-op if this popup is not showing.
-     */
     private void updateCoordinates(Rect contentRectOnScreen) {
         Objects.requireNonNull(contentRectOnScreen);
 
-        if (!isShowing() || !mPopupWindow.isShowing()) {
+        if (!isShowing()) {
             return;
         }
-
         cancelOverflowAnimations();
         refreshCoordinatesAndOverflowDirection(contentRectOnScreen);
         preparePopupContent();
-        // We need to specify the position in window coordinates.
-        // TODO: Consider to use PopupWindow.setIsLaidOutInScreen(true) so that we can
-        // specify the popup position in screen coordinates.
-        mPopupWindow.update(
-                mCoordsOnWindow.x, mCoordsOnWindow.y,
-                mPopupWindow.getWidth(), mPopupWindow.getHeight());
+        WidgetInfo widgetInfo = createWidgetInfo();
+        mSurfaceControlViewHost.relayout(mPopupWidth, mPopupHeight);
+        mCallbackWrapper.onWidgetUpdated(widgetInfo);
     }
 
     private void refreshCoordinatesAndOverflowDirection(Rect contentRectOnScreen) {
-        refreshViewPort();
-
         // Initialize x ensuring that the toolbar isn't rendered behind the nav bar in
         // landscape.
         final int x = Math.min(
-                contentRectOnScreen.centerX() - mPopupWindow.getWidth() / 2,
-                mViewPortOnScreen.right - mPopupWindow.getWidth());
+                contentRectOnScreen.centerX() - mPopupWidth / 2,
+                mViewPortOnScreen.right - mPopupWidth);
 
         final int y;
 
@@ -484,7 +433,7 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
                 // There is enough space at the top of the content rect for the overflow.
                 // Position above and open upwards.
                 updateOverflowHeight(availableHeightAboveContent - margin);
-                y = contentRectOnScreen.top - mPopupWindow.getHeight();
+                y = contentRectOnScreen.top - mPopupHeight;
                 mOpenOverflowUpwards = true;
             } else if (availableHeightAboveContent >= toolbarHeightWithVerticalMargin
                     && availableHeightThroughContentDown >= minimumOverflowHeightWithMargin) {
@@ -507,7 +456,7 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
                 // Position below but open upwards.
                 updateOverflowHeight(availableHeightThroughContentUp - margin);
                 y = contentRectOnScreen.bottom + toolbarHeightWithVerticalMargin
-                        - mPopupWindow.getHeight();
+                        - mPopupHeight;
                 mOpenOverflowUpwards = true;
             } else {
                 // Not enough space.
@@ -517,45 +466,7 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
                 mOpenOverflowUpwards = false;
             }
         }
-
-        // We later specify the location of PopupWindow relative to the attached window.
-        // The idea here is that 1) we can get the location of a View in both window coordinates
-        // and screen coordinates, where the offset between them should be equal to the window
-        // origin, and 2) we can use an arbitrary for this calculation while calculating the
-        // location of the rootview is supposed to be least expensive.
-        // TODO: Consider to use PopupWindow.setIsLaidOutInScreen(true) so that we can avoid
-        // the following calculation.
-        mParent.getRootView().getLocationOnScreen(mTmpCoords);
-        int rootViewLeftOnScreen = mTmpCoords[0];
-        int rootViewTopOnScreen = mTmpCoords[1];
-        mParent.getRootView().getLocationInWindow(mTmpCoords);
-        int rootViewLeftOnWindow = mTmpCoords[0];
-        int rootViewTopOnWindow = mTmpCoords[1];
-        int windowLeftOnScreen = rootViewLeftOnScreen - rootViewLeftOnWindow;
-        int windowTopOnScreen = rootViewTopOnScreen - rootViewTopOnWindow;
-        mCoordsOnWindow.set(
-                Math.max(0, x - windowLeftOnScreen), Math.max(0, y - windowTopOnScreen));
-    }
-
-    /**
-     * Performs the "show" animation on the floating popup.
-     */
-    private void runShowAnimation() {
-        mShowAnimation.start();
-    }
-
-    /**
-     * Performs the "dismiss" animation on the floating popup.
-     */
-    private void runDismissAnimation() {
-        mDismissAnimation.start();
-    }
-
-    /**
-     * Performs the "hide" animation on the floating popup.
-     */
-    private void runHideAnimation() {
-        mHideAnimation.start();
+        mRelativeCoordsForToolbar.set(x, y);
     }
 
     private void cancelDismissAndHideAnimations() {
@@ -625,15 +536,15 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
                         isInRTLMode() ? 0 : mContentContainer.getWidth() - startWidth;
                 float actualOverflowButtonX = overflowButtonX + deltaContainerWidth;
                 mOverflowButton.setX(actualOverflowButtonX);
+                updateFloatingToolbarRootContentRect();
             }
         };
         widthAnimation.setInterpolator(mLogAccelerateInterpolator);
-        widthAnimation.setDuration(getAdjustedDuration(250));
+        widthAnimation.setDuration(getAnimationDuration());
         heightAnimation.setInterpolator(mFastOutSlowInInterpolator);
-        heightAnimation.setDuration(getAdjustedDuration(250));
+        heightAnimation.setDuration(getAnimationDuration());
         overflowButtonAnimation.setInterpolator(mFastOutSlowInInterpolator);
-        overflowButtonAnimation.setDuration(getAdjustedDuration(250));
-        mOpenOverflowAnimation.getAnimations().clear();
+        overflowButtonAnimation.setDuration(getAnimationDuration());
         mOpenOverflowAnimation.getAnimations().clear();
         mOpenOverflowAnimation.addAnimation(widthAnimation);
         mOpenOverflowAnimation.addAnimation(heightAnimation);
@@ -701,14 +612,15 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
                         isInRTLMode() ? 0 : mContentContainer.getWidth() - startWidth;
                 float actualOverflowButtonX = overflowButtonX + deltaContainerWidth;
                 mOverflowButton.setX(actualOverflowButtonX);
+                updateFloatingToolbarRootContentRect();
             }
         };
         widthAnimation.setInterpolator(mFastOutSlowInInterpolator);
-        widthAnimation.setDuration(getAdjustedDuration(250));
+        widthAnimation.setDuration(getAnimationDuration());
         heightAnimation.setInterpolator(mLogAccelerateInterpolator);
-        heightAnimation.setDuration(getAdjustedDuration(250));
+        heightAnimation.setDuration(getAnimationDuration());
         overflowButtonAnimation.setInterpolator(mFastOutSlowInInterpolator);
-        overflowButtonAnimation.setDuration(getAdjustedDuration(250));
+        overflowButtonAnimation.setDuration(getAnimationDuration());
         mCloseOverflowAnimation.getAnimations().clear();
         mCloseOverflowAnimation.addAnimation(widthAnimation);
         mCloseOverflowAnimation.addAnimation(heightAnimation);
@@ -756,7 +668,7 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
                 mOverflowPanel.setX(0);  // align left
             } else {
                 mContentContainer.setX(// align right
-                        mPopupWindow.getWidth() - containerSize.getWidth() - mMarginHorizontal);
+                        mPopupWidth - containerSize.getWidth() - mMarginHorizontal);
                 mMainPanel.setX(-mContentContainer.getX());  // align right
                 mOverflowButton.setX(0);  // align left
                 mOverflowPanel.setX(0);  // align left
@@ -798,7 +710,7 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
                     mOverflowPanel.setX(0);  // align left
                 } else {
                     mContentContainer.setX(// align right
-                            mPopupWindow.getWidth() - containerSize.getWidth() - mMarginHorizontal);
+                            mPopupWidth - containerSize.getWidth() - mMarginHorizontal);
                     mMainPanel.setX(0);  // align left
                     mOverflowButton.setX(// align right
                             containerSize.getWidth() - mOverflowButtonSize.getWidth());
@@ -866,68 +778,21 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
             width = Math.max(width, mOverflowPanelSize.getWidth());
             height = Math.max(height, mOverflowPanelSize.getHeight());
         }
-        mPopupWindow.setWidth(width + mMarginHorizontal * 2);
-        mPopupWindow.setHeight(height + mMarginVertical * 2);
-        maybeComputeTransitionDurationScale();
-    }
 
-    private void refreshViewPort() {
-        mParent.getWindowVisibleDisplayFrame(mViewPortOnScreen);
+        mPopupWidth = width + mMarginHorizontal * 2;
+        mPopupHeight = height + mMarginVertical * 2;
+        maybeComputeTransitionDurationScale();
     }
 
     private int getAdjustedToolbarWidth(int suggestedWidth) {
         int width = suggestedWidth;
-        refreshViewPort();
-        int maximumWidth = mViewPortOnScreen.width() - 2 * mParent.getResources()
+        int maximumWidth = mViewPortOnScreen.width() - 2 * mContext.getResources()
                 .getDimensionPixelSize(R.dimen.floating_toolbar_horizontal_margin);
         if (width <= 0) {
-            width = mParent.getResources()
+            width = mContext.getResources()
                     .getDimensionPixelSize(R.dimen.floating_toolbar_preferred_width);
         }
         return Math.min(width, maximumWidth);
-    }
-
-    /**
-     * Sets the touchable region of this popup to be zero. This means that all touch events on
-     * this popup will go through to the surface behind it.
-     */
-    private void setZeroTouchableSurface() {
-        mTouchableRegion.setEmpty();
-    }
-
-    /**
-     * Sets the touchable region of this popup to be the area occupied by its content.
-     */
-    private void setContentAreaAsTouchableSurface() {
-        Objects.requireNonNull(mMainPanelSize);
-        final int width;
-        final int height;
-        if (mIsOverflowOpen) {
-            Objects.requireNonNull(mOverflowPanelSize);
-            width = mOverflowPanelSize.getWidth();
-            height = mOverflowPanelSize.getHeight();
-        } else {
-            width = mMainPanelSize.getWidth();
-            height = mMainPanelSize.getHeight();
-        }
-        mTouchableRegion.set(
-                (int) mContentContainer.getX(),
-                (int) mContentContainer.getY(),
-                (int) mContentContainer.getX() + width,
-                (int) mContentContainer.getY() + height);
-    }
-
-    /**
-     * Make the touchable area of this popup be the area specified by mTouchableRegion.
-     * This should be called after the popup window has been dismissed (dismiss/hide)
-     * and is probably being re-shown with a new content root view.
-     */
-    private void setTouchableSurfaceInsetsComputer() {
-        ViewTreeObserver viewTreeObserver = mPopupWindow.getContentView()
-                .getRootView()
-                .getViewTreeObserver();
-        viewTreeObserver.removeOnComputeInternalInsetsListener(mInsetsComputer);
-        viewTreeObserver.addOnComputeInternalInsetsListener(mInsetsComputer);
     }
 
     private boolean isInRTLMode() {
@@ -946,18 +811,14 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
      *
      * @return The menu items that are not included in this main panel.
      */
-    public List<MenuItem> layoutMainPanelItems(
-            List<MenuItem> menuItems, final int toolbarWidth) {
-        Objects.requireNonNull(menuItems);
-
-        int availableWidth = toolbarWidth;
-
-        final LinkedList<MenuItem> remainingMenuItems = new LinkedList<>();
+    private List<ToolbarMenuItem> layoutMainPanelItems(List<ToolbarMenuItem> menuItems,
+            int toolbarWidth) {
+        final LinkedList<ToolbarMenuItem> remainingMenuItems = new LinkedList<>();
         // add the overflow menu items to the end of the remainingMenuItems list.
-        final LinkedList<MenuItem> overflowMenuItems = new LinkedList();
-        for (MenuItem menuItem : menuItems) {
+        final LinkedList<ToolbarMenuItem> overflowMenuItems = new LinkedList();
+        for (ToolbarMenuItem menuItem : menuItems) {
             if (menuItem.getItemId() != android.R.id.textAssist
-                    && menuItem.requiresOverflow()) {
+                    && menuItem.getPriority() == ToolbarMenuItem.PRIORITY_OVERFLOW) {
                 overflowMenuItems.add(menuItem);
             } else {
                 remainingMenuItems.add(menuItem);
@@ -968,25 +829,22 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
         mMainPanel.removeAllViews();
         mMainPanel.setPaddingRelative(0, 0, 0, 0);
 
-        int lastGroupId = -1;
+        int availableWidth = toolbarWidth;
         boolean isFirstItem = true;
         while (!remainingMenuItems.isEmpty()) {
-            final MenuItem menuItem = remainingMenuItems.peek();
-
+            ToolbarMenuItem menuItem = remainingMenuItems.peek();
             // if this is the first item, regardless of requiresOverflow(), it should be
             // displayed on the main panel. Otherwise all items including this one will be
             // overflow items, and should be displayed in overflow panel.
-            if (!isFirstItem && menuItem.requiresOverflow()) {
+            if (!isFirstItem && menuItem.getPriority() == ToolbarMenuItem.PRIORITY_OVERFLOW) {
                 break;
             }
-
             final boolean showIcon = isFirstItem && menuItem.getItemId() == R.id.textAssist;
             final View menuItemButton = createMenuItemButton(
                     mContext, menuItem, mIconTextSpacing, showIcon);
             if (!showIcon && menuItemButton instanceof LinearLayout) {
                 ((LinearLayout) menuItemButton).setGravity(Gravity.CENTER);
             }
-
             // Adding additional start padding for the first button to even out button spacing.
             if (isFirstItem) {
                 menuItemButton.setPaddingRelative(
@@ -995,7 +853,6 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
                         menuItemButton.getPaddingEnd(),
                         menuItemButton.getPaddingBottom());
             }
-
             // Adding additional end padding for the last button to even out button spacing.
             boolean isLastItem = remainingMenuItems.size() == 1;
             if (isLastItem) {
@@ -1005,18 +862,17 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
                         (int) (1.5 * menuItemButton.getPaddingEnd()),
                         menuItemButton.getPaddingBottom());
             }
-
-            menuItemButton.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+            menuItemButton.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
             final int menuItemButtonWidth = Math.min(
                     menuItemButton.getMeasuredWidth(), toolbarWidth);
-
             // Check if we can fit an item while reserving space for the overflowButton.
             final boolean canFitWithOverflow =
                     menuItemButtonWidth <= availableWidth - mOverflowButtonSize.getWidth();
             final boolean canFitNoOverflow =
                     isLastItem && menuItemButtonWidth <= availableWidth;
             if (canFitWithOverflow || canFitNoOverflow) {
-                setButtonTagAndClickListener(menuItemButton, menuItem);
+                menuItemButton.setTag(menuItem);
+                menuItemButton.setOnClickListener(mMenuItemButtonOnClickListener);
                 // Set tooltips for main panel items, but not overflow items (b/35726766).
                 menuItemButton.setTooltipText(menuItem.getTooltipText());
                 mMainPanel.addView(menuItemButton);
@@ -1028,22 +884,20 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
             } else {
                 break;
             }
-            lastGroupId = menuItem.getGroupId();
             isFirstItem = false;
         }
-
         if (!remainingMenuItems.isEmpty()) {
             // Reserve space for overflowButton.
             mMainPanel.setPaddingRelative(0, 0, mOverflowButtonSize.getWidth(), 0);
         }
-
         mMainPanelSize = measure(mMainPanel);
+
         return remainingMenuItems;
     }
 
-    private void layoutOverflowPanelItems(List<MenuItem> menuItems) {
-        ArrayAdapter<MenuItem> overflowPanelAdapter =
-                (ArrayAdapter<MenuItem>) mOverflowPanel.getAdapter();
+    private void layoutOverflowPanelItems(List<ToolbarMenuItem> menuItems) {
+        ArrayAdapter<ToolbarMenuItem> overflowPanelAdapter =
+                (ArrayAdapter<ToolbarMenuItem>) mOverflowPanel.getAdapter();
         overflowPanelAdapter.clear();
         final int size = menuItems.size();
         for (int i = 0; i < size; i++) {
@@ -1055,7 +909,6 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
         } else {
             mOverflowPanel.setY(mOverflowButtonSize.getHeight());
         }
-
         int width = Math.max(getOverflowWidth(), mOverflowButtonSize.getWidth());
         int height = calculateOverflowHeight(MAX_OVERFLOW_SIZE);
         mOverflowPanelSize = new Size(width, height);
@@ -1067,7 +920,6 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
      */
     private void preparePopupContent() {
         mContentContainer.removeAllViews();
-
         // Add views in the specified order so they stack up as expected.
         // Order: overflowPanel, mainPanel, overflowButton.
         if (hasOverflow()) {
@@ -1078,7 +930,6 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
             mContentContainer.addView(mOverflowButton);
         }
         setPanelsStatesAtRestingPosition();
-        setContentAreaAsTouchableSurface();
 
         // The positioning of contents in RTL is wrong when the view is first rendered.
         // Hide the view and post a runnable to recalculate positions and render the view.
@@ -1093,12 +944,12 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
      * Clears out the panels and their container. Resets their calculated sizes.
      */
     private void clearPanels() {
-        mOverflowPanelSize = null;
-        mMainPanelSize = null;
         mIsOverflowOpen = false;
+        mMainPanelSize = null;
         mMainPanel.removeAllViews();
-        ArrayAdapter<MenuItem> overflowPanelAdapter =
-                (ArrayAdapter<MenuItem>) mOverflowPanel.getAdapter();
+        mOverflowPanelSize = null;
+        ArrayAdapter<ToolbarMenuItem> overflowPanelAdapter =
+                (ArrayAdapter<ToolbarMenuItem>) mOverflowPanel.getAdapter();
         overflowPanelAdapter.clear();
         mOverflowPanel.setAdapter(overflowPanelAdapter);
         mContentContainer.removeAllViews();
@@ -1116,7 +967,7 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
         int overflowWidth = 0;
         final int count = mOverflowPanel.getAdapter().getCount();
         for (int i = 0; i < count; i++) {
-            MenuItem menuItem = (MenuItem) mOverflowPanel.getAdapter().getItem(i);
+            ToolbarMenuItem menuItem = (ToolbarMenuItem) mOverflowPanel.getAdapter().getItem(i);
             overflowWidth =
                     Math.max(mOverflowPanelViewHelper.calculateWidth(menuItem), overflowWidth);
         }
@@ -1141,29 +992,24 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
                 + extension;
     }
 
-    private void setButtonTagAndClickListener(View menuItemButton, MenuItem menuItem) {
-        menuItemButton.setTag(MenuItemRepr.of(menuItem));
-        menuItemButton.setOnClickListener(mMenuItemButtonOnClickListener);
-    }
-
     /**
      * NOTE: Use only in android.view.animation.* animations. Do not use in android.animation.*
      * animations. See comment about this in the code.
      */
-    private int getAdjustedDuration(int originalDuration) {
+    private int getAnimationDuration() {
         if (mTransitionDurationScale < 150) {
             // For smaller transition, decrease the time.
-            return Math.max(originalDuration - 50, 0);
+            return 200;
         } else if (mTransitionDurationScale > 300) {
             // For bigger transition, increase the time.
-            return originalDuration + 50;
+            return 300;
         }
 
         // Scale the animation duration with getDurationScale(). This allows
         // android.view.animation.* animations to scale just like android.animation.* animations
         // when  animator duration scale is adjusted in "Developer Options".
         // For this reason, do not use this method for android.animation.* animations.
-        return (int) (originalDuration * ValueAnimator.getDurationScale());
+        return (int) (250 * ValueAnimator.getDurationScale());
     }
 
     private void maybeComputeTransitionDurationScale() {
@@ -1176,7 +1022,7 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
     }
 
     private ViewGroup createMainPanel() {
-        ViewGroup mainPanel = new LinearLayout(mContext) {
+        return new LinearLayout(mContext) {
             @Override
             protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
                 if (isOverflowAnimating()) {
@@ -1195,7 +1041,6 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
                 return isOverflowAnimating();
             }
         };
-        return mainPanel;
     }
 
     private ImageButton createOverflowButton() {
@@ -1203,6 +1048,12 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
                 .inflate(R.layout.floating_popup_overflow_button, null);
         overflowButton.setImageDrawable(mOverflow);
         overflowButton.setOnClickListener(v -> {
+            if (isShowing()) {
+                preparePopupContent();
+                WidgetInfo widgetInfo = createWidgetInfo();
+                mSurfaceControlViewHost.relayout(mPopupWidth, mPopupHeight);
+                mCallbackWrapper.onWidgetUpdated(widgetInfo);
+            }
             if (mIsOverflowOpen) {
                 overflowButton.setImageDrawable(mToOverflow);
                 mToOverflow.start();
@@ -1224,7 +1075,7 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
         overflowPanel.setDividerHeight(0);
 
         final ArrayAdapter adapter =
-                new ArrayAdapter<MenuItem>(mContext, 0) {
+                new ArrayAdapter<ToolbarMenuItem>(mContext, 0) {
                     @Override
                     public View getView(int position, View convertView, ViewGroup parent) {
                         return mOverflowPanelViewHelper.getView(
@@ -1232,14 +1083,11 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
                     }
                 };
         overflowPanel.setAdapter(adapter);
-
         overflowPanel.setOnItemClickListener((parent, view, position, id) -> {
-            MenuItem menuItem = (MenuItem) overflowPanel.getAdapter().getItem(position);
-            if (mOnMenuItemClickListener != null) {
-                mOnMenuItemClickListener.onMenuItemClick(menuItem);
-            }
+            ToolbarMenuItem menuItem =
+                    (ToolbarMenuItem) overflowPanel.getAdapter().getItem(position);
+            mCallbackWrapper.onMenuItemClicked(menuItem);
         });
-
         return overflowPanel;
     }
 
@@ -1252,7 +1100,7 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
     }
 
     private Animation.AnimationListener createOverflowAnimationListener() {
-        Animation.AnimationListener listener = new Animation.AnimationListener() {
+        return new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
                 // Disable the overflow button while it's animating.
@@ -1270,7 +1118,6 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
                 // actually ends.
                 mContentContainer.post(() -> {
                     setPanelsStatesAtRestingPosition();
-                    setContentAreaAsTouchableSurface();
                 });
             }
 
@@ -1278,12 +1125,11 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
             public void onAnimationRepeat(Animation animation) {
             }
         };
-        return listener;
     }
 
     private static Size measure(View view) {
         Preconditions.checkState(view.getParent() == null);
-        view.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+        view.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         return new Size(view.getMeasuredWidth(), view.getMeasuredHeight());
     }
 
@@ -1372,12 +1218,10 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
      * A helper for generating views for the overflow panel.
      */
     private static final class OverflowPanelViewHelper {
-
+        private final Context mContext;
         private final View mCalculator;
         private final int mIconTextSpacing;
         private final int mSidePadding;
-
-        private final Context mContext;
 
         OverflowPanelViewHelper(Context context, int iconTextSpacing) {
             mContext = Objects.requireNonNull(context);
@@ -1387,7 +1231,7 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
             mCalculator = createMenuButton(null);
         }
 
-        public View getView(MenuItem menuItem, int minimumWidth, View convertView) {
+        public View getView(ToolbarMenuItem menuItem, int minimumWidth, View convertView) {
             Objects.requireNonNull(menuItem);
             if (convertView != null) {
                 updateMenuItemButton(
@@ -1399,7 +1243,7 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
             return convertView;
         }
 
-        public int calculateWidth(MenuItem menuItem) {
+        public int calculateWidth(ToolbarMenuItem menuItem) {
             updateMenuItemButton(
                     mCalculator, menuItem, mIconTextSpacing, shouldShowIcon(menuItem));
             mCalculator.measure(
@@ -1407,18 +1251,18 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
             return mCalculator.getMeasuredWidth();
         }
 
-        private View createMenuButton(MenuItem menuItem) {
+        private View createMenuButton(ToolbarMenuItem menuItem) {
             View button = createMenuItemButton(
                     mContext, menuItem, mIconTextSpacing, shouldShowIcon(menuItem));
             button.setPadding(mSidePadding, 0, mSidePadding, 0);
             return button;
         }
 
-        private boolean shouldShowIcon(MenuItem menuItem) {
+        private boolean shouldShowIcon(ToolbarMenuItem menuItem) {
             if (menuItem != null) {
                 return menuItem.getGroupId() == android.R.id.textAssist;
             }
-            return false;
+            return  false;
         }
     }
 
@@ -1426,7 +1270,7 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
      * Creates and returns a menu button for the specified menu item.
      */
     private static View createMenuItemButton(
-            Context context, MenuItem menuItem, int iconTextSpacing, boolean showIcon) {
+            Context context, ToolbarMenuItem menuItem, int iconTextSpacing, boolean showIcon) {
         final View menuItemButton = LayoutInflater.from(context)
                 .inflate(R.layout.floating_popup_menu_button, null);
         if (menuItem != null) {
@@ -1438,8 +1282,8 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
     /**
      * Updates the specified menu item button with the specified menu item data.
      */
-    private static void updateMenuItemButton(
-            View menuItemButton, MenuItem menuItem, int iconTextSpacing, boolean showIcon) {
+    private static void updateMenuItemButton(View menuItemButton, ToolbarMenuItem menuItem,
+            int iconTextSpacing, boolean showIcon) {
         final TextView buttonText = menuItemButton.findViewById(
                 R.id.floating_toolbar_menu_item_text);
         buttonText.setEllipsize(null);
@@ -1453,15 +1297,12 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
                 R.id.floating_toolbar_menu_item_image);
         if (menuItem.getIcon() == null || !showIcon) {
             buttonIcon.setVisibility(View.GONE);
-            if (buttonText != null) {
-                buttonText.setPaddingRelative(0, 0, 0, 0);
-            }
+            buttonText.setPaddingRelative(0, 0, 0, 0);
         } else {
             buttonIcon.setVisibility(View.VISIBLE);
-            buttonIcon.setImageDrawable(menuItem.getIcon());
-            if (buttonText != null) {
-                buttonText.setPaddingRelative(iconTextSpacing, 0, 0, 0);
-            }
+            buttonIcon.setImageDrawable(
+                    menuItem.getIcon().loadDrawable(menuItemButton.getContext()));
+            buttonText.setPaddingRelative(iconTextSpacing, 0, 0, 0);
         }
         final CharSequence contentDescription = menuItem.getContentDescription();
         if (TextUtils.isEmpty(contentDescription)) {
@@ -1476,25 +1317,9 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
                 .inflate(R.layout.floating_popup_container, null);
         contentContainer.setLayoutParams(new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        contentContainer.setTag("floating_toolbar");
+        contentContainer.setTag(FloatingToolbar.FLOATING_TOOLBAR_TAG);
         contentContainer.setClipToOutline(true);
         return contentContainer;
-    }
-
-    private static PopupWindow createPopupWindow(ViewGroup content) {
-        ViewGroup popupContentHolder = new LinearLayout(content.getContext());
-        PopupWindow popupWindow = new PopupWindow(popupContentHolder);
-        // TODO: Use .setIsLaidOutInScreen(true) instead of .setClippingEnabled(false)
-        // unless FLAG_LAYOUT_IN_SCREEN has any unintentional side-effects.
-        popupWindow.setClippingEnabled(false);
-        popupWindow.setWindowLayoutType(
-                WindowManager.LayoutParams.TYPE_APPLICATION_ABOVE_SUB_PANEL);
-        popupWindow.setAnimationStyle(0);
-        popupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        content.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        popupContentHolder.addView(content);
-        return popupWindow;
     }
 
     /**
@@ -1502,10 +1327,11 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
      *
      * @param view  The view to animate
      */
-    private static AnimatorSet createEnterAnimation(View view) {
+    private static AnimatorSet createEnterAnimation(View view, Animator.AnimatorListener listener) {
         AnimatorSet animation = new AnimatorSet();
         animation.playTogether(
                 ObjectAnimator.ofFloat(view, View.ALPHA, 0, 1).setDuration(150));
+        animation.addListener(listener);
         return animation;
     }
 
@@ -1522,7 +1348,9 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
         animation.playTogether(
                 ObjectAnimator.ofFloat(view, View.ALPHA, 1, 0).setDuration(100));
         animation.setStartDelay(startDelay);
-        animation.addListener(listener);
+        if (listener != null) {
+            animation.addListener(listener);
+        }
         return animation;
     }
 
@@ -1538,82 +1366,9 @@ final class RemoteSelectionToolbar implements FloatingToolbarPopup {
         return new ContextThemeWrapper(originalContext, themeId);
     }
 
-    /**
-     * Represents the identity of a MenuItem that is rendered in a FloatingToolbarPopup.
-     */
-    @VisibleForTesting
-    public static final class MenuItemRepr {
-
-        public final int itemId;
-        public final int groupId;
-        @Nullable public final String title;
-        @Nullable private final Drawable mIcon;
-
-        private MenuItemRepr(
-                int itemId, int groupId, @Nullable CharSequence title, @Nullable Drawable icon) {
-            this.itemId = itemId;
-            this.groupId = groupId;
-            this.title = (title == null) ? null : title.toString();
-            mIcon = icon;
-        }
-
-        /**
-         * Creates an instance of MenuItemRepr for the specified menu item.
-         */
-        public static MenuItemRepr of(MenuItem menuItem) {
-            return new MenuItemRepr(
-                    menuItem.getItemId(),
-                    menuItem.getGroupId(),
-                    menuItem.getTitle(),
-                    menuItem.getIcon());
-        }
-
-        /**
-         * Returns this object's hashcode.
-         */
-        @Override
-        public int hashCode() {
-            return Objects.hash(itemId, groupId, title, mIcon);
-        }
-
-        /**
-         * Returns true if this object is the same as the specified object.
-         */
-        @Override
-        public boolean equals(Object o) {
-            if (o == this) {
-                return true;
-            }
-            if (!(o instanceof MenuItemRepr)) {
-                return false;
-            }
-            final MenuItemRepr other = (MenuItemRepr) o;
-            return itemId == other.itemId
-                    && groupId == other.groupId
-                    && TextUtils.equals(title, other.title)
-                    // Many Drawables (icons) do not implement equals(). Using equals() here instead
-                    // of reference comparisons in case a Drawable subclass implements equals().
-                    && Objects.equals(mIcon, other.mIcon);
-        }
-
-        /**
-         * Returns true if the two menu item collections are the same based on MenuItemRepr.
-         */
-        public static boolean reprEquals(
-                Collection<MenuItem> menuItems1, Collection<MenuItem> menuItems2) {
-            if (menuItems1.size() != menuItems2.size()) {
-                return false;
-            }
-
-            final Iterator<MenuItem> menuItems2Iter = menuItems2.iterator();
-            for (MenuItem menuItem1 : menuItems1) {
-                final MenuItem menuItem2 = menuItems2Iter.next();
-                if (!MenuItemRepr.of(menuItem1).equals(MenuItemRepr.of(menuItem2))) {
-                    return false;
-                }
-            }
-
-            return true;
+    private static void debugLog(String message) {
+        if (Log.isLoggable(FloatingToolbar.FLOATING_TOOLBAR_TAG, Log.DEBUG)) {
+            Log.v(TAG, message);
         }
     }
 }

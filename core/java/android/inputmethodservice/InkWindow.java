@@ -39,6 +39,7 @@ import com.android.internal.policy.PhoneWindow;
 final class InkWindow extends PhoneWindow {
 
     private final WindowManager mWindowManager;
+    private boolean mIsViewAdded;
 
     public InkWindow(@NonNull Context context) {
         super(context);
@@ -47,6 +48,7 @@ final class InkWindow extends PhoneWindow {
         final LayoutParams attrs = getAttributes();
         attrs.layoutInDisplayCutoutMode = LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         attrs.setFitInsetsTypes(0);
+        // TODO(b/210039666): use INPUT_FEATURE_NO_INPUT_CHANNEL once b/216179339 is fixed.
         setAttributes(attrs);
         // Ink window is not touchable with finger.
         addFlags(FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_NO_LIMITS | FLAG_NOT_TOUCHABLE
@@ -57,16 +59,30 @@ final class InkWindow extends PhoneWindow {
     }
 
     /**
+     * Initialize InkWindow if we only want to create and draw surface but not show it.
+     */
+    void initOnly() {
+        show(true /* keepInvisible */);
+    }
+
+    /**
      * Method to show InkWindow on screen.
      * Emulates internal behavior similar to Dialog.show().
      */
     void show() {
+        show(false /* keepInvisible */);
+    }
+
+    private void show(boolean keepInvisible) {
         if (getDecorView() == null) {
             Slog.i(InputMethodService.TAG, "DecorView is not set for InkWindow. show() failed.");
             return;
         }
-        getDecorView().setVisibility(View.VISIBLE);
-        mWindowManager.addView(getDecorView(), getAttributes());
+        getDecorView().setVisibility(keepInvisible ? View.INVISIBLE : View.VISIBLE);
+        if (!mIsViewAdded) {
+            mWindowManager.addView(getDecorView(), getAttributes());
+            mIsViewAdded = true;
+        }
     }
 
     /**
@@ -78,11 +94,19 @@ final class InkWindow extends PhoneWindow {
         if (getDecorView() != null) {
             getDecorView().setVisibility(remove ? View.GONE : View.INVISIBLE);
         }
+        //TODO(b/210039666): remove window from WM after a delay. Delay amount TBD.
     }
 
     void setToken(@NonNull IBinder token) {
         WindowManager.LayoutParams lp = getAttributes();
         lp.token = token;
         setAttributes(lp);
+    }
+
+    /**
+     * Returns {@code true} if Window was created and added to WM.
+     */
+    boolean isInitialized() {
+        return mIsViewAdded;
     }
 }

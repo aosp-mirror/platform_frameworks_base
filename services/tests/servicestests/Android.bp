@@ -133,9 +133,11 @@ java_library {
     name: "servicestests-core-utils",
     srcs: [
         "src/com/android/server/pm/PackageSettingBuilder.java",
+        "src/com/android/server/am/DeviceConfigSession.java",
     ],
     static_libs: [
         "services.core",
+        "compatibility-device-util-axt",
     ],
 }
 

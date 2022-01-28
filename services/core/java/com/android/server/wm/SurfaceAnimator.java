@@ -88,6 +88,8 @@ class SurfaceAnimator {
 
     private boolean mAnimationStartDelayed;
 
+    private boolean mAnimationFinished;
+
     /**
      * @param animatable The object to animate.
      * @param staticAnimationFinishedCallback Callback to invoke when an animation has finished
@@ -137,6 +139,7 @@ class SurfaceAnimator {
                         || anim.shouldDeferAnimationFinish(resetAndInvokeFinish))) {
                     resetAndInvokeFinish.run();
                 }
+                mAnimationFinished = true;
             }
         };
     }
@@ -302,6 +305,9 @@ class SurfaceAnimator {
             Slog.w(TAG, "Unable to transfer animation, surface or parent is null");
             cancelAnimation();
             return;
+        } else if (from.mAnimationFinished) {
+            Slog.w(TAG, "Unable to transfer animation, because " + from + " animation is finished");
+            return;
         }
         endDelayingAnimationStart();
         final Transaction t = mAnimatable.getPendingTransaction();
@@ -392,6 +398,7 @@ class SurfaceAnimator {
         SurfaceControl leash = mLeash;
         mLeash = null;
         final boolean scheduleAnim = removeLeash(t, mAnimatable, leash, destroyLeash);
+        mAnimationFinished = false;
         if (scheduleAnim) {
             mService.scheduleAnimationLocked();
         }

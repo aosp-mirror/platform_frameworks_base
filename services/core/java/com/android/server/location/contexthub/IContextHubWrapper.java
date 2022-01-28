@@ -243,6 +243,22 @@ public abstract class IContextHubWrapper {
     public abstract void onMicrophoneSettingChanged(boolean enabled);
 
     /**
+     * @return True if this version of the Contexthub HAL supports BT availability setting
+     * notifications.
+     */
+    public abstract boolean supportsBtSettingNotifications();
+
+    /**
+     * Notifies the Contexthub implementation of a BT main setting change.
+     */
+    public abstract void onBtMainSettingChanged(boolean enabled);
+
+    /**
+     * Notifies the Contexthub implementation of a BT scanning setting change.
+     */
+    public abstract void onBtScanningSettingChanged(boolean enabled);
+
+    /**
      * Invoked whenever a host client connects with the framework.
      *
      * @param info The host endpoint info.
@@ -409,6 +425,10 @@ public abstract class IContextHubWrapper {
             return true;
         }
 
+        public boolean supportsBtSettingNotifications() {
+            return true;
+        }
+
         public void onLocationSettingChanged(boolean enabled) {
             onSettingChanged(android.hardware.contexthub.Setting.LOCATION, enabled);
         }
@@ -430,6 +450,14 @@ public abstract class IContextHubWrapper {
 
         public void onWifiScanningSettingChanged(boolean enabled) {
             onSettingChanged(android.hardware.contexthub.Setting.WIFI_SCANNING, enabled);
+        }
+
+        public void onBtMainSettingChanged(boolean enabled) {
+            onSettingChanged(android.hardware.contexthub.Setting.BT_MAIN, enabled);
+        }
+
+        public void onBtScanningSettingChanged(boolean enabled) {
+            onSettingChanged(android.hardware.contexthub.Setting.BT_SCANNING, enabled);
         }
 
         @Override
@@ -662,8 +690,14 @@ public abstract class IContextHubWrapper {
             mHub.registerCallback(contextHubId, mHidlCallbackMap.get(contextHubId));
         }
 
+        public boolean supportsBtSettingNotifications() {
+            return false;
+        }
+
         public void onWifiMainSettingChanged(boolean enabled) {}
         public void onWifiScanningSettingChanged(boolean enabled) {}
+        public void onBtMainSettingChanged(boolean enabled) {}
+        public void onBtScanningSettingChanged(boolean enabled) {}
     }
 
     private static class ContextHubWrapperV1_0 extends ContextHubWrapperHidl {

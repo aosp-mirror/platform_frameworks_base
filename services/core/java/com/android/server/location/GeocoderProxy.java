@@ -83,9 +83,9 @@ public class GeocoderProxy {
             }
 
             @Override
-            public void onError() {
+            public void onError(Throwable t) {
                 try {
-                    listener.onResults("Service not Available", Collections.emptyList());
+                    listener.onResults(t.toString(), Collections.emptyList());
                 } catch (RemoteException e) {
                     // ignore
                 }
@@ -110,9 +110,9 @@ public class GeocoderProxy {
             }
 
             @Override
-            public void onError() {
+            public void onError(Throwable t) {
                 try {
-                    listener.onResults("Service not Available", Collections.emptyList());
+                    listener.onResults(t.toString(), Collections.emptyList());
                 } catch (RemoteException e) {
                     // ignore
                 }

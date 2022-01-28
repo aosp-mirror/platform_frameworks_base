@@ -412,7 +412,7 @@ class AutomaticBrightnessController {
         if (mLoggingEnabled) {
             Slog.d(TAG, "Display policy transitioning from " + oldPolicy + " to " + policy);
         }
-        if (!isInteractivePolicy(policy) && isInteractivePolicy(oldPolicy)) {
+        if (!isInteractivePolicy(policy) && isInteractivePolicy(oldPolicy) && !isInIdleMode()) {
             mHandler.sendEmptyMessageDelayed(MSG_INVALIDATE_SHORT_TERM_MODEL,
                     mCurrentBrightnessMapper.getShortTermModelTimeout());
         } else if (isInteractivePolicy(policy) && !isInteractivePolicy(oldPolicy)) {

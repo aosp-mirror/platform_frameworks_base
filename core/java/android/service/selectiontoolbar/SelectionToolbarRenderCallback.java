@@ -31,14 +31,6 @@ public interface SelectionToolbarRenderCallback {
      */
     void onShown(WidgetInfo widgetInfo);
     /**
-     * The selection toolbar is hidden.
-     */
-    void onHidden(long widgetToken);
-    /**
-     * The selection toolbar is dismissed.
-     */
-    void onDismissed(long widgetToken);
-    /**
      * The selection toolbar has changed.
      */
     void onWidgetUpdated(WidgetInfo info);
@@ -46,6 +38,10 @@ public interface SelectionToolbarRenderCallback {
      * The menu item on the selection toolbar has been clicked.
      */
     void onMenuItemClicked(ToolbarMenuItem item);
+    /**
+     * The toolbar doesn't be dismissed after showing on a given timeout.
+     */
+    void onToolbarShowTimeout();
     /**
      * The error occurred when operating on the selection toolbar.
      */

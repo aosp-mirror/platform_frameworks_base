@@ -61,5 +61,8 @@ oneway interface IInputMethod {
 
     void canStartStylusHandwriting(int requestId);
 
-    void startStylusHandwriting(in InputChannel channel, in List<MotionEvent> events);
+    void startStylusHandwriting(int requestId, in InputChannel channel,
+            in List<MotionEvent> events);
+
+    void initInkWindow();
 }

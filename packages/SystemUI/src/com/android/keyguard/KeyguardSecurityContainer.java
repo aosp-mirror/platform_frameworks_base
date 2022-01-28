@@ -20,6 +20,8 @@ import static android.view.WindowInsets.Type.systemBars;
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
 import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
+import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_DISABLED_ALPHA;
+import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_ENABLED_ALPHA;
 
 import static java.lang.Integer.max;
 
@@ -892,6 +894,9 @@ public class KeyguardSecurityContainer extends FrameLayout {
                     } else {
                         textView.setBackground(null);
                     }
+                    view.setEnabled(item.isSwitchToEnabled);
+                    view.setAlpha(view.isEnabled() ? USER_SWITCH_ENABLED_ALPHA :
+                            USER_SWITCH_DISABLED_ALPHA);
                     return view;
                 }
 
@@ -941,6 +946,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 mPopup.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         public void onItemClick(AdapterView parent, View view, int pos, long id) {
                             if (mFalsingManager.isFalseTap(LOW_PENALTY)) return;
+                            if (!view.isEnabled()) return;
 
                             // Subtract one for the header
                             UserRecord user = adapter.getItem(pos - 1);

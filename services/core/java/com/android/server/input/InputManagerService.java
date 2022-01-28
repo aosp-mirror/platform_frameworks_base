@@ -3510,6 +3510,16 @@ public class InputManagerService extends IInputManager.Stub
         public void unregisterLidSwitchCallback(LidSwitchCallback callbacks) {
             unregisterLidSwitchCallbackInternal(callbacks);
         }
+
+        @Override
+        public InputChannel createInputChannel(String inputChannelName) {
+            return InputManagerService.this.createInputChannel(inputChannelName);
+        }
+
+        @Override
+        public void pilferPointers(IBinder token) {
+            nativePilferPointers(mPtr, token);
+        }
     }
 
     @Override

@@ -62,6 +62,11 @@ public class SystemServicePowerCalculator extends PowerCalculator {
     }
 
     @Override
+    public boolean isPowerComponentSupported(@BatteryConsumer.PowerComponent int powerComponent) {
+        return powerComponent == BatteryConsumer.POWER_COMPONENT_SYSTEM_SERVICES;
+    }
+
+    @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         final BatteryStats.Uid systemUid = batteryStats.getUidStats().get(Process.SYSTEM_UID);

@@ -17,13 +17,16 @@
 package android.media.tv;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/** @hide */
+/**
+ * A response for Section from broadcast signal.
+ */
 public final class SectionResponse extends BroadcastInfoResponse implements Parcelable {
-    public static final @TvInputManager.BroadcastInfoType int responseType =
+    private static final @TvInputManager.BroadcastInfoType int RESPONSE_TYPE =
             TvInputManager.BROADCAST_INFO_TYPE_SECTION;
 
     public static final @NonNull Parcelable.Creator<SectionResponse> CREATOR =
@@ -44,35 +47,50 @@ public final class SectionResponse extends BroadcastInfoResponse implements Parc
     private final int mVersion;
     private final Bundle mSessionData;
 
-    public static SectionResponse createFromParcelBody(Parcel in) {
+    static SectionResponse createFromParcelBody(Parcel in) {
         return new SectionResponse(in);
     }
 
     public SectionResponse(int requestId, int sequence, @ResponseResult int responseResult,
-            int sessionId, int version, Bundle sessionData) {
-        super(responseType, requestId, sequence, responseResult);
+            int sessionId, int version, @Nullable Bundle sessionData) {
+        super(RESPONSE_TYPE, requestId, sequence, responseResult);
         mSessionId = sessionId;
         mVersion = version;
         mSessionData = sessionData;
     }
 
-    protected SectionResponse(Parcel source) {
-        super(responseType, source);
+    SectionResponse(Parcel source) {
+        super(RESPONSE_TYPE, source);
         mSessionId = source.readInt();
         mVersion = source.readInt();
         mSessionData = source.readBundle();
     }
 
+    /**
+     * Gets the Session Id of requested session.
+     */
     public int getSessionId() {
         return mSessionId;
     }
 
+    /**
+     * Gets the Version number of requested session.
+     */
     public int getVersion() {
         return mVersion;
     }
 
+    /**
+     * Gets the raw data of session.
+     */
+    @NonNull
     public Bundle getSessionData() {
         return mSessionData;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     @Override

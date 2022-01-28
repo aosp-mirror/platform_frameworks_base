@@ -74,6 +74,7 @@ package android.app.usage {
 
   public class NetworkStatsManager {
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void forceUpdate();
+    method public static int getCollapsedRatType(int);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void notifyNetworkStatus(@NonNull java.util.List<android.net.Network>, @NonNull java.util.List<android.net.NetworkStateSnapshot>, @Nullable String, @NonNull java.util.List<android.net.UnderlyingNetworkInfo>);
     method @NonNull @WorkerThread public android.app.usage.NetworkStats queryDetailsForDevice(@NonNull android.net.NetworkTemplate, long, long);
     method @NonNull @WorkerThread public android.app.usage.NetworkStats queryDetailsForUidTagState(@NonNull android.net.NetworkTemplate, long, long, int, int, int) throws java.lang.SecurityException;
@@ -85,6 +86,7 @@ package android.app.usage {
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void setPollOnOpen(boolean);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void setStatsProviderWarningAndLimitAsync(@NonNull String, long, long);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void setUidForeground(int, boolean);
+    field public static final int NETWORK_TYPE_5G_NSA = -2; // 0xfffffffe
   }
 
   public abstract static class NetworkStatsManager.UsageCallback {

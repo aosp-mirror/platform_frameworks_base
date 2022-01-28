@@ -59,34 +59,20 @@ public class HandwritingInitiatorTest {
 
     private HandwritingInitiator mHandwritingInitiator;
     private View mTestView;
+    private  Context mContext;
 
     @Before
     public void setup() {
         final Instrumentation mInstrumentation = InstrumentationRegistry.getInstrumentation();
-        Context context = mInstrumentation.getTargetContext();
+        mContext = mInstrumentation.getTargetContext();
         ViewConfiguration viewConfiguration = mock(ViewConfiguration.class);
         when(viewConfiguration.getScaledTouchSlop()).thenReturn(TOUCH_SLOP);
 
-        InputMethodManager inputMethodManager = context.getSystemService(InputMethodManager.class);
+        InputMethodManager inputMethodManager = mContext.getSystemService(InputMethodManager.class);
         mHandwritingInitiator =
                 spy(new HandwritingInitiator(viewConfiguration, inputMethodManager));
 
-        // mock a parent so that HandwritingInitiator can get
-        ViewGroup parent = new ViewGroup(context) {
-            @Override
-            protected void onLayout(boolean changed, int l, int t, int r, int b) {
-                // We don't layout this view.
-            }
-            @Override
-            public boolean getChildVisibleRect(View child, Rect r, android.graphics.Point offset) {
-                r.set(sHwArea);
-                return true;
-            }
-        };
-
-        mTestView = mock(View.class);
-        when(mTestView.isAttachedToWindow()).thenReturn(true);
-        parent.addView(mTestView);
+        mTestView = createMockView(sHwArea, true);
     }
 
     @Test
@@ -203,16 +189,54 @@ public class HandwritingInitiatorTest {
     }
 
     @Test
-    public void onInputConnectionCreated_inputConnectionCreated() {
+    public void autoHandwriting_whenDisabled_wontStartHW() {
+        View mockView = createMockView(sHwArea, false);
+        mHandwritingInitiator.onInputConnectionCreated(mockView);
+        final int x1 = (sHwArea.left + sHwArea.right) / 2;
+        final int y1 = (sHwArea.top + sHwArea.bottom) / 2;
+        MotionEvent stylusEvent1 = createStylusEvent(ACTION_DOWN, x1, y1, 0);
+        mHandwritingInitiator.onTouchEvent(stylusEvent1);
+
+        final int x2 = x1 + TOUCH_SLOP * 2;
+        final int y2 = y1;
+
+        MotionEvent stylusEvent2 = createStylusEvent(ACTION_MOVE, x2, y2, 0);
+        mHandwritingInitiator.onTouchEvent(stylusEvent2);
+
+        verify(mHandwritingInitiator, never()).startHandwriting(mTestView);
+    }
+
+    @Test
+    public void onInputConnectionCreated() {
         mHandwritingInitiator.onInputConnectionCreated(mTestView);
         assertThat(mHandwritingInitiator.mConnectedView).isNotNull();
         assertThat(mHandwritingInitiator.mConnectedView.get()).isEqualTo(mTestView);
     }
 
     @Test
-    public void onInputConnectionCreated_inputConnectionClosed() {
+    public void onInputConnectionCreated_whenAutoHandwritingIsDisabled() {
+        View view = new View(mContext);
+        view.setAutoHandwritingEnabled(false);
+        assertThat(view.isAutoHandwritingEnabled()).isFalse();
+        mHandwritingInitiator.onInputConnectionCreated(view);
+
+        assertThat(mHandwritingInitiator.mConnectedView).isNull();
+    }
+
+    @Test
+    public void onInputConnectionClosed() {
         mHandwritingInitiator.onInputConnectionCreated(mTestView);
         mHandwritingInitiator.onInputConnectionClosed(mTestView);
+
+        assertThat(mHandwritingInitiator.mConnectedView).isNull();
+    }
+
+    @Test
+    public void onInputConnectionClosed_whenAutoHandwritingIsDisabled() {
+        View view = new View(mContext);
+        view.setAutoHandwritingEnabled(false);
+        mHandwritingInitiator.onInputConnectionCreated(view);
+        mHandwritingInitiator.onInputConnectionClosed(view);
 
         assertThat(mHandwritingInitiator.mConnectedView).isNull();
     }
@@ -242,5 +266,26 @@ public class HandwritingInitiatorTest {
                 properties, coords, 0 /* metaState */, 0 /* buttonState */, 1 /* xPrecision */,
                 1 /* yPrecision */, 0 /* deviceId */, 0 /* edgeFlags */,
                 InputDevice.SOURCE_TOUCHSCREEN, 0 /* flags */);
+    }
+
+    private View createMockView(Rect viewBound, boolean autoHandwritingEnabled) {
+        // mock a parent so that HandwritingInitiator can get
+        ViewGroup parent = new ViewGroup(mContext) {
+            @Override
+            protected void onLayout(boolean changed, int l, int t, int r, int b) {
+                // We don't layout this view.
+            }
+            @Override
+            public boolean getChildVisibleRect(View child, Rect r, android.graphics.Point offset) {
+                r.set(viewBound);
+                return true;
+            }
+        };
+
+        View mockView = mock(View.class);
+        when(mockView.isAttachedToWindow()).thenReturn(true);
+        when(mockView.isAutoHandwritingEnabled()).thenReturn(autoHandwritingEnabled);
+        parent.addView(mockView);
+        return mockView;
     }
 }

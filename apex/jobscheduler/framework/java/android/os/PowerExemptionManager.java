@@ -259,10 +259,9 @@ public class PowerExemptionManager {
      */
     public static final int REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED = 207;
     /**
-     * Broadcast {@link android.content.Intent#ACTION_REFRESH_SAFETY_SOURCES}.
-     * @hide
+     * Broadcast {@link android.safetycenter.SafetyCenterManager#ACTION_REFRESH_SAFETY_SOURCES}.
      */
-    public static final int REASON_ACTION_REFRESH_SAFETY_SOURCES = 208;
+    public static final int REASON_REFRESH_SAFETY_SOURCES = 208;
 
     /* Reason code range 300-399 are reserved for other internal reasons */
     /**
@@ -350,6 +349,21 @@ public class PowerExemptionManager {
      * @hide
      */
     public static final int REASON_MEDIA_SESSION_CALLBACK = 317;
+    /**
+     * Dialer app.
+     * @hide
+     */
+    public static final int REASON_ROLE_DIALER = 318;
+    /**
+     * Emergency app.
+     * @hide
+     */
+    public static final int REASON_ROLE_EMERGENCY = 319;
+    /**
+     * System Module.
+     * @hide
+     */
+    public static final int REASON_SYSTEM_MODULE = 320;
 
     /** @hide The app requests out-out. */
     public static final int REASON_OPT_OUT_REQUESTED = 1000;
@@ -404,7 +418,7 @@ public class PowerExemptionManager {
             REASON_TIME_CHANGED,
             REASON_LOCALE_CHANGED,
             REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED,
-            REASON_ACTION_REFRESH_SAFETY_SOURCES,
+            REASON_REFRESH_SAFETY_SOURCES,
             REASON_SYSTEM_ALLOW_LISTED,
             REASON_ALARM_MANAGER_ALARM_CLOCK,
             REASON_ALARM_MANAGER_WHILE_IDLE,
@@ -423,6 +437,9 @@ public class PowerExemptionManager {
             REASON_EVENT_MMS,
             REASON_SHELL,
             REASON_MEDIA_SESSION_CALLBACK,
+            REASON_ROLE_DIALER,
+            REASON_ROLE_EMERGENCY,
+            REASON_SYSTEM_MODULE,
             REASON_OPT_OUT_REQUESTED,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -688,8 +705,8 @@ public class PowerExemptionManager {
                 return "LOCALE_CHANGED";
             case REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED:
                 return "REASON_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED";
-            case REASON_ACTION_REFRESH_SAFETY_SOURCES:
-                return "REASON_ACTION_REFRESH_SAFETY_SOURCES";
+            case REASON_REFRESH_SAFETY_SOURCES:
+                return "REASON_REFRESH_SAFETY_SOURCES";
             case REASON_SYSTEM_ALLOW_LISTED:
                 return "SYSTEM_ALLOW_LISTED";
             case REASON_ALARM_MANAGER_ALARM_CLOCK:
@@ -726,6 +743,12 @@ public class PowerExemptionManager {
                 return "SHELL";
             case REASON_MEDIA_SESSION_CALLBACK:
                 return "MEDIA_SESSION_CALLBACK";
+            case REASON_ROLE_DIALER:
+                return "ROLE_DIALER";
+            case REASON_ROLE_EMERGENCY:
+                return "ROLE_EMERGENCY";
+            case REASON_SYSTEM_MODULE:
+                return "SYSTEM_MODULE";
             case REASON_OPT_OUT_REQUESTED:
                 return "REASON_OPT_OUT_REQUESTED";
             default:

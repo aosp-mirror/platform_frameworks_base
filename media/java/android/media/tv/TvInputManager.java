@@ -369,21 +369,13 @@ public final class TvInputManager {
             BROADCAST_INFO_TYPE_COMMAND, BROADCAST_INFO_TYPE_TIMELINE})
     public @interface BroadcastInfoType {}
 
-    /** @hide */
     public static final int BROADCAST_INFO_TYPE_TS = 1;
-    /** @hide */
     public static final int BROADCAST_INFO_TYPE_TABLE = 2;
-    /** @hide */
     public static final int BROADCAST_INFO_TYPE_SECTION = 3;
-    /** @hide */
     public static final int BROADCAST_INFO_TYPE_PES = 4;
-    /** @hide */
     public static final int BROADCAST_INFO_STREAM_EVENT = 5;
-    /** @hide */
     public static final int BROADCAST_INFO_TYPE_DSMCC = 6;
-    /** @hide */
     public static final int BROADCAST_INFO_TYPE_COMMAND = 7;
-    /** @hide */
     public static final int BROADCAST_INFO_TYPE_TIMELINE = 8;
 
     /** @hide */

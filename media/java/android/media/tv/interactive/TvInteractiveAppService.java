@@ -556,7 +556,6 @@ public abstract class TvInteractiveAppService extends Service {
 
         /**
          * Called when a broadcast info response is received.
-         * @hide
          */
         public void onBroadcastInfoResponse(@NonNull BroadcastInfoResponse response) {
         }
@@ -659,7 +658,6 @@ public abstract class TvInteractiveAppService extends Service {
         /**
          * Requests broadcast related information from the related TV input.
          * @param request the request for broadcast info
-         * @hide
          */
         public void requestBroadcastInfo(@NonNull final BroadcastInfoRequest request) {
             executeOrPostRunnableOnMainThread(new Runnable() {
@@ -684,7 +682,6 @@ public abstract class TvInteractiveAppService extends Service {
         /**
          * Remove broadcast information request from the related TV input.
          * @param requestId the ID of the request
-         * @hide
          */
         public void removeBroadcastInfo(final int requestId) {
             executeOrPostRunnableOnMainThread(new Runnable() {

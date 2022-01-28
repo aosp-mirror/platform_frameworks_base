@@ -4,8 +4,8 @@ import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.usage.AppStandbyInfo;
+import android.app.usage.UsageStatsManager.ForcedReasons;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
-import android.app.usage.UsageStatsManager.SystemForcedReasons;
 import android.content.Context;
 import android.util.IndentingPrintWriter;
 
@@ -152,7 +152,7 @@ public interface AppStandbyInternal {
      *                       UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_* reasons.
      */
     void restrictApp(@NonNull String packageName, int userId,
-            @SystemForcedReasons int restrictReason);
+            @ForcedReasons int restrictReason);
 
     /**
      * Put the specified app in the
@@ -169,7 +169,29 @@ public interface AppStandbyInternal {
      *                       UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_* reasons.
      */
     void restrictApp(@NonNull String packageName, int userId, int mainReason,
-            @SystemForcedReasons int restrictReason);
+            @ForcedReasons int restrictReason);
+
+    /**
+     * Unrestrict an app if there is no other reason to restrict it.
+     *
+     * <p>
+     * The {@code prevMainReasonRestrict} and {@code prevSubReasonRestrict} are the previous
+     * reasons of why it was restricted, but the caller knows that these conditions are not true
+     * anymore; therefore if there is no other reasons to restrict it (as there could bemultiple
+     * reasons to restrict it), lift the restriction.
+     * </p>
+     *
+     * @param packageName            The package name of the app.
+     * @param userId                 The user id that this app runs in.
+     * @param prevMainReasonRestrict The main reason that why it was restricted, must be either
+     *                               {@link android.app.usage.UsageStatsManager#REASON_MAIN_FORCED_BY_SYSTEM}
+     *                               or {@link android.app.usage.UsageStatsManager#REASON_MAIN_FORCED_BY_USER}.
+     * @param prevSubReasonRestrict  The subreason that why it was restricted before.
+     * @param mainReasonUnrestrict   The main reason that why it could be unrestricted now.
+     * @param subReasonUnrestrict    The subreason that why it could be unrestricted now.
+     */
+    void maybeUnrestrictApp(@NonNull String packageName, int userId, int prevMainReasonRestrict,
+            int prevSubReasonRestrict, int mainReasonUnrestrict, int subReasonUnrestrict);
 
     void addActiveDeviceAdmin(String adminPkg, int userId);
 

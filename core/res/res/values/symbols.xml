@@ -1251,13 +1251,12 @@
   <java-symbol type="string" name="conference_call" />
   <java-symbol type="string" name="tooltip_popup_title" />
 
-  <java-symbol type="plurals" name="bugreport_countdown" />
-  <java-symbol type="plurals" name="file_count" />
-  <java-symbol type="plurals" name="last_num_days" />
-  <java-symbol type="plurals" name="matches_found" />
-  <java-symbol type="plurals" name="restr_pin_countdown" />
+  <java-symbol type="string" name="bugreport_countdown" />
+  <java-symbol type="string" name="file_count" />
+  <java-symbol type="string" name="last_num_days" />
+  <java-symbol type="string" name="matches_found" />
   <java-symbol type="plurals" name="pinpuk_attempts" />
-  <java-symbol type="plurals" name="ssl_ca_cert_warning" />
+  <java-symbol type="string" name="ssl_ca_cert_warning" />
 
   <java-symbol type="array" name="carrier_properties" />
   <java-symbol type="array" name="config_sms_enabled_locking_shift_tables" />
@@ -2212,6 +2211,7 @@
   <java-symbol type="integer" name="config_dreamsBatteryLevelDrainCutoff" />
   <java-symbol type="string" name="config_dreamsDefaultComponent" />
   <java-symbol type="drawable" name="default_dream_preview" />
+  <java-symbol type="array" name="config_disabledDreamComponents" />
   <java-symbol type="string" name="config_dozeComponent" />
   <java-symbol type="string" name="enable_explore_by_touch_warning_title" />
   <java-symbol type="string" name="enable_explore_by_touch_warning_message" />
@@ -2502,14 +2502,14 @@
   <java-symbol type="string" name="zen_mode_forever" />
   <java-symbol type="string" name="zen_mode_forever_dnd" />
   <java-symbol type="string" name="zen_mode_rule_name_combination" />
-  <java-symbol type="plurals" name="zen_mode_duration_minutes" />
-  <java-symbol type="plurals" name="zen_mode_duration_hours" />
-  <java-symbol type="plurals" name="zen_mode_duration_minutes_summary" />
-  <java-symbol type="plurals" name="zen_mode_duration_hours_summary" />
-  <java-symbol type="plurals" name="zen_mode_duration_minutes_short" />
-  <java-symbol type="plurals" name="zen_mode_duration_hours_short" />
-  <java-symbol type="plurals" name="zen_mode_duration_minutes_summary_short" />
-  <java-symbol type="plurals" name="zen_mode_duration_hours_summary_short" />
+  <java-symbol type="string" name="zen_mode_duration_minutes" />
+  <java-symbol type="string" name="zen_mode_duration_hours" />
+  <java-symbol type="string" name="zen_mode_duration_minutes_summary" />
+  <java-symbol type="string" name="zen_mode_duration_hours_summary" />
+  <java-symbol type="string" name="zen_mode_duration_minutes_short" />
+  <java-symbol type="string" name="zen_mode_duration_hours_short" />
+  <java-symbol type="string" name="zen_mode_duration_minutes_summary_short" />
+  <java-symbol type="string" name="zen_mode_duration_hours_summary_short" />
   <java-symbol type="string" name="zen_mode_until_next_day" />
   <java-symbol type="string" name="zen_mode_until" />
   <java-symbol type="string" name="zen_mode_feature_name" />
@@ -2941,7 +2941,6 @@
   <java-symbol type="string" name="ext_media_status_missing" />
   <java-symbol type="string" name="ext_media_unsupported_notification_message" />
   <java-symbol type="string" name="ext_media_unsupported_notification_title" />
-  <java-symbol type="plurals" name="selected_count" />
   <java-symbol type="drawable" name="ic_dialog_alert_material" />
 
 
@@ -3112,23 +3111,23 @@
 
   <java-symbol type="id" name="aerr_wait" />
 
-  <java-symbol type="plurals" name="duration_minutes_shortest" />
-  <java-symbol type="plurals" name="duration_hours_shortest" />
-  <java-symbol type="plurals" name="duration_days_shortest" />
-  <java-symbol type="plurals" name="duration_years_shortest" />
-  <java-symbol type="plurals" name="duration_minutes_shortest_future" />
-  <java-symbol type="plurals" name="duration_hours_shortest_future" />
-  <java-symbol type="plurals" name="duration_days_shortest_future" />
-  <java-symbol type="plurals" name="duration_years_shortest_future" />
+  <java-symbol type="string" name="duration_minutes_shortest" />
+  <java-symbol type="string" name="duration_hours_shortest" />
+  <java-symbol type="string" name="duration_days_shortest" />
+  <java-symbol type="string" name="duration_years_shortest" />
+  <java-symbol type="string" name="duration_minutes_shortest_future" />
+  <java-symbol type="string" name="duration_hours_shortest_future" />
+  <java-symbol type="string" name="duration_days_shortest_future" />
+  <java-symbol type="string" name="duration_years_shortest_future" />
 
-  <java-symbol type="plurals" name="duration_minutes_relative" />
-  <java-symbol type="plurals" name="duration_hours_relative" />
-  <java-symbol type="plurals" name="duration_days_relative" />
-  <java-symbol type="plurals" name="duration_years_relative" />
-  <java-symbol type="plurals" name="duration_minutes_relative_future" />
-  <java-symbol type="plurals" name="duration_hours_relative_future" />
-  <java-symbol type="plurals" name="duration_days_relative_future" />
-  <java-symbol type="plurals" name="duration_years_relative_future" />
+  <java-symbol type="string" name="duration_minutes_relative" />
+  <java-symbol type="string" name="duration_hours_relative" />
+  <java-symbol type="string" name="duration_days_relative" />
+  <java-symbol type="string" name="duration_years_relative" />
+  <java-symbol type="string" name="duration_minutes_relative_future" />
+  <java-symbol type="string" name="duration_hours_relative_future" />
+  <java-symbol type="string" name="duration_days_relative_future" />
+  <java-symbol type="string" name="duration_years_relative_future" />
 
   <java-symbol type="string" name="now_string_shortest" />
 
@@ -3520,7 +3519,7 @@
   <java-symbol type="id" name="autofill_save_yes" />
   <java-symbol type="string" name="autofill_error_cannot_autofill" />
   <java-symbol type="string" name="autofill_picker_no_suggestions" />
-  <java-symbol type="plurals" name="autofill_picker_some_suggestions" />
+  <java-symbol type="string" name="autofill_picker_some_suggestions" />
   <java-symbol type="string" name="autofill" />
   <java-symbol type="string" name="autofill_picker_accessibility_title " />
   <java-symbol type="string" name="autofill_update_title" />
@@ -3636,6 +3635,7 @@
   <java-symbol type="string" name="notification_channel_network_status" />
   <java-symbol type="string" name="notification_channel_network_alerts" />
   <java-symbol type="string" name="notification_channel_network_available" />
+  <java-symbol type="string" name="config_defaultCloudSearchService" />
   <java-symbol type="string" name="notification_channel_vpn" />
   <java-symbol type="string" name="notification_channel_device_admin" />
   <java-symbol type="string" name="notification_channel_alerts" />
@@ -4661,4 +4661,10 @@
   <java-symbol type="string" name="config_deviceManagerUpdater" />
 
   <java-symbol type="string" name="config_deviceSpecificDeviceStatePolicyProvider" />
+
+  <java-symbol type="string" name="notification_channel_abusive_bg_apps"/>
+  <java-symbol type="string" name="notification_title_abusive_bg_apps"/>
+  <java-symbol type="string" name="notification_content_abusive_bg_apps"/>
+  <java-symbol type="string" name="notification_content_long_running_fgs"/>
+  <java-symbol type="string" name="notification_action_check_bg_apps"/>
 </resources>

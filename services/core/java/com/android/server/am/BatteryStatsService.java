@@ -431,6 +431,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
 
         @Override
+        public List<BatteryUsageStats> getBatteryUsageStats(List<BatteryUsageStatsQuery> queries) {
+            return BatteryStatsService.this.getBatteryUsageStats(queries);
+        }
+
+        @Override
         public void noteJobsDeferred(int uid, int numDeferred, long sinceLast) {
             if (DBG) Slog.d(TAG, "Jobs deferred " + uid + ": " + numDeferred + " " + sinceLast);
             BatteryStatsService.this.noteJobsDeferred(uid, numDeferred, sinceLast);

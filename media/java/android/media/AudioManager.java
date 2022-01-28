@@ -7242,6 +7242,24 @@ public class AudioManager {
 
     /**
      * @hide
+     * Indicates whether a platform supports the Ultrasound feature which covers the playback
+     * and recording of 20kHz~ sounds. If platform supports Ultrasound, then the
+     * usage will be
+     * To start the Ultrasound playback:
+     *     - Create an AudioTrack with {@link AudioAttributes.CONTENT_TYPE_ULTRASOUND}.
+     * To start the Ultrasound capture:
+     *     - Create an AudioRecord with {@link MediaRecorder.AudioSource.ULTRASOUND}.
+     *
+     * @return whether the ultrasound feature is supported, true when platform supports both
+     * Ultrasound playback and capture, false otherwise.
+     */
+    @SystemApi
+    public static boolean isUltrasoundSupported() {
+        return AudioSystem.isUltrasoundSupported();
+    }
+
+    /**
+     * @hide
      * Introspection API to retrieve audio product strategies.
      * When implementing {Car|Oem}AudioManager, use this method  to retrieve the collection of
      * audio product strategies, which is indexed by a weakly typed index in order to be extended

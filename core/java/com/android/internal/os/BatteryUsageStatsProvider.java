@@ -181,9 +181,22 @@ public class BatteryUsageStatsProvider {
                             getProcessForegroundTimeMs(uid, realtimeUs));
         }
 
+        final int[] powerComponents = query.getPowerComponents();
         final List<PowerCalculator> powerCalculators = getPowerCalculators();
         for (int i = 0, count = powerCalculators.size(); i < count; i++) {
             PowerCalculator powerCalculator = powerCalculators.get(i);
+            if (powerComponents != null) {
+                boolean include = false;
+                for (int j = 0; j < powerComponents.length; j++) {
+                    if (powerCalculator.isPowerComponentSupported(powerComponents[j])) {
+                        include = true;
+                        break;
+                    }
+                }
+                if (!include) {
+                    continue;
+                }
+            }
             powerCalculator.calculate(batteryUsageStatsBuilder, mStats, realtimeUs, uptimeUs,
                     query);
         }

@@ -62,6 +62,8 @@ interface IUserManager {
     int[] getProfileIds(int userId, boolean enabledOnly);
     boolean isUserTypeEnabled(in String userType);
     boolean canAddMoreUsersOfType(in String userType);
+    int getRemainingCreatableUserCount(in String userType);
+    int getRemainingCreatableProfileCount(in String userType, int userId, boolean allowedToRemoveOne);
     boolean canAddMoreProfilesToUser(in String userType, int userId, boolean allowedToRemoveOne);
     boolean canAddMoreManagedProfiles(int userId, boolean allowedToRemoveOne);
     UserInfo getProfileParent(int userId);

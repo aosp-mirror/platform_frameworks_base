@@ -72,6 +72,7 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Patterns;
+import android.util.PluralsMessageFormatter;
 import android.util.SparseArray;
 import android.view.ContextThemeWrapper;
 import android.view.IWindowManager;
@@ -111,7 +112,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -943,9 +946,12 @@ public class BugreportProgressService extends Service {
         }
         setTakingScreenshot(true);
         collapseNotificationBar();
-        final String msg = mContext.getResources()
-                .getQuantityString(com.android.internal.R.plurals.bugreport_countdown,
-                        mScreenshotDelaySec, mScreenshotDelaySec);
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put("count", mScreenshotDelaySec);
+        final String msg = PluralsMessageFormatter.format(
+                mContext.getResources(),
+                arguments,
+                com.android.internal.R.string.bugreport_countdown);
         Log.i(TAG, msg);
         // Show a toast just once, otherwise it might be captured in the screenshot.
         Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();

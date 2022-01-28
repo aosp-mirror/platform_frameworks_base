@@ -65,6 +65,8 @@ import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.PowerExemptionManager;
+import android.os.PowerExemptionManager.ReasonCode;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -936,6 +938,121 @@ public class ActivityManager {
     @ChangeId
     @EnabledSince(targetSdkVersion = VERSION_CODES.S)
     public static final long LOCK_DOWN_CLOSE_SYSTEM_DIALOGS = 174664365L;
+
+    // The background process restriction levels. The definitions here are meant for internal
+    // bookkeeping only.
+
+    /**
+     * Not a valid restriction level.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_UNKNOWN = 0;
+
+    /**
+     * No background restrictions at all, this should NEVER be used
+     * for any process other than selected system processes, currently it's reserved.
+     *
+     * <p>In the future, apps in {@link #RESTRICTION_LEVEL_EXEMPTED} would receive permissive
+     * background restrictions to protect the system from buggy behaviors; in other words,
+     * the {@link #RESTRICTION_LEVEL_EXEMPTED} would not be the truly "unrestricted" state, while
+     * the {@link #RESTRICTION_LEVEL_UNRESTRICTED} here would be the last resort if there is
+     * a strong reason to grant such a capability to a system app. </p>
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_UNRESTRICTED = 10;
+
+    /**
+     * The default background restriction level for the "unrestricted" apps set by the user,
+     * where it'll have the {@link android.app.AppOpsManager#OP_RUN_ANY_IN_BACKGROUND} set to
+     * ALLOWED, being added into the device idle allow list; however there will be still certain
+     * restrictions to apps in this level.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_EXEMPTED = 20;
+
+    /**
+     * The default background restriction level for all other apps, they'll be moved between
+     * various standby buckets, including
+     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_ACTIVE},
+     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_WORKING_SET},
+     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_FREQUENT},
+     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RARE}.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_ADAPTIVE_BUCKET = 30;
+
+    /**
+     * The background restriction level where the apps will be placed in the restricted bucket
+     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED}.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_RESTRICTED_BUCKET = 40;
+
+    /**
+     * The background restricted level, where apps would get more restrictions,
+     * such as not allowed to launch foreground services besides on TOP.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_BACKGROUND_RESTRICTED = 50;
+
+    /**
+     * The most restricted level where the apps are considered "in-hibernation",
+     * its package visibility to the rest of the system is limited.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_HIBERNATION = 60;
+
+    /**
+     * Not a valid restriction level, it defines the maximum numerical value of restriction level.
+     *
+     * @hide
+     */
+    public static final int RESTRICTION_LEVEL_MAX = 100;
+
+    /** @hide */
+    @IntDef(prefix = { "RESTRICTION_LEVEL_" }, value = {
+            RESTRICTION_LEVEL_UNKNOWN,
+            RESTRICTION_LEVEL_UNRESTRICTED,
+            RESTRICTION_LEVEL_EXEMPTED,
+            RESTRICTION_LEVEL_ADAPTIVE_BUCKET,
+            RESTRICTION_LEVEL_RESTRICTED_BUCKET,
+            RESTRICTION_LEVEL_BACKGROUND_RESTRICTED,
+            RESTRICTION_LEVEL_HIBERNATION,
+            RESTRICTION_LEVEL_MAX,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RestrictionLevel{}
+
+    /** @hide */
+    public static String restrictionLevelToName(@RestrictionLevel int level) {
+        switch (level) {
+            case RESTRICTION_LEVEL_UNKNOWN:
+                return "unknown";
+            case RESTRICTION_LEVEL_UNRESTRICTED:
+                return "unrestricted";
+            case RESTRICTION_LEVEL_EXEMPTED:
+                return "exempted";
+            case RESTRICTION_LEVEL_ADAPTIVE_BUCKET:
+                return "adaptive_bucket";
+            case RESTRICTION_LEVEL_RESTRICTED_BUCKET:
+                return "restricted_bucket";
+            case RESTRICTION_LEVEL_BACKGROUND_RESTRICTED:
+                return "background_restricted";
+            case RESTRICTION_LEVEL_HIBERNATION:
+                return "hibernation";
+            case RESTRICTION_LEVEL_MAX:
+                return "max";
+            default:
+                return "";
+        }
+    }
 
     /** @hide */
     public int getFrontActivityScreenCompatMode() {
@@ -4947,6 +5064,27 @@ public class ActivityManager {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * @return The reason code of whether or not the given UID should be exempted from background
+     * restrictions here.
+     *
+     * <p>
+     * Note: Call it with caution as it'll try to acquire locks in other services.
+     * </p>
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    @ReasonCode
+    public int getBackgroundRestrictionExemptionReason(int uid) {
+        try {
+            return getService().getBackgroundRestrictionExemptionReason(uid);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return PowerExemptionManager.REASON_DENIED;
     }
 
     /**
