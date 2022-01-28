@@ -6456,7 +6456,7 @@ package android.media.tv.tuner {
     method @Nullable public android.media.tv.tuner.DemuxCapabilities getDemuxCapabilities();
     method @Nullable public android.media.tv.tuner.frontend.FrontendInfo getFrontendInfo();
     method @Nullable public android.media.tv.tuner.frontend.FrontendStatus getFrontendStatus(@NonNull int[]);
-    method @Nullable public android.media.tv.tuner.frontend.FrontendStatusReadiness[] getFrontendStatusReadiness(@NonNull int[]);
+    method @NonNull public java.util.List<android.media.tv.tuner.frontend.FrontendStatusReadiness> getFrontendStatusReadiness(@NonNull int[]);
     method @IntRange(from=0xffffffff) public int getMaxNumberOfFrontends(int);
     method @RequiresPermission("android.permission.TUNER_RESOURCE_ACCESS") public boolean hasUnusedFrontend(int);
     method public boolean isLowestPriority(int);
@@ -7701,7 +7701,7 @@ package android.media.tv.tuner.frontend {
     method public boolean isLocked();
   }
 
-  public class FrontendStatusReadiness {
+  public final class FrontendStatusReadiness {
     method public int getStatusReadiness();
     method public int getStatusType();
     field public static final int FRONTEND_STATUS_READINESS_STABLE = 3; // 0x3
