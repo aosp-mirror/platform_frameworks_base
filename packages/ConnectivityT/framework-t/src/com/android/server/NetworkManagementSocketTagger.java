@@ -111,21 +111,6 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
         public int statsUid = -1;
     }
 
-    public static void setKernelCounterSet(int uid, int counterSet) {
-        final int errno = native_setCounterSet(counterSet, uid);
-        if (errno < 0) {
-            Log.w(TAG, "setKernelCountSet(" + uid + ", " + counterSet + ") failed with errno "
-                    + errno);
-        }
-    }
-
-    public static void resetKernelUidStats(int uid) {
-        int errno = native_deleteTagData(0, uid);
-        if (errno < 0) {
-            Log.w(TAG, "problem clearing counters for uid " + uid + " : errno " + errno);
-        }
-    }
-
     /**
      * Convert {@code /proc/} tag format to {@link Integer}. Assumes incoming
      * format like {@code 0x7fffffff00000000}.
@@ -141,6 +126,4 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
 
     private static native int native_tagSocketFd(FileDescriptor fd, int tag, int uid);
     private static native int native_untagSocketFd(FileDescriptor fd);
-    private static native int native_setCounterSet(int uid, int counterSetNum);
-    private static native int native_deleteTagData(int tag, int uid);
 }
