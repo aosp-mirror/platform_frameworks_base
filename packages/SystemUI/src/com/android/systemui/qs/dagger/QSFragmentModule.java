@@ -21,10 +21,13 @@ import static com.android.systemui.util.Utils.useQsMediaPlayer;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewStub;
 
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.dagger.qualifiers.RootView;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.qs.FooterActionsView;
@@ -117,9 +120,21 @@ public interface QSFragmentModule {
         return view.findViewById(R.id.qs_footer);
     }
 
-    /** */
+    /**
+     * Provides a {@link FooterActionsView}.
+     *
+     * This will replace a ViewStub either in {@link QSFooterView} or in {@link QSContainerImpl}.
+     */
     @Provides
-    static FooterActionsView providesQSFooterActionsView(@RootView View view) {
+    static FooterActionsView providesQSFooterActionsView(@RootView View view,
+            FeatureFlags featureFlags) {
+        ViewStub stub;
+        if (featureFlags.isEnabled(Flags.NEW_FOOTER)) {
+            stub = view.requireViewById(R.id.container_stub);
+        } else {
+            stub = view.requireViewById(R.id.footer_stub);
+        }
+        stub.inflate();
         return view.findViewById(R.id.qs_footer_actions);
     }
 

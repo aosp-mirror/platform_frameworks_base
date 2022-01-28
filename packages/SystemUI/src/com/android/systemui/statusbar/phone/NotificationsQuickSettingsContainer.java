@@ -53,6 +53,7 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     private Consumer<QS> mQSFragmentAttachedListener = qs -> {};
     private QS mQs;
     private View mQSScrollView;
+    private View mQSContainer;
 
     public NotificationsQuickSettingsContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -72,6 +73,7 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         mQs = (QS) fragment;
         mQSFragmentAttachedListener.accept(mQs);
         mQSScrollView = mQs.getView().findViewById(R.id.expanded_qs_scroll_view);
+        mQSContainer = mQs.getView().findViewById(R.id.quick_settings_container);
     }
 
     @Override
@@ -91,6 +93,16 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
                     mQSScrollView.getPaddingLeft(),
                     mQSScrollView.getPaddingTop(),
                     mQSScrollView.getPaddingRight(),
+                    paddingBottom);
+        }
+    }
+
+    public void setQSContainerPaddingBottom(int paddingBottom) {
+        if (mQSContainer != null) {
+            mQSContainer.setPadding(
+                    mQSContainer.getPaddingLeft(),
+                    mQSContainer.getPaddingTop(),
+                    mQSContainer.getPaddingRight(),
                     paddingBottom
             );
         }

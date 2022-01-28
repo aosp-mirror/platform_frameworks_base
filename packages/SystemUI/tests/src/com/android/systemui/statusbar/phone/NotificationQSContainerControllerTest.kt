@@ -6,6 +6,8 @@ import android.view.WindowInsets
 import android.view.WindowManagerPolicyConstants
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.navigationbar.NavigationModeController.ModeChangedListener
 import com.android.systemui.recents.OverviewProxyService
@@ -46,6 +48,8 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     private lateinit var overviewProxyService: OverviewProxyService
     @Mock
     private lateinit var notificationsQSContainer: NotificationsQuickSettingsContainer
+    @Mock
+    private lateinit var featureFlags: FeatureFlags
     @Captor
     lateinit var navigationModeCaptor: ArgumentCaptor<ModeChangedListener>
     @Captor
@@ -64,7 +68,8 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
         notificationsQSContainerController = NotificationsQSContainerController(
                 notificationsQSContainer,
                 navigationModeController,
-                overviewProxyService
+                overviewProxyService,
+                featureFlags
         )
         whenever(notificationsQSContainer.defaultNotificationsMarginBottom)
                 .thenReturn(NOTIFICATIONS_MARGIN)
@@ -85,6 +90,26 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     @Test
     fun testTaskbarVisibleInSplitShade() {
         notificationsQSContainerController.splitShadeEnabled = true
+        useNewFooter(false)
+
+        given(taskbarVisible = true,
+                navigationMode = GESTURES_NAVIGATION,
+                insets = windowInsets().withStableBottom())
+        then(expectedContainerPadding = 0, // taskbar should disappear when shade is expanded
+                expectedNotificationsMargin = NOTIFICATIONS_MARGIN)
+
+        given(taskbarVisible = true,
+                navigationMode = BUTTONS_NAVIGATION,
+                insets = windowInsets().withStableBottom())
+        then(expectedContainerPadding = STABLE_INSET_BOTTOM,
+                expectedNotificationsMargin = NOTIFICATIONS_MARGIN)
+    }
+
+    @Test
+    fun testTaskbarVisibleInSplitShade_newFooter() {
+        notificationsQSContainerController.splitShadeEnabled = true
+        useNewFooter(true)
+
         given(taskbarVisible = true,
                 navigationMode = GESTURES_NAVIGATION,
                 insets = windowInsets().withStableBottom())
@@ -102,6 +127,26 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     fun testTaskbarNotVisibleInSplitShade() {
         // when taskbar is not visible, it means we're on the home screen
         notificationsQSContainerController.splitShadeEnabled = true
+        useNewFooter(false)
+
+        given(taskbarVisible = false,
+                navigationMode = GESTURES_NAVIGATION,
+                insets = windowInsets().withStableBottom())
+        then(expectedContainerPadding = 0)
+
+        given(taskbarVisible = false,
+                navigationMode = BUTTONS_NAVIGATION,
+                insets = windowInsets().withStableBottom())
+        then(expectedContainerPadding = 0, // qs goes full height as it's not obscuring nav buttons
+                expectedNotificationsMargin = STABLE_INSET_BOTTOM + NOTIFICATIONS_MARGIN)
+    }
+
+    @Test
+    fun testTaskbarNotVisibleInSplitShade_newFooter() {
+        // when taskbar is not visible, it means we're on the home screen
+        notificationsQSContainerController.splitShadeEnabled = true
+        useNewFooter(true)
+
         given(taskbarVisible = false,
                 navigationMode = GESTURES_NAVIGATION,
                 insets = windowInsets().withStableBottom())
@@ -117,6 +162,25 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     @Test
     fun testTaskbarNotVisibleInSplitShadeWithCutout() {
         notificationsQSContainerController.splitShadeEnabled = true
+        useNewFooter(false)
+
+        given(taskbarVisible = false,
+                navigationMode = GESTURES_NAVIGATION,
+                insets = windowInsets().withCutout())
+        then(expectedContainerPadding = CUTOUT_HEIGHT)
+
+        given(taskbarVisible = false,
+                navigationMode = BUTTONS_NAVIGATION,
+                insets = windowInsets().withCutout().withStableBottom())
+        then(expectedContainerPadding = 0,
+                expectedNotificationsMargin = STABLE_INSET_BOTTOM + NOTIFICATIONS_MARGIN)
+    }
+
+    @Test
+    fun testTaskbarNotVisibleInSplitShadeWithCutout_newFooter() {
+        notificationsQSContainerController.splitShadeEnabled = true
+        useNewFooter(true)
+
         given(taskbarVisible = false,
                 navigationMode = GESTURES_NAVIGATION,
                 insets = windowInsets().withCutout())
@@ -132,6 +196,24 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     @Test
     fun testTaskbarVisibleInSinglePaneShade() {
         notificationsQSContainerController.splitShadeEnabled = false
+        useNewFooter(false)
+
+        given(taskbarVisible = true,
+                navigationMode = GESTURES_NAVIGATION,
+                insets = windowInsets().withStableBottom())
+        then(expectedContainerPadding = 0)
+
+        given(taskbarVisible = true,
+                navigationMode = BUTTONS_NAVIGATION,
+                insets = windowInsets().withStableBottom())
+        then(expectedContainerPadding = STABLE_INSET_BOTTOM)
+    }
+
+    @Test
+    fun testTaskbarVisibleInSinglePaneShade_newFooter() {
+        notificationsQSContainerController.splitShadeEnabled = false
+        useNewFooter(true)
+
         given(taskbarVisible = true,
                 navigationMode = GESTURES_NAVIGATION,
                 insets = windowInsets().withStableBottom())
@@ -146,6 +228,8 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     @Test
     fun testTaskbarNotVisibleInSinglePaneShade() {
         notificationsQSContainerController.splitShadeEnabled = false
+        useNewFooter(false)
+
         given(taskbarVisible = false,
                 navigationMode = GESTURES_NAVIGATION,
                 insets = emptyInsets())
@@ -159,14 +243,56 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
         given(taskbarVisible = false,
                 navigationMode = BUTTONS_NAVIGATION,
                 insets = windowInsets().withStableBottom())
-        then(expectedContainerPadding = 0,
-                expectedQsPadding = STABLE_INSET_BOTTOM)
+        then(expectedContainerPadding = 0, expectedQsPadding = STABLE_INSET_BOTTOM)
+    }
+
+    @Test
+    fun testTaskbarNotVisibleInSinglePaneShade_newFooter() {
+        notificationsQSContainerController.splitShadeEnabled = false
+        useNewFooter(true)
+
+        given(taskbarVisible = false,
+                navigationMode = GESTURES_NAVIGATION,
+                insets = emptyInsets())
+        then(expectedContainerPadding = 0)
+
+        given(taskbarVisible = false,
+                navigationMode = GESTURES_NAVIGATION,
+                insets = windowInsets().withCutout().withStableBottom())
+        then(expectedContainerPadding = CUTOUT_HEIGHT)
+
+        given(taskbarVisible = false,
+                navigationMode = BUTTONS_NAVIGATION,
+                insets = windowInsets().withStableBottom())
+        then(expectedContainerPadding = 0, expectedQsPadding = STABLE_INSET_BOTTOM)
     }
 
     @Test
     fun testCustomizingInSinglePaneShade() {
         notificationsQSContainerController.splitShadeEnabled = false
         notificationsQSContainerController.setCustomizerShowing(true)
+        useNewFooter(false)
+
+        // always sets spacings to 0
+        given(taskbarVisible = false,
+                navigationMode = GESTURES_NAVIGATION,
+                insets = windowInsets().withStableBottom())
+        then(expectedContainerPadding = 0,
+                expectedNotificationsMargin = 0)
+
+        given(taskbarVisible = false,
+                navigationMode = BUTTONS_NAVIGATION,
+                insets = emptyInsets())
+        then(expectedContainerPadding = 0,
+                expectedNotificationsMargin = 0)
+    }
+
+    @Test
+    fun testCustomizingInSinglePaneShade_newFooter() {
+        notificationsQSContainerController.splitShadeEnabled = false
+        notificationsQSContainerController.setCustomizerShowing(true)
+        useNewFooter(true)
+
         // always sets spacings to 0
         given(taskbarVisible = false,
                 navigationMode = GESTURES_NAVIGATION,
@@ -185,6 +311,28 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     fun testDetailShowingInSinglePaneShade() {
         notificationsQSContainerController.splitShadeEnabled = false
         notificationsQSContainerController.setDetailShowing(true)
+        useNewFooter(false)
+
+        // always sets spacings to 0
+        given(taskbarVisible = false,
+                navigationMode = GESTURES_NAVIGATION,
+                insets = windowInsets().withStableBottom())
+        then(expectedContainerPadding = 0,
+                expectedNotificationsMargin = 0)
+
+        given(taskbarVisible = false,
+                navigationMode = BUTTONS_NAVIGATION,
+                insets = emptyInsets())
+        then(expectedContainerPadding = 0,
+                expectedNotificationsMargin = 0)
+    }
+
+    @Test
+    fun testDetailShowingInSinglePaneShade_newFooter() {
+        notificationsQSContainerController.splitShadeEnabled = false
+        notificationsQSContainerController.setDetailShowing(true)
+        useNewFooter(true)
+
         // always sets spacings to 0
         given(taskbarVisible = false,
                 navigationMode = GESTURES_NAVIGATION,
@@ -202,6 +350,26 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     @Test
     fun testDetailShowingInSplitShade() {
         notificationsQSContainerController.splitShadeEnabled = true
+        useNewFooter(false)
+
+        given(taskbarVisible = false,
+                navigationMode = GESTURES_NAVIGATION,
+                insets = windowInsets().withStableBottom())
+        then(expectedContainerPadding = 0)
+
+        notificationsQSContainerController.setDetailShowing(true)
+        // should not influence spacing
+        given(taskbarVisible = false,
+                navigationMode = BUTTONS_NAVIGATION,
+                insets = emptyInsets())
+        then(expectedContainerPadding = 0)
+    }
+
+    @Test
+    fun testDetailShowingInSplitShade_newFooter() {
+        notificationsQSContainerController.splitShadeEnabled = true
+        useNewFooter(true)
+
         given(taskbarVisible = false,
                 navigationMode = GESTURES_NAVIGATION,
                 insets = windowInsets().withStableBottom())
@@ -234,7 +402,13 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
         verify(notificationsQSContainer)
                 .setPadding(anyInt(), anyInt(), anyInt(), eq(expectedContainerPadding))
         verify(notificationsQSContainer).setNotificationsMarginBottom(expectedNotificationsMargin)
-        verify(notificationsQSContainer).setQSScrollPaddingBottom(expectedQsPadding)
+        val newFooter = featureFlags.isEnabled(Flags.NEW_FOOTER)
+        if (newFooter) {
+            verify(notificationsQSContainer)
+                    .setQSContainerPaddingBottom(expectedNotificationsMargin)
+        } else {
+            verify(notificationsQSContainer).setQSScrollPaddingBottom(expectedQsPadding)
+        }
         Mockito.clearInvocations(notificationsQSContainer)
     }
 
@@ -250,5 +424,9 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
     private fun WindowInsets.withStableBottom(): WindowInsets {
         whenever(stableInsetBottom).thenReturn(STABLE_INSET_BOTTOM)
         return this
+    }
+
+    private fun useNewFooter(useNewFooter: Boolean) {
+        whenever(featureFlags.isEnabled(Flags.NEW_FOOTER)).thenReturn(useNewFooter)
     }
 }

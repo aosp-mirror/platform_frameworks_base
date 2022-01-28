@@ -29,12 +29,16 @@ import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.logging.nano.MetricsProto
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.globalactions.GlobalActionsDialogLite
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.dagger.QSFlagsModule.PM_LITE_ENABLED
+import com.android.systemui.qs.dagger.QSScope
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.MultiUserSwitchController
 import com.android.systemui.statusbar.phone.SettingsButton
@@ -52,6 +56,7 @@ import javax.inject.Named
  * Main difference between QS and QQS behaviour is condition when buttons should be visible,
  * determined by [buttonsVisibleState]
  */
+@QSScope
 class FooterActionsController @Inject constructor(
     view: FooterActionsView,
     multiUserSwitchControllerFactory: MultiUserSwitchController.Factory,
@@ -67,12 +72,28 @@ class FooterActionsController @Inject constructor(
     private val uiEventLogger: UiEventLogger,
     @Named(PM_LITE_ENABLED) private val showPMLiteButton: Boolean,
     private val globalSetting: GlobalSettings,
-    private val handler: Handler
+    private val handler: Handler,
+    private val featureFlags: FeatureFlags
 ) : ViewController<FooterActionsView>(view) {
 
+    private var lastExpansion = -1f
     private var listening: Boolean = false
 
-    var expanded = false
+    private val alphaAnimator = TouchAnimator.Builder()
+            .addFloat(mView, "alpha", 0f, 1f)
+            .setStartDelay(0.9f)
+            .build()
+
+    var visible = true
+        set(value) {
+            field = value
+            updateVisibility()
+        }
+
+    init {
+        view.elevation = resources.displayMetrics.density * 4f
+        view.setBackgroundColor(Utils.getColorAttrDefaultColor(context, R.attr.underSurfaceColor))
+    }
 
     private val settingsButton: SettingsButton = view.findViewById(R.id.settings_button)
     private val settingsButtonContainer: View? = view.findViewById(R.id.settings_button_container)
@@ -96,7 +117,7 @@ class FooterActionsController @Inject constructor(
 
     private val onClickListener = View.OnClickListener { v ->
         // Don't do anything if the tap looks suspicious.
-        if (!expanded || falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+        if (!visible || falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
             return@OnClickListener
         }
         if (v === settingsButton) {
@@ -130,6 +151,12 @@ class FooterActionsController @Inject constructor(
 
     override fun onInit() {
         multiUserSwitchController.init()
+    }
+
+    private fun updateVisibility() {
+        val previousVisibility = mView.visibility
+        mView.visibility = if (visible) View.VISIBLE else View.INVISIBLE
+        if (previousVisibility != mView.visibility) updateView()
     }
 
     private fun startSettingsActivity() {
@@ -181,15 +208,22 @@ class FooterActionsController @Inject constructor(
     }
 
     fun setExpansion(headerExpansionFraction: Float) {
-        mView.setExpansion(headerExpansionFraction)
+        if (featureFlags.isEnabled(Flags.NEW_FOOTER)) {
+            if (headerExpansionFraction != lastExpansion) {
+                if (headerExpansionFraction >= 1f) {
+                    mView.animate().alpha(1f).setDuration(500L).start()
+                } else if (lastExpansion >= 1f && headerExpansionFraction < 1f) {
+                    mView.animate().alpha(0f).setDuration(250L).start()
+                }
+                lastExpansion = headerExpansionFraction
+            }
+        } else {
+            alphaAnimator.setPosition(headerExpansionFraction)
+        }
     }
 
-    fun updateAnimator(width: Int, numTiles: Int) {
-        mView.updateAnimator(width, numTiles)
-    }
-
-    fun setKeyguardShowing() {
-        mView.setKeyguardShowing()
+    fun setKeyguardShowing(showing: Boolean) {
+        setExpansion(lastExpansion)
     }
 
     private fun isTunerEnabled() = tunerService.isTunerEnabled

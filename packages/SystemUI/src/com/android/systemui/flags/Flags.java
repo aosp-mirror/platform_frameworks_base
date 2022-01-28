@@ -107,6 +107,8 @@ public class Flags {
     public static final ResourceBooleanFlag QS_USER_DETAIL_SHORTCUT =
             new ResourceBooleanFlag(503, R.bool.flag_lockscreen_qs_user_detail_shortcut);
 
+    public static final BooleanFlag NEW_FOOTER = new BooleanFlag(504, false);
+
     /***************************************/
     // 600- status bar
     public static final BooleanFlag COMBINED_STATUS_BAR_SIGNAL_ICONS =
