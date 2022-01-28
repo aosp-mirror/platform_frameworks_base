@@ -20,6 +20,7 @@ import android.app.PendingIntent;
 import android.app.smartspace.SmartspaceAction;
 import android.app.smartspace.SmartspaceTarget;
 import android.app.smartspace.SmartspaceTargetEvent;
+import android.app.smartspace.uitemplatedata.SmartspaceTapAction;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -132,6 +133,18 @@ public interface BcSmartspaceDataPlugin extends Plugin {
     /** Interface for launching Intents, which can differ on the lockscreen */
     interface IntentStarter {
         default void startFromAction(SmartspaceAction action, View v, boolean showOnLockscreen) {
+            try {
+                if (action.getIntent() != null) {
+                    startIntent(v, action.getIntent(), showOnLockscreen);
+                } else if (action.getPendingIntent() != null) {
+                    startPendingIntent(action.getPendingIntent(), showOnLockscreen);
+                }
+            } catch (ActivityNotFoundException e) {
+                Log.w(TAG, "Could not launch intent for action: " + action, e);
+            }
+        }
+
+        default void startFromAction(SmartspaceTapAction action, View v, boolean showOnLockscreen) {
             try {
                 if (action.getIntent() != null) {
                     startIntent(v, action.getIntent(), showOnLockscreen);
