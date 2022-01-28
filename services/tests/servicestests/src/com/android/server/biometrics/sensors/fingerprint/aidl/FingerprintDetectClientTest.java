@@ -55,7 +55,6 @@ import org.mockito.junit.MockitoRule;
 public class FingerprintDetectClientTest {
 
     private static final int USER_ID = 8;
-    private static final boolean HAS_AOD = true;
 
     @Rule
     public final TestableContext mContext = new TestableContext(
@@ -85,7 +84,6 @@ public class FingerprintDetectClientTest {
 
     @Before
     public void setup() {
-        when(mBiometricContext.isAoD()).thenReturn(HAS_AOD);
         when(mBiometricContext.updateContext(any(), anyBoolean())).thenAnswer(
                 i -> i.getArgument(0));
     }

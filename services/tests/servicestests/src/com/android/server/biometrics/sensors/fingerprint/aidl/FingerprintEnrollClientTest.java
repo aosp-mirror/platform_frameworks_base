@@ -26,6 +26,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.same;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,6 +48,8 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.log.CallbackWithProbe;
+import com.android.server.biometrics.log.Probe;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -101,16 +104,22 @@ public class FingerprintEnrollClientTest {
     private ClientMonitorCallback mCallback;
     @Mock
     private Sensor.HalSessionCallback mHalSessionCallback;
+    @Mock
+    private Probe mLuxProbe;
     @Captor
     private ArgumentCaptor<OperationContext> mOperationContextCaptor;
     @Captor
     private ArgumentCaptor<PointerContext> mPointerContextCaptor;
+    @Captor
+    private ArgumentCaptor<Consumer<OperationContext>> mContextInjector;
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
 
     @Before
     public void setup() {
+        when(mBiometricLogger.createALSCallback(anyBoolean())).thenAnswer(i ->
+                new CallbackWithProbe<>(mLuxProbe, i.getArgument(0)));
         when(mBiometricContext.updateContext(any(), anyBoolean())).thenAnswer(
                 i -> i.getArgument(0));
     }
@@ -183,6 +192,41 @@ public class FingerprintEnrollClientTest {
 
         final PointerContext pContext = mPointerContextCaptor.getValue();
         assertThat(pContext.pointerId).isEqualTo(POINTER_ID);
+    }
+
+    @Test
+    public void luxProbeWhenFingerDown() throws RemoteException {
+        final FingerprintEnrollClient client = createClient();
+        client.start(mCallback);
+
+        client.onPointerDown(TOUCH_X, TOUCH_Y, TOUCH_MAJOR, TOUCH_MINOR);
+        verify(mLuxProbe).enable();
+
+        client.onAcquired(2, 0);
+        verify(mLuxProbe, never()).disable();
+
+        client.onPointerUp();
+        verify(mLuxProbe).disable();
+
+        client.onPointerDown(TOUCH_X, TOUCH_Y, TOUCH_MAJOR, TOUCH_MINOR);
+        verify(mLuxProbe, times(2)).enable();
+    }
+
+    @Test
+    public void notifyHalWhenContextChanges() throws RemoteException {
+        final FingerprintEnrollClient client = createClient();
+        client.start(mCallback);
+
+        verify(mHal).enrollWithContext(any(), mOperationContextCaptor.capture());
+        OperationContext opContext = mOperationContextCaptor.getValue();
+
+        // fake an update to the context
+        verify(mBiometricContext).subscribe(eq(opContext), mContextInjector.capture());
+        mContextInjector.getValue().accept(opContext);
+        verify(mHal).onContextChanged(eq(opContext));
+
+        client.stopHalOperation();
+        verify(mBiometricContext).unsubscribe(same(opContext));
     }
 
     @Test

@@ -109,6 +109,8 @@ public class FingerprintAuthenticationClientTest {
     private ArgumentCaptor<OperationContext> mOperationContextCaptor;
     @Captor
     private ArgumentCaptor<PointerContext> mPointerContextCaptor;
+    @Captor
+    private ArgumentCaptor<Consumer<OperationContext>> mContextInjector;
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
@@ -206,6 +208,23 @@ public class FingerprintAuthenticationClientTest {
 
         client.onPointerDown(TOUCH_X, TOUCH_Y, TOUCH_MAJOR, TOUCH_MINOR);
         verify(mLuxProbe, times(2)).enable();
+    }
+
+    @Test
+    public void notifyHalWhenContextChanges() throws RemoteException {
+        final FingerprintAuthenticationClient client = createClient();
+        client.start(mCallback);
+
+        verify(mHal).authenticateWithContext(eq(OP_ID), mOperationContextCaptor.capture());
+        OperationContext opContext = mOperationContextCaptor.getValue();
+
+        // fake an update to the context
+        verify(mBiometricContext).subscribe(eq(opContext), mContextInjector.capture());
+        mContextInjector.getValue().accept(opContext);
+        verify(mHal).onContextChanged(eq(opContext));
+
+        client.stopHalOperation();
+        verify(mBiometricContext).unsubscribe(same(opContext));
     }
 
     @Test

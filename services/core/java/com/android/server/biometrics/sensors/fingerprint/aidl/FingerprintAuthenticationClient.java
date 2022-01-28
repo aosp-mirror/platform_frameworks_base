@@ -24,6 +24,7 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants.FingerprintAcquired;
 import android.hardware.biometrics.common.ICancellationSignal;
+import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
@@ -107,7 +108,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession> 
     @NonNull
     @Override
     protected ClientMonitorCallback wrapCallbackForStart(@NonNull ClientMonitorCallback callback) {
-        return new ClientMonitorCompositeCallback(mALSProbeCallback, callback);
+        return new ClientMonitorCompositeCallback(mALSProbeCallback,
+                getBiometricContextUnsubscriber(), callback);
     }
 
     @Override
@@ -177,8 +179,17 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession> 
         final AidlSession session = getFreshDaemon();
 
         if (session.hasContextMethods()) {
-            return session.getSession().authenticateWithContext(
-                    mOperationId, getOperationContext());
+            final OperationContext opContext = getOperationContext();
+            final ICancellationSignal cancel =  session.getSession().authenticateWithContext(
+                    mOperationId, opContext);
+            getBiometricContext().subscribe(opContext, ctx -> {
+                try {
+                    session.getSession().onContextChanged(ctx);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to notify context changed", e);
+                }
+            });
+            return cancel;
         } else {
             return session.getSession().authenticate(mOperationId);
         }
@@ -187,6 +198,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession> 
     @Override
     protected void stopHalOperation() {
         mSensorOverlays.hide(getSensorId());
+        unsubscribeBiometricContext();
+
         if (mCancellationSignal != null) {
             try {
                 mCancellationSignal.cancel();
@@ -216,7 +229,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession> 
                 context.y = y;
                 context.minor = minor;
                 context.major = major;
-                context.isAoD = false; // TODO; get value
+                context.isAoD = getBiometricContext().isAoD();
                 session.getSession().onPointerDownWithContext(context);
             } else {
                 session.getSession().onPointerDown(0 /* pointerId */, x, y, minor, major);
