@@ -19,7 +19,7 @@ package android.window;
 /**
  * @hide
  */
-oneway interface IOnFpsCallbackListener {
+oneway interface ITaskFpsCallback {
 
     /**
      * Reports the fps from the registered task

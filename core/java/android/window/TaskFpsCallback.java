@@ -21,8 +21,6 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.RemoteException;
 
-import java.util.concurrent.Executor;
-
 /**
  * Callback for sampling the frames per second for a task and its children.
  * This should only be used by a system component that needs to listen to a task's
@@ -30,44 +28,19 @@ import java.util.concurrent.Executor;
  * Otherwise, ASurfaceTransaction_OnComplete callbacks should be used.
  *
  * Each callback can only register for receiving FPS report for one task id until
- * {@link WindowManager#unregister()} is called.
+ * {@link WindowManager#unregisterTaskFpsCallback()} is called.
  *
  * @hide
  */
 @SystemApi
-public final class TaskFpsCallback {
+public abstract class TaskFpsCallback {
 
     /**
-     * Listener interface to receive frame per second of a task.
+     * Reports the fps from the registered task
+     * @param fps The frame per second of the task that has the registered task id
+     *            and its children.
      */
-    public interface OnFpsCallbackListener {
-        /**
-         * Reports the fps from the registered task
-         * @param fps The frame per second of the task that has the registered task id
-         *            and its children.
-         */
-        void onFpsReported(float fps);
-    }
-
-    private final IOnFpsCallbackListener mListener;
-
-    public TaskFpsCallback(@NonNull Executor executor, @NonNull OnFpsCallbackListener listener) {
-        mListener = new IOnFpsCallbackListener.Stub() {
-            @Override
-            public void onFpsReported(float fps) {
-                executor.execute(() -> {
-                    listener.onFpsReported(fps);
-                });
-            }
-        };
-    }
-
-    /**
-     * @hide
-     */
-    public IOnFpsCallbackListener getListener() {
-        return mListener;
-    }
+    public abstract void onFpsReported(float fps);
 
     /**
      * Dispatch the collected sample.
@@ -76,7 +49,7 @@ public final class TaskFpsCallback {
      */
     @BinderThread
     private static void dispatchOnFpsReported(
-            @NonNull IOnFpsCallbackListener listener, float fps) {
+            @NonNull ITaskFpsCallback listener, float fps) {
         try {
             listener.onFpsReported(fps);
         } catch (RemoteException e) {
