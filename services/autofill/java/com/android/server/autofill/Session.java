@@ -447,31 +447,24 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     private final class SessionFlags {
         /** Whether autofill is disabled by the service */
-        @GuardedBy("mLock")
         private boolean mAutofillDisabled;
 
         /** Whether the autofill service supports inline suggestions */
-        @GuardedBy("mLock")
         private boolean mInlineSupportedByService;
 
         /** True if session is for augmented only */
-        @GuardedBy("mLock")
         private boolean mAugmentedAutofillOnly;
 
         /** Whether the session is currently showing the SaveUi. */
-        @GuardedBy("mLock")
         private boolean mShowingSaveUi;
 
         /** Whether the current {@link FillResponse} is expired. */
-        @GuardedBy("mLock")
         private boolean mExpiredResponse;
 
         /** Whether the client is using {@link android.view.autofill.AutofillRequestCallback}. */
-        @GuardedBy("mLock")
         private boolean mClientSuggestionsEnabled;
 
         /** Whether the fill dialog UI is disabled. */
-        @GuardedBy("mLock")
         private boolean mFillDialogDisabled;
     }
 
@@ -1642,7 +1635,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 Slog.e(TAG, "Error sending input show up notification", e);
             }
         }
-        synchronized (Session.this.mLock) {
+        synchronized (mLock) {
             // stop to show fill dialog
             mSessionFlags.mFillDialogDisabled = true;
         }
@@ -3379,7 +3372,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private boolean isFillDialogUiEnabled() {
         // TODO read from Settings or somewhere
         final boolean isSettingsEnabledFillDialog = true;
-        synchronized (Session.this.mLock) {
+        synchronized (mLock) {
             return isSettingsEnabledFillDialog && !mSessionFlags.mFillDialogDisabled;
         }
     }
