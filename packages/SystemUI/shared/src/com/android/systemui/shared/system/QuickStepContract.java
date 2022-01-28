@@ -120,6 +120,8 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_BACK_DISABLED = 1 << 22;
     // The bubble stack is expanded AND the mange menu for bubbles is expanded on top of it.
     public static final int SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED = 1 << 23;
+    // The current app is in immersive mode
+    public static final int SYSUI_STATE_IMMERSIVE_MODE = 1 << 24;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -145,7 +147,8 @@ public class QuickStepContract {
             SYSUI_STATE_IME_SWITCHER_SHOWING,
             SYSUI_STATE_DEVICE_DOZING,
             SYSUI_STATE_BACK_DISABLED,
-            SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED
+            SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED,
+            SYSUI_STATE_IMMERSIVE_MODE
     })
     public @interface SystemUiStateFlags {}
 
@@ -179,6 +182,7 @@ public class QuickStepContract {
         str.add((flags & SYSUI_STATE_BACK_DISABLED) != 0 ? "back_disabled" : "");
         str.add((flags & SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED) != 0
                 ? "bubbles_mange_menu_expanded" : "");
+        str.add((flags & SYSUI_STATE_IMMERSIVE_MODE) != 0 ? "immersive_mode" : "");
         return str.toString();
     }
 
