@@ -216,6 +216,17 @@ public final class PowerManager {
     public static final int UNIMPORTANT_FOR_LOGGING = 0x40000000;
 
     /**
+     * Wake lock flag: This wake lock should be held by the system.
+     *
+     * <p>Meant to allow tests to keep the device awake even when power restrictions are active.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    public static final int SYSTEM_WAKELOCK = 0x80000000;
+
+    /**
      * Flag for {@link WakeLock#release WakeLock.release(int)}: Defer releasing a
      * {@link #PROXIMITY_SCREEN_OFF_WAKE_LOCK} wake lock until the proximity sensor
      * indicates that an object is not in close proximity.
@@ -2146,6 +2157,105 @@ public final class PowerManager {
     }
 
     /**
+     * Returns true if Low Power Standby is supported on this device.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_LOW_POWER_STANDBY,
+            android.Manifest.permission.DEVICE_POWER
+    })
+    public boolean isLowPowerStandbySupported() {
+        try {
+            return mService.isLowPowerStandbySupported();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns true if Low Power Standby is enabled.
+     *
+     * <p>When Low Power Standby is enabled, apps (including apps running foreground services) are
+     * subject to additional restrictions while the device is non-interactive, outside of device
+     * idle maintenance windows: Their network access is disabled, and any wakelocks they hold are
+     * ignored.
+     *
+     * <p>When Low Power Standby is enabled or disabled, a Intent with action
+     * {@link #ACTION_LOW_POWER_STANDBY_ENABLED_CHANGED} is broadcast to registered receivers.
+     */
+    public boolean isLowPowerStandbyEnabled() {
+        try {
+            return mService.isLowPowerStandbyEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set whether Low Power Standby is enabled.
+     * Does nothing if Low Power Standby is not supported.
+     *
+     * @see #isLowPowerStandbySupported()
+     * @see #isLowPowerStandbyEnabled()
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_LOW_POWER_STANDBY,
+            android.Manifest.permission.DEVICE_POWER
+    })
+    public void setLowPowerStandbyEnabled(boolean enabled) {
+        try {
+            mService.setLowPowerStandbyEnabled(enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set whether Low Power Standby should be active during doze maintenance mode.
+     * Does nothing if Low Power Standby is not supported.
+     *
+     * @see #isLowPowerStandbySupported()
+     * @see #isLowPowerStandbyEnabled()
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_LOW_POWER_STANDBY,
+            android.Manifest.permission.DEVICE_POWER
+    })
+    public void setLowPowerStandbyActiveDuringMaintenance(boolean activeDuringMaintenance) {
+        try {
+            mService.setLowPowerStandbyActiveDuringMaintenance(activeDuringMaintenance);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Force Low Power Standby restrictions to be active.
+     * Does nothing if Low Power Standby is not supported.
+     *
+     * @see #isLowPowerStandbySupported()
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.MANAGE_LOW_POWER_STANDBY,
+            android.Manifest.permission.DEVICE_POWER
+    })
+    public void forceLowPowerStandbyActive(boolean active) {
+        try {
+            mService.forceLowPowerStandbyActive(active);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Return whether the given application package name is on the device's power allowlist.
      * Apps can be placed on the allowlist through the settings UI invoked by
      * {@link android.provider.Settings#ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS}.
@@ -2629,6 +2739,16 @@ public final class PowerManager {
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_POWER_SAVE_TEMP_WHITELIST_CHANGED
             = "android.os.action.POWER_SAVE_TEMP_WHITELIST_CHANGED";
+
+    /**
+     * Intent that is broadcast when Low Power Standby is enabled or disabled.
+     * This broadcast is only sent to registered receivers.
+     *
+     * @see #isLowPowerStandbyEnabled()
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_LOW_POWER_STANDBY_ENABLED_CHANGED =
+            "android.os.action.LOW_POWER_STANDBY_ENABLED_CHANGED";
 
     /**
      * Constant for PreIdleTimeout normal mode (default mode, not short nor extend timeout) .

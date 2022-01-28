@@ -211,6 +211,25 @@ public class WakeLockLogTest {
                 dumpLog(log, false));
     }
 
+    @Test
+    public void testAddSystemWakelock() {
+        final int tagDatabaseSize = 6;
+        final int logSize = 10;
+        TestInjector injectorSpy = spy(new TestInjector(tagDatabaseSize, logSize));
+        WakeLockLog log = new WakeLockLog(injectorSpy);
+
+        when(injectorSpy.currentTimeMillis()).thenReturn(1000L);
+        log.onWakeLockAcquired("TagPartial", 101,
+                PowerManager.PARTIAL_WAKE_LOCK | PowerManager.SYSTEM_WAKELOCK);
+
+        assertEquals("Wake Lock Log\n"
+                        + "  01-01 00:00:01.000 - 101 - ACQ TagPartial (partial,system-wakelock)\n"
+                        + "  -\n"
+                        + "  Events: 1, Time-Resets: 0\n"
+                        + "  Buffer, Bytes used: 3\n",
+                dumpLog(log, false));
+    }
+
     private String dumpLog(WakeLockLog log, boolean includeTagDb) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);

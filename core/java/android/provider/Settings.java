@@ -16750,6 +16750,30 @@ public final class Settings {
         public static final String RESTRICTED_NETWORKING_MODE = "restricted_networking_mode";
 
         /**
+         * Setting indicating whether Low Power Standby is enabled, if supported.
+         *
+         * Values are:
+         * 0: disabled
+         * 1: enabled
+         *
+         * @hide
+         */
+        public static final String LOW_POWER_STANDBY_ENABLED = "low_power_standby_enabled";
+
+        /**
+         * Setting indicating whether Low Power Standby is allowed to be active during doze
+         * maintenance mode.
+         *
+         * Values are:
+         * 0: Low Power Standby will be disabled during doze maintenance mode
+         * 1: Low Power Standby can be active during doze maintenance mode
+         *
+         * @hide
+         */
+        public static final String LOW_POWER_STANDBY_ACTIVE_DURING_MAINTENANCE =
+                "low_power_standby_active_during_maintenance";
+
+        /**
          * Settings migrated from Wear OS settings provider.
          * @hide
          */
