@@ -20,9 +20,11 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/** @hide */
+/**
+ * A request for command from broadcast signal.
+ */
 public final class CommandRequest extends BroadcastInfoRequest implements Parcelable {
-    public static final @TvInputManager.BroadcastInfoType int requestType =
+    private static final @TvInputManager.BroadcastInfoType int REQUEST_TYPE =
             TvInputManager.BROADCAST_INFO_TYPE_COMMAND;
 
     public static final @NonNull Parcelable.Creator<CommandRequest> CREATOR =
@@ -43,35 +45,53 @@ public final class CommandRequest extends BroadcastInfoRequest implements Parcel
     private final String mName;
     private final String mArguments;
 
-    public static CommandRequest createFromParcelBody(Parcel in) {
+    static CommandRequest createFromParcelBody(Parcel in) {
         return new CommandRequest(in);
     }
 
-    public CommandRequest(int requestId, @RequestOption int option, String nameSpace,
-            String name, String arguments) {
-        super(requestType, requestId, option);
+    public CommandRequest(int requestId, @RequestOption int option, @NonNull String nameSpace,
+            @NonNull String name, @NonNull String arguments) {
+        super(REQUEST_TYPE, requestId, option);
         mNameSpace = nameSpace;
         mName = name;
         mArguments = arguments;
     }
 
-    protected CommandRequest(Parcel source) {
-        super(requestType, source);
+    CommandRequest(Parcel source) {
+        super(REQUEST_TYPE, source);
         mNameSpace = source.readString();
         mName = source.readString();
         mArguments = source.readString();
     }
 
+    /**
+     * Gets the namespace of the command.
+     */
+    @NonNull
     public String getNameSpace() {
         return mNameSpace;
     }
 
+    /**
+     * Gets the name of the command.
+     */
+    @NonNull
     public String getName() {
         return mName;
     }
 
+    /**
+     * Gets the arguments of the command.
+     * It could be serialized from some formats, such as JSON, XML, etc.
+     */
+    @NonNull
     public String getArguments() {
         return mArguments;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     @Override

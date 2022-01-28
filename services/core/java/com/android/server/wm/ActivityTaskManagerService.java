@@ -3959,6 +3959,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         getActivityStartController().dump(pw, "", dumpPackage);
     }
 
+    /** Dumps installed packages having app-specific config. */
+    void dumpInstalledPackagesConfig(PrintWriter pw) {
+        mPackageConfigPersister.dump(pw, getCurrentUserId());
+    }
+
     /**
      * There are three things that cmd can be:
      * - a flattened component name that matches an existing activity
@@ -6624,9 +6629,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public void notifyWakingUp() {
-            // Start a transition for waking. This is needed for showWhenLocked activities.
-            getTransitionController().requestTransitionIfNeeded(TRANSIT_WAKE, 0 /* flags */,
-                    null /* trigger */, mRootWindowContainer.getDefaultDisplay());
+            synchronized (mGlobalLock) {
+                // Start a transition for waking. This is needed for showWhenLocked activities.
+                getTransitionController().requestTransitionIfNeeded(TRANSIT_WAKE, 0 /* flags */,
+                        null /* trigger */, mRootWindowContainer.getDefaultDisplay());
+            }
         }
 
         @Override

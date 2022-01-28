@@ -62,6 +62,7 @@ public class SystemNotificationChannels {
     public static String DO_NOT_DISTURB = "DO_NOT_DISTURB";
     public static String ACCESSIBILITY_MAGNIFICATION = "ACCESSIBILITY_MAGNIFICATION";
     public static String ACCESSIBILITY_SECURITY_POLICY = "ACCESSIBILITY_SECURITY_POLICY";
+    public static String ABUSIVE_BACKGROUND_APPS = "ABUSIVE_BACKGROUND_APPS";
 
     public static void createAll(Context context) {
         final NotificationManager nm = context.getSystemService(NotificationManager.class);
@@ -208,6 +209,12 @@ public class SystemNotificationChannels {
                 context.getString(R.string.notification_channel_accessibility_security_policy),
                 NotificationManager.IMPORTANCE_LOW);
         channelsList.add(accessibilitySecurityPolicyChannel);
+
+        final NotificationChannel abusiveBackgroundAppsChannel = new NotificationChannel(
+                ABUSIVE_BACKGROUND_APPS,
+                context.getString(R.string.notification_channel_abusive_bg_apps),
+                NotificationManager.IMPORTANCE_LOW);
+        channelsList.add(abusiveBackgroundAppsChannel);
 
         nm.createNotificationChannels(channelsList);
     }

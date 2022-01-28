@@ -436,6 +436,7 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_COMPANION_DEVICES" />
         <permission name="android.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING" />
         <permission name="android.permission.REQUEST_COMPANION_PROFILE_WATCH" />
+        <permission name="android.permission.REQUEST_COMPANION_PROFILE_COMPUTER" />
         <permission name="android.permission.REQUEST_COMPANION_SELF_MANAGED" />
         <!-- Permission required for testing registering pull atom callbacks. -->
         <permission name="android.permission.REGISTER_STATS_PULL_ATOM"/>
@@ -472,6 +473,7 @@ applications that come with the platform
         <!-- Permission needed for CTS test - WifiManagerTest -->
         <permission name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS" />
         <permission name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
+        <permission name="android.permission.OVERRIDE_WIFI_CONFIG" />
         <!-- Permission required for CTS test CarrierMessagingServiceWrapperTest -->
         <permission name="android.permission.BIND_CARRIER_SERVICES"/>
         <!-- Permission required for CTS test - MusicRecognitionManagerTest -->

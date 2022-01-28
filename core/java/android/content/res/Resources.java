@@ -2080,7 +2080,7 @@ public class Resources {
 
             // Clean up references to garbage collected themes
             if (mThemeRefs.size() > mThemeRefsNextFlushSize) {
-                mThemeRefs.removeIf(ref -> ref.get() == null);
+                mThemeRefs.removeIf(ref -> ref.refersTo(null));
                 mThemeRefsNextFlushSize = Math.max(MIN_THEME_REFS_FLUSH_SIZE,
                         2 * mThemeRefs.size());
             }

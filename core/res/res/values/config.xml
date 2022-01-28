@@ -2373,6 +2373,9 @@
     <bool name="config_dreamsActivatedOnSleepByDefault">false</bool>
     <!-- ComponentName of the default dream (Settings.Secure.DEFAULT_SCREENSAVER_COMPONENT) -->
     <string name="config_dreamsDefaultComponent" translatable="false">com.android.deskclock/com.android.deskclock.Screensaver</string>
+    <!-- ComponentNames of the dreams that we should hide -->
+    <string-array name="config_disabledDreamComponents" translatable="false">
+    </string-array>
 
     <!-- Are we allowed to dream while not plugged in? -->
     <bool name="config_dreamsEnabledOnBattery">false</bool>
@@ -4096,6 +4099,15 @@
          Example: "com.android.augmentedautofill/.AugmentedAutofillService"
     -->
     <string name="config_defaultAugmentedAutofillService" translatable="false"></string>
+
+    <!-- The package name list for the system's cloudsearch service.
+          This service returns cloudsearch results.
+          This service must be trusted, as it can be activated without explicit consent of the user.
+          If no service with the specified name exists on the device, cloudsearch will be disabled.
+          Example: "com.android.intelligence/.CloudSearchService"
+          config_defaultCloudSearchService is for the single provider case.
+    -->
+    <string name="config_defaultCloudSearchService" translatable="false"></string>
 
     <!-- The package name for the system's translation service.
      This service must be trusted, as it can be activated without explicit consent of the user.

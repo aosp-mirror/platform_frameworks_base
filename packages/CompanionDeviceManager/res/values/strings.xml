@@ -58,6 +58,14 @@
     <!-- Description of the privileges the application will get if associated with the companion device of AUTOMOTIVE_PROJECTION profile (type) [CHAR LIMIT=NONE] -->
     <string name="summary_automotive_projection"></string>
 
+    <!-- ================= DEVICE_PROFILE_COMPUTER ================= -->
+
+    <!-- Confirmation for associating an application with a companion device of COMPUTER profile (type) [CHAR LIMIT=NONE] -->
+    <string name="title_computer">Allow &lt;strong&gt;<xliff:g id="app_name" example="GMS">%1$s</xliff:g>&lt;/strong&gt; to access this information from your phone</string>
+
+    <!-- Description of the privileges the application will get if associated with the companion device of COMPUTER profile (type) [CHAR LIMIT=NONE] -->
+    <string name="summary_computer"></string>
+
     <!-- ================= null profile ================= -->
 
     <!-- A noun for a companion device with unspecified profile (type) [CHAR LIMIT=30] -->

@@ -49,19 +49,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * This class gives you control of the power state of the device.
- *
- * <p>
- * <b>Device battery life will be significantly affected by the use of this API.</b>
- * Do not acquire {@link WakeLock}s unless you really need them, use the minimum levels
- * possible, and be sure to release them as soon as possible. In most cases,
- * you'll want to use
- * {@link android.view.WindowManager.LayoutParams#FLAG_KEEP_SCREEN_ON} instead.
- *
- * <p>
- * Any application using a WakeLock must request the {@code android.permission.WAKE_LOCK}
- * permission in an {@code <uses-permission>} element of the application's manifest.
- * </p>
+ * This class lets you query and request control of aspects of the device's power state.
  */
 @SystemService(Context.POWER_SERVICE)
 public final class PowerManager {
@@ -1196,6 +1184,11 @@ public final class PowerManager {
      * Although a wake lock can be created without special permissions,
      * the {@link android.Manifest.permission#WAKE_LOCK} permission is
      * required to actually acquire or release the wake lock that is returned.
+     *
+     * </p><p>
+     * <b>Device battery life will be significantly affected by the use of this API.</b>
+     * Do not acquire {@link WakeLock}s unless you really need them, use the minimum levels
+     * possible, and be sure to release them as soon as possible.
      * </p><p class="note">
      * If using this to keep the screen on, you should strongly consider using
      * {@link android.view.WindowManager.LayoutParams#FLAG_KEEP_SCREEN_ON} instead.

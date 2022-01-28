@@ -18,20 +18,35 @@ package android.media.tv;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-/** @hide */
+/**
+ * A response of {@link BroadcastInfoRequest} for information retrieved from broadcast signal.
+ */
+@SuppressLint("ParcelNotFinal")
 public abstract class BroadcastInfoResponse implements Parcelable {
+    /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({RESPONSE_RESULT_ERROR, RESPONSE_RESULT_OK, RESPONSE_RESULT_CANCEL})
     public @interface ResponseResult {}
 
+    /**
+     * Response result: error. This means the request can not be set up successfully.
+     */
     public static final int RESPONSE_RESULT_ERROR = 1;
+    /**
+     * Response result: OK. This means the request is set up successfully and the related responses
+     * are normal responses.
+     */
     public static final int RESPONSE_RESULT_OK = 2;
+    /**
+     * Response result: cancel. This means the request has been cancelled.
+     */
     public static final int RESPONSE_RESULT_CANCEL = 3;
 
     public static final @NonNull Parcelable.Creator<BroadcastInfoResponse> CREATOR =
@@ -67,12 +82,12 @@ public abstract class BroadcastInfoResponse implements Parcelable {
                 }
             };
 
-    protected final @TvInputManager.BroadcastInfoType int mType;
-    protected final int mRequestId;
-    protected final int mSequence;
-    protected final @ResponseResult int mResponseResult;
+    private final @TvInputManager.BroadcastInfoType int mType;
+    private final int mRequestId;
+    private final int mSequence;
+    private final @ResponseResult int mResponseResult;
 
-    protected BroadcastInfoResponse(@TvInputManager.BroadcastInfoType int type, int requestId,
+    BroadcastInfoResponse(@TvInputManager.BroadcastInfoType int type, int requestId,
             int sequence, @ResponseResult int responseResult) {
         mType = type;
         mRequestId = requestId;
@@ -80,26 +95,52 @@ public abstract class BroadcastInfoResponse implements Parcelable {
         mResponseResult = responseResult;
     }
 
-    protected BroadcastInfoResponse(@TvInputManager.BroadcastInfoType int type, Parcel source) {
+    BroadcastInfoResponse(@TvInputManager.BroadcastInfoType int type, Parcel source) {
         mType = type;
         mRequestId = source.readInt();
         mSequence = source.readInt();
         mResponseResult = source.readInt();
     }
 
-    public @TvInputManager.BroadcastInfoType int getType() {
+    /**
+     * Gets the broadcast info type.
+     *
+     * <p>The type indicates what broadcast information is requested, such as broadcast table,
+     * PES (packetized Elementary Stream), TS (transport stream), etc. The type of the
+     * request and the related responses should be the same.
+     */
+    @TvInputManager.BroadcastInfoType
+    public int getType() {
         return mType;
     }
 
+    /**
+     * Gets the ID of the request.
+     *
+     * <p>The ID is used to associate the response with the request.
+     *
+     * @see android.media.tv.BroadcastInfoRequest#getRequestId()
+     */
     public int getRequestId() {
         return mRequestId;
     }
 
+    /**
+     * Gets the sequence number which indicates the order of related responses.
+     */
     public int getSequence() {
         return mSequence;
     }
 
-    public @ResponseResult int getResponseResult() {
+    /**
+     * Gets the result for the response.
+     *
+     * @see #RESPONSE_RESULT_OK
+     * @see #RESPONSE_RESULT_ERROR
+     * @see #RESPONSE_RESULT_CANCEL
+     */
+    @ResponseResult
+    public int getResponseResult() {
         return mResponseResult;
     }
 

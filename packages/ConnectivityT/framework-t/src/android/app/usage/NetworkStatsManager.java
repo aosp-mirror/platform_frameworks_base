@@ -145,6 +145,18 @@ public class NetworkStatsManager {
     /** @hide */
     public static final int FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN = 1 << 2;
 
+    /**
+     * Virtual RAT type to represent 5G NSA (Non Stand Alone) mode, where the primary cell is
+     * still LTE and network allocates a secondary 5G cell so telephony reports RAT = LTE along
+     * with NR state as connected. This is a concept added by NetworkStats on top of the telephony
+     * constants for backward compatibility of metrics so this should not be overlapped with any of
+     * the {@code TelephonyManager.NETWORK_TYPE_*} constants.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static final int NETWORK_TYPE_5G_NSA = -2;
+
     private int mFlags;
 
     /** @hide */
@@ -1109,6 +1121,54 @@ public class NetworkStatsManager {
             mService.setStatsProviderWarningAndLimitAsync(iface, warning, limit);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get a RAT type representative of a group of RAT types for network statistics.
+     *
+     * Collapse the given Radio Access Technology (RAT) type into a bucket that
+     * is representative of the original RAT type for network statistics. The
+     * mapping mostly corresponds to {@code TelephonyManager#NETWORK_CLASS_BIT_MASK_*}
+     * but with adaptations specific to the virtual types introduced by
+     * networks stats.
+     *
+     * @param ratType An integer defined in {@code TelephonyManager#NETWORK_TYPE_*}.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static int getCollapsedRatType(int ratType) {
+        switch (ratType) {
+            case TelephonyManager.NETWORK_TYPE_GPRS:
+            case TelephonyManager.NETWORK_TYPE_GSM:
+            case TelephonyManager.NETWORK_TYPE_EDGE:
+            case TelephonyManager.NETWORK_TYPE_IDEN:
+            case TelephonyManager.NETWORK_TYPE_CDMA:
+            case TelephonyManager.NETWORK_TYPE_1xRTT:
+                return TelephonyManager.NETWORK_TYPE_GSM;
+            case TelephonyManager.NETWORK_TYPE_EVDO_0:
+            case TelephonyManager.NETWORK_TYPE_EVDO_A:
+            case TelephonyManager.NETWORK_TYPE_EVDO_B:
+            case TelephonyManager.NETWORK_TYPE_EHRPD:
+            case TelephonyManager.NETWORK_TYPE_UMTS:
+            case TelephonyManager.NETWORK_TYPE_HSDPA:
+            case TelephonyManager.NETWORK_TYPE_HSUPA:
+            case TelephonyManager.NETWORK_TYPE_HSPA:
+            case TelephonyManager.NETWORK_TYPE_HSPAP:
+            case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
+                return TelephonyManager.NETWORK_TYPE_UMTS;
+            case TelephonyManager.NETWORK_TYPE_LTE:
+            case TelephonyManager.NETWORK_TYPE_IWLAN:
+                return TelephonyManager.NETWORK_TYPE_LTE;
+            case TelephonyManager.NETWORK_TYPE_NR:
+                return TelephonyManager.NETWORK_TYPE_NR;
+            // Virtual RAT type for 5G NSA mode, see
+            // {@link NetworkStatsManager#NETWORK_TYPE_5G_NSA}.
+            case NetworkStatsManager.NETWORK_TYPE_5G_NSA:
+                return NetworkStatsManager.NETWORK_TYPE_5G_NSA;
+            default:
+                return TelephonyManager.NETWORK_TYPE_UNKNOWN;
         }
     }
 }

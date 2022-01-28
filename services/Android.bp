@@ -79,6 +79,7 @@ filegroup {
         ":services.backup-sources",
         ":services.bluetooth-sources", // TODO(b/214988855) : Remove once apex/service-bluetooth jar is ready
         ":backuplib-sources",
+        ":services.cloudsearch-sources",
         ":services.companion-sources",
         ":services.contentcapture-sources",
         ":services.contentsuggestions-sources",
@@ -133,6 +134,7 @@ java_library {
         "services.appwidget",
         "services.autofill",
         "services.backup",
+        "services.cloudsearch",
         "services.companion",
         "services.contentcapture",
         "services.contentsuggestions",

@@ -64,6 +64,11 @@ public class BluetoothPowerCalculator extends PowerCalculator {
     }
 
     @Override
+    public boolean isPowerComponentSupported(@BatteryConsumer.PowerComponent int powerComponent) {
+        return powerComponent == BatteryConsumer.POWER_COMPONENT_BLUETOOTH;
+    }
+
+    @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         if (!batteryStats.hasBluetoothActivityReporting()) {

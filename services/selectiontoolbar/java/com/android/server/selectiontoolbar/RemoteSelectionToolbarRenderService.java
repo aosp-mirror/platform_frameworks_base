@@ -19,8 +19,10 @@ package com.android.server.selectiontoolbar;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.IBinder;
 import android.service.selectiontoolbar.ISelectionToolbarRenderService;
 import android.service.selectiontoolbar.SelectionToolbarRenderService;
+import android.util.Slog;
 import android.view.selectiontoolbar.ISelectionToolbarCallback;
 import android.view.selectiontoolbar.ShowInfo;
 
@@ -35,12 +37,14 @@ final class RemoteSelectionToolbarRenderService extends
             AbstractRemoteService.PERMANENT_BOUND_TIMEOUT_MS;
 
     private final ComponentName mComponentName;
+    private final IBinder mRemoteCallback;
 
-
-    RemoteSelectionToolbarRenderService(Context context, ComponentName serviceName, int userId) {
+    RemoteSelectionToolbarRenderService(Context context, ComponentName serviceName, int userId,
+            IBinder callback) {
         super(context, new Intent(SelectionToolbarRenderService.SERVICE_INTERFACE).setComponent(
                 serviceName), 0, userId, ISelectionToolbarRenderService.Stub::asInterface);
         mComponentName = serviceName;
+        mRemoteCallback = callback;
         // Bind right away.
         connect();
     }
@@ -50,19 +54,31 @@ final class RemoteSelectionToolbarRenderService extends
         return TIMEOUT_IDLE_UNBIND_MS;
     }
 
+    @Override // from ServiceConnector.Impl
+    protected void onServiceConnectionStatusChanged(ISelectionToolbarRenderService service,
+            boolean connected) {
+        try {
+            if (connected) {
+                service.onConnected(mRemoteCallback);
+            }
+        } catch (Exception e) {
+            Slog.w(TAG, "Exception calling onConnected().", e);
+        }
+    }
+
     public ComponentName getComponentName() {
         return mComponentName;
     }
 
-    public void onShow(ShowInfo showInfo, ISelectionToolbarCallback callback) {
-        run((s) -> s.onShow(showInfo, callback));
+    public void onShow(int callingUid, ShowInfo showInfo, ISelectionToolbarCallback callback) {
+        run((s) -> s.onShow(callingUid, showInfo, callback));
     }
 
     public void onHide(long widgetToken) {
         run((s) -> s.onHide(widgetToken));
     }
 
-    public void onDismiss(long widgetToken) {
-        run((s) -> s.onDismiss(widgetToken));
+    public void onDismiss(int callingUid, long widgetToken) {
+        run((s) -> s.onDismiss(callingUid, widgetToken));
     }
 }

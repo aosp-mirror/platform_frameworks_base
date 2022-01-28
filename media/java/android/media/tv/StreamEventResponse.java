@@ -17,12 +17,15 @@
 package android.media.tv;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/** @hide */
+/**
+ * A response for Stream Event from broadcast signal.
+ */
 public final class StreamEventResponse extends BroadcastInfoResponse implements Parcelable {
-    public static final @TvInputManager.BroadcastInfoType int responseType =
+    private static final @TvInputManager.BroadcastInfoType int RESPONSE_TYPE =
             TvInputManager.BROADCAST_INFO_STREAM_EVENT;
 
     public static final @NonNull Parcelable.Creator<StreamEventResponse> CREATOR =
@@ -43,20 +46,20 @@ public final class StreamEventResponse extends BroadcastInfoResponse implements 
     private final long mNpt;
     private final byte[] mData;
 
-    public static StreamEventResponse createFromParcelBody(Parcel in) {
+    static StreamEventResponse createFromParcelBody(Parcel in) {
         return new StreamEventResponse(in);
     }
 
     public StreamEventResponse(int requestId, int sequence, @ResponseResult int responseResult,
-            int eventId, long npt, @NonNull byte[] data) {
-        super(responseType, requestId, sequence, responseResult);
+            int eventId, long npt, @Nullable byte[] data) {
+        super(RESPONSE_TYPE, requestId, sequence, responseResult);
         mEventId = eventId;
         mNpt = npt;
         mData = data;
     }
 
     private StreamEventResponse(@NonNull Parcel source) {
-        super(responseType, source);
+        super(RESPONSE_TYPE, source);
         mEventId = source.readInt();
         mNpt = source.readLong();
         int dataLength = source.readInt();
@@ -64,20 +67,31 @@ public final class StreamEventResponse extends BroadcastInfoResponse implements 
         source.readByteArray(mData);
     }
 
-    /** Returns the event ID */
+    /**
+     * Returns the event ID.
+     */
     public int getEventId() {
         return mEventId;
     }
 
-    /** Returns the NPT(Normal Play Time) value when the event occurred or will occur */
+    /**
+     * Returns the NPT(Normal Play Time) value when the event occurred or will occur.
+     */
     public long getNpt() {
         return mNpt;
     }
 
-    /** Returns the application specific data */
-    @NonNull
+    /**
+     * Returns the application specific data.
+     */
+    @Nullable
     public byte[] getData() {
         return mData;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     @Override

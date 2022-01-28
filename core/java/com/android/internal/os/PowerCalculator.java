@@ -36,6 +36,14 @@ public abstract class PowerCalculator {
     protected static final double MILLIAMPHOUR_PER_MICROCOULOMB = 1.0 / 1000.0 / 60.0 / 60.0;
 
     /**
+     * Returns true if this power calculator computes power/duration for the specified
+     * power component.
+     */
+    public abstract boolean isPowerComponentSupported(
+            @BatteryConsumer.PowerComponent int powerComponent);
+
+
+    /**
      * Attributes the total amount of power used by this subsystem to various consumers such
      * as apps.
      *

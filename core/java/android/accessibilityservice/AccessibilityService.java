@@ -1400,7 +1400,9 @@ public abstract class AccessibilityService extends Service {
          * </p>
          *
          * @return the current magnification scale
+         * @deprecated Use {@link #getMagnificationConfig()} instead
          */
+        @Deprecated
         public float getScale() {
             final IAccessibilityServiceConnection connection =
                     AccessibilityInteractionClient.getInstance(mService).getConnection(
@@ -1435,7 +1437,9 @@ public abstract class AccessibilityService extends Service {
          *
          * @return the unscaled screen-relative X coordinate of the center of
          *         the magnified region
+         * @deprecated Use {@link #getMagnificationConfig()} instead
          */
+        @Deprecated
         public float getCenterX() {
             final IAccessibilityServiceConnection connection =
                     AccessibilityInteractionClient.getInstance(mService).getConnection(
@@ -1470,7 +1474,9 @@ public abstract class AccessibilityService extends Service {
          *
          * @return the unscaled screen-relative Y coordinate of the center of
          *         the magnified region
+         * @deprecated Use {@link #getMagnificationConfig()} instead
          */
+        @Deprecated
         public float getCenterY() {
             final IAccessibilityServiceConnection connection =
                     AccessibilityInteractionClient.getInstance(mService).getConnection(
@@ -1509,7 +1515,9 @@ public abstract class AccessibilityService extends Service {
          *
          * @return the region of the screen currently active for magnification, or an empty region
          * if magnification is not active.
+         * @deprecated Use {@link #getCurrentMagnificationRegion()} instead
          */
+        @Deprecated
         @NonNull
         public Region getMagnificationRegion() {
             final IAccessibilityServiceConnection connection =
@@ -1677,7 +1685,9 @@ public abstract class AccessibilityService extends Service {
          * @param animate {@code true} to animate from the current scale or
          *                {@code false} to set the scale immediately
          * @return {@code true} on success, {@code false} on failure
+         * @deprecated Use {@link #setMagnificationConfig(MagnificationConfig, boolean)} instead
          */
+        @Deprecated
         public boolean setScale(float scale, boolean animate) {
             final IAccessibilityServiceConnection connection =
                     AccessibilityInteractionClient.getInstance(mService).getConnection(
@@ -1717,7 +1727,9 @@ public abstract class AccessibilityService extends Service {
          * @param animate {@code true} to animate from the current viewport
          *                center or {@code false} to set the center immediately
          * @return {@code true} on success, {@code false} on failure
+         * @deprecated Use {@link #setMagnificationConfig(MagnificationConfig, boolean)} instead
          */
+        @Deprecated
         public boolean setCenter(float centerX, float centerY, boolean animate) {
             final IAccessibilityServiceConnection connection =
                     AccessibilityInteractionClient.getInstance(mService).getConnection(
@@ -1754,7 +1766,11 @@ public abstract class AccessibilityService extends Service {
              * magnification is focused
              * @param centerY the new Y coordinate, in unscaled coordinates, around which
              * magnification is focused
+             * @deprecated Override
+             * {@link #onMagnificationChanged(MagnificationController, Region, MagnificationConfig)}
+             * instead
              */
+            @Deprecated
             void onMagnificationChanged(@NonNull MagnificationController controller,
                     @NonNull Region region, float scale, float centerX, float centerY);
 

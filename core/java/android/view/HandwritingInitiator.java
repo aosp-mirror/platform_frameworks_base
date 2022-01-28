@@ -161,6 +161,11 @@ public class HandwritingInitiator {
         return mConnectedView.get();
     }
 
+    private void clearConnectedView() {
+        mConnectedView = null;
+        mConnectionCount = 0;
+    }
+
     /**
      * Notify HandwritingInitiator that a new InputConnection is created.
      * The caller of this method should guarantee that each onInputConnectionCreated call
@@ -169,6 +174,10 @@ public class HandwritingInitiator {
      * @see  #onInputConnectionClosed(View)
      */
     public void onInputConnectionCreated(@NonNull View view) {
+        if (!view.isAutoHandwritingEnabled()) {
+            clearConnectedView();
+            return;
+        }
         final View connectedView = getConnectedView();
         if (connectedView == view) {
             ++mConnectionCount;
@@ -187,15 +196,15 @@ public class HandwritingInitiator {
      */
     public void onInputConnectionClosed(@NonNull View view) {
         final View connectedView = getConnectedView();
+        if (connectedView == null) return;
         if (connectedView == view) {
             --mConnectionCount;
             if (mConnectionCount == 0) {
-                mConnectedView = null;
+                clearConnectedView();
             }
         } else {
             // Unexpected branch, set mConnectedView to null to avoid further problem.
-            mConnectedView = null;
-            mConnectionCount = 0;
+            clearConnectedView();
         }
     }
 
@@ -218,6 +227,12 @@ public class HandwritingInitiator {
         if (connectedView == null) {
             return;
         }
+
+        if (!connectedView.isAutoHandwritingEnabled()) {
+            clearConnectedView();
+            return;
+        }
+
         final ViewParent viewParent = connectedView.getParent();
         // Do a final check before startHandwriting.
         if (viewParent != null && connectedView.isAttachedToWindow()) {

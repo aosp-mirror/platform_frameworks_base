@@ -17,12 +17,15 @@
 package android.media.tv;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-/** @hide */
+/**
+ * A response for command from broadcast signal.
+ */
 public final class CommandResponse extends BroadcastInfoResponse implements Parcelable {
-    public static final @TvInputManager.BroadcastInfoType int responseType =
+    private static final @TvInputManager.BroadcastInfoType int RESPONSE_TYPE =
             TvInputManager.BROADCAST_INFO_TYPE_COMMAND;
 
     public static final @NonNull Parcelable.Creator<CommandResponse> CREATOR =
@@ -41,23 +44,33 @@ public final class CommandResponse extends BroadcastInfoResponse implements Parc
 
     private final String mResponse;
 
-    public static CommandResponse createFromParcelBody(Parcel in) {
+    static CommandResponse createFromParcelBody(Parcel in) {
         return new CommandResponse(in);
     }
 
     public CommandResponse(int requestId, int sequence,
-            @ResponseResult int responseResult, String response) {
-        super(responseType, requestId, sequence, responseResult);
+            @ResponseResult int responseResult, @Nullable String response) {
+        super(RESPONSE_TYPE, requestId, sequence, responseResult);
         mResponse = response;
     }
 
-    protected CommandResponse(Parcel source) {
-        super(responseType, source);
+    CommandResponse(Parcel source) {
+        super(RESPONSE_TYPE, source);
         mResponse = source.readString();
     }
 
+    /**
+     * Gets the response of the command.
+     * It could be serialized from some formats, such as JSON, XML, etc.
+     */
+    @Nullable
     public String getResponse() {
         return mResponse;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
     @Override

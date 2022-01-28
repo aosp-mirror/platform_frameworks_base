@@ -28,7 +28,10 @@ import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.traces.common.WindowManagerConditionsFactory
+import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -124,6 +127,21 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
     @Presubmit
     @Test
     override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun appWindowReplacesLauncherAsTopWindow() {
+        assumeFalse(isShellTransitionsEnabled)
+        super.appWindowReplacesLauncherAsTopWindow()
+    }
+
+    @FlakyTest(bugId = 216266712)
+    @Test
+    fun appWindowReplacesLauncherAsTopWindow_shellTransit() {
+        assumeTrue(isShellTransitionsEnabled)
+        super.appWindowReplacesLauncherAsTopWindow()
+    }
 
     companion object {
         /**

@@ -28,6 +28,8 @@ import android.app.ambientcontext.AmbientContextManager;
 import android.app.ambientcontext.IAmbientContextEventObserver;
 import android.app.appsearch.AppSearchManagerFrameworkInitializer;
 import android.app.blob.BlobStoreManagerFrameworkInitializer;
+import android.app.cloudsearch.CloudSearchManager;
+import android.app.cloudsearch.ICloudSearchManager;
 import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IContentSuggestionsManager;
 import android.app.job.JobSchedulerFrameworkInitializer;
@@ -213,6 +215,7 @@ import android.telecom.TelecomManager;
 import android.telephony.MmsManager;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.TelephonyRegistryManager;
+import android.transparency.BinaryTransparencyManager;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
@@ -243,6 +246,7 @@ import com.android.internal.app.ISoundTriggerService;
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.graphics.fonts.IFontManager;
 import com.android.internal.net.INetworkWatchlistManager;
+import com.android.internal.os.IBinaryTransparencyService;
 import com.android.internal.os.IDropBoxManagerService;
 import com.android.internal.policy.PhoneLayoutInflater;
 import com.android.internal.util.Preconditions;
@@ -492,6 +496,17 @@ public final class SystemServiceRegistry {
                 IBinder b = ServiceManager.getServiceOrThrow(Context.DROPBOX_SERVICE);
                 IDropBoxManagerService service = IDropBoxManagerService.Stub.asInterface(b);
                 return new DropBoxManager(ctx, service);
+            }});
+
+        registerService(Context.BINARY_TRANSPARENCY_SERVICE, BinaryTransparencyManager.class,
+                new CachedServiceFetcher<BinaryTransparencyManager>() {
+            @Override
+            public BinaryTransparencyManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                IBinder b = ServiceManager.getServiceOrThrow(
+                        Context.BINARY_TRANSPARENCY_SERVICE);
+                IBinaryTransparencyService service = IBinaryTransparencyService.Stub.asInterface(b);
+                return new BinaryTransparencyManager(ctx, service);
             }});
 
         registerService(Context.INPUT_SERVICE, InputManager.class,
@@ -1245,6 +1260,17 @@ public final class SystemServiceRegistry {
                     throws ServiceNotFoundException {
                     IBinder b = ServiceManager.getService(Context.SMARTSPACE_SERVICE);
                     return b == null ? null : new SmartspaceManager(ctx);
+                }
+            });
+
+        registerService(Context.CLOUDSEARCH_SERVICE, CloudSearchManager.class,
+            new CachedServiceFetcher<CloudSearchManager>() {
+                @Override
+                public CloudSearchManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                    IBinder b = ServiceManager.getService(Context.CLOUDSEARCH_SERVICE);
+                    return b == null ? null :
+                        new CloudSearchManager(ICloudSearchManager.Stub.asInterface(b));
                 }
             });
 

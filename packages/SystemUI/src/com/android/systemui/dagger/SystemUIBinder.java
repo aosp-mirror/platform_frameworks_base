@@ -29,6 +29,7 @@ import com.android.systemui.dreams.DreamOverlayRegistrant;
 import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
+import com.android.systemui.log.SessionTracker;
 import com.android.systemui.media.systemsounds.HomeSoundEffectController;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.privacy.television.TvOngoingPrivacyChip;
@@ -65,6 +66,12 @@ public abstract class SystemUIBinder {
     @IntoMap
     @ClassKey(AuthController.class)
     public abstract CoreStartable bindAuthController(AuthController service);
+
+    /** Inject into SessionTracker. */
+    @Binds
+    @IntoMap
+    @ClassKey(SessionTracker.class)
+    public abstract CoreStartable bindSessionTracker(SessionTracker service);
 
     /** Inject into GarbageMonitor.Service. */
     @Binds

@@ -196,6 +196,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.OptionalInt;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -222,6 +223,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private static final int MSG_REMOVE_IME_SURFACE = 1060;
     private static final int MSG_REMOVE_IME_SURFACE_FROM_WINDOW = 1061;
     private static final int MSG_UPDATE_IME_WINDOW_STATUS = 1070;
+
+    private static final int MSG_RESET_HANDWRITING = 1090;
+    private static final int MSG_START_HANDWRITING = 1100;
 
     private static final int MSG_UNBIND_CLIENT = 3000;
     private static final int MSG_BIND_CLIENT = 3010;
@@ -299,12 +303,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private int mMethodMapUpdateCount = 0;
 
     /**
-     * Tracks requestIds for Stylus handwriting mode.
-     */
-    @GuardedBy("ImfLock.class")
-    private int mHwRequestId = 0;
-
-    /**
      * The display id for which the latest startInput was called.
      */
     @GuardedBy("ImfLock.class")
@@ -323,6 +321,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private final PendingIntent mImeSwitchPendingIntent;
     private boolean mShowOngoingImeSwitcherForPhones;
     private boolean mNotificationShown;
+    @GuardedBy("ImfLock.class")
+    private final HandwritingModeController mHwController;
 
     static class SessionState {
         final ClientState client;
@@ -1636,6 +1636,19 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mBindingController = new InputMethodBindingController(this);
         mPreventImeStartupUnlessTextEditor = mRes.getBoolean(
                 com.android.internal.R.bool.config_preventImeStartupUnlessTextEditor);
+        mHwController = new HandwritingModeController(thread.getLooper(),
+                new InkWindowInitializer());
+    }
+
+    private final class InkWindowInitializer implements Runnable {
+        public void run() {
+            synchronized (ImfLock.class) {
+                IInputMethodInvoker curMethod = getCurMethodLocked();
+                if (curMethod != null) {
+                    curMethod.initInkWindow();
+                }
+            }
+        }
     }
 
     @GuardedBy("ImfLock.class")
@@ -2519,6 +2532,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @AnyThread
+    void scheduleResetStylusHandwriting() {
+        mHandler.obtainMessage(MSG_RESET_HANDWRITING).sendToTarget();
+    }
+
+    @AnyThread
     void scheduleNotifyImeUidToAudioService(int uid) {
         mHandler.removeMessages(MSG_NOTIFY_IME_UID_TO_AUDIO_SERVICE);
         mHandler.obtainMessage(MSG_NOTIFY_IME_UID_TO_AUDIO_SERVICE, uid, 0 /* unused */)
@@ -3060,6 +3078,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @BinderThread
     @Override
     public void startStylusHandwriting(IInputMethodClient client) {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.startStylusHandwriting");
@@ -3074,18 +3093,21 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             final long ident = Binder.clearCallingIdentity();
             try {
                 if (!canInteractWithImeLocked(uid, client, "startStylusHandwriting")) {
-                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                     return;
                 }
                 if (!mBindingController.supportsStylusHandwriting()) {
                     Slog.w(TAG, "Stylus HW unsupported by IME. Ignoring startStylusHandwriting()");
-                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+                    return;
+                }
+                final OptionalInt requestId = mHwController.getCurrentRequestId();
+                if (!requestId.isPresent()) {
+                    Slog.e(TAG, "Stylus handwriting was not initialized.");
                     return;
                 }
                 if (DEBUG) Slog.v(TAG, "Client requesting Stylus Handwriting to be started");
                 final IInputMethodInvoker curMethod = getCurMethodLocked();
                 if (curMethod != null) {
-                    curMethod.canStartStylusHandwriting(++mHwRequestId);
+                    curMethod.canStartStylusHandwriting(requestId.getAsInt());
                 }
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -4118,6 +4140,18 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
+    @BinderThread
+    private void finishStylusHandwriting(int requestId) {
+        synchronized (ImfLock.class) {
+            final OptionalInt curRequest = mHwController.getCurrentRequestId();
+            if (!curRequest.isPresent() || curRequest.getAsInt() != requestId) {
+                Slog.w(TAG, "IME requested to finish handwriting with a mismatched requestId: "
+                        + requestId);
+            }
+            scheduleResetStylusHandwriting();
+        }
+    }
+
     @GuardedBy("ImfLock.class")
     private void setInputMethodWithSubtypeIdLocked(IBinder token, String id, int subtypeId) {
         if (token == null) {
@@ -4358,21 +4392,47 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 }
                 return true;
             }
+
+            case MSG_RESET_HANDWRITING: {
+                synchronized (ImfLock.class) {
+                    if (mBindingController.supportsStylusHandwriting()
+                            && getCurMethodLocked() != null) {
+                        mHwController.initializeHandwritingSpy(mCurTokenDisplayId);
+                    } else {
+                        mHwController.reset();
+                    }
+                }
+                return true;
+            }
+            case MSG_START_HANDWRITING:
+                synchronized (ImfLock.class) {
+                    IInputMethodInvoker curMethod = getCurMethodLocked();
+                    if (curMethod == null) {
+                        return true;
+                    }
+                    final HandwritingModeController.HandwritingSession session =
+                            mHwController.startHandwritingSession(msg.arg1);
+                    if (session == null) {
+                        Slog.e(TAG,
+                                "Failed to start handwriting session for requestId: " + msg.arg1);
+                        return true;
+                    }
+
+                    if (!curMethod.startStylusHandwriting(session.getRequestId(),
+                            session.getHandwritingChannel(), session.getRecordedEvents())) {
+                        // When failed to issue IPCs, re-initialize handwriting state.
+                        Slog.w(TAG, "Resetting handwriting mode.");
+                        mHwController.initializeHandwritingSpy(mCurTokenDisplayId);
+                    }
+                }
+                return true;
         }
         return false;
     }
 
     @BinderThread
     private void onStylusHandwritingReady(int requestId) {
-        synchronized (ImfLock.class) {
-            if (mHwRequestId != requestId) {
-                // obsolete request
-                return;
-            }
-
-            // TODO: replace null  with actual Channel, MotionEvents
-            getCurMethodLocked().startStylusHandwriting(null, null);
-        }
+        mHandler.obtainMessage(MSG_START_HANDWRITING, requestId, 0 /* unused */).sendToTarget();
     }
 
     private void handleSetInteractive(final boolean interactive) {
@@ -5916,6 +5976,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void onStylusHandwritingReady(int requestId) {
             mImms.onStylusHandwritingReady(requestId);
+        }
+
+        @BinderThread
+        @Override
+        public void finishStylusHandwriting(int requestId) {
+            mImms.finishStylusHandwriting(requestId);
         }
     }
 }

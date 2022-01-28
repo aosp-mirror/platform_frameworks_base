@@ -246,7 +246,7 @@ public class RunningFgsControllerTest extends SysuiTestCase {
     public void testStopFgs() throws RemoteException {
         String pkgName = "package.name";
         mController.stopFgs(0, pkgName);
-        verify(mActivityManager).makeServicesNonForeground(pkgName, 0);
+        verify(mActivityManager).stopAppForUser(pkgName, 0);
     }
 
     /**

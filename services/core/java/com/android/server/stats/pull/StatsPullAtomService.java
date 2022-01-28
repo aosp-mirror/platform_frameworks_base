@@ -30,7 +30,6 @@ import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.net.NetworkTemplate.OEM_MANAGED_ALL;
 import static android.net.NetworkTemplate.OEM_MANAGED_PAID;
 import static android.net.NetworkTemplate.OEM_MANAGED_PRIVATE;
-import static android.net.NetworkTemplate.getAllCollapsedRatTypes;
 import static android.os.Debug.getIonHeapsSizeKb;
 import static android.os.Process.LAST_SHARED_APPLICATION_GID;
 import static android.os.Process.getUidForPid;
@@ -1190,13 +1189,14 @@ public class StatsPullAtomService extends SystemService {
                 Slog.e(TAG, "baseline is null for " + atomTag + ", return.");
                 return StatsManager.PULL_SKIP;
             }
+
             final NetworkStatsExt diff = new NetworkStatsExt(
-                    item.stats.subtract(baseline.stats).removeEmptyEntries(), item.transports,
+                    removeEmptyEntries(item.stats.subtract(baseline.stats)), item.transports,
                     item.slicedByFgbg, item.slicedByTag, item.slicedByMetered, item.ratType,
                     item.subInfo, item.oemManaged);
 
             // If no diff, skip.
-            if (diff.stats.size() == 0) continue;
+            if (!diff.stats.iterator().hasNext()) continue;
 
             switch (atomTag) {
                 case FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED:
@@ -1213,6 +1213,17 @@ public class StatsPullAtomService extends SystemService {
             }
         }
         return StatsManager.PULL_SUCCESS;
+    }
+
+    @NonNull private static NetworkStats removeEmptyEntries(NetworkStats stats) {
+        NetworkStats ret = new NetworkStats(0, 1);
+        for (NetworkStats.Entry e : stats) {
+            if (e.getRxBytes() != 0 || e.getRxPackets() != 0 || e.getTxBytes() != 0
+                    || e.getTxPackets() != 0 || e.getOperations() != 0) {
+                ret = ret.addEntry(e);
+            }
+        }
+        return ret;
     }
 
     private void addNetworkStats(int atomTag, @NonNull List<StatsEvent> ret,
@@ -1249,11 +1260,11 @@ public class StatsPullAtomService extends SystemService {
     private void addDataUsageBytesTransferAtoms(@NonNull NetworkStatsExt statsExt,
             @NonNull List<StatsEvent> pulledData) {
 
-        // Workaround for 5G NSA mode, see {@link NetworkTemplate#NETWORK_TYPE_5G_NSA}.
+        // Workaround for 5G NSA mode, see {@link NetworkStatsManager#NETWORK_TYPE_5G_NSA}.
         // 5G NSA mode means the primary cell is LTE with a secondary connection to an
         // NR cell. To mitigate risk, NetworkStats is currently storing this state as
         // a fake RAT type rather than storing the boolean separately.
-        final boolean is5GNsa = statsExt.ratType == NetworkTemplate.NETWORK_TYPE_5G_NSA;
+        final boolean is5GNsa = statsExt.ratType == NetworkStatsManager.NETWORK_TYPE_5G_NSA;
         // Report NR connected in 5G non-standalone mode, or if the RAT type is NR to begin with.
         final boolean isNR = is5GNsa || statsExt.ratType == TelephonyManager.NETWORK_TYPE_NR;
 
@@ -1399,6 +1410,27 @@ public class StatsPullAtomService extends SystemService {
         return ret;
     }
 
+    /**
+     * Return all supported collapsed RAT types that could be returned by
+     * {@link android.app.usage.NetworkStatsManager#getCollapsedRatType(int)}.
+     */
+    @NonNull
+    private static int[] getAllCollapsedRatTypes() {
+        final int[] ratTypes = TelephonyManager.getAllNetworkTypes();
+        final HashSet<Integer> collapsedRatTypes = new HashSet<>();
+        for (final int ratType : ratTypes) {
+            collapsedRatTypes.add(NetworkStatsManager.getCollapsedRatType(ratType));
+        }
+        // Add NETWORK_TYPE_5G_NSA to the returned list since 5G NSA is a virtual RAT type and
+        // it is not in TelephonyManager#NETWORK_TYPE_* constants.
+        // See {@link NetworkStatsManager#NETWORK_TYPE_5G_NSA}.
+        collapsedRatTypes.add(
+                NetworkStatsManager.getCollapsedRatType(NetworkStatsManager.NETWORK_TYPE_5G_NSA));
+        // Ensure that unknown type is returned.
+        collapsedRatTypes.add(TelephonyManager.NETWORK_TYPE_UNKNOWN);
+        return com.android.net.module.util.CollectionUtils.toIntArray(collapsedRatTypes);
+    }
+
     @NonNull private NetworkStats sliceNetworkStatsByUid(@NonNull NetworkStats stats) {
         return sliceNetworkStats(stats,
                 (entry) -> {
@@ -1472,12 +1504,8 @@ public class StatsPullAtomService extends SystemService {
     @NonNull private NetworkStats sliceNetworkStats(@NonNull NetworkStats stats,
             @NonNull Function<NetworkStats.Entry, NetworkStats.Entry> slicer) {
         NetworkStats ret = new NetworkStats(0, 1);
-        NetworkStats.Entry entry = new NetworkStats.Entry();
         for (NetworkStats.Entry e : stats) {
-            if (slicer != null) {
-                entry = slicer.apply(e);
-            }
-            ret = ret.addEntry(entry);
+            ret = ret.addEntry(slicer.apply(e));
         }
         return ret;
     }

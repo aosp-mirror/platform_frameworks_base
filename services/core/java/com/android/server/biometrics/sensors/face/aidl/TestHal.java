@@ -207,6 +207,11 @@ public class TestHal extends IFace.Stub {
             public ICancellationSignal detectInteractionWithContext(OperationContext context) {
                 return detectInteraction();
             }
+
+            @Override
+            public void onContextChanged(OperationContext context) {
+                Slog.w(TAG, "onContextChanged");
+            }
         };
     }
 }

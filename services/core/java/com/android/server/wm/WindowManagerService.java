@@ -6622,6 +6622,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println("    d[isplays]: active display contents");
                 pw.println("    t[okens]: token list");
                 pw.println("    w[indows]: window list");
+                pw.println("    package-config: installed packages having app-specific config");
                 pw.println("    trace: print trace status and write Winscope trace to file");
                 pw.println("  cmd may also be a NAME to dump windows.  NAME may");
                 pw.println("    be a partial substring in a window name, a");
@@ -6708,6 +6709,9 @@ public class WindowManagerService extends IWindowManager.Stub
             } else if ("constants".equals(cmd)) {
                 mConstants.dump(pw);
                 return;
+            } else if ("package-config".equals(cmd)) {
+                mAtmService.dumpInstalledPackagesConfig(pw);
+                return;
             } else {
                 // Dumping a single name?
                 if (!dumpWindows(pw, cmd, args, opti, dumpAll)) {
@@ -6771,6 +6775,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.println(separator);
             }
             dumpHighRefreshRateBlacklist(pw);
+            if (dumpAll) {
+                pw.println(separator);
+            }
+            mAtmService.dumpInstalledPackagesConfig(pw);
             if (dumpAll) {
                 pw.println(separator);
             }
@@ -7947,6 +7955,25 @@ public class WindowManagerService extends IWindowManager.Stub
                     throw new IllegalArgumentException("no task with taskId" + taskId);
                 }
                 task.removeOverlay(overlay);
+            }
+        }
+
+        @Override
+        public SurfaceControl getHandwritingSurfaceForDisplay(int displayId) {
+            synchronized (mGlobalLock) {
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    Slog.e(TAG, "Failed to create a handwriting surface on display: "
+                            + displayId + " - DisplayContent not found.");
+                    return null;
+                }
+                //TODO (b/210039666): Use a method like add/removeDisplayOverlay if available.
+                return makeSurfaceBuilder(dc.getSession())
+                        .setContainerLayer()
+                        .setName("IME Handwriting Surface")
+                        .setCallsite("getHandwritingSurfaceForDisplay")
+                        .setParent(dc.getSurfaceControl())
+                        .build();
             }
         }
     }

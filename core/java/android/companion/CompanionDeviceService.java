@@ -36,11 +36,6 @@ import java.util.Objects;
  * See {@link #onDeviceAppeared(AssociationInfo)}/{@link #onDeviceDisappeared(AssociationInfo)}.
  *
  * <p>
- * Additionally, the service will receive a call from the system, if and when the system needs to
- * transfer data to the companion device.
- * See {@link #dispatchMessage(int, int, byte[])}).
- *
- * <p>
  * Companion applications must create a service that {@code extends}
  * {@link CompanionDeviceService}, and declare it in their AndroidManifest.xml with the
  * "android.permission.BIND_COMPANION_DEVICE_SERVICE" permission
@@ -79,8 +74,8 @@ import java.util.Objects;
  * <p>
  * It is possible for an application to declare multiple {@link CompanionDeviceService}-s.
  * In such case, the system will bind all declared services, but will deliver
- * {@link #onDeviceAppeared(AssociationInfo)}, {@link #onDeviceDisappeared(AssociationInfo)} and
- * {@link #dispatchMessage(int, int, byte[])} only to one "primary" services.
+ * {@link #onDeviceAppeared(AssociationInfo)} and {@link #onDeviceDisappeared(AssociationInfo)}
+ * only to one "primary" services.
  * Applications that declare multiple {@link CompanionDeviceService}-s should indicate the "primary"
  * service using "android.companion.primary" tag.
  * <pre>{@code
@@ -156,6 +151,8 @@ public abstract class CompanionDeviceService extends Service {
      * @param messageId system assigned id of the message to be sent
      * @param associationId association id of the associated device
      * @param message message to be sent
+     *
+     * @hide
      */
     @MainThread
     public void onDispatchMessage(int messageId, int associationId, @NonNull byte[] message) {
@@ -172,6 +169,8 @@ public abstract class CompanionDeviceService extends Service {
      * @param messageId id of the message
      * @param associationId id of the associated device
      * @param message messaged received from the associated device
+     *
+     * @hide
      */
     @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES)
     public final void dispatchMessage(int messageId, int associationId, @NonNull byte[] message) {

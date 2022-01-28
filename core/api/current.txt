@@ -153,8 +153,12 @@ package android {
     field public static final String RECEIVE_WAP_PUSH = "android.permission.RECEIVE_WAP_PUSH";
     field public static final String RECORD_AUDIO = "android.permission.RECORD_AUDIO";
     field public static final String REORDER_TASKS = "android.permission.REORDER_TASKS";
+    field public static final String REQUEST_COMPANION_PROFILE_APP_STREAMING = "android.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING";
+    field public static final String REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION = "android.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION";
+    field public static final String REQUEST_COMPANION_PROFILE_COMPUTER = "android.permission.REQUEST_COMPANION_PROFILE_COMPUTER";
     field public static final String REQUEST_COMPANION_PROFILE_WATCH = "android.permission.REQUEST_COMPANION_PROFILE_WATCH";
     field public static final String REQUEST_COMPANION_RUN_IN_BACKGROUND = "android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND";
+    field public static final String REQUEST_COMPANION_SELF_MANAGED = "android.permission.REQUEST_COMPANION_SELF_MANAGED";
     field public static final String REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND = "android.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND";
     field public static final String REQUEST_COMPANION_USE_DATA_IN_BACKGROUND = "android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND";
     field public static final String REQUEST_DELETE_PACKAGES = "android.permission.REQUEST_DELETE_PACKAGES";
@@ -362,6 +366,7 @@ package android {
     field public static final int authorities = 16842776; // 0x1010018
     field public static final int autoAdvanceViewId = 16843535; // 0x101030f
     field public static final int autoCompleteTextViewStyle = 16842859; // 0x101006b
+    field public static final int autoHandwritingEnabled;
     field public static final int autoLink = 16842928; // 0x10100b0
     field public static final int autoMirrored = 16843754; // 0x10103ea
     field public static final int autoRemoveFromRecents = 16843847; // 0x1010447
@@ -3145,22 +3150,22 @@ package android.accessibilityservice {
   public static final class AccessibilityService.MagnificationController {
     method public void addListener(@NonNull android.accessibilityservice.AccessibilityService.MagnificationController.OnMagnificationChangedListener);
     method public void addListener(@NonNull android.accessibilityservice.AccessibilityService.MagnificationController.OnMagnificationChangedListener, @Nullable android.os.Handler);
-    method public float getCenterX();
-    method public float getCenterY();
+    method @Deprecated public float getCenterX();
+    method @Deprecated public float getCenterY();
     method @NonNull public android.graphics.Region getCurrentMagnificationRegion();
     method @Nullable public android.accessibilityservice.MagnificationConfig getMagnificationConfig();
-    method @NonNull public android.graphics.Region getMagnificationRegion();
-    method public float getScale();
+    method @Deprecated @NonNull public android.graphics.Region getMagnificationRegion();
+    method @Deprecated public float getScale();
     method public boolean removeListener(@NonNull android.accessibilityservice.AccessibilityService.MagnificationController.OnMagnificationChangedListener);
     method public boolean reset(boolean);
     method public boolean resetCurrentMagnification(boolean);
-    method public boolean setCenter(float, float, boolean);
+    method @Deprecated public boolean setCenter(float, float, boolean);
     method public boolean setMagnificationConfig(@NonNull android.accessibilityservice.MagnificationConfig, boolean);
-    method public boolean setScale(float, boolean);
+    method @Deprecated public boolean setScale(float, boolean);
   }
 
   public static interface AccessibilityService.MagnificationController.OnMagnificationChangedListener {
-    method public void onMagnificationChanged(@NonNull android.accessibilityservice.AccessibilityService.MagnificationController, @NonNull android.graphics.Region, float, float, float);
+    method @Deprecated public void onMagnificationChanged(@NonNull android.accessibilityservice.AccessibilityService.MagnificationController, @NonNull android.graphics.Region, float, float, float);
     method public default void onMagnificationChanged(@NonNull android.accessibilityservice.AccessibilityService.MagnificationController, @NonNull android.graphics.Region, @NonNull android.accessibilityservice.MagnificationConfig);
   }
 
@@ -8890,9 +8895,14 @@ package android.companion {
     method public int describeContents();
     method @Nullable public String getDeviceProfile();
     method @Nullable public CharSequence getDisplayName();
+    method public boolean isForceConfirmation();
+    method public boolean isSelfManaged();
     method public boolean isSingleDevice();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.companion.AssociationRequest> CREATOR;
+    field @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING) public static final String DEVICE_PROFILE_APP_STREAMING = "android.app.role.COMPANION_DEVICE_APP_STREAMING";
+    field @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION) public static final String DEVICE_PROFILE_AUTOMOTIVE_PROJECTION = "android.app.role.SYSTEM_AUTOMOTIVE_PROJECTION";
+    field @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER) public static final String DEVICE_PROFILE_COMPUTER = "android.app.role.COMPANION_DEVICE_COMPUTER";
     field public static final String DEVICE_PROFILE_WATCH = "android.app.role.COMPANION_DEVICE_WATCH";
   }
 
@@ -8902,6 +8912,8 @@ package android.companion {
     method @NonNull public android.companion.AssociationRequest build();
     method @NonNull public android.companion.AssociationRequest.Builder setDeviceProfile(@NonNull String);
     method @NonNull public android.companion.AssociationRequest.Builder setDisplayName(@NonNull CharSequence);
+    method @NonNull @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_SELF_MANAGED) public android.companion.AssociationRequest.Builder setForceConfirmation(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.REQUEST_COMPANION_SELF_MANAGED) public android.companion.AssociationRequest.Builder setSelfManaged(boolean);
     method @NonNull public android.companion.AssociationRequest.Builder setSingleDevice(boolean);
   }
 
@@ -8937,8 +8949,8 @@ package android.companion {
   }
 
   public final class CompanionDeviceManager {
-    method @RequiresPermission(anyOf={android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH, "android.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING", "android.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION"}, conditional=true) public void associate(@NonNull android.companion.AssociationRequest, @NonNull android.companion.CompanionDeviceManager.Callback, @Nullable android.os.Handler);
-    method @RequiresPermission(anyOf={android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH, "android.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING", "android.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION"}, conditional=true) public void associate(@NonNull android.companion.AssociationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.companion.CompanionDeviceManager.Callback);
+    method @RequiresPermission(anyOf={android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH, android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER, android.Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING, android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION}, conditional=true) public void associate(@NonNull android.companion.AssociationRequest, @NonNull android.companion.CompanionDeviceManager.Callback, @Nullable android.os.Handler);
+    method @RequiresPermission(anyOf={android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH, android.Manifest.permission.REQUEST_COMPANION_PROFILE_COMPUTER, android.Manifest.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING, android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION}, conditional=true) public void associate(@NonNull android.companion.AssociationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.companion.CompanionDeviceManager.Callback);
     method @Deprecated public void disassociate(@NonNull String);
     method public void disassociate(int);
     method @Deprecated @NonNull public java.util.List<java.lang.String> getAssociations();
@@ -8961,13 +8973,11 @@ package android.companion {
 
   public abstract class CompanionDeviceService extends android.app.Service {
     ctor public CompanionDeviceService();
-    method @RequiresPermission(android.Manifest.permission.DELIVER_COMPANION_MESSAGES) public final void dispatchMessage(int, int, @NonNull byte[]);
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @Deprecated @MainThread public void onDeviceAppeared(@NonNull String);
     method @MainThread public void onDeviceAppeared(@NonNull android.companion.AssociationInfo);
     method @Deprecated @MainThread public void onDeviceDisappeared(@NonNull String);
     method @MainThread public void onDeviceDisappeared(@NonNull android.companion.AssociationInfo);
-    method @MainThread public void onDispatchMessage(int, int, @NonNull byte[]);
     field public static final String SERVICE_INTERFACE = "android.companion.CompanionDeviceService";
   }
 
@@ -16798,7 +16808,7 @@ package android.hardware {
     field public static final long USAGE_CPU_READ_RARELY = 2L; // 0x2L
     field public static final long USAGE_CPU_WRITE_OFTEN = 48L; // 0x30L
     field public static final long USAGE_CPU_WRITE_RARELY = 32L; // 0x20L
-    field public static final long USAGE_FRONT_BUFFER = 1L; // 0x1L
+    field public static final long USAGE_FRONT_BUFFER = 4294967296L; // 0x100000000L
     field public static final long USAGE_GPU_COLOR_OUTPUT = 512L; // 0x200L
     field public static final long USAGE_GPU_CUBE_MAP = 33554432L; // 0x2000000L
     field public static final long USAGE_GPU_DATA_BUFFER = 16777216L; // 0x1000000L
@@ -18658,6 +18668,7 @@ package android.inputmethodservice {
     method public boolean onKeyLongPress(int, android.view.KeyEvent);
     method public boolean onKeyMultiple(int, int, android.view.KeyEvent);
     method public boolean onKeyUp(int, android.view.KeyEvent);
+    method public void onPrepareStylusHandwriting();
     method public boolean onShowInputRequested(int, boolean);
     method public void onStartCandidatesView(android.view.inputmethod.EditorInfo, boolean);
     method public void onStartInput(android.view.inputmethod.EditorInfo, boolean);
@@ -21349,11 +21360,14 @@ package android.media {
     field public static final int AVCProfileHigh422 = 32; // 0x20
     field public static final int AVCProfileHigh444 = 64; // 0x40
     field public static final int AVCProfileMain = 2; // 0x2
+    field public static final int DolbyVisionLevel8k30 = 1024; // 0x400
+    field public static final int DolbyVisionLevel8k60 = 2048; // 0x800
     field public static final int DolbyVisionLevelFhd24 = 4; // 0x4
     field public static final int DolbyVisionLevelFhd30 = 8; // 0x8
     field public static final int DolbyVisionLevelFhd60 = 16; // 0x10
     field public static final int DolbyVisionLevelHd24 = 1; // 0x1
     field public static final int DolbyVisionLevelHd30 = 2; // 0x2
+    field public static final int DolbyVisionLevelUhd120 = 512; // 0x200
     field public static final int DolbyVisionLevelUhd24 = 32; // 0x20
     field public static final int DolbyVisionLevelUhd30 = 64; // 0x40
     field public static final int DolbyVisionLevelUhd48 = 128; // 0x80
@@ -21652,9 +21666,9 @@ package android.media {
     method @NonNull public byte[] getPropertyByteArray(String);
     method @NonNull public String getPropertyString(@NonNull String);
     method @NonNull public android.media.MediaDrm.ProvisionRequest getProvisionRequest();
-    method @NonNull public byte[] getSecureStop(@NonNull byte[]);
-    method @NonNull public java.util.List<byte[]> getSecureStopIds();
-    method @NonNull public java.util.List<byte[]> getSecureStops();
+    method @Deprecated @NonNull public byte[] getSecureStop(@NonNull byte[]);
+    method @Deprecated @NonNull public java.util.List<byte[]> getSecureStopIds();
+    method @Deprecated @NonNull public java.util.List<byte[]> getSecureStops();
     method @android.media.MediaDrm.SecurityLevel public int getSecurityLevel(@NonNull byte[]);
     method @NonNull public static java.util.List<java.util.UUID> getSupportedCryptoSchemes();
     method public static boolean isCryptoSchemeSupported(@NonNull java.util.UUID);
@@ -21667,11 +21681,11 @@ package android.media {
     method @NonNull public java.util.HashMap<java.lang.String,java.lang.String> queryKeyStatus(@NonNull byte[]);
     method @Deprecated public void release();
     method @Deprecated public void releaseAllSecureStops();
-    method public void releaseSecureStops(@NonNull byte[]);
-    method public void removeAllSecureStops();
+    method @Deprecated public void releaseSecureStops(@NonNull byte[]);
+    method @Deprecated public void removeAllSecureStops();
     method public void removeKeys(@NonNull byte[]);
     method public void removeOfflineLicense(@NonNull byte[]);
-    method public void removeSecureStop(@NonNull byte[]);
+    method @Deprecated public void removeSecureStop(@NonNull byte[]);
     method public boolean requiresSecureDecoder(@NonNull String);
     method public boolean requiresSecureDecoder(@NonNull String, @android.media.MediaDrm.SecurityLevel int);
     method public void restoreKeys(@NonNull byte[], @NonNull byte[]);
@@ -24936,6 +24950,156 @@ package android.media.tv {
     field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.AitInfo> CREATOR;
   }
 
+  public abstract class BroadcastInfoRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getOption();
+    method public int getRequestId();
+    method public int getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.BroadcastInfoRequest> CREATOR;
+    field public static final int REQUEST_OPTION_AUTO_UPDATE = 1; // 0x1
+    field public static final int REQUEST_OPTION_REPEAT = 0; // 0x0
+  }
+
+  public abstract class BroadcastInfoResponse implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getRequestId();
+    method public int getResponseResult();
+    method public int getSequence();
+    method public int getType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.BroadcastInfoResponse> CREATOR;
+    field public static final int RESPONSE_RESULT_CANCEL = 3; // 0x3
+    field public static final int RESPONSE_RESULT_ERROR = 1; // 0x1
+    field public static final int RESPONSE_RESULT_OK = 2; // 0x2
+  }
+
+  public final class CommandRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
+    ctor public CommandRequest(int, int, @NonNull String, @NonNull String, @NonNull String);
+    method @NonNull public String getArguments();
+    method @NonNull public String getName();
+    method @NonNull public String getNameSpace();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.CommandRequest> CREATOR;
+  }
+
+  public final class CommandResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
+    ctor public CommandResponse(int, int, int, @Nullable String);
+    method @Nullable public String getResponse();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.CommandResponse> CREATOR;
+  }
+
+  public final class DsmccRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
+    ctor public DsmccRequest(int, int, @NonNull android.net.Uri);
+    method @NonNull public android.net.Uri getUri();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.DsmccRequest> CREATOR;
+  }
+
+  public final class DsmccResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
+    ctor public DsmccResponse(int, int, int, @Nullable android.os.ParcelFileDescriptor);
+    ctor public DsmccResponse(int, int, int, boolean, @Nullable java.util.List<java.lang.String>);
+    ctor public DsmccResponse(int, int, int, @Nullable int[], @Nullable String[]);
+    method @NonNull public String getBiopMessageType();
+    method @NonNull public java.util.List<java.lang.String> getChildList();
+    method @NonNull public android.os.ParcelFileDescriptor getFile();
+    method @NonNull public int[] getStreamEventIds();
+    method @NonNull public String[] getStreamEventNames();
+    field public static final String BIOP_MESSAGE_TYPE_DIRECTORY = "directory";
+    field public static final String BIOP_MESSAGE_TYPE_FILE = "file";
+    field public static final String BIOP_MESSAGE_TYPE_SERVICE_GATEWAY = "service_gateway";
+    field public static final String BIOP_MESSAGE_TYPE_STREAM = "stream";
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.DsmccResponse> CREATOR;
+  }
+
+  public final class PesRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
+    ctor public PesRequest(int, int, int, int);
+    method public int getStreamId();
+    method public int getTsPid();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.PesRequest> CREATOR;
+  }
+
+  public final class PesResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
+    ctor public PesResponse(int, int, int, @Nullable String);
+    method @Nullable public String getSharedFilterToken();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.PesResponse> CREATOR;
+  }
+
+  public final class SectionRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
+    ctor public SectionRequest(int, int, int, int, int);
+    method public int getTableId();
+    method public int getTsPid();
+    method public int getVersion();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.SectionRequest> CREATOR;
+  }
+
+  public final class SectionResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
+    ctor public SectionResponse(int, int, int, int, int, @Nullable android.os.Bundle);
+    method @NonNull public android.os.Bundle getSessionData();
+    method public int getSessionId();
+    method public int getVersion();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.SectionResponse> CREATOR;
+  }
+
+  public final class StreamEventRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
+    ctor public StreamEventRequest(int, int, @NonNull android.net.Uri, @NonNull String);
+    method @NonNull public String getEventName();
+    method @NonNull public android.net.Uri getTargetUri();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.StreamEventRequest> CREATOR;
+  }
+
+  public final class StreamEventResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
+    ctor public StreamEventResponse(int, int, int, int, long, @Nullable byte[]);
+    method @Nullable public byte[] getData();
+    method public int getEventId();
+    method public long getNpt();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.StreamEventResponse> CREATOR;
+  }
+
+  public final class TableRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
+    ctor public TableRequest(int, int, int, int, int);
+    method public int getTableId();
+    method public int getTableName();
+    method public int getVersion();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.TableRequest> CREATOR;
+    field public static final int TABLE_NAME_PAT = 0; // 0x0
+    field public static final int TABLE_NAME_PMT = 1; // 0x1
+  }
+
+  public final class TableResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
+    ctor public TableResponse(int, int, int, @Nullable android.net.Uri, int, int);
+    method public int getSize();
+    method @Nullable public android.net.Uri getTableUri();
+    method public int getVersion();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.TableResponse> CREATOR;
+  }
+
+  public final class TimelineRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
+    ctor public TimelineRequest(int, int, int);
+    method public int getIntervalMillis();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.TimelineRequest> CREATOR;
+  }
+
+  public final class TimelineResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
+    ctor public TimelineResponse(int, int, int, @Nullable String, int, int, long, long);
+    method @Nullable public String getSelector();
+    method public long getTicks();
+    method public int getUnitsPerSecond();
+    method public int getUnitsPerTick();
+    method public long getWallClock();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.TimelineResponse> CREATOR;
+  }
+
+  public final class TsRequest extends android.media.tv.BroadcastInfoRequest implements android.os.Parcelable {
+    ctor public TsRequest(int, int, int);
+    method public int getTsPid();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.TsRequest> CREATOR;
+  }
+
+  public final class TsResponse extends android.media.tv.BroadcastInfoResponse implements android.os.Parcelable {
+    ctor public TsResponse(int, int, int, @Nullable String);
+    method @Nullable public String getSharedFilterToken();
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.tv.TsResponse> CREATOR;
+  }
+
   public final class TvContentRating {
     method public boolean contains(@NonNull android.media.tv.TvContentRating);
     method public static android.media.tv.TvContentRating createRating(String, String, String, java.lang.String...);
@@ -25422,6 +25586,14 @@ package android.media.tv {
     field public static final String ACTION_QUERY_CONTENT_RATING_SYSTEMS = "android.media.tv.action.QUERY_CONTENT_RATING_SYSTEMS";
     field public static final String ACTION_SETUP_INPUTS = "android.media.tv.action.SETUP_INPUTS";
     field public static final String ACTION_VIEW_RECORDING_SCHEDULES = "android.media.tv.action.VIEW_RECORDING_SCHEDULES";
+    field public static final int BROADCAST_INFO_STREAM_EVENT = 5; // 0x5
+    field public static final int BROADCAST_INFO_TYPE_COMMAND = 7; // 0x7
+    field public static final int BROADCAST_INFO_TYPE_DSMCC = 6; // 0x6
+    field public static final int BROADCAST_INFO_TYPE_PES = 4; // 0x4
+    field public static final int BROADCAST_INFO_TYPE_SECTION = 3; // 0x3
+    field public static final int BROADCAST_INFO_TYPE_TABLE = 2; // 0x2
+    field public static final int BROADCAST_INFO_TYPE_TIMELINE = 8; // 0x8
+    field public static final int BROADCAST_INFO_TYPE_TS = 1; // 0x1
     field public static final int INPUT_STATE_CONNECTED = 0; // 0x0
     field public static final int INPUT_STATE_CONNECTED_STANDBY = 1; // 0x1
     field public static final int INPUT_STATE_DISCONNECTED = 2; // 0x2
@@ -25511,6 +25683,7 @@ package android.media.tv {
     method public void layoutSurface(int, int, int, int);
     method public void notifyAdResponse(@NonNull android.media.tv.AdResponse);
     method public void notifyAitInfoUpdated(@NonNull android.media.tv.AitInfo);
+    method public void notifyBroadcastInfoResponse(@NonNull android.media.tv.BroadcastInfoResponse);
     method public void notifyChannelRetuned(android.net.Uri);
     method public void notifyContentAllowed();
     method public void notifyContentBlocked(@NonNull android.media.tv.TvContentRating);
@@ -25530,7 +25703,9 @@ package android.media.tv {
     method public boolean onKeyUp(int, android.view.KeyEvent);
     method public void onOverlayViewSizeChanged(int, int);
     method public abstract void onRelease();
+    method public void onRemoveBroadcastInfo(int);
     method public void onRequestAd(@NonNull android.media.tv.AdRequest);
+    method public void onRequestBroadcastInfo(@NonNull android.media.tv.BroadcastInfoRequest);
     method public boolean onSelectTrack(int, @Nullable String);
     method public abstract void onSetCaptionEnabled(boolean);
     method public void onSetInteractiveAppNotificationEnabled(boolean);
@@ -25795,6 +25970,7 @@ package android.media.tv.interactive {
     method public void notifySessionStateChanged(int, int);
     method public final void notifyTeletextAppStateChanged(int);
     method public void onAdResponse(@NonNull android.media.tv.AdResponse);
+    method public void onBroadcastInfoResponse(@NonNull android.media.tv.BroadcastInfoResponse);
     method public void onContentAllowed();
     method public void onContentBlocked(@NonNull android.media.tv.TvContentRating);
     method public void onCreateBiInteractiveApp(@NonNull android.net.Uri, @Nullable android.os.Bundle);
@@ -25826,7 +26002,9 @@ package android.media.tv.interactive {
     method public void onTuned(@NonNull android.net.Uri);
     method public void onVideoAvailable();
     method public void onVideoUnavailable(int);
+    method public void removeBroadcastInfo(int);
     method public void requestAd(@NonNull android.media.tv.AdRequest);
+    method public void requestBroadcastInfo(@NonNull android.media.tv.BroadcastInfoRequest);
     method public void requestCurrentChannelLcn();
     method public void requestCurrentChannelUri();
     method public void requestCurrentTvInputId();
@@ -26155,12 +26333,14 @@ package android.net {
 
   public static final class Ikev2VpnProfile.Builder {
     ctor public Ikev2VpnProfile.Builder(@NonNull String, @NonNull String);
+    ctor public Ikev2VpnProfile.Builder(@NonNull android.net.ipsec.ike.IkeTunnelConnectionParams);
     method @NonNull public android.net.Ikev2VpnProfile build();
     method @NonNull public android.net.Ikev2VpnProfile.Builder setAllowedAlgorithms(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setAuthDigitalSignature(@NonNull java.security.cert.X509Certificate, @NonNull java.security.PrivateKey, @Nullable java.security.cert.X509Certificate);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setAuthPsk(@NonNull byte[]);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setAuthUsernamePassword(@NonNull String, @NonNull String, @Nullable java.security.cert.X509Certificate);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setBypassable(boolean);
+    method @NonNull public android.net.Ikev2VpnProfile.Builder setExcludeLocalRoutes(boolean);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setMaxMtu(int);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setMetered(boolean);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setProxy(@Nullable android.net.ProxyInfo);
@@ -26306,6 +26486,7 @@ package android.net {
   }
 
   public abstract class PlatformVpnProfile {
+    method public final boolean getExcludeLocalRoutes();
     method public final int getType();
     method @NonNull public final String getTypeString();
     field public static final int TYPE_IKEV2_IPSEC_PSK = 7; // 0x7
@@ -31264,7 +31445,7 @@ package android.os {
     method @Deprecated public void readMap(@NonNull java.util.Map, @Nullable ClassLoader);
     method public <K, V> void readMap(@NonNull java.util.Map<? super K,? super V>, @Nullable ClassLoader, @NonNull Class<K>, @NonNull Class<V>);
     method @Deprecated @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader);
-    method @Nullable public <T extends android.os.Parcelable> T readParcelable(@Nullable ClassLoader, @NonNull Class<? super T>);
+    method @Nullable public <T> T readParcelable(@Nullable ClassLoader, @NonNull Class<T>);
     method @Deprecated @Nullable public android.os.Parcelable[] readParcelableArray(@Nullable ClassLoader);
     method @Nullable public <T> T[] readParcelableArray(@Nullable ClassLoader, @NonNull Class<T>);
     method @Deprecated @Nullable public android.os.Parcelable.Creator<?> readParcelableCreator(@Nullable ClassLoader);
@@ -31274,7 +31455,7 @@ package android.os {
     method @Nullable public android.os.PersistableBundle readPersistableBundle();
     method @Nullable public android.os.PersistableBundle readPersistableBundle(@Nullable ClassLoader);
     method @Deprecated @Nullable public java.io.Serializable readSerializable();
-    method @Nullable public <T extends java.io.Serializable> T readSerializable(@Nullable ClassLoader, @NonNull Class<? super T>);
+    method @Nullable public <T> T readSerializable(@Nullable ClassLoader, @NonNull Class<T>);
     method @NonNull public android.util.Size readSize();
     method @NonNull public android.util.SizeF readSizeF();
     method @Deprecated @Nullable public <T> android.util.SparseArray<T> readSparseArray(@Nullable ClassLoader);
@@ -49423,6 +49604,7 @@ package android.view {
     method public boolean isAccessibilityHeading();
     method public boolean isActivated();
     method public boolean isAttachedToWindow();
+    method public boolean isAutoHandwritingEnabled();
     method public boolean isClickable();
     method public boolean isContextClickable();
     method public boolean isDirty();
@@ -49606,6 +49788,7 @@ package android.view {
     method public void setAlpha(@FloatRange(from=0.0, to=1.0) float);
     method public void setAnimation(android.view.animation.Animation);
     method public void setAnimationMatrix(@Nullable android.graphics.Matrix);
+    method public void setAutoHandwritingEnabled(boolean);
     method public void setAutofillHints(@Nullable java.lang.String...);
     method public void setAutofillId(@Nullable android.view.autofill.AutofillId);
     method public void setBackground(android.graphics.drawable.Drawable);
@@ -52592,6 +52775,9 @@ package android.view.inputmethod {
     method public default boolean setImeConsumesInput(boolean);
     method public boolean setSelection(int, int);
     method @Nullable public default android.view.inputmethod.TextSnapshot takeSnapshot();
+    field public static final int CURSOR_UPDATE_FILTER_CHARACTER_BOUNDS = 8; // 0x8
+    field public static final int CURSOR_UPDATE_FILTER_EDITOR_BOUNDS = 4; // 0x4
+    field public static final int CURSOR_UPDATE_FILTER_INSERTION_MARKER = 16; // 0x10
     field public static final int CURSOR_UPDATE_IMMEDIATE = 1; // 0x1
     field public static final int CURSOR_UPDATE_MONITOR = 2; // 0x2
     field public static final int GET_EXTRACTED_TEXT_MONITOR = 1; // 0x1

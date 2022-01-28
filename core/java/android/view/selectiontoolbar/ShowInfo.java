@@ -17,9 +17,13 @@
 package android.view.selectiontoolbar;
 
 import android.annotation.NonNull;
+import android.graphics.Rect;
+import android.os.IBinder;
 import android.os.Parcelable;
 
 import com.android.internal.util.DataClass;
+
+import java.util.List;
 
 
 /**
@@ -29,14 +33,47 @@ import com.android.internal.util.DataClass;
  */
 @DataClass(genToString = true, genEqualsHashCode = true)
 public final class ShowInfo implements Parcelable {
+
     /**
      * The token that is used to identify the selection toolbar. This is initially set to 0
      * until a selection toolbar has been created for the showToolbar request.
      */
     private final long mWidgetToken;
 
-    // TODO: add members when the code really uses it
+    /**
+     * If the toolbar menu items need to be re-layout.
+     */
+    private final boolean mLayoutRequired;
 
+    /**
+     * The menu items to be rendered in the selection toolbar.
+     */
+    @NonNull
+    private final List<ToolbarMenuItem> mMenuItems;
+
+    /**
+     * A rect specifying where the selection toolbar on the screen.
+     */
+    @NonNull
+    private final Rect mContentRect;
+
+    /**
+     * A recommended maximum suggested width of the selection toolbar.
+     */
+    private final int mSuggestedWidth;
+
+    /**
+     * The portion of the screen that is available to the selection toolbar.
+     */
+    @NonNull
+    private final Rect mViewPortOnScreen;
+
+    /**
+     * The host application's input token, this allows the remote render service to transfer
+     * the touch focus to the host application.
+     */
+    @NonNull
+    private final IBinder mHostInputToken;
 
 
 
@@ -57,22 +94,106 @@ public final class ShowInfo implements Parcelable {
      * Creates a new ShowInfo.
      *
      * @param widgetToken
-     *   The token that is used to identify the selection toolbar.
+     *   The token that is used to identify the selection toolbar. This is initially set to 0
+     *   until a selection toolbar has been created for the showToolbar request.
+     * @param layoutRequired
+     *   If the toolbar menu items need to be re-layout.
+     * @param menuItems
+     *   The menu items to be rendered in the selection toolbar.
+     * @param contentRect
+     *   A rect specifying where the selection toolbar on the screen.
+     * @param suggestedWidth
+     *   A recommended maximum suggested width of the selection toolbar.
+     * @param viewPortOnScreen
+     *   The portion of the screen that is available to the selection toolbar.
+     * @param hostInputToken
+     *   The host application's input token, this allows the remote render service to transfer
+     *   the touch focus to the host application.
      */
     @DataClass.Generated.Member
     public ShowInfo(
-            long widgetToken) {
+            long widgetToken,
+            boolean layoutRequired,
+            @NonNull List<ToolbarMenuItem> menuItems,
+            @NonNull Rect contentRect,
+            int suggestedWidth,
+            @NonNull Rect viewPortOnScreen,
+            @NonNull IBinder hostInputToken) {
         this.mWidgetToken = widgetToken;
+        this.mLayoutRequired = layoutRequired;
+        this.mMenuItems = menuItems;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mMenuItems);
+        this.mContentRect = contentRect;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mContentRect);
+        this.mSuggestedWidth = suggestedWidth;
+        this.mViewPortOnScreen = viewPortOnScreen;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mViewPortOnScreen);
+        this.mHostInputToken = hostInputToken;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mHostInputToken);
 
         // onConstructed(); // You can define this method to get a callback
     }
 
     /**
-     * The token that is used to identify the selection toolbar.
+     * The token that is used to identify the selection toolbar. This is initially set to 0
+     * until a selection toolbar has been created for the showToolbar request.
      */
     @DataClass.Generated.Member
     public long getWidgetToken() {
         return mWidgetToken;
+    }
+
+    /**
+     * If the toolbar menu items need to be re-layout.
+     */
+    @DataClass.Generated.Member
+    public boolean isLayoutRequired() {
+        return mLayoutRequired;
+    }
+
+    /**
+     * The menu items to be rendered in the selection toolbar.
+     */
+    @DataClass.Generated.Member
+    public @NonNull List<ToolbarMenuItem> getMenuItems() {
+        return mMenuItems;
+    }
+
+    /**
+     * A rect specifying where the selection toolbar on the screen.
+     */
+    @DataClass.Generated.Member
+    public @NonNull Rect getContentRect() {
+        return mContentRect;
+    }
+
+    /**
+     * A recommended maximum suggested width of the selection toolbar.
+     */
+    @DataClass.Generated.Member
+    public int getSuggestedWidth() {
+        return mSuggestedWidth;
+    }
+
+    /**
+     * The portion of the screen that is available to the selection toolbar.
+     */
+    @DataClass.Generated.Member
+    public @NonNull Rect getViewPortOnScreen() {
+        return mViewPortOnScreen;
+    }
+
+    /**
+     * The host application's input token, this allows the remote render service to transfer
+     * the touch focus to the host application.
+     */
+    @DataClass.Generated.Member
+    public @NonNull IBinder getHostInputToken() {
+        return mHostInputToken;
     }
 
     @Override
@@ -82,7 +203,13 @@ public final class ShowInfo implements Parcelable {
         // String fieldNameToString() { ... }
 
         return "ShowInfo { " +
-                "widgetToken = " + mWidgetToken +
+                "widgetToken = " + mWidgetToken + ", " +
+                "layoutRequired = " + mLayoutRequired + ", " +
+                "menuItems = " + mMenuItems + ", " +
+                "contentRect = " + mContentRect + ", " +
+                "suggestedWidth = " + mSuggestedWidth + ", " +
+                "viewPortOnScreen = " + mViewPortOnScreen + ", " +
+                "hostInputToken = " + mHostInputToken +
         " }";
     }
 
@@ -99,7 +226,13 @@ public final class ShowInfo implements Parcelable {
         ShowInfo that = (ShowInfo) o;
         //noinspection PointlessBooleanExpression
         return true
-                && mWidgetToken == that.mWidgetToken;
+                && mWidgetToken == that.mWidgetToken
+                && mLayoutRequired == that.mLayoutRequired
+                && java.util.Objects.equals(mMenuItems, that.mMenuItems)
+                && java.util.Objects.equals(mContentRect, that.mContentRect)
+                && mSuggestedWidth == that.mSuggestedWidth
+                && java.util.Objects.equals(mViewPortOnScreen, that.mViewPortOnScreen)
+                && java.util.Objects.equals(mHostInputToken, that.mHostInputToken);
     }
 
     @Override
@@ -110,6 +243,12 @@ public final class ShowInfo implements Parcelable {
 
         int _hash = 1;
         _hash = 31 * _hash + Long.hashCode(mWidgetToken);
+        _hash = 31 * _hash + Boolean.hashCode(mLayoutRequired);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mMenuItems);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mContentRect);
+        _hash = 31 * _hash + mSuggestedWidth;
+        _hash = 31 * _hash + java.util.Objects.hashCode(mViewPortOnScreen);
+        _hash = 31 * _hash + java.util.Objects.hashCode(mHostInputToken);
         return _hash;
     }
 
@@ -119,7 +258,15 @@ public final class ShowInfo implements Parcelable {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
+        byte flg = 0;
+        if (mLayoutRequired) flg |= 0x2;
+        dest.writeByte(flg);
         dest.writeLong(mWidgetToken);
+        dest.writeParcelableList(mMenuItems, flags);
+        dest.writeTypedObject(mContentRect, flags);
+        dest.writeInt(mSuggestedWidth);
+        dest.writeTypedObject(mViewPortOnScreen, flags);
+        dest.writeStrongBinder(mHostInputToken);
     }
 
     @Override
@@ -133,9 +280,31 @@ public final class ShowInfo implements Parcelable {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
+        byte flg = in.readByte();
+        boolean layoutRequired = (flg & 0x2) != 0;
         long widgetToken = in.readLong();
+        List<ToolbarMenuItem> menuItems = new java.util.ArrayList<>();
+        in.readParcelableList(menuItems, ToolbarMenuItem.class.getClassLoader());
+        Rect contentRect = (Rect) in.readTypedObject(Rect.CREATOR);
+        int suggestedWidth = in.readInt();
+        Rect viewPortOnScreen = (Rect) in.readTypedObject(Rect.CREATOR);
+        IBinder hostInputToken = (IBinder) in.readStrongBinder();
 
         this.mWidgetToken = widgetToken;
+        this.mLayoutRequired = layoutRequired;
+        this.mMenuItems = menuItems;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mMenuItems);
+        this.mContentRect = contentRect;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mContentRect);
+        this.mSuggestedWidth = suggestedWidth;
+        this.mViewPortOnScreen = viewPortOnScreen;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mViewPortOnScreen);
+        this.mHostInputToken = hostInputToken;
+        com.android.internal.util.AnnotationValidations.validate(
+                NonNull.class, null, mHostInputToken);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -155,10 +324,10 @@ public final class ShowInfo implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1639488262761L,
+            time = 1643186262604L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/view/selectiontoolbar/ShowInfo.java",
-            inputSignatures = "private final  long mWidgetToken\nclass ShowInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genEqualsHashCode=true)")
+            inputSignatures = "private final  long mWidgetToken\nprivate final  boolean mLayoutRequired\nprivate final @android.annotation.NonNull java.util.List<android.view.selectiontoolbar.ToolbarMenuItem> mMenuItems\nprivate final @android.annotation.NonNull android.graphics.Rect mContentRect\nprivate final  int mSuggestedWidth\nprivate final @android.annotation.NonNull android.graphics.Rect mViewPortOnScreen\nprivate final @android.annotation.NonNull android.os.IBinder mHostInputToken\nclass ShowInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genEqualsHashCode=true)")
     @Deprecated
     private void __metadata() {}
 

@@ -526,11 +526,7 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Nije registrovan"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"Nedostupno"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC adresa je nasumično izabrana"</string>
-    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
-      <item quantity="one">Povezan je %1$d uređaj</item>
-      <item quantity="few">Povezana su %1$d uređaja</item>
-      <item quantity="other">Povezano je %1$d uređaja</item>
-    </plurals>
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{0 uređaja je povezano}=1{1 uređaj je povezan}one{# uređaj je povezan}few{# uređaja su povezana}other{# uređaja je povezano}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Više vremena."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Manje vremena."</string>
     <string name="cancel" msgid="5665114069455378395">"Otkaži"</string>

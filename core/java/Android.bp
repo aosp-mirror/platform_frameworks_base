@@ -29,6 +29,11 @@ filegroup {
 }
 
 filegroup {
+    name: "IBinaryTransparencyService.aidl",
+    srcs: ["com/android/internal/os/IBinaryTransparencyService.aidl"],
+}
+
+filegroup {
     name: "ITracingServiceProxy.aidl",
     srcs: ["android/tracing/ITracingServiceProxy.aidl"],
 }

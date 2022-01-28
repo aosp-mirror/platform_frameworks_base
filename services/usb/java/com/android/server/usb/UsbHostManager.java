@@ -165,7 +165,7 @@ public class UsbHostManager {
                 pw.println("manfacturer:0x" + Integer.toHexString(deviceDescriptor.getVendorID())
                         + " product:" + Integer.toHexString(deviceDescriptor.getProductID()));
                 pw.println("isHeadset[in: " + parser.isInputHeadset()
-                        + " , out: " + parser.isOutputHeadset() + "]");
+                        + " , out: " + parser.isOutputHeadset() + "], isDock: " + parser.isDock());
             } else {
                 pw.println(formatTime() + " Disconnect " + mDeviceAddress);
             }
@@ -179,9 +179,8 @@ public class UsbHostManager {
                 UsbDescriptorsTree descriptorTree = new UsbDescriptorsTree();
                 descriptorTree.parse(parser);
                 descriptorTree.report(new TextReportCanvas(parser, stringBuilder));
-
                 stringBuilder.append("isHeadset[in: " + parser.isInputHeadset()
-                        + " , out: " + parser.isOutputHeadset() + "]");
+                        + " , out: " + parser.isOutputHeadset() + "], isDock: " + parser.isDock());
                 pw.println(stringBuilder.toString());
             } else {
                 pw.println(formatTime() + " Disconnect " + mDeviceAddress);
@@ -198,9 +197,8 @@ public class UsbHostManager {
                     descriptor.report(canvas);
                 }
                 pw.println(stringBuilder.toString());
-
                 pw.println("isHeadset[in: " + parser.isInputHeadset()
-                        + " , out: " + parser.isOutputHeadset() + "]");
+                        + " , out: " + parser.isOutputHeadset() + "], isDock: " + parser.isDock());
             } else {
                 pw.println(formatTime() + " Disconnect " + mDeviceAddress);
             }

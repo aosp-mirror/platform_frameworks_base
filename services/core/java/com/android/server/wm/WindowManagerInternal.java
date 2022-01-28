@@ -35,6 +35,7 @@ import android.view.IWindow;
 import android.view.InputChannel;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationTarget;
+import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 import android.view.WindowInfo;
 import android.view.WindowManager.DisplayImePolicy;
@@ -82,7 +83,7 @@ public abstract class WindowManagerInternal {
          *        through the tracing file.
          * @param loggingTypeFlags The flags for the logging types this log entry belongs to.
          * @param callingParams The parameters for the method to be logged.
-         * @param a11yDump The proto byte array for a11y state when the entry is generated.
+         * @param a11yDump The proto byte array for a11y state when the entry is generated
          * @param callingUid The calling uid.
          * @param stackTrace The stack trace, null if not needed.
          * @param ignoreStackEntries The stack entries can be removed
@@ -800,4 +801,10 @@ public abstract class WindowManagerInternal {
      */
     public abstract void addTaskOverlay(int taskId, SurfaceControlViewHost.SurfacePackage overlay);
     public abstract void removeTaskOverlay(int taskId, SurfaceControlViewHost.SurfacePackage overlay);
+
+    /**
+     * Get a SurfaceControl that is the container layer that should be used to receive input to
+     * support handwriting (Scribe) by the IME.
+     */
+    public abstract SurfaceControl getHandwritingSurfaceForDisplay(int displayId);
 }

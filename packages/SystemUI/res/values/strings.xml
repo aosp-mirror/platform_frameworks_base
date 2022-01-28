@@ -2360,12 +2360,12 @@
 
     <!-- Label for the entry point to open the dialog which shows currently running applications [CHAR LIMIT=NONE]-->
     <plurals name="fgs_manager_footer_label">
-        <item quantity="one"><xliff:g id="count" example="1">%s</xliff:g> app running in the background</item>
-        <item quantity="other"><xliff:g id="count" example="2">%s</xliff:g> apps running in the background</item>
+        <item quantity="one"><xliff:g id="count" example="1">%s</xliff:g> active app</item>
+        <item quantity="other"><xliff:g id="count" example="2">%s</xliff:g> active apps</item>
     </plurals>
-    <!-- Title for dialog listing applications currently running in the backing [CHAR LIMIT=NONE]-->
-    <string name="fgs_manager_dialog_title">Apps running in the background</string>
-    <!-- Label of the button to stop the app from running in the background [CHAR LIMIT=12]-->
+    <!-- Title for dialog listing applications currently running [CHAR LIMIT=NONE]-->
+    <string name="fgs_manager_dialog_title">Active apps</string>
+    <!-- Label of the button to stop an app from running [CHAR LIMIT=12]-->
     <string name="fgs_manager_app_item_stop_button_label">Stop</string>
 
     <!-- Label for button to copy edited text back to the clipboard [CHAR LIMIT=20] -->

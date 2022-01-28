@@ -78,6 +78,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_CREATE_INLINE_SUGGESTIONS_REQUEST = 90;
     private static final int DO_CAN_START_STYLUS_HANDWRITING = 100;
     private static final int DO_START_STYLUS_HANDWRITING = 110;
+    private static final int DO_INIT_INK_WINDOW = 120;
 
     final WeakReference<InputMethodServiceInternal> mTarget;
     final Context mContext;
@@ -245,9 +246,13 @@ class IInputMethodWrapper extends IInputMethod.Stub
             }
             case DO_START_STYLUS_HANDWRITING: {
                 final SomeArgs args = (SomeArgs) msg.obj;
-                inputMethod.startStylusHandwriting((InputChannel) args.arg1,
+                inputMethod.startStylusHandwriting(msg.arg1, (InputChannel) args.arg1,
                         (List<MotionEvent>) args.arg2);
                 args.recycle();
+                return;
+            }
+            case DO_INIT_INK_WINDOW: {
+                inputMethod.initInkWindow();
                 return;
             }
 
@@ -393,10 +398,17 @@ class IInputMethodWrapper extends IInputMethod.Stub
 
     @BinderThread
     @Override
-    public void startStylusHandwriting(@NonNull InputChannel channel,
+    public void startStylusHandwriting(int requestId, @NonNull InputChannel channel,
             @Nullable List<MotionEvent> stylusEvents)
             throws RemoteException {
         mCaller.executeOrSendMessage(
-                mCaller.obtainMessageOO(DO_START_STYLUS_HANDWRITING, channel, stylusEvents));
+                mCaller.obtainMessageIOO(DO_START_STYLUS_HANDWRITING, requestId, channel,
+                        stylusEvents));
+    }
+
+    @BinderThread
+    @Override
+    public void initInkWindow() {
+        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_INIT_INK_WINDOW));
     }
 }

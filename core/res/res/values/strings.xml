@@ -463,10 +463,11 @@
     <!-- SSL CA cert notification --> <skip />
     <!-- Shows up when there is a user SSL CA Cert installed on the
          device.  Indicates to the user that SSL traffic can be intercepted.  [CHAR LIMIT=NONE] -->
-    <plurals name="ssl_ca_cert_warning">
-        <item quantity="one">Certificate authority installed</item>
-        <item quantity="other">Certificate authorities installed</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning">{count, plural,
+        =1    {Certificate authority installed}
+        other {Certificate authorities installed}
+    }
+    </string>
     <!-- Content text for a notification. The Title of the notification is "ssl_ca_cert_warning".
          This says that an unknown party is doing the monitoring. [CHAR LIMIT=100]-->
     <string name="ssl_ca_cert_noti_by_unknown">By an unknown third party</string>
@@ -691,10 +692,11 @@
         your device is unresponsive or too slow, or when you need all report sections.
         Does not allow you to enter more details or take additional screenshots.</string>
     <!--  Toast message informing user in how many seconds a bugreport screenshot will be taken -->
-    <plurals name="bugreport_countdown">
-        <item quantity="one">Taking screenshot for bug report in <xliff:g id="number">%d</xliff:g> second.</item>
-        <item quantity="other">Taking screenshot for bug report in <xliff:g id="number">%d</xliff:g> seconds.</item>
-    </plurals>
+    <string name="bugreport_countdown">{count, plural,
+        =1 {Taking screenshot for bug report in # second.}
+        other {Taking screenshot for bug report in # seconds.}
+    }
+    </string>
 
     <!-- Format for build summary info [CHAR LIMIT=NONE] -->
     <string name="bugreport_status" translatable="false">%s (%s)</string>
@@ -3066,10 +3068,10 @@
     <string name="beforeOneMonthDurationPast">Before 1 month ago</string>
 
     <!-- This is used to express that something occurred within the last X days (e.g., Last 7 days). -->
-    <plurals name="last_num_days">
-        <item quantity="one">Last <xliff:g id="count">%d</xliff:g> day</item>
-        <item quantity="other">Last <xliff:g id="count">%d</xliff:g> days</item>
-    </plurals>
+    <string name="last_num_days">{ count, plural,
+        =1 {Last # day}
+        other {Last # days}
+    }</string>
 
     <!-- This is used to express that something has occurred within the last month -->
     <string name="last_month">Last month</string>
@@ -3113,100 +3115,100 @@
     <string name="now_string_shortest">now</string>
 
     <!-- Phrase describing a time duration using minutes that is as short as possible, preferrably one character. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=6] -->
-    <plurals name="duration_minutes_shortest">
-        <item quantity="one"><xliff:g example="1" id="count">%d</xliff:g>m</item>
-        <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g>m</item>
-    </plurals>
+    <string name="duration_minutes_shortest">
+        <xliff:g id="count">%d</xliff:g>m
+    </string>
 
     <!-- Phrase describing a time duration using hours that is as short as possible, preferrably one character. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=6] -->
-    <plurals name="duration_hours_shortest">
-        <item quantity="one"><xliff:g example="1" id="count">%d</xliff:g>h</item>
-        <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g>h</item>
-    </plurals>
+    <string name="duration_hours_shortest">
+        <xliff:g id="count">%d</xliff:g>h
+    </string>
 
     <!-- Phrase describing a time duration using days that is as short as possible, preferrably one character. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=6] -->
-    <plurals name="duration_days_shortest">
-        <item quantity="one"><xliff:g example="1" id="count">%d</xliff:g>d</item>
-        <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g>d</item>
-    </plurals>
+    <string name="duration_days_shortest">
+       <xliff:g id="count">%d</xliff:g>d
+    </string>
 
     <!-- Phrase describing a time duration using years that is as short as possible, preferrably one character. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=6] -->
-    <plurals name="duration_years_shortest">
-        <item quantity="one"><xliff:g example="1" id="count">%d</xliff:g>y</item>
-        <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g>y</item>
-    </plurals>
+    <string name="duration_years_shortest">
+        <xliff:g id="count">%d</xliff:g>y
+    </string>
 
     <!-- Phrase describing a time duration using minutes that is as short as possible, preferrably one character. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
-    <plurals name="duration_minutes_shortest_future">
-        <item quantity="one">in <xliff:g example="1" id="count">%d</xliff:g>m</item>
-        <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g>m</item>
-    </plurals>
+    <string name="duration_minutes_shortest_future">
+        in <xliff:g id="count">%d</xliff:g>m
+    </string>
 
     <!-- Phrase describing a time duration using hours that is as short as possible, preferrably one character. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
-    <plurals name="duration_hours_shortest_future">
-        <item quantity="one">in <xliff:g example="1" id="count">%d</xliff:g>h</item>
-        <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g>h</item>
-    </plurals>
+    <string name="duration_hours_shortest_future">
+        in <xliff:g id="count">%d</xliff:g>h
+    </string>
 
     <!-- Phrase describing a time duration using days that is as short as possible, preferrably one character. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
-    <plurals name="duration_days_shortest_future">
-        <item quantity="one">in <xliff:g example="1" id="count">%d</xliff:g>d</item>
-        <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g>d</item>
-    </plurals>
+    <string name="duration_days_shortest_future">
+        in <xliff:g example="1" id="count">%d</xliff:g>d
+    </string>
 
     <!-- Phrase describing a time duration using years that is as short as possible, preferrably one character. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
-    <plurals name="duration_years_shortest_future">
-        <item quantity="one">in <xliff:g example="1" id="count">%d</xliff:g>y</item>
-        <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g>y</item>
-    </plurals>
+    <string name="duration_years_shortest_future">
+        in <xliff:g id="count">%d</xliff:g>y
+    </string>
 
     <!-- Phrase describing a relative time using minutes in the past that is not shown on the screen but used for accessibility. [CHAR LIMIT=NONE] -->
-    <plurals name="duration_minutes_relative">
-        <item quantity="one"><xliff:g example="1" id="count">%d</xliff:g> minute ago</item>
-        <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g> minutes ago</item>
-    </plurals>
+    <string name="duration_minutes_relative">{count, plural,
+        =1 {# minute ago}
+        other {# minutes ago}
+    }
+    </string>
 
     <!-- Phrase describing a relative time using hours in the past that is not shown on the screen but used for accessibility. [CHAR LIMIT=NONE] -->
-    <plurals name="duration_hours_relative">
-        <item quantity="one"><xliff:g example="1" id="count">%d</xliff:g> hour ago</item>
-        <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g> hours ago</item>
-    </plurals>
+    <string name="duration_hours_relative">{count, plural,
+        =1 {# hour ago}
+        other {# hours ago}
+    }
+    </string>
 
     <!-- Phrase describing a relative time using days in the past that is not shown on the screen but used for accessibility. [CHAR LIMIT=NONE] -->
-    <plurals name="duration_days_relative">
-        <item quantity="one"><xliff:g example="1" id="count">%d</xliff:g> day ago</item>
-        <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g> days ago</item>
-    </plurals>
+    <string name="duration_days_relative">{count, plural,
+        =1 {# day ago}
+        other {# days ago}
+    }
+    </string>
 
     <!-- Phrase describing a relative time using years in the past that is not shown on the screen but used for accessibility. [CHAR LIMIT=NONE] -->
-    <plurals name="duration_years_relative">
-        <item quantity="one"><xliff:g example="1" id="count">%d</xliff:g> year ago</item>
-        <item quantity="other"><xliff:g example="2" id="count">%d</xliff:g> years ago</item>
-    </plurals>
+    <string name="duration_years_relative">{count, plural,
+        =1 {# year ago}
+        other {# years ago}
+    }
+    </string>
 
     <!-- Phrase describing a relative time using minutes that is not shown on the screen but used for accessibility. This version should be a future point in time. [CHAR LIMIT=NONE] -->
-    <plurals name="duration_minutes_relative_future">
-        <item quantity="one">in <xliff:g example="1" id="count">%d</xliff:g> minute</item>
-        <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g> minutes</item>
-    </plurals>
+    <string name="duration_minutes_relative_future">{count, plural,
+        =1 {# minute}
+        other {# minutes}
+    }
+    </string>
 
     <!-- Phrase describing a relative time using hours that is not shown on the screen but used for accessibility. This version should be a future point in time. [CHAR LIMIT=NONE] -->
-    <plurals name="duration_hours_relative_future">
-        <item quantity="one">in <xliff:g example="1" id="count">%d</xliff:g> hour</item>
-        <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g> hours</item>
-    </plurals>
+    <string name="duration_hours_relative_future">{count, plural,
+        =1 {# hour}
+        other {# hours}
+    }
+    </string>
 
     <!-- Phrase describing a relative time using days that is not shown on the screen but used for accessibility. This version should be a future point in time. [CHAR LIMIT=NONE] -->
-    <plurals name="duration_days_relative_future">
-        <item quantity="one">in <xliff:g example="1" id="count">%d</xliff:g> day</item>
-        <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g> days</item>
-    </plurals>
+    <string name="duration_days_relative_future">{count, plural,
+        =1 {# day}
+        other {# days}
+    }
+    </string>
 
     <!-- Phrase describing a relative time using years that is not shown on the screen but used for accessibility. This version should be a future point in time. [CHAR LIMIT=NONE] -->
-    <plurals name="duration_years_relative_future">
-        <item quantity="one">in <xliff:g example="1" id="count">%d</xliff:g> year</item>
-        <item quantity="other">in <xliff:g example="2" id="count">%d</xliff:g> years</item>
-    </plurals>
+    <string name="duration_years_relative_future">{count, plural,
+        =1 {# year}
+        other {# years}
+    }
+    </string>
 
     <!-- Title for error alert when a video cannot be played.  it can be used by any app. -->
     <string name="VideoView_error_title">Video problem</string>
@@ -4228,12 +4230,11 @@
 
     <!-- Displayed on the Find dialog to display the index of the highlighted
          match and total number of matches found in the current page. [CHAR LIMIT=NONE] -->
-    <plurals name="matches_found">
-        <!-- Case of one match -->
-        <item quantity="one">1 match</item>
-        <!-- Case of multiple total matches -->
-        <item quantity="other"><xliff:g id="index" example="2">%d</xliff:g> of <xliff:g id="total" example="137">%d</xliff:g></item>
-    </plurals>
+    <string name="matches_found">{ count, plural,
+        =1 {# match}
+        other {# of {total}}}
+    }
+    </string>
 
     <!-- Label for the "Done" button on the far left of action mode toolbars. -->
     <string name="action_mode_done">Done</string>
@@ -4595,11 +4596,6 @@
     <string name="kg_wrong_password">Wrong Password</string>
     <!-- Message shown when user enters wrong PIN -->
     <string name="kg_wrong_pin">Wrong PIN</string>
-    <!-- Countdown message shown after too many failed unlock attempts -->
-    <plurals name="kg_too_many_failed_attempts_countdown">
-        <item quantity="one">Try again in 1 second.</item>
-        <item quantity="other">Try again in <xliff:g id="number">%d</xliff:g> seconds.</item>
-    </plurals>
     <!-- Instructions for using the pattern unlock screen -->
     <string name="kg_pattern_instructions">Draw your pattern</string>
     <!-- Instructions for using the SIM PIN unlock screen -->
@@ -5135,12 +5131,6 @@
     <string name="restr_pin_error_doesnt_match">PINs don\'t match. Try again.</string>
     <!-- PIN entry dialog error when PIN is too short [CHAR LIMIT=none] -->
     <string name="restr_pin_error_too_short">PIN is too short. Must be at least 4 digits.</string>
-    <!-- PIN entry dialog countdown message for next chance to enter the PIN [CHAR LIMIT=none] -->
-    <!-- Phrase describing a time duration using seconds [CHAR LIMIT=none] -->
-    <plurals name="restr_pin_countdown">
-        <item quantity="one">Try again in 1 second</item>
-        <item quantity="other">Try again in <xliff:g id="count">%d</xliff:g> seconds</item>
-    </plurals>
     <!-- PIN entry dialog tells the user to not enter a PIN for a while. [CHAR LIMIT=none] -->
     <string name="restr_pin_try_later">Try again later</string>
 
@@ -5234,52 +5224,60 @@
     <string name="data_saver_enable_button">Turn on</string>
 
     <!-- Zen mode condition - summary: time duration in minutes. [CHAR LIMIT=NONE] -->
-    <plurals name="zen_mode_duration_minutes_summary">
-        <item quantity="one">For one minute (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
-        <item quantity="other">For %1$d minutes (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary">{count, plural,
+        =1    {For one minute (until {formattedTime})}
+        other {For # minutes (until {formattedTime})}
+    }
+    </string>
 
     <!-- Zen mode condition - summary: time duration in minutes (short version). [CHAR LIMIT=NONE] -->
-    <plurals name="zen_mode_duration_minutes_summary_short">
-        <item quantity="one">For 1 min (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
-        <item quantity="other">For %1$d min (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary_short">{count, plural,
+        =1    {For 1 min (until {formattedTime})}
+        other {For # min (until {formattedTime})}
+    }
+    </string>
 
     <!-- Zen mode condition - summary: time duration in hours. [CHAR LIMIT=NONE] -->
-    <plurals name="zen_mode_duration_hours_summary">
-        <item quantity="one">For 1 hour (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
-        <item quantity="other">For %1$d hours (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
-    </plurals>
+    <string name="zen_mode_duration_hours_summary">{count, plural,
+        =1    {For 1 hour (until {formattedTime})}
+        other {For # hours (until {formattedTime})}
+    }
+    </string>
 
     <!-- Zen mode condition - summary: time duration in hours (short version). [CHAR LIMIT=NONE] -->
-    <plurals name="zen_mode_duration_hours_summary_short">
-        <item quantity="one">For 1 hr (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
-        <item quantity="other">For %1$d hr (until <xliff:g id="formattedTime" example="10:00 PM">%2$s</xliff:g>)</item>
-    </plurals>
+    <string name="zen_mode_duration_hours_summary_short">{count, plural,
+        =1    {For 1 hr (until {formattedTime})}
+        other {For # hr (until {formattedTime})}
+    }
+    </string>
 
     <!-- Zen mode condition - line one: time duration in minutes. [CHAR LIMIT=NONE] -->
-    <plurals name="zen_mode_duration_minutes">
-        <item quantity="one">For one minute</item>
-        <item quantity="other">For %d minutes</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes">{count, plural,
+        =1    {For one minute}
+        other {For # minutes}
+    }
+    </string>
 
     <!-- Zen mode condition - line one: time duration in minutes (short version). [CHAR LIMIT=NONE] -->
-    <plurals name="zen_mode_duration_minutes_short">
-        <item quantity="one">For 1 min</item>
-        <item quantity="other">For %d min</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_short">{count, plural,
+        =1    {For 1 min}
+        other {For # min}
+    }
+    </string>
 
     <!-- Zen mode condition - line one: time duration in hours. [CHAR LIMIT=NONE] -->
-    <plurals name="zen_mode_duration_hours">
-        <item quantity="one">For 1 hour</item>
-        <item quantity="other">For %d hours</item>
-    </plurals>
+    <string name="zen_mode_duration_hours">{count, plural,
+        =1    {For 1 hour}
+        other {For # hours}
+    }
+    </string>
 
     <!-- Zen mode condition - line one: time duration in hours (short version). [CHAR LIMIT=NONE] -->
-    <plurals name="zen_mode_duration_hours_short">
-        <item quantity="one">For 1 hr</item>
-        <item quantity="other">For %d hr</item>
-    </plurals>
+    <string name="zen_mode_duration_hours_short">{count, plural,
+        =1    {For 1 hr}
+        other {For # hr}
+    }
+    </string>
 
     <!-- Zen mode condition - line two: ending time indicating the next day. [CHAR LIMIT=NONE] -->
     <string name="zen_mode_until_next_day">Until <xliff:g id="formattedTime" example="Tue, 10 PM">%1$s</xliff:g></string>
@@ -5401,12 +5399,6 @@
     <string name="call_notification_ongoing_text">Ongoing call</string>
     <!-- Default notification text to be displayed in screening call notifications [CHAR LIMIT=40] -->
     <string name="call_notification_screening_text">Screening an incoming call</string>
-
-    <!-- Label describing the number of selected items [CHAR LIMIT=48] -->
-    <plurals name="selected_count">
-        <item quantity="one"><xliff:g id="count" example="1">%1$d</xliff:g> selected</item>
-        <item quantity="other"><xliff:g id="count" example="3">%1$d</xliff:g> selected</item>
-    </plurals>
 
     <string name="default_notification_channel_label">Uncategorized</string>
 
@@ -5570,10 +5562,11 @@
     <string name="autofill_picker_no_suggestions">No autofill suggestions</string>
 
     <!-- Accessibility string to announce there are some autofill suggestions in the autofill picker. [CHAR LIMIT=NONE] -->
-    <plurals name="autofill_picker_some_suggestions">
-        <item quantity="one">One autofill suggestion</item>
-        <item quantity="other"><xliff:g id="count" example="Two">%1$s</xliff:g> autofill suggestions</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions">{count, plural,
+        =1    {One autofill suggestion}
+        other {# autofill suggestions}
+    }
+    </string>
 
     <!-- Title for the autofill save dialog shown when the the contents of the activity can be saved
          by an autofill service, but the service does not know what the activity represents [CHAR LIMIT=NONE] -->
@@ -5843,10 +5836,11 @@
     <!-- String displayed when loading a user in the car [CHAR LIMIT=30] -->
     <string name="car_loading_profile">Loading</string>
 
-    <plurals name="file_count">
-        <item quantity="one"><xliff:g id="file_name">%s</xliff:g> + <xliff:g id="count">%d</xliff:g> file</item>
-        <item quantity="other"><xliff:g id="file_name">%s</xliff:g> + <xliff:g id="count">%d</xliff:g> files</item>
-    </plurals>
+    <string name="file_count">{count, plural,
+        =1    {{file_name} + # file}
+        other {{file_name} + # files}
+    }
+    </string>
 
     <!-- ChooserActivity - No direct share targets are available. [CHAR LIMIT=NONE] -->
     <string name="chooser_no_direct_share_targets">No recommended people to share with</string>
@@ -6226,4 +6220,19 @@ ul.</string>
     <string name="ui_translation_accessibility_translated_text"><xliff:g id="message" example="Hello">%1$s</xliff:g> Translated.</string>
     <!-- Accessibility message announced to notify the user when the system has finished translating the content displayed on the screen to a different language after the user requested translation. [CHAR LIMIT=NONE] -->
     <string name="ui_translation_accessibility_translation_finished">Message translated from <xliff:g id="from_language" example="English">%1$s</xliff:g> to <xliff:g id="to_language" example="French">%2$s</xliff:g>.</string>
+
+    <!-- Title for the notification channel notifying user of abusive background apps. [CHAR LIMIT=NONE] -->
+    <string name="notification_channel_abusive_bg_apps">Background Activity</string>
+    <!-- Title of notification indicating abusive background apps. [CHAR LIMIT=NONE] -->
+    <string name="notification_title_abusive_bg_apps">Background Activity</string>
+    <!-- Content of notification indicating abusive background apps. [CHAR LIMIT=NONE] -->
+    <string name="notification_content_abusive_bg_apps">
+        <xliff:g id="app" example="Gmail">%1$s</xliff:g> is running in the background and draining battery. Tap to review.
+    </string>
+    <!-- Content of notification indicating long running foreground service. [CHAR LIMIT=NONE] -->
+    <string name="notification_content_long_running_fgs">
+        <xliff:g id="app" example="Gmail">%1$s</xliff:g> is running in the background for a long time. Tap to review.
+    </string>
+    <!-- Action label of notification for user to check background apps. [CHAR LIMIT=NONE]  -->
+    <string name="notification_action_check_bg_apps">Check active apps</string>
 </resources>

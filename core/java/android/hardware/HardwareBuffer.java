@@ -156,7 +156,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      * used as USAGE_GPU_COLOR_OUTPUT the buffer will behave similar to a single-buffered window.
      * When used with USAGE_COMPOSER_OVERLAY, the system will try to prioritize the buffer
      * receiving an overlay plane & avoid caching it in intermediate composition buffers. */
-    public static final long USAGE_FRONT_BUFFER           = 1 << 32;
+    public static final long USAGE_FRONT_BUFFER           = 1L << 32;
 
     /**
      * Creates a new <code>HardwareBuffer</code> instance.
