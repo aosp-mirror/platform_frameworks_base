@@ -84,6 +84,15 @@ public abstract class GameSession {
         }
 
         @Override
+        public void onTransientSystemBarVisibilityFromRevealGestureChanged(
+                boolean visibleDueToGesture) {
+            Handler.getMain().executeOrSendMessage(PooledLambda.obtainMessage(
+                    GameSession::dispatchTransientSystemBarVisibilityFromRevealGestureChanged,
+                    GameSession.this,
+                    visibleDueToGesture));
+        }
+
+        @Override
         public void onTaskFocusChanged(boolean focused) {
             Handler.getMain().executeOrSendMessage(PooledLambda.obtainMessage(
                     GameSession::moveToState, GameSession.this,
@@ -109,6 +118,7 @@ public abstract class GameSession {
     }
 
     private LifecycleState mLifecycleState = LifecycleState.INITIALIZED;
+    private boolean mAreTransientInsetsVisibleDueToGesture = false;
     private IGameSessionController mGameSessionController;
     private int mTaskId;
     private GameSessionRootView mGameSessionRootView;
@@ -138,9 +148,21 @@ public abstract class GameSession {
     }
 
     @Hide
-    void doDestroy() {
+    private void doDestroy() {
         mSurfaceControlViewHost.release();
         moveToState(LifecycleState.DESTROYED);
+    }
+
+    /** @hide */
+    @VisibleForTesting
+    @MainThread
+    public void dispatchTransientSystemBarVisibilityFromRevealGestureChanged(
+            boolean visibleDueToGesture) {
+        boolean didValueChange = mAreTransientInsetsVisibleDueToGesture != visibleDueToGesture;
+        mAreTransientInsetsVisibleDueToGesture = visibleDueToGesture;
+        if (didValueChange) {
+            onTransientSystemBarVisibilityFromRevealGestureChanged(visibleDueToGesture);
+        }
     }
 
     /**
@@ -252,7 +274,23 @@ public abstract class GameSession {
      *
      * @param focused True if the game task is focused, false if the game task is unfocused.
      */
-    public void onGameTaskFocusChanged(boolean focused) {}
+    public void onGameTaskFocusChanged(boolean focused) {
+    }
+
+    /**
+     * Called when the visibility of the transient system bars changed due to the user performing
+     * the reveal gesture. The reveal gesture is defined as a swipe to reveal the transient system
+     * bars that originates from the system bars.
+     *
+     * @param visibleDueToGesture if the transient bars triggered by the reveal gesture are visible.
+     *                            This is {@code true} when the transient system bars become visible
+     *                            due to user performing the reveal gesture. This is {@code false}
+     *                            when the transient system bars are hidden or become permanently
+     *                            visible.
+     */
+    public void onTransientSystemBarVisibilityFromRevealGestureChanged(
+            boolean visibleDueToGesture) {
+    }
 
     /**
      * Sets the task overlay content to an explicit view. This view is placed directly into the game
@@ -344,12 +382,14 @@ public abstract class GameSession {
 
         /**
          * Called when taking the screenshot failed.
+         *
          * @param statusCode Indicates the reason for failure.
          */
         void onFailure(@ScreenshotFailureStatus int statusCode);
 
         /**
          * Called when taking the screenshot succeeded.
+         *
          * @param bitmap The screenshot.
          */
         void onSuccess(@NonNull Bitmap bitmap);

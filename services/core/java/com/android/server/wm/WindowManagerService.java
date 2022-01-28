@@ -683,6 +683,7 @@ public class WindowManagerService extends IWindowManager.Stub
             () -> mDisplayRotationController = null;
 
     final DisplayWindowListenerController mDisplayNotificationController;
+    final TaskSystemBarsListenerController mTaskSystemBarsListenerController;
 
     boolean mDisplayFrozen = false;
     long mDisplayFreezeTime = 0;
@@ -1265,6 +1266,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mScreenFrozenLock.setReferenceCounted(false);
 
         mDisplayNotificationController = new DisplayWindowListenerController(this);
+        mTaskSystemBarsListenerController = new TaskSystemBarsListenerController();
 
         mActivityManager = ActivityManager.getService();
         mActivityTaskManager = ActivityTaskManager.getService();
@@ -7587,6 +7589,20 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mGlobalLock) {
                 getDefaultDisplayContentLocked().mAppTransition.registerListenerLocked(listener);
                 mAtmService.getTransitionController().registerLegacyListener(listener);
+            }
+        }
+
+        @Override
+        public void registerTaskSystemBarsListener(TaskSystemBarsListener listener) {
+            synchronized (mGlobalLock) {
+                mTaskSystemBarsListenerController.registerListener(listener);
+            }
+        }
+
+        @Override
+        public void unregisterTaskSystemBarsListener(TaskSystemBarsListener listener) {
+            synchronized (mGlobalLock) {
+                mTaskSystemBarsListenerController.unregisterListener(listener);
             }
         }
 
