@@ -541,10 +541,6 @@ package android.os.storage {
     field public static final int APP_IO_BLOCKED_REASON_UNKNOWN = 0; // 0x0
   }
 
-  public final class StorageVolume implements android.os.Parcelable {
-    method @NonNull public android.os.UserHandle getOwner();
-  }
-
 }
 
 package android.provider {

@@ -32416,6 +32416,7 @@ package android.os.storage {
     method @Nullable public android.os.storage.StorageVolume getStorageVolume(@NonNull java.io.File);
     method @NonNull public android.os.storage.StorageVolume getStorageVolume(@NonNull android.net.Uri);
     method @NonNull public java.util.List<android.os.storage.StorageVolume> getStorageVolumes();
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_EXTERNAL_STORAGE) public java.util.List<android.os.storage.StorageVolume> getStorageVolumesIncludingSharedProfiles();
     method @NonNull public java.util.UUID getUuidForPath(@NonNull java.io.File) throws java.io.IOException;
     method public boolean isAllocationSupported(@NonNull java.io.FileDescriptor);
     method public boolean isCacheBehaviorGroup(java.io.File) throws java.io.IOException;
@@ -32449,6 +32450,7 @@ package android.os.storage {
     method public String getDescription(android.content.Context);
     method @Nullable public java.io.File getDirectory();
     method @Nullable public String getMediaStoreVolumeName();
+    method @NonNull public android.os.UserHandle getOwner();
     method public String getState();
     method @Nullable public java.util.UUID getStorageUuid();
     method @Nullable public String getUuid();
