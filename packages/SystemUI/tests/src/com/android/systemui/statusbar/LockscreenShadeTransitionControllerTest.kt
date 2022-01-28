@@ -227,7 +227,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     fun testDragDownAmountDoesntCallOutInLockedDownShade() {
         whenever(nsslController.isInLockedDownShade).thenReturn(true)
         transitionController.dragDownAmount = 10f
-        verify(nsslController, never()).setTransitionToFullShadeAmount(anyFloat())
+        verify(nsslController, never()).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
         verify(mediaHierarchyManager, never()).setTransitionToFullShadeAmount(anyFloat())
         verify(scrimController, never()).setTransitionToFullShadeProgress(anyFloat())
         verify(notificationPanelController, never()).setTransitionToFullShadeAmount(anyFloat(),
@@ -238,7 +238,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Test
     fun testDragDownAmountCallsOut() {
         transitionController.dragDownAmount = 10f
-        verify(nsslController).setTransitionToFullShadeAmount(anyFloat())
+        verify(nsslController).setTransitionToFullShadeAmount(anyFloat(), anyFloat())
         verify(mediaHierarchyManager).setTransitionToFullShadeAmount(anyFloat())
         verify(scrimController).setTransitionToFullShadeProgress(anyFloat())
         verify(notificationPanelController).setTransitionToFullShadeAmount(anyFloat(),

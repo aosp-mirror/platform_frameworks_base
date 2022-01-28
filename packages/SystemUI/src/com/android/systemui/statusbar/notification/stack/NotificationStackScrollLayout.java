@@ -5497,6 +5497,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     /**
+     * @param fraction Fraction of the lockscreen to shade transition. 0f for all other states.
+     *                 Once the lockscreen to shade transition completes and the shade is 100% open
+     *                 LockscreenShadeTransitionController resets fraction to 0
+     *                 where it remains until the next lockscreen-to-shade transition.
+     */
+    public void setFractionToShade(float fraction) {
+        mShelf.setFractionToShade(fraction);
+        requestChildrenUpdate();
+    }
+
+    /**
      * Set a listener to when scrolling changes.
      */
     public void setOnScrollListener(Consumer<Integer> listener) {
