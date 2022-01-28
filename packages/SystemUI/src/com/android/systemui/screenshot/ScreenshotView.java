@@ -86,6 +86,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
+import com.android.systemui.shared.system.InputChannelCompat;
 import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.shared.system.QuickStepContract;
 
@@ -162,6 +163,7 @@ public class ScreenshotView extends FrameLayout implements
     private GestureDetector mSwipeDetector;
     private SwipeDismissHandler mSwipeDismissHandler;
     private InputMonitorCompat mInputMonitor;
+    private InputChannelCompat.InputEventReceiver mInputEventReceiver;
     private boolean mShowScrollablePreview;
     private String mPackageName = "";
 
@@ -302,8 +304,8 @@ public class ScreenshotView extends FrameLayout implements
     private void startInputListening() {
         stopInputListening();
         mInputMonitor = new InputMonitorCompat("Screenshot", Display.DEFAULT_DISPLAY);
-        mInputMonitor.getInputReceiver(Looper.getMainLooper(), Choreographer.getInstance(),
-                ev -> {
+        mInputEventReceiver = mInputMonitor.getInputReceiver(
+                Looper.getMainLooper(), Choreographer.getInstance(), ev -> {
                     if (ev instanceof MotionEvent) {
                         MotionEvent event = (MotionEvent) ev;
                         if (event.getActionMasked() == MotionEvent.ACTION_DOWN
@@ -319,6 +321,10 @@ public class ScreenshotView extends FrameLayout implements
         if (mInputMonitor != null) {
             mInputMonitor.dispose();
             mInputMonitor = null;
+        }
+        if (mInputEventReceiver != null) {
+            mInputEventReceiver.dispose();
+            mInputEventReceiver = null;
         }
     }
 
