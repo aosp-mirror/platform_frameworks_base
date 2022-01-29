@@ -280,7 +280,7 @@ void ReportFile::addReport(const IncidentReportArgs& args) {
                 // Lower privacy policy (less restrictive) wins.
                 report->set_privacy_policy(args.getPrivacyPolicy());
             }
-            report->set_all_sections(report->all_sections() | args.all());
+            report->set_all_sections(report->all_sections() || args.all());
             for (int section: args.sections()) {
                 if (!has_section(*report, section)) {
                     report->add_section(section);

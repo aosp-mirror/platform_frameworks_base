@@ -488,7 +488,7 @@ public class ShortcutService extends IShortcutService.Stub {
         mShortcutBitmapSaver = new ShortcutBitmapSaver(this);
         mShortcutDumpFiles = new ShortcutDumpFiles(this);
         mIsAppSearchEnabled = DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.SHORTCUT_APPSEARCH_INTEGRATION, false);
+                SystemUiDeviceConfigFlags.SHORTCUT_APPSEARCH_INTEGRATION, true);
 
         if (onlyForPackageManagerApis) {
             return; // Don't do anything further.  For unit tests only.
@@ -736,7 +736,7 @@ public class ShortcutService extends IShortcutService.Stub {
             Slog.d(TAG, "unloadUserLocked: user=" + userId);
         }
         // Save all dirty information.
-        saveDirtyInfo();
+        saveDirtyInfo(false);
 
         // Unload
         mUsers.delete(userId);
@@ -1191,6 +1191,10 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @VisibleForTesting
     void saveDirtyInfo() {
+        saveDirtyInfo(true);
+    }
+
+    private void saveDirtyInfo(boolean saveShortcutsInAppSearch) {
         if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "saveDirtyInfo");
         }
@@ -1205,6 +1209,10 @@ public class ShortcutService extends IShortcutService.Stub {
                     if (userId == UserHandle.USER_NULL) { // USER_NULL for base state.
                         saveBaseStateLocked();
                     } else {
+                        if (saveShortcutsInAppSearch) {
+                            getUserShortcutsLocked(userId).forAllPackages(
+                                    ShortcutPackage::persistsAllShortcutsAsync);
+                        }
                         saveUserLocked(userId);
                     }
                 }
@@ -3719,13 +3727,16 @@ public class ShortcutService extends IShortcutService.Stub {
     private final BroadcastReceiver mShutdownReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (DEBUG || DEBUG_REBOOT) {
+                Slog.d(TAG, "Shutdown broadcast received.");
+            }
             // Since it cleans up the shortcut directory and rewrite the ShortcutPackageItems
             // in odrder during saveToXml(), it could lead to shortcuts missing when shutdown.
             // We need it so that it can finish up saving before shutdown.
             synchronized (mLock) {
                 if (mHandler.hasCallbacks(mSaveDirtyInfoRunner)) {
                     mHandler.removeCallbacks(mSaveDirtyInfoRunner);
-                    saveDirtyInfo();
+                    saveDirtyInfo(false);
                 }
                 mShutdown.set(true);
             }
@@ -4394,7 +4405,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
             // Save to the filesystem.
             scheduleSaveUser(userId);
-            saveDirtyInfo();
+            saveDirtyInfo(false);
 
             // Note, in case of backup, we don't have to wait on bitmap saving, because we don't
             // back up bitmaps anyway.

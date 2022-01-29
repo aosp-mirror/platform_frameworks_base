@@ -22,6 +22,7 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 
@@ -139,5 +140,11 @@ public abstract class DreamOverlayModule {
     @DreamOverlayComponent.DreamOverlayScope
     static LifecycleRegistry providesLifecycleRegistry(LifecycleOwner lifecycleOwner) {
         return new LifecycleRegistry(lifecycleOwner);
+    }
+
+    @Provides
+    @DreamOverlayComponent.DreamOverlayScope
+    static Lifecycle providesLifecycle(LifecycleOwner lifecycleOwner) {
+        return lifecycleOwner.getLifecycle();
     }
 }

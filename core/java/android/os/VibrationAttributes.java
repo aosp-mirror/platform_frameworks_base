@@ -37,6 +37,7 @@ public final class VibrationAttributes implements Parcelable {
             USAGE_CLASS_UNKNOWN,
             USAGE_CLASS_ALARM,
             USAGE_CLASS_FEEDBACK,
+            USAGE_CLASS_MEDIA,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UsageClass {}
@@ -459,4 +460,3 @@ public final class VibrationAttributes implements Parcelable {
         }
     }
 }
-

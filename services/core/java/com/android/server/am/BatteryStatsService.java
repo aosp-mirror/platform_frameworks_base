@@ -1365,7 +1365,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     public void notePhoneDataConnectionState(final int dataType, final boolean hasData,
-            final int serviceType) {
+            final int serviceType, final int nrFrequency) {
         enforceCallingPermission();
         synchronized (mLock) {
             final long elapsedRealtime = SystemClock.elapsedRealtime();
@@ -1373,7 +1373,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mHandler.post(() -> {
                 synchronized (mStats) {
                     mStats.notePhoneDataConnectionStateLocked(dataType, hasData, serviceType,
-                            elapsedRealtime, uptime);
+                            nrFrequency, elapsedRealtime, uptime);
                 }
             });
         }

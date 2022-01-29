@@ -71,10 +71,15 @@ final class DexOptHelper {
     private final PackageManagerService mPm;
 
     public boolean isDexOptDialogShown() {
-        return mDexOptDialogShown;
+        synchronized (mLock) {
+            return mDexOptDialogShown;
+        }
     }
 
-    @GuardedBy("mPm.mLock")
+    // TODO: Is this lock really necessary?
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
     private boolean mDexOptDialogShown;
 
     DexOptHelper(PackageManagerService pm) {
@@ -191,7 +196,7 @@ final class DexOptHelper {
                                     numberOfPackagesVisited, numberOfPackagesToDexopt), true);
                 } catch (RemoteException e) {
                 }
-                synchronized (mPm.mLock) {
+                synchronized (mLock) {
                     mDexOptDialogShown = true;
                 }
             }
@@ -287,13 +292,11 @@ final class DexOptHelper {
 
     public ArraySet<String> getOptimizablePackages() {
         ArraySet<String> pkgs = new ArraySet<>();
-        synchronized (mPm.mLock) {
-            for (AndroidPackage p : mPm.mPackages.values()) {
-                if (mPm.mPackageDexOptimizer.canOptimizePackage(p)) {
-                    pkgs.add(p.getPackageName());
-                }
+        mPm.forEachPackageState(packageState -> {
+            if (mPm.mPackageDexOptimizer.canOptimizePackage(packageState.getPkg())) {
+                pkgs.add(packageState.getPackageName());
             }
-        }
+        });
         return pkgs;
     }
 
@@ -415,14 +418,10 @@ final class DexOptHelper {
     public void forceDexOpt(String packageName) {
         PackageManagerServiceUtils.enforceSystemOrRoot("forceDexOpt");
 
-        AndroidPackage pkg;
-        PackageSetting pkgSetting;
-        synchronized (mPm.mLock) {
-            pkg = mPm.mPackages.get(packageName);
-            pkgSetting = mPm.mSettings.getPackageLPr(packageName);
-            if (pkg == null || pkgSetting == null) {
-                throw new IllegalArgumentException("Unknown package: " + packageName);
-            }
+        final PackageStateInternal packageState = mPm.getPackageStateInternal(packageName);
+        final AndroidPackage pkg = packageState == null ? null : packageState.getPkg();
+        if (packageState == null || pkg == null) {
+            throw new IllegalArgumentException("Unknown package: " + packageName);
         }
 
         synchronized (mPm.mInstallLock) {
@@ -430,7 +429,7 @@ final class DexOptHelper {
 
             // Whoever is calling forceDexOpt wants a compiled package.
             // Don't use profiles since that may cause compilation to be skipped.
-            final int res = performDexOptInternalWithDependenciesLI(pkg, pkgSetting,
+            final int res = performDexOptInternalWithDependenciesLI(pkg, packageState,
                     new DexoptOptions(packageName,
                             getDefaultCompilerFilter(),
                             DexoptOptions.DEXOPT_FORCE | DexoptOptions.DEXOPT_BOOT_COMPLETE));

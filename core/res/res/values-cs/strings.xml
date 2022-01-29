@@ -1227,6 +1227,10 @@
     <string name="deleteText" msgid="4200807474529938112">"Smazat"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Metoda zadávání dat"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Operace s textem"</string>
+    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
+    <skip />
+    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"V úložišti je málo místa"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Některé systémové funkce nemusí fungovat"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Pro systém není dostatek místa v úložišti. Uvolněte alespoň 250 MB místa a restartujte zařízení."</string>
@@ -1531,6 +1535,8 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Povoluje aplikaci požádat o oprávnění ignorovat optimalizaci využití baterie, která pro ni je nastavena."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"zjistit všechny balíčky"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Umožňuje aplikaci načíst všechny nainstalované balíčky."</string>
+    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"přístup k rozhraním SupplementalApi"</string>
+    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Umožňuje aplikaci přístup k rozhraním SupplementalApi."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Poklepáním můžete ovládat přiblížení"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Widget nelze přidat."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Přejít"</string>

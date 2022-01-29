@@ -91,7 +91,7 @@ class BluetoothCompanionDeviceConnectionListener
      */
     @Override
     public void onDeviceDisconnected(@NonNull BluetoothDevice device,
-            @DisconnectReason int reason) {
+            int reason) {
         if (DEBUG) {
             Log.i(TAG, "onDevice_Disconnected() " + btDeviceToString(device));
             Log.d(TAG, "  reason=" + disconnectReasonText(reason));

@@ -21,7 +21,6 @@ import android.content.Context;
 import android.graphics.drawable.Icon;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -129,7 +128,6 @@ public class ScreenshotActionChip extends FrameLayout {
             iconParams.setMarginStart(paddingHorizontal);
             iconParams.setMarginEnd(paddingHorizontal);
         }
-        mTextView.setVisibility(hasText ? View.VISIBLE : View.GONE);
         mIconView.setLayoutParams(iconParams);
         mTextView.setLayoutParams(textParams);
     }

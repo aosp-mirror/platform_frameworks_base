@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.os.UserManager;
 
 import com.android.internal.R;
+import com.android.settingslib.devicestate.DeviceStateRotationLockSettingsManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.settings.UserTracker;
@@ -36,7 +37,6 @@ import com.android.systemui.statusbar.policy.DeviceControlsController;
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.statusbar.policy.DevicePostureControllerImpl;
-import com.android.systemui.statusbar.policy.DeviceStateRotationLockSettingsManager;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.ExtensionControllerImpl;
 import com.android.systemui.statusbar.policy.FlashlightController;

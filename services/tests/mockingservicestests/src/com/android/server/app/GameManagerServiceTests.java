@@ -35,6 +35,7 @@ import android.content.ContextWrapper;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.os.Bundle;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -44,6 +45,8 @@ import android.util.ArraySet;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.SystemService;
 
 import org.junit.After;
 import org.junit.Before;
@@ -167,7 +170,8 @@ public class GameManagerServiceTests {
     }
 
     private void startUser(GameManagerService gameManagerService, int userId) {
-        gameManagerService.onUserStarting(userId);
+        UserInfo userInfo = new UserInfo(userId, "name", 0);
+        gameManagerService.onUserStarting(new SystemService.TargetUser(userInfo));
         mTestLooper.dispatchAll();
     }
 
@@ -861,7 +865,7 @@ public class GameManagerServiceTests {
     public void testInterventionAllowAngleFalse() throws Exception {
         GameManagerService gameManagerService =
                 new GameManagerService(mMockContext, mTestLooper.getLooper());
-        gameManagerService.onUserStarting(USER_ID_1);
+        startUser(gameManagerService, USER_ID_1);
         mockDeviceConfigPerformanceEnableAngle();
         mockInterventionAllowAngleFalse();
         mockModifyGameModeGranted();

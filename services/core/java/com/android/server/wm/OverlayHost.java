@@ -17,6 +17,8 @@
 package com.android.server.wm;
 
 import android.content.res.Configuration;
+import android.graphics.Rect;
+import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.SurfaceControlViewHost;
 
@@ -118,6 +120,16 @@ class OverlayHost {
                 // Oh well we are tearing down anyway.
             }
             l.release();
+        }
+    }
+
+    void dispatchInsetsChanged(InsetsState s, Rect insetFrame) {
+        for (int i = mOverlays.size() - 1; i >= 0; i--) {
+            SurfaceControlViewHost.SurfacePackage l = mOverlays.get(i);
+            try {
+                l.getRemoteInterface().onInsetsChanged(s, insetFrame);
+            } catch (Exception e) {
+            }
         }
     }
 

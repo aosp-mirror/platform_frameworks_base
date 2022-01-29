@@ -30,6 +30,7 @@ import android.platform.test.annotations.Presubmit;
 import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
 
 import org.junit.Before;
@@ -48,6 +49,8 @@ public class BaseClientMonitorTest {
     private @Mock ClientMonitorCallbackConverter mListener;
     @Mock
     private BiometricLogger mLogger;
+    @Mock
+    private BiometricContext mBiometricContext;
     @Mock
     private ClientMonitorCallback mCallback;
 
@@ -109,7 +112,7 @@ public class BaseClientMonitorTest {
 
         TestClientMonitor() {
             super(mContext, mToken, mListener, 9 /* userId */, "foo" /* owner */, 2 /* cookie */,
-                    5 /* sensorId */, mLogger);
+                    5 /* sensorId */, mLogger, mBiometricContext);
         }
 
         @Override

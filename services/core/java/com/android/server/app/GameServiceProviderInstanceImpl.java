@@ -330,7 +330,6 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                     + ") is not awaiting game session request. Ignoring.");
             return;
         }
-        mGameSessions.put(taskId, existingGameSessionRecord.withGameSessionRequested());
 
         GameSessionViewHostConfiguration gameSessionViewHostConfiguration =
                 createViewHostConfigurationForTask(taskId);

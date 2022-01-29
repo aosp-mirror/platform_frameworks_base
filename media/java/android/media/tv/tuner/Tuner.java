@@ -68,6 +68,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -1602,25 +1603,27 @@ public class Tuner implements AutoCloseable  {
      *
      * @param statusTypes an array of status types.
      *
-     * @return an array of current readiness states. {@code null} if the operation failed or
-     *         unsupported versions.
+     * @return a list of current readiness states. It is empty if the operation fails or unsupported
+     *         versions.
      * @throws IllegalStateException if there is no active frontend currently.
      */
-    @Nullable
-    @SuppressLint("ArrayReturn")
-    @SuppressWarnings("NullableCollection")
-    public FrontendStatusReadiness[] getFrontendStatusReadiness(
+    @NonNull
+    public List<FrontendStatusReadiness> getFrontendStatusReadiness(
             @NonNull @FrontendStatusType int[] statusTypes) {
         mFrontendLock.lock();
         try {
             if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
-                        TunerVersionChecker.TUNER_VERSION_2_0, "Remove output PID")) {
-                return null;
+                        TunerVersionChecker.TUNER_VERSION_2_0, "Get fronted status readiness")) {
+                return Collections.EMPTY_LIST;
             }
             if (mFrontend == null) {
                 throw new IllegalStateException("frontend is not initialized");
             }
-            return nativeGetFrontendStatusReadiness(statusTypes);
+            FrontendStatusReadiness[] readiness = nativeGetFrontendStatusReadiness(statusTypes);
+            if (readiness == null) {
+                return Collections.EMPTY_LIST;
+            }
+            return Arrays.asList(readiness);
         } finally {
             mFrontendLock.unlock();
         }

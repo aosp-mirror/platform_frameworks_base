@@ -315,18 +315,18 @@ LIBANDROID {
     AThermal_registerThermalStatusListener; # introduced=30
     AThermal_unregisterThermalStatusListener; # introduced=30
     AThermal_getThermalHeadroom; # introduced=31
+    APerformanceHint_getManager; # introduced=Tiramisu
+    APerformanceHint_createSession; # introduced=Tiramisu
+    APerformanceHint_getPreferredUpdateRateNanos; # introduced=Tiramisu
+    APerformanceHint_updateTargetWorkDuration; # introduced=Tiramisu
+    APerformanceHint_reportActualWorkDuration; # introduced=Tiramisu
+    APerformanceHint_closeSession; # introduced=Tiramisu
   local:
     *;
 };
 
 LIBANDROID_PLATFORM {
   global:
-    APerformanceHint_getManager;
-    APerformanceHint_createSession;
-    APerformanceHint_getPreferredUpdateRateNanos;
-    APerformanceHint_updateTargetWorkDuration;
-    APerformanceHint_reportActualWorkDuration;
-    APerformanceHint_closeSession;
     APerformanceHint_setIHintManagerForTesting;
     extern "C++" {
         ASurfaceControl_registerSurfaceStatsListener*;

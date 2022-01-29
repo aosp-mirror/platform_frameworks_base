@@ -25,7 +25,6 @@ import android.hardware.SensorPrivacyManager;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFaceConstants;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.common.OperationReason;
@@ -37,7 +36,10 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
@@ -76,19 +78,36 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
             @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
-            boolean isStrongBiometric, int statsClient, @NonNull UsageStats usageStats,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+            boolean isStrongBiometric, @NonNull UsageStats usageStats,
             @NonNull LockoutCache lockoutCache, boolean allowBackgroundAuthentication,
             boolean isKeyguardBypassEnabled) {
+        this(context, lazyDaemon, token, requestId, listener, targetUserId, operationId,
+                restricted, owner, cookie, requireConfirmation, sensorId, logger, biometricContext,
+                isStrongBiometric, usageStats, lockoutCache, allowBackgroundAuthentication,
+                isKeyguardBypassEnabled, context.getSystemService(SensorPrivacyManager.class));
+    }
+
+    @VisibleForTesting
+    FaceAuthenticationClient(@NonNull Context context,
+            @NonNull Supplier<AidlSession> lazyDaemon,
+            @NonNull IBinder token, long requestId,
+            @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
+            boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+            boolean isStrongBiometric, @NonNull UsageStats usageStats,
+            @NonNull LockoutCache lockoutCache, boolean allowBackgroundAuthentication,
+            boolean isKeyguardBypassEnabled, SensorPrivacyManager sensorPrivacyManager) {
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
-                owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
-                BiometricsProtoEnums.MODALITY_FACE, statsClient, null /* taskStackListener */,
-                lockoutCache, allowBackgroundAuthentication, true /* shouldVibrate */,
+                owner, cookie, requireConfirmation, sensorId, logger, biometricContext,
+                isStrongBiometric, null /* taskStackListener */, lockoutCache,
+                allowBackgroundAuthentication, true /* shouldVibrate */,
                 isKeyguardBypassEnabled);
         setRequestId(requestId);
         mUsageStats = usageStats;
         mLockoutCache = lockoutCache;
         mNotificationManager = context.getSystemService(NotificationManager.class);
-        mSensorPrivacyManager = context.getSystemService(SensorPrivacyManager.class);
+        mSensorPrivacyManager = sensorPrivacyManager;
 
         final Resources resources = getContext().getResources();
         mBiometricPromptIgnoreList = resources.getIntArray(
@@ -139,10 +158,10 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
 
         if (session.hasContextMethods()) {
             final OperationContext context = new OperationContext();
-            // TODO: add reason, id, and isAoD
+            // TODO: add reason, id
             context.id = 0;
             context.reason = OperationReason.UNKNOWN;
-            context.isAoD = false;
+            context.isAoD = getBiometricContext().isAoD();
             context.isCrypto = isCryptoOperation();
             return session.getSession().authenticateWithContext(mOperationId, context);
         } else {

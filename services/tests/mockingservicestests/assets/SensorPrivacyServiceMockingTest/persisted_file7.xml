@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<sensor-privacy persistence-version="2" version="2">
+    <sensor-state toggle-type="1" user-id="0" sensor="1" state-type="1" last-change="123" />
+    <sensor-state toggle-type="1" user-id="0" sensor="2" state-type="2" last-change="123" />
+</sensor-privacy>

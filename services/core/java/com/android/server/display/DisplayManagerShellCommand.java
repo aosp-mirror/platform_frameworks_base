@@ -335,7 +335,7 @@ class DisplayManagerShellCommand extends ShellCommand {
     }
 
     private int setUserDisabledHdrTypes() {
-        final String[] userDisabledHdrTypesText = getAllArgs();
+        String[] userDisabledHdrTypesText = peekRemainingArgs();
         if (userDisabledHdrTypesText == null) {
             getErrPrintWriter().println("Error: no userDisabledHdrTypes specified");
             return 1;
@@ -351,7 +351,6 @@ class DisplayManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: invalid format of userDisabledHdrTypes");
             return 1;
         }
-
         final Context context = mService.getContext();
         final DisplayManager dm = context.getSystemService(DisplayManager.class);
         dm.setUserDisabledHdrTypes(userDisabledHdrTypes);

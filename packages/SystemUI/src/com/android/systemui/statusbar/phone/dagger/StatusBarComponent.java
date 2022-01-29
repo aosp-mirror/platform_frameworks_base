@@ -24,6 +24,7 @@ import com.android.keyguard.LockIconViewController;
 import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.core.StatusBarInitializer;
+import com.android.systemui.statusbar.notification.collection.render.StatusBarNotifPanelEventSourceModule;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
@@ -35,6 +36,7 @@ import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
+import java.util.Set;
 
 import javax.inject.Named;
 import javax.inject.Scope;
@@ -50,7 +52,10 @@ import dagger.Subcomponent;
  * that it has many getter methods indicates that we need to access many of these classes from
  * outside the component. Should more items be moved *into* this component to avoid so many getters?
  */
-@Subcomponent(modules = {StatusBarViewModule.class})
+@Subcomponent(modules = {
+        StatusBarNotifPanelEventSourceModule.class,
+        StatusBarViewModule.class
+})
 @StatusBarComponent.StatusBarScope
 public interface StatusBarComponent {
     /**
@@ -70,8 +75,7 @@ public interface StatusBarComponent {
     @interface StatusBarScope {}
 
     /**
-     * Creates a {@link NotificationShadeWindowView}/
-     * @return
+     * Creates a {@link NotificationShadeWindowView}.
      */
     @StatusBarScope
     NotificationShadeWindowView getNotificationShadeWindowView();
@@ -138,4 +142,18 @@ public interface StatusBarComponent {
      */
     @StatusBarScope
     StatusBarInitializer getStatusBarInitializer();
+
+    /**
+     * Set of startables to be run after a StatusBarComponent has been constructed.
+     */
+    @StatusBarScope
+    Set<Startable> getStartables();
+
+    /**
+     * Performs initialization logic after {@link StatusBarComponent} has been constructed.
+     */
+    interface Startable {
+        void start();
+        void stop();
+    }
 }

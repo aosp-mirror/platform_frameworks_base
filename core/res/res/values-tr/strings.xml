@@ -1187,6 +1187,10 @@
     <string name="deleteText" msgid="4200807474529938112">"Sil"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Giriş yöntemi"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Metin eylemleri"</string>
+    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
+    <skip />
+    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Depolama alanı bitiyor"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Bazı sistem işlevleri çalışmayabilir"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Sistem için yeterli depolama alanı yok. 250 MB boş alanınızın bulunduğundan emin olun ve yeniden başlatın."</string>
@@ -1491,6 +1495,8 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Bir uygulamanın, kendisi için pil optimizasyonlarını göz ardı etme izni istemesine olanak sağlar."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"tüm paketleri sorgulama"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Uygulamaya tüm yüklü paketleri görme izni verir."</string>
+    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApis\'e erişim"</string>
+    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Bir uygulamanın SupplementalApis\'e erişimine izin verir."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Zum denetimi için iki kez dokun"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Widget eklenemedi."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Git"</string>

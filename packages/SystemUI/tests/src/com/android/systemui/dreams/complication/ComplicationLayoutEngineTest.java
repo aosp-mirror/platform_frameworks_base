@@ -27,6 +27,7 @@ import android.view.View;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
@@ -118,6 +119,34 @@ public class ComplicationLayoutEngineTest extends SysuiTestCase {
         verifyChange(firstViewInfo, true, lp -> {
             assertThat(lp.topToTop == ConstraintLayout.LayoutParams.PARENT_ID).isTrue();
             assertThat(lp.endToEnd == ConstraintLayout.LayoutParams.PARENT_ID).isTrue();
+        });
+    }
+
+    /**
+     * Makes sure the engine properly places a view within the {@link ConstraintLayout}.
+     */
+    @Test
+    public void testSnapToGuide() {
+        final ViewInfo firstViewInfo = new ViewInfo(
+                new ComplicationLayoutParams(
+                        100,
+                        100,
+                        ComplicationLayoutParams.POSITION_TOP
+                                | ComplicationLayoutParams.POSITION_END,
+                        ComplicationLayoutParams.DIRECTION_DOWN,
+                        0,
+                        true),
+                Complication.CATEGORY_STANDARD,
+                mLayout);
+
+        final ComplicationLayoutEngine engine = new ComplicationLayoutEngine(mLayout);
+        addComplication(engine, firstViewInfo);
+
+        // Ensure the view is added to the top end corner
+        verifyChange(firstViewInfo, true, lp -> {
+            assertThat(lp.topToTop == ConstraintLayout.LayoutParams.PARENT_ID).isTrue();
+            assertThat(lp.endToEnd == ConstraintLayout.LayoutParams.PARENT_ID).isTrue();
+            assertThat(lp.startToEnd == R.id.complication_end_guide).isTrue();
         });
     }
 

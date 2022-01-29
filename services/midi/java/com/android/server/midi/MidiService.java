@@ -90,6 +90,11 @@ public class MidiService extends IMidiManager.Stub {
 
     private static final String TAG = "MidiService";
 
+    // These limits are much higher than any normal app should need.
+    private static final int MAX_DEVICE_SERVERS_PER_UID = 16;
+    private static final int MAX_LISTENERS_PER_CLIENT = 16;
+    private static final int MAX_CONNECTIONS_PER_CLIENT = 64;
+
     private final Context mContext;
 
     // list of all our clients, keyed by Binder token
@@ -161,6 +166,10 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         public void addListener(IMidiDeviceListener listener) {
+            if (mListeners.size() >= MAX_LISTENERS_PER_CLIENT) {
+                throw new SecurityException(
+                        "too many MIDI listeners for UID = " + mUid);
+            }
             // Use asBinder() so that we can match it in removeListener().
             // The listener proxy objects themselves do not match.
             mListeners.put(listener.asBinder(), listener);
@@ -174,6 +183,10 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         public void addDeviceConnection(Device device, IMidiDeviceOpenCallback callback) {
+            if (mDeviceConnections.size() >= MAX_CONNECTIONS_PER_CLIENT) {
+                throw new SecurityException(
+                        "too many MIDI connections for UID = " + mUid);
+            }
             DeviceConnection connection = new DeviceConnection(device, this, callback);
             mDeviceConnections.put(connection.getToken(), connection);
             device.addDeviceConnection(connection);
@@ -901,6 +914,19 @@ public class MidiService extends IMidiManager.Stub {
             String[] inputPortNames, String[] outputPortNames, Bundle properties,
             IMidiDeviceServer server, ServiceInfo serviceInfo,
             boolean isPrivate, int uid, int defaultProtocol) {
+
+        // Limit the number of devices per app.
+        int deviceCountForApp = 0;
+        for (Device device : mDevicesByInfo.values()) {
+            if (device.getUid() == uid) {
+                deviceCountForApp++;
+            }
+        }
+        if (deviceCountForApp >= MAX_DEVICE_SERVERS_PER_UID) {
+            throw new SecurityException(
+                    "too many MIDI devices already created for UID = "
+                    + uid);
+        }
 
         int id = mNextDeviceId++;
         MidiDeviceInfo deviceInfo = new MidiDeviceInfo(type, id, numInputPorts, numOutputPorts,

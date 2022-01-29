@@ -1504,11 +1504,14 @@ static jboolean android_location_gnss_hal_GnssNative_set_position_mode(
         JNIEnv* /* env */, jclass, jint mode, jint recurrence, jint min_interval,
         jint preferred_accuracy, jint preferred_time, jboolean low_power_mode) {
     if (gnssHalAidl != nullptr && gnssHalAidl->getInterfaceVersion() >= 2) {
-        auto status = gnssHalAidl->setPositionMode(static_cast<IGnssAidl::GnssPositionMode>(mode),
-                                                   static_cast<IGnssAidl::GnssPositionRecurrence>(
-                                                           recurrence),
-                                                   min_interval, preferred_accuracy, preferred_time,
-                                                   low_power_mode);
+        IGnssAidl::PositionModeOptions options;
+        options.mode = static_cast<IGnssAidl::GnssPositionMode>(mode);
+        options.recurrence = static_cast<IGnssAidl::GnssPositionRecurrence>(recurrence);
+        options.minIntervalMs = min_interval;
+        options.preferredAccuracyMeters = preferred_accuracy;
+        options.preferredTimeMs = preferred_time;
+        options.lowPowerMode = low_power_mode;
+        auto status = gnssHalAidl->setPositionMode(options);
         return checkAidlStatus(status, "IGnssAidl setPositionMode() failed.");
     }
 

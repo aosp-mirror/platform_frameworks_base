@@ -1034,6 +1034,12 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     @Override
     public void onSystemBarAppearanceChanged(@WindowInsetsController.Appearance int appearance) {
         updateColorViews(null /* insets */, true /* animate */);
+        if (mWindow != null) {
+            final Window.Callback callback = mWindow.getCallback();
+            if (callback != null) {
+                callback.onSystemBarAppearanceChanged(appearance);
+            }
+        }
     }
 
     @Override

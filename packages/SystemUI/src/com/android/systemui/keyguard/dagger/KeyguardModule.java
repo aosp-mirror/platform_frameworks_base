@@ -37,6 +37,7 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
@@ -100,6 +101,7 @@ public class KeyguardModule {
             Lazy<NotificationShadeDepthController> notificationShadeDepthController,
             ScreenOnCoordinator screenOnCoordinator,
             InteractionJankMonitor interactionJankMonitor,
+            DreamOverlayStateController dreamOverlayStateController,
             Lazy<NotificationShadeWindowController> notificationShadeWindowController) {
         return new KeyguardViewMediator(
                 context,
@@ -125,6 +127,7 @@ public class KeyguardModule {
                 notificationShadeDepthController,
                 screenOnCoordinator,
                 interactionJankMonitor,
+                dreamOverlayStateController,
                 notificationShadeWindowController
         );
     }

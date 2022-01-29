@@ -18,13 +18,14 @@ package com.android.server.biometrics.sensors.face.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.face.Face;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.InternalEnumerateClient;
 
@@ -40,9 +41,10 @@ class FaceInternalEnumerateClient extends InternalEnumerateClient<AidlSession> {
     FaceInternalEnumerateClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon, @NonNull IBinder token, int userId,
             @NonNull String owner, @NonNull List<Face> enrolledList,
-            @NonNull BiometricUtils<Face> utils, int sensorId) {
+            @NonNull BiometricUtils<Face> utils, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext) {
         super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,
-                BiometricsProtoEnums.MODALITY_FACE);
+                logger, biometricContext);
     }
 
     @Override

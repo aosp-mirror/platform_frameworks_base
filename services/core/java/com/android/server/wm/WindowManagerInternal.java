@@ -797,7 +797,12 @@ public abstract class WindowManagerInternal {
      * Callers prepare a view hierarchy with SurfaceControlViewHost
      * and send the package to WM here. The remote view hierarchy will receive
      * configuration change, lifecycle events, etc, forwarded over the
-     * ISurfaceControlViewHost interface inside the SurfacePackage.
+     * ISurfaceControlViewHost interface inside the SurfacePackage. Embedded
+     * hierarchies will receive inset changes, including transient inset changes
+     * (to avoid the status bar in immersive mode).
+     *
+     * The embedded hierarchy exists in a coordinate space relative to the task
+     * bounds.
      */
     public abstract void addTaskOverlay(int taskId, SurfaceControlViewHost.SurfacePackage overlay);
     public abstract void removeTaskOverlay(int taskId, SurfaceControlViewHost.SurfacePackage overlay);

@@ -82,6 +82,8 @@ final class ViewState {
     public static final int STATE_INLINE_DISABLED = 0x8000;
     /** The View is waiting for an inline suggestions request from IME.*/
     public static final int STATE_PENDING_CREATE_INLINE_REQUEST = 0x10000;
+    /** Fill dialog were shown for this View. */
+    public static final int STATE_FILL_DIALOG_SHOWN = 0x20000;
 
     public final AutofillId id;
 

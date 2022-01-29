@@ -3154,6 +3154,14 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports exposing head tracker sensors from peripheral
+     * devices via the dynamic sensors API.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_DYNAMIC_HEAD_TRACKER = "android.hardware.sensor.dynamic.head_tracker";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports high fidelity sensor processing
      * capabilities.
      */

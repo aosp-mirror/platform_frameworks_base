@@ -62,7 +62,7 @@ public class EditUserInfoControllerTest {
     @Mock
     private ActivityStarter mActivityStarter;
 
-    private boolean mCanChangePhoto;
+    private boolean mPhotoRestrictedByBase;
     private Activity mActivity;
     private TestEditUserInfoController mController;
 
@@ -85,8 +85,8 @@ public class EditUserInfoControllerTest {
         }
 
         @Override
-        boolean canChangePhoto(Context context) {
-            return mCanChangePhoto;
+        boolean isChangePhotoRestrictedByBase(Context context) {
+            return mPhotoRestrictedByBase;
         }
     }
 
@@ -96,7 +96,7 @@ public class EditUserInfoControllerTest {
         mActivity = spy(ActivityController.of(new FragmentActivity()).get());
         mActivity.setTheme(R.style.Theme_AppCompat_DayNight);
         mController = new TestEditUserInfoController();
-        mCanChangePhoto = true;
+        mPhotoRestrictedByBase = true;
     }
 
     @Test
@@ -260,7 +260,7 @@ public class EditUserInfoControllerTest {
 
     @Test
     public void createDialog_canNotChangePhoto_nullPhotoController() {
-        mCanChangePhoto = false;
+        mPhotoRestrictedByBase = false;
 
         mController.createDialog(mActivity, mActivityStarter, mCurrentIcon,
                 "test", "title", null, null);

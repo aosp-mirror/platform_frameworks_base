@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
@@ -31,6 +30,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
@@ -62,12 +63,13 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
             long requestId, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner,
             @NonNull BiometricUtils<Fingerprint> utils, int timeoutSec, int sensorId,
+            @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
             @Nullable IUdfpsOverlayController udfpsOverlayController,
             @Nullable ISidefpsController sidefpsController,
             @FingerprintManager.EnrollReason int enrollReason) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
-                timeoutSec, BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
-                true /* shouldVibrate */);
+                timeoutSec, sensorId, true /* shouldVibrate */, biometricLogger,
+                biometricContext);
         setRequestId(requestId);
         mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
 

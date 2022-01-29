@@ -59,6 +59,12 @@
   <item type="id" name="candidatesArea" />
   <item type="id" name="inputArea" />
   <item type="id" name="inputExtractEditText" />
+  <!-- View id for the action of text editor inside of an extracted text
+        {@link InputMethodService#onCreateExtractTextView IME extract view}. -->
+  <item type="id" name="inputExtractAction" />
+  <!-- View id for the accessories of text editor inside of an extracted text
+        {@link InputMethodService#onCreateExtractTextView IME extract view}. -->
+  <item type="id" name="inputExtractAccessories" />
   <item type="id" name="selectAll" />
   <item type="id" name="cut" />
   <item type="id" name="copy" />

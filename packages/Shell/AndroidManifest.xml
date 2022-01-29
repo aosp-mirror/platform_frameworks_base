@@ -204,7 +204,6 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.CREATE_USERS" />
     <uses-permission android:name="android.permission.QUERY_USERS" />
-    <uses-permission android:name="android.permission.CREATE_VIRTUAL_DEVICE" />
     <uses-permission android:name="android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
     <uses-permission android:name="android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS" />
@@ -249,6 +248,7 @@
     <uses-permission android:name="android.permission.MANAGE_CONTENT_CAPTURE" />
     <uses-permission android:name="android.permission.MANAGE_CONTENT_SUGGESTIONS" />
     <uses-permission android:name="android.permission.MANAGE_APP_PREDICTIONS" />
+    <uses-permission android:name="android.permission.MANAGE_LOW_POWER_STANDBY" />
     <uses-permission android:name="android.permission.MANAGE_SEARCH_UI" />
     <uses-permission android:name="android.permission.MANAGE_SMARTSPACE" />
     <uses-permission android:name="android.permission.MANAGE_WALLPAPER_EFFECTS_GENERATION" />
@@ -562,6 +562,9 @@
     <!-- Permission required for CTS test - CtsGameManagerTestCases -->
     <uses-permission android:name="android.permission.MANAGE_GAME_MODE" />
 
+    <!-- Permission required for CTS test - CtsGameServiceTestCases -->
+    <uses-permission android:name="android.permission.SET_GAME_SERVICE" />
+
     <!-- Permission required for CTS test - ClipboardManagerTest -->
     <uses-permission android:name="android.permission.SET_CLIP_SOURCE" />
 
@@ -629,6 +632,11 @@
     <uses-permission android:name="android.permission.SEND_SAFETY_CENTER_UPDATE" />
     <uses-permission android:name="android.permission.READ_SAFETY_CENTER_STATUS" />
     <uses-permission android:name="android.permission.MANAGE_SAFETY_CENTER" />
+
+    <!-- Permissions required for CTS test - CtsVirtualDevicesTestCases -->
+    <uses-permission android:name="android.permission.CREATE_VIRTUAL_DEVICE" />
+    <uses-permission android:name="android.permission.ADD_TRUSTED_DISPLAY" />
+    <uses-permission android:name="android.permission.ADD_ALWAYS_UNLOCKED_DISPLAY" />
 
 
     <!-- Permission required for CTS test - Notification test suite -->

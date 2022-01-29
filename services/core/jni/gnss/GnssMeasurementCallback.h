@@ -62,8 +62,8 @@ private:
 
     jobjectArray translateAllGnssMeasurements(
             JNIEnv* env, const std::vector<hardware::gnss::GnssMeasurement>& measurements);
-    jobjectArray translateAllGnssAgcs(
-            JNIEnv* env, const std::vector<std::optional<hardware::gnss::GnssData::GnssAgc>>& agcs);
+    jobjectArray translateAllGnssAgcs(JNIEnv* env,
+                                      const std::vector<hardware::gnss::GnssData::GnssAgc>& agcs);
 
     void translateAndSetGnssData(const hardware::gnss::GnssData& data);
 

@@ -36,6 +36,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.internal.view.RotationPolicy;
+import com.android.settingslib.devicestate.DeviceStateRotationLockSettingsManager;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;

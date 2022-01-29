@@ -359,9 +359,7 @@ void GnssMeasurementCallbackAidl::translateAndSetGnssData(const GnssData& data) 
     jobjectArray measurementArray = translateAllGnssMeasurements(env, data.measurements);
 
     jobjectArray gnssAgcArray = nullptr;
-    if (data.gnssAgcs.has_value()) {
-        gnssAgcArray = translateAllGnssAgcs(env, data.gnssAgcs.value());
-    }
+    gnssAgcArray = translateAllGnssAgcs(env, data.gnssAgcs);
     setMeasurementData(env, mCallbacksObj, clock, measurementArray, gnssAgcArray);
 
     env->DeleteLocalRef(clock);
@@ -508,8 +506,8 @@ jobjectArray GnssMeasurementCallbackAidl::translateAllGnssMeasurements(
     return gnssMeasurementArray;
 }
 
-jobjectArray GnssMeasurementCallbackAidl::translateAllGnssAgcs(
-        JNIEnv* env, const std::vector<std::optional<GnssAgc>>& agcs) {
+jobjectArray GnssMeasurementCallbackAidl::translateAllGnssAgcs(JNIEnv* env,
+                                                               const std::vector<GnssAgc>& agcs) {
     if (agcs.size() == 0) {
         return nullptr;
     }
@@ -518,10 +516,7 @@ jobjectArray GnssMeasurementCallbackAidl::translateAllGnssAgcs(
             env->NewObjectArray(agcs.size(), class_gnssAgc, nullptr /* initialElement */);
 
     for (uint16_t i = 0; i < agcs.size(); ++i) {
-        if (!agcs[i].has_value()) {
-            continue;
-        }
-        const GnssAgc& gnssAgc = agcs[i].value();
+        const GnssAgc& gnssAgc = agcs[i];
 
         jobject agcBuilderObject = env->NewObject(class_gnssAgcBuilder, method_gnssAgcBuilderCtor);
         env->CallObjectMethod(agcBuilderObject, method_gnssAgcBuilderSetLevelDb,

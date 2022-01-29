@@ -40,13 +40,13 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
 
     @interface Position {}
     /** Align view with the top of parent or bottom of preceding {@link Complication}. */
-    static final int POSITION_TOP = 1 << 0;
+    public static final int POSITION_TOP = 1 << 0;
     /** Align view with the bottom of parent or top of preceding {@link Complication}. */
-    static final int POSITION_BOTTOM = 1 << 1;
+    public static final int POSITION_BOTTOM = 1 << 1;
     /** Align view with the start of parent or end of preceding {@link Complication}. */
-    static final int POSITION_START = 1 << 2;
+    public static final int POSITION_START = 1 << 2;
     /** Align view with the end of parent or start of preceding {@link Complication}. */
-    static final int POSITION_END = 1 << 3;
+    public static final int POSITION_END = 1 << 3;
 
     private static final int FIRST_POSITION = POSITION_TOP;
     private static final int LAST_POSITION = POSITION_END;
@@ -61,13 +61,13 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
 
     @interface Direction {}
     /** Position view upward from position. */
-    static final int DIRECTION_UP = 1 << 0;
+    public static final int DIRECTION_UP = 1 << 0;
     /** Position view downward from position. */
-    static final int DIRECTION_DOWN = 1 << 1;
+    public static final int DIRECTION_DOWN = 1 << 1;
     /** Position view towards the start of the parent. */
-    static final int DIRECTION_START = 1 << 2;
+    public static final int DIRECTION_START = 1 << 2;
     /** Position view towards the end of parent. */
-    static final int DIRECTION_END = 1 << 3;
+    public static final int DIRECTION_END = 1 << 3;
 
     @Position
     private final int mPosition;
@@ -76,6 +76,8 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
     private final int mDirection;
 
     private final int mWeight;
+
+    private final boolean mSnapToGuide;
 
     // Do not allow specifying opposite positions
     private static final int[] INVALID_POSITIONS =
@@ -104,6 +106,27 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
      */
     public ComplicationLayoutParams(int width, int height, @Position int position,
             @Direction int direction, int weight) {
+        this(width, height, position, direction, weight, false);
+    }
+
+    /**
+     * Constructs a {@link ComplicationLayoutParams}.
+     * @param width The width {@link android.view.View.MeasureSpec} for the view.
+     * @param height The height {@link android.view.View.MeasureSpec} for the view.
+     * @param position The place within the parent container where the view should be positioned.
+     * @param direction The direction the view should be laid out from either the parent container
+     *                  or preceding view.
+     * @param weight The weight that should be considered for this view when compared to other
+     *               views. This has an impact on the placement of the view but not the rendering of
+     *               the view.
+     * @param snapToGuide When set to {@code true}, the dimension perpendicular to the direction
+     *                    will be automatically set to align with a predetermined guide for that
+     *                    side. For example, if the complication is aligned to the top end and
+     *                    direction is down, then the width of the complication will be set to span
+     *                    from the end of the parent to the guide.
+     */
+    public ComplicationLayoutParams(int width, int height, @Position int position,
+            @Direction int direction, int weight, boolean snapToGuide) {
         super(width, height);
 
         if (!validatePosition(position)) {
@@ -118,6 +141,8 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
         mDirection = direction;
 
         mWeight = weight;
+
+        mSnapToGuide = snapToGuide;
     }
 
     /**
@@ -128,6 +153,7 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
         mPosition = source.mPosition;
         mDirection = source.mDirection;
         mWeight = source.mWeight;
+        mSnapToGuide = source.mSnapToGuide;
     }
 
     private static boolean validateDirection(@Position int position, @Direction int direction) {
@@ -180,7 +206,19 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
         return mPosition;
     }
 
+    /**
+     * Returns the set weight for the complication. The weight determines ordering a complication
+     * given the same position/direction.
+     */
     public int getWeight() {
         return mWeight;
+    }
+
+    /**
+     * Returns whether the complication's dimension perpendicular to direction should be
+     * automatically set.
+     */
+    public boolean snapsToGuide() {
+        return mSnapToGuide;
     }
 }

@@ -37,6 +37,7 @@ import android.content.Context;
 import android.graphics.drawable.Icon;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
+import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
@@ -154,6 +155,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_SET_UDFPS_HBM_LISTENER = 60 << MSG_SHIFT;
     private static final int MSG_TILE_SERVICE_REQUEST_ADD = 61 << MSG_SHIFT;
     private static final int MSG_TILE_SERVICE_REQUEST_CANCEL = 62 << MSG_SHIFT;
+    private static final int MSG_SET_BIOMETRICS_LISTENER = 63 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -314,6 +316,12 @@ public class CommandQueue extends IStatusBar.Stub implements
         }
 
         default void hideAuthenticationDialog() {
+        }
+
+        /**
+         * @see IStatusBar#setBiometicContextListener(IBiometricContextListener)
+         */
+        default void setBiometicContextListener(IBiometricContextListener listener) {
         }
 
         /**
@@ -958,6 +966,13 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
+    public void setBiometicContextListener(IBiometricContextListener listener) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_SET_BIOMETRICS_LISTENER, listener).sendToTarget();
+        }
+    }
+
+    @Override
     public void setUdfpsHbmListener(IUdfpsHbmListener listener) {
         synchronized (mLock) {
             mHandler.obtainMessage(MSG_SET_UDFPS_HBM_LISTENER, listener).sendToTarget();
@@ -1409,6 +1424,12 @@ public class CommandQueue extends IStatusBar.Stub implements
                 case MSG_BIOMETRIC_HIDE:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).hideAuthenticationDialog();
+                    }
+                    break;
+                case MSG_SET_BIOMETRICS_LISTENER:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).setBiometicContextListener(
+                                (IBiometricContextListener) msg.obj);
                     }
                     break;
                 case MSG_SET_UDFPS_HBM_LISTENER:

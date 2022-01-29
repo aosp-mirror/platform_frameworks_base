@@ -51,6 +51,7 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -111,6 +112,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final KeyguardBouncer.Factory mKeyguardBouncerFactory;
     private final KeyguardMessageAreaController.Factory mKeyguardMessageAreaFactory;
+    private final DreamOverlayStateController mDreamOverlayStateController;
     private KeyguardMessageAreaController mKeyguardMessageAreaController;
     private final Lazy<ShadeController> mShadeController;
     private final BouncerExpansionCallback mExpansionCallback = new BouncerExpansionCallback() {
@@ -235,6 +237,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             SysuiStatusBarStateController sysuiStatusBarStateController,
             ConfigurationController configurationController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
+            DreamOverlayStateController dreamOverlayStateController,
             NavigationModeController navigationModeController,
             DockManager dockManager,
             NotificationShadeWindowController notificationShadeWindowController,
@@ -249,6 +252,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mConfigurationController = configurationController;
         mNavigationModeController = navigationModeController;
         mNotificationShadeWindowController = notificationShadeWindowController;
+        mDreamOverlayStateController = dreamOverlayStateController;
         mKeyguardStateController = keyguardStateController;
         mMediaManager = notificationMediaManager;
         mKeyguardUpdateManager = keyguardUpdateMonitor;
@@ -1174,7 +1178,9 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     public boolean bouncerNeedsScrimming() {
-        return mOccluded || mBouncer.willDismissWithAction()
+        // When a dream overlay is active, scrimming will cause any expansion to immediately expand.
+        return (mOccluded && !mDreamOverlayStateController.isOverlayActive())
+                || mBouncer.willDismissWithAction()
                 || mStatusBar.isFullScreenUserSwitcherState()
                 || (mBouncer.isShowing() && mBouncer.isScrimmed())
                 || mBouncer.isFullscreenBouncer();

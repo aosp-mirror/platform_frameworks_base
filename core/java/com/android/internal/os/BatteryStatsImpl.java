@@ -69,10 +69,14 @@ import android.os.connectivity.GpsBatteryStats;
 import android.os.connectivity.WifiActivityEnergyInfo;
 import android.os.connectivity.WifiBatteryStats;
 import android.provider.Settings;
+import android.telephony.Annotation.NetworkType;
 import android.telephony.CellSignalStrength;
+import android.telephony.CellSignalStrengthLte;
+import android.telephony.CellSignalStrengthNr;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ModemActivityInfo;
 import android.telephony.ServiceState;
+import android.telephony.ServiceState.RegState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -934,6 +938,119 @@ public class BatteryStatsImpl extends BatteryStats {
     int mPhoneDataConnectionType = -1;
     final StopwatchTimer[] mPhoneDataConnectionsTimer =
             new StopwatchTimer[NUM_DATA_CONNECTION_TYPES];
+
+    @RadioAccessTechnology
+    int mActiveRat = RADIO_ACCESS_TECHNOLOGY_OTHER;
+
+    private static class RadioAccessTechnologyBatteryStats {
+        /**
+         * This RAT is currently being used.
+         */
+        private boolean mActive = false;
+        /**
+         * Current active frequency range for this RAT.
+         */
+        @ServiceState.FrequencyRange
+        private int mFrequencyRange = ServiceState.FREQUENCY_RANGE_UNKNOWN;
+        /**
+         * Current signal strength for this RAT.
+         */
+        private int mSignalStrength = CellSignalStrength.SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+        /**
+         * Timers for each combination of frequency range and signal strength.
+         */
+        public final StopwatchTimer[][] perStateTimers;
+
+        RadioAccessTechnologyBatteryStats(int freqCount, Clock clock, TimeBase timeBase) {
+            perStateTimers =
+                    new StopwatchTimer[freqCount][CellSignalStrength.NUM_SIGNAL_STRENGTH_BINS];
+            for (int i = 0; i < freqCount; i++) {
+                for (int j = 0; j < CellSignalStrength.NUM_SIGNAL_STRENGTH_BINS; j++) {
+                    perStateTimers[i][j] = new StopwatchTimer(clock, null, -1, null, timeBase);
+                }
+            }
+        }
+
+        /**
+         * Note this RAT is currently being used.
+         */
+        public void noteActive(boolean active, long elapsedRealtimeMs) {
+            if (mActive == active) return;
+            mActive = active;
+            if (mActive) {
+                perStateTimers[mFrequencyRange][mSignalStrength].startRunningLocked(
+                        elapsedRealtimeMs);
+            } else {
+                perStateTimers[mFrequencyRange][mSignalStrength].stopRunningLocked(
+                        elapsedRealtimeMs);
+            }
+        }
+
+        /**
+         * Note current frequency range has changed.
+         */
+        public void noteFrequencyRange(@ServiceState.FrequencyRange int frequencyRange,
+                long elapsedRealtimeMs) {
+            if (mFrequencyRange == frequencyRange) return;
+
+            if (!mActive) {
+                // RAT not in use, note the frequency change and move on.
+                mFrequencyRange = frequencyRange;
+                return;
+            }
+            perStateTimers[mFrequencyRange][mSignalStrength].stopRunningLocked(elapsedRealtimeMs);
+            perStateTimers[frequencyRange][mSignalStrength].startRunningLocked(elapsedRealtimeMs);
+            mFrequencyRange = frequencyRange;
+        }
+
+        /**
+         * Note current signal strength has changed.
+         */
+        public void noteSignalStrength(int signalStrength, long elapsedRealtimeMs) {
+            if (mSignalStrength == signalStrength) return;
+
+            if (!mActive) {
+                // RAT not in use, note the signal strength change and move on.
+                mSignalStrength = signalStrength;
+                return;
+            }
+            perStateTimers[mFrequencyRange][mSignalStrength].stopRunningLocked(elapsedRealtimeMs);
+            perStateTimers[mFrequencyRange][signalStrength].startRunningLocked(elapsedRealtimeMs);
+            mSignalStrength = signalStrength;
+        }
+
+        /**
+         * Reset display timers.
+         */
+        public void reset(long elapsedRealtimeUs) {
+            final int size = perStateTimers.length;
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < CellSignalStrength.NUM_SIGNAL_STRENGTH_BINS; j++) {
+                    perStateTimers[i][j].reset(false, elapsedRealtimeUs);
+                }
+            }
+        }
+    }
+
+    /**
+     * Number of frequency ranges, keep in sync with {@link ServiceState.FrequencyRange}
+     */
+    private static final int NR_FREQUENCY_COUNT = 5;
+
+    RadioAccessTechnologyBatteryStats[] mPerRatBatteryStats =
+            new RadioAccessTechnologyBatteryStats[RADIO_ACCESS_TECHNOLOGY_COUNT];
+
+    @GuardedBy("this")
+    private RadioAccessTechnologyBatteryStats getRatBatteryStatsLocked(
+            @RadioAccessTechnology int rat) {
+        RadioAccessTechnologyBatteryStats stats = mPerRatBatteryStats[rat];
+        if (stats == null) {
+            final int freqCount = rat == RADIO_ACCESS_TECHNOLOGY_NR ? NR_FREQUENCY_COUNT : 1;
+            stats = new RadioAccessTechnologyBatteryStats(freqCount, mClock, mOnBatteryTimeBase);
+            mPerRatBatteryStats[rat] = stats;
+        }
+        return stats;
+    }
 
     final LongSamplingCounter[] mNetworkByteActivityCounters =
             new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
@@ -5886,6 +6003,10 @@ public class BatteryStatsImpl extends BatteryStats {
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtimeMs, uptimeMs);
             mMobileRadioPowerState = powerState;
+
+            // Inform current RatBatteryStats that the modem active state might have changed.
+            getRatBatteryStatsLocked(mActiveRat).noteActive(active, elapsedRealtimeMs);
+
             if (active) {
                 mMobileRadioActiveTimer.startRunningLocked(elapsedRealtimeMs);
                 mMobileRadioActivePerAppTimer.startRunningLocked(elapsedRealtimeMs);
@@ -6307,21 +6428,86 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     public void notePhoneSignalStrengthLocked(SignalStrength signalStrength,
             long elapsedRealtimeMs, long uptimeMs) {
-        // Bin the strength.
-        int bin = signalStrength.getLevel();
-        updateAllPhoneStateLocked(mPhoneServiceStateRaw, mPhoneSimStateRaw, bin,
+        final int overallSignalStrength = signalStrength.getLevel();
+        final SparseIntArray perRatSignalStrength = new SparseIntArray(
+                BatteryStats.RADIO_ACCESS_TECHNOLOGY_COUNT);
+
+        // Extract signal strength level for each RAT.
+        final List<CellSignalStrength> cellSignalStrengths =
+                signalStrength.getCellSignalStrengths();
+        final int size = cellSignalStrengths.size();
+        for (int i = 0; i < size; i++) {
+            CellSignalStrength cellSignalStrength = cellSignalStrengths.get(i);
+            // Map each CellSignalStrength to a BatteryStats.RadioAccessTechnology
+            final int ratType;
+            final int level;
+            if (cellSignalStrength instanceof CellSignalStrengthNr) {
+                ratType = RADIO_ACCESS_TECHNOLOGY_NR;
+                level = cellSignalStrength.getLevel();
+            } else if (cellSignalStrength instanceof CellSignalStrengthLte) {
+                ratType = RADIO_ACCESS_TECHNOLOGY_LTE;
+                level = cellSignalStrength.getLevel();
+            } else {
+                ratType = RADIO_ACCESS_TECHNOLOGY_OTHER;
+                level = cellSignalStrength.getLevel();
+            }
+
+            // According to SignalStrength#getCellSignalStrengths(), multiple of the same
+            // cellSignalStrength can be present. Just take the highest level one for each RAT.
+            if (perRatSignalStrength.get(ratType, -1) < level) {
+                perRatSignalStrength.put(ratType, level);
+            }
+        }
+
+        notePhoneSignalStrengthLocked(overallSignalStrength, perRatSignalStrength,
+                elapsedRealtimeMs, uptimeMs);
+    }
+
+    /**
+     * Note phone signal strength change, including per RAT signal strength.
+     *
+     * @param signalStrength overall signal strength {@see SignalStrength#getLevel()}
+     * @param perRatSignalStrength signal strength of available RATs
+     */
+    @GuardedBy("this")
+    public void notePhoneSignalStrengthLocked(int signalStrength,
+            SparseIntArray perRatSignalStrength) {
+        notePhoneSignalStrengthLocked(signalStrength, perRatSignalStrength,
+                mClock.elapsedRealtime(), mClock.uptimeMillis());
+    }
+
+    /**
+     * Note phone signal strength change, including per RAT signal strength.
+     *
+     * @param signalStrength overall signal strength {@see SignalStrength#getLevel()}
+     * @param perRatSignalStrength signal strength of available RATs
+     */
+    @GuardedBy("this")
+    public void notePhoneSignalStrengthLocked(int signalStrength,
+            SparseIntArray perRatSignalStrength,
+            long elapsedRealtimeMs, long uptimeMs) {
+        // Note each RAT's signal strength.
+        final int size = perRatSignalStrength.size();
+        for (int i = 0; i < size; i++) {
+            final int rat = perRatSignalStrength.keyAt(i);
+            final int ratSignalStrength = perRatSignalStrength.valueAt(i);
+            getRatBatteryStatsLocked(rat).noteSignalStrength(ratSignalStrength, elapsedRealtimeMs);
+        }
+        updateAllPhoneStateLocked(mPhoneServiceStateRaw, mPhoneSimStateRaw, signalStrength,
                 elapsedRealtimeMs, uptimeMs);
     }
 
     @UnsupportedAppUsage
     @GuardedBy("this")
-    public void notePhoneDataConnectionStateLocked(int dataType, boolean hasData, int serviceType) {
-        notePhoneDataConnectionStateLocked(dataType, hasData, serviceType,
+    public void notePhoneDataConnectionStateLocked(@NetworkType int dataType, boolean hasData,
+            @RegState int serviceType, @ServiceState.FrequencyRange int nrFrequency) {
+        notePhoneDataConnectionStateLocked(dataType, hasData, serviceType, nrFrequency,
                 mClock.elapsedRealtime(), mClock.uptimeMillis());
     }
 
     @GuardedBy("this")
-    public void notePhoneDataConnectionStateLocked(int dataType, boolean hasData, int serviceType,
+    public void notePhoneDataConnectionStateLocked(@NetworkType int dataType, boolean hasData,
+            @RegState int serviceType, @ServiceState.FrequencyRange int nrFrequency,
             long elapsedRealtimeMs, long uptimeMs) {
         // BatteryStats uses 0 to represent no network type.
         // Telephony does not have a concept of no network type, and uses 0 to represent unknown.
@@ -6344,6 +6530,13 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
             }
         }
+
+        final int newRat = mapNetworkTypeToRadioAccessTechnology(bin);
+        if (newRat == RADIO_ACCESS_TECHNOLOGY_NR) {
+            // Note possible frequency change for the NR RAT.
+            getRatBatteryStatsLocked(newRat).noteFrequencyRange(nrFrequency, elapsedRealtimeMs);
+        }
+
         if (DEBUG) Log.i(TAG, "Phone Data Connection -> " + dataType + " = " + hasData);
         if (mPhoneDataConnectionType != bin) {
             mHistoryCur.states = (mHistoryCur.states&~HistoryItem.STATE_DATA_CONNECTION_MASK)
@@ -6357,6 +6550,45 @@ public class BatteryStatsImpl extends BatteryStats {
             }
             mPhoneDataConnectionType = bin;
             mPhoneDataConnectionsTimer[bin].startRunningLocked(elapsedRealtimeMs);
+
+            if (mActiveRat != newRat) {
+                getRatBatteryStatsLocked(mActiveRat).noteActive(false, elapsedRealtimeMs);
+                mActiveRat = newRat;
+            }
+            final boolean modemActive = mMobileRadioActiveTimer.isRunningLocked();
+            getRatBatteryStatsLocked(newRat).noteActive(modemActive, elapsedRealtimeMs);
+        }
+    }
+
+    @RadioAccessTechnology
+    private static int mapNetworkTypeToRadioAccessTechnology(@NetworkType int dataType) {
+        switch (dataType) {
+            case TelephonyManager.NETWORK_TYPE_NR:
+                return RADIO_ACCESS_TECHNOLOGY_NR;
+            case TelephonyManager.NETWORK_TYPE_LTE:
+                return RADIO_ACCESS_TECHNOLOGY_LTE;
+            case TelephonyManager.NETWORK_TYPE_UNKNOWN: //fallthrough
+            case TelephonyManager.NETWORK_TYPE_GPRS: //fallthrough
+            case TelephonyManager.NETWORK_TYPE_EDGE: //fallthrough
+            case TelephonyManager.NETWORK_TYPE_UMTS: //fallthrough
+            case TelephonyManager.NETWORK_TYPE_CDMA: //fallthrough
+            case TelephonyManager.NETWORK_TYPE_EVDO_0: //fallthrough
+            case TelephonyManager.NETWORK_TYPE_EVDO_A: //fallthrough
+            case TelephonyManager.NETWORK_TYPE_1xRTT: //fallthrough
+            case TelephonyManager.NETWORK_TYPE_HSDPA: //fallthrough
+            case TelephonyManager.NETWORK_TYPE_HSUPA: //fallthrough
+            case TelephonyManager.NETWORK_TYPE_HSPA: //fallthrough
+            case TelephonyManager.NETWORK_TYPE_IDEN: //fallthrough
+            case TelephonyManager.NETWORK_TYPE_EVDO_B: //fallthrough
+            case TelephonyManager.NETWORK_TYPE_EHRPD: //fallthrough
+            case TelephonyManager.NETWORK_TYPE_HSPAP: //fallthrough
+            case TelephonyManager.NETWORK_TYPE_GSM: //fallthrough
+            case TelephonyManager.NETWORK_TYPE_TD_SCDMA: //fallthrough
+            case TelephonyManager.NETWORK_TYPE_IWLAN: //fallthrough
+                return RADIO_ACCESS_TECHNOLOGY_OTHER;
+            default:
+                Slog.w(TAG, "Unhandled NetworkType (" + dataType + "), mapping to OTHER");
+                return RADIO_ACCESS_TECHNOLOGY_OTHER;
         }
     }
 
@@ -7729,6 +7961,23 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @Override public Timer getPhoneDataConnectionTimer(int dataType) {
         return mPhoneDataConnectionsTimer[dataType];
+    }
+
+    @Override public long getActiveRadioDurationMs(@RadioAccessTechnology int rat,
+            @ServiceState.FrequencyRange int frequencyRange, int signalStrength,
+            long elapsedRealtimeMs) {
+        final RadioAccessTechnologyBatteryStats stats = mPerRatBatteryStats[rat];
+        if (stats == null) return 0L;
+
+        final int freqCount = stats.perStateTimers.length;
+        if (frequencyRange < 0 || frequencyRange >= freqCount) return 0L;
+
+        final StopwatchTimer[] strengthTimers = stats.perStateTimers[frequencyRange];
+        final int strengthCount = strengthTimers.length;
+        if (signalStrength < 0 || signalStrength >= strengthCount) return 0L;
+
+        return stats.perStateTimers[frequencyRange][signalStrength].getTotalTimeLocked(
+                elapsedRealtimeMs * 1000, STATS_SINCE_CHARGED) / 1000;
     }
 
     @UnsupportedAppUsage
@@ -12552,6 +12801,11 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i = 0; i < NUM_NETWORK_ACTIVITY_TYPES; i++) {
             mNetworkByteActivityCounters[i].reset(false, elapsedRealtimeUs);
             mNetworkPacketActivityCounters[i].reset(false, elapsedRealtimeUs);
+        }
+        for (int i = 0; i < RADIO_ACCESS_TECHNOLOGY_COUNT; i++) {
+            final RadioAccessTechnologyBatteryStats stats = mPerRatBatteryStats[i];
+            if (stats == null) continue;
+            stats.reset(elapsedRealtimeUs);
         }
         mMobileRadioActiveTimer.reset(false, elapsedRealtimeUs);
         mMobileRadioActivePerAppTimer.reset(false, elapsedRealtimeUs);

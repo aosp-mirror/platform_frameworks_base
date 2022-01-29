@@ -89,6 +89,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -141,6 +142,7 @@ public class UsageStatsService extends SystemService implements
             = SystemProperties.getBoolean("persist.debug.time_correction", true);
 
     static final boolean DEBUG = false; // Never submit with true
+    static final boolean DEBUG_RESPONSE_STATS = DEBUG || Log.isLoggable(TAG, Log.DEBUG);
     static final boolean COMPRESS_TIME = false;
 
     private static final long TEN_SECONDS = 10 * 1000;
@@ -279,7 +281,7 @@ public class UsageStatsService extends SystemService implements
         mHandler = new H(BackgroundThread.get().getLooper());
 
         mAppStandby = mInjector.getAppStandbyController(getContext());
-        mResponseStatsTracker = new BroadcastResponseStatsTracker();
+        mResponseStatsTracker = new BroadcastResponseStatsTracker(mAppStandby);
 
         mAppTimeLimit = new AppTimeLimitController(getContext(),
                 new AppTimeLimitController.TimeLimitCallbackListener() {

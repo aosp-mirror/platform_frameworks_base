@@ -16,8 +16,6 @@
 
 package android.os.storage;
 
-import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -308,11 +306,9 @@ public final class StorageVolume implements Parcelable {
 
     /**
      * Returns the user that owns this volume
-     *
-     * {@hide}
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    @SystemApi(client = MODULE_LIBRARIES)
+    // TODO(b/193460475) : Android Lint handle API change from systemApi to public Api incorrectly
+    @SuppressLint("NewApi")
     public @NonNull UserHandle getOwner() {
         return mOwner;
     }

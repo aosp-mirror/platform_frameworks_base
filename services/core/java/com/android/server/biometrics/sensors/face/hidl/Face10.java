@@ -55,6 +55,8 @@ import com.android.server.biometrics.SensorServiceStateProto;
 import com.android.server.biometrics.SensorStateProto;
 import com.android.server.biometrics.UserStateProto;
 import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
@@ -533,7 +535,10 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
             final FaceGenerateChallengeClient client = new FaceGenerateChallengeClient(mContext,
                     mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), userId,
-                    opPackageName, mSensorId, sSystemClock.millis());
+                    opPackageName, mSensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    BiometricContext.getInstance(), sSystemClock.millis());
             mGeneratedChallengeCache = client;
             mScheduler.scheduleClientMonitor(client, new ClientMonitorCallback() {
                 @Override
@@ -562,7 +567,10 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             mGeneratedChallengeCache = null;
 
             final FaceRevokeChallengeClient client = new FaceRevokeChallengeClient(mContext,
-                    mLazyDaemon, token, userId, opPackageName, mSensorId);
+                    mLazyDaemon, token, userId, opPackageName, mSensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    BiometricContext.getInstance());
             mScheduler.scheduleClientMonitor(client, new ClientMonitorCallback() {
                 @Override
                 public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
@@ -590,7 +598,10 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             final FaceEnrollClient client = new FaceEnrollClient(mContext, mLazyDaemon, token,
                     new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
                     opPackageName, id, FaceUtils.getLegacyInstance(mSensorId), disabledFeatures,
-                    ENROLL_TIMEOUT_SEC, previewSurface, mSensorId);
+                    ENROLL_TIMEOUT_SEC, previewSurface, mSensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_ENROLL,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    BiometricContext.getInstance());
 
             mScheduler.scheduleClientMonitor(client, new ClientMonitorCallback() {
                 @Override
@@ -637,7 +648,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             final FaceAuthenticationClient client = new FaceAuthenticationClient(mContext,
                     mLazyDaemon, token, requestId, receiver, userId, operationId, restricted,
                     opPackageName, cookie, false /* requireConfirmation */, mSensorId,
-                    isStrongBiometric, statsClient, mLockoutTracker, mUsageStats,
+                    createLogger(BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient),
+                    BiometricContext.getInstance(), isStrongBiometric, mLockoutTracker, mUsageStats,
                     allowBackgroundAuthentication, isKeyguardBypassEnabled);
             mScheduler.scheduleClientMonitor(client);
         });
@@ -670,7 +682,10 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
             final FaceRemovalClient client = new FaceRemovalClient(mContext, mLazyDaemon, token,
                     new ClientMonitorCallbackConverter(receiver), faceId, userId, opPackageName,
-                    FaceUtils.getLegacyInstance(mSensorId), mSensorId, mAuthenticatorIds);
+                    FaceUtils.getLegacyInstance(mSensorId), mSensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_REMOVE,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    BiometricContext.getInstance(), mAuthenticatorIds);
             mScheduler.scheduleClientMonitor(client);
         });
     }
@@ -685,7 +700,10 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             final FaceRemovalClient client = new FaceRemovalClient(mContext, mLazyDaemon, token,
                     new ClientMonitorCallbackConverter(receiver), 0 /* faceId */, userId,
                     opPackageName,
-                    FaceUtils.getLegacyInstance(mSensorId), mSensorId, mAuthenticatorIds);
+                    FaceUtils.getLegacyInstance(mSensorId), mSensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_REMOVE,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    BiometricContext.getInstance(), mAuthenticatorIds);
             mScheduler.scheduleClientMonitor(client);
         });
     }
@@ -702,7 +720,9 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
             final FaceResetLockoutClient client = new FaceResetLockoutClient(mContext,
                     mLazyDaemon, userId, mContext.getOpPackageName(), mSensorId,
-                    hardwareAuthToken);
+                    createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    BiometricContext.getInstance(), hardwareAuthToken);
             mScheduler.scheduleClientMonitor(client);
         });
     }
@@ -723,7 +743,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             final int faceId = faces.get(0).getBiometricId();
             final FaceSetFeatureClient client = new FaceSetFeatureClient(mContext,
                     mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), userId,
-                    opPackageName, mSensorId, feature, enabled, hardwareAuthToken, faceId);
+                    opPackageName, mSensorId, BiometricLogger.ofUnknown(mContext),
+                    BiometricContext.getInstance(), feature, enabled, hardwareAuthToken, faceId);
             mScheduler.scheduleClientMonitor(client);
         });
     }
@@ -742,7 +763,9 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
             final int faceId = faces.get(0).getBiometricId();
             final FaceGetFeatureClient client = new FaceGetFeatureClient(mContext, mLazyDaemon,
-                    token, listener, userId, opPackageName, mSensorId, feature, faceId);
+                    token, listener, userId, opPackageName, mSensorId,
+                    BiometricLogger.ofUnknown(mContext), BiometricContext.getInstance(),
+                    feature, faceId);
             mScheduler.scheduleClientMonitor(client, new ClientMonitorCallback() {
                 @Override
                 public void onClientFinished(
@@ -767,7 +790,10 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
 
             final List<Face> enrolledList = getEnrolledFaces(mSensorId, userId);
             final FaceInternalCleanupClient client = new FaceInternalCleanupClient(mContext,
-                    mLazyDaemon, userId, mContext.getOpPackageName(), mSensorId, enrolledList,
+                    mLazyDaemon, userId, mContext.getOpPackageName(), mSensorId,
+                    createLogger(BiometricsProtoEnums.ACTION_ENUMERATE,
+                            BiometricsProtoEnums.CLIENT_UNKNOWN),
+                    BiometricContext.getInstance(), enrolledList,
                     FaceUtils.getLegacyInstance(mSensorId), mAuthenticatorIds);
             mScheduler.scheduleClientMonitor(client, callback);
         });
@@ -890,7 +916,9 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         final boolean hasEnrolled = !getEnrolledFaces(mSensorId, targetUserId).isEmpty();
         final FaceUpdateActiveUserClient client = new FaceUpdateActiveUserClient(mContext,
                 mLazyDaemon, targetUserId, mContext.getOpPackageName(), mSensorId,
-                hasEnrolled, mAuthenticatorIds);
+                createLogger(BiometricsProtoEnums.ACTION_UNKNOWN,
+                        BiometricsProtoEnums.CLIENT_UNKNOWN),
+                BiometricContext.getInstance(), hasEnrolled, mAuthenticatorIds);
         mScheduler.scheduleClientMonitor(client, new ClientMonitorCallback() {
             @Override
             public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
@@ -902,6 +930,11 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
                 }
             }
         });
+    }
+
+    private BiometricLogger createLogger(int statsAction, int statsClient) {
+        return new BiometricLogger(mContext, BiometricsProtoEnums.MODALITY_FACE,
+                statsAction, statsClient);
     }
 
     /**

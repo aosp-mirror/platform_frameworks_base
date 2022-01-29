@@ -60,8 +60,8 @@ public class ClipboardListener extends CoreStartable
             return;
         }
         if (mClipboardOverlayController == null) {
-            mClipboardOverlayController = new ClipboardOverlayController(mContext,
-                    new TimeoutHandler(mContext));
+            mClipboardOverlayController =
+                    new ClipboardOverlayController(mContext, new TimeoutHandler(mContext));
         }
         mClipboardOverlayController.setClipData(mClipboardManager.getPrimaryClip());
         mClipboardOverlayController.setOnSessionCompleteListener(() -> {

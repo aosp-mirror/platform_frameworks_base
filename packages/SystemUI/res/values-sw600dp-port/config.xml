@@ -15,7 +15,6 @@
   ~ limitations under the License
   -->
 <resources>
-
     <!-- The maximum number of tiles in the QuickQSPanel -->
     <integer name="quick_qs_panel_max_tiles">6</integer>
 

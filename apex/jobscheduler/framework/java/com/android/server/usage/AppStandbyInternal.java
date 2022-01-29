@@ -216,4 +216,11 @@ public interface AppStandbyInternal {
     void dumpState(String[] args, PrintWriter pw);
 
     boolean isAppIdleEnabled();
+
+    /**
+     * Returns the duration (in millis) for the window where events occurring will be
+     * considered as broadcast response, starting from the point when an app receives
+     * a broadcast.
+     */
+    long getBroadcastResponseWindowDurationMs();
 }

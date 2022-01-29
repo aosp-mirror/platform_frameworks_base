@@ -33,12 +33,16 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.StyleRes;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UiContext;
 import android.app.VoiceInteractor.Request;
 import android.app.admin.DevicePolicyManager;
 import android.app.assist.AssistContent;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
@@ -787,6 +791,16 @@ public class Activity extends ContextThemeWrapper
     private static final int LOG_AM_ON_ACTIVITY_RESULT_CALLED = 30062;
     private static final int LOG_AM_ON_TOP_RESUMED_GAINED_CALLED = 30064;
     private static final int LOG_AM_ON_TOP_RESUMED_LOST_CALLED = 30065;
+
+    /**
+     * After {@link Build.VERSION_CODES#TIRAMISU},
+     * {@link #dump(String, FileDescriptor, PrintWriter, String[])} is not called if
+     * {@code dumpsys activity} is called with some special arguments.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    @VisibleForTesting
+    private static final long DUMP_IGNORES_SPECIAL_ARGS = 149254050L;
 
     private static class ManagedDialog {
         Dialog mDialog;
@@ -6131,8 +6145,31 @@ public class Activity extends ContextThemeWrapper
      * the outgoing activity.  Use 0 for no animation.
      */
     public void overridePendingTransition(int enterAnim, int exitAnim) {
-        ActivityClient.getInstance().overridePendingTransition(mToken, getPackageName(),
-                enterAnim, exitAnim);
+        overridePendingTransition(enterAnim, exitAnim, 0);
+    }
+
+    /**
+     * Call immediately after one of the flavors of {@link #startActivity(Intent)}
+     * or {@link #finish} to specify an explicit transition animation to
+     * perform next.
+     *
+     * <p>As of {@link android.os.Build.VERSION_CODES#JELLY_BEAN} an alternative
+     * to using this with starting activities is to supply the desired animation
+     * information through a {@link ActivityOptions} bundle to
+     * {@link #startActivity(Intent, Bundle)} or a related function.  This allows
+     * you to specify a custom animation even when starting an activity from
+     * outside the context of the current top activity.
+     *
+     * @param enterAnim A resource ID of the animation resource to use for
+     * the incoming activity.  Use 0 for no animation.
+     * @param exitAnim A resource ID of the animation resource to use for
+     * the outgoing activity.  Use 0 for no animation.
+     * @param backgroundColor The background color to use for the background during the animation if
+     * the animation requires a background. Set to 0 to not override the default color.
+     */
+    public void overridePendingTransition(int enterAnim, int exitAnim, int backgroundColor) {
+        ActivityClient.getInstance().overridePendingTransition(mToken, getPackageName(), enterAnim,
+                exitAnim, backgroundColor);
     }
 
     /**
@@ -7079,7 +7116,18 @@ public class Activity extends ContextThemeWrapper
 
     /**
      * Print the Activity's state into the given stream.  This gets invoked if
-     * you run "adb shell dumpsys activity &lt;activity_component_name&gt;".
+     * you run <code>adb shell dumpsys activity &lt;activity_component_name&gt;</code>.
+     *
+     * <p>This method won't be called if the app targets
+     * {@link android.os.Build.VERSION_CODES#TIRAMISU} or later if the dump request starts with one
+     * of the following arguments:
+     * <ul>
+     *   <li>--autofill
+     *   <li>--contentcapture
+     *   <li>--translation
+     *   <li>--list-dumpables
+     *   <li>--dump-dumpable
+     * </ul>
      *
      * @param prefix Desired prefix to prepend at each line of output.
      * @param fd The raw file descriptor that the dump is being sent to.
@@ -7106,11 +7154,20 @@ public class Activity extends ContextThemeWrapper
         return mDumpableContainer.addDumpable(dumpable);
     }
 
-    void dumpInner(@NonNull String prefix, @Nullable FileDescriptor fd,
+    /**
+     * This is the real method called by {@code ActivityThread}, but it's also exposed so
+     * CTS can test for the special args cases.
+     *
+     * @hide
+     */
+    @TestApi
+    @VisibleForTesting
+    @SuppressLint("OnNameExpected")
+    public void dumpInternal(@NonNull String prefix,
+            @SuppressLint("UseParcelFileDescriptor") @Nullable FileDescriptor fd,
             @NonNull PrintWriter writer, @Nullable String[] args) {
-        String innerPrefix = prefix + "  ";
-
-        if (args != null && args.length > 0) {
+        if (args != null && args.length > 0
+                && CompatChanges.isChangeEnabled(DUMP_IGNORES_SPECIAL_ARGS)) {
             // Handle special cases
             switch (args[0]) {
                 case "--autofill":
@@ -7145,6 +7202,12 @@ public class Activity extends ContextThemeWrapper
                     return;
             }
         }
+        dump(prefix, fd, writer, args);
+    }
+
+    void dumpInner(@NonNull String prefix, @Nullable FileDescriptor fd,
+            @NonNull PrintWriter writer, @Nullable String[] args) {
+        String innerPrefix = prefix + "  ";
 
         writer.print(prefix); writer.print("Local Activity ");
                 writer.print(Integer.toHexString(System.identityHashCode(this)));
@@ -7161,11 +7224,6 @@ public class Activity extends ContextThemeWrapper
                 writer.println(mChangingConfigurations);
         writer.print(innerPrefix); writer.print("mCurrentConfig=");
                 writer.println(mCurrentConfig);
-        if (getResources().hasOverrideDisplayAdjustments()) {
-            writer.print(innerPrefix);
-            writer.print("FixedRotationAdjustments=");
-            writer.println(getResources().getDisplayAdjustments().getFixedRotationAdjustments());
-        }
 
         mFragments.dumpLoaders(innerPrefix, fd, writer, args);
         mFragments.getFragmentManager().dump(innerPrefix, fd, writer, args);

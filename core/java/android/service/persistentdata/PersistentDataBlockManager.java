@@ -26,8 +26,6 @@ import android.content.Context;
 import android.os.RemoteException;
 import android.service.oemlock.OemLockManager;
 
-import com.android.internal.R;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -53,7 +51,6 @@ import java.lang.annotation.RetentionPolicy;
 @SystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE)
 public class PersistentDataBlockManager {
     private static final String TAG = PersistentDataBlockManager.class.getSimpleName();
-    private final Context mContext;
     private IPersistentDataBlockService sService;
 
     /**
@@ -78,10 +75,7 @@ public class PersistentDataBlockManager {
     public @interface FlashLockState {}
 
     /** @hide */
-    public PersistentDataBlockManager(
-            Context context,
-            IPersistentDataBlockService service) {
-        mContext = context;
+    public PersistentDataBlockManager(IPersistentDataBlockService service) {
         sService = service;
     }
 
@@ -219,7 +213,12 @@ public class PersistentDataBlockManager {
      */
     @SystemApi
     @NonNull
+    @RequiresPermission(android.Manifest.permission.ACCESS_PDB_STATE)
     public String getPersistentDataPackageName() {
-        return mContext.getString(R.string.config_persistentDataPackageName);
+        try {
+            return sService.getPersistentDataPackageName();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 }

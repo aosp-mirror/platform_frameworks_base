@@ -19,12 +19,13 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.fingerprint.Fingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.RemovalClient;
@@ -45,9 +46,10 @@ class FingerprintRemovalClient extends RemovalClient<Fingerprint, AidlSession> {
             @NonNull Supplier<AidlSession> lazyDaemon, @NonNull IBinder token,
             @Nullable ClientMonitorCallbackConverter listener, int[] biometricIds, int userId,
             @NonNull String owner, @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, token, listener, userId, owner, utils, sensorId,
-                authenticatorIds, BiometricsProtoEnums.MODALITY_FINGERPRINT);
+                logger, biometricContext, authenticatorIds);
         mBiometricIds = biometricIds;
     }
 

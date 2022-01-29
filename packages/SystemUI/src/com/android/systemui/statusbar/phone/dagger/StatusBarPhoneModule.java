@@ -40,6 +40,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
@@ -231,7 +232,8 @@ public interface StatusBarPhoneModule {
             ActivityLaunchAnimator activityLaunchAnimator,
             NotifPipelineFlags notifPipelineFlags,
             InteractionJankMonitor jankMonitor,
-            DeviceStateManager deviceStateManager) {
+            DeviceStateManager deviceStateManager,
+            DreamOverlayStateController dreamOverlayStateController) {
         return new StatusBar(
                 context,
                 notificationsController,
@@ -327,7 +329,8 @@ public interface StatusBarPhoneModule {
                 activityLaunchAnimator,
                 notifPipelineFlags,
                 jankMonitor,
-                deviceStateManager
+                deviceStateManager,
+                dreamOverlayStateController
         );
     }
 }

@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import android.annotation.NonNull;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.SigningDetails;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;
 import com.android.server.pm.pkg.component.ParsedProcess;
 import com.android.server.pm.pkg.component.ParsedProcessImpl;
@@ -28,6 +29,8 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageStateInternal;
+import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.utils.SnapshotCache;
 
 import libcore.util.EmptyArray;
@@ -40,25 +43,26 @@ import java.util.Map;
 /**
  * Settings data for a particular shared user ID we know about.
  */
-public final class SharedUserSetting extends SettingBase {
+public final class SharedUserSetting extends SettingBase implements SharedUserApi {
     final String name;
 
     int userId;
 
-    // flags that are associated with this uid, regardless of any package flags
+    /** @see SharedUserApi#getUidFlags() **/
     int uidFlags;
     int uidPrivateFlags;
 
-    // The lowest targetSdkVersion of all apps in the sharedUserSetting, used to assign seinfo so
-    // that all apps within the sharedUser run in the same selinux context.
+    /** @see SharedUserApi#getSeInfoTargetSdkVersion() **/
     int seInfoTargetSdkVersion;
 
     final ArraySet<PackageSetting> packages;
+    private ArraySet<PackageStateInternal> mPackagesSnapshot;
 
     // It is possible for a system app to leave shared user ID by an update.
     // We need to keep track of the shadowed PackageSettings so that it is possible to uninstall
     // the update and revert the system app back into the original shared user ID.
     final ArraySet<PackageSetting> mDisabledPackages;
+    private ArraySet<PackageStateInternal> mDisabledPackagesSnapshot;
 
     final PackageSignatures signatures = new PackageSignatures();
     Boolean signaturesChanged;
@@ -98,7 +102,19 @@ public final class SharedUserSetting extends SettingBase {
         uidFlags = orig.uidFlags;
         uidPrivateFlags = orig.uidPrivateFlags;
         packages = new ArraySet<>(orig.packages);
+        if (!packages.isEmpty()) {
+            mPackagesSnapshot = new ArraySet<>();
+            for (int index = 0; index < packages.size(); index++) {
+                mPackagesSnapshot.add(new PackageSetting(packages.valueAt(index)));
+            }
+        }
         mDisabledPackages = new ArraySet<>(orig.mDisabledPackages);
+        if (!mDisabledPackages.isEmpty()) {
+            mDisabledPackagesSnapshot = new ArraySet<>();
+            for (int index = 0; index < mDisabledPackages.size(); index++) {
+                mDisabledPackagesSnapshot.add(new PackageSetting(mDisabledPackages.valueAt(index)));
+            }
+        }
         // A SigningDetails seems to consist solely of final attributes, so
         // it is safe to copy the reference.
         signatures.mSigningDetails = orig.signatures.mSigningDetails;
@@ -184,10 +200,9 @@ public final class SharedUserSetting extends SettingBase {
         }
     }
 
-    /**
-     * @return the list of packages that uses this shared UID
-     */
-    public @NonNull List<AndroidPackage> getPackages() {
+    @NonNull
+    @Override
+    public List<AndroidPackage> getPackages() {
         if (packages == null || packages.size() == 0) {
             return Collections.emptyList();
         }
@@ -201,6 +216,7 @@ public final class SharedUserSetting extends SettingBase {
         return pkgList;
     }
 
+    @Override
     public boolean isPrivileged() {
         return (this.getPrivateFlags() & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
     }
@@ -290,5 +306,61 @@ public final class SharedUserSetting extends SettingBase {
         }
         onChanged();
         return this;
+    }
+
+    @NonNull
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public int getUserId() {
+        return userId;
+    }
+
+    @Override
+    public int getUidFlags() {
+        return uidFlags;
+    }
+
+    @Override
+    public int getPrivateUidFlags() {
+        return uidPrivateFlags;
+    }
+
+    @Override
+    public int getSeInfoTargetSdkVersion() {
+        return seInfoTargetSdkVersion;
+    }
+
+    @NonNull
+    @Override
+    public ArraySet<? extends PackageStateInternal> getPackageStates() {
+        if (mPackagesSnapshot != null) {
+            return mPackagesSnapshot;
+        }
+        return packages;
+    }
+
+    @NonNull
+    @Override
+    public ArraySet<? extends PackageStateInternal> getDisabledPackageStates() {
+        if (mDisabledPackagesSnapshot != null) {
+            return mDisabledPackagesSnapshot;
+        }
+        return mDisabledPackages;
+    }
+
+    @NonNull
+    @Override
+    public SigningDetails getSigningDetails() {
+        return signatures.mSigningDetails;
+    }
+
+    @NonNull
+    @Override
+    public ArrayMap<String, ParsedProcess> getProcesses() {
+        return processes;
     }
 }

@@ -1187,6 +1187,10 @@
     <string name="deleteText" msgid="4200807474529938112">"Törlés"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Beviteli mód"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Műveletek szöveggel"</string>
+    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
+    <skip />
+    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Kevés a szabad terület"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Előfordulhat, hogy néhány rendszerfunkció nem működik."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Nincs elegendő tárhely a rendszerhez. Győződjön meg arról, hogy rendelkezik 250 MB szabad területtel, majd kezdje elölről."</string>
@@ -1491,6 +1495,8 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Az alkalmazás engedélyt kérhet az akkumulátoroptimalizálási beállítások mellőzésére."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"az összes csomag lekérdezése"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Engedélyezi az adott alkalmazás számára, hogy lássa az összes telepített csomagot."</string>
+    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"hozzáférés ehhez: SupplementalApis"</string>
+    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Lehetővé teszi egy alkalmazás számára, hogy hozzáférjen a következőhöz: SupplementalApis."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Érintse meg kétszer a nagyítás beállításához"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Nem sikerült hozzáadni a modult."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Ugrás"</string>

@@ -36,6 +36,9 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,7 +57,8 @@ public class BiometricSchedulerOperationTest {
     public abstract static class InterruptableMonitor<T>
             extends HalClientMonitor<T> implements  Interruptable {
         public InterruptableMonitor() {
-            super(null, null, null, null, 0, null, 0, 0, 0, 0, 0);
+            super(null, null, null, null, 0, null, 0, 0,
+                    mock(BiometricLogger.class), mock(BiometricContext.class));
         }
     }
 

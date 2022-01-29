@@ -2,6 +2,7 @@
 package android {
 
   public static final class Manifest.permission {
+    field public static final String CONTROL_AUTOMOTIVE_GNSS = "android.permission.CONTROL_AUTOMOTIVE_GNSS";
     field public static final String GET_INTENT_SENDER_INTENT = "android.permission.GET_INTENT_SENDER_INTENT";
   }
 
@@ -162,6 +163,8 @@ package android.location {
 
   public class LocationManager {
     method @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_FINE_LOCATION}) public boolean injectLocation(@NonNull android.location.Location);
+    method @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS) public boolean isAutomotiveGnssSuspended();
+    method @RequiresPermission(android.Manifest.permission.CONTROL_AUTOMOTIVE_GNSS) public void setAutomotiveGnssSuspended(boolean);
   }
 
 }
@@ -538,10 +541,6 @@ package android.os.storage {
     field public static final int APP_IO_BLOCKED_REASON_UNKNOWN = 0; // 0x0
   }
 
-  public final class StorageVolume implements android.os.Parcelable {
-    method @NonNull public android.os.UserHandle getOwner();
-  }
-
 }
 
 package android.provider {
@@ -554,6 +553,26 @@ package android.provider {
     field public static final String NAMESPACE_ALARM_MANAGER = "alarm_manager";
     field public static final String NAMESPACE_APP_STANDBY = "app_standby";
     field public static final String NAMESPACE_DEVICE_IDLE = "device_idle";
+  }
+
+  public static final class Settings.Global extends android.provider.Settings.NameValueTable {
+    field public static final String BLE_SCAN_ALWAYS_AVAILABLE = "ble_scan_always_enabled";
+    field public static final String BLE_SCAN_BACKGROUND_MODE = "ble_scan_background_mode";
+    field public static final String BLE_SCAN_BALANCED_INTERVAL_MS = "ble_scan_balanced_interval_ms";
+    field public static final String BLE_SCAN_BALANCED_WINDOW_MS = "ble_scan_balanced_window_ms";
+    field public static final String BLE_SCAN_LOW_LATENCY_INTERVAL_MS = "ble_scan_low_latency_interval_ms";
+    field public static final String BLE_SCAN_LOW_LATENCY_WINDOW_MS = "ble_scan_low_latency_window_ms";
+    field public static final String BLE_SCAN_LOW_POWER_INTERVAL_MS = "ble_scan_low_power_interval_ms";
+    field public static final String BLE_SCAN_LOW_POWER_WINDOW_MS = "ble_scan_low_power_window_ms";
+    field public static final String BLUETOOTH_BTSNOOP_DEFAULT_MODE = "bluetooth_btsnoop_default_mode";
+    field public static final String BLUETOOTH_CLASS_OF_DEVICE = "bluetooth_class_of_device";
+    field public static final String BLUETOOTH_DISABLED_PROFILES = "bluetooth_disabled_profiles";
+  }
+
+  public static final class Settings.Secure extends android.provider.Settings.NameValueTable {
+    field public static final String BLUETOOTH_ADDRESS = "bluetooth_address";
+    field public static final String BLUETOOTH_ADDR_VALID = "bluetooth_addr_valid";
+    field public static final String BLUETOOTH_NAME = "bluetooth_name";
   }
 
 }

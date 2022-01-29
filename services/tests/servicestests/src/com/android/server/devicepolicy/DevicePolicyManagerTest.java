@@ -28,6 +28,14 @@ import static android.app.admin.DevicePolicyManager.ID_TYPE_BASE_INFO;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_IMEI;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_MEID;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_SERIAL;
+import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_BLOCK_ACTIVITY_START_IN_TASK;
+import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_GLOBAL_ACTIONS;
+import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_HOME;
+import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_KEYGUARD;
+import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NONE;
+import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS;
+import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW;
+import static android.app.admin.DevicePolicyManager.LOCK_TASK_FEATURE_SYSTEM_INFO;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_HIGH;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_LOW;
 import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_MEDIUM;
@@ -101,6 +109,7 @@ import android.app.admin.WifiSsidPolicy;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -138,6 +147,9 @@ import com.android.internal.widget.LockscreenCredential;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.devicepolicy.DevicePolicyManagerService.RestrictionsListener;
+import com.android.server.pm.RestrictionsSet;
+import com.android.server.pm.UserManagerInternal;
+import com.android.server.pm.UserRestrictionsUtils;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -7761,6 +7773,296 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setDeviceOwner();
 
         assertThrows(IllegalStateException.class, () -> dpm.getDeviceOwnerType(admin2));
+    }
+
+    @Test
+    public void testSetUserRestriction_financeDo_invalidRestrictions_restrictionNotSet()
+            throws Exception {
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        for (String restriction : UserRestrictionsUtils.USER_RESTRICTIONS) {
+            if (!UserRestrictionsUtils.canFinancedDeviceOwnerChange(restriction)) {
+                assertNoDeviceOwnerRestrictions();
+                assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                        () -> dpm.addUserRestriction(admin1, restriction));
+
+                verify(getServices().userManagerInternal, never())
+                        .setDevicePolicyUserRestrictions(anyInt(), any(), any(), anyBoolean());
+            }
+        }
+    }
+
+    @Test
+    public void testSetUserRestriction_financeDo_validRestrictions_setsRestriction()
+            throws Exception {
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        for (String restriction : UserRestrictionsUtils.USER_RESTRICTIONS) {
+            if (UserRestrictionsUtils.canFinancedDeviceOwnerChange(restriction)) {
+                assertNoDeviceOwnerRestrictions();
+                dpm.addUserRestriction(admin1, restriction);
+
+                Bundle globalRestrictions =
+                        dpms.getDeviceOwnerAdminLocked().getGlobalUserRestrictions(
+                                UserManagerInternal.OWNER_TYPE_DEVICE_OWNER);
+                RestrictionsSet localRestrictions = new RestrictionsSet();
+                localRestrictions.updateRestrictions(
+                        UserHandle.USER_SYSTEM,
+                        dpms.getDeviceOwnerAdminLocked().getLocalUserRestrictions(
+                                UserManagerInternal.OWNER_TYPE_DEVICE_OWNER));
+                verify(getServices().userManagerInternal)
+                        .setDevicePolicyUserRestrictions(eq(UserHandle.USER_SYSTEM),
+                                MockUtils.checkUserRestrictions(globalRestrictions),
+                                MockUtils.checkUserRestrictions(
+                                        UserHandle.USER_SYSTEM, localRestrictions),
+                                eq(true));
+                reset(getServices().userManagerInternal);
+
+                dpm.clearUserRestriction(admin1, restriction);
+                reset(getServices().userManagerInternal);
+            }
+        }
+    }
+
+    @Test
+    public void testSetLockTaskFeatures_financeDo_validLockTaskFeatures_lockTaskFeaturesSet()
+            throws Exception {
+        int validLockTaskFeatures = LOCK_TASK_FEATURE_SYSTEM_INFO | LOCK_TASK_FEATURE_KEYGUARD
+                | LOCK_TASK_FEATURE_HOME | LOCK_TASK_FEATURE_GLOBAL_ACTIONS
+                | LOCK_TASK_FEATURE_NOTIFICATIONS;
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        dpm.setLockTaskFeatures(admin1, validLockTaskFeatures);
+
+        verify(getServices().iactivityTaskManager)
+                .updateLockTaskFeatures(eq(UserHandle.USER_SYSTEM), eq(validLockTaskFeatures));
+    }
+
+    @Test
+    public void testSetLockTaskFeatures_financeDo_invalidLockTaskFeatures_throwsException()
+            throws Exception {
+        int invalidLockTaskFeatures = LOCK_TASK_FEATURE_NONE | LOCK_TASK_FEATURE_OVERVIEW
+                | LOCK_TASK_FEATURE_HOME | LOCK_TASK_FEATURE_BLOCK_ACTIVITY_START_IN_TASK;
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+        // Called during setup.
+        verify(getServices().iactivityTaskManager).updateLockTaskFeatures(anyInt(), anyInt());
+
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.setLockTaskFeatures(admin1, invalidLockTaskFeatures));
+
+        verifyNoMoreInteractions(getServices().iactivityTaskManager);
+    }
+
+    @Test
+    public void testIsUninstallBlocked_financeDo_success() throws Exception {
+        String packageName = "com.android.foo.package";
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+        when(getServices().ipackageManager.getBlockUninstallForUser(
+                eq(packageName), eq(UserHandle.USER_SYSTEM)))
+                .thenReturn(true);
+
+        assertThat(dpm.isUninstallBlocked(admin1, packageName)).isTrue();
+    }
+
+    @Test
+    public void testSetUninstallBlocked_financeDo_success() throws Exception {
+        String packageName = "com.android.foo.package";
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        dpm.setUninstallBlocked(admin1, packageName, false);
+
+        verify(getServices().ipackageManager)
+                .setBlockUninstallForUser(eq(packageName), eq(false),
+                        eq(UserHandle.USER_SYSTEM));
+    }
+
+    @Test
+    public void testSetUserControlDisabledPackages_financeDo_success() throws Exception {
+        List<String> packages = new ArrayList<>();
+        packages.add("com.android.foo.package");
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        dpm.setUserControlDisabledPackages(admin1, packages);
+
+        verify(getServices().packageManagerInternal)
+                .setDeviceOwnerProtectedPackages(eq(admin1.getPackageName()), eq(packages));
+    }
+
+    @Test
+    public void testGetUserControlDisabledPackages_financeDo_success() throws Exception {
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        assertThat(dpm.getUserControlDisabledPackages(admin1)).isEmpty();
+    }
+
+    @Test
+    public void testSetOrganizationName_financeDo_success() throws Exception {
+        String organizationName = "Test Organization";
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        dpm.setOrganizationName(admin1, organizationName);
+
+        assertThat(dpm.getDeviceOwnerOrganizationName()).isEqualTo(organizationName);
+    }
+
+    @Test
+    public void testSetShortSupportMessage_financeDo_success() throws Exception {
+        String supportMessage = "Test short support message";
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        dpm.setShortSupportMessage(admin1, supportMessage);
+
+        assertThat(dpm.getShortSupportMessage(admin1)).isEqualTo(supportMessage);
+    }
+
+    @Test
+    public void testIsBackupServiceEnabled_financeDo_success() throws Exception {
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+        when(getServices().ibackupManager.isBackupServiceActive(eq(UserHandle.USER_SYSTEM)))
+                .thenReturn(true);
+
+        assertThat(dpm.isBackupServiceEnabled(admin1)).isTrue();
+    }
+
+    @Test
+    public void testSetBackupServiceEnabled_financeDo_success() throws Exception {
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        dpm.setBackupServiceEnabled(admin1, true);
+
+        verify(getServices().ibackupManager)
+                .setBackupServiceActive(eq(UserHandle.USER_SYSTEM), eq(true));
+    }
+
+    @Test
+    public void testIsLockTaskPermitted_financeDo_success() throws Exception {
+        String packageName = "com.android.foo.package";
+        mockPolicyExemptApps(packageName);
+        mockVendorPolicyExemptApps();
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        assertThat(dpm.isLockTaskPermitted(packageName)).isTrue();
+    }
+
+    @Test
+    public void testSetLockTaskPackages_financeDo_success() throws Exception {
+        String[] packages = {"com.android.foo.package"};
+        mockEmptyPolicyExemptApps();
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        dpm.setLockTaskPackages(admin1, packages);
+
+        verify(getServices().iactivityManager)
+                .updateLockTaskPackages(eq(UserHandle.USER_SYSTEM), eq(packages));
+    }
+
+    @Test
+    public void testAddPersistentPreferredActivity_financeDo_success() throws Exception {
+        IntentFilter filter = new IntentFilter();
+        ComponentName target = new ComponentName(admin2.getPackageName(), "test.class");
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        dpm.addPersistentPreferredActivity(admin1, filter, target);
+
+        verify(getServices().ipackageManager)
+                .addPersistentPreferredActivity(eq(filter), eq(target), eq(UserHandle.USER_SYSTEM));
+        verify(getServices().ipackageManager)
+                .flushPackageRestrictionsAsUser(eq(UserHandle.USER_SYSTEM));
+    }
+
+    @Test
+    public void testClearPackagePersistentPreferredActvities_financeDo_success() throws Exception {
+        String packageName = admin2.getPackageName();
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        dpm.clearPackagePersistentPreferredActivities(admin1, packageName);
+
+        verify(getServices().ipackageManager)
+                .clearPackagePersistentPreferredActivities(
+                        eq(packageName), eq(UserHandle.USER_SYSTEM));
+        verify(getServices().ipackageManager)
+                .flushPackageRestrictionsAsUser(eq(UserHandle.USER_SYSTEM));
+    }
+
+    @Test
+    public void testWipeData_financeDo_success() throws Exception {
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+        when(getServices().userManager.getUserRestrictionSource(
+                UserManager.DISALLOW_FACTORY_RESET,
+                UserHandle.SYSTEM))
+                .thenReturn(UserManager.RESTRICTION_SOURCE_DEVICE_OWNER);
+        when(mMockContext.getResources()
+                .getString(R.string.work_profile_deleted_description_dpm_wipe))
+                .thenReturn("Test string");
+
+        dpm.wipeData(0);
+
+        verifyRebootWipeUserData(/* wipeEuicc= */ false);
+    }
+
+    @Test
+    public void testIsDeviceOwnerApp_financeDo_success() throws Exception {
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        assertThat(dpm.isDeviceOwnerApp(admin1.getPackageName())).isTrue();
+    }
+
+    @Test
+    public void testClearDeviceOwnerApp_financeDo_success() throws Exception {
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        dpm.clearDeviceOwnerApp(admin1.getPackageName());
+
+        assertThat(dpm.getDeviceOwnerComponentOnAnyUser()).isNull();
+        assertThat(dpm.isAdminActiveAsUser(admin1, UserHandle.USER_SYSTEM)).isFalse();
+        verify(mMockContext.spiedContext, times(2))
+                .sendBroadcastAsUser(
+                        MockUtils.checkIntentAction(
+                                DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED),
+                        eq(UserHandle.SYSTEM));
+    }
+
+    @Test
+    public void testSetPermissionGrantState_financeDo_notReadPhoneStatePermission_throwsException()
+            throws Exception {
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.setPermissionGrantState(admin1, admin1.getPackageName(),
+                        permission.READ_CALENDAR,
+                        DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED));
+    }
+
+    @Test
+    public void testSetPermissionGrantState_financeDo_grantPermissionToNonDeviceOwnerPackage_throwsException()
+            throws Exception {
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.setPermissionGrantState(admin1, "com.android.foo.package",
+                        permission.READ_PHONE_STATE,
+                        DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED));
     }
 
     @Test

@@ -42,12 +42,14 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.SystemConfig;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.Watchable;
@@ -254,12 +256,18 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
 
     /**
      * Given the library name, returns a list of shared libraries on all versions.
+     * TODO: Remove, this is used for live mutation outside of the defined commit path
      */
     @GuardedBy("mPm.mLock")
     @Override
     public @NonNull WatchedLongSparseArray<SharedLibraryInfo> getSharedLibraryInfos(
             @NonNull String libName) {
         return mSharedLibraries.get(libName);
+    }
+
+    @VisibleForTesting
+    public WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>> getSharedLibraries() {
+        return mSharedLibraries;
     }
 
     /**
@@ -286,18 +294,19 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
         return mStaticLibsByDeclaringPackage.get(declaringPackageName);
     }
 
-    @GuardedBy("mPm.mLock")
-    private @Nullable PackageSetting getLibraryPackageLPr(@NonNull SharedLibraryInfo libInfo) {
+    @Nullable
+    private PackageStateInternal getLibraryPackage(@NonNull Computer computer,
+            @NonNull SharedLibraryInfo libInfo) {
         final VersionedPackage declaringPackage = libInfo.getDeclaringPackage();
         if (libInfo.isStatic()) {
             // Resolve the package name - we use synthetic package names internally
-            final String internalPackageName = mPm.resolveInternalPackageNameLPr(
+            final String internalPackageName = computer.resolveInternalPackageName(
                     declaringPackage.getPackageName(),
                     declaringPackage.getLongVersionCode());
-            return mPm.mSettings.getPackageLPr(internalPackageName);
+            return computer.getPackageStateInternal(internalPackageName);
         }
         if (libInfo.isSdk()) {
-            return mPm.mSettings.getPackageLPr(declaringPackage.getPackageName());
+            return computer.getPackageStateInternal(declaringPackage.getPackageName());
         }
         return null;
     }
@@ -317,24 +326,26 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
         final StorageManager storage = mInjector.getSystemService(StorageManager.class);
         final File volume = storage.findPathForUuid(StorageManager.UUID_PRIVATE_INTERNAL);
 
-        List<VersionedPackage> packagesToDelete = null;
+        final ArrayList<VersionedPackage> packagesToDelete = new ArrayList<>();
         final long now = System.currentTimeMillis();
 
         // Important: We skip shared libs used for some user since
         // in such a case we need to keep the APK on the device. The check for
         // a lib being used for any user is performed by the uninstall call.
-        synchronized (mPm.mLock) {
-            final int libCount = mSharedLibraries.size();
+        mPm.executeWithConsistentComputer(computer -> {
+            final WatchedArrayMap<String, WatchedLongSparseArray<SharedLibraryInfo>>
+                    sharedLibraries = computer.getSharedLibraries();
+            final int libCount = sharedLibraries.size();
             for (int i = 0; i < libCount; i++) {
                 final WatchedLongSparseArray<SharedLibraryInfo> versionedLib =
-                        mSharedLibraries.valueAt(i);
+                        sharedLibraries.valueAt(i);
                 if (versionedLib == null) {
                     continue;
                 }
                 final int versionCount = versionedLib.size();
                 for (int j = 0; j < versionCount; j++) {
                     SharedLibraryInfo libInfo = versionedLib.valueAt(j);
-                    final PackageSetting ps = getLibraryPackageLPr(libInfo);
+                    final PackageStateInternal ps = getLibraryPackage(computer, libInfo);
                     if (ps == null) {
                         continue;
                     }
@@ -348,27 +359,22 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
                         continue;
                     }
 
-                    if (packagesToDelete == null) {
-                        packagesToDelete = new ArrayList<>();
-                    }
                     packagesToDelete.add(new VersionedPackage(ps.getPkg().getPackageName(),
                             libInfo.getDeclaringPackage().getLongVersionCode()));
                 }
             }
-        }
+        });
 
-        if (packagesToDelete != null) {
-            final int packageCount = packagesToDelete.size();
-            for (int i = 0; i < packageCount; i++) {
-                final VersionedPackage pkgToDelete = packagesToDelete.get(i);
-                // Delete the package synchronously (will fail of the lib used for any user).
-                if (mDeletePackageHelper.deletePackageX(pkgToDelete.getPackageName(),
-                        pkgToDelete.getLongVersionCode(), UserHandle.USER_SYSTEM,
-                        PackageManager.DELETE_ALL_USERS,
-                        true /*removedBySystem*/) == PackageManager.DELETE_SUCCEEDED) {
-                    if (volume.getUsableSpace() >= neededSpace) {
-                        return true;
-                    }
+        final int packageCount = packagesToDelete.size();
+        for (int i = 0; i < packageCount; i++) {
+            final VersionedPackage pkgToDelete = packagesToDelete.get(i);
+            // Delete the package synchronously (will fail of the lib used for any user).
+            if (mDeletePackageHelper.deletePackageX(pkgToDelete.getPackageName(),
+                    pkgToDelete.getLongVersionCode(), UserHandle.USER_SYSTEM,
+                    PackageManager.DELETE_ALL_USERS,
+                    true /*removedBySystem*/) == PackageManager.DELETE_SUCCEEDED) {
+                if (volume.getUsableSpace() >= neededSpace) {
+                    return true;
                 }
             }
         }
@@ -525,7 +531,7 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
             @NonNull Map<String, AndroidPackage> availablePackages)
             throws PackageManagerException {
         final ArrayList<SharedLibraryInfo> sharedLibraryInfos = collectSharedLibraryInfos(
-                pkgSetting.getPkg(), availablePackages, null /* newLibraries */);
+                pkg, availablePackages, null /* newLibraries */);
         executeSharedLibrariesUpdateLPw(pkg, pkgSetting, changingLib, changingLibSetting,
                 sharedLibraryInfos, mPm.mUserManager.getUserIds());
     }

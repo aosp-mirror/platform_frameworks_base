@@ -85,7 +85,7 @@ static jlong android_hardware_HardwareBuffer_create(JNIEnv* env, jobject clazz,
     sp<GraphicBuffer> buffer = new GraphicBuffer(width, height, pixelFormat, layers,
             grallocUsage, std::string("HardwareBuffer pid [") + std::to_string(getpid()) +"]");
     status_t error = buffer->initCheck();
-    if (error < 0) {
+    if (error != OK) {
         if (kDebugGraphicBuffer) {
             ALOGW("createGraphicBuffer() failed in HardwareBuffer.create()");
         }

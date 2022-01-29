@@ -23,6 +23,8 @@ import android.hardware.fingerprint.Fingerprint;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.InvalidationClient;
 
 import java.util.Map;
@@ -33,8 +35,10 @@ public class FingerprintInvalidationClient extends InvalidationClient<Fingerprin
 
     public FingerprintInvalidationClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon, int userId, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             @NonNull Map<Integer, Long> authenticatorIds, @NonNull IInvalidationCallback callback) {
-        super(context, lazyDaemon, userId, sensorId, authenticatorIds, callback);
+        super(context, lazyDaemon, userId, sensorId, logger, biometricContext,
+                authenticatorIds, callback);
     }
 
     @Override

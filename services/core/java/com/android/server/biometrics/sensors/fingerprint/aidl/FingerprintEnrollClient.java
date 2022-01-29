@@ -22,7 +22,6 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants.FingerprintAcquired;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.common.OperationReason;
@@ -38,6 +37,8 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.HardwareAuthTokenUtils;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
@@ -68,14 +69,15 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
             @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String owner,
             @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
             @NonNull FingerprintSensorPropertiesInternal sensorProps,
             @Nullable IUdfpsOverlayController udfpsOverlayController,
             @Nullable ISidefpsController sidefpsController,
             int maxTemplatesPerUser, @FingerprintManager.EnrollReason int enrollReason) {
         // UDFPS haptics occur when an image is acquired (instead of when the result is known)
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, owner, utils,
-                0 /* timeoutSec */, BiometricsProtoEnums.MODALITY_FINGERPRINT, sensorId,
-                !sensorProps.isAnyUdfpsType() /* shouldVibrate */);
+                0 /* timeoutSec */, sensorId,
+                !sensorProps.isAnyUdfpsType() /* shouldVibrate */, logger, biometricContext);
         setRequestId(requestId);
         mSensorProps = sensorProps;
         mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
@@ -177,10 +179,10 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
 
         if (session.hasContextMethods()) {
             final OperationContext context = new OperationContext();
-            // TODO: add reason, id, and isAoD
+            // TODO: add reason, id
             context.id = 0;
             context.reason = OperationReason.UNKNOWN;
-            context.isAoD = false;
+            context.isAoD = getBiometricContext().isAoD();
             context.isCrypto = isCryptoOperation();
             return session.getSession().enrollWithContext(hat, context);
         } else {

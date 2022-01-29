@@ -19,12 +19,13 @@ package com.android.server.biometrics.sensors;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -44,10 +45,12 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
     public RemovalClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
             int userId, @NonNull String owner, @NonNull BiometricUtils<S> utils, int sensorId,
-            @NonNull Map<Integer, Long> authenticatorIds, int statsModality) {
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+            @NonNull Map<Integer, Long> authenticatorIds) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
-                statsModality, BiometricsProtoEnums.ACTION_REMOVE,
-                BiometricsProtoEnums.CLIENT_UNKNOWN);
+                logger, biometricContext);
+        //, BiometricsProtoEnums.ACTION_REMOVE,
+          //      BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
         mAuthenticatorIds = authenticatorIds;
         mHasEnrollmentsBeforeStarting = !utils.getBiometricsForUser(context, userId).isEmpty();

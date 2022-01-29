@@ -905,11 +905,12 @@ public abstract class WallpaperService extends Service {
             if (!ENABLE_WALLPAPER_DIMMING || mBbqSurfaceControl == null) {
                 return;
             }
+
+            SurfaceControl.Transaction surfaceControlTransaction = new SurfaceControl.Transaction();
             // TODO: apply the dimming to preview as well once surface transparency works in
             // preview mode.
             if (!isPreview() && mShouldDim) {
                 Log.v(TAG, "Setting wallpaper dimming: " + mWallpaperDimAmount);
-                SurfaceControl.Transaction surfaceControl = new SurfaceControl.Transaction();
 
                 // Animate dimming to gradually change the wallpaper alpha from the previous
                 // dim amount to the new amount only if the dim amount changed.
@@ -919,16 +920,15 @@ public abstract class WallpaperService extends Service {
                         ? 0 : DIMMING_ANIMATION_DURATION_MS);
                 animator.addUpdateListener((ValueAnimator va) -> {
                     final float dimValue = (float) va.getAnimatedValue();
-                    surfaceControl
-                            .setAlpha(mBbqSurfaceControl, 1 - dimValue)
-                            .apply();
+                    if (mBbqSurfaceControl != null) {
+                        surfaceControlTransaction
+                                .setAlpha(mBbqSurfaceControl, 1 - dimValue).apply();
+                    }
                 });
                 animator.start();
             } else {
                 Log.v(TAG, "Setting wallpaper dimming: " + 0);
-                new SurfaceControl.Transaction()
-                        .setAlpha(mBbqSurfaceControl, 1.0f)
-                        .apply();
+                surfaceControlTransaction.setAlpha(mBbqSurfaceControl, 1.0f).apply();
             }
         }
 

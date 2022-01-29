@@ -43,6 +43,7 @@ import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_N
 import static com.android.server.wm.ActivityTaskManagerService.TAG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerService.enforceNotIsolatedCaller;
 
+import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
@@ -1081,7 +1082,7 @@ class ActivityClientController extends IActivityClientController.Stub {
 
     @Override
     public void overridePendingTransition(IBinder token, String packageName,
-            int enterAnim, int exitAnim) {
+            int enterAnim, int exitAnim, @ColorInt int backgroundColor) {
         final long origId = Binder.clearCallingIdentity();
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
@@ -1091,7 +1092,7 @@ class ActivityClientController extends IActivityClientController.Stub {
                         r.mOverrideTaskTransition);
                 r.mTransitionController.setOverrideAnimation(
                         TransitionInfo.AnimationOptions.makeCustomAnimOptions(packageName,
-                                enterAnim, exitAnim, r.mOverrideTaskTransition),
+                                enterAnim, exitAnim, backgroundColor, r.mOverrideTaskTransition),
                         null /* startCallback */, null /* finishCallback */);
             }
         }

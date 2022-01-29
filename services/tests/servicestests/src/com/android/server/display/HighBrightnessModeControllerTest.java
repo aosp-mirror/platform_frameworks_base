@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import static android.hardware.display.BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
+import static android.hardware.display.BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL;
 import static android.hardware.display.BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR;
 import static android.hardware.display.BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF;
 import static android.hardware.display.BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT;
@@ -201,7 +203,7 @@ public class HighBrightnessModeControllerTest {
 
         hbmc.setAutoBrightnessEnabled(AUTO_BRIGHTNESS_ENABLED);
         hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
-        hbmc.onBrightnessChanged(TRANSITION_POINT + 0.01f);
+        hbmcOnBrightnessChanged(hbmc, TRANSITION_POINT + 0.01f);
 
         // Verify we are in HBM
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_SUNLIGHT);
@@ -233,7 +235,7 @@ public class HighBrightnessModeControllerTest {
 
         hbmc.setAutoBrightnessEnabled(AUTO_BRIGHTNESS_ENABLED);
         hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
-        hbmc.onBrightnessChanged(TRANSITION_POINT + 0.01f);
+        hbmcOnBrightnessChanged(hbmc, TRANSITION_POINT + 0.01f);
 
         // Verify we are in HBM
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_SUNLIGHT);
@@ -258,18 +260,18 @@ public class HighBrightnessModeControllerTest {
         hbmc.setAutoBrightnessEnabled(AUTO_BRIGHTNESS_ENABLED);
         hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
 
-        hbmc.onBrightnessChanged(TRANSITION_POINT + 0.01f);
+        hbmcOnBrightnessChanged(hbmc, TRANSITION_POINT + 0.01f);
         advanceTime(TIME_ALLOWED_IN_WINDOW_MILLIS / 2);
 
         // Verify we are in HBM
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_SUNLIGHT);
 
-        hbmc.onBrightnessChanged(TRANSITION_POINT - 0.01f);
+        hbmcOnBrightnessChanged(hbmc, TRANSITION_POINT - 0.01f);
         advanceTime(1);
 
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_SUNLIGHT);
 
-        hbmc.onBrightnessChanged(TRANSITION_POINT + 0.01f);
+        hbmcOnBrightnessChanged(hbmc, TRANSITION_POINT + 0.01f);
         advanceTime(TIME_ALLOWED_IN_WINDOW_MILLIS / 2);
 
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_SUNLIGHT);
@@ -288,13 +290,13 @@ public class HighBrightnessModeControllerTest {
         hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
 
         // Go into HBM for half the allowed window
-        hbmc.onBrightnessChanged(TRANSITION_POINT + 0.01f);
+        hbmcOnBrightnessChanged(hbmc, TRANSITION_POINT + 0.01f);
         advanceTime(TIME_ALLOWED_IN_WINDOW_MILLIS / 2);
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_SUNLIGHT);
 
         // Move lux below threshold (ending first event);
         hbmc.onAmbientLuxChange(MINIMUM_LUX - 1);
-        hbmc.onBrightnessChanged(TRANSITION_POINT);
+        hbmcOnBrightnessChanged(hbmc, TRANSITION_POINT);
         assertState(hbmc, DEFAULT_MIN, TRANSITION_POINT, HIGH_BRIGHTNESS_MODE_OFF);
 
         // Move up some amount of time so that there's still time in the window even after a
@@ -304,7 +306,7 @@ public class HighBrightnessModeControllerTest {
 
         // Go into HBM for just under the second half of allowed window
         hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
-        hbmc.onBrightnessChanged(TRANSITION_POINT + 1);
+        hbmcOnBrightnessChanged(hbmc, TRANSITION_POINT + 1);
         advanceTime((TIME_ALLOWED_IN_WINDOW_MILLIS / 2) - 1);
 
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_SUNLIGHT);
@@ -434,7 +436,7 @@ public class HighBrightnessModeControllerTest {
         float brightness = 0.5f;
         float expectedHdrBrightness = MathUtils.map(DEFAULT_MIN, TRANSITION_POINT,
                 DEFAULT_MIN, DEFAULT_MAX, brightness); // map value from normal range to hdr range
-        hbmc.onBrightnessChanged(brightness);
+        hbmcOnBrightnessChanged(hbmc, brightness);
         advanceTime(0);
         assertEquals(expectedHdrBrightness, hbmc.getHdrBrightnessValue(), EPSILON);
 
@@ -442,21 +444,21 @@ public class HighBrightnessModeControllerTest {
         brightness = 0.33f;
         expectedHdrBrightness = MathUtils.map(DEFAULT_MIN, TRANSITION_POINT,
                 DEFAULT_MIN, DEFAULT_MAX, brightness); // map value from normal range to hdr range
-        hbmc.onBrightnessChanged(brightness);
+        hbmcOnBrightnessChanged(hbmc, brightness);
         advanceTime(0);
         assertEquals(expectedHdrBrightness, hbmc.getHdrBrightnessValue(), EPSILON);
 
         // Try the min value
         brightness = DEFAULT_MIN;
         expectedHdrBrightness = DEFAULT_MIN;
-        hbmc.onBrightnessChanged(brightness);
+        hbmcOnBrightnessChanged(hbmc, brightness);
         advanceTime(0);
         assertEquals(expectedHdrBrightness, hbmc.getHdrBrightnessValue(), EPSILON);
 
         // Try the max value
         brightness = TRANSITION_POINT;
         expectedHdrBrightness = DEFAULT_MAX;
-        hbmc.onBrightnessChanged(brightness);
+        hbmcOnBrightnessChanged(hbmc, brightness);
         advanceTime(0);
         assertEquals(expectedHdrBrightness, hbmc.getHdrBrightnessValue(), EPSILON);
     }
@@ -467,7 +469,7 @@ public class HighBrightnessModeControllerTest {
         final int displayStatsId = mDisplayUniqueId.hashCode();
 
         hbmc.setAutoBrightnessEnabled(AUTO_BRIGHTNESS_ENABLED);
-        hbmc.onBrightnessChanged(TRANSITION_POINT);
+        hbmcOnBrightnessChanged(hbmc, TRANSITION_POINT);
         hbmc.getHdrListener().onHdrInfoChanged(null /*displayToken*/, 1 /*numberOfHdrLayers*/,
                 DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/);
         advanceTime(0);
@@ -489,7 +491,7 @@ public class HighBrightnessModeControllerTest {
 
         hbmc.setAutoBrightnessEnabled(AUTO_BRIGHTNESS_ENABLED);
         hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
-        hbmc.onBrightnessChanged(TRANSITION_POINT + 0.01f);
+        hbmcOnBrightnessChanged(hbmc, TRANSITION_POINT + 0.01f);
 
         // Verify Stats HBM_ON_SUNLIGHT
         verify(mInjectorMock).reportHbmStateChange(eq(displayStatsId),
@@ -506,12 +508,12 @@ public class HighBrightnessModeControllerTest {
     }
 
     @Test
-    public void tetHbmStats_NbmHdrNoReport() {
+    public void testHbmStats_NbmHdrNoReport() {
         final HighBrightnessModeController hbmc = createDefaultHbm(new OffsettableClock());
         final int displayStatsId = mDisplayUniqueId.hashCode();
 
         hbmc.setAutoBrightnessEnabled(AUTO_BRIGHTNESS_ENABLED);
-        hbmc.onBrightnessChanged(DEFAULT_MIN);
+        hbmcOnBrightnessChanged(hbmc, DEFAULT_MIN);
         hbmc.getHdrListener().onHdrInfoChanged(null /*displayToken*/, 1 /*numberOfHdrLayers*/,
                 DISPLAY_WIDTH, DISPLAY_HEIGHT, 0 /*flags*/);
         advanceTime(0);
@@ -524,7 +526,27 @@ public class HighBrightnessModeControllerTest {
     }
 
     @Test
-    public void testHbmStats_ThermalOff() throws Exception {
+    public void testHbmStats_HighLuxLowBrightnessNoReport() {
+        final HighBrightnessModeController hbmc = createDefaultHbm(new OffsettableClock());
+        final int displayStatsId = mDisplayUniqueId.hashCode();
+
+        hbmc.setAutoBrightnessEnabled(AUTO_BRIGHTNESS_ENABLED);
+        hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
+        hbmcOnBrightnessChanged(hbmc, DEFAULT_MIN);
+        advanceTime(0);
+        // verify in HBM sunlight mode
+        assertEquals(HIGH_BRIGHTNESS_MODE_SUNLIGHT, hbmc.getHighBrightnessMode());
+
+        // Verify Stats HBM_ON_SUNLIGHT not report
+        verify(mInjectorMock, never()).reportHbmStateChange(eq(displayStatsId),
+            eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_SUNLIGHT),
+            anyInt());
+    }
+
+    // Test reporting of thermal throttling when triggered by HighBrightnessModeController's
+    // internal thermal throttling.
+    @Test
+    public void testHbmStats_InternalThermalOff() throws Exception {
         final HighBrightnessModeController hbmc = createDefaultHbm(new OffsettableClock());
         final int displayStatsId = mDisplayUniqueId.hashCode();
 
@@ -534,7 +556,7 @@ public class HighBrightnessModeControllerTest {
 
         hbmc.setAutoBrightnessEnabled(AUTO_BRIGHTNESS_ENABLED);
         hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
-        hbmc.onBrightnessChanged(TRANSITION_POINT + 0.01f);
+        hbmcOnBrightnessChanged(hbmc, TRANSITION_POINT + 0.01f);
         advanceTime(1);
         verify(mInjectorMock).reportHbmStateChange(eq(displayStatsId),
             eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_SUNLIGHT),
@@ -548,6 +570,37 @@ public class HighBrightnessModeControllerTest {
             eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__REASON__HBM_SV_OFF_THERMAL_LIMIT));
     }
 
+    // Test reporting of thermal throttling when triggered externally through
+    // HighBrightnessModeController.onBrightnessChanged()
+    @Test
+    public void testHbmStats_ExternalThermalOff() throws Exception {
+        final HighBrightnessModeController hbmc = createDefaultHbm(new OffsettableClock());
+        final int displayStatsId = mDisplayUniqueId.hashCode();
+        final float hbmBrightness = TRANSITION_POINT + 0.01f;
+        final float nbmBrightness = TRANSITION_POINT - 0.01f;
+
+        hbmc.setAutoBrightnessEnabled(AUTO_BRIGHTNESS_ENABLED);
+        hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
+        // Brightness is unthrottled, HBM brightness granted
+        hbmc.onBrightnessChanged(hbmBrightness, hbmBrightness, BRIGHTNESS_MAX_REASON_NONE);
+        advanceTime(1);
+        verify(mInjectorMock).reportHbmStateChange(eq(displayStatsId),
+            eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_SUNLIGHT),
+            eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__REASON__HBM_TRANSITION_REASON_UNKNOWN));
+
+        // Brightness is thermally throttled, HBM brightness denied (NBM brightness granted)
+        hbmc.onBrightnessChanged(nbmBrightness, hbmBrightness, BRIGHTNESS_MAX_REASON_THERMAL);
+        advanceTime(1);
+        // We expect HBM mode to remain set to sunlight, indicating that HBMC *allows* this mode.
+        // However, we expect the HBM state reported by HBMC to be off, since external thermal
+        // throttling (reported to HBMC through onBrightnessChanged()) lowers brightness to below
+        // the HBM transition point.
+        assertEquals(HIGH_BRIGHTNESS_MODE_SUNLIGHT, hbmc.getHighBrightnessMode());
+        verify(mInjectorMock).reportHbmStateChange(eq(displayStatsId),
+            eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_OFF),
+            eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__REASON__HBM_SV_OFF_THERMAL_LIMIT));
+    }
+
     @Test
     public void testHbmStats_TimeOut() {
         final HighBrightnessModeController hbmc = createDefaultHbm(new OffsettableClock());
@@ -555,7 +608,7 @@ public class HighBrightnessModeControllerTest {
 
         hbmc.setAutoBrightnessEnabled(AUTO_BRIGHTNESS_ENABLED);
         hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
-        hbmc.onBrightnessChanged(TRANSITION_POINT + 0.01f);
+        hbmcOnBrightnessChanged(hbmc, TRANSITION_POINT + 0.01f);
         advanceTime(0);
         verify(mInjectorMock).reportHbmStateChange(eq(displayStatsId),
             eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_SUNLIGHT),
@@ -576,7 +629,7 @@ public class HighBrightnessModeControllerTest {
 
         hbmc.setAutoBrightnessEnabled(AUTO_BRIGHTNESS_ENABLED);
         hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
-        hbmc.onBrightnessChanged(TRANSITION_POINT + 0.01f);
+        hbmcOnBrightnessChanged(hbmc, TRANSITION_POINT + 0.01f);
         advanceTime(0);
         verify(mInjectorMock).reportHbmStateChange(eq(displayStatsId),
             eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_SUNLIGHT),
@@ -595,7 +648,7 @@ public class HighBrightnessModeControllerTest {
 
         hbmc.setAutoBrightnessEnabled(AUTO_BRIGHTNESS_ENABLED);
         hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
-        hbmc.onBrightnessChanged(TRANSITION_POINT + 0.01f);
+        hbmcOnBrightnessChanged(hbmc, TRANSITION_POINT + 0.01f);
         advanceTime(0);
         verify(mInjectorMock).reportHbmStateChange(eq(displayStatsId),
             eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_SUNLIGHT),
@@ -648,5 +701,9 @@ public class HighBrightnessModeControllerTest {
 
     private Temperature getSkinTemp(@ThrottlingStatus int status) {
         return new Temperature(30.0f, Temperature.TYPE_SKIN, "test_skin_temp", status);
+    }
+
+    private void hbmcOnBrightnessChanged(HighBrightnessModeController hbmc, float brightness) {
+        hbmc.onBrightnessChanged(brightness, brightness, BRIGHTNESS_MAX_REASON_NONE);
     }
 }

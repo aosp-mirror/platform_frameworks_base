@@ -326,6 +326,8 @@ public class SettingsBackupTest {
                     Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL_MAX,
                     Settings.Global.LOW_POWER_MODE_STICKY,
                     Settings.Global.LOW_POWER_MODE_SUGGESTION_PARAMS,
+                    Settings.Global.LOW_POWER_STANDBY_ACTIVE_DURING_MAINTENANCE,
+                    Settings.Global.LOW_POWER_STANDBY_ENABLED,
                     Settings.Global.LTE_SERVICE_FORCED,
                     Settings.Global.LID_BEHAVIOR,
                     Settings.Global.MAX_ERROR_BYTES_PREFIX,
