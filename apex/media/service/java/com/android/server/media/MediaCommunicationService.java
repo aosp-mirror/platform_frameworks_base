@@ -46,6 +46,8 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.KeyEvent;
 
+import androidx.annotation.RequiresApi;
+
 import com.android.internal.annotations.GuardedBy;
 import com.android.modules.annotation.MinSdk;
 import com.android.server.SystemService;
@@ -63,6 +65,7 @@ import java.util.concurrent.Executors;
  * @hide
  */
 @MinSdk(Build.VERSION_CODES.S)
+@RequiresApi(Build.VERSION_CODES.S)
 public class MediaCommunicationService extends SystemService {
     private static final String TAG = "MediaCommunicationSrv";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
