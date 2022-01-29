@@ -16,7 +16,6 @@
 
 package com.android.server.usage;
 
-import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.procStateToString;
 
 import static com.android.server.usage.UsageStatsService.DEBUG_RESPONSE_STATS;
@@ -89,8 +88,7 @@ class BroadcastResponseStatsTracker {
                     sourceUid, targetPackage, targetUser, idForResponseEvent,
                     TimeUtils.formatDuration(timestampMs), procStateToString(targetUidProcState)));
         }
-        // TODO (206518114): Make the fg threshold state configurable.
-        if (targetUidProcState <= PROCESS_STATE_TOP) {
+        if (targetUidProcState <= mAppStandby.getBroadcastResponseFgThresholdState()) {
             // No need to track the broadcast response state while the target app is
             // in the foreground.
             return;
