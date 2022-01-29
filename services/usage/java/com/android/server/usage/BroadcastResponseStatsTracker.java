@@ -16,6 +16,9 @@
 
 package com.android.server.usage;
 
+import static android.app.ActivityManager.PROCESS_STATE_TOP;
+import static android.app.ActivityManager.procStateToString;
+
 import static com.android.server.usage.UsageStatsService.DEBUG_RESPONSE_STATS;
 
 import android.annotation.ElapsedRealtimeLong;
@@ -23,6 +26,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager.ProcessState;
 import android.app.usage.BroadcastResponseStats;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -78,12 +82,18 @@ class BroadcastResponseStatsTracker {
     // TODO (206518114): Move all callbacks handling to a handler thread.
     void reportBroadcastDispatchEvent(int sourceUid, @NonNull String targetPackage,
             UserHandle targetUser, long idForResponseEvent,
-            @ElapsedRealtimeLong long timestampMs) {
+            @ElapsedRealtimeLong long timestampMs, @ProcessState int targetUidProcState) {
         if (DEBUG_RESPONSE_STATS) {
-            Slog.d(TAG, TextUtils.formatSimple(
-                    "reportBroadcastDispatchEvent; srcUid=%d, tgtPkg=%s, tgtUsr=%d, id=%d, ts=%s",
+            Slog.d(TAG, TextUtils.formatSimple("reportBroadcastDispatchEvent; "
+                            + "srcUid=%d, tgtPkg=%s, tgtUsr=%d, id=%d, ts=%s, state=%s",
                     sourceUid, targetPackage, targetUser, idForResponseEvent,
-                    TimeUtils.formatDuration(timestampMs)));
+                    TimeUtils.formatDuration(timestampMs), procStateToString(targetUidProcState)));
+        }
+        // TODO (206518114): Make the fg threshold state configurable.
+        if (targetUidProcState <= PROCESS_STATE_TOP) {
+            // No need to track the broadcast response state while the target app is
+            // in the foreground.
+            return;
         }
         synchronized (mLock) {
             final LongSparseArray<BroadcastEvent> broadcastEvents =
