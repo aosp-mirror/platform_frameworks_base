@@ -37,7 +37,8 @@ import com.android.internal.view.InlineSuggestionsRequestInfo;
  */
 oneway interface IInputMethod {
     void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privOps,
-             int configChanges, boolean stylusHwSupported);
+             int configChanges, boolean stylusHwSupported,
+             boolean shouldShowImeSwitcherWhenImeIsShown);
 
     void onCreateInlineSuggestionsRequest(in InlineSuggestionsRequestInfo requestInfo,
             in IInlineSuggestionsRequestCallback cb);
@@ -47,7 +48,10 @@ oneway interface IInputMethod {
     void unbindInput();
 
     void startInput(in IBinder startInputToken, in IInputContext inputContext,
-            in EditorInfo attribute, boolean restarting);
+            in EditorInfo attribute, boolean restarting,
+             boolean shouldShowImeSwitcherWhenImeIsShown);
+
+    void onShouldShowImeSwitcherWhenImeIsShownChanged(boolean shouldShowImeSwitcherWhenImeIsShown);
 
     void createSession(in InputChannel channel, IInputSessionCallback callback);
 

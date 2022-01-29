@@ -70,6 +70,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
     private static final int DO_SET_INPUT_CONTEXT = 20;
     private static final int DO_UNSET_INPUT_CONTEXT = 30;
     private static final int DO_START_INPUT = 32;
+    private static final int DO_ON_SHOULD_SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN_CHANGED = 35;
     private static final int DO_CREATE_SESSION = 40;
     private static final int DO_SET_SESSION_ENABLED = 45;
     private static final int DO_SHOW_SOFT_INPUT = 60;
@@ -175,7 +176,7 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 try {
                     inputMethod.initializeInternal((IBinder) args.arg1,
                             (IInputMethodPrivilegedOperations) args.arg2, msg.arg1,
-                            (boolean) args.arg3);
+                            (boolean) args.arg3, msg.arg2 != 0);
                 } finally {
                     args.recycle();
                 }
@@ -195,12 +196,20 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 final EditorInfo info = (EditorInfo) args.arg3;
                 final CancellationGroup cancellationGroup = (CancellationGroup) args.arg4;
                 final boolean restarting = args.argi5 == 1;
+                final boolean shouldShowImeSwitcherWhenImeIsShown = args.argi6 != 0;
                 final InputConnection ic = inputContext != null
                         ? new RemoteInputConnection(mTarget, inputContext, cancellationGroup)
                         : null;
                 info.makeCompatible(mTargetSdkVersion);
-                inputMethod.dispatchStartInputWithToken(ic, info, restarting, startInputToken);
+                inputMethod.dispatchStartInputWithToken(ic, info, restarting, startInputToken,
+                        shouldShowImeSwitcherWhenImeIsShown);
                 args.recycle();
+                return;
+            }
+            case DO_ON_SHOULD_SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN_CHANGED: {
+                final boolean shouldShowImeSwitcherWhenImeIsShown = msg.arg1 != 0;
+                inputMethod.onShouldShowImeSwitcherWhenImeIsShownChanged(
+                        shouldShowImeSwitcherWhenImeIsShown);
                 return;
             }
             case DO_CREATE_SESSION: {
@@ -291,10 +300,11 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @BinderThread
     @Override
     public void initializeInternal(IBinder token, IInputMethodPrivilegedOperations privOps,
-            int configChanges, boolean stylusHwSupported) {
-        mCaller.executeOrSendMessage(
-                mCaller.obtainMessageIOOO(
-                        DO_INITIALIZE_INTERNAL, configChanges, token, privOps, stylusHwSupported));
+            int configChanges, boolean stylusHwSupported,
+            boolean shouldShowImeSwitcherWhenImeIsShown) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageIIOOO(DO_INITIALIZE_INTERNAL,
+                configChanges, shouldShowImeSwitcherWhenImeIsShown ? 1 : 0, token, privOps,
+                stylusHwSupported));
     }
 
     @BinderThread
@@ -334,13 +344,23 @@ class IInputMethodWrapper extends IInputMethod.Stub
     @BinderThread
     @Override
     public void startInput(IBinder startInputToken, IInputContext inputContext,
-            EditorInfo attribute, boolean restarting) {
+            EditorInfo attribute, boolean restarting, boolean shouldShowImeSwitcherWhenImeIsShown) {
         if (mCancellationGroup == null) {
             Log.e(TAG, "startInput must be called after bindInput.");
             mCancellationGroup = new CancellationGroup();
         }
         mCaller.executeOrSendMessage(mCaller.obtainMessageOOOOII(DO_START_INPUT, startInputToken,
-                inputContext, attribute, mCancellationGroup, restarting ? 1 : 0, 0 /* unused */));
+                inputContext, attribute, mCancellationGroup, restarting ? 1 : 0,
+                shouldShowImeSwitcherWhenImeIsShown ? 1 : 0));
+    }
+
+    @BinderThread
+    @Override
+    public void onShouldShowImeSwitcherWhenImeIsShownChanged(
+            boolean shouldShowImeSwitcherWhenImeIsShown) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageI(
+                DO_ON_SHOULD_SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN_CHANGED,
+                shouldShowImeSwitcherWhenImeIsShown ? 1 : 0));
     }
 
     @BinderThread

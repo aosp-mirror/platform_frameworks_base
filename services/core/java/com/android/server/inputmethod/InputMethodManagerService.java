@@ -2325,10 +2325,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     true /* direct */);
         }
 
+        final boolean shouldShowImeSwitcherWhenImeIsShown =
+                shouldShowImeSwitcherWhenImeIsShownLocked();
         final SessionState session = mCurClient.curSession;
         setEnabledSessionLocked(session);
-        session.method.startInput(startInputToken, mCurInputContext, mCurAttribute, restarting);
-
+        session.method.startInput(startInputToken, mCurInputContext, mCurAttribute, restarting,
+                shouldShowImeSwitcherWhenImeIsShown);
         if (mShowRequested) {
             if (DEBUG) Slog.v(TAG, "Attach new input asks to show input");
             showCurrentInputLocked(mCurFocusedWindow, getAppShowFlagsLocked(), null,
@@ -2528,7 +2530,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     + mCurTokenDisplayId);
         }
         inputMethod.initializeInternal(token, new InputMethodPrivilegedOperationsImpl(this, token),
-                configChanges, supportStylusHw);
+                configChanges, supportStylusHw, shouldShowImeSwitcherWhenImeIsShownLocked());
     }
 
     @AnyThread
@@ -2728,6 +2730,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         if (mStatusBar != null) {
             mStatusBar.setIconVisibility(mSlotIme, false);
         }
+    }
+
+    @GuardedBy("ImfLock.class")
+    boolean shouldShowImeSwitcherWhenImeIsShownLocked() {
+        return shouldShowImeSwitcherLocked(
+                InputMethodService.IME_ACTIVE | InputMethodService.IME_VISIBLE);
     }
 
     @GuardedBy("ImfLock.class")
@@ -2990,6 +2998,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // the same enabled IMEs list.
         mSwitchingController.resetCircularListLocked(mContext);
 
+        sendShouldShowImeSwitcherWhenImeIsShownLocked();
     }
 
     @GuardedBy("ImfLock.class")
@@ -4308,6 +4317,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 updateImeWindowStatus(msg.arg1 == 1);
                 return true;
             }
+
             // ---------------------------------------------------------
 
             case MSG_UNBIND_CLIENT:
@@ -4368,6 +4378,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             // --------------------------------------------------------------
             case MSG_HARD_KEYBOARD_SWITCH_CHANGED:
                 mMenuController.handleHardKeyboardStatusChange(msg.arg1 == 1);
+                synchronized (ImfLock.class) {
+                    sendShouldShowImeSwitcherWhenImeIsShownLocked();
+                }
                 return true;
             case MSG_SYSTEM_UNLOCK_USER: {
                 final int userId = msg.arg1;
@@ -4638,10 +4651,23 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // the same enabled IMEs list.
         mSwitchingController.resetCircularListLocked(mContext);
 
+        sendShouldShowImeSwitcherWhenImeIsShownLocked();
+
         // Notify InputMethodListListeners of the new installed InputMethods.
         final List<InputMethodInfo> inputMethodList = new ArrayList<>(mMethodList);
         mHandler.obtainMessage(MSG_DISPATCH_ON_INPUT_METHOD_LIST_UPDATED,
                 mSettings.getCurrentUserId(), 0 /* unused */, inputMethodList).sendToTarget();
+    }
+
+    @GuardedBy("ImfLock.class")
+    void sendShouldShowImeSwitcherWhenImeIsShownLocked() {
+        final IInputMethodInvoker curMethod = mBindingController.getCurMethod();
+        if (curMethod == null) {
+            // No need to send the data if the IME is not yet bound.
+            return;
+        }
+        curMethod.onShouldShowImeSwitcherWhenImeIsShownChanged(
+                shouldShowImeSwitcherWhenImeIsShownLocked());
     }
 
     @GuardedBy("ImfLock.class")

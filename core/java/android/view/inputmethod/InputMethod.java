@@ -105,12 +105,14 @@ public interface InputMethod {
      *                             current IME.
      * @param configChanges {@link InputMethodInfo#getConfigChanges()} declared by IME.
      * @param stylusHwSupported {@link InputMethodInfo#supportsStylusHandwriting()} declared by IME.
+     * @param shouldShowImeSwitcherWhenImeIsShown {@code true} If the IME switcher is expected to be
+     *                                            shown while the IME is shown.
      * @hide
      */
     @MainThread
     default void initializeInternal(IBinder token,
             IInputMethodPrivilegedOperations privilegedOperations, int configChanges,
-            boolean stylusHwSupported) {
+            boolean stylusHwSupported, boolean shouldShowImeSwitcherWhenImeIsShown) {
         attachToken(token);
     }
 
@@ -229,6 +231,8 @@ public interface InputMethod {
      *                        the next {@link #startInput(InputConnection, EditorInfo, IBinder)} as
      *                        long as your implementation of {@link InputMethod} relies on such
      *                        IPCs
+     * @param shouldShowImeSwitcherWhenImeIsShown {@code true} If the IME switcher is expected to be
+     *                                            shown while the IME is shown.
      * @see #startInput(InputConnection, EditorInfo)
      * @see #restartInput(InputConnection, EditorInfo)
      * @see EditorInfo
@@ -237,12 +241,24 @@ public interface InputMethod {
     @MainThread
     default void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
             @NonNull EditorInfo editorInfo, boolean restarting,
-            @NonNull IBinder startInputToken) {
+            @NonNull IBinder startInputToken, boolean shouldShowImeSwitcherWhenImeIsShown) {
         if (restarting) {
             restartInput(inputConnection, editorInfo);
         } else {
             startInput(inputConnection, editorInfo);
         }
+    }
+
+    /**
+     * Notifies that whether the IME should show the IME switcher or not is being changed.
+     *
+     * @param shouldShowImeSwitcherWhenImeIsShown {@code true} If the IME switcher is expected to be
+     *                                            shown while the IME is shown.
+     * @hide
+     */
+    @MainThread
+    default void onShouldShowImeSwitcherWhenImeIsShownChanged(
+            boolean shouldShowImeSwitcherWhenImeIsShown) {
     }
 
     /**

@@ -658,7 +658,7 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public final void initializeInternal(@NonNull IBinder token,
                 IInputMethodPrivilegedOperations privilegedOperations, int configChanges,
-                boolean stylusHwSupported) {
+                boolean stylusHwSupported, boolean shouldShowImeSwitcherWhenImeIsShown) {
             if (mDestroyed) {
                 Log.i(TAG, "The InputMethodService has already onDestroyed()."
                     + "Ignore the initialization.");
@@ -671,6 +671,8 @@ public class InputMethodService extends AbstractInputMethodService {
             if (stylusHwSupported) {
                 mInkWindow = new InkWindow(mWindow.getContext());
             }
+            mNavigationBarController.setShouldShowImeSwitcherWhenImeIsShown(
+                    shouldShowImeSwitcherWhenImeIsShown);
             attachToken(token);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
@@ -780,14 +782,27 @@ public class InputMethodService extends AbstractInputMethodService {
         @Override
         public final void dispatchStartInputWithToken(@Nullable InputConnection inputConnection,
                 @NonNull EditorInfo editorInfo, boolean restarting,
-                @NonNull IBinder startInputToken) {
+                @NonNull IBinder startInputToken, boolean shouldShowImeSwitcherWhenImeIsShown) {
             mPrivOps.reportStartInputAsync(startInputToken);
-
+            mNavigationBarController.setShouldShowImeSwitcherWhenImeIsShown(
+                    shouldShowImeSwitcherWhenImeIsShown);
             if (restarting) {
                 restartInput(inputConnection, editorInfo);
             } else {
                 startInput(inputConnection, editorInfo);
             }
+        }
+
+        /**
+         * {@inheritDoc}
+         * @hide
+         */
+        @MainThread
+        @Override
+        public void onShouldShowImeSwitcherWhenImeIsShownChanged(
+                boolean shouldShowImeSwitcherWhenImeIsShown) {
+            mNavigationBarController.setShouldShowImeSwitcherWhenImeIsShown(
+                    shouldShowImeSwitcherWhenImeIsShown);
         }
 
         /**
