@@ -974,7 +974,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                     lightSensorRate, initialLightSensorRate, brighteningLightDebounce,
                     darkeningLightDebounce, autoBrightnessResetAmbientLuxAfterWarmUp,
                     ambientBrightnessThresholds, screenBrightnessThresholds, mContext,
-                    mHbmController, mIdleModeBrightnessMapper,
+                    mHbmController, mBrightnessThrottler, mIdleModeBrightnessMapper,
                     mDisplayDeviceConfig.getAmbientHorizonShort(),
                     mDisplayDeviceConfig.getAmbientHorizonLong());
         } else {
@@ -1344,6 +1344,29 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mBrightnessReasonTemp.setReason(BrightnessReason.REASON_MANUAL);
         }
 
+        // Now that a desired brightness has been calculated, apply brightness throttling. The
+        // dimming and low power transformations that follow can only dim brightness further.
+        //
+        // We didn't do this earlier through brightness clamping because we need to know both
+        // unthrottled (unclamped/ideal) and throttled brightness levels for subsequent operations.
+        // Note throttling effectively changes the allowed brightness range, so, similarly to HBM,
+        // we broadcast this change through setting.
+        final float unthrottledBrightnessState = brightnessState;
+        if (mBrightnessThrottler.isThrottled()) {
+            brightnessState = Math.min(brightnessState, mBrightnessThrottler.getBrightnessCap());
+            mBrightnessReasonTemp.addModifier(BrightnessReason.MODIFIER_THROTTLED);
+            if (!mAppliedThrottling) {
+                // Brightness throttling is needed, so do so quickly.
+                // Later, when throttling is removed, we let other mechanisms decide on speed.
+                slowChange = false;
+                updateScreenBrightnessSetting = true;
+            }
+            mAppliedThrottling = true;
+        } else if (mAppliedThrottling) {
+            mAppliedThrottling = false;
+            updateScreenBrightnessSetting = true;
+        }
+
         if (updateScreenBrightnessSetting) {
             // Tell the rest of the system about the new brightness in case we had to change it
             // for things like auto-brightness or high-brightness-mode. Note that we do this
@@ -1388,20 +1411,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         } else if (mAppliedLowPower) {
             slowChange = false;
             mAppliedLowPower = false;
-        }
-
-        // Apply brightness throttling after applying all other transforms
-        final float unthrottledBrightnessState = brightnessState;
-        if (mBrightnessThrottler.isThrottled()) {
-            brightnessState = Math.min(brightnessState, mBrightnessThrottler.getBrightnessCap());
-            mBrightnessReasonTemp.addModifier(BrightnessReason.MODIFIER_THROTTLED);
-            if (!mAppliedThrottling) {
-                slowChange = false;
-            }
-            mAppliedThrottling = true;
-        } else if (mAppliedThrottling) {
-            slowChange = false;
-            mAppliedThrottling = false;
         }
 
         // The current brightness to use has been calculated at this point, and HbmController should
@@ -1653,6 +1662,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private boolean saveBrightnessInfo(float brightness, float adjustedBrightness) {
         synchronized (mCachedBrightnessInfo) {
+            final float minBrightness = Math.min(mHbmController.getCurrentBrightnessMin(),
+                    mBrightnessThrottler.getBrightnessCap());
+            final float maxBrightness = Math.min(mHbmController.getCurrentBrightnessMax(),
+                    mBrightnessThrottler.getBrightnessCap());
             boolean changed = false;
 
             changed |=
@@ -1663,10 +1676,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                         adjustedBrightness);
             changed |=
                 mCachedBrightnessInfo.checkAndSetFloat(mCachedBrightnessInfo.brightnessMin,
-                        mHbmController.getCurrentBrightnessMin());
+                        minBrightness);
             changed |=
                 mCachedBrightnessInfo.checkAndSetFloat(mCachedBrightnessInfo.brightnessMax,
-                        mHbmController.getCurrentBrightnessMax());
+                        maxBrightness);
             changed |=
                 mCachedBrightnessInfo.checkAndSetInt(mCachedBrightnessInfo.hbmMode,
                         mHbmController.getHighBrightnessMode());

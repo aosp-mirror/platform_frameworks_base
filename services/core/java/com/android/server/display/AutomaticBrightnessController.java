@@ -201,6 +201,10 @@ class AutomaticBrightnessController {
     // Controls High Brightness Mode.
     private HighBrightnessModeController mHbmController;
 
+    // Throttles (caps) maximum allowed brightness
+    private BrightnessThrottler mBrightnessThrottler;
+    private boolean mIsBrightnessThrottled;
+
     // Context-sensitive brightness configurations require keeping track of the foreground app's
     // package name and category, which is done by registering a TaskStackListener to call back to
     // us onTaskStackChanged, and then using the ActivityTaskManager to get the foreground app's
@@ -226,7 +230,7 @@ class AutomaticBrightnessController {
             long brighteningLightDebounceConfig, long darkeningLightDebounceConfig,
             boolean resetAmbientLuxAfterWarmUpConfig, HysteresisLevels ambientBrightnessThresholds,
             HysteresisLevels screenBrightnessThresholds, Context context,
-            HighBrightnessModeController hbmController,
+            HighBrightnessModeController hbmController, BrightnessThrottler brightnessThrottler,
             BrightnessMappingStrategy idleModeBrightnessMapper, int ambientLightHorizonShort,
             int ambientLightHorizonLong) {
         this(new Injector(), callbacks, looper, sensorManager, lightSensor,
@@ -235,8 +239,8 @@ class AutomaticBrightnessController {
                 lightSensorRate, initialLightSensorRate, brighteningLightDebounceConfig,
                 darkeningLightDebounceConfig, resetAmbientLuxAfterWarmUpConfig,
                 ambientBrightnessThresholds, screenBrightnessThresholds, context,
-                hbmController, idleModeBrightnessMapper, ambientLightHorizonShort,
-                ambientLightHorizonLong
+                hbmController, brightnessThrottler, idleModeBrightnessMapper,
+                ambientLightHorizonShort, ambientLightHorizonLong
         );
     }
 
@@ -249,7 +253,7 @@ class AutomaticBrightnessController {
             long brighteningLightDebounceConfig, long darkeningLightDebounceConfig,
             boolean resetAmbientLuxAfterWarmUpConfig, HysteresisLevels ambientBrightnessThresholds,
             HysteresisLevels screenBrightnessThresholds, Context context,
-            HighBrightnessModeController hbmController,
+            HighBrightnessModeController hbmController, BrightnessThrottler brightnessThrottler,
             BrightnessMappingStrategy idleModeBrightnessMapper, int ambientLightHorizonShort,
             int ambientLightHorizonLong) {
         mInjector = injector;
@@ -291,6 +295,7 @@ class AutomaticBrightnessController {
         mForegroundAppCategory = ApplicationInfo.CATEGORY_UNDEFINED;
         mPendingForegroundAppCategory = ApplicationInfo.CATEGORY_UNDEFINED;
         mHbmController = hbmController;
+        mBrightnessThrottler = brightnessThrottler;
         mInteractiveModeBrightnessMapper = interactiveModeBrightnessMapper;
         mIdleModeBrightnessMapper = idleModeBrightnessMapper;
         // Initialize to active (normal) screen brightness mode
@@ -365,6 +370,13 @@ class AutomaticBrightnessController {
             prepareBrightnessAdjustmentSample();
         }
         changed |= setLightSensorEnabled(enable && !dozing);
+
+        if (mIsBrightnessThrottled != mBrightnessThrottler.isThrottled()) {
+            // Maximum brightness has changed, so recalculate display brightness.
+            mIsBrightnessThrottled = mBrightnessThrottler.isThrottled();
+            changed = true;
+        }
+
         if (changed) {
             updateAutoBrightness(false /*sendUpdate*/, userInitiatedChange);
         }
@@ -855,8 +867,11 @@ class AutomaticBrightnessController {
 
     // Clamps values with float range [0.0-1.0]
     private float clampScreenBrightness(float value) {
-        return MathUtils.constrain(value,
-                mHbmController.getCurrentBrightnessMin(), mHbmController.getCurrentBrightnessMax());
+        final float minBrightness = Math.min(mHbmController.getCurrentBrightnessMin(),
+                mBrightnessThrottler.getBrightnessCap());
+        final float maxBrightness = Math.min(mHbmController.getCurrentBrightnessMax(),
+                mBrightnessThrottler.getBrightnessCap());
+        return MathUtils.constrain(value, minBrightness, maxBrightness);
     }
 
     private void prepareBrightnessAdjustmentSample() {
