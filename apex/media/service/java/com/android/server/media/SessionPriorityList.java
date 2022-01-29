@@ -18,9 +18,13 @@ package com.android.server.media;
 
 import android.annotation.Nullable;
 import android.media.Session2Token;
+import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.RequiresApi;
+
 import com.android.internal.annotations.GuardedBy;
+import com.android.modules.annotation.MinSdk;
 import com.android.server.media.MediaCommunicationService.Session2Record;
 
 import java.util.ArrayList;
@@ -33,6 +37,8 @@ import java.util.List;
  * Higher priority session has more chance to be selected as media button session,
  * which receives the media button events.
  */
+@MinSdk(Build.VERSION_CODES.S)
+@RequiresApi(Build.VERSION_CODES.S)
 class SessionPriorityList {
     private static final String TAG = "SessionPriorityList";
     private final Object mLock = new Object();
