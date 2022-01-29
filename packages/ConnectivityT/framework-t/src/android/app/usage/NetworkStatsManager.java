@@ -41,6 +41,7 @@ import android.net.NetworkStateSnapshot;
 import android.net.NetworkTemplate;
 import android.net.UnderlyingNetworkInfo;
 import android.net.netstats.IUsageCallback;
+import android.net.netstats.NetworkStatsDataMigrationUtils;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.net.netstats.provider.NetworkStatsProvider;
 import android.os.Build;
@@ -126,17 +127,12 @@ public class NetworkStatsManager {
     private final INetworkStatsService mService;
 
     /**
-     * Type constants for reading different types of Data Usage.
+     * @deprecated Use {@link NetworkStatsDataMigrationUtils#PREFIX_XT}
+     * instead.
      * @hide
      */
-    // @SystemApi(client = MODULE_LIBRARIES)
+    @Deprecated
     public static final String PREFIX_DEV = "dev";
-    /** @hide */
-    public static final String PREFIX_XT = "xt";
-    /** @hide */
-    public static final String PREFIX_UID = "uid";
-    /** @hide */
-    public static final String PREFIX_UID_TAG = "uid_tag";
 
     /** @hide */
     public static final int FLAG_POLL_ON_OPEN = 1 << 0;
