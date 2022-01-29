@@ -344,7 +344,7 @@ public class ScreenshotController {
         };
         mContext.registerReceiver(mCopyBroadcastReceiver, new IntentFilter(
                         ClipboardOverlayController.COPY_OVERLAY_ACTION),
-                ClipboardOverlayController.SELF_PERMISSION, null);
+                ClipboardOverlayController.SELF_PERMISSION, null, Context.RECEIVER_NOT_EXPORTED);
     }
 
     void takeScreenshotFullscreen(ComponentName topComponent, Consumer<Uri> finisher,
