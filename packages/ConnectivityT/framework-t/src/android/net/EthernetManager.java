@@ -358,6 +358,7 @@ public class EthernetManager {
         return proxy;
     }
 
+    @RequiresPermission(android.Manifest.permission.MANAGE_ETHERNET_NETWORKS)
     private void updateConfiguration(
             @NonNull String iface,
             @NonNull InternalNetworkUpdateRequest request,
@@ -372,6 +373,7 @@ public class EthernetManager {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.MANAGE_ETHERNET_NETWORKS)
     private void connectNetwork(
             @NonNull String iface,
             @Nullable @CallbackExecutor Executor executor,
@@ -385,6 +387,7 @@ public class EthernetManager {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.MANAGE_ETHERNET_NETWORKS)
     private void disconnectNetwork(
             @NonNull String iface,
             @Nullable @CallbackExecutor Executor executor,
