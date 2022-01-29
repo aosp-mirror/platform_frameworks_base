@@ -7737,30 +7737,20 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
 
-        int returnedDeviceOwnerType = dpm.getDeviceOwnerType(admin1);
-        assertThat(dpms.mOwners.hasDeviceOwner()).isTrue();
-        assertThat(returnedDeviceOwnerType).isEqualTo(DEVICE_OWNER_TYPE_FINANCED);
-
+        assertThat(dpm.getDeviceOwnerType(admin1)).isEqualTo(DEVICE_OWNER_TYPE_FINANCED);
         initializeDpms();
-
-        returnedDeviceOwnerType = dpm.getDeviceOwnerType(admin1);
-        assertThat(dpms.mOwners.hasDeviceOwner()).isTrue();
-        assertThat(returnedDeviceOwnerType).isEqualTo(DEVICE_OWNER_TYPE_FINANCED);
+        assertThat(dpm.getDeviceOwnerType(admin1)).isEqualTo(DEVICE_OWNER_TYPE_FINANCED);
     }
 
     @Test
-    public void testSetDeviceOwnerType_asDeviceOwner_throwsExceptionWhenSetDeviceOwnerTypeAgain()
+    public void testSetDeviceOwnerType_asDeviceOwner_setDeviceOwnerTypeTwice_success()
             throws Exception {
         setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_DEFAULT);
 
         dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
 
-        int returnedDeviceOwnerType = dpm.getDeviceOwnerType(admin1);
-        assertThat(dpms.mOwners.hasDeviceOwner()).isTrue();
-        assertThat(returnedDeviceOwnerType).isEqualTo(DEVICE_OWNER_TYPE_FINANCED);
-
-        assertThrows(IllegalStateException.class,
-                () -> dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_DEFAULT));
+        assertThat(dpm.getDeviceOwnerType(admin1)).isEqualTo(DEVICE_OWNER_TYPE_FINANCED);
     }
 
     @Test
