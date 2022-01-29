@@ -290,6 +290,8 @@ public abstract class ContentCaptureSession implements AutoCloseable {
      * <p>Typically used to change the context associated with the default session from an activity.
      */
     public final void setContentCaptureContext(@Nullable ContentCaptureContext context) {
+        if (!isContentCaptureEnabled()) return;
+
         mClientContext = context;
         updateContentCaptureContext(context);
     }
