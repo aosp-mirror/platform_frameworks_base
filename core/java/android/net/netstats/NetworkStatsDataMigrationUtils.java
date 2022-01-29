@@ -16,9 +16,7 @@
 
 package android.net.netstats;
 
-import static android.app.usage.NetworkStatsManager.PREFIX_UID;
-import static android.app.usage.NetworkStatsManager.PREFIX_UID_TAG;
-import static android.app.usage.NetworkStatsManager.PREFIX_XT;
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
@@ -28,6 +26,7 @@ import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.TAG_NONE;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.net.NetworkIdentity;
 import android.net.NetworkStatsCollection;
 import android.net.NetworkStatsHistory;
@@ -54,12 +53,27 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Helper class to read old version of persistent network statistics, the implementation is
- * intended to be modified by OEM partners to accommodate their custom changes.
+ * Helper class to read old version of persistent network statistics.
+ *
+ * The implementation is intended to be modified by OEM partners to
+ * accommodate their custom changes.
+ *
  * @hide
  */
-// @SystemApi(client = MODULE_LIBRARIES)
+@SystemApi(client = MODULE_LIBRARIES)
 public class NetworkStatsDataMigrationUtils {
+    /**
+     * Prefix of the files which are used to store per network interface statistics.
+     */
+    public static final String PREFIX_XT = "xt";
+    /**
+     * Prefix of the files which are used to store per uid statistics.
+     */
+    public static final String PREFIX_UID = "uid";
+    /**
+     * Prefix of the files which are used to store per uid tagged traffic statistics.
+     */
+    public static final String PREFIX_UID_TAG = "uid_tag";
 
     private static final HashMap<String, String> sPrefixLegacyFileNameMap =
             new HashMap<String, String>() {{
@@ -146,17 +160,51 @@ public class NetworkStatsDataMigrationUtils {
     }
 
     /**
-     * Read legacy persisted network stats from disk. This function provides a default
-     * implementation to read persisted network stats from two different locations.
-     * And this is intended to be modified by OEM to read from custom file format or
-     * locations if necessary.
+     * Read legacy persisted network stats from disk.
+     *
+     * This function provides the implementation to read legacy network stats
+     * from disk. It is used for migration of legacy network stats into the
+     * stats provided by the Connectivity module.
+     * This function needs to know about the previous format(s) of the network
+     * stats data that might be stored on this device so it can be read and
+     * conserved upon upgrade to Android 13 or above.
+     *
+     * This function will be called multiple times sequentially, all on the
+     * same thread, and will not be called multiple times concurrently. This
+     * function is expected to do a substantial amount of disk access, and
+     * doesn't need to return particularly fast, but the first boot after
+     * an upgrade to Android 13+ will be held until migration is done. As
+     * migration is only necessary once, after the first boot following the
+     * upgrade, this delay is not incurred.
+     *
+     * If this function fails in any way, it should throw an exception. If this
+     * happens, the system can't know about the data that was stored in the
+     * legacy files, but it will still count data usage happening on this
+     * session. On the next boot, the system will try migration again, and
+     * merge the returned data with the data used with the previous session.
+     * The system will only try the migration up to three (3) times. The remaining
+     * count is stored in the netstats_import_legacy_file_needed device config. The
+     * legacy data is never deleted by the mainline module to avoid any possible
+     * data loss.
+     *
+     * It is possible to set the netstats_import_legacy_file_needed device config
+     * to any positive integer to force the module to perform the migration. This
+     * can be achieved by calling the following command before rebooting :
+     *     adb shell device_config put connectivity netstats_import_legacy_file_needed 1
+     *
+     * The AOSP implementation provides code to read persisted network stats as
+     * they were written by AOSP prior to Android 13.
+     * OEMs who have used the AOSP implementation of persisting network stats
+     * to disk don't need to change anything.
+     * OEM that had modifications to this format should modify this function
+     * to read from their custom file format or locations if necessary.
      *
      * @param prefix         Type of data which is being read by the service.
      * @param bucketDuration Duration of the buckets of the object, in milliseconds.
      * @return {@link NetworkStatsCollection} instance.
      */
     @NonNull
-    public static NetworkStatsCollection readPlatformCollectionLocked(
+    public static NetworkStatsCollection readPlatformCollection(
             @NonNull String prefix, long bucketDuration) throws IOException {
         final NetworkStatsCollection.Builder builder =
                 new NetworkStatsCollection.Builder(bucketDuration);
@@ -397,7 +445,7 @@ public class NetworkStatsDataMigrationUtils {
             if (version >= IdentitySetVersion.VERSION_ADD_OEM_MANAGED_NETWORK) {
                 oemNetCapabilities = in.readInt();
             } else {
-                oemNetCapabilities = NetworkIdentity.OEM_NONE;
+                oemNetCapabilities = NetworkTemplate.OEM_MANAGED_NO;
             }
 
             // Legacy files might contain TYPE_MOBILE_* types which were deprecated in later
