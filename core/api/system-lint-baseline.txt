@@ -294,7 +294,6 @@ SamShouldBeLast: android.webkit.WebChromeClient#onShowFileChooser(android.webkit
 
 
 ServiceName: android.content.Context#CLOUDSEARCH_SERVICE:
-    Inconsistent service value; expected `cloudsearch`, was `cloudsearch_service` (Note: Do not change the name of already released services, which will break tools using `adb shell dumpsys`. Instead add `@SuppressLint("ServiceName"))`
 
 
 UserHandleName: android.app.search.SearchAction.Builder#setUserHandle(android.os.UserHandle):
