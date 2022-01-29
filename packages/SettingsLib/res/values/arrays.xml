@@ -647,4 +647,6 @@
         <item>disabled</item>
     </array>
 
+    <array name="avatar_images"/>
+
 </resources>

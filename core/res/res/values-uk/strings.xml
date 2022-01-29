@@ -1227,6 +1227,10 @@
     <string name="deleteText" msgid="4200807474529938112">"Видалити"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Метод введення"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Дії з текстом"</string>
+    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
+    <skip />
+    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Закінчується пам’ять"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Деякі системні функції можуть не працювати"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Недостатньо місця для системи. Переконайтесь, що на пристрої є 250 МБ вільного місця, і повторіть спробу."</string>
@@ -1531,6 +1535,8 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Додаток зможе запитувати дозвіл ігнорувати оптимізацію використання заряду акумулятора."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"подавати запити на всі пакети"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Дозволяє додатку переглядати всі встановлені пакети."</string>
+    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"Доступ до SupplementalApis"</string>
+    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Надає додатку доступ до SupplementalApis."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Двічі натис. для кер. масшт."</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Не вдалося додати віджет."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Йти"</string>

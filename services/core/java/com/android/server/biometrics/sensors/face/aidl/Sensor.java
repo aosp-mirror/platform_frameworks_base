@@ -42,12 +42,15 @@ import android.os.UserManager;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.SensorServiceStateProto;
 import com.android.server.biometrics.SensorStateProto;
 import com.android.server.biometrics.UserStateProto;
 import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
@@ -88,7 +91,8 @@ public class Sensor {
     @NonNull private final Supplier<AidlSession> mLazySession;
     @Nullable private AidlSession mCurrentSession;
 
-    static class HalSessionCallback extends ISessionCallback.Stub {
+    @VisibleForTesting
+    public static class HalSessionCallback extends ISessionCallback.Stub {
         /**
          * Interface to sends results to the HalSessionCallback's owner.
          */
@@ -487,7 +491,9 @@ public class Sensor {
                     @Override
                     public StopUserClient<?> getStopUserClient(int userId) {
                         return new FaceStopUserClient(mContext, mLazySession, mToken, userId,
-                                mSensorProperties.sensorId, () -> mCurrentSession = null);
+                                mSensorProperties.sensorId,
+                                BiometricLogger.ofUnknown(mContext), BiometricContext.getInstance(),
+                                () -> mCurrentSession = null);
                     }
 
                     @NonNull
@@ -523,6 +529,7 @@ public class Sensor {
 
                         return new FaceStartUserClient(mContext, provider::getHalInstance,
                                 mToken, newUserId, mSensorProperties.sensorId,
+                                BiometricLogger.ofUnknown(mContext), BiometricContext.getInstance(),
                                 resultController, userStartedCallback);
                     }
                 });

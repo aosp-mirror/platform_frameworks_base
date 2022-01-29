@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view;
+package android.view.stylus;
 
 import static android.view.MotionEvent.ACTION_DOWN;
 import static android.view.MotionEvent.ACTION_MOVE;
@@ -33,6 +33,12 @@ import android.app.Instrumentation;
 import android.content.Context;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.view.HandwritingInitiator;
+import android.view.InputDevice;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -47,7 +53,7 @@ import org.junit.runner.RunWith;
  * Tests for {@link HandwritingInitiator}
  *
  * Build/Install/Run:
- *  atest FrameworksCoreTests:HandwritingInitiatorTest
+ *  atest FrameworksCoreTests:android.view.stylus.HandwritingInitiatorTest
  */
 @Presubmit
 @SmallTest

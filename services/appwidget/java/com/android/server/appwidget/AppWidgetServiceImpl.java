@@ -3346,8 +3346,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             // Isolate the changes relating to RROs. The app info must be copied to prevent
             // affecting other parts of system server that may have cached this app info.
             oldAppInfo = new ApplicationInfo(oldAppInfo);
-            oldAppInfo.overlayPaths = newAppInfo.overlayPaths.clone();
-            oldAppInfo.resourceDirs = newAppInfo.resourceDirs.clone();
+            oldAppInfo.overlayPaths = newAppInfo.overlayPaths == null
+                    ? null : newAppInfo.overlayPaths.clone();
+            oldAppInfo.resourceDirs = newAppInfo.resourceDirs == null
+                    ? null : newAppInfo.resourceDirs.clone();
             provider.info.providerInfo.applicationInfo = oldAppInfo;
 
             for (int j = 0, M = provider.widgets.size(); j < M; j++) {

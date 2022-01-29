@@ -112,7 +112,7 @@ interface IActivityClientController {
      * calls, so this method should be the same as them to keep the invocation order.
      */
     void overridePendingTransition(in IBinder token, in String packageName,
-            int enterAnim, int exitAnim);
+            int enterAnim, int exitAnim, int backgroundColor);
     int setVrMode(in IBinder token, boolean enabled, in ComponentName packageName);
 
     /** See {@link android.app.Activity#setDisablePreviewScreenshots}. */

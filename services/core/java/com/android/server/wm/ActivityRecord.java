@@ -4469,6 +4469,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         pendingOptions.getOverrideTaskTransition());
                 options = AnimationOptions.makeCustomAnimOptions(pendingOptions.getPackageName(),
                         pendingOptions.getCustomEnterResId(), pendingOptions.getCustomExitResId(),
+                        pendingOptions.getCustomBackgroundColor(),
                         pendingOptions.getOverrideTaskTransition());
                 startCallback = pendingOptions.getAnimationStartedListener();
                 finishCallback = pendingOptions.getAnimationFinishedListener();

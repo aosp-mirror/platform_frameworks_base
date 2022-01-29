@@ -1227,6 +1227,10 @@
     <string name="deleteText" msgid="4200807474529938112">"Odstrániť"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Metóda vstupu"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Operácie s textom"</string>
+    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
+    <skip />
+    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Nedostatok ukladacieho priestoru"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Niektoré systémové funkcie nemusia fungovať"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"V úložisku nie je dostatok voľného miesta pre systém. Zaistite, aby ste mali 250 MB voľného miesta a zariadenie reštartujte."</string>
@@ -1531,6 +1535,8 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Umožňuje aplikácii požiadať o povolenie ignorovať optimalizácie výdrže batérie pre danú aplikáciu."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"dopytovať všetky balíky"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Povoľuje aplikácii čítať všetky nainštalované balíky."</string>
+    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"prístup k rozhraniam SupplementalApi"</string>
+    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Umožňuje aplikácii získať prístup k rozhraniam SupplementalApi."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Dvojitým klepnutím môžete ovládať priblíženie"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Miniaplikáciu sa nepodarilo pridať."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Hľadať"</string>

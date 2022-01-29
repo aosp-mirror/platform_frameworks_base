@@ -1187,6 +1187,10 @@
     <string name="deleteText" msgid="4200807474529938112">"মচক"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ইনপুট পদ্ধতি"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"পাঠ বিষয়ক কাৰ্য"</string>
+    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
+    <skip />
+    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"ষ্ট’ৰেজৰ খালী ঠাই শেষ হৈ আছে"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"ছিষ্টেমৰ কিছুমান কাৰ্যকলাপে কাম নকৰিবও পাৰে"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"ছিষ্টেমৰ বাবে পৰ্যাপ্ত খালী ঠাই নাই। আপোনাৰ ২৫০এমবি খালী ঠাই থকাটো নিশ্চিত কৰক আৰু ৰিষ্টাৰ্ট কৰক।"</string>
@@ -1491,6 +1495,8 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"কোনো এপক সেই এপ্‌টোৰ বাবে বেটাৰী অপ্টিমাইজেশ্বন উপেক্ষা কৰিবলৈ অনুমতি বিচাৰিবলৈ দিয়ে।"</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"আটাইবোৰ পেকেজত প্ৰশ্ন সোধক"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"এপক আটাইবোৰ ইনষ্টল কৰি থোৱা পেকেজ চাবলৈ দিয়ে।"</string>
+    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApis এক্সেছ কৰক"</string>
+    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"কোনো এপ্লিকেশ্বনক SupplementalApis এক্সেছ কৰিবলৈ অনুমতি দিয়ে।"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"জুম নিয়ন্ত্ৰণ কৰিবলৈ দুবাৰ টিপক"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ৱিজেট যোগ কৰিব পৰা নগ\'ল।"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"যাওক"</string>

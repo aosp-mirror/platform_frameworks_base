@@ -2386,6 +2386,15 @@ public final class Settings {
             "android.settings.ENABLE_MMS_DATA_REQUEST";
 
     /**
+     * Shows restrict settings dialog when settings is blocked.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SHOW_RESTRICTED_SETTING_DIALOG =
+            "android.settings.SHOW_RESTRICTED_SETTING_DIALOG";
+
+    /**
      * Integer value that specifies the reason triggering enable MMS data notification.
      * This must be passed as an extra field to the {@link #ACTION_ENABLE_MMS_DATA_REQUEST}.
      * Extra with value of EnableMmsDataReason interface.
@@ -6574,6 +6583,8 @@ public final class Settings {
          * @hide
          */
         @Readable(maxTargetSdk = Build.VERSION_CODES.S)
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLUETOOTH_NAME = "bluetooth_name";
 
         /**
@@ -6581,6 +6592,8 @@ public final class Settings {
          * @hide
          */
         @Readable(maxTargetSdk = Build.VERSION_CODES.S)
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLUETOOTH_ADDRESS = "bluetooth_address";
 
         /**
@@ -6588,6 +6601,8 @@ public final class Settings {
          * @hide
          */
         @Readable(maxTargetSdk = Build.VERSION_CODES.S)
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLUETOOTH_ADDR_VALID = "bluetooth_addr_valid";
 
         /**
@@ -10259,6 +10274,13 @@ public final class Settings {
         public static final String NEARBY_SHARING_COMPONENT = "nearby_sharing_component";
 
         /**
+         * Nearby Sharing Slice URI for the SliceProvider to
+         * read Nearby Sharing scan results and then draw the UI.
+         * @hide
+         */
+        public static final String NEARBY_SHARING_SLICE_URI = "nearby_sharing_slice_uri";
+
+        /**
          * Controls whether aware is enabled.
          * @hide
          */
@@ -10826,6 +10848,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLUETOOTH_CLASS_OF_DEVICE = "bluetooth_class_of_device";
 
         /**
@@ -10834,6 +10858,8 @@ public final class Settings {
          * {@hide}
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLUETOOTH_DISABLED_PROFILES = "bluetooth_disabled_profiles";
 
         /**
@@ -12371,6 +12397,8 @@ public final class Settings {
         * @hide
         */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_ALWAYS_AVAILABLE = "ble_scan_always_enabled";
 
         /**
@@ -12378,6 +12406,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_LOW_POWER_WINDOW_MS = "ble_scan_low_power_window_ms";
 
         /**
@@ -12385,6 +12415,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_BALANCED_WINDOW_MS = "ble_scan_balanced_window_ms";
 
         /**
@@ -12392,6 +12424,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_LOW_LATENCY_WINDOW_MS =
                 "ble_scan_low_latency_window_ms";
 
@@ -12400,6 +12434,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_LOW_POWER_INTERVAL_MS =
                 "ble_scan_low_power_interval_ms";
 
@@ -12408,6 +12444,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_BALANCED_INTERVAL_MS =
                 "ble_scan_balanced_interval_ms";
 
@@ -12416,6 +12454,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_LOW_LATENCY_INTERVAL_MS =
                 "ble_scan_low_latency_interval_ms";
 
@@ -12424,6 +12464,8 @@ public final class Settings {
          * @hide
          */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String BLE_SCAN_BACKGROUND_MODE = "ble_scan_background_mode";
 
         /**
@@ -13156,6 +13198,8 @@ public final class Settings {
 
         /** {@hide} */
         @Readable
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+        @SuppressLint("NoSettingsProvider")
         public static final String
                 BLUETOOTH_BTSNOOP_DEFAULT_MODE = "bluetooth_btsnoop_default_mode";
         /** {@hide} */
@@ -16704,6 +16748,30 @@ public final class Settings {
          * @hide
          */
         public static final String RESTRICTED_NETWORKING_MODE = "restricted_networking_mode";
+
+        /**
+         * Setting indicating whether Low Power Standby is enabled, if supported.
+         *
+         * Values are:
+         * 0: disabled
+         * 1: enabled
+         *
+         * @hide
+         */
+        public static final String LOW_POWER_STANDBY_ENABLED = "low_power_standby_enabled";
+
+        /**
+         * Setting indicating whether Low Power Standby is allowed to be active during doze
+         * maintenance mode.
+         *
+         * Values are:
+         * 0: Low Power Standby will be disabled during doze maintenance mode
+         * 1: Low Power Standby can be active during doze maintenance mode
+         *
+         * @hide
+         */
+        public static final String LOW_POWER_STANDBY_ACTIVE_DURING_MAINTENANCE =
+                "low_power_standby_active_during_maintenance";
 
         /**
          * Settings migrated from Wear OS settings provider.

@@ -1227,6 +1227,10 @@
     <string name="deleteText" msgid="4200807474529938112">"Usuń"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Sposób wprowadzania tekstu"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Działania na tekście"</string>
+    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
+    <skip />
+    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Kończy się miejsce"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Niektóre funkcje systemu mogą nie działać"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Za mało pamięci w systemie. Upewnij się, że masz 250 MB wolnego miejsca i uruchom urządzenie ponownie."</string>
@@ -1531,6 +1535,8 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Zezwala aplikacji na proszenie o uprawnienia do ignorowania optymalizacji wykorzystania baterii w przypadku danej aplikacji."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"zapytanie o wszystkie pakiety"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Pozwala aplikacji wyświetlać wszystkie zainstalowane pakiety."</string>
+    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"dostęp do SupplementalApis"</string>
+    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Zezwala na dostęp aplikacji do SupplementalApis."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Dotknij dwukrotnie, aby sterować powiększeniem"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"Nie można dodać widżetu."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"OK"</string>

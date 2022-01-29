@@ -599,6 +599,7 @@ public final class TransitionInfo implements Parcelable {
         private final Rect mTransitionBounds = new Rect();
         private HardwareBuffer mThumbnail;
         private int mAnimations;
+        private @ColorInt int mBackgroundColor;
 
         private AnimationOptions(int type) {
             mType = type;
@@ -608,6 +609,7 @@ public final class TransitionInfo implements Parcelable {
             mType = in.readInt();
             mEnterResId = in.readInt();
             mExitResId = in.readInt();
+            mBackgroundColor = in.readInt();
             mOverrideTaskTransition = in.readBoolean();
             mPackageName = in.readString();
             mTransitionBounds.readFromParcel(in);
@@ -624,11 +626,12 @@ public final class TransitionInfo implements Parcelable {
         }
 
         public static AnimationOptions makeCustomAnimOptions(String packageName, int enterResId,
-                int exitResId, boolean overrideTaskTransition) {
+                int exitResId, @ColorInt int backgroundColor, boolean overrideTaskTransition) {
             AnimationOptions options = new AnimationOptions(ANIM_CUSTOM);
             options.mPackageName = packageName;
             options.mEnterResId = enterResId;
             options.mExitResId = exitResId;
+            options.mBackgroundColor = backgroundColor;
             options.mOverrideTaskTransition = overrideTaskTransition;
             return options;
         }
@@ -673,6 +676,10 @@ public final class TransitionInfo implements Parcelable {
             return mExitResId;
         }
 
+        public @ColorInt int getBackgroundColor() {
+            return mBackgroundColor;
+        }
+
         public boolean getOverrideTaskTransition() {
             return mOverrideTaskTransition;
         }
@@ -698,6 +705,7 @@ public final class TransitionInfo implements Parcelable {
             dest.writeInt(mType);
             dest.writeInt(mEnterResId);
             dest.writeInt(mExitResId);
+            dest.writeInt(mBackgroundColor);
             dest.writeBoolean(mOverrideTaskTransition);
             dest.writeString(mPackageName);
             mTransitionBounds.writeToParcel(dest, flags);
@@ -740,7 +748,7 @@ public final class TransitionInfo implements Parcelable {
 
         @Override
         public String toString() {
-            return "{ AnimationOtions type= " + typeToString(mType) + " package=" + mPackageName
+            return "{ AnimationOptions type= " + typeToString(mType) + " package=" + mPackageName
                     + " override=" + mOverrideTaskTransition + " b=" + mTransitionBounds + "}";
         }
     }

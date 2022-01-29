@@ -31,6 +31,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.service.SensorPrivacyIndividualEnabledSensorProto;
+import android.service.SensorPrivacySensorProto;
 import android.service.SensorPrivacyToggleSourceProto;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -75,7 +76,7 @@ public final class SensorPrivacyManager {
     private final SparseArray<Boolean> mToggleSupportCache = new SparseArray<>();
 
     /**
-     * Individual sensors not listed in {@link Sensors}
+     * Sensor constants which are used in {@link SensorPrivacyManager}
      */
     public static class Sensors {
 
@@ -84,12 +85,12 @@ public final class SensorPrivacyManager {
         /**
          * Constant for the microphone
          */
-        public static final int MICROPHONE = SensorPrivacyIndividualEnabledSensorProto.MICROPHONE;
+        public static final int MICROPHONE = SensorPrivacySensorProto.MICROPHONE;
 
         /**
          * Constant for the camera
          */
-        public static final int CAMERA = SensorPrivacyIndividualEnabledSensorProto.CAMERA;
+        public static final int CAMERA = SensorPrivacySensorProto.CAMERA;
 
         /**
          * Individual sensors not listed in {@link Sensors}
@@ -157,6 +158,68 @@ public final class SensorPrivacyManager {
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface Source {}
+
+    }
+
+    /**
+     * Types of toggles which can exist for sensor privacy
+     * @hide
+     */
+    public static class ToggleTypes {
+        private ToggleTypes() {}
+
+        /**
+         * Constant for software toggle.
+         */
+        public static final int SOFTWARE = SensorPrivacyIndividualEnabledSensorProto.SOFTWARE;
+
+        /**
+         * Constant for hardware toggle.
+         */
+        public static final int HARDWARE = SensorPrivacyIndividualEnabledSensorProto.HARDWARE;
+
+        /**
+         * Types of toggles which can exist for sensor privacy
+         *
+         * @hide
+         */
+        @IntDef(value = {
+                SOFTWARE,
+                HARDWARE
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface ToggleType {}
+
+    }
+
+    /**
+     * Types of state which can exist for the sensor privacy toggle
+     * @hide
+     */
+    public static class StateTypes {
+        private StateTypes() {}
+
+        /**
+         * Constant indicating privacy is enabled.
+         */
+        public static final int ENABLED = SensorPrivacyIndividualEnabledSensorProto.ENABLED;
+
+        /**
+         * Constant indicating privacy is disabled.
+         */
+        public static final int DISABLED = SensorPrivacyIndividualEnabledSensorProto.DISABLED;
+
+        /**
+         * Types of state which can exist for a sensor privacy toggle
+         *
+         * @hide
+         */
+        @IntDef(value = {
+                ENABLED,
+                DISABLED
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface StateType {}
 
     }
 
@@ -507,7 +570,6 @@ public final class SensorPrivacyManager {
     /**
      * Don't show dialogs to turn off sensor privacy for this package.
      *
-     * @param packageName Package name not to show dialogs for
      * @param suppress Whether to suppress or re-enable.
      *
      * @hide
@@ -521,7 +583,6 @@ public final class SensorPrivacyManager {
     /**
      * Don't show dialogs to turn off sensor privacy for this package.
      *
-     * @param packageName Package name not to show dialogs for
      * @param suppress Whether to suppress or re-enable.
      * @param userId the user's id
      *

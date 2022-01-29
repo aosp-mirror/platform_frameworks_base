@@ -18,6 +18,8 @@ package com.android.server.pm;
 
 import android.content.pm.IPackageLoadingProgressCallback;
 
+import com.android.server.pm.pkg.PackageStateInternal;
+
 /**
  * Loading progress callback, used to listen for progress changes and update package setting
  */
@@ -31,25 +33,24 @@ final class IncrementalProgressListener extends IPackageLoadingProgressCallback.
 
     @Override
     public void onPackageLoadingProgressChanged(float progress) {
-        final PackageSetting ps;
-        synchronized (mPm.mLock) {
-            ps = mPm.mSettings.getPackageLPr(mPackageName);
-            if (ps == null) {
-                return;
-            }
+        PackageStateInternal packageState = mPm.getPackageStateInternal(mPackageName);
+        if (packageState == null) {
+            return;
+        }
 
-            boolean wasLoading = ps.isLoading();
-            // Due to asynchronous progress reporting, incomplete progress might be received
-            // after the app is migrated off incremental. Ignore such progress updates.
-            if (wasLoading) {
-                ps.setLoadingProgress(progress);
-                // Only report the state change when loading state changes from loading to not
-                if (!ps.isLoading()) {
-                    // Unregister progress listener
-                    mPm.mIncrementalManager.unregisterLoadingProgressCallbacks(ps.getPathString());
-                    // Make sure the information is preserved
-                    mPm.scheduleWriteSettings();
-                }
+        boolean wasLoading = packageState.isLoading();
+        // Due to asynchronous progress reporting, incomplete progress might be received
+        // after the app is migrated off incremental. Ignore such progress updates.
+        if (wasLoading) {
+            mPm.commitPackageStateMutation(null, mPackageName,
+                    state -> state.setLoadingProgress(progress));
+            // Only report the state change when loading state changes from loading to not
+            if (Math.abs(1.0f - progress) < 0.00000001f) {
+                // Unregister progress listener
+                mPm.mIncrementalManager
+                        .unregisterLoadingProgressCallbacks(packageState.getPathString());
+                // Make sure the information is preserved
+                mPm.scheduleWriteSettings();
             }
         }
     }

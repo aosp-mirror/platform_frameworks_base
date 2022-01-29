@@ -880,6 +880,16 @@
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_storage">access photos, media, and files on your device</string>
 
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=40]-->
+    <string name="permgrouplab_readMediaAural">Music &amp; other audio</string>
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE]-->
+    <string name="permgroupdesc_readMediaAural">access audio files on your device</string>
+
+    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=40]-->
+    <string name="permgrouplab_readMediaVisual">Photos &amp; videos</string>
+    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE]-->
+    <string name="permgroupdesc_readMediaVisual">access images and video files on your device</string>
+
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_microphone">Microphone</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1892,6 +1902,21 @@
     <string name="permlab_sdcardRead">read the contents of your shared storage</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
     <string name="permdesc_sdcardRead">Allows the app to read the contents of your shared storage.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
+    <string name="permlab_readMediaAudio">read audio files from shared storage</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
+    <string name="permdesc_readMediaAudio">Allows the app to read audio files from your shared storage.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
+    <string name="permlab_readMediaVideo">read video files from shared storage</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
+    <string name="permdesc_readMediaVideo">Allows the app to read video files from your shared storage.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
+    <string name="permlab_readMediaImage">read image files from shared storage</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
+    <string name="permdesc_readMediaImage">Allows the app to read image files from your shared storage.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can write to. [CHAR LIMIT=none] -->
     <string name="permlab_sdcardWrite">modify or delete the contents of your shared storage</string>
@@ -3847,6 +3872,11 @@
     <!-- Message of notification shown when serial console is enabled. [CHAR LIMIT=NONE] -->
     <string name="console_running_notification_message">Performance is impacted. To disable, check bootloader.</string>
 
+    <!-- Title of notification shown when MTE status override is enabled. [CHAR LIMIT=NONE] -->
+    <string name="mte_override_notification_title">Experimental MTE enabled</string>
+    <!-- Message of notification shown when MTE status override is enabled. [CHAR LIMIT=NONE] -->
+    <string name="mte_override_notification_message">Performance and stability might be impacted. Reboot to disable. If enabled using arm64.memtag.bootctl, set it to "none" beforehand.</string>
+
     <!-- Title of notification shown when contaminant is detected on the USB port. [CHAR LIMIT=NONE] -->
     <string name="usb_contaminant_detected_title">Liquid or debris in USB port</string>
     <!-- Message of notification shown when contaminant is detected on the USB port. [CHAR LIMIT=NONE] -->
@@ -5433,6 +5463,15 @@
     <string name="app_blocked_message">
         <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> is not available right now.
     </string>
+
+    <!-- Title of the dialog shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_title"><xliff:g id="activity" example="Permission dialog">%1$s</xliff:g> unavailable</string>
+    <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message" product="tv">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your Android TV device instead.</string>
+    <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message" product="tablet">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your tablet instead.</string>
+    <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message" product="default">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your phone instead.</string>
 
     <!-- Message displayed in dialog when app is too old to run on this verison of android. [CHAR LIMIT=NONE] -->
     <string name="deprecated_target_sdk_message">This app was built for an older version of Android and may not work properly. Try checking for updates, or contact the developer.</string>

@@ -18,7 +18,6 @@ package com.android.server.biometrics.sensors.fingerprint.hidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.os.Build;
 import android.os.Environment;
@@ -27,6 +26,8 @@ import android.os.SELinux;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
@@ -50,12 +51,13 @@ public class FingerprintUpdateActiveUserClient extends HalClientMonitor<IBiometr
 
     FingerprintUpdateActiveUserClient(@NonNull Context context,
             @NonNull Supplier<IBiometricsFingerprint> lazyDaemon, int userId,
-            @NonNull String owner, int sensorId, Supplier<Integer> currentUserId,
+            @NonNull String owner, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+            Supplier<Integer> currentUserId,
             boolean hasEnrolledBiometrics, @NonNull Map<Integer, Long> authenticatorIds,
             boolean forceUpdateAuthenticatorId) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId, owner,
-                0 /* cookie */, sensorId, BiometricsProtoEnums.MODALITY_UNKNOWN,
-                BiometricsProtoEnums.ACTION_UNKNOWN, BiometricsProtoEnums.CLIENT_UNKNOWN);
+                0 /* cookie */, sensorId, logger, biometricContext);
         mCurrentUserId = currentUserId;
         mForceUpdateAuthenticatorId = forceUpdateAuthenticatorId;
         mHasEnrolledBiometrics = hasEnrolledBiometrics;

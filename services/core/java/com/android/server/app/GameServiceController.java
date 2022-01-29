@@ -44,6 +44,8 @@ final class GameServiceController {
 
     private volatile boolean mHasBootCompleted;
     @Nullable
+    private volatile String mGameServiceProviderOverride;
+    @Nullable
     private volatile SystemService.TargetUser mCurrentForegroundUser;
     @GuardedBy("mLock")
     @Nullable
@@ -108,6 +110,16 @@ final class GameServiceController {
         setCurrentForegroundUserAndEvaluateProvider(null);
     }
 
+    void setGameServiceProvider(@Nullable String packageName) {
+        boolean hasPackageChanged = !Objects.equals(mGameServiceProviderOverride, packageName);
+        if (!hasPackageChanged) {
+            return;
+        }
+        mGameServiceProviderOverride = packageName;
+
+        mBackgroundExecutor.execute(this::evaluateActiveGameServiceProvider);
+    }
+
     private void setCurrentForegroundUserAndEvaluateProvider(
             @Nullable SystemService.TargetUser user) {
         boolean hasUserChanged =
@@ -128,7 +140,8 @@ final class GameServiceController {
 
         synchronized (mLock) {
             GameServiceProviderConfiguration selectedGameServiceProviderConfiguration =
-                    mGameServiceProviderSelector.get(mCurrentForegroundUser);
+                    mGameServiceProviderSelector.get(mCurrentForegroundUser,
+                            mGameServiceProviderOverride);
 
             boolean didActiveGameServiceProviderChanged =
                     !Objects.equals(selectedGameServiceProviderConfiguration,

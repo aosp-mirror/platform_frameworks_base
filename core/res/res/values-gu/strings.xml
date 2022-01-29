@@ -1187,6 +1187,10 @@
     <string name="deleteText" msgid="4200807474529938112">"ડિલીટ કરો"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ઇનપુટ પદ્ધતિ"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"ટેક્સ્ટ ક્રિયાઓ"</string>
+    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
+    <skip />
+    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"સ્ટોરેજ સ્થાન સમાપ્ત થયું"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"કેટલાક સિસ્ટમ Tasks કામ કરી શકશે નહીં"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"સિસ્ટમ માટે પર્યાપ્ત સ્ટોરેજ નથી. ખાતરી કરો કે તમારી પાસે 250MB ખાલી સ્થાન છે અને ફરીથી પ્રારંભ કરો."</string>
@@ -1491,6 +1495,8 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"ઍપ્લિકેશનને તે ઍપ્લિકેશન માટે બૅટરી ઓપ્ટિમાઇઝેશન્સને અવગણવાની પરવાનગી આપવા માટે પૂછવાની મંજૂરી આપે છે."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"બધા પૅકેજ જુઓ"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"કોઈ ઍપને ઇન્સ્ટૉલ કરેલા બધા પૅકેજ જોવાની મંજૂરી આપે છે."</string>
+    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"SupplementalApisને ઍક્સેસ કરો"</string>
+    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"કોઈ ઍપ્લિકેશનને SupplementalApis ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"ઝૂમ નિયંત્રણ માટે બેવાર ટૅપ કરો"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"વિજેટ ઉમેરી શકાયું નથી."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"જાઓ"</string>

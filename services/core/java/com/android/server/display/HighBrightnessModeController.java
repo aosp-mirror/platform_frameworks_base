@@ -82,7 +82,15 @@ class HighBrightnessModeController {
     private boolean mIsTimeAvailable = false;
     private boolean mIsAutoBrightnessEnabled = false;
     private boolean mIsAutoBrightnessOffByState = false;
+
+    // The following values are typically reported by DisplayPowerController.
+    // This value includes brightness throttling effects.
     private float mBrightness;
+    // This value excludes brightness throttling effects.
+    private float mUnthrottledBrightness;
+    private @BrightnessInfo.BrightnessMaxReason int mThrottlingReason =
+        BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
+
     private int mHbmMode = BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF;
     private boolean mIsHdrLayerPresent = false;
     private boolean mIsThermalStatusWithinLimit = true;
@@ -192,11 +200,14 @@ class HighBrightnessModeController {
         }
     }
 
-    void onBrightnessChanged(float brightness) {
+    void onBrightnessChanged(float brightness, float unthrottledBrightness,
+            @BrightnessInfo.BrightnessMaxReason int throttlingReason) {
         if (!deviceSupportsHbm()) {
             return;
         }
         mBrightness = brightness;
+        mUnthrottledBrightness = unthrottledBrightness;
+        mThrottlingReason = throttlingReason;
 
         // If we are starting or ending a high brightness mode session, store the current
         // session in mRunningStartTimeMillis, or the old one in mEvents.
@@ -274,6 +285,8 @@ class HighBrightnessModeController {
     private void dumpLocal(PrintWriter pw) {
         pw.println("HighBrightnessModeController:");
         pw.println("  mBrightness=" + mBrightness);
+        pw.println("  mUnthrottledBrightness=" + mUnthrottledBrightness);
+        pw.println("  mThrottlingReason=" + BrightnessInfo.briMaxReasonToString(mThrottlingReason));
         pw.println("  mCurrentMin=" + getCurrentBrightnessMin());
         pw.println("  mCurrentMax=" + getCurrentBrightnessMax());
         pw.println("  mHbmMode=" + BrightnessInfo.hbmToString(mHbmMode)
@@ -431,6 +444,9 @@ class HighBrightnessModeController {
                     + ", mIsThermalStatusWithinLimit: " + mIsThermalStatusWithinLimit
                     + ", mIsBlockedByLowPowerMode: " + mIsBlockedByLowPowerMode
                     + ", mBrightness: " + mBrightness
+                    + ", mUnthrottledBrightness: " + mUnthrottledBrightness
+                    + ", mThrottlingReason: "
+                        + BrightnessInfo.briMaxReasonToString(mThrottlingReason)
                     + ", RunningStartTimeMillis: " + mRunningStartTimeMillis
                     + ", nextTimeout: " + (nextTimeout != -1 ? (nextTimeout - currentTime) : -1)
                     + ", events: " + mEvents);
@@ -446,31 +462,44 @@ class HighBrightnessModeController {
 
     private void updateHbmMode() {
         int newHbmMode = calculateHighBrightnessMode();
-        updateHbmStats(mHbmMode, newHbmMode);
+        updateHbmStats(newHbmMode);
         if (mHbmMode != newHbmMode) {
             mHbmMode = newHbmMode;
             mHbmChangeCallback.run();
         }
     }
 
-    private void updateHbmStats(int mode, int newMode) {
+    private void updateHbmStats(int newMode) {
+        final float transitionPoint = mHbmData.transitionPoint;
         int state = FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_OFF;
         if (newMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR
-                && getHdrBrightnessValue() > mHbmData.transitionPoint) {
+                && getHdrBrightnessValue() > transitionPoint) {
             state = FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_HDR;
-        } else if (newMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT) {
+        } else if (newMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT
+                && mBrightness > transitionPoint) {
             state = FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_SUNLIGHT;
         }
         if (state == mHbmStatsState) {
             return;
         }
-        mHbmStatsState = state;
 
         int reason =
                 FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__REASON__HBM_TRANSITION_REASON_UNKNOWN;
-        boolean oldHbmSv = (mode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT);
-        boolean newHbmSv = (newMode == BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT);
+        final boolean oldHbmSv = (mHbmStatsState
+                == FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_SUNLIGHT);
+        final boolean newHbmSv =
+                (state == FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_SUNLIGHT);
         if (oldHbmSv && !newHbmSv) {
+            // HighBrightnessModeController (HBMC) currently supports throttling from two sources:
+            //     1. Internal, received from HBMC.SkinThermalStatusObserver.notifyThrottling()
+            //     2. External, received from HBMC.onBrightnessChanged()
+            // TODO(b/216373254): Deprecate internal throttling source
+            final boolean internalThermalThrottling = !mIsThermalStatusWithinLimit;
+            final boolean externalThermalThrottling =
+                mUnthrottledBrightness > transitionPoint && // We would've liked HBM brightness...
+                mBrightness <= transitionPoint &&           // ...but we got NBM, because of...
+                mThrottlingReason == BrightnessInfo.BRIGHTNESS_MAX_REASON_THERMAL; // ...thermals.
+
             // If more than one conditions are flipped and turn off HBM sunlight
             // visibility, only one condition will be reported to make it simple.
             if (!mIsAutoBrightnessEnabled && mIsAutoBrightnessOffByState) {
@@ -483,7 +512,7 @@ class HighBrightnessModeController {
                 reason = FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__REASON__HBM_SV_OFF_LUX_DROP;
             } else if (!mIsTimeAvailable) {
                 reason = FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__REASON__HBM_SV_OFF_TIME_LIMIT;
-            } else if (!mIsThermalStatusWithinLimit) {
+            } else if (internalThermalThrottling || externalThermalThrottling) {
                 reason = FrameworkStatsLog
                                  .DISPLAY_HBM_STATE_CHANGED__REASON__HBM_SV_OFF_THERMAL_LIMIT;
             } else if (mIsHdrLayerPresent) {
@@ -496,6 +525,7 @@ class HighBrightnessModeController {
         }
 
         mInjector.reportHbmStateChange(mDisplayStatsId, state, reason);
+        mHbmStatsState = state;
     }
 
     private String hbmStatsStateToString(int hbmStatsState) {
@@ -572,7 +602,7 @@ class HighBrightnessModeController {
                                 >= ((float) (mWidth * mHeight) * HDR_PERCENT_OF_SCREEN_REQUIRED);
                 // Calling the brightness update so that we can recalculate
                 // brightness with HDR in mind.
-                onBrightnessChanged(mBrightness);
+                onBrightnessChanged(mBrightness, mUnthrottledBrightness, mThrottlingReason);
             });
         }
     }

@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UserHandleAware;
 import android.content.Context;
 import android.os.Handler;
@@ -200,6 +201,22 @@ public final class GameManager {
     public void setGameState(@NonNull GameState gameState) {
         try {
             mService.setGameState(mContext.getPackageName(), gameState, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+
+    /**
+     * Sets the game service provider to the given package name for test only.
+     *
+     * <p>Passing in {@code null} will clear a previously set value.
+     * @hide
+     */
+    @TestApi
+    public void setGameServiceProvider(@Nullable String packageName) {
+        try {
+            mService.setGameServiceProvider(packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

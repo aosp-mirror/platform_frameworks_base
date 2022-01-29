@@ -22,10 +22,13 @@ import android.annotation.TestApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
 import android.view.accessibility.IAccessibilityEmbeddedConnection;
+import android.view.InsetsState;
 
 import java.util.Objects;
 
@@ -70,6 +73,16 @@ public class SurfaceControlViewHost {
             mViewRoot.mHandler.post(() -> {
                 release();
             });
+        }
+
+        @Override
+        public void onInsetsChanged(InsetsState state, Rect frame) {
+            if (mViewRoot != null) {
+                mViewRoot.mHandler.post(() -> {
+                    mViewRoot.setOverrideInsetsFrame(frame);
+                });
+            }
+            mWm.setInsetsState(state);
         }
     }
 
@@ -166,6 +179,36 @@ public class SurfaceControlViewHost {
          */
         public ISurfaceControlViewHost getRemoteInterface() {
             return mRemoteInterface;
+        }
+
+        /**
+         * Forward a configuration to the remote SurfaceControlViewHost.
+         * This will cause View#onConfigurationChanged to be invoked on the remote
+         * end. This does not automatically cause the SurfaceControlViewHost
+         * to be resized. The root View of a SurfaceControlViewHost
+         * is more akin to a PopupWindow in that the size is user specified
+         * independent of configuration width and height.
+         *
+         * @param c The configuration to forward
+         */
+        public void notifyConfigurationChanged(@NonNull Configuration c) {
+            try {
+                getRemoteInterface().onConfigurationChanged(c);
+            } catch (RemoteException e) {
+                e.rethrowAsRuntimeException();
+            }
+        }
+
+        /**
+         * Tear down the remote SurfaceControlViewHost and cause
+         * View#onDetachedFromWindow to be invoked on the other side.
+         */
+        public void notifyDetachedFromWindow() {
+            try {
+                getRemoteInterface().onDispatchDetachedFromWindow();
+            } catch (RemoteException e) {
+                e.rethrowAsRuntimeException();
+            }
         }
 
         @Override
@@ -274,7 +317,7 @@ public class SurfaceControlViewHost {
     public @Nullable SurfacePackage getSurfacePackage() {
         if (mSurfaceControl != null && mAccessibilityEmbeddedConnection != null) {
             return new SurfacePackage(mSurfaceControl, mAccessibilityEmbeddedConnection,
-                mViewRoot.getInputToken(), mRemoteInterface);
+                mWm.getFocusGrantToken(), mRemoteInterface);
         } else {
             return null;
         }

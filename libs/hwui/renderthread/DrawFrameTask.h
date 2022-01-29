@@ -16,19 +16,18 @@
 #ifndef DRAWFRAMETASK_H
 #define DRAWFRAMETASK_H
 
-#include <optional>
-#include <vector>
-
-#include <performance_hint_private.h>
+#include <android/performance_hint.h>
 #include <utils/Condition.h>
 #include <utils/Mutex.h>
 #include <utils/StrongPointer.h>
 
-#include "RenderTask.h"
+#include <optional>
+#include <vector>
 
 #include "../FrameInfo.h"
 #include "../Rect.h"
 #include "../TreeInfo.h"
+#include "RenderTask.h"
 
 namespace android {
 namespace uirenderer {

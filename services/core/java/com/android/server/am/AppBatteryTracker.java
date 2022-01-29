@@ -145,7 +145,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
     /**
      * The uid battery usage stats data from our last query, it does not include snapshot data.
      */
-    // No lock is needed.
+    @GuardedBy("mLock")
     private final SparseDoubleArray mLastUidBatteryUsage = new SparseDoubleArray();
 
     // No lock is needed.
@@ -155,12 +155,15 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
     private final SparseDoubleArray mTmpUidBatteryUsage2 = new SparseDoubleArray();
 
     // No lock is needed.
+    private final SparseDoubleArray mTmpUidBatteryUsageInWindow = new SparseDoubleArray();
+
+    // No lock is needed.
     private final ArraySet<UserHandle> mTmpUserIds = new ArraySet<>();
 
     /**
      * The start timestamp of the battery usage stats result from our last query.
      */
-    // No lock is needed.
+    @GuardedBy("mLock")
     private long mLastUidBatteryUsageStartTs;
 
     // For debug only.
@@ -296,8 +299,10 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             checkBatteryUsageStats();
         } else {
             // We didn't do the battery stats update above, schedule a check later.
-            scheduleBatteryUsageStatsUpdateIfNecessary(
-                    mLastBatteryUsageSamplingTs + mBatteryUsageStatsPollingMinIntervalMs - now);
+            synchronized (mLock) {
+                scheduleBatteryUsageStatsUpdateIfNecessary(
+                        mLastBatteryUsageSamplingTs + mBatteryUsageStatsPollingMinIntervalMs - now);
+            }
         }
     }
 
@@ -305,7 +310,10 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         final long now = SystemClock.elapsedRealtime();
         final AppBatteryPolicy bgPolicy = mInjector.getPolicy();
         try {
-            final SparseDoubleArray uidConsumers = mUidBatteryUsageInWindow;
+            final SparseDoubleArray uidConsumers = mTmpUidBatteryUsageInWindow;
+            synchronized (mLock) {
+                copyUidBatteryUsage(mUidBatteryUsageInWindow, uidConsumers);
+            }
             final long since = Math.max(0, now - bgPolicy.mBgCurrentDrainWindowMs);
             for (int i = 0, size = uidConsumers.size(); i < size; i++) {
                 final int uid = uidConsumers.keyAt(i);
@@ -408,7 +416,9 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
 
         if (curDuration >= windowSize) {
             // If we do have long enough data for the window, save it.
-            copyUidBatteryUsage(buf, mUidBatteryUsageInWindow, windowSize * 1.0d / curDuration);
+            synchronized (mLock) {
+                copyUidBatteryUsage(buf, mUidBatteryUsageInWindow, windowSize * 1.0d / curDuration);
+            }
             needUpdateUidBatteryUsageInWindow = false;
         }
 
@@ -416,8 +426,11 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         mTmpUidBatteryUsage2.clear();
         copyUidBatteryUsage(buf, mTmpUidBatteryUsage2);
 
-        final long lastUidBatteryUsageStartTs = mLastUidBatteryUsageStartTs;
-        mLastUidBatteryUsageStartTs = curStart;
+        final long lastUidBatteryUsageStartTs;
+        synchronized (mLock) {
+            lastUidBatteryUsageStartTs = mLastUidBatteryUsageStartTs;
+            mLastUidBatteryUsageStartTs = curStart;
+        }
         if (curStart > lastUidBatteryUsageStartTs && lastUidBatteryUsageStartTs > 0) {
             // The battery usage stats committed data since our last query,
             // let's query the snapshots to get the data since last start.
@@ -429,42 +442,47 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         }
         if (needUpdateUidBatteryUsageInWindow && curDuration > windowSize) {
             // If we do have long enough data for the window, save it.
-            copyUidBatteryUsage(buf, mUidBatteryUsageInWindow, windowSize * 1.0d / curDuration);
+            synchronized (mLock) {
+                copyUidBatteryUsage(buf, mUidBatteryUsageInWindow, windowSize * 1.0d / curDuration);
+            }
             needUpdateUidBatteryUsageInWindow = false;
         }
 
         // Add the delta into the global records.
-        for (int i = 0, size = buf.size(); i < size; i++) {
-            final int uid = buf.keyAt(i);
-            final int index = mUidBatteryUsage.indexOfKey(uid);
-            final double delta = Math.max(0.0d,
-                    buf.valueAt(i) - mLastUidBatteryUsage.get(uid, 0.0d));
-            final double before;
-            if (index >= 0) {
-                before = mUidBatteryUsage.valueAt(index);
-                mUidBatteryUsage.setValueAt(index, before + delta);
-            } else {
-                before = 0.0d;
-                mUidBatteryUsage.put(uid, delta);
-            }
-            if (DEBUG_BACKGROUND_BATTERY_TRACKER) {
-                final double actualDelta = buf.valueAt(i) - mLastUidBatteryUsage.get(uid, 0.0d);
-                String msg = "Updating mUidBatteryUsage uid=" + uid + ", before=" + before
-                        + ", after=" + mUidBatteryUsage.get(uid, 0.0d) + ", delta=" + actualDelta
-                        + ", last=" + mLastUidBatteryUsage.get(uid, 0.0d)
-                        + ", curStart=" + curStart
-                        + ", lastLastStart=" + lastUidBatteryUsageStartTs
-                        + ", thisLastStart=" + mLastUidBatteryUsageStartTs;
-                if (actualDelta < 0.0d) {
-                    // Something is wrong, the battery usage shouldn't be negative.
-                    Slog.e(TAG, msg);
+        synchronized (mLock) {
+            for (int i = 0, size = buf.size(); i < size; i++) {
+                final int uid = buf.keyAt(i);
+                final int index = mUidBatteryUsage.indexOfKey(uid);
+                final double delta = Math.max(0.0d,
+                        buf.valueAt(i) - mLastUidBatteryUsage.get(uid, 0.0d));
+                final double before;
+                if (index >= 0) {
+                    before = mUidBatteryUsage.valueAt(index);
+                    mUidBatteryUsage.setValueAt(index, before + delta);
                 } else {
-                    Slog.i(TAG, msg);
+                    before = 0.0d;
+                    mUidBatteryUsage.put(uid, delta);
+                }
+                if (DEBUG_BACKGROUND_BATTERY_TRACKER) {
+                    final double actualDelta = buf.valueAt(i) - mLastUidBatteryUsage.get(uid, 0.0d);
+                    String msg = "Updating mUidBatteryUsage uid=" + uid + ", before=" + before
+                            + ", after=" + mUidBatteryUsage.get(uid, 0.0d)
+                            + ", delta=" + actualDelta
+                            + ", last=" + mLastUidBatteryUsage.get(uid, 0.0d)
+                            + ", curStart=" + curStart
+                            + ", lastLastStart=" + lastUidBatteryUsageStartTs
+                            + ", thisLastStart=" + mLastUidBatteryUsageStartTs;
+                    if (actualDelta < 0.0d) {
+                        // Something is wrong, the battery usage shouldn't be negative.
+                        Slog.e(TAG, msg);
+                    } else {
+                        Slog.i(TAG, msg);
+                    }
                 }
             }
+            // Now update the mLastUidBatteryUsage with the data we just saved above.
+            copyUidBatteryUsage(mTmpUidBatteryUsage2, mLastUidBatteryUsage);
         }
-        // Now update the mLastUidBatteryUsage with the data we just saved above.
-        copyUidBatteryUsage(mTmpUidBatteryUsage2, mLastUidBatteryUsage);
         mTmpUidBatteryUsage2.clear();
 
         if (needUpdateUidBatteryUsageInWindow) {
@@ -473,7 +491,9 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                     .includeProcessStateData()
                     .aggregateSnapshots(now - windowSize, lastUidBatteryUsageStartTs);
             updateBatteryUsageStatsOnceInternal(buf, builder, userIds, batteryStatsInternal);
-            copyUidBatteryUsage(buf, mUidBatteryUsageInWindow);
+            synchronized (mLock) {
+                copyUidBatteryUsage(buf, mUidBatteryUsageInWindow);
+            }
         }
     }
 
@@ -584,38 +604,40 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         pw.print(prefix);
         pw.println("APP BATTERY STATE TRACKER:");
         updateBatteryUsageStatsIfNecessary(mInjector.currentTimeMillis(), true);
-        final SparseDoubleArray uidConsumers = mUidBatteryUsageInWindow;
-        pw.print("  " + prefix);
-        pw.print("Boot=");
-        TimeUtils.dumpTime(pw, mBootTimestamp);
-        pw.print("  Last battery usage start=");
-        TimeUtils.dumpTime(pw, mLastUidBatteryUsageStartTs);
-        pw.println();
-        pw.print("  " + prefix);
-        pw.print("Battery usage over last ");
-        final String newPrefix = "    " + prefix;
-        final AppBatteryPolicy bgPolicy = mInjector.getPolicy();
-        final long now = SystemClock.elapsedRealtime();
-        final long since = Math.max(0, now - bgPolicy.mBgCurrentDrainWindowMs);
-        pw.println(TimeUtils.formatDuration(now - since));
-        if (uidConsumers.size() == 0) {
-            pw.print(newPrefix);
-            pw.println("(none)");
-        } else {
-            for (int i = 0, size = uidConsumers.size(); i < size; i++) {
-                final int uid = uidConsumers.keyAt(i);
-                final double bgUsage = uidConsumers.valueAt(i);
-                final double exemptedUsage = mAppRestrictionController
-                        .getUidBatteryExemptedUsageSince(uid, since, now);
-                final double reportedUsage = Math.max(0.0d, bgUsage - exemptedUsage);
-                pw.format("%s%s: [%s] %.3f mAh (%4.2f%%) | %.3f mAh (%4.2f%%) | "
-                        + "%.3f mAh (%4.2f%%) | %.3f mAh\n",
-                        newPrefix, UserHandle.formatUid(uid),
-                        PowerExemptionManager.reasonCodeToString(bgPolicy.shouldExemptUid(uid)),
-                        bgUsage , bgPolicy.getPercentage(uid, bgUsage),
-                        exemptedUsage, bgPolicy.getPercentage(-1, exemptedUsage),
-                        reportedUsage, bgPolicy.getPercentage(-1, reportedUsage),
-                        mUidBatteryUsage.get(uid, 0.0d));
+        synchronized (mLock) {
+            final SparseDoubleArray uidConsumers = mUidBatteryUsageInWindow;
+            pw.print("  " + prefix);
+            pw.print("Boot=");
+            TimeUtils.dumpTime(pw, mBootTimestamp);
+            pw.print("  Last battery usage start=");
+            TimeUtils.dumpTime(pw, mLastUidBatteryUsageStartTs);
+            pw.println();
+            pw.print("  " + prefix);
+            pw.print("Battery usage over last ");
+            final String newPrefix = "    " + prefix;
+            final AppBatteryPolicy bgPolicy = mInjector.getPolicy();
+            final long now = SystemClock.elapsedRealtime();
+            final long since = Math.max(0, now - bgPolicy.mBgCurrentDrainWindowMs);
+            pw.println(TimeUtils.formatDuration(now - since));
+            if (uidConsumers.size() == 0) {
+                pw.print(newPrefix);
+                pw.println("(none)");
+            } else {
+                for (int i = 0, size = uidConsumers.size(); i < size; i++) {
+                    final int uid = uidConsumers.keyAt(i);
+                    final double bgUsage = uidConsumers.valueAt(i);
+                    final double exemptedUsage = mAppRestrictionController
+                            .getUidBatteryExemptedUsageSince(uid, since, now);
+                    final double reportedUsage = Math.max(0.0d, bgUsage - exemptedUsage);
+                    pw.format("%s%s: [%s] %.3f mAh (%4.2f%%) | %.3f mAh (%4.2f%%) | "
+                            + "%.3f mAh (%4.2f%%) | %.3f mAh\n",
+                            newPrefix, UserHandle.formatUid(uid),
+                            PowerExemptionManager.reasonCodeToString(bgPolicy.shouldExemptUid(uid)),
+                            bgUsage , bgPolicy.getPercentage(uid, bgUsage),
+                            exemptedUsage, bgPolicy.getPercentage(-1, exemptedUsage),
+                            reportedUsage, bgPolicy.getPercentage(-1, reportedUsage),
+                            mUidBatteryUsage.get(uid, 0.0d));
+                }
             }
         }
         super.dump(pw, prefix);

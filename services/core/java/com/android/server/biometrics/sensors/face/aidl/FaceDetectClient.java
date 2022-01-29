@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.biometrics.BiometricConstants;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.common.OperationReason;
@@ -29,7 +28,10 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -52,13 +54,26 @@ public class FaceDetectClient extends AcquisitionClient<AidlSession> implements 
     FaceDetectClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
             @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int userId,
-            @NonNull String owner, int sensorId, boolean isStrongBiometric, int statsClient) {
+            @NonNull String owner, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+            boolean isStrongBiometric) {
+        this(context, lazyDaemon, token, requestId, listener, userId, owner, sensorId,
+                logger, biometricContext, isStrongBiometric,
+                context.getSystemService(SensorPrivacyManager.class));
+    }
+
+    @VisibleForTesting
+    FaceDetectClient(@NonNull Context context, @NonNull Supplier<AidlSession> lazyDaemon,
+            @NonNull IBinder token, long requestId,
+            @NonNull ClientMonitorCallbackConverter listener, int userId,
+            @NonNull String owner, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext,
+            boolean isStrongBiometric, SensorPrivacyManager sensorPrivacyManager) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
-                true /* shouldVibrate */, BiometricsProtoEnums.MODALITY_FACE,
-                BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
+                true /* shouldVibrate */, logger, biometricContext);
         setRequestId(requestId);
         mIsStrongBiometric = isStrongBiometric;
-        mSensorPrivacyManager = context.getSystemService(SensorPrivacyManager.class);
+        mSensorPrivacyManager = sensorPrivacyManager;
     }
 
     @Override
@@ -102,10 +117,10 @@ public class FaceDetectClient extends AcquisitionClient<AidlSession> implements 
 
         if (session.hasContextMethods()) {
             final OperationContext context = new OperationContext();
-            // TODO: add reason, id, and isAoD
+            // TODO: add reason, id
             context.id = 0;
             context.reason = OperationReason.UNKNOWN;
-            context.isAoD = false;
+            context.isAoD = getBiometricContext().isAoD();
             context.isCrypto = isCryptoOperation();
             return session.getSession().detectInteractionWithContext(context);
         } else {

@@ -18,6 +18,7 @@ package com.android.server.pm.pkg.mutate;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.overlay.OverlayPaths;
@@ -177,6 +178,13 @@ public class PackageStateMutator {
         }
 
         @Override
+        public void onChanged() {
+            if (mState != null) {
+                mState.onChanged();
+            }
+        }
+
+        @Override
         public PackageStateWrite setLastPackageUsageTime(int reason, long timeInMillis) {
             if (mState != null) {
                 mState.getTransientState().setLastPackageUsageTimeInMills(reason, timeInMillis);
@@ -213,6 +221,51 @@ public class PackageStateMutator {
                 @NonNull ArraySet<String> mimeTypes) {
             if (mState != null) {
                 mState.setMimeGroup(mimeGroup, mimeTypes);
+            }
+            return this;
+        }
+
+        @NonNull
+        @Override
+        public PackageStateWrite setCategoryOverride(@ApplicationInfo.Category int category) {
+            if (mState != null) {
+                mState.setCategoryOverride(category);
+            }
+            return this;
+        }
+
+        @NonNull
+        @Override
+        public PackageStateWrite setUpdateAvailable(boolean updateAvailable) {
+            if (mState != null) {
+                mState.setUpdateAvailable(updateAvailable);
+            }
+            return this;
+        }
+
+        @NonNull
+        @Override
+        public PackageStateWrite setLoadingProgress(float progress) {
+            if (mState != null) {
+                mState.setLoadingProgress(progress);
+            }
+            return this;
+        }
+
+        @NonNull
+        @Override
+        public PackageStateWrite setOverrideSeInfo(@Nullable String newSeInfo) {
+            if (mState != null) {
+                mState.getTransientState().setOverrideSeInfo(newSeInfo);
+            }
+            return this;
+        }
+
+        @NonNull
+        @Override
+        public PackageStateWrite setInstaller(@NonNull String installerPackageName) {
+            if (mState != null) {
+                mState.setInstallerPackageName(installerPackageName);
             }
             return this;
         }
@@ -327,6 +380,25 @@ public class PackageStateMutator {
                     mUserState.setHarmfulAppWarning(warning);
                 }
                 return this;
+            }
+
+            @NonNull
+            @Override
+            public PackageUserStateWrite setSplashScreenTheme(@Nullable String theme) {
+                if (mUserState != null) {
+                    mUserState.setSplashScreenTheme(theme);
+                }
+                return this;
+            }
+
+            @NonNull
+            @Override
+            public PackageUserStateWrite setComponentLabelIcon(@NonNull ComponentName componentName,
+                    @Nullable String nonLocalizedLabel, @Nullable Integer icon) {
+                if (mUserState != null) {
+                    mUserState.overrideLabelAndIcon(componentName, nonLocalizedLabel, icon);
+                }
+                return null;
             }
         }
     }

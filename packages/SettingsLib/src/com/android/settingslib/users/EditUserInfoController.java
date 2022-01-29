@@ -25,6 +25,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -36,6 +37,8 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.R;
+import com.android.settingslib.RestrictedLockUtils;
+import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.drawable.CircleFramedDrawable;
 
 import java.io.File;
@@ -139,13 +142,20 @@ public class EditUserInfoController {
         Drawable userIcon = getUserIcon(activity, defaultUserIcon);
         userPhotoView.setImageDrawable(userIcon);
 
-        if (canChangePhoto(activity)) {
-            mEditUserPhotoController = createEditUserPhotoController(activity, activityStarter,
-                    userPhotoView);
+        if (isChangePhotoRestrictedByBase(activity)) {
+            // some users can't change their photos so we need to remove the suggestive icon
+            content.findViewById(R.id.add_a_photo_icon).setVisibility(View.GONE);
         } else {
-            // some users can't change their photos so we need to remove suggestive
-            // background from the photoView
-            userPhotoView.setBackground(null);
+            RestrictedLockUtils.EnforcedAdmin adminRestriction =
+                    getChangePhotoAdminRestriction(activity);
+            if (adminRestriction != null) {
+                userPhotoView.setOnClickListener(view ->
+                        RestrictedLockUtils.sendShowAdminSupportDetailsIntent(
+                                activity, adminRestriction));
+            } else {
+                mEditUserPhotoController = createEditUserPhotoController(activity, activityStarter,
+                        userPhotoView);
+            }
         }
 
         mEditUserInfoDialog = buildDialog(activity, content, userNameView, oldUserIcon,
@@ -204,16 +214,21 @@ public class EditUserInfoController {
     }
 
     @VisibleForTesting
-    boolean canChangePhoto(Context context) {
-        return (PhotoCapabilityUtils.canCropPhoto(context)
-                && PhotoCapabilityUtils.canChoosePhoto(context))
-                || PhotoCapabilityUtils.canTakePhoto(context);
+    boolean isChangePhotoRestrictedByBase(Context context) {
+        return RestrictedLockUtilsInternal.hasBaseUserRestriction(
+                context, UserManager.DISALLOW_SET_USER_ICON, UserHandle.myUserId());
+    }
+
+    @VisibleForTesting
+    RestrictedLockUtils.EnforcedAdmin getChangePhotoAdminRestriction(Context context) {
+        return RestrictedLockUtilsInternal.checkIfRestrictionEnforced(
+                context, UserManager.DISALLOW_SET_USER_ICON, UserHandle.myUserId());
     }
 
     @VisibleForTesting
     EditUserPhotoController createEditUserPhotoController(Activity activity,
             ActivityStarter activityStarter, ImageView userPhotoView) {
         return new EditUserPhotoController(activity, activityStarter, userPhotoView,
-                mSavedPhoto, mWaitingForActivityResult, mFileAuthority);
+                mSavedPhoto, mFileAuthority);
     }
 }

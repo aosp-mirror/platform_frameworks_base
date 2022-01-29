@@ -2,6 +2,7 @@
 package android {
 
   public static final class Manifest.permission {
+    field public static final String ACCESS_KEYGUARD_SECURE_STORAGE = "android.permission.ACCESS_KEYGUARD_SECURE_STORAGE";
     field public static final String ACCESS_NOTIFICATIONS = "android.permission.ACCESS_NOTIFICATIONS";
     field public static final String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
     field public static final String APPROVE_INCIDENT_REPORTS = "android.permission.APPROVE_INCIDENT_REPORTS";
@@ -38,6 +39,7 @@ package android {
     field public static final String RESET_APP_ERRORS = "android.permission.RESET_APP_ERRORS";
     field public static final String REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL = "android.permission.REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL";
     field public static final String SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS = "android.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS";
+    field public static final String SET_GAME_SERVICE = "android.permission.SET_GAME_SERVICE";
     field public static final String SET_KEYBOARD_LAYOUT = "android.permission.SET_KEYBOARD_LAYOUT";
     field public static final String START_TASKS_FROM_RECENTS = "android.permission.START_TASKS_FROM_RECENTS";
     field public static final String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
@@ -104,6 +106,7 @@ package android.app {
 
   @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     method public final boolean addDumpable(@NonNull android.util.Dumpable);
+    method public void dumpInternal(@NonNull String, @Nullable java.io.FileDescriptor, @NonNull java.io.PrintWriter, @Nullable String[]);
     method public void onMovedToDisplay(int, android.content.res.Configuration);
   }
 
@@ -151,7 +154,7 @@ package android.app {
 
   public class ActivityOptions {
     method @NonNull public static android.app.ActivityOptions fromBundle(@NonNull android.os.Bundle);
-    method @NonNull public static android.app.ActivityOptions makeCustomAnimation(@NonNull android.content.Context, int, int, @Nullable android.os.Handler, @Nullable android.app.ActivityOptions.OnAnimationStartedListener, @Nullable android.app.ActivityOptions.OnAnimationFinishedListener);
+    method @NonNull public static android.app.ActivityOptions makeCustomAnimation(@NonNull android.content.Context, int, int, int, @Nullable android.os.Handler, @Nullable android.app.ActivityOptions.OnAnimationStartedListener, @Nullable android.app.ActivityOptions.OnAnimationFinishedListener);
     method @NonNull @RequiresPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS) public static android.app.ActivityOptions makeCustomTaskAnimation(@NonNull android.content.Context, int, int, @Nullable android.os.Handler, @Nullable android.app.ActivityOptions.OnAnimationStartedListener, @Nullable android.app.ActivityOptions.OnAnimationFinishedListener);
     method public static void setExitTransitionTimeout(long);
     method public void setLaunchActivityType(int);
@@ -275,14 +278,18 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void stopDream();
   }
 
+  public final class GameManager {
+    method public void setGameServiceProvider(@Nullable String);
+  }
+
   public abstract class HomeVisibilityListener {
     ctor public HomeVisibilityListener();
     method public abstract void onHomeVisibilityChanged(boolean);
   }
 
   public class KeyguardManager {
-    method @RequiresPermission(anyOf={android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS, "android.permission.ACCESS_KEYGUARD_SECURE_STORAGE"}) public boolean checkLock(int, @Nullable byte[]);
-    method @RequiresPermission(anyOf={android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS, "android.permission.ACCESS_KEYGUARD_SECURE_STORAGE"}) public boolean setLock(int, @Nullable byte[], int, @Nullable byte[]);
+    method @RequiresPermission(anyOf={android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS, android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE}) public boolean checkLock(int, @Nullable byte[]);
+    method @RequiresPermission(anyOf={android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS, android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE}) public boolean setLock(int, @Nullable byte[], int, @Nullable byte[]);
   }
 
   public class LocaleManager {
@@ -456,6 +463,7 @@ package android.app.admin {
     method @RequiresPermission(android.Manifest.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS) public long forceSecurityLogs();
     method public void forceUpdateUserSetupComplete(int);
     method @NonNull public java.util.Set<java.lang.String> getDefaultCrossProfilePackages();
+    method public int getDeviceOwnerType(@NonNull android.content.ComponentName);
     method @NonNull public java.util.Set<java.lang.String> getDisallowedSystemApps(@NonNull android.content.ComponentName, int, @NonNull String);
     method public long getLastBugReportRequestTime();
     method public long getLastNetworkLogRetrievalTime();
@@ -471,6 +479,7 @@ package android.app.admin {
     method @RequiresPermission(allOf={android.Manifest.permission.MANAGE_DEVICE_ADMINS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public void setActiveAdmin(@NonNull android.content.ComponentName, boolean, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public boolean setDeviceOwner(@NonNull android.content.ComponentName, @Nullable String, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public boolean setDeviceOwnerOnly(@NonNull android.content.ComponentName, @Nullable String, int);
+    method public void setDeviceOwnerType(@NonNull android.content.ComponentName, int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS) public void setNextOperationSafety(int, int);
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
     field public static final String ACTION_DEVICE_POLICY_CONSTANTS_CHANGED = "android.app.action.DEVICE_POLICY_CONSTANTS_CHANGED";
@@ -572,6 +581,15 @@ package android.app.prediction {
 
   public final class AppPredictor {
     method public android.app.prediction.AppPredictionSessionId getSessionId();
+  }
+
+}
+
+package android.app.trust {
+
+  public class TrustManager {
+    method @RequiresPermission(android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE) public void enableTrustAgentForUserForTest(@NonNull android.content.ComponentName, int);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE) public void reportUserRequestedUnlock(int);
   }
 
 }
@@ -1713,7 +1731,9 @@ package android.os {
   }
 
   public final class PowerManager {
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_LOW_POWER_STANDBY, android.Manifest.permission.DEVICE_POWER}) public void forceLowPowerStandbyActive(boolean);
     field public static final String ACTION_ENHANCED_DISCHARGE_PREDICTION_CHANGED = "android.os.action.ENHANCED_DISCHARGE_PREDICTION_CHANGED";
+    field @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public static final int SYSTEM_WAKELOCK = -2147483648; // 0x80000000
   }
 
   public class Process {
@@ -2350,6 +2370,14 @@ package android.service.quicksettings {
 
   public class TileService extends android.app.Service {
     method public static boolean isQuickSettingsSupported();
+  }
+
+}
+
+package android.service.trust {
+
+  public class TrustAgentService extends android.app.Service {
+    method public void onUserRequestedUnlock();
   }
 
 }

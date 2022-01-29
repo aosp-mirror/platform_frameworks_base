@@ -20,11 +20,12 @@ import android.hardware.biometrics.BiometricSourceType
 import org.mockito.Mockito.verify
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import com.android.internal.logging.InstanceId
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT
 import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_FOR_UNATTENDED_UPDATE
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dump.DumpManager
+import com.android.systemui.log.SessionTracker
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -44,9 +45,11 @@ class KeyguardBiometricLockoutLoggerTest : SysuiTestCase() {
     @Mock
     lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock
-    lateinit var dumpManager: DumpManager
-    @Mock
     lateinit var strongAuthTracker: KeyguardUpdateMonitor.StrongAuthTracker
+    @Mock
+    lateinit var sessionTracker: SessionTracker
+    @Mock
+    lateinit var sessionId: InstanceId
 
     @Captor
     lateinit var updateMonitorCallbackCaptor: ArgumentCaptor<KeyguardUpdateMonitorCallback>
@@ -58,11 +61,12 @@ class KeyguardBiometricLockoutLoggerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         whenever(keyguardUpdateMonitor.strongAuthTracker).thenReturn(strongAuthTracker)
+        whenever(sessionTracker.getSessionId(anyInt())).thenReturn(sessionId)
         keyguardBiometricLockoutLogger = KeyguardBiometricLockoutLogger(
                 mContext,
                 uiEventLogger,
                 keyguardUpdateMonitor,
-                dumpManager)
+                sessionTracker)
     }
 
     @Test
@@ -76,7 +80,7 @@ class KeyguardBiometricLockoutLoggerTest : SysuiTestCase() {
 
         // THEN encrypted / lockdown state is logged
         verify(uiEventLogger).log(KeyguardBiometricLockoutLogger.PrimaryAuthRequiredEvent
-                .PRIMARY_AUTH_REQUIRED_ENCRYPTED_OR_LOCKDOWN)
+                .PRIMARY_AUTH_REQUIRED_ENCRYPTED_OR_LOCKDOWN, sessionId)
     }
 
     @Test
@@ -93,7 +97,7 @@ class KeyguardBiometricLockoutLoggerTest : SysuiTestCase() {
 
         // THEN primary auth required state is logged
         verify(uiEventLogger).log(KeyguardBiometricLockoutLogger.PrimaryAuthRequiredEvent
-                .PRIMARY_AUTH_REQUIRED_TIMEOUT)
+                .PRIMARY_AUTH_REQUIRED_TIMEOUT, sessionId)
     }
 
     @Test
@@ -110,7 +114,7 @@ class KeyguardBiometricLockoutLoggerTest : SysuiTestCase() {
 
         // THEN primary auth required state is logged
         verify(uiEventLogger).log(KeyguardBiometricLockoutLogger.PrimaryAuthRequiredEvent
-                .PRIMARY_AUTH_REQUIRED_UNATTENDED_UPDATE)
+                .PRIMARY_AUTH_REQUIRED_UNATTENDED_UPDATE, sessionId)
     }
 
     @Test
@@ -128,9 +132,9 @@ class KeyguardBiometricLockoutLoggerTest : SysuiTestCase() {
 
         // THEN primary auth required state is logged with all the reasons
         verify(uiEventLogger).log(KeyguardBiometricLockoutLogger.PrimaryAuthRequiredEvent
-                .PRIMARY_AUTH_REQUIRED_TIMEOUT)
+                .PRIMARY_AUTH_REQUIRED_TIMEOUT, sessionId)
         verify(uiEventLogger).log(KeyguardBiometricLockoutLogger.PrimaryAuthRequiredEvent
-                .PRIMARY_AUTH_REQUIRED_UNATTENDED_UPDATE)
+                .PRIMARY_AUTH_REQUIRED_UNATTENDED_UPDATE, sessionId)
 
         // WHEN onStrongAuthStateChanged is called again
         updateMonitorCallback.onStrongAuthStateChanged(0)
@@ -152,7 +156,7 @@ class KeyguardBiometricLockoutLoggerTest : SysuiTestCase() {
 
         // THEN primary auth required state is logged
         verify(uiEventLogger).log(KeyguardBiometricLockoutLogger.PrimaryAuthRequiredEvent
-                .PRIMARY_AUTH_REQUIRED_FACE_LOCKED_OUT)
+                .PRIMARY_AUTH_REQUIRED_FACE_LOCKED_OUT, sessionId)
 
         // WHEN face lockout is reset
         whenever(keyguardUpdateMonitor.isFaceLockedOut).thenReturn(false)
@@ -160,7 +164,7 @@ class KeyguardBiometricLockoutLoggerTest : SysuiTestCase() {
 
         // THEN primary auth required state is logged
         verify(uiEventLogger).log(KeyguardBiometricLockoutLogger.PrimaryAuthRequiredEvent
-                .PRIMARY_AUTH_REQUIRED_FACE_LOCKED_OUT_RESET)
+                .PRIMARY_AUTH_REQUIRED_FACE_LOCKED_OUT_RESET, sessionId)
     }
 
     @Test
@@ -176,7 +180,7 @@ class KeyguardBiometricLockoutLoggerTest : SysuiTestCase() {
 
         // THEN primary auth required state is logged
         verify(uiEventLogger).log(KeyguardBiometricLockoutLogger.PrimaryAuthRequiredEvent
-                .PRIMARY_AUTH_REQUIRED_FINGERPRINT_LOCKED_OUT)
+                .PRIMARY_AUTH_REQUIRED_FINGERPRINT_LOCKED_OUT, sessionId)
 
         // WHEN fingerprint lockout is reset
         whenever(keyguardUpdateMonitor.isFingerprintLockedOut).thenReturn(false)
@@ -184,7 +188,7 @@ class KeyguardBiometricLockoutLoggerTest : SysuiTestCase() {
 
         // THEN primary auth required state is logged
         verify(uiEventLogger).log(KeyguardBiometricLockoutLogger.PrimaryAuthRequiredEvent
-                .PRIMARY_AUTH_REQUIRED_FINGERPRINT_LOCKED_OUT_RESET)
+                .PRIMARY_AUTH_REQUIRED_FINGERPRINT_LOCKED_OUT_RESET, sessionId)
     }
 
     fun captureUpdateMonitorCallback() {

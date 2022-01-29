@@ -112,7 +112,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     private CollectionReadyForBuildListener mReadyForBuildListener;
     private List<NotificationEntryBuilder> mPendingSet = new ArrayList<>();
     private List<NotificationEntry> mEntrySet = new ArrayList<>();
-    private List<ListEntry> mBuiltList;
+    private List<ListEntry> mBuiltList = new ArrayList<>();
     private TestableStabilityManager mStabilityManager;
     private TestableNotifFilter mFinalizeFilter;
 
@@ -361,6 +361,50 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         verifyBuiltList(
                 notif(0),
                 notif(2)
+        );
+
+        // THEN the summary is discarded
+        assertNull(mEntrySet.get(1).getParent());
+    }
+
+    @Test
+    public void testGroupsWhoLoseAllChildrenToPromotionSuppressSummary() {
+        // GIVEN a group with two children
+        addGroupChild(0, PACKAGE_2, GROUP_1);
+        addGroupSummary(1, PACKAGE_2, GROUP_1);
+        addGroupChild(2, PACKAGE_2, GROUP_1);
+
+        // GIVEN a promoter that will promote one of children to top level
+        mListBuilder.addPromoter(new IdPromoter(0, 2));
+
+        // WHEN we build the list
+        dispatchBuild();
+
+        // THEN both children end up at top level (because group is now too small)
+        verifyBuiltList(
+                notif(0),
+                notif(2)
+        );
+
+        // THEN the summary is discarded
+        assertNull(mEntrySet.get(1).getParent());
+    }
+
+    @Test
+    public void testGroupsWhoLoseOnlyChildToPromotionSuppressSummary() {
+        // GIVEN a group with two children
+        addGroupChild(0, PACKAGE_2, GROUP_1);
+        addGroupSummary(1, PACKAGE_2, GROUP_1);
+
+        // GIVEN a promoter that will promote one of children to top level
+        mListBuilder.addPromoter(new IdPromoter(0));
+
+        // WHEN we build the list
+        dispatchBuild();
+
+        // THEN both children end up at top level (because group is now too small)
+        verifyBuiltList(
+                notif(0)
         );
 
         // THEN the summary is discarded
@@ -1642,6 +1686,19 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
+    public void testPipelineRunDisallowedDueToVisualStability() {
+        // GIVEN pipeline run not allowed due to visual stability
+        mStabilityManager.setAllowPipelineRun(false);
+
+        // WHEN we try to run the pipeline with a change
+        addNotif(0, PACKAGE_1);
+        dispatchBuild();
+
+        // THEN there is no change; the pipeline did not run
+        verifyBuiltList();
+    }
+
+    @Test
     public void testIsSorted() {
         Comparator<Integer> intCmp = Integer::compare;
         assertTrue(ShadeListBuilder.isSorted(Collections.emptyList(), intCmp));
@@ -2037,6 +2094,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     private static class TestableStabilityManager extends NotifStabilityManager {
+        boolean mAllowPipelineRun = true;
         boolean mAllowGroupChanges = true;
         boolean mAllowSectionChanges = true;
         boolean mAllowEntryReodering = true;
@@ -2060,6 +2118,15 @@ public class ShadeListBuilderTest extends SysuiTestCase {
             return this;
         }
 
+        TestableStabilityManager setAllowPipelineRun(boolean allowPipelineRun) {
+            mAllowPipelineRun = allowPipelineRun;
+            return this;
+        }
+
+        @Override
+        public boolean isPipelineRunAllowed() {
+            return mAllowPipelineRun;
+        }
 
         @Override
         public void onBeginRun() {

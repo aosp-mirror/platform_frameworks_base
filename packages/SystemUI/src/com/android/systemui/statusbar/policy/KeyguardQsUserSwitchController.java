@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardConstants;
 import com.android.keyguard.KeyguardVisibilityHelper;
 import com.android.keyguard.dagger.KeyguardUserSwitcherScope;
@@ -49,6 +50,7 @@ import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.UserAvatarView;
@@ -82,6 +84,7 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
     private final KeyguardUserDetailAdapter mUserDetailAdapter;
     private final FeatureFlags mFeatureFlags;
     private final UserSwitchDialogController mUserSwitchDialogController;
+    private final UiEventLogger mUiEventLogger;
     private NotificationPanelViewController mNotificationPanelViewController;
     private UserAvatarView mUserAvatarView;
     UserSwitcherController.UserRecord mCurrentUser;
@@ -133,7 +136,8 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
             Provider<UserDetailView.Adapter> userDetailViewAdapterProvider,
             ScreenOffAnimationController screenOffAnimationController,
             FeatureFlags featureFlags,
-            UserSwitchDialogController userSwitchDialogController) {
+            UserSwitchDialogController userSwitchDialogController,
+            UiEventLogger uiEventLogger) {
         super(view);
         if (DEBUG) Log.d(TAG, "New KeyguardQsUserSwitchController");
         mContext = context;
@@ -151,6 +155,7 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
         mUserDetailAdapter = new KeyguardUserDetailAdapter(context, userDetailViewAdapterProvider);
         mFeatureFlags = featureFlags;
         mUserSwitchDialogController = userSwitchDialogController;
+        mUiEventLogger = uiEventLogger;
     }
 
     @Override
@@ -173,7 +178,10 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
                 return;
             }
 
-            // Tapping anywhere in the view will open QS user panel
+            // Tapping anywhere in the view will open the user switcher
+            mUiEventLogger.log(
+                    LockscreenGestureLogger.LockscreenUiEvent.LOCKSCREEN_SWITCH_USER_TAP);
+
             if (mFeatureFlags.isEnabled(Flags.NEW_USER_SWITCHER)) {
                 mUserSwitchDialogController.showDialog(mView);
             } else {

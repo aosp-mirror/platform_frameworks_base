@@ -315,18 +315,19 @@ public class PackageManagerSettingsTests {
                 .setNeutralButtonAction(BUTTON_ACTION_UNSUSPEND)
                 .build();
 
-        ps1.addOrUpdateSuspension("suspendingPackage1", dialogInfo1, appExtras1, launcherExtras1,
-                0);
-        ps1.addOrUpdateSuspension("suspendingPackage2", dialogInfo2, appExtras2, launcherExtras2,
-                0);
+        ps1.modifyUserState(0).putSuspendParams( "suspendingPackage1",
+                SuspendParams.getInstanceOrNull(dialogInfo1, appExtras1, launcherExtras1));
+        ps1.modifyUserState(0).putSuspendParams( "suspendingPackage2",
+                SuspendParams.getInstanceOrNull(dialogInfo2, appExtras2, launcherExtras2));
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, ps1);
         watcher.verifyChangeReported("put package 1");
 
-        ps2.addOrUpdateSuspension("suspendingPackage3", null, appExtras1, null, 0);
+        ps2.modifyUserState(0).putSuspendParams( "suspendingPackage3",
+                SuspendParams.getInstanceOrNull(null, appExtras1, null));
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
         watcher.verifyChangeReported("put package 2");
 
-        ps3.removeSuspension("irrelevant", 0);
+        ps3.modifyUserState(0).removeSuspension("irrelevant");
         settingsUnderTest.mPackages.put(PACKAGE_NAME_3, ps3);
         watcher.verifyChangeReported("put package 3");
 

@@ -162,6 +162,13 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         updateBackgroundTint();
     }
 
+    /**
+     * @return The background of this view.
+     */
+    public NotificationBackgroundView getBackgroundNormal() {
+        return mBackgroundNormal;
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();

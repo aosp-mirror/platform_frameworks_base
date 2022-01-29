@@ -41,6 +41,7 @@ import com.android.server.pm.pkg.SuspendParams;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 @Presubmit
 @RunWith(AndroidJUnit4.class)
@@ -323,30 +324,31 @@ public class PackageUserStateTest {
     }
     @Test
     public void testPackageUseReasons() throws Exception {
-        final PackageStateUnserialized testState1 = new PackageStateUnserialized();
+        PackageSetting packageSetting = Mockito.mock(PackageSetting.class);
+        final PackageStateUnserialized testState1 = new PackageStateUnserialized(packageSetting);
         testState1.setLastPackageUsageTimeInMills(-1, 10L);
         assertLastPackageUsageUnset(testState1);
 
-        final PackageStateUnserialized testState2 = new PackageStateUnserialized();
+        final PackageStateUnserialized testState2 = new PackageStateUnserialized(packageSetting);
         testState2.setLastPackageUsageTimeInMills(
                 PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT, 20L);
         assertLastPackageUsageUnset(testState2);
 
-        final PackageStateUnserialized testState3 = new PackageStateUnserialized();
+        final PackageStateUnserialized testState3 = new PackageStateUnserialized(packageSetting);
         testState3.setLastPackageUsageTimeInMills(Integer.MAX_VALUE, 30L);
         assertLastPackageUsageUnset(testState3);
 
-        final PackageStateUnserialized testState4 = new PackageStateUnserialized();
+        final PackageStateUnserialized testState4 = new PackageStateUnserialized(packageSetting);
         testState4.setLastPackageUsageTimeInMills(0, 40L);
         assertLastPackageUsageSet(testState4, 0, 40L);
 
-        final PackageStateUnserialized testState5 = new PackageStateUnserialized();
+        final PackageStateUnserialized testState5 = new PackageStateUnserialized(packageSetting);
         testState5.setLastPackageUsageTimeInMills(
                 PackageManager.NOTIFY_PACKAGE_USE_CONTENT_PROVIDER, 50L);
         assertLastPackageUsageSet(
                 testState5, PackageManager.NOTIFY_PACKAGE_USE_CONTENT_PROVIDER, 50L);
 
-        final PackageStateUnserialized testState6 = new PackageStateUnserialized();
+        final PackageStateUnserialized testState6 = new PackageStateUnserialized(packageSetting);
         testState6.setLastPackageUsageTimeInMills(
                 PackageManager.NOTIFY_PACKAGE_USE_REASONS_COUNT - 1, 60L);
         assertLastPackageUsageSet(

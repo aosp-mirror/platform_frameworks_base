@@ -1288,7 +1288,7 @@ static jint convertAudioProfileFromNative(JNIEnv *env, jobject *jAudioProfile,
                            audioFormatFromNative(nAudioProfile->format), jSamplingRates.get(),
                            jChannelMasks.get(), jChannelIndexMasks.get(), encapsulationType);
 
-    if (jAudioProfile == nullptr) {
+    if (*jAudioProfile == nullptr) {
         return AUDIO_JAVA_ERROR;
     }
 

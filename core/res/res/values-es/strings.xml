@@ -1187,6 +1187,10 @@
     <string name="deleteText" msgid="4200807474529938112">"Eliminar"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Método de introducción de texto"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Acciones de texto"</string>
+    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
+    <skip />
+    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Queda poco espacio"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Es posible que algunas funciones del sistema no funcionen."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"No hay espacio suficiente para el sistema. Comprueba que haya 250 MB libres y reinicia el dispositivo."</string>
@@ -1264,7 +1268,7 @@
     <string name="screen_compat_mode_hint" msgid="4032272159093750908">"Para volver a habilitar esta opción, accede a Ajustes &gt; Aplicaciones &gt; Descargadas."</string>
     <string name="unsupported_display_size_message" msgid="7265211375269394699">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admite el tamaño de pantalla actual y es posible que funcione de forma inesperada."</string>
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Mostrar siempre"</string>
-    <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> se diseñó para una versión incompatible de Android OS y puede que funcione de forma inesperada. Es posible que haya una versión actualizada de la aplicación."</string>
+    <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> se diseñó para una versión incompatible del SO Android y puede que funcione de forma inesperada. Es posible que haya una versión actualizada de la aplicación."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Mostrar siempre"</string>
     <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Buscar actualizaciones"</string>
     <string name="smv_application" msgid="3775183542777792638">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> (proceso <xliff:g id="PROCESS">%2$s</xliff:g>) ha infringido su política StrictMode autoaplicable."</string>
@@ -1491,6 +1495,8 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"Permite que una aplicación solicite permiso para ignorar las optimizaciones de la batería."</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"consultar todos los paquetes"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"Permite que una aplicación vea todos los paquetes instalados."</string>
+    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"acceder a SupplementalApis"</string>
+    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"Permite que una aplicación acceda a SupplementalApis."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"Da dos toques para acceder al control de zoom."</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"No se ha podido añadir el widget."</string>
     <string name="ime_action_go" msgid="5536744546326495436">"Ir"</string>

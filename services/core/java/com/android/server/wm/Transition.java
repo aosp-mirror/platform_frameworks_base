@@ -1039,6 +1039,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                         "  Rejecting as detached: %s", wc);
                 continue;
             }
+            // The level of transition target should be at least window token.
+            if (wc.asWindowState() != null) continue;
 
             final ChangeInfo changeInfo = changes.get(wc);
 

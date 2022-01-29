@@ -18,12 +18,13 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.fingerprint.Fingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.InternalEnumerateClient;
 
@@ -40,9 +41,10 @@ class FingerprintInternalEnumerateClient extends InternalEnumerateClient<AidlSes
     protected FingerprintInternalEnumerateClient(@NonNull Context context,
             @NonNull Supplier<AidlSession> lazyDaemon, @NonNull IBinder token, int userId,
             @NonNull String owner, @NonNull List<Fingerprint> enrolledList,
-            @NonNull BiometricUtils<Fingerprint> utils, int sensorId) {
+            @NonNull BiometricUtils<Fingerprint> utils, int sensorId,
+            @NonNull BiometricLogger logger, @NonNull BiometricContext biometricContext) {
         super(context, lazyDaemon, token, userId, owner, enrolledList, utils, sensorId,
-                BiometricsProtoEnums.MODALITY_FINGERPRINT);
+                logger, biometricContext);
     }
 
     @Override

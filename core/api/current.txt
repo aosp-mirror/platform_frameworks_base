@@ -135,6 +135,9 @@ package android {
     field public static final String READ_HOME_APP_SEARCH_DATA = "android.permission.READ_HOME_APP_SEARCH_DATA";
     field @Deprecated public static final String READ_INPUT_STATE = "android.permission.READ_INPUT_STATE";
     field public static final String READ_LOGS = "android.permission.READ_LOGS";
+    field public static final String READ_MEDIA_AUDIO = "android.permission.READ_MEDIA_AUDIO";
+    field public static final String READ_MEDIA_IMAGE = "android.permission.READ_MEDIA_IMAGE";
+    field public static final String READ_MEDIA_VIDEO = "android.permission.READ_MEDIA_VIDEO";
     field public static final String READ_NEARBY_STREAMING_POLICY = "android.permission.READ_NEARBY_STREAMING_POLICY";
     field public static final String READ_PHONE_NUMBERS = "android.permission.READ_PHONE_NUMBERS";
     field public static final String READ_PHONE_STATE = "android.permission.READ_PHONE_STATE";
@@ -220,6 +223,8 @@ package android {
     field public static final String NEARBY_DEVICES = "android.permission-group.NEARBY_DEVICES";
     field public static final String NOTIFICATIONS = "android.permission-group.NOTIFICATIONS";
     field public static final String PHONE = "android.permission-group.PHONE";
+    field public static final String READ_MEDIA_AURAL = "android.permission-group.READ_MEDIA_AURAL";
+    field public static final String READ_MEDIA_VISUAL = "android.permission-group.READ_MEDIA_VISUAL";
     field public static final String SENSORS = "android.permission-group.SENSORS";
     field public static final String SMS = "android.permission-group.SMS";
     field public static final String STORAGE = "android.permission-group.STORAGE";
@@ -2103,6 +2108,8 @@ package android {
     field public static final int icon_frame = 16908350; // 0x102003e
     field public static final int input = 16908297; // 0x1020009
     field public static final int inputArea = 16908318; // 0x102001e
+    field public static final int inputExtractAccessories;
+    field public static final int inputExtractAction;
     field public static final int inputExtractEditText = 16908325; // 0x1020025
     field @Deprecated public static final int keyboardView = 16908326; // 0x1020026
     field public static final int list = 16908298; // 0x102000a
@@ -4176,6 +4183,7 @@ package android.app {
     method public void openContextMenu(android.view.View);
     method public void openOptionsMenu();
     method public void overridePendingTransition(int, int);
+    method public void overridePendingTransition(int, int, int);
     method public void postponeEnterTransition();
     method public void recreate();
     method public void registerActivityLifecycleCallbacks(@NonNull android.app.Application.ActivityLifecycleCallbacks);
@@ -4479,6 +4487,7 @@ package android.app {
     method public static android.app.ActivityOptions makeBasic();
     method public static android.app.ActivityOptions makeClipRevealAnimation(android.view.View, int, int, int, int);
     method public static android.app.ActivityOptions makeCustomAnimation(android.content.Context, int, int);
+    method @NonNull public static android.app.ActivityOptions makeCustomAnimation(@NonNull android.content.Context, int, int, int);
     method public static android.app.ActivityOptions makeScaleUpAnimation(android.view.View, int, int, int, int);
     method public static android.app.ActivityOptions makeSceneTransitionAnimation(android.app.Activity, android.view.View, String);
     method @java.lang.SafeVarargs public static android.app.ActivityOptions makeSceneTransitionAnimation(android.app.Activity, android.util.Pair<android.view.View,java.lang.String>...);
@@ -11881,6 +11890,7 @@ package android.content.pm {
     field public static final String FEATURE_SENSOR_AMBIENT_TEMPERATURE = "android.hardware.sensor.ambient_temperature";
     field public static final String FEATURE_SENSOR_BAROMETER = "android.hardware.sensor.barometer";
     field public static final String FEATURE_SENSOR_COMPASS = "android.hardware.sensor.compass";
+    field public static final String FEATURE_SENSOR_DYNAMIC_HEAD_TRACKER = "android.hardware.sensor.dynamic.head_tracker";
     field public static final String FEATURE_SENSOR_GYROSCOPE = "android.hardware.sensor.gyroscope";
     field public static final String FEATURE_SENSOR_HEART_RATE = "android.hardware.sensor.heartrate";
     field public static final String FEATURE_SENSOR_HEART_RATE_ECG = "android.hardware.sensor.heartrate.ecg";
@@ -20566,13 +20576,24 @@ package android.media {
   }
 
   public static final class EncoderProfiles.VideoProfile {
+    method public int getBitDepth();
     method public int getBitrate();
+    method public int getChromaSubsampling();
     method public int getCodec();
     method public int getFrameRate();
+    method public int getHdrFormat();
     method public int getHeight();
     method @NonNull public String getMediaType();
     method public int getProfile();
     method public int getWidth();
+    field public static final int HDR_DOLBY_VISION = 4; // 0x4
+    field public static final int HDR_HDR10 = 2; // 0x2
+    field public static final int HDR_HDR10PLUS = 3; // 0x3
+    field public static final int HDR_HLG = 1; // 0x1
+    field public static final int HDR_NONE = 0; // 0x0
+    field public static final int YUV_420 = 0; // 0x0
+    field public static final int YUV_422 = 1; // 0x1
+    field public static final int YUV_444 = 2; // 0x2
   }
 
   public class ExifInterface {
@@ -22681,12 +22702,15 @@ package android.media {
   }
 
   public final class MediaRecorder.VideoEncoder {
+    field public static final int AV1 = 8; // 0x8
     field public static final int DEFAULT = 0; // 0x0
+    field public static final int DOLBY_VISION = 7; // 0x7
     field public static final int H263 = 1; // 0x1
     field public static final int H264 = 2; // 0x2
     field public static final int HEVC = 5; // 0x5
     field public static final int MPEG_4_SP = 3; // 0x3
     field public static final int VP8 = 4; // 0x4
+    field public static final int VP9 = 6; // 0x6
   }
 
   public final class MediaRecorder.VideoSource {
@@ -31659,6 +31683,7 @@ package android.os {
     method public boolean isDeviceLightIdleMode();
     method public boolean isIgnoringBatteryOptimizations(String);
     method public boolean isInteractive();
+    method public boolean isLowPowerStandbyEnabled();
     method public boolean isPowerSaveMode();
     method public boolean isRebootingUserspaceSupported();
     method @Deprecated public boolean isScreenOn();
@@ -31670,6 +31695,7 @@ package android.os {
     field public static final int ACQUIRE_CAUSES_WAKEUP = 268435456; // 0x10000000
     field public static final String ACTION_DEVICE_IDLE_MODE_CHANGED = "android.os.action.DEVICE_IDLE_MODE_CHANGED";
     field public static final String ACTION_DEVICE_LIGHT_IDLE_MODE_CHANGED = "android.os.action.LIGHT_DEVICE_IDLE_MODE_CHANGED";
+    field public static final String ACTION_LOW_POWER_STANDBY_ENABLED_CHANGED = "android.os.action.LOW_POWER_STANDBY_ENABLED_CHANGED";
     field public static final String ACTION_POWER_SAVE_MODE_CHANGED = "android.os.action.POWER_SAVE_MODE_CHANGED";
     field @Deprecated public static final int FULL_WAKE_LOCK = 26; // 0x1a
     field public static final int LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF = 2; // 0x2
@@ -32394,6 +32420,7 @@ package android.os.storage {
     method @Nullable public android.os.storage.StorageVolume getStorageVolume(@NonNull java.io.File);
     method @NonNull public android.os.storage.StorageVolume getStorageVolume(@NonNull android.net.Uri);
     method @NonNull public java.util.List<android.os.storage.StorageVolume> getStorageVolumes();
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_EXTERNAL_STORAGE) public java.util.List<android.os.storage.StorageVolume> getStorageVolumesIncludingSharedProfiles();
     method @NonNull public java.util.UUID getUuidForPath(@NonNull java.io.File) throws java.io.IOException;
     method public boolean isAllocationSupported(@NonNull java.io.FileDescriptor);
     method public boolean isCacheBehaviorGroup(java.io.File) throws java.io.IOException;
@@ -32427,6 +32454,7 @@ package android.os.storage {
     method public String getDescription(android.content.Context);
     method @Nullable public java.io.File getDirectory();
     method @Nullable public String getMediaStoreVolumeName();
+    method @NonNull public android.os.UserHandle getOwner();
     method public String getState();
     method @Nullable public java.util.UUID getStorageUuid();
     method @Nullable public String getUuid();
@@ -37904,21 +37932,23 @@ package android.service.autofill {
   }
 
   public static final class Dataset.Builder {
-    ctor public Dataset.Builder(@NonNull android.widget.RemoteViews);
+    ctor @Deprecated public Dataset.Builder(@NonNull android.widget.RemoteViews);
+    ctor public Dataset.Builder(@NonNull android.service.autofill.Presentations);
     ctor public Dataset.Builder();
     method @NonNull public android.service.autofill.Dataset build();
     method @NonNull public android.service.autofill.Dataset.Builder setAuthentication(@Nullable android.content.IntentSender);
+    method @NonNull public android.service.autofill.Dataset.Builder setField(@NonNull android.view.autofill.AutofillId, @Nullable android.service.autofill.Field);
     method @NonNull public android.service.autofill.Dataset.Builder setId(@Nullable String);
-    method @NonNull public android.service.autofill.Dataset.Builder setInlinePresentation(@NonNull android.service.autofill.InlinePresentation);
-    method @NonNull public android.service.autofill.Dataset.Builder setInlinePresentation(@NonNull android.service.autofill.InlinePresentation, @NonNull android.service.autofill.InlinePresentation);
-    method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue);
-    method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @NonNull android.widget.RemoteViews);
-    method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern);
-    method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.widget.RemoteViews);
-    method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation);
-    method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation, @NonNull android.service.autofill.InlinePresentation);
-    method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation);
-    method @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation, @NonNull android.service.autofill.InlinePresentation);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setInlinePresentation(@NonNull android.service.autofill.InlinePresentation);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setInlinePresentation(@NonNull android.service.autofill.InlinePresentation, @NonNull android.service.autofill.InlinePresentation);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @NonNull android.widget.RemoteViews);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.widget.RemoteViews);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation, @NonNull android.service.autofill.InlinePresentation);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation);
+    method @Deprecated @NonNull public android.service.autofill.Dataset.Builder setValue(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.widget.RemoteViews, @NonNull android.service.autofill.InlinePresentation, @NonNull android.service.autofill.InlinePresentation);
   }
 
   public final class DateTransformation implements android.os.Parcelable android.service.autofill.Transformation {
@@ -37933,6 +37963,19 @@ package android.service.autofill {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.autofill.DateValueSanitizer> CREATOR;
+  }
+
+  public final class Field {
+    method @Nullable public android.service.autofill.Presentations getPresentations();
+    method @Nullable public android.view.autofill.AutofillValue getValue();
+  }
+
+  public static final class Field.Builder {
+    ctor public Field.Builder();
+    method @NonNull public android.service.autofill.Field build();
+    method @NonNull public android.service.autofill.Field.Builder setFilter(@Nullable java.util.regex.Pattern);
+    method @NonNull public android.service.autofill.Field.Builder setPresentations(@NonNull android.service.autofill.Presentations);
+    method @NonNull public android.service.autofill.Field.Builder setValue(@NonNull android.view.autofill.AutofillValue);
   }
 
   public final class FieldClassification {
@@ -38017,11 +38060,14 @@ package android.service.autofill {
     method @NonNull public android.service.autofill.FillResponse.Builder addDataset(@Nullable android.service.autofill.Dataset);
     method @NonNull public android.service.autofill.FillResponse build();
     method @NonNull public android.service.autofill.FillResponse.Builder disableAutofill(long);
-    method @NonNull public android.service.autofill.FillResponse.Builder setAuthentication(@NonNull android.view.autofill.AutofillId[], @Nullable android.content.IntentSender, @Nullable android.widget.RemoteViews);
-    method @NonNull public android.service.autofill.FillResponse.Builder setAuthentication(@NonNull android.view.autofill.AutofillId[], @Nullable android.content.IntentSender, @Nullable android.widget.RemoteViews, @Nullable android.service.autofill.InlinePresentation);
-    method @NonNull public android.service.autofill.FillResponse.Builder setAuthentication(@NonNull android.view.autofill.AutofillId[], @Nullable android.content.IntentSender, @Nullable android.widget.RemoteViews, @Nullable android.service.autofill.InlinePresentation, @Nullable android.service.autofill.InlinePresentation);
+    method @Deprecated @NonNull public android.service.autofill.FillResponse.Builder setAuthentication(@NonNull android.view.autofill.AutofillId[], @Nullable android.content.IntentSender, @Nullable android.widget.RemoteViews);
+    method @Deprecated @NonNull public android.service.autofill.FillResponse.Builder setAuthentication(@NonNull android.view.autofill.AutofillId[], @Nullable android.content.IntentSender, @Nullable android.widget.RemoteViews, @Nullable android.service.autofill.InlinePresentation);
+    method @Deprecated @NonNull public android.service.autofill.FillResponse.Builder setAuthentication(@NonNull android.view.autofill.AutofillId[], @Nullable android.content.IntentSender, @Nullable android.widget.RemoteViews, @Nullable android.service.autofill.InlinePresentation, @Nullable android.service.autofill.InlinePresentation);
+    method @NonNull public android.service.autofill.FillResponse.Builder setAuthentication(@NonNull android.view.autofill.AutofillId[], @Nullable android.content.IntentSender, @Nullable android.service.autofill.Presentations);
     method @NonNull public android.service.autofill.FillResponse.Builder setClientState(@Nullable android.os.Bundle);
+    method @NonNull public android.service.autofill.FillResponse.Builder setDialogHeader(@NonNull android.widget.RemoteViews);
     method @NonNull public android.service.autofill.FillResponse.Builder setFieldClassificationIds(@NonNull android.view.autofill.AutofillId...);
+    method @NonNull public android.service.autofill.FillResponse.Builder setFillDialogTriggerIds(@NonNull android.view.autofill.AutofillId...);
     method @NonNull public android.service.autofill.FillResponse.Builder setFlags(int);
     method @NonNull public android.service.autofill.FillResponse.Builder setFooter(@NonNull android.widget.RemoteViews);
     method @NonNull public android.service.autofill.FillResponse.Builder setHeader(@NonNull android.widget.RemoteViews);
@@ -38064,6 +38110,22 @@ package android.service.autofill {
   }
 
   public interface OnClickAction {
+  }
+
+  public final class Presentations {
+    method @Nullable public android.widget.RemoteViews getDialogPresentation();
+    method @Nullable public android.service.autofill.InlinePresentation getInlinePresentation();
+    method @Nullable public android.service.autofill.InlinePresentation getInlineTooltipPresentation();
+    method @Nullable public android.widget.RemoteViews getMenuPresentation();
+  }
+
+  public static final class Presentations.Builder {
+    ctor public Presentations.Builder();
+    method @NonNull public android.service.autofill.Presentations build();
+    method @NonNull public android.service.autofill.Presentations.Builder setDialogPresentation(@NonNull android.widget.RemoteViews);
+    method @NonNull public android.service.autofill.Presentations.Builder setInlinePresentation(@NonNull android.service.autofill.InlinePresentation);
+    method @NonNull public android.service.autofill.Presentations.Builder setInlineTooltipPresentation(@NonNull android.service.autofill.InlinePresentation);
+    method @NonNull public android.service.autofill.Presentations.Builder setMenuPresentation(@NonNull android.widget.RemoteViews);
   }
 
   public final class RegexValidator implements android.os.Parcelable android.service.autofill.Validator {
@@ -49144,6 +49206,8 @@ package android.view {
   public static final class SurfaceControlViewHost.SurfacePackage implements android.os.Parcelable {
     ctor public SurfaceControlViewHost.SurfacePackage(@NonNull android.view.SurfaceControlViewHost.SurfacePackage);
     method public int describeContents();
+    method public void notifyConfigurationChanged(@NonNull android.content.res.Configuration);
+    method public void notifyDetachedFromWindow();
     method public void release();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.SurfaceControlViewHost.SurfacePackage> CREATOR;
@@ -54278,7 +54342,6 @@ package android.webkit {
   public abstract class WebSettings {
     ctor public WebSettings();
     method @Deprecated public abstract boolean enableSmoothTransition();
-    method public boolean getAllowAlgorithmicDarkening();
     method public abstract boolean getAllowContentAccess();
     method public abstract boolean getAllowFileAccess();
     method public abstract boolean getAllowFileAccessFromFileURLs();
@@ -54323,7 +54386,8 @@ package android.webkit {
     method public abstract int getTextZoom();
     method public abstract boolean getUseWideViewPort();
     method public abstract String getUserAgentString();
-    method public void setAllowAlgorithmicDarkening(boolean);
+    method public boolean isAlgorithmicDarkeningAllowed();
+    method public void setAlgorithmicDarkeningAllowed(boolean);
     method public abstract void setAllowContentAccess(boolean);
     method public abstract void setAllowFileAccess(boolean);
     method @Deprecated public abstract void setAllowFileAccessFromFileURLs(boolean);

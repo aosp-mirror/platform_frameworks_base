@@ -901,32 +901,20 @@ public abstract class PackageManagerInternal implements PackageSettingsSnapshotP
 
     /**
      * Perform the given action for each package.
-     *
-     * @param locked whether to hold the packages lock. If the lock is not held, the objects will
-     *               be iterated using a temporary data structure. In the vast majority of cases,
-     *               the lock should not have to be held. This is exposed to mirror the
-     *               functionality of the other forEach methods, for eventual migration.
      * @param action action to be performed
      */
-    public abstract void forEachPackageState(boolean locked, Consumer<PackageStateInternal> action);
+    public abstract void forEachPackageState(Consumer<PackageStateInternal> action);
 
     /**
-     * {@link #forEachPackageState(boolean, Consumer)} but filtered to only states with packages
+     * {@link #forEachPackageState(Consumer)} but filtered to only states with packages
      * on device where {@link PackageStateInternal#getPkg()} is not null.
      */
     public abstract void forEachPackage(Consumer<AndroidPackage> action);
 
     /**
      * Perform the given action for each installed package for a user.
-     * Note that packages lock will be held while performing the actions.
      */
     public abstract void forEachInstalledPackage(
-            @NonNull Consumer<AndroidPackage> actionLocked, @UserIdInt int userId);
-
-    /**
-     * Perform the given action for each installed package for a user.
-     */
-    public abstract void forEachInstalledPackage(boolean locked,
             @NonNull Consumer<AndroidPackage> action, @UserIdInt int userId);
 
     /** Returns the list of enabled components */

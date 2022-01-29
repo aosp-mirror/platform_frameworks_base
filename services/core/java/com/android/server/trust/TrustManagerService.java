@@ -122,7 +122,8 @@ public class TrustManagerService extends SystemService {
     private static final int MSG_DISPATCH_UNLOCK_LOCKOUT = 13;
     private static final int MSG_REFRESH_DEVICE_LOCKED_FOR_USER = 14;
     private static final int MSG_SCHEDULE_TRUST_TIMEOUT = 15;
-    public static final int MSG_USER_REQUESTED_UNLOCK = 16;
+    private static final int MSG_USER_REQUESTED_UNLOCK = 16;
+    private static final int MSG_ENABLE_TRUST_AGENT = 17;
 
     private static final String REFRESH_DEVICE_LOCKED_EXCEPT_USER = "except";
 
@@ -631,6 +632,24 @@ public class TrustManagerService extends SystemService {
         }
     }
 
+
+    /**
+     * Uses {@link LockPatternUtils} to enable the setting for trust agent in the specified
+     * component name. This should only be used for testing.
+     */
+    private void enableTrustAgentForUserForTest(@NonNull ComponentName componentName, int userId) {
+        Log.i(TAG,
+                "Enabling trust agent " + componentName.flattenToString() + " for user " + userId);
+        List<ComponentName> agents =
+                new ArrayList<>(mLockPatternUtils.getEnabledTrustAgents(userId));
+        if (!agents.contains(componentName)) {
+            agents.add(componentName);
+        }
+        // Even if the agent was already there, we still call setEnabledTrustAgents to trigger a
+        // refresh of installed agents.
+        mLockPatternUtils.setEnabledTrustAgents(agents, userId);
+    }
+
     boolean isDeviceLockedInner(int userId) {
         synchronized (mDeviceLockedForUser) {
             return mDeviceLockedForUser.get(userId, true);
@@ -929,6 +948,7 @@ public class TrustManagerService extends SystemService {
                 continue;
             }
             allowedAgents.add(resolveInfo);
+            if (DEBUG) Slog.d(TAG, "Adding agent " + getComponentName(resolveInfo));
         }
         return allowedAgents;
     }
@@ -1155,6 +1175,13 @@ public class TrustManagerService extends SystemService {
             // coalesce refresh messages.
             mHandler.removeMessages(MSG_ENABLED_AGENTS_CHANGED);
             mHandler.sendEmptyMessage(MSG_ENABLED_AGENTS_CHANGED);
+        }
+
+        @Override
+        public void enableTrustAgentForUserForTest(ComponentName componentName, int userId)
+                throws RemoteException {
+            enforceReportPermission();
+            mHandler.obtainMessage(MSG_ENABLE_TRUST_AGENT, userId, 0, componentName).sendToTarget();
         }
 
         @Override
@@ -1432,6 +1459,9 @@ public class TrustManagerService extends SystemService {
                     refreshAgentList(UserHandle.USER_ALL);
                     // This is also called when the security mode of a user changes.
                     refreshDeviceLockedForUser(UserHandle.USER_ALL);
+                    break;
+                case MSG_ENABLE_TRUST_AGENT:
+                    enableTrustAgentForUserForTest((ComponentName) msg.obj, msg.arg1);
                     break;
                 case MSG_KEYGUARD_SHOWING_CHANGED:
                     refreshDeviceLockedForUser(mCurrentUser);

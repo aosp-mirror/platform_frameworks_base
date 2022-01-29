@@ -83,7 +83,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Class for accessing an application's resources.  This sits on top of the
@@ -142,9 +141,6 @@ public class Resources {
     /** Used to inflate drawable objects from XML. */
     @UnsupportedAppUsage
     private DrawableInflater mDrawableInflater;
-
-    /** Used to override the returned adjustments of {@link #getDisplayAdjustments}. */
-    private DisplayAdjustments mOverrideDisplayAdjustments;
 
     /** Lock object used to protect access to {@link #mTmpValue}. */
     private final Object mTmpValueLock = new Object();
@@ -2174,30 +2170,7 @@ public class Resources {
     /** @hide */
     @UnsupportedAppUsage(trackingBug = 176190631)
     public DisplayAdjustments getDisplayAdjustments() {
-        final DisplayAdjustments overrideDisplayAdjustments = mOverrideDisplayAdjustments;
-        if (overrideDisplayAdjustments != null) {
-            return overrideDisplayAdjustments;
-        }
         return mResourcesImpl.getDisplayAdjustments();
-    }
-
-    /**
-     * Customize the display adjustments based on the current one in {@link #mResourcesImpl}, in
-     * order to isolate the effect with other instances of {@link Resource} that may share the same
-     * instance of {@link ResourcesImpl}.
-     *
-     * @param override The operation to override the existing display adjustments. If it is null,
-     *                 the override adjustments will be cleared.
-     * @hide
-     */
-    public void overrideDisplayAdjustments(@Nullable Consumer<DisplayAdjustments> override) {
-        if (override != null) {
-            mOverrideDisplayAdjustments = new DisplayAdjustments(
-                    mResourcesImpl.getDisplayAdjustments());
-            override.accept(mOverrideDisplayAdjustments);
-        } else {
-            mOverrideDisplayAdjustments = null;
-        }
     }
 
     /**
@@ -2205,7 +2178,7 @@ public class Resources {
      * @hide
      */
     public boolean hasOverrideDisplayAdjustments() {
-        return mOverrideDisplayAdjustments != null;
+        return false;
     }
 
     /**

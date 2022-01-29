@@ -25,6 +25,8 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.internal.util.Preconditions;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.GenerateChallengeClient;
@@ -51,8 +53,10 @@ public class FaceGenerateChallengeClient extends GenerateChallengeClient<IBiomet
     FaceGenerateChallengeClient(@NonNull Context context,
             @NonNull Supplier<IBiometricsFace> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int userId, @NonNull String owner,
-            int sensorId, long now) {
-        super(context, lazyDaemon, token, listener, userId, owner, sensorId);
+            int sensorId, @NonNull BiometricLogger logger,
+            @NonNull BiometricContext biometricContext, long now) {
+        super(context, lazyDaemon, token, listener, userId, owner, sensorId, logger,
+                biometricContext);
         mCreatedAt = now;
         mWaiting = new ArrayList<>();
     }

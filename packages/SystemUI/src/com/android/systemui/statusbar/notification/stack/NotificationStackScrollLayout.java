@@ -202,6 +202,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private int mBottomMargin;
     private int mBottomInset = 0;
     private float mQsExpansionFraction;
+    private final int mSplitShadeMinContentHeight;
 
     /**
      * The algorithm which calculates the properties for our children
@@ -583,6 +584,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 .getDefaultColor();
         int minHeight = res.getDimensionPixelSize(R.dimen.notification_min_height);
         int maxHeight = res.getDimensionPixelSize(R.dimen.notification_max_height);
+        mSplitShadeMinContentHeight = res.getDimensionPixelSize(
+                R.dimen.nssl_split_shade_min_content_height);
         mExpandHelper = new ExpandHelper(getContext(), mExpandHelperCallback,
                 minHeight, maxHeight);
         mExpandHelper.setEventSource(this);
@@ -1273,8 +1276,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * @param listenerNeedsAnimation does the listener need to animate?
      */
     private void updateStackPosition(boolean listenerNeedsAnimation) {
-        // Consider interpolating from an mExpansionStartY for use on lockscreen and AOD
-        float endTopPosition = mTopPadding + mExtraTopInsetForFullShadeTransition
+        final float endTopPosition = mTopPadding + mExtraTopInsetForFullShadeTransition
                 + mAmbientState.getOverExpansion()
                 - getCurrentOverScrollAmount(false /* top */);
         final float fraction = mAmbientState.getExpansionFraction();
@@ -1284,13 +1286,29 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mOnStackYChanged.accept(listenerNeedsAnimation);
         }
         if (mQsExpansionFraction <= 0) {
-            final float stackEndHeight = Math.max(0f,
-                    getHeight() - getEmptyBottomMargin() - mTopPadding);
-            mAmbientState.setStackEndHeight(stackEndHeight);
-            mAmbientState.setStackHeight(
-                    MathUtils.lerp(stackEndHeight * StackScrollAlgorithm.START_FRACTION,
-                            stackEndHeight, fraction));
+            final float endHeight = updateStackEndHeight(
+                    getHeight(), getEmptyBottomMargin(), mTopPadding);
+            updateStackHeight(endHeight, fraction);
         }
+    }
+
+    public float updateStackEndHeight(float height, float bottomMargin, float topPadding) {
+        final float stackEndHeight = Math.max(0f, height - bottomMargin - topPadding);
+        mAmbientState.setStackEndHeight(stackEndHeight);
+        return stackEndHeight;
+    }
+
+    public void updateStackHeight(float endHeight, float fraction) {
+        // During the (AOD<=>LS) transition where dozeAmount is changing,
+        // apply dozeAmount to stack height instead of expansionFraction
+        // to unfurl notifications on AOD=>LS wakeup (and furl up on LS=>AOD sleep)
+        final float dozeAmount = mAmbientState.getDozeAmount();
+        if (0f < dozeAmount && dozeAmount < 1f) {
+            fraction = 1f - dozeAmount;
+        }
+        mAmbientState.setStackHeight(
+                MathUtils.lerp(endHeight * StackScrollAlgorithm.START_FRACTION,
+                        endHeight, fraction));
     }
 
     /**
@@ -3910,7 +3928,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     int getEmptyBottomMargin() {
-        return Math.max(mMaxLayoutHeight - mContentHeight, 0);
+        int contentHeight;
+        if (mShouldUseSplitNotificationShade) {
+            // When in split shade and there are no notifications, the height can be too low, as
+            // it is based on notifications bottom, which is lower on split shade.
+            // Here we prefer to use at least a minimum height defined for split shade.
+            // Otherwise the expansion motion is too fast.
+            contentHeight = Math.max(mSplitShadeMinContentHeight, mContentHeight);
+        } else {
+            contentHeight = mContentHeight;
+        }
+        return Math.max(mMaxLayoutHeight - contentHeight, 0);
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -5465,6 +5493,17 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     public void setExtraTopInsetForFullShadeTransition(float inset) {
         mExtraTopInsetForFullShadeTransition = inset;
         updateStackPosition();
+        requestChildrenUpdate();
+    }
+
+    /**
+     * @param fraction Fraction of the lockscreen to shade transition. 0f for all other states.
+     *                 Once the lockscreen to shade transition completes and the shade is 100% open
+     *                 LockscreenShadeTransitionController resets fraction to 0
+     *                 where it remains until the next lockscreen-to-shade transition.
+     */
+    public void setFractionToShade(float fraction) {
+        mShelf.setFractionToShade(fraction);
         requestChildrenUpdate();
     }
 

@@ -18,6 +18,7 @@ package com.android.settingslib.deviceinfo;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doReturn;
@@ -33,7 +34,6 @@ import android.os.Handler;
 import com.android.settingslib.core.lifecycle.Lifecycle;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -55,7 +55,6 @@ public class ConnectivityPreferenceControllerTest {
     }
 
     @Test
-    @Ignore
     public void testBroadcastReceiver() {
         final AbstractConnectivityPreferenceController preferenceController =
                 spy(new ConcreteConnectivityPreferenceController(mContext, mLifecycle));
@@ -73,7 +72,7 @@ public class ConnectivityPreferenceControllerTest {
         verify(mContext, times(1))
                 .registerReceiver(receiverArgumentCaptor.capture(),
                         filterArgumentCaptor.capture(),
-                        anyString(), nullable(Handler.class));
+                        anyString(), nullable(Handler.class), anyInt());
 
         final BroadcastReceiver receiver = receiverArgumentCaptor.getValue();
         final IntentFilter filter = filterArgumentCaptor.getValue();

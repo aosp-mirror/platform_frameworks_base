@@ -150,43 +150,45 @@ public class DragAndDropPolicy {
 
             if (inLandscape) {
                 final Rect leftHitRegion = new Rect();
-                final Rect leftDrawRegion = topOrLeftBounds;
                 final Rect rightHitRegion = new Rect();
-                final Rect rightDrawRegion = bottomOrRightBounds;
 
                 // If we have existing split regions use those bounds, otherwise split it 50/50
                 if (inSplitScreen) {
-                    // Add the divider bounds to each side since that counts for the hit region.
-                    leftHitRegion.set(topOrLeftBounds);
-                    leftHitRegion.right += dividerWidth / 2;
-                    rightHitRegion.set(bottomOrRightBounds);
-                    rightHitRegion.left -= dividerWidth / 2;
+                    // The bounds of the existing split will have a divider bar, the hit region
+                    // should include that space. Find the center of the divider bar:
+                    float centerX = topOrLeftBounds.right + (dividerWidth / 2);
+                    // Now set the hit regions using that center.
+                    leftHitRegion.set(displayRegion);
+                    leftHitRegion.right = (int) centerX;
+                    rightHitRegion.set(displayRegion);
+                    rightHitRegion.left = (int) centerX;
                 } else {
                     displayRegion.splitVertically(leftHitRegion, rightHitRegion);
                 }
 
-                mTargets.add(new Target(TYPE_SPLIT_LEFT, leftHitRegion, leftDrawRegion));
-                mTargets.add(new Target(TYPE_SPLIT_RIGHT, rightHitRegion, rightDrawRegion));
+                mTargets.add(new Target(TYPE_SPLIT_LEFT, leftHitRegion, topOrLeftBounds));
+                mTargets.add(new Target(TYPE_SPLIT_RIGHT, rightHitRegion, bottomOrRightBounds));
 
             } else {
                 final Rect topHitRegion = new Rect();
-                final Rect topDrawRegion = topOrLeftBounds;
                 final Rect bottomHitRegion = new Rect();
-                final Rect bottomDrawRegion = bottomOrRightBounds;
 
                 // If we have existing split regions use those bounds, otherwise split it 50/50
                 if (inSplitScreen) {
-                    // Add the divider bounds to each side since that counts for the hit region.
-                    topHitRegion.set(topOrLeftBounds);
-                    topHitRegion.bottom += dividerWidth / 2;
-                    bottomHitRegion.set(bottomOrRightBounds);
-                    bottomHitRegion.top -= dividerWidth / 2;
+                    // The bounds of the existing split will have a divider bar, the hit region
+                    // should include that space. Find the center of the divider bar:
+                    float centerX = topOrLeftBounds.bottom + (dividerWidth / 2);
+                    // Now set the hit regions using that center.
+                    topHitRegion.set(displayRegion);
+                    topHitRegion.bottom = (int) centerX;
+                    bottomHitRegion.set(displayRegion);
+                    bottomHitRegion.top = (int) centerX;
                 } else {
                     displayRegion.splitHorizontally(topHitRegion, bottomHitRegion);
                 }
 
-                mTargets.add(new Target(TYPE_SPLIT_TOP, topHitRegion, topDrawRegion));
-                mTargets.add(new Target(TYPE_SPLIT_BOTTOM, bottomHitRegion, bottomDrawRegion));
+                mTargets.add(new Target(TYPE_SPLIT_TOP, topHitRegion, topOrLeftBounds));
+                mTargets.add(new Target(TYPE_SPLIT_BOTTOM, bottomHitRegion, bottomOrRightBounds));
             }
         } else {
             // Split-screen not allowed, so only show the fullscreen target

@@ -98,8 +98,6 @@ import static android.net.NetworkStats.METERED_YES;
 import static android.net.NetworkTemplate.MATCH_CARRIER;
 import static android.net.NetworkTemplate.MATCH_MOBILE;
 import static android.net.NetworkTemplate.MATCH_WIFI;
-import static android.net.NetworkTemplate.buildTemplateCarrierMetered;
-import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.netstats.provider.NetworkStatsProvider.QUOTA_UNLIMITED;
 import static android.os.Trace.TRACE_TAG_NETWORK;
 import static android.provider.Settings.Global.NETPOLICY_OVERRIDE_ENABLED;
@@ -168,7 +166,6 @@ import android.net.ConnectivityManager.NetworkCallback;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
-import android.net.INetworkStatsService;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkIdentity;
@@ -1324,7 +1321,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     };
 
     /**
-     * Check {@link NetworkPolicy} against current {@link INetworkStatsService}
+     * Check {@link NetworkPolicy} against current {@link NetworkStatsManager}
      * to show visible notifications as needed.
      */
     @GuardedBy("mNetworkPoliciesSecondLock")
@@ -2322,6 +2319,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
+     * Template to match all metered carrier networks with the given IMSI.
+     *
+     * @hide
+     */
+    public static NetworkTemplate buildTemplateCarrierMetered(@NonNull String subscriberId) {
+        Objects.requireNonNull(subscriberId);
+        return new NetworkTemplate.Builder(MATCH_CARRIER)
+                .setSubscriberIds(Set.of(subscriberId))
+                .setMeteredness(METERED_YES).build();
+    }
+
+    /**
      * Update the given {@link NetworkPolicy} based on any carrier-provided
      * defaults via {@link SubscriptionPlan} or {@link CarrierConfigManager}.
      * Leaves policy untouched if the user has modified it.
@@ -2724,7 +2733,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                 out.startTag(null, TAG_NETWORK_POLICY);
                 writeIntAttribute(out, ATTR_NETWORK_TEMPLATE, template.getMatchRule());
-                final String subscriberId = template.getSubscriberId();
+                final String subscriberId = template.getSubscriberIds().isEmpty() ? null
+                        : template.getSubscriberIds().iterator().next();
                 if (subscriberId != null) {
                     out.attribute(null, ATTR_SUBSCRIBER_ID, subscriberId);
                 }
@@ -3101,7 +3111,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
             // When two normalized templates conflict, prefer the most
             // restrictive policy
-            policy.template = NetworkTemplate.normalize(policy.template, mMergedSubscriberIds);
+            policy.template = normalizeTemplate(policy.template, mMergedSubscriberIds);
             final NetworkPolicy existing = mNetworkPolicy.get(policy.template);
             if (existing == null || existing.compareTo(policy) > 0) {
                 if (existing != null) {
@@ -3110,6 +3120,46 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 mNetworkPolicy.put(policy.template, policy);
             }
         }
+    }
+
+    /**
+     * Examine the given template and normalize it.
+     * We pick the "lowest" merged subscriber as the primary
+     * for key purposes, and expand the template to match all other merged
+     * subscribers.
+     *
+     * There can be multiple merged subscriberIds for multi-SIM devices.
+     *
+     * <p>
+     * For example, given an incoming template matching B, and the currently
+     * active merge set [A,B], we'd return a new template that primarily matches
+     * A, but also matches B.
+     */
+    private static NetworkTemplate normalizeTemplate(@NonNull NetworkTemplate template,
+            @NonNull List<String[]> mergedList) {
+        // Now there are several types of network which uses Subscriber Id to store network
+        // information. For instance:
+        // 1. A merged carrier wifi network which has TYPE_WIFI with a Subscriber Id.
+        // 2. A typical cellular network could have TYPE_MOBILE with a Subscriber Id.
+
+        if (template.getSubscriberIds().isEmpty()) return template;
+
+        for (final String[] merged : mergedList) {
+            // TODO: Handle incompatible subscriberIds if that happens in practice.
+            for (final String subscriberId : template.getSubscriberIds()) {
+                if (com.android.net.module.util.CollectionUtils.contains(merged, subscriberId)) {
+                    // Requested template subscriber is part of the merged group; return
+                    // a template that matches all merged subscribers.
+                    return new NetworkTemplate.Builder(template.getMatchRule())
+                            .setWifiNetworkKeys(template.getWifiNetworkKeys())
+                            .setSubscriberIds(Set.of(merged))
+                            .setMeteredness(template.getMeteredness())
+                            .build();
+                }
+            }
+        }
+
+        return template;
     }
 
     @Override
@@ -5559,7 +5609,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         NetworkPolicy[] policies = getNetworkPolicies(mContext.getOpPackageName());
         NetworkTemplate templateCarrier = subscriber != null
                 ? buildTemplateCarrierMetered(subscriber) : null;
-        NetworkTemplate templateMobile = buildTemplateMobileAll(subscriber);
+        NetworkTemplate templateMobile = subscriber != null
+                ? new NetworkTemplate.Builder(MATCH_MOBILE)
+                .setSubscriberIds(Set.of(subscriber))
+                .setMeteredness(android.net.NetworkStats.METERED_YES)
+                .build() : null;
         for (NetworkPolicy policy : policies) {
             //  All policies loaded from disk will be carrier templates, and setting will also only
             //  set carrier templates, but we clear mobile templates just in case one is set by

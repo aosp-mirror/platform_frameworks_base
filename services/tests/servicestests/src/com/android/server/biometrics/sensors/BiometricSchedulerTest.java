@@ -51,6 +51,8 @@ import androidx.annotation.Nullable;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.nano.BiometricSchedulerProto;
 import com.android.server.biometrics.nano.BiometricsProto;
 
@@ -526,10 +528,10 @@ public class BiometricSchedulerTest {
                 @NonNull ClientMonitorCallbackConverter listener) {
             super(context, lazyDaemon, token, listener, 0 /* targetUserId */, 0 /* operationId */,
                     false /* restricted */, TAG, 1 /* cookie */, false /* requireConfirmation */,
-                    TEST_SENSOR_ID, true /* isStrongBiometric */, 0 /* statsModality */,
-                    0 /* statsClient */, null /* taskStackListener */, mock(LockoutTracker.class),
-                    false /* isKeyguard */, true /* shouldVibrate */,
-                    false /* isKeyguardBypassEnabled */);
+                    TEST_SENSOR_ID, mock(BiometricLogger.class), mock(BiometricContext.class),
+                    true /* isStrongBiometric */, null /* taskStackListener */,
+                    mock(LockoutTracker.class), false /* isKeyguard */,
+                    true /* shouldVibrate */, false /* isKeyguardBypassEnabled */);
         }
 
         @Override
@@ -573,8 +575,9 @@ public class BiometricSchedulerTest {
                 @NonNull ClientMonitorCallbackConverter listener) {
             super(context, lazyDaemon, token, listener, 0 /* userId */, new byte[69],
                     "test" /* owner */, mock(BiometricUtils.class),
-                    5 /* timeoutSec */, 0 /* statsModality */, TEST_SENSOR_ID,
-                    true /* shouldVibrate */);
+                    5 /* timeoutSec */, TEST_SENSOR_ID,
+                    true /* shouldVibrate */,
+                    mock(BiometricLogger.class), mock(BiometricContext.class));
         }
 
         @Override
@@ -613,8 +616,8 @@ public class BiometricSchedulerTest {
         TestHalClientMonitor(@NonNull Context context, @NonNull IBinder token,
                 @NonNull Supplier<Object> lazyDaemon, int cookie, int protoEnum) {
             super(context, lazyDaemon, token /* token */, null /* listener */, 0 /* userId */,
-                    TAG, cookie, TEST_SENSOR_ID, 0 /* statsModality */,
-                    0 /* statsAction */, 0 /* statsClient */);
+                    TAG, cookie, TEST_SENSOR_ID,
+                    mock(BiometricLogger.class), mock(BiometricContext.class));
             mProtoEnum = protoEnum;
         }
 

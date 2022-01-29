@@ -38,7 +38,6 @@ import android.graphics.drawable.AnimatedStateListDrawable;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
-import android.os.Vibrator;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Pair;
@@ -62,6 +61,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -104,7 +104,7 @@ public class LockIconViewControllerTest extends SysuiTestCase {
     private @Mock DumpManager mDumpManager;
     private @Mock AccessibilityManager mAccessibilityManager;
     private @Mock ConfigurationController mConfigurationController;
-    private @Mock Vibrator mVibrator;
+    private @Mock VibratorHelper mVibrator;
     private @Mock AuthRippleController mAuthRippleController;
     private FakeExecutor mDelayableExecutor = new FakeExecutor(new FakeSystemClock());
 

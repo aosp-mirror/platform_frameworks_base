@@ -29,7 +29,6 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricOverlayConstants;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -39,6 +38,8 @@ import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,13 +94,13 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     public AuthenticationClient(@NonNull Context context, @NonNull Supplier<T> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
             int targetUserId, long operationId, boolean restricted, @NonNull String owner,
-            int cookie, boolean requireConfirmation, int sensorId, boolean isStrongBiometric,
-            int statsModality, int statsClient, @Nullable TaskStackListener taskStackListener,
+            int cookie, boolean requireConfirmation, int sensorId,
+            @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
+            boolean isStrongBiometric, @Nullable TaskStackListener taskStackListener,
             @NonNull LockoutTracker lockoutTracker, boolean allowBackgroundAuthentication,
             boolean shouldVibrate, boolean isKeyguardBypassEnabled) {
         super(context, lazyDaemon, token, listener, targetUserId, owner, cookie, sensorId,
-                shouldVibrate, statsModality, BiometricsProtoEnums.ACTION_AUTHENTICATE,
-                statsClient);
+                shouldVibrate, biometricLogger, biometricContext);
         mIsStrongBiometric = isStrongBiometric;
         mOperationId = operationId;
         mRequireConfirmation = requireConfirmation;

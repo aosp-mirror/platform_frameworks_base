@@ -19,6 +19,7 @@ package com.android.server.pm.test.override
 import android.app.PropertyInvalidatedCache
 import android.content.ComponentName
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import com.android.server.pm.pkg.component.ParsedActivity
 import android.os.Binder
@@ -167,12 +168,12 @@ class PackageManagerComponentLabelIconOverrideTest {
     @Parameterized.Parameter(0)
     lateinit var params: Params
 
-    private lateinit var testHandler: TestHandler
     private lateinit var mockPendingBroadcasts: PendingPackageBroadcasts
     private lateinit var mockPkg: AndroidPackage
     private lateinit var mockPkgSetting: PackageSetting
     private lateinit var service: PackageManagerService
 
+    private val testHandler = TestHandler(null)
     private val userId = UserHandle.getCallingUserId()
     private val userIdDifferent = userId + 1
 
@@ -180,16 +181,16 @@ class PackageManagerComponentLabelIconOverrideTest {
     fun setUpMocks() {
         makeTestData()
 
-        testHandler = TestHandler(null)
+        mockPendingBroadcasts = PendingPackageBroadcasts()
+        service = mockService()
+
+        testHandler.clear()
+
         if (params.result is Result.ChangedWithoutNotify) {
             // Case where the handler already has a message and so another should not be sent.
             // This case will verify that only 1 message exists, which is the one added here.
             testHandler.sendEmptyMessage(SEND_PENDING_BROADCAST)
         }
-
-        mockPendingBroadcasts = PendingPackageBroadcasts()
-
-        service = mockService()
     }
 
     @Test
@@ -201,19 +202,22 @@ class PackageManagerComponentLabelIconOverrideTest {
         when (val result = params.result) {
             Result.Changed, Result.ChangedWithoutNotify, Result.NotChanged -> {
                 runUpdate()
-                verify(mockPkgSetting).overrideNonLocalizedLabelAndIcon(params.componentName!!,
-                        TEST_LABEL, TEST_ICON, userId)
+                mockPkgSetting.getUserStateOrDefault(userId)
+                    .getOverrideLabelIconForComponent(params.componentName!!)
+                    .let {
+                        assertThat(it?.first).isEqualTo(TEST_LABEL)
+                        assertThat(it?.second).isEqualTo(TEST_ICON)
+                    }
             }
             is Result.Exception -> {
                 assertThrows(result.type) { runUpdate() }
-                verify(mockPkgSetting, never()).overrideNonLocalizedLabelAndIcon(
-                        any<ComponentName>(), any(), anyInt(), anyInt())
             }
         }
     }
 
     @After
     fun verifyExpectedResult() {
+        assertServiceInitialized() ?: return
         if (params.componentName != null) {
             val activityInfo = service.getActivityInfo(params.componentName, 0, userId)
             if (activityInfo != null) {
@@ -225,11 +229,14 @@ class PackageManagerComponentLabelIconOverrideTest {
 
     @After
     fun verifyDifferentUserUnchanged() {
+        assertServiceInitialized() ?: return
         when (params.result) {
             Result.Changed, Result.ChangedWithoutNotify -> {
-                val activityInfo = service.getActivityInfo(params.componentName, 0, userIdDifferent)
-                assertThat(activityInfo.nonLocalizedLabel).isEqualTo(DEFAULT_LABEL)
-                assertThat(activityInfo.icon).isEqualTo(DEFAULT_ICON)
+                // Suppress so that failures in @After don't override the actual test failure
+                @Suppress("UNNECESSARY_SAFE_CALL")
+                val activityInfo = service?.getActivityInfo(params.componentName, 0, userIdDifferent)
+                assertThat(activityInfo?.nonLocalizedLabel).isEqualTo(DEFAULT_LABEL)
+                assertThat(activityInfo?.icon).isEqualTo(DEFAULT_ICON)
             }
             Result.NotChanged, is Result.Exception -> {}
         }.run { /*exhaust*/ }
@@ -237,6 +244,7 @@ class PackageManagerComponentLabelIconOverrideTest {
 
     @After
     fun verifyHandlerHasMessage() {
+        assertServiceInitialized() ?: return
         when (params.result) {
             is Result.Changed, is Result.ChangedWithoutNotify -> {
                 assertThat(testHandler.pendingMessages).hasSize(1)
@@ -251,9 +259,10 @@ class PackageManagerComponentLabelIconOverrideTest {
 
     @After
     fun verifyPendingBroadcast() {
+        assertServiceInitialized() ?: return
         when (params.result) {
             is Result.Changed, Result.ChangedWithoutNotify -> {
-                assertThat(mockPendingBroadcasts.get(userId, params.pkgName))
+                assertThat(mockPendingBroadcasts.get(userId, params.pkgName) ?: emptyList<String>())
                         .containsExactly(params.componentName!!.className)
                         .inOrder()
             }
@@ -271,26 +280,27 @@ class PackageManagerComponentLabelIconOverrideTest {
                     .apply(block)
                     .hideAsFinal()
 
-    private fun makePkgSetting(pkgName: String) = spy(
+    private fun makePkgSetting(pkgName: String, pkg: AndroidPackage) =
         PackageSetting(
             pkgName, null, File("/test"),
             null, null, null, null, 0, 0, 0, 0, null, null, null, null, null,
             UUID.fromString("3f9d52b7-d7b4-406a-a1da-d9f19984c72c")
-        )
-    ) {
-        this.pkgState.isUpdatedSystemApp = params.isUpdatedSystemApp
-    }
+        ).apply {
+            if (params.isSystem) {
+                this.flags = this.flags or ApplicationInfo.FLAG_SYSTEM
+            }
+            this.pkgState.isUpdatedSystemApp = params.isUpdatedSystemApp
+            this.pkg = pkg
+        }
 
     private fun makeTestData() {
         mockPkg = makePkg(params.pkgName)
-        mockPkgSetting = makePkgSetting(params.pkgName)
+        mockPkgSetting = makePkgSetting(params.pkgName, mockPkg)
 
         if (params.result is Result.NotChanged) {
             // If verifying no-op behavior, set the current setting to the test values
             mockPkgSetting.overrideNonLocalizedLabelAndIcon(params.componentName!!, TEST_LABEL,
                     TEST_ICON, userId)
-            // Then clear the mock because the line above just incremented it
-            clearInvocations(mockPkgSetting)
         }
     }
 
@@ -303,9 +313,9 @@ class PackageManagerComponentLabelIconOverrideTest {
                 INVALID_PKG to makePkg(INVALID_PKG) { uid = Binder.getCallingUid() + 1 }
         )
         val mockedPkgSettings = mutableMapOf(
-                VALID_PKG to makePkgSetting(VALID_PKG),
-                SHARED_PKG to makePkgSetting(SHARED_PKG),
-                INVALID_PKG to makePkgSetting(INVALID_PKG)
+                VALID_PKG to makePkgSetting(VALID_PKG, mockedPkgs[VALID_PKG]!!),
+                SHARED_PKG to makePkgSetting(SHARED_PKG, mockedPkgs[SHARED_PKG]!!),
+                INVALID_PKG to makePkgSetting(INVALID_PKG, mockedPkgs[INVALID_PKG]!!)
         )
 
         var mockActivity: ParsedActivity? = null
@@ -330,6 +340,8 @@ class PackageManagerComponentLabelIconOverrideTest {
                 whenever(this.componentExists(same(it))) { mockActivity != null }
                 whenever(this.getActivity(same(it))) { mockActivity }
             }
+            whenever(this.snapshot()) { this@mockThrowOnUnmocked }
+            whenever(registerObserver(any())).thenCallRealMethod()
         }
         val mockUserManagerService: UserManagerService = mockThrowOnUnmocked {
             val matcher: (Int) -> Boolean = { it == userId || it == userIdDifferent }
@@ -345,6 +357,8 @@ class PackageManagerComponentLabelIconOverrideTest {
         val mockAppsFilter: AppsFilter = mockThrowOnUnmocked {
             whenever(this.shouldFilterApplication(anyInt(), any<PackageSetting>(),
                     any<PackageSetting>(), anyInt())) { false }
+            whenever(this.snapshot()) { this@mockThrowOnUnmocked }
+            whenever(registerObserver(any())).thenCallRealMethod()
         }
         val mockContext: Context = mockThrowOnUnmocked {
             whenever(this.getString(
@@ -354,27 +368,33 @@ class PackageManagerComponentLabelIconOverrideTest {
                 PackageManager.PERMISSION_GRANTED
             }
         }
-        val mockSharedLibrariesImpl: SharedLibrariesImpl = mock()
+        val mockSharedLibrariesImpl: SharedLibrariesImpl = mock {
+            whenever(this.snapshot()) { this@mock }
+        }
         val mockInjector: PackageManagerServiceInjector = mock {
             whenever(this.lock) { PackageManagerTracedLock() }
             whenever(this.componentResolver) { mockComponentResolver }
             whenever(this.userManagerService) { mockUserManagerService }
-            whenever(this.getUserManagerInternal()) { mockUserManagerInternal }
+            whenever(this.userManagerInternal) { mockUserManagerInternal }
             whenever(this.settings) { mockSettings }
             whenever(this.getLocalService(ActivityTaskManagerInternal::class.java)) {
                 mockActivityTaskManager
             }
             whenever(this.appsFilter) { mockAppsFilter }
             whenever(this.context) { mockContext }
-            whenever(this.getHandler()) { testHandler }
+            whenever(this.handler) { testHandler }
             whenever(this.sharedLibrariesImpl) { mockSharedLibrariesImpl }
         }
         val testParams = PackageManagerServiceTestParams().apply {
             this.pendingPackageBroadcasts = mockPendingBroadcasts
             this.resolveComponentName = ComponentName("android", ".Test")
             this.packages = ArrayMap<String, AndroidPackage>().apply { putAll(mockedPkgs) }
+            this.instantAppRegistry = mock()
         }
 
         return PackageManagerService(mockInjector, testParams)
     }
+
+    // If service isn't initialized, then test setup failed and @Afters should be skipped
+    private fun assertServiceInitialized() = Unit.takeIf { ::service.isInitialized }
 }

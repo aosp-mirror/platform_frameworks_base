@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.policy;
+package com.android.settingslib.devicestate;
 
 import static android.provider.Settings.Secure.DEVICE_STATE_ROTATION_LOCK_IGNORED;
 import static android.provider.Settings.Secure.DEVICE_STATE_ROTATION_LOCK_LOCKED;

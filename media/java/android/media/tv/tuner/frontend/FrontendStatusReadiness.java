@@ -30,7 +30,7 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
-public class FrontendStatusReadiness {
+public final class FrontendStatusReadiness {
     /** @hide */
     @IntDef({FRONTEND_STATUS_READINESS_UNDEFINED, FRONTEND_STATUS_READINESS_UNAVAILABLE,
             FRONTEND_STATUS_READINESS_UNSTABLE, FRONTEND_STATUS_READINESS_STABLE,

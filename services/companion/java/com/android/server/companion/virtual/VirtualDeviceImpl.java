@@ -34,6 +34,8 @@ import android.companion.virtual.VirtualDeviceManager.ActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.hardware.display.DisplayManager;
@@ -57,6 +59,7 @@ import android.util.SparseArray;
 import android.window.DisplayWindowPolicyController;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.BlockedAppActivity;
 import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
@@ -418,7 +421,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                             getAllowedUserHandles(),
                             mParams.getAllowedActivities(),
                             mParams.getBlockedActivities(),
-                            createListenerAdapter(displayId));
+                            createListenerAdapter(displayId),
+                            activityInfo -> onActivityBlocked(displayId, activityInfo));
             mWindowPolicyControllers.put(displayId, dwpc);
             return dwpc;
         }
@@ -439,6 +443,16 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             wakeLock.acquire();
             mPerDisplayWakelocks.put(displayId, wakeLock);
         }
+    }
+
+    private void onActivityBlocked(int displayId, ActivityInfo activityInfo) {
+        Intent intent = BlockedAppActivity.createStreamingBlockedIntent(
+                UserHandle.getUserId(activityInfo.applicationInfo.uid), activityInfo,
+                mAssociationInfo.getDisplayName());
+        mContext.startActivityAsUser(
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+                ActivityOptions.makeBasic().setLaunchDisplayId(displayId).toBundle(),
+                mContext.getUser());
     }
 
     private ArraySet<UserHandle> getAllowedUserHandles() {

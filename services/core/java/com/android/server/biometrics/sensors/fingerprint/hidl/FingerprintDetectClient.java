@@ -22,7 +22,6 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricOverlayConstants;
-import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
@@ -30,6 +29,8 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.log.BiometricContext;
+import com.android.server.biometrics.log.BiometricLogger;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
@@ -59,11 +60,11 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
             @NonNull Supplier<IBiometricsFingerprint> lazyDaemon,
             @NonNull IBinder token, long requestId,
             @NonNull ClientMonitorCallbackConverter listener, int userId, @NonNull String owner,
-            int sensorId, @Nullable IUdfpsOverlayController udfpsOverlayController,
-            boolean isStrongBiometric, int statsClient) {
+            int sensorId,
+            @NonNull BiometricLogger biometricLogger, @NonNull BiometricContext biometricContext,
+            @Nullable IUdfpsOverlayController udfpsOverlayController, boolean isStrongBiometric) {
         super(context, lazyDaemon, token, listener, userId, owner, 0 /* cookie */, sensorId,
-                true /* shouldVibrate */, BiometricsProtoEnums.MODALITY_FINGERPRINT,
-                BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
+                true /* shouldVibrate */, biometricLogger, biometricContext);
         setRequestId(requestId);
         mSensorOverlays = new SensorOverlays(udfpsOverlayController, null /* sideFpsController */);
         mIsStrongBiometric = isStrongBiometric;

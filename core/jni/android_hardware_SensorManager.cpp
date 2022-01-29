@@ -133,6 +133,18 @@ nativeClassInit (JNIEnv *_env, jclass _this)
             MakeGlobalRefOrDie(_env, _env->CallObjectMethod(empty.get(), stringOffsets.intern));
 }
 
+uint64_t htonll(uint64_t ll) {
+    constexpr uint32_t kBytesToTest = 0x12345678;
+    constexpr uint8_t kFirstByte = (const uint8_t &)kBytesToTest;
+    constexpr bool kIsLittleEndian = kFirstByte == 0x78;
+
+    if constexpr (kIsLittleEndian) {
+        return static_cast<uint64_t>(htonl(ll & 0xffffffff)) << 32 | htonl(ll >> 32);
+    } else {
+        return ll;
+    }
+}
+
 static jstring getJavaInternedString(JNIEnv *env, const String8 &string) {
     if (string == "") {
         return gStringOffsets.emptyString;
@@ -193,7 +205,8 @@ translateNativeSensorToJavaSensor(JNIEnv *env, jobject sensor, const Sensor& nat
         int32_t id = nativeSensor.getId();
         env->CallVoidMethod(sensor, sensorOffsets.setId, id);
         Sensor::uuid_t uuid = nativeSensor.getUuid();
-        env->CallVoidMethod(sensor, sensorOffsets.setUuid, id, uuid.i64[0], uuid.i64[1]);
+        env->CallVoidMethod(sensor, sensorOffsets.setUuid, htonll(uuid.i64[0]),
+                            htonll(uuid.i64[1]));
     }
     return sensor;
 }

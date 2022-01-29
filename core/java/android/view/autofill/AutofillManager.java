@@ -16,6 +16,7 @@
 
 package android.view.autofill;
 
+import static android.service.autofill.FillRequest.FLAG_ACTIVITY_START;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
@@ -538,6 +539,8 @@ public final class AutofillManager {
      */
     public static final int NO_SESSION = Integer.MAX_VALUE;
 
+    private static final boolean HAS_FILL_DIALOG_UI_FEATURE = false;
+
     private final IAutoFillManager mService;
 
     private final Object mLock = new Object();
@@ -628,6 +631,29 @@ public final class AutofillManager {
     @Nullable private AutofillRequestCallback mAutofillRequestCallback;
     @GuardedBy("mLock")
     @Nullable private Executor mRequestCallbackExecutor;
+
+    /**
+     * Indicates whether there are any fields that need to do a fill request
+     * after the activity starts.
+     *
+     * Note: This field will be set to true multiple times if there are many
+     * autofillable views. So needs to check mIsFillRequested at the same time to
+     * avoid re-trigger autofill.
+     */
+    private boolean mRequireAutofill;
+
+    /**
+     * Indicates whether there is already a field to do a fill request after
+     * the activity started.
+     *
+     * Autofill will automatically trigger a fill request after activity
+     * start if there is any field is autofillable. But if there is a field that
+     * triggered autofill, it is unnecessary to trigger again through
+     * AutofillManager#notifyViewEnteredForActivityStarted.
+     */
+    private boolean mIsFillRequested;
+
+    @Nullable private List<AutofillId> mFillDialogTriggerIds;
 
     /** @hide */
     public interface AutofillClient {
@@ -766,6 +792,8 @@ public final class AutofillManager {
         mContext = Objects.requireNonNull(context, "context cannot be null");
         mService = service;
         mOptions = context.getAutofillOptions();
+        mIsFillRequested = false;
+        mRequireAutofill = false;
 
         if (mOptions != null) {
             sDebug = (mOptions.loggingLevel & FLAG_ADD_CLIENT_DEBUG) != 0;
@@ -1042,6 +1070,39 @@ public final class AutofillManager {
         notifyViewEntered(view, 0);
     }
 
+    /**
+     * The view is autofillable, marked to perform a fill request after layout if
+     * the field does not trigger a fill request.
+     *
+     * @hide
+     */
+    public void enableFillRequestActivityStarted() {
+        mRequireAutofill = true;
+    }
+
+    private boolean hasFillDialogUiFeature() {
+        return HAS_FILL_DIALOG_UI_FEATURE;
+    }
+
+    /**
+     * Notify autofill to do a fill request while the activity started.
+     *
+     * @hide
+     */
+    public void notifyViewEnteredForActivityStarted(@NonNull View view) {
+        if (!hasAutofillFeature() || !hasFillDialogUiFeature()) {
+            return;
+        }
+
+        if (!mRequireAutofill || mIsFillRequested) {
+            return;
+        }
+
+        int flags = FLAG_ACTIVITY_START;
+        flags |= FLAG_VIEW_NOT_FOCUSED;
+        notifyViewEntered(view, flags);
+    }
+
     @GuardedBy("mLock")
     private boolean shouldIgnoreViewEnteredLocked(@NonNull AutofillId id, int flags) {
         if (isDisabledByServiceLocked()) {
@@ -1082,6 +1143,7 @@ public final class AutofillManager {
         }
         AutofillCallback callback;
         synchronized (mLock) {
+            mIsFillRequested = true;
             callback = notifyViewEnteredLocked(view, flags);
         }
 
@@ -2026,6 +2088,8 @@ public final class AutofillManager {
         mFillableIds = null;
         mSaveTriggerId = null;
         mIdShownFillUi = null;
+        mIsFillRequested = false;
+        mRequireAutofill = false;
         if (resetEnteredIds) {
             mEnteredIds = null;
         }
@@ -3031,6 +3095,29 @@ public final class AutofillManager {
         client.autofillClientRunOnUiThread(runnable);
     }
 
+    private void setFillDialogTriggerIds(@Nullable List<AutofillId> ids) {
+        mFillDialogTriggerIds = ids;
+    }
+
+    /**
+     * Checks the id of autofill whether supported the fill dialog.
+     *
+     * @hide
+     */
+    public boolean isShowFillDialog(AutofillId id) {
+        if (!hasFillDialogUiFeature() || mFillDialogTriggerIds == null) {
+            return false;
+        }
+        final int size = mFillDialogTriggerIds.size();
+        for (int i = 0; i < size; i++) {
+            AutofillId fillId = mFillDialogTriggerIds.get(i);
+            if (fillId.equalsIgnoreSession(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Implementation of the accessibility based compatibility.
      */
@@ -3734,6 +3821,13 @@ public final class AutofillManager {
 
                 afm.onFillRequest(request, CancellationSignal.fromTransport(transport),
                         new FillCallback(callback, id));
+            }
+        }
+
+        public void notifyFillDialogTriggerIds(List<AutofillId> ids) {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.post(() -> afm.setFillDialogTriggerIds(ids));
             }
         }
     }

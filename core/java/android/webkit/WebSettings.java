@@ -141,7 +141,7 @@ public abstract class WebSettings {
      * and WebView to attempt to darken web content by algorithmic darkening when
      * appropriate.
      *
-     * Refer to {@link #setAllowAlgorithmicDarkening} for detail.
+     * Refer to {@link #setAlgorithmicDarkeningAllowed} for detail.
      *
      * @hide
      */
@@ -1558,7 +1558,7 @@ public abstract class WebSettings {
      * {@code targetSdkVersion} &ge; {@link android.os.Build.VERSION_CODES#TIRAMISU}
      * this API is a no-op and WebView will always use the dark style defined by web content
      * authors if the app's theme is dark. To customize the behavior, refer to
-     * {@link #setAllowAlgorithmicDarkening}.
+     * {@link #setAlgorithmicDarkeningAllowed}.
      */
     public void setForceDark(@ForceDark int forceDark) {
         // Stub implementation to satisfy Roboelectrc shadows that don't override this yet.
@@ -1604,7 +1604,7 @@ public abstract class WebSettings {
      *
      * @param allow allow algorithmic darkening or not.
      */
-    public void setAllowAlgorithmicDarkening(boolean allow) {
+    public void setAlgorithmicDarkeningAllowed(boolean allow) {
         // Stub implementation to satisfy Roboelectrc shadows that don't override this yet.
     }
 
@@ -1613,9 +1613,9 @@ public abstract class WebSettings {
      * The default is false.
      *
      * @return if the algorithmic darkening is allowed or not.
-     * @see #setAllowAlgorithmicDarkening
+     * @see #setAlgorithmicDarkeningAllowed
      */
-    public boolean getAllowAlgorithmicDarkening() {
+    public boolean isAlgorithmicDarkeningAllowed() {
         // Stub implementation to satisfy Roboelectrc shadows that don't override this yet.
         return false;
     }

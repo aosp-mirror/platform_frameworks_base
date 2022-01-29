@@ -81,6 +81,7 @@ import android.util.Pools;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
+import android.view.InsetsState;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
@@ -313,7 +314,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     private final List<WindowContainerListener> mListeners = new ArrayList<>();
 
-    private OverlayHost mOverlayHost;
+    protected OverlayHost mOverlayHost;
 
     WindowContainer(WindowManagerService wms) {
         mWmService = wms;
@@ -3620,6 +3621,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (mOverlayHost != null && !mOverlayHost.removeOverlay(overlay)) {
             mOverlayHost.release();
             mOverlayHost = null;
+        }
+    }
+
+    void updateOverlayInsetsState(WindowState originalChange) {
+        final WindowContainer p = getParent();
+        if (p != null) {
+            p.updateOverlayInsetsState(originalChange);
         }
     }
 }

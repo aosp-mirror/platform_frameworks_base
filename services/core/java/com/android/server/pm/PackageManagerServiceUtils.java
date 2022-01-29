@@ -463,18 +463,18 @@ public class PackageManagerServiceUtils {
      * <p>The rationale is that {@code disabledPkg} is a PackageSetting backed by xml files in /data
      * and is not tamperproof.
      */
-    private static boolean matchSignatureInSystem(PackageSetting pkgSetting,
-            PackageSetting disabledPkgSetting) {
-        if (pkgSetting.getSigningDetails().checkCapability(
+    private static boolean matchSignatureInSystem(@NonNull String packageName,
+            @NonNull SigningDetails signingDetails, PackageSetting disabledPkgSetting) {
+        if (signingDetails.checkCapability(
                 disabledPkgSetting.getSigningDetails(),
                 SigningDetails.CertCapabilities.INSTALLED_DATA)
                 || disabledPkgSetting.getSigningDetails().checkCapability(
-                pkgSetting.getSigningDetails(),
+                signingDetails,
                 SigningDetails.CertCapabilities.ROLLBACK)) {
             return true;
         } else {
             logCriticalInfo(Log.ERROR, "Updated system app mismatches cert on /system: " +
-                    pkgSetting.getPackageName());
+                    packageName);
             return false;
         }
     }
@@ -536,7 +536,8 @@ public class PackageManagerServiceUtils {
             }
 
             if (!match && isApkVerificationForced(disabledPkgSetting)) {
-                match = matchSignatureInSystem(pkgSetting, disabledPkgSetting);
+                match = matchSignatureInSystem(packageName, pkgSetting.getSigningDetails(),
+                        disabledPkgSetting);
             }
 
             if (!match && isRollback) {

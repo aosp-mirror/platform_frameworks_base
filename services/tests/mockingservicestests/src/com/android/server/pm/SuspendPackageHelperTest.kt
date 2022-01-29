@@ -128,7 +128,7 @@ class SuspendPackageHelperTest {
             null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid)
         testHandler.flush()
 
-        verify(pms).scheduleWritePackageRestrictionsLocked(eq(TEST_USER_ID))
+        verify(pms).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper).sendPackageBroadcast(eq(Intent.ACTION_PACKAGES_SUSPENDED),
             nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
             nullable(), nullable(), nullable())
@@ -214,7 +214,7 @@ class SuspendPackageHelperTest {
             null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid)
         testHandler.flush()
 
-        verify(pms, times(2)).scheduleWritePackageRestrictionsLocked(eq(TEST_USER_ID))
+        verify(pms, times(2)).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper).sendPackageBroadcast(eq(Intent.ACTION_PACKAGES_UNSUSPENDED),
             nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
             nullable(), nullable(), nullable())
@@ -295,7 +295,7 @@ class SuspendPackageHelperTest {
             { suspendingPackage -> suspendingPackage == DEVICE_OWNER_PACKAGE }, TEST_USER_ID)
 
         testHandler.flush()
-        verify(pms, times(2)).scheduleWritePackageRestrictionsLocked(eq(TEST_USER_ID))
+        verify(pms, times(2)).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
         verify(broadcastHelper).sendPackageBroadcast(eq(Intent.ACTION_PACKAGES_UNSUSPENDED),
             nullable(), bundleCaptor.capture(), anyInt(), nullable(), nullable(), any(),
             nullable(), nullable(), nullable())
@@ -499,8 +499,7 @@ class SuspendPackageHelperTest {
                 false /*isEngBuild*/,
                 false /*isUserDebugBuild*/,
                 Build.VERSION_CODES.CUR_DEVELOPMENT,
-                Build.VERSION.INCREMENTAL,
-                false /*snapshotEnabled*/)
+                Build.VERSION.INCREMENTAL)
         rule.system().validateFinalState()
         return pms
     }

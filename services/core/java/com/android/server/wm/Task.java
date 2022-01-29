@@ -6588,4 +6588,18 @@ class Task extends TaskFragment {
                     mLaunchCookie, mDeferTaskAppear, mRemoveWithTaskOrganizer);
         }
     }
+
+    @Override
+    void updateOverlayInsetsState(WindowState originalChange) {
+        super.updateOverlayInsetsState(originalChange);
+        if (originalChange != getTopVisibleAppMainWindow()) {
+            return;
+        }
+        if (mOverlayHost != null) {
+            final InsetsState s = getDisplayContent().getInsetsPolicy()
+                .getInsetsForWindow(originalChange, true);
+            getBounds(mTmpRect);
+            mOverlayHost.dispatchInsetsChanged(s, mTmpRect);
+        }
+    }
 }

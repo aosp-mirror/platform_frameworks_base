@@ -175,7 +175,6 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.DisplayAdjustments;
-import android.view.DisplayAdjustments.FixedRotationAdjustments;
 import android.view.SurfaceControl;
 import android.view.ThreadedRenderer;
 import android.view.View;
@@ -201,6 +200,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
+import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SomeArgs;
@@ -598,12 +598,6 @@ public final class ActivityThread extends ClientTransactionHandler
         /** The options for scene transition. */
         ActivityOptions mActivityOptions;
 
-        /**
-         * If non-null, the activity is launching with a specified rotation, the adjustments should
-         * be consumed before activity creation.
-         */
-        FixedRotationAdjustments mPendingFixedRotationAdjustments;
-
         /** Whether this activiy was launched from a bubble. */
         boolean mLaunchedFromBubble;
 
@@ -625,8 +619,7 @@ public final class ActivityThread extends ClientTransactionHandler
                 PersistableBundle persistentState, List<ResultInfo> pendingResults,
                 List<ReferrerIntent> pendingNewIntents, ActivityOptions activityOptions,
                 boolean isForward, ProfilerInfo profilerInfo, ClientTransactionHandler client,
-                IBinder assistToken, FixedRotationAdjustments fixedRotationAdjustments,
-                IBinder shareableActivityToken, boolean launchedFromBubble) {
+                IBinder assistToken, IBinder shareableActivityToken, boolean launchedFromBubble) {
             this.token = token;
             this.assistToken = assistToken;
             this.shareableActivityToken = shareableActivityToken;
@@ -646,7 +639,6 @@ public final class ActivityThread extends ClientTransactionHandler
             this.packageInfo = client.getPackageInfoNoCheck(activityInfo.applicationInfo,
                     compatInfo);
             mActivityOptions = activityOptions;
-            mPendingFixedRotationAdjustments = fixedRotationAdjustments;
             mLaunchedFromBubble = launchedFromBubble;
             init();
         }
@@ -3512,21 +3504,6 @@ public final class ActivityThread extends ClientTransactionHandler
         mH.sendMessage(msg);
     }
 
-    private void sendMessage(int what, Object obj, int arg1, int arg2, int seq) {
-        if (DEBUG_MESSAGES) Slog.v(
-                TAG, "SCHEDULE " + mH.codeToString(what) + " arg1=" + arg1 + " arg2=" + arg2 +
-                        "seq= " + seq);
-        Message msg = Message.obtain();
-        msg.what = what;
-        SomeArgs args = SomeArgs.obtain();
-        args.arg1 = obj;
-        args.argi1 = arg1;
-        args.argi2 = arg2;
-        args.argi3 = seq;
-        msg.obj = args;
-        mH.sendMessage(msg);
-    }
-
     final void scheduleContextCleanup(ContextImpl context, String who,
             String what) {
         ContextCleanupInfo cci = new ContextCleanupInfo();
@@ -3534,64 +3511,6 @@ public final class ActivityThread extends ClientTransactionHandler
         cci.who = who;
         cci.what = what;
         sendMessage(H.CLEAN_UP_CONTEXT, cci);
-    }
-
-    /**
-     * Applies the rotation adjustments to override display information in resources belong to the
-     * provided token. If the token is activity token, the adjustments also apply to application
-     * because the appearance of activity is usually more sensitive to the application resources.
-     *
-     * @param token The token to apply the adjustments.
-     * @param fixedRotationAdjustments The information to override the display adjustments of
-     *                                 corresponding resources. If it is null, the exiting override
-     *                                 will be cleared.
-     */
-    @Override
-    public void handleFixedRotationAdjustments(@NonNull IBinder token,
-            @Nullable FixedRotationAdjustments fixedRotationAdjustments) {
-        final Consumer<DisplayAdjustments> override = fixedRotationAdjustments != null
-                ? displayAdjustments -> displayAdjustments
-                        .setFixedRotationAdjustments(fixedRotationAdjustments)
-                : null;
-        if (!mResourcesManager.overrideTokenDisplayAdjustments(token, override)) {
-            // No resources are associated with the token.
-            return;
-        }
-        if (mActivities.get(token) == null) {
-            // Nothing to do for application if it is not an activity token.
-            return;
-        }
-
-        overrideApplicationDisplayAdjustments(token, override);
-    }
-
-    /**
-     * Applies the last override to application resources for compatibility. Because the Resources
-     * of Display can be from application, e.g.
-     *   applicationContext.getSystemService(DisplayManager.class).getDisplay(displayId)
-     * and the deprecated usage:
-     *   applicationContext.getSystemService(WindowManager.class).getDefaultDisplay();
-     *
-     * @param token The owner and target of the override.
-     * @param override The display adjustments override for application resources. If it is null,
-     *                 the override of the token will be removed and pop the last one to use.
-     */
-    private void overrideApplicationDisplayAdjustments(@NonNull IBinder token,
-            @Nullable Consumer<DisplayAdjustments> override) {
-        final Consumer<DisplayAdjustments> appOverride;
-        if (mActiveRotationAdjustments == null) {
-            mActiveRotationAdjustments = new ArrayList<>(2);
-        }
-        if (override != null) {
-            mActiveRotationAdjustments.add(Pair.create(token, override));
-            appOverride = override;
-        } else {
-            mActiveRotationAdjustments.removeIf(adjustmentsPair -> adjustmentsPair.first == token);
-            appOverride = mActiveRotationAdjustments.isEmpty()
-                    ? null
-                    : mActiveRotationAdjustments.get(mActiveRotationAdjustments.size() - 1).second;
-        }
-        mInitialApplication.getResources().overrideDisplayAdjustments(appOverride);
     }
 
     /**  Core implementation of activity launch. */
@@ -3811,19 +3730,6 @@ public final class ActivityThread extends ClientTransactionHandler
         ContextImpl appContext = ContextImpl.createActivityContext(
                 this, r.packageInfo, r.activityInfo, r.token, displayId, r.overrideConfig);
 
-        // The rotation adjustments must be applied before creating the activity, so the activity
-        // can get the adjusted display info during creation.
-        if (r.mPendingFixedRotationAdjustments != null) {
-            // The adjustments should have been set by handleLaunchActivity, so the last one is the
-            // override for activity resources.
-            if (mActiveRotationAdjustments != null && !mActiveRotationAdjustments.isEmpty()) {
-                mResourcesManager.overrideTokenDisplayAdjustments(r.token,
-                        mActiveRotationAdjustments.get(
-                                mActiveRotationAdjustments.size() - 1).second);
-            }
-            r.mPendingFixedRotationAdjustments = null;
-        }
-
         final DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
         // For debugging purposes, if the activity's package name contains the value of
         // the "debug.use-second-display" system property as a substring, then show
@@ -3857,13 +3763,6 @@ public final class ActivityThread extends ClientTransactionHandler
         if (r.profilerInfo != null) {
             mProfiler.setProfiler(r.profilerInfo);
             mProfiler.startProfiling();
-        }
-
-        if (r.mPendingFixedRotationAdjustments != null) {
-            // The rotation adjustments must be applied before handling configuration, so process
-            // level display metrics can be adjusted.
-            overrideApplicationDisplayAdjustments(r.token, adjustments ->
-                    adjustments.setFixedRotationAdjustments(r.mPendingFixedRotationAdjustments));
         }
 
         // Make sure we are running with the most recent config.
@@ -4693,7 +4592,7 @@ public final class ActivityThread extends ClientTransactionHandler
             if (r != null && r.activity != null) {
                 PrintWriter pw = new FastPrintWriter(new FileOutputStream(
                         info.fd.getFileDescriptor()));
-                r.activity.dump(info.prefix, info.fd.getFileDescriptor(), pw, info.args);
+                r.activity.dumpInternal(info.prefix, info.fd.getFileDescriptor(), pw, info.args);
                 pw.flush();
             }
         } finally {
@@ -5974,13 +5873,6 @@ public final class ActivityThread extends ClientTransactionHandler
         final Configuration finalOverrideConfig = createNewConfigAndUpdateIfNotNull(
                 amOverrideConfig, contextThemeWrapperOverrideConfig);
         mResourcesManager.updateResourcesForActivity(activityToken, finalOverrideConfig, displayId);
-        final Resources res = activity.getResources();
-        if (res.hasOverrideDisplayAdjustments()) {
-            // If fixed rotation is applied while the activity is visible (e.g. PiP), the rotated
-            // configuration of activity may be sent later than the adjustments. In this case, the
-            // adjustments need to be updated for the consistency of display info.
-            res.getDisplayAdjustments().getConfiguration().updateFrom(finalOverrideConfig);
-        }
 
         activity.mConfigChangeFlags = 0;
         activity.mCurrentConfig = new Configuration(newConfig);
@@ -7643,8 +7535,7 @@ public final class ActivityThread extends ClientTransactionHandler
                 // We need to apply this change to the resources immediately, because upon returning
                 // the view hierarchy will be informed about it.
                 if (mResourcesManager.applyConfigurationToResources(globalConfig,
-                        null /* compat */,
-                        mInitialApplication.getResources().getDisplayAdjustments())) {
+                        null /* compat */)) {
                     mConfigurationController.updateLocaleListFromAppContext(
                             mInitialApplication.getApplicationContext());
 
@@ -7922,6 +7813,8 @@ public final class ActivityThread extends ClientTransactionHandler
         MediaFrameworkPlatformInitializer.setMediaServiceManager(new MediaServiceManager());
         MediaFrameworkInitializer.setMediaServiceManager(new MediaServiceManager());
         BluetoothFrameworkInitializer.setBluetoothServiceManager(new BluetoothServiceManager());
+        BluetoothFrameworkInitializer.setBinderCallsStatsInitializer(context -> {
+            BinderCallsStats.startForBluetooth(context); });
     }
 
     private void purgePendingResources() {

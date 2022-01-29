@@ -123,6 +123,7 @@ import android.provider.DocumentsContract;
 import android.provider.Downloads;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.service.storage.ExternalStorageService;
 import android.sysprop.VoldProperties;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -490,6 +491,8 @@ class StorageManagerService extends IStorageManager.Stub
 
     @GuardedBy("mAppFuseLock")
     private AppFuseBridge mAppFuseBridge = null;
+
+    private HashMap<Integer, Integer> mUserSharesMediaWith = new HashMap<>();
 
     /** Matches known application dir paths. The first group contains the generic part of the path,
      * the second group contains the user id (or null if it's a public volume without users), the
@@ -1235,6 +1238,21 @@ class StorageManagerService extends IStorageManager.Stub
     private void onUnlockUser(int userId) {
         Slog.d(TAG, "onUnlockUser " + userId);
 
+        if (userId != UserHandle.USER_SYSTEM) {
+            // Check if this user shares media with another user
+            try {
+                Context userContext = mContext.createPackageContextAsUser("system", 0,
+                        UserHandle.of(userId));
+                UserManager um = userContext.getSystemService(UserManager.class);
+                if (um != null && um.isMediaSharedWithParent()) {
+                    int parentUserId = um.getProfileParent(userId).id;
+                    mUserSharesMediaWith.put(userId, parentUserId);
+                    mUserSharesMediaWith.put(parentUserId, userId);
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(TAG, "Failed to create user context for user " + userId);
+            }
+        }
         // We purposefully block here to make sure that user-specific
         // staging area is ready so it's ready for zygote-forked apps to
         // bind mount against.
@@ -3971,6 +3989,29 @@ class StorageManagerService extends IStorageManager.Stub
         final boolean realState = (flags & StorageManager.FLAG_REAL_STATE) != 0;
         final boolean includeInvisible = (flags & StorageManager.FLAG_INCLUDE_INVISIBLE) != 0;
         final boolean includeRecent = (flags & StorageManager.FLAG_INCLUDE_RECENT) != 0;
+        final boolean includeSharedProfile =
+                (flags & StorageManager.FLAG_INCLUDE_SHARED_PROFILE) != 0;
+
+        // Only Apps with MANAGE_EXTERNAL_STORAGE should call the API with includeSharedProfile
+        if (includeSharedProfile) {
+            try {
+                // Get package name for calling app and
+                // verify it has MANAGE_EXTERNAL_STORAGE permission
+                final String[] packagesFromUid = mIPackageManager.getPackagesForUid(callingUid);
+                if (packagesFromUid == null) {
+                    throw new SecurityException("Unknown uid " + callingUid);
+                }
+                // Checking first entry in packagesFromUid is enough as using "sharedUserId"
+                // mechanism is rare and discouraged. Also, Apps that share same UID share the same
+                // permissions.
+                if (!mStorageManagerInternal.hasExternalStorageAccess(callingUid,
+                        packagesFromUid[0])) {
+                    throw new SecurityException("Only File Manager Apps permitted");
+                }
+            } catch (RemoteException re) {
+                throw new SecurityException("Unknown uid " + callingUid, re);
+            }
+        }
 
         // Report all volumes as unmounted until we've recorded that user 0 has unlocked. There
         // are no guarantees that callers will see a consistent view of the volume before that
@@ -4002,6 +4043,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         final ArrayList<StorageVolume> res = new ArrayList<>();
         final ArraySet<String> resUuids = new ArraySet<>();
+        final int userIdSharingMedia = mUserSharesMediaWith.getOrDefault(userId, -1);
         synchronized (mLock) {
             for (int i = 0; i < mVolumes.size(); i++) {
                 final String volId = mVolumes.keyAt(i);
@@ -4014,6 +4056,11 @@ class StorageManagerService extends IStorageManager.Stub
                         if (vol.getMountUserId() == userId) {
                             break;
                         }
+                        if (includeSharedProfile && vol.getMountUserId() == userIdSharingMedia) {
+                            // If the volume belongs to a user we share media with,
+                            // return it too.
+                            break;
+                        }
                         // Skip if emulated volume not for userId
                     default:
                         continue;
@@ -4021,10 +4068,12 @@ class StorageManagerService extends IStorageManager.Stub
 
                 boolean match = false;
                 if (forWrite) {
-                    match = vol.isVisibleForWrite(userId);
+                    match = vol.isVisibleForWrite(userId)
+                            || (includeSharedProfile && vol.isVisibleForWrite(userIdSharingMedia));
                 } else {
                     match = vol.isVisibleForUser(userId)
-                            || (includeInvisible && vol.getPath() != null);
+                            || (includeInvisible && vol.getPath() != null)
+                            || (includeSharedProfile && vol.isVisibleForRead(userIdSharingMedia));
                 }
                 if (!match) continue;
 
@@ -4045,9 +4094,13 @@ class StorageManagerService extends IStorageManager.Stub
                     reportUnmounted = true;
                 }
 
-                final StorageVolume userVol = vol.buildStorageVolume(mContext, userId,
+                int volUserId = userId;
+                if (volUserId != vol.getMountUserId() && vol.getMountUserId() >= 0) {
+                    volUserId = vol.getMountUserId();
+                }
+                final StorageVolume userVol = vol.buildStorageVolume(mContext, volUserId,
                         reportUnmounted);
-                if (vol.isPrimary()) {
+                if (vol.isPrimary() && vol.getMountUserId() == userId) {
                     res.add(0, userVol);
                     foundPrimary = true;
                 } else {

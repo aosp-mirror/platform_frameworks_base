@@ -219,12 +219,22 @@ class InsetsPolicy {
     /**
      * @see InsetsStateController#getInsetsForWindow
      */
-    InsetsState getInsetsForWindow(WindowState target) {
+    InsetsState getInsetsForWindow(WindowState target, boolean includesTransient) {
         final InsetsState originalState = mStateController.getInsetsForWindow(target);
-        InsetsState state = adjustVisibilityForTransientTypes(originalState);
+        InsetsState state;
+        if (!includesTransient) {
+            state = adjustVisibilityForTransientTypes(originalState);
+        } else {
+            state = originalState;
+        }
         state = adjustVisibilityForIme(target, state, state == originalState);
         return adjustInsetsForRoundedCorners(target, state, state == originalState);
     }
+
+    InsetsState getInsetsForWindow(WindowState target) {
+        return getInsetsForWindow(target, false);
+    }
+
 
     /**
      * @see InsetsStateController#getInsetsForWindowMetrics

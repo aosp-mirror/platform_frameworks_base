@@ -1187,6 +1187,10 @@
     <string name="deleteText" msgid="4200807474529938112">"ลบ"</string>
     <string name="inputMethod" msgid="1784759500516314751">"วิธีป้อนข้อมูล"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"การทำงานของข้อความ"</string>
+    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
+    <skip />
+    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"พื้นที่จัดเก็บเหลือน้อย"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"บางฟังก์ชันระบบอาจไม่ทำงาน"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"พื้นที่เก็บข้อมูลไม่เพียงพอสำหรับระบบ โปรดตรวจสอบว่าคุณมีพื้นที่ว่าง 250 MB แล้วรีสตาร์ท"</string>
@@ -1491,6 +1495,8 @@
     <string name="permdesc_requestIgnoreBatteryOptimizations" msgid="634260656917874356">"อนุญาตให้แอปขอสิทธิ์เพิกเฉยต่อการเพิ่มประสิทธิภาพแบตเตอรี่สำหรับแอปนั้น"</string>
     <string name="permlab_queryAllPackages" msgid="2928450604653281650">"ค้นหาแพ็กเกจทั้งหมด"</string>
     <string name="permdesc_queryAllPackages" msgid="5339069855520996010">"อนุญาตให้แอปดูแพ็กเกจที่ติดตั้งไว้ทั้งหมด"</string>
+    <string name="permlab_accessSupplementalApi" msgid="3544659160536960275">"เข้าถึง SupplementalApis"</string>
+    <string name="permdesc_accessSupplementalApi" msgid="8974758769370951074">"อนุญาตให้แอปพลิเคชันเข้าถึง SupplementalApis"</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1842872462124648678">"แตะสองครั้งเพื่อควบคุมการซูม"</string>
     <string name="gadget_host_error_inflating" msgid="2449961590495198720">"ไม่สามารถเพิ่มวิดเจ็ต"</string>
     <string name="ime_action_go" msgid="5536744546326495436">"ไป"</string>
