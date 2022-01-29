@@ -880,16 +880,6 @@
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgroupdesc_storage">access photos, media, and files on your device</string>
 
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=40]-->
-    <string name="permgrouplab_readMediaAural">Music &amp; other audio</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE]-->
-    <string name="permgroupdesc_readMediaAural">access audio files on your device</string>
-
-    <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=40]-->
-    <string name="permgrouplab_readMediaVisual">Photos &amp; videos</string>
-    <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE]-->
-    <string name="permgroupdesc_readMediaVisual">access images and video files on your device</string>
-
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_microphone">Microphone</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1902,21 +1892,6 @@
     <string name="permlab_sdcardRead">read the contents of your shared storage</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
     <string name="permdesc_sdcardRead">Allows the app to read the contents of your shared storage.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
-    <string name="permlab_readMediaAudio">read audio files from shared storage</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
-    <string name="permdesc_readMediaAudio">Allows the app to read audio files from your shared storage.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
-    <string name="permlab_readMediaVideo">read video files from shared storage</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
-    <string name="permdesc_readMediaVideo">Allows the app to read video files from your shared storage.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
-    <string name="permlab_readMediaImage">read image files from shared storage</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can read from. [CHAR LIMIT=none] -->
-    <string name="permdesc_readMediaImage">Allows the app to read image files from your shared storage.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. "shared storage" refers to a storage space on the device that all apps with this permission can write to. [CHAR LIMIT=none] -->
     <string name="permlab_sdcardWrite">modify or delete the contents of your shared storage</string>
