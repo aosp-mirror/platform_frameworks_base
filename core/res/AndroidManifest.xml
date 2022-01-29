@@ -1145,6 +1145,15 @@
         android:description="@string/permdesc_accessBackgroundLocation"
         android:protectionLevel="dangerous|instant" />
 
+    <!-- Allows an application (emergency or advanced driver-assistance app) to bypass
+    location settings.
+         <p>Not for use by third-party applications.
+         @SystemApi
+         @hide
+    -->
+    <permission android:name="android.permission.LOCATION_BYPASS"
+                android:protectionLevel="signature|privileged"/>
+
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the call log                                 -->
     <!-- ====================================================================== -->
