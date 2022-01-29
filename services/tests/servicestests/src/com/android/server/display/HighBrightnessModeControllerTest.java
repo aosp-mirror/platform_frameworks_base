@@ -663,6 +663,30 @@ public class HighBrightnessModeControllerTest {
             eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__REASON__HBM_SV_OFF_HDR_PLAYING));
     }
 
+    @Test
+    public void tetHbmStats_LowRequestedBrightness() {
+        final HighBrightnessModeController hbmc = createDefaultHbm(new OffsettableClock());
+        final int displayStatsId = mDisplayUniqueId.hashCode();
+
+        hbmc.setAutoBrightnessEnabled(AUTO_BRIGHTNESS_ENABLED);
+        hbmc.onAmbientLuxChange(MINIMUM_LUX + 1);
+        hbmcOnBrightnessChanged(hbmc, TRANSITION_POINT + 0.01f);
+        advanceTime(0);
+        // verify in HBM sunlight mode
+        assertEquals(HIGH_BRIGHTNESS_MODE_SUNLIGHT, hbmc.getHighBrightnessMode());
+        // verify HBM_ON_SUNLIGHT
+        verify(mInjectorMock).reportHbmStateChange(eq(displayStatsId),
+            eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_ON_SUNLIGHT),
+            eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__REASON__HBM_TRANSITION_REASON_UNKNOWN));
+
+        hbmcOnBrightnessChanged(hbmc, DEFAULT_MIN);
+        // verify HBM_SV_OFF due to LOW_REQUESTED_BRIGHTNESS
+        verify(mInjectorMock).reportHbmStateChange(eq(displayStatsId),
+            eq(FrameworkStatsLog.DISPLAY_HBM_STATE_CHANGED__STATE__HBM_OFF),
+            eq(FrameworkStatsLog
+                      .DISPLAY_HBM_STATE_CHANGED__REASON__HBM_SV_OFF_LOW_REQUESTED_BRIGHTNESS));
+    }
+
     private void assertState(HighBrightnessModeController hbmc,
             float brightnessMin, float brightnessMax, int hbmMode) {
         assertEquals(brightnessMin, hbmc.getCurrentBrightnessMin(), EPSILON);
