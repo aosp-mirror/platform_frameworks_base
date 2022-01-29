@@ -21,6 +21,7 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.media.MediaRoute2Info
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -38,9 +39,9 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class MediaTttChipControllerSender @Inject constructor(
+    commandQueue: CommandQueue,
     context: Context,
     windowManager: WindowManager,
-    private val commandQueue: CommandQueue
 ) : MediaTttChipControllerCommon<ChipStateSender>(
     context, windowManager, R.layout.media_ttt_chip
 ) {
@@ -50,25 +51,80 @@ class MediaTttChipControllerSender @Inject constructor(
             it.setTint(Color.YELLOW)
         }
 
-    private val commandQueueCallback = object : CommandQueue.Callbacks {
+    private val commandQueueCallbacks = object : CommandQueue.Callbacks {
         override fun updateMediaTapToTransferSenderDisplay(
                 @StatusBarManager.MediaTransferSenderState displayState: Int,
                 routeInfo: MediaRoute2Info,
                 undoCallback: IUndoMediaTransferCallback?
         ) {
-            // TODO(b/216318437): Trigger displayChip with the right state based on displayState.
-            displayChip(
-                MoveCloserToStartCast(
-                    // TODO(b/217418566): This app icon content description is incorrect --
-                    //   routeInfo.name is the name of the device, not the name of the app.
-                    fakeAppIconDrawable, routeInfo.name.toString(), routeInfo.name.toString()
-                )
+            this@MediaTttChipControllerSender.updateMediaTapToTransferSenderDisplay(
+                displayState, routeInfo, undoCallback
             )
         }
     }
 
     init {
-        commandQueue.addCallback(commandQueueCallback)
+        commandQueue.addCallback(commandQueueCallbacks)
+    }
+
+    private fun updateMediaTapToTransferSenderDisplay(
+        @StatusBarManager.MediaTransferSenderState displayState: Int,
+        routeInfo: MediaRoute2Info,
+        undoCallback: IUndoMediaTransferCallback?
+    ) {
+        // TODO(b/217418566): This app icon content description is incorrect --
+        //   routeInfo.name is the name of the device, not the name of the app.
+        val appIconContentDescription = routeInfo.name.toString()
+        val otherDeviceName = routeInfo.name.toString()
+        val chipState = when(displayState) {
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST ->
+                AlmostCloseToStartCast(
+                    fakeAppIconDrawable, appIconContentDescription, otherDeviceName
+                )
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST ->
+                AlmostCloseToEndCast(
+                    fakeAppIconDrawable, appIconContentDescription, otherDeviceName
+                )
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED ->
+                TransferToReceiverTriggered(
+                    fakeAppIconDrawable, appIconContentDescription, otherDeviceName
+                )
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED ->
+                TransferToThisDeviceTriggered(
+                    fakeAppIconDrawable, appIconContentDescription
+                )
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED ->
+                TransferToReceiverSucceeded(
+                    fakeAppIconDrawable,
+                    appIconContentDescription,
+                    otherDeviceName,
+                    undoCallback
+                )
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED ->
+                TransferToThisDeviceSucceeded(
+                    fakeAppIconDrawable,
+                    appIconContentDescription,
+                    otherDeviceName,
+                    undoCallback
+                )
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_FAILED,
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED ->
+                TransferFailed(
+                    fakeAppIconDrawable, appIconContentDescription
+                )
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER -> {
+                removeChip()
+                null
+            }
+            else -> {
+                Log.e(SENDER_TAG, "Unhandled MediaTransferSenderState $displayState")
+                null
+            }
+        }
+
+        chipState?.let {
+            displayChip(it)
+        }
     }
 
     /** Displays the chip view for the given state. */
@@ -97,3 +153,5 @@ class MediaTttChipControllerSender @Inject constructor(
             if (showFailure) { View.VISIBLE } else { View.GONE }
     }
 }
+
+const val SENDER_TAG = "MediaTapToTransferSender"
