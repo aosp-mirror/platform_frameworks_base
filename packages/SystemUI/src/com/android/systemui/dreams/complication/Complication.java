@@ -228,4 +228,15 @@ public interface Complication {
      * @return a {@link ViewHolder} for this {@link Complication} instance.
      */
     ViewHolder createView(ComplicationViewModel model);
+
+    /**
+     * Returns the types that must be present in order for this complication to participate on
+     * the dream overlay. By default, this method returns
+     * {@code Complication.COMPLICATION_TYPE_NONE} to indicate no types are required.
+     * @return
+     */
+    @Complication.ComplicationType
+    default int getRequiredTypeAvailability() {
+        return Complication.COMPLICATION_TYPE_NONE;
+    }
 }
