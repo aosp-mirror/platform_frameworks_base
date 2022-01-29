@@ -37882,6 +37882,7 @@ package android.service.autofill {
     method public abstract void onFillRequest(@NonNull android.service.autofill.FillRequest, @NonNull android.os.CancellationSignal, @NonNull android.service.autofill.FillCallback);
     method public abstract void onSaveRequest(@NonNull android.service.autofill.SaveRequest, @NonNull android.service.autofill.SaveCallback);
     method public void onSavedDatasetsInfoRequest(@NonNull android.service.autofill.SavedDatasetsInfoCallback);
+    field public static final String EXTRA_FILL_RESPONSE = "android.service.autofill.extra.FILL_RESPONSE";
     field public static final String SERVICE_INTERFACE = "android.service.autofill.AutofillService";
     field public static final String SERVICE_META_DATA = "android.autofill";
   }
@@ -38037,6 +38038,7 @@ package android.service.autofill {
   public final class FillRequest implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.os.Bundle getClientState();
+    method @Nullable public android.content.IntentSender getDelayedFillIntentSender();
     method @NonNull public java.util.List<android.service.autofill.FillContext> getFillContexts();
     method public int getFlags();
     method public int getId();
@@ -38051,6 +38053,7 @@ package android.service.autofill {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.autofill.FillResponse> CREATOR;
+    field public static final int FLAG_DELAY_FILL = 4; // 0x4
     field public static final int FLAG_DISABLE_ACTIVITY_ONLY = 2; // 0x2
     field public static final int FLAG_TRACK_CONTEXT_COMMITED = 1; // 0x1
   }

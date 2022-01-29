@@ -578,6 +578,14 @@ public abstract class AutofillService extends Service {
     public static final String SERVICE_META_DATA = "android.autofill";
 
     /**
+     * Name of the {@link FillResponse} extra used to return a delayed fill response.
+     *
+     * <p>Please see {@link FillRequest#getDelayedFillIntentSender()} on how to send a delayed
+     * fill response to framework.</p>
+     */
+    public static final String EXTRA_FILL_RESPONSE = "android.service.autofill.extra.FILL_RESPONSE";
+
+    /**
      * Name of the {@link IResultReceiver} extra used to return the primary result of a request.
      *
      * @hide
