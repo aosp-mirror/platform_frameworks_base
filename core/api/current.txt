@@ -12953,6 +12953,10 @@ package android.database {
     field @NonNull public static final android.os.Parcelable.Creator<android.database.CursorWindow> CREATOR;
   }
 
+  public class CursorWindowAllocationException extends java.lang.RuntimeException {
+    ctor public CursorWindowAllocationException(@NonNull String);
+  }
+
   public class CursorWrapper implements android.database.Cursor {
     ctor public CursorWrapper(android.database.Cursor);
     method public void close();
