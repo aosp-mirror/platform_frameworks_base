@@ -62,7 +62,7 @@ public enum ScrimState {
         public void prepare(ScrimState previousState) {
             mBlankScreen = false;
             if (previousState == ScrimState.AOD) {
-                mAnimationDuration = StackStateAnimator.ANIMATION_DURATION_WAKEUP;
+                mAnimationDuration = StackStateAnimator.ANIMATION_DURATION_WAKEUP_SCRIM;
                 if (mDisplayRequiresBlanking) {
                     // DisplayPowerManager will blank the screen, we'll just
                     // set our scrim to black in this frame to avoid flickering and
@@ -70,7 +70,7 @@ public enum ScrimState {
                     mBlankScreen = true;
                 }
             } else if (previousState == ScrimState.KEYGUARD) {
-                mAnimationDuration = StackStateAnimator.ANIMATION_DURATION_WAKEUP;
+                mAnimationDuration = StackStateAnimator.ANIMATION_DURATION_WAKEUP_SCRIM;
             } else {
                 mAnimationDuration = ScrimController.ANIMATION_DURATION;
             }
