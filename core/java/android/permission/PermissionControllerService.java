@@ -291,7 +291,7 @@ public abstract class PermissionControllerService extends Service {
 
     /**
      * Called when a package is considered inactive based on the criteria given by
-     * {@link PermissionManager#startOneTimePermissionSession(String, long, int, int)}.
+     * {@link PermissionManager#startOneTimePermissionSession(String, long, long, int, int)}.
      * This method is called at the end of a one-time permission session
      *
      * @param packageName The package that has been inactive

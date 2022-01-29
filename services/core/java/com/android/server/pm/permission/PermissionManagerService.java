@@ -68,7 +68,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.TriFunction;
 import com.android.server.LocalServices;
@@ -388,7 +387,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @Override
     public void startOneTimePermissionSession(String packageName, @UserIdInt int userId,
-            long timeoutMillis, int importanceToResetTimer, int importanceToKeepSessionAlive) {
+            long timeoutMillis, long revokeAfterKilledDelayMillis, int importanceToResetTimer,
+            int importanceToKeepSessionAlive) {
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS,
                 "Must hold " + Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS
@@ -398,7 +398,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final long token = Binder.clearCallingIdentity();
         try {
             getOneTimePermissionUserManager(userId).startPackageOneTimeSession(packageName,
-                    timeoutMillis, importanceToResetTimer, importanceToKeepSessionAlive);
+                    timeoutMillis, revokeAfterKilledDelayMillis, importanceToResetTimer,
+                    importanceToKeepSessionAlive);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -563,16 +564,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     @Override
     public void revokeOwnPermissionsOnKill(@NonNull String packageName,
             @NonNull List<String> permissions) {
-        final int callingUid = Binder.getCallingUid();
-        final int callingUserId = UserHandle.getUserId(callingUid);
-        AndroidFuture<Void> future = new AndroidFuture<>();
-        future.whenComplete((result, err) -> {
-            if (err == null) {
-                getOneTimePermissionUserManager(callingUserId)
-                        .setSelfRevokedPermissionSession(callingUid);
-            }
-        });
-        mPermissionManagerServiceImpl.revokeOwnPermissionsOnKill(packageName, permissions, future);
+        mPermissionManagerServiceImpl.revokeOwnPermissionsOnKill(packageName, permissions);
     }
 
     @Override

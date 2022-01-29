@@ -79,7 +79,8 @@ interface IPermissionManager {
     void revokeOwnPermissionsOnKill(String packageName, in List<String> permissions);
 
     void startOneTimePermissionSession(String packageName, int userId, long timeout,
-            int importanceToResetTimer, int importanceToKeepSessionAlive);
+            long revokeAfterKilledDelay, int importanceToResetTimer,
+            int importanceToKeepSessionAlive);
 
     void stopOneTimePermissionSession(String packageName, int userId);
 

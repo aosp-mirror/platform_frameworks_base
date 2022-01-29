@@ -913,15 +913,15 @@ public final class PermissionControllerManager {
      *
      * @param packageName The name of the package for which the permissions will be revoked.
      * @param permissions List of permissions to be revoked.
-     * @param callback Callback called when the revocation request has been completed.
      *
-     * @see Context#revokeOwnPermissionsOnKill(Collection)
+     * @see Context#revokeOwnPermissionsOnKill(java.util.Collection)
      *
      * @hide
      */
     public void revokeOwnPermissionsOnKill(@NonNull String packageName,
-            @NonNull List<String> permissions, AndroidFuture<Void> callback) {
+            @NonNull List<String> permissions) {
         mRemoteService.postAsync(service -> {
+            AndroidFuture<Void> callback = new AndroidFuture<>();
             service.revokeOwnPermissionsOnKill(packageName, permissions, callback);
             return callback;
         }).whenComplete((result, err) -> {
