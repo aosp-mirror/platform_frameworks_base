@@ -356,13 +356,17 @@ public class TelecomManager {
             "android.telecom.extra.INCOMING_CALL_EXTRAS";
 
     /**
-     * Optional extra for {@link #ACTION_INCOMING_CALL} containing a boolean to indicate that the
-     * call has an externally generated ringer. Used by the HfpClientConnectionService when In Band
-     * Ringtone is enabled to prevent two ringers from being generated.
+     * Optional extra for {@link #addNewIncomingCall(PhoneAccountHandle, Bundle)} used to indicate
+     * that a call has an in-band ringtone associated with it.  This is used when the device is
+     * acting as an HFP headset and the Bluetooth stack has received an in-band ringtone from the
+     * the HFP host which must be played instead of any local ringtone the device would otherwise
+     * have generated.
+     *
      * @hide
      */
-    public static final String EXTRA_CALL_EXTERNAL_RINGER =
-            "android.telecom.extra.CALL_EXTERNAL_RINGER";
+    @SystemApi
+    public static final String EXTRA_CALL_HAS_IN_BAND_RINGTONE =
+            "android.telecom.extra.CALL_HAS_IN_BAND_RINGTONE";
 
     /**
      * Optional extra for {@link android.content.Intent#ACTION_CALL} and
