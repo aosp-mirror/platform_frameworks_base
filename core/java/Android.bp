@@ -33,6 +33,11 @@ filegroup {
     srcs: ["android/tracing/ITracingServiceProxy.aidl"],
 }
 
+filegroup {
+    name: "TraceReportParams.aidl",
+    srcs: ["android/tracing/TraceReportParams.aidl"],
+}
+
 // These are subset of framework-core-sources that are needed by the
 // android.test.mock library. The implementation of android.test.mock references
 // private members of various components to allow mocking of classes that cannot

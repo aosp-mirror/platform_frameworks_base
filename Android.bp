@@ -65,7 +65,6 @@ filegroup {
         // Java/AIDL sources under frameworks/base
         ":framework-annotations",
         ":framework-blobstore-sources",
-        ":framework-bluetooth-sources", // TODO(b/214988855) : Remove once framework-bluetooth jar is ready
         ":framework-connectivity-tiramisu-sources",
         ":framework-core-sources",
         ":framework-drm-sources",
@@ -273,6 +272,7 @@ java_defaults {
     defaults: ["framework-aidl-export-defaults"],
     srcs: [
         ":framework-non-updatable-sources",
+        ":framework-bluetooth-sources", // TODO(b/214988855) : Remove once framework-bluetooth jar is ready
         "core/java/**/*.logtags",
         ":apex-info-list",
     ],
@@ -503,7 +503,9 @@ filegroup {
     visibility: ["//visibility:private"],
 }
 
-// These defaults are used for both the jar stubs and the doc stubs.
+// Defaults for all stubs that include the non-updatable framework. These defaults do not include
+// module symbols, so will not compile correctly on their own. Users must add module APIs to the
+// classpath (or sources) somehow.
 stubs_defaults {
     name: "android-non-updatable-stubs-defaults",
     srcs: [":android-non-updatable-stub-sources"],
@@ -511,17 +513,14 @@ stubs_defaults {
     system_modules: "none",
     java_version: "1.8",
     arg_files: ["core/res/AndroidManifest.xml"],
-    // TODO(b/147699819): remove below aidl includes.
     aidl: {
         local_include_dirs: [
-            "apex/media/aidl/stable",
             "media/aidl",
             "telephony/java",
         ],
         include_dirs: [
             "frameworks/av/aidl",
             "frameworks/native/libs/permission/aidl",
-            "packages/modules/Connectivity/framework/aidl-export",
         ],
     },
     // These are libs from framework-internal-utils that are required (i.e. being referenced)
@@ -543,15 +542,6 @@ stubs_defaults {
         "android.hardware.usb.gadget-V1.0-java",
         "android.hardware.vibrator-V1.3-java",
         "framework-protos",
-        "art.module.public.api",
-        "sdk_module-lib_current_framework-tethering",
-        // There are a few classes from modules used by the core that
-        // need to be resolved by metalava. We use a prebuilt stub of the
-        // full sdk to ensure we can resolve them. If a new class gets added,
-        // the prebuilts/sdk/current needs to be updated.
-        "sdk_system_current_android",
-        // NOTE: The below can be removed once the prebuilt stub contains IKE.
-        "sdk_system_current_android.net.ipsec.ike",
     ],
     filter_packages: packages_to_document,
     high_mem: true, // Lots of sources => high memory use, see b/170701554
@@ -561,6 +551,33 @@ stubs_defaults {
     merge_annotations_dirs: ["metalava-manual"],
     defaults_visibility: ["//visibility:private"],
     visibility: ["//frameworks/base/api"],
+}
+
+// Defaults with module APIs in the classpath (mostly from prebuilts).
+// Suitable for compiling android-non-updatable.
+stubs_defaults {
+    name: "module-classpath-stubs-defaults",
+    aidl: {
+        local_include_dirs: [
+            "apex/media/aidl/stable",
+        ],
+        include_dirs: [
+            "packages/modules/Connectivity/framework/aidl-export",
+        ],
+    },
+    libs: [
+        "art.module.public.api",
+        "sdk_module-lib_current_framework-tethering",
+        "sdk_public_current_framework-bluetooth",
+        // There are a few classes from modules used by the core that
+        // need to be resolved by metalava. We use a prebuilt stub of the
+        // full sdk to ensure we can resolve them. If a new class gets added,
+        // the prebuilts/sdk/current needs to be updated.
+        "sdk_system_current_android",
+        // NOTE: The below can be removed once the prebuilt stub contains IKE.
+        "sdk_system_current_android.net.ipsec.ike",
+    ],
+    defaults_visibility: ["//visibility:private"],
 }
 
 build = [

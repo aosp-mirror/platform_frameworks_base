@@ -24,6 +24,7 @@ import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.UnderlyingNetworkInfo;
+import android.net.netstats.IUsageCallback;
 import android.net.netstats.provider.INetworkStatsProvider;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.os.IBinder;
@@ -71,7 +72,7 @@ interface INetworkStatsService {
 
     /** Registers a callback on data usage. */
     DataUsageRequest registerUsageCallback(String callingPackage,
-            in DataUsageRequest request, in Messenger messenger, in IBinder binder);
+            in DataUsageRequest request, in IUsageCallback callback);
 
     /** Unregisters a callback on data usage. */
     void unregisterUsageRequest(in DataUsageRequest request);

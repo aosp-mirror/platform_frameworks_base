@@ -25,6 +25,12 @@ import static android.net.IpSecAlgorithm.AUTH_HMAC_SHA384;
 import static android.net.IpSecAlgorithm.AUTH_HMAC_SHA512;
 import static android.net.IpSecAlgorithm.CRYPT_AES_CBC;
 import static android.net.IpSecAlgorithm.CRYPT_AES_CTR;
+import static android.net.eap.EapSessionConfig.EapMsChapV2Config;
+import static android.net.ipsec.ike.IkeSessionParams.IkeAuthConfig;
+import static android.net.ipsec.ike.IkeSessionParams.IkeAuthDigitalSignLocalConfig;
+import static android.net.ipsec.ike.IkeSessionParams.IkeAuthDigitalSignRemoteConfig;
+import static android.net.ipsec.ike.IkeSessionParams.IkeAuthEapConfig;
+import static android.net.ipsec.ike.IkeSessionParams.IkeAuthPskConfig;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 import static com.android.internal.util.Preconditions.checkStringNotEmpty;
@@ -34,6 +40,14 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
 import android.content.pm.PackageManager;
+import android.net.ipsec.ike.IkeFqdnIdentification;
+import android.net.ipsec.ike.IkeIdentification;
+import android.net.ipsec.ike.IkeIpv4AddrIdentification;
+import android.net.ipsec.ike.IkeIpv6AddrIdentification;
+import android.net.ipsec.ike.IkeKeyIdIdentification;
+import android.net.ipsec.ike.IkeRfc822AddrIdentification;
+import android.net.ipsec.ike.IkeSessionParams;
+import android.net.ipsec.ike.IkeTunnelConnectionParams;
 import android.security.Credentials;
 import android.util.Log;
 
@@ -644,6 +658,102 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         return Objects.requireNonNull(reference, String.format(messageTemplate, messageArgs));
     }
 
+    private static void checkBuilderSetter(boolean constructedFromIkeTunConParams,
+            @NonNull String message) {
+        if (constructedFromIkeTunConParams) {
+            throw new IllegalArgumentException("Constructed using IkeTunnelConnectionParams "
+                    + "should not set " + message);
+        }
+    }
+
+    private static int getTypeFromIkeSession(@NonNull IkeSessionParams params) {
+        final IkeAuthConfig config = params.getLocalAuthConfig();
+        if (config instanceof IkeAuthDigitalSignLocalConfig) {
+            return TYPE_IKEV2_IPSEC_RSA;
+        } else if (config instanceof IkeAuthEapConfig) {
+            return TYPE_IKEV2_IPSEC_USER_PASS;
+        } else if (config instanceof IkeAuthPskConfig) {
+            return TYPE_IKEV2_IPSEC_PSK;
+        } else {
+            throw new IllegalStateException("Invalid local IkeAuthConfig");
+        }
+    }
+
+    @Nullable
+    private static String getPasswordFromIkeSession(@NonNull IkeSessionParams params) {
+        if (!(params.getLocalAuthConfig() instanceof IkeAuthEapConfig)) return null;
+
+        final IkeAuthEapConfig ikeAuthEapConfig = (IkeAuthEapConfig) params.getLocalAuthConfig();
+        final EapMsChapV2Config eapMsChapV2Config =
+                ikeAuthEapConfig.getEapConfig().getEapMsChapV2Config();
+        return (eapMsChapV2Config != null) ? eapMsChapV2Config.getPassword() : null;
+    }
+
+    @Nullable
+    private static String getUsernameFromIkeSession(@NonNull IkeSessionParams params) {
+        if (!(params.getLocalAuthConfig() instanceof IkeAuthEapConfig)) return null;
+
+        final IkeAuthEapConfig ikeAuthEapConfig = (IkeAuthEapConfig) params.getLocalAuthConfig();
+        final EapMsChapV2Config eapMsChapV2Config =
+                ikeAuthEapConfig.getEapConfig().getEapMsChapV2Config();
+        return (eapMsChapV2Config != null) ? eapMsChapV2Config.getUsername() : null;
+    }
+
+    @Nullable
+    private static X509Certificate getUserCertFromIkeSession(@NonNull IkeSessionParams params) {
+        if (!(params.getLocalAuthConfig() instanceof IkeAuthDigitalSignLocalConfig)) return null;
+
+        final IkeAuthDigitalSignLocalConfig config =
+                (IkeAuthDigitalSignLocalConfig) params.getLocalAuthConfig();
+        return config.getClientEndCertificate();
+    }
+
+    @Nullable
+    private static X509Certificate getServerRootCaCertFromIkeSession(
+            @NonNull IkeSessionParams params) {
+        if (!(params.getRemoteAuthConfig() instanceof IkeAuthDigitalSignRemoteConfig)) return null;
+
+        final IkeAuthDigitalSignRemoteConfig config =
+                (IkeAuthDigitalSignRemoteConfig) params.getRemoteAuthConfig();
+        return config.getRemoteCaCert();
+    }
+
+    @Nullable
+    private static PrivateKey getRsaPrivateKeyFromIkeSession(@NonNull IkeSessionParams params) {
+        if (!(params.getLocalAuthConfig() instanceof IkeAuthDigitalSignLocalConfig)) return null;
+
+        final IkeAuthDigitalSignLocalConfig config =
+                (IkeAuthDigitalSignLocalConfig) params.getLocalAuthConfig();
+        return config.getPrivateKey();
+    }
+
+    @Nullable
+    private static byte[] getPresharedKeyFromIkeSession(@NonNull IkeSessionParams params) {
+        if (!(params.getLocalAuthConfig() instanceof IkeAuthPskConfig)) return null;
+
+        final IkeAuthPskConfig config = (IkeAuthPskConfig) params.getLocalAuthConfig();
+        return config.getPsk();
+    }
+
+    @NonNull
+    private static String getUserIdentityFromIkeSession(@NonNull IkeSessionParams params) {
+        final IkeIdentification ident = params.getLocalIdentification();
+        // Refer to VpnIkev2Utils.parseIkeIdentification().
+        if (ident instanceof IkeKeyIdIdentification) {
+            return "@#" + new String(((IkeKeyIdIdentification) ident).keyId);
+        } else if (ident instanceof IkeRfc822AddrIdentification) {
+            return "@@" + ((IkeRfc822AddrIdentification) ident).rfc822Name;
+        } else if (ident instanceof IkeFqdnIdentification) {
+            return "@" + ((IkeFqdnIdentification) ident).fqdn;
+        } else if (ident instanceof IkeIpv4AddrIdentification) {
+            return ((IkeIpv4AddrIdentification) ident).ipv4Address.getHostAddress();
+        } else if (ident instanceof IkeIpv6AddrIdentification) {
+            return ((IkeIpv6AddrIdentification) ident).ipv6Address.getHostAddress();
+        } else {
+            throw new IllegalArgumentException("Unknown IkeIdentification to get user identity");
+        }
+    }
+
     /** A incremental builder for IKEv2 VPN profiles */
     public static final class Builder {
         private int mType = -1;
@@ -671,6 +781,7 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         private int mMaxMtu = PlatformVpnProfile.MAX_MTU_DEFAULT;
         private boolean mIsRestrictedToTestNetworks = false;
         private boolean mExcludeLocalRoutes = false;
+        @Nullable private IkeTunnelConnectionParams mIkeTunConnParams;
 
         /**
          * Creates a new builder with the basic parameters of an IKEv2/IPsec VPN.
@@ -685,6 +796,32 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
 
             mServerAddr = serverAddr;
             mUserIdentity = identity;
+        }
+
+        /**
+         * Creates a new builder from a {@link IkeTunnelConnectionParams}
+         *
+         * @param ikeTunConnParams the {@link IkeTunnelConnectionParams} contains IKEv2
+         *                         configurations
+         */
+        @RequiresFeature(PackageManager.FEATURE_IPSEC_TUNNELS)
+        public Builder(@NonNull IkeTunnelConnectionParams ikeTunConnParams) {
+            checkNotNull(ikeTunConnParams, MISSING_PARAM_MSG_TMPL, "ikeTunConnParams");
+
+            mIkeTunConnParams = ikeTunConnParams;
+
+            final IkeSessionParams ikeSessionParams = mIkeTunConnParams.getIkeSessionParams();
+            mServerAddr = ikeSessionParams.getServerHostname();
+
+            mType = getTypeFromIkeSession(ikeSessionParams);
+            mUserCert = getUserCertFromIkeSession(ikeSessionParams);
+            mServerRootCaCert = getServerRootCaCertFromIkeSession(ikeSessionParams);
+            mRsaPrivateKey = getRsaPrivateKeyFromIkeSession(ikeSessionParams);
+            mServerRootCaCert = getServerRootCaCertFromIkeSession(ikeSessionParams);
+            mUsername = getUsernameFromIkeSession(ikeSessionParams);
+            mPassword = getPasswordFromIkeSession(ikeSessionParams);
+            mPresharedKey = getPresharedKeyFromIkeSession(ikeSessionParams);
+            mUserIdentity = getUserIdentityFromIkeSession(ikeSessionParams);
         }
 
         private void resetAuthParams() {
@@ -719,6 +856,7 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
                 @Nullable X509Certificate serverRootCa) {
             checkNotNull(user, MISSING_PARAM_MSG_TMPL, "user");
             checkNotNull(pass, MISSING_PARAM_MSG_TMPL, "pass");
+            checkBuilderSetter(mIkeTunConnParams != null, "authUsernamePassword");
 
             // Test to make sure all auth params can be encoded safely.
             if (serverRootCa != null) checkCert(serverRootCa);
@@ -755,6 +893,7 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
                 @Nullable X509Certificate serverRootCa) {
             checkNotNull(userCert, MISSING_PARAM_MSG_TMPL, "userCert");
             checkNotNull(key, MISSING_PARAM_MSG_TMPL, "key");
+            checkBuilderSetter(mIkeTunConnParams != null, "authDigitalSignature");
 
             // Test to make sure all auth params can be encoded safely.
             checkCert(userCert);
@@ -782,6 +921,7 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         @RequiresFeature(PackageManager.FEATURE_IPSEC_TUNNELS)
         public Builder setAuthPsk(@NonNull byte[] psk) {
             checkNotNull(psk, MISSING_PARAM_MSG_TMPL, "psk");
+            checkBuilderSetter(mIkeTunConnParams != null, "authPsk");
 
             resetAuthParams();
             mPresharedKey = psk;
@@ -931,8 +1071,6 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
          *
          * Note that because the local traffic will always bypass the VPN,
          * it is not possible to set this flag on a non-bypassable VPN.
-         *
-         * @hide TODO(184750836): unhide once the implementation is completed
          */
         @NonNull
         @RequiresFeature(PackageManager.FEATURE_IPSEC_TUNNELS)

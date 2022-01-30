@@ -26,6 +26,8 @@ filegroup {
     srcs: [
         "src/com/android/server/net/NetworkIdentity*.java",
         "src/com/android/server/net/NetworkStats*.java",
+        "src/com/android/server/net/BpfInterfaceMapUpdater.java",
+        "src/com/android/server/net/InterfaceMapValue.java",
     ],
     path: "src",
     visibility: [
@@ -66,6 +68,7 @@ filegroup {
 filegroup {
     name: "services.connectivity-ethernet-sources",
     srcs: [
+        "src/com/android/server/net/DelayedDiskWrite.java",
         "src/com/android/server/net/IpConfigStore.java",
     ],
     path: "src",
@@ -95,5 +98,30 @@ filegroup {
     path: "src",
     visibility: [
         "//packages/modules/Connectivity:__subpackages__",
+    ],
+}
+
+cc_library_shared {
+    name: "libcom_android_net_module_util_jni",
+    min_sdk_version: "30",
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-Wthread-safety",
+    ],
+    srcs: [
+        "jni/onload.cpp",
+    ],
+    stl: "libc++_static",
+    static_libs: [
+        "libnet_utils_device_common_bpfjni",
+    ],
+    shared_libs: [
+        "liblog",
+        "libnativehelper",
+    ],
+    apex_available: [
+        "//apex_available:platform",
     ],
 }

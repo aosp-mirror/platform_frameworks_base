@@ -20,9 +20,6 @@ import static android.Manifest.permission.NETWORK_STATS_PROVIDER;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.UPDATE_DEVICE_STATS;
 import static android.app.usage.NetworkStatsManager.PREFIX_DEV;
-import static android.app.usage.NetworkStatsManager.PREFIX_UID;
-import static android.app.usage.NetworkStatsManager.PREFIX_UID_TAG;
-import static android.app.usage.NetworkStatsManager.PREFIX_XT;
 import static android.content.Intent.ACTION_SHUTDOWN;
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.ACTION_USER_REMOVED;
@@ -50,6 +47,9 @@ import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.net.TrafficStats.UID_TETHERING;
 import static android.net.TrafficStats.UNSUPPORTED;
+import static android.net.netstats.NetworkStatsDataMigrationUtils.PREFIX_UID;
+import static android.net.netstats.NetworkStatsDataMigrationUtils.PREFIX_UID_TAG;
+import static android.net.netstats.NetworkStatsDataMigrationUtils.PREFIX_XT;
 import static android.os.Trace.TRACE_TAG_NETWORK;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
@@ -59,8 +59,6 @@ import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 
 import static com.android.net.module.util.NetworkCapabilitiesUtils.getDisplayTransport;
 import static com.android.net.module.util.NetworkStatsUtils.LIMIT_GLOBAL_ALERT;
-import static com.android.server.NetworkManagementSocketTagger.resetKernelUidStats;
-import static com.android.server.NetworkManagementSocketTagger.setKernelCounterSet;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -99,6 +97,7 @@ import android.net.TetheringManager;
 import android.net.TrafficStats;
 import android.net.UnderlyingNetworkInfo;
 import android.net.Uri;
+import android.net.netstats.IUsageCallback;
 import android.net.netstats.provider.INetworkStatsProvider;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.net.netstats.provider.NetworkStatsProvider;
@@ -106,12 +105,10 @@ import android.os.Binder;
 import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -122,6 +119,8 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.NetworkInterfaceProto;
 import android.service.NetworkStatsServiceDumpProto;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.telephony.PhoneStateListener;
 import android.telephony.SubscriptionPlan;
 import android.text.TextUtils;
@@ -140,10 +139,14 @@ import com.android.internal.util.FileRotator;
 import com.android.net.module.util.BaseNetdUnsolicitedEventListener;
 import com.android.net.module.util.BestClock;
 import com.android.net.module.util.BinderUtils;
+import com.android.net.module.util.BpfMap;
 import com.android.net.module.util.CollectionUtils;
+import com.android.net.module.util.IBpfMap;
 import com.android.net.module.util.LocationPermissionChecker;
 import com.android.net.module.util.NetworkStatsUtils;
 import com.android.net.module.util.PermissionUtils;
+import com.android.net.module.util.Struct.U32;
+import com.android.net.module.util.Struct.U8;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -208,6 +211,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private static final String NETSTATS_COMBINE_SUBTYPE_ENABLED =
             "netstats_combine_subtype_enabled";
 
+    // This is current path but may be changed soon.
+    private static final String UID_COUNTERSET_MAP_PATH =
+            "/sys/fs/bpf/map_netd_uid_counterset_map";
+
     private final Context mContext;
     private final NetworkStatsFactory mStatsFactory;
     private final AlarmManager mAlarmManager;
@@ -245,7 +252,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         /**
          * When enabled, all mobile data is reported under {@link NetworkTemplate#NETWORK_TYPE_ALL}.
          * When disabled, mobile data is broken down by a granular ratType representative of the
-         * actual ratType. {@see NetworkTemplate#getCollapsedRatType}.
+         * actual ratType. {@see android.app.usage.NetworkStatsManager#getCollapsedRatType}.
          * Enabling this decreases the level of detail but saves performance, disk space and
          * amount of data logged.
          */
@@ -326,8 +333,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @GuardedBy("mStatsLock")
     private NetworkStatsCollection mXtStatsCached;
 
-    /** Current counter sets for each UID. */
+    /**
+     * Current counter sets for each UID.
+     * TODO: maybe remove mActiveUidCounterSet and read UidCouneterSet value from mUidCounterSetMap
+     * directly ? But if mActiveUidCounterSet would be accessed very frequently, maybe keep
+     * mActiveUidCounterSet to avoid accessing kernel too frequently.
+     */
     private SparseIntArray mActiveUidCounterSet = new SparseIntArray();
+    private final IBpfMap<U32, U8> mUidCounterSetMap;
 
     /** Data layer operation counters for splicing into other structures. */
     private NetworkStats mUidOperations = new NetworkStats(0L, 10);
@@ -357,6 +370,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @NonNull
     private final LocationPermissionChecker mLocationPermissionChecker;
+
+    @NonNull
+    private final BpfInterfaceMapUpdater mInterfaceMapUpdater;
 
     private static @NonNull File getDefaultSystemDir() {
         return new File(Environment.getDataDirectory(), "system");
@@ -420,7 +436,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final NetworkStatsService service = new NetworkStatsService(context,
                 INetd.Stub.asInterface((IBinder) context.getSystemService(Context.NETD_SERVICE)),
                 alarmManager, wakeLock, getDefaultClock(),
-                new DefaultNetworkStatsSettings(), new NetworkStatsFactory(netd),
+                new DefaultNetworkStatsSettings(), new NetworkStatsFactory(context),
                 new NetworkStatsObservers(), getDefaultSystemDir(), getDefaultBaseDir(),
                 new Dependencies());
 
@@ -450,11 +466,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         handlerThread.start();
         mHandler = new NetworkStatsHandler(handlerThread.getLooper());
         mNetworkStatsSubscriptionsMonitor = deps.makeSubscriptionsMonitor(mContext,
-                new HandlerExecutor(mHandler), this);
+                (command) -> mHandler.post(command) , this);
         mContentResolver = mContext.getContentResolver();
         mContentObserver = mDeps.makeContentObserver(mHandler, mSettings,
                 mNetworkStatsSubscriptionsMonitor);
         mLocationPermissionChecker = mDeps.makeLocationPermissionChecker(mContext);
+        mInterfaceMapUpdater = mDeps.makeBpfInterfaceMapUpdater(mContext, mHandler);
+        mInterfaceMapUpdater.start();
+        mUidCounterSetMap = mDeps.getUidCounterSetMap();
     }
 
     /**
@@ -509,6 +528,28 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         public LocationPermissionChecker makeLocationPermissionChecker(final Context context) {
             return new LocationPermissionChecker(context);
         }
+
+        /** Create BpfInterfaceMapUpdater to update bpf interface map. */
+        @NonNull
+        public BpfInterfaceMapUpdater makeBpfInterfaceMapUpdater(
+                @NonNull Context ctx, @NonNull Handler handler) {
+            return new BpfInterfaceMapUpdater(ctx, handler);
+        }
+
+        /** Get counter sets map for each UID. */
+        public IBpfMap<U32, U8> getUidCounterSetMap() {
+            try {
+                return new BpfMap<U32, U8>(UID_COUNTERSET_MAP_PATH, BpfMap.BPF_F_RDWR,
+                        U32.class, U8.class);
+            } catch (ErrnoException e) {
+                Log.wtf(TAG, "Cannot create uid counter set map: " + e);
+                return null;
+            }
+        }
+
+        public TagStatsDeleter getTagStatsDeleter() {
+            return NetworkStatsService::nativeDeleteTagData;
+        }
     }
 
     /**
@@ -557,7 +598,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // watch for tethering changes
         final TetheringManager tetheringManager = mContext.getSystemService(TetheringManager.class);
         tetheringManager.registerTetheringEventCallback(
-                new HandlerExecutor(mHandler), mTetherListener);
+                (command) -> mHandler.post(command), mTetherListener);
 
         // listen for periodic polling events
         final IntentFilter pollFilter = new IntentFilter(ACTION_NETWORK_STATS_POLL);
@@ -989,8 +1030,17 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         // TODO: switch to data layer stats once kernel exports
-        // for now, read network layer stats and flatten across all ifaces
-        final NetworkStats networkLayer = readNetworkStatsUidDetail(uid, INTERFACES_ALL, TAG_ALL);
+        // for now, read network layer stats and flatten across all ifaces.
+        // This function is used to query NeworkStats for calle's uid. The only caller method
+        // TrafficStats#getDataLayerSnapshotForUid alrady claim no special permission to query
+        // its own NetworkStats.
+        final long ident = Binder.clearCallingIdentity();
+        final NetworkStats networkLayer;
+        try {
+            networkLayer = readNetworkStatsUidDetail(uid, INTERFACES_ALL, TAG_ALL);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
 
         // splice in operation counts
         networkLayer.spliceOperationsFrom(mUidOperations);
@@ -1054,6 +1104,29 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     mActiveIface, uid, set, tag, 0L, 0L, 0L, 0L, operationCount);
             mUidOperations.combineValues(
                     mActiveIface, uid, set, TAG_NONE, 0L, 0L, 0L, 0L, operationCount);
+        }
+    }
+
+    private void setKernelCounterSet(int uid, int set) {
+        if (mUidCounterSetMap == null) {
+            Log.wtf(TAG, "Fail to set UidCounterSet: Null bpf map");
+            return;
+        }
+
+        if (set == SET_DEFAULT) {
+            try {
+                mUidCounterSetMap.deleteEntry(new U32(uid));
+            } catch (ErrnoException e) {
+                Log.w(TAG, "UidCounterSetMap.deleteEntry(" + uid + ") failed with errno: " + e);
+            }
+            return;
+        }
+
+        try {
+            mUidCounterSetMap.updateEntry(new U32(uid), new U8((short) set));
+        } catch (ErrnoException e) {
+            Log.w(TAG, "UidCounterSetMap.updateEntry(" + uid + ", " + set
+                    + ") failed with errno: " + e);
         }
     }
 
@@ -1137,21 +1210,20 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @Override
-    public DataUsageRequest registerUsageCallback(String callingPackage,
-                DataUsageRequest request, Messenger messenger, IBinder binder) {
+    public DataUsageRequest registerUsageCallback(@NonNull String callingPackage,
+                @NonNull DataUsageRequest request, @NonNull IUsageCallback callback) {
         Objects.requireNonNull(callingPackage, "calling package is null");
         Objects.requireNonNull(request, "DataUsageRequest is null");
         Objects.requireNonNull(request.template, "NetworkTemplate is null");
-        Objects.requireNonNull(messenger, "messenger is null");
-        Objects.requireNonNull(binder, "binder is null");
+        Objects.requireNonNull(callback, "callback is null");
 
         int callingUid = Binder.getCallingUid();
         @NetworkStatsAccess.Level int accessLevel = checkAccessLevel(callingPackage);
         DataUsageRequest normalizedRequest;
         final long token = Binder.clearCallingIdentity();
         try {
-            normalizedRequest = mStatsObservers.register(request, messenger, binder,
-                    callingUid, accessLevel);
+            normalizedRequest = mStatsObservers.register(
+                    request, callback, callingUid, accessLevel);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -1733,7 +1805,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // Clear kernel stats associated with UID
         for (int uid : uids) {
-            resetKernelUidStats(uid);
+            final int ret = mDeps.getTagStatsDeleter().deleteTagData(uid);
+            if (ret < 0) {
+                Log.w(TAG, "problem clearing counters for uid " + uid + ": " + Os.strerror(-ret));
+            }
         }
     }
 
@@ -2312,4 +2387,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private static native long nativeGetTotalStat(int type);
     private static native long nativeGetIfaceStat(String iface, int type);
     private static native long nativeGetUidStat(int uid, int type);
+
+    // TODO: use BpfNetMaps to delete tag data and remove this.
+    @VisibleForTesting
+    interface TagStatsDeleter {
+        int deleteTagData(int uid);
+    }
+
+    private static native int nativeDeleteTagData(int uid);
 }

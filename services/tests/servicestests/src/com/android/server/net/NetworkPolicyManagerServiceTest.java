@@ -51,9 +51,9 @@ import static android.net.NetworkPolicyManager.uidRulesToString;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.net.NetworkStats.METERED_NO;
 import static android.net.NetworkStats.METERED_YES;
-import static android.net.NetworkTemplate.buildTemplateCarrierMetered;
-import static android.net.NetworkTemplate.buildTemplateWifi;
-import static android.net.TrafficStats.MB_IN_BYTES;
+import static android.net.NetworkTemplate.MATCH_CARRIER;
+import static android.net.NetworkTemplate.MATCH_MOBILE;
+import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.telephony.CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED;
 import static android.telephony.CarrierConfigManager.DATA_CYCLE_THRESHOLD_DISABLED;
 import static android.telephony.CarrierConfigManager.DATA_CYCLE_USE_PLATFORM_DEFAULT;
@@ -71,7 +71,6 @@ import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT_SNOO
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_RAPID;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_WARNING;
 import static com.android.server.net.NetworkPolicyManagerService.UidBlockedState.getEffectiveBlockedReasons;
-import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_UPDATED;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -95,6 +94,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -204,6 +204,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -228,10 +229,12 @@ public class NetworkPolicyManagerServiceTest {
     private static final int TEST_SUB_ID = 42;
     private static final Network TEST_NETWORK = mock(Network.class, CALLS_REAL_METHODS);
 
-
-    private static NetworkTemplate sTemplateWifi = buildTemplateWifi(TEST_WIFI_NETWORK_KEY);
+    private static NetworkTemplate sTemplateWifi = new NetworkTemplate.Builder(MATCH_WIFI)
+            .setWifiNetworkKeys(Set.of(TEST_WIFI_NETWORK_KEY)).build();
     private static NetworkTemplate sTemplateCarrierMetered =
-            buildTemplateCarrierMetered(TEST_IMSI);
+            new NetworkTemplate.Builder(MATCH_CARRIER)
+                    .setSubscriberIds(Set.of(TEST_IMSI))
+                    .setMeteredness(METERED_YES).build();
 
     /**
      * Path on assets where files used by {@link NetPolicyXml} are located.
@@ -495,8 +498,14 @@ public class NetworkPolicyManagerServiceTest {
         verify(mNetworkManager).registerObserver(networkObserver.capture());
         mNetworkObserver = networkObserver.getValue();
 
-        // Simulate NetworkStatsService broadcast stats updated to signal its readiness.
-        mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_UPDATED));
+        // Catch UsageCallback during systemReady(). Simulate NetworkStatsService triggered
+        // stats updated callback to signal its readiness.
+        final ArgumentCaptor<NetworkStatsManager.UsageCallback> usageObserver =
+                ArgumentCaptor.forClass(NetworkStatsManager.UsageCallback.class);
+        verify(mStatsManager, times(2))
+                .registerUsageCallback(any(), anyLong(), any(), usageObserver.capture());
+        usageObserver.getValue().onThresholdReached(
+                new NetworkTemplate.Builder(MATCH_MOBILE).build());
 
         NetworkPolicy defaultPolicy = mService.buildDefaultCarrierPolicy(0, "");
         mDefaultWarningBytes = defaultPolicy.warningBytes;
@@ -1153,11 +1162,12 @@ public class NetworkPolicyManagerServiceTest {
 
         mPolicyListener.expect().onMeteredIfacesChanged(any());
         setNetworkPolicies(new NetworkPolicy(
-                sTemplateWifi, CYCLE_DAY, TIMEZONE_UTC, 1 * MB_IN_BYTES, 2 * MB_IN_BYTES, false));
+                sTemplateWifi, CYCLE_DAY, TIMEZONE_UTC, DataUnit.MEBIBYTES.toBytes(1),
+                DataUnit.MEBIBYTES.toBytes(2), false));
         mPolicyListener.waitAndVerify().onMeteredIfacesChanged(eq(new String[]{TEST_IFACE}));
 
         verify(mNetworkManager, atLeastOnce()).setInterfaceQuota(TEST_IFACE,
-                (2 * MB_IN_BYTES) - 512);
+                DataUnit.MEBIBYTES.toBytes(2) - 512);
     }
 
     @Test
@@ -1245,7 +1255,7 @@ public class NetworkPolicyManagerServiceTest {
             reset(mTelephonyManager, mNetworkManager, mNotifManager);
             TelephonyManager tmSub = expectMobileDefaults();
 
-            mService.snoozeLimit(NetworkTemplate.buildTemplateCarrierMetered(TEST_IMSI));
+            mService.snoozeLimit(sTemplateCarrierMetered);
             mService.updateNetworks();
 
             verify(tmSub, atLeastOnce()).setPolicyDataEnabled(true);
@@ -1948,7 +1958,7 @@ public class NetworkPolicyManagerServiceTest {
         assertEquals("Unexpected number of network policies", 1, policies.length);
         NetworkPolicy actualPolicy = policies[0];
         assertEquals("Unexpected template match rule in network policies",
-                NetworkTemplate.MATCH_WIFI,
+                MATCH_WIFI,
                 actualPolicy.template.getMatchRule());
         assertEquals("Unexpected subscriberIds size in network policies",
                 actualPolicy.template.getSubscriberIds().size(), 0);
@@ -2019,7 +2029,10 @@ public class NetworkPolicyManagerServiceTest {
 
     private static NetworkPolicy buildFakeCarrierPolicy(int cycleDay, long warningBytes,
             long limitBytes, boolean inferred) {
-        final NetworkTemplate template = buildTemplateCarrierMetered(FAKE_SUBSCRIBER_ID);
+        // TODO: Refactor this to use sTemplateCarrierMetered.
+        final NetworkTemplate template = new NetworkTemplate.Builder(MATCH_CARRIER)
+                .setSubscriberIds(Set.of(FAKE_SUBSCRIBER_ID))
+                .setMeteredness(METERED_YES).build();
         return new NetworkPolicy(template, cycleDay, TimeZone.getDefault().getID(), warningBytes,
                 limitBytes, SNOOZE_NEVER, SNOOZE_NEVER, true, inferred);
     }

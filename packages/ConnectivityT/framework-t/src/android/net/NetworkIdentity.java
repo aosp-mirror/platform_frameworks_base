@@ -16,6 +16,7 @@
 
 package android.net;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkTemplate.NETWORK_TYPE_ALL;
@@ -24,10 +25,11 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
+import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.service.NetworkIdentityProto;
-import android.telephony.Annotation;
 import android.telephony.TelephonyManager;
 import android.util.proto.ProtoOutputStream;
 
@@ -46,8 +48,8 @@ import java.util.Objects;
  *
  * @hide
  */
-// @SystemApi(client = MODULE_LIBRARIES)
-public class NetworkIdentity implements Comparable<NetworkIdentity> {
+@SystemApi(client = MODULE_LIBRARIES)
+public class NetworkIdentity {
     private static final String TAG = "NetworkIdentity";
 
     /** @hide */
@@ -272,8 +274,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
     @Deprecated
     @NonNull
     public static NetworkIdentity buildNetworkIdentity(Context context,
-            @NonNull NetworkStateSnapshot snapshot,
-            boolean defaultNetwork, @Annotation.NetworkType int ratType) {
+            @NonNull NetworkStateSnapshot snapshot, boolean defaultNetwork, int ratType) {
         final NetworkIdentity.Builder builder = new NetworkIdentity.Builder()
                 .setNetworkStateSnapshot(snapshot).setDefaultNetwork(defaultNetwork);
         if (snapshot.getLegacyType() == TYPE_MOBILE && ratType != NETWORK_TYPE_ALL) {
@@ -299,30 +300,30 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         return oemManaged;
     }
 
-    @Override
-    public int compareTo(@NonNull NetworkIdentity another) {
-        Objects.requireNonNull(another);
-        int res = Integer.compare(mType, another.mType);
+    /** @hide */
+    public static int compare(@NonNull NetworkIdentity left, @NonNull NetworkIdentity right) {
+        Objects.requireNonNull(right);
+        int res = Integer.compare(left.mType, right.mType);
         if (res == 0) {
-            res = Integer.compare(mRatType, another.mRatType);
+            res = Integer.compare(left.mRatType, right.mRatType);
         }
-        if (res == 0 && mSubscriberId != null && another.mSubscriberId != null) {
-            res = mSubscriberId.compareTo(another.mSubscriberId);
+        if (res == 0 && left.mSubscriberId != null && right.mSubscriberId != null) {
+            res = left.mSubscriberId.compareTo(right.mSubscriberId);
         }
-        if (res == 0 && mWifiNetworkKey != null && another.mWifiNetworkKey != null) {
-            res = mWifiNetworkKey.compareTo(another.mWifiNetworkKey);
-        }
-        if (res == 0) {
-            res = Boolean.compare(mRoaming, another.mRoaming);
+        if (res == 0 && left.mWifiNetworkKey != null && right.mWifiNetworkKey != null) {
+            res = left.mWifiNetworkKey.compareTo(right.mWifiNetworkKey);
         }
         if (res == 0) {
-            res = Boolean.compare(mMetered, another.mMetered);
+            res = Boolean.compare(left.mRoaming, right.mRoaming);
         }
         if (res == 0) {
-            res = Boolean.compare(mDefaultNetwork, another.mDefaultNetwork);
+            res = Boolean.compare(left.mMetered, right.mMetered);
         }
         if (res == 0) {
-            res = Integer.compare(mOemManaged, another.mOemManaged);
+            res = Boolean.compare(left.mDefaultNetwork, right.mDefaultNetwork);
+        }
+        if (res == 0) {
+            res = Integer.compare(left.mOemManaged, right.mOemManaged);
         }
         return res;
     }
@@ -362,7 +363,14 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
 
         /**
          * Add an {@link NetworkStateSnapshot} into the {@link NetworkIdentity} instance.
-         * This is to read roaming, metered, wifikey... from the snapshot for convenience.
+         * This is a useful shorthand that will read from the snapshot and set the
+         * following fields, if they are set in the snapshot :
+         *  - type
+         *  - subscriberId
+         *  - roaming
+         *  - metered
+         *  - oemManaged
+         *  - wifiNetworkKey
          *
          * @param snapshot The target {@link NetworkStateSnapshot} object.
          * @return The builder object.
@@ -415,15 +423,18 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         /**
          * Set the Radio Access Technology(RAT) type of the network.
          *
+         * No RAT type is specified by default. Call clearRatType to reset.
+         *
          * @param ratType the Radio Access Technology(RAT) type if applicable. See
          *                {@code TelephonyManager.NETWORK_TYPE_*}.
          *
          * @return this builder.
          */
         @NonNull
-        public Builder setRatType(@Annotation.NetworkType int ratType) {
+        public Builder setRatType(int ratType) {
             if (!CollectionUtils.contains(TelephonyManager.getAllNetworkTypes(), ratType)
-                    && ratType != TelephonyManager.NETWORK_TYPE_UNKNOWN) {
+                    && ratType != TelephonyManager.NETWORK_TYPE_UNKNOWN
+                    && ratType != NetworkStatsManager.NETWORK_TYPE_5G_NSA) {
                 throw new IllegalArgumentException("Invalid ratType " + ratType);
             }
             mRatType = ratType;
@@ -470,6 +481,8 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         /**
          * Set whether this network is roaming.
          *
+         * This field is false by default. Call with false to reset.
+         *
          * @param roaming the roaming status of the network.
          * @return this builder.
          */
@@ -482,6 +495,8 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         /**
          * Set whether this network is metered.
          *
+         * This field is false by default. Call with false to reset.
+         *
          * @param metered the meteredness of the network.
          * @return this builder.
          */
@@ -493,6 +508,8 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
 
         /**
          * Set whether this network is the default network.
+         *
+         * This field is false by default. Call with false to reset.
          *
          * @param defaultNetwork the default network status of the network.
          * @return this builder.
