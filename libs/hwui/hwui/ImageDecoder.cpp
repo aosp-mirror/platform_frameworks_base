@@ -159,6 +159,8 @@ bool ImageDecoder::setOutColorType(SkColorType colorType) {
             break;
         case kRGBA_F16_SkColorType:
             break;
+        case kRGBA_1010102_SkColorType:
+            break;
         default:
             return false;
     }

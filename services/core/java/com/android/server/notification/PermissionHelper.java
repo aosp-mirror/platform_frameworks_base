@@ -19,7 +19,7 @@ package com.android.server.notification;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
-import static android.permission.PermissionManager.PERMISSION_GRANTED;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -77,7 +77,8 @@ public final class PermissionHelper {
         assertFlag();
         final long callingId = Binder.clearCallingIdentity();
         try {
-            return mPmi.checkUidPermission(uid, NOTIFICATION_PERMISSION) == PERMISSION_GRANTED;
+            return mPmi.checkPostNotificationsPermissionGrantedOrLegacyAccess(uid)
+                    == PERMISSION_GRANTED;
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }

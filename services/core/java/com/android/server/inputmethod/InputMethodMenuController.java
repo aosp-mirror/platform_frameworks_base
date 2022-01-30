@@ -203,6 +203,7 @@ final class InputMethodMenuController {
             attrs.setTitle("Select input method");
             w.setAttributes(attrs);
             mService.updateSystemUiLocked();
+            mService.sendShouldShowImeSwitcherWhenImeIsShownLocked();
             mSwitchingDialog.show();
         }
     }
@@ -238,6 +239,7 @@ final class InputMethodMenuController {
             mSwitchingDialogTitleView = null;
 
             mService.updateSystemUiLocked();
+            mService.sendShouldShowImeSwitcherWhenImeIsShownLocked();
             mDialogBuilder = null;
             mIms = null;
         }

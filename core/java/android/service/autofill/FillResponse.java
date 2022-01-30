@@ -65,10 +65,22 @@ public final class FillResponse implements Parcelable {
      */
     public static final int FLAG_DISABLE_ACTIVITY_ONLY = 0x2;
 
+    /**
+     * Flag used to request to wait for a delayed fill from the remote Autofill service if it's
+     * passed to {@link Builder#setFlags(int)}.
+     *
+     * <p>Some datasets (i.e. OTP) take time to produce. This flags allows remote service to send
+     * a {@link FillResponse} to the latest {@link FillRequest} via
+     * {@link FillRequest#getDelayedFillIntentSender()} even if the original {@link FillCallback}
+     * has timed out.
+     */
+    public static final int FLAG_DELAY_FILL = 0x4;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             FLAG_TRACK_CONTEXT_COMMITED,
-            FLAG_DISABLE_ACTIVITY_ONLY
+            FLAG_DISABLE_ACTIVITY_ONLY,
+            FLAG_DELAY_FILL
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface FillResponseFlags {}
@@ -657,7 +669,7 @@ public final class FillResponse implements Parcelable {
         public Builder setFlags(@FillResponseFlags int flags) {
             throwIfDestroyed();
             mFlags = Preconditions.checkFlagsArgument(flags,
-                    FLAG_TRACK_CONTEXT_COMMITED | FLAG_DISABLE_ACTIVITY_ONLY);
+                    FLAG_TRACK_CONTEXT_COMMITED | FLAG_DISABLE_ACTIVITY_ONLY | FLAG_DELAY_FILL);
             return this;
         }
 

@@ -24,6 +24,8 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.bluetooth.annotations.RequiresBluetoothConnectPermission;
+import android.bluetooth.annotations.RequiresLegacyBluetoothAdminPermission;
 import android.content.Context;
 import android.net.NetworkStack;
 import android.os.connectivity.CellularBatteryStats;
@@ -509,6 +511,42 @@ public final class BatteryStatsManager {
             @NonNull int[] transportTypes) throws RuntimeException {
         try {
             mBatteryStats.noteNetworkInterfaceForTransports(iface, transportTypes);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Indicates that Bluetooth was toggled on.
+     *
+     * @param uid calling package uid
+     * @param reason why Bluetooth has been turned on
+     * @param packageName package responsible for this change
+     */
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    public void reportBluetoothOn(int uid, int reason, @NonNull String packageName) {
+        try {
+            mBatteryStats.noteBluetoothOn(uid, reason, packageName);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Indicates that Bluetooth was toggled off.
+     *
+     * @param uid calling package uid
+     * @param reason why Bluetooth has been turned on
+     * @param packageName package responsible for this change
+     */
+    @RequiresLegacyBluetoothAdminPermission
+    @RequiresBluetoothConnectPermission
+    @RequiresPermission(android.Manifest.permission.BLUETOOTH_CONNECT)
+    public void reportBluetoothOff(int uid, int reason, @NonNull String packageName) {
+        try {
+            mBatteryStats.noteBluetoothOff(uid, reason, packageName);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
