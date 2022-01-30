@@ -5884,6 +5884,7 @@ package android.media {
     field public static final int DEVICE_VOLUME_BEHAVIOR_VARIABLE = 0; // 0x0
     field public static final String EXTRA_VOLUME_STREAM_TYPE = "android.media.EXTRA_VOLUME_STREAM_TYPE";
     field public static final String EXTRA_VOLUME_STREAM_VALUE = "android.media.EXTRA_VOLUME_STREAM_VALUE";
+    field public static final int FLAG_BLUETOOTH_ABS_VOLUME = 64; // 0x40
     field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int STREAM_ASSISTANT = 11; // 0xb
     field public static final int STREAM_BLUETOOTH_SCO = 6; // 0x6
     field public static final int SUCCESS = 0; // 0x0
