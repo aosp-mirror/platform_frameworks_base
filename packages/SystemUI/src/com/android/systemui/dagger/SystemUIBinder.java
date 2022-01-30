@@ -31,6 +31,7 @@ import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.log.SessionTracker;
+import com.android.systemui.media.dream.MediaDreamSentinel;
 import com.android.systemui.media.systemsounds.HomeSoundEffectController;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.privacy.television.TvOngoingPrivacyChip;
@@ -226,4 +227,11 @@ public abstract class SystemUIBinder {
     @ClassKey(SmartSpaceComplication.Registrant.class)
     public abstract CoreStartable bindSmartSpaceComplicationRegistrant(
             SmartSpaceComplication.Registrant registrant);
+
+    /** Inject into MediaDreamSentinel. */
+    @Binds
+    @IntoMap
+    @ClassKey(MediaDreamSentinel.class)
+    public abstract CoreStartable bindMediaDreamSentinel(
+            MediaDreamSentinel sentinel);
 }
