@@ -21,6 +21,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -39,14 +40,12 @@ import android.net.NetworkStack;
 import android.net.NetworkStateSnapshot;
 import android.net.NetworkTemplate;
 import android.net.UnderlyingNetworkInfo;
+import android.net.netstats.IUsageCallback;
+import android.net.netstats.NetworkStatsDataMigrationUtils;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.net.netstats.provider.NetworkStatsProvider;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.os.Messenger;
 import android.os.RemoteException;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
@@ -57,6 +56,7 @@ import com.android.net.module.util.NetworkIdentityUtils;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * Provides access to network usage history and statistics. Usage data is collected in
@@ -127,17 +127,12 @@ public class NetworkStatsManager {
     private final INetworkStatsService mService;
 
     /**
-     * Type constants for reading different types of Data Usage.
+     * @deprecated Use {@link NetworkStatsDataMigrationUtils#PREFIX_XT}
+     * instead.
      * @hide
      */
-    // @SystemApi(client = MODULE_LIBRARIES)
+    @Deprecated
     public static final String PREFIX_DEV = "dev";
-    /** @hide */
-    public static final String PREFIX_XT = "xt";
-    /** @hide */
-    public static final String PREFIX_UID = "uid";
-    /** @hide */
-    public static final String PREFIX_UID_TAG = "uid_tag";
 
     /** @hide */
     public static final int FLAG_POLL_ON_OPEN = 1 << 0;
@@ -145,6 +140,18 @@ public class NetworkStatsManager {
     public static final int FLAG_POLL_FORCE = 1 << 1;
     /** @hide */
     public static final int FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN = 1 << 2;
+
+    /**
+     * Virtual RAT type to represent 5G NSA (Non Stand Alone) mode, where the primary cell is
+     * still LTE and network allocates a secondary 5G cell so telephony reports RAT = LTE along
+     * with NR state as connected. This is a concept added by NetworkStats on top of the telephony
+     * constants for backward compatibility of metrics so this should not be overlapped with any of
+     * the {@code TelephonyManager.NETWORK_TYPE_*} constants.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static final int NETWORK_TYPE_5G_NSA = -2;
 
     private int mFlags;
 
@@ -723,26 +730,36 @@ public class NetworkStatsManager {
         }
     }
 
-    /** @hide */
-    public void registerUsageCallback(NetworkTemplate template, int networkType,
-            long thresholdBytes, UsageCallback callback, @Nullable Handler handler) {
+    /**
+     * Registers to receive notifications about data usage on specified networks.
+     *
+     * <p>The callbacks will continue to be called as long as the process is alive or
+     * {@link #unregisterUsageCallback} is called.
+     *
+     * @param template Template used to match networks. See {@link NetworkTemplate}.
+     * @param thresholdBytes Threshold in bytes to be notified on. The provided value that lower
+     *                       than 2MiB will be clamped for non-privileged callers.
+     * @param executor The executor on which callback will be invoked. The provided {@link Executor}
+     *                 must run callback sequentially, otherwise the order of callbacks cannot be
+     *                 guaranteed.
+     * @param callback The {@link UsageCallback} that the system will call when data usage
+     *                 has exceeded the specified threshold.
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public void registerUsageCallback(@NonNull NetworkTemplate template, long thresholdBytes,
+            @NonNull @CallbackExecutor Executor executor, @NonNull UsageCallback callback) {
+        Objects.requireNonNull(template, "NetworkTemplate cannot be null");
         Objects.requireNonNull(callback, "UsageCallback cannot be null");
+        Objects.requireNonNull(executor, "Executor cannot be null");
 
-        final Looper looper;
-        if (handler == null) {
-            looper = Looper.myLooper();
-        } else {
-            looper = handler.getLooper();
-        }
-
-        DataUsageRequest request = new DataUsageRequest(DataUsageRequest.REQUEST_ID_UNSET,
+        final DataUsageRequest request = new DataUsageRequest(DataUsageRequest.REQUEST_ID_UNSET,
                 template, thresholdBytes);
         try {
-            CallbackHandler callbackHandler = new CallbackHandler(looper, networkType,
-                    template.getSubscriberId(), callback);
+            final UsageCallbackWrapper callbackWrapper =
+                    new UsageCallbackWrapper(executor, callback);
             callback.request = mService.registerUsageCallback(
-                    mContext.getOpPackageName(), request, new Messenger(callbackHandler),
-                    new Binder());
+                    mContext.getOpPackageName(), request, callbackWrapper);
             if (DBG) Log.d(TAG, "registerUsageCallback returned " + callback.request);
 
             if (callback.request == null) {
@@ -795,12 +812,15 @@ public class NetworkStatsManager {
         NetworkTemplate template = createTemplate(networkType, subscriberId);
         if (DBG) {
             Log.d(TAG, "registerUsageCallback called with: {"
-                + " networkType=" + networkType
-                + " subscriberId=" + subscriberId
-                + " thresholdBytes=" + thresholdBytes
-                + " }");
+                    + " networkType=" + networkType
+                    + " subscriberId=" + subscriberId
+                    + " thresholdBytes=" + thresholdBytes
+                    + " }");
         }
-        registerUsageCallback(template, networkType, thresholdBytes, callback, handler);
+
+        final Executor executor = handler == null ? r -> r.run() : r -> handler.post(r);
+
+        registerUsageCallback(template, thresholdBytes, executor, callback);
     }
 
     /**
@@ -825,6 +845,26 @@ public class NetworkStatsManager {
      * Base class for usage callbacks. Should be extended by applications wanting notifications.
      */
     public static abstract class UsageCallback {
+        /**
+         * Called when data usage has reached the given threshold.
+         *
+         * Called by {@code NetworkStatsService} when the registered threshold is reached.
+         * If a caller implements {@link #onThresholdReached(NetworkTemplate)}, the system
+         * will not call {@link #onThresholdReached(int, String)}.
+         *
+         * @param template The {@link NetworkTemplate} that associated with this callback.
+         * @hide
+         */
+        @SystemApi(client = MODULE_LIBRARIES)
+        public void onThresholdReached(@NonNull NetworkTemplate template) {
+            // Backward compatibility for those who didn't override this function.
+            final int networkType = networkTypeForTemplate(template);
+            if (networkType != ConnectivityManager.TYPE_NONE) {
+                final String subscriberId = template.getSubscriberIds().isEmpty() ? null
+                        : template.getSubscriberIds().iterator().next();
+                onThresholdReached(networkType, subscriberId);
+            }
+        }
 
         /**
          * Called when data usage has reached the given threshold.
@@ -835,6 +875,25 @@ public class NetworkStatsManager {
          * @hide used for internal bookkeeping
          */
         private DataUsageRequest request;
+
+        /**
+         * Get network type from a template if feasible.
+         *
+         * @param template the target {@link NetworkTemplate}.
+         * @return legacy network type, only supports for the types which is already supported in
+         *         {@link #registerUsageCallback(int, String, long, UsageCallback, Handler)}.
+         *         {@link ConnectivityManager#TYPE_NONE} for other types.
+         */
+        private static int networkTypeForTemplate(@NonNull NetworkTemplate template) {
+            switch (template.getMatchRule()) {
+                case NetworkTemplate.MATCH_MOBILE:
+                    return ConnectivityManager.TYPE_MOBILE;
+                case NetworkTemplate.MATCH_WIFI:
+                    return ConnectivityManager.TYPE_WIFI;
+                default:
+                    return ConnectivityManager.TYPE_NONE;
+            }
+        }
     }
 
     /**
@@ -953,43 +1012,32 @@ public class NetworkStatsManager {
         }
     }
 
-    private static class CallbackHandler extends Handler {
-        private final int mNetworkType;
-        private final String mSubscriberId;
-        private UsageCallback mCallback;
+    private static class UsageCallbackWrapper extends IUsageCallback.Stub {
+        // Null if unregistered.
+        private volatile UsageCallback mCallback;
 
-        CallbackHandler(Looper looper, int networkType, String subscriberId,
-                UsageCallback callback) {
-            super(looper);
-            mNetworkType = networkType;
-            mSubscriberId = subscriberId;
+        private final Executor mExecutor;
+
+        UsageCallbackWrapper(@NonNull Executor executor, @NonNull UsageCallback callback) {
             mCallback = callback;
+            mExecutor = executor;
         }
 
         @Override
-        public void handleMessage(Message message) {
-            DataUsageRequest request =
-                    (DataUsageRequest) getObject(message, DataUsageRequest.PARCELABLE_KEY);
-
-            switch (message.what) {
-                case CALLBACK_LIMIT_REACHED: {
-                    if (mCallback != null) {
-                        mCallback.onThresholdReached(mNetworkType, mSubscriberId);
-                    } else {
-                        Log.e(TAG, "limit reached with released callback for " + request);
-                    }
-                    break;
-                }
-                case CALLBACK_RELEASED: {
-                    if (DBG) Log.d(TAG, "callback released for " + request);
-                    mCallback = null;
-                    break;
-                }
+        public void onThresholdReached(DataUsageRequest request) {
+            // Copy it to a local variable in case mCallback changed inside the if condition.
+            final UsageCallback callback = mCallback;
+            if (callback != null) {
+                mExecutor.execute(() -> callback.onThresholdReached(request.template));
+            } else {
+                Log.e(TAG, "onThresholdReached with released callback for " + request);
             }
         }
 
-        private static Object getObject(Message msg, String key) {
-            return msg.getData().getParcelable(key);
+        @Override
+        public void onCallbackReleased(DataUsageRequest request) {
+            if (DBG) Log.d(TAG, "callback released for " + request);
+            mCallback = null;
         }
     }
 
@@ -1069,6 +1117,54 @@ public class NetworkStatsManager {
             mService.setStatsProviderWarningAndLimitAsync(iface, warning, limit);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get a RAT type representative of a group of RAT types for network statistics.
+     *
+     * Collapse the given Radio Access Technology (RAT) type into a bucket that
+     * is representative of the original RAT type for network statistics. The
+     * mapping mostly corresponds to {@code TelephonyManager#NETWORK_CLASS_BIT_MASK_*}
+     * but with adaptations specific to the virtual types introduced by
+     * networks stats.
+     *
+     * @param ratType An integer defined in {@code TelephonyManager#NETWORK_TYPE_*}.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public static int getCollapsedRatType(int ratType) {
+        switch (ratType) {
+            case TelephonyManager.NETWORK_TYPE_GPRS:
+            case TelephonyManager.NETWORK_TYPE_GSM:
+            case TelephonyManager.NETWORK_TYPE_EDGE:
+            case TelephonyManager.NETWORK_TYPE_IDEN:
+            case TelephonyManager.NETWORK_TYPE_CDMA:
+            case TelephonyManager.NETWORK_TYPE_1xRTT:
+                return TelephonyManager.NETWORK_TYPE_GSM;
+            case TelephonyManager.NETWORK_TYPE_EVDO_0:
+            case TelephonyManager.NETWORK_TYPE_EVDO_A:
+            case TelephonyManager.NETWORK_TYPE_EVDO_B:
+            case TelephonyManager.NETWORK_TYPE_EHRPD:
+            case TelephonyManager.NETWORK_TYPE_UMTS:
+            case TelephonyManager.NETWORK_TYPE_HSDPA:
+            case TelephonyManager.NETWORK_TYPE_HSUPA:
+            case TelephonyManager.NETWORK_TYPE_HSPA:
+            case TelephonyManager.NETWORK_TYPE_HSPAP:
+            case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
+                return TelephonyManager.NETWORK_TYPE_UMTS;
+            case TelephonyManager.NETWORK_TYPE_LTE:
+            case TelephonyManager.NETWORK_TYPE_IWLAN:
+                return TelephonyManager.NETWORK_TYPE_LTE;
+            case TelephonyManager.NETWORK_TYPE_NR:
+                return TelephonyManager.NETWORK_TYPE_NR;
+            // Virtual RAT type for 5G NSA mode, see
+            // {@link NetworkStatsManager#NETWORK_TYPE_5G_NSA}.
+            case NetworkStatsManager.NETWORK_TYPE_5G_NSA:
+                return NetworkStatsManager.NETWORK_TYPE_5G_NSA;
+            default:
+                return TelephonyManager.NETWORK_TYPE_UNKNOWN;
         }
     }
 }

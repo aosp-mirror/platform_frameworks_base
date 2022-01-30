@@ -148,8 +148,6 @@ func createMergedStubsSrcjar(ctx android.LoadHookContext, modules []string) {
 // This produces the same annotations.zip as framework-doc-stubs, but by using
 // outputs from individual modules instead of all the source code.
 func createMergedAnnotations(ctx android.LoadHookContext, modules []string) {
-	// Conscrypt and i18n currently do not enable annotations
-	modules = removeAll(modules, []string{conscrypt, i18n})
 	props := genruleProps{}
 	props.Name = proptools.StringPtr("sdk-annotations.zip")
 	props.Tools = []string{"merge_annotation_zips", "soong_zip"}
@@ -183,6 +181,24 @@ func createFilteredApiVersions(ctx android.LoadHookContext, modules []string) {
 	ctx.CreateModule(genrule.GenRuleFactory, &props)
 }
 
+func createMergedPublicStubs(ctx android.LoadHookContext, modules []string) {
+	props := libraryProps{}
+	props.Name = proptools.StringPtr("all-modules-public-stubs")
+	props.Static_libs = transformArray(modules, "", ".stubs")
+	props.Sdk_version = proptools.StringPtr("module_current")
+	props.Visibility = []string{"//frameworks/base"}
+	ctx.CreateModule(java.LibraryFactory, &props)
+}
+
+func createMergedSystemStubs(ctx android.LoadHookContext, modules []string) {
+	props := libraryProps{}
+	props.Name = proptools.StringPtr("all-modules-system-stubs")
+	props.Static_libs = transformArray(modules, "", ".stubs.system")
+	props.Sdk_version = proptools.StringPtr("module_current")
+	props.Visibility = []string{"//frameworks/base"}
+	ctx.CreateModule(java.LibraryFactory, &props)
+}
+
 func createMergedModuleLibStubs(ctx android.LoadHookContext, modules []string) {
 	// The user of this module compiles against the "core" SDK, so remove core libraries to avoid dupes.
 	modules = removeAll(modules, []string{art, conscrypt, i18n})
@@ -204,8 +220,6 @@ func createPublicStubsSourceFilegroup(ctx android.LoadHookContext, modules []str
 
 func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_classpath []string) {
 	var textFiles []MergedTxtDefinition
-	// Two module libraries currently do not support @SystemApi so only have the public scope.
-	bcpWithSystemApi := removeAll(bootclasspath, []string{conscrypt, i18n})
 
 	tagSuffix := []string{".api.txt}", ".removed-api.txt}"}
 	for i, f := range []string{"current.txt", "removed.txt"} {
@@ -219,14 +233,14 @@ func createMergedTxts(ctx android.LoadHookContext, bootclasspath, system_server_
 		textFiles = append(textFiles, MergedTxtDefinition{
 			TxtFilename: f,
 			BaseTxt:     ":non-updatable-system-" + f,
-			Modules:     bcpWithSystemApi,
+			Modules:     bootclasspath,
 			ModuleTag:   "{.system" + tagSuffix[i],
 			Scope:       "system",
 		})
 		textFiles = append(textFiles, MergedTxtDefinition{
 			TxtFilename: f,
 			BaseTxt:     ":non-updatable-module-lib-" + f,
-			Modules:     bcpWithSystemApi,
+			Modules:     bootclasspath,
 			ModuleTag:   "{.module-lib" + tagSuffix[i],
 			Scope:       "module-lib",
 		})
@@ -253,6 +267,8 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 
 	createMergedStubsSrcjar(ctx, bootclasspath)
 
+	createMergedPublicStubs(ctx, bootclasspath)
+	createMergedSystemStubs(ctx, bootclasspath)
 	createMergedModuleLibStubs(ctx, bootclasspath)
 
 	createMergedAnnotations(ctx, bootclasspath)

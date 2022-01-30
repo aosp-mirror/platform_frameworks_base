@@ -16,15 +16,14 @@
 
 package com.android.server.net;
 
-import static android.net.NetworkTemplate.NETWORK_TYPE_5G_NSA;
-import static android.net.NetworkTemplate.getCollapsedRatType;
+import static android.app.usage.NetworkStatsManager.NETWORK_TYPE_5G_NSA;
+import static android.app.usage.NetworkStatsManager.getCollapsedRatType;
 import static android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_ADVANCED;
 import static android.telephony.TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA;
 import static android.telephony.TelephonyManager.NETWORK_TYPE_LTE;
 
 import android.annotation.NonNull;
 import android.content.Context;
-import android.telephony.Annotation;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyDisplayInfo;
@@ -57,10 +56,9 @@ public class NetworkStatsSubscriptionsMonitor extends
          *
          * @param subscriberId IMSI of the subscription.
          * @param collapsedRatType collapsed RAT type.
-         *                         @see android.net.NetworkTemplate#getCollapsedRatType(int).
+         *                     @see android.app.usage.NetworkStatsManager#getCollapsedRatType(int).
          */
-        void onCollapsedRatTypeChanged(@NonNull String subscriberId,
-                @Annotation.NetworkType int collapsedRatType);
+        void onCollapsedRatTypeChanged(@NonNull String subscriberId, int collapsedRatType);
     }
     private final Delegate mDelegate;
 

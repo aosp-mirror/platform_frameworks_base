@@ -20,12 +20,12 @@ import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.Manifest.permission.OBSERVE_NETWORK_POLICY;
 import static android.Manifest.permission.SHUTDOWN;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_DOZABLE;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_POWERSAVE;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_RESTRICTED;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_STANDBY;
 import static android.net.INetd.FIREWALL_ALLOWLIST;
-import static android.net.INetd.FIREWALL_CHAIN_DOZABLE;
 import static android.net.INetd.FIREWALL_CHAIN_NONE;
-import static android.net.INetd.FIREWALL_CHAIN_POWERSAVE;
-import static android.net.INetd.FIREWALL_CHAIN_RESTRICTED;
-import static android.net.INetd.FIREWALL_CHAIN_STANDBY;
 import static android.net.INetd.FIREWALL_DENYLIST;
 import static android.net.INetd.FIREWALL_RULE_ALLOW;
 import static android.net.INetd.FIREWALL_RULE_DENY;
@@ -34,16 +34,13 @@ import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_POWERSAVE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_RESTRICTED;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_STANDBY;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
-import static android.net.NetworkStats.SET_DEFAULT;
-import static android.net.NetworkStats.STATS_PER_UID;
-import static android.net.NetworkStats.TAG_NONE;
-import static android.net.TrafficStats.UID_TETHERING;
 
 import static com.android.net.module.util.NetworkStatsUtils.LIMIT_GLOBAL_ALERT;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.net.INetd;
 import android.net.INetdUnsolicitedEventListener;
 import android.net.INetworkManagementEventObserver;
@@ -57,7 +54,6 @@ import android.net.NetworkPolicyManager;
 import android.net.NetworkStack;
 import android.net.NetworkStats;
 import android.net.RouteInfo;
-import android.net.TetherStatsParcel;
 import android.net.UidRangeParcel;
 import android.net.util.NetdService;
 import android.os.BatteryStats;
@@ -1158,19 +1154,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             }
 
             Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "inetd bandwidth");
+            final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
             try {
                 if (allowlist) {
-                    if (enable) {
-                        mNetdService.bandwidthAddNiceApp(uid);
-                    } else {
-                        mNetdService.bandwidthRemoveNiceApp(uid);
-                    }
+                    cm.updateMeteredNetworkAllowList(uid, enable);
                 } else {
-                    if (enable) {
-                        mNetdService.bandwidthAddNaughtyApp(uid);
-                    } else {
-                        mNetdService.bandwidthRemoveNaughtyApp(uid);
-                    }
+                    cm.updateMeteredNetworkDenyList(uid, enable);
                 }
                 synchronized (mRulesLock) {
                     if (enable) {
@@ -1179,7 +1168,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                         quotaList.delete(uid);
                     }
                 }
-            } catch (RemoteException | ServiceSpecificException e) {
+            } catch (RuntimeException e) {
                 throw new IllegalStateException(e);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
@@ -1292,40 +1281,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     private class NetdTetheringStatsProvider extends ITetheringStatsProvider.Stub {
         @Override
         public NetworkStats getTetherStats(int how) {
-            // We only need to return per-UID stats. Per-device stats are already counted by
-            // interface counters.
-            if (how != STATS_PER_UID) {
-                return new NetworkStats(SystemClock.elapsedRealtime(), 0);
-            }
-
-            final TetherStatsParcel[] tetherStatsVec;
-            try {
-                tetherStatsVec = mNetdService.tetherGetStats();
-            } catch (RemoteException | ServiceSpecificException e) {
-                throw new IllegalStateException("problem parsing tethering stats: ", e);
-            }
-
-            final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(),
-                tetherStatsVec.length);
-            final NetworkStats.Entry entry = new NetworkStats.Entry();
-
-            for (TetherStatsParcel tetherStats : tetherStatsVec) {
-                try {
-                    entry.iface = tetherStats.iface;
-                    entry.uid = UID_TETHERING;
-                    entry.set = SET_DEFAULT;
-                    entry.tag = TAG_NONE;
-                    entry.rxBytes   = tetherStats.rxBytes;
-                    entry.rxPackets = tetherStats.rxPackets;
-                    entry.txBytes   = tetherStats.txBytes;
-                    entry.txPackets = tetherStats.txPackets;
-                    stats.combineValues(entry);
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    throw new IllegalStateException("invalid tethering stats " + e);
-                }
-            }
-
-            return stats;
+            // Remove the implementation of NetdTetheringStatsProvider#getTetherStats
+            // since all callers are migrated to use INetd#tetherGetStats directly.
+            throw new UnsupportedOperationException();
         }
 
         @Override
@@ -1336,20 +1294,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     @Override
     public NetworkStats getNetworkStatsTethering(int how) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-
-        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 1);
-        synchronized (mTetheringStatsProviders) {
-            for (ITetheringStatsProvider provider: mTetheringStatsProviders.keySet()) {
-                try {
-                    stats.combineAllValues(provider.getTetherStats(how));
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Problem reading tethering stats from " +
-                            mTetheringStatsProviders.get(provider) + ": " + e);
-                }
-            }
-        }
-        return stats;
+        // Remove the implementation of getNetworkStatsTethering since all callers are migrated
+        // to use INetd#tetherGetStats directly.
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -1464,9 +1411,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 throw new IllegalArgumentException("Bad child chain: " + chainName);
             }
 
+            final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
             try {
-                mNetdService.firewallEnableChildChain(chain, enable);
-            } catch (RemoteException | ServiceSpecificException e) {
+                cm.setFirewallChainEnabled(chain, enable);
+            } catch (RuntimeException e) {
                 throw new IllegalStateException(e);
             }
 
@@ -1538,25 +1486,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                     updateFirewallUidRuleLocked(chain, uid, FIREWALL_RULE_DEFAULT);
                 }
             }
+            final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
             try {
-                switch (chain) {
-                    case FIREWALL_CHAIN_DOZABLE:
-                        mNetdService.firewallReplaceUidChain("fw_dozable", true, uids);
-                        break;
-                    case FIREWALL_CHAIN_STANDBY:
-                        mNetdService.firewallReplaceUidChain("fw_standby", false, uids);
-                        break;
-                    case FIREWALL_CHAIN_POWERSAVE:
-                        mNetdService.firewallReplaceUidChain("fw_powersave", true, uids);
-                        break;
-                    case FIREWALL_CHAIN_RESTRICTED:
-                        mNetdService.firewallReplaceUidChain("fw_restricted", true, uids);
-                        break;
-                    case FIREWALL_CHAIN_NONE:
-                    default:
-                        Slog.d(TAG, "setFirewallUidRules() called on invalid chain: " + chain);
-                }
-            } catch (RemoteException e) {
+                cm.replaceFirewallChain(chain, uids);
+            } catch (RuntimeException e) {
                 Slog.w(TAG, "Error flushing firewall chain " + chain, e);
             }
         }
@@ -1572,10 +1505,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
     private void setFirewallUidRuleLocked(int chain, int uid, int rule) {
         if (updateFirewallUidRuleLocked(chain, uid, rule)) {
-            final int ruleType = getFirewallRuleType(chain, rule);
+            final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
             try {
-                mNetdService.firewallSetUidRule(chain, uid, ruleType);
-            } catch (RemoteException | ServiceSpecificException e) {
+                cm.updateFirewallRule(chain, uid, isFirewallRuleAllow(chain, rule));
+            } catch (RuntimeException e) {
                 throw new IllegalStateException(e);
             }
         }
@@ -1645,12 +1578,12 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         }
     }
 
-    private int getFirewallRuleType(int chain, int rule) {
+    // There are only two type of firewall rule: FIREWALL_RULE_ALLOW or FIREWALL_RULE_DENY.
+    private boolean isFirewallRuleAllow(int chain, int rule) {
         if (rule == NetworkPolicyManager.FIREWALL_RULE_DEFAULT) {
-            return getFirewallType(chain) == FIREWALL_ALLOWLIST
-                    ? INetd.FIREWALL_RULE_DENY : INetd.FIREWALL_RULE_ALLOW;
+            return getFirewallType(chain) == FIREWALL_DENYLIST;
         }
-        return rule;
+        return rule == INetd.FIREWALL_RULE_ALLOW;
     }
 
     private void enforceSystemUid() {
