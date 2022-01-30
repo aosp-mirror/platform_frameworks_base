@@ -521,6 +521,10 @@ class HighBrightnessModeController {
             } else if (mIsBlockedByLowPowerMode) {
                 reason = FrameworkStatsLog
                                  .DISPLAY_HBM_STATE_CHANGED__REASON__HBM_SV_OFF_BATTERY_SAVE_ON;
+            } else if (mBrightness <= mHbmData.transitionPoint) {
+                // This must be after external thermal check.
+                reason = FrameworkStatsLog
+                            .DISPLAY_HBM_STATE_CHANGED__REASON__HBM_SV_OFF_LOW_REQUESTED_BRIGHTNESS;
             }
         }
 

@@ -19,6 +19,7 @@ package android.service.autofill;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -160,6 +161,19 @@ public final class FillRequest implements Parcelable {
      */
     private final @Nullable InlineSuggestionsRequest mInlineSuggestionsRequest;
 
+    /**
+     * Gets the {@link IntentSender} to send a delayed fill response.
+     *
+     * <p>The autofill service must first indicate that it wants to return a delayed
+     * {@link FillResponse} by setting {@link FillResponse#FLAG_DELAY_FILL} in a successful
+     * fill response. Then it can use this IntentSender to send an Intent with extra
+     * {@link AutofillService#EXTRA_FILL_RESPONSE} with the delayed response.</p>
+     *
+     * <p>Note that this may be null if a delayed fill response is not supported for
+     * this fill request.</p>
+     */
+    private final @Nullable IntentSender mDelayedFillIntentSender;
+
     private void onConstructed() {
         Preconditions.checkCollectionElementsNotNull(mFillContexts, "contexts");
     }
@@ -252,6 +266,16 @@ public final class FillRequest implements Parcelable {
      *
      *   <p>The Autofill Service must set supportsInlineSuggestions in its XML to enable support
      *   for inline suggestions.</p>
+     * @param delayedFillIntentSender
+     *   Gets the {@link IntentSender} to send a delayed fill response.
+     *
+     *   <p>The autofill service must first indicate that it wants to return a delayed
+     *   {@link FillResponse} by setting {@link FillResponse#FLAG_DELAY_FILL} in a successful
+     *   fill response. Then it can use this IntentSender to send an Intent with extra
+     *   {@link AutofillService#EXTRA_FILL_RESPONSE} with the delayed response.</p>
+     *
+     *   <p>Note that this may be null if a delayed fill response is not supported for
+     *   this fill request.</p>
      * @hide
      */
     @DataClass.Generated.Member
@@ -260,7 +284,8 @@ public final class FillRequest implements Parcelable {
             @NonNull List<FillContext> fillContexts,
             @Nullable Bundle clientState,
             @RequestFlags int flags,
-            @Nullable InlineSuggestionsRequest inlineSuggestionsRequest) {
+            @Nullable InlineSuggestionsRequest inlineSuggestionsRequest,
+            @Nullable IntentSender delayedFillIntentSender) {
         this.mId = id;
         this.mFillContexts = fillContexts;
         com.android.internal.util.AnnotationValidations.validate(
@@ -276,6 +301,7 @@ public final class FillRequest implements Parcelable {
                         | FLAG_VIEW_NOT_FOCUSED
                         | FLAG_ACTIVITY_START);
         this.mInlineSuggestionsRequest = inlineSuggestionsRequest;
+        this.mDelayedFillIntentSender = delayedFillIntentSender;
 
         onConstructed();
     }
@@ -348,6 +374,22 @@ public final class FillRequest implements Parcelable {
         return mInlineSuggestionsRequest;
     }
 
+    /**
+     * Gets the {@link IntentSender} to send a delayed fill response.
+     *
+     * <p>The autofill service must first indicate that it wants to return a delayed
+     * {@link FillResponse} by setting {@link FillResponse#FLAG_DELAY_FILL} in a successful
+     * fill response. Then it can use this IntentSender to send an Intent with extra
+     * {@link AutofillService#EXTRA_FILL_RESPONSE} with the delayed response.</p>
+     *
+     * <p>Note that this may be null if a delayed fill response is not supported for
+     * this fill request.</p>
+     */
+    @DataClass.Generated.Member
+    public @Nullable IntentSender getDelayedFillIntentSender() {
+        return mDelayedFillIntentSender;
+    }
+
     @Override
     @DataClass.Generated.Member
     public String toString() {
@@ -359,7 +401,8 @@ public final class FillRequest implements Parcelable {
                 "fillContexts = " + mFillContexts + ", " +
                 "clientState = " + mClientState + ", " +
                 "flags = " + requestFlagsToString(mFlags) + ", " +
-                "inlineSuggestionsRequest = " + mInlineSuggestionsRequest +
+                "inlineSuggestionsRequest = " + mInlineSuggestionsRequest + ", " +
+                "delayedFillIntentSender = " + mDelayedFillIntentSender +
         " }";
     }
 
@@ -372,12 +415,14 @@ public final class FillRequest implements Parcelable {
         byte flg = 0;
         if (mClientState != null) flg |= 0x4;
         if (mInlineSuggestionsRequest != null) flg |= 0x10;
+        if (mDelayedFillIntentSender != null) flg |= 0x20;
         dest.writeByte(flg);
         dest.writeInt(mId);
         dest.writeParcelableList(mFillContexts, flags);
         if (mClientState != null) dest.writeBundle(mClientState);
         dest.writeInt(mFlags);
         if (mInlineSuggestionsRequest != null) dest.writeTypedObject(mInlineSuggestionsRequest, flags);
+        if (mDelayedFillIntentSender != null) dest.writeTypedObject(mDelayedFillIntentSender, flags);
     }
 
     @Override
@@ -398,6 +443,7 @@ public final class FillRequest implements Parcelable {
         Bundle clientState = (flg & 0x4) == 0 ? null : in.readBundle();
         int flags = in.readInt();
         InlineSuggestionsRequest inlineSuggestionsRequest = (flg & 0x10) == 0 ? null : (InlineSuggestionsRequest) in.readTypedObject(InlineSuggestionsRequest.CREATOR);
+        IntentSender delayedFillIntentSender = (flg & 0x20) == 0 ? null : (IntentSender) in.readTypedObject(IntentSender.CREATOR);
 
         this.mId = id;
         this.mFillContexts = fillContexts;
@@ -414,6 +460,7 @@ public final class FillRequest implements Parcelable {
                         | FLAG_VIEW_NOT_FOCUSED
                         | FLAG_ACTIVITY_START);
         this.mInlineSuggestionsRequest = inlineSuggestionsRequest;
+        this.mDelayedFillIntentSender = delayedFillIntentSender;
 
         onConstructed();
     }
@@ -433,10 +480,10 @@ public final class FillRequest implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1643052544776L,
+            time = 1643386870464L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/service/autofill/FillRequest.java",
-            inputSignatures = "public static final @android.service.autofill.FillRequest.RequestFlags int FLAG_MANUAL_REQUEST\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_COMPATIBILITY_MODE_REQUEST\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_PASSWORD_INPUT_TYPE\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_VIEW_NOT_FOCUSED\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_ACTIVITY_START\npublic static final  int INVALID_REQUEST_ID\nprivate final  int mId\nprivate final @android.annotation.NonNull java.util.List<android.service.autofill.FillContext> mFillContexts\nprivate final @android.annotation.Nullable android.os.Bundle mClientState\nprivate final @android.service.autofill.FillRequest.RequestFlags int mFlags\nprivate final @android.annotation.Nullable android.view.inputmethod.InlineSuggestionsRequest mInlineSuggestionsRequest\nprivate  void onConstructed()\nclass FillRequest extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genHiddenConstructor=true, genHiddenConstDefs=true)")
+            inputSignatures = "public static final @android.service.autofill.FillRequest.RequestFlags int FLAG_MANUAL_REQUEST\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_COMPATIBILITY_MODE_REQUEST\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_PASSWORD_INPUT_TYPE\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_VIEW_NOT_FOCUSED\npublic static final @android.service.autofill.FillRequest.RequestFlags int FLAG_ACTIVITY_START\npublic static final  int INVALID_REQUEST_ID\nprivate final  int mId\nprivate final @android.annotation.NonNull java.util.List<android.service.autofill.FillContext> mFillContexts\nprivate final @android.annotation.Nullable android.os.Bundle mClientState\nprivate final @android.service.autofill.FillRequest.RequestFlags int mFlags\nprivate final @android.annotation.Nullable android.view.inputmethod.InlineSuggestionsRequest mInlineSuggestionsRequest\nprivate final @android.annotation.Nullable android.content.IntentSender mDelayedFillIntentSender\nprivate  void onConstructed()\nclass FillRequest extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genHiddenConstructor=true, genHiddenConstDefs=true)")
     @Deprecated
     private void __metadata() {}
 

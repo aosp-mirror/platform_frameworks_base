@@ -18,6 +18,7 @@ package android.location;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.LOCATION_BYPASS;
 import static android.Manifest.permission.LOCATION_HARDWARE;
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static android.location.LocationRequest.createFromDeprecatedCriteria;
@@ -678,8 +679,9 @@ public class LocationManager {
      *
      * @hide
      */
+    // TODO: remove WRITE_SECURE_SETTINGS.
     @SystemApi
-    @RequiresPermission(WRITE_SECURE_SETTINGS)
+    @RequiresPermission(anyOf = {WRITE_SECURE_SETTINGS, LOCATION_BYPASS})
     public void setAdasGnssLocationEnabled(boolean enabled) {
         try {
             mService.setAdasGnssLocationEnabledForUser(enabled, mContext.getUser().getIdentifier());

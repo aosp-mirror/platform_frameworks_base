@@ -44,6 +44,7 @@ public class StackStateAnimator {
     public static final int ANIMATION_DURATION_STANDARD = 360;
     public static final int ANIMATION_DURATION_CORNER_RADIUS = 200;
     public static final int ANIMATION_DURATION_WAKEUP = 500;
+    public static final int ANIMATION_DURATION_WAKEUP_SCRIM = 667;
     public static final int ANIMATION_DURATION_GO_TO_FULL_SHADE = 448;
     public static final int ANIMATION_DURATION_APPEAR_DISAPPEAR = 464;
     public static final int ANIMATION_DURATION_SWIPE = 200;

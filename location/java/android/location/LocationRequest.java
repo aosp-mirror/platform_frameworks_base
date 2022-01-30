@@ -16,6 +16,9 @@
 
 package android.location;
 
+import static android.Manifest.permission.LOCATION_BYPASS;
+import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
+
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -662,9 +665,10 @@ public final class LocationRequest implements Parcelable {
      * @hide
      * @deprecated LocationRequests should be treated as immutable.
      */
+    // TODO: remove WRITE_SECURE_SETTINGS.
     @SystemApi
     @Deprecated
-    @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+    @RequiresPermission(anyOf = {WRITE_SECURE_SETTINGS, LOCATION_BYPASS})
     public @NonNull LocationRequest setLocationSettingsIgnored(boolean locationSettingsIgnored) {
         mBypass = locationSettingsIgnored;
         return this;
@@ -1132,8 +1136,9 @@ public final class LocationRequest implements Parcelable {
          *
          * @hide
          */
+        // TODO: remove WRITE_SECURE_SETTINGS
         @SystemApi
-        @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+        @RequiresPermission(anyOf = {WRITE_SECURE_SETTINGS, LOCATION_BYPASS})
         public @NonNull Builder setAdasGnssBypass(boolean adasGnssBypass) {
             mAdasGnssBypass = adasGnssBypass;
             return this;
@@ -1150,8 +1155,9 @@ public final class LocationRequest implements Parcelable {
          *
          * @hide
          */
+        // TODO: remove WRITE_SECURE_SETTINGS
         @SystemApi
-        @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+        @RequiresPermission(anyOf = {WRITE_SECURE_SETTINGS, LOCATION_BYPASS})
         public @NonNull Builder setLocationSettingsIgnored(boolean locationSettingsIgnored) {
             mBypass = locationSettingsIgnored;
             return this;

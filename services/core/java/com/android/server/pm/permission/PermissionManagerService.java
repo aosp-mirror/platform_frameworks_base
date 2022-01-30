@@ -17,6 +17,7 @@
 package com.android.server.pm.permission;
 
 import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
+import static android.Manifest.permission.POST_NOTIFICATIONS;
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.UPDATE_APP_OPS_STATS;
 import static android.app.AppOpsManager.ATTRIBUTION_CHAIN_ID_NONE;
@@ -605,6 +606,21 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         @Override
         public int checkUidPermission(int uid, @NonNull String permissionName) {
             return PermissionManagerService.this.checkUidPermission(uid, permissionName);
+        }
+
+        @Override
+        public int checkPostNotificationsPermissionGrantedOrLegacyAccess(int uid) {
+            int granted = PermissionManagerService.this.checkUidPermission(uid,
+                    POST_NOTIFICATIONS);
+            AndroidPackage pkg = mPackageManagerInt.getPackage(uid);
+            if (granted != PermissionManager.PERMISSION_GRANTED) {
+                int flags = PermissionManagerService.this.getPermissionFlags(pkg.getPackageName(),
+                        POST_NOTIFICATIONS, UserHandle.getUserId(uid));
+                if ((flags & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
+                    return PermissionManager.PERMISSION_GRANTED;
+                }
+            }
+            return granted;
         }
 
         @Override
