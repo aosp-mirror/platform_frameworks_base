@@ -250,6 +250,22 @@ package android.media.session {
 
 package android.net {
 
+  public class EthernetManager {
+    method @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public void addInterfaceStateListener(@NonNull java.util.concurrent.Executor, @NonNull android.net.EthernetManager.InterfaceStateListener);
+    method public void removeInterfaceStateListener(@NonNull android.net.EthernetManager.InterfaceStateListener);
+    method public void setIncludeTestInterfaces(boolean);
+    field public static final int ROLE_CLIENT = 1; // 0x1
+    field public static final int ROLE_NONE = 0; // 0x0
+    field public static final int ROLE_SERVER = 2; // 0x2
+    field public static final int STATE_ABSENT = 0; // 0x0
+    field public static final int STATE_LINK_DOWN = 1; // 0x1
+    field public static final int STATE_LINK_UP = 2; // 0x2
+  }
+
+  public static interface EthernetManager.InterfaceStateListener {
+    method public void onInterfaceStateChanged(@NonNull String, int, int, @Nullable android.net.IpConfiguration);
+  }
+
   public class LocalSocket implements java.io.Closeable {
     ctor public LocalSocket(@NonNull java.io.FileDescriptor);
   }
