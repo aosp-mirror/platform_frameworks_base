@@ -17,7 +17,7 @@
 package com.android.server.pm;
 
 import static android.content.pm.SharedLibraryInfo.TYPE_DYNAMIC;
-import static android.content.pm.SharedLibraryInfo.TYPE_SDK;
+import static android.content.pm.SharedLibraryInfo.TYPE_SDK_PACKAGE;
 import static android.content.pm.SharedLibraryInfo.TYPE_STATIC;
 import static android.content.pm.SharedLibraryInfo.VERSION_UNDEFINED;
 
@@ -258,7 +258,7 @@ public class ScanTests {
         assertThat(scanResult.mSdkSharedLibraryInfo.getPackageName(), is("ogl.sdk_123"));
         assertThat(scanResult.mSdkSharedLibraryInfo.getName(), is("ogl.sdk"));
         assertThat(scanResult.mSdkSharedLibraryInfo.getLongVersion(), is(123L));
-        assertThat(scanResult.mSdkSharedLibraryInfo.getType(), is(TYPE_SDK));
+        assertThat(scanResult.mSdkSharedLibraryInfo.getType(), is(TYPE_SDK_PACKAGE));
         assertThat(scanResult.mSdkSharedLibraryInfo.getDeclaringPackage().getPackageName(),
                 is("ogl.sdk_123"));
         assertThat(scanResult.mSdkSharedLibraryInfo.getDeclaringPackage().getLongVersionCode(),

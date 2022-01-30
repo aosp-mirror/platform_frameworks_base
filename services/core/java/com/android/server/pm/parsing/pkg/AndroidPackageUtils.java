@@ -92,7 +92,7 @@ public class AndroidPackageUtils {
                 AndroidPackageUtils.getAllCodePaths(pkg),
                 pkg.getSdkLibName(),
                 pkg.getSdkLibVersionMajor(),
-                SharedLibraryInfo.TYPE_SDK,
+                SharedLibraryInfo.TYPE_SDK_PACKAGE,
                 new VersionedPackage(pkg.getManifestPackageName(),
                         pkg.getLongVersionCode()),
                 null, null, false /* isNative */);
