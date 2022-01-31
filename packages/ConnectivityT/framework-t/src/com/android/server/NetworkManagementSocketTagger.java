@@ -111,19 +111,6 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
         public int statsUid = -1;
     }
 
-    /**
-     * Convert {@code /proc/} tag format to {@link Integer}. Assumes incoming
-     * format like {@code 0x7fffffff00000000}.
-     */
-    public static int kernelToTag(String string) {
-        int length = string.length();
-        if (length > 10) {
-            return Long.decode(string.substring(0, length - 8)).intValue();
-        } else {
-            return 0;
-        }
-    }
-
     private static native int native_tagSocketFd(FileDescriptor fd, int tag, int uid);
     private static native int native_untagSocketFd(FileDescriptor fd);
 }
