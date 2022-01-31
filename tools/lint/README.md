@@ -40,6 +40,9 @@ m out/soong/.intermediates/frameworks/base/services/autofill/services.autofill/a
 - If you want to build lint reports for more than 1 module and they include a common module in their
   `defaults` field, e.g. `platform_service_defaults`, you can add the `lint` property to that common
   module instead of adding it in every module.
+- If you want to run a single lint type, use the `ANDROID_LINT_CHECK`
+  environment variable with the id of the lint. For example:
+  `ANDROID_LINT_CHECK=UnusedTokenOfOriginalCallingIdentity m out/[...]/lint-report.html`
 
 ## Create or update a baseline
 
