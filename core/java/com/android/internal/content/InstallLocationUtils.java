@@ -16,6 +16,7 @@
 
 package com.android.internal.content;
 
+import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.os.storage.VolumeInfo.ID_PRIVATE_INTERNAL;
 
 import android.content.Context;
@@ -53,7 +54,7 @@ import java.util.UUID;
  * and media container service transports.
  * Some utility methods to invoke StorageManagerService api.
  */
-public class PackageHelper {
+public class InstallLocationUtils {
     public static final int RECOMMEND_INSTALL_INTERNAL = 1;
     public static final int RECOMMEND_INSTALL_EXTERNAL = 2;
     public static final int RECOMMEND_INSTALL_EPHEMERAL = 3;
@@ -89,9 +90,13 @@ public class PackageHelper {
      */
     public static abstract class TestableInterface {
         abstract public StorageManager getStorageManager(Context context);
+
         abstract public boolean getForceAllowOnExternalSetting(Context context);
+
         abstract public boolean getAllow3rdPartyOnInternalConfig(Context context);
+
         abstract public ApplicationInfo getExistingAppInfo(Context context, String packageName);
+
         abstract public File getDataDirectory();
     }
 
@@ -150,11 +155,11 @@ public class PackageHelper {
     /**
      * Given a requested {@link PackageInfo#installLocation} and calculated
      * install size, pick the actual volume to install the app. Only considers
-     * internal and private volumes, and prefers to keep an existing package on
+     * internal and private volumes, and prefers to keep an existing package onocation
      * its current volume.
      *
      * @return the {@link VolumeInfo#fsUuid} to install onto, or {@code null}
-     *         for internal storage.
+     * for internal storage.
      */
     public static String resolveInstallVolume(Context context, SessionParams params)
             throws IOException {
@@ -316,21 +321,6 @@ public class PackageHelper {
                 && params.sizeBytes <= storage.getStorageBytesUntilLow(primary.getPathFile());
     }
 
-    @Deprecated
-    public static int resolveInstallLocation(Context context, String packageName,
-            int installLocation, long sizeBytes, int installFlags) {
-        final SessionParams params = new SessionParams(SessionParams.MODE_INVALID);
-        params.appPackageName = packageName;
-        params.installLocation = installLocation;
-        params.sizeBytes = sizeBytes;
-        params.installFlags = installFlags;
-        try {
-            return resolveInstallLocation(context, params);
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
     /**
      * Given a requested {@link PackageInfo#installLocation} and calculated
      * install size, pick the actual location to install the app.
@@ -393,24 +383,24 @@ public class PackageHelper {
             // and will fall through to return INSUFFICIENT_STORAGE
             if (fitsOnInternal) {
                 return (ephemeral)
-                        ? PackageHelper.RECOMMEND_INSTALL_EPHEMERAL
-                        : PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+                        ? InstallLocationUtils.RECOMMEND_INSTALL_EPHEMERAL
+                        : InstallLocationUtils.RECOMMEND_INSTALL_INTERNAL;
             }
         } else if (prefer == RECOMMEND_INSTALL_EXTERNAL) {
             if (fitsOnExternal) {
-                return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
+                return InstallLocationUtils.RECOMMEND_INSTALL_EXTERNAL;
             }
         }
 
         if (checkBoth) {
             if (fitsOnInternal) {
-                return PackageHelper.RECOMMEND_INSTALL_INTERNAL;
+                return InstallLocationUtils.RECOMMEND_INSTALL_INTERNAL;
             } else if (fitsOnExternal) {
-                return PackageHelper.RECOMMEND_INSTALL_EXTERNAL;
+                return InstallLocationUtils.RECOMMEND_INSTALL_EXTERNAL;
             }
         }
 
-        return PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
+        return InstallLocationUtils.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
     }
 
     @Deprecated
@@ -474,6 +464,50 @@ public class PackageHelper {
             return StorageManager.FLAG_ALLOCATE_AGGRESSIVE;
         } else {
             return 0;
+        }
+    }
+
+    public static int installLocationPolicy(int installLocation, int recommendedInstallLocation,
+            int installFlags, boolean installedPkgIsSystem, boolean installedPackageOnExternal) {
+        if ((installFlags & PackageManager.INSTALL_REPLACE_EXISTING) == 0) {
+            // Invalid install. Return error code
+            return RECOMMEND_FAILED_ALREADY_EXISTS;
+        }
+        // Check for updated system application.
+        if (installedPkgIsSystem) {
+            return RECOMMEND_INSTALL_INTERNAL;
+        }
+        // If current upgrade specifies particular preference
+        if (installLocation == PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY) {
+            // Application explicitly specified internal.
+            return RECOMMEND_INSTALL_INTERNAL;
+        } else if (installLocation == PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL) {
+            // App explicitly prefers external. Let policy decide
+            return recommendedInstallLocation;
+        } else {
+            // Prefer previous location
+            if (installedPackageOnExternal) {
+                return RECOMMEND_INSTALL_EXTERNAL;
+            }
+            return RECOMMEND_INSTALL_INTERNAL;
+        }
+    }
+
+    public static int getInstallationErrorCode(int loc) {
+        if (loc == RECOMMEND_FAILED_INVALID_LOCATION) {
+            return PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
+        } else if (loc == RECOMMEND_FAILED_ALREADY_EXISTS) {
+            return PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
+        } else if (loc == RECOMMEND_FAILED_INSUFFICIENT_STORAGE) {
+            return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+        } else if (loc == RECOMMEND_FAILED_INVALID_APK) {
+            return PackageManager.INSTALL_FAILED_INVALID_APK;
+        } else if (loc == RECOMMEND_FAILED_INVALID_URI) {
+            return PackageManager.INSTALL_FAILED_INVALID_URI;
+        } else if (loc == RECOMMEND_MEDIA_UNAVAILABLE) {
+            return PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
+        } else {
+            return INSTALL_SUCCEEDED;
         }
     }
 }

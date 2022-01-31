@@ -337,7 +337,7 @@ import com.android.internal.app.ProcessMap;
 import com.android.internal.app.SystemUserHomeActivity;
 import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.app.procstats.ProcessStats;
-import com.android.internal.content.PackageHelper;
+import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
@@ -4952,7 +4952,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // This line is needed to CTS test for the correct exception handling
             // See b/138952436#comment36 for context
             Slog.i(TAG, "About to commit checkpoint");
-            IStorageManager storageManager = PackageHelper.getStorageManager();
+            IStorageManager storageManager = InstallLocationUtils.getStorageManager();
             storageManager.commitChanges();
         } catch (Exception e) {
             PowerManager pm = (PowerManager)

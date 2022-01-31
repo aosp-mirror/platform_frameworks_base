@@ -84,7 +84,7 @@ import android.util.Xml;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.content.PackageHelper;
+import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.util.ImageUtils;
@@ -782,7 +782,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             // If caller requested explicit location, validity check it, otherwise
             // resolve the best internal or adopted location.
             if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
-                if (!PackageHelper.fitsOnInternal(mContext, params)) {
+                if (!InstallLocationUtils.fitsOnInternal(mContext, params)) {
                     throw new IOException("No suitable internal storage available");
                 }
             } else if ((params.installFlags & PackageManager.INSTALL_FORCE_VOLUME_UUID) != 0) {
@@ -796,7 +796,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 // requested install flags, delta size, and manifest settings.
                 final long ident = Binder.clearCallingIdentity();
                 try {
-                    params.volumeUuid = PackageHelper.resolveInstallVolume(mContext, params);
+                    params.volumeUuid = InstallLocationUtils.resolveInstallVolume(mContext, params);
                 } finally {
                     Binder.restoreCallingIdentity(ident);
                 }
