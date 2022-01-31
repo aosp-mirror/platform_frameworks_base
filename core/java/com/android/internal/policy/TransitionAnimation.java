@@ -29,7 +29,6 @@ import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_CLOSE;
 import static android.view.WindowManager.TRANSIT_OLD_WALLPAPER_INTRA_OPEN;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
-import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -915,7 +914,7 @@ public class TransitionAnimation {
      * animation.
      */
     public HardwareBuffer createCrossProfileAppsThumbnail(
-            @DrawableRes int thumbnailDrawableRes, Rect frame) {
+            Drawable thumbnailDrawable, Rect frame) {
         final int width = frame.width();
         final int height = frame.height();
 
@@ -924,14 +923,13 @@ public class TransitionAnimation {
         canvas.drawColor(Color.argb(0.6f, 0, 0, 0));
         final int thumbnailSize = mContext.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.cross_profile_apps_thumbnail_size);
-        final Drawable drawable = mContext.getDrawable(thumbnailDrawableRes);
-        drawable.setBounds(
+        thumbnailDrawable.setBounds(
                 (width - thumbnailSize) / 2,
                 (height - thumbnailSize) / 2,
                 (width + thumbnailSize) / 2,
                 (height + thumbnailSize) / 2);
-        drawable.setTint(mContext.getColor(android.R.color.white));
-        drawable.draw(canvas);
+        thumbnailDrawable.setTint(mContext.getColor(android.R.color.white));
+        thumbnailDrawable.draw(canvas);
         picture.endRecording();
 
         return Bitmap.createBitmap(picture).getHardwareBuffer();
