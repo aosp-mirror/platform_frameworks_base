@@ -63,7 +63,8 @@ public class ClipboardListener extends CoreStartable
             mClipboardOverlayController =
                     new ClipboardOverlayController(mContext, new TimeoutHandler(mContext));
         }
-        mClipboardOverlayController.setClipData(mClipboardManager.getPrimaryClip());
+        mClipboardOverlayController.setClipData(
+                mClipboardManager.getPrimaryClip(), mClipboardManager.getPrimaryClipSource());
         mClipboardOverlayController.setOnSessionCompleteListener(() -> {
             // Session is complete, free memory until it's needed again.
             mClipboardOverlayController = null;
