@@ -10907,7 +10907,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (mPendingUserCreatedCallbackTokens.contains(token)) {
                     // Ignore because it was triggered by createAndManageUser()
                     Slogf.d(LOG_TAG, "handleNewUserCreated(): ignoring for user " + userId
-                            + " due to token" + token);
+                            + " due to token " + token);
                     mPendingUserCreatedCallbackTokens.remove(token);
                     return;
                 }
@@ -11026,6 +11026,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 switched = mInjector.getIActivityManager().switchUser(userId);
                 if (!switched) {
                     Slogf.w(LOG_TAG, "Failed to switch to user %d", userId);
+                } else {
+                    Slogf.d(LOG_TAG, "Switched");
                 }
                 return switched;
             } catch (RemoteException e) {
@@ -11049,18 +11051,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private @UserIdInt int getLogoutUserIdUnchecked() {
-        if (!mInjector.userManagerIsHeadlessSystemUserMode()) {
-            // mLogoutUserId is USER_SYSTEM as well, but there's no need to acquire the lock
-            return UserHandle.USER_SYSTEM;
-        }
         synchronized (getLockObject()) {
             return mLogoutUserId;
         }
     }
 
     private void clearLogoutUser() {
-        if (!mInjector.userManagerIsHeadlessSystemUserMode()) return; // ignore
-
         synchronized (getLockObject()) {
             setLogoutUserIdLocked(UserHandle.USER_NULL);
         }
@@ -11068,8 +11064,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @GuardedBy("getLockObject()")
     private void setLogoutUserIdLocked(@UserIdInt int userId) {
-        if (!mInjector.userManagerIsHeadlessSystemUserMode()) return; // ignore
-
         if (userId == UserHandle.USER_CURRENT) {
             userId = getCurrentForegroundUserId();
         }
@@ -11151,8 +11145,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return UserManager.USER_OPERATION_ERROR_MANAGED_PROFILE;
         }
 
-        // TODO(b/204585343): remove the headless system user check?
-        if (mInjector.userManagerIsHeadlessSystemUserMode() && callingUserId != mInjector
+        if (callingUserId != mInjector
                 .binderWithCleanCallingIdentity(() -> getCurrentForegroundUserId())) {
             Slogf.d(LOG_TAG, "logoutUser(): user %d is in background, just stopping, not switching",
                     callingUserId);
@@ -11168,8 +11161,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(
                 canManageUsers(caller) || hasCallingOrSelfPermission(permission.CREATE_USERS));
 
-        int result = logoutUserUnchecked(getCurrentForegroundUserId());
-        Slogf.d(LOG_TAG, "logout called by uid %d. Result: %d", caller.getUid(), result);
+        int currentUserId = getCurrentForegroundUserId();
+        if (VERBOSE_LOG) {
+            Slogf.v(LOG_TAG, "logout() called by uid %d; current user is %d", caller.getUid(),
+                    currentUserId);
+        }
+        int result = logoutUserUnchecked(currentUserId);
+        if (VERBOSE_LOG) {
+            Slogf.v(LOG_TAG, "Result of logout(): %d", result);
+        }
         return result;
     }
 
