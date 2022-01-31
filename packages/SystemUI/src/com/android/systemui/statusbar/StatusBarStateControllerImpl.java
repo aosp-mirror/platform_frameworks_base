@@ -518,6 +518,7 @@ public class StatusBarStateControllerImpl implements
     }
 
     private void recordHistoricalState(int newState, int lastState, boolean upcoming) {
+        Trace.traceCounter(Trace.TRACE_TAG_APP, "statusBarState", newState);
         mHistoryIndex = (mHistoryIndex + 1) % HISTORY_SIZE;
         HistoricalState state = mHistoricalRecords[mHistoryIndex];
         state.mNewState = newState;
