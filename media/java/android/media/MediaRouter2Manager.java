@@ -29,6 +29,8 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -36,15 +38,18 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -84,7 +89,8 @@ public final class MediaRouter2Manager {
     @GuardedBy("mRoutesLock")
     private final Map<String, MediaRoute2Info> mRoutes = new HashMap<>();
     @NonNull
-    final ConcurrentMap<String, List<String>> mPreferredFeaturesMap = new ConcurrentHashMap<>();
+    final ConcurrentMap<String, RouteDiscoveryPreference> mDiscoveryPreferenceMap =
+            new ConcurrentHashMap<>();
 
     private final AtomicInteger mNextRequestId = new AtomicInteger(1);
     private final CopyOnWriteArrayList<TransferRequest> mTransferRequests =
@@ -247,25 +253,8 @@ public final class MediaRouter2Manager {
      */
     @NonNull
     public List<MediaRoute2Info> getAvailableRoutes(@NonNull RoutingSessionInfo sessionInfo) {
-        Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
-
-        List<MediaRoute2Info> routes = new ArrayList<>();
-
-        String packageName = sessionInfo.getClientPackageName();
-        List<String> preferredFeatures = mPreferredFeaturesMap.get(packageName);
-        if (preferredFeatures == null) {
-            preferredFeatures = Collections.emptyList();
-        }
-        synchronized (mRoutesLock) {
-            for (MediaRoute2Info route : mRoutes.values()) {
-                if (route.hasAnyFeatures(preferredFeatures)
-                        || sessionInfo.getSelectedRoutes().contains(route.getId())
-                        || sessionInfo.getTransferableRoutes().contains(route.getId())) {
-                    routes.add(route);
-                }
-            }
-        }
-        return routes;
+        return getFilteredRoutes(sessionInfo, /*includeSelectedRoutes=*/true,
+                null);
     }
 
     /**
@@ -281,27 +270,70 @@ public final class MediaRouter2Manager {
      */
     @NonNull
     public List<MediaRoute2Info> getTransferableRoutes(@NonNull RoutingSessionInfo sessionInfo) {
+        return getFilteredRoutes(sessionInfo, /*includeSelectedRoutes=*/false,
+                (route) -> sessionInfo.isSystemSession() ^ route.isSystemRoute());
+    }
+
+    private List<MediaRoute2Info> getSortedRoutes(RouteDiscoveryPreference preference) {
+        if (!preference.shouldRemoveDuplicates()) {
+            synchronized (mRoutesLock) {
+                return List.copyOf(mRoutes.values());
+            }
+        }
+        Map<String, Integer> packagePriority = new ArrayMap<>();
+        int count = preference.getDeduplicationPackageOrder().size();
+        for (int i = 0; i < count; i++) {
+            // the last package will have 1 as the priority
+            packagePriority.put(preference.getDeduplicationPackageOrder().get(i), count - i);
+        }
+        ArrayList<MediaRoute2Info> routes;
+        synchronized (mRoutesLock) {
+            routes = new ArrayList<>(mRoutes.values());
+        }
+        // take the negative for descending order
+        routes.sort(Comparator.comparingInt(
+                r -> -packagePriority.getOrDefault(r.getPackageName(), 0)));
+        return routes;
+    }
+
+    private List<MediaRoute2Info> getFilteredRoutes(@NonNull RoutingSessionInfo sessionInfo,
+            boolean includeSelectedRoutes,
+            @Nullable Predicate<MediaRoute2Info> additionalFilter) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
 
         List<MediaRoute2Info> routes = new ArrayList<>();
 
+        Set<String> deduplicationIdSet = new ArraySet<>();
         String packageName = sessionInfo.getClientPackageName();
-        List<String> preferredFeatures = mPreferredFeaturesMap.get(packageName);
-        if (preferredFeatures == null) {
-            preferredFeatures = Collections.emptyList();
-        }
-        synchronized (mRoutesLock) {
-            for (MediaRoute2Info route : mRoutes.values()) {
-                if (sessionInfo.getTransferableRoutes().contains(route.getId())) {
-                    routes.add(route);
+        RouteDiscoveryPreference discoveryPreference =
+                mDiscoveryPreferenceMap.getOrDefault(packageName, RouteDiscoveryPreference.EMPTY);
+
+        for (MediaRoute2Info route : getSortedRoutes(discoveryPreference)) {
+            if (sessionInfo.getTransferableRoutes().contains(route.getId())
+                    || (includeSelectedRoutes
+                    && sessionInfo.getSelectedRoutes().contains(route.getId()))) {
+                routes.add(route);
+                continue;
+            }
+            if (!route.hasAllFeatures(discoveryPreference.getRequiredFeatures())
+                    || !route.hasAnyFeatures(discoveryPreference.getPreferredFeatures())) {
+                continue;
+            }
+            if (!discoveryPreference.getAllowedPackages().isEmpty()
+                    && !discoveryPreference.getAllowedPackages()
+                    .contains(route.getPackageName())) {
+                continue;
+            }
+            if (additionalFilter != null && !additionalFilter.test(route)) {
+                continue;
+            }
+            if (discoveryPreference.shouldRemoveDuplicates()) {
+                if (Collections.disjoint(deduplicationIdSet, route.getDeduplicationIds())) {
                     continue;
                 }
-                // Add Phone -> Cast and Cast -> Phone
-                if (route.hasAnyFeatures(preferredFeatures)
-                        && (sessionInfo.isSystemSession() ^ route.isSystemRoute())) {
-                    routes.add(route);
-                }
+                deduplicationIdSet.addAll(route.getDeduplicationIds());
             }
+            routes.add(route);
         }
         return routes;
     }
@@ -310,44 +342,10 @@ public final class MediaRouter2Manager {
      * Returns the preferred features of the specified package name.
      */
     @NonNull
-    public List<String> getPreferredFeatures(@NonNull String packageName) {
+    public RouteDiscoveryPreference getDiscoveryPreference(@NonNull String packageName) {
         Objects.requireNonNull(packageName, "packageName must not be null");
 
-        List<String> preferredFeatures = mPreferredFeaturesMap.get(packageName);
-        if (preferredFeatures == null) {
-            preferredFeatures = Collections.emptyList();
-        }
-        return preferredFeatures;
-    }
-
-    /**
-     * Returns a list of routes which are related to the given package name in the given route list.
-     */
-    @NonNull
-    public List<MediaRoute2Info> filterRoutesForPackage(@NonNull List<MediaRoute2Info> routes,
-            @NonNull String packageName) {
-        Objects.requireNonNull(routes, "routes must not be null");
-        Objects.requireNonNull(packageName, "packageName must not be null");
-
-        List<RoutingSessionInfo> sessions = getRoutingSessions(packageName);
-        RoutingSessionInfo sessionInfo = sessions.get(sessions.size() - 1);
-
-        List<MediaRoute2Info> result = new ArrayList<>();
-        List<String> preferredFeatures = mPreferredFeaturesMap.get(packageName);
-        if (preferredFeatures == null) {
-            preferredFeatures = Collections.emptyList();
-        }
-
-        synchronized (mRoutesLock) {
-            for (MediaRoute2Info route : routes) {
-                if (route.hasAnyFeatures(preferredFeatures)
-                        || sessionInfo.getSelectedRoutes().contains(route.getId())
-                        || sessionInfo.getTransferableRoutes().contains(route.getId())) {
-                    result.add(route);
-                }
-            }
-        }
-        return result;
+        return mDiscoveryPreferenceMap.getOrDefault(packageName, RouteDiscoveryPreference.EMPTY);
     }
 
     /**
@@ -713,19 +711,19 @@ public final class MediaRouter2Manager {
         }
     }
 
-    void updatePreferredFeatures(String packageName, List<String> preferredFeatures) {
-        if (preferredFeatures == null) {
-            mPreferredFeaturesMap.remove(packageName);
+    void updateDiscoveryPreference(String packageName, RouteDiscoveryPreference preference) {
+        if (preference == null) {
+            mDiscoveryPreferenceMap.remove(packageName);
             return;
         }
-        List<String> prevFeatures = mPreferredFeaturesMap.put(packageName, preferredFeatures);
-        if ((prevFeatures == null && preferredFeatures.size() == 0)
-                || Objects.equals(preferredFeatures, prevFeatures)) {
+        RouteDiscoveryPreference prevPreference =
+                mDiscoveryPreferenceMap.put(packageName, preference);
+        if (Objects.equals(preference, prevPreference)) {
             return;
         }
         for (CallbackRecord record : mCallbackRecords) {
             record.mExecutor.execute(() -> record.mCallback
-                    .onPreferredFeaturesChanged(packageName, preferredFeatures));
+                    .onDiscoveryPreferenceChanged(packageName, preference));
         }
     }
 
@@ -1047,6 +1045,17 @@ public final class MediaRouter2Manager {
                 @NonNull List<String> preferredFeatures) {}
 
         /**
+         * Called when the preferred route features of an app is changed.
+         *
+         * @param packageName the package name of the application
+         * @param discoveryPreference the new discovery preference set by the application.
+         */
+        default void onDiscoveryPreferenceChanged(@NonNull String packageName,
+                @NonNull RouteDiscoveryPreference discoveryPreference) {
+            onPreferredFeaturesChanged(packageName, discoveryPreference.getPreferredFeatures());
+        }
+
+        /**
          * Called when a previous request has failed.
          *
          * @param reason the reason that the request has failed. Can be one of followings:
@@ -1125,9 +1134,10 @@ public final class MediaRouter2Manager {
         }
 
         @Override
-        public void notifyPreferredFeaturesChanged(String packageName, List<String> features) {
-            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::updatePreferredFeatures,
-                    MediaRouter2Manager.this, packageName, features));
+        public void notifyDiscoveryPreferenceChanged(String packageName,
+                RouteDiscoveryPreference discoveryPreference) {
+            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::updateDiscoveryPreference,
+                    MediaRouter2Manager.this, packageName, discoveryPreference));
         }
 
         @Override
