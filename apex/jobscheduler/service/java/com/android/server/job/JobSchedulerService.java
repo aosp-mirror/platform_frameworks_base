@@ -357,6 +357,9 @@ public class JobSchedulerService extends com.android.server.SystemService
     // Putting RESTRICTED_INDEX after NEVER_INDEX to make it easier for proto dumping
     // (ScheduledJobStateChanged and JobStatusDumpProto).
     public static final int RESTRICTED_INDEX = 5;
+    // Putting EXEMPTED_INDEX after RESTRICTED_INDEX to make it easier for proto dumping
+    // (ScheduledJobStateChanged and JobStatusDumpProto).
+    public static final int EXEMPTED_INDEX = 6;
 
     private class ConstantsObserver implements DeviceConfig.OnPropertiesChangedListener,
             EconomyManagerInternal.TareStateChangeListener {
@@ -2492,6 +2495,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     shouldForceBatchJob =
                             mConstants.MIN_READY_NON_ACTIVE_JOBS_COUNT > 1
                                     && job.getEffectiveStandbyBucket() != ACTIVE_INDEX
+                                    && job.getEffectiveStandbyBucket() != EXEMPTED_INDEX
                                     && !batchDelayExpired;
                 }
 
@@ -3086,8 +3090,10 @@ public class JobSchedulerService extends com.android.server.SystemService
             return FREQUENT_INDEX;
         } else if (bucket > UsageStatsManager.STANDBY_BUCKET_ACTIVE) {
             return WORKING_INDEX;
-        } else {
+        } else if (bucket > UsageStatsManager.STANDBY_BUCKET_EXEMPTED) {
             return ACTIVE_INDEX;
+        } else {
+            return EXEMPTED_INDEX;
         }
     }
 
