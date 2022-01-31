@@ -5486,26 +5486,46 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     void updateKeepClearAreas() {
+        final List<Rect> restrictedKeepClearAreas = new ArrayList();
+        final List<Rect> unrestrictedKeepClearAreas = new ArrayList();
+        getKeepClearAreas(restrictedKeepClearAreas, unrestrictedKeepClearAreas);
         mWmService.mDisplayNotificationController.dispatchKeepClearAreasChanged(
-                this, getKeepClearAreas());
+                this, restrictedKeepClearAreas, unrestrictedKeepClearAreas);
     }
 
     /**
-     * Returns all keep-clear areas from visible windows on this display.
+     * Fills {@param outRestricted} with all keep-clear areas from visible, relevant windows
+     * on this display, which set restricted keep-clear areas.
+     * Fills {@param outUnrestricted} with keep-clear areas from visible, relevant windows on this
+     * display, which set unrestricted keep-clear areas.
+     *
+     * For context on restricted vs unrestricted keep-clear areas, see
+     * {@link android.Manifest.permission.USE_UNRESTRICTED_KEEP_CLEAR_AREAS}.
      */
-    ArrayList<Rect> getKeepClearAreas() {
-        final ArrayList<Rect> keepClearAreas = new ArrayList<Rect>();
+    void getKeepClearAreas(List<Rect> outRestricted, List<Rect> outUnrestricted) {
         final Matrix tmpMatrix = new Matrix();
         final float[] tmpFloat9 = new float[9];
         forAllWindows(w -> {
             if (w.isVisible() && !w.inPinnedWindowingMode()) {
-                keepClearAreas.addAll(w.getKeepClearAreas(tmpMatrix, tmpFloat9));
+                if (w.mSession.mSetsUnrestrictedKeepClearAreas) {
+                    outUnrestricted.addAll(w.getKeepClearAreas(tmpMatrix, tmpFloat9));
+                } else {
+                    outRestricted.addAll(w.getKeepClearAreas(tmpMatrix, tmpFloat9));
+                }
             }
 
             // We stop traversing when we reach the base of a fullscreen app.
             return w.getWindowType() == TYPE_BASE_APPLICATION
                     && w.getWindowingMode() == WINDOWING_MODE_FULLSCREEN;
         }, true);
+    }
+
+    /**
+     * Returns all keep-clear areas from visible, relevant windows on this display.
+     */
+    ArrayList<Rect> getKeepClearAreas() {
+        final ArrayList<Rect> keepClearAreas = new ArrayList<Rect>();
+        getKeepClearAreas(keepClearAreas, keepClearAreas);
         return keepClearAreas;
     }
 
