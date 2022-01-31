@@ -17,6 +17,7 @@
 <com.android.systemui.clipboardoverlay.DraggableConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:theme="@style/Screenshot"
     android:alpha="0"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -50,7 +51,8 @@
         <LinearLayout
             android:id="@+id/actions"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true">
             <include layout="@layout/screenshot_action_chip"
                      android:id="@+id/remote_copy_chip"/>
             <include layout="@layout/screenshot_action_chip"
@@ -64,7 +66,7 @@
         android:layout_marginStart="@dimen/overlay_offset_x"
         android:layout_marginBottom="@dimen/overlay_offset_y"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/actions_container_background"
         android:elevation="@dimen/overlay_preview_elevation"
         app:layout_constraintEnd_toEndOf="@id/clipboard_preview_end"
         app:layout_constraintTop_toTopOf="@id/clipboard_preview_top"
