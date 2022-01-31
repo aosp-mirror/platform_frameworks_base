@@ -175,7 +175,7 @@ public final class ParcelableResource implements Parcelable {
      * <p>Returns the default drawable by calling the {@code defaultDrawableLoader} if the updated
      * drawable was not found or could not be loaded.</p>
      */
-    @NonNull
+    @Nullable
     public Drawable getDrawable(
             Context context,
             int density,
@@ -200,7 +200,7 @@ public final class ParcelableResource implements Parcelable {
      * <p>Returns the default string by calling  {@code defaultStringLoader} if the updated
      * string was not found or could not be loaded.</p>
      */
-    @NonNull
+    @Nullable
     public String getString(
             Context context,
             @NonNull Callable<String> defaultStringLoader) {
@@ -267,17 +267,11 @@ public final class ParcelableResource implements Parcelable {
     /**
      * returns the {@link Drawable} loaded from calling {@code defaultDrawableLoader}.
      */
-    @NonNull
+    @Nullable
     public static Drawable loadDefaultDrawable(@NonNull Callable<Drawable> defaultDrawableLoader) {
         try {
             Objects.requireNonNull(defaultDrawableLoader, "defaultDrawableLoader can't be null");
-
-            Drawable drawable = defaultDrawableLoader.call();
-            Objects.requireNonNull(drawable, "defaultDrawable can't be null");
-
-            return drawable;
-        } catch (NullPointerException rethrown) {
-            throw rethrown;
+            return defaultDrawableLoader.call();
         } catch (Exception e) {
             throw new RuntimeException("Couldn't load default drawable: ", e);
         }
@@ -286,17 +280,11 @@ public final class ParcelableResource implements Parcelable {
     /**
      * returns the {@link String} loaded from calling {@code defaultStringLoader}.
      */
-    @NonNull
+    @Nullable
     public static String loadDefaultString(@NonNull Callable<String> defaultStringLoader) {
         try {
             Objects.requireNonNull(defaultStringLoader, "defaultStringLoader can't be null");
-
-            String string = defaultStringLoader.call();
-            Objects.requireNonNull(string, "defaultString can't be null");
-
-            return string;
-        } catch (NullPointerException rethrown) {
-            throw rethrown;
+            return defaultStringLoader.call();
         } catch (Exception e) {
             throw new RuntimeException("Couldn't load default string: ", e);
         }

@@ -14991,8 +14991,8 @@ public class DevicePolicyManager {
      * <p>Also returns the drawable from {@code defaultDrawableLoader} if
      * {@link DevicePolicyResources.Drawables#UNDEFINED} was passed.
      *
-     * <p>{@code defaultDrawableLoader} must return a non {@code null} {@link Drawable}, otherwise a
-     * {@link NullPointerException} is thrown.
+     * <p>Calls to this API will not return {@code null} unless no updated drawable was found
+     * and the call to {@code defaultDrawableLoader} returned {@code null}.
      *
      * <p>This API uses the screen density returned from {@link Resources#getConfiguration()}, to
      * set a different value use
@@ -15025,8 +15025,8 @@ public class DevicePolicyManager {
      * {@link #getDrawable(String, String, Callable)}
      * if an override was set for that specific source.
      *
-     * <p>{@code defaultDrawableLoader} must return a non {@code null} {@link Drawable}, otherwise a
-     * {@link NullPointerException} is thrown.
+     * <p>Calls to this API will not return {@code null} unless no updated drawable was found
+     * and the call to {@code defaultDrawableLoader} returned {@code null}.
      *
      * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
      * notified when a resource has been updated.
@@ -15080,8 +15080,8 @@ public class DevicePolicyManager {
      * Similar to {@link #getDrawable(String, String, Callable)}, but also accepts
      * {@code density}. See {@link Resources#getDrawableForDensity(int, int, Resources.Theme)}.
      *
-     * <p>{@code defaultDrawableLoader} must return a non {@code null} {@link Drawable}, otherwise a
-     * {@link NullPointerException} is thrown.
+     * <p>Calls to this API will not return {@code null} unless no updated drawable was found
+     * and the call to {@code defaultDrawableLoader} returned {@code null}.
      *
      * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
      * notified when a resource has been updated.
@@ -15112,8 +15112,8 @@ public class DevicePolicyManager {
      * Similar to {@link #getDrawable(String, String, String, Callable)}, but also accepts
      * {@code density}. See {@link Resources#getDrawableForDensity(int, int, Resources.Theme)}.
      *
-     * <p>{@code defaultDrawableLoader} must return a non {@code null} {@link Drawable}, otherwise a
-     * {@link NullPointerException} is thrown.
+      * <p>Calls to this API will not return {@code null} unless no updated drawable was found
+      * and the call to {@code defaultDrawableLoader} returned {@code null}.
      *
      * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
      * notified when a resource has been updated.
@@ -15166,7 +15166,7 @@ public class DevicePolicyManager {
     /**
      * For each {@link DevicePolicyStringResource} item in {@code strings}, it updates the string
      * resource for {@link DevicePolicyStringResource#getStringId()} to the string with ID
-     * {@code callingPackageResourceId} (see {@link DevicePolicyResources.String}), meaning any
+     * {@code callingPackageResourceId} (see {@link DevicePolicyResources.Strings}), meaning any
      * system UI surface calling {@link #getString} with {@code stringId} will get
      * the new resource after this API is called.
      *
@@ -15202,7 +15202,7 @@ public class DevicePolicyManager {
 
     /**
      * Removes the updated strings for the list of {@code stringIds} (see
-     * {@link DevicePolicyResources.String}) that was previously set by calling {@link #setStrings},
+     * {@link DevicePolicyResources.Strings}) that was previously set by calling {@link #setStrings},
      * meaning any subsequent calls to {@link #getString} for the provided IDs will
      * return the default string from {@code defaultStringLoader}.
      *
@@ -15227,14 +15227,14 @@ public class DevicePolicyManager {
 
     /**
      * Returns the appropriate updated string for the {@code stringId} (see
-     * {@link DevicePolicyResources.String}) if one was set using
+     * {@link DevicePolicyResources.Strings}) if one was set using
      * {@link #setStrings}, otherwise returns the string from {@code defaultStringLoader}.
      *
      * <p>Also returns the string from {@code defaultStringLoader} if
-     * {@link DevicePolicyResources.String#INVALID_ID} was passed.
+     * {@link DevicePolicyResources.Strings#UNDEFINED} was passed.
      *
-     * <p>{@code defaultStringLoader} must return a non {@code null} {@link String}, otherwise a
-     * {@link NullPointerException} is thrown.
+     * <p>Calls to this API will not return {@code null} unless no updated drawable was found
+     * and the call to {@code defaultStringLoader} returned {@code null}.
      *
      * <p>Callers should register for {@link #ACTION_DEVICE_POLICY_RESOURCE_UPDATED} to get
      * notified when a resource has been updated.
@@ -15284,8 +15284,8 @@ public class DevicePolicyManager {
      * {@link java.util.Formatter} and {@link java.lang.String#format}, (see
      * {@link Resources#getString(int, Object...)}).
      *
-     * <p>{@code defaultStringLoader} must return a non {@code null} {@link String}, otherwise a
-     * {@link NullPointerException} is thrown.
+     * <p>Calls to this API will not return {@code null} unless no updated drawable was found
+     * and the call to {@code defaultStringLoader} returned {@code null}.
      *
      * @param stringId The IDs to get the updated resource for.
      * @param defaultStringLoader To get the default string if no updated string was set for
