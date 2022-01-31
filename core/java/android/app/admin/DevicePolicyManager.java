@@ -15009,7 +15009,7 @@ public class DevicePolicyManager {
      * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
      *                              the provided params.
      */
-    @NonNull
+    @Nullable
     public Drawable getDrawable(
             @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
             @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
@@ -15037,7 +15037,7 @@ public class DevicePolicyManager {
      * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
      *                              the provided params.
      */
-    @NonNull
+    @Nullable
     public Drawable getDrawable(
             @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
             @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
@@ -15094,7 +15094,7 @@ public class DevicePolicyManager {
      * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
      *                              the provided params.
      */
-    @NonNull
+    @Nullable
     public Drawable getDrawableForDensity(
             @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
             @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
@@ -15127,7 +15127,7 @@ public class DevicePolicyManager {
      * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
      *                              the provided params.
      */
-    @NonNull
+    @Nullable
     public Drawable getDrawableForDensity(
             @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
             @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
@@ -15249,7 +15249,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @NonNull
+    @Nullable
     public String getString(
             @NonNull @DevicePolicyResources.UpdatableStringId String stringId,
             @NonNull Callable<String> defaultStringLoader) {
@@ -15295,7 +15295,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @NonNull
+    @Nullable
     @SuppressLint("SamShouldBeLast")
     public String getString(
             @NonNull @DevicePolicyResources.UpdatableStringId String stringId,

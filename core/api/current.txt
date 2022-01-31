@@ -7311,10 +7311,10 @@ package android.app.admin {
     method @Nullable public java.util.List<java.lang.String> getDelegatePackages(@NonNull android.content.ComponentName, @NonNull String);
     method @NonNull public java.util.List<java.lang.String> getDelegatedScopes(@Nullable android.content.ComponentName, @NonNull String);
     method public CharSequence getDeviceOwnerLockScreenInfo();
-    method @NonNull public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
-    method @NonNull public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull String, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
-    method @NonNull public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
-    method @NonNull public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull String, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
     method public CharSequence getEndUserSessionMessage(@NonNull android.content.ComponentName);
     method @NonNull public String getEnrollmentSpecificId();
     method @Nullable public android.app.admin.FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(@Nullable android.content.ComponentName);
