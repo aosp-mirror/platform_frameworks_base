@@ -1014,6 +1014,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mAutomaticBrightnessController.switchToInteractiveScreenBrightnessMode();
             }
         }
+        if (mDisplayWhiteBalanceController != null) {
+            mDisplayWhiteBalanceController.setStrongModeEnabled(isIdle);
+        }
     }
 
     private final Animator.AnimatorListener mAnimatorListener = new Animator.AnimatorListener() {
