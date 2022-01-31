@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <!--
  * Copyright (c) 2022, The Android Open Source Project
  *
@@ -16,6 +17,7 @@
 */
 -->
 <resources>
+    <dimen name="controls_padding_horizontal">205dp</dimen>
     <dimen name="split_shade_notifications_scrim_margin_bottom">16dp</dimen>
     <dimen name="notification_panel_margin_bottom">56dp</dimen>
 </resources>
