@@ -194,27 +194,27 @@ public abstract class VibrationEffect implements Parcelable {
     }
 
     /**
-     * Create a waveform vibration.
+     * Create a waveform vibration, using only off/on transitions at the provided time intervals,
+     * and potentially repeating.
      *
-     * <p>Waveform vibrations are a potentially repeating series of timing and amplitude pairs. For
-     * each pair, the value in the amplitude array determines the strength of the vibration and the
-     * value in the timing array determines how long it vibrates for. An amplitude of 0 implies no
-     * vibration (i.e. off), and any pairs with a timing value of 0 will be ignored.
+     * <p>In effect, the timings array represents the number of milliseconds <em>before</em> turning
+     * the vibrator on, followed by the number of milliseconds to keep the vibrator on, then
+     * the number of milliseconds turned off, and so on. Consequently, the first timing value will
+     * often be 0, so that the effect will start vibrating immediately.
      *
-     * <p>The amplitude array of the generated waveform will be the same size as the given
-     * timing array with alternating values of 0 (i.e. off) and {@link #DEFAULT_AMPLITUDE},
-     * starting with 0. Therefore the first timing value will be the period to wait before turning
-     * the vibrator on, the second value will be how long to vibrate at {@link #DEFAULT_AMPLITUDE}
-     * strength, etc.
+     * <p>This method is equivalent to calling {@link #createWaveform(long[], int[], int)} with
+     * corresponding amplitude values alternating between 0 and {@link #DEFAULT_AMPLITUDE},
+     * beginning with 0.
      *
      * <p>To cause the pattern to repeat, pass the index into the timings array at which to start
      * the repetition, or -1 to disable repeating. Repeating effects will be played indefinitely
      * and should be cancelled via {@link Vibrator#cancel()}.
      *
-     * @param timings The pattern of alternating on-off timings, starting with off. Timing values
-     *                of 0 will cause the timing / amplitude pair to be ignored.
-     * @param repeat The index into the timings array at which to repeat, or -1 if you you don't
-     *               want to repeat.
+     * @param timings The pattern of alternating on-off timings, starting with an 'off' timing, and
+     *               representing the length of time to sustain the individual item (not
+     *               cumulative).
+     * @param repeat The index into the timings array at which to repeat, or -1 if you don't
+     *               want to repeat indefinitely.
      *
      * @return The desired effect.
      */
@@ -229,11 +229,10 @@ public abstract class VibrationEffect implements Parcelable {
     /**
      * Create a waveform vibration.
      *
-     * <p>Waveform vibrations are a potentially repeating series of timing and amplitude pairs. For
-     * each pair, the value in the amplitude array determines the strength of the vibration and the
-     * value in the timing array determines how long it vibrates for, in milliseconds. Amplitude
-     * values must be between 0 and 255, and an amplitude of 0 implies no vibration (i.e. off). Any
-     * pairs with a timing value of 0 will be ignored.
+     * <p>Waveform vibrations are a potentially repeating series of timing and amplitude pairs,
+     * provided in separate arrays. For each pair, the value in the amplitude array determines
+     * the strength of the vibration and the value in the timing array determines how long it
+     * vibrates for, in milliseconds.
      *
      * <p>To cause the pattern to repeat, pass the index into the timings array at which to start
      * the repetition, or -1 to disable repeating. Repeating effects will be played indefinitely
@@ -244,8 +243,8 @@ public abstract class VibrationEffect implements Parcelable {
      * @param amplitudes The amplitude values of the timing / amplitude pairs. Amplitude values
      *                   must be between 0 and 255, or equal to {@link #DEFAULT_AMPLITUDE}. An
      *                   amplitude value of 0 implies the motor is off.
-     * @param repeat The index into the timings array at which to repeat, or -1 if you you don't
-     *               want to repeat.
+     * @param repeat The index into the timings array at which to repeat, or -1 if you don't
+     *               want to repeat indefinitely.
      *
      * @return The desired effect.
      */
