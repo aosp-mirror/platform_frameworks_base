@@ -17680,6 +17680,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     ? Collections.emptySet()
                     : mOverlayPackagesProvider.getNonRequiredApps(
                             admin, caller.getUserId(), ACTION_PROVISION_MANAGED_PROFILE);
+            if (nonRequiredApps.isEmpty()) {
+                Slogf.i(LOG_TAG, "No disallowed packages for the managed profile.");
+            } else {
+                for (String packageName : nonRequiredApps) {
+                    Slogf.i(LOG_TAG, "Disallowed package [" + packageName + "]");
+                }
+            }
             userInfo = mUserManager.createProfileForUserEvenWhenDisallowed(
                     provisioningParams.getProfileName(),
                     UserManager.USER_TYPE_PROFILE_MANAGED,
