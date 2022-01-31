@@ -14,31 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.nearby
+package com.android.systemui.shared.media
 
 import androidx.annotation.IntDef
 import kotlin.annotation.AnnotationRetention
 
 @IntDef(
-        RangeZone.RANGE_UNKNOWN,
-        RangeZone.RANGE_FAR,
-        RangeZone.RANGE_LONG,
-        RangeZone.RANGE_CLOSE,
-        RangeZone.RANGE_WITHIN_REACH
+    INearbyMediaDevicesUpdateCallback.RANGE_UNKNOWN,
+    INearbyMediaDevicesUpdateCallback.RANGE_FAR,
+    INearbyMediaDevicesUpdateCallback.RANGE_LONG,
+    INearbyMediaDevicesUpdateCallback.RANGE_CLOSE,
+    INearbyMediaDevicesUpdateCallback.RANGE_WITHIN_REACH
 )
 @Retention(AnnotationRetention.SOURCE)
 /** The various range zones a device can be in, in relation to the current device. */
-annotation class RangeZone {
-    companion object {
-        /** Unknown distance range. */
-        const val RANGE_UNKNOWN = 0
-        /** Distance is very far away from the peer device. */
-        const val RANGE_FAR = 1
-        /** Distance is relatively long from the peer device, typically a few meters. */
-        const val RANGE_LONG = 2
-        /** Distance is close to the peer device, typically with one or two meter. */
-        const val RANGE_CLOSE = 3
-        /** Distance is very close to the peer device, typically within one meter or less. */
-        const val RANGE_WITHIN_REACH = 4
-    }
-}
+annotation class RangeZone

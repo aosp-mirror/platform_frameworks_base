@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.media.nearby
+package com.android.systemui.shared.media
 
 import android.os.Parcel
 import android.os.Parcelable
@@ -26,14 +26,15 @@ import android.os.Parcelable
  *   - [routeId] identifying the media route
  *   - [rangeZone] specifying how far away the device with the media route is from this device.
  */
-class NearbyDevice(parcel: Parcel) : Parcelable {
-    var routeId: String? = null
+class NearbyDevice(
+    val routeId: String?,
     @RangeZone val rangeZone: Int
+) : Parcelable {
 
-    init {
-        routeId = parcel.readString() ?: "unknown"
+    private constructor(parcel: Parcel) : this(
+        routeId = parcel.readString() ?: null,
         rangeZone = parcel.readInt()
-    }
+    )
 
     override fun describeContents() = 0
 
