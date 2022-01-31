@@ -162,5 +162,68 @@
     {
       "name": "CtsInstallHostTestCases"
     }
+  ],
+  "staged-platinum-postsubmit": [
+    {
+      "name": "CtsIncrementalInstallHostTestCases"
+    },
+    {
+      "name": "CtsInstallHostTestCases"
+    },
+    {
+      "name": "CtsStagedInstallHostTestCases"
+    },
+    {
+      "name": "CtsExtractNativeLibsHostTestCases"
+    },
+    {
+      "name": "CtsAppSecurityHostTestCases",
+      "options": [
+        {
+          "include-filter": "com.android.cts.splitapp.SplitAppTest"
+        },
+        {
+          "include-filter": "android.appsecurity.cts.EphemeralTest"
+        }
+      ]
+    },
+    {
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.pm.PackageParserTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsRollbackManagerHostTestCases"
+    },
+    {
+      "name": "CtsOsHostTestCases",
+      "options": [
+        {
+          "include-filter": "com.android.server.pm.PackageParserTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsContentTestCases",
+      "options": [
+        {
+          "include-filter": "android.content.cts.IntentFilterTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsAppEnumerationTestCases"
+    },
+    {
+      "name": "PackageManagerServiceUnitTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.pm.test.verify.domain"
+        }
+      ]
+    }
   ]
 }
