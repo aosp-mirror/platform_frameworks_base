@@ -18,6 +18,7 @@ package android.view;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.window.BackEvent;
 
 /**
  * Interface for applications to register back invocation callbacks. This allows the client
@@ -46,14 +47,12 @@ public interface OnBackInvokedCallback {
     /**
      * Called on back gesture progress.
      *
-     * @param touchX Absolute X location of the touch point.
-     * @param touchY Absolute Y location of the touch point.
-     * @param progress Value between 0 and 1 on how far along the back gesture is.
+     * @param backEvent An {@link android.window.BackEvent} object describing the progress event.
      *
+     * @see android.window.BackEvent
      * @hide
      */
-    // TODO(b/210539672): combine back progress params into BackEvent.
-    default void onBackProgressed(int touchX, int touchY, float progress) { };
+    default void onBackProgressed(BackEvent backEvent) { };
 
     /**
      * Called when a back gesture or back button press has been cancelled.

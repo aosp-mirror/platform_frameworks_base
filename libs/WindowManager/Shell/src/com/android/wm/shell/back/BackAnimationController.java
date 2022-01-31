@@ -36,6 +36,7 @@ import android.os.SystemProperties;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
+import android.window.BackEvent;
 import android.window.BackNavigationInfo;
 import android.window.IOnBackInvokedCallback;
 
@@ -127,8 +128,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         }
 
         @Override
-        public void onBackMotion(MotionEvent event) {
-            mShellExecutor.execute(() -> onMotionEvent(event));
+        public void onBackMotion(MotionEvent event, @BackEvent.SwipeEdge int swipeEdge) {
+            mShellExecutor.execute(() -> onMotionEvent(event, swipeEdge));
         }
 
         @Override
@@ -183,12 +184,12 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      * Called when a new motion event needs to be transferred to this
      * {@link BackAnimationController}
      */
-    public void onMotionEvent(MotionEvent event) {
+    public void onMotionEvent(MotionEvent event, @BackEvent.SwipeEdge int swipeEdge) {
         int action = event.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN) {
             initAnimation(event);
         } else if (action == MotionEvent.ACTION_MOVE) {
-            onMove(event);
+            onMove(event, swipeEdge);
         } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
             onGestureFinished();
         }
@@ -264,7 +265,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mTransaction.setVisibility(screenshotSurface, true);
     }
 
-    private void onMove(MotionEvent event) {
+    private void onMove(MotionEvent event, @BackEvent.SwipeEdge int swipeEdge) {
         if (!mBackGestureStarted || mBackNavigationInfo == null) {
             return;
         }
