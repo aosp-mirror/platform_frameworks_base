@@ -591,6 +591,13 @@ public class ShellTransitionTests {
                         .setRotate().build())
                 .build();
         assertFalse(DefaultTransitionHandler.isRotationSeamless(noTask, displays));
+
+        // Seamless if display is explicitly seamless.
+        final TransitionInfo seamlessDisplay = new TransitionInfoBuilder(TRANSIT_CHANGE)
+                .addChange(new ChangeBuilder(TRANSIT_CHANGE).setFlags(FLAG_IS_DISPLAY)
+                        .setRotate(ROTATION_ANIMATION_SEAMLESS).build())
+                .build();
+        assertTrue(DefaultTransitionHandler.isRotationSeamless(seamlessDisplay, displays));
     }
 
     class TransitionInfoBuilder {
