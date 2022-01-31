@@ -16361,6 +16361,11 @@ public class BatteryStatsImpl extends BatteryStats {
             BATTERY_CHARGED_DELAY_MS = delay >= 0 ? delay : mParser.getInt(
                     KEY_BATTERY_CHARGED_DELAY_MS,
                     DEFAULT_BATTERY_CHARGED_DELAY_MS);
+
+            if (mHandler.hasCallbacks(mDeferSetCharging)) {
+                mHandler.removeCallbacks(mDeferSetCharging);
+                mHandler.postDelayed(mDeferSetCharging, BATTERY_CHARGED_DELAY_MS);
+            }
         }
 
         private void updateKernelUidReadersThrottleTime(long oldTimeMs, long newTimeMs) {
