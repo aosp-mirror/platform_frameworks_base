@@ -3030,7 +3030,7 @@ final class InstallPackageHelper {
         final RemovePackageHelper removePackageHelper = new RemovePackageHelper(mPm);
         removePackageHelper.removePackageLI(stubPkg, true /*chatty*/);
         try {
-            return scanSystemPackageTracedLI(scanFile, parseFlags, scanFlags, 0, null);
+            return scanSystemPackageTracedLI(scanFile, parseFlags, scanFlags, null);
         } catch (PackageManagerException e) {
             Slog.w(TAG, "Failed to install compressed system package:" + stubPkg.getPackageName(),
                     e);
@@ -3163,7 +3163,7 @@ final class InstallPackageHelper {
                         | ParsingPackageUtils.PARSE_IS_SYSTEM_DIR;
         @PackageManagerService.ScanFlags int scanFlags = mPm.getSystemPackageScanFlags(codePath);
         final AndroidPackage pkg = scanSystemPackageTracedLI(
-                        codePath, parseFlags, scanFlags, 0 /*currentTime*/, null);
+                codePath, parseFlags, scanFlags, null);
 
         PackageSetting pkgSetting = mPm.mSettings.getPackageLPr(pkg.getPackageName());
 
@@ -3338,7 +3338,7 @@ final class InstallPackageHelper {
                 mRemovePackageHelper.removePackageLI(pkg, true);
                 try {
                     final File codePath = new File(pkg.getPath());
-                    scanSystemPackageTracedLI(codePath, 0, scanFlags, 0, null);
+                    scanSystemPackageTracedLI(codePath, 0, scanFlags, null);
                 } catch (PackageManagerException e) {
                     Slog.e(TAG, "Failed to parse updated, ex-system package: "
                             + e.getMessage());
@@ -3359,7 +3359,7 @@ final class InstallPackageHelper {
 
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
     public void installPackagesFromDir(File scanDir, List<File> frameworkSplits, int parseFlags,
-            int scanFlags, long currentTime, PackageParser2 packageParser,
+            int scanFlags, PackageParser2 packageParser,
             ExecutorService executorService) {
         final File[] files = scanDir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
@@ -3402,7 +3402,7 @@ final class InstallPackageHelper {
                             parseResult.parsedPackage);
                 }
                 try {
-                    addForInitLI(parseResult.parsedPackage, parseFlags, scanFlags, currentTime,
+                    addForInitLI(parseResult.parsedPackage, parseFlags, scanFlags,
                             null);
                 } catch (PackageManagerException e) {
                     errorCode = e.error;
@@ -3465,7 +3465,7 @@ final class InstallPackageHelper {
 
             try {
                 final AndroidPackage newPkg = scanSystemPackageTracedLI(
-                        scanFile, reparseFlags, rescanFlags, 0, null);
+                        scanFile, reparseFlags, rescanFlags, null);
                 // We rescanned a stub, add it to the list of stubbed system packages
                 if (newPkg.isStub()) {
                     stubSystemApps.add(packageName);
@@ -3479,14 +3479,14 @@ final class InstallPackageHelper {
 
     /**
      *  Traces a package scan.
-     *  @see #scanSystemPackageLI(File, int, int, long, UserHandle)
+     *  @see #scanSystemPackageLI(File, int, int, UserHandle)
      */
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
     public AndroidPackage scanSystemPackageTracedLI(File scanFile, final int parseFlags,
-            int scanFlags, long currentTime, UserHandle user) throws PackageManagerException {
+            int scanFlags, UserHandle user) throws PackageManagerException {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanPackage [" + scanFile.toString() + "]");
         try {
-            return scanSystemPackageLI(scanFile, parseFlags, scanFlags, currentTime, user);
+            return scanSystemPackageLI(scanFile, parseFlags, scanFlags, user);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -3498,7 +3498,7 @@ final class InstallPackageHelper {
      */
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
     private AndroidPackage scanSystemPackageLI(File scanFile, int parseFlags, int scanFlags,
-            long currentTime, UserHandle user) throws PackageManagerException {
+            UserHandle user) throws PackageManagerException {
         if (DEBUG_INSTALL) Slog.d(TAG, "Parsing: " + scanFile);
 
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parsePackage");
@@ -3514,7 +3514,7 @@ final class InstallPackageHelper {
             PackageManagerService.renameStaticSharedLibraryPackage(parsedPackage);
         }
 
-        return addForInitLI(parsedPackage, parseFlags, scanFlags, currentTime, user);
+        return addForInitLI(parsedPackage, parseFlags, scanFlags, user);
     }
 
     /**
@@ -3533,11 +3533,11 @@ final class InstallPackageHelper {
     @GuardedBy({"mPm.mLock", "mPm.mInstallLock"})
     private AndroidPackage addForInitLI(ParsedPackage parsedPackage,
             @ParsingPackageUtils.ParseFlags int parseFlags,
-            @PackageManagerService.ScanFlags int scanFlags, long currentTime,
+            @PackageManagerService.ScanFlags int scanFlags,
             @Nullable UserHandle user) throws PackageManagerException {
 
         final Pair<ScanResult, Boolean> scanResultPair = scanSystemPackageLI(
-                parsedPackage, parseFlags, scanFlags, currentTime, user);
+                parsedPackage, parseFlags, scanFlags, user);
         final ScanResult scanResult = scanResultPair.first;
         boolean shouldHideSystemApp = scanResultPair.second;
         if (scanResult.mSuccess) {
@@ -3715,7 +3715,7 @@ final class InstallPackageHelper {
 
     private Pair<ScanResult, Boolean> scanSystemPackageLI(ParsedPackage parsedPackage,
             @ParsingPackageUtils.ParseFlags int parseFlags,
-            @PackageManagerService.ScanFlags int scanFlags, long currentTime,
+            @PackageManagerService.ScanFlags int scanFlags,
             @Nullable UserHandle user) throws PackageManagerException {
         final boolean scanSystemPartition =
                 (parseFlags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) != 0;
@@ -3902,7 +3902,7 @@ final class InstallPackageHelper {
         }
 
         final ScanResult scanResult = scanPackageNewLI(parsedPackage, parseFlags,
-                scanFlags | SCAN_UPDATE_SIGNATURE, currentTime, user, null);
+                scanFlags | SCAN_UPDATE_SIGNATURE, 0 /* currentTime */, user, null);
         return new Pair<>(scanResult, shouldHideSystemApp);
     }
 
