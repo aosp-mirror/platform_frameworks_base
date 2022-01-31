@@ -23,7 +23,6 @@ import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STA
 import static com.android.server.devicestate.DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS;
 import static com.android.server.devicestate.OverrideRequestController.STATUS_ACTIVE;
 import static com.android.server.devicestate.OverrideRequestController.STATUS_CANCELED;
-import static com.android.server.devicestate.OverrideRequestController.STATUS_SUSPENDED;
 
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -348,7 +347,7 @@ public final class DeviceStateManagerService extends SystemService {
             mBaseState = Optional.of(baseState);
 
             if (baseState.hasFlag(FLAG_CANCEL_OVERRIDE_REQUESTS)) {
-                mOverrideRequestController.cancelOverrideRequests();
+                mOverrideRequestController.cancelOverrideRequest();
             }
             mOverrideRequestController.handleBaseStateChanged();
             updatePendingStateLocked();
@@ -503,7 +502,7 @@ public final class DeviceStateManagerService extends SystemService {
             @OverrideRequestController.RequestStatus int status) {
         if (status == STATUS_ACTIVE) {
             mActiveOverride = Optional.of(request);
-        } else if (status == STATUS_SUSPENDED || status == STATUS_CANCELED) {
+        } else if (status == STATUS_CANCELED) {
             if (mActiveOverride.isPresent() && mActiveOverride.get() == request) {
                 mActiveOverride = Optional.empty();
             }
@@ -528,8 +527,6 @@ public final class DeviceStateManagerService extends SystemService {
                 // Schedule the notification now.
                 processRecord.notifyRequestActiveAsync(request.getToken());
             }
-        } else if (status == STATUS_SUSPENDED) {
-            processRecord.notifyRequestSuspendedAsync(request.getToken());
         } else {
             processRecord.notifyRequestCanceledAsync(request.getToken());
         }
@@ -595,15 +592,14 @@ public final class DeviceStateManagerService extends SystemService {
         }
     }
 
-    private void cancelRequestInternal(int callingPid, @NonNull IBinder token) {
+    private void cancelStateRequestInternal(int callingPid) {
         synchronized (mLock) {
             final ProcessRecord processRecord = mProcessRecords.get(callingPid);
             if (processRecord == null) {
                 throw new IllegalStateException("Process " + callingPid
                         + " has no registered callback.");
             }
-
-            mOverrideRequestController.cancelRequest(token);
+            mActiveOverride.ifPresent(mOverrideRequestController::cancelRequest);
         }
     }
 
@@ -625,6 +621,23 @@ public final class DeviceStateManagerService extends SystemService {
             }
 
             mOverrideRequestController.dumpInternal(pw);
+        }
+    }
+
+    /**
+     * Allow top processes to request or cancel a device state change. If the calling process ID is
+     * not the top app, then check if this process holds the CONTROL_DEVICE_STATE permission.
+     * @param callingPid
+     */
+    private void checkCanControlDeviceState(int callingPid) {
+        // Allow top processes to request a device state change
+        // If the calling process ID is not the top app, then we check if this process
+        // holds a permission to CONTROL_DEVICE_STATE
+        final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
+        if (topApp == null || topApp.getPid() != callingPid) {
+            getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
+                    "Permission required to request device state, "
+                            + "or the call must come from the top focused app.");
         }
     }
 
@@ -716,24 +729,6 @@ public final class DeviceStateManagerService extends SystemService {
             });
         }
 
-        public void notifyRequestSuspendedAsync(IBinder token) {
-            @RequestStatus Integer lastStatus = mLastNotifiedStatus.get(token);
-            if (lastStatus != null
-                    && (lastStatus == STATUS_SUSPENDED || lastStatus == STATUS_CANCELED)) {
-                return;
-            }
-
-            mLastNotifiedStatus.put(token, STATUS_SUSPENDED);
-            mHandler.post(() -> {
-                try {
-                    mCallback.onRequestSuspended(token);
-                } catch (RemoteException ex) {
-                    Slog.w(TAG, "Failed to notify process " + mPid + " that request state changed.",
-                            ex);
-                }
-            });
-        }
-
         public void notifyRequestCanceledAsync(IBinder token) {
             @RequestStatus Integer lastStatus = mLastNotifiedStatus.get(token);
             if (lastStatus != null && lastStatus == STATUS_CANCELED) {
@@ -782,12 +777,7 @@ public final class DeviceStateManagerService extends SystemService {
             // Allow top processes to request a device state change
             // If the calling process ID is not the top app, then we check if this process
             // holds a permission to CONTROL_DEVICE_STATE
-            final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
-            if (topApp.getPid() != callingPid) {
-                getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
-                        "Permission required to request device state, "
-                                + "or the call must come from the top focused app.");
-            }
+            checkCanControlDeviceState(callingPid);
 
             if (token == null) {
                 throw new IllegalArgumentException("Request token must not be null.");
@@ -802,25 +792,16 @@ public final class DeviceStateManagerService extends SystemService {
         }
 
         @Override // Binder call
-        public void cancelRequest(IBinder token) {
+        public void cancelStateRequest() {
             final int callingPid = Binder.getCallingPid();
             // Allow top processes to cancel a device state change
             // If the calling process ID is not the top app, then we check if this process
             // holds a permission to CONTROL_DEVICE_STATE
-            final WindowProcessController topApp = mActivityTaskManagerInternal.getTopApp();
-            if (topApp.getPid() != callingPid) {
-                getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
-                        "Permission required to cancel device state, "
-                                + "or the call must come from the top focused app.");
-            }
-
-            if (token == null) {
-                throw new IllegalArgumentException("Request token must not be null.");
-            }
+            checkCanControlDeviceState(callingPid);
 
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
-                cancelRequestInternal(callingPid, token);
+                cancelStateRequestInternal(callingPid);
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }

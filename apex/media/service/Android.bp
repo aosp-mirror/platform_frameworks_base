@@ -39,6 +39,7 @@ java_sdk_library {
         ":service-media-s-sources",
     ],
     libs: [
+        "androidx.annotation_annotation",
         "updatable-media",
         "modules-annotation-minsdk",
         "modules-utils-build",

@@ -181,6 +181,22 @@ public class AudioManager {
     public static final String VOLUME_CHANGED_ACTION = "android.media.VOLUME_CHANGED_ACTION";
 
     /**
+     * @hide Broadcast intent when the volume for a particular stream type changes.
+     * Includes the stream, the new volume and previous volumes.
+     * Notes:
+     *  - for internal platform use only, do not make public,
+     *  - never used for "remote" volume changes
+     *
+     * @see #EXTRA_VOLUME_STREAM_TYPE
+     * @see #EXTRA_VOLUME_STREAM_VALUE
+     * @see #EXTRA_PREV_VOLUME_STREAM_VALUE
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @SuppressLint("ActionValue")
+    public static final String ACTION_VOLUME_CHANGED = "android.media.VOLUME_CHANGED_ACTION";
+
+    /**
      * @hide Broadcast intent when the devices for a particular stream type changes.
      * Includes the stream, the new devices and previous devices.
      * Notes:
@@ -244,7 +260,8 @@ public class AudioManager {
     /**
      * @hide The stream type for the volume changed intent.
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @SuppressLint("ActionValue")
     public static final String EXTRA_VOLUME_STREAM_TYPE = "android.media.EXTRA_VOLUME_STREAM_TYPE";
 
     /**
@@ -261,7 +278,8 @@ public class AudioManager {
     /**
      * @hide The volume associated with the stream for the volume changed intent.
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @SuppressLint("ActionValue")
     public static final String EXTRA_VOLUME_STREAM_VALUE =
         "android.media.EXTRA_VOLUME_STREAM_VALUE";
 
@@ -368,7 +386,7 @@ public class AudioManager {
     public static final int STREAM_NOTIFICATION = AudioSystem.STREAM_NOTIFICATION;
     /** @hide Used to identify the volume of audio streams for phone calls when connected
      *        to bluetooth */
-    @UnsupportedAppUsage
+    @SystemApi
     public static final int STREAM_BLUETOOTH_SCO = AudioSystem.STREAM_BLUETOOTH_SCO;
     /** @hide Used to identify the volume of audio streams for enforced system sounds
      *        in certain countries (e.g camera in Japan) */

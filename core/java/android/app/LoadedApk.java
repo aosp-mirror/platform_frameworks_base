@@ -746,6 +746,10 @@ public final class LoadedApk {
                 // default linker namespace.
                 continue;
             }
+            if (info.isSdk()) {
+                // SDKs are not loaded automatically.
+                continue;
+            }
             if (libsToLoadAfter.contains(info.getName())) {
                 if (DEBUG) {
                     Slog.v(ActivityThread.TAG,

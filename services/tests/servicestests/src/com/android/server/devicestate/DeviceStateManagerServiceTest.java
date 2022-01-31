@@ -326,7 +326,7 @@ public final class DeviceStateManagerServiceTest {
         assertEquals(callback.getLastNotifiedInfo().currentState,
                 OTHER_DEVICE_STATE.getIdentifier());
 
-        mService.getBinderService().cancelRequest(token);
+        mService.getBinderService().cancelStateRequest();
         flushHandler();
 
         assertEquals(callback.getLastNotifiedStatus(token),
@@ -378,9 +378,9 @@ public final class DeviceStateManagerServiceTest {
         mPolicy.resumeConfigureOnce();
         flushHandler();
 
-        // First request status is now suspended as there is another pending request.
+        // First request status is now canceled as there is another pending request.
         assertEquals(callback.getLastNotifiedStatus(firstRequestToken),
-                TestDeviceStateManagerCallback.STATUS_SUSPENDED);
+                TestDeviceStateManagerCallback.STATUS_CANCELED);
         // Second request status still unknown because the service is still awaiting policy
         // callback.
         assertEquals(callback.getLastNotifiedStatus(secondRequestToken),
@@ -402,19 +402,19 @@ public final class DeviceStateManagerServiceTest {
                 DEFAULT_DEVICE_STATE.getIdentifier());
 
         // Now cancel the second request to make the first request active.
-        mService.getBinderService().cancelRequest(secondRequestToken);
+        mService.getBinderService().cancelStateRequest();
         flushHandler();
 
         assertEquals(callback.getLastNotifiedStatus(firstRequestToken),
-                TestDeviceStateManagerCallback.STATUS_ACTIVE);
+                TestDeviceStateManagerCallback.STATUS_CANCELED);
         assertEquals(callback.getLastNotifiedStatus(secondRequestToken),
                 TestDeviceStateManagerCallback.STATUS_CANCELED);
 
-        assertEquals(mService.getCommittedState(), Optional.of(OTHER_DEVICE_STATE));
+        assertEquals(mService.getCommittedState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mService.getPendingState(), Optional.empty());
         assertEquals(mService.getBaseState(), Optional.of(DEFAULT_DEVICE_STATE));
         assertEquals(mPolicy.getMostRecentRequestedStateToConfigure(),
-                OTHER_DEVICE_STATE.getIdentifier());
+                DEFAULT_DEVICE_STATE.getIdentifier());
     }
 
     @Test
@@ -653,11 +653,6 @@ public final class DeviceStateManagerServiceTest {
         @Override
         public void onRequestActive(IBinder token) {
             mLastNotifiedStatus.put(token, STATUS_ACTIVE);
-        }
-
-        @Override
-        public void onRequestSuspended(IBinder token) {
-            mLastNotifiedStatus.put(token, STATUS_SUSPENDED);
         }
 
         @Override

@@ -16,6 +16,11 @@
 
 package android.app;
 
+import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
+import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_NOT_COLORED;
+import static android.app.admin.DevicePolicyResources.Drawables.UNDEFINED;
+import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
+import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON_BADGE;
 import static android.content.pm.Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA256;
 import static android.content.pm.Checksum.TYPE_PARTIAL_MERKLE_ROOT_1M_SHA512;
 import static android.content.pm.Checksum.TYPE_WHOLE_MD5;
@@ -31,6 +36,7 @@ import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UserIdInt;
 import android.annotation.XmlRes;
+import android.app.admin.DevicePolicyManager;
 import android.app.role.RoleManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -62,7 +68,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
@@ -74,7 +79,6 @@ import android.content.pm.SuspendDialogInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
-import android.content.pm.pkg.FrameworkPackageUserState;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -122,7 +126,6 @@ import dalvik.system.VMRuntime;
 
 import libcore.util.EmptyArray;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
@@ -172,6 +175,8 @@ public class ApplicationPackageManager extends PackageManager {
     private PackageInstaller mInstaller;
     @GuardedBy("mLock")
     private ArtManager mArtManager;
+    @GuardedBy("mLock")
+    private DevicePolicyManager mDevicePolicyManager;
 
     @GuardedBy("mDelegates")
     private final ArrayList<MoveCallbackDelegate> mDelegates = new ArrayList<>();
@@ -185,6 +190,15 @@ public class ApplicationPackageManager extends PackageManager {
                 mUserManager = UserManager.get(mContext);
             }
             return mUserManager;
+        }
+    }
+
+    DevicePolicyManager getDevicePolicyManager() {
+        synchronized (mLock) {
+            if (mDevicePolicyManager == null) {
+                mDevicePolicyManager = mContext.getSystemService(DevicePolicyManager.class);
+            }
+            return mDevicePolicyManager;
         }
     }
 
@@ -1876,10 +1890,25 @@ public class ApplicationPackageManager extends PackageManager {
         if (!hasUserBadge(user.getIdentifier())) {
             return icon;
         }
+
+        final Drawable badgeForeground = getDevicePolicyManager().getDrawable(
+                getUpdatableUserIconBadgeId(user),
+                SOLID_COLORED,
+                () -> getDefaultUserIconBadge(user));
+
         Drawable badge = new LauncherIcons(mContext).getBadgeDrawable(
-                getUserManager().getUserIconBadgeResId(user.getIdentifier()),
+                badgeForeground,
                 getUserBadgeColor(user, false));
         return getBadgedDrawable(icon, badge, null, true);
+    }
+
+    private String getUpdatableUserIconBadgeId(UserHandle user) {
+        return getUserManager().isManagedProfile(user.getIdentifier())
+                ? WORK_PROFILE_ICON_BADGE : UNDEFINED;
+    }
+
+    private Drawable getDefaultUserIconBadge(UserHandle user) {
+        return mContext.getDrawable(getUserManager().getUserIconBadgeResId(user.getIdentifier()));
     }
 
     @Override
@@ -1913,11 +1942,26 @@ public class ApplicationPackageManager extends PackageManager {
         if (badgeColor == null) {
             return null;
         }
-        Drawable badgeForeground = getDrawableForDensity(
-                getUserManager().getUserBadgeResId(user.getIdentifier()), density);
+
+        final Drawable badgeForeground = getDevicePolicyManager().getDrawableForDensity(
+                getUpdatableUserBadgeId(user),
+                SOLID_COLORED,
+                density,
+                () -> getDefaultUserBadgeForDensity(user, density));
+
         badgeForeground.setTint(getUserBadgeColor(user, false));
         Drawable badge = new LayerDrawable(new Drawable[] {badgeColor, badgeForeground });
         return badge;
+    }
+
+    private String getUpdatableUserBadgeId(UserHandle user) {
+        return getUserManager().isManagedProfile(user.getIdentifier())
+                ? WORK_PROFILE_ICON : UNDEFINED;
+    }
+
+    private Drawable getDefaultUserBadgeForDensity(UserHandle user, int density) {
+        return getDrawableForDensity(
+                getUserManager().getUserBadgeResId(user.getIdentifier()), density);
     }
 
     /**
@@ -1928,12 +1972,22 @@ public class ApplicationPackageManager extends PackageManager {
         if (!hasUserBadge(user.getIdentifier())) {
             return null;
         }
-        Drawable badge = getDrawableForDensity(
-                getUserManager().getUserBadgeNoBackgroundResId(user.getIdentifier()), density);
+
+        final Drawable badge = getDevicePolicyManager().getDrawableForDensity(
+                getUpdatableUserBadgeId(user),
+                SOLID_NOT_COLORED,
+                density,
+                () -> getDefaultUserBadgeNoBackgroundForDensity(user, density));
+
         if (badge != null) {
             badge.setTint(getUserBadgeColor(user, true));
         }
         return badge;
+    }
+
+    private Drawable getDefaultUserBadgeNoBackgroundForDensity(UserHandle user, int density) {
+        return getDrawableForDensity(
+                getUserManager().getUserBadgeNoBackgroundResId(user.getIdentifier()), density);
     }
 
     private Drawable getDrawableForDensity(int drawableId, int density) {
