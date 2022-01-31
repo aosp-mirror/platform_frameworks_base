@@ -195,7 +195,6 @@ cc_library_shared {
                 "android_util_FileObserver.cpp",
                 "android/opengl/poly_clip.cpp", // TODO: .arm
                 "android/opengl/util.cpp",
-                "android_server_NetworkManagementSocketTagger.cpp",
                 "android_ddm_DdmHandleNativeHeap.cpp",
                 "android_backup_BackupDataInput.cpp",
                 "android_backup_BackupDataOutput.cpp",
@@ -310,6 +309,8 @@ cc_library_shared {
                 "libdl_android",
                 "libtimeinstate",
                 "server_configurable_flags",
+                // TODO: delete when ConnectivityT moves to APEX.
+                "libframework-connectivity-tiramisu-jni",
             ],
             export_shared_lib_headers: [
                 // our headers include libnativewindow's public headers
