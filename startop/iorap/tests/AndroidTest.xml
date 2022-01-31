@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2018 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<configuration description="Runs libiorap-java-tests.">
+    <option name="test-suite-tag" value="apct" />
+    <option name="test-suite-tag" value="apct-instrumentation" />
+    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
+        <option name="cleanup-apks" value="true" />
+        <option name="test-file-name" value="libiorap-java-tests.apk" />
+    </target_preparer>
+
+    <!--
+      Our IIorapIntegrationTest.kt requires setlinux to be disabled:
+      it connects to the iorapd binder service but this requires selinux permissions:
+
+      avc:  denied  { find } for service=iorapd pid=2738 uid=10050
+        scontext=u:r:platform_app:s0:c512,c768 tcontext=u:object_r:iorapd_service:s0
+        tclass=service_manager permissive=0
+    -->
+    <target_preparer class="com.android.tradefed.targetprep.DisableSELinuxTargetPreparer">
+    </target_preparer>
+
+    <!-- do not use DeviceSetup#set-property because it reboots the device b/136200738.
+         furthermore the changes in /data/local.prop don't actually seem to get picked up.
+    -->
+    <target_preparer
+        class="com.android.tradefed.targetprep.DeviceSetup">
+        <!-- we need this magic flag, otherwise it always reboots and breaks the selinux -->
+        <option name="force-skip-system-props" value="true" />
+
+        <!-- Crash instead of using Log.wtf within the system_server iorap code. -->
+        <option name="run-command" value="setprop iorapd.forwarding_service.wtf_crash true" />
+        <!-- IIorapd has fake behavior: it doesn't do anything but reply with 'DONE' status -->
+        <option name="run-command" value="setprop iorapd.binder.fake true" />
+
+        <!-- iorapd does not pick up the above changes until we restart it -->
+        <option name="run-command" value="stop iorapd" />
+        <option name="run-command" value="start iorapd" />
+        <!-- give it some time to restart the service; otherwise the first unit test might fail -->
+        <option name="run-command" value="sleep 1" />
+    </target_preparer>
+
+    <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
+        <option name="package" value="com.google.android.startop.iorap.tests" />
+        <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
+    </test>
+
+    <!-- using DeviceSetup again does not work. we simply leave the device in a semi-bad
+         state. there is no way to clean this up as far as I know.
+         -->
+
+</configuration>
+

@@ -1,0 +1,143 @@
+#!/bin/bash
+#
+# Copyright 2018, The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#
+# Forces an application APK to be compiled (by ART's dex2oat)
+# with a specific compiler filter.
+#
+# Example usage:
+#    $> ./force_compiler_filter -p com.google.android.apps.maps -c speed-profile
+#
+# (The application may be started/stopped as a side effect)
+#
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$DIR/lib/common"
+
+usage() {
+    cat <<EOF
+Usage: $(basename $0) [OPTION]...
+
+  Required:
+    -p, --package               package of the app to recompile
+    -c, --compiler-filter       override the compiler filter if set (default none)
+                                valid options are listed by: adb shell cmd package, under compile -m
+
+  Optional:
+    -a, --activity              activity of the app to recompile
+    -h, --help                  usage information (this)
+    -v, --verbose               enable extra verbose printing
+    -w, --wait_time             how long to wait for app startup (default 10) in seconds
+EOF
+}
+
+wait_time="10" # seconds
+
+parse_arguments() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -a|--activity)
+        activity="$2"
+        shift
+        ;;
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      -p|--package)
+        package="$2"
+        shift
+        ;;
+      -w|--wait_time)
+        wait_time="$2"
+        shift
+        ;;
+      -c|--compiler-filter)
+        compiler_filter="$2"
+        shift
+        ;;
+      -v|--verbose)
+        verbose="y"
+        ;;
+    esac
+    shift
+  done
+
+  if [[ -z "$compiler_filter" ]]; then
+    echo "Missing required --compiler-filter" >&2
+    echo ""
+    usage
+    exit 1
+  fi
+  if [[ -z "$package" ]]; then
+    echo "Missing required --package" >&2
+    echo ""
+    usage
+    exit 1
+  fi
+
+  if [[ "$activity" == "" ]]; then
+    activity="$(get_activity_name "$package")"
+    if [[ "$activity" == "" ]]; then
+      echo "Activity name could not be found, invalid package name?" 1>&2
+      exit 1
+    else
+      verbose_print "Activity name inferred: " "$activity"
+    fi
+  fi
+}
+
+force_package_compilation() {
+  local arg_compiler_filter="$1"
+  local arg_package="$2"
+
+  if [[ $arg_compiler_filter == speed-profile ]]; then
+    # Force the running app to dump its profiles to disk.
+    remote_pkill "$arg_package" -SIGUSR1
+    sleep 1 # give some time for above to complete.
+  fi
+
+  adb shell cmd package compile -m "$arg_compiler_filter" -f "$arg_package"
+}
+
+main() {
+  parse_arguments "$@"
+
+  if [[ $compiler_filter == speed-profile ]]; then
+    # screen needs to be unlocked in order to run an app
+    "$DIR"/unlock_screen
+
+    local output=$("$DIR"/launch_application "$package" "$activity")
+    if [[ $? -ne 0 ]]; then
+      echo "launching application failed" >&2
+      exit 1
+    fi
+
+    verbose_print "$output"
+    # give some time for app startup to complete.
+    # this is supposed to be an upper bound for measuring startup time.
+    sleep "$wait_time"
+  fi
+
+  force_package_compilation "$compiler_filter" "$package"
+
+  # kill the application to ensure next time it's started,
+  # it picks up the correct compilation filter.
+  adb shell am force-stop "$package"
+  remote_pkill "$package"
+}
+
+main "$@"
