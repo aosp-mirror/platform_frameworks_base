@@ -20,7 +20,6 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
-import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import java.io.FileDescriptor
 import java.io.PrintWriter
@@ -64,7 +63,6 @@ class NotifCoordinatorsImpl @Inject constructor(
 
     private val mCoordinators: MutableList<Coordinator> = ArrayList()
     private val mOrderedSections: MutableList<NotifSectioner> = ArrayList()
-    private val mOrderedComparators: MutableList<NotifComparator> = ArrayList()
 
     /**
      * Creates all the coordinators.
@@ -119,9 +117,6 @@ class NotifCoordinatorsImpl @Inject constructor(
         mOrderedSections.add(rankingCoordinator.alertingSectioner) // Alerting
         mOrderedSections.add(rankingCoordinator.silentSectioner) // Silent
         mOrderedSections.add(rankingCoordinator.minimizedSectioner) // Minimized
-
-        // Manually add ordered comparators
-        mOrderedComparators.add(conversationCoordinator.comparator)
     }
 
     /**
@@ -133,7 +128,6 @@ class NotifCoordinatorsImpl @Inject constructor(
             c.attach(pipeline)
         }
         pipeline.setSections(mOrderedSections)
-        pipeline.setComparators(mOrderedComparators)
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {

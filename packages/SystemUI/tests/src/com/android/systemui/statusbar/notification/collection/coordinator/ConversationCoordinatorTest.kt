@@ -32,7 +32,6 @@ import com.android.systemui.statusbar.notification.collection.render.NodeControl
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_IMPORTANT_PERSON
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_PERSON
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertFalse
@@ -41,7 +40,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
@@ -79,7 +77,7 @@ class ConversationCoordinatorTest : SysuiTestCase() {
         }
 
         peopleSectioner = coordinator.sectioner
-        peopleComparator = coordinator.comparator
+        peopleComparator = peopleSectioner.comparator!!
 
         entry = NotificationEntryBuilder().setChannel(channel).build()
 
@@ -105,16 +103,6 @@ class ConversationCoordinatorTest : SysuiTestCase() {
         // only put people notifications in this section
         assertTrue(peopleSectioner.isInSection(entry))
         assertFalse(peopleSectioner.isInSection(NotificationEntryBuilder().build()))
-    }
-
-    @Test
-    fun testComparatorIgnoresFromOtherSection() {
-        val e1 = NotificationEntryBuilder().setId(1).setChannel(channel).build()
-        val e2 = NotificationEntryBuilder().setId(2).setChannel(channel).build()
-
-        // wrong section -- never classify
-        assertThat(peopleComparator.compare(e1, e2)).isEqualTo(0)
-        verify(peopleNotificationIdentifier, never()).getPeopleNotificationType(any())
     }
 
     @Test

@@ -128,6 +128,28 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     }
 
     @Test
+    public void testCompareTo_withNullEntries() {
+        NotificationEntry alertEntry = new NotificationEntryBuilder().setTag("alert").build();
+        mHeadsUpManager.showNotification(alertEntry);
+
+        assertThat(mHeadsUpManager.compare(alertEntry, null)).isLessThan(0);
+        assertThat(mHeadsUpManager.compare(null, alertEntry)).isGreaterThan(0);
+        assertThat(mHeadsUpManager.compare(null, null)).isEqualTo(0);
+    }
+
+    @Test
+    public void testCompareTo_withNonAlertEntries() {
+        NotificationEntry nonAlertEntry1 = new NotificationEntryBuilder().setTag("nae1").build();
+        NotificationEntry nonAlertEntry2 = new NotificationEntryBuilder().setTag("nae2").build();
+        NotificationEntry alertEntry = new NotificationEntryBuilder().setTag("alert").build();
+        mHeadsUpManager.showNotification(alertEntry);
+
+        assertThat(mHeadsUpManager.compare(alertEntry, nonAlertEntry1)).isLessThan(0);
+        assertThat(mHeadsUpManager.compare(nonAlertEntry1, alertEntry)).isGreaterThan(0);
+        assertThat(mHeadsUpManager.compare(nonAlertEntry1, nonAlertEntry2)).isEqualTo(0);
+    }
+
+    @Test
     public void testAlertEntryCompareTo_ongoingCallLessThanActiveRemoteInput() {
         HeadsUpManager.HeadsUpEntry ongoingCall = mHeadsUpManager.new HeadsUpEntry();
         ongoingCall.setEntry(new NotificationEntryBuilder()
