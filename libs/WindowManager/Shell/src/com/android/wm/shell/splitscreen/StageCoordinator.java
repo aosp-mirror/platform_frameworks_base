@@ -879,6 +879,7 @@ class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (mMainUnfoldController != null && mSideUnfoldController != null) {
             mMainUnfoldController.onSplitVisibilityChanged(mDividerVisible);
             mSideUnfoldController.onSplitVisibilityChanged(mDividerVisible);
+            updateUnfoldBounds();
         }
     }
 
