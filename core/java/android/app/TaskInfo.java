@@ -214,6 +214,12 @@ public class TaskInfo {
     public boolean topActivityInSizeCompat;
 
     /**
+     * Whether the direct top activity is eligible for letterbox education.
+     * @hide
+     */
+    public boolean topActivityEligibleForLetterboxEducation;
+
+    /**
      * Whether this task is resizable. Unlike {@link #resizeMode} (which is what the top activity
      * supports), this is what the system actually uses for resizability based on other policy and
      * developer options.
@@ -398,7 +404,8 @@ public class TaskInfo {
 
     /** @hide */
     public boolean hasCompatUI() {
-        return hasCameraCompatControl() || topActivityInSizeCompat;
+        return hasCameraCompatControl() || topActivityInSizeCompat
+                || topActivityEligibleForLetterboxEducation;
     }
 
     /**
@@ -460,6 +467,8 @@ public class TaskInfo {
         return displayId == that.displayId
                 && taskId == that.taskId
                 && topActivityInSizeCompat == that.topActivityInSizeCompat
+                && topActivityEligibleForLetterboxEducation
+                    == that.topActivityEligibleForLetterboxEducation
                 && cameraCompatControlState == that.cameraCompatControlState
                 // Bounds are important if top activity has compat controls.
                 && (!hasCompatUI() || configuration.windowConfiguration.getBounds()
@@ -507,6 +516,7 @@ public class TaskInfo {
         isVisible = source.readBoolean();
         isSleeping = source.readBoolean();
         topActivityInSizeCompat = source.readBoolean();
+        topActivityEligibleForLetterboxEducation = source.readBoolean();
         mTopActivityLocusId = source.readTypedObject(LocusId.CREATOR);
         displayAreaFeatureId = source.readInt();
         cameraCompatControlState = source.readInt();
@@ -551,6 +561,7 @@ public class TaskInfo {
         dest.writeBoolean(isVisible);
         dest.writeBoolean(isSleeping);
         dest.writeBoolean(topActivityInSizeCompat);
+        dest.writeBoolean(topActivityEligibleForLetterboxEducation);
         dest.writeTypedObject(mTopActivityLocusId, flags);
         dest.writeInt(displayAreaFeatureId);
         dest.writeInt(cameraCompatControlState);
@@ -585,6 +596,8 @@ public class TaskInfo {
                 + " isVisible=" + isVisible
                 + " isSleeping=" + isSleeping
                 + " topActivityInSizeCompat=" + topActivityInSizeCompat
+                + " topActivityEligibleForLetterboxEducation= "
+                        + topActivityEligibleForLetterboxEducation
                 + " locusId=" + mTopActivityLocusId
                 + " displayAreaFeatureId=" + displayAreaFeatureId
                 + " cameraCompatControlState="
