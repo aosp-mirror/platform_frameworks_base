@@ -264,6 +264,7 @@
         app:layout_constraintTop_toBottomOf="@id/remove_text">
 
         <TextView
+            android:id="@+id/cancel_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center|bottom"
@@ -288,6 +289,7 @@
         app:layout_constraintTop_toBottomOf="@id/remove_text">
 
         <TextView
+            android:id="@+id/dismiss_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center|bottom"
