@@ -641,6 +641,18 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         }
 
         @Override
+        public void startIntentAndTaskWithLegacyTransition(PendingIntent pendingIntent,
+                Intent fillInIntent, int taskId, boolean intentFirst, Bundle mainOptions,
+                Bundle sideOptions, int sidePosition, float splitRatio,
+                RemoteAnimationAdapter adapter) {
+            executeRemoteCallWithTaskPermission(mController,
+                    "startIntentAndTaskWithLegacyTransition", (controller) ->
+                            controller.mStageCoordinator.startIntentAndTaskWithLegacyTransition(
+                                    pendingIntent, fillInIntent, taskId, intentFirst, mainOptions,
+                                    sideOptions, sidePosition, splitRatio, adapter));
+        }
+
+        @Override
         public void startTasks(int mainTaskId, @Nullable Bundle mainOptions,
                 int sideTaskId, @Nullable Bundle sideOptions,
                 @SplitPosition int sidePosition, float splitRatio,
