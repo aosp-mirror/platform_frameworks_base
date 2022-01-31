@@ -922,7 +922,7 @@ class PackageManagerShellCommand extends ShellCommand {
                 final List<SharedLibraryInfo> libs = libsSlice.getList();
                 for (int l = 0, lsize = libs.size(); l < lsize; ++l) {
                     SharedLibraryInfo lib = libs.get(l);
-                    if (lib.getType() == SharedLibraryInfo.TYPE_SDK) {
+                    if (lib.getType() == SharedLibraryInfo.TYPE_SDK_PACKAGE) {
                         name = lib.getName() + ":" + lib.getLongVersion();
                         break;
                     }

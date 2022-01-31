@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -69,10 +70,19 @@ public class DreamOverlayStateController implements
          */
         default void onStateChanged() {
         }
+
+        /**
+         * Called when the available complication types changes.
+         */
+        default void onAvailableComplicationTypesChanged() {
+        }
     }
 
     private final Executor mExecutor;
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
+
+    @Complication.ComplicationType
+    private int mAvailableComplicationTypes = Complication.COMPLICATION_TYPE_NONE;
 
     private final Collection<Complication> mComplications = new HashSet();
 
@@ -108,7 +118,25 @@ public class DreamOverlayStateController implements
      * Returns collection of present {@link Complication}.
      */
     public Collection<Complication> getComplications() {
-        return Collections.unmodifiableCollection(mComplications);
+        return getComplications(true);
+    }
+
+    /**
+     * Returns collection of present {@link Complication}.
+     */
+    public Collection<Complication> getComplications(boolean filterByAvailability) {
+        return Collections.unmodifiableCollection(filterByAvailability
+                ? mComplications
+                .stream()
+                .filter(complication -> {
+                    @Complication.ComplicationType
+                    final int requiredTypes = complication.getRequiredTypeAvailability();
+
+                    return requiredTypes == Complication.COMPLICATION_TYPE_NONE
+                            || (requiredTypes & getAvailableComplicationTypes()) == requiredTypes;
+                })
+                .collect(Collectors.toCollection(HashSet::new))
+                : mComplications);
     }
 
     private void notifyCallbacks(Consumer<Callback> callbackConsumer) {
@@ -179,5 +207,23 @@ public class DreamOverlayStateController implements
      */
     public void setOverlayActive(boolean active) {
         modifyState(active ? OP_SET_STATE : OP_CLEAR_STATE, STATE_DREAM_OVERLAY_ACTIVE);
+    }
+
+    /**
+     * Returns the available complication types.
+     */
+    @Complication.ComplicationType
+    public int getAvailableComplicationTypes() {
+        return mAvailableComplicationTypes;
+    }
+
+    /**
+     * Sets the available complication types for the dream overlay.
+     */
+    public void setAvailableComplicationTypes(@Complication.ComplicationType int types) {
+        mExecutor.execute(() -> {
+            mAvailableComplicationTypes = types;
+            mCallbacks.forEach(callback -> callback.onAvailableComplicationTypesChanged());
+        });
     }
 }

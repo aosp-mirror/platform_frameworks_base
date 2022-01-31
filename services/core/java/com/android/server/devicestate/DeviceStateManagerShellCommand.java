@@ -97,7 +97,7 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
         try {
             if ("reset".equals(nextArg)) {
                 if (sLastRequest != null) {
-                    mClient.cancelRequest(sLastRequest);
+                    mClient.cancelStateRequest();
                     sLastRequest = null;
                 }
             } else {
@@ -105,9 +105,6 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
                 DeviceStateRequest request = DeviceStateRequest.newBuilder(requestedState).build();
 
                 mClient.requestState(request, null /* executor */, null /* callback */);
-                if (sLastRequest != null) {
-                    mClient.cancelRequest(sLastRequest);
-                }
 
                 sLastRequest = request;
             }

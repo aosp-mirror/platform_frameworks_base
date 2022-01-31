@@ -42,6 +42,10 @@ public class ComplicationCollectionLiveData extends LiveData<Collection<Complica
                 setValue(mDreamOverlayStateController.getComplications());
             }
 
+            @Override
+            public void onAvailableComplicationTypesChanged() {
+                setValue(mDreamOverlayStateController.getComplications());
+            }
         };
     }
 

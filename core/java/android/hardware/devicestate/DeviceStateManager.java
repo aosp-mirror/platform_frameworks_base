@@ -79,9 +79,9 @@ public final class DeviceStateManager {
      * <ul>
      *     <li>The system deems the request can no longer be honored, for example if the requested
      *     state becomes unsupported.
-     *     <li>A call to {@link #cancelRequest(DeviceStateRequest)}.
+     *     <li>A call to {@link #cancelStateRequest}.
      *     <li>Another processes submits a request succeeding this request in which case the request
-     *     will be suspended until the interrupting request is canceled.
+     *     will be canceled.
      * </ul>
      * However, this behavior can be changed by setting flags on the {@link DeviceStateRequest}.
      *
@@ -100,19 +100,18 @@ public final class DeviceStateManager {
     }
 
     /**
-     * Cancels a {@link DeviceStateRequest request} previously submitted with a call to
+     * Cancels the active {@link DeviceStateRequest} previously submitted with a call to
      * {@link #requestState(DeviceStateRequest, Executor, DeviceStateRequest.Callback)}.
      * <p>
-     * This method is noop if the {@code request} has not been submitted with a call to
-     * {@link #requestState(DeviceStateRequest, Executor, DeviceStateRequest.Callback)}.
+     * This method is noop if there is no request currently active.
      *
      * @throws SecurityException if the caller is neither the current top-focused activity nor if
      * the {@link android.Manifest.permission#CONTROL_DEVICE_STATE} permission is held.
      */
     @RequiresPermission(value = android.Manifest.permission.CONTROL_DEVICE_STATE,
             conditional = true)
-    public void cancelRequest(@NonNull DeviceStateRequest request) {
-        mGlobal.cancelRequest(request);
+    public void cancelStateRequest() {
+        mGlobal.cancelStateRequest();
     }
 
     /**

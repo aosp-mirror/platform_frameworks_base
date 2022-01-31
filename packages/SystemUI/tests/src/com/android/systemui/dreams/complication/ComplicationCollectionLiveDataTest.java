@@ -75,6 +75,10 @@ public class ComplicationCollectionLiveDataTest extends SysuiTestCase {
             callbackCaptor.getValue().onComplicationsChanged();
 
             verifyUpdate(observer, complications);
+
+            callbackCaptor.getValue().onAvailableComplicationTypesChanged();
+
+            verifyUpdate(observer, complications);
         });
     }
 
