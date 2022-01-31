@@ -7829,6 +7829,7 @@ package android.os {
   }
 
   public static class Build.VERSION {
+    field @NonNull public static final java.util.Set<java.lang.String> KNOWN_CODENAMES;
     field @NonNull public static final String PREVIEW_SDK_FINGERPRINT;
   }
 
