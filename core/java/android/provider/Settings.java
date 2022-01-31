@@ -2436,6 +2436,23 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MMS_MESSAGE_SETTING = "android.settings.MMS_MESSAGE_SETTING";
 
+    /**
+     * Activity Action: Show a screen of bedtime settings, which is provided by the wellbeing app.
+     * <p>
+     * The handler of this intent action may not exist.
+     * <p>
+     * To start an activity with this intent, apps should set the wellbeing package explicitly in
+     * the intent together with this action. The wellbeing package is defined in
+     * {@code com.android.internal.R.string.config_defaultWellbeingPackage}.
+     * <p>
+     * Output: Nothing
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_BEDTIME_SETTINGS = "android.settings.BEDTIME_SETTINGS";
+
     // End of Intent actions for Settings
 
     /**
