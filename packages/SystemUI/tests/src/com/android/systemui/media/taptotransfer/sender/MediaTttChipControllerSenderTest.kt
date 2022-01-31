@@ -17,8 +17,6 @@
 package com.android.systemui.media.taptotransfer.sender
 
 import android.app.StatusBarManager
-import android.graphics.drawable.Drawable
-import android.graphics.drawable.Icon
 import android.media.MediaRoute2Info
 import android.view.View
 import android.view.WindowManager
@@ -44,8 +42,6 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @Ignore("b/216286227")
 class MediaTttChipControllerSenderTest : SysuiTestCase() {
-    private lateinit var appIconDrawable: Drawable
-
     private lateinit var controllerSender: MediaTttChipControllerSender
 
     @Mock
@@ -57,7 +53,6 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        appIconDrawable = Icon.createWithResource(context, R.drawable.ic_cake).loadDrawable(context)
         controllerSender = MediaTttChipControllerSender(commandQueue, context, windowManager)
 
         val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
@@ -197,7 +192,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         controllerSender.displayChip(state)
 
         val chipView = getChipView()
-        assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconDrawable)
+        assertThat(chipView.getAppIconView().drawable).isEqualTo(state.getAppIcon(context))
         assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_ICON_CONTENT_DESC)
         assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
@@ -211,7 +206,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         controllerSender.displayChip(state)
 
         val chipView = getChipView()
-        assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconDrawable)
+        assertThat(chipView.getAppIconView().drawable).isEqualTo(state.getAppIcon(context))
         assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_ICON_CONTENT_DESC)
         assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
@@ -225,7 +220,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         controllerSender.displayChip(state)
 
         val chipView = getChipView()
-        assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconDrawable)
+        assertThat(chipView.getAppIconView().drawable).isEqualTo(state.getAppIcon(context))
         assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_ICON_CONTENT_DESC)
         assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.VISIBLE)
@@ -239,7 +234,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         controllerSender.displayChip(state)
 
         val chipView = getChipView()
-        assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconDrawable)
+        assertThat(chipView.getAppIconView().drawable).isEqualTo(state.getAppIcon(context))
         assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_ICON_CONTENT_DESC)
         assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.VISIBLE)
@@ -253,7 +248,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         controllerSender.displayChip(state)
 
         val chipView = getChipView()
-        assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconDrawable)
+        assertThat(chipView.getAppIconView().drawable).isEqualTo(state.getAppIcon(context))
         assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_ICON_CONTENT_DESC)
         assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
@@ -314,7 +309,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         controllerSender.displayChip(state)
 
         val chipView = getChipView()
-        assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconDrawable)
+        assertThat(chipView.getAppIconView().drawable).isEqualTo(state.getAppIcon(context))
         assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_ICON_CONTENT_DESC)
         assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
@@ -375,7 +370,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         controllerSender.displayChip(state)
 
         val chipView = getChipView()
-        assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconDrawable)
+        assertThat(chipView.getAppIconView().drawable).isEqualTo(state.getAppIcon(context))
         assertThat(chipView.getAppIconView().contentDescription).isEqualTo(APP_ICON_CONTENT_DESC)
         assertThat(chipView.getChipText()).isEqualTo(state.getChipTextString(context))
         assertThat(chipView.getLoadingIconVisibility()).isEqualTo(View.GONE)
@@ -449,39 +444,41 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun almostCloseToStartCast() =
-        AlmostCloseToStartCast(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME)
+        AlmostCloseToStartCast(PACKAGE_NAME, APP_ICON_CONTENT_DESC, DEVICE_NAME)
 
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun almostCloseToEndCast() =
-        AlmostCloseToEndCast(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME)
+        AlmostCloseToEndCast(PACKAGE_NAME, APP_ICON_CONTENT_DESC, DEVICE_NAME)
 
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun transferToReceiverTriggered() =
-        TransferToReceiverTriggered(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME)
+        TransferToReceiverTriggered(PACKAGE_NAME, APP_ICON_CONTENT_DESC, DEVICE_NAME)
 
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun transferToThisDeviceTriggered() =
-        TransferToThisDeviceTriggered(appIconDrawable, APP_ICON_CONTENT_DESC)
+        TransferToThisDeviceTriggered(PACKAGE_NAME, APP_ICON_CONTENT_DESC)
 
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun transferToReceiverSucceeded(undoCallback: IUndoMediaTransferCallback? = null) =
         TransferToReceiverSucceeded(
-            appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME, undoCallback
+            PACKAGE_NAME, APP_ICON_CONTENT_DESC, DEVICE_NAME, undoCallback
         )
 
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun transferToThisDeviceSucceeded(undoCallback: IUndoMediaTransferCallback? = null) =
         TransferToThisDeviceSucceeded(
-            appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME, undoCallback
+            PACKAGE_NAME, APP_ICON_CONTENT_DESC, DEVICE_NAME, undoCallback
         )
 
     /** Helper method providing default parameters to not clutter up the tests. */
-    private fun transferFailed() = TransferFailed(appIconDrawable, APP_ICON_CONTENT_DESC)
+    private fun transferFailed() = TransferFailed(PACKAGE_NAME, APP_ICON_CONTENT_DESC)
 }
 
 private const val DEVICE_NAME = "My Tablet"
 private const val APP_ICON_CONTENT_DESC = "Content description"
+private const val PACKAGE_NAME = "com.android.systemui"
 
 private val routeInfo = MediaRoute2Info.Builder("id", "Test Name")
     .addFeature("feature")
+    .setPackageName(PACKAGE_NAME)
     .build()

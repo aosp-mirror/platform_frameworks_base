@@ -22,6 +22,7 @@ import android.content.Context
 import android.graphics.PixelFormat
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import com.android.internal.widget.CachingIconView
@@ -100,10 +101,17 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
      * This is in the common superclass since both the sender and the receiver show an icon.
      */
     internal fun setIcon(chipState: T, currentChipView: ViewGroup) {
-        currentChipView.findViewById<CachingIconView>(R.id.app_icon).apply {
-            this.setImageDrawable(chipState.appIconDrawable)
-            this.contentDescription = chipState.appIconContentDescription
+        val appIconView = currentChipView.findViewById<CachingIconView>(R.id.app_icon)
+        appIconView.contentDescription = chipState.appIconContentDescription
+
+        val appIcon = chipState.getAppIcon(context)
+        val visibility = if (appIcon != null) {
+            View.VISIBLE
+        } else {
+            View.GONE
         }
+        appIconView.setImageDrawable(appIcon)
+        appIconView.visibility = visibility
     }
 }
 

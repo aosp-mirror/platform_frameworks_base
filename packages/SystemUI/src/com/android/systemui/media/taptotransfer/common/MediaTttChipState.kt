@@ -16,15 +16,31 @@
 
 package com.android.systemui.media.taptotransfer.common
 
+import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
+import android.util.Log
 
 /**
  * A superclass chip state that will be subclassed by the sender chip and receiver chip.
  *
- * @property appIconDrawable a drawable representing the icon of the app playing the media.
+ * @property appPackageName the package name of the app playing the media. Will be used to fetch the
+ *   app icon.
  * @property appIconContentDescription a string to use as the content description for the icon.
  */
 open class MediaTttChipState(
-    internal val appIconDrawable: Drawable,
+    internal val appPackageName: String?,
     internal val appIconContentDescription: String
-)
+) {
+    fun getAppIcon(context: Context): Drawable? {
+        appPackageName ?: return null
+        return try {
+            context.packageManager.getApplicationIcon(appPackageName)
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.w(TAG, "Cannot find icon for package $appPackageName", e)
+            null
+        }
+    }
+}
+
+private val TAG = MediaTttChipState::class.simpleName!!

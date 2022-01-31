@@ -101,7 +101,7 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         val drawable = Icon.createWithResource(context, R.drawable.ic_cake).loadDrawable(context)
         val contentDescription = "Test description"
 
-        controllerReceiver.displayChip(ChipStateReceiver(drawable, contentDescription))
+        controllerReceiver.displayChip(ChipStateReceiver(PACKAGE_NAME, contentDescription))
 
         assertThat(getChipView().getAppIconView().drawable).isEqualTo(drawable)
         assertThat(getChipView().getAppIconView().contentDescription).isEqualTo(contentDescription)
@@ -117,6 +117,9 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
 }
 
 private const val ROUTE_NAME = "Test name"
+private const val PACKAGE_NAME = "com.android.systemui"
+
 private val routeInfo = MediaRoute2Info.Builder("id", ROUTE_NAME)
     .addFeature("feature")
+    .setPackageName(PACKAGE_NAME)
     .build()

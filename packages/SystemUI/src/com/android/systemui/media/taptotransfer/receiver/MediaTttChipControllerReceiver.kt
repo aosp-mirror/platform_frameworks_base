@@ -18,8 +18,6 @@ package com.android.systemui.media.taptotransfer.receiver
 
 import android.app.StatusBarManager
 import android.content.Context
-import android.graphics.Color
-import android.graphics.drawable.Icon
 import android.media.MediaRoute2Info
 import android.util.Log
 import android.view.ViewGroup
@@ -43,12 +41,6 @@ class MediaTttChipControllerReceiver @Inject constructor(
 ) : MediaTttChipControllerCommon<ChipStateReceiver>(
     context, windowManager, R.layout.media_ttt_chip_receiver
 ) {
-    // TODO(b/216141279): Use app icon from media route info instead of this fake one.
-    private val fakeAppIconDrawable =
-        Icon.createWithResource(context, R.drawable.ic_avatar_user).loadDrawable(context).also {
-            it.setTint(Color.YELLOW)
-        }
-
     private val commandQueueCallbacks = object : CommandQueue.Callbacks {
         override fun updateMediaTapToTransferReceiverDisplay(
             @StatusBarManager.MediaTransferReceiverState displayState: Int,
@@ -70,7 +62,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
     ) {
         when(displayState) {
             StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER ->
-                displayChip(ChipStateReceiver(fakeAppIconDrawable, routeInfo.name.toString()))
+                displayChip(ChipStateReceiver(routeInfo.packageName, routeInfo.name.toString()))
             StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER -> removeChip()
             else ->
                 Log.e(RECEIVER_TAG, "Unhandled MediaTransferReceiverState $displayState")
