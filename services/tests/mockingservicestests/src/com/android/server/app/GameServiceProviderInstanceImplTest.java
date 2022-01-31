@@ -304,6 +304,7 @@ public final class GameServiceProviderInstanceImplTest {
             throws Exception {
         mGameServiceProviderInstance.start();
 
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         assertThat(mFakeGameSessionService.getCapturedCreateInvocations()).isEmpty();
@@ -325,6 +326,7 @@ public final class GameServiceProviderInstanceImplTest {
         mGameServiceProviderInstance.start();
         startTask(10, GAME_A_MAIN_ACTIVITY);
 
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         FakeGameSessionService.CapturedCreateInvocation capturedCreateInvocation =
@@ -339,6 +341,7 @@ public final class GameServiceProviderInstanceImplTest {
         mGameServiceProviderInstance.start();
         dispatchTaskCreated(10, GAME_A_MAIN_ACTIVITY);
 
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         assertThat(mFakeGameSessionService.getCapturedCreateInvocations()).isEmpty();
@@ -348,6 +351,7 @@ public final class GameServiceProviderInstanceImplTest {
     public void gameTaskStartedAndSessionRequested_createsGameSession() throws Exception {
         mGameServiceProviderInstance.start();
         startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         FakeGameSession gameSession10 = new FakeGameSession();
@@ -365,7 +369,9 @@ public final class GameServiceProviderInstanceImplTest {
         mGameServiceProviderInstance.start();
         startTask(10, GAME_A_MAIN_ACTIVITY);
 
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         CreateGameSessionRequest expectedCreateGameSessionRequest = new CreateGameSessionRequest(10,
@@ -379,6 +385,7 @@ public final class GameServiceProviderInstanceImplTest {
     public void gameSessionSuccessfullyCreated_createsTaskOverlay() throws Exception {
         mGameServiceProviderInstance.start();
         startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         FakeGameSession gameSession10 = new FakeGameSession();
@@ -394,6 +401,7 @@ public final class GameServiceProviderInstanceImplTest {
     public void gameTaskFocused_propagatedToGameSession() throws Exception {
         mGameServiceProviderInstance.start();
         startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         FakeGameSession gameSession10 = new FakeGameSession();
@@ -419,6 +427,7 @@ public final class GameServiceProviderInstanceImplTest {
 
         mGameServiceProviderInstance.start();
         startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         FakeGameSession gameSession10 = new FakeGameSession();
@@ -435,6 +444,7 @@ public final class GameServiceProviderInstanceImplTest {
         mGameServiceProviderInstance.start();
 
         startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         dispatchTaskRemoved(10);
@@ -452,6 +462,7 @@ public final class GameServiceProviderInstanceImplTest {
         mGameServiceProviderInstance.start();
 
         startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         FakeGameSession gameSession10 = new FakeGameSession();
@@ -469,6 +480,7 @@ public final class GameServiceProviderInstanceImplTest {
         mGameServiceProviderInstance.start();
 
         startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         FakeGameSession gameSession10 = new FakeGameSession();
@@ -489,6 +501,7 @@ public final class GameServiceProviderInstanceImplTest {
         mGameServiceProviderInstance.start();
 
         startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         FakeGameSession gameSession10 = new FakeGameSession();
@@ -516,6 +529,7 @@ public final class GameServiceProviderInstanceImplTest {
         startTask(10, GAME_A_MAIN_ACTIVITY);
         startTask(11, GAME_A_MAIN_ACTIVITY);
 
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         FakeGameSession gameSession10 = new FakeGameSession();
@@ -533,6 +547,7 @@ public final class GameServiceProviderInstanceImplTest {
         mGameServiceProviderInstance.start();
 
         startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         FakeGameSession gameSession10 = new FakeGameSession();
@@ -560,6 +575,7 @@ public final class GameServiceProviderInstanceImplTest {
         mGameServiceProviderInstance.start();
 
         startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         FakeGameSession gameSession10 = new FakeGameSession();
@@ -589,6 +605,7 @@ public final class GameServiceProviderInstanceImplTest {
         mGameServiceProviderInstance.start();
 
         startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         FakeGameSession gameSession10 = new FakeGameSession();
@@ -622,10 +639,19 @@ public final class GameServiceProviderInstanceImplTest {
     }
 
     @Test
+    public void createGameSession_failurePermissionDenied() throws Exception {
+        mGameServiceProviderInstance.start();
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionDenied(Manifest.permission.MANAGE_GAME_ACTIVITY);
+        assertThrows(SecurityException.class, () -> mFakeGameService.requestCreateGameSession(10));
+    }
+
+    @Test
     public void stop_severalActiveGameSessions_destroysGameSessionsAndUnbinds() throws Exception {
         mGameServiceProviderInstance.start();
 
         startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         FakeGameSession gameSession10 = new FakeGameSession();
@@ -653,6 +679,7 @@ public final class GameServiceProviderInstanceImplTest {
     public void takeScreenshot_failureNoBitmapCaptured() throws Exception {
         mGameServiceProviderInstance.start();
         startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         IGameSessionController gameSessionController = getOnlyElement(
@@ -672,6 +699,7 @@ public final class GameServiceProviderInstanceImplTest {
 
         mGameServiceProviderInstance.start();
         startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         IGameSessionController gameSessionController = getOnlyElement(
@@ -695,6 +723,7 @@ public final class GameServiceProviderInstanceImplTest {
         mGameServiceProviderInstance.start();
 
         startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         FakeGameSession gameSession10 = new FakeGameSession();
@@ -723,6 +752,7 @@ public final class GameServiceProviderInstanceImplTest {
         mGameServiceProviderInstance.start();
 
         startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
 
         FakeGameSession gameSession10 = new FakeGameSession();
@@ -742,10 +772,11 @@ public final class GameServiceProviderInstanceImplTest {
     public void restartGame_failurePermissionDenied() throws Exception {
         mGameServiceProviderInstance.start();
         startTask(10, GAME_A_MAIN_ACTIVITY);
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mFakeGameService.requestCreateGameSession(10);
-
         IGameSessionController gameSessionController = Objects.requireNonNull(getOnlyElement(
                 mFakeGameSessionService.getCapturedCreateInvocations())).mGameSessionController;
+        mockPermissionDenied(Manifest.permission.MANAGE_GAME_ACTIVITY);
         assertThrows(SecurityException.class,
                 () -> gameSessionController.restartGame(10));
     }
