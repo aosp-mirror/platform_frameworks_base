@@ -1989,7 +1989,7 @@ static SingleSatCorrection_V1_0 getSingleSatCorrection_1_0_withoutConstellation(
     jfloat eplMeters = env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatEpl);
     jfloat eplUncMeters = env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatEplUnc);
     uint16_t corrFlags = static_cast<uint16_t>(correctionFlags);
-    jobject reflectingPlaneObj;
+    jobject reflectingPlaneObj = nullptr;
     bool has_ref_plane = (corrFlags & GnssSingleSatCorrectionFlags::HAS_REFLECTING_PLANE) != 0;
     if (has_ref_plane) {
         reflectingPlaneObj =
@@ -2013,6 +2013,7 @@ static SingleSatCorrection_V1_0 getSingleSatCorrection_1_0_withoutConstellation(
                 .azimuthDegrees = azimuthDegreeRefPlane,
         };
     }
+    env->DeleteLocalRef(reflectingPlaneObj);
 
     SingleSatCorrection_V1_0 singleSatCorrection = {
             .singleSatCorrectionFlags = corrFlags,
@@ -2044,6 +2045,7 @@ static void getSingleSatCorrectionList_1_1(JNIEnv* env, jobject singleSatCorrect
         };
 
         list[i] = singleSatCorrection_1_1;
+        env->DeleteLocalRef(singleSatCorrectionObj);
     }
 }
 
@@ -2061,6 +2063,7 @@ static void getSingleSatCorrectionList_1_0(JNIEnv* env, jobject singleSatCorrect
         singleSatCorrection.constellation = static_cast<GnssConstellationType_V1_0>(constType),
 
         list[i] = singleSatCorrection;
+        env->DeleteLocalRef(singleSatCorrectionObj);
     }
 }
 
@@ -2131,6 +2134,7 @@ static jboolean android_location_gnss_hal_GnssNative_inject_measurement_correcti
 
     hidl_vec<SingleSatCorrection_V1_0> list(len);
     getSingleSatCorrectionList_1_0(env, singleSatCorrectionList, list);
+    env->DeleteLocalRef(singleSatCorrectionList);
     measurementCorrections_1_0.satCorrections = list;
 
     auto result = gnssCorrectionsIface_V1_0->setCorrections(measurementCorrections_1_0);
