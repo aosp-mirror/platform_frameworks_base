@@ -15,15 +15,11 @@
  */
 package android.media;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.bluetooth.BluetoothProfile;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 
 /**
  * Contains information about Bluetooth profile connection state changed
@@ -31,23 +27,12 @@ import java.lang.annotation.RetentionPolicy;
  */
 @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class BtProfileConnectionInfo implements Parcelable {
-    /** @hide */
-    @IntDef({
-            BluetoothProfile.A2DP,
-            BluetoothProfile.A2DP_SINK,
-            BluetoothProfile.HEADSET, // Can only be set by BtHelper
-            BluetoothProfile.HEARING_AID,
-            BluetoothProfile.LE_AUDIO,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface BtProfile {}
-
-    private final @BtProfile int mProfile;
+    private final int mProfile;
     private final boolean mSupprNoisy;
     private final int mVolume;
     private final boolean mIsLeOutput;
 
-    private BtProfileConnectionInfo(@BtProfile int profile, boolean suppressNoisyIntent, int volume,
+    private BtProfileConnectionInfo(int profile, boolean suppressNoisyIntent, int volume,
             boolean isLeOutput) {
         mProfile = profile;
         mSupprNoisy = suppressNoisyIntent;
@@ -59,7 +44,7 @@ public final class BtProfileConnectionInfo implements Parcelable {
      * Constructor used by BtHelper when a profile is connected
      * {@hide}
      */
-    public BtProfileConnectionInfo(@BtProfile int profile) {
+    public BtProfileConnectionInfo(int profile) {
         this(profile, false, -1, false);
     }
 
@@ -142,7 +127,7 @@ public final class BtProfileConnectionInfo implements Parcelable {
     /**
      * @return The profile connection
      */
-    public @BtProfile int getProfile() {
+    public int getProfile() {
         return mProfile;
     }
 
