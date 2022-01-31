@@ -214,6 +214,7 @@ import android.app.admin.SystemUpdatePolicy;
 import android.app.admin.UnsafeStateException;
 import android.app.backup.IBackupManager;
 import android.app.compat.CompatChanges;
+import android.app.role.RoleManager;
 import android.app.trust.TrustManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.compat.annotation.ChangeId;
@@ -10855,6 +10856,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int userHandle = user.getIdentifier();
         final long id = mInjector.binderClearCallingIdentity();
         try {
+            maybeInstallDeviceManagerRoleHolderInUser(userHandle);
+
             manageUserUnchecked(admin, profileOwner, userHandle, adminExtras,
                     /* showDisclaimer= */ true);
 
@@ -17676,6 +17679,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
 
             final long startTime = SystemClock.elapsedRealtime();
+
+            onCreateAndProvisionManagedProfileStarted(provisioningParams);
+
             final Set<String> nonRequiredApps = provisioningParams.isLeaveAllSystemAppsEnabled()
                     ? Collections.emptySet()
                     : mOverlayPackagesProvider.getNonRequiredApps(
@@ -17687,6 +17693,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     Slogf.i(LOG_TAG, "Disallowed package [" + packageName + "]");
                 }
             }
+
             userInfo = mUserManager.createProfileForUserEvenWhenDisallowed(
                     provisioningParams.getProfileName(),
                     UserManager.USER_TYPE_PROFILE_MANAGED,
@@ -17705,7 +17712,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     startTime,
                     callerPackage);
 
-            onCreateAndProvisionManagedProfileStarted(provisioningParams);
+            maybeInstallDeviceManagerRoleHolderInUser(userInfo.id);
 
             installExistingAdminPackage(userInfo.id, admin.getPackageName());
             if (!enableAdminAndSetProfileOwner(
@@ -17772,6 +17779,43 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     private void onCreateAndProvisionManagedProfileCompleted(
             ManagedProfileProvisioningParams provisioningParams) {}
+
+    private void maybeInstallDeviceManagerRoleHolderInUser(int targetUserId) {
+        String deviceManagerRoleHolderPackageName = getDeviceManagerRoleHolderPackageName(mContext);
+        if (deviceManagerRoleHolderPackageName == null) {
+            Slogf.d(LOG_TAG, "No device manager role holder specified.");
+            return;
+        }
+        try {
+            if (mIPackageManager.isPackageAvailable(
+                    deviceManagerRoleHolderPackageName, targetUserId)) {
+                Slogf.d(LOG_TAG, "The device manager role holder "
+                        + deviceManagerRoleHolderPackageName + " is already installed in "
+                        + "user " + targetUserId);
+                return;
+            }
+            Slogf.d(LOG_TAG, "Installing the device manager role holder "
+                    + deviceManagerRoleHolderPackageName + " in user " + targetUserId);
+            mIPackageManager.installExistingPackageAsUser(
+                    deviceManagerRoleHolderPackageName,
+                    targetUserId,
+                    PackageManager.INSTALL_ALL_WHITELIST_RESTRICTED_PERMISSIONS,
+                    PackageManager.INSTALL_REASON_POLICY,
+                    /* whiteListedPermissions= */ null);
+        } catch (RemoteException e) {
+            // Does not happen, same process
+        }
+    }
+
+    private String getDeviceManagerRoleHolderPackageName(Context context) {
+        RoleManager roleManager = context.getSystemService(RoleManager.class);
+        List<String> roleHolders =
+                roleManager.getRoleHolders(RoleManager.ROLE_DEVICE_MANAGER);
+        if (roleHolders.isEmpty()) {
+            return null;
+        }
+        return roleHolders.get(0);
+    }
 
     private void resetInteractAcrossProfilesAppOps() {
         mInjector.getCrossProfileApps().clearInteractAcrossProfilesAppOps();
