@@ -23,6 +23,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.graphics.Insets;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -87,11 +89,8 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         this(context, theme, dismissOnDeviceLock, null);
     }
 
-    /**
-     * @param udfpsDialogManager If set, UDFPS will hide if this dialog is showing.
-     */
     public SystemUIDialog(Context context, int theme, boolean dismissOnDeviceLock,
-            SystemUIDialogManager dialogManager) {
+            @Nullable SystemUIDialogManager dialogManager) {
         super(context, theme);
         mContext = context;
 
@@ -148,7 +147,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
      * the device configuration changes, and the result will be used to resize this dialog window.
      */
     protected int getWidth() {
-        return getDefaultDialogWidth(mContext);
+        return getDefaultDialogWidth(this);
     }
 
     /**
@@ -279,34 +278,51 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         // We need to create the dialog first, otherwise the size will be overridden when it is
         // created.
         dialog.create();
-        dialog.getWindow().setLayout(getDefaultDialogWidth(dialog.getContext()),
-                getDefaultDialogHeight());
+        dialog.getWindow().setLayout(getDefaultDialogWidth(dialog), getDefaultDialogHeight());
     }
 
-    private static int getDefaultDialogWidth(Context context) {
-        boolean isOnTablet = context.getResources().getConfiguration().smallestScreenWidthDp >= 600;
-        if (!isOnTablet) {
-            return ViewGroup.LayoutParams.MATCH_PARENT;
-        }
-
+    private static int getDefaultDialogWidth(Dialog dialog) {
+        Context context = dialog.getContext();
         int flagValue = SystemProperties.getInt(FLAG_TABLET_DIALOG_WIDTH, 0);
         if (flagValue == -1) {
             // The width of bottom sheets (624dp).
-            return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 624,
-                    context.getResources().getDisplayMetrics()));
+            return calculateDialogWidthWithInsets(dialog, 624);
         } else if (flagValue == -2) {
             // The suggested small width for all dialogs (348dp)
-            return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 348,
-                    context.getResources().getDisplayMetrics()));
+            return calculateDialogWidthWithInsets(dialog, 348);
         } else if (flagValue > 0) {
             // Any given width.
-            return Math.round(
-                    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, flagValue,
-                            context.getResources().getDisplayMetrics()));
+            return calculateDialogWidthWithInsets(dialog, flagValue);
         } else {
-            // By default we use the same width as the notification shade in portrait mode (504dp).
-            return context.getResources().getDimensionPixelSize(R.dimen.large_dialog_width);
+            // By default we use the same width as the notification shade in portrait mode.
+            int width = context.getResources().getDimensionPixelSize(R.dimen.large_dialog_width);
+            if (width > 0) {
+                // If we are neither WRAP_CONTENT or MATCH_PARENT, add the background insets so that
+                // the dialog is the desired width.
+                width += getHorizontalInsets(dialog);
+            }
+            return width;
         }
+    }
+
+    /**
+     * Return the pixel width {@param dialog} should be so that it is {@param widthInDp} wide,
+     * taking its background insets into consideration.
+     */
+    private static int calculateDialogWidthWithInsets(Dialog dialog, int widthInDp) {
+        float widthInPixels = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, widthInDp,
+                dialog.getContext().getResources().getDisplayMetrics());
+        return Math.round(widthInPixels + getHorizontalInsets(dialog));
+    }
+
+    private static int getHorizontalInsets(Dialog dialog) {
+        if (dialog.getWindow().getDecorView() == null) {
+            return 0;
+        }
+
+        Drawable background = dialog.getWindow().getDecorView().getBackground();
+        Insets insets = background != null ? background.getOpticalInsets() : Insets.NONE;
+        return insets.left + insets.right;
     }
 
     private static int getDefaultDialogHeight() {
