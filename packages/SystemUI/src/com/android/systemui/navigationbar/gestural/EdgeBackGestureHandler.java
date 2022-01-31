@@ -318,7 +318,11 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
             String recentsPackageName = recentsComponentName.getPackageName();
             PackageManager manager = context.getPackageManager();
             try {
-                Resources resources = manager.getResourcesForApplication(recentsPackageName);
+                Resources resources = manager.getResourcesForApplication(
+                        manager.getApplicationInfo(recentsPackageName,
+                                PackageManager.MATCH_UNINSTALLED_PACKAGES
+                                        | PackageManager.MATCH_DISABLED_COMPONENTS
+                                        | PackageManager.GET_SHARED_LIBRARY_FILES));
                 int resId = resources.getIdentifier(
                         "gesture_blocking_activities", "array", recentsPackageName);
 
