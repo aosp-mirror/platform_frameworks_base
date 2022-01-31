@@ -5785,6 +5785,7 @@ public abstract class Context {
      * @see android.nearby.NearbyManager
      * @hide
      */
+    @SystemApi
     public static final String NEARBY_SERVICE = "nearby";
 
     /**
