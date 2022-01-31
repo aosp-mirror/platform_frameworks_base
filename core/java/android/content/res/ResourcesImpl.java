@@ -61,6 +61,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -1270,6 +1271,12 @@ public class ResourcesImpl {
     private static final NativeAllocationRegistry sThemeRegistry =
             NativeAllocationRegistry.createMalloced(ResourcesImpl.class.getClassLoader(),
                     AssetManager.getThemeFreeFunction());
+
+    void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "class=" + getClass());
+        pw.println(prefix + "assets");
+        mAssets.dump(pw, prefix + "  ");
+    }
 
     public class ThemeImpl {
         /**

@@ -176,6 +176,7 @@ import com.android.server.power.hint.HintManagerService;
 import com.android.server.powerstats.PowerStatsService;
 import com.android.server.profcollect.ProfcollectForwardingService;
 import com.android.server.recoverysystem.RecoverySystemService;
+import com.android.server.resources.ResourcesManagerService;
 import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.role.RoleServicePlatformHelper;
 import com.android.server.rotationresolver.RotationResolverManagerService;
@@ -1281,6 +1282,13 @@ public final class SystemServer implements Dumpable {
         // Manages Overlay packages
         t.traceBegin("StartOverlayManagerService");
         mSystemServiceManager.startService(new OverlayManagerService(mSystemContext));
+        t.traceEnd();
+
+        // Manages Resources packages
+        t.traceBegin("StartResourcesManagerService");
+        ResourcesManagerService resourcesService = new ResourcesManagerService(mSystemContext);
+        resourcesService.setActivityManagerService(mActivityManagerService);
+        mSystemServiceManager.startService(resourcesService);
         t.traceEnd();
 
         t.traceBegin("StartSensorPrivacyService");
