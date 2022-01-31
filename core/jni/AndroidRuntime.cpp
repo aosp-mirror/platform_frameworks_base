@@ -164,7 +164,6 @@ extern int register_android_text_AndroidCharacter(JNIEnv *env);
 extern int register_android_text_Hyphenator(JNIEnv *env);
 extern int register_android_opengl_classes(JNIEnv *env);
 extern int register_android_ddm_DdmHandleNativeHeap(JNIEnv *env);
-extern int register_android_server_NetworkManagementSocketTagger(JNIEnv* env);
 extern int register_android_backup_BackupDataInput(JNIEnv *env);
 extern int register_android_backup_BackupDataOutput(JNIEnv *env);
 extern int register_android_backup_FileBackupHelperBase(JNIEnv *env);
@@ -1618,7 +1617,6 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_media_midi),
 
         REG_JNI(register_android_opengl_classes),
-        REG_JNI(register_android_server_NetworkManagementSocketTagger),
         REG_JNI(register_android_ddm_DdmHandleNativeHeap),
         REG_JNI(register_android_backup_BackupDataInput),
         REG_JNI(register_android_backup_BackupDataOutput),
