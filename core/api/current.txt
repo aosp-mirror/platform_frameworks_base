@@ -135,9 +135,6 @@ package android {
     field public static final String READ_HOME_APP_SEARCH_DATA = "android.permission.READ_HOME_APP_SEARCH_DATA";
     field @Deprecated public static final String READ_INPUT_STATE = "android.permission.READ_INPUT_STATE";
     field public static final String READ_LOGS = "android.permission.READ_LOGS";
-    field public static final String READ_MEDIA_AUDIO = "android.permission.READ_MEDIA_AUDIO";
-    field public static final String READ_MEDIA_IMAGE = "android.permission.READ_MEDIA_IMAGE";
-    field public static final String READ_MEDIA_VIDEO = "android.permission.READ_MEDIA_VIDEO";
     field public static final String READ_NEARBY_STREAMING_POLICY = "android.permission.READ_NEARBY_STREAMING_POLICY";
     field public static final String READ_PHONE_NUMBERS = "android.permission.READ_PHONE_NUMBERS";
     field public static final String READ_PHONE_STATE = "android.permission.READ_PHONE_STATE";
@@ -223,8 +220,6 @@ package android {
     field public static final String NEARBY_DEVICES = "android.permission-group.NEARBY_DEVICES";
     field public static final String NOTIFICATIONS = "android.permission-group.NOTIFICATIONS";
     field public static final String PHONE = "android.permission-group.PHONE";
-    field public static final String READ_MEDIA_AURAL = "android.permission-group.READ_MEDIA_AURAL";
-    field public static final String READ_MEDIA_VISUAL = "android.permission-group.READ_MEDIA_VISUAL";
     field public static final String SENSORS = "android.permission-group.SENSORS";
     field public static final String SMS = "android.permission-group.SMS";
     field public static final String STORAGE = "android.permission-group.STORAGE";
