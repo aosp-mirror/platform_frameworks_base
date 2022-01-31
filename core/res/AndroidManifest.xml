@@ -4384,6 +4384,16 @@
     <permission android:name="android.permission.SCHEDULE_EXACT_ALARM"
         android:protectionLevel="normal|appop"/>
 
+    <!-- Allows apps to use exact alarms just like with SCHEDULE_EXACT_ALARM but without needing
+        to request this permission from the user.
+        <p><b>This is only for apps that rely on exact alarms for their core functionality.</b>
+        App stores may enforce policies to audit and review the use of this permission. Any app that
+        requests this but is found to not require exact alarms for its primary function may be
+        removed from the app store.
+    -->
+    <permission android:name="android.permission.USE_EXACT_ALARM"
+                android:protectionLevel="normal"/>
+
     <!-- Allows an application to query tablet mode state and monitor changes
          in it.
          <p>Not for use by third-party applications.
