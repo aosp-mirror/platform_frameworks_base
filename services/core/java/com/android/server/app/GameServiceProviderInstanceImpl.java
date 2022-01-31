@@ -116,9 +116,10 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                     });
                 }
 
-                @RequiresPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
+                @Override
+                @RequiresPermission(Manifest.permission.MANAGE_GAME_ACTIVITY)
                 public void restartGame(int taskId) {
-                    mContext.enforceCallingPermission(Manifest.permission.FORCE_STOP_PACKAGES,
+                    mContext.enforceCallingPermission(Manifest.permission.MANAGE_GAME_ACTIVITY,
                             "restartGame()");
                     mBackgroundExecutor.execute(() -> {
                         GameServiceProviderInstanceImpl.this.restartGame(taskId);
@@ -372,12 +373,12 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
                         }, mBackgroundExecutor);
 
         AndroidFuture<Void> unusedPostCreateGameSessionFuture =
-                mGameSessionServiceConnector.post(gameService -> {
+                mGameSessionServiceConnector.post(gameSessionService -> {
                     CreateGameSessionRequest createGameSessionRequest =
                             new CreateGameSessionRequest(
                                     taskId,
                                     existingGameSessionRecord.getComponentName().getPackageName());
-                    gameService.create(
+                    gameSessionService.create(
                             mGameSessionController,
                             createGameSessionRequest,
                             gameSessionViewHostConfiguration,
