@@ -61,7 +61,7 @@ public class StackScrollAlgorithm {
     @VisibleForTesting float mHeadsUpInset;
     private int mPinnedZTranslationExtra;
     private float mNotificationScrimPadding;
-    private int mCloseHandleUnderlapHeight;
+    private int mMarginBottom;
 
     public StackScrollAlgorithm(
             Context context,
@@ -87,7 +87,7 @@ public class StackScrollAlgorithm {
                 R.dimen.heads_up_pinned_elevation);
         mGapHeight = res.getDimensionPixelSize(R.dimen.notification_section_divider_height);
         mNotificationScrimPadding = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
-        mCloseHandleUnderlapHeight = res.getDimensionPixelSize(R.dimen.close_handle_underlap);
+        mMarginBottom = res.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom);
     }
 
     /**
@@ -463,7 +463,7 @@ public class StackScrollAlgorithm {
             }
         } else {
             if (view instanceof EmptyShadeView) {
-                float fullHeight = ambientState.getLayoutMaxHeight() + mCloseHandleUnderlapHeight
+                float fullHeight = ambientState.getLayoutMaxHeight() + mMarginBottom
                         - ambientState.getStackY();
                 viewState.yTranslation = (fullHeight - getMaxAllowedChildHeight(view)) / 2f;
             } else if (view != ambientState.getTrackedHeadsUpRow()) {

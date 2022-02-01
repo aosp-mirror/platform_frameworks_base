@@ -63,7 +63,7 @@ class NotificationsQSContainerController @Inject constructor(
     }
 
     public override fun onViewAttached() {
-        notificationsBottomMargin = mView.defaultNotificationsMarginBottom
+        updateMargins()
         overviewProxyService.addCallback(taskbarVisibilityListener)
         mView.setInsetsChangedListener(windowInsetsListener)
         mView.setQSFragmentAttachedListener { qs: QS -> qs.setContainerController(this) }
@@ -73,6 +73,10 @@ class NotificationsQSContainerController @Inject constructor(
         overviewProxyService.removeCallback(taskbarVisibilityListener)
         mView.removeOnInsetsChangedListener()
         mView.removeQSFragmentAttachedListener()
+    }
+
+    fun updateMargins() {
+        notificationsBottomMargin = mView.defaultNotificationsMarginBottom
     }
 
     override fun setCustomizerAnimating(animating: Boolean) {

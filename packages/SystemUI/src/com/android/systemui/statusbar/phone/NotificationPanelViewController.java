@@ -20,6 +20,7 @@ import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.view.View.GONE;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+import static androidx.constraintlayout.widget.ConstraintSet.BOTTOM;
 import static androidx.constraintlayout.widget.ConstraintSet.END;
 import static androidx.constraintlayout.widget.ConstraintSet.PARENT_ID;
 import static androidx.constraintlayout.widget.ConstraintSet.START;
@@ -414,6 +415,7 @@ public class NotificationPanelViewController extends PanelViewController
     private int mDisplayTopInset = 0; // in pixels
     private int mDisplayRightInset = 0; // in pixels
     private int mSplitShadeStatusBarHeight;
+    private int mSplitShadeNotificationsScrimMarginBottom;
 
     private final KeyguardClockPositionAlgorithm
             mClockPositionAlgorithm =
@@ -1168,6 +1170,9 @@ public class NotificationPanelViewController extends PanelViewController
     public void updateResources() {
         mQuickQsOffsetHeight = SystemBarUtils.getQuickQsOffsetHeight(mView.getContext());
         mSplitShadeStatusBarHeight = Utils.getSplitShadeStatusBarHeight(mView.getContext());
+        mSplitShadeNotificationsScrimMarginBottom =
+                mResources.getDimensionPixelSize(
+                        R.dimen.split_shade_notifications_scrim_margin_bottom);
         int qsWidth = mResources.getDimensionPixelSize(R.dimen.qs_panel_width);
         int panelWidth = mResources.getDimensionPixelSize(R.dimen.notification_panel_width);
         mShouldUseSplitNotificationShade =
@@ -1177,6 +1182,8 @@ public class NotificationPanelViewController extends PanelViewController
             mQs.setInSplitShade(mShouldUseSplitNotificationShade);
         }
 
+        int notificationsBottomMargin = mResources.getDimensionPixelSize(
+                R.dimen.notification_panel_margin_bottom);
         int topMargin = mShouldUseSplitNotificationShade ? mSplitShadeStatusBarHeight :
                 mResources.getDimensionPixelSize(R.dimen.notification_panel_margin_top);
         mSplitShadeHeaderController.setSplitShadeMode(mShouldUseSplitNotificationShade);
@@ -1205,9 +1212,12 @@ public class NotificationPanelViewController extends PanelViewController
         constraintSet.getConstraint(R.id.notification_stack_scroller).layout.mWidth = panelWidth;
         constraintSet.getConstraint(R.id.qs_frame).layout.mWidth = qsWidth;
         constraintSet.setMargin(R.id.notification_stack_scroller, TOP, topMargin);
+        constraintSet.setMargin(R.id.notification_stack_scroller, BOTTOM,
+                notificationsBottomMargin);
         constraintSet.setMargin(R.id.qs_frame, TOP, topMargin);
         constraintSet.applyTo(mNotificationContainerParent);
         mAmbientState.setStackTopMargin(topMargin);
+        mNotificationsQSContainerController.updateMargins();
         mNotificationsQSContainerController.setSplitShadeEnabled(mShouldUseSplitNotificationShade);
 
         updateKeyguardStatusViewAlignment(/* animate= */false);
@@ -2565,7 +2575,8 @@ public class NotificationPanelViewController extends PanelViewController
             right = getView().getRight() + mDisplayRightInset;
         } else {
             top = Math.min(qsPanelBottomY, mSplitShadeStatusBarHeight);
-            bottom = top + mNotificationStackScrollLayoutController.getHeight();
+            bottom = top + mNotificationStackScrollLayoutController.getHeight()
+                    - mSplitShadeNotificationsScrimMarginBottom;
             left = mNotificationStackScrollLayoutController.getLeft();
             right = mNotificationStackScrollLayoutController.getRight();
         }

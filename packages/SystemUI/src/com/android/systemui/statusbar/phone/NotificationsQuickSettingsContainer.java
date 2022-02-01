@@ -45,7 +45,6 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     private View mStackScroller;
     private View mKeyguardStatusBar;
 
-    private int mStackScrollerMargin;
     private ArrayList<View> mDrawingOrderedChildren = new ArrayList<>();
     private ArrayList<View> mLayoutDrawingOrder = new ArrayList<>();
     private final Comparator<View> mIndexComparator = Comparator.comparingInt(this::indexOfChild);
@@ -63,7 +62,6 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         super.onFinishInflate();
         mQsFrame = findViewById(R.id.qs_frame);
         mStackScroller = findViewById(R.id.notification_stack_scroller);
-        mStackScrollerMargin = ((LayoutParams) mStackScroller.getLayoutParams()).bottomMargin;
         mKeyguardStatusBar = findViewById(R.id.keyguard_header);
     }
 
@@ -97,7 +95,7 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     }
 
     public int getDefaultNotificationsMarginBottom() {
-        return mStackScrollerMargin;
+        return ((LayoutParams) mStackScroller.getLayoutParams()).bottomMargin;
     }
 
     public void setInsetsChangedListener(Consumer<WindowInsets> onInsetsChangedListener) {
