@@ -47,6 +47,7 @@ import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.util.Size;
 import android.util.Slog;
 import android.view.Gravity;
 import android.view.View;
@@ -65,10 +66,6 @@ import java.util.List;
 class TaskLaunchParamsModifier implements LaunchParamsModifier {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskLaunchParamsModifier" : TAG_ATM;
     private static final boolean DEBUG = false;
-
-    // Screen size of Nexus 5x
-    private static final int DEFAULT_PORTRAIT_PHONE_WIDTH_DP = 412;
-    private static final int DEFAULT_PORTRAIT_PHONE_HEIGHT_DP = 732;
 
     // Allowance of size matching.
     private static final int EPSILON = 2;
@@ -731,7 +728,10 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
 
         // First we get the default size we want.
-        getDefaultFreeformSize(root.info, displayArea, layout, orientation, mTmpBounds);
+        displayArea.getStableRect(mTmpStableBounds);
+        final Size defaultSize = LaunchParamsUtil.getDefaultFreeformSize(root.info, displayArea,
+                layout, orientation, mTmpStableBounds);
+        mTmpBounds.set(0, 0, defaultSize.getWidth(), defaultSize.getHeight());
         if (hasInitialBounds || sizeMatches(inOutBounds, mTmpBounds)) {
             // We're here because either input parameters specified initial bounds, or the suggested
             // bounds have the same size of the default freeform size. We should use the suggested
@@ -741,8 +741,8 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                 if (DEBUG) appendLog("freeform-size-orientation-match=" + inOutBounds);
             } else {
                 // Meh, orientation doesn't match. Let's rotate inOutBounds in-place.
-                centerBounds(displayArea, inOutBounds.height(), inOutBounds.width(),
-                        inOutBounds);
+                LaunchParamsUtil.centerBounds(displayArea, inOutBounds.height(),
+                        inOutBounds.width(), inOutBounds);
                 if (DEBUG) appendLog("freeform-orientation-mismatch=" + inOutBounds);
             }
         } else {
@@ -751,7 +751,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             // to the center of suggested bounds (or the displayArea if no suggested bounds). The
             // default size might be too big to center to source activity bounds in displayArea, so
             // we may need to move it back to the displayArea.
-            centerBounds(displayArea, mTmpBounds.width(), mTmpBounds.height(),
+            LaunchParamsUtil.centerBounds(displayArea, mTmpBounds.width(), mTmpBounds.height(),
                     inOutBounds);
             adjustBoundsToFitInDisplayArea(displayArea, inOutBounds);
             if (DEBUG) appendLog("freeform-size-mismatch=" + inOutBounds);
@@ -797,87 +797,6 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
 
         return orientation;
-    }
-
-    private void getDefaultFreeformSize(@NonNull ActivityInfo info,
-            @NonNull TaskDisplayArea displayArea,
-            @NonNull ActivityInfo.WindowLayout layout, int orientation, @NonNull Rect bounds) {
-        // Default size, which is letterboxing/pillarboxing in displayArea. That's to say the large
-        // dimension of default size is the small dimension of displayArea size, and the small
-        // dimension of default size is calculated to keep the same aspect ratio as the
-        // displayArea's. Here we use stable bounds of displayArea because that indicates the area
-        // that isn't occupied by system widgets (e.g. sysbar and navbar).
-        final Rect stableBounds = mTmpStableBounds;
-        displayArea.getStableRect(stableBounds);
-        final int portraitHeight = Math.min(stableBounds.width(), stableBounds.height());
-        final int otherDimension = Math.max(stableBounds.width(), stableBounds.height());
-        final int portraitWidth = (portraitHeight * portraitHeight) / otherDimension;
-        final int defaultWidth = (orientation == SCREEN_ORIENTATION_LANDSCAPE) ? portraitHeight
-                : portraitWidth;
-        final int defaultHeight = (orientation == SCREEN_ORIENTATION_LANDSCAPE) ? portraitWidth
-                : portraitHeight;
-
-        // Get window size based on Nexus 5x screen, we assume that this is enough to show content
-        // of activities.
-        final float density = (float) displayArea.getConfiguration().densityDpi / DENSITY_DEFAULT;
-        final int phonePortraitWidth = (int) (DEFAULT_PORTRAIT_PHONE_WIDTH_DP * density + 0.5f);
-        final int phonePortraitHeight = (int) (DEFAULT_PORTRAIT_PHONE_HEIGHT_DP * density + 0.5f);
-        final int phoneWidth = (orientation == SCREEN_ORIENTATION_LANDSCAPE) ? phonePortraitHeight
-                : phonePortraitWidth;
-        final int phoneHeight = (orientation == SCREEN_ORIENTATION_LANDSCAPE) ? phonePortraitWidth
-                : phonePortraitHeight;
-
-        // Minimum layout requirements.
-        final int layoutMinWidth = (layout == null) ? -1 : layout.minWidth;
-        final int layoutMinHeight = (layout == null) ? -1 : layout.minHeight;
-
-        // Aspect ratio requirements.
-        final float minAspectRatio = info.getMinAspectRatio(orientation);
-        final float maxAspectRatio = info.getMaxAspectRatio();
-
-        final int width = Math.min(defaultWidth, Math.max(phoneWidth, layoutMinWidth));
-        final int height = Math.min(defaultHeight, Math.max(phoneHeight, layoutMinHeight));
-        final float aspectRatio = (float) Math.max(width, height) / (float) Math.min(width, height);
-
-        // Adjust the width and height to the aspect ratio requirements.
-        int adjWidth = width;
-        int adjHeight = height;
-        if (minAspectRatio >= 1 && aspectRatio < minAspectRatio) {
-            // The aspect ratio is below the minimum, adjust it to the minimum.
-            if (orientation == SCREEN_ORIENTATION_LANDSCAPE) {
-                // Fix the width, scale the height.
-                adjHeight = (int) (adjWidth / minAspectRatio + 0.5f);
-            } else {
-                // Fix the height, scale the width.
-                adjWidth = (int) (adjHeight / minAspectRatio + 0.5f);
-            }
-        } else if (maxAspectRatio >= 1 && aspectRatio > maxAspectRatio) {
-            // The aspect ratio exceeds the maximum, adjust it to the maximum.
-            if (orientation == SCREEN_ORIENTATION_LANDSCAPE) {
-                // Fix the width, scale the height.
-                adjHeight = (int) (adjWidth / maxAspectRatio + 0.5f);
-            } else {
-                // Fix the height, scale the width.
-                adjWidth = (int) (adjHeight / maxAspectRatio + 0.5f);
-            }
-        }
-
-        bounds.set(0, 0, adjWidth, adjHeight);
-        bounds.offset(stableBounds.left, stableBounds.top);
-    }
-
-    /**
-     * Gets centered bounds of width x height. If inOutBounds is not empty, the result bounds
-     * centers at its center or displayArea's app bounds center if inOutBounds is empty.
-     */
-    private void centerBounds(@NonNull TaskDisplayArea displayArea, int width, int height,
-            @NonNull Rect inOutBounds) {
-        if (inOutBounds.isEmpty()) {
-            displayArea.getStableRect(inOutBounds);
-        }
-        final int left = inOutBounds.centerX() - width / 2;
-        final int top = inOutBounds.centerY() - height / 2;
-        inOutBounds.set(left, top, left + width, top + height);
     }
 
     private void adjustBoundsToFitInDisplayArea(@NonNull TaskDisplayArea displayArea,
