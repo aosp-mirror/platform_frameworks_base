@@ -18459,9 +18459,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(
                 isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller)
-                        || isSystemUid(caller),
+                        || canQueryAdminPolicy(caller),
                 "SSID allowlist can only be retrieved by a device owner or "
-                        + "a profile owner on an organization-owned device or a system app.");
+                        + "a profile owner on an organization-owned device or "
+                        + "an app with the QUERY_ADMIN_POLICY permission.");
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
                     UserHandle.USER_SYSTEM);
@@ -18497,9 +18498,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(
                 isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller)
-                        || isSystemUid(caller),
+                        || canQueryAdminPolicy(caller),
                 "SSID denylist can only be retrieved by a device owner or "
-                        + "a profile owner on an organization-owned device or a system app.");
+                        + "a profile owner on an organization-owned device or "
+                        + "an app with the QUERY_ADMIN_POLICY permission.");
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
                     UserHandle.USER_SYSTEM);
