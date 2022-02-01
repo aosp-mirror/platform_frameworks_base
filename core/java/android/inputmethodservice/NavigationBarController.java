@@ -65,6 +65,9 @@ final class NavigationBarController {
                 @NonNull ViewTreeObserver.InternalInsetsInfo dest) {
         }
 
+        default void onSoftInputWindowCreated(@NonNull SoftInputWindow softInputWindow) {
+        }
+
         default void onViewInitialized() {
         }
 
@@ -76,9 +79,6 @@ final class NavigationBarController {
 
         default void setShouldShowImeSwitcherWhenImeIsShown(
                 boolean shouldShowImeSwitcherWhenImeIsShown) {
-        }
-
-        default void onSystemBarAppearanceChanged(@Appearance int appearance) {
         }
 
         default String toDebugString() {
@@ -101,6 +101,10 @@ final class NavigationBarController {
         mImpl.updateTouchableInsets(originalInsets, dest);
     }
 
+    void onSoftInputWindowCreated(@NonNull SoftInputWindow softInputWindow) {
+        mImpl.onSoftInputWindowCreated(softInputWindow);
+    }
+
     void onViewInitialized() {
         mImpl.onViewInitialized();
     }
@@ -117,15 +121,11 @@ final class NavigationBarController {
         mImpl.setShouldShowImeSwitcherWhenImeIsShown(shouldShowImeSwitcherWhenImeIsShown);
     }
 
-    void onSystemBarAppearanceChanged(@Appearance int appearance) {
-        mImpl.onSystemBarAppearanceChanged(appearance);
-    }
-
     String toDebugString() {
         return mImpl.toDebugString();
     }
 
-    private static final class Impl implements Callback {
+    private static final class Impl implements Callback, Window.DecorCallback {
         private static final int DEFAULT_COLOR_ADAPT_TRANSITION_TIME = 1700;
 
         // Copied from com.android.systemui.animation.Interpolators#LEGACY_DECELERATE
@@ -359,6 +359,13 @@ final class NavigationBarController {
             }
             return resources.getInteger(com.android.internal.R.integer.config_navBarInteractionMode)
                     == WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
+        }
+
+        @Override
+        public void onSoftInputWindowCreated(@NonNull SoftInputWindow softInputWindow) {
+            final Window window = softInputWindow.getWindow();
+            mAppearance = window.getSystemBarAppearance();
+            window.setDecorCallback(this);
         }
 
         @Override

@@ -295,6 +295,9 @@ public abstract class Window {
     private OnWindowDismissedCallback mOnWindowDismissedCallback;
     private OnWindowSwipeDismissedCallback mOnWindowSwipeDismissedCallback;
     private WindowControllerCallback mWindowControllerCallback;
+    @WindowInsetsController.Appearance
+    private int mSystemBarAppearance;
+    private DecorCallback mDecorCallback;
     private OnRestrictedCaptionAreaChangedListener mOnRestrictedCaptionAreaChangedListener;
     private Rect mRestrictedCaptionAreaRect;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -607,17 +610,6 @@ public abstract class Window {
          * @param hasCapture True if the window has pointer capture.
          */
         default public void onPointerCaptureChanged(boolean hasCapture) { };
-
-        /**
-         * Called from
-         * {@link com.android.internal.policy.DecorView#onSystemBarAppearanceChanged(int)}.
-         *
-         * @param appearance The newly applied appearance.
-         * @hide
-         */
-        default void onSystemBarAppearanceChanged(
-                @WindowInsetsController.Appearance int appearance) {
-        }
     }
 
     /** @hide */
@@ -670,6 +662,17 @@ public abstract class Window {
          * Update the navigation bar color to a forced one.
          */
         void updateNavigationBarColor(int color);
+    }
+
+    /** @hide */
+    public interface DecorCallback {
+        /**
+         * Called from
+         * {@link com.android.internal.policy.DecorView#onSystemBarAppearanceChanged(int)}.
+         *
+         * @param appearance The newly applied appearance.
+         */
+        void onSystemBarAppearanceChanged(@WindowInsetsController.Appearance int appearance);
     }
 
     /**
@@ -994,6 +997,26 @@ public abstract class Window {
     /** @hide */
     public final WindowControllerCallback getWindowControllerCallback() {
         return mWindowControllerCallback;
+    }
+
+    /** @hide */
+    public final void setDecorCallback(DecorCallback decorCallback) {
+        mDecorCallback = decorCallback;
+    }
+
+    /** @hide */
+    @WindowInsetsController.Appearance
+    public final int getSystemBarAppearance() {
+        return mSystemBarAppearance;
+    }
+
+    /** @hide */
+    public final void dispatchOnSystemBarAppearanceChanged(
+            @WindowInsetsController.Appearance int appearance) {
+        mSystemBarAppearance = appearance;
+        if (mDecorCallback != null) {
+            mDecorCallback.onSystemBarAppearanceChanged(appearance);
+        }
     }
 
     /**
