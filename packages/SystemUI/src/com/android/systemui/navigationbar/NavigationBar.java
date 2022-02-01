@@ -110,7 +110,6 @@ import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.R;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
-import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -122,7 +121,6 @@ import com.android.systemui.navigationbar.gestural.QuickswitchOrientedNavHandle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.recents.utilities.Utilities;
 import com.android.systemui.shared.rotation.RotationButton;
 import com.android.systemui.shared.rotation.RotationButtonController;
@@ -192,7 +190,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     private final Optional<LegacySplitScreen> mSplitScreenOptional;
     private final Optional<Recents> mRecentsOptional;
     private final Optional<BackAnimation> mBackAnimation;
-    private final SystemActions mSystemActions;
     private final Handler mHandler;
     private final NavigationBarOverlayController mNavbarOverlayController;
     private final UiEventLogger mUiEventLogger;
@@ -307,7 +304,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             new NavBarHelper.NavbarTaskbarStateUpdater() {
                 @Override
                 public void updateAccessibilityServicesState() {
-                    updateAcessibilityStateFlags();
+                    updateAccessibilityStateFlags();
                 }
 
                 @Override
@@ -495,12 +492,10 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             ShadeController shadeController,
             NotificationRemoteInputManager notificationRemoteInputManager,
             NotificationShadeDepthController notificationShadeDepthController,
-            SystemActions systemActions,
             @Main Handler mainHandler,
             NavigationBarOverlayController navbarOverlayController,
             UiEventLogger uiEventLogger,
             NavBarHelper navBarHelper,
-            UserTracker userTracker,
             LightBarController mainLightBarController,
             LightBarController.Factory lightBarControllerFactory,
             AutoHideController mainAutoHideController,
@@ -528,7 +523,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         mSplitScreenOptional = splitScreenOptional;
         mRecentsOptional = recentsOptional;
         mBackAnimation = backAnimation;
-        mSystemActions = systemActions;
         mHandler = mainHandler;
         mNavbarOverlayController = navbarOverlayController;
         mUiEventLogger = uiEventLogger;
@@ -646,7 +640,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         notifyNavigationBarScreenOn();
 
         mOverviewProxyService.addCallback(mOverviewProxyListener);
-        updateSystemUiStateFlags(-1);
+        updateSystemUiStateFlags();
 
         // Currently there is no accelerometer sensor on non-default display.
         if (mIsOnDefaultDisplay) {
@@ -904,7 +898,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             mNavigationBarView.setNavigationIconHints(hints);
         }
         checkBarModes();
-        updateSystemUiStateFlags(-1);
+        updateSystemUiStateFlags();
     }
 
     @Override
@@ -914,7 +908,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 && window == StatusBarManager.WINDOW_NAVIGATION_BAR
                 && mNavigationBarWindowState != state) {
             mNavigationBarWindowState = state;
-            updateSystemUiStateFlags(-1);
+            updateSystemUiStateFlags();
             mShowOrientedHandleForImmersiveMode = state == WINDOW_STATE_HIDDEN;
             if (mOrientationHandle != null
                     && mStartingQuickSwitchRotation != -1) {
@@ -993,7 +987,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         if (mBehavior != behavior) {
             mBehavior = behavior;
             mNavigationBarView.setBehavior(behavior);
-            updateSystemUiStateFlags(-1);
+            updateSystemUiStateFlags();
         }
     }
 
@@ -1160,7 +1154,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         ButtonDispatcher accessibilityButton = mNavigationBarView.getAccessibilityButton();
         accessibilityButton.setOnClickListener(this::onAccessibilityClick);
         accessibilityButton.setOnLongClickListener(this::onAccessibilityLongClick);
-        updateAcessibilityStateFlags();
+        updateAccessibilityStateFlags();
 
         ButtonDispatcher imeSwitcherButton = mNavigationBarView.getImeSwitchButton();
         imeSwitcherButton.setOnClickListener(this::onImeSwitcherClick);
@@ -1386,21 +1380,18 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         return true;
     }
 
-    void updateAcessibilityStateFlags() {
-        int a11yFlags = mNavBarHelper.getA11yButtonState();
-
+    void updateAccessibilityStateFlags() {
         if (mNavigationBarView != null) {
+            int a11yFlags = mNavBarHelper.getA11yButtonState();
             boolean clickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0;
             boolean longClickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0;
             mNavigationBarView.setAccessibilityButtonState(clickable, longClickable);
         }
-        updateSystemUiStateFlags(a11yFlags);
+        updateSystemUiStateFlags();
     }
 
-    public void updateSystemUiStateFlags(int a11yFlags) {
-        if (a11yFlags < 0) {
-            a11yFlags = mNavBarHelper.getA11yButtonState();
-        }
+    public void updateSystemUiStateFlags() {
+        int a11yFlags = mNavBarHelper.getA11yButtonState();
         boolean clickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0;
         boolean longClickable = (a11yFlags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0;
 
@@ -1414,16 +1405,6 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 .setFlag(SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY,
                         allowSystemGestureIgnoringBarVisibility())
                 .commitUpdate(mDisplayId);
-        registerAction(clickable, SystemActions.SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON);
-        registerAction(longClickable, SystemActions.SYSTEM_ACTION_ID_ACCESSIBILITY_BUTTON_CHOOSER);
-    }
-
-    private void registerAction(boolean register, int actionId) {
-        if (register) {
-            mSystemActions.register(actionId);
-        } else {
-            mSystemActions.unregister(actionId);
-        }
     }
 
     private void updateAssistantEntrypoints(boolean assistantAvailable) {
@@ -1641,7 +1622,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             }
             if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 // The accessibility settings may be different for the new user
-                updateAcessibilityStateFlags();
+                updateAccessibilityStateFlags();
             }
         }
     };
@@ -1673,12 +1654,10 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         private final ShadeController mShadeController;
         private final NotificationRemoteInputManager mNotificationRemoteInputManager;
         private final NotificationShadeDepthController mNotificationShadeDepthController;
-        private final SystemActions mSystemActions;
         private final Handler mMainHandler;
         private final NavigationBarOverlayController mNavbarOverlayController;
         private final UiEventLogger mUiEventLogger;
         private final NavBarHelper mNavBarHelper;
-        private final UserTracker mUserTracker;
         private final LightBarController mMainLightBarController;
         private final LightBarController.Factory mLightBarControllerFactory;
         private final AutoHideController mMainAutoHideController;
@@ -1707,12 +1686,10 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                 ShadeController shadeController,
                 NotificationRemoteInputManager notificationRemoteInputManager,
                 NotificationShadeDepthController notificationShadeDepthController,
-                SystemActions systemActions,
                 @Main Handler mainHandler,
                 NavigationBarOverlayController navbarOverlayController,
                 UiEventLogger uiEventLogger,
                 NavBarHelper navBarHelper,
-                UserTracker userTracker,
                 LightBarController mainLightBarController,
                 LightBarController.Factory lightBarControllerFactory,
                 AutoHideController mainAutoHideController,
@@ -1738,12 +1715,10 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             mShadeController = shadeController;
             mNotificationRemoteInputManager = notificationRemoteInputManager;
             mNotificationShadeDepthController = notificationShadeDepthController;
-            mSystemActions = systemActions;
             mMainHandler = mainHandler;
             mNavbarOverlayController = navbarOverlayController;
             mUiEventLogger = uiEventLogger;
             mNavBarHelper = navBarHelper;
-            mUserTracker = userTracker;
             mMainLightBarController = mainLightBarController;
             mLightBarControllerFactory = lightBarControllerFactory;
             mMainAutoHideController = mainAutoHideController;
@@ -1763,9 +1738,9 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
                     mSysUiFlagsContainer, mBroadcastDispatcher, mCommandQueue, mPipOptional,
                     mSplitScreenOptional, mRecentsOptional, mStatusBarOptionalLazy,
                     mShadeController, mNotificationRemoteInputManager,
-                    mNotificationShadeDepthController, mSystemActions, mMainHandler,
+                    mNotificationShadeDepthController, mMainHandler,
                     mNavbarOverlayController, mUiEventLogger, mNavBarHelper,
-                    mUserTracker, mMainLightBarController, mLightBarControllerFactory,
+                    mMainLightBarController, mLightBarControllerFactory,
                     mMainAutoHideController, mAutoHideControllerFactory, mTelecomManagerOptional,
                     mInputMethodManager, mBackAnimation);
         }

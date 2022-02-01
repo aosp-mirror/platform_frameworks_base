@@ -677,7 +677,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
 
         if (navBarFragment != null) {
-            navBarFragment.updateSystemUiStateFlags(-1);
+            navBarFragment.updateSystemUiStateFlags();
         }
         if (navBarView != null) {
             navBarView.updateDisabledSystemUiStateFlags();
