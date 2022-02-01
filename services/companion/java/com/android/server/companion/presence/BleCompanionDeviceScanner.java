@@ -21,8 +21,6 @@ import static android.bluetooth.BluetoothAdapter.ACTION_BLE_STATE_CHANGED;
 import static android.bluetooth.BluetoothAdapter.ACTION_STATE_CHANGED;
 import static android.bluetooth.BluetoothAdapter.EXTRA_PREVIOUS_STATE;
 import static android.bluetooth.BluetoothAdapter.EXTRA_STATE;
-import static android.bluetooth.BluetoothAdapter.STATE_BLE_ON;
-import static android.bluetooth.BluetoothAdapter.STATE_ON;
 import static android.bluetooth.BluetoothAdapter.nameForState;
 import static android.bluetooth.le.ScanCallback.SCAN_FAILED_ALREADY_STARTED;
 import static android.bluetooth.le.ScanCallback.SCAN_FAILED_APPLICATION_REGISTRATION_FAILED;
@@ -156,7 +154,7 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
     private void checkBleState() {
         enforceInitialized();
 
-        final boolean bleAvailable = isBleAvailable();
+        final boolean bleAvailable = mBtAdapter.isLeEnabled();
         if (DEBUG) {
             Log.i(TAG, "checkBleState() bleAvailable=" + bleAvailable);
         }
@@ -181,16 +179,6 @@ class BleCompanionDeviceScanner implements AssociationStore.OnChangeListener {
             stopScanIfNeeded();
             mBleScanner = null;
         }
-    }
-
-    /**
-     * A duplicate of {@code BluetoothAdapter.getLeAccess()} method which has the package-private
-     * access level, so it's not accessible from here.
-     */
-    private boolean isBleAvailable() {
-        final int state = mBtAdapter.getLeState();
-        if (DEBUG) Log.d(TAG, "getLeAccess() state=" + nameForBtState(state));
-        return state == STATE_ON || state == STATE_BLE_ON;
     }
 
     @MainThread
