@@ -637,13 +637,15 @@ class Owners {
         }
     }
 
-    void setDeviceOwnerType(String packageName, @DeviceOwnerType int deviceOwnerType) {
+    void setDeviceOwnerType(String packageName, @DeviceOwnerType int deviceOwnerType,
+            boolean isAdminTestOnly) {
         synchronized (mLock) {
             if (!hasDeviceOwner()) {
                 Slog.e(TAG, "Attempting to set a device owner type when there is no device owner");
                 return;
-            } else if (isDeviceOwnerTypeSetForDeviceOwner(packageName)) {
-                Slog.e(TAG, "Device owner type for " + packageName + " has already been set");
+            } else if (!isAdminTestOnly && isDeviceOwnerTypeSetForDeviceOwner(packageName)) {
+                Slog.e(TAG, "Setting the device owner type more than once is only allowed"
+                        + " for test only admins");
                 return;
             }
 

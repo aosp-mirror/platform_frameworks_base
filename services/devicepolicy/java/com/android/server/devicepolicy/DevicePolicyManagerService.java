@@ -18330,12 +18330,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private void setDeviceOwnerTypeLocked(ComponentName admin,
             @DeviceOwnerType int deviceOwnerType) {
         String packageName = admin.getPackageName();
+        boolean isAdminTestOnly;
 
         verifyDeviceOwnerTypePreconditionsLocked(admin);
-        Preconditions.checkState(!mOwners.isDeviceOwnerTypeSetForDeviceOwner(packageName),
-                "The device owner type has already been set for " + packageName);
 
-        mOwners.setDeviceOwnerType(packageName, deviceOwnerType);
+        isAdminTestOnly = isAdminTestOnlyLocked(admin, mOwners.getDeviceOwnerUserId());
+        Preconditions.checkState(isAdminTestOnly
+                        || !mOwners.isDeviceOwnerTypeSetForDeviceOwner(packageName),
+                "Test only admins can only set the device owner type more than once");
+
+        mOwners.setDeviceOwnerType(packageName, deviceOwnerType, isAdminTestOnly);
     }
 
     @Override
