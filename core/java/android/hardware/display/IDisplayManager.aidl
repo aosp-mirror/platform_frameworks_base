@@ -168,6 +168,7 @@ interface IDisplayManager {
     // Requires MODIFY_USER_PREFERRED_DISPLAY_MODE permission.
     void setUserPreferredDisplayMode(int displayId, in Mode mode);
     Mode getUserPreferredDisplayMode(int displayId);
+    Mode getSystemPreferredDisplayMode(int displayId);
 
     // When enabled the app requested display resolution and refresh rate is always selected
     // in DisplayModeDirector regardless of user settings and policies for low brightness, low
