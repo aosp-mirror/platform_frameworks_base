@@ -32,7 +32,7 @@
         android:gravity="center">
         <ImageView
             android:id="@+id/overlay_action_chip_icon"
-            android:tint="?android:attr/textColorPrimary"
+            android:tint="?attr/overlayButtonTextColor"
             android:layout_width="@dimen/overlay_action_chip_icon_size"
             android:layout_height="@dimen/overlay_action_chip_icon_size"/>
         <TextView
@@ -41,6 +41,6 @@
             android:layout_height="wrap_content"
             android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
             android:textSize="@dimen/overlay_action_chip_text_size"
-            android:textColor="?android:attr/textColorPrimary"/>
+            android:textColor="?attr/overlayButtonTextColor"/>
     </LinearLayout>
 </com.android.systemui.screenshot.OverlayActionChip>

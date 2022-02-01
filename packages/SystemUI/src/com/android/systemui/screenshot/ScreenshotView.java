@@ -158,7 +158,6 @@ public class ScreenshotView extends FrameLayout implements
 
     private UiEventLogger mUiEventLogger;
     private ScreenshotViewCallback mCallbacks;
-    private Animator mDismissAnimation;
     private boolean mPendingSharedTransition;
     private SwipeDismissHandler mSwipeDismissHandler;
     private InputMonitorCompat mInputMonitor;
@@ -940,7 +939,7 @@ public class ScreenshotView extends FrameLayout implements
     }
 
     boolean isDismissing() {
-        return (mDismissAnimation != null && mDismissAnimation.isRunning());
+        return mSwipeDismissHandler.isDismissing();
     }
 
     boolean isPendingSharedTransition() {
@@ -956,12 +955,6 @@ public class ScreenshotView extends FrameLayout implements
             Log.d(TAG, "reset screenshot view");
         }
 
-        if (mDismissAnimation != null && mDismissAnimation.isRunning()) {
-            if (DEBUG_ANIM) {
-                Log.d(TAG, "cancelling dismiss animation");
-            }
-            mDismissAnimation.cancel();
-        }
         mSwipeDismissHandler.cancel();
         if (DEBUG_WINDOW) {
             Log.d(TAG, "removing OnComputeInternalInsetsListener");
@@ -1012,31 +1005,6 @@ public class ScreenshotView extends FrameLayout implements
             }
             Log.e(TAG, "Intent cancelled", e);
         }
-    }
-
-    private AnimatorSet createScreenshotTranslateDismissAnimation() {
-        ValueAnimator alphaAnim = ValueAnimator.ofFloat(0, 1);
-        alphaAnim.setStartDelay(SCREENSHOT_DISMISS_ALPHA_OFFSET_MS);
-        alphaAnim.setDuration(SCREENSHOT_DISMISS_ALPHA_DURATION_MS);
-        alphaAnim.addUpdateListener(animation -> {
-            setAlpha(1 - animation.getAnimatedFraction());
-        });
-
-        ValueAnimator xAnim = ValueAnimator.ofFloat(0, 1);
-        xAnim.setInterpolator(mAccelerateInterpolator);
-        xAnim.setDuration(SCREENSHOT_DISMISS_X_DURATION_MS);
-        float deltaX = mDirectionLTR
-                ? -1 * (mScreenshotPreviewBorder.getX() + mScreenshotPreviewBorder.getWidth())
-                : (mDisplayMetrics.widthPixels - mScreenshotPreviewBorder.getX());
-        xAnim.addUpdateListener(animation -> {
-            float currXDelta = MathUtils.lerp(0, deltaX, animation.getAnimatedFraction());
-            mScreenshotStatic.setTranslationX(currXDelta);
-        });
-
-        AnimatorSet animSet = new AnimatorSet();
-        animSet.play(xAnim).with(alphaAnim);
-
-        return animSet;
     }
 
     ValueAnimator createScreenshotFadeDismissAnimation() {

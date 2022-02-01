@@ -664,7 +664,9 @@
         <item name="android:windowActivityTransitions">true</item>
     </style>
 
-    <style name="FloatingOverlay" parent="@android:style/Theme.DeviceDefault.DayNight"/>
+    <style name="FloatingOverlay" parent="@android:style/Theme.DeviceDefault.DayNight">
+        <item name="overlayButtonTextColor">?android:attr/textColorPrimary</item>
+    </style>
 
     <!-- Clipboard overlay's edit text activity. -->
     <style name="EditTextActivity" parent="@android:style/Theme.DeviceDefault.DayNight">

@@ -365,7 +365,7 @@ public class ClipboardOverlayController {
     }
 
     private void animateOut() {
-        getExitAnimation().start();
+        mView.dismiss();
     }
 
     private ValueAnimator getEnterAnimation() {
@@ -398,28 +398,6 @@ public class ClipboardOverlayController {
                 mTimeoutHandler.resetTimeout();
             }
         });
-        return anim;
-    }
-
-    private ValueAnimator getExitAnimation() {
-        ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
-
-        anim.addUpdateListener(animation -> {
-            mView.setAlpha(1 - animation.getAnimatedFraction());
-            final View actionBackground = requireNonNull(
-                    mView.findViewById(R.id.actions_container_background));
-            mView.setTranslationX(
-                    -animation.getAnimatedFraction() * actionBackground.getWidth() / 2);
-        });
-
-        anim.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                hideImmediate();
-            }
-        });
-
         return anim;
     }
 
