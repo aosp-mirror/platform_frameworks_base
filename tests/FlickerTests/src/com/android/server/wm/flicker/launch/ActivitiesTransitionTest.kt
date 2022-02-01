@@ -70,7 +70,7 @@ class ActivitiesTransitionTest(val testSpec: FlickerTestParameter) {
     fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
             setup {
-                eachRun {
+                test {
                     testApp.launchViaIntent(wmHelper)
                     wmHelper.waitForFullScreenApp(testApp.component)
                 }
