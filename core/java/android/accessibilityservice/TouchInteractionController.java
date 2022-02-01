@@ -376,7 +376,7 @@ public final class TouchInteractionController {
             throw new IllegalStateException(
                     "State transitions are not allowed without first adding a callback.");
         }
-        if (mState != STATE_TOUCH_INTERACTING) {
+        if (mState != STATE_TOUCH_INTERACTING && mState != STATE_DRAGGING) {
             throw new IllegalStateException(
                     "State transitions are not allowed in " + stateToString(mState));
         }
