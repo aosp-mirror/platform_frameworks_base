@@ -19,6 +19,7 @@ package com.android.systemui.dagger;
 import android.app.Activity;
 
 import com.android.systemui.ForegroundServicesDialog;
+import com.android.systemui.hdmi.HdmiCecSetMenuLanguageActivity;
 import com.android.systemui.keyguard.WorkLockActivity;
 import com.android.systemui.people.PeopleSpaceActivity;
 import com.android.systemui.people.widget.LaunchConversationActivity;
@@ -120,4 +121,11 @@ public abstract class DefaultActivityBinder {
     @IntoMap
     @ClassKey(TvUnblockSensorActivity.class)
     public abstract Activity bindTvUnblockSensorActivity(TvUnblockSensorActivity activity);
+
+    /** Inject into HdmiCecSetMenuLanguageActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(HdmiCecSetMenuLanguageActivity.class)
+    public abstract Activity bindHdmiCecSetMenuLanguageActivity(
+            HdmiCecSetMenuLanguageActivity activity);
 }
