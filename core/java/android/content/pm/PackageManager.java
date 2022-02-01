@@ -3325,7 +3325,8 @@ public abstract class PackageManager {
      * <p>This feature should only be defined if {@link #FEATURE_TELEPHONY} has been defined.
      */
     @SdkConstant(SdkConstantType.FEATURE)
-    public static final String FEATURE_TELEPHONY_RADIO_ACCESS = "android.hardware.telephony.radio";
+    public static final String FEATURE_TELEPHONY_RADIO_ACCESS =
+            "android.hardware.telephony.radio.access";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:

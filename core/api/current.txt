@@ -11911,7 +11911,7 @@ package android.content.pm {
     field public static final String FEATURE_TELEPHONY_IMS = "android.hardware.telephony.ims";
     field public static final String FEATURE_TELEPHONY_MBMS = "android.hardware.telephony.mbms";
     field public static final String FEATURE_TELEPHONY_MESSAGING = "android.hardware.telephony.messaging";
-    field public static final String FEATURE_TELEPHONY_RADIO_ACCESS = "android.hardware.telephony.radio";
+    field public static final String FEATURE_TELEPHONY_RADIO_ACCESS = "android.hardware.telephony.radio.access";
     field public static final String FEATURE_TELEPHONY_SUBSCRIPTION = "android.hardware.telephony.subscription";
     field @Deprecated public static final String FEATURE_TELEVISION = "android.hardware.type.television";
     field public static final String FEATURE_TOUCHSCREEN = "android.hardware.touchscreen";
