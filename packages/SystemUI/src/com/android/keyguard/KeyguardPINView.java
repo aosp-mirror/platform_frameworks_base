@@ -112,13 +112,13 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
 
         // Password entry area
         int passwordHeight = res.getDimensionPixelSize(R.dimen.keyguard_password_height);
-        View pinEntry = mContainer.findViewById(R.id.pinEntry);
+        View pinEntry = findViewById(getPasswordTextViewId());
         ViewGroup.LayoutParams lp = pinEntry.getLayoutParams();
         lp.height = passwordHeight;
         pinEntry.setLayoutParams(lp);
 
         // Below row0
-        View row0 = mContainer.findViewById(R.id.row0);
+        View row0 = findViewById(R.id.row0);
         row0.setPadding(0, 0, 0, verticalMargin);
 
         // Above the emergency contact area
