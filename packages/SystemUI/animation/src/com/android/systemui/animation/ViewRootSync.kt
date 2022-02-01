@@ -1,15 +1,15 @@
 package com.android.systemui.animation
 
 import android.app.ActivityManager
-import android.view.SurfaceControl
 import android.view.View
-import android.view.ViewRootImpl
+import android.window.SurfaceSyncer
 
 /** A util class to synchronize 2 view roots. */
 // TODO(b/200284684): Remove this class.
 object ViewRootSync {
     // TODO(b/217621394): Remove special handling for low-RAM devices after animation sync is fixed
     private val forceDisableSynchronization = ActivityManager.isLowRamDeviceStatic()
+    private var surfaceSyncer: SurfaceSyncer? = null
 
     /**
      * Synchronize the next draw between the view roots of [view] and [otherView], then run [then].
@@ -33,35 +33,11 @@ object ViewRootSync {
             return
         }
 
-        // Consume the next frames of both view roots to make sure the ghost view is drawn at
-        // exactly the same time as when the touch surface is made invisible.
-        var remainingTransactions = 0
-        val mergedTransactions = SurfaceControl.Transaction()
-
-        fun onTransaction(transaction: SurfaceControl.Transaction?) {
-            remainingTransactions--
-            transaction?.let { mergedTransactions.merge(it) }
-
-            if (remainingTransactions == 0) {
-                mergedTransactions.apply()
-                then()
-            }
-        }
-
-        fun consumeNextDraw(viewRootImpl: ViewRootImpl) {
-            if (viewRootImpl.consumeNextDraw(::onTransaction)) {
-                remainingTransactions++
-
-                // Make sure we trigger a traversal.
-                viewRootImpl.view.invalidate()
-            }
-        }
-
-        consumeNextDraw(view.viewRootImpl)
-        consumeNextDraw(otherView.viewRootImpl)
-
-        if (remainingTransactions == 0) {
-            then()
+        surfaceSyncer = SurfaceSyncer().apply {
+            val syncId = setupSync(Runnable { then() })
+            addToSync(syncId, view)
+            addToSync(syncId, otherView)
+            markSyncReady(syncId)
         }
     }
 
