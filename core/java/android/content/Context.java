@@ -6504,15 +6504,26 @@ public abstract class Context {
      * <li>Each permission in {@code permissions} must be a runtime permission.
      * </ul>
      * <p>
-     * For every permission in {@code permissions}, the entire permission group it belongs to will
-     * be revoked. The revocation happens asynchronously and kills all processes running in the
-     * calling UID. It will be triggered once it is safe to do so. In particular, it will not be
-     * triggered as long as the package remains in the foreground, or has any active manifest
-     * components (e.g. when another app is accessing a content provider in the package).
+     * Background permissions which have no corresponding foreground permission still granted once
+     * the revocation is effective will also be revoked.
+     * <p>
+     * The revocation happens asynchronously and kills all processes running in the calling UID. It
+     * will be triggered once it is safe to do so. In particular, it will not be triggered as long
+     * as the package remains in the foreground, or has any active manifest components (e.g. when
+     * another app is accessing a content provider in the package).
      * <p>
      * If you want to revoke the permissions right away, you could call {@code System.exit()}, but
      * this could affect other apps that are accessing your app at the moment. For example, apps
      * accessing a content provider in your app will all crash.
+     * <p>
+     * Note that the settings UI shows a permission group as granted as long as at least one
+     * permission in the group is granted. If you want the user to observe the revocation in the
+     * settings, you should revoke every permission in the target group. To learn the current list
+     * of permissions in a group, you may use
+     * {@link PackageManager#getGroupOfPlatformPermission(String, Executor, Consumer)} and
+     * {@link PackageManager#getPlatformPermissionsForGroup(String, Executor, Consumer)}. This list
+     * of permissions may evolve over time, so it is recommended to check whether it contains any
+     * permission you wish to retain before trying to revoke an entire group.
      *
      * @param permissions Collection of permissions to be revoked.
      * @see PackageManager#getGroupOfPlatformPermission(String, Executor, Consumer)

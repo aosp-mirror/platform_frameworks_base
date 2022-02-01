@@ -337,9 +337,11 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      * <li>Each permission in {@code permissions} must be a runtime permission.
      * </ul>
      * <p>
-     * For every permission in {@code permissions}, the entire permission group it belongs to will
-     * be revoked. This revocation happens asynchronously and kills all processes running in the
-     * same UID as {@code packageName}. It will be triggered once it is safe to do so.
+     * Background permissions which have no corresponding foreground permission still granted once
+     * the revocation is effective will also be revoked.
+     * <p>
+     * This revocation happens asynchronously and kills all processes running in the same UID as
+     * {@code packageName}. It will be triggered once it is safe to do so.
      *
      * @param packageName The name of the package for which the permissions will be revoked.
      * @param permissions List of permissions to be revoked.
