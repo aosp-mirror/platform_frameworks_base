@@ -57,6 +57,9 @@ public final class DreamBackendTest {
         when(res.getIntArray(
                 com.android.internal.R.array.config_dreamComplicationsEnabledByDefault)).thenReturn(
                 DEFAULT_DREAM_COMPLICATIONS);
+        when(res.getStringArray(
+                com.android.internal.R.array.config_disabledDreamComponents)).thenReturn(
+                new String[]{});
         mBackend = new DreamBackend(mContext);
     }
 
