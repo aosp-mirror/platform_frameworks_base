@@ -230,8 +230,10 @@ public final class AppHibernationService extends SystemService {
             }
             final Map<String, UserLevelState> packageStates = mUserStates.get(userId);
             final UserLevelState pkgState = packageStates.get(packageName);
-            if (pkgState == null) {
-                Slog.e(TAG, String.format("Package %s is not installed for user %s",
+            if (pkgState == null
+                    || !mPackageManagerInternal.canQueryPackage(
+                            Binder.getCallingUid(), packageName)) {
+                Slog.e(TAG, TextUtils.formatSimple("Package %s is not installed for user %s",
                         packageName, userId));
                 return false;
             }
@@ -254,7 +256,9 @@ public final class AppHibernationService extends SystemService {
                 "Caller does not have MANAGE_APP_HIBERNATION permission.");
         synchronized (mLock) {
             GlobalLevelState state = mGlobalHibernationStates.get(packageName);
-            if (state == null) {
+            if (state == null
+                    || !mPackageManagerInternal.canQueryPackage(
+                            Binder.getCallingUid(), packageName)) {
                 // This API can be legitimately called before installation finishes as part of
                 // dex optimization, so we just return false here.
                 return false;
@@ -285,8 +289,10 @@ public final class AppHibernationService extends SystemService {
             }
             final Map<String, UserLevelState> packageStates = mUserStates.get(realUserId);
             final UserLevelState pkgState = packageStates.get(packageName);
-            if (pkgState == null) {
-                Slog.e(TAG, String.format("Package %s is not installed for user %s",
+            if (pkgState == null
+                    || !mPackageManagerInternal.canQueryPackage(
+                            Binder.getCallingUid(), packageName)) {
+                Slog.e(TAG, TextUtils.formatSimple("Package %s is not installed for user %s",
                         packageName, realUserId));
                 return;
             }
@@ -334,8 +340,11 @@ public final class AppHibernationService extends SystemService {
                 "Caller does not have MANAGE_APP_HIBERNATION permission.");
         synchronized (mLock) {
             GlobalLevelState state = mGlobalHibernationStates.get(packageName);
-            if (state == null) {
-                Slog.e(TAG, String.format("Package %s is not installed for any user", packageName));
+            if (state == null
+                    || !mPackageManagerInternal.canQueryPackage(
+                            Binder.getCallingUid(), packageName)) {
+                Slog.e(TAG, TextUtils.formatSimple(
+                        "Package %s is not installed for any user", packageName));
                 return;
             }
             if (state.hibernated != isHibernating) {
@@ -372,6 +381,12 @@ public final class AppHibernationService extends SystemService {
             }
             Map<String, UserLevelState> userStates = mUserStates.get(userId);
             for (UserLevelState state : userStates.values()) {
+                String packageName = state.packageName;
+                if (!mPackageManagerInternal.canQueryPackage(
+                        Binder.getCallingUid(), packageName)) {
+                    // Package is not visible to caller
+                    continue;
+                }
                 if (state.hibernated) {
                     hibernatingPackages.add(state.packageName);
                 }

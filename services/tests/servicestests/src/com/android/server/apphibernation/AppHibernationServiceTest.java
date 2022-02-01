@@ -235,6 +235,29 @@ public final class AppHibernationServiceTest {
     }
 
     @Test
+    public void testGetHibernatingPackagesForUser_doesNotReturnPackagesThatArentVisible()
+            throws RemoteException {
+        // GIVEN an unlocked user with all packages installed but only some are visible to the
+        // caller
+        UserInfo userInfo =
+                addUser(USER_ID_2, new String[]{PACKAGE_NAME_1, PACKAGE_NAME_2, PACKAGE_NAME_3});
+        doReturn(false).when(mPackageManagerInternal).canQueryPackage(anyInt(), eq(PACKAGE_NAME_2));
+        doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(USER_ID_2);
+        mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(userInfo));
+
+        // WHEN packages are hibernated for the user
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_2, true);
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_2, USER_ID_2, true);
+
+        // THEN the hibernating packages returned does not contain the package that was not visible
+        List<String> hibernatingPackages =
+                mAppHibernationService.getHibernatingPackagesForUser(USER_ID_2);
+        assertEquals(1, hibernatingPackages.size());
+        assertTrue(hibernatingPackages.contains(PACKAGE_NAME_1));
+        assertFalse(hibernatingPackages.contains(PACKAGE_NAME_2));
+    }
+
+    @Test
     public void testUserLevelStatesInitializedFromDisk() throws RemoteException {
         // GIVEN states stored on disk that match with package manager's force-stop states
         List<UserLevelState> diskStates = new ArrayList<>();
