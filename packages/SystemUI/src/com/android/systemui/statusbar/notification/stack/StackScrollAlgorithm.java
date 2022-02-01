@@ -46,7 +46,7 @@ import java.util.List;
  */
 public class StackScrollAlgorithm {
 
-    public static final float START_FRACTION = 0.3f;
+    public static final float START_FRACTION = 0.5f;
 
     private static final String LOG_TAG = "StackScrollAlgorithm";
     private final ViewGroup mHostView;
