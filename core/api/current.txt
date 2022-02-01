@@ -31738,7 +31738,12 @@ package android.os {
     method public void release();
     method public void release(int);
     method public void setReferenceCounted(boolean);
+    method public void setStateListener(@NonNull java.util.concurrent.Executor, @Nullable android.os.PowerManager.WakeLockStateListener);
     method public void setWorkSource(android.os.WorkSource);
+  }
+
+  public static interface PowerManager.WakeLockStateListener {
+    method public void onStateChanged(boolean);
   }
 
   public class Process {
