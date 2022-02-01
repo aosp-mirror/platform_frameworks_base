@@ -1199,6 +1199,7 @@ package android.app.admin {
   public final class FullyManagedDeviceProvisioningParams implements android.os.Parcelable {
     method public boolean canDeviceOwnerGrantSensorsPermissions();
     method public int describeContents();
+    method @NonNull public android.os.PersistableBundle getAdminExtras();
     method @NonNull public android.content.ComponentName getDeviceAdminComponentName();
     method public long getLocalTime();
     method @Nullable public java.util.Locale getLocale();
@@ -1212,6 +1213,7 @@ package android.app.admin {
   public static final class FullyManagedDeviceProvisioningParams.Builder {
     ctor public FullyManagedDeviceProvisioningParams.Builder(@NonNull android.content.ComponentName, @NonNull String);
     method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams build();
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setAdminExtras(@NonNull android.os.PersistableBundle);
     method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setCanDeviceOwnerGrantSensorsPermissions(boolean);
     method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLeaveAllSystemAppsEnabled(boolean);
     method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLocalTime(long);
@@ -1222,6 +1224,7 @@ package android.app.admin {
   public final class ManagedProfileProvisioningParams implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.accounts.Account getAccountToMigrate();
+    method @NonNull public android.os.PersistableBundle getAdminExtras();
     method @NonNull public String getOwnerName();
     method @NonNull public android.content.ComponentName getProfileAdminComponentName();
     method @Nullable public String getProfileName();
@@ -1236,6 +1239,7 @@ package android.app.admin {
     ctor public ManagedProfileProvisioningParams.Builder(@NonNull android.content.ComponentName, @NonNull String);
     method @NonNull public android.app.admin.ManagedProfileProvisioningParams build();
     method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setAccountToMigrate(@Nullable android.accounts.Account);
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setAdminExtras(@NonNull android.os.PersistableBundle);
     method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setKeepingAccountOnMigration(boolean);
     method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setLeaveAllSystemAppsEnabled(boolean);
     method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setOrganizationOwnedProvisioning(boolean);
