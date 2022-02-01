@@ -1161,6 +1161,13 @@ package android.app.admin {
     field public static final String UNDEFINED = "UNDEFINED";
   }
 
+  public static final class DevicePolicyResources.Strings.Dialer {
+    field public static final String NOTIFICATION_INCOMING_WORK_CALL_TITLE = "Dialer.NOTIFICATION_INCOMING_WORK_CALL_TITLE";
+    field public static final String NOTIFICATION_MISSED_WORK_CALL_TITLE = "Dialer.NOTIFICATION_MISSED_WORK_CALL_TITLE";
+    field public static final String NOTIFICATION_ONGOING_WORK_CALL_TITLE = "Dialer.NOTIFICATION_ONGOING_WORK_CALL_TITLE";
+    field public static final String NOTIFICATION_WIFI_WORK_CALL_LABEL = "Dialer.NOTIFICATION_WIFI_WORK_CALL_LABEL";
+  }
+
   public static final class DevicePolicyResources.Strings.DocumentsUi {
     field public static final String CANT_SAVE_TO_PERSONAL_MESSAGE = "DocumentsUi.CANT_SAVE_TO_PERSONAL_MESSAGE";
     field public static final String CANT_SAVE_TO_PERSONAL_TITLE = "DocumentsUi.CANT_SAVE_TO_PERSONAL_TITLE";
