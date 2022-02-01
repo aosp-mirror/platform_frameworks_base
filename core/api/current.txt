@@ -23299,7 +23299,7 @@ package android.media {
     ctor public RouteDiscoveryPreference.Builder(@NonNull android.media.RouteDiscoveryPreference);
     method @NonNull public android.media.RouteDiscoveryPreference build();
     method @NonNull public android.media.RouteDiscoveryPreference.Builder setAllowedPackages(@NonNull java.util.List<java.lang.String>);
-    method @NonNull public android.media.RouteDiscoveryPreference.Builder setDeduplicationPackageOrder(@Nullable java.util.List<java.lang.String>);
+    method @NonNull public android.media.RouteDiscoveryPreference.Builder setDeduplicationPackageOrder(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.media.RouteDiscoveryPreference.Builder setPreferredFeatures(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.media.RouteDiscoveryPreference.Builder setRequiredFeatures(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.media.RouteDiscoveryPreference.Builder setShouldPerformActiveScan(boolean);
