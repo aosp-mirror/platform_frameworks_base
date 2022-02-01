@@ -551,27 +551,6 @@ public class ApkSignatureVerifier {
     }
 
     /**
-     * Generates the FSVerity root hash from FSVerity header, extensions and Merkle tree root hash
-     * in Signing Block.
-     *
-     * @return FSverity root hash
-     */
-    public static byte[] generateApkVerityRootHash(String apkPath)
-            throws NoSuchAlgorithmException, DigestException, IOException {
-        // first try v3
-        try {
-            return ApkSignatureSchemeV3Verifier.generateApkVerityRootHash(apkPath);
-        } catch (SignatureNotFoundException e) {
-            // try older version
-        }
-        try {
-            return ApkSignatureSchemeV2Verifier.generateApkVerityRootHash(apkPath);
-        } catch (SignatureNotFoundException e) {
-            return null;
-        }
-    }
-
-    /**
      * Extended signing details.
      * @hide for internal use only.
      */
