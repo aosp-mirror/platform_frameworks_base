@@ -163,10 +163,5 @@ public class WindowCallbackWrapper implements Window.Callback {
     public void onPointerCaptureChanged(boolean hasCapture) {
         mWrapped.onPointerCaptureChanged(hasCapture);
     }
-
-    @Override
-    public void onSystemBarAppearanceChanged(@WindowInsetsController.Appearance int appearance) {
-        mWrapped.onSystemBarAppearanceChanged(appearance);
-    }
 }
 
