@@ -669,6 +669,8 @@ public class NotificationPanelViewController extends PanelViewController
     private boolean mStatusViewCentered = true;
 
     private Optional<KeyguardUnfoldTransition> mKeyguardUnfoldTransition;
+    private Optional<NotificationPanelUnfoldAnimationController>
+            mNotificationPanelUnfoldAnimationController;
 
     private final ListenerSet<Callbacks> mNotifEventSourceCallbacks = new ListenerSet<>();
 
@@ -929,6 +931,8 @@ public class NotificationPanelViewController extends PanelViewController
 
         mMaxKeyguardNotifications = resources.getInteger(R.integer.keyguard_max_notification_count);
         mKeyguardUnfoldTransition = unfoldComponent.map(c -> c.getKeyguardUnfoldTransition());
+        mNotificationPanelUnfoldAnimationController = unfoldComponent.map(
+                SysUIUnfoldComponent::getNotificationPanelUnfoldAnimationController);
 
         mCommunalSourceMonitorCallback = (source) -> {
             mUiExecutor.execute(() -> setCommunalSource(source));
@@ -1064,6 +1068,8 @@ public class NotificationPanelViewController extends PanelViewController
 
         mTapAgainViewController.init();
         mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mView));
+        mNotificationPanelUnfoldAnimationController.ifPresent(controller ->
+                controller.setup(mNotificationContainerParent));
     }
 
     @Override
@@ -1319,6 +1325,7 @@ public class NotificationPanelViewController extends PanelViewController
         setKeyguardBottomAreaVisibility(mBarState, false);
 
         mKeyguardUnfoldTransition.ifPresent(u -> u.setup(mView));
+        mNotificationPanelUnfoldAnimationController.ifPresent(u -> u.setup(mView));
     }
 
     private void attachSplitShadeMediaPlayerContainer(FrameLayout container) {
