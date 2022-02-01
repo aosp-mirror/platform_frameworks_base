@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification
+package com.android.systemui.statusbar.notification.collection.provider
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
@@ -26,7 +26,7 @@ import javax.inject.Inject
  * NOTE: This class exists to avoid putting metadata like "isMinimized" on the NotifSection
  */
 @SysUISingleton
-class SectionClassifier @Inject constructor() {
+class SectionStyleProvider @Inject constructor() {
     private lateinit var lowPrioritySections: Set<NotifSectioner>
 
     /**

@@ -18,9 +18,9 @@ package com.android.systemui.statusbar.notification.collection.inflation
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
-import com.android.systemui.statusbar.notification.SectionClassifier
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider
 import com.android.systemui.util.ListenerSet
 import javax.inject.Inject
 
@@ -31,7 +31,7 @@ import javax.inject.Inject
 @SysUISingleton
 class NotifUiAdjustmentProvider @Inject constructor(
     private val lockscreenUserManager: NotificationLockscreenUserManager,
-    private val sectionClassifier: SectionClassifier,
+    private val sectionStyleProvider: SectionStyleProvider
 ) {
     private val dirtyListeners = ListenerSet<Runnable>()
 
@@ -57,7 +57,7 @@ class NotifUiAdjustmentProvider @Inject constructor(
     private fun isEntryMinimized(entry: NotificationEntry): Boolean {
         val section = entry.section ?: error("Entry must have a section to determine if minimized")
         val parent = entry.parent ?: error("Entry must have a parent to determine if minimized")
-        val isMinimizedSection = sectionClassifier.isMinimizedSection(section)
+        val isMinimizedSection = sectionStyleProvider.isMinimizedSection(section)
         val isTopLevelEntry = parent == GroupEntry.ROOT_ENTRY
         val isGroupSummary = parent.summary == entry
         return isMinimizedSection && (isTopLevelEntry || isGroupSummary)
