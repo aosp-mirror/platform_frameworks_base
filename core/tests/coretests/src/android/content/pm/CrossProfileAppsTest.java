@@ -71,6 +71,8 @@ public class CrossProfileAppsTest {
     private Resources mResources;
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private Drawable mDrawable;
+    @Mock
+    private PackageManager mPackageManager;
     private CrossProfileApps mCrossProfileApps;
 
     @Before
@@ -87,6 +89,7 @@ public class CrossProfileAppsTest {
                 Context.DEVICE_POLICY_SERVICE);
         when(mContext.getSystemService(Context.DEVICE_POLICY_SERVICE)).thenReturn(
                 mDevicePolicyManager);
+        when(mContext.getPackageManager()).thenReturn(mPackageManager);
     }
 
     @Before
@@ -131,7 +134,8 @@ public class CrossProfileAppsTest {
         setValidTargetProfile(MANAGED_PROFILE);
 
         mCrossProfileApps.getProfileSwitchingIconDrawable(MANAGED_PROFILE);
-        verify(mResources).getDrawable(R.drawable.ic_corp_badge, null);
+        verify(mPackageManager).getUserBadgeForDensityNoBackground(
+                MANAGED_PROFILE, /* density= */0);
     }
 
     @Test

@@ -28,6 +28,7 @@ import com.android.internal.annotations.GuardedBy;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
@@ -436,6 +437,12 @@ public final class ApkAssets {
                 mNativePtr = 0;
             }
         }
+    }
+
+    void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "class=" + getClass());
+        pw.println(prefix + "debugName=" + getDebugName());
+        pw.println(prefix + "assetPath=" + getAssetPath());
     }
 
     private static native long nativeLoad(@FormatType int format, @NonNull String path,

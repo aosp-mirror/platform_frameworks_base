@@ -34,15 +34,18 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -302,8 +305,7 @@ public final class MediaRouter2 {
         mSystemController = new SystemRoutingController(
                 ensureClientPackageNameForSystemSession(
                         sManager.getSystemRoutingSession(clientPackageName)));
-        mDiscoveryPreference = new RouteDiscoveryPreference.Builder(
-                sManager.getPreferredFeatures(clientPackageName), true).build();
+        mDiscoveryPreference = sManager.getDiscoveryPreference(clientPackageName);
         updateAllRoutesFromManager();
 
         // Only used by non-system MediaRouter2.
@@ -1060,11 +1062,48 @@ public final class MediaRouter2 {
                 .build();
     }
 
+    private List<MediaRoute2Info> getSortedRoutes(List<MediaRoute2Info> routes,
+            RouteDiscoveryPreference preference) {
+        if (!preference.shouldRemoveDuplicates()) {
+            return routes;
+        }
+        Map<String, Integer> packagePriority = new ArrayMap<>();
+        int count = preference.getDeduplicationPackageOrder().size();
+        for (int i = 0; i < count; i++) {
+            // the last package will have 1 as the priority
+            packagePriority.put(preference.getDeduplicationPackageOrder().get(i), count - i);
+        }
+        ArrayList<MediaRoute2Info> sortedRoutes = new ArrayList<>(routes);
+        // take the negative for descending order
+        sortedRoutes.sort(Comparator.comparingInt(
+                r -> -packagePriority.getOrDefault(r.getPackageName(), 0)));
+        return sortedRoutes;
+    }
+
     private List<MediaRoute2Info> filterRoutes(List<MediaRoute2Info> routes,
-            RouteDiscoveryPreference discoveryRequest) {
-        return routes.stream()
-                .filter(route -> route.hasAnyFeatures(discoveryRequest.getPreferredFeatures()))
-                .collect(Collectors.toList());
+            RouteDiscoveryPreference discoveryPreference) {
+
+        Set<String> deduplicationIdSet = new ArraySet<>();
+
+        List<MediaRoute2Info> filteredRoutes = new ArrayList<>();
+        for (MediaRoute2Info route : getSortedRoutes(routes, discoveryPreference)) {
+            if (!route.hasAllFeatures(discoveryPreference.getRequiredFeatures())
+                    || !route.hasAnyFeatures(discoveryPreference.getPreferredFeatures())) {
+                continue;
+            }
+            if (!discoveryPreference.getAllowedPackages().isEmpty()
+                    && !discoveryPreference.getAllowedPackages().contains(route.getPackageName())) {
+                continue;
+            }
+            if (discoveryPreference.shouldRemoveDuplicates()) {
+                if (Collections.disjoint(deduplicationIdSet, route.getDeduplicationIds())) {
+                    continue;
+                }
+                deduplicationIdSet.addAll(route.getDeduplicationIds());
+            }
+            filteredRoutes.add(route);
+        }
+        return filteredRoutes;
     }
 
     private void updateAllRoutesFromManager() {

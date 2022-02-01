@@ -677,9 +677,9 @@ class MediaRouter2ServiceImpl {
         UserRecord userRecord = routerRecord.mUserRecord;
         userRecord.mRouterRecords.remove(routerRecord);
         routerRecord.mUserRecord.mHandler.sendMessage(
-                obtainMessage(UserHandler::notifyPreferredFeaturesChangedToManagers,
+                obtainMessage(UserHandler::notifyDiscoveryPreferenceChangedToManagers,
                         routerRecord.mUserRecord.mHandler,
-                        routerRecord.mPackageName, /* preferredFeatures=*/ null));
+                        routerRecord.mPackageName, null));
         userRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::updateDiscoveryPreferenceOnHandler,
                         userRecord.mHandler));
@@ -694,10 +694,10 @@ class MediaRouter2ServiceImpl {
         }
         routerRecord.mDiscoveryPreference = discoveryRequest;
         routerRecord.mUserRecord.mHandler.sendMessage(
-                obtainMessage(UserHandler::notifyPreferredFeaturesChangedToManagers,
+                obtainMessage(UserHandler::notifyDiscoveryPreferenceChangedToManagers,
                         routerRecord.mUserRecord.mHandler,
                         routerRecord.mPackageName,
-                        routerRecord.mDiscoveryPreference.getPreferredFeatures()));
+                        routerRecord.mDiscoveryPreference));
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::updateDiscoveryPreferenceOnHandler,
                         routerRecord.mUserRecord.mHandler));
@@ -921,7 +921,7 @@ class MediaRouter2ServiceImpl {
             // TODO: UserRecord <-> routerRecord, why do they reference each other?
             // How about removing mUserRecord from routerRecord?
             routerRecord.mUserRecord.mHandler.sendMessage(
-                    obtainMessage(UserHandler::notifyPreferredFeaturesChangedToManager,
+                    obtainMessage(UserHandler::notifyDiscoveryPreferenceChangedToManager,
                         routerRecord.mUserRecord.mHandler, routerRecord, manager));
         }
 
@@ -2118,19 +2118,19 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void notifyPreferredFeaturesChangedToManager(@NonNull RouterRecord routerRecord,
+        private void notifyDiscoveryPreferenceChangedToManager(@NonNull RouterRecord routerRecord,
                 @NonNull IMediaRouter2Manager manager) {
             try {
-                manager.notifyPreferredFeaturesChanged(routerRecord.mPackageName,
-                        routerRecord.mDiscoveryPreference.getPreferredFeatures());
+                manager.notifyDiscoveryPreferenceChanged(routerRecord.mPackageName,
+                        routerRecord.mDiscoveryPreference);
             } catch (RemoteException ex) {
                 Slog.w(TAG, "Failed to notify preferred features changed."
                         + " Manager probably died.", ex);
             }
         }
 
-        private void notifyPreferredFeaturesChangedToManagers(@NonNull String routerPackageName,
-                @Nullable List<String> preferredFeatures) {
+        private void notifyDiscoveryPreferenceChangedToManagers(@NonNull String routerPackageName,
+                @Nullable RouteDiscoveryPreference discoveryPreference) {
             MediaRouter2ServiceImpl service = mServiceRef.get();
             if (service == null) {
                 return;
@@ -2143,7 +2143,8 @@ class MediaRouter2ServiceImpl {
             }
             for (IMediaRouter2Manager manager : managers) {
                 try {
-                    manager.notifyPreferredFeaturesChanged(routerPackageName, preferredFeatures);
+                    manager.notifyDiscoveryPreferenceChanged(routerPackageName,
+                            discoveryPreference);
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "Failed to notify preferred features changed."
                             + " Manager probably died.", ex);

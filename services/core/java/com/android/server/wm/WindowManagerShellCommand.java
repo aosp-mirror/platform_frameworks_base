@@ -822,6 +822,29 @@ public class WindowManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSetLetterboxIsEducationEnabled(PrintWriter pw) throws RemoteException {
+        String arg = getNextArg();
+        final boolean enabled;
+        switch (arg) {
+            case "true":
+            case "1":
+                enabled = true;
+                break;
+            case "false":
+            case "0":
+                enabled = false;
+                break;
+            default:
+                getErrPrintWriter().println("Error: expected true, 1, false, 0, but got " + arg);
+                return -1;
+        }
+
+        synchronized (mInternal.mGlobalLock) {
+            mLetterboxConfiguration.setIsEducationEnabled(enabled);
+        }
+        return 0;
+    }
+
     private int runSetLetterboxStyle(PrintWriter pw) throws RemoteException {
         if (peekNextArg() == null) {
             getErrPrintWriter().println("Error: No arguments provided.");
@@ -858,6 +881,9 @@ public class WindowManagerShellCommand extends ShellCommand {
                     break;
                 case "--defaultPositionForReachability":
                     runSetLetterboxDefaultPositionForReachability(pw);
+                    break;
+                case "--isEducationEnabled":
+                    runSetLetterboxIsEducationEnabled(pw);
                     break;
                 default:
                     getErrPrintWriter().println(
@@ -902,6 +928,9 @@ public class WindowManagerShellCommand extends ShellCommand {
                         break;
                     case "defaultPositionForReachability":
                         mLetterboxConfiguration.getDefaultPositionForReachability();
+                        break;
+                    case "isEducationEnabled":
+                        mLetterboxConfiguration.getIsEducationEnabled();
                         break;
                     default:
                         getErrPrintWriter().println(
@@ -998,6 +1027,7 @@ public class WindowManagerShellCommand extends ShellCommand {
             mLetterboxConfiguration.resetLetterboxHorizontalPositionMultiplier();
             mLetterboxConfiguration.resetIsReachabilityEnabled();
             mLetterboxConfiguration.resetDefaultPositionForReachability();
+            mLetterboxConfiguration.resetIsEducationEnabled();
         }
     }
 
@@ -1014,6 +1044,8 @@ public class WindowManagerShellCommand extends ShellCommand {
             pw.println("Default position for reachability: "
                     + LetterboxConfiguration.letterboxReachabilityPositionToString(
                             mLetterboxConfiguration.getDefaultPositionForReachability()));
+            pw.println("Is education enabled: "
+                    + mLetterboxConfiguration.getIsEducationEnabled());
 
             pw.println("Background type: "
                     + LetterboxConfiguration.letterboxBackgroundTypeToString(
@@ -1154,10 +1186,12 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("      --defaultPositionForReachability [left|center|right]");
         pw.println("        Default horizontal position of app window  when reachability is.");
         pw.println("        enabled.");
+        pw.println("      --isEducationEnabled [true|1|false|0]");
+        pw.println("        Whether education is allowed for letterboxed fullscreen apps.");
         pw.println("  reset-letterbox-style [aspectRatio|cornerRadius|backgroundType");
         pw.println("      |backgroundColor|wallpaperBlurRadius|wallpaperDarkScrimAlpha");
         pw.println("      |horizontalPositionMultiplier|isReachabilityEnabled");
-        pw.println("      |defaultPositionMultiplierForReachability]");
+        pw.println("      isEducationEnabled||defaultPositionMultiplierForReachability]");
         pw.println("    Resets overrides to default values for specified properties separated");
         pw.println("    by space, e.g. 'reset-letterbox-style aspectRatio cornerRadius'.");
         pw.println("    If no arguments provided, all values will be reset.");

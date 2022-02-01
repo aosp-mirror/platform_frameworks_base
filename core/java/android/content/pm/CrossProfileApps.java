@@ -282,7 +282,8 @@ public class CrossProfileApps {
         final boolean isManagedProfile =
                 mUserManager.isManagedProfile(userHandle.getIdentifier());
         if (isManagedProfile) {
-            return mResources.getDrawable(R.drawable.ic_corp_badge, null);
+            return mContext.getPackageManager().getUserBadgeForDensityNoBackground(
+                    userHandle, /* density= */ 0);
         } else {
             return UserIcons.getDefaultUserIcon(
                     mResources, UserHandle.USER_SYSTEM, true /* light */);

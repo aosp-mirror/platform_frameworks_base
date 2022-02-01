@@ -562,6 +562,7 @@ public class AudioManager {
      * Indicates the volume set/adjust call is for Bluetooth absolute volume
      * @hide
      */
+    @SystemApi
     public static final int FLAG_BLUETOOTH_ABS_VOLUME = 1 << 6;
 
     /**

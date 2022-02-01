@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.Manifest.permission.HIDE_OVERLAY_WINDOWS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.Manifest.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
@@ -114,6 +115,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     private String mRelayoutTag;
     private final InsetsVisibilities mDummyRequestedVisibilities = new InsetsVisibilities();
     private final InsetsSourceControl[] mDummyControls =  new InsetsSourceControl[0];
+    final boolean mSetsUnrestrictedKeepClearAreas;
 
     public Session(WindowManagerService service, IWindowSessionCallback callback) {
         mService = service;
@@ -132,6 +134,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                         == PERMISSION_GRANTED;
         mCanStartTasksFromRecents = service.mContext.checkCallingOrSelfPermission(
                 START_TASKS_FROM_RECENTS) == PERMISSION_GRANTED;
+        mSetsUnrestrictedKeepClearAreas =
+                service.mContext.checkCallingOrSelfPermission(SET_UNRESTRICTED_KEEP_CLEAR_AREAS)
+                        == PERMISSION_GRANTED;
         mShowingAlertWindowNotificationAllowed = mService.mShowAlertWindowNotifications;
         mDragDropController = mService.mDragDropController;
         StringBuilder sb = new StringBuilder();

@@ -5636,6 +5636,15 @@ public abstract class Context {
     public static final String OVERLAY_SERVICE = "overlay";
 
     /**
+     * Use with {@link #getSystemService(String)} to manage resources.
+     *
+     * @see #getSystemService(String)
+     * @see com.android.server.resources.ResourcesManagerService
+     * @hide
+     */
+    public static final String RESOURCES_SERVICE = "resources";
+
+    /**
      * Use with {@link #getSystemService(String)} to retrieve a
      * {android.os.IIdmap2} for managing idmap files (used by overlay
      * packages).

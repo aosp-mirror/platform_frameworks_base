@@ -120,12 +120,13 @@ class DisplayWindowListenerController {
         mDisplayListeners.finishBroadcast();
     }
 
-    void dispatchKeepClearAreasChanged(DisplayContent display, List<Rect> keepClearAreas) {
+    void dispatchKeepClearAreasChanged(DisplayContent display, List<Rect> restricted,
+            List<Rect> unrestricted) {
         int count = mDisplayListeners.beginBroadcast();
         for (int i = 0; i < count; ++i) {
             try {
                 mDisplayListeners.getBroadcastItem(i).onKeepClearAreasChanged(
-                        display.mDisplayId, keepClearAreas);
+                        display.mDisplayId, restricted, unrestricted);
             } catch (RemoteException e) {
             }
         }

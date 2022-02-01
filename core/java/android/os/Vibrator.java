@@ -98,7 +98,8 @@ public abstract class Vibrator {
     /**
      * Vibration effect support: unsupported
      *
-     * This effect is <b>not</b> supported by the underlying hardware.
+     * This effect is <b>not</b> natively supported by the underlying hardware, although
+     * the system may still play a fallback vibration.
      */
     public static final int VIBRATION_EFFECT_SUPPORT_NO = 2;
 
@@ -485,20 +486,25 @@ public abstract class Vibrator {
             String reason, @NonNull VibrationAttributes attributes);
 
     /**
-     * Query whether the vibrator supports the given effects.
+     * Query whether the vibrator natively supports the given effects.
      *
-     * Not all hardware reports its effect capabilities, so the system may not necessarily know
-     * whether an effect is supported or not.
+     * <p>If an effect is not supported, the system may still automatically fall back to playing
+     * a simpler vibration instead, which is not optimised for the specific device. This includes
+     * the unknown case, which can't be determined in advance, that will dynamically attempt to
+     * fall back if the optimised effect fails to play.
      *
-     * The returned array will be the same length as the query array and the value at a given index
-     * will contain {@link #VIBRATION_EFFECT_SUPPORT_YES} if the effect at that same index in the
-     * querying array is supported, {@link #VIBRATION_EFFECT_SUPPORT_NO} if it isn't supported, or
-     * {@link #VIBRATION_EFFECT_SUPPORT_UNKNOWN} if the system can't determine whether it's
-     * supported or not.
+     * <p>The returned array will be the same length as the query array and the value at a given
+     * index will contain {@link #VIBRATION_EFFECT_SUPPORT_YES} if the effect at that same index
+     * in the querying array is supported, {@link #VIBRATION_EFFECT_SUPPORT_NO} if it isn't
+     * supported, or {@link #VIBRATION_EFFECT_SUPPORT_UNKNOWN} if the system can't determine whether
+     * it's supported or not, as some hardware doesn't report its effect capabilities.
+     *
+     * <p>Use {@link #areAllEffectsSupported(int...)} to get a single combined result,
+     * or for convenience when querying exactly one effect.
      *
      * @param effectIds Which effects to query for.
      * @return An array containing the systems current knowledge about whether the given effects
-     * are supported or not.
+     * are natively supported by the device, or not.
      */
     @NonNull
     @VibrationEffectSupport
@@ -515,23 +521,27 @@ public abstract class Vibrator {
     /**
      * Query whether the vibrator supports all of the given effects.
      *
-     * Not all hardware reports its effect capabilities, so the system may not necessarily know
-     * whether an effect is supported or not.
+     * <p>If an effect is not supported, the system may still automatically fall back to a simpler
+     * vibration instead, which is not optimised for the specific device, however vibration isn't
+     * guaranteed in this case.
      *
-     * If the result is {@link #VIBRATION_EFFECT_SUPPORT_YES}, all effects in the query are
+     * <p>If the result is {@link #VIBRATION_EFFECT_SUPPORT_YES}, all effects in the query are
      * supported by the hardware.
      *
-     * If the result is {@link #VIBRATION_EFFECT_SUPPORT_NO}, at least one of the effects in the
-     * query is not supported.
+     * <p>If the result is {@link #VIBRATION_EFFECT_SUPPORT_NO}, at least one of the effects in the
+     * query is not supported, and using them may fall back to an un-optimized vibration or no
+     * vibration.
      *
-     * If the result is {@link #VIBRATION_EFFECT_SUPPORT_UNKNOWN}, the system doesn't know whether
-     * all of the effects are supported. It may support any or all of the queried effects,
+     * <p>If the result is {@link #VIBRATION_EFFECT_SUPPORT_UNKNOWN}, the system doesn't know
+     * whether all of the effects are supported. It may support any or all of the queried effects,
      * but there's no way to programmatically know whether a {@link #vibrate} call will successfully
      * cause a vibration. It's guaranteed, however, that none of the queried effects are
      * definitively unsupported by the hardware.
      *
+     * <p>Use {@link #areEffectsSupported(int...)} to get individual results for each effect.
+     *
      * @param effectIds Which effects to query for.
-     * @return Whether all of the effects are supported.
+     * @return Whether all of the effects are natively supported by the device.
      */
     @VibrationEffectSupport
     public final int areAllEffectsSupported(
@@ -555,6 +565,12 @@ public abstract class Vibrator {
      * will contain whether the effect at that same index in the querying array is supported or
      * not.
      *
+     * <p>If a primitive is not supported by the device, then <em>no vibration</em> will occur if
+     * it is played.
+     *
+     * <p>Use {@link #areAllPrimitivesSupported(int...)} to get a single combined result,
+     * or for convenience when querying exactly one primitive.
+     *
      * @param primitiveIds Which primitives to query for.
      * @return Whether the primitives are supported.
      */
@@ -572,8 +588,13 @@ public abstract class Vibrator {
     /**
      * Query whether the vibrator supports all of the given primitives.
      *
+     * <p>If a primitive is not supported by the device, then <em>no vibration</em> will occur if
+     * it is played.
+     *
+     * <p>Use {@link #arePrimitivesSupported(int...)} to get individual results for each primitive.
+     *
      * @param primitiveIds Which primitives to query for.
-     * @return Whether primitives effects are supported.
+     * @return Whether all specified primitives are supported.
      */
     public final boolean areAllPrimitivesSupported(
             @NonNull @VibrationEffect.Composition.PrimitiveType int... primitiveIds) {

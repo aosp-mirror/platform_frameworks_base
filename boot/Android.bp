@@ -80,10 +80,6 @@ platform_bootclasspath {
             module: "com.android.mediaprovider-bootclasspath-fragment",
         },
         {
-            apex: "com.android.nearby",
-            module: "com.android.nearby-bootclasspath-fragment",
-        },
-        {
             apex: "com.android.os.statsd",
             module: "com.android.os.statsd-bootclasspath-fragment",
         },

@@ -1005,6 +1005,11 @@ public final class ActivityThread extends ClientTransactionHandler
         RemoteCallback finishCallback;
     }
 
+    static final class DumpResourcesData {
+        public ParcelFileDescriptor fd;
+        public RemoteCallback finishCallback;
+    }
+
     static final class UpdateCompatibilityData {
         String pkg;
         CompatibilityInfo info;
@@ -1314,6 +1319,20 @@ public final class ActivityThread extends ClientTransactionHandler
             args.arg1 = msg;
             args.arg2 = extras;
             sendMessage(H.SCHEDULE_CRASH, args, typeId);
+        }
+
+        @Override
+        public void dumpResources(ParcelFileDescriptor fd, RemoteCallback callback) {
+            DumpResourcesData data = new DumpResourcesData();
+            try {
+                data.fd = fd.dup();
+                data.finishCallback = callback;
+                sendMessage(H.DUMP_RESOURCES, data, 0, 0, false /*async*/);
+            } catch (IOException e) {
+                Slog.w(TAG, "dumpResources failed", e);
+            } finally {
+                IoUtils.closeQuietly(fd);
+            }
         }
 
         public void dumpActivity(ParcelFileDescriptor pfd, IBinder activitytoken,
@@ -2039,6 +2058,7 @@ public final class ActivityThread extends ClientTransactionHandler
         public static final int UPDATE_UI_TRANSLATION_STATE = 163;
         public static final int SET_CONTENT_CAPTURE_OPTIONS_CALLBACK = 164;
         public static final int DUMP_GFXINFO = 165;
+        public static final int DUMP_RESOURCES = 166;
 
         public static final int INSTRUMENT_WITHOUT_RESTART = 170;
         public static final int FINISH_INSTRUMENTATION_WITHOUT_RESTART = 171;
@@ -2092,6 +2112,7 @@ public final class ActivityThread extends ClientTransactionHandler
                     case INSTRUMENT_WITHOUT_RESTART: return "INSTRUMENT_WITHOUT_RESTART";
                     case FINISH_INSTRUMENTATION_WITHOUT_RESTART:
                         return "FINISH_INSTRUMENTATION_WITHOUT_RESTART";
+                    case DUMP_RESOURCES: return "DUMP_RESOURCES";
                 }
             }
             return Integer.toString(code);
@@ -2206,6 +2227,9 @@ public final class ActivityThread extends ClientTransactionHandler
                 }
                 case DUMP_HEAP:
                     handleDumpHeap((DumpHeapData) msg.obj);
+                    break;
+                case DUMP_RESOURCES:
+                    handleDumpResources((DumpResourcesData) msg.obj);
                     break;
                 case DUMP_ACTIVITY:
                     handleDumpActivity((DumpComponentInfo)msg.obj);
@@ -4578,6 +4602,23 @@ public final class ActivityThread extends ClientTransactionHandler
                         info.fd.getFileDescriptor()));
                 s.dump(info.fd.getFileDescriptor(), pw, info.args);
                 pw.flush();
+            }
+        } finally {
+            IoUtils.closeQuietly(info.fd);
+            StrictMode.setThreadPolicy(oldPolicy);
+        }
+    }
+
+    private void handleDumpResources(DumpResourcesData info) {
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskWrites();
+        try {
+            PrintWriter pw = new FastPrintWriter(new FileOutputStream(
+                    info.fd.getFileDescriptor()));
+
+            Resources.dumpHistory(pw, "");
+            pw.flush();
+            if (info.finishCallback != null) {
+                info.finishCallback.sendResult(null);
             }
         } finally {
             IoUtils.closeQuietly(info.fd);

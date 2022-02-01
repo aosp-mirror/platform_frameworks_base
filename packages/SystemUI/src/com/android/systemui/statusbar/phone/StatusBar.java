@@ -2987,6 +2987,7 @@ public class StatusBar extends CoreStartable implements
     }
 
     public void showKeyguardImpl() {
+        Trace.beginSection("StatusBar#showKeyguard");
         mIsKeyguard = true;
         // In case we're locking while a smartspace transition is in progress, reset it.
         mKeyguardUnlockAnimationController.resetSmartspaceTransition();
@@ -3001,6 +3002,7 @@ public class StatusBar extends CoreStartable implements
             mStatusBarStateController.setState(StatusBarState.KEYGUARD);
         }
         updatePanelExpansionForKeyguard();
+        Trace.endSection();
     }
 
     private void updatePanelExpansionForKeyguard() {

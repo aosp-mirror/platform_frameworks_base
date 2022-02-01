@@ -34,6 +34,7 @@ import android.os.ServiceManager;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
@@ -50,6 +51,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -292,6 +294,11 @@ public class DreamBackend {
         }
     }
 
+    /** Returns whether a particular complication is enabled */
+    public boolean isComplicationEnabled(@ComplicationType int complication) {
+        return getEnabledComplications().contains(complication);
+    }
+
     /** Gets all complications which have been enabled by the user. */
     public Set<Integer> getEnabledComplications() {
         final String enabledComplications = Settings.Secure.getString(
@@ -331,6 +338,35 @@ public class DreamBackend {
                 convertToString(enabledComplications));
     }
 
+    /**
+     * Gets the title of a particular complication type to be displayed to the user. If there
+     * is no title, null is returned.
+     */
+    @Nullable
+    public CharSequence getComplicationTitle(@ComplicationType int complicationType) {
+        int res = 0;
+        switch (complicationType) {
+            case COMPLICATION_TYPE_TIME:
+                res = R.string.dream_complication_title_time;
+                break;
+            case COMPLICATION_TYPE_DATE:
+                res = R.string.dream_complication_title_date;
+                break;
+            case COMPLICATION_TYPE_WEATHER:
+                res = R.string.dream_complication_title_weather;
+                break;
+            case COMPLICATION_TYPE_AIR_QUALITY:
+                res = R.string.dream_complication_title_aqi;
+                break;
+            case COMPLICATION_TYPE_CAST_INFO:
+                res = R.string.dream_complication_title_cast_info;
+                break;
+            default:
+                return null;
+        }
+        return mContext.getString(res);
+    }
+
     private static String convertToString(Set<Integer> set) {
         return set.stream()
                 .map(String::valueOf)
@@ -338,6 +374,9 @@ public class DreamBackend {
     }
 
     private static Set<Integer> parseFromString(String string) {
+        if (TextUtils.isEmpty(string)) {
+            return new HashSet<>();
+        }
         return Arrays.stream(string.split(","))
                 .map(Integer::parseInt)
                 .collect(Collectors.toSet());
