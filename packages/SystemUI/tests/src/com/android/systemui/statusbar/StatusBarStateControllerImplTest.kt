@@ -61,18 +61,16 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
     @Test
     fun testChangeState_logged() {
         TestableLooper.get(this).runWithLooper {
-            controller.state = StatusBarState.FULLSCREEN_USER_SWITCHER
             controller.state = StatusBarState.KEYGUARD
             controller.state = StatusBarState.SHADE
             controller.state = StatusBarState.SHADE_LOCKED
         }
 
         val logs = uiEventLogger.logs
-        assertEquals(4, logs.size)
+        assertEquals(3, logs.size)
         val ids = logs.map(UiEventLoggerFake.FakeUiEvent::eventId)
-        assertEquals(StatusBarStateEvent.STATUS_BAR_STATE_FULLSCREEN_USER_SWITCHER.id, ids[0])
-        assertEquals(StatusBarStateEvent.STATUS_BAR_STATE_KEYGUARD.id, ids[1])
-        assertEquals(StatusBarStateEvent.STATUS_BAR_STATE_SHADE.id, ids[2])
-        assertEquals(StatusBarStateEvent.STATUS_BAR_STATE_SHADE_LOCKED.id, ids[3])
+        assertEquals(StatusBarStateEvent.STATUS_BAR_STATE_KEYGUARD.id, ids[0])
+        assertEquals(StatusBarStateEvent.STATUS_BAR_STATE_SHADE.id, ids[1])
+        assertEquals(StatusBarStateEvent.STATUS_BAR_STATE_SHADE_LOCKED.id, ids[2])
     }
 }

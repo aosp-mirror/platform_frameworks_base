@@ -169,8 +169,6 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         transitionController.goToLockedShade(null)
         whenever(statusbarStateController.state).thenReturn(StatusBarState.SHADE)
         transitionController.goToLockedShade(null)
-        whenever(statusbarStateController.state).thenReturn(StatusBarState.FULLSCREEN_USER_SWITCHER)
-        transitionController.goToLockedShade(null)
         verify(statusbarStateController, never()).setState(anyInt())
     }
 

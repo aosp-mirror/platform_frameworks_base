@@ -2935,14 +2935,6 @@ public class StatusBar extends CoreStartable implements
         return updateIsKeyguard();
     }
 
-    /**
-     * stop(tag)
-     * @return True if StatusBar state is FULLSCREEN_USER_SWITCHER.
-     */
-    public boolean isFullScreenUserSwitcherState() {
-        return mState == StatusBarState.FULLSCREEN_USER_SWITCHER;
-    }
-
     boolean updateIsKeyguard() {
         return updateIsKeyguard(false /* forceStateChange */);
     }
@@ -2996,9 +2988,7 @@ public class StatusBar extends CoreStartable implements
             onLaunchTransitionFadingEnded();
         }
         mMessageRouter.cancelMessages(MSG_LAUNCH_TRANSITION_TIMEOUT);
-        if (mUserSwitcherController != null && mUserSwitcherController.useFullscreenUserSwitcher()) {
-            mStatusBarStateController.setState(StatusBarState.FULLSCREEN_USER_SWITCHER);
-        } else if (!mLockscreenShadeTransitionController.isWakingToShadeLocked()) {
+        if (!mLockscreenShadeTransitionController.isWakingToShadeLocked()) {
             mStatusBarStateController.setState(StatusBarState.KEYGUARD);
         }
         updatePanelExpansionForKeyguard();
@@ -3009,8 +2999,6 @@ public class StatusBar extends CoreStartable implements
         if (mState == StatusBarState.KEYGUARD && mBiometricUnlockController.getMode()
                 != BiometricUnlockController.MODE_WAKE_AND_UNLOCK && !mBouncerShowing) {
             mShadeController.instantExpandNotificationsPanel();
-        } else if (mState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
-            instantCollapseNotificationPanel();
         }
     }
 

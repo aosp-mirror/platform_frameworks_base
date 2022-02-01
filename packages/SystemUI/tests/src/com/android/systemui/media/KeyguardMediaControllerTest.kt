@@ -95,7 +95,6 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     fun testVisibleOnKeyguardOrFullScreenUserSwitcher() {
         testStateVisibility(StatusBarState.SHADE, GONE)
         testStateVisibility(StatusBarState.SHADE_LOCKED, GONE)
-        testStateVisibility(StatusBarState.FULLSCREEN_USER_SWITCHER, VISIBLE)
         testStateVisibility(StatusBarState.KEYGUARD, VISIBLE)
     }
 

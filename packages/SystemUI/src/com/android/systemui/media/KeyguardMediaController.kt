@@ -159,8 +159,7 @@ class KeyguardMediaController @Inject constructor(
     }
 
     fun refreshMediaPosition() {
-        val keyguardOrUserSwitcher = (statusBarStateController.state == StatusBarState.KEYGUARD ||
-                statusBarStateController.state == StatusBarState.FULLSCREEN_USER_SWITCHER)
+        val keyguardOrUserSwitcher = (statusBarStateController.state == StatusBarState.KEYGUARD)
         // mediaHost.visible required for proper animations handling
         visible = mediaHost.visible &&
                 !bypassController.bypassEnabled &&
