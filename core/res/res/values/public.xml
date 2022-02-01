@@ -3260,6 +3260,14 @@
     <public name="inheritKeyStoreKeys" />
     <public name="preferKeepClear" />
     <public name="autoHandwritingEnabled" />
+    <public name="fromExtendLeft" />
+    <public name="fromExtendTop" />
+    <public name="fromExtendRight" />
+    <public name="fromExtendBottom" />
+    <public name="toExtendLeft" />
+    <public name="toExtendTop" />
+    <public name="toExtendRight" />
+    <public name="toExtendBottom" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01de0000">

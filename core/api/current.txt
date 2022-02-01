@@ -729,6 +729,10 @@ package android {
     field public static final int freezesText = 16843116; // 0x101016c
     field public static final int fromAlpha = 16843210; // 0x10101ca
     field public static final int fromDegrees = 16843187; // 0x10101b3
+    field public static final int fromExtendBottom;
+    field public static final int fromExtendLeft;
+    field public static final int fromExtendRight;
+    field public static final int fromExtendTop;
     field public static final int fromId = 16843850; // 0x101044a
     field public static final int fromScene = 16843741; // 0x10103dd
     field public static final int fromXDelta = 16843206; // 0x10101c6
@@ -1574,6 +1578,10 @@ package android {
     field public static final int titleTextStyle = 16843512; // 0x10102f8
     field public static final int toAlpha = 16843211; // 0x10101cb
     field public static final int toDegrees = 16843188; // 0x10101b4
+    field public static final int toExtendBottom;
+    field public static final int toExtendLeft;
+    field public static final int toExtendRight;
+    field public static final int toExtendTop;
     field public static final int toId = 16843849; // 0x1010449
     field public static final int toScene = 16843742; // 0x10103de
     field public static final int toXDelta = 16843207; // 0x10101c7
