@@ -21,7 +21,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.app.Service;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
@@ -311,10 +310,9 @@ public class TrustAgentService extends Service {
      *
      * @see #FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE
      *
-     * TODO(b/213631672): Remove @hide and @TestApi
+     * TODO(b/213631672): Add CTS tests
      * @hide
      */
-    @TestApi
     public void onUserRequestedUnlock() {
     }
 

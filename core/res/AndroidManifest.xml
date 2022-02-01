@@ -5316,7 +5316,7 @@
                 android:protectionLevel="signature|setup|role" />
 
     <!-- Allows access to keyguard secure storage.  Only allowed for system processes.
-         @hide @TestApi -->
+        @hide -->
     <permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE"
         android:protectionLevel="signature|setup" />
 

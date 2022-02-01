@@ -2,7 +2,6 @@
 package android {
 
   public static final class Manifest.permission {
-    field public static final String ACCESS_KEYGUARD_SECURE_STORAGE = "android.permission.ACCESS_KEYGUARD_SECURE_STORAGE";
     field public static final String ACCESS_NOTIFICATIONS = "android.permission.ACCESS_NOTIFICATIONS";
     field public static final String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
     field public static final String APPROVE_INCIDENT_REPORTS = "android.permission.APPROVE_INCIDENT_REPORTS";
@@ -281,8 +280,8 @@ package android.app {
   }
 
   public class KeyguardManager {
-    method @RequiresPermission(anyOf={android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS, android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE}) public boolean checkLock(int, @Nullable byte[]);
-    method @RequiresPermission(anyOf={android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS, android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE}) public boolean setLock(int, @Nullable byte[], int, @Nullable byte[]);
+    method @RequiresPermission(anyOf={android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS, "android.permission.ACCESS_KEYGUARD_SECURE_STORAGE"}) public boolean checkLock(int, @Nullable byte[]);
+    method @RequiresPermission(anyOf={android.Manifest.permission.SET_AND_VERIFY_LOCKSCREEN_CREDENTIALS, "android.permission.ACCESS_KEYGUARD_SECURE_STORAGE"}) public boolean setLock(int, @Nullable byte[], int, @Nullable byte[]);
   }
 
   public class LocaleManager {
@@ -572,15 +571,6 @@ package android.app.prediction {
 
   public final class AppPredictor {
     method public android.app.prediction.AppPredictionSessionId getSessionId();
-  }
-
-}
-
-package android.app.trust {
-
-  public class TrustManager {
-    method @RequiresPermission(android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE) public void enableTrustAgentForUserForTest(@NonNull android.content.ComponentName, int);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE) public void reportUserRequestedUnlock(int);
   }
 
 }
@@ -2382,14 +2372,6 @@ package android.service.quicksettings {
 
   public class TileService extends android.app.Service {
     method public static boolean isQuickSettingsSupported();
-  }
-
-}
-
-package android.service.trust {
-
-  public class TrustAgentService extends android.app.Service {
-    method public void onUserRequestedUnlock();
   }
 
 }
