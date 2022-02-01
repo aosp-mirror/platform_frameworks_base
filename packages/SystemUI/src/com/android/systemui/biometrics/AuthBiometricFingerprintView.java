@@ -17,11 +17,15 @@
 package com.android.systemui.biometrics;
 
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
+import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 
@@ -31,12 +35,59 @@ public class AuthBiometricFingerprintView extends AuthBiometricView {
 
     private static final String TAG = "BiometricPrompt/AuthBiometricFingerprintView";
 
+    private boolean mIsUdfps = false;
+    @Nullable private UdfpsDialogMeasureAdapter mUdfpsAdapter;
+
     public AuthBiometricFingerprintView(Context context) {
         this(context, null);
     }
 
     public AuthBiometricFingerprintView(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    @Override
+    AuthDialog.LayoutParams onMeasureInternal(int width, int height) {
+        final AuthDialog.LayoutParams layoutParams = super.onMeasureInternal(width, height);
+        return mUdfpsAdapter != null
+                ? mUdfpsAdapter.onMeasureInternal(width, height, layoutParams)
+                : layoutParams;
+    }
+
+    /**
+     * Set the properties of this sensor so the view can be customized prior to layout.
+     *
+     * @param sensorProps sensor properties
+     */
+    public void setSensorProperties(@NonNull FingerprintSensorPropertiesInternal sensorProps) {
+        mIsUdfps = sensorProps.isAnyUdfpsType();
+        mUdfpsAdapter = mIsUdfps ? new UdfpsDialogMeasureAdapter(this, sensorProps) : null;
+    }
+
+    @Override
+    void onLayoutInternal() {
+        super.onLayoutInternal();
+
+        if (mUdfpsAdapter != null) {
+            // Move the UDFPS icon and indicator text if necessary. This probably only needs to happen
+            // for devices where the UDFPS sensor is too low.
+            // TODO(b/201510778): Update this logic to support cases where the sensor or text overlap
+            //  the button bar area.
+            final int bottomSpacerHeight = mUdfpsAdapter.getBottomSpacerHeight();
+            Log.w(TAG, "bottomSpacerHeight: " + bottomSpacerHeight);
+            if (bottomSpacerHeight < 0) {
+                FrameLayout iconFrame = findViewById(R.id.biometric_icon_frame);
+                iconFrame.setTranslationY(-bottomSpacerHeight);
+
+                TextView indicator = findViewById(R.id.indicator);
+                indicator.setTranslationY(-bottomSpacerHeight);
+            }
+        }
+    }
+
+    /** If this view is for a UDFPS sensor. */
+    public boolean isUdfps() {
+        return mIsUdfps;
     }
 
     @Override

@@ -319,15 +319,11 @@ public class AuthContainerView extends LinearLayout
                         }
                     }
 
-                    if (sensorProps.isAnyUdfpsType()) {
-                        AuthBiometricUdfpsView udfpsView = (AuthBiometricUdfpsView) factory
-                                .inflate(R.layout.auth_biometric_udfps_view, null, false);
-                        udfpsView.setSensorProps(sensorProps);
-                        mBiometricView = udfpsView;
-                    } else {
-                        mBiometricView = (AuthBiometricFingerprintView) factory
-                                .inflate(R.layout.auth_biometric_fingerprint_view, null, false);
-                    }
+
+                    final AuthBiometricFingerprintView fpView = (AuthBiometricFingerprintView)
+                            factory.inflate(R.layout.auth_biometric_fingerprint_view, null, false);
+                    fpView.setSensorProperties(sensorProps);
+                    mBiometricView = fpView;
                 } else if (Utils.containsSensorId(mFaceProps, singleSensorAuthId)) {
                     mBiometricView = (AuthBiometricFaceView)
                             factory.inflate(R.layout.auth_biometric_face_view, null, false);
@@ -555,8 +551,8 @@ public class AuthContainerView extends LinearLayout
     }
 
     private static boolean shouldUpdatePositionForUdfps(@NonNull View view) {
-        if (view instanceof AuthBiometricUdfpsView) {
-            return true;
+        if (view instanceof AuthBiometricFingerprintView) {
+            return ((AuthBiometricFingerprintView) view).isUdfps();
         }
 
         if (view instanceof AuthBiometricFaceToFingerprintView) {
