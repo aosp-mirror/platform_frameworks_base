@@ -21,8 +21,6 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.common.ICancellationSignal;
-import android.hardware.biometrics.common.OperationContext;
-import android.hardware.biometrics.common.OperationReason;
 import android.hardware.biometrics.face.EnrollmentType;
 import android.hardware.biometrics.face.Feature;
 import android.hardware.biometrics.face.IFace;
@@ -200,14 +198,8 @@ public class FaceEnrollClient extends EnrollClient<AidlSession> {
                 HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken);
 
         if (session.hasContextMethods()) {
-            final OperationContext context = new OperationContext();
-            // TODO: add reason, id
-            context.id = 0;
-            context.reason = OperationReason.UNKNOWN;
-            context.isAoD = getBiometricContext().isAoD();
-            context.isCrypto = isCryptoOperation();
             return session.getSession().enrollWithContext(
-                    hat, EnrollmentType.DEFAULT, features, mHwPreviewHandle, context);
+                    hat, EnrollmentType.DEFAULT, features, mHwPreviewHandle, getOperationContext());
         } else {
             return session.getSession().enroll(hat, EnrollmentType.DEFAULT, features,
                     mHwPreviewHandle);

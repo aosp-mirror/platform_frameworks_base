@@ -24,7 +24,6 @@ import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants.FingerprintAcquired;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
-import android.hardware.biometrics.common.OperationReason;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
@@ -39,6 +38,8 @@ import android.util.Slog;
 import com.android.server.biometrics.HardwareAuthTokenUtils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.log.CallbackWithProbe;
+import com.android.server.biometrics.log.Probe;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
@@ -58,6 +59,7 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
 
     @NonNull private final FingerprintSensorPropertiesInternal mSensorProps;
     @NonNull private final SensorOverlays mSensorOverlays;
+    @NonNull private final CallbackWithProbe<Probe> mALSProbeCallback;
 
     private final @FingerprintManager.EnrollReason int mEnrollReason;
     @Nullable private ICancellationSignal mCancellationSignal;
@@ -83,6 +85,8 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
         mSensorOverlays = new SensorOverlays(udfpsOverlayController, sidefpsController);
         mMaxTemplatesPerUser = maxTemplatesPerUser;
 
+        mALSProbeCallback = getLogger().createALSCallback(false /* startWithClient */);
+
         mEnrollReason = enrollReason;
         if (enrollReason == FingerprintManager.ENROLL_FIND_SENSOR) {
             getLogger().disableMetrics();
@@ -92,8 +96,8 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
     @NonNull
     @Override
     protected ClientMonitorCallback wrapCallbackForStart(@NonNull ClientMonitorCallback callback) {
-        return new ClientMonitorCompositeCallback(
-                getLogger().createALSCallback(true /* startWithClient */), callback);
+        return new ClientMonitorCompositeCallback(mALSProbeCallback,
+                getBiometricContextUnsubscriber(), callback);
     }
 
     @Override
@@ -142,22 +146,6 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
     }
 
     @Override
-    protected void stopHalOperation() {
-        mSensorOverlays.hide(getSensorId());
-
-        if (mCancellationSignal != null) {
-            try {
-                mCancellationSignal.cancel();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Remote exception when requesting cancel", e);
-                onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
-                        0 /* vendorCode */);
-                mCallback.onClientFinished(this, false /* success */);
-            }
-        }
-    }
-
-    @Override
     protected void startHalOperation() {
         mSensorOverlays.show(getSensorId(), getOverlayReasonFromEnrollReason(mEnrollReason), this);
 
@@ -178,15 +166,36 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
                 HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken);
 
         if (session.hasContextMethods()) {
-            final OperationContext context = new OperationContext();
-            // TODO: add reason, id
-            context.id = 0;
-            context.reason = OperationReason.UNKNOWN;
-            context.isAoD = getBiometricContext().isAoD();
-            context.isCrypto = isCryptoOperation();
-            return session.getSession().enrollWithContext(hat, context);
+            final OperationContext opContext = getOperationContext();
+            final ICancellationSignal cancel = session.getSession().enrollWithContext(
+                    hat, opContext);
+            getBiometricContext().subscribe(opContext, ctx -> {
+                try {
+                    session.getSession().onContextChanged(ctx);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to notify context changed", e);
+                }
+            });
+            return cancel;
         } else {
             return session.getSession().enroll(hat);
+        }
+    }
+
+    @Override
+    protected void stopHalOperation() {
+        mSensorOverlays.hide(getSensorId());
+        unsubscribeBiometricContext();
+
+        if (mCancellationSignal != null) {
+            try {
+                mCancellationSignal.cancel();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception when requesting cancel", e);
+                onError(BiometricFingerprintConstants.FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                        0 /* vendorCode */);
+                mCallback.onClientFinished(this, false /* success */);
+            }
         }
     }
 
@@ -194,6 +203,7 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
     public void onPointerDown(int x, int y, float minor, float major) {
         try {
             mIsPointerDown = true;
+            mALSProbeCallback.getProbe().enable();
 
             final AidlSession session = getFreshDaemon();
             if (session.hasContextMethods()) {
@@ -203,7 +213,7 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
                 context.y = y;
                 context.minor = minor;
                 context.major = major;
-                context.isAoD = false;
+                context.isAoD = getBiometricContext().isAoD();
                 session.getSession().onPointerDownWithContext(context);
             } else {
                 session.getSession().onPointerDown(0 /* pointerId */, x, y, minor, major);
@@ -217,6 +227,7 @@ class FingerprintEnrollClient extends EnrollClient<AidlSession> implements Udfps
     public void onPointerUp() {
         try {
             mIsPointerDown = false;
+            mALSProbeCallback.getProbe().disable();
 
             final AidlSession session = getFreshDaemon();
             if (session.hasContextMethods()) {

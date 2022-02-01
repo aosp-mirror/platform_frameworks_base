@@ -25,6 +25,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.common.OperationContext;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.util.Slog;
@@ -144,8 +145,8 @@ public class BiometricLogger {
     }
 
     /** Log an acquisition event. */
-    public void logOnAcquired(Context context,
-            int acquiredInfo, int vendorCode, boolean isCrypto, int targetUserId) {
+    public void logOnAcquired(Context context, OperationContext operationContext,
+            int acquiredInfo, int vendorCode, int targetUserId) {
         if (!mShouldLogMetrics) {
             return;
         }
@@ -165,7 +166,7 @@ public class BiometricLogger {
         if (DEBUG) {
             Slog.v(TAG, "Acquired! Modality: " + mStatsModality
                     + ", User: " + targetUserId
-                    + ", IsCrypto: " + isCrypto
+                    + ", IsCrypto: " + operationContext.isCrypto
                     + ", Action: " + mStatsAction
                     + ", Client: " + mStatsClient
                     + ", AcquiredInfo: " + acquiredInfo
@@ -176,14 +177,14 @@ public class BiometricLogger {
             return;
         }
 
-        mSink.acquired(mStatsModality, mStatsAction, mStatsClient,
+        mSink.acquired(operationContext, mStatsModality, mStatsAction, mStatsClient,
                 Utils.isDebugEnabled(context, targetUserId),
-                acquiredInfo, vendorCode, isCrypto, targetUserId);
+                acquiredInfo, vendorCode, targetUserId);
     }
 
     /** Log an error during an operation. */
-    public void logOnError(Context context,
-            int error, int vendorCode, boolean isCrypto, int targetUserId) {
+    public void logOnError(Context context, OperationContext operationContext,
+            int error, int vendorCode, int targetUserId) {
         if (!mShouldLogMetrics) {
             return;
         }
@@ -194,7 +195,7 @@ public class BiometricLogger {
         if (DEBUG) {
             Slog.v(TAG, "Error! Modality: " + mStatsModality
                     + ", User: " + targetUserId
-                    + ", IsCrypto: " + isCrypto
+                    + ", IsCrypto: " + operationContext.isCrypto
                     + ", Action: " + mStatsAction
                     + ", Client: " + mStatsClient
                     + ", Error: " + error
@@ -208,14 +209,14 @@ public class BiometricLogger {
             return;
         }
 
-        mSink.error(mStatsModality, mStatsAction, mStatsClient,
+        mSink.error(operationContext, mStatsModality, mStatsAction, mStatsClient,
                 Utils.isDebugEnabled(context, targetUserId), latency,
-                error, vendorCode, isCrypto, targetUserId);
+                error, vendorCode, targetUserId);
     }
 
     /** Log authentication attempt. */
-    public void logOnAuthenticated(Context context,
-            boolean authenticated, boolean requireConfirmation, boolean isCrypto,
+    public void logOnAuthenticated(Context context, OperationContext operationContext,
+            boolean authenticated, boolean requireConfirmation,
             int targetUserId, boolean isBiometricPrompt) {
         if (!mShouldLogMetrics) {
             return;
@@ -241,7 +242,7 @@ public class BiometricLogger {
         if (DEBUG) {
             Slog.v(TAG, "Authenticated! Modality: " + mStatsModality
                     + ", User: " + targetUserId
-                    + ", IsCrypto: " + isCrypto
+                    + ", IsCrypto: " + operationContext.isCrypto
                     + ", Client: " + mStatsClient
                     + ", RequireConfirmation: " + requireConfirmation
                     + ", State: " + authState
@@ -255,10 +256,9 @@ public class BiometricLogger {
             return;
         }
 
-        mSink.authenticate(mStatsModality, mStatsAction, mStatsClient,
+        mSink.authenticate(operationContext, mStatsModality, mStatsAction, mStatsClient,
                 Utils.isDebugEnabled(context, targetUserId),
-                latency, authenticated, authState, requireConfirmation, isCrypto,
-                targetUserId, isBiometricPrompt, mLastAmbientLux);
+                latency, authState, requireConfirmation, targetUserId, mLastAmbientLux);
     }
 
     /** Log enrollment outcome. */

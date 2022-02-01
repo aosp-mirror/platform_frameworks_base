@@ -16,10 +16,11 @@
 
 package com.android.server.biometrics.sensors.face.aidl;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -43,6 +44,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -52,7 +54,6 @@ import org.mockito.junit.MockitoRule;
 public class FaceDetectClientTest {
 
     private static final int USER_ID = 12;
-    private static final boolean HAS_AOD = true;
 
     @Rule
     public final TestableContext mContext = new TestableContext(
@@ -80,7 +81,8 @@ public class FaceDetectClientTest {
 
     @Before
     public void setup() {
-        when(mBiometricContext.isAoD()).thenReturn(HAS_AOD);
+        when(mBiometricContext.updateContext(any(), anyBoolean())).thenAnswer(
+                i -> i.getArgument(0));
     }
 
     @Test
@@ -97,11 +99,11 @@ public class FaceDetectClientTest {
         final FaceDetectClient client = createClient(2);
         client.start(mCallback);
 
-        verify(mHal).detectInteractionWithContext(mOperationContextCaptor.capture());
+        InOrder order = inOrder(mHal, mBiometricContext);
+        order.verify(mBiometricContext).updateContext(
+                mOperationContextCaptor.capture(), anyBoolean());
+        order.verify(mHal).detectInteractionWithContext(same(mOperationContextCaptor.getValue()));
         verify(mHal, never()).detectInteraction();
-
-        final OperationContext opContext = mOperationContextCaptor.getValue();
-        assertThat(opContext.isAoD).isEqualTo(HAS_AOD);
     }
 
     private FaceDetectClient createClient(int version) throws RemoteException {

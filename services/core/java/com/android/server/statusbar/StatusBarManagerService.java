@@ -158,6 +158,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     private final SparseArray<UiState> mDisplayUiState = new SparseArray<>();
     @GuardedBy("mLock")
     private IUdfpsHbmListener mUdfpsHbmListener;
+    @GuardedBy("mLock")
+    private IBiometricContextListener mBiometricContextListener;
 
     @GuardedBy("mCurrentRequestAddTilePackages")
     private final ArrayMap<String, Long> mCurrentRequestAddTilePackages = new ArrayMap<>();
@@ -897,6 +899,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void setBiometicContextListener(IBiometricContextListener listener) {
         enforceStatusBarService();
+        synchronized (mLock) {
+            mBiometricContextListener = listener;
+        }
         if (mBar != null) {
             try {
                 mBar.setBiometicContextListener(listener);
@@ -1327,6 +1332,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         mHandler.post(() -> {
             synchronized (mLock) {
                 setUdfpsHbmListener(mUdfpsHbmListener);
+                setBiometicContextListener(mBiometricContextListener);
             }
         });
     }
