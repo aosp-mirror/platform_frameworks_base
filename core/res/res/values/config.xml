@@ -4161,6 +4161,15 @@
 
     <string name="config_defaultMusicRecognitionService" translatable="false"></string>
 
+    <!-- The package name for the system's wallpaper effects generation service.
+    This service returns wallpaper effects results.
+    This service must be trusted, as it can be activated without explicit consent of the user.
+    If no service with the specified name exists on the device, wallpaper effects
+    generation service will be disabled.
+    Example: "com.android.intelligence/.WallpaperEffectsGenerationService"
+-->
+    <string name="config_defaultWallpaperEffectsGenerationService" translatable="false"></string>
+
     <!-- The package name for the default retail demo app.
          This package must be trusted, as it has the permissions to query the usage stats on the
          device.
