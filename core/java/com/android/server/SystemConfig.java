@@ -237,6 +237,10 @@ public class SystemConfig {
     // be delivered anonymously even to apps which target O+.
     final ArraySet<String> mAllowImplicitBroadcasts = new ArraySet<>();
 
+    // These are the packages that are exempted from the background restriction applied
+    // by the system automatically, i.e., due to high background current drain.
+    final ArraySet<String> mBgRestrictionExemption = new ArraySet<>();
+
     // These are the package names of apps which should be automatically granted domain verification
     // for all of their domains. The only way these apps can be overridden by the user is by
     // explicitly disabling overall link handling support in app info.
@@ -387,6 +391,10 @@ public class SystemConfig {
 
     public ArrayMap<String, ArraySet<String>> getAllowIgnoreLocationSettings() {
         return mAllowIgnoreLocationSettings;
+    }
+
+    public ArraySet<String> getBgRestrictionExemption() {
+        return mBgRestrictionExemption;
     }
 
     public ArraySet<String> getLinkedApps() {
@@ -1043,6 +1051,20 @@ public class SystemConfig {
                                         + " at " + parser.getPositionDescription());
                             } else {
                                 mLinkedApps.add(pkgname);
+                            }
+                        } else {
+                            logNotAllowedInPartition(name, permFile, parser);
+                        }
+                        XmlUtils.skipCurrentTag(parser);
+                    } break;
+                    case "bg-restriction-exemption": {
+                        if (allowOverrideAppRestrictions) {
+                            String pkgname = parser.getAttributeValue(null, "package");
+                            if (pkgname == null) {
+                                Slog.w(TAG, "<" + name + "> without package in "
+                                        + permFile + " at " + parser.getPositionDescription());
+                            } else {
+                                mBgRestrictionExemption.add(pkgname);
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);
