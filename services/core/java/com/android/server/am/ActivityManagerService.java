@@ -218,6 +218,7 @@ import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.LocusId;
+import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityPresentationInfo;
 import android.content.pm.ApplicationInfo;
@@ -12315,13 +12316,25 @@ public class ActivityManagerService extends IActivityManager.Stub
     public int bindService(IApplicationThread caller, IBinder token, Intent service,
             String resolvedType, IServiceConnection connection, int flags,
             String callingPackage, int userId) throws TransactionTooLargeException {
-        return bindIsolatedService(caller, token, service, resolvedType, connection, flags,
+        return bindServiceInstance(caller, token, service, resolvedType, connection, flags,
                 null, callingPackage, userId);
     }
 
-    public int bindIsolatedService(IApplicationThread caller, IBinder token, Intent service,
+    /**
+     * Binds to a service with a given instanceName, creating it if it does not already exist.
+     * If the instanceName field is not supplied, binding to the service occurs as usual.
+     */
+    public int bindServiceInstance(IApplicationThread caller, IBinder token, Intent service,
             String resolvedType, IServiceConnection connection, int flags, String instanceName,
             String callingPackage, int userId) throws TransactionTooLargeException {
+        return bindServiceInstance(caller, token, service, resolvedType, connection, flags,
+                instanceName, false, callingPackage, userId);
+    }
+
+    private int bindServiceInstance(IApplicationThread caller, IBinder token, Intent service,
+            String resolvedType, IServiceConnection connection, int flags, String instanceName,
+            boolean isSupplementalProcessService, String callingPackage, int userId)
+            throws TransactionTooLargeException {
         enforceNotIsolatedCaller("bindService");
 
         // Refuse possible leaked file descriptors
@@ -12331,6 +12344,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (callingPackage == null) {
             throw new IllegalArgumentException("callingPackage cannot be null");
+        }
+
+        if (isSupplementalProcessService && instanceName == null) {
+            throw new IllegalArgumentException("No instance name provided for isolated process");
         }
 
         // Ensure that instanceName, which is caller provided, does not contain
@@ -12346,8 +12363,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         synchronized(this) {
-            return mServices.bindServiceLocked(caller, token, service,
-                    resolvedType, connection, flags, instanceName, callingPackage, userId);
+            return mServices.bindServiceLocked(caller, token, service, resolvedType, connection,
+                    flags, instanceName, isSupplementalProcessService, callingPackage, userId);
         }
     }
 
@@ -15877,6 +15894,34 @@ public class ActivityManagerService extends IActivityManager.Stub
                 String processName, String abiOverride, int uid, Runnable crashHandler) {
             return ActivityManagerService.this.startIsolatedProcess(entryPoint, entryPointArgs,
                     processName, abiOverride, uid, crashHandler);
+        }
+
+        @Override
+        public boolean startAndBindSupplementalProcessService(Intent service,
+                ServiceConnection conn, int userAppUid) throws TransactionTooLargeException {
+            if (service == null) {
+                throw new IllegalArgumentException("intent is null");
+            }
+            if (conn == null) {
+                throw new IllegalArgumentException("connection is null");
+            }
+            if (service.getComponent() == null) {
+                throw new IllegalArgumentException("service must specify explicit component");
+            }
+            if (!UserHandle.isApp(userAppUid)) {
+                throw new IllegalArgumentException("uid is not within application range");
+            }
+
+            Handler handler = mContext.getMainThreadHandler();
+            int flags = Context.BIND_AUTO_CREATE;
+
+            final IServiceConnection sd = mContext.getServiceDispatcher(conn, handler, flags);
+            service.prepareToLeaveProcess(mContext);
+            return ActivityManagerService.this.bindServiceInstance(
+                        mContext.getIApplicationThread(), mContext.getActivityToken(), service,
+                        service.resolveTypeIfNeeded(mContext.getContentResolver()), sd, flags,
+                        Integer.toString(userAppUid), /*isSupplementalProcessService*/ true,
+                        mContext.getOpPackageName(), UserHandle.getUserId(userAppUid)) != 0;
         }
 
         @Override

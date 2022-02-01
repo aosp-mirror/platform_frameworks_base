@@ -2721,7 +2721,8 @@ public final class ActiveServices {
 
     int bindServiceLocked(IApplicationThread caller, IBinder token, Intent service,
             String resolvedType, final IServiceConnection connection, int flags,
-            String instanceName, String callingPackage, final int userId)
+            String instanceName, boolean isSupplementalProcessService, String callingPackage,
+            final int userId)
             throws TransactionTooLargeException {
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "bindService: " + service
                 + " type=" + resolvedType + " conn=" + connection.asBinder()
@@ -2805,10 +2806,9 @@ public final class ActiveServices {
         final boolean isBindExternal = (flags & Context.BIND_EXTERNAL_SERVICE) != 0;
         final boolean allowInstant = (flags & Context.BIND_ALLOW_INSTANT) != 0;
 
-        ServiceLookupResult res =
-            retrieveServiceLocked(service, instanceName, resolvedType, callingPackage,
-                    callingPid, callingUid, userId, true,
-                    callerFg, isBindExternal, allowInstant);
+        ServiceLookupResult res = retrieveServiceLocked(service, instanceName,
+                isSupplementalProcessService, resolvedType, callingPackage, callingPid, callingUid,
+                userId, true, callerFg, isBindExternal, allowInstant);
         if (res == null) {
             return 0;
         }
@@ -3228,6 +3228,20 @@ public final class ActiveServices {
             int callingPid, int callingUid, int userId,
             boolean createIfNeeded, boolean callingFromFg, boolean isBindExternal,
             boolean allowInstant) {
+        return retrieveServiceLocked(service, instanceName, false, resolvedType, callingPackage,
+                callingPid, callingUid, userId, createIfNeeded, callingFromFg, isBindExternal,
+                allowInstant);
+    }
+
+    private ServiceLookupResult retrieveServiceLocked(Intent service,
+            String instanceName, boolean isSupplementalProcessService, String resolvedType,
+            String callingPackage, int callingPid, int callingUid, int userId,
+            boolean createIfNeeded, boolean callingFromFg, boolean isBindExternal,
+            boolean allowInstant) {
+        if (isSupplementalProcessService && instanceName == null) {
+            throw new IllegalArgumentException("No instanceName provided for supplemental process");
+        }
+
         ServiceRecord r = null;
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "retrieveServiceLocked: " + service
                 + " type=" + resolvedType + " callingUid=" + callingUid);
@@ -3249,7 +3263,6 @@ public final class ActiveServices {
         if (instanceName == null) {
             comp = service.getComponent();
         } else {
-            // This is for isolated services
             final ComponentName realComp = service.getComponent();
             if (realComp == null) {
                 throw new IllegalArgumentException("Can't use custom instance name '" + instanceName
@@ -3304,12 +3317,19 @@ public final class ActiveServices {
                     return null;
                 }
                 if (instanceName != null
-                        && (sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) == 0) {
+                        && (sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) == 0
+                        && !isSupplementalProcessService) {
                     throw new IllegalArgumentException("Can't use instance name '" + instanceName
-                            + "' with non-isolated service '" + sInfo.name + "'");
+                            + "' with non-isolated non-supplemental service '" + sInfo.name + "'");
                 }
-                ComponentName className = new ComponentName(
-                        sInfo.applicationInfo.packageName, sInfo.name);
+                if (isSupplementalProcessService
+                        && (sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0) {
+                    throw new IllegalArgumentException("Service cannot be both supplemental and "
+                            + "isolated");
+                }
+
+                ComponentName className = new ComponentName(sInfo.applicationInfo.packageName,
+                                                            sInfo.name);
                 ComponentName name = comp != null ? comp : className;
                 if (!mAm.validateAssociationAllowedLocked(callingPackage, callingUid,
                         name.getPackageName(), sInfo.applicationInfo.uid)) {
@@ -3392,7 +3412,8 @@ public final class ActiveServices {
                             = new Intent.FilterComparison(service.cloneFilter());
                     final ServiceRestarter res = new ServiceRestarter();
                     r = new ServiceRecord(mAm, className, name, definingPackageName,
-                            definingUid, filter, sInfo, callingFromFg, res);
+                            definingUid, filter, sInfo, callingFromFg, res,
+                            isSupplementalProcessService);
                     res.setService(r);
                     smap.mServicesByInstanceName.put(name, r);
                     smap.mServicesByIntent.put(filter, r);

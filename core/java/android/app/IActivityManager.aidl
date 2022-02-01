@@ -169,7 +169,7 @@ interface IActivityManager {
     int bindService(in IApplicationThread caller, in IBinder token, in Intent service,
             in String resolvedType, in IServiceConnection connection, int flags,
             in String callingPackage, int userId);
-    int bindIsolatedService(in IApplicationThread caller, in IBinder token, in Intent service,
+    int bindServiceInstance(in IApplicationThread caller, in IBinder token, in Intent service,
             in String resolvedType, in IServiceConnection connection, int flags,
             in String instanceName, in String callingPackage, int userId);
     void updateServiceGroup(in IServiceConnection connection, int group, int importance);
