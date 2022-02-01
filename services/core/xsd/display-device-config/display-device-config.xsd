@@ -123,6 +123,18 @@
                 <xs:annotation name="nonnull"/>
                 <xs:annotation name="final"/>
             </xs:element>
+            <!-- The minimum HDR video size at which high-brightness-mode is allowed to operate.
+                Default is 0.5 if not specified-->
+            <xs:element name="minimumHdrPercentOfScreen" type="nonNegativeDecimal"
+                        minOccurs="0" maxOccurs="1">
+                <xs:annotation name="nullable"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <!-- This LUT specifies how to boost HDR brightness at given SDR brightness (nits). -->
+            <xs:element type="sdrHdrRatioMap" name="sdrHdrRatioMap" minOccurs="0" maxOccurs="1">
+                <xs:annotation name="nullable"/>
+                <xs:annotation name="final"/>
+            </xs:element>
         </xs:all>
         <xs:attribute name="enabled" type="xs:boolean" use="optional"/>
     </xs:complexType>
@@ -155,6 +167,14 @@
             <xs:enumeration value="critical"/>
             <xs:enumeration value="emergency"/>
             <xs:enumeration value="shutdown"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Maps to DisplayDeviceConfig.INTERPOLATION_* values. -->
+    <xs:simpleType name="interpolation">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="default"/>
+            <xs:enumeration value="linear"/>
         </xs:restriction>
     </xs:simpleType>
 
@@ -196,6 +216,7 @@
                 <xs:annotation name="final"/>
             </xs:element>
         </xs:sequence>
+        <xs:attribute name="interpolation" type="interpolation" use="optional"/>
     </xs:complexType>
 
     <xs:complexType name="point">
@@ -205,6 +226,28 @@
                 <xs:annotation name="final"/>
             </xs:element>
             <xs:element type="nonNegativeDecimal" name="nits">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="sdrHdrRatioMap">
+        <xs:sequence>
+            <xs:element name="point" type="sdrHdrRatioPoint" maxOccurs="unbounded" minOccurs="2">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="sdrHdrRatioPoint">
+        <xs:sequence>
+            <xs:element type="nonNegativeDecimal" name="sdrNits">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element type="nonNegativeDecimal" name="hdrRatio">
                 <xs:annotation name="nonnull"/>
                 <xs:annotation name="final"/>
             </xs:element>
