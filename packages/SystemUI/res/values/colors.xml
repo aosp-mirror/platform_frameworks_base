@@ -138,9 +138,9 @@
     <color name="udfps_enroll_progress">#7DA7F1</color>
     <color name="udfps_enroll_progress_help">#ffEE675C</color>
 
-    <!-- Global screenshot actions -->
-    <color name="screenshot_button_ripple">#1f000000</color>
-    <color name="screenshot_background_protection_start">#40000000</color> <!-- 25% black -->
+    <!-- Floating overlay actions -->
+    <color name="overlay_button_ripple">#1f000000</color>
+    <color name="overlay_background_protection_start">#40000000</color> <!-- 25% black -->
 
     <!-- GM2 colors -->
     <color name="GM2_grey_100">#F1F3F4</color>
