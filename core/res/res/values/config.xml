@@ -5648,4 +5648,13 @@
     <!-- The amount of time after becoming non-interactive (in ms) after which
          Low Power Standby can activate. -->
     <integer name="config_lowPowerStandbyNonInteractiveTimeout">5000</integer>
+
+
+    <!-- Mapping to select an Intent.EXTRA_DOCK_STATE value from extcon state
+         key-value pairs. Each entry is evaluated in order and is of the form:
+            "[EXTRA_DOCK_STATE value],key1=value1,key2=value2[,...]"
+         An entry with no key-value pairs is valid and can be used as a wildcard.
+     -->
+    <string-array name="config_dockExtconStateMapping">
+    </string-array>
 </resources>
