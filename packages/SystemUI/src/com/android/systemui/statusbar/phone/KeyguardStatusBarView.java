@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
 import static com.android.systemui.util.Utils.getStatusBarHeaderHeightKeyguard;
 
@@ -27,7 +26,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.UserManager;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.util.TypedValue;
@@ -47,7 +45,6 @@ import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
-import com.android.systemui.statusbar.window.StatusBarWindowView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -72,7 +69,6 @@ public class KeyguardStatusBarView extends RelativeLayout {
     private StatusIconContainer mStatusIconContainer;
 
     private boolean mKeyguardUserSwitcherEnabled;
-    private final UserManager mUserManager;
 
     private boolean mIsPrivacyDotEnabled;
     private int mSystemIconsSwitcherHiddenExpandedMargin;
@@ -99,10 +95,10 @@ public class KeyguardStatusBarView extends RelativeLayout {
      */
     private int mTopClipping;
     private final Rect mClipRect = new Rect(0, 0, 0, 0);
+    private boolean mIsUserSwitcherEnabled;
 
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mUserManager = UserManager.get(getContext());
     }
 
     @Override
@@ -163,6 +159,10 @@ public class KeyguardStatusBarView extends RelativeLayout {
         updateKeyguardStatusBarHeight();
     }
 
+    public void setUserSwitcherEnabled(boolean enabled) {
+        mIsUserSwitcherEnabled = enabled;
+    }
+
     private void updateKeyguardStatusBarHeight() {
         MarginLayoutParams lp =  (MarginLayoutParams) getLayoutParams();
         lp.height = getStatusBarHeaderHeightKeyguard(mContext);
@@ -200,11 +200,7 @@ public class KeyguardStatusBarView extends RelativeLayout {
             // If we have no keyguard switcher, the screen width is under 600dp. In this case,
             // we only show the multi-user switch if it's enabled through UserManager as well as
             // by the user.
-            // TODO(b/138661450) Move IPC calls to background
-            boolean isMultiUserEnabled = whitelistIpcs(() -> mUserManager.isUserSwitcherEnabled(
-                    mContext.getResources().getBoolean(
-                            R.bool.qs_show_user_switcher_for_single_user)));
-            if (isMultiUserEnabled) {
+            if (mIsUserSwitcherEnabled) {
                 mMultiUserAvatar.setVisibility(View.VISIBLE);
             } else {
                 mMultiUserAvatar.setVisibility(View.GONE);
