@@ -364,6 +364,11 @@ public class PowerExemptionManager {
      * @hide
      */
     public static final int REASON_SYSTEM_MODULE = 320;
+    /**
+     * Carrier privileged app.
+     * @hide
+     */
+    public static final int REASON_CARRIER_PRIVILEGED_APP = 321;
 
     /** @hide The app requests out-out. */
     public static final int REASON_OPT_OUT_REQUESTED = 1000;
@@ -440,6 +445,7 @@ public class PowerExemptionManager {
             REASON_ROLE_DIALER,
             REASON_ROLE_EMERGENCY,
             REASON_SYSTEM_MODULE,
+            REASON_CARRIER_PRIVILEGED_APP,
             REASON_OPT_OUT_REQUESTED,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -749,6 +755,8 @@ public class PowerExemptionManager {
                 return "ROLE_EMERGENCY";
             case REASON_SYSTEM_MODULE:
                 return "SYSTEM_MODULE";
+            case REASON_CARRIER_PRIVILEGED_APP:
+                return "CARRIER_PRIVILEGED_APP";
             case REASON_OPT_OUT_REQUESTED:
                 return "REASON_OPT_OUT_REQUESTED";
             default:
