@@ -1567,6 +1567,12 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "-432881038": {
+      "message": "startBackNavigation task=%s, topRunningActivity=%s, applicationBackCallback=%s, systemBackCallback=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "-415865166": {
       "message": "findFocusedWindow: Found new focus @ %s",
       "level": "VERBOSE",
@@ -3690,12 +3696,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
-    },
-    "1898905572": {
-      "message": "startBackNavigation task=%s, topRunningActivity=%s, topWindow=%s backCallback=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "1903353011": {
       "message": "notifyAppStopped: %s",

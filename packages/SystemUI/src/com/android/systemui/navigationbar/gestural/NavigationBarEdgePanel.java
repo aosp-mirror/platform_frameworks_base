@@ -162,7 +162,8 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
     // The amount the arrow is shifted to avoid the finger.
     private int mFingerOffset;
 
-    private final float mSwipeThreshold;
+    private final float mSwipeTriggerThreshold;
+    private final float mSwipeProgressThreshold;
     private final Path mArrowPath = new Path();
     private final Point mDisplaySize = new Point();
 
@@ -352,10 +353,15 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
         loadColors(context);
         updateArrowDirection();
 
-        mSwipeThreshold = context.getResources()
+        mSwipeTriggerThreshold = context.getResources()
                 .getDimension(R.dimen.navigation_edge_action_drag_threshold);
-        setVisibility(GONE);
+        mSwipeProgressThreshold = context.getResources()
+                .getDimension(R.dimen.navigation_edge_action_progress_threshold);
+        if (mBackAnimation != null) {
+            mBackAnimation.setSwipeThresholds(mSwipeTriggerThreshold, mSwipeProgressThreshold);
+        }
 
+        setVisibility(GONE);
         Executor backgroundExecutor = Dependency.get(Dependency.BACKGROUND_EXECUTOR);
         boolean isPrimaryDisplay = mContext.getDisplayId() == DEFAULT_DISPLAY;
         mRegionSamplingHelper = new RegionSamplingHelper(this,
@@ -730,7 +736,7 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
         mPreviousTouchTranslation = touchTranslation;
 
         // Apply a haptic on drag slop passed
-        if (!mDragSlopPassed && touchTranslation > mSwipeThreshold) {
+        if (!mDragSlopPassed && touchTranslation > mSwipeTriggerThreshold) {
             mDragSlopPassed = true;
             mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
             mVibrationTime = SystemClock.uptimeMillis();

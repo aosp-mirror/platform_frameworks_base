@@ -43,4 +43,11 @@ public interface BackAnimation {
     default IBackAnimation createExternalInterface() {
         return null;
     }
+
+    /**
+     * Sets the threshold values that defining edge swipe behavior.
+     * @param triggerThreshold the min threshold to trigger back.
+     * @param progressThreshold the max threshold to keep progressing back animation.
+     */
+    void setSwipeThresholds(float triggerThreshold, float progressThreshold);
 }

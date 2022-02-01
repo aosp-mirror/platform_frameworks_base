@@ -27,8 +27,6 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.MergedConfiguration;
-import android.view.InsetsState;
-import android.view.IWindow;
 import android.window.ClientWindowFrames;
 import android.window.IOnBackInvokedCallback;
 
@@ -511,7 +509,7 @@ public class WindowlessWindowManager implements IWindowSession {
 
     @Override
     public void setOnBackInvokedCallback(IWindow iWindow,
-            IOnBackInvokedCallback iOnBackInvokedCallback) throws RemoteException { }
+            IOnBackInvokedCallback iOnBackInvokedCallback, int priority) throws RemoteException { }
 
     @Override
     public boolean dropForAccessibility(IWindow window, int x, int y) {

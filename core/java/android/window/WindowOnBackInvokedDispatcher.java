@@ -160,11 +160,11 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
         try {
             if (callback == null) {
-                mWindowSession.setOnBackInvokedCallback(mWindow, null);
+                mWindowSession.setOnBackInvokedCallback(mWindow, null, PRIORITY_DEFAULT);
             } else {
                 int priority = mAllCallbacks.get(callback);
                 mWindowSession.setOnBackInvokedCallback(
-                        mWindow, new OnBackInvokedCallbackWrapper(callback, priority));
+                        mWindow, new OnBackInvokedCallbackWrapper(callback, priority), priority);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to set OnBackInvokedCallback to WM. Error: " + e);

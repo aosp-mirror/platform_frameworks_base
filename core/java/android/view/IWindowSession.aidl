@@ -337,8 +337,10 @@ interface IWindowSession {
      *
      * @param window The token for the window to set the callback to.
      * @param callback The {@link IOnBackInvokedCallback} to set.
+     * @param priority The priority of the callback.
      */
-    oneway void setOnBackInvokedCallback(IWindow window, IOnBackInvokedCallback callback);
+    oneway void setOnBackInvokedCallback(
+            IWindow window, IOnBackInvokedCallback callback, int priority);
 
     /**
      * Clears a touchable region set by {@link #setInsets}.
