@@ -36,6 +36,7 @@ import android.view.ViewGroup;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardMessageArea;
 import com.android.keyguard.KeyguardMessageAreaController;
@@ -100,6 +101,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     private ShadeController mShadeController;
     @Mock
     private DreamOverlayStateController mDreamOverlayStateController;
+    @Mock
+    private LatencyTracker mLatencyTracker;
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
@@ -127,7 +130,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mock(NotificationMediaManager.class),
                 mKeyguardBouncerFactory,
                 mKeyguardMessageAreaFactory,
-                () -> mShadeController);
+                () -> mShadeController,
+                mLatencyTracker);
         mStatusBarKeyguardViewManager.registerStatusBar(
                 mStatusBar,
                 mNotificationPanelView,
