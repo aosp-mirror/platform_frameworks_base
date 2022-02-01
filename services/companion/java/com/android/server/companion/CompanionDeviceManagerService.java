@@ -35,10 +35,10 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainRunna
 import static com.android.server.companion.AssociationStore.CHANGE_TYPE_UPDATED_ADDRESS_UNCHANGED;
 import static com.android.server.companion.PermissionsUtils.checkCallerCanManageAssociationsForPackage;
 import static com.android.server.companion.PermissionsUtils.checkCallerCanManageCompanionDevice;
-import static com.android.server.companion.PermissionsUtils.enforceCallerCanInteractWithUserId;
 import static com.android.server.companion.PermissionsUtils.enforceCallerCanManageAssociationsForPackage;
 import static com.android.server.companion.PermissionsUtils.enforceCallerCanManageCompanionDevice;
 import static com.android.server.companion.PermissionsUtils.enforceCallerIsSystemOr;
+import static com.android.server.companion.PermissionsUtils.enforceCallerIsSystemOrCanInteractWithUserId;
 import static com.android.server.companion.RolesUtils.addRoleHolderForAssociation;
 import static com.android.server.companion.RolesUtils.removeRoleHolderForAssociation;
 
@@ -459,7 +459,7 @@ public class CompanionDeviceManagerService extends SystemService
 
         @Override
         public List<AssociationInfo> getAllAssociationsForUser(int userId) throws RemoteException {
-            enforceCallerCanInteractWithUserId(getContext(), userId);
+            enforceCallerIsSystemOrCanInteractWithUserId(getContext(), userId);
             enforceCallerCanManageCompanionDevice(getContext(), "getAllAssociationsForUser");
 
             return mAssociationStore.getAssociationsForUser(userId);
@@ -468,7 +468,7 @@ public class CompanionDeviceManagerService extends SystemService
         @Override
         public void addOnAssociationsChangedListener(IOnAssociationsChangedListener listener,
                 int userId) {
-            enforceCallerCanInteractWithUserId(getContext(), userId);
+            enforceCallerIsSystemOrCanInteractWithUserId(getContext(), userId);
             enforceCallerCanManageCompanionDevice(getContext(),
                     "addOnAssociationsChangedListener");
 
@@ -478,7 +478,7 @@ public class CompanionDeviceManagerService extends SystemService
         @Override
         public void removeOnAssociationsChangedListener(IOnAssociationsChangedListener listener,
                 int userId) {
-            enforceCallerCanInteractWithUserId(getContext(), userId);
+            enforceCallerIsSystemOrCanInteractWithUserId(getContext(), userId);
             enforceCallerCanManageCompanionDevice(
                     getContext(), "removeOnAssociationsChangedListener");
 
