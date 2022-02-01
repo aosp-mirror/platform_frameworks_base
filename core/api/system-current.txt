@@ -11055,7 +11055,7 @@ package android.service.games {
 
   public class GameService extends android.app.Service {
     ctor public GameService();
-    method public final void createGameSession(@IntRange(from=0) int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY) public final void createGameSession(@IntRange(from=0) int);
     method @Nullable public final android.os.IBinder onBind(@Nullable android.content.Intent);
     method public void onConnected();
     method public void onDisconnected();

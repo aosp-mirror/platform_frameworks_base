@@ -16,9 +16,11 @@
 
 package android.service.games;
 
+import android.Manifest;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.app.IGameManagerService;
@@ -173,6 +175,7 @@ public class GameService extends Service {
      *
      * @param taskId The taskId of the game.
      */
+    @RequiresPermission(Manifest.permission.MANAGE_GAME_ACTIVITY)
     public final void createGameSession(@IntRange(from = 0) int taskId) {
         if (mGameServiceController == null) {
             throw new IllegalStateException("Can not call before connected()");
