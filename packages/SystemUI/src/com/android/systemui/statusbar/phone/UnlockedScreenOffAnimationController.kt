@@ -136,6 +136,12 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                 globalSettings.getFloat(Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
     }
 
+    override fun shouldDelayKeyguardShow(): Boolean =
+        shouldPlayAnimation()
+
+    override fun isKeyguardShowDelayed(): Boolean =
+        isAnimationPlaying()
+
     /**
      * Animates in the provided keyguard view, ending in the same position that it will be in on
      * AOD.

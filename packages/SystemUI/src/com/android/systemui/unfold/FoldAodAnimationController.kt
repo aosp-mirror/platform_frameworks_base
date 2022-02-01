@@ -20,7 +20,6 @@ import android.os.Handler
 import android.os.PowerManager
 import android.provider.Settings
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.phone.ScreenOffAnimation
@@ -28,7 +27,6 @@ import com.android.systemui.statusbar.phone.StatusBar
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.unfold.FoldAodAnimationController.FoldAodAnimationStatus
 import com.android.systemui.util.settings.GlobalSettings
-import dagger.Lazy
 import javax.inject.Inject
 
 /**
@@ -40,7 +38,6 @@ class FoldAodAnimationController
 @Inject
 constructor(
     @Main private val handler: Handler,
-    private val keyguardViewMediatorLazy: Lazy<KeyguardViewMediator>,
     private val wakefulnessLifecycle: WakefulnessLifecycle,
     private val globalSettings: GlobalSettings
 ) : CallbackController<FoldAodAnimationStatus>, ScreenOffAnimation, WakefulnessLifecycle.Observer {
@@ -57,7 +54,6 @@ constructor(
         statusBar.notificationPanelViewController.startFoldToAodAnimation {
             // End action
             isAnimationPlaying = false
-            keyguardViewMediatorLazy.get().maybeHandlePendingLock()
         }
     }
 
