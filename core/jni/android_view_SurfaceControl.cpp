@@ -1638,27 +1638,6 @@ static void nativeOverrideHdrTypes(JNIEnv* env, jclass clazz, jobject tokenObjec
     }
 }
 
-static jboolean nativeGetBootDisplayModeSupport(JNIEnv* env, jclass clazz) {
-    bool isBootDisplayModeSupported = false;
-    SurfaceComposerClient::getBootDisplayModeSupport(&isBootDisplayModeSupported);
-    return static_cast<jboolean>(isBootDisplayModeSupported);
-}
-
-static void nativeSetBootDisplayMode(JNIEnv* env, jclass clazz, jobject tokenObject,
-                                     jint displayModId) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
-    if (token == NULL) return;
-
-    SurfaceComposerClient::setBootDisplayMode(token, displayModId);
-}
-
-static void nativeClearBootDisplayMode(JNIEnv* env, jclass clazz, jobject tokenObject) {
-    sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
-    if (token == NULL) return;
-
-    SurfaceComposerClient::clearBootDisplayMode(token);
-}
-
 static void nativeSetAutoLowLatencyMode(JNIEnv* env, jclass clazz, jobject tokenObject, jboolean on) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObject));
     if (token == NULL) return;
@@ -2067,12 +2046,6 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetDisplayNativePrimaries },
     {"nativeSetActiveColorMode", "(Landroid/os/IBinder;I)Z",
             (void*)nativeSetActiveColorMode},
-     {"nativeGetBootDisplayModeSupport", "()Z",
-                (void*)nativeGetBootDisplayModeSupport },
-    {"nativeSetBootDisplayMode", "(Landroid/os/IBinder;I)V",
-            (void*)nativeSetBootDisplayMode },
-    {"nativeClearBootDisplayMode", "(Landroid/os/IBinder;)V",
-            (void*)nativeClearBootDisplayMode },
     {"nativeSetAutoLowLatencyMode", "(Landroid/os/IBinder;Z)V",
             (void*)nativeSetAutoLowLatencyMode },
     {"nativeSetGameContentType", "(Landroid/os/IBinder;Z)V",
