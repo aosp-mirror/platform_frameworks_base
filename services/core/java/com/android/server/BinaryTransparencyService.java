@@ -33,6 +33,7 @@ import android.util.PackageUtils;
 import android.util.Slog;
 
 import com.android.internal.os.IBinaryTransparencyService;
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -373,6 +374,7 @@ public class BinaryTransparencyService extends SystemService {
     private void getVBMetaDigestInformation() {
         mVbmetaDigest = SystemProperties.get(SYSPROP_NAME_VBETA_DIGEST, VBMETA_DIGEST_UNAVAILABLE);
         Slog.d(TAG, String.format("VBMeta Digest: %s", mVbmetaDigest));
+        FrameworkStatsLog.write(FrameworkStatsLog.VBMETA_DIGEST_REPORTED, mVbmetaDigest);
     }
 
     @NonNull
@@ -437,6 +439,13 @@ public class BinaryTransparencyService extends SystemService {
                     } else {
                         mBinaryHashes.put(packageName, sha256digest);
                     }
+
+                    if (packageInfo.isApex) {
+                        FrameworkStatsLog.write(FrameworkStatsLog.APEX_INFO_GATHERED,
+                                packageInfo.packageName,
+                                packageInfo.getLongVersionCode(),
+                                mBinaryHashes.get(packageInfo.packageName));
+                    }
                 }
             } catch (PackageManager.NameNotFoundException e) {
                 Slog.e(TAG, "Could not find package with name " + packageName);
@@ -466,6 +475,8 @@ public class BinaryTransparencyService extends SystemService {
             } else {
                 mBinaryHashes.put(packageInfo.packageName, sha256digest);
             }
+            FrameworkStatsLog.write(FrameworkStatsLog.APEX_INFO_GATHERED, packageInfo.packageName,
+                    packageInfo.getLongVersionCode(), mBinaryHashes.get(packageInfo.packageName));
             Slog.d(TAG, String.format("Last update time for %s: %d", packageInfo.packageName,
                     packageInfo.lastUpdateTime));
             mBinaryLastUpdateTimes.put(packageInfo.packageName, packageInfo.lastUpdateTime);
