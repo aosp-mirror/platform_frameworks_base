@@ -36,7 +36,6 @@ import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_RESTORE;
 import static android.content.pm.PackageManager.INSTALL_REASON_DEVICE_SETUP;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
-import static android.content.pm.PackageManagerInternal.PACKAGE_SETUP_WIZARD;
 import static android.content.pm.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4;
 import static android.content.pm.parsing.ApkLiteParseUtils.isApkFile;
 import static android.os.PowerExemptionManager.REASON_PACKAGE_REPLACED;
@@ -145,6 +144,7 @@ import com.android.internal.content.F2fsUtils;
 import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.security.VerityUtils;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
 import com.android.server.pm.dex.ArtManagerService;
@@ -2563,7 +2563,9 @@ final class InstallPackageHelper {
         Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
 
         synchronized (mPm.mLock) {
-            size = mPm.mPendingBroadcasts.size();
+            final SparseArray<ArrayMap<String, ArrayList<String>>> userIdToPackagesToComponents =
+                    mPm.mPendingBroadcasts.copiedMap();
+            size = userIdToPackagesToComponents.size();
             if (size <= 0) {
                 // Nothing to be done. Just return
                 return;
@@ -2573,11 +2575,11 @@ final class InstallPackageHelper {
             uids = new int[size];
             int i = 0;  // filling out the above arrays
 
-            for (int n = 0; n < mPm.mPendingBroadcasts.userIdCount(); n++) {
-                final int packageUserId = mPm.mPendingBroadcasts.userIdAt(n);
+            for (int n = 0; n < size; n++) {
+                final int packageUserId = userIdToPackagesToComponents.keyAt(n);
                 final ArrayMap<String, ArrayList<String>> componentsToBroadcast =
-                        mPm.mPendingBroadcasts.packagesForUserId(packageUserId);
-                final int numComponents = componentsToBroadcast.size();
+                        userIdToPackagesToComponents.valueAt(n);
+                final int numComponents = CollectionUtils.size(componentsToBroadcast);
                 for (int index = 0; i < size && index < numComponents; index++) {
                     packages[i] = componentsToBroadcast.keyAt(index);
                     components[i] = componentsToBroadcast.valueAt(index);
