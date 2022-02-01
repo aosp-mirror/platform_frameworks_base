@@ -58,10 +58,12 @@ class HighBrightnessModeController {
 
     private static final boolean DEBUG = false;
 
-    private static final float HDR_PERCENT_OF_SCREEN_REQUIRED = 0.50f;
-
     @VisibleForTesting
     static final float HBM_TRANSITION_POINT_INVALID = Float.POSITIVE_INFINITY;
+
+    public interface HdrBrightnessDeviceConfig {
+        float getHdrBrightnessFromSdr(float sdrBrightness);
+    }
 
     private final float mBrightnessMin;
     private final float mBrightnessMax;
@@ -76,6 +78,7 @@ class HighBrightnessModeController {
 
     private HdrListener mHdrListener;
     private HighBrightnessModeData mHbmData;
+    private HdrBrightnessDeviceConfig mHdrBrightnessCfg;
     private IBinder mRegisteredDisplayToken;
 
     private boolean mIsInAllowedAmbientRange = false;
@@ -115,16 +118,17 @@ class HighBrightnessModeController {
 
     HighBrightnessModeController(Handler handler, int width, int height, IBinder displayToken,
             String displayUniqueId, float brightnessMin, float brightnessMax,
-            HighBrightnessModeData hbmData, Runnable hbmChangeCallback, Context context) {
+            HighBrightnessModeData hbmData, HdrBrightnessDeviceConfig hdrBrightnessCfg,
+            Runnable hbmChangeCallback, Context context) {
         this(new Injector(), handler, width, height, displayToken, displayUniqueId, brightnessMin,
-            brightnessMax, hbmData, hbmChangeCallback, context);
+            brightnessMax, hbmData, hdrBrightnessCfg, hbmChangeCallback, context);
     }
 
     @VisibleForTesting
     HighBrightnessModeController(Injector injector, Handler handler, int width, int height,
             IBinder displayToken, String displayUniqueId, float brightnessMin, float brightnessMax,
-            HighBrightnessModeData hbmData, Runnable hbmChangeCallback,
-            Context context) {
+            HighBrightnessModeData hbmData, HdrBrightnessDeviceConfig hdrBrightnessCfg,
+            Runnable hbmChangeCallback, Context context) {
         mInjector = injector;
         mContext = context;
         mClock = injector.getClock();
@@ -138,7 +142,7 @@ class HighBrightnessModeController {
         mRecalcRunnable = this::recalculateTimeAllowance;
         mHdrListener = new HdrListener();
 
-        resetHbmData(width, height, displayToken, displayUniqueId, hbmData);
+        resetHbmData(width, height, displayToken, displayUniqueId, hbmData, hdrBrightnessCfg);
     }
 
     void setAutoBrightnessEnabled(int state) {
@@ -178,6 +182,13 @@ class HighBrightnessModeController {
     }
 
     float getHdrBrightnessValue() {
+        if (mHdrBrightnessCfg != null) {
+            float hdrBrightness = mHdrBrightnessCfg.getHdrBrightnessFromSdr(mBrightness);
+            if (hdrBrightness != PowerManager.BRIGHTNESS_INVALID) {
+                return hdrBrightness;
+            }
+        }
+
         // For HDR brightness, we take the current brightness and scale it to the max. The reason
         // we do this is because we want brightness to go to HBM max when it would normally go
         // to normal max, meaning it should not wait to go to 10000 lux (or whatever the transition
@@ -250,10 +261,11 @@ class HighBrightnessModeController {
     }
 
     void resetHbmData(int width, int height, IBinder displayToken, String displayUniqueId,
-            HighBrightnessModeData hbmData) {
+            HighBrightnessModeData hbmData, HdrBrightnessDeviceConfig hdrBrightnessCfg) {
         mWidth = width;
         mHeight = height;
         mHbmData = hbmData;
+        mHdrBrightnessCfg = hdrBrightnessCfg;
         mDisplayStatsId = displayUniqueId.hashCode();
 
         unregisterHdrListener();
@@ -598,8 +610,8 @@ class HighBrightnessModeController {
                 int maxW, int maxH, int flags) {
             mHandler.post(() -> {
                 mIsHdrLayerPresent = numberOfHdrLayers > 0
-                        && (float) (maxW * maxH)
-                                >= ((float) (mWidth * mHeight) * HDR_PERCENT_OF_SCREEN_REQUIRED);
+                        && (float) (maxW * maxH) >= ((float) (mWidth * mHeight)
+                                   * mHbmData.minimumHdrPercentOfScreen);
                 // Calling the brightness update so that we can recalculate
                 // brightness with HDR in mind.
                 onBrightnessChanged(mBrightness, mUnthrottledBrightness, mThrottlingReason);

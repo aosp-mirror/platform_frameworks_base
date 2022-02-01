@@ -22,10 +22,13 @@ import static android.hardware.display.BrightnessInfo.HIGH_BRIGHTNESS_MODE_HDR;
 import static android.hardware.display.BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF;
 import static android.hardware.display.BrightnessInfo.HIGH_BRIGHTNESS_MODE_SUNLIGHT;
 
+
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED;
 import static com.android.server.display.AutomaticBrightnessController.AUTO_BRIGHTNESS_ENABLED;
 import static com.android.server.display.AutomaticBrightnessController
                                                       .AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE;
+
+import static com.android.server.display.DisplayDeviceConfig.HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT;
 
 import static com.android.server.display.HighBrightnessModeController.HBM_TRANSITION_POINT_INVALID;
 
@@ -111,7 +114,8 @@ public class HighBrightnessModeControllerTest {
     private static final HighBrightnessModeData DEFAULT_HBM_DATA =
             new HighBrightnessModeData(MINIMUM_LUX, TRANSITION_POINT, TIME_WINDOW_MILLIS,
                     TIME_ALLOWED_IN_WINDOW_MILLIS, TIME_MINIMUM_AVAILABLE_TO_ENABLE_MILLIS,
-                    THERMAL_STATUS_LIMIT, ALLOW_IN_LOW_POWER_MODE);
+                    THERMAL_STATUS_LIMIT, ALLOW_IN_LOW_POWER_MODE,
+                    HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT);
 
     @Before
     public void setUp() {
@@ -136,7 +140,7 @@ public class HighBrightnessModeControllerTest {
         initHandler(null);
         final HighBrightnessModeController hbmc = new HighBrightnessModeController(
                 mInjectorMock, mHandler, DISPLAY_WIDTH, DISPLAY_HEIGHT, mDisplayToken,
-                mDisplayUniqueId, DEFAULT_MIN, DEFAULT_MAX, null, () -> {}, mContextSpy);
+                mDisplayUniqueId, DEFAULT_MIN, DEFAULT_MAX, null, null, () -> {}, mContextSpy);
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_OFF);
         assertEquals(hbmc.getTransitionPoint(), HBM_TRANSITION_POINT_INVALID, 0.0f);
     }
@@ -146,7 +150,7 @@ public class HighBrightnessModeControllerTest {
         initHandler(null);
         final HighBrightnessModeController hbmc = new HighBrightnessModeController(
                 mInjectorMock, mHandler, DISPLAY_WIDTH, DISPLAY_HEIGHT, mDisplayToken,
-                mDisplayUniqueId, DEFAULT_MIN, DEFAULT_MAX, null, () -> {}, mContextSpy);
+                mDisplayUniqueId, DEFAULT_MIN, DEFAULT_MAX, null, null, () -> {}, mContextSpy);
         hbmc.setAutoBrightnessEnabled(AUTO_BRIGHTNESS_ENABLED);
         hbmc.onAmbientLuxChange(MINIMUM_LUX - 1); // below allowed range
         assertState(hbmc, DEFAULT_MIN, DEFAULT_MAX, HIGH_BRIGHTNESS_MODE_OFF);
@@ -679,7 +683,7 @@ public class HighBrightnessModeControllerTest {
         initHandler(clock);
         return new HighBrightnessModeController(mInjectorMock, mHandler, DISPLAY_WIDTH,
                 DISPLAY_HEIGHT, mDisplayToken, mDisplayUniqueId, DEFAULT_MIN, DEFAULT_MAX,
-                DEFAULT_HBM_DATA, () -> {}, mContextSpy);
+                DEFAULT_HBM_DATA, null, () -> {}, mContextSpy);
     }
 
     private void initHandler(OffsettableClock clock) {
