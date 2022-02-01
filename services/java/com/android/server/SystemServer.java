@@ -369,6 +369,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.adb.AdbService$Lifecycle";
     private static final String SPEECH_RECOGNITION_MANAGER_SERVICE_CLASS =
             "com.android.server.speech.SpeechRecognitionManagerService";
+    private static final String WALLPAPER_EFFECTS_GENERATION_MANAGER_SERVICE_CLASS =
+            "com.android.server.wallpapereffectsgeneration.WallpaperEffectsGenerationManagerService";
     private static final String APP_PREDICTION_MANAGER_SERVICE_CLASS =
             "com.android.server.appprediction.AppPredictionManagerService";
     private static final String CONTENT_SUGGESTIONS_SERVICE_CLASS =
@@ -1891,7 +1893,6 @@ public final class SystemServer implements Dumpable {
             }
             t.traceEnd();
 
-
             t.traceBegin("StartIpSecService");
             try {
                 ipSecService = IpSecService.create(context);
@@ -2131,6 +2132,14 @@ public final class SystemServer implements Dumpable {
             } else {
                 Slog.i(TAG, "Wallpaper service disabled by config");
             }
+
+            // WallpaperEffectsGeneration manager service
+            // TODO (b/135218095): Use deviceHasConfigString(context,
+            //  R.string.config_defaultWallpaperEffectsGenerationService)
+            t.traceBegin("StartWallpaperEffectsGenerationService");
+            mSystemServiceManager.startService(
+                    WALLPAPER_EFFECTS_GENERATION_MANAGER_SERVICE_CLASS);
+            t.traceEnd();
 
             t.traceBegin("StartAudioService");
             if (!isArc) {
