@@ -51668,6 +51668,7 @@ package android.view.accessibility {
     method public boolean isSelected();
     method public boolean isShowingHintText();
     method public boolean isTextEntryKey();
+    method public boolean isTextSelectable();
     method public boolean isVisibleToUser();
     method @Deprecated public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View);
     method @Deprecated public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View, int);
@@ -51731,6 +51732,7 @@ package android.view.accessibility {
     method public void setStateDescription(@Nullable CharSequence);
     method public void setText(CharSequence);
     method public void setTextEntryKey(boolean);
+    method public void setTextSelectable(boolean);
     method public void setTextSelection(int, int);
     method public void setTooltipText(@Nullable CharSequence);
     method public void setTouchDelegateInfo(@NonNull android.view.accessibility.AccessibilityNodeInfo.TouchDelegateInfo);
