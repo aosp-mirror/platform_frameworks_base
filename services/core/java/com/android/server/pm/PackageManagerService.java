@@ -961,7 +961,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private final BroadcastHelper mBroadcastHelper;
     private final RemovePackageHelper mRemovePackageHelper;
     private final DeletePackageHelper mDeletePackageHelper;
-    private final InitAppsHelper mInitAppsHelper;
+    private final InitAndSystemPackageHelper mInitAndSystemPackageHelper;
     private final AppDataHelper mAppDataHelper;
     private final InstallPackageHelper mInstallPackageHelper;
     private final PreferredActivityHelper mPreferredActivityHelper;
@@ -1699,7 +1699,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mAppDataHelper = testParams.appDataHelper;
         mInstallPackageHelper = testParams.installPackageHelper;
         mRemovePackageHelper = testParams.removePackageHelper;
-        mInitAppsHelper = testParams.initAndSystemPackageHelper;
+        mInitAndSystemPackageHelper = testParams.initAndSystemPackageHelper;
         mDeletePackageHelper = testParams.deletePackageHelper;
         mPreferredActivityHelper = testParams.preferredActivityHelper;
         mResolveIntentHelper = testParams.resolveIntentHelper;
@@ -1844,8 +1844,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mAppDataHelper = new AppDataHelper(this);
         mInstallPackageHelper = new InstallPackageHelper(this, mAppDataHelper);
         mRemovePackageHelper = new RemovePackageHelper(this, mAppDataHelper);
-        mInitAppsHelper = new InitAppsHelper(this, mApexManager, mInstallPackageHelper,
-                mInjector.getScanningCachingPackageParser(), mInjector.getSystemPartitions());
+        mInitAndSystemPackageHelper = new InitAndSystemPackageHelper(this);
         mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
                 mAppDataHelper);
         mSharedLibraries.setDeletePackageHelper(mDeletePackageHelper);
@@ -1979,8 +1978,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     mIsEngBuild, mIsUserDebugBuild, mIncrementalVersion);
 
             final int[] userIds = mUserManager.getUserIds();
-            mOverlayConfig = mInitAppsHelper.initSystemApps(packageSettings, userIds, startTime);
-            mInitAppsHelper.initNonSystemApps(userIds, startTime);
+            mOverlayConfig = mInitAndSystemPackageHelper.initPackages(packageSettings,
+                    userIds, startTime);
 
             // Resolve the storage manager.
             mStorageManagerPackage = getStorageManagerPackageName();
@@ -8752,7 +8751,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     boolean isExpectingBetter(String packageName) {
-        return mInitAppsHelper.isExpectingBetter(packageName);
+        return mInitAndSystemPackageHelper.isExpectingBetter(packageName);
     }
 
     int getDefParseFlags() {
@@ -8855,12 +8854,13 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     boolean isOverlayMutable(String packageName) {
-        return mOverlayConfig.isMutable(packageName);
+        return (mOverlayConfig != null ? mOverlayConfig
+                : OverlayConfig.getSystemInstance()).isMutable(packageName);
     }
 
     @ScanFlags int getSystemPackageScanFlags(File codePath) {
         List<ScanPartition> dirsToScanAsSystem =
-                mInitAppsHelper.getDirsToScanAsSystem();
+                mInitAndSystemPackageHelper.getDirsToScanAsSystem();
         @PackageManagerService.ScanFlags int scanFlags = SCAN_AS_SYSTEM;
         for (int i = dirsToScanAsSystem.size() - 1; i >= 0; i--) {
             ScanPartition partition = dirsToScanAsSystem.get(i);
@@ -8878,7 +8878,7 @@ public class PackageManagerService extends IPackageManager.Stub
     Pair<Integer, Integer> getSystemPackageRescanFlagsAndReparseFlags(File scanFile,
             int systemScanFlags, int systemParseFlags) {
         List<ScanPartition> dirsToScanAsSystem =
-                mInitAppsHelper.getDirsToScanAsSystem();
+                mInitAndSystemPackageHelper.getDirsToScanAsSystem();
         @ParsingPackageUtils.ParseFlags int reparseFlags = 0;
         @PackageManagerService.ScanFlags int rescanFlags = 0;
         for (int i1 = dirsToScanAsSystem.size() - 1; i1 >= 0; i1--) {
