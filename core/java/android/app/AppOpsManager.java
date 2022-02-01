@@ -2363,11 +2363,11 @@ public class AppOpsManager {
             Manifest.permission.USE_BIOMETRIC,
             Manifest.permission.ACTIVITY_RECOGNITION,
             Manifest.permission.SMS_FINANCIAL_TRANSACTIONS,
-            null,
+            Manifest.permission.READ_MEDIA_AUDIO,
             null, // no permission for OP_WRITE_MEDIA_AUDIO
-            null,
+            Manifest.permission.READ_MEDIA_VIDEO,
             null, // no permission for OP_WRITE_MEDIA_VIDEO
-            null,
+            Manifest.permission.READ_MEDIA_IMAGE,
             null, // no permission for OP_WRITE_MEDIA_IMAGES
             null, // no permission for OP_LEGACY_STORAGE
             null, // no permission for OP_ACCESS_ACCESSIBILITY
