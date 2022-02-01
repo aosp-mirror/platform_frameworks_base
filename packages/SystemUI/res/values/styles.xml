@@ -399,6 +399,11 @@
         <!-- that would otherwise be intercepted by the Shade. -->
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
+
+        <!-- Empty enter/exit animation, we will animate in-window. Note that the implementation -->
+        <!-- of ActionsDialogLite relies on this to be null (resource=0) to detect when to run -->
+        <!-- the in-window animation. -->
+        <item name="android:windowAnimationStyle">@null</item>
     </style>
 
     <style name="QSBorderlessButton">
