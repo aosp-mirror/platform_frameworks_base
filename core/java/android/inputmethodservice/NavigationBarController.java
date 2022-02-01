@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -158,6 +159,8 @@ final class NavigationBarController {
         @Nullable
         private ValueAnimator mTintAnimator;
 
+        private boolean mDrawLegacyNavigationBarBackground;
+
         Impl(@NonNull InputMethodService inputMethodService) {
             mService = inputMethodService;
         }
@@ -226,9 +229,14 @@ final class NavigationBarController {
                 mLastInsets = systemInsets;
             }
 
-            mNavigationBarFrame.setBackground(null);
+            if (mDrawLegacyNavigationBarBackground) {
+                mNavigationBarFrame.setBackgroundColor(Color.BLACK);
+            } else {
+                mNavigationBarFrame.setBackground(null);
+            }
 
-            setIconTintInternal(calculateTargetDarkIntensity(mAppearance));
+            setIconTintInternal(calculateTargetDarkIntensity(mAppearance,
+                    mDrawLegacyNavigationBarBackground));
         }
 
         private void uninstallNavigationBarFrameIfNecessary() {
@@ -478,7 +486,8 @@ final class NavigationBarController {
                 return;
             }
 
-            final float targetDarkIntensity = calculateTargetDarkIntensity(mAppearance);
+            final float targetDarkIntensity = calculateTargetDarkIntensity(mAppearance,
+                    mDrawLegacyNavigationBarBackground);
 
             if (mTintAnimator != null) {
                 mTintAnimator.cancel();
@@ -506,9 +515,31 @@ final class NavigationBarController {
         }
 
         @FloatRange(from = 0.0f, to = 1.0f)
-        private static float calculateTargetDarkIntensity(@Appearance int appearance) {
-            final boolean lightNavBar = (appearance & APPEARANCE_LIGHT_NAVIGATION_BARS) != 0;
+        private static float calculateTargetDarkIntensity(@Appearance int appearance,
+                boolean drawLegacyNavigationBarBackground) {
+            final boolean lightNavBar = !drawLegacyNavigationBarBackground
+                    && (appearance & APPEARANCE_LIGHT_NAVIGATION_BARS) != 0;
             return lightNavBar ? 1.0f : 0.0f;
+        }
+
+        @Override
+        public boolean onDrawLegacyNavigationBarBackgroundChanged(
+                boolean drawLegacyNavigationBarBackground) {
+            if (mDestroyed) {
+                return false;
+            }
+
+            if (drawLegacyNavigationBarBackground != mDrawLegacyNavigationBarBackground) {
+                mDrawLegacyNavigationBarBackground = drawLegacyNavigationBarBackground;
+                if (mDrawLegacyNavigationBarBackground) {
+                    mNavigationBarFrame.setBackgroundColor(Color.BLACK);
+                } else {
+                    mNavigationBarFrame.setBackground(null);
+                }
+                scheduleRelayout();
+                onSystemBarAppearanceChanged(mAppearance);
+            }
+            return drawLegacyNavigationBarBackground;
         }
 
         @Override
@@ -518,6 +549,7 @@ final class NavigationBarController {
                     + " mShouldShowImeSwitcherWhenImeIsShown" + mShouldShowImeSwitcherWhenImeIsShown
                     + " mAppearance=0x" + Integer.toHexString(mAppearance)
                     + " mDarkIntensity=" + mDarkIntensity
+                    + " mDrawLegacyNavigationBarBackground=" + mDrawLegacyNavigationBarBackground
                     + "}";
         }
     }

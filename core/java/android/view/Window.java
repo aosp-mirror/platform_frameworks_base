@@ -673,6 +673,24 @@ public abstract class Window {
          * @param appearance The newly applied appearance.
          */
         void onSystemBarAppearanceChanged(@WindowInsetsController.Appearance int appearance);
+
+        /**
+         * Called from
+         * {@link com.android.internal.policy.DecorView#updateColorViews(WindowInsets, boolean)}
+         * when {@link com.android.internal.policy.DecorView#mDrawLegacyNavigationBarBackground} is
+         * being updated.
+         *
+         * @param drawLegacyNavigationBarBackground the new value that is being set to
+         *        {@link com.android.internal.policy.DecorView#mDrawLegacyNavigationBarBackground}.
+         * @return The value to be set to
+         *   {@link com.android.internal.policy.DecorView#mDrawLegacyNavigationBarBackgroundHandled}
+         *         on behalf of the {@link com.android.internal.policy.DecorView}.
+         *         {@code true} to tell that the Window can render the legacy navigation bar
+         *         background on behalf of the {@link com.android.internal.policy.DecorView}.
+         *         {@code false} to let {@link com.android.internal.policy.DecorView} handle it.
+         */
+        boolean onDrawLegacyNavigationBarBackgroundChanged(
+                boolean drawLegacyNavigationBarBackground);
     }
 
     /**
@@ -1017,6 +1035,16 @@ public abstract class Window {
         if (mDecorCallback != null) {
             mDecorCallback.onSystemBarAppearanceChanged(appearance);
         }
+    }
+
+    /** @hide */
+    public final boolean onDrawLegacyNavigationBarBackgroundChanged(
+            boolean drawLegacyNavigationBarBackground) {
+        if (mDecorCallback == null) {
+            return false;
+        }
+        return mDecorCallback.onDrawLegacyNavigationBarBackgroundChanged(
+                drawLegacyNavigationBarBackground);
     }
 
     /**
