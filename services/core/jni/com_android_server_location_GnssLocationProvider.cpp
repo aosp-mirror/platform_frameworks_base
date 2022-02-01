@@ -37,6 +37,7 @@
 #include <android/hardware/gnss/BnGnssPsdsCallback.h>
 #include <android/hardware/gnss/measurement_corrections/1.0/IMeasurementCorrections.h>
 #include <android/hardware/gnss/measurement_corrections/1.1/IMeasurementCorrections.h>
+#include <android/hardware/gnss/visibility_control/1.0/IGnssVisibilityControl.h>
 #include <binder/IServiceManager.h>
 #include <nativehelper/JNIHelp.h>
 #include <pthread.h>
@@ -58,7 +59,6 @@
 #include "gnss/GnssGeofence.h"
 #include "gnss/GnssMeasurement.h"
 #include "gnss/GnssNavigationMessage.h"
-#include "gnss/GnssVisibilityControl.h"
 #include "gnss/Utils.h"
 #include "hardware_legacy/power.h"
 #include "jni.h"
@@ -162,6 +162,9 @@ using IMeasurementCorrections_V1_1 = android::hardware::gnss::measurement_correc
 using android::hardware::gnss::measurement_corrections::V1_0::IMeasurementCorrectionsCallback;
 using android::hardware::gnss::measurement_corrections::V1_0::GnssSingleSatCorrectionFlags;
 
+using android::hardware::gnss::visibility_control::V1_0::IGnssVisibilityControl;
+using android::hardware::gnss::visibility_control::V1_0::IGnssVisibilityControlCallback;
+
 using android::hardware::gnss::BlocklistedSource;
 using android::hardware::gnss::GnssConstellationType;
 using android::hardware::gnss::GnssPowerStats;
@@ -207,6 +210,7 @@ sp<IGnssNi> gnssNiIface = nullptr;
 sp<IGnssPowerIndication> gnssPowerIndicationIface = nullptr;
 sp<IMeasurementCorrections_V1_0> gnssCorrectionsIface_V1_0 = nullptr;
 sp<IMeasurementCorrections_V1_1> gnssCorrectionsIface_V1_1 = nullptr;
+sp<IGnssVisibilityControl> gnssVisibilityControlIface = nullptr;
 sp<IGnssAntennaInfo> gnssAntennaInfoIface = nullptr;
 
 std::unique_ptr<GnssConfigurationInterface> gnssConfigurationIface = nullptr;
@@ -217,7 +221,6 @@ std::unique_ptr<android::gnss::GnssGeofenceInterface> gnssGeofencingIface = null
 std::unique_ptr<android::gnss::AGnssInterface> agnssIface = nullptr;
 std::unique_ptr<android::gnss::GnssDebugInterface> gnssDebugIface = nullptr;
 std::unique_ptr<android::gnss::AGnssRilInterface> agnssRilIface = nullptr;
-std::unique_ptr<android::gnss::GnssVisibilityControlInterface> gnssVisibilityControlIface = nullptr;
 
 #define WAKE_LOCK_NAME  "GPS"
 
@@ -855,6 +858,54 @@ Return<void> GnssNiCallback::niNotifyCb(
     return Void();
 }
 
+/*
+ * GnssVisibilityControlCallback implements callback methods of IGnssVisibilityControlCallback.hal.
+ */
+struct GnssVisibilityControlCallback : public IGnssVisibilityControlCallback {
+    Return<void> nfwNotifyCb(const IGnssVisibilityControlCallback::NfwNotification& notification)
+            override;
+    Return<bool> isInEmergencySession() override;
+};
+
+Return<void> GnssVisibilityControlCallback::nfwNotifyCb(
+        const IGnssVisibilityControlCallback::NfwNotification& notification) {
+    JNIEnv* env = getJniEnv();
+    jstring proxyAppPackageName = env->NewStringUTF(notification.proxyAppPackageName.c_str());
+    jstring otherProtocolStackName = env->NewStringUTF(notification.otherProtocolStackName.c_str());
+    jstring requestorId = env->NewStringUTF(notification.requestorId.c_str());
+
+    if (proxyAppPackageName && otherProtocolStackName && requestorId) {
+        env->CallVoidMethod(mCallbacksObj, method_reportNfwNotification, proxyAppPackageName,
+                            notification.protocolStack, otherProtocolStackName,
+                            notification.requestor, requestorId, notification.responseType,
+                            notification.inEmergencyMode, notification.isCachedLocation);
+    } else {
+        ALOGE("%s: OOM Error\n", __func__);
+    }
+
+    if (requestorId) {
+        env->DeleteLocalRef(requestorId);
+    }
+
+    if (otherProtocolStackName) {
+        env->DeleteLocalRef(otherProtocolStackName);
+    }
+
+    if (proxyAppPackageName) {
+        env->DeleteLocalRef(proxyAppPackageName);
+    }
+
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    return Void();
+}
+
+Return<bool> GnssVisibilityControlCallback::isInEmergencySession() {
+    JNIEnv* env = getJniEnv();
+    auto result = env->CallBooleanMethod(mCallbacksObj, method_isInEmergencySession);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    return result;
+}
+
 /* Initializes the GNSS service handle. */
 static void android_location_gnss_hal_GnssNative_set_gps_service_handle() {
     gnssHalAidl = waitForVintfService<IGnssAidl>();
@@ -1271,21 +1322,12 @@ static void android_location_gnss_hal_GnssNative_init_once(JNIEnv* env, jobject 
         }
     }
 
-    if (gnssHalAidl != nullptr && gnssHalAidl->getInterfaceVersion() >= 2) {
-        sp<android::hardware::gnss::visibility_control::IGnssVisibilityControl>
-                gnssVisibilityControlAidl;
-        auto status = gnssHalAidl->getExtensionGnssVisibilityControl(&gnssVisibilityControlAidl);
-        if (checkAidlStatus(status,
-                            "Unable to get a handle to GnssVisibilityControl AIDL interface.")) {
-            gnssVisibilityControlIface =
-                    std::make_unique<gnss::GnssVisibilityControlAidl>(gnssVisibilityControlAidl);
-        }
-    } else if (gnssHal_V2_0 != nullptr) {
-        auto gnssVisibilityControlHidl = gnssHal_V2_0->getExtensionVisibilityControl();
-        if (checkHidlReturn(gnssVisibilityControlHidl,
-                            "Unable to get a handle to GnssVisibilityControl HIDL interface")) {
-            gnssVisibilityControlIface =
-                    std::make_unique<gnss::GnssVisibilityControlHidl>(gnssVisibilityControlHidl);
+    if (gnssHal_V2_0 != nullptr) {
+        auto gnssVisibilityControl = gnssHal_V2_0->getExtensionVisibilityControl();
+        if (!gnssVisibilityControl.isOk()) {
+            ALOGD("Unable to get a handle to GnssVisibilityControl interface");
+        } else {
+            gnssVisibilityControlIface = gnssVisibilityControl;
         }
     }
 
@@ -1410,12 +1452,12 @@ static jboolean android_location_gnss_hal_GnssNative_init(JNIEnv* /* env */, jcl
         ALOGI("Unable to initialize IAGnssRil interface.");
     }
 
-    // Set IGnssVisibilityControl callback.
+    // Set IGnssVisibilityControl.hal callback.
     if (gnssVisibilityControlIface != nullptr) {
-        gnssVisibilityControlIface->setCallback(
-                std::make_unique<gnss::GnssVisibilityControlCallback>());
-    } else {
-        ALOGI("Unable to initialize IGnssVisibilityControl interface.");
+        sp<IGnssVisibilityControlCallback> gnssVisibilityControlCbIface =
+                new GnssVisibilityControlCallback();
+        auto result = gnssVisibilityControlIface->setCallback(gnssVisibilityControlCbIface);
+        checkHidlReturn(result, "IGnssVisibilityControl setCallback() failed.");
     }
 
     // Set IMeasurementCorrections.hal callback.
@@ -2262,7 +2304,17 @@ static jboolean android_location_GnssVisibilityControl_enable_nfw_location_acces
         ALOGI("IGnssVisibilityControl interface not available.");
         return JNI_FALSE;
     }
-    return gnssVisibilityControlIface->enableNfwLocationAccess(env, proxyApps);
+
+    const jsize length = env->GetArrayLength(proxyApps);
+    hidl_vec<hidl_string> hidlProxyApps(length);
+    for (int i = 0; i < length; ++i) {
+        jstring proxyApp = (jstring) (env->GetObjectArrayElement(proxyApps, i));
+        ScopedJniString jniProxyApp(env, proxyApp);
+        hidlProxyApps[i] = jniProxyApp;
+    }
+
+    auto result = gnssVisibilityControlIface->enableNfwLocationAccess(hidlProxyApps);
+    return checkHidlReturn(result, "IGnssVisibilityControl enableNfwLocationAccess() failed.");
 }
 
 static const JNINativeMethod sCoreMethods[] = {
