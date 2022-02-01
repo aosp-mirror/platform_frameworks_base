@@ -250,15 +250,17 @@ public class NotificationGroupManagerLegacyTest extends SysuiTestCase {
             @Notification.GroupAlertBehavior int priorityGroupAlert,
             @Notification.GroupAlertBehavior int siblingGroupAlert,
             boolean expectAlertOverride) {
+        long when = 10000;
         // Create entries in an order so that the priority entry can be deemed the newest child.
         NotificationEntry[] siblings = new NotificationEntry[numSiblings];
         for (int i = 0; i < numSiblings; i++) {
-            siblings[i] = mGroupTestHelper.createChildNotification(siblingGroupAlert, i, "sibling");
+            siblings[i] = mGroupTestHelper
+                    .createChildNotification(siblingGroupAlert, i, "sibling", ++when);
         }
         NotificationEntry priorityEntry =
-                mGroupTestHelper.createChildNotification(priorityGroupAlert, 0, "priority");
+                mGroupTestHelper.createChildNotification(priorityGroupAlert, 0, "priority", ++when);
         NotificationEntry summaryEntry =
-                mGroupTestHelper.createSummaryNotification(summaryGroupAlert, 0, "summary");
+                mGroupTestHelper.createSummaryNotification(summaryGroupAlert, 0, "summary", ++when);
 
         // The priority entry is an important conversation.
         when(mPeopleNotificationIdentifier.getPeopleNotificationType(eq(priorityEntry)))
@@ -322,17 +324,19 @@ public class NotificationGroupManagerLegacyTest extends SysuiTestCase {
 
     @Test
     public void testAlertOverrideWhenUpdatingSummaryAtEnd() {
+        long when = 10000;
         int numSiblings = 2;
         int groupAlert = Notification.GROUP_ALERT_SUMMARY;
         // Create entries in an order so that the priority entry can be deemed the newest child.
         NotificationEntry[] siblings = new NotificationEntry[numSiblings];
         for (int i = 0; i < numSiblings; i++) {
-            siblings[i] = mGroupTestHelper.createChildNotification(groupAlert, i, "sibling");
+            siblings[i] =
+                    mGroupTestHelper.createChildNotification(groupAlert, i, "sibling", ++when);
         }
         NotificationEntry priorityEntry =
-                mGroupTestHelper.createChildNotification(groupAlert, 0, "priority");
+                mGroupTestHelper.createChildNotification(groupAlert, 0, "priority", ++when);
         NotificationEntry summaryEntry =
-                mGroupTestHelper.createSummaryNotification(groupAlert, 0, "summary");
+                mGroupTestHelper.createSummaryNotification(groupAlert, 0, "summary", ++when);
 
         // The priority entry is an important conversation.
         when(mPeopleNotificationIdentifier.getPeopleNotificationType(eq(priorityEntry)))
