@@ -32,7 +32,6 @@ import static com.android.server.pm.PackageManagerService.SYSTEM_PARTITIONS;
 import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.pkg.parsing.ParsingPackageUtils.PARSE_FRAMEWORK_RES_SPLITS;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.os.Environment;
@@ -62,25 +61,14 @@ import java.util.concurrent.ExecutorService;
  * further cleanup and eventually all the installation/scanning related logic will go to another
  * class.
  */
-final class InitAppsHelper {
+final class InitAndSystemPackageHelper {
     private final PackageManagerService mPm;
+
     private final List<ScanPartition> mDirsToScanAsSystem;
     private final int mScanFlags;
     private final int mSystemParseFlags;
     private final int mSystemScanFlags;
     private final InstallPackageHelper mInstallPackageHelper;
-    private final ApexManager mApexManager;
-    private final PackageParser2 mPackageParser;
-    private final ExecutorService mExecutorService;
-    /* Tracks how long system scan took */
-    private long mSystemScanTime;
-    /* Track of the number of cached system apps */
-    private int mCachedSystemApps;
-    /* Track of the number of system apps */
-    private int mSystemPackagesCount;
-    private final boolean mIsDeviceUpgrading;
-    private final boolean mIsOnlyCoreApps;
-    private final List<ScanPartition> mSystemPartitions;
 
     /**
      * Tracks new system packages [received in an OTA] that we expect to
@@ -88,34 +76,21 @@ final class InitAppsHelper {
      * are package location.
      */
     private final ArrayMap<String, File> mExpectingBetter = new ArrayMap<>();
-    /* Tracks of any system packages that no longer exist that needs to be pruned. */
-    private final List<String> mPossiblyDeletedUpdatedSystemApps = new ArrayList<>();
-    // Tracks of stub packages that must either be replaced with full versions in the /data
-    // partition or be disabled.
-    private final List<String> mStubSystemApps = new ArrayList<>();
 
     // TODO(b/198166813): remove PMS dependency
-    InitAppsHelper(PackageManagerService pm, ApexManager apexManager,
-            InstallPackageHelper installPackageHelper, PackageParser2 packageParser,
-            List<ScanPartition> systemPartitions) {
+    InitAndSystemPackageHelper(PackageManagerService pm) {
         mPm = pm;
-        mApexManager = apexManager;
-        mInstallPackageHelper = installPackageHelper;
-        mPackageParser = packageParser;
-        mSystemPartitions = systemPartitions;
+        mInstallPackageHelper = new InstallPackageHelper(pm);
         mDirsToScanAsSystem = getSystemScanPartitions();
-        mIsDeviceUpgrading = mPm.isDeviceUpgrading();
-        mIsOnlyCoreApps = mPm.isOnlyCoreApps();
         // Set flag to monitor and not change apk file paths when scanning install directories.
         int scanFlags = SCAN_BOOTING | SCAN_INITIAL;
-        if (mIsDeviceUpgrading || mPm.isFirstBoot()) {
+        if (mPm.isDeviceUpgrading() || mPm.isFirstBoot()) {
             mScanFlags = scanFlags | SCAN_FIRST_BOOT_OR_UPGRADE;
         } else {
             mScanFlags = scanFlags;
         }
         mSystemParseFlags = mPm.getDefParseFlags() | ParsingPackageUtils.PARSE_IS_SYSTEM_DIR;
         mSystemScanFlags = scanFlags | SCAN_AS_SYSTEM;
-        mExecutorService = ParallelPackageParser.makeExecutorService();
     }
 
     private List<File> getFrameworkResApkSplitFiles() {
@@ -143,7 +118,7 @@ final class InitAppsHelper {
 
     private List<ScanPartition> getSystemScanPartitions() {
         final List<ScanPartition> scanPartitions = new ArrayList<>();
-        scanPartitions.addAll(mSystemPartitions);
+        scanPartitions.addAll(mPm.mInjector.getSystemPartitions());
         scanPartitions.addAll(getApexScanPartitions());
         Slog.d(TAG, "Directories scanned as system partitions: " + scanPartitions);
         return scanPartitions;
@@ -151,7 +126,8 @@ final class InitAppsHelper {
 
     private List<ScanPartition> getApexScanPartitions() {
         final List<ScanPartition> scanPartitions = new ArrayList<>();
-        final List<ApexManager.ActiveApexInfo> activeApexInfos = mApexManager.getActiveApexInfos();
+        final List<ApexManager.ActiveApexInfo> activeApexInfos =
+                mPm.mApexManager.getActiveApexInfos();
         for (int i = 0; i < activeApexInfos.size(); i++) {
             final ScanPartition scanPartition = resolveApexToScanPartition(activeApexInfos.get(i));
             if (scanPartition != null) {
@@ -168,133 +144,117 @@ final class InitAppsHelper {
             if (apexInfo.preInstalledApexPath.getAbsolutePath().equals(
                     sp.getFolder().getAbsolutePath())
                     || apexInfo.preInstalledApexPath.getAbsolutePath().startsWith(
-                    sp.getFolder().getAbsolutePath() + File.separator)) {
+                        sp.getFolder().getAbsolutePath() + File.separator)) {
                 return new ScanPartition(apexInfo.apexDirectory, sp, SCAN_AS_APK_IN_APEX);
             }
         }
         return null;
     }
 
-    /**
-     * Install apps from system dirs.
-     */
-    @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
-    public OverlayConfig initSystemApps(WatchedArrayMap<String, PackageSetting> packageSettings,
-            int[] userIds, long startTime) {
+    public OverlayConfig initPackages(
+            WatchedArrayMap<String, PackageSetting> packageSettings, int[] userIds,
+            long startTime) {
+        PackageParser2 packageParser = mPm.mInjector.getScanningCachingPackageParser();
+
+        ExecutorService executorService = ParallelPackageParser.makeExecutorService();
         // Prepare apex package info before scanning APKs, this information is needed when
         // scanning apk in apex.
-        mApexManager.scanApexPackagesTraced(mPackageParser, mExecutorService);
+        mPm.mApexManager.scanApexPackagesTraced(packageParser, executorService);
 
-        scanSystemDirs(mPackageParser, mExecutorService);
+        scanSystemDirs(packageParser, executorService);
         // Parse overlay configuration files to set default enable state, mutability, and
         // priority of system overlays.
         final ArrayMap<String, File> apkInApexPreInstalledPaths = new ArrayMap<>();
-        for (ApexManager.ActiveApexInfo apexInfo : mApexManager.getActiveApexInfos()) {
-            for (String packageName : mApexManager.getApksInApex(apexInfo.apexModuleName)) {
+        for (ApexManager.ActiveApexInfo apexInfo : mPm.mApexManager.getActiveApexInfos()) {
+            for (String packageName : mPm.mApexManager.getApksInApex(apexInfo.apexModuleName)) {
                 apkInApexPreInstalledPaths.put(packageName, apexInfo.preInstalledApexPath);
             }
         }
-        final OverlayConfig overlayConfig = OverlayConfig.initializeSystemInstance(
+        OverlayConfig overlayConfig = OverlayConfig.initializeSystemInstance(
                 consumer -> mPm.forEachPackage(
                         pkg -> consumer.accept(pkg, pkg.isSystem(),
-                                apkInApexPreInstalledPaths.get(pkg.getPackageName()))));
+                          apkInApexPreInstalledPaths.get(pkg.getPackageName()))));
+        // Prune any system packages that no longer exist.
+        final List<String> possiblyDeletedUpdatedSystemApps = new ArrayList<>();
+        // Stub packages must either be replaced with full versions in the /data
+        // partition or be disabled.
+        final List<String> stubSystemApps = new ArrayList<>();
 
-        if (!mIsOnlyCoreApps) {
+        if (!mPm.isOnlyCoreApps()) {
             // do this first before mucking with mPackages for the "expecting better" case
-            updateStubSystemAppsList(mStubSystemApps);
+            updateStubSystemAppsList(stubSystemApps);
             mInstallPackageHelper.prepareSystemPackageCleanUp(packageSettings,
-                    mPossiblyDeletedUpdatedSystemApps, mExpectingBetter, userIds);
+                    possiblyDeletedUpdatedSystemApps, mExpectingBetter, userIds);
         }
 
-        logSystemAppsScanningTime(startTime);
-        return overlayConfig;
-    }
-
-    @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
-    private void logSystemAppsScanningTime(long startTime) {
-        mCachedSystemApps = PackageCacher.sCachedPackageReadCount.get();
+        final int cachedSystemApps = PackageCacher.sCachedPackageReadCount.get();
 
         // Remove any shared userIDs that have no associated packages
         mPm.mSettings.pruneSharedUsersLPw();
-        mSystemScanTime = SystemClock.uptimeMillis() - startTime;
-        mSystemPackagesCount = mPm.mPackages.size();
-        Slog.i(TAG, "Finished scanning system apps. Time: " + mSystemScanTime
-                + " ms, packageCount: " + mSystemPackagesCount
+        final long systemScanTime = SystemClock.uptimeMillis() - startTime;
+        final int systemPackagesCount = mPm.mPackages.size();
+        Slog.i(TAG, "Finished scanning system apps. Time: " + systemScanTime
+                + " ms, packageCount: " + systemPackagesCount
                 + " , timePerPackage: "
-                + (mSystemPackagesCount == 0 ? 0 : mSystemScanTime / mSystemPackagesCount)
-                + " , cached: " + mCachedSystemApps);
-        if (mIsDeviceUpgrading && mSystemPackagesCount > 0) {
+                + (systemPackagesCount == 0 ? 0 : systemScanTime / systemPackagesCount)
+                + " , cached: " + cachedSystemApps);
+        if (mPm.isDeviceUpgrading() && systemPackagesCount > 0) {
             //CHECKSTYLE:OFF IndentationCheck
             FrameworkStatsLog.write(FrameworkStatsLog.BOOT_TIME_EVENT_DURATION_REPORTED,
                     BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_SYSTEM_APP_AVG_SCAN_TIME,
-                    mSystemScanTime / mSystemPackagesCount);
+                    systemScanTime / systemPackagesCount);
             //CHECKSTYLE:ON IndentationCheck
         }
-    }
 
-    /**
-     * Install apps/updates from data dir and fix system apps that are affected.
-     */
-    @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
-    public void initNonSystemApps(@NonNull int[] userIds, long startTime) {
-        if (!mIsOnlyCoreApps) {
+        if (!mPm.isOnlyCoreApps()) {
             EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START,
                     SystemClock.uptimeMillis());
             scanDirTracedLI(mPm.getAppInstallDir(), /* frameworkSplits= */ null, 0,
-                    mScanFlags | SCAN_REQUIRE_KNOWN,
-                    mPackageParser, mExecutorService);
+                    mScanFlags | SCAN_REQUIRE_KNOWN, 0,
+                    packageParser, executorService);
+
         }
 
-        List<Runnable> unfinishedTasks = mExecutorService.shutdownNow();
+        List<Runnable> unfinishedTasks = executorService.shutdownNow();
         if (!unfinishedTasks.isEmpty()) {
             throw new IllegalStateException("Not all tasks finished before calling close: "
                     + unfinishedTasks);
         }
-        if (!mIsOnlyCoreApps) {
-            fixSystemPackages(userIds);
-            logNonSystemAppScanningTime(startTime);
+
+        if (!mPm.isOnlyCoreApps()) {
+            mInstallPackageHelper.cleanupDisabledPackageSettings(possiblyDeletedUpdatedSystemApps,
+                    userIds, mScanFlags);
+            mInstallPackageHelper.checkExistingBetterPackages(mExpectingBetter,
+                    stubSystemApps, mSystemScanFlags, mSystemParseFlags);
+
+            // Uncompress and install any stubbed system applications.
+            // This must be done last to ensure all stubs are replaced or disabled.
+            mInstallPackageHelper.installSystemStubPackages(stubSystemApps, mScanFlags);
+
+            final int cachedNonSystemApps = PackageCacher.sCachedPackageReadCount.get()
+                    - cachedSystemApps;
+
+            final long dataScanTime = SystemClock.uptimeMillis() - systemScanTime - startTime;
+            final int dataPackagesCount = mPm.mPackages.size() - systemPackagesCount;
+            Slog.i(TAG, "Finished scanning non-system apps. Time: " + dataScanTime
+                    + " ms, packageCount: " + dataPackagesCount
+                    + " , timePerPackage: "
+                    + (dataPackagesCount == 0 ? 0 : dataScanTime / dataPackagesCount)
+                    + " , cached: " + cachedNonSystemApps);
+            if (mPm.isDeviceUpgrading() && dataPackagesCount > 0) {
+                //CHECKSTYLE:OFF IndentationCheck
+                FrameworkStatsLog.write(
+                        FrameworkStatsLog.BOOT_TIME_EVENT_DURATION_REPORTED,
+                        BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_DATA_APP_AVG_SCAN_TIME,
+                        dataScanTime / dataPackagesCount);
+                //CHECKSTYLE:OFF IndentationCheck
+            }
         }
         mExpectingBetter.clear();
+
         mPm.mSettings.pruneRenamedPackagesLPw();
-        mPackageParser.close();
-    }
-
-    /**
-     * Clean up system packages now that some system package updates have been installed from
-     * the data dir. Also install system stub packages as the last step.
-     */
-    @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
-    private void fixSystemPackages(@NonNull int[] userIds) {
-        mInstallPackageHelper.cleanupDisabledPackageSettings(mPossiblyDeletedUpdatedSystemApps,
-                userIds, mScanFlags);
-        mInstallPackageHelper.checkExistingBetterPackages(mExpectingBetter,
-                mStubSystemApps, mSystemScanFlags, mSystemParseFlags);
-
-        // Uncompress and install any stubbed system applications.
-        // This must be done last to ensure all stubs are replaced or disabled.
-        mInstallPackageHelper.installSystemStubPackages(mStubSystemApps, mScanFlags);
-    }
-
-    @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
-    private void logNonSystemAppScanningTime(long startTime) {
-        final int cachedNonSystemApps = PackageCacher.sCachedPackageReadCount.get()
-                - mCachedSystemApps;
-
-        final long dataScanTime = SystemClock.uptimeMillis() - mSystemScanTime - startTime;
-        final int dataPackagesCount = mPm.mPackages.size() - mSystemPackagesCount;
-        Slog.i(TAG, "Finished scanning non-system apps. Time: " + dataScanTime
-                + " ms, packageCount: " + dataPackagesCount
-                + " , timePerPackage: "
-                + (dataPackagesCount == 0 ? 0 : dataScanTime / dataPackagesCount)
-                + " , cached: " + cachedNonSystemApps);
-        if (mIsDeviceUpgrading && dataPackagesCount > 0) {
-            //CHECKSTYLE:OFF IndentationCheck
-            FrameworkStatsLog.write(
-                    FrameworkStatsLog.BOOT_TIME_EVENT_DURATION_REPORTED,
-                    BOOT_TIME_EVENT_DURATION__EVENT__OTA_PACKAGE_MANAGER_DATA_APP_AVG_SCAN_TIME,
-                    dataScanTime / dataPackagesCount);
-            //CHECKSTYLE:OFF IndentationCheck
-        }
+        packageParser.close();
+        return overlayConfig;
     }
 
     /**
@@ -314,14 +274,14 @@ final class InitAppsHelper {
                 continue;
             }
             scanDirTracedLI(partition.getOverlayFolder(), /* frameworkSplits= */ null,
-                    mSystemParseFlags, mSystemScanFlags | partition.scanFlag,
+                    mSystemParseFlags, mSystemScanFlags | partition.scanFlag, 0,
                     packageParser, executorService);
         }
 
         List<File> frameworkSplits = getFrameworkResApkSplitFiles();
         scanDirTracedLI(frameworkDir, frameworkSplits,
                 mSystemParseFlags | PARSE_FRAMEWORK_RES_SPLITS,
-                mSystemScanFlags | SCAN_NO_DEX | SCAN_AS_PRIVILEGED,
+                mSystemScanFlags | SCAN_NO_DEX | SCAN_AS_PRIVILEGED, 0,
                 packageParser, executorService);
         if (!mPm.mPackages.containsKey("android")) {
             throw new IllegalStateException(
@@ -333,11 +293,11 @@ final class InitAppsHelper {
             if (partition.getPrivAppFolder() != null) {
                 scanDirTracedLI(partition.getPrivAppFolder(), /* frameworkSplits= */ null,
                         mSystemParseFlags,
-                        mSystemScanFlags | SCAN_AS_PRIVILEGED | partition.scanFlag,
+                        mSystemScanFlags | SCAN_AS_PRIVILEGED | partition.scanFlag, 0,
                         packageParser, executorService);
             }
             scanDirTracedLI(partition.getAppFolder(), /* frameworkSplits= */ null,
-                    mSystemParseFlags, mSystemScanFlags | partition.scanFlag,
+                    mSystemParseFlags, mSystemScanFlags | partition.scanFlag, 0,
                     packageParser, executorService);
         }
     }
@@ -356,11 +316,11 @@ final class InitAppsHelper {
     @GuardedBy({"mPm.mInstallLock", "mPm.mLock"})
     private void scanDirTracedLI(File scanDir, List<File> frameworkSplits,
             final int parseFlags, int scanFlags,
-            PackageParser2 packageParser, ExecutorService executorService) {
+            long currentTime, PackageParser2 packageParser, ExecutorService executorService) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "scanDir [" + scanDir.getAbsolutePath() + "]");
         try {
             mInstallPackageHelper.installPackagesFromDir(scanDir, frameworkSplits, parseFlags,
-                    scanFlags, packageParser, executorService);
+                    scanFlags, currentTime, packageParser, executorService);
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
