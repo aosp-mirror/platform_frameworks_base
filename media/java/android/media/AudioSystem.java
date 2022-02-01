@@ -1856,6 +1856,12 @@ public class AudioSystem
 
     /**
      * @hide
+     * Communicate UIDs of the active assistant to audio policy service.
+     */
+    public static native int setActiveAssistantServicesUids(int[] uids);
+
+    /**
+     * @hide
      * Communicate UIDs of assistant to audio policy service.
      */
     public static native int setAssistantServicesUids(int[] uids);

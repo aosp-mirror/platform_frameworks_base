@@ -2500,6 +2500,16 @@ static jint android_media_AudioSystem_setAssistantServicesUids(JNIEnv *env, jobj
     std::vector<uid_t> nativeUidsVector = convertJIntArrayToUidVector(env, uids);
 
     status_t status = AudioSystem::setAssistantServicesUids(nativeUidsVector);
+
+    return (jint)nativeToJavaStatus(status);
+}
+
+static jint android_media_AudioSystem_setActiveAssistantServicesUids(JNIEnv *env, jobject thiz,
+                                                                     jintArray activeUids) {
+    std::vector<uid_t> nativeActiveUidsVector = convertJIntArrayToUidVector(env, activeUids);
+
+    status_t status = AudioSystem::setActiveAssistantServicesUids(nativeActiveUidsVector);
+
     return (jint)nativeToJavaStatus(status);
 }
 
@@ -3002,6 +3012,8 @@ static const JNINativeMethod gMethods[] =
           (void *)android_media_AudioSystem_setSurroundFormatEnabled},
          {"setAssistantServicesUids", "([I)I",
           (void *)android_media_AudioSystem_setAssistantServicesUids},
+         {"setActiveAssistantServicesUids", "([I)I",
+          (void *)android_media_AudioSystem_setActiveAssistantServicesUids},
          {"setA11yServicesUids", "([I)I", (void *)android_media_AudioSystem_setA11yServicesUids},
          {"isHapticPlaybackSupported", "()Z",
           (void *)android_media_AudioSystem_isHapticPlaybackSupported},

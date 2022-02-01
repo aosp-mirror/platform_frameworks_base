@@ -55,6 +55,12 @@ public abstract class AudioManagerInternal {
     public abstract void removeAssistantServiceUid(int uid);
 
     /**
+     * Set the currently active assistant service UIDs
+     * @param activeUids active UIDs of the assistant service
+     */
+    public abstract void setActiveAssistantServicesUids(IntArray activeUids);
+
+    /**
      * Called by {@link com.android.server.inputmethod.InputMethodManagerService} to notify the UID
      * of the currently used {@link android.inputmethodservice.InputMethodService}.
      *

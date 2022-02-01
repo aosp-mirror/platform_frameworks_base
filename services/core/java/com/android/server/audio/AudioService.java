@@ -333,6 +333,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_PERSIST_SPATIAL_AUDIO_ENABLED = 43;
     private static final int MSG_ADD_ASSISTANT_SERVICE_UID = 44;
     private static final int MSG_REMOVE_ASSISTANT_SERVICE_UID = 45;
+    private static final int MSG_UPDATE_ACTIVE_ASSISTANT_SERVICE_UID = 46;
 
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
@@ -344,6 +345,9 @@ public class AudioService extends IAudioService.Stub
 
     // retry delay in case of failure to indicate system ready to AudioFlinger
     private static final int INDICATE_SYSTEM_READY_RETRY_DELAY_MS = 1000;
+
+    // List of empty UIDs used to reset the active assistant list
+    private static final int[] NO_ACTIVE_ASSISTANT_SERVICE_UIDS = new int[0];
 
     /** @see AudioSystemThread */
     private AudioSystemThread mAudioSystemThread;
@@ -766,6 +770,9 @@ public class AudioService extends IAudioService.Stub
     @GuardedBy("mSettingsLock")
     private int mPrimaryAssistantUid = INVALID_UID;
 
+    // Array of Uids of valid active assistant service to check if caller is one of them
+    @GuardedBy("mSettingsLock")
+    private int[] mActiveAssistantServiceUids = NO_ACTIVE_ASSISTANT_SERVICE_UIDS;
 
     // Array of Uids of valid accessibility services to check if caller is one of them
     private final Object mAccessibilityServiceUidsLock = new Object();
@@ -1531,6 +1538,14 @@ public class AudioService extends IAudioService.Stub
     private void updateAssistantServicesUidsLocked() {
         int[] assistantUids = mAssistantUids.stream().mapToInt(Integer::intValue).toArray();
         AudioSystem.setAssistantServicesUids(assistantUids);
+    }
+
+    private void updateActiveAssistantServiceUids() {
+        int [] activeAssistantServiceUids;
+        synchronized (mSettingsLock) {
+            activeAssistantServiceUids = mActiveAssistantServiceUids;
+        }
+        AudioSystem.setActiveAssistantServicesUids(activeAssistantServiceUids);
     }
 
     private void onReinitVolumes(@NonNull String caller) {
@@ -2396,6 +2411,7 @@ public class AudioService extends IAudioService.Stub
             sendEncodedSurroundMode(cr, "readPersistedSettings");
             sendEnabledSurroundFormats(cr, true);
             updateAssistantUId(true);
+            resetActiveAssistantUidsLocked();
             AudioSystem.setRttEnabled(mRttEnabled);
         }
 
@@ -2419,6 +2435,12 @@ public class AudioService extends IAudioService.Stub
 
         // Load settings for the volume controller
         mVolumeController.loadSettings(cr);
+    }
+
+    @GuardedBy("mSettingsLock")
+    private void resetActiveAssistantUidsLocked() {
+        mActiveAssistantServiceUids = NO_ACTIVE_ASSISTANT_SERVICE_UIDS;
+        updateActiveAssistantServiceUids();
     }
 
     private void readUserRestrictions() {
@@ -7905,6 +7927,9 @@ public class AudioService extends IAudioService.Stub
                 case MSG_REMOVE_ASSISTANT_SERVICE_UID:
                     onRemoveAssistantServiceUids(new int[]{msg.arg1});
                     break;
+                case MSG_UPDATE_ACTIVE_ASSISTANT_SERVICE_UID:
+                    updateActiveAssistantServiceUids();
+                    break;
             }
         }
     }
@@ -9801,6 +9826,31 @@ public class AudioService extends IAudioService.Stub
         }
 
         @Override
+        public void setActiveAssistantServicesUids(IntArray activeUids) {
+            synchronized (mSettingsLock) {
+                if (activeUids.size() == 0) {
+                    mActiveAssistantServiceUids = NO_ACTIVE_ASSISTANT_SERVICE_UIDS;
+                } else {
+                    boolean changed = (mActiveAssistantServiceUids == null)
+                            || (mActiveAssistantServiceUids.length != activeUids.size());
+                    if (!changed) {
+                        for (int i = 0; i < mActiveAssistantServiceUids.length; i++) {
+                            if (activeUids.get(i) != mActiveAssistantServiceUids[i]) {
+                                changed = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (changed) {
+                        mActiveAssistantServiceUids = activeUids.toArray();
+                    }
+                }
+            }
+            sendMsg(mAudioHandler, MSG_UPDATE_ACTIVE_ASSISTANT_SERVICE_UID, SENDMSG_REPLACE,
+                    0, 0, null, 0);
+        }
+
+        @Override
         public void setAccessibilityServiceUids(IntArray uids) {
             synchronized (mAccessibilityServiceUidsLock) {
                 if (uids.size() == 0) {
@@ -11092,6 +11142,59 @@ public class AudioService extends IAudioService.Stub
             delayMillis = 0;
         }
         return delayMillis;
+    }
+
+    /** @see AudioManager#addAssistantServicesUids(int []) */
+    @Override
+    public void addAssistantServicesUids(int [] assistantUids) {
+        enforceModifyAudioRoutingPermission();
+        Objects.requireNonNull(assistantUids);
+
+        synchronized (mSettingsLock) {
+            addAssistantServiceUidsLocked(assistantUids);
+        }
+    }
+
+    /** @see AudioManager#removeAssistantServicesUids(int []) */
+    @Override
+    public void removeAssistantServicesUids(int [] assistantUids) {
+        enforceModifyAudioRoutingPermission();
+        Objects.requireNonNull(assistantUids);
+        synchronized (mSettingsLock) {
+            removeAssistantServiceUidsLocked(assistantUids);
+        }
+    }
+
+    /** @see AudioManager#getAssistantServicesUids() */
+    @Override
+    public int[] getAssistantServicesUids() {
+        enforceModifyAudioRoutingPermission();
+        int [] assistantUids;
+        synchronized (mSettingsLock) {
+            assistantUids = mAssistantUids.stream().mapToInt(Integer::intValue).toArray();
+        }
+        return assistantUids;
+    }
+
+    /** @see AudioManager#setActiveAssistantServiceUids(int []) */
+    @Override
+    public void setActiveAssistantServiceUids(int [] activeAssistantUids) {
+        enforceModifyAudioRoutingPermission();
+        synchronized (mSettingsLock) {
+            mActiveAssistantServiceUids = activeAssistantUids;
+        }
+        updateActiveAssistantServiceUids();
+    }
+
+    /** @see AudioManager#getActiveAssistantServiceUids() */
+    @Override
+    public int[] getActiveAssistantServiceUids() {
+        enforceModifyAudioRoutingPermission();
+        int [] activeAssistantUids;
+        synchronized (mSettingsLock) {
+            activeAssistantUids = mActiveAssistantServiceUids.clone();
+        }
+        return activeAssistantUids;
     }
 
     UUID getDeviceSensorUuid(AudioDeviceAttributes device) {
