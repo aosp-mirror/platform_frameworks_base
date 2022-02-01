@@ -39,7 +39,6 @@ filegroup {
         "src/android/net/TrafficStats.java",
         "src/android/net/UnderlyingNetworkInfo.*",
         "src/android/net/netstats/**/*.*",
-        "src/com/android/server/NetworkManagementSocketTagger.java",
     ],
     path: "src",
     visibility: [
@@ -174,5 +173,36 @@ filegroup {
     visibility: [
         "//frameworks/base",
         "//packages/modules/Connectivity:__subpackages__",
+    ],
+}
+
+cc_library_shared {
+    name: "libframework-connectivity-tiramisu-jni",
+    min_sdk_version: "30",
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        // Don't warn about S API usage even with
+        // min_sdk 30: the library is only loaded
+        // on S+ devices
+        "-Wno-unguarded-availability",
+        "-Wthread-safety",
+    ],
+    srcs: [
+        "jni/android_net_TrafficStats.cpp",
+        "jni/onload.cpp",
+    ],
+    shared_libs: [
+        "liblog",
+    ],
+    static_libs: [
+        "libnativehelper_compat_libc++",
+    ],
+    stl: "none",
+    apex_available: [
+        "com.android.tethering",
+        // TODO: remove when ConnectivityT moves to APEX.
+        "//apex_available:platform",
     ],
 }

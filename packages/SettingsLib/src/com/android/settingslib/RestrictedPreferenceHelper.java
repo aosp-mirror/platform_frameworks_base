@@ -16,8 +16,11 @@
 
 package com.android.settingslib;
 
+import static android.app.admin.DevicePolicyResources.Strings.Settings.CONTROLLED_BY_ADMIN_SUMMARY;
+
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Build;
@@ -102,8 +105,11 @@ public class RestrictedPreferenceHelper {
         if (mDisabledSummary) {
             final TextView summaryView = (TextView) holder.findViewById(android.R.id.summary);
             if (summaryView != null) {
-                final CharSequence disabledText = summaryView.getContext().getText(
-                        R.string.disabled_by_admin_summary_text);
+                final CharSequence disabledText = mContext
+                        .getSystemService(DevicePolicyManager.class)
+                        .getString(CONTROLLED_BY_ADMIN_SUMMARY,
+                                () -> summaryView.getContext().getString(
+                                        R.string.disabled_by_admin_summary_text));
                 if (mDisabledByAdmin) {
                     summaryView.setText(disabledText);
                 } else if (mDisabledByAppOps) {

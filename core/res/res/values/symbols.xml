@@ -465,6 +465,7 @@
   <java-symbol type="integer" name="config_multiuserMaximumUsers" />
   <java-symbol type="integer" name="config_multiuserMaxRunningUsers" />
   <java-symbol type="bool" name="config_multiuserDelayUserDataLocking" />
+  <java-symbol type="bool" name="config_enableTimeoutToUserZeroWhenDocked" />
   <java-symbol type="integer" name="config_userTypePackageWhitelistMode"/>
   <java-symbol type="xml" name="config_user_types" />
   <java-symbol type="integer" name="config_safe_media_volume_index" />
@@ -4329,6 +4330,7 @@
   <java-symbol type="dimen" name="config_letterboxHorizontalPositionMultiplier" />
   <java-symbol type="bool" name="config_letterboxIsReachabilityEnabled" />
   <java-symbol type="integer" name="config_letterboxDefaultPositionForReachability" />
+  <java-symbol type="bool" name="config_letterboxIsEducationEnabled" />
   <java-symbol type="bool" name="config_isCameraCompatControlForStretchedIssuesEnabled" />
 
   <java-symbol type="bool" name="config_hideDisplayCutoutWithDisplayArea" />

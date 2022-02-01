@@ -176,6 +176,7 @@ import com.android.server.power.hint.HintManagerService;
 import com.android.server.powerstats.PowerStatsService;
 import com.android.server.profcollect.ProfcollectForwardingService;
 import com.android.server.recoverysystem.RecoverySystemService;
+import com.android.server.resources.ResourcesManagerService;
 import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.role.RoleServicePlatformHelper;
 import com.android.server.rotationresolver.RotationResolverManagerService;
@@ -212,8 +213,6 @@ import com.android.server.wm.WindowManagerGlobalLock;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
-
-import com.google.android.startop.iorap.IorapForwardingService;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -265,8 +264,6 @@ public final class SystemServer implements Dumpable {
             "/apex/com.android.os.statsd/javalib/service-statsd.jar";
     private static final String CONNECTIVITY_SERVICE_APEX_PATH =
             "/apex/com.android.tethering/javalib/service-connectivity.jar";
-    private static final String NEARBY_SERVICE_APEX_PATH =
-            "/apex/com.android.nearby/javalib/service-nearby.jar";
     private static final String STATS_COMPANION_LIFECYCLE_CLASS =
             "com.android.server.stats.StatsCompanion$Lifecycle";
     private static final String STATS_PULL_ATOM_SERVICE_CLASS =
@@ -277,8 +274,6 @@ public final class SystemServer implements Dumpable {
             "com.android.server.usb.UsbService$Lifecycle";
     private static final String MIDI_SERVICE_CLASS =
             "com.android.server.midi.MidiService$Lifecycle";
-    private static final String NEARBY_SERVICE_CLASS =
-            "com.android.server.nearby.NearbyService";
     private static final String WIFI_APEX_SERVICE_JAR_PATH =
             "/apex/com.android.wifi/javalib/service-wifi.jar";
     private static final String WIFI_SERVICE_CLASS =
@@ -1289,6 +1284,13 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(new OverlayManagerService(mSystemContext));
         t.traceEnd();
 
+        // Manages Resources packages
+        t.traceBegin("StartResourcesManagerService");
+        ResourcesManagerService resourcesService = new ResourcesManagerService(mSystemContext);
+        resourcesService.setActivityManagerService(mActivityManagerService);
+        mSystemServiceManager.startService(resourcesService);
+        t.traceEnd();
+
         t.traceBegin("StartSensorPrivacyService");
         mSystemServiceManager.startService(new SensorPrivacyService(mSystemContext));
         t.traceEnd();
@@ -1619,10 +1621,6 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("PinnerService");
             mSystemServiceManager.startService(PinnerService.class);
-            t.traceEnd();
-
-            t.traceBegin("IorapForwardingService");
-            mSystemServiceManager.startService(IorapForwardingService.class);
             t.traceEnd();
 
             if (Build.IS_DEBUGGABLE && ProfcollectForwardingService.enabled()) {
@@ -1997,16 +1995,6 @@ public final class SystemServer implements Dumpable {
                 ServiceManager.addService(Context.PAC_PROXY_SERVICE, pacProxyService);
             } catch (Throwable e) {
                 reportWtf("starting PacProxyService", e);
-            }
-            t.traceEnd();
-
-            // Start Nearby Service.
-            t.traceBegin("StartNearbyService");
-            try {
-                mSystemServiceManager.startServiceFromJar(NEARBY_SERVICE_CLASS,
-                        NEARBY_SERVICE_APEX_PATH);
-            } catch (Throwable e) {
-                reportWtf("starting NearbyService", e);
             }
             t.traceEnd();
 

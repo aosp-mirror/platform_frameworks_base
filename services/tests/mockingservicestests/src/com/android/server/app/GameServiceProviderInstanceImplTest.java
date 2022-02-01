@@ -26,6 +26,7 @@ import static com.google.common.collect.Iterables.getOnlyElement;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -33,6 +34,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
+import android.Manifest;
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
@@ -83,6 +85,7 @@ import org.mockito.quality.Strictness;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 
 /**
@@ -121,7 +124,7 @@ public final class GameServiceProviderInstanceImplTest {
     private WindowManagerInternal mMockWindowManagerInternal;
     @Mock
     private IActivityManager mMockActivityManager;
-    private FakeContext mFakeContext;
+    private MockContext mMockContext;
     private FakeGameClassifier mFakeGameClassifier;
     private FakeGameService mFakeGameService;
     private FakeServiceConnector<IGameService> mFakeGameServiceConnector;
@@ -140,7 +143,7 @@ public final class GameServiceProviderInstanceImplTest {
                 .strictness(Strictness.LENIENT)
                 .startMocking();
 
-        mFakeContext = new FakeContext(InstrumentationRegistry.getInstrumentation().getContext());
+        mMockContext = new MockContext(InstrumentationRegistry.getInstrumentation().getContext());
 
         mFakeGameClassifier = new FakeGameClassifier();
         mFakeGameClassifier.recordGamePackage(GAME_A_PACKAGE);
@@ -169,7 +172,7 @@ public final class GameServiceProviderInstanceImplTest {
         mGameServiceProviderInstance = new GameServiceProviderInstanceImpl(
                 new UserHandle(USER_ID),
                 ConcurrentUtils.DIRECT_EXECUTOR,
-                mFakeContext,
+                mMockContext,
                 mFakeGameClassifier,
                 mMockActivityManager,
                 mMockActivityTaskManager,
@@ -683,6 +686,7 @@ public final class GameServiceProviderInstanceImplTest {
 
     @Test
     public void restartGame_taskIdAssociatedWithGame_restartsTargetGame() throws Exception {
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         Intent launchIntent = new Intent("com.test.ACTION_LAUNCH_GAME_PACKAGE")
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         when(mMockPackageManager.getLaunchIntentForPackage(GAME_A_PACKAGE))
@@ -710,11 +714,12 @@ public final class GameServiceProviderInstanceImplTest {
                 .mGameSessionController.restartGame(10);
 
         verify(mMockActivityManager).forceStopPackage(GAME_A_PACKAGE, UserHandle.USER_CURRENT);
-        assertThat(mFakeContext.getLastStartedIntent()).isEqualTo(launchIntent);
+        assertThat(mMockContext.getLastStartedIntent()).isEqualTo(launchIntent);
     }
 
     @Test
     public void restartGame_taskIdNotAssociatedWithGame_noOp() throws Exception {
+        mockPermissionGranted(Manifest.permission.MANAGE_GAME_ACTIVITY);
         mGameServiceProviderInstance.start();
 
         startTask(10, GAME_A_MAIN_ACTIVITY);
@@ -730,7 +735,19 @@ public final class GameServiceProviderInstanceImplTest {
                 .mGameSessionController.restartGame(11);
 
         verifyZeroInteractions(mMockActivityManager);
-        assertThat(mFakeContext.getLastStartedIntent()).isNull();
+        assertThat(mMockContext.getLastStartedIntent()).isNull();
+    }
+
+    @Test
+    public void restartGame_failurePermissionDenied() throws Exception {
+        mGameServiceProviderInstance.start();
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        IGameSessionController gameSessionController = Objects.requireNonNull(getOnlyElement(
+                mFakeGameSessionService.getCapturedCreateInvocations())).mGameSessionController;
+        assertThrows(SecurityException.class,
+                () -> gameSessionController.restartGame(10));
     }
 
     private void startTask(int taskId, ComponentName componentName) {
@@ -772,6 +789,14 @@ public final class GameServiceProviderInstanceImplTest {
         for (ITaskStackListener taskStackListener : mTaskStackListeners) {
             taskStackListenerConsumer.accept(taskStackListener);
         }
+    }
+
+    private void mockPermissionGranted(String permission) {
+        mMockContext.setPermission(permission, PackageManager.PERMISSION_GRANTED);
+    }
+
+    private void mockPermissionDenied(String permission) {
+        mMockContext.setPermission(permission, PackageManager.PERMISSION_DENIED);
     }
 
     static final class FakeGameService extends IGameService.Stub {
@@ -900,11 +925,26 @@ public final class GameServiceProviderInstanceImplTest {
         }
     }
 
-    private final class FakeContext extends ContextWrapper {
+    private final class MockContext extends ContextWrapper {
         private Intent mLastStartedIntent;
+        // Map of permission name -> PermissionManager.Permission_{GRANTED|DENIED} constant
+        private final HashMap<String, Integer> mMockedPermissions = new HashMap<>();
 
-        FakeContext(Context base) {
+        MockContext(Context base) {
             super(base);
+        }
+
+        /**
+         * Mock checks for the specified permission, and have them behave as per {@code granted}.
+         *
+         * <p>Passing null reverts to default behavior, which does a real permission check on the
+         * test package.
+         *
+         * @param granted One of {@link PackageManager#PERMISSION_GRANTED} or
+         *                {@link PackageManager#PERMISSION_DENIED}.
+         */
+        public void setPermission(String permission, Integer granted) {
+            mMockedPermissions.put(permission, granted);
         }
 
         @Override
@@ -919,7 +959,15 @@ public final class GameServiceProviderInstanceImplTest {
 
         @Override
         public void enforceCallingPermission(String permission, @Nullable String message) {
-            // Do nothing.
+            final Integer granted = mMockedPermissions.get(permission);
+            if (granted == null) {
+                super.enforceCallingOrSelfPermission(permission, message);
+                return;
+            }
+
+            if (!granted.equals(PackageManager.PERMISSION_GRANTED)) {
+                throw new SecurityException("[Test] permission denied: " + permission);
+            }
         }
 
         Intent getLastStartedIntent() {

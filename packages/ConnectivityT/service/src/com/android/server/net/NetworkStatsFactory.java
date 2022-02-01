@@ -22,8 +22,6 @@ import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 
-import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -466,6 +464,19 @@ public class NetworkStatsFactory {
                 throw new AssertionError(
                         "Expected row " + i + ": " + expectedRow + ", actual row " + actualRow);
             }
+        }
+    }
+
+    /**
+     * Convert {@code /proc/} tag format to {@link Integer}. Assumes incoming
+     * format like {@code 0x7fffffff00000000}.
+     */
+    public static int kernelToTag(String string) {
+        int length = string.length();
+        if (length > 10) {
+            return Long.decode(string.substring(0, length - 8)).intValue();
+        } else {
+            return 0;
         }
     }
 

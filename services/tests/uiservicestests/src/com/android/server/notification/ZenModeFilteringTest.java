@@ -17,7 +17,6 @@
 package com.android.server.notification;
 
 import static android.app.Notification.CATEGORY_CALL;
-import static android.app.Notification.CATEGORY_MESSAGE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.Policy.CONVERSATION_SENDERS_ANYONE;
 import static android.app.NotificationManager.Policy.CONVERSATION_SENDERS_IMPORTANT;
@@ -25,6 +24,7 @@ import static android.app.NotificationManager.Policy.CONVERSATION_SENDERS_NONE;
 import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_CALLS;
 import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_CONVERSATIONS;
 import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_MESSAGES;
+import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_REPEAT_CALLERS;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_ANY;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
 import static android.provider.Settings.Global.ZEN_MODE_ALARMS;
@@ -43,8 +43,10 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager.Policy;
 import android.media.AudioAttributes;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
+import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -68,10 +70,15 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
     private NotificationMessagingUtil mMessagingUtil;
     private ZenModeFiltering mZenModeFiltering;
 
+    @Mock private TelephonyManager mTelephonyManager;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         mZenModeFiltering = new ZenModeFiltering(mContext, mMessagingUtil);
+
+        // for repeat callers / matchesCallFilter
+        mContext.addMockSystemService(TelephonyManager.class, mTelephonyManager);
     }
 
     private NotificationRecord getNotificationRecord() {
@@ -92,6 +99,23 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         when(r.getSbn()).thenReturn(sbn);
         when(r.getChannel()).thenReturn(c);
         when(r.isConversation()).thenReturn(true);
+        return r;
+    }
+
+    private Bundle makeExtrasBundleWithPeople(String[] people) {
+        Bundle extras = new Bundle();
+        extras.putObject(Notification.EXTRA_PEOPLE_LIST, people);
+        return extras;
+    }
+
+    private NotificationRecord getNotificationRecordWithPeople(String[] people) {
+        // set up notification record
+        NotificationRecord r = mock(NotificationRecord.class);
+        StatusBarNotification sbn = mock(StatusBarNotification.class);
+        Notification notification = mock(Notification.class);
+        notification.extras = makeExtrasBundleWithPeople(people);
+        when(sbn.getNotification()).thenReturn(notification);
+        when(r.getSbn()).thenReturn(sbn);
         return r;
     }
 
@@ -308,5 +332,112 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
                         0, PRIORITY_SENDERS_ANY, 0, CONVERSATION_SENDERS_NONE);
 
         assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, policy, r));
+    }
+
+    @Test
+    public void testMatchesCallFilter_repeatCallers_directMatch() {
+        // after calls given an email with an exact string match, make sure that
+        // matchesCallFilter returns the right thing
+        String[] mailSource = new String[]{"mailto:hello.world"};
+        mZenModeFiltering.recordCall(getNotificationRecordWithPeople(mailSource));
+
+        // set up policy to only allow repeat callers
+        Policy policy = new Policy(
+                PRIORITY_CATEGORY_REPEAT_CALLERS, 0, 0, 0, CONVERSATION_SENDERS_NONE);
+
+        // check whether matchesCallFilter returns the right thing
+        Bundle inputMatches = makeExtrasBundleWithPeople(new String[]{"mailto:hello.world"});
+        Bundle inputWrong = makeExtrasBundleWithPeople(new String[]{"mailto:nope"});
+        assertTrue(ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                policy, UserHandle.SYSTEM,
+                inputMatches, null, 0, 0));
+        assertFalse(ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                policy, UserHandle.SYSTEM,
+                inputWrong, null, 0, 0));
+    }
+
+    @Test
+    public void testMatchesCallFilter_repeatCallers_telephoneVariants() {
+        // set up telephony manager behavior
+        when(mTelephonyManager.getNetworkCountryIso()).thenReturn("us");
+
+        String[] telSource = new String[]{"tel:+1-617-555-1212"};
+        mZenModeFiltering.recordCall(getNotificationRecordWithPeople(telSource));
+
+        // set up policy to only allow repeat callers
+        Policy policy = new Policy(
+                PRIORITY_CATEGORY_REPEAT_CALLERS, 0, 0, 0, CONVERSATION_SENDERS_NONE);
+
+        // cases to test:
+        //   - identical number
+        //   - same number, different formatting
+        //   - different number
+        //   - garbage
+        Bundle identical = makeExtrasBundleWithPeople(new String[]{"tel:+1-617-555-1212"});
+        Bundle same = makeExtrasBundleWithPeople(new String[]{"tel:16175551212"});
+        Bundle different = makeExtrasBundleWithPeople(new String[]{"tel:123-456-7890"});
+        Bundle garbage = makeExtrasBundleWithPeople(new String[]{"asdfghjkl;"});
+
+        assertTrue("identical numbers should match",
+                ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                policy, UserHandle.SYSTEM,
+                identical, null, 0, 0));
+        assertTrue("equivalent but non-identical numbers should match",
+                ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                policy, UserHandle.SYSTEM,
+                same, null, 0, 0));
+        assertFalse("non-equivalent numbers should not match",
+                ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                policy, UserHandle.SYSTEM,
+                different, null, 0, 0));
+        assertFalse("non-tel strings should not match",
+                ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                policy, UserHandle.SYSTEM,
+                garbage, null, 0, 0));
+    }
+
+    @Test
+    public void testMatchesCallFilter_repeatCallers_urlEncodedTels() {
+        // this is not intended to be a supported case but is one that we have seen
+        // sometimes in the wild, so make sure we handle url-encoded telephone numbers correctly
+        // when somebody provides one.
+
+        // set up telephony manager behavior
+        when(mTelephonyManager.getNetworkCountryIso()).thenReturn("us");
+
+        String[] telSource = new String[]{"tel:%2B16175551212"};
+        mZenModeFiltering.recordCall(getNotificationRecordWithPeople(telSource));
+
+        // set up policy to only allow repeat callers
+        Policy policy = new Policy(
+                PRIORITY_CATEGORY_REPEAT_CALLERS, 0, 0, 0, CONVERSATION_SENDERS_NONE);
+
+        // test cases for various forms of the same phone number and different ones
+        Bundle same1 = makeExtrasBundleWithPeople(new String[]{"tel:+1-617-555-1212"});
+        Bundle same2 = makeExtrasBundleWithPeople(new String[]{"tel:%2B1-617-555-1212"});
+        Bundle same3 = makeExtrasBundleWithPeople(new String[]{"tel:6175551212"});
+        Bundle different1 = makeExtrasBundleWithPeople(new String[]{"tel:%2B16175553434"});
+        Bundle different2 = makeExtrasBundleWithPeople(new String[]{"tel:+16175553434"});
+
+        assertTrue("same number should match",
+                ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                        policy, UserHandle.SYSTEM,
+                        same1, null, 0, 0));
+        assertTrue("same number should match",
+                ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                        policy, UserHandle.SYSTEM,
+                        same2, null, 0, 0));
+        assertTrue("same number should match",
+                ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                        policy, UserHandle.SYSTEM,
+                        same3, null, 0, 0));
+        assertFalse("different number should not match",
+                ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                        policy, UserHandle.SYSTEM,
+                        different1, null, 0, 0));
+        assertFalse("different number should not match",
+                ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                        policy, UserHandle.SYSTEM,
+                        different2, null, 0, 0));
     }
 }

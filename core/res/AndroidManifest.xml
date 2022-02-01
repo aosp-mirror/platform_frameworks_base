@@ -6119,6 +6119,12 @@
     <permission android:name="android.permission.ACCESS_FPS_COUNTER"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows the GameService provider to create GameSession and call GameSession
+                    APIs and overlay a view on top of the game's Activity.
+     @hide -->
+    <permission android:name="android.permission.MANAGE_GAME_ACTIVITY"
+                android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows the holder to register callbacks to inform the RebootReadinessManager
          when they are performing reboot-blocking work.
          @hide -->
@@ -6244,6 +6250,15 @@
     -->
     <permission android:name="android.permission.BIND_AMBIENT_CONTEXT_DETECTION_SERVICE"
                 android:protectionLevel="signature" />
+
+    <!-- @SystemApi Allows an app to set keep-clear areas without restrictions on the size or
+        number of keep-clear areas (see {@link android.view.View#setPreferKeepClearRects}).
+        When the system arranges floating windows onscreen, it might decide to ignore keep-clear
+        areas from windows, whose owner does not have this permission.
+        @hide
+    -->
+    <permission android:name="android.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS"
+                android:protectionLevel="signature|privileged" />
 
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
@@ -6737,10 +6752,6 @@
             <meta-data
                     android:name="android.accessibilityservice"
                     android:resource="@xml/autofill_compat_accessibility_service" />
-        </service>
-
-        <service android:name="com.google.android.startop.iorap.IorapForwardingService$IorapdJobServiceProxy"
-                 android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
         <service android:name="com.android.server.blob.BlobStoreIdleJobService"

@@ -1341,7 +1341,6 @@ public class UsbManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.MANAGE_USB)
     boolean resetUsbPort(@NonNull UsbPort port, int operationId,
             IUsbOperationInternal callback) {

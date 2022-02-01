@@ -746,7 +746,7 @@ public class KeyguardManager {
         if (!hasPermission(Manifest.permission.SET_INITIAL_LOCK)) {
             throw new SecurityException("Requires SET_INITIAL_LOCK permission.");
         }
-        return mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+        return true;
     }
 
     private boolean hasPermission(String permission) {
@@ -814,6 +814,8 @@ public class KeyguardManager {
     /**
     * Set the lockscreen password after validating against its expected complexity level.
     *
+    * Below {@link android.os.Build.VERSION_CODES#S_V2}, this API will only work
+    * when {@link PackageManager.FEATURE_AUTOMOTIVE} is present.
     * @param lockType - type of lock as specified in {@link LockTypes}
     * @param password - password to validate; this has the same encoding
     *        as the output of String#getBytes

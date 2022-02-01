@@ -63,5 +63,5 @@ oneway interface IDisplayWindowListener {
     /**
      * Called when the keep clear ares on a display have changed.
      */
-    void onKeepClearAreasChanged(int displayId, in List<Rect> keepClearAreas);
+    void onKeepClearAreasChanged(int displayId, in List<Rect> restricted, in List<Rect> unrestricted);
 }

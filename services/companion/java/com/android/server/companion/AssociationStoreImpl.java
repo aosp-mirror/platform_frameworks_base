@@ -125,7 +125,7 @@ class AssociationStoreImpl implements AssociationStore {
             // Update the MacAddress-to-List<Association> map if needed.
             final MacAddress updatedAddress = updated.getDeviceMacAddress();
             final MacAddress currentAddress = current.getDeviceMacAddress();
-            macAddressChanged = Objects.equals(currentAddress, updatedAddress);
+            macAddressChanged = !Objects.equals(currentAddress, updatedAddress);
             if (macAddressChanged) {
                 if (currentAddress != null) {
                     mAddressMap.get(currentAddress).remove(id);
