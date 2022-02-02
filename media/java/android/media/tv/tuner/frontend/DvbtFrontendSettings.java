@@ -42,8 +42,7 @@ import java.lang.annotation.RetentionPolicy;
 public class DvbtFrontendSettings extends FrontendSettings {
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "TRANSMISSION_MODE_",
+    @IntDef(prefix = "TRANSMISSION_MODE_",
             value = {TRANSMISSION_MODE_UNDEFINED, TRANSMISSION_MODE_AUTO,
                     TRANSMISSION_MODE_2K, TRANSMISSION_MODE_8K, TRANSMISSION_MODE_4K,
                     TRANSMISSION_MODE_1K, TRANSMISSION_MODE_16K, TRANSMISSION_MODE_32K})
@@ -98,8 +97,7 @@ public class DvbtFrontendSettings extends FrontendSettings {
             FrontendDvbtTransmissionMode.MODE_32K_E;
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "BANDWIDTH_",
+    @IntDef(prefix = "BANDWIDTH_",
             value = {BANDWIDTH_UNDEFINED, BANDWIDTH_AUTO, BANDWIDTH_8MHZ, BANDWIDTH_7MHZ,
                     BANDWIDTH_6MHZ, BANDWIDTH_5MHZ, BANDWIDTH_1_7MHZ, BANDWIDTH_10MHZ})
     @Retention(RetentionPolicy.SOURCE)
@@ -140,8 +138,7 @@ public class DvbtFrontendSettings extends FrontendSettings {
 
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "CONSTELLATION_",
+    @IntDef(prefix = "CONSTELLATION_",
             value = {CONSTELLATION_UNDEFINED, CONSTELLATION_AUTO, CONSTELLATION_QPSK,
                     CONSTELLATION_16QAM, CONSTELLATION_64QAM, CONSTELLATION_256QAM,
                     CONSTELLATION_QPSK_R, CONSTELLATION_16QAM_R, CONSTELLATION_64QAM_R,
@@ -192,8 +189,7 @@ public class DvbtFrontendSettings extends FrontendSettings {
             FrontendDvbtConstellation.CONSTELLATION_256QAM_R;
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "HIERARCHY_",
+    @IntDef(prefix = "HIERARCHY_",
             value = {HIERARCHY_UNDEFINED, HIERARCHY_AUTO, HIERARCHY_NON_NATIVE, HIERARCHY_1_NATIVE,
             HIERARCHY_2_NATIVE, HIERARCHY_4_NATIVE, HIERARCHY_NON_INDEPTH, HIERARCHY_1_INDEPTH,
             HIERARCHY_2_INDEPTH, HIERARCHY_4_INDEPTH})
@@ -243,8 +239,7 @@ public class DvbtFrontendSettings extends FrontendSettings {
 
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "CODERATE_",
+    @IntDef(prefix = "CODERATE_",
             value = {CODERATE_UNDEFINED, CODERATE_AUTO, CODERATE_1_2, CODERATE_2_3, CODERATE_3_4,
             CODERATE_5_6, CODERATE_7_8, CODERATE_3_5, CODERATE_4_5, CODERATE_6_7, CODERATE_8_9})
     @Retention(RetentionPolicy.SOURCE)
@@ -296,8 +291,7 @@ public class DvbtFrontendSettings extends FrontendSettings {
     public static final int CODERATE_8_9 = FrontendDvbtCoderate.CODERATE_8_9;
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "GUARD_INTERVAL_",
+    @IntDef(prefix = "GUARD_INTERVAL_",
             value = {GUARD_INTERVAL_UNDEFINED, GUARD_INTERVAL_AUTO,
             GUARD_INTERVAL_1_32, GUARD_INTERVAL_1_16,
             GUARD_INTERVAL_1_8, GUARD_INTERVAL_1_4,
@@ -346,8 +340,7 @@ public class DvbtFrontendSettings extends FrontendSettings {
     public static final int GUARD_INTERVAL_19_256 = FrontendDvbtGuardInterval.INTERVAL_19_256;
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "STANDARD",
+    @IntDef(prefix = "STANDARD_",
             value = {STANDARD_AUTO, STANDARD_T, STANDARD_T2}
     )
     @Retention(RetentionPolicy.SOURCE)

@@ -153,8 +153,8 @@ public class Filter implements AutoCloseable {
 
 
     /** @hide */
-    @IntDef(flag = true, prefix = "STATUS_", value = {STATUS_DATA_READY, STATUS_LOW_WATER,
-            STATUS_HIGH_WATER, STATUS_OVERFLOW})
+    @IntDef(prefix = "STATUS_",
+            value = {STATUS_DATA_READY, STATUS_LOW_WATER, STATUS_HIGH_WATER, STATUS_OVERFLOW})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Status {}
 
@@ -185,8 +185,7 @@ public class Filter implements AutoCloseable {
     public static final int STATUS_OVERFLOW = DemuxFilterStatus.OVERFLOW;
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "SCRAMBLING_STATUS_",
+    @IntDef(prefix = "SCRAMBLING_STATUS_",
             value = {SCRAMBLING_STATUS_UNKNOWN, SCRAMBLING_STATUS_NOT_SCRAMBLED,
                     SCRAMBLING_STATUS_SCRAMBLED})
     @Retention(RetentionPolicy.SOURCE)
@@ -209,8 +208,7 @@ public class Filter implements AutoCloseable {
             android.hardware.tv.tuner.ScramblingStatus.SCRAMBLED;
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "MONITOR_EVENT_",
+    @IntDef(prefix = "MONITOR_EVENT_",
             value = {MONITOR_EVENT_SCRAMBLING_STATUS, MONITOR_EVENT_IP_CID_CHANGE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface MonitorEventMask {}
