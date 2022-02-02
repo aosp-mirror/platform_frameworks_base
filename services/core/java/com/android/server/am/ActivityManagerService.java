@@ -12798,7 +12798,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 noAction.add(null);
                 actions = noAction.iterator();
             }
-            boolean onlyProtectedBroadcasts = actions.hasNext();
+            boolean onlyProtectedBroadcasts = true;
 
             // Collect stickies of users and check if broadcast is only registered for protected
             // broadcasts
@@ -12872,6 +12872,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // Change is not enabled, thus not targeting T+. Assume exported.
                     flags |= Context.RECEIVER_EXPORTED;
                 }
+            } else if ((flags & Context.RECEIVER_NOT_EXPORTED) == 0) {
+                flags |= Context.RECEIVER_EXPORTED;
             }
         }
 

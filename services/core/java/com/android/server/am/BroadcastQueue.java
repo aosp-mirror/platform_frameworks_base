@@ -870,7 +870,7 @@ public final class BroadcastQueue {
                     + " due to receiver " + filter.receiverList.app
                     + " (uid " + filter.receiverList.uid + ")"
                     + " not specifying RECEIVER_EXPORTED");
-            // skip = true;
+            skip = true;
         }
 
         if (skip) {
