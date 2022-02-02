@@ -30,9 +30,7 @@ import android.content.IntentFilter
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.ImageDecoder
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
 import android.media.MediaDescription
 import android.media.MediaMetadata
@@ -562,7 +560,7 @@ class MediaDataManager(
         val mediaController = mediaControllerFactory.create(token)
         val metadata = mediaController.metadata
 
-        // Foreground and Background colors computed from album art
+        // Album art
         val notif: Notification = sbn.notification
         var artworkBitmap = metadata?.getBitmap(MediaMetadata.METADATA_KEY_ART)
         if (artworkBitmap == null) {
@@ -575,24 +573,6 @@ class MediaDataManager(
             notif.getLargeIcon()
         } else {
             Icon.createWithBitmap(artworkBitmap)
-        }
-        if (artWorkIcon != null) {
-            // If we have art, get colors from that
-            if (artworkBitmap == null) {
-                if (artWorkIcon.type == Icon.TYPE_BITMAP ||
-                        artWorkIcon.type == Icon.TYPE_ADAPTIVE_BITMAP) {
-                    artworkBitmap = artWorkIcon.bitmap
-                } else {
-                    val drawable: Drawable = artWorkIcon.loadDrawable(context)
-                    artworkBitmap = Bitmap.createBitmap(
-                            drawable.intrinsicWidth,
-                            drawable.intrinsicHeight,
-                            Bitmap.Config.ARGB_8888)
-                    val canvas = Canvas(artworkBitmap)
-                    drawable.setBounds(0, 0, drawable.intrinsicWidth, drawable.intrinsicHeight)
-                    drawable.draw(canvas)
-                }
-            }
         }
 
         // App name
@@ -787,30 +767,28 @@ class MediaDataManager(
         return when (action) {
             PlaybackState.ACTION_PLAY -> {
                 MediaAction(
-                    Icon.createWithResource(context, com.android.internal.R.drawable.ic_media_play),
+                    Icon.createWithResource(context, R.drawable.ic_media_play),
                     { controller.transportControls.play() },
                     context.getString(R.string.controls_media_button_play)
                 )
             }
             PlaybackState.ACTION_PAUSE -> {
                 MediaAction(
-                    Icon.createWithResource(context,
-                        com.android.internal.R.drawable.ic_media_pause),
+                    Icon.createWithResource(context, R.drawable.ic_media_pause),
                     { controller.transportControls.pause() },
                     context.getString(R.string.controls_media_button_pause)
                 )
             }
             PlaybackState.ACTION_SKIP_TO_PREVIOUS -> {
                 MediaAction(
-                    Icon.createWithResource(context,
-                        com.android.internal.R.drawable.ic_media_previous),
+                    Icon.createWithResource(context, R.drawable.ic_media_prev),
                     { controller.transportControls.skipToPrevious() },
                     context.getString(R.string.controls_media_button_prev)
                 )
             }
             PlaybackState.ACTION_SKIP_TO_NEXT -> {
                 MediaAction(
-                    Icon.createWithResource(context, com.android.internal.R.drawable.ic_media_next),
+                    Icon.createWithResource(context, R.drawable.ic_media_next),
                     { controller.transportControls.skipToNext() },
                     context.getString(R.string.controls_media_button_next)
                 )
@@ -900,7 +878,7 @@ class MediaDataManager(
 
     private fun getResumeMediaAction(action: Runnable): MediaAction {
         return MediaAction(
-            Icon.createWithResource(context, R.drawable.lb_ic_play).setTint(themeText),
+            Icon.createWithResource(context, R.drawable.ic_media_play).setTint(themeText),
             action,
             context.getString(R.string.controls_media_resume)
         )

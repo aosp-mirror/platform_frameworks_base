@@ -19,6 +19,7 @@ package com.android.systemui.media;
 import static android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS;
 
 import android.app.PendingIntent;
+import android.app.WallpaperColors;
 import android.app.smartspace.SmartspaceAction;
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +41,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -54,6 +56,7 @@ import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.GhostedViewLaunchAnimatorController;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
+import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.SysUiStatsLog;
@@ -405,7 +408,7 @@ public class MediaControlPanel {
         seamlessView.setContentDescription(deviceString);
 
         // Dismiss
-        mMediaViewHolder.getDismissLabel().setAlpha(isDismissible ? 1 : DISABLED_ALPHA);
+        mMediaViewHolder.getDismissText().setAlpha(isDismissible ? 1 : DISABLED_ALPHA);
         mMediaViewHolder.getDismiss().setEnabled(isDismissible);
         mMediaViewHolder.getDismiss().setOnClickListener(v -> {
             if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) return;
@@ -438,11 +441,10 @@ public class MediaControlPanel {
         ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
 
         // Album art
-        PlayerViewHolder playerHolder = (PlayerViewHolder) mMediaViewHolder;
-        ImageView albumView = playerHolder.getAlbumView();
+        ImageView albumView = mMediaViewHolder.getAlbumView();
         boolean hasArtwork = data.getArtwork() != null;
         if (hasArtwork) {
-            Drawable artwork = scaleDrawable(data.getArtwork());
+            Drawable artwork = getScaledThumbnail(data.getArtwork());
             albumView.setPadding(0, 0, 0, 0);
             albumView.setImageDrawable(artwork);
         } else {
@@ -548,6 +550,19 @@ public class MediaControlPanel {
 
     /** Bind elements specific to PlayerSessionViewHolder */
     private void bindSessionPlayer(@NonNull MediaData data, String key) {
+        // Default colors
+        int surfaceColor = mBackgroundColor;
+        int accentPrimary = com.android.settingslib.Utils.getColorAttr(mContext,
+                com.android.internal.R.attr.textColorPrimary).getDefaultColor();
+        int textPrimary = com.android.settingslib.Utils.getColorAttr(mContext,
+                com.android.internal.R.attr.textColorPrimary).getDefaultColor();
+        int textPrimaryInverse = com.android.settingslib.Utils.getColorAttr(mContext,
+                com.android.internal.R.attr.textColorPrimaryInverse).getDefaultColor();
+        int textSecondary = com.android.settingslib.Utils.getColorAttr(mContext,
+                com.android.internal.R.attr.textColorSecondary).getDefaultColor();
+        int textTertiary = com.android.settingslib.Utils.getColorAttr(mContext,
+                com.android.internal.R.attr.textColorTertiary).getDefaultColor();
+
         // App icon - use launcher icon
         ImageView appIconView = mMediaViewHolder.getAppIcon();
         appIconView.clearColorFilter();
@@ -567,26 +582,106 @@ public class MediaControlPanel {
             appIconView.setColorFilter(color);
         }
 
+        // Album art
+        ColorScheme colorScheme = null;
+        ImageView albumView = mMediaViewHolder.getAlbumView();
+        boolean hasArtwork = data.getArtwork() != null;
+        if (hasArtwork) {
+            colorScheme = new ColorScheme(WallpaperColors.fromBitmap(data.getArtwork().getBitmap()),
+                        true);
+
+            // Scale artwork to fit background
+            int width = mMediaViewHolder.getPlayer().getWidth();
+            int height = mMediaViewHolder.getPlayer().getHeight();
+            Drawable artwork = getScaledBackground(data.getArtwork(), width, height);
+            albumView.setPadding(0, 0, 0, 0);
+            albumView.setImageDrawable(artwork);
+            albumView.setClipToOutline(true);
+        } else {
+            // If there's no artwork, use colors from the app icon
+            try {
+                Drawable icon = mContext.getPackageManager().getApplicationIcon(
+                        data.getPackageName());
+                colorScheme = new ColorScheme(WallpaperColors.fromDrawable(icon), true);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, "Cannot find icon for package " + data.getPackageName(), e);
+            }
+        }
+
+        // Get colors for player
+        if (colorScheme != null) {
+            surfaceColor = colorScheme.getAccent2().get(9); // A2-800
+            accentPrimary = colorScheme.getAccent1().get(2); // A1-100
+            textPrimary = colorScheme.getNeutral1().get(1); // N1-50
+            textPrimaryInverse = colorScheme.getNeutral1().get(10); // N1-900
+            textSecondary = colorScheme.getNeutral2().get(3); // N2-200
+            textTertiary = colorScheme.getNeutral2().get(5); // N2-400
+        }
+
+        ColorStateList bgColorList = ColorStateList.valueOf(surfaceColor);
+        ColorStateList accentColorList = ColorStateList.valueOf(accentPrimary);
+        ColorStateList textColorList = ColorStateList.valueOf(textPrimary);
+
+        // Gradient and background (visible when there is no art)
+        albumView.setForegroundTintList(ColorStateList.valueOf(surfaceColor));
+        albumView.setBackgroundTintList(
+                ColorStateList.valueOf(surfaceColor));
+        mMediaViewHolder.getPlayer().setBackgroundTintList(bgColorList);
+
+        // Metadata text
+        mMediaViewHolder.getTitleText().setTextColor(textPrimary);
+        mMediaViewHolder.getArtistText().setTextColor(textSecondary);
+
+        // Seekbar
+        SeekBar seekbar = mMediaViewHolder.getSeekBar();
+        seekbar.getThumb().setTintList(textColorList);
+        seekbar.setProgressTintList(textColorList);
+        seekbar.setProgressBackgroundTintList(ColorStateList.valueOf(textTertiary));
+
+        // Output switcher
+        View seamlessView = mMediaViewHolder.getSeamlessButton();
+        seamlessView.setBackgroundTintList(accentColorList);
+        ImageView seamlessIconView = mMediaViewHolder.getSeamlessIcon();
+        seamlessIconView.setImageTintList(bgColorList);
+        TextView seamlessText = mMediaViewHolder.getSeamlessText();
+        seamlessText.setTextColor(surfaceColor);
+
         // Media action buttons
         MediaButton semanticActions = data.getSemanticActions();
         if (semanticActions != null) {
             PlayerSessionViewHolder sessionHolder = (PlayerSessionViewHolder) mMediaViewHolder;
-            setSemanticButton(sessionHolder.getActionPlayPause(),
-                    semanticActions.getPlayOrPause());
-            setSemanticButton(sessionHolder.getActionNext(),
-                    semanticActions.getNextOrCustom());
-            setSemanticButton(sessionHolder.getActionPrev(),
-                    semanticActions.getPrevOrCustom());
-            setSemanticButton(sessionHolder.getActionStart(),
-                    semanticActions.getStartCustom());
-            setSemanticButton(sessionHolder.getActionEnd(),
-                    semanticActions.getEndCustom());
+
+            // Play/pause button has a background
+            sessionHolder.getActionPlayPause().setBackgroundTintList(accentColorList);
+            setSemanticButton(sessionHolder.getActionPlayPause(), semanticActions.getPlayOrPause(),
+                    ColorStateList.valueOf(textPrimaryInverse));
+
+            setSemanticButton(sessionHolder.getActionNext(), semanticActions.getNextOrCustom(),
+                    textColorList);
+            setSemanticButton(sessionHolder.getActionPrev(), semanticActions.getPrevOrCustom(),
+                    textColorList);
+            setSemanticButton(sessionHolder.getActionStart(), semanticActions.getStartCustom(),
+                    textColorList);
+            setSemanticButton(sessionHolder.getActionEnd(), semanticActions.getEndCustom(),
+                    textColorList);
         } else {
             Log.w(TAG, "Using semantic player, but did not get buttons");
         }
+
+        // Long press buttons
+        mMediaViewHolder.getLongPressText().setTextColor(textColorList);
+        mMediaViewHolder.getSettingsText().setTextColor(textColorList);
+        mMediaViewHolder.getSettingsText().setBackgroundTintList(accentColorList);
+        mMediaViewHolder.getCancelText().setTextColor(textColorList);
+        mMediaViewHolder.getCancelText().setBackgroundTintList(accentColorList);
+        mMediaViewHolder.getDismissText().setTextColor(textColorList);
+        mMediaViewHolder.getDismissText().setBackgroundTintList(accentColorList);
+
     }
 
-    private void setSemanticButton(final ImageButton button, MediaAction mediaAction) {
+    private void setSemanticButton(final ImageButton button, MediaAction mediaAction,
+            ColorStateList fgColor) {
+        button.setImageTintList(fgColor);
         if (mediaAction != null) {
             button.setImageIcon(mediaAction.getIcon());
             button.setContentDescription(mediaAction.getContentDescription());
@@ -844,8 +939,11 @@ public class MediaControlPanel {
         mMediaViewController.openGuts();
     }
 
+    /**
+     * Scale drawable to fit into the square album art thumbnail
+     */
     @UiThread
-    private Drawable scaleDrawable(Icon icon) {
+    private Drawable getScaledThumbnail(Icon icon) {
         if (icon == null) {
             return null;
         }
@@ -863,6 +961,25 @@ public class MediaControlPanel {
         if (bounds.width() > mAlbumArtSize || bounds.height() > mAlbumArtSize) {
             float offsetX = (bounds.width() - mAlbumArtSize) / 2.0f;
             float offsetY = (bounds.height() - mAlbumArtSize) / 2.0f;
+            bounds.offset((int) -offsetX, (int) -offsetY);
+        }
+        drawable.setBounds(bounds);
+        return drawable;
+    }
+
+    /**
+     * Scale artwork to fill the background of the panel
+     */
+    @UiThread
+    private Drawable getScaledBackground(Icon icon, int width, int height) {
+        if (icon == null) {
+            return null;
+        }
+        Drawable drawable = icon.loadDrawable(mContext);
+        Rect bounds = new Rect(0, 0, width, height);
+        if (bounds.width() > width || bounds.height() > height) {
+            float offsetX = (bounds.width() - width) / 2.0f;
+            float offsetY = (bounds.height() - height) / 2.0f;
             bounds.offset((int) -offsetX, (int) -offsetY);
         }
         drawable.setBounds(bounds);

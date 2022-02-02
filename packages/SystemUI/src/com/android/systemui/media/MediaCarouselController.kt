@@ -411,7 +411,6 @@ class MediaCarouselController @Inject constructor(
 
     // Returns true if new player is added
     private fun addOrUpdatePlayer(key: String, oldKey: String?, data: MediaData): Boolean {
-        val dataCopy = data.copy(backgroundColor = bgColor)
         MediaPlayerData.moveIfExists(oldKey, key)
         val existingPlayer = MediaPlayerData.getMediaPlayer(key)
         val curVisibleMediaKey = MediaPlayerData.playerKeys()
@@ -431,14 +430,14 @@ class MediaCarouselController @Inject constructor(
             val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT)
             newPlayer.mediaViewHolder?.player?.setLayoutParams(lp)
-            newPlayer.bindPlayer(dataCopy, key)
+            newPlayer.bindPlayer(data, key)
             newPlayer.setListening(currentlyExpanded)
-            MediaPlayerData.addMediaPlayer(key, dataCopy, newPlayer, systemClock)
+            MediaPlayerData.addMediaPlayer(key, data, newPlayer, systemClock)
             updatePlayerToState(newPlayer, noAnimation = true)
             reorderAllPlayers(curVisibleMediaKey)
         } else {
-            existingPlayer.bindPlayer(dataCopy, key)
-            MediaPlayerData.addMediaPlayer(key, dataCopy, existingPlayer, systemClock)
+            existingPlayer.bindPlayer(data, key)
+            MediaPlayerData.addMediaPlayer(key, data, existingPlayer, systemClock)
             if (visualStabilityManager.isReorderingAllowed || shouldScrollToActivePlayer) {
                 reorderAllPlayers(curVisibleMediaKey)
             } else {
@@ -543,7 +542,11 @@ class MediaCarouselController @Inject constructor(
     }
 
     private fun getForegroundColor(): Int {
-        return context.getColor(android.R.color.system_accent2_900)
+        return if (mediaFlags.useMediaSessionLayout()) {
+            context.getColor(android.R.color.system_neutral2_200)
+        } else {
+            context.getColor(android.R.color.system_accent2_900)
+        }
     }
 
     private fun updatePageIndicator() {
