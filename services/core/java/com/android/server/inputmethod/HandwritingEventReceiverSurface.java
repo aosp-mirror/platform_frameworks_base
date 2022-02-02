@@ -57,7 +57,8 @@ final class HandwritingEventReceiverSurface {
         mWindowHandle.name = name;
         mWindowHandle.token = mClientChannel.getToken();
         mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
-        mWindowHandle.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        mWindowHandle.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
         mWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
         mWindowHandle.visible = true;
         mWindowHandle.focusable = false;
