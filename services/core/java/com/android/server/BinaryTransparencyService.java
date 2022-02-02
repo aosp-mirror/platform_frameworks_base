@@ -32,6 +32,7 @@ import android.os.SystemProperties;
 import android.util.PackageUtils;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IBinaryTransparencyService;
 
 import java.io.File;
@@ -51,11 +52,15 @@ import java.util.stream.Collectors;
 public class BinaryTransparencyService extends SystemService {
     private static final String TAG = "TransparencyService";
 
-    private static final String VBMETA_DIGEST_UNINITIALIZED = "vbmeta-digest-uninitialized";
-    private static final String VBMETA_DIGEST_UNAVAILABLE = "vbmeta-digest-unavailable";
-    private static final String SYSPROP_NAME_VBETA_DIGEST = "ro.boot.vbmeta.digest";
+    @VisibleForTesting
+    static final String VBMETA_DIGEST_UNINITIALIZED = "vbmeta-digest-uninitialized";
+    @VisibleForTesting
+    static final String VBMETA_DIGEST_UNAVAILABLE = "vbmeta-digest-unavailable";
+    @VisibleForTesting
+    static final String SYSPROP_NAME_VBETA_DIGEST = "ro.boot.vbmeta.digest";
 
-    private static final String BINARY_HASH_ERROR = "SHA256HashError";
+    @VisibleForTesting
+    static final String BINARY_HASH_ERROR = "SHA256HashError";
 
     private final Context mContext;
     private String mVbmetaDigest;
