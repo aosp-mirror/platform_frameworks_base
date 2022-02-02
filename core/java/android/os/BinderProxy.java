@@ -516,12 +516,15 @@ public final class BinderProxy implements IBinder {
     public boolean transact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
         Binder.checkParcel(this, code, data, "Unreasonably large binder buffer");
 
-        if (mWarnOnBlocking && ((flags & FLAG_ONEWAY) == 0)
+        boolean warnOnBlocking = mWarnOnBlocking; // Cache it to reduce volatile access.
+
+        if (warnOnBlocking && ((flags & FLAG_ONEWAY) == 0)
                 && Binder.sWarnOnBlockingOnCurrentThread.get()) {
 
             // For now, avoid spamming the log by disabling after we've logged
             // about this interface at least once
             mWarnOnBlocking = false;
+            warnOnBlocking = false;
 
             if (Build.IS_USERDEBUG) {
                 // Log this as a WTF on userdebug builds.
@@ -568,7 +571,13 @@ public final class BinderProxy implements IBinder {
         }
 
         try {
-            return transactNative(code, data, reply, flags);
+            final boolean result = transactNative(code, data, reply, flags);
+
+            if (reply != null && !warnOnBlocking) {
+                reply.addFlags(Parcel.FLAG_IS_REPLY_FROM_BLOCKING_ALLOWED_OBJECT);
+            }
+
+            return result;
         } finally {
             AppOpsManager.resumeNotedAppOpsCollection(prevCollection);
 
