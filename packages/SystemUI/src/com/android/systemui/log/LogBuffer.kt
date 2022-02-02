@@ -176,14 +176,9 @@ class LogBuffer @JvmOverloads constructor(
             buffer.removeFirst()
         }
         buffer.add(message as LogMessageImpl)
-        if (systrace) {
-            val messageStr = message.printer(message)
-            Trace.instantForTrack(Trace.TRACE_TAG_APP, "UI Events", "$name - $messageStr")
-        }
-        if (logcatEchoTracker.isBufferLoggable(name, message.level) ||
-                logcatEchoTracker.isTagLoggable(message.tag, message.level)) {
-            echo(message)
-        }
+        val includeInLogcat = logcatEchoTracker.isBufferLoggable(name, message.level) ||
+                logcatEchoTracker.isTagLoggable(message.tag, message.level)
+        echo(message, toLogcat = includeInLogcat, toSystrace = systrace)
     }
 
     /** Converts the entire buffer to a newline-delimited string */
@@ -232,8 +227,24 @@ class LogBuffer @JvmOverloads constructor(
         pw.println(message.printer(message))
     }
 
-    private fun echo(message: LogMessage) {
-        val strMessage = message.printer(message)
+    private fun echo(message: LogMessage, toLogcat: Boolean, toSystrace: Boolean) {
+        if (toLogcat || toSystrace) {
+            val strMessage = message.printer(message)
+            if (toSystrace) {
+                echoToSystrace(message, strMessage)
+            }
+            if (toLogcat) {
+                echoToLogcat(message, strMessage)
+            }
+        }
+    }
+
+    private fun echoToSystrace(message: LogMessage, strMessage: String) {
+        Trace.instantForTrack(Trace.TRACE_TAG_APP, "UI Events",
+            "$name - ${message.level.shortString} ${message.tag}: $strMessage")
+    }
+
+    private fun echoToLogcat(message: LogMessage, strMessage: String) {
         when (message.level) {
             LogLevel.VERBOSE -> Log.v(message.tag, strMessage)
             LogLevel.DEBUG -> Log.d(message.tag, strMessage)
