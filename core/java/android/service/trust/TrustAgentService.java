@@ -126,9 +126,6 @@ public class TrustAgentService extends Service {
      * <p>When the platform internally removes the agent's trust in this manner, an agent can
      * re-grant it (via a call to grantTrust) without the user having to unlock the device through
      * another method (e.g. PIN). This renewable state only persists for a limited time.
-     *
-     * TODO(b/213631675): Remove @hide
-     * @hide
      */
     public static final int FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE = 1 << 2;
 
@@ -624,11 +621,15 @@ public class TrustAgentService extends Service {
      *
      * If the user has no auth method specified, then keyguard will still be shown but can be
      * dismissed normally.
-     *
-     * TODO(b/213631675): Implement & make public
-     * @hide
      */
     public final void lockUser() {
+        if (mCallback != null) {
+            try {
+                mCallback.lockUser();
+            } catch (RemoteException e) {
+                onError("calling lockUser");
+            }
+        }
     }
 
     /**
