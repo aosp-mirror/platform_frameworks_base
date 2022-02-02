@@ -3250,6 +3250,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public static final int DEVICE_OWNER_TYPE_DEFAULT = 0;
 
     /**
@@ -3257,6 +3258,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public static final int DEVICE_OWNER_TYPE_FINANCED = 1;
 
     /**
