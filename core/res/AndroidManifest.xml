@@ -4125,6 +4125,16 @@
     <permission android:name="android.permission.BIND_CONTENT_SUGGESTIONS_SERVICE"
                 android:protectionLevel="signature" />
 
+    <!-- Must be required by a
+         android.service.wallpapereffectsgeneration.WallpaperEffectsGenerationService,
+         to ensure that only the system can bind to it.
+         @SystemApi @hide This is not a third-party API (intended for OEMs and system apps).
+         <p>Protection level: signature
+   -->
+    <permission android:name="android.permission.BIND_WALLPAPER_EFFECTS_GENERATION_SERVICE"
+        android:protectionLevel="signature" />
+
+
     <!-- Must be declared by a android.service.musicrecognition.MusicRecognitionService,
          to ensure that only the system can bind to it.
          @SystemApi @hide This is not a third-party API (intended for OEMs and system apps).
@@ -5823,6 +5833,13 @@
      @hide  <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.MANAGE_SMARTSPACE"
         android:protectionLevel="signature" />
+
+    <!-- @SystemApi Allows an application to manage the wallpaper effects
+     generation service.
+        @hide  <p>Not for use by third-party applications.</p> -->
+    <permission android:name="android.permission.MANAGE_WALLPAPER_EFFECTS_GENERATION"
+        android:protectionLevel="signature" />
+
 
     <!-- Allows an app to set the theme overlay in /vendor/overlay
          being used.
