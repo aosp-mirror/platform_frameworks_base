@@ -122,10 +122,12 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
     @Override
     public void onDestroy() {
-        mKeyguardUpdateMonitor.registerCallback(mKeyguardCallback);
+        mKeyguardUpdateMonitor.removeCallback(mKeyguardCallback);
         setCurrentState(Lifecycle.State.DESTROYED);
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
-        windowManager.removeView(mWindow.getDecorView());
+        if (mWindow != null) {
+            windowManager.removeView(mWindow.getDecorView());
+        }
         mStateController.setOverlayActive(false);
         super.onDestroy();
     }
