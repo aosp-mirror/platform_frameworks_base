@@ -24,6 +24,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
@@ -343,11 +344,14 @@ public class NotificationEntryManager implements
     private final InflationCallback mInflationCallback = new InflationCallback() {
         @Override
         public void handleInflationException(NotificationEntry entry, Exception e) {
+            Trace.beginSection("NotificationEntryManager.handleInflationException");
             NotificationEntryManager.this.handleInflationException(entry.getSbn(), e);
+            Trace.endSection();
         }
 
         @Override
         public void onAsyncInflationFinished(NotificationEntry entry) {
+            Trace.beginSection("NotificationEntryManager.onAsyncInflationFinished");
             mPendingNotifications.remove(entry.getKey());
             // If there was an async task started after the removal, we don't want to add it back to
             // the list, otherwise we might get leaks.
@@ -369,6 +373,7 @@ public class NotificationEntryManager implements
                     }
                 }
             }
+            Trace.endSection();
         }
     };
 
@@ -463,6 +468,7 @@ public class NotificationEntryManager implements
             boolean forceRemove,
             DismissedByUserStats dismissedByUserStats,
             int reason) {
+        Trace.beginSection("NotificationEntryManager.removeNotificationInternal");
 
         final NotificationEntry entry = getActiveNotificationUnfiltered(key);
 
@@ -470,6 +476,7 @@ public class NotificationEntryManager implements
             if (interceptor.onNotificationRemoveRequested(key, entry, reason)) {
                 // Remove intercepted; log and skip
                 mLogger.logRemovalIntercepted(key);
+                Trace.endSection();
                 return;
             }
         }
@@ -557,6 +564,7 @@ public class NotificationEntryManager implements
                 mLeakDetector.trackGarbage(entry);
             }
         }
+        Trace.endSection();
     }
 
     private void sendNotificationRemovalToServer(
@@ -620,6 +628,7 @@ public class NotificationEntryManager implements
     private void addNotificationInternal(
             StatusBarNotification notification,
             RankingMap rankingMap) throws InflationException {
+        Trace.beginSection("NotificationEntryManager.addNotificationInternal");
         String key = notification.getKey();
         if (DEBUG) {
             Log.d(TAG, "addNotification key=" + key);
@@ -667,6 +676,7 @@ public class NotificationEntryManager implements
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onRankingApplied();
         }
+        Trace.endSection();
     }
 
     public void addNotification(StatusBarNotification notification, RankingMap ranking) {
@@ -679,12 +689,14 @@ public class NotificationEntryManager implements
 
     private void updateNotificationInternal(StatusBarNotification notification,
             RankingMap ranking) throws InflationException {
+        Trace.beginSection("NotificationEntryManager.updateNotificationInternal");
         if (DEBUG) Log.d(TAG, "updateNotification(" + notification + ")");
 
         final String key = notification.getKey();
         abortExistingInflation(key, "updateNotification");
         final NotificationEntry entry = getActiveNotificationUnfiltered(key);
         if (entry == null) {
+            Trace.endSection();
             return;
         }
 
@@ -721,6 +733,7 @@ public class NotificationEntryManager implements
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onRankingApplied();
         }
+        Trace.endSection();
     }
 
     public void updateNotification(StatusBarNotification notification, RankingMap ranking) {
@@ -740,14 +753,17 @@ public class NotificationEntryManager implements
             mLogger.logUseWhileNewPipelineActive("updateNotifications", reason);
             return;
         }
+        Trace.beginSection("NotificationEntryManager.updateNotifications");
         reapplyFilterAndSort(reason);
         if (mPresenter != null) {
             mPresenter.updateNotificationViews(reason);
         }
         mNotifLiveDataStore.setActiveNotifList(getVisibleNotifications());
+        Trace.endSection();
     }
 
     public void updateNotificationRanking(RankingMap rankingMap) {
+        Trace.beginSection("NotificationEntryManager.updateNotificationRanking");
         List<NotificationEntry> entries = new ArrayList<>();
         entries.addAll(getVisibleNotifications());
         entries.addAll(mPendingNotifications.values());
@@ -788,6 +804,7 @@ public class NotificationEntryManager implements
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onRankingApplied();
         }
+        Trace.endSection();
     }
 
     void notifyChannelModified(
@@ -887,6 +904,7 @@ public class NotificationEntryManager implements
 
     /** @return list of active notifications filtered for the current user */
     public List<NotificationEntry> getActiveNotificationsForCurrentUser() {
+        Trace.beginSection("NotificationEntryManager.getActiveNotificationsForCurrentUser");
         Assert.isMainThread();
         ArrayList<NotificationEntry> filtered = new ArrayList<>();
 
@@ -898,7 +916,7 @@ public class NotificationEntryManager implements
             }
             filtered.add(entry);
         }
-
+        Trace.endSection();
         return filtered;
     }
 
@@ -908,10 +926,12 @@ public class NotificationEntryManager implements
      * @param reason the reason for calling this method, which will be logged
      */
     public void updateRanking(RankingMap rankingMap, String reason) {
+        Trace.beginSection("NotificationEntryManager.updateRanking");
         updateRankingAndSort(rankingMap, reason);
         for (NotifCollectionListener listener : mNotifCollectionListeners) {
             listener.onRankingApplied();
         }
+        Trace.endSection();
     }
 
     /** Resorts / filters the current notification set with the current RankingMap */
@@ -920,7 +940,9 @@ public class NotificationEntryManager implements
             mLogger.logUseWhileNewPipelineActive("reapplyFilterAndSort", reason);
             return;
         }
+        Trace.beginSection("NotificationEntryManager.reapplyFilterAndSort");
         updateRankingAndSort(mRanker.getRankingMap(), reason);
+        Trace.endSection();
     }
 
     /** Calls to NotificationRankingManager and updates mSortedAndFiltered */
@@ -929,9 +951,11 @@ public class NotificationEntryManager implements
             mLogger.logUseWhileNewPipelineActive("updateRankingAndSort", reason);
             return;
         }
+        Trace.beginSection("NotificationEntryManager.updateRankingAndSort");
         mSortedAndFiltered.clear();
         mSortedAndFiltered.addAll(mRanker.updateRanking(
                 rankingMap, mActiveNotifications.values(), reason));
+        Trace.endSection();
     }
 
     /** dump the current active notification list. Called from StatusBar */

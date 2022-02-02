@@ -39,6 +39,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.children
 import com.android.systemui.util.foldToSparseArray
 import com.android.systemui.util.takeUntil
+import com.android.systemui.util.traceSection
 import javax.inject.Inject
 
 /**
@@ -157,7 +158,9 @@ class NotificationSectionsManager @Inject internal constructor(
             }
         }
     }
-    private fun logShadeContents() = parent.children.forEachIndexed(::logShadeChild)
+    private fun logShadeContents() = traceSection("NotifSectionsManager.logShadeContents") {
+        parent.children.forEachIndexed(::logShadeChild)
+    }
 
     private val isUsingMultipleSections: Boolean
         get() = sectionsFeatureManager.getNumberOfBuckets() > 1
@@ -221,10 +224,10 @@ class NotificationSectionsManager @Inject internal constructor(
      * Should be called whenever notifs are added, removed, or updated. Updates section boundary
      * bookkeeping and adds/moves/removes section headers if appropriate.
      */
-    fun updateSectionBoundaries(reason: String) {
+    fun updateSectionBoundaries(reason: String) = traceSection("NotifSectionsManager.update") {
         notifPipelineFlags.checkLegacyPipelineEnabled()
         if (!isUsingMultipleSections) {
-            return
+            return@traceSection
         }
         logger.logStartSectionUpdate(reason)
 
