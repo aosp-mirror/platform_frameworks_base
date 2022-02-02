@@ -278,6 +278,7 @@ package android.app {
   }
 
   public final class GameManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE) public boolean isAngleEnabled(@NonNull String);
     method public void setGameServiceProvider(@Nullable String);
   }
 
