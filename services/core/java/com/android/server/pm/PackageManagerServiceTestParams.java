@@ -89,6 +89,7 @@ public final class PackageManagerServiceTestParams {
     public @Nullable String defaultTextClassifierPackage;
     public @Nullable String systemTextClassifierPackage;
     public @Nullable String overlayConfigSignaturePackage;
+    public @NonNull String requiredSupplementalProcessPackage;
     public ViewCompiler viewCompiler;
     public @Nullable String retailDemoPackage;
     public @Nullable String recentsPackage;

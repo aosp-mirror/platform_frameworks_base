@@ -69,6 +69,7 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal
 import com.android.server.pm.pkg.parsing.ParsingPackage
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
+import com.android.server.supplementalprocess.SupplementalProcessManagerLocal
 import com.android.server.testutils.TestHandler
 import com.android.server.testutils.mock
 import com.android.server.testutils.nullable
@@ -335,6 +336,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         stageServicesExtensionScan()
         stageSystemSharedLibraryScan()
         stagePermissionsControllerScan()
+        stageSupplementalProcessScan()
         stageInstantAppResolverScan()
     }
 
@@ -561,6 +563,22 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
                     mockQueryActivities(Intent.ACTION_MANAGE_PERMISSIONS,
                             createBasicActivityInfo(
                                     pkg, applicationInfo, "test.PermissionActivity"))
+                    pkg
+                },
+                withSetting = { setting: PackageSettingBuilder ->
+                    setting.setPkgFlags(ApplicationInfo.FLAG_SYSTEM)
+                })
+    }
+
+    @Throws(Exception::class)
+    private fun stageSupplementalProcessScan() {
+        stageScanNewPackage("com.android.supplemental.process",
+                1L, systemPartitions[0].privAppFolder,
+                withPackage = { pkg: PackageImpl ->
+                    val applicationInfo: ApplicationInfo = createBasicApplicationInfo(pkg)
+                    mockQueryServices(SupplementalProcessManagerLocal.SERVICE_INTERFACE,
+                            createBasicServiceInfo(
+                                    pkg, applicationInfo, "SupplementalProcessService"))
                     pkg
                 },
                 withSetting = { setting: PackageSettingBuilder ->

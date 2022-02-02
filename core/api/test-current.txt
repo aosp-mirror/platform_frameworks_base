@@ -801,6 +801,7 @@ package android.content.pm {
     method @NonNull public String getPermissionControllerPackageName();
     method @NonNull public abstract String getServicesSystemSharedLibraryPackageName();
     method @NonNull public abstract String getSharedSystemSharedLibraryPackageName();
+    method @NonNull public String getSupplementalProcessPackageName();
     method @Nullable public String getSystemTextClassifierPackageName();
     method @Nullable public String getWellbeingPackageName();
     method public void holdLock(android.os.IBinder, int);
