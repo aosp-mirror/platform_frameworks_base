@@ -81,6 +81,7 @@ public class AutomaticBrightnessControllerTest {
     @Mock HysteresisLevels mScreenBrightnessThresholds;
     @Mock Handler mNoOpHandler;
     @Mock HighBrightnessModeController mHbmController;
+    @Mock BrightnessThrottler mBrightnessThrottler;
 
     @Before
     public void setUp() {
@@ -128,12 +129,15 @@ public class AutomaticBrightnessControllerTest {
                 INITIAL_LIGHT_SENSOR_RATE, BRIGHTENING_LIGHT_DEBOUNCE_CONFIG,
                 DARKENING_LIGHT_DEBOUNCE_CONFIG, RESET_AMBIENT_LUX_AFTER_WARMUP_CONFIG,
                 mAmbientBrightnessThresholds, mScreenBrightnessThresholds,
-                mContext, mHbmController, mIdleBrightnessMappingStrategy,
+                mContext, mHbmController, mBrightnessThrottler, mIdleBrightnessMappingStrategy,
                 AMBIENT_LIGHT_HORIZON_SHORT, AMBIENT_LIGHT_HORIZON_LONG
         );
 
         when(mHbmController.getCurrentBrightnessMax()).thenReturn(BRIGHTNESS_MAX_FLOAT);
         when(mHbmController.getCurrentBrightnessMin()).thenReturn(BRIGHTNESS_MIN_FLOAT);
+        // Disable brightness throttling by default. Individual tests can enable it as needed.
+        when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
+        when(mBrightnessThrottler.isThrottled()).thenReturn(false);
 
         // Configure the brightness controller and grab an instance of the sensor listener,
         // through which we can deliver fake (for test) sensor values.
@@ -419,5 +423,48 @@ public class AutomaticBrightnessControllerTest {
         // test at (considered above) threshold
         assertEquals(600f, hysteresisLevels.getBrighteningThreshold(500f), EPSILON);
         assertEquals(250f, hysteresisLevels.getDarkeningThreshold(500f), EPSILON);
+    }
+
+    @Test
+    public void testBrightnessGetsThrottled() throws Exception {
+        Sensor lightSensor = TestUtils.createSensor(Sensor.TYPE_LIGHT, "Light Sensor");
+        mController = setupController(lightSensor);
+
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager).registerListener(listenerCaptor.capture(), eq(lightSensor),
+                eq(INITIAL_LIGHT_SENSOR_RATE * 1000), any(Handler.class));
+        SensorEventListener listener = listenerCaptor.getValue();
+
+        // Set up system to return max brightness at 100 lux
+        final float normalizedBrightness = BRIGHTNESS_MAX_FLOAT;
+        final float lux = 100.0f;
+        when(mAmbientBrightnessThresholds.getBrighteningThreshold(lux))
+                .thenReturn(lux);
+        when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux))
+                .thenReturn(lux);
+        when(mBrightnessMappingStrategy.getBrightness(eq(lux), eq(null), anyInt()))
+                .thenReturn(normalizedBrightness);
+
+        // Sensor reads 100 lux. We should get max brightness.
+        listener.onSensorChanged(TestUtils.createSensorEvent(lightSensor, (int) lux));
+        assertEquals(BRIGHTNESS_MAX_FLOAT, mController.getAutomaticScreenBrightness(), 0.0f);
+
+        // Apply throttling and notify ABC (simulates DisplayPowerController#updatePowerState())
+        final float throttledBrightness = 0.123f;
+        when(mBrightnessThrottler.getBrightnessCap()).thenReturn(throttledBrightness);
+        when(mBrightnessThrottler.isThrottled()).thenReturn(true);
+        mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration */,
+                BRIGHTNESS_MAX_FLOAT /* brightness */, false /* userChangedBrightness */,
+                0 /* adjustment */, false /* userChanged */, DisplayPowerRequest.POLICY_BRIGHT);
+        assertEquals(throttledBrightness, mController.getAutomaticScreenBrightness(), 0.0f);
+
+        // Remove throttling and notify ABC again
+        when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
+        when(mBrightnessThrottler.isThrottled()).thenReturn(false);
+        mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration */,
+                BRIGHTNESS_MAX_FLOAT /* brightness */, false /* userChangedBrightness */,
+                0 /* adjustment */, false /* userChanged */, DisplayPowerRequest.POLICY_BRIGHT);
+        assertEquals(BRIGHTNESS_MAX_FLOAT, mController.getAutomaticScreenBrightness(), 0.0f);
     }
 }
