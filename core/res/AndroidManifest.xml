@@ -6542,14 +6542,6 @@
                   android:exported="false">
         </activity>
 
-        <activity android:name="com.android.server.logcat.LogAccessConfirmationActivity"
-                  android:theme="@style/Theme.Dialog.Confirmation"
-                  android:excludeFromRecents="true"
-                  android:process=":ui"
-                  android:label="@string/log_access_confirmation_title"
-                  android:exported="false">
-        </activity>
-
         <activity android:name="com.android.server.notification.NASLearnMoreActivity"
                   android:theme="@style/Theme.Dialog.Confirmation"
                   android:excludeFromRecents="true"
