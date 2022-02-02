@@ -49,7 +49,6 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
 import com.android.keyguard.ViewMediatorCallback;
-import com.android.systemui.DejankUtils;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
@@ -214,6 +213,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final DockManager mDockManager;
     private final KeyguardUpdateMonitor mKeyguardUpdateManager;
+    private final LatencyTracker mLatencyTracker;
     private KeyguardBypassController mBypassController;
     @Nullable private AlternateAuthInterceptor mAlternateAuthInterceptor;
 
@@ -246,7 +246,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             NotificationMediaManager notificationMediaManager,
             KeyguardBouncer.Factory keyguardBouncerFactory,
             KeyguardMessageAreaController.Factory keyguardMessageAreaFactory,
-            Lazy<ShadeController> shadeController) {
+            Lazy<ShadeController> shadeController,
+            LatencyTracker latencyTracker) {
         mContext = context;
         mViewMediatorCallback = callback;
         mLockPatternUtils = lockPatternUtils;
@@ -262,6 +263,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mKeyguardBouncerFactory = keyguardBouncerFactory;
         mKeyguardMessageAreaFactory = keyguardMessageAreaFactory;
         mShadeController = shadeController;
+        mLatencyTracker = latencyTracker;
     }
 
     @Override
@@ -859,15 +861,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     private void wakeAndUnlockDejank() {
-        if (mBiometricUnlockController.getMode() == MODE_WAKE_AND_UNLOCK
-                && LatencyTracker.isEnabled(mContext)) {
+        if (mBiometricUnlockController.isWakeAndUnlock() && mLatencyTracker.isEnabled()) {
             BiometricSourceType type = mBiometricUnlockController.getBiometricType();
-            DejankUtils.postAfterTraversal(() -> {
-                    LatencyTracker.getInstance(mContext).onActionEnd(
-                            type == BiometricSourceType.FACE
-                                    ? LatencyTracker.ACTION_FACE_WAKE_AND_UNLOCK
-                                    : LatencyTracker.ACTION_FINGERPRINT_WAKE_AND_UNLOCK);
-            });
+            mLatencyTracker.onActionEnd(type == BiometricSourceType.FACE
+                            ? LatencyTracker.ACTION_FACE_WAKE_AND_UNLOCK
+                            : LatencyTracker.ACTION_FINGERPRINT_WAKE_AND_UNLOCK);
         }
     }
 
