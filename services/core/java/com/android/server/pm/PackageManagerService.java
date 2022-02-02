@@ -6192,6 +6192,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             });
 
+            if (wasNotLaunched) {
+                final String installerPackageName = wasNotLaunchedAndInstallerPackageName.second;
+                if (installerPackageName != null) {
+                    notifyFirstLaunch(packageName, installerPackageName, userId);
+                }
+            }
+
             scheduleWritePackageRestrictions(userId);
         }
 
