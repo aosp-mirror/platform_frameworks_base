@@ -1111,6 +1111,19 @@ public final class Display {
     }
 
     /**
+     * Returns the system's preferred display mode. This mode will be used when the user has not
+     * specified a display-mode preference. This returns null if the boot display mode feature is
+     * not supported by system.
+     *
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    public Display.Mode getSystemPreferredDisplayMode() {
+        return mGlobal.getSystemPreferredDisplayMode(getDisplayId());
+    }
+
+    /**
      * Returns the display's HDR capabilities.
      *
      * @see #isHdr()

@@ -1828,6 +1828,16 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
+    Display.Mode getSystemPreferredDisplayModeInternal(int displayId) {
+        synchronized (mSyncRoot) {
+            final DisplayDevice device = getDeviceForDisplayLocked(displayId);
+            if (device == null) {
+                return null;
+            }
+            return device.getSystemPreferredDisplayModeLocked();
+        }
+    }
+
     void setShouldAlwaysRespectAppRequestedModeInternal(boolean enabled) {
         mDisplayModeDirector.setShouldAlwaysRespectAppRequestedMode(enabled);
     }
@@ -2175,6 +2185,16 @@ public final class DisplayManagerService extends SystemService {
             if (mDisplayModeDirector != null) {
                 mDisplayModeDirector.setLoggingEnabled(enabled);
             }
+        }
+    }
+
+    Display.Mode getActiveDisplayModeAtStart(int displayId) {
+        synchronized (mSyncRoot) {
+            final DisplayDevice device = getDeviceForDisplayLocked(displayId);
+            if (device == null) {
+                return null;
+            }
+            return device.getActiveDisplayModeAtStartLocked();
         }
     }
 
@@ -3460,6 +3480,16 @@ public final class DisplayManagerService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 return getUserPreferredDisplayModeInternal(displayId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public Display.Mode getSystemPreferredDisplayMode(int displayId) {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return getSystemPreferredDisplayModeInternal(displayId);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

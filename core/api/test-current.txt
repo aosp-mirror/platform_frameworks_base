@@ -2705,6 +2705,7 @@ package android.view {
     method @NonNull public android.view.Display.Mode getDefaultMode();
     method @NonNull public int[] getReportedHdrTypes();
     method @NonNull public android.graphics.ColorSpace[] getSupportedWideColorGamut();
+    method @Nullable public android.view.Display.Mode getSystemPreferredDisplayMode();
     method public int getType();
     method @Nullable public android.view.Display.Mode getUserPreferredDisplayMode();
     method public boolean hasAccess(int);
