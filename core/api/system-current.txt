@@ -7952,7 +7952,7 @@ package android.media.tv.tuner.frontend {
 
   public class FrontendStatus {
     method public int getAgc();
-    method @NonNull public android.media.tv.tuner.frontend.Atsc3PlpInfo[] getAllAtsc3PlpInfo();
+    method @NonNull public java.util.List<android.media.tv.tuner.frontend.Atsc3PlpInfo> getAllAtsc3PlpInfo();
     method @NonNull public android.media.tv.tuner.frontend.FrontendStatus.Atsc3PlpTuningInfo[] getAtsc3PlpTuningInfo();
     method public int getBandwidth();
     method public int getBer();
