@@ -56,6 +56,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 
 public class BatteryMeterView extends LinearLayout implements DarkReceiver {
 
@@ -125,7 +126,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
         updateShowPercent();
         mDualToneHandler = new DualToneHandler(context);
         // Init to not dark at all.
-        onDarkChanged(new Rect(), 0, DarkIconDispatcher.DEFAULT_ICON_TINT);
+        onDarkChanged(new ArrayList<Rect>(), 0, DarkIconDispatcher.DEFAULT_ICON_TINT);
 
         setClipChildren(false);
         setClipToPadding(false);
@@ -353,8 +354,8 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     }
 
     @Override
-    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
-        float intensity = DarkIconDispatcher.isInArea(area, this) ? darkIntensity : 0;
+    public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
+        float intensity = DarkIconDispatcher.isInAreas(areas, this) ? darkIntensity : 0;
         mNonAdaptedSingleToneColor = mDualToneHandler.getSingleColor(intensity);
         mNonAdaptedForegroundColor = mDualToneHandler.getFillColor(intensity);
         mNonAdaptedBackgroundColor = mDualToneHandler.getBackgroundColor(intensity);

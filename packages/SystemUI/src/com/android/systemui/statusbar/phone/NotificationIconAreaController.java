@@ -83,7 +83,7 @@ public class NotificationIconAreaController implements
     private NotificationIconContainer mNotificationIcons;
     private NotificationIconContainer mShelfIcons;
     private NotificationIconContainer mAodIcons;
-    private final Rect mTintArea = new Rect();
+    private final ArrayList<Rect> mTintAreas = new ArrayList<>();
     private Context mContext;
 
     private final DemoModeController mDemoModeController;
@@ -240,17 +240,14 @@ public class NotificationIconAreaController implements
      * See {@link com.android.systemui.statusbar.policy.DarkIconDispatcher#setIconsDarkArea}.
      * Sets the color that should be used to tint any icons in the notification area.
      *
-     * @param tintArea the area in which to tint the icons, specified in screen coordinates
+     * @param tintAreas the areas in which to tint the icons, specified in screen coordinates
      * @param darkIntensity
      */
-    public void onDarkChanged(Rect tintArea, float darkIntensity, int iconTint) {
-        if (tintArea == null) {
-            mTintArea.setEmpty();
-        } else {
-            mTintArea.set(tintArea);
-        }
+    public void onDarkChanged(ArrayList<Rect> tintAreas, float darkIntensity, int iconTint) {
+        mTintAreas.clear();
+        mTintAreas.addAll(tintAreas);
 
-        if (DarkIconDispatcher.isInArea(tintArea, mNotificationIconArea)) {
+        if (DarkIconDispatcher.isInAreas(tintAreas, mNotificationIconArea)) {
             mIconTint = iconTint;
         }
 
@@ -489,7 +486,7 @@ public class NotificationIconAreaController implements
         int color = StatusBarIconView.NO_COLOR;
         boolean colorize = !isPreL || NotificationUtils.isGrayscale(v, mContrastColorUtil);
         if (colorize) {
-            color = DarkIconDispatcher.getTint(mTintArea, v, tint);
+            color = DarkIconDispatcher.getTint(mTintAreas, v, tint);
         }
         v.setStaticDrawableColor(color);
         v.setDecorColor(tint);
