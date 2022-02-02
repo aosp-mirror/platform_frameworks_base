@@ -45,6 +45,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.metrics.LogMaker;
+import android.os.Binder;
 import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -190,8 +191,6 @@ public class PreferencesHelper implements RankingConfig {
 
     private Map<String, List<String>> mOemLockedApps = new HashMap();
 
-    private int mCurrentUserId = UserHandle.USER_NULL;
-
     public PreferencesHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
             ZenModeHelper zenHelper, PermissionHelper permHelper,
             NotificationChannelLogger notificationChannelLogger,
@@ -215,7 +214,6 @@ public class PreferencesHelper implements RankingConfig {
         updateBadgingEnabled();
         updateBubblesEnabled();
         updateMediaNotificationFilteringEnabled();
-        mCurrentUserId = ActivityManager.getCurrentUser();
         syncChannelsBypassingDnd();
     }
 
@@ -1762,12 +1760,13 @@ public class PreferencesHelper implements RankingConfig {
     private void updateChannelsBypassingDnd() {
         ArraySet<Pair<String, Integer>> candidatePkgs = new ArraySet<>();
 
+        final int currentUserId = getCurrentUser();
         synchronized (mPackagePreferences) {
             final int numPackagePreferences = mPackagePreferences.size();
             for (int i = 0; i < numPackagePreferences; i++) {
                 final PackagePreferences r = mPackagePreferences.valueAt(i);
                 // Package isn't associated with the current userId
-                if (mCurrentUserId != UserHandle.getUserId(r.uid)) {
+                if (currentUserId != UserHandle.getUserId(r.uid)) {
                     continue;
                 }
 
@@ -1802,6 +1801,13 @@ public class PreferencesHelper implements RankingConfig {
             mAreChannelsBypassingDnd = haveBypassingApps;
             updateZenPolicy(mAreChannelsBypassingDnd);
         }
+    }
+
+    private int getCurrentUser() {
+        final long identity = Binder.clearCallingIdentity();
+        int currentUserId = ActivityManager.getCurrentUser();
+        Binder.restoreCallingIdentity(identity);
+        return currentUserId;
     }
 
     private boolean channelIsLiveLocked(PackagePreferences pkgPref, NotificationChannel channel) {
@@ -2507,22 +2513,6 @@ public class PreferencesHelper implements RankingConfig {
             }
         }
         return packageChannels;
-    }
-
-    /**
-     * Called when user switches
-     */
-    public void onUserSwitched(int userId) {
-        mCurrentUserId = userId;
-        syncChannelsBypassingDnd();
-    }
-
-    /**
-     * Called when user is unlocked
-     */
-    public void onUserUnlocked(int userId) {
-        mCurrentUserId = userId;
-        syncChannelsBypassingDnd();
     }
 
     public void onUserRemoved(int userId) {

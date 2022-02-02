@@ -1801,24 +1801,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testUpdateChannelsBypassingDnd_onUserSwitch_onUserUnlocked() throws Exception {
-        int user = USER.getIdentifier();
-        NotificationChannelGroup ncg = new NotificationChannelGroup("group1", "name1");
-        NotificationChannel channel1 = new NotificationChannel("id1", "name1",
-                NotificationManager.IMPORTANCE_MAX);
-        channel1.setBypassDnd(true);
-        channel1.setGroup(ncg.getId());
-
-        // channel is associated with a group, then group is deleted
-        mHelper.createNotificationChannelGroup(PKG_N_MR1, user, ncg,  /* fromTargetApp */ true);
-        mHelper.createNotificationChannel(PKG_N_MR1, user, channel1, true, /*has DND access*/ true);
-        mHelper.deleteNotificationChannelGroup(PKG_N_MR1, user, ncg.getId());
-
-        mHelper.onUserSwitched(user);
-        mHelper.onUserUnlocked(user);
-    }
-
-    @Test
     public void testGetChannelsBypassingDndCount_noChannelsBypassing() throws Exception {
         assertEquals(0, mHelper.getNotificationChannelsBypassingDnd(PKG_N_MR1,
                 USER.getIdentifier()).getList().size());
