@@ -40,6 +40,30 @@ filegroup {
     ],
 }
 
+// For test code only.
+filegroup {
+    name: "lib_networkStatsFactory_native",
+    srcs: [
+        "jni/com_android_server_net_NetworkStatsFactory.cpp",
+    ],
+    path: "jni",
+    visibility: [
+        "//packages/modules/Connectivity:__subpackages__",
+    ],
+}
+
+filegroup {
+    name: "services.connectivity-netstats-jni-sources",
+    srcs: [
+        "jni/com_android_server_net_NetworkStatsFactory.cpp",
+        "jni/com_android_server_net_NetworkStatsService.cpp",
+    ],
+    path: "jni",
+    visibility: [
+        "//packages/modules/Connectivity:__subpackages__",
+    ],
+}
+
 // Nsd related libraries.
 
 filegroup {
