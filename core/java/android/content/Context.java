@@ -3888,7 +3888,6 @@ public abstract class Context {
             //@hide: SPEECH_RECOGNITION_SERVICE,
             UWB_SERVICE,
             MEDIA_METRICS_SERVICE,
-            SUPPLEMENTAL_PROCESS_SERVICE,
             //@hide: ATTESTATION_VERIFICATION_SERVICE,
             //@hide: SAFETY_CENTER_SERVICE,
     })
@@ -5968,13 +5967,6 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     public static final String LOCALE_SERVICE = "locale";
-
-    /**
-     * Use with {@link #getSystemService(String)} to retrieve a Supplemental Process Manager.
-     *
-     * @see #getSystemService(String)
-     */
-    public static final String SUPPLEMENTAL_PROCESS_SERVICE = "supplemental_process";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
