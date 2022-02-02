@@ -31425,6 +31425,9 @@ package android.os {
     method @Nullable public byte[] createByteArray();
     method @Nullable public char[] createCharArray();
     method @Nullable public double[] createDoubleArray();
+    method @Nullable public <T> T createFixedArray(@NonNull Class<T>, @NonNull int...);
+    method @Nullable public <T, S extends android.os.IInterface> T createFixedArray(@NonNull Class<T>, @NonNull java.util.function.Function<android.os.IBinder,S>, @NonNull int...);
+    method @Nullable public <T, S extends android.os.Parcelable> T createFixedArray(@NonNull Class<T>, @NonNull android.os.Parcelable.Creator<S>, @NonNull int...);
     method @Nullable public float[] createFloatArray();
     method @Nullable public int[] createIntArray();
     method @Nullable public <T extends android.os.IInterface> T[] createInterfaceArray(@NonNull java.util.function.IntFunction<T[]>, @NonNull java.util.function.Function<android.os.IBinder,T>);
@@ -31466,6 +31469,9 @@ package android.os {
     method public void readException();
     method public void readException(int, String);
     method public android.os.ParcelFileDescriptor readFileDescriptor();
+    method public <T> void readFixedArray(@NonNull T);
+    method public <T, S extends android.os.IInterface> void readFixedArray(@NonNull T, @NonNull java.util.function.Function<android.os.IBinder,S>);
+    method public <T, S extends android.os.Parcelable> void readFixedArray(@NonNull T, @NonNull android.os.Parcelable.Creator<S>);
     method public float readFloat();
     method public void readFloatArray(@NonNull float[]);
     method @Deprecated @Nullable public java.util.HashMap readHashMap(@Nullable ClassLoader);
@@ -31526,6 +31532,7 @@ package android.os {
     method public void writeDoubleArray(@Nullable double[]);
     method public void writeException(@NonNull Exception);
     method public void writeFileDescriptor(@NonNull java.io.FileDescriptor);
+    method public <T> void writeFixedArray(@Nullable T, int, @NonNull int...);
     method public void writeFloat(float);
     method public void writeFloatArray(@Nullable float[]);
     method public void writeInt(int);
