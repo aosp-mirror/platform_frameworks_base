@@ -11627,6 +11627,7 @@ package android.service.trust {
     method @Deprecated public final void grantTrust(CharSequence, long, boolean);
     method public final void grantTrust(CharSequence, long, int);
     method public final void isEscrowTokenActive(long, android.os.UserHandle);
+    method public final void lockUser();
     method public final android.os.IBinder onBind(android.content.Intent);
     method public boolean onConfigure(java.util.List<android.os.PersistableBundle>);
     method public void onDeviceLocked();
@@ -11637,13 +11638,16 @@ package android.service.trust {
     method public void onEscrowTokenStateReceived(long, int);
     method public void onTrustTimeout();
     method public void onUnlockAttempt(boolean);
+    method public void onUserRequestedUnlock();
     method public final void removeEscrowToken(long, android.os.UserHandle);
     method public final void revokeTrust();
     method public final void setManagingTrust(boolean);
     method public final void showKeyguardErrorMessage(@NonNull CharSequence);
     method public final void unlockUserWithToken(long, byte[], android.os.UserHandle);
     field public static final int FLAG_GRANT_TRUST_DISMISS_KEYGUARD = 2; // 0x2
+    field public static final int FLAG_GRANT_TRUST_DISPLAY_MESSAGE = 8; // 0x8
     field public static final int FLAG_GRANT_TRUST_INITIATED_BY_USER = 1; // 0x1
+    field public static final int FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE = 4; // 0x4
     field public static final String SERVICE_INTERFACE = "android.service.trust.TrustAgentService";
     field public static final int TOKEN_STATE_ACTIVE = 1; // 0x1
     field public static final int TOKEN_STATE_INACTIVE = 0; // 0x0
