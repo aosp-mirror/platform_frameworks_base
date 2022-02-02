@@ -4135,10 +4135,16 @@
   <java-symbol type="string" name="accessibility_system_action_quick_settings_label" />
   <java-symbol type="string" name="accessibility_system_action_recents_label" />
   <java-symbol type="string" name="accessibility_system_action_screenshot_label" />
+  <java-symbol type="string" name="accessibility_system_action_headset_hook_label" />
   <java-symbol type="string" name="accessibility_system_action_on_screen_a11y_shortcut_label" />
   <java-symbol type="string" name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" />
   <java-symbol type="string" name="accessibility_system_action_hardware_a11y_shortcut_label" />
   <java-symbol type="string" name="accessibility_system_action_dismiss_notification_shade" />
+  <java-symbol type="string" name="accessibility_system_action_dpad_up_label" />
+  <java-symbol type="string" name="accessibility_system_action_dpad_down_label" />
+  <java-symbol type="string" name="accessibility_system_action_dpad_left_label" />
+  <java-symbol type="string" name="accessibility_system_action_dpad_right_label" />
+  <java-symbol type="string" name="accessibility_system_action_dpad_center_label" />
 
   <java-symbol type="string" name="accessibility_freeform_caption" />
 
