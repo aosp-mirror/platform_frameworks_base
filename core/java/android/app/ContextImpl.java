@@ -1998,7 +1998,7 @@ class ContextImpl extends Context {
     private boolean bindServiceCommon(Intent service, ServiceConnection conn, int flags,
             String instanceName, Handler handler, Executor executor, UserHandle user) {
         // Keep this in sync with DevicePolicyManager.bindDeviceAdminServiceAsUser and
-        // ActivityManagerService.LocalService.startAndBindSupplementalProcessService
+        // ActivityManagerLocal.bindSupplementalProcessService
         IServiceConnection sd;
         if (conn == null) {
             throw new IllegalArgumentException("connection is null");
