@@ -17,11 +17,15 @@
 package com.android.server.biometrics.sensors.face.aidl;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyByte;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
 import android.os.IBinder;
@@ -38,8 +42,12 @@ import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -71,9 +79,17 @@ public class FaceEnrollClientTest {
     private ClientMonitorCallback mCallback;
     @Mock
     private Sensor.HalSessionCallback mHalSessionCallback;
+    @Captor
+    private ArgumentCaptor<OperationContext> mOperationContextCaptor;
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
+
+    @Before
+    public void setup() {
+        when(mBiometricContext.updateContext(any(), anyBoolean())).thenAnswer(
+                i -> i.getArgument(0));
+    }
 
     @Test
     public void enrollNoContext_v1() throws RemoteException {
@@ -89,7 +105,11 @@ public class FaceEnrollClientTest {
         final FaceEnrollClient client = createClient(2);
         client.start(mCallback);
 
-        verify(mHal).enrollWithContext(any(), anyByte(), any(), any(), any());
+        InOrder order = inOrder(mHal, mBiometricContext);
+        order.verify(mBiometricContext).updateContext(
+                mOperationContextCaptor.capture(), anyBoolean());
+        order.verify(mHal).enrollWithContext(any(), anyByte(), any(), any(),
+                same(mOperationContextCaptor.getValue()));
         verify(mHal, never()).enroll(any(), anyByte(), any(), any());
     }
 

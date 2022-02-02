@@ -98,6 +98,8 @@ public class KeyguardCoordinator implements Coordinator {
         setupInvalidateNotifListCallbacks();
         // Filter at the "finalize" stage so that views remain bound by PreparationCoordinator
         pipeline.addFinalizeFilter(mNotifFilter);
+
+        updateSectionHeadersVisibility();
     }
 
     private final NotifFilter mNotifFilter = new NotifFilter(TAG) {
@@ -164,6 +166,8 @@ public class KeyguardCoordinator implements Coordinator {
         }
     }
 
+    // TODO(b/206118999): merge this class with SensitiveContentCoordinator which also depends on
+    // these same updates
     private void setupInvalidateNotifListCallbacks() {
         // register onKeyguardShowing callback
         mKeyguardStateController.addCallback(mKeyguardCallback);
@@ -220,10 +224,7 @@ public class KeyguardCoordinator implements Coordinator {
     }
 
     private void invalidateListFromFilter(String reason) {
-        boolean onKeyguard = mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
-        boolean neverShowSections = mSectionHeaderVisibilityProvider.getNeverShowSectionHeaders();
-        boolean showSections = !onKeyguard && !neverShowSections;
-        mSectionHeaderVisibilityProvider.setSectionHeadersVisible(showSections);
+        updateSectionHeadersVisibility();
         mNotifFilter.invalidateList();
     }
 
@@ -233,6 +234,13 @@ public class KeyguardCoordinator implements Coordinator {
                         mContext.getContentResolver(),
                         Settings.Secure.LOCK_SCREEN_SHOW_SILENT_NOTIFICATIONS,
                         1) == 0;
+    }
+
+    private void updateSectionHeadersVisibility() {
+        boolean onKeyguard = mStatusBarStateController.getState() == StatusBarState.KEYGUARD;
+        boolean neverShowSections = mSectionHeaderVisibilityProvider.getNeverShowSectionHeaders();
+        boolean showSections = !onKeyguard && !neverShowSections;
+        mSectionHeaderVisibilityProvider.setSectionHeadersVisible(showSections);
     }
 
     private final KeyguardStateController.Callback mKeyguardCallback =

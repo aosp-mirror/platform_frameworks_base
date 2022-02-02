@@ -475,7 +475,7 @@ public class InputMethodService extends AbstractInputMethodService {
     private InputMethodPrivilegedOperations mPrivOps = new InputMethodPrivilegedOperations();
 
     @NonNull
-    final NavigationBarController mNavigationBarController =
+    private final NavigationBarController mNavigationBarController =
             new NavigationBarController(this);
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -1504,7 +1504,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 Context.LAYOUT_INFLATER_SERVICE);
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.initSoftInputWindow");
         mWindow = new SoftInputWindow(this, mTheme, mDispatcherState);
-
+        mNavigationBarController.onSoftInputWindowCreated(mWindow);
         {
             final Window window = mWindow.getWindow();
             {

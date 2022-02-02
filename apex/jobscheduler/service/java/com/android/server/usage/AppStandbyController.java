@@ -356,6 +356,14 @@ public class AppStandbyController
             ConstantsObserver.DEFAULT_BROADCAST_RESPONSE_WINDOW_DURATION_MS;
 
     /**
+     * Process state threshold that is used for deciding whether or not an app is in the background
+     * in the context of recording broadcast response stats. Apps whose process state is higher
+     * than this threshold state will be considered to be in background.
+     */
+    volatile int mBroadcastResponseFgThresholdState =
+            ConstantsObserver.DEFAULT_BROADCAST_RESPONSE_FG_THRESHOLD_STATE;
+
+    /**
      * Whether we should allow apps into the
      * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED} bucket or not.
      * If false, any attempts to put an app into the bucket will put the app into the
@@ -1788,6 +1796,11 @@ public class AppStandbyController
     }
 
     @Override
+    public int getBroadcastResponseFgThresholdState() {
+        return mBroadcastResponseFgThresholdState;
+    }
+
+    @Override
     public void flushToDisk() {
         synchronized (mAppIdleLock) {
             mAppIdleHistory.writeAppIdleTimes(mInjector.elapsedRealtime());
@@ -2056,6 +2069,10 @@ public class AppStandbyController
 
         pw.print("  mBroadcastResponseWindowDurationMillis=");
         TimeUtils.formatDuration(mBroadcastResponseWindowDurationMillis, pw);
+        pw.println();
+
+        pw.print("  mBroadcastResponseFgThresholdState=");
+        pw.print(ActivityManager.procStateToString(mBroadcastResponseFgThresholdState));
         pw.println();
 
         pw.println();
@@ -2491,6 +2508,8 @@ public class AppStandbyController
         };
         private static final String KEY_BROADCAST_RESPONSE_WINDOW_DURATION_MS =
                 "broadcast_response_window_timeout_ms";
+        private static final String KEY_BROADCAST_RESPONSE_FG_THRESHOLD_STATE =
+                "broadcast_response_fg_threshold_state";
         public static final long DEFAULT_CHECK_IDLE_INTERVAL_MS =
                 COMPRESS_TIME ? ONE_MINUTE : 4 * ONE_HOUR;
         public static final long DEFAULT_STRONG_USAGE_TIMEOUT =
@@ -2522,6 +2541,8 @@ public class AppStandbyController
         public static final boolean DEFAULT_CROSS_PROFILE_APPS_SHARE_STANDBY_BUCKETS = true;
         public static final long DEFAULT_BROADCAST_RESPONSE_WINDOW_DURATION_MS =
                 2 * ONE_MINUTE;
+        public static final int DEFAULT_BROADCAST_RESPONSE_FG_THRESHOLD_STATE =
+                ActivityManager.PROCESS_STATE_TOP;
 
         ConstantsObserver(Handler handler) {
             super(handler);
@@ -2643,6 +2664,11 @@ public class AppStandbyController
                             mBroadcastResponseWindowDurationMillis = properties.getLong(
                                     KEY_BROADCAST_RESPONSE_WINDOW_DURATION_MS,
                                     DEFAULT_BROADCAST_RESPONSE_WINDOW_DURATION_MS);
+                            break;
+                        case KEY_BROADCAST_RESPONSE_FG_THRESHOLD_STATE:
+                            mBroadcastResponseFgThresholdState = properties.getInt(
+                                    KEY_BROADCAST_RESPONSE_FG_THRESHOLD_STATE,
+                                    DEFAULT_BROADCAST_RESPONSE_FG_THRESHOLD_STATE);
                             break;
                         default:
                             if (!timeThresholdsUpdated

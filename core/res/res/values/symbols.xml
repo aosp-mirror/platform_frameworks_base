@@ -375,6 +375,7 @@
   <java-symbol type="string" name="config_usbConfirmActivity" />
   <java-symbol type="string" name="config_usbResolverActivity" />
   <java-symbol type="string" name="config_sensorUseStartedActivity" />
+  <java-symbol type="string" name="config_hdmiCecSetMenuLanguageActivity" />
   <java-symbol type="integer" name="config_minNumVisibleRecentTasks_lowRam" />
   <java-symbol type="integer" name="config_maxNumVisibleRecentTasks_lowRam" />
   <java-symbol type="integer" name="config_minNumVisibleRecentTasks_grid" />
@@ -4100,6 +4101,7 @@
   <java-symbol type="layout" name="chooser_action_button" />
   <java-symbol type="dimen" name="chooser_action_button_icon_size" />
   <java-symbol type="string" name="config_defaultNearbySharingComponent" />
+  <java-symbol type="string" name="config_defaultNearbyFastPairSettingsDevicesComponent" />
   <java-symbol type="bool" name="config_disable_all_cb_messages" />
   <java-symbol type="drawable" name="ic_close" />
 
@@ -4677,6 +4679,8 @@
   <java-symbol type="string" name="config_deviceManagerUpdater" />
 
   <java-symbol type="string" name="config_deviceSpecificDeviceStatePolicyProvider" />
+
+  <java-symbol type="array" name="config_dockExtconStateMapping" />
 
   <java-symbol type="string" name="notification_channel_abusive_bg_apps"/>
   <java-symbol type="string" name="notification_title_abusive_bg_apps"/>

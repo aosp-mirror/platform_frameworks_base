@@ -1602,7 +1602,7 @@
         android:protectionLevel="normal"
         android:permissionFlags="removed"/>
 
-    <!-- @hide We need to keep this around for backwards compatibility -->
+    <!-- @SystemApi @hide We need to keep this around for backwards compatibility -->
     <permission android:name="android.permission.WRITE_SMS"
         android:protectionLevel="normal"
         android:permissionFlags="removed"/>
@@ -1680,7 +1680,7 @@
     <permission android:name="android.permission.RECEIVE_EMERGENCY_BROADCAST"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Allows an application to monitor incoming Bluetooth MAP messages, to record
+    <!-- @SystemApi Allows an application to monitor incoming Bluetooth MAP messages, to record
          or perform processing on them. -->
     <!-- @hide -->
     <permission android:name="android.permission.RECEIVE_BLUETOOTH_MAP"
@@ -4627,6 +4627,13 @@
     <permission android:name="android.permission.READ_FRAME_BUFFER"
         android:protectionLevel="signature|recents" />
 
+      <!-- @SystemApi Allows an application to change the touch mode state.
+           Without this permission, an app can only change the touch mode
+           if it currently has focus.
+         @hide -->
+    <permission android:name="android.permission.MODIFY_TOUCH_MODE_STATE"
+        android:protectionLevel="signature" />
+
     <!-- Allows an application to use InputFlinger's low level features.
          @hide -->
     <permission android:name="android.permission.ACCESS_INPUT_FLINGER"
@@ -5371,7 +5378,7 @@
                 android:protectionLevel="signature|setup|role" />
 
     <!-- Allows access to keyguard secure storage.  Only allowed for system processes.
-         @hide @TestApi -->
+        @hide -->
     <permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE"
         android:protectionLevel="signature|setup" />
 
@@ -6752,6 +6759,10 @@
             <meta-data
                     android:name="android.accessibilityservice"
                     android:resource="@xml/autofill_compat_accessibility_service" />
+        </service>
+
+        <service android:name="com.google.android.startop.iorap.IorapForwardingService$IorapdJobServiceProxy"
+                 android:permission="android.permission.BIND_JOB_SERVICE" >
         </service>
 
         <service android:name="com.android.server.blob.BlobStoreIdleJobService"

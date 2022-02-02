@@ -457,6 +457,9 @@ void NativeInputManager::dump(std::string& dump) {
     mInputManager->getReader().dump(dump);
     dump += "\n";
 
+    mInputManager->getUnwantedInteractionBlocker().dump(dump);
+    dump += "\n";
+
     mInputManager->getClassifier().dump(dump);
     dump += "\n";
 
@@ -704,6 +707,7 @@ void NativeInputManager::ensureSpriteControllerLocked() REQUIRES(mLock) {
 
 void NativeInputManager::notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices) {
     ATRACE_CALL();
+    mInputManager->getUnwantedInteractionBlocker().notifyInputDevicesChanged(inputDevices);
     JNIEnv* env = jniEnv();
 
     size_t count = inputDevices.size();

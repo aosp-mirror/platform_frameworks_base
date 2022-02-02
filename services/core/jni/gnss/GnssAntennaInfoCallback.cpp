@@ -226,17 +226,18 @@ jobject GnssAntennaInfoCallback::translateSingleGnssAntennaInfo(
             env->NewObject(class_gnssAntennaInfoBuilder, method_gnssAntennaInfoBuilderCtor);
 
     // Set fields
-    env->CallObjectMethod(gnssAntennaInfoBuilderObject,
-                          method_gnssAntennaInfoBuilderSetCarrierFrequencyMHz,
-                          gnssAntennaInfo.carrierFrequencyMHz);
-    env->CallObjectMethod(gnssAntennaInfoBuilderObject,
-                          method_gnssAntennaInfoBuilderSetPhaseCenterOffset, phaseCenterOffset);
-    env->CallObjectMethod(gnssAntennaInfoBuilderObject,
-                          method_gnssAntennaInfoBuilderSetPhaseCenterVariationCorrections,
-                          phaseCenterVariationCorrections);
-    env->CallObjectMethod(gnssAntennaInfoBuilderObject,
-                          method_gnssAntennaInfoBuilderSetSignalGainCorrections,
-                          signalGainCorrections);
+    callObjectMethodIgnoringResult(env, gnssAntennaInfoBuilderObject,
+                                   method_gnssAntennaInfoBuilderSetCarrierFrequencyMHz,
+                                   gnssAntennaInfo.carrierFrequencyMHz);
+    callObjectMethodIgnoringResult(env, gnssAntennaInfoBuilderObject,
+                                   method_gnssAntennaInfoBuilderSetPhaseCenterOffset,
+                                   phaseCenterOffset);
+    callObjectMethodIgnoringResult(env, gnssAntennaInfoBuilderObject,
+                                   method_gnssAntennaInfoBuilderSetPhaseCenterVariationCorrections,
+                                   phaseCenterVariationCorrections);
+    callObjectMethodIgnoringResult(env, gnssAntennaInfoBuilderObject,
+                                   method_gnssAntennaInfoBuilderSetSignalGainCorrections,
+                                   signalGainCorrections);
 
     // build
     jobject gnssAntennaInfoObject =

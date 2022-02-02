@@ -311,9 +311,6 @@
     <!-- Move the back button drawable for 3 button layout upwards in ime mode and in portrait -->
     <dimen name="navbar_back_button_ime_offset">2dp</dimen>
 
-    <!-- Amount of close_handle that will NOT overlap the notification list -->
-    <dimen name="close_handle_underlap">32dp</dimen>
-
     <!-- Height of the status bar header bar in the car setting. -->
     <dimen name="car_status_bar_header_height">128dp</dimen>
 
@@ -376,8 +373,12 @@
     -->
     <dimen name="nssl_split_shade_min_content_height">256dp</dimen>
 
-    <!-- The bottom margin of the panel that holds the list of notifications. -->
-    <dimen name="notification_panel_margin_bottom">0dp</dimen>
+    <dimen name="notification_panel_margin_bottom">32dp</dimen>
+
+    <!-- The bottom padding of the panel that holds the list of notifications. -->
+    <dimen name="notification_panel_padding_bottom">0dp</dimen>
+
+    <dimen name="split_shade_notifications_scrim_margin_bottom">0dp</dimen>
 
     <dimen name="notification_panel_width">@dimen/match_parent</dimen>
 

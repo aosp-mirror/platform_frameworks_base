@@ -54,7 +54,9 @@ import static org.mockito.Mockito.verify;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.view.IDisplayWindowListener;
 import android.view.IWindowManager;
@@ -84,8 +86,6 @@ import com.android.wm.shell.common.TransactionPool;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 
@@ -106,6 +106,7 @@ public class ShellTransitionTests {
     private final TestShellExecutor mMainExecutor = new TestShellExecutor();
     private final ShellExecutor mAnimExecutor = new TestShellExecutor();
     private final TestTransitionHandler mDefaultHandler = new TestTransitionHandler();
+    private final Handler mMainHandler = new Handler(Looper.getMainLooper());
 
     @Before
     public void setUp() {
@@ -752,7 +753,7 @@ public class ShellTransitionTests {
 
     private Transitions createTestTransitions() {
         return new Transitions(mOrganizer, mTransactionPool, createTestDisplayController(),
-                mContext, mMainExecutor, mAnimExecutor);
+                mContext, mMainExecutor, mMainHandler, mAnimExecutor);
     }
 //
 //    private class TestDisplayController extends DisplayController {

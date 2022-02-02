@@ -182,6 +182,7 @@ public class ClipboardOverlayController {
         withWindowAttached(() -> {
             mWindow.setContentView(mView);
             updateInsets(mWindowManager.getCurrentWindowMetrics().getWindowInsets());
+            mView.requestLayout();
             mView.post(this::animateIn);
         });
 
@@ -213,7 +214,7 @@ public class ClipboardOverlayController {
         mContext.sendBroadcast(new Intent(COPY_OVERLAY_ACTION), SELF_PERMISSION);
     }
 
-    void setClipData(ClipData clipData) {
+    void setClipData(ClipData clipData, String clipSource) {
         reset();
         if (clipData == null || clipData.getItemCount() == 0) {
             showTextPreview(mContext.getResources().getString(
@@ -221,7 +222,7 @@ public class ClipboardOverlayController {
         } else if (!TextUtils.isEmpty(clipData.getItemAt(0).getText())) {
             ClipData.Item item = clipData.getItemAt(0);
             if (item.getTextLinks() != null) {
-                AsyncTask.execute(() -> classifyText(clipData.getItemAt(0)));
+                AsyncTask.execute(() -> classifyText(clipData.getItemAt(0), clipSource));
             }
             showEditableText(item.getText());
         } else if (clipData.getItemAt(0).getUri() != null) {
@@ -238,7 +239,7 @@ public class ClipboardOverlayController {
         mOnSessionCompleteListener = runnable;
     }
 
-    private void classifyText(ClipData.Item item) {
+    private void classifyText(ClipData.Item item, String source) {
         ArrayList<RemoteAction> actions = new ArrayList<>();
         for (TextLinks.TextLink link : item.getTextLinks().getLinks()) {
             TextClassification classification = mTextClassifier.classifyText(
@@ -246,14 +247,14 @@ public class ClipboardOverlayController {
             actions.addAll(classification.getActions());
         }
         mView.post(() -> {
-            for (ScreenshotActionChip chip : mActionChips) {
-                mActionContainer.removeView(chip);
-            }
-            mActionChips.clear();
+            resetActionChips();
             for (RemoteAction action : actions) {
-                ScreenshotActionChip chip = constructActionChip(action);
-                mActionContainer.addView(chip);
-                mActionChips.add(chip);
+                Intent targetIntent = action.getActionIntent().getIntent();
+                if (!TextUtils.equals(source, targetIntent.getComponent().getPackageName())) {
+                    ScreenshotActionChip chip = constructActionChip(action);
+                    mActionContainer.addView(chip);
+                    mActionChips.add(chip);
+                }
             }
         });
     }
@@ -451,13 +452,17 @@ public class ClipboardOverlayController {
         }
     }
 
-    private void reset() {
-        mView.setTranslationX(0);
-        mView.setAlpha(0);
+    private void resetActionChips() {
         for (ScreenshotActionChip chip : mActionChips) {
             mActionContainer.removeView(chip);
         }
         mActionChips.clear();
+    }
+
+    private void reset() {
+        mView.setTranslationX(0);
+        mView.setAlpha(0);
+        resetActionChips();
         mTimeoutHandler.cancelTimeout();
     }
 

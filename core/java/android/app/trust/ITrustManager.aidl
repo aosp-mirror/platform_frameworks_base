@@ -17,7 +17,6 @@
 package android.app.trust;
 
 import android.app.trust.ITrustListener;
-import android.content.ComponentName;
 import android.hardware.biometrics.BiometricSourceType;
 
 /**
@@ -30,7 +29,6 @@ interface ITrustManager {
     void reportUserRequestedUnlock(int userId);
     void reportUnlockLockout(int timeoutMs, int userId);
     void reportEnabledTrustAgentsChanged(int userId);
-    void enableTrustAgentForUserForTest(in ComponentName componentName, int userId);
     void registerTrustListener(in ITrustListener trustListener);
     void unregisterTrustListener(in ITrustListener trustListener);
     void reportKeyguardShowingChanged();

@@ -400,4 +400,16 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
         assertEquals(fgUserName, userSwitcherController.currentUserName)
     }
+
+    @Test
+    fun isSystemUser_currentUserIsSystemUser_shouldReturnTrue() {
+        `when`(userTracker.userId).thenReturn(UserHandle.USER_SYSTEM)
+        assertEquals(true, userSwitcherController.isSystemUser)
+    }
+
+    @Test
+    fun isSystemUser_currentUserIsNotSystemUser_shouldReturnFalse() {
+        `when`(userTracker.userId).thenReturn(1)
+        assertEquals(false, userSwitcherController.isSystemUser)
+    }
 }

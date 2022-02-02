@@ -31,7 +31,6 @@ import android.util.proto.ProtoOutputStream;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowInsetsController;
 import android.view.WindowManager;
 
 import java.lang.annotation.Retention;
@@ -262,11 +261,6 @@ final class SoftInputWindow extends Dialog {
             default:
                 throw new IllegalStateException("Unknown state=" + state);
         }
-    }
-
-    @Override
-    public void onSystemBarAppearanceChanged(@WindowInsetsController.Appearance int appearance) {
-        mService.mNavigationBarController.onSystemBarAppearanceChanged(appearance);
     }
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {

@@ -53,6 +53,7 @@ import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
+import android.hardware.biometrics.common.OperationContext;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -64,6 +65,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.biometrics.log.BiometricFrameworkStatsLogger;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -681,16 +683,18 @@ public final class AuthSession implements IBinder.DeathRecipient {
                         + ", Latency: " + latency);
             }
 
-            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_AUTHENTICATED,
+            final OperationContext operationContext = new OperationContext();
+            operationContext.isCrypto = isCrypto();
+            BiometricFrameworkStatsLogger.getInstance().authenticate(
+                    operationContext,
                     statsModality(),
-                    mUserId,
-                    isCrypto(),
+                    BiometricsProtoEnums.ACTION_UNKNOWN,
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
-                    mPreAuthInfo.confirmationRequested,
-                    FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED,
-                    latency,
                     mDebugEnabled,
-                    -1 /* sensorId */,
+                    latency,
+                    FrameworkStatsLog.BIOMETRIC_AUTHENTICATED__STATE__CONFIRMED,
+                    mPreAuthInfo.confirmationRequested,
+                    mUserId,
                     -1f /* ambientLightLux */);
         } else {
             final long latency = System.currentTimeMillis() - mStartTimeMs;
@@ -711,17 +715,18 @@ public final class AuthSession implements IBinder.DeathRecipient {
                         + ", Latency: " + latency);
             }
             // Auth canceled
-            FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ERROR_OCCURRED,
+            final OperationContext operationContext = new OperationContext();
+            operationContext.isCrypto = isCrypto();
+            BiometricFrameworkStatsLogger.getInstance().error(
+                    operationContext,
                     statsModality(),
-                    mUserId,
-                    isCrypto(),
                     BiometricsProtoEnums.ACTION_AUTHENTICATE,
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
-                    error,
-                    0 /* vendorCode */,
                     mDebugEnabled,
                     latency,
-                    -1 /* sensorId */);
+                    error,
+                    0 /* vendorCode */,
+                    mUserId);
         }
     }
 

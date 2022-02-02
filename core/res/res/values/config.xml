@@ -2891,6 +2891,11 @@
     <string name="config_sensorUseStartedActivity" translatable="false"
             >com.android.systemui/com.android.systemui.sensorprivacy.SensorUseStartedActivity</string>
 
+    <!-- Component name of the activity used to ask a user to confirm system language change after
+         receiving <Set Menu Language> CEC message. -->
+    <string name="config_hdmiCecSetMenuLanguageActivity"
+            >com.android.systemui/com.android.systemui.hdmi.HdmiCecSetMenuLanguageActivity</string>
+
     <!-- Name of the dialog that is used to request the user's consent for a Platform VPN -->
     <string name="config_platformVpnConfirmDialogComponent" translatable="false"
             >com.android.vpndialogs/com.android.vpndialogs.PlatformVpnConfirmDialog</string>
@@ -4978,6 +4983,10 @@
     <!-- URI used for Nearby Share SliceProvider scanning. -->
     <string translatable="false" name="config_defaultNearbySharingSliceUri"></string>
 
+    <!-- Component name that accepts settings intents for saved devices.
+             Used by FastPairSettingsFragment. -->
+    <string translatable="false" name="config_defaultNearbyFastPairSettingsDevicesComponent"></string>
+
     <!-- Boolean indicating whether frameworks needs to reset cell broadcast geo-fencing
          check after reboot or airplane mode toggling -->
     <bool translatable="false" name="reset_geo_fencing_check_after_boot_or_apm">false</bool>
@@ -5644,4 +5653,13 @@
     <!-- The amount of time after becoming non-interactive (in ms) after which
          Low Power Standby can activate. -->
     <integer name="config_lowPowerStandbyNonInteractiveTimeout">5000</integer>
+
+
+    <!-- Mapping to select an Intent.EXTRA_DOCK_STATE value from extcon state
+         key-value pairs. Each entry is evaluated in order and is of the form:
+            "[EXTRA_DOCK_STATE value],key1=value1,key2=value2[,...]"
+         An entry with no key-value pairs is valid and can be used as a wildcard.
+     -->
+    <string-array name="config_dockExtconStateMapping">
+    </string-array>
 </resources>

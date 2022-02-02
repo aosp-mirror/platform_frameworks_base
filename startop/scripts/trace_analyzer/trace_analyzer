@@ -1,0 +1,42 @@
+#!/bin/bash
+# Copyright (C) 2019 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+DIR="$( cd "$(dirname "$0")" ; pwd -P )"
+
+if [[ "$#" -lt 2 ]]; then
+  echo "Usage: $0 <filename.trace> <sqlite-filename.db>" >&2
+  exit 1
+fi
+
+TRACE_FILENAME="$1"
+SQLITE_FILENAME="$2"
+
+#echo "Trace filename: $TRACE_FILENAME"
+#echo "SQLite filename: $SQLITE_FILENAME"
+
+if ! [[ -f "$TRACE_FILENAME" ]]; then
+  echo "Error: Trace '$TRACE_FILENAME' does not exist." >&2
+  exit 1
+fi
+
+if ! "$DIR/trace_analyzer.py" "$SQLITE_FILENAME" "$TRACE_FILENAME" > /dev/null; then
+  echo "Fatal: trace_analyzer.py failed, aborting." >&2
+  exit 1
+fi
+
+if ! "$DIR/run-sql-queries" "$SQLITE_FILENAME"; then
+  echo "Fatal: Failed to run sql queries, aborting." >&2
+  exit 1
+fi

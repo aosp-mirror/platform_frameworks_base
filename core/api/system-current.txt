@@ -203,6 +203,7 @@ package android {
     field public static final String MODIFY_PARENTAL_CONTROLS = "android.permission.MODIFY_PARENTAL_CONTROLS";
     field public static final String MODIFY_QUIET_MODE = "android.permission.MODIFY_QUIET_MODE";
     field public static final String MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE = "android.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE";
+    field public static final String MODIFY_TOUCH_MODE_STATE = "android.permission.MODIFY_TOUCH_MODE_STATE";
     field public static final String MOVE_PACKAGE = "android.permission.MOVE_PACKAGE";
     field public static final String NETWORK_AIRPLANE_MODE = "android.permission.NETWORK_AIRPLANE_MODE";
     field public static final String NETWORK_CARRIER_PROVISIONING = "android.permission.NETWORK_CARRIER_PROVISIONING";
@@ -260,6 +261,7 @@ package android {
     field public static final String READ_WALLPAPER_INTERNAL = "android.permission.READ_WALLPAPER_INTERNAL";
     field public static final String READ_WIFI_CREDENTIAL = "android.permission.READ_WIFI_CREDENTIAL";
     field public static final String REAL_GET_TASKS = "android.permission.REAL_GET_TASKS";
+    field public static final String RECEIVE_BLUETOOTH_MAP = "android.permission.RECEIVE_BLUETOOTH_MAP";
     field public static final String RECEIVE_DATA_ACTIVITY_CHANGE = "android.permission.RECEIVE_DATA_ACTIVITY_CHANGE";
     field public static final String RECEIVE_DEVICE_CUSTOMIZATION_READY = "android.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY";
     field public static final String RECEIVE_EMERGENCY_BROADCAST = "android.permission.RECEIVE_EMERGENCY_BROADCAST";
@@ -351,6 +353,7 @@ package android {
     field public static final String WRITE_EMBEDDED_SUBSCRIPTIONS = "android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS";
     field @Deprecated public static final String WRITE_MEDIA_STORAGE = "android.permission.WRITE_MEDIA_STORAGE";
     field public static final String WRITE_OBB = "android.permission.WRITE_OBB";
+    field public static final String WRITE_SMS = "android.permission.WRITE_SMS";
   }
 
   public static final class Manifest.permission_group {
@@ -1060,8 +1063,8 @@ package android.app.admin {
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_ADMIN_POLICY}) public java.util.List<java.lang.String> getPermittedInputMethodsForCurrentUser();
     method @Nullable public android.content.ComponentName getProfileOwner() throws java.lang.IllegalArgumentException;
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}) public String getProfileOwnerNameAsUser(int) throws java.lang.IllegalArgumentException;
-    method @NonNull public String getString(@NonNull String, @NonNull java.util.concurrent.Callable<java.lang.String>);
-    method @NonNull public String getString(@NonNull String, @NonNull java.util.concurrent.Callable<java.lang.String>, @NonNull java.lang.Object...);
+    method @Nullable public String getString(@NonNull String, @NonNull java.util.concurrent.Callable<java.lang.String>);
+    method @Nullable public String getString(@NonNull String, @NonNull java.util.concurrent.Callable<java.lang.String>, @NonNull java.lang.Object...);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}) public int getUserProvisioningState();
     method public boolean isDeviceManaged();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean isDeviceProvisioned();
@@ -1185,6 +1188,15 @@ package android.app.admin {
     field public static final String WORK_PROFILE_PAUSED_TITLE = "MediaProvider.WORK_PROFILE_PAUSED_TITLE";
   }
 
+  public static final class DevicePolicyResources.Strings.PermissionController {
+    field public static final String BACKGROUND_ACCESS_DISABLED_BY_ADMIN_MESSAGE = "PermissionController.BACKGROUND_ACCESS_DISABLED_BY_ADMIN_MESSAGE";
+    field public static final String BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE = "PermissionController.BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE";
+    field public static final String FOREGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE = "PermissionController.FOREGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE";
+    field public static final String HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE = "PermissionController.HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE";
+    field public static final String LOCATION_AUTO_GRANTED_MESSAGE = "PermissionController.LOCATION_AUTO_GRANTED_MESSAGE";
+    field public static final String WORK_PROFILE_DEFAULT_APPS_TITLE = "PermissionController.WORK_PROFILE_DEFAULT_APPS_TITLE";
+  }
+
   public final class DevicePolicyStringResource implements android.os.Parcelable {
     ctor public DevicePolicyStringResource(@NonNull android.content.Context, @NonNull String, @StringRes int);
     method public int describeContents();
@@ -1197,6 +1209,7 @@ package android.app.admin {
   public final class FullyManagedDeviceProvisioningParams implements android.os.Parcelable {
     method public boolean canDeviceOwnerGrantSensorsPermissions();
     method public int describeContents();
+    method @NonNull public android.os.PersistableBundle getAdminExtras();
     method @NonNull public android.content.ComponentName getDeviceAdminComponentName();
     method public long getLocalTime();
     method @Nullable public java.util.Locale getLocale();
@@ -1210,6 +1223,7 @@ package android.app.admin {
   public static final class FullyManagedDeviceProvisioningParams.Builder {
     ctor public FullyManagedDeviceProvisioningParams.Builder(@NonNull android.content.ComponentName, @NonNull String);
     method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams build();
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setAdminExtras(@NonNull android.os.PersistableBundle);
     method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setCanDeviceOwnerGrantSensorsPermissions(boolean);
     method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLeaveAllSystemAppsEnabled(boolean);
     method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLocalTime(long);
@@ -1220,6 +1234,7 @@ package android.app.admin {
   public final class ManagedProfileProvisioningParams implements android.os.Parcelable {
     method public int describeContents();
     method @Nullable public android.accounts.Account getAccountToMigrate();
+    method @NonNull public android.os.PersistableBundle getAdminExtras();
     method @NonNull public String getOwnerName();
     method @NonNull public android.content.ComponentName getProfileAdminComponentName();
     method @Nullable public String getProfileName();
@@ -1234,6 +1249,7 @@ package android.app.admin {
     ctor public ManagedProfileProvisioningParams.Builder(@NonNull android.content.ComponentName, @NonNull String);
     method @NonNull public android.app.admin.ManagedProfileProvisioningParams build();
     method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setAccountToMigrate(@Nullable android.accounts.Account);
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setAdminExtras(@NonNull android.os.PersistableBundle);
     method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setKeepingAccountOnMigration(boolean);
     method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setLeaveAllSystemAppsEnabled(boolean);
     method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setOrganizationOwnedProvisioning(boolean);
@@ -2685,6 +2701,7 @@ package android.content {
     method @Nullable @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public android.content.Intent registerReceiverForAllUsers(@Nullable android.content.BroadcastReceiver, @NonNull android.content.IntentFilter, @Nullable String, @Nullable android.os.Handler, int);
     method public abstract void sendBroadcast(android.content.Intent, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public abstract void sendBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle, @Nullable String, @Nullable android.os.Bundle);
+    method public void sendBroadcastMultiplePermissions(@NonNull android.content.Intent, @NonNull String[], @Nullable android.app.BroadcastOptions);
     method public abstract void sendOrderedBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable android.os.Bundle, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public void startActivityAsUser(@NonNull @RequiresPermission android.content.Intent, @NonNull android.os.UserHandle);
     field public static final String AMBIENT_CONTEXT_SERVICE = "ambient_context";
@@ -2788,6 +2805,7 @@ package android.content {
     field public static final String ACTION_UPGRADE_SETUP = "android.intent.action.UPGRADE_SETUP";
     field public static final String ACTION_USER_ADDED = "android.intent.action.USER_ADDED";
     field public static final String ACTION_USER_REMOVED = "android.intent.action.USER_REMOVED";
+    field public static final String ACTION_USER_SWITCHED = "android.intent.action.USER_SWITCHED";
     field @RequiresPermission(android.Manifest.permission.START_VIEW_APP_FEATURES) public static final String ACTION_VIEW_APP_FEATURES = "android.intent.action.VIEW_APP_FEATURES";
     field public static final String ACTION_VOICE_ASSIST = "android.intent.action.VOICE_ASSIST";
     field public static final String CATEGORY_LEANBACK_SETTINGS = "android.intent.category.LEANBACK_SETTINGS";
@@ -2810,7 +2828,9 @@ package android.content {
     field public static final String EXTRA_ROLE_NAME = "android.intent.extra.ROLE_NAME";
     field public static final String EXTRA_SHOWING_ATTRIBUTION = "android.intent.extra.SHOWING_ATTRIBUTION";
     field public static final String EXTRA_UNKNOWN_INSTANT_APP = "android.intent.extra.UNKNOWN_INSTANT_APP";
+    field public static final String EXTRA_USER_HANDLE = "android.intent.extra.user_handle";
     field public static final String EXTRA_VERIFICATION_BUNDLE = "android.intent.extra.VERIFICATION_BUNDLE";
+    field public static final int FLAG_RECEIVER_INCLUDE_BACKGROUND = 16777216; // 0x1000000
     field public static final int FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT = 67108864; // 0x4000000
     field public static final String METADATA_SETUP_VERSION = "android.SETUP_VERSION";
   }
@@ -10233,6 +10253,7 @@ package android.provider {
     method @Deprecated public static boolean checkAndNoteWriteSettingsOperation(@NonNull android.content.Context, int, @NonNull String, boolean);
     method public static boolean checkAndNoteWriteSettingsOperation(@NonNull android.content.Context, int, @NonNull String, @Nullable String, boolean);
     field public static final String ACTION_ACCESSIBILITY_DETAILS_SETTINGS = "android.settings.ACCESSIBILITY_DETAILS_SETTINGS";
+    field public static final String ACTION_BEDTIME_SETTINGS = "android.settings.BEDTIME_SETTINGS";
     field public static final String ACTION_BUGREPORT_HANDLER_SETTINGS = "android.settings.BUGREPORT_HANDLER_SETTINGS";
     field public static final String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";
     field public static final String ACTION_LOCATION_CONTROLLER_EXTRA_PACKAGE_SETTINGS = "android.settings.LOCATION_CONTROLLER_EXTRA_PACKAGE_SETTINGS";
@@ -11048,7 +11069,7 @@ package android.service.games {
 
   public class GameService extends android.app.Service {
     ctor public GameService();
-    method public final void createGameSession(@IntRange(from=0) int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY) public final void createGameSession(@IntRange(from=0) int);
     method @Nullable public final android.os.IBinder onBind(@Nullable android.content.Intent);
     method public void onConnected();
     method public void onDisconnected();

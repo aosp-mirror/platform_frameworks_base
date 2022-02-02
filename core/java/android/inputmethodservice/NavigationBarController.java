@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -65,6 +66,9 @@ final class NavigationBarController {
                 @NonNull ViewTreeObserver.InternalInsetsInfo dest) {
         }
 
+        default void onSoftInputWindowCreated(@NonNull SoftInputWindow softInputWindow) {
+        }
+
         default void onViewInitialized() {
         }
 
@@ -76,9 +80,6 @@ final class NavigationBarController {
 
         default void setShouldShowImeSwitcherWhenImeIsShown(
                 boolean shouldShowImeSwitcherWhenImeIsShown) {
-        }
-
-        default void onSystemBarAppearanceChanged(@Appearance int appearance) {
         }
 
         default String toDebugString() {
@@ -101,6 +102,10 @@ final class NavigationBarController {
         mImpl.updateTouchableInsets(originalInsets, dest);
     }
 
+    void onSoftInputWindowCreated(@NonNull SoftInputWindow softInputWindow) {
+        mImpl.onSoftInputWindowCreated(softInputWindow);
+    }
+
     void onViewInitialized() {
         mImpl.onViewInitialized();
     }
@@ -117,15 +122,11 @@ final class NavigationBarController {
         mImpl.setShouldShowImeSwitcherWhenImeIsShown(shouldShowImeSwitcherWhenImeIsShown);
     }
 
-    void onSystemBarAppearanceChanged(@Appearance int appearance) {
-        mImpl.onSystemBarAppearanceChanged(appearance);
-    }
-
     String toDebugString() {
         return mImpl.toDebugString();
     }
 
-    private static final class Impl implements Callback {
+    private static final class Impl implements Callback, Window.DecorCallback {
         private static final int DEFAULT_COLOR_ADAPT_TRANSITION_TIME = 1700;
 
         // Copied from com.android.systemui.animation.Interpolators#LEGACY_DECELERATE
@@ -157,6 +158,8 @@ final class NavigationBarController {
 
         @Nullable
         private ValueAnimator mTintAnimator;
+
+        private boolean mDrawLegacyNavigationBarBackground;
 
         Impl(@NonNull InputMethodService inputMethodService) {
             mService = inputMethodService;
@@ -226,9 +229,14 @@ final class NavigationBarController {
                 mLastInsets = systemInsets;
             }
 
-            mNavigationBarFrame.setBackground(null);
+            if (mDrawLegacyNavigationBarBackground) {
+                mNavigationBarFrame.setBackgroundColor(Color.BLACK);
+            } else {
+                mNavigationBarFrame.setBackground(null);
+            }
 
-            setIconTintInternal(calculateTargetDarkIntensity(mAppearance));
+            setIconTintInternal(calculateTargetDarkIntensity(mAppearance,
+                    mDrawLegacyNavigationBarBackground));
         }
 
         private void uninstallNavigationBarFrameIfNecessary() {
@@ -362,6 +370,13 @@ final class NavigationBarController {
         }
 
         @Override
+        public void onSoftInputWindowCreated(@NonNull SoftInputWindow softInputWindow) {
+            final Window window = softInputWindow.getWindow();
+            mAppearance = window.getSystemBarAppearance();
+            window.setDecorCallback(this);
+        }
+
+        @Override
         public void onViewInitialized() {
             if (mDestroyed) {
                 return;
@@ -471,7 +486,8 @@ final class NavigationBarController {
                 return;
             }
 
-            final float targetDarkIntensity = calculateTargetDarkIntensity(mAppearance);
+            final float targetDarkIntensity = calculateTargetDarkIntensity(mAppearance,
+                    mDrawLegacyNavigationBarBackground);
 
             if (mTintAnimator != null) {
                 mTintAnimator.cancel();
@@ -499,9 +515,31 @@ final class NavigationBarController {
         }
 
         @FloatRange(from = 0.0f, to = 1.0f)
-        private static float calculateTargetDarkIntensity(@Appearance int appearance) {
-            final boolean lightNavBar = (appearance & APPEARANCE_LIGHT_NAVIGATION_BARS) != 0;
+        private static float calculateTargetDarkIntensity(@Appearance int appearance,
+                boolean drawLegacyNavigationBarBackground) {
+            final boolean lightNavBar = !drawLegacyNavigationBarBackground
+                    && (appearance & APPEARANCE_LIGHT_NAVIGATION_BARS) != 0;
             return lightNavBar ? 1.0f : 0.0f;
+        }
+
+        @Override
+        public boolean onDrawLegacyNavigationBarBackgroundChanged(
+                boolean drawLegacyNavigationBarBackground) {
+            if (mDestroyed) {
+                return false;
+            }
+
+            if (drawLegacyNavigationBarBackground != mDrawLegacyNavigationBarBackground) {
+                mDrawLegacyNavigationBarBackground = drawLegacyNavigationBarBackground;
+                if (mDrawLegacyNavigationBarBackground) {
+                    mNavigationBarFrame.setBackgroundColor(Color.BLACK);
+                } else {
+                    mNavigationBarFrame.setBackground(null);
+                }
+                scheduleRelayout();
+                onSystemBarAppearanceChanged(mAppearance);
+            }
+            return drawLegacyNavigationBarBackground;
         }
 
         @Override
@@ -511,6 +549,7 @@ final class NavigationBarController {
                     + " mShouldShowImeSwitcherWhenImeIsShown" + mShouldShowImeSwitcherWhenImeIsShown
                     + " mAppearance=0x" + Integer.toHexString(mAppearance)
                     + " mDarkIntensity=" + mDarkIntensity
+                    + " mDrawLegacyNavigationBarBackground=" + mDrawLegacyNavigationBarBackground
                     + "}";
         }
     }

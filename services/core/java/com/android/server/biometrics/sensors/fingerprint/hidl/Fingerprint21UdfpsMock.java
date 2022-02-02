@@ -37,6 +37,7 @@ import android.util.Slog;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.R;
+import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
@@ -247,7 +248,8 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
             @NonNull FingerprintStateCallback fingerprintStateCallback,
             @NonNull FingerprintSensorPropertiesInternal sensorProps,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
+            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
+            @NonNull BiometricContext biometricContext) {
         Slog.d(TAG, "Creating Fingerprint23Mock!");
 
         final Handler handler = new Handler(Looper.getMainLooper());
@@ -256,7 +258,7 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
         final MockHalResultController controller =
                 new MockHalResultController(sensorProps.sensorId, context, handler, scheduler);
         return new Fingerprint21UdfpsMock(context, fingerprintStateCallback, sensorProps, scheduler,
-                handler, lockoutResetDispatcher, controller);
+                handler, lockoutResetDispatcher, controller, biometricContext);
     }
 
     private static abstract class FakeFingerRunnable implements Runnable {
@@ -385,9 +387,10 @@ public class Fingerprint21UdfpsMock extends Fingerprint21 implements TrustManage
             @NonNull TestableBiometricScheduler scheduler,
             @NonNull Handler handler,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            @NonNull MockHalResultController controller) {
+            @NonNull MockHalResultController controller,
+            @NonNull BiometricContext biometricContext) {
         super(context, fingerprintStateCallback, sensorProps, scheduler, handler,
-                lockoutResetDispatcher, controller);
+                lockoutResetDispatcher, controller, biometricContext);
         mScheduler = scheduler;
         mScheduler.init(this);
         mHandler = handler;

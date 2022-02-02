@@ -215,6 +215,18 @@ class NotificationQSContainerControllerTest : SysuiTestCase() {
         then(expectedContainerPadding = 0)
     }
 
+    @Test
+    fun testNotificationsMarginBottomIsUpdated() {
+        notificationsQSContainerController.splitShadeEnabled = true
+        verify(notificationsQSContainer).setNotificationsMarginBottom(NOTIFICATIONS_MARGIN)
+
+        whenever(notificationsQSContainer.defaultNotificationsMarginBottom).thenReturn(100)
+        notificationsQSContainerController.updateMargins()
+        notificationsQSContainerController.splitShadeEnabled = false
+
+        verify(notificationsQSContainer).setNotificationsMarginBottom(100)
+    }
+
     private fun given(
         taskbarVisible: Boolean,
         navigationMode: Int,

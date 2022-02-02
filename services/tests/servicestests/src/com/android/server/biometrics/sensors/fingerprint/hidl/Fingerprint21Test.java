@@ -39,6 +39,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
+import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.sensors.BiometricScheduler;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintStateCallback;
@@ -70,6 +71,8 @@ public class Fingerprint21Test {
     private BiometricScheduler mScheduler;
     @Mock
     private FingerprintStateCallback mFingerprintStateCallback;
+    @Mock
+    private BiometricContext mBiometricContext;
 
     private LockoutResetDispatcher mLockoutResetDispatcher;
     private Fingerprint21 mFingerprint21;
@@ -101,7 +104,7 @@ public class Fingerprint21Test {
 
         mFingerprint21 = new TestableFingerprint21(mContext, mFingerprintStateCallback, sensorProps,
                 mScheduler, new Handler(Looper.getMainLooper()), mLockoutResetDispatcher,
-                mHalResultController);
+                mHalResultController, mBiometricContext);
     }
 
     @Test
@@ -126,9 +129,10 @@ public class Fingerprint21Test {
                 @NonNull FingerprintSensorPropertiesInternal sensorProps,
                 @NonNull BiometricScheduler scheduler, @NonNull Handler handler,
                 @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-                @NonNull HalResultController controller) {
+                @NonNull HalResultController controller,
+                @NonNull BiometricContext biometricContext) {
             super(context, fingerprintStateCallback, sensorProps, scheduler, handler,
-                    lockoutResetDispatcher, controller);
+                    lockoutResetDispatcher, controller, biometricContext);
         }
 
         @Override

@@ -69,10 +69,9 @@ class StackScrollAlgorithmTest : SysuiTestCase() {
 
         stackScrollAlgorithm.resetViewStates(ambientState, /* speedBumpIndex= */ 0)
 
-        val closeHandleUnderlapHeight =
-            context.resources.getDimensionPixelSize(R.dimen.close_handle_underlap)
-        val fullHeight =
-            ambientState.layoutMaxHeight + closeHandleUnderlapHeight - ambientState.stackY
+        val marginBottom =
+            context.resources.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom)
+        val fullHeight = ambientState.layoutMaxHeight + marginBottom - ambientState.stackY
         val centeredY = ambientState.stackY + fullHeight / 2f - emptyShadeView.height / 2f
         assertThat(emptyShadeView.viewState?.yTranslation).isEqualTo(centeredY)
     }

@@ -93,7 +93,6 @@ import static com.android.server.wm.WindowManagerInternal.KeyguardExitAnimationS
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_NONE;
 
-import android.annotation.DrawableRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -101,6 +100,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.hardware.HardwareBuffer;
 import android.os.Binder;
 import android.os.Debug;
@@ -539,8 +539,8 @@ public class AppTransition implements Dump {
      * animation.
      */
     HardwareBuffer createCrossProfileAppsThumbnail(
-            @DrawableRes int thumbnailDrawableRes, Rect frame) {
-        return mTransitionAnimation.createCrossProfileAppsThumbnail(thumbnailDrawableRes, frame);
+            Drawable thumbnailDrawable, Rect frame) {
+        return mTransitionAnimation.createCrossProfileAppsThumbnail(thumbnailDrawable, frame);
     }
 
     Animation createCrossProfileAppsThumbnailAnimationLocked(Rect appRect) {

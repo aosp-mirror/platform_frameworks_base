@@ -7306,10 +7306,10 @@ package android.app.admin {
     method @Nullable public java.util.List<java.lang.String> getDelegatePackages(@NonNull android.content.ComponentName, @NonNull String);
     method @NonNull public java.util.List<java.lang.String> getDelegatedScopes(@Nullable android.content.ComponentName, @NonNull String);
     method public CharSequence getDeviceOwnerLockScreenInfo();
-    method @NonNull public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
-    method @NonNull public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull String, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
-    method @NonNull public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
-    method @NonNull public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawable(@NonNull String, @NonNull String, @NonNull String, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
+    method @Nullable public android.graphics.drawable.Drawable getDrawableForDensity(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.concurrent.Callable<android.graphics.drawable.Drawable>);
     method public CharSequence getEndUserSessionMessage(@NonNull android.content.ComponentName);
     method @NonNull public String getEnrollmentSpecificId();
     method @Nullable public android.app.admin.FactoryResetProtectionPolicy getFactoryResetProtectionPolicy(@Nullable android.content.ComponentName);
@@ -23299,7 +23299,7 @@ package android.media {
     ctor public RouteDiscoveryPreference.Builder(@NonNull android.media.RouteDiscoveryPreference);
     method @NonNull public android.media.RouteDiscoveryPreference build();
     method @NonNull public android.media.RouteDiscoveryPreference.Builder setAllowedPackages(@NonNull java.util.List<java.lang.String>);
-    method @NonNull public android.media.RouteDiscoveryPreference.Builder setDeduplicationPackageOrder(@Nullable java.util.List<java.lang.String>);
+    method @NonNull public android.media.RouteDiscoveryPreference.Builder setDeduplicationPackageOrder(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.media.RouteDiscoveryPreference.Builder setPreferredFeatures(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.media.RouteDiscoveryPreference.Builder setRequiredFeatures(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.media.RouteDiscoveryPreference.Builder setShouldPerformActiveScan(boolean);
@@ -31738,7 +31738,12 @@ package android.os {
     method public void release();
     method public void release(int);
     method public void setReferenceCounted(boolean);
+    method public void setStateListener(@NonNull java.util.concurrent.Executor, @Nullable android.os.PowerManager.WakeLockStateListener);
     method public void setWorkSource(android.os.WorkSource);
+  }
+
+  public static interface PowerManager.WakeLockStateListener {
+    method public void onStateChanged(boolean);
   }
 
   public class Process {

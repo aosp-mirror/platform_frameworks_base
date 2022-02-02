@@ -410,9 +410,9 @@ public abstract class VibrationEffect implements Parcelable {
      *
      * <p>The waveform will start the first transition from the vibrator off state, with the
      * resonant frequency by default. To provide an initial state, use
-     * {@link #startWaveform(VibrationParameter)}.
+     * {@link #startWaveform(VibrationEffect.VibrationParameter)}.
      *
-     * @return The {@link VibrationEffect.WaveformBuilder} started with the initial parameters.
+     * @see VibrationEffect.WaveformBuilder
      */
     @NonNull
     public static WaveformBuilder startWaveform() {
@@ -421,14 +421,16 @@ public abstract class VibrationEffect implements Parcelable {
 
     /**
      * Start building a waveform vibration with an initial state specified by a
-     * {@link VibrationParameter}.
+     * {@link VibrationEffect.VibrationParameter}.
      *
      * <p>The waveform builder offers more flexibility for creating waveform vibrations, allowing
      * control over vibration amplitude and frequency via smooth transitions between values.
      *
-     * @param initialParameter The initial {@link VibrationParameter} value to be applied at the
-     *                         beginning of the vibration.
+     * @param initialParameter The initial {@link VibrationEffect.VibrationParameter} value to be
+     *                         applied at the beginning of the vibration.
      * @return The {@link VibrationEffect.WaveformBuilder} started with the initial parameters.
+     *
+     * @see VibrationEffect.WaveformBuilder
      */
     @NonNull
     public static WaveformBuilder startWaveform(@NonNull VibrationParameter initialParameter) {
@@ -439,17 +441,19 @@ public abstract class VibrationEffect implements Parcelable {
 
     /**
      * Start building a waveform vibration with an initial state specified by two
-     * {@link VibrationParameter VibrationParameters}.
+     * {@link VibrationEffect.VibrationParameter VibrationParameters}.
      *
      * <p>The waveform builder offers more flexibility for creating waveform vibrations, allowing
      * control over vibration amplitude and frequency via smooth transitions between values.
      *
-     * @param initialParameter1 The initial {@link VibrationParameter} value to be applied at the
-     *                          beginning of the vibration.
-     * @param initialParameter2 The initial {@link VibrationParameter} value to be applied at the
-     *                          beginning of the vibration, must be a different type of parameter
-     *                          than the one specified by the first argument.
+     * @param initialParameter1 The initial {@link VibrationEffect.VibrationParameter} value to be
+     *                          applied at the beginning of the vibration.
+     * @param initialParameter2 The initial {@link VibrationEffect.VibrationParameter} value to be
+     *                          applied at the beginning of the vibration, must be a different type
+     *                          of parameter than the one specified by the first argument.
      * @return The {@link VibrationEffect.WaveformBuilder} started with the initial parameters.
+     *
+     * @see VibrationEffect.WaveformBuilder
      */
     @NonNull
     public static WaveformBuilder startWaveform(@NonNull VibrationParameter initialParameter1,
@@ -805,7 +809,46 @@ public abstract class VibrationEffect implements Parcelable {
     }
 
     /**
-     * A composition of haptic primitives that, when combined, create a single haptic effect.
+     * A composition of haptic elements that are combined to be playable as a single
+     * {@link VibrationEffect}.
+     *
+     * <p>The haptic primitives are available as {@code Composition.PRIMITIVE_*} constants and
+     * can be added to a composition to create a custom vibration effect. Here is an example of an
+     * effect that grows in intensity and then dies off, with a longer rising portion for emphasis
+     * and an extra tick 100ms after:
+     *
+     * <code>
+     * VibrationEffect effect = VibrationEffect.startComposition()
+     *     .addPrimitive(VibrationEffect.Composition.PRIMITIVE_SLOW_RISE, 0.5f)
+     *     .addPrimitive(VibrationEffect.Composition.PRIMITIVE_QUICK_FALL, 0.5f)
+     *     .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1.0f, 100)
+     *     .compose();
+     * </code>
+     *
+     * <p>Composition elements can also be {@link VibrationEffect} instances, including other
+     * compositions, and off durations, which are periods of time when the vibrator will be
+     * turned off. Here is an example of a composition that "warms up" with a light tap,
+     * a stronger double tap, then repeats a vibration pattern indefinitely:
+     *
+     * <code>
+     * VibrationEffect repeatingEffect = VibrationEffect.startComposition()
+     *     .addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK)
+     *     .addOffDuration(Duration.ofMillis(10))
+     *     .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_DOUBLE_CLICK))
+     *     .addOffDuration(Duration.ofMillis(50))
+     *     .addEffect(VibrationEffect.createWaveform(pattern, repeatIndex))
+     *     .compose();
+     * </code>
+     *
+     * <p>When choosing to play a composed effect, you should check that individual components are
+     * supported by the device by using the appropriate vibrator method:
+     *
+     * <ul>
+     *     <li>Primitive support can be checked using {@link Vibrator#arePrimitivesSupported}.
+     *     <li>Effect support can be checked using {@link Vibrator#areEffectsSupported}.
+     *     <li>Amplitude control for one-shot and waveforms with amplitude values can be checked
+     *         using {@link Vibrator#hasAmplitudeControl}.
+     * </ul>
      *
      * @see VibrationEffect#startComposition()
      */
@@ -1091,16 +1134,77 @@ public abstract class VibrationEffect implements Parcelable {
      * A builder for waveform haptic effects.
      *
      * <p>Waveform vibrations constitute of one or more timed transitions to new sets of vibration
-     * parameters. These parameters can be the vibration amplitude or frequency, for example.
+     * parameters. These parameters can be the vibration amplitude, frequency, or both.
+     *
+     * <p>The following example ramps a vibrator turned off to full amplitude at 120Hz, over 100ms
+     * starting at 60Hz, then holds that state for 200ms and ramps back down again over 100ms:
+     *
+     * <code>
+     * import static android.os.VibrationEffect.VibrationParameter.targetAmplitude;
+     * import static android.os.VibrationEffect.VibrationParameter.targetFrequency;
+     *
+     * VibrationEffect effect = VibrationEffect.startWaveform(targetFrequency(60))
+     *     .addTransition(Duration.ofMillis(100), targetAmplitude(1), targetFrequency(120))
+     *     .addSustain(Duration.ofMillis(200))
+     *     .addTransition(Duration.ofMillis(100), targetAmplitude(0), targetFrequency(60))
+     *     .build();
+     * </code>
+     *
+     * <p>The initial state of the waveform can be set via
+     * {@link VibrationEffect#startWaveform(VibrationParameter)} or
+     * {@link VibrationEffect#startWaveform(VibrationParameter, VibrationParameter)}. If the initial
+     * parameters are not set then the {@link WaveformBuilder} will start with the vibrator off,
+     * represented by zero amplitude, at the vibrator's resonant frequency.
+     *
+     * <p>Repeating waveforms can be created by building the repeating block separately and adding
+     * it to the end of a composition with
+     * {@link Composition#repeatEffectIndefinitely(VibrationEffect)}:
      *
      * <p>Note that physical vibration actuators have different reaction times for changing
      * amplitude and frequency. Durations specified here represent a timeline for the target
      * parameters, and quality of effects may be improved if the durations allow time for a
      * transition to be smoothly applied.
      *
-     * <p>Repeating waveforms can be built by constructing the repeating block separately and adding
-     * it to the end of a composition using
-     * {@link Composition#repeatEffectIndefinitely(VibrationEffect)}.
+     * <p>The following example illustrates both an initial state and a repeating section, using
+     * a {@link VibrationEffect.Composition}. The resulting effect will have a tick followed by a
+     * repeated beating effect with a rise that stretches out and a sharp finish.
+     *
+     * <code>
+     * VibrationEffect patternToBeRepeated = VibrationEffect.startWaveform(targetAmplitude(0.2f))
+     *     .addSustain(Duration.ofMillis(10))
+     *     .addTransition(Duration.ofMillis(20), targetAmplitude(0.4f))
+     *     .addSustain(Duration.ofMillis(30))
+     *     .addTransition(Duration.ofMillis(40), targetAmplitude(0.8f))
+     *     .addSustain(Duration.ofMillis(50))
+     *     .addTransition(Duration.ofMillis(60), targetAmplitude(0.2f))
+     *     .build();
+     *
+     * VibrationEffect effect = VibrationEffect.startComposition()
+     *     .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK)
+     *     .addOffDuration(Duration.ofMillis(20))
+     *     .repeatEffectIndefinitely(patternToBeRepeated)
+     *     .compose();
+     * </code>
+     *
+     * <p>The amplitude step waveforms that can be created via
+     * {@link VibrationEffect#createWaveform(long[], int[], int)} can also be created with
+     * {@link WaveformBuilder} by adding zero duration transitions:
+     *
+     * <code>
+     * // These two effects are the same
+     * VibrationEffect waveform = VibrationEffect.createWaveform(
+     *     new long[] { 10, 20, 30 },  // timings in milliseconds
+     *     new int[] { 51, 102, 204 }, // amplitudes in [0,255]
+     *     -1);                        // repeat index
+     *
+     * VibrationEffect sameWaveform = VibrationEffect.startWaveform(targetAmplitude(0.2f))
+     *     .addSustain(Duration.ofMillis(10))
+     *     .addTransition(Duration.ZERO, targetAmplitude(0.4f))
+     *     .addSustain(Duration.ofMillis(20))
+     *     .addTransition(Duration.ZERO, targetAmplitude(0.8f))
+     *     .addSustain(Duration.ofMillis(30))
+     *     .build();
+     * </code>
      *
      * @see VibrationEffect#startWaveform
      */

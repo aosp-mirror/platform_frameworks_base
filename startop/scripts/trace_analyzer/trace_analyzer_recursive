@@ -1,0 +1,78 @@
+#!/bin/bash
+# Copyright (C) 2019 The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+DIR="$( cd "$(dirname "$0")" ; pwd -P )"
+
+if [[ "$#" -lt 3 ]]; then
+  echo "Usage: $0 <trace-dir> <db-dir> <output.csv>" >&2
+  exit 1
+fi
+
+simulate="n"
+
+TRACE_DIRNAME="$1"
+SQLITE_DIRNAME="$2"
+OUTPUT_FILENAME="$3"
+
+echo "Trace filename: $TRACE_DIRNAME"
+echo "SQLite filename: $SQLITE_DIRNAME"
+
+if ! [[ -d "$TRACE_DIRNAME" ]]; then
+  echo "Error: Trace '$TRACE_DIRNAME' does not exist." >&2
+  exit 1
+fi
+
+process_trace_file() {
+  local trace_filename="$1"
+  local db_dirname="$2"
+  local output_file="$3"
+
+  local db_filename="$db_dirname/$(basename "$trace_filename").db"
+
+  if [[ $simulate == y ]]; then
+    echo "$DIR/trace_analyzer.py" "$db_filename" "$trace_filename" "> /dev/null"
+  else
+    if ! "$DIR/trace_analyzer.py" "$db_filename" "$trace_filename" > /dev/null; then
+      echo "Fatal: trace_analyzer.py failed, aborting." >&2
+      return 1
+    fi
+  fi
+
+  if [[ $simulate == y ]]; then
+    echo "$DIR/run-sql-queries" "$db_filename" ">> '$output_file'"
+  else
+    # append name of trace to CSV, so we can see where data came from
+    echo "; $trace_filename" >> "$output_file"
+    if ! "$DIR/run-sql-queries" "$db_filename" >> "$output_file"; then
+      echo "Fatal: Failed to run sql queries, aborting." >&2
+      return 1
+    fi
+  fi
+
+  return 0
+}
+
+find "$TRACE_DIRNAME" -type f -name '*.trace' -print0 |
+while IFS= read -r -d '' file; do
+  if [[ $file == *#*.trace && $file != *#1.trace ]]; then
+    echo "Skip $file"
+    continue
+  fi
+
+  printf '%s\n' "$file"
+  process_trace_file "$file" "$SQLITE_DIRNAME" "$OUTPUT_FILENAME"
+done
+
+echo "Done"

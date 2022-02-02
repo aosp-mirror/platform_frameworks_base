@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.service.dreams.IDreamManager;
 
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.SysUISingleton;
@@ -72,6 +73,7 @@ import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallFlags;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLogger;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.tracing.ProtoTracer;
@@ -214,7 +216,9 @@ public interface StatusBarDependenciesModule {
             DynamicChildBindController dynamicChildBindController,
             LowPriorityInflationHelper lowPriorityInflationHelper,
             AssistantFeedbackController assistantFeedbackController,
-            NotifPipelineFlags notifPipelineFlags) {
+            NotifPipelineFlags notifPipelineFlags,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            KeyguardStateController keyguardStateController) {
         return new NotificationViewHierarchyManager(
                 context,
                 mainHandler,
@@ -231,7 +235,9 @@ public interface StatusBarDependenciesModule {
                 dynamicChildBindController,
                 lowPriorityInflationHelper,
                 assistantFeedbackController,
-                notifPipelineFlags);
+                notifPipelineFlags,
+                keyguardUpdateMonitor,
+                keyguardStateController);
     }
 
     /**

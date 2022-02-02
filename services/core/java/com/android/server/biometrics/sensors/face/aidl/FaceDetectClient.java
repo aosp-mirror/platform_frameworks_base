@@ -22,8 +22,6 @@ import android.content.Context;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.common.ICancellationSignal;
-import android.hardware.biometrics.common.OperationContext;
-import android.hardware.biometrics.common.OperationReason;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -116,13 +114,7 @@ public class FaceDetectClient extends AcquisitionClient<AidlSession> implements 
         final AidlSession session = getFreshDaemon();
 
         if (session.hasContextMethods()) {
-            final OperationContext context = new OperationContext();
-            // TODO: add reason, id
-            context.id = 0;
-            context.reason = OperationReason.UNKNOWN;
-            context.isAoD = getBiometricContext().isAoD();
-            context.isCrypto = isCryptoOperation();
-            return session.getSession().detectInteractionWithContext(context);
+            return session.getSession().detectInteractionWithContext(getOperationContext());
         } else {
             return session.getSession().detectInteraction();
         }

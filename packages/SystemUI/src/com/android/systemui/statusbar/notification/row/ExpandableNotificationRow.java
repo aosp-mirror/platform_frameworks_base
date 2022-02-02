@@ -49,6 +49,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.Trace;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
@@ -1246,6 +1247,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private void reInflateViews() {
+        Trace.beginSection("ExpandableNotificationRow#reInflateViews");
         // Let's update our childrencontainer. This is intentionally not guarded with
         // mIsSummaryWithChildren since we might have had children but not anymore.
         if (mChildrenContainer != null) {
@@ -1277,6 +1279,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         RowContentBindParams params = mRowContentBindStage.getStageParams(mEntry);
         params.setNeedsReinflation(true);
         mRowContentBindStage.requestRebind(mEntry, null /* callback */);
+        Trace.endSection();
     }
 
     @Override
@@ -1734,6 +1737,29 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 l.onClick(this, v.getWidth() / 2, v.getHeight() / 2, menuItem);
             }
         };
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        Trace.beginSection(appendTraceStyleTag("ExpNotRow#onMeasure"));
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        Trace.endSection();
+    }
+
+    /** Generates and appends "(MessagingStyle)" type tag to passed string for tracing. */
+    @NonNull
+    private String appendTraceStyleTag(@NonNull String traceTag) {
+        if (!Trace.isEnabled()) {
+            return traceTag;
+        }
+
+        Class<? extends Notification.Style> style =
+                getEntry().getSbn().getNotification().getNotificationStyle();
+        if (style == null) {
+            return traceTag + "(nostyle)";
+        } else {
+            return traceTag + "(" + style.getSimpleName() + ")";
+        }
     }
 
     @Override
@@ -2542,6 +2568,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        Trace.beginSection(appendTraceStyleTag("ExpNotRow#onLayout"));
         int intrinsicBefore = getIntrinsicHeight();
         super.onLayout(changed, left, top, right, bottom);
         if (intrinsicBefore != getIntrinsicHeight()
@@ -2555,6 +2582,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mLayoutListener != null) {
             mLayoutListener.onLayout();
         }
+        Trace.endSection();
     }
 
     /**

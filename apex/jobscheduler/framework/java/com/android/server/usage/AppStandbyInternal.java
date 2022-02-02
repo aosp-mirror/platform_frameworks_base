@@ -3,6 +3,7 @@ package com.android.server.usage;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager.ProcessState;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageStatsManager.ForcedReasons;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
@@ -223,4 +224,12 @@ public interface AppStandbyInternal {
      * a broadcast.
      */
     long getBroadcastResponseWindowDurationMs();
+
+    /**
+     * Returns the process state threshold that should be used for deciding whether or not an app
+     * is in the background in the context of recording broadcast response stats. Apps whose
+     * process state is higher than this threshold state should be considered to be in background.
+     */
+    @ProcessState
+    int getBroadcastResponseFgThresholdState();
 }

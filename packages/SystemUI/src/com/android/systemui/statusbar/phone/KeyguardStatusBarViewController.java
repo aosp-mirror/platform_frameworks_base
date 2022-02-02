@@ -23,8 +23,10 @@ import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedul
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricSourceType;
+import android.os.UserManager;
 import android.util.MathUtils;
 import android.view.View;
 
@@ -92,6 +94,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final BiometricUnlockController mBiometricUnlockController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final StatusBarContentInsetsProvider mInsetsProvider;
+    private final UserManager mUserManager;
 
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
@@ -104,6 +107,11 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                 public void onThemeChanged() {
                     mView.onOverlayChanged();
                     KeyguardStatusBarViewController.this.onThemeChanged();
+                }
+
+                @Override
+                public void onConfigChanged(Configuration newConfig) {
+                    updateUserSwitcher();
                 }
             };
 
@@ -155,6 +163,13 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                             && mKeyguardUpdateMonitor.isUnlockingWithBiometricAllowed(
                                     isStrongBiometric)) {
                         mDelayShowingKeyguardStatusBar = true;
+                    }
+                }
+
+                @Override
+                public void onKeyguardVisibilityChanged(boolean showing) {
+                    if (showing) {
+                        updateUserSwitcher();
                     }
                 }
 
@@ -230,7 +245,8 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             BiometricUnlockController biometricUnlockController,
             SysuiStatusBarStateController statusBarStateController,
-            StatusBarContentInsetsProvider statusBarContentInsetsProvider
+            StatusBarContentInsetsProvider statusBarContentInsetsProvider,
+            UserManager userManager
     ) {
         super(view);
         mCarrierTextController = carrierTextController;
@@ -248,6 +264,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mBiometricUnlockController = biometricUnlockController;
         mStatusBarStateController = statusBarStateController;
         mInsetsProvider = statusBarContentInsetsProvider;
+        mUserManager = userManager;
 
         mFirstBypassAttempt = mKeyguardBypassController.getBypassEnabled();
         mKeyguardStateController.addCallback(
@@ -293,7 +310,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         }
         mView.setOnApplyWindowInsetsListener(
                 (view, windowInsets) -> mView.updateWindowInsets(windowInsets, mInsetsProvider));
-
+        updateUserSwitcher();
         onThemeChanged();
     }
 
@@ -434,6 +451,14 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         alpha = MathUtils.saturate(alpha);
         alpha = (float) Math.pow(alpha, 0.75);
         return alpha;
+    }
+
+    /**
+     * Updates visibility of the user switcher button based on {@link android.os.UserManager} state.
+     */
+    private void updateUserSwitcher() {
+        mView.setUserSwitcherEnabled(mUserManager.isUserSwitcherEnabled(getResources().getBoolean(
+                R.bool.qs_show_user_switcher_for_single_user)));
     }
 
     /**

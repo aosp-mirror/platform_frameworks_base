@@ -21,6 +21,7 @@ import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager.ProcessState;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.content.ComponentName;
 import android.content.LocusId;
@@ -375,10 +376,11 @@ public abstract class UsageStatsManagerInternal {
      *                           to this broadcast.
      * @param timestampMs time (in millis) when the broadcast was dispatched, in
      *                    {@link SystemClock#elapsedRealtime()} timebase.
+     * @param targetUidProcState process state of the uid that the broadcast is targeted to.
      */
     public abstract void reportBroadcastDispatched(int sourceUid, @NonNull String targetPackage,
             @NonNull UserHandle targetUser, long idForResponseEvent,
-            @ElapsedRealtimeLong long timestampMs);
+            @ElapsedRealtimeLong long timestampMs, @ProcessState int targetUidProcState);
 
     /**
      * Reports a notification posted event to the UsageStatsManager.

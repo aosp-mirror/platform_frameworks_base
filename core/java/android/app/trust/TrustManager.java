@@ -16,14 +16,10 @@
 
 package android.app.trust;
 
-import static android.Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE;
-
-import android.annotation.NonNull;
+import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.ComponentName;
 import android.content.Context;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.Handler;
@@ -37,17 +33,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Interface to the system service managing trust.
- *
- * <p>This class is for internal use only. This class is marked {@code @TestApi} to
- * enable testing the trust system including {@link android.service.trust.TrustAgentService}.
- * Methods which are currently not used in tests are marked @hide.
- *
- * @see com.android.server.trust.TrustManagerService
- *
+ * See {@link com.android.server.trust.TrustManagerService}
  * @hide
  */
-@TestApi
 @SystemService(Context.TRUST_SERVICE)
 public class TrustManager {
 
@@ -63,8 +51,7 @@ public class TrustManager {
     private final ITrustManager mService;
     private final ArrayMap<TrustListener, ITrustListener> mTrustListeners;
 
-    /** @hide */
-    public TrustManager(@NonNull IBinder b) {
+    public TrustManager(IBinder b) {
         mService = ITrustManager.Stub.asInterface(b);
         mTrustListeners = new ArrayMap<TrustListener, ITrustListener>();
     }
@@ -75,10 +62,8 @@ public class TrustManager {
      *
      * @param userId The id for the user to be locked/unlocked.
      * @param locked The value for that user's locked state.
-     *
-     * @hide
      */
-    @RequiresPermission(ACCESS_KEYGUARD_SECURE_STORAGE)
+    @RequiresPermission(Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE)
     public void setDeviceLockedForUser(int userId, boolean locked) {
         try {
             mService.setDeviceLockedForUser(userId, locked);
@@ -93,11 +78,8 @@ public class TrustManager {
      * @param successful if true, the unlock attempt was successful.
      *
      * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
-     *
-     * @hide
      */
     @UnsupportedAppUsage
-    @RequiresPermission(ACCESS_KEYGUARD_SECURE_STORAGE)
     public void reportUnlockAttempt(boolean successful, int userId) {
         try {
             mService.reportUnlockAttempt(successful, userId);
@@ -111,7 +93,6 @@ public class TrustManager {
      *
      * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
      */
-    @RequiresPermission(ACCESS_KEYGUARD_SECURE_STORAGE)
     public void reportUserRequestedUnlock(int userId) {
         try {
             mService.reportUserRequestedUnlock(userId);
@@ -131,10 +112,7 @@ public class TrustManager {
      *    attempt to unlock the device again.
      *
      * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
-     *
-     * @hide
      */
-    @RequiresPermission(ACCESS_KEYGUARD_SECURE_STORAGE)
     public void reportUnlockLockout(int timeoutMs, int userId) {
         try {
             mService.reportUnlockLockout(timeoutMs, userId);
@@ -147,10 +125,7 @@ public class TrustManager {
      * Reports that the list of enabled trust agents changed for user {@param userId}.
      *
      * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
-     *
-     * @hide
      */
-    @RequiresPermission(ACCESS_KEYGUARD_SECURE_STORAGE)
     public void reportEnabledTrustAgentsChanged(int userId) {
         try {
             mService.reportEnabledTrustAgentsChanged(userId);
@@ -160,33 +135,10 @@ public class TrustManager {
     }
 
     /**
-     * Enables a trust agent.
-     *
-     * <p>The agent is specified by {@code componentName} and must be a subclass of
-     * {@link android.service.trust.TrustAgentService} and otherwise meet the requirements
-     * to be a trust agent.
-     *
-     * <p>This method can only be used in tests.
-     *
-     * @param componentName the trust agent to enable
-     */
-    @RequiresPermission(ACCESS_KEYGUARD_SECURE_STORAGE)
-    public void enableTrustAgentForUserForTest(@NonNull ComponentName componentName, int userId) {
-        try {
-            mService.enableTrustAgentForUserForTest(componentName, userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Reports that the visibility of the keyguard has changed.
      *
      * Requires the {@link android.Manifest.permission#ACCESS_KEYGUARD_SECURE_STORAGE} permission.
-     *
-     * @hide
      */
-    @RequiresPermission(ACCESS_KEYGUARD_SECURE_STORAGE)
     public void reportKeyguardShowingChanged() {
         try {
             mService.reportKeyguardShowingChanged();
@@ -199,10 +151,7 @@ public class TrustManager {
      * Registers a listener for trust events.
      *
      * Requires the {@link android.Manifest.permission#TRUST_LISTENER} permission.
-     *
-     * @hide
      */
-    @RequiresPermission(android.Manifest.permission.TRUST_LISTENER)
     public void registerTrustListener(final TrustListener trustListener) {
         try {
             ITrustListener.Stub iTrustListener = new ITrustListener.Stub() {
@@ -243,10 +192,7 @@ public class TrustManager {
      * Unregisters a listener for trust events.
      *
      * Requires the {@link android.Manifest.permission#TRUST_LISTENER} permission.
-     *
-     * @hide
      */
-    @RequiresPermission(android.Manifest.permission.TRUST_LISTENER)
     public void unregisterTrustListener(final TrustListener trustListener) {
         ITrustListener iTrustListener = mTrustListeners.remove(trustListener);
         if (iTrustListener != null) {
@@ -261,8 +207,6 @@ public class TrustManager {
     /**
      * @return whether {@param userId} has enabled and configured trust agents. Ignores short-term
      * unavailability of trust due to {@link LockPatternUtils.StrongAuthTracker}.
-     *
-     * @hide
      */
     @RequiresPermission(android.Manifest.permission.TRUST_LISTENER)
     public boolean isTrustUsuallyManaged(int userId) {
@@ -279,10 +223,8 @@ public class TrustManager {
      * can be skipped.
      *
      * @param userId
-     *
-     * @hide
      */
-    @RequiresPermission(ACCESS_KEYGUARD_SECURE_STORAGE)
+    @RequiresPermission(Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE)
     public void unlockedByBiometricForUser(int userId, BiometricSourceType source) {
         try {
             mService.unlockedByBiometricForUser(userId, source);
@@ -293,10 +235,8 @@ public class TrustManager {
 
     /**
      * Clears authentication by the specified biometric type for all users.
-     *
-     * @hide
      */
-    @RequiresPermission(ACCESS_KEYGUARD_SECURE_STORAGE)
+    @RequiresPermission(Manifest.permission.ACCESS_KEYGUARD_SECURE_STORAGE)
     public void clearAllBiometricRecognized(BiometricSourceType source, int unlockedUser) {
         try {
             mService.clearAllBiometricRecognized(source, unlockedUser);
@@ -324,7 +264,6 @@ public class TrustManager {
         }
     };
 
-    /** @hide */
     public interface TrustListener {
 
         /**

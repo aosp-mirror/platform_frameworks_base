@@ -23,20 +23,27 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.Manifest;
 import android.app.GameManager;
 import android.app.GameModeInfo;
+import android.app.GameState;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.hardware.power.Mode;
 import android.os.Bundle;
+import android.os.PowerManagerInternal;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
@@ -46,6 +53,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import org.junit.After;
@@ -76,6 +84,8 @@ public class GameManagerServiceTests {
     private TestLooper mTestLooper;
     @Mock
     private PackageManager mMockPackageManager;
+    @Mock
+    private PowerManagerInternal mMockPowerManager;
 
     // Stolen from ConnectivityServiceTest.MockContext
     class MockContext extends ContextWrapper {
@@ -158,10 +168,12 @@ public class GameManagerServiceTests {
                 .thenReturn(packages);
         when(mMockPackageManager.getApplicationInfoAsUser(anyString(), anyInt(), anyInt()))
                 .thenReturn(applicationInfo);
+        LocalServices.addService(PowerManagerInternal.class, mMockPowerManager);
     }
 
     @After
     public void tearDown() throws Exception {
+        LocalServices.removeServiceForTest(PowerManagerInternal.class);
         GameManagerService gameManagerService = new GameManagerService(mMockContext);
         gameManagerService.disableCompatScale(mPackageName);
         if (mMockingSession != null) {
@@ -1051,5 +1063,42 @@ public class GameManagerServiceTests {
 
         assertEquals(GameManager.GAME_MODE_UNSUPPORTED, gameModeInfo.getActiveGameMode());
         assertEquals(0, gameModeInfo.getAvailableGameModes().length);
+    }
+
+    @Test
+    public void testGameStateLoadingRequiresPerformanceMode() {
+        mockDeviceConfigNone();
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_1);
+        GameState gameState = new GameState(true, GameState.MODE_NONE);
+        gameManagerService.setGameState(mPackageName, gameState, USER_ID_1);
+        mTestLooper.dispatchAll();
+        verify(mMockPowerManager, never()).setPowerMode(anyInt(), anyBoolean());
+    }
+
+    private void setGameState(boolean isLoading) {
+        mockDeviceConfigNone();
+        mockModifyGameModeGranted();
+        GameManagerService gameManagerService =
+                new GameManagerService(mMockContext, mTestLooper.getLooper());
+        startUser(gameManagerService, USER_ID_1);
+        gameManagerService.setGameMode(
+                mPackageName, GameManager.GAME_MODE_PERFORMANCE, USER_ID_1);
+        GameState gameState = new GameState(isLoading, GameState.MODE_NONE);
+        gameManagerService.setGameState(mPackageName, gameState, USER_ID_1);
+        mTestLooper.dispatchAll();
+        verify(mMockPowerManager, times(1)).setPowerMode(Mode.GAME_LOADING, isLoading);
+    }
+
+    @Test
+    public void testSetGameStateLoading() {
+        setGameState(true);
+    }
+
+    @Test
+    public void testSetGameStateNotLoading() {
+        setGameState(false);
     }
 }

@@ -98,7 +98,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 
-import com.android.internal.content.PackageHelper;
+import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
@@ -593,7 +593,7 @@ class PackageManagerShellCommand extends ShellCommand {
                         null /* splitApkPaths */, null /* splitRevisionCodes */,
                         apkLite.getTargetSdkVersion(), null /* requiredSplitTypes */,
                         null /* splitTypes */);
-                sessionSize += PackageHelper.calculateInstalledSize(pkgLite,
+                sessionSize += InstallLocationUtils.calculateInstalledSize(pkgLite,
                         params.sessionParams.abiOverride, fd.getFileDescriptor());
             } catch (IOException e) {
                 getErrPrintWriter().println("Error: Failed to parse APK file: " + inPath);
@@ -1649,11 +1649,11 @@ class PackageManagerShellCommand extends ShellCommand {
     private int runGetInstallLocation() throws RemoteException {
         int loc = mInterface.getInstallLocation();
         String locStr = "invalid";
-        if (loc == PackageHelper.APP_INSTALL_AUTO) {
+        if (loc == InstallLocationUtils.APP_INSTALL_AUTO) {
             locStr = "auto";
-        } else if (loc == PackageHelper.APP_INSTALL_INTERNAL) {
+        } else if (loc == InstallLocationUtils.APP_INSTALL_INTERNAL) {
             locStr = "internal";
-        } else if (loc == PackageHelper.APP_INSTALL_EXTERNAL) {
+        } else if (loc == InstallLocationUtils.APP_INSTALL_EXTERNAL) {
             locStr = "external";
         }
         getOutPrintWriter().println(loc + "[" + locStr + "]");

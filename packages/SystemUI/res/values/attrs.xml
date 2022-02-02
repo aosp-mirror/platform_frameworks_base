@@ -85,7 +85,7 @@
          Contract: Pixel with fillColor blended over backgroundColor blended over translucent should
          equal to singleToneColor blended over translucent. -->
     <declare-styleable name="TonedIcon">
-        <attr name="backgroundColor" format="integer" />
+        <attr name="iconBackgroundColor" format="integer" />
         <attr name="fillColor" format="integer" />
         <attr name="singleToneColor" format="integer" />
         <attr name="homeHandleColor" format="integer" />

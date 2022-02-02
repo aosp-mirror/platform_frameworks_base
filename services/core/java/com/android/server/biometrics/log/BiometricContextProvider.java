@@ -18,16 +18,22 @@ package com.android.server.biometrics.log;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.StatusBarManager;
 import android.content.Context;
 import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.common.OperationContext;
+import android.hardware.biometrics.common.OperationReason;
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.util.Singleton;
+import android.os.ServiceManager.ServiceNotFoundException;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.InstanceId;
+import com.android.internal.statusbar.ISessionListener;
 import com.android.internal.statusbar.IStatusBarService;
 
 import java.util.Map;
@@ -41,22 +47,41 @@ class BiometricContextProvider implements BiometricContext {
 
     private static final String TAG = "BiometricContextProvider";
 
-    static final Singleton<BiometricContextProvider> sInstance =
-            new Singleton<BiometricContextProvider>() {
-                @Override
-                protected BiometricContextProvider create() {
-                    return new BiometricContextProvider(IStatusBarService.Stub.asInterface(
-                            ServiceManager.getService(
+    private static final int SESSION_TYPES =
+            StatusBarManager.SESSION_KEYGUARD | StatusBarManager.SESSION_BIOMETRIC_PROMPT;
+
+    private static BiometricContextProvider sInstance;
+
+    static BiometricContextProvider defaultProvider(@NonNull Context context) {
+        synchronized (BiometricContextProvider.class) {
+            if (sInstance == null) {
+                try {
+                    sInstance = new BiometricContextProvider(
+                            new AmbientDisplayConfiguration(context),
+                            IStatusBarService.Stub.asInterface(ServiceManager.getServiceOrThrow(
                                     Context.STATUS_BAR_SERVICE)), null /* handler */);
+                } catch (ServiceNotFoundException e) {
+                    throw new IllegalStateException("Failed to find required service", e);
                 }
-            };
+            }
+        }
+        return sInstance;
+    }
 
     @NonNull
     private final Map<OperationContext, Consumer<OperationContext>> mSubscribers =
             new ConcurrentHashMap<>();
 
+    @Nullable
+    private final Map<Integer, InstanceId> mSession = new ConcurrentHashMap<>();
+
+    private final AmbientDisplayConfiguration mAmbientDisplayConfiguration;
+    private boolean mIsDozing = false;
+
     @VisibleForTesting
-    BiometricContextProvider(@NonNull IStatusBarService service, @Nullable Handler handler) {
+    BiometricContextProvider(@NonNull AmbientDisplayConfiguration ambientDisplayConfiguration,
+            @NonNull IStatusBarService service, @Nullable Handler handler) {
+        mAmbientDisplayConfiguration = ambientDisplayConfiguration;
         try {
             service.setBiometicContextListener(new IBiometricContextListener.Stub() {
                 @Override
@@ -73,16 +98,70 @@ class BiometricContextProvider implements BiometricContext {
                     }
                 }
             });
+            service.registerSessionListener(SESSION_TYPES, new ISessionListener.Stub() {
+                @Override
+                public void onSessionStarted(int sessionType, InstanceId instance) {
+                    mSession.put(sessionType, instance);
+                }
+
+                @Override
+                public void onSessionEnded(int sessionType, InstanceId instance) {
+                    final InstanceId id = mSession.remove(sessionType);
+                    if (id != null && instance != null && id.getId() != instance.getId()) {
+                        Slog.w(TAG, "session id mismatch");
+                    }
+                }
+            });
         } catch (RemoteException e) {
             Slog.e(TAG, "Unable to register biometric context listener", e);
         }
     }
 
-    private boolean mIsDozing = false;
+    @Override
+    public OperationContext updateContext(@NonNull OperationContext operationContext,
+            boolean isCryptoOperation) {
+        operationContext.isAoD = isAoD();
+        operationContext.isCrypto = isCryptoOperation;
+        setFirstSessionId(operationContext);
+        return operationContext;
+    }
+
+    private void setFirstSessionId(@NonNull OperationContext operationContext) {
+        Integer sessionId = getKeyguardEntrySessionId();
+        if (sessionId != null) {
+            operationContext.id = sessionId;
+            operationContext.reason = OperationReason.KEYGUARD;
+            return;
+        }
+
+        sessionId = getBiometricPromptSessionId();
+        if (sessionId != null) {
+            operationContext.id = sessionId;
+            operationContext.reason = OperationReason.BIOMETRIC_PROMPT;
+            return;
+        }
+
+        operationContext.id = 0;
+        operationContext.reason = OperationReason.UNKNOWN;
+    }
+
+    @Nullable
+    @Override
+    public Integer getKeyguardEntrySessionId() {
+        final InstanceId id = mSession.get(StatusBarManager.SESSION_KEYGUARD);
+        return id != null ? id.getId() : null;
+    }
+
+    @Nullable
+    @Override
+    public Integer getBiometricPromptSessionId() {
+        final InstanceId id = mSession.get(StatusBarManager.SESSION_BIOMETRIC_PROMPT);
+        return id != null ? id.getId() : null;
+    }
 
     @Override
     public boolean isAoD() {
-        return mIsDozing;
+        return mIsDozing && mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
     }
 
     @Override
@@ -98,7 +177,7 @@ class BiometricContextProvider implements BiometricContext {
 
     private void notifySubscribers() {
         mSubscribers.forEach((context, consumer) -> {
-            context.isAoD = mIsDozing;
+            context.isAoD = isAoD();
             consumer.accept(context);
         });
     }

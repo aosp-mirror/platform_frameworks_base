@@ -26,8 +26,6 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.common.ICancellationSignal;
-import android.hardware.biometrics.common.OperationContext;
-import android.hardware.biometrics.common.OperationReason;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.face.FaceAuthenticationFrame;
 import android.hardware.face.FaceManager;
@@ -157,13 +155,8 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
         final AidlSession session = getFreshDaemon();
 
         if (session.hasContextMethods()) {
-            final OperationContext context = new OperationContext();
-            // TODO: add reason, id
-            context.id = 0;
-            context.reason = OperationReason.UNKNOWN;
-            context.isAoD = getBiometricContext().isAoD();
-            context.isCrypto = isCryptoOperation();
-            return session.getSession().authenticateWithContext(mOperationId, context);
+            return session.getSession().authenticateWithContext(
+                    mOperationId, getOperationContext());
         } else {
             return session.getSession().authenticate(mOperationId);
         }
@@ -282,8 +275,8 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
         mLockoutCache.setLockoutModeForUser(getTargetUserId(), LockoutTracker.LOCKOUT_TIMED);
         // Lockout metrics are logged as an error code.
         final int error = BiometricFaceConstants.FACE_ERROR_LOCKOUT;
-        getLogger().logOnError(getContext(), error, 0 /* vendorCode */,
-                isCryptoOperation(), getTargetUserId());
+        getLogger().logOnError(getContext(), getOperationContext(),
+                error, 0 /* vendorCode */, getTargetUserId());
 
         try {
             getListener().onError(getSensorId(), getCookie(), error, 0 /* vendorCode */);
@@ -298,8 +291,8 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession>
         mLockoutCache.setLockoutModeForUser(getTargetUserId(), LockoutTracker.LOCKOUT_PERMANENT);
         // Lockout metrics are logged as an error code.
         final int error = BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT;
-        getLogger().logOnError(getContext(), error, 0 /* vendorCode */,
-                isCryptoOperation(), getTargetUserId());
+        getLogger().logOnError(getContext(), getOperationContext(),
+                error, 0 /* vendorCode */, getTargetUserId());
 
         try {
             getListener().onError(getSensorId(), getCookie(), error, 0 /* vendorCode */);
