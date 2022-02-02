@@ -1650,6 +1650,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             win.mToken.addWindow(win);
             displayPolicy.addWindowLw(win, attrs);
+            displayPolicy.setDropInputModePolicy(win, win.mAttrs);
             if (type == TYPE_INPUT_METHOD) {
                 displayContent.setInputMethodWindowLocked(win);
                 imMayMove = false;
