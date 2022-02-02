@@ -2839,6 +2839,14 @@
         <attr name="path" />
         <attr name="minSdkVersion" />
         <attr name="maxSdkVersion" />
+        <!-- The order in which the apex system services are initiated. When there are dependencies
+        among apex system services, setting this attribute for each of them ensures that they are
+        created in the order required by those dependencies. The apex-system-services that are
+        started manually within SystemServer ignore the initOrder and are not considered for
+        automatic starting of the other services.
+        The value is a simple integer, with higher number being initialized first. If not specified,
+        the default order is 0. -->
+        <attr name="initOrder" format="integer" />
     </declare-styleable>
 
     <!-- The <code>receiver</code> tag declares an

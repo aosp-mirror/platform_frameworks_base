@@ -8,7 +8,7 @@ package {
 }
 
 java_library {
-    name: "FakeApexSystemService",
+    name: "FakeApexSystemServices",
     srcs: ["**/*.java"],
     sdk_version: "system_server_current",
     libs: [
