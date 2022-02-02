@@ -24,6 +24,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.ON_POINTER_DOWN_OUTSIDE_FOCUS;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.PointF;
 import android.os.Debug;
 import android.os.IBinder;
@@ -251,6 +252,25 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
                 return null;
             }
             return dc.getOverlayLayer();
+        }
+    }
+
+    @Override
+    @Nullable
+    public SurfaceControl createSurfaceForGestureMonitor(String name, int displayId) {
+        synchronized (mService.mGlobalLock) {
+            final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
+            if (dc == null) {
+                Slog.e(TAG, "Failed to create a gesture monitor on display: " + displayId
+                        + " - DisplayContent not found.");
+                return null;
+            }
+            return mService.makeSurfaceBuilder(dc.getSession())
+                    .setContainerLayer()
+                    .setName(name)
+                    .setCallsite("createSurfaceForGestureMonitor")
+                    .setParent(dc.getSurfaceControl())
+                    .build();
         }
     }
 
