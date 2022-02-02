@@ -26,6 +26,7 @@ import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.media.MediaHostStatesManager;
 import com.android.systemui.media.dream.dagger.MediaComplicationComponent;
+import com.android.systemui.media.nearby.NearbyMediaDevicesService;
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.MediaTttFlags;
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver;
@@ -142,4 +143,10 @@ public interface MediaModule {
     @IntoMap
     @ClassKey(MediaTttSenderService.class)
     Service bindMediaTttSenderService(MediaTttSenderService service);
+
+    /** Inject into NearbyMediaDevicesService. */
+    @Binds
+    @IntoMap
+    @ClassKey(NearbyMediaDevicesService.class)
+    Service bindMediaNearbyDevicesService(NearbyMediaDevicesService service);
 }
