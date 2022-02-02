@@ -17,6 +17,7 @@
 <com.android.systemui.screenshot.OverlayActionChip
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/overlay_action_chip"
+    android:theme="@style/FloatingOverlay"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginStart="@dimen/overlay_action_chip_margin_start"
