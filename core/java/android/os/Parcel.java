@@ -18,6 +18,7 @@ package android.os;
 
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -53,6 +54,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.Serializable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -228,6 +231,25 @@ public final class Parcel {
     private ArrayMap<Class, Object> mClassCookies;
 
     private RuntimeException mStack;
+
+    /** @hide */
+    @TestApi
+    public static final int FLAG_IS_REPLY_FROM_BLOCKING_ALLOWED_OBJECT = 1 << 0;
+
+    /** @hide */
+    @TestApi
+    public static final int FLAG_PROPAGATE_ALLOW_BLOCKING = 1 << 1;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+            FLAG_IS_REPLY_FROM_BLOCKING_ALLOWED_OBJECT,
+            FLAG_PROPAGATE_ALLOW_BLOCKING,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ParcelFlags {}
+
+    @ParcelFlags
+    private int mFlags;
 
     /**
      * Whether or not to parcel the stack trace of an exception. This has a performance
@@ -583,6 +605,40 @@ public final class Parcel {
      */
     private void markForBinder(@NonNull IBinder binder) {
         nativeMarkForBinder(mNativePtr, binder);
+    }
+
+    /** @hide */
+    @ParcelFlags
+    @TestApi
+    public int getFlags() {
+        return mFlags;
+    }
+
+    /** @hide */
+    public void setFlags(@ParcelFlags int flags) {
+        mFlags = flags;
+    }
+
+    /** @hide */
+    public void addFlags(@ParcelFlags int flags) {
+        mFlags |= flags;
+    }
+
+    /** @hide */
+    private boolean hasFlags(@ParcelFlags int flags) {
+        return (mFlags & flags) == flags;
+    }
+
+    /**
+     * This method is used by the AIDL compiler for system components. Not intended to be
+     * used by non-system apps.
+     */
+    // Note: Ideally this method should be @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES),
+    // but we need to make this method public due to the way the aidl compiler is compiled.
+    // We don't really need to protect it; even if 3p / non-system apps, nothing would happen.
+    // This would only work when used on a reply parcel by a binder object that's allowed-blocking.
+    public void setPropagateAllowBlocking() {
+        addFlags(FLAG_PROPAGATE_ALLOW_BLOCKING);
     }
 
     /**
@@ -3045,7 +3101,15 @@ public final class Parcel {
      * Read an object from the parcel at the current dataPosition().
      */
     public final IBinder readStrongBinder() {
-        return nativeReadStrongBinder(mNativePtr);
+        final IBinder result = nativeReadStrongBinder(mNativePtr);
+
+        // If it's a reply from a method with @PropagateAllowBlocking, then inherit allow-blocking
+        // from the object that returned it.
+        if (result != null && hasFlags(
+                FLAG_IS_REPLY_FROM_BLOCKING_ALLOWED_OBJECT | FLAG_PROPAGATE_ALLOW_BLOCKING)) {
+            Binder.allowBlocking(result);
+        }
+        return result;
     }
 
     /**
@@ -4995,6 +5059,7 @@ public final class Parcel {
     }
 
     private void freeBuffer() {
+        mFlags = 0;
         resetSqaushingState();
         if (mOwnsNativeParcelObject) {
             nativeFreeBuffer(mNativePtr);
