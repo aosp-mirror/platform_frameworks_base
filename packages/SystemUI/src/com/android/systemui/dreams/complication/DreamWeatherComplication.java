@@ -53,6 +53,11 @@ public class DreamWeatherComplication implements Complication {
         mComponentFactory = componentFactory;
     }
 
+    @Override
+    public int getRequiredTypeAvailability() {
+        return COMPLICATION_TYPE_WEATHER;
+    }
+
     /**
      * Create {@link DreamWeatherViewHolder}.
      */

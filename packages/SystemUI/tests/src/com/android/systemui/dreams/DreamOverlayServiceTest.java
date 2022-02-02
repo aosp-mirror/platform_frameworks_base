@@ -36,7 +36,9 @@ import androidx.lifecycle.LifecycleRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.settingslib.dream.DreamBackend;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dreams.complication.Complication;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -49,6 +51,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -94,11 +100,13 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
     @Mock
     DreamOverlayStateController mStateController;
 
+    @Mock
+    DreamBackend mDreamBackend;
 
     DreamOverlayService mService;
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         MockitoAnnotations.initMocks(this);
         mContext.addMockSystemService(WindowManager.class, mWindowManager);
 
@@ -110,6 +118,8 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 .thenReturn(mLifecycleRegistry);
         when(mDreamOverlayComponent.getDreamOverlayTouchMonitor())
                 .thenReturn(mDreamOverlayTouchMonitor);
+        when(mDreamOverlayComponent.getDreamBackend())
+                .thenReturn(mDreamBackend);
         when(mDreamOverlayComponentFactory
                 .create(any(), any()))
                 .thenReturn(mDreamOverlayComponent);
@@ -120,28 +130,34 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 mDreamOverlayComponentFactory,
                 mStateController,
                 mKeyguardUpdateMonitor);
+    }
+
+    @Test
+    public void testOverlayContainerViewAddedToWindow() throws Exception {
         final IBinder proxy = mService.onBind(new Intent());
         final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
 
         // Inform the overlay service of dream starting.
         overlay.startDream(mWindowParams, mDreamOverlayCallback);
         mMainExecutor.runAllReady();
-    }
 
-    @Test
-    public void testOverlayContainerViewAddedToWindow() {
         verify(mWindowManager).addView(any(), any());
     }
 
     @Test
-    public void testDreamOverlayContainerViewControllerInitialized() {
+    public void testDreamOverlayContainerViewControllerInitialized() throws Exception {
+        final IBinder proxy = mService.onBind(new Intent());
+        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+
+        // Inform the overlay service of dream starting.
+        overlay.startDream(mWindowParams, mDreamOverlayCallback);
+        mMainExecutor.runAllReady();
+
         verify(mDreamOverlayContainerViewController).init();
     }
 
     @Test
     public void testShouldShowComplicationsTrueByDefault() {
-        assertThat(mService.shouldShowComplications()).isTrue();
-
         mService.onBind(new Intent());
 
         assertThat(mService.shouldShowComplications()).isTrue();
@@ -154,5 +170,25 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
         mService.onBind(intent);
 
         assertThat(mService.shouldShowComplications()).isFalse();
+    }
+
+    @Test
+    public void testSetAvailableComplicationTypes() throws Exception {
+        final Set<Integer> enabledComplications = new HashSet<>(
+                Arrays.asList(DreamBackend.COMPLICATION_TYPE_TIME,
+                        DreamBackend.COMPLICATION_TYPE_DATE,
+                        DreamBackend.COMPLICATION_TYPE_WEATHER));
+        when(mDreamBackend.getEnabledComplications()).thenReturn(enabledComplications);
+
+        final IBinder proxy = mService.onBind(new Intent());
+        final IDreamOverlay overlay = IDreamOverlay.Stub.asInterface(proxy);
+
+        overlay.startDream(mWindowParams, mDreamOverlayCallback);
+        mMainExecutor.runAllReady();
+
+        final int expectedTypes =
+                Complication.COMPLICATION_TYPE_TIME | Complication.COMPLICATION_TYPE_DATE
+                        | Complication.COMPLICATION_TYPE_WEATHER;
+        verify(mStateController).setAvailableComplicationTypes(expectedTypes);
     }
 }
