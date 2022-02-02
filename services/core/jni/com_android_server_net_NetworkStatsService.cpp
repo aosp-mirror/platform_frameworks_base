@@ -16,20 +16,18 @@
 
 #define LOG_TAG "NetworkStatsNative"
 
+#include <cutils/qtaguid.h>
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-
-#include "core_jni_helpers.h"
 #include <jni.h>
 #include <nativehelper/ScopedUtfChars.h>
-#include <utils/misc.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <utils/Log.h>
+#include <utils/misc.h>
 
-#include "android-base/unique_fd.h"
 #include "bpf/BpfUtils.h"
 #include "netdbpf/BpfNetworkStats.h"
 
@@ -104,10 +102,15 @@ static jlong getUidStat(JNIEnv* env, jclass clazz, jint uid, jint type) {
     }
 }
 
+static int deleteTagData(JNIEnv* /* env */, jclass /* clazz */, jint uid) {
+    return qtaguid_deleteTagData(0, uid);
+}
+
 static const JNINativeMethod gMethods[] = {
         {"nativeGetTotalStat", "(I)J", (void*)getTotalStat},
         {"nativeGetIfaceStat", "(Ljava/lang/String;I)J", (void*)getIfaceStat},
         {"nativeGetUidStat", "(II)J", (void*)getUidStat},
+        {"nativeDeleteTagData", "(I)I", (void*)deleteTagData},
 };
 
 int register_android_server_net_NetworkStatsService(JNIEnv* env) {

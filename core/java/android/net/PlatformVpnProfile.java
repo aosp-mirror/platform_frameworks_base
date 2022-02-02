@@ -83,8 +83,6 @@ public abstract class PlatformVpnProfile {
 
     /**
      * Returns if the local traffic is exempted from the VPN.
-     *
-     * @hide TODO(184750836): unhide once the implementation is completed
      */
     public final boolean getExcludeLocalRoutes() {
         return mExcludeLocalRoutes;

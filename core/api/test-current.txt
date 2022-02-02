@@ -675,14 +675,6 @@ package android.appwidget {
 
 }
 
-package android.bluetooth {
-
-  public final class BluetoothClass implements android.os.Parcelable {
-    method public int getClassOfDevice();
-  }
-
-}
-
 package android.content {
 
   public final class AttributionSource implements android.os.Parcelable {

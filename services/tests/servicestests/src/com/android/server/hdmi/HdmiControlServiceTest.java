@@ -43,6 +43,7 @@ import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiCecVolumeControlFeatureListener;
 import android.hardware.hdmi.IHdmiControlStatusChangeListener;
+import android.hardware.hdmi.IHdmiVendorCommandListener;
 import android.os.Binder;
 import android.os.IPowerManager;
 import android.os.IThermalService;
@@ -883,6 +884,114 @@ public class HdmiControlServiceTest {
 
         assertThat(mHdmiControlServiceSpy.handleCecCommand(message))
                 .isEqualTo(Constants.ABORT_REFUSED);
+    }
+
+    @Test
+    public void addVendorCommandListener_receiveCallback_VendorCmdNoIdTest() {
+        int destAddress = mHdmiControlServiceSpy.playback().getDeviceInfo().getLogicalAddress();
+        int sourceAddress = Constants.ADDR_TV;
+        byte[] params = {0x00, 0x01, 0x02, 0x03};
+        int vendorId = 0x123456;
+
+        VendorCommandListener vendorCmdListener =
+                new VendorCommandListener(sourceAddress, destAddress, params, vendorId);
+        mHdmiControlServiceSpy.addVendorCommandListener(vendorCmdListener, vendorId);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage vendorCommandNoId =
+                HdmiCecMessageBuilder.buildVendorCommand(sourceAddress, destAddress, params);
+        mNativeWrapper.onCecMessage(vendorCommandNoId);
+        mTestLooper.dispatchAll();
+        assertThat(vendorCmdListener.mVendorCommandCallbackReceived).isTrue();
+        assertThat(vendorCmdListener.mParamsCorrect).isTrue();
+        assertThat(vendorCmdListener.mHasVendorId).isFalse();
+    }
+
+    @Test
+    public void addVendorCommandListener_receiveCallback_VendorCmdWithIdTest() {
+        int destAddress = mHdmiControlServiceSpy.playback().getDeviceInfo().getLogicalAddress();
+        int sourceAddress = Constants.ADDR_TV;
+        byte[] params = {0x00, 0x01, 0x02, 0x03};
+        int vendorId = 0x123456;
+
+        VendorCommandListener vendorCmdListener =
+                new VendorCommandListener(sourceAddress, destAddress, params, vendorId);
+        mHdmiControlServiceSpy.addVendorCommandListener(vendorCmdListener, vendorId);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage vendorCommandWithId =
+                HdmiCecMessageBuilder.buildVendorCommandWithId(
+                        sourceAddress, destAddress, vendorId, params);
+        mNativeWrapper.onCecMessage(vendorCommandWithId);
+        mTestLooper.dispatchAll();
+        assertThat(vendorCmdListener.mVendorCommandCallbackReceived).isTrue();
+        assertThat(vendorCmdListener.mParamsCorrect).isTrue();
+        assertThat(vendorCmdListener.mHasVendorId).isTrue();
+    }
+
+    @Test
+    public void addVendorCommandListener_noCallback_VendorCmdDiffIdTest() {
+        int destAddress = mHdmiControlServiceSpy.playback().getDeviceInfo().getLogicalAddress();
+        int sourceAddress = Constants.ADDR_TV;
+        byte[] params = {0x00, 0x01, 0x02, 0x03};
+        int vendorId = 0x123456;
+        int diffVendorId = 0x345678;
+
+        VendorCommandListener vendorCmdListener =
+                new VendorCommandListener(sourceAddress, destAddress, params, vendorId);
+        mHdmiControlServiceSpy.addVendorCommandListener(vendorCmdListener, vendorId);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage vendorCommandWithDiffId =
+                HdmiCecMessageBuilder.buildVendorCommandWithId(
+                        sourceAddress, destAddress, diffVendorId, params);
+        mNativeWrapper.onCecMessage(vendorCommandWithDiffId);
+        mTestLooper.dispatchAll();
+        assertThat(vendorCmdListener.mVendorCommandCallbackReceived).isFalse();
+    }
+
+    private static class VendorCommandListener extends IHdmiVendorCommandListener.Stub {
+        boolean mVendorCommandCallbackReceived = false;
+        boolean mParamsCorrect = false;
+        boolean mHasVendorId = false;
+
+        int mSourceAddress;
+        int mDestAddress;
+        byte[] mParams;
+        int mVendorId;
+
+        VendorCommandListener(int sourceAddress, int destAddress, byte[] params, int vendorId) {
+            this.mSourceAddress = sourceAddress;
+            this.mDestAddress = destAddress;
+            this.mParams = params.clone();
+            this.mVendorId = vendorId;
+        }
+
+        @Override
+        public void onReceived(
+                int sourceAddress, int destAddress, byte[] params, boolean hasVendorId) {
+            mVendorCommandCallbackReceived = true;
+            if (mSourceAddress == sourceAddress && mDestAddress == destAddress) {
+                byte[] expectedParams;
+                if (hasVendorId) {
+                    // If the command has vendor ID, we have to add it to mParams.
+                    expectedParams = new byte[params.length];
+                    expectedParams[0] = (byte) ((mVendorId >> 16) & 0xFF);
+                    expectedParams[1] = (byte) ((mVendorId >> 8) & 0xFF);
+                    expectedParams[2] = (byte) (mVendorId & 0xFF);
+                    System.arraycopy(mParams, 0, expectedParams, 3, mParams.length);
+                } else {
+                    expectedParams = params.clone();
+                }
+                if (Arrays.equals(expectedParams, params)) {
+                    mParamsCorrect = true;
+                }
+            }
+            mHasVendorId = hasVendorId;
+        }
+
+        @Override
+        public void onControlStateChanged(boolean enabled, int reason) {}
     }
 
     @Test

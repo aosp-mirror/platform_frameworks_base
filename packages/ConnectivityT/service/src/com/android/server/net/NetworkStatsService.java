@@ -20,9 +20,6 @@ import static android.Manifest.permission.NETWORK_STATS_PROVIDER;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.UPDATE_DEVICE_STATS;
 import static android.app.usage.NetworkStatsManager.PREFIX_DEV;
-import static android.app.usage.NetworkStatsManager.PREFIX_UID;
-import static android.app.usage.NetworkStatsManager.PREFIX_UID_TAG;
-import static android.app.usage.NetworkStatsManager.PREFIX_XT;
 import static android.content.Intent.ACTION_SHUTDOWN;
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.ACTION_USER_REMOVED;
@@ -50,6 +47,9 @@ import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.net.TrafficStats.UID_TETHERING;
 import static android.net.TrafficStats.UNSUPPORTED;
+import static android.net.netstats.NetworkStatsDataMigrationUtils.PREFIX_UID;
+import static android.net.netstats.NetworkStatsDataMigrationUtils.PREFIX_UID_TAG;
+import static android.net.netstats.NetworkStatsDataMigrationUtils.PREFIX_XT;
 import static android.os.Trace.TRACE_TAG_NETWORK;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
@@ -59,8 +59,6 @@ import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 
 import static com.android.net.module.util.NetworkCapabilitiesUtils.getDisplayTransport;
 import static com.android.net.module.util.NetworkStatsUtils.LIMIT_GLOBAL_ALERT;
-import static com.android.server.NetworkManagementSocketTagger.resetKernelUidStats;
-import static com.android.server.NetworkManagementSocketTagger.setKernelCounterSet;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -121,6 +119,8 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.NetworkInterfaceProto;
 import android.service.NetworkStatsServiceDumpProto;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.telephony.PhoneStateListener;
 import android.telephony.SubscriptionPlan;
 import android.text.TextUtils;
@@ -139,10 +139,14 @@ import com.android.internal.util.FileRotator;
 import com.android.net.module.util.BaseNetdUnsolicitedEventListener;
 import com.android.net.module.util.BestClock;
 import com.android.net.module.util.BinderUtils;
+import com.android.net.module.util.BpfMap;
 import com.android.net.module.util.CollectionUtils;
+import com.android.net.module.util.IBpfMap;
 import com.android.net.module.util.LocationPermissionChecker;
 import com.android.net.module.util.NetworkStatsUtils;
 import com.android.net.module.util.PermissionUtils;
+import com.android.net.module.util.Struct.U32;
+import com.android.net.module.util.Struct.U8;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -207,6 +211,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private static final String NETSTATS_COMBINE_SUBTYPE_ENABLED =
             "netstats_combine_subtype_enabled";
 
+    // This is current path but may be changed soon.
+    private static final String UID_COUNTERSET_MAP_PATH =
+            "/sys/fs/bpf/map_netd_uid_counterset_map";
+
     private final Context mContext;
     private final NetworkStatsFactory mStatsFactory;
     private final AlarmManager mAlarmManager;
@@ -244,7 +252,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         /**
          * When enabled, all mobile data is reported under {@link NetworkTemplate#NETWORK_TYPE_ALL}.
          * When disabled, mobile data is broken down by a granular ratType representative of the
-         * actual ratType. {@see NetworkTemplate#getCollapsedRatType}.
+         * actual ratType. {@see android.app.usage.NetworkStatsManager#getCollapsedRatType}.
          * Enabling this decreases the level of detail but saves performance, disk space and
          * amount of data logged.
          */
@@ -325,8 +333,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @GuardedBy("mStatsLock")
     private NetworkStatsCollection mXtStatsCached;
 
-    /** Current counter sets for each UID. */
+    /**
+     * Current counter sets for each UID.
+     * TODO: maybe remove mActiveUidCounterSet and read UidCouneterSet value from mUidCounterSetMap
+     * directly ? But if mActiveUidCounterSet would be accessed very frequently, maybe keep
+     * mActiveUidCounterSet to avoid accessing kernel too frequently.
+     */
     private SparseIntArray mActiveUidCounterSet = new SparseIntArray();
+    private final IBpfMap<U32, U8> mUidCounterSetMap;
 
     /** Data layer operation counters for splicing into other structures. */
     private NetworkStats mUidOperations = new NetworkStats(0L, 10);
@@ -459,6 +473,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mLocationPermissionChecker = mDeps.makeLocationPermissionChecker(mContext);
         mInterfaceMapUpdater = mDeps.makeBpfInterfaceMapUpdater(mContext, mHandler);
         mInterfaceMapUpdater.start();
+        mUidCounterSetMap = mDeps.getUidCounterSetMap();
     }
 
     /**
@@ -519,6 +534,21 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         public BpfInterfaceMapUpdater makeBpfInterfaceMapUpdater(
                 @NonNull Context ctx, @NonNull Handler handler) {
             return new BpfInterfaceMapUpdater(ctx, handler);
+        }
+
+        /** Get counter sets map for each UID. */
+        public IBpfMap<U32, U8> getUidCounterSetMap() {
+            try {
+                return new BpfMap<U32, U8>(UID_COUNTERSET_MAP_PATH, BpfMap.BPF_F_RDWR,
+                        U32.class, U8.class);
+            } catch (ErrnoException e) {
+                Log.wtf(TAG, "Cannot create uid counter set map: " + e);
+                return null;
+            }
+        }
+
+        public TagStatsDeleter getTagStatsDeleter() {
+            return NetworkStatsService::nativeDeleteTagData;
         }
     }
 
@@ -1074,6 +1104,29 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     mActiveIface, uid, set, tag, 0L, 0L, 0L, 0L, operationCount);
             mUidOperations.combineValues(
                     mActiveIface, uid, set, TAG_NONE, 0L, 0L, 0L, 0L, operationCount);
+        }
+    }
+
+    private void setKernelCounterSet(int uid, int set) {
+        if (mUidCounterSetMap == null) {
+            Log.wtf(TAG, "Fail to set UidCounterSet: Null bpf map");
+            return;
+        }
+
+        if (set == SET_DEFAULT) {
+            try {
+                mUidCounterSetMap.deleteEntry(new U32(uid));
+            } catch (ErrnoException e) {
+                Log.w(TAG, "UidCounterSetMap.deleteEntry(" + uid + ") failed with errno: " + e);
+            }
+            return;
+        }
+
+        try {
+            mUidCounterSetMap.updateEntry(new U32(uid), new U8((short) set));
+        } catch (ErrnoException e) {
+            Log.w(TAG, "UidCounterSetMap.updateEntry(" + uid + ", " + set
+                    + ") failed with errno: " + e);
         }
     }
 
@@ -1752,7 +1805,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // Clear kernel stats associated with UID
         for (int uid : uids) {
-            resetKernelUidStats(uid);
+            final int ret = mDeps.getTagStatsDeleter().deleteTagData(uid);
+            if (ret < 0) {
+                Log.w(TAG, "problem clearing counters for uid " + uid + ": " + Os.strerror(-ret));
+            }
         }
     }
 
@@ -2331,4 +2387,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private static native long nativeGetTotalStat(int type);
     private static native long nativeGetIfaceStat(String iface, int type);
     private static native long nativeGetUidStat(int uid, int type);
+
+    // TODO: use BpfNetMaps to delete tag data and remove this.
+    @VisibleForTesting
+    interface TagStatsDeleter {
+        int deleteTagData(int uid);
+    }
+
+    private static native int nativeDeleteTagData(int uid);
 }

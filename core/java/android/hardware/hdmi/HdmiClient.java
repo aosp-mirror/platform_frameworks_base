@@ -17,6 +17,8 @@ import android.util.Log;
 public abstract class HdmiClient {
     private static final String TAG = "HdmiClient";
 
+    private static final int UNKNOWN_VENDOR_ID = 0xFFFFFF;
+
     /* package */ final IHdmiControlService mService;
 
     private IHdmiVendorCommandListener mIHdmiVendorCommandListener;
@@ -94,11 +96,25 @@ public abstract class HdmiClient {
     }
 
     /**
-     * Sets a listener used to receive incoming vendor-specific command.
+     * Sets a listener used to receive incoming vendor-specific command. This listener will only
+     * receive {@code <Vendor Command>} but will not receive any {@code <Vendor Command with ID>}
+     * messages.
      *
      * @param listener listener object
      */
     public void setVendorCommandListener(@NonNull VendorCommandListener listener) {
+        // Set the vendor ID to INVALID_VENDOR_ID.
+        setVendorCommandListener(listener, UNKNOWN_VENDOR_ID);
+    }
+
+    /**
+     * Sets a listener used to receive incoming vendor-specific command.
+     *
+     * @param listener listener object
+     * @param vendorId The listener is interested in {@code <Vendor Command with ID>} received with
+     *     this vendorId and all {@code <Vendor Command>} messages.
+     */
+    public void setVendorCommandListener(@NonNull VendorCommandListener listener, int vendorId) {
         if (listener == null) {
             throw new IllegalArgumentException("listener cannot be null");
         }
@@ -107,7 +123,7 @@ public abstract class HdmiClient {
         }
         try {
             IHdmiVendorCommandListener wrappedListener = getListenerWrapper(listener);
-            mService.addVendorCommandListener(wrappedListener, getDeviceType());
+            mService.addVendorCommandListener(wrappedListener, vendorId);
             mIHdmiVendorCommandListener = wrappedListener;
         } catch (RemoteException e) {
             Log.e(TAG, "failed to set vendor command listener: ", e);
