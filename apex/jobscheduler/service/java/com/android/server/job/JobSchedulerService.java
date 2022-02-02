@@ -2768,7 +2768,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 return job.getEffectiveStandbyBucket() != RESTRICTED_INDEX
                         ? mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS
                         : Math.min(mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS, 5 * MINUTE_IN_MILLIS);
-            } else if (job.getEffectivePriority() == JobInfo.PRIORITY_HIGH) {
+            } else if (job.getEffectivePriority() >= JobInfo.PRIORITY_HIGH) {
                 return mConstants.RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS;
             } else {
                 return mConstants.RUNTIME_MIN_GUARANTEE_MS;

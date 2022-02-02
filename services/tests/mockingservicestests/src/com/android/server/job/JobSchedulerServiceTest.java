@@ -204,6 +204,49 @@ public class JobSchedulerServiceTest {
                 jobInfoBuilder.build(), callingUid, "com.android.test", 0, testTag);
     }
 
+    @Test
+    public void testGetMinJobExecutionGuaranteeMs() {
+        JobStatus ejMax = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(1).setExpedited(true));
+        JobStatus ejHigh = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(2).setExpedited(true).setPriority(JobInfo.PRIORITY_HIGH));
+        JobStatus ejMaxDowngraded = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(3).setExpedited(true));
+        JobStatus ejHighDowngraded = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(4).setExpedited(true).setPriority(JobInfo.PRIORITY_HIGH));
+        JobStatus jobHigh = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(5).setPriority(JobInfo.PRIORITY_HIGH));
+        JobStatus jobDef = createJobStatus("testGetMinJobExecutionGuaranteeMs",
+                createJobInfo(6));
+
+        spyOn(ejMax);
+        spyOn(ejHigh);
+        spyOn(ejMaxDowngraded);
+        spyOn(ejHighDowngraded);
+        spyOn(jobHigh);
+        spyOn(jobDef);
+
+        when(ejMax.shouldTreatAsExpeditedJob()).thenReturn(true);
+        when(ejHigh.shouldTreatAsExpeditedJob()).thenReturn(true);
+        when(ejMaxDowngraded.shouldTreatAsExpeditedJob()).thenReturn(false);
+        when(ejHighDowngraded.shouldTreatAsExpeditedJob()).thenReturn(false);
+        when(jobHigh.shouldTreatAsExpeditedJob()).thenReturn(false);
+        when(jobDef.shouldTreatAsExpeditedJob()).thenReturn(false);
+
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(ejMax));
+        assertEquals(mService.mConstants.RUNTIME_MIN_EJ_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(ejHigh));
+        assertEquals(mService.mConstants.RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(ejMaxDowngraded));
+        assertEquals(mService.mConstants.RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(ejHighDowngraded));
+        assertEquals(mService.mConstants.RUNTIME_MIN_HIGH_PRIORITY_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobHigh));
+        assertEquals(mService.mConstants.RUNTIME_MIN_GUARANTEE_MS,
+                mService.getMinJobExecutionGuaranteeMs(jobDef));
+    }
+
     /**
      * Confirm that {@link JobSchedulerService#getRescheduleJobForPeriodic(JobStatus)} returns a job
      * with the correct delay and deadline constraints if the periodic job is scheduled with the
