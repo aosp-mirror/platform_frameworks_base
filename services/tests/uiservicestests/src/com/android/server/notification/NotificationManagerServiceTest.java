@@ -52,8 +52,11 @@ import static android.os.Build.VERSION_CODES.P;
 import static android.os.UserHandle.USER_SYSTEM;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
 import static android.service.notification.Adjustment.KEY_USER_SENTIMENT;
+import static android.service.notification.NotificationListenerService.REASON_CANCEL_ALL;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
+
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -398,7 +401,25 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         interface NotificationAssistantAccessGrantedCallback {
             void onGranted(ComponentName assistant, int userId, boolean granted);
         }
+
+        class StrongAuthTrackerFake extends NotificationManagerService.StrongAuthTracker {
+            private int mGetStrongAuthForUserReturnValue = 0;
+            StrongAuthTrackerFake(Context context) {
+                super(context);
+            }
+
+            public void setGetStrongAuthForUserReturnValue(int val) {
+                mGetStrongAuthForUserReturnValue = val;
+            }
+
+            @Override
+            public int getStrongAuthForUser(int userId) {
+                return mGetStrongAuthForUserReturnValue;
+            }
+        }
     }
+
+    TestableNotificationManagerService.StrongAuthTrackerFake mStrongAuthTracker;
 
     private class TestableToastCallback extends ITransientNotification.Stub {
         @Override
@@ -515,6 +536,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
 
         mService.setAudioManager(mAudioManager);
+
+        mStrongAuthTracker = mService.new StrongAuthTrackerFake(mContext);
+        mService.setStrongAuthTracker(mStrongAuthTracker);
 
         mShortcutHelper = mService.getShortcutHelper();
         mShortcutHelper.setLauncherApps(mLauncherApps);
@@ -7128,5 +7152,45 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 fail("leaked data across users");
             }
         }
+    }
+
+    @Test
+    public void testStrongAuthTracker_isInLockDownMode() {
+        mStrongAuthTracker.setGetStrongAuthForUserReturnValue(
+                STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+        mStrongAuthTracker.onStrongAuthRequiredChanged(mContext.getUserId());
+        assertTrue(mStrongAuthTracker.isInLockDownMode());
+        mStrongAuthTracker.setGetStrongAuthForUserReturnValue(0);
+        mStrongAuthTracker.onStrongAuthRequiredChanged(mContext.getUserId());
+        assertFalse(mStrongAuthTracker.isInLockDownMode());
+    }
+
+    @Test
+    public void testCancelAndPostNotificationsWhenEnterAndExitLockDownMode() {
+        // post 2 notifications from 2 packages
+        NotificationRecord pkgA = new NotificationRecord(mContext,
+                generateSbn("a", 1000, 9, 0), mTestNotificationChannel);
+        mService.addNotification(pkgA);
+        NotificationRecord pkgB = new NotificationRecord(mContext,
+                generateSbn("b", 1001, 9, 0), mTestNotificationChannel);
+        mService.addNotification(pkgB);
+
+        // when entering the lockdown mode, cancel the 2 notifications.
+        mStrongAuthTracker.setGetStrongAuthForUserReturnValue(
+                STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+        mStrongAuthTracker.onStrongAuthRequiredChanged(mContext.getUserId());
+        assertTrue(mStrongAuthTracker.isInLockDownMode());
+
+        // the notifyRemovedLocked function is called twice due to REASON_LOCKDOWN.
+        ArgumentCaptor<Integer> captor = ArgumentCaptor.forClass(Integer.class);
+        verify(mListeners, times(2)).notifyRemovedLocked(any(), captor.capture(), any());
+        assertEquals(REASON_CANCEL_ALL, captor.getValue().intValue());
+
+        // exit lockdown mode.
+        mStrongAuthTracker.setGetStrongAuthForUserReturnValue(0);
+        mStrongAuthTracker.onStrongAuthRequiredChanged(mContext.getUserId());
+
+        // the notifyPostedLocked function is called twice.
+        verify(mListeners, times(2)).notifyPostedLocked(any(), any());
     }
 }
