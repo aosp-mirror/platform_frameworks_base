@@ -66,6 +66,7 @@ import static android.os.PowerExemptionManager.REASON_PROC_STATE_PERSISTENT_UI;
 import static android.os.PowerExemptionManager.REASON_PROFILE_OWNER;
 import static android.os.PowerExemptionManager.REASON_ROLE_DIALER;
 import static android.os.PowerExemptionManager.REASON_ROLE_EMERGENCY;
+import static android.os.PowerExemptionManager.REASON_SYSTEM_ALLOW_LISTED;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_MODULE;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_UID;
 import static android.os.Process.SYSTEM_UID;
@@ -140,6 +141,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.TriConsumer;
 import com.android.server.AppStateTracker;
 import com.android.server.LocalServices;
+import com.android.server.SystemConfig;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
@@ -230,6 +232,11 @@ public final class AppRestrictionController {
      */
     @GuardedBy("mLock")
     private final HashMap<String, Boolean> mSystemModulesCache = new HashMap<>();
+
+    /**
+     * The pre-config packages that are exempted from the background restrictions.
+     */
+    private ArraySet<String> mBgRestrictionExemptioFromSysConfig;
 
     /**
      * Lock specifically for bookkeeping around the carrier-privileged app set.
@@ -705,6 +712,7 @@ public final class AppRestrictionController {
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 ActivityThread.currentApplication().getMainExecutor(), mConstantsObserver);
         mConstantsObserver.start();
+        initBgRestrictionExemptioFromSysConfig();
         initRestrictionStates();
         initSystemModuleNames();
         registerForUidObservers();
@@ -724,6 +732,22 @@ public final class AppRestrictionController {
     void resetRestrictionSettings() {
         mRestrictionSettings.reset();
         initRestrictionStates();
+    }
+
+    private void initBgRestrictionExemptioFromSysConfig() {
+        mBgRestrictionExemptioFromSysConfig =
+                SystemConfig.getInstance().getBgRestrictionExemption();
+        if (DEBUG_BG_RESTRICTION_CONTROLLER) {
+            final ArraySet<String> exemptedPkgs = mBgRestrictionExemptioFromSysConfig;
+            for (int i = exemptedPkgs.size() - 1; i >= 0; i--) {
+                Slog.i(TAG, "bg-restriction-exemption: " + exemptedPkgs.valueAt(i));
+            }
+        }
+    }
+
+    private boolean isExemptedFromSysConfig(String packageName) {
+        return mBgRestrictionExemptioFromSysConfig != null
+                && mBgRestrictionExemptioFromSysConfig.contains(packageName);
     }
 
     private void initRestrictionStates() {
@@ -1557,14 +1581,11 @@ public final class AppRestrictionController {
         }
     }
 
-    boolean isOnDeviceIdleAllowlist(int uid, boolean allowExceptIdle) {
+    boolean isOnDeviceIdleAllowlist(int uid) {
         final int appId = UserHandle.getAppId(uid);
 
-        final int[] allowlist = allowExceptIdle
-                ? mDeviceIdleExceptIdleAllowlist
-                : mDeviceIdleAllowlist;
-
-        return Arrays.binarySearch(allowlist, appId) >= 0;
+        return Arrays.binarySearch(mDeviceIdleAllowlist, appId) >= 0
+                || Arrays.binarySearch(mDeviceIdleExceptIdleAllowlist, appId) >= 0;
     }
 
     void setDeviceIdleAllowlist(int[] allAppids, int[] exceptIdleAppids) {
@@ -1585,7 +1606,7 @@ public final class AppRestrictionController {
         if (UserHandle.isCore(uid)) {
             return REASON_SYSTEM_UID;
         }
-        if (isOnDeviceIdleAllowlist(uid, false)) {
+        if (isOnDeviceIdleAllowlist(uid)) {
             return REASON_ALLOWLISTED_PACKAGE;
         }
         final ActivityManagerInternal am = mInjector.getActivityManagerInternal();
@@ -1621,6 +1642,8 @@ public final class AppRestrictionController {
                     return REASON_SYSTEM_MODULE;
                 } else if (isCarrierApp(pkg)) {
                     return REASON_CARRIER_PRIVILEGED_APP;
+                } else if (isExemptedFromSysConfig(pkg)) {
+                    return REASON_SYSTEM_ALLOW_LISTED;
                 }
             }
         }
