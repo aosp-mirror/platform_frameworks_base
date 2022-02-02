@@ -56,6 +56,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.net.PrivateDnsConnectivityChecker;
 import android.net.ProxyInfo;
 import android.net.Uri;
@@ -15220,6 +15221,66 @@ public class DevicePolicyManager {
         }
         return ParcelableResource.loadDefaultDrawable(defaultDrawableLoader);
     }
+
+    /**
+     * Similar to {@link #getDrawable(String, String, String, Callable)} but returns an
+     * {@link Icon} instead of a {@link Drawable}.
+     *
+     * @param drawableId The drawable ID to get the updated resource for.
+     * @param drawableStyle The drawable style to use.
+     * @param drawableSource The source for the caller.
+     * @param defaultIcon Returned if no updated drawable was set for the provided params.
+     */
+    @Nullable
+    public Icon getDrawableAsIcon(
+            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
+            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
+            @NonNull @DevicePolicyResources.UpdatableDrawableSource String drawableSource,
+            @Nullable Icon defaultIcon) {
+        Objects.requireNonNull(drawableId, "drawableId can't be null");
+        Objects.requireNonNull(drawableStyle, "drawableStyle can't be null");
+        Objects.requireNonNull(drawableSource, "drawableSource can't be null");
+        Objects.requireNonNull(defaultIcon, "defaultIcon can't be null");
+
+        if (Drawables.UNDEFINED.equals(drawableId)) {
+            return defaultIcon;
+        }
+        if (mService != null) {
+            try {
+                ParcelableResource resource = mService.getDrawable(
+                        drawableId, drawableStyle, drawableSource);
+                if (resource == null) {
+                    return defaultIcon;
+                }
+                return Icon.createWithResource(resource.getPackageName(), resource.getResourceId());
+            } catch (RemoteException e) {
+                Log.e(
+                        TAG,
+                        "Error getting the updated drawable from DevicePolicyManagerService.",
+                        e);
+                return defaultIcon;
+            }
+        }
+        return defaultIcon;
+    }
+
+    /**
+     * Similar to {@link #getDrawable(String, String, Callable)} but returns an {@link Icon}
+     * instead of a {@link Drawable}.
+     *
+     * @param drawableId The drawable ID to get the updated resource for.
+     * @param drawableStyle The drawable style to use.
+     * @param defaultIcon Returned if no updated drawable was set for the provided params.
+     */
+    @Nullable
+    public Icon getDrawableAsIcon(
+            @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
+            @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
+            @Nullable Icon defaultIcon) {
+        return getDrawableAsIcon(
+                drawableId, drawableStyle, Drawables.Source.UNDEFINED, defaultIcon);
+    }
+
 
     /**
      * For each {@link DevicePolicyStringResource} item in {@code strings}, it updates the string
