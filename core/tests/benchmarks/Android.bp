@@ -27,6 +27,7 @@ package {
 
 java_library {
     name: "frameworks-base-core-benchmarks",
+    defaults: ["framework-connectivity-test-defaults"],
     installable: true,
     srcs: ["src/**/*.java"],
     libs: ["caliper-api-target"],
