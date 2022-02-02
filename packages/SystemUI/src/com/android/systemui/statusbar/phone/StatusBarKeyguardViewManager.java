@@ -1184,7 +1184,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         // When a dream overlay is active, scrimming will cause any expansion to immediately expand.
         return (mOccluded && !mDreamOverlayStateController.isOverlayActive())
                 || mBouncer.willDismissWithAction()
-                || mStatusBar.isFullScreenUserSwitcherState()
                 || (mBouncer.isShowing() && mBouncer.isScrimmed())
                 || mBouncer.isFullscreenBouncer();
     }

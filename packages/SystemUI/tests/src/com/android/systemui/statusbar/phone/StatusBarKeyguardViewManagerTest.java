@@ -175,17 +175,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onPanelExpansionChanged_neverHidesFullscreenBouncer() {
-        // TODO: StatusBar should not be here, mBouncer.isFullscreenBouncer() should do the same.
-        when(mStatusBar.isFullScreenUserSwitcherState()).thenReturn(true);
-        mStatusBarKeyguardViewManager.onPanelExpansionChanged(
-                /* fraction= */ 0.5f,
-                /* expanded= */ false,
-                /* tracking= */ true);
-        verify(mBouncer).setExpansion(eq(KeyguardBouncer.EXPANSION_VISIBLE));
-    }
-
-    @Test
     public void onPanelExpansionChanged_neverHidesScrimmedBouncer() {
         when(mBouncer.isShowing()).thenReturn(true);
         when(mBouncer.isScrimmed()).thenReturn(true);
