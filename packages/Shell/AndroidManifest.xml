@@ -190,6 +190,9 @@
     <uses-permission android:name="android.permission.REVOKE_RUNTIME_PERMISSIONS" />
     <uses-permission android:name="android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS" />
     <uses-permission android:name="android.permission.WHITELIST_RESTRICTED_PERMISSIONS" />
+    <!-- Permission required for processes that don't own the focused window to switch
+         touch mode state -->
+    <uses-permission android:name="android.permission.MODIFY_TOUCH_MODE_STATE" />
     <!-- Permission required to test onPermissionsChangedListener -->
     <uses-permission android:name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS" />
     <uses-permission android:name="android.permission.SET_KEYBOARD_LAYOUT" />

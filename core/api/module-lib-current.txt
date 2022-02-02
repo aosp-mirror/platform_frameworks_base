@@ -55,6 +55,7 @@ package android.app.usage {
 
   public class NetworkStatsManager {
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void forceUpdate();
+    method public static int getCollapsedRatType(int);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void notifyNetworkStatus(@NonNull java.util.List<android.net.Network>, @NonNull java.util.List<android.net.NetworkStateSnapshot>, @Nullable String, @NonNull java.util.List<android.net.UnderlyingNetworkInfo>);
     method @NonNull @WorkerThread public android.app.usage.NetworkStats queryDetailsForDevice(@NonNull android.net.NetworkTemplate, long, long);
     method @NonNull @WorkerThread public android.app.usage.NetworkStats queryDetailsForUidTagState(@NonNull android.net.NetworkTemplate, long, long, int, int, int) throws java.lang.SecurityException;
@@ -66,18 +67,11 @@ package android.app.usage {
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void setPollOnOpen(boolean);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void setStatsProviderWarningAndLimitAsync(@NonNull String, long, long);
     method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK}) public void setUidForeground(int, boolean);
+    field public static final int NETWORK_TYPE_5G_NSA = -2; // 0xfffffffe
   }
 
   public abstract static class NetworkStatsManager.UsageCallback {
     method public void onThresholdReached(@NonNull android.net.NetworkTemplate);
-  }
-
-}
-
-package android.bluetooth {
-
-  public final class BluetoothPan implements android.bluetooth.BluetoothProfile {
-    method @Nullable @RequiresPermission(allOf={android.Manifest.permission.BLUETOOTH_CONNECT, android.Manifest.permission.BLUETOOTH_PRIVILEGED, android.Manifest.permission.TETHER_PRIVILEGED}) public android.net.TetheringManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull java.util.concurrent.Executor, @NonNull android.net.TetheringManager.TetheredInterfaceCallback);
   }
 
 }
@@ -412,6 +406,17 @@ package android.net {
     field public static final int TYPE_VPN_OEM = 4; // 0x4
     field public static final int TYPE_VPN_PLATFORM = 2; // 0x2
     field public static final int TYPE_VPN_SERVICE = 1; // 0x1
+  }
+
+}
+
+package android.net.netstats {
+
+  public class NetworkStatsDataMigrationUtils {
+    method @NonNull public static android.net.NetworkStatsCollection readPlatformCollection(@NonNull String, long) throws java.io.IOException;
+    field public static final String PREFIX_UID = "uid";
+    field public static final String PREFIX_UID_TAG = "uid_tag";
+    field public static final String PREFIX_XT = "xt";
   }
 
 }

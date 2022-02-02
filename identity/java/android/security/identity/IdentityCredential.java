@@ -454,7 +454,8 @@ public abstract class IdentityCredential {
      * @param challenge is a non-empty byte array whose contents should be unique, fresh and
      *                  provided by the issuing authority. The value provided is embedded in the
      *                  generated CBOR and enables the issuing authority to verify that the
-     *                  returned proof is fresh.
+     *                  returned proof is fresh. Implementations are required to support
+     *                  challenges at least 32 bytes of length.
      * @return the COSE_Sign1 data structure above
      */
     public @NonNull byte[] proveOwnership(@NonNull byte[] challenge)  {
@@ -485,7 +486,8 @@ public abstract class IdentityCredential {
      * @param challenge is a non-empty byte array whose contents should be unique, fresh and
      *                  provided by the issuing authority. The value provided is embedded in the
      *                  generated CBOR and enables the issuing authority to verify that the
-     *                  returned proof is fresh.
+     *                  returned proof is fresh. Implementations are required to support
+     *                  challenges at least 32 bytes of length.
      * @return the COSE_Sign1 data structure above
      */
     public @NonNull byte[] delete(@NonNull byte[] challenge)  {
