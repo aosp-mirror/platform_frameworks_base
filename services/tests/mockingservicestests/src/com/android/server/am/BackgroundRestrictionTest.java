@@ -101,6 +101,7 @@ import android.os.SystemClock;
 import android.os.UidBatteryConsumer;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.util.Pair;
 
@@ -211,6 +212,7 @@ public final class BackgroundRestrictionTest {
     @Mock private PermissionManagerServiceInternal mPermissionManagerServiceInternal;
     @Mock private MediaSessionManager mMediaSessionManager;
     @Mock private RoleManager mRoleManager;
+    @Mock private TelephonyManager mTelephonyManager;
 
     private long mCurrentTimeMillis;
 
@@ -2306,6 +2308,11 @@ public final class BackgroundRestrictionTest {
         @Override
         RoleManager getRoleManager() {
             return mRoleManager;
+        }
+
+        @Override
+        TelephonyManager getTelephonyManager() {
+            return mTelephonyManager;
         }
 
         @Override

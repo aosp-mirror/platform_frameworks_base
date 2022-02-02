@@ -54,6 +54,7 @@ import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS;
 import static android.os.PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE;
+import static android.os.PowerExemptionManager.REASON_CARRIER_PRIVILEGED_APP;
 import static android.os.PowerExemptionManager.REASON_COMPANION_DEVICE_MANAGER;
 import static android.os.PowerExemptionManager.REASON_DENIED;
 import static android.os.PowerExemptionManager.REASON_DEVICE_DEMO_MODE;
@@ -125,6 +126,7 @@ import android.provider.DeviceConfig.OnPropertiesChangedListener;
 import android.provider.DeviceConfig.Properties;
 import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -228,6 +230,19 @@ public final class AppRestrictionController {
      */
     @GuardedBy("mLock")
     private final HashMap<String, Boolean> mSystemModulesCache = new HashMap<>();
+
+    /**
+     * Lock specifically for bookkeeping around the carrier-privileged app set.
+     * Do not acquire any other locks while holding this one. Methods that
+     * require this lock to be held are named with a "CPL" suffix.
+     */
+    private final Object mCarrierPrivilegedLock = new Object();
+
+    /**
+     * List of carrier-privileged apps that should be excluded from standby.
+     */
+    @GuardedBy("mCarrierPrivilegedLock")
+    private List<String> mCarrierPrivilegedApps;
 
     final ActivityManagerService mActivityManagerService;
 
@@ -1604,6 +1619,8 @@ public final class AppRestrictionController {
                     return REASON_OP_ACTIVATE_PLATFORM_VPN;
                 } else if (isSystemModule(pkg)) {
                     return REASON_SYSTEM_MODULE;
+                } else if (isCarrierApp(pkg)) {
+                    return REASON_CARRIER_PRIVILEGED_APP;
                 }
             }
         }
@@ -1614,6 +1631,37 @@ public final class AppRestrictionController {
             return REASON_ROLE_EMERGENCY;
         }
         return REASON_DENIED;
+    }
+
+    private boolean isCarrierApp(String packageName) {
+        synchronized (mCarrierPrivilegedLock) {
+            if (mCarrierPrivilegedApps == null) {
+                fetchCarrierPrivilegedAppsCPL();
+            }
+            if (mCarrierPrivilegedApps != null) {
+                return mCarrierPrivilegedApps.contains(packageName);
+            }
+            return false;
+        }
+    }
+
+    private void clearCarrierPrivilegedApps() {
+        if (DEBUG_BG_RESTRICTION_CONTROLLER) {
+            Slog.i(TAG, "Clearing carrier privileged apps list");
+        }
+        synchronized (mCarrierPrivilegedLock) {
+            mCarrierPrivilegedApps = null; // Need to be refetched.
+        }
+    }
+
+    @GuardedBy("mCarrierPrivilegedLock")
+    private void fetchCarrierPrivilegedAppsCPL() {
+        final TelephonyManager telephonyManager = mInjector.getTelephonyManager();
+        mCarrierPrivilegedApps =
+                telephonyManager.getCarrierPrivilegedPackagesForAllActiveSubscriptions();
+        if (DEBUG_BG_RESTRICTION_CONTROLLER) {
+            Slog.d(TAG, "apps with carrier privilege " + mCarrierPrivilegedApps);
+        }
     }
 
     private boolean isRoleHeldByUid(@NonNull String roleName, int uid) {
@@ -1791,6 +1839,7 @@ public final class AppRestrictionController {
         private AppBatteryExemptionTracker mAppBatteryExemptionTracker;
         private AppFGSTracker mAppFGSTracker;
         private AppMediaSessionTracker mAppMediaSessionTracker;
+        private TelephonyManager mTelephonyManager;
 
         Injector(Context context) {
             mContext = context;
@@ -1890,6 +1939,13 @@ public final class AppRestrictionController {
             return mRoleManager;
         }
 
+        TelephonyManager getTelephonyManager() {
+            if (mTelephonyManager == null) {
+                mTelephonyManager = getContext().getSystemService(TelephonyManager.class);
+            }
+            return mTelephonyManager;
+        }
+
         AppFGSTracker getAppFGSTracker() {
             return mAppFGSTracker;
         }
@@ -1939,6 +1995,19 @@ public final class AppRestrictionController {
                                 onUidAdded(uid);
                             }
                         }
+                    }
+                    // fall through.
+                    case Intent.ACTION_PACKAGE_CHANGED: {
+                        final String pkgName = intent.getData().getSchemeSpecificPart();
+                        final String[] cmpList = intent.getStringArrayExtra(
+                                Intent.EXTRA_CHANGED_COMPONENT_NAME_LIST);
+                        // If this is PACKAGE_ADDED (cmpList == null), or if it's a whole-package
+                        // enable/disable event (cmpList is just the package name itself), drop
+                        // our carrier privileged app & system-app caches and let them refresh
+                        if (cmpList == null
+                                || (cmpList.length == 1 && pkgName.equals(cmpList[0]))) {
+                            clearCarrierPrivilegedApps();
+                        }
                     } break;
                     case Intent.ACTION_PACKAGE_FULLY_REMOVED: {
                         final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
@@ -1986,6 +2055,7 @@ public final class AppRestrictionController {
         };
         final IntentFilter packageFilter = new IntentFilter();
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         packageFilter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
         packageFilter.addDataScheme("package");
         mContext.registerReceiverForAllUsers(broadcastReceiver, packageFilter, null, mBgHandler);
