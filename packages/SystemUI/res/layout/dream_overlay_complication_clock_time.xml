@@ -20,7 +20,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:paddingLeft="@dimen/dream_overlay_complication_clock_time_padding_left"
-    android:fontFamily="sans-serif-thin"
+    android:fontFamily="@font/clock"
     android:textColor="@android:color/white"
     android:format12Hour="h:mm"
     android:format24Hour="kk:mm"

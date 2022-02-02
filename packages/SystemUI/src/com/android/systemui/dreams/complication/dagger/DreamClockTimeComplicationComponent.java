@@ -22,6 +22,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextClock;
 
 import com.android.internal.util.Preconditions;
 import com.android.systemui.R;
@@ -78,6 +79,8 @@ public interface DreamClockTimeComplicationComponent {
                 "clock_time_complication_layout_params";
         // Order weight of insert into parent container
         int INSERT_ORDER_WEIGHT = 0;
+        String TAG_WEIGHT = "'wght' ";
+        int WEIGHT = 200;
 
         /**
          * Provides the complication view.
@@ -86,10 +89,12 @@ public interface DreamClockTimeComplicationComponent {
         @DreamClockTimeComplicationScope
         @Named(DREAM_CLOCK_TIME_COMPLICATION_VIEW)
         static View provideComplicationView(LayoutInflater layoutInflater) {
-            return Preconditions.checkNotNull(
-                    layoutInflater.inflate(R.layout.dream_overlay_complication_clock_time,
-                            null, false),
+            final TextClock view = Preconditions.checkNotNull((TextClock)
+                            layoutInflater.inflate(R.layout.dream_overlay_complication_clock_time,
+                                    null, false),
                     "R.layout.dream_overlay_complication_clock_time did not properly inflated");
+            view.setFontVariationSettings(TAG_WEIGHT + WEIGHT);
+            return view;
         }
 
         /**
