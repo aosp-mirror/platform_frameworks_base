@@ -7630,13 +7630,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *     <li>{@link LetterboxConfiguration#getIsEducationEnabled} is true.
      *     <li>The activity is eligible for fixed orientation letterbox.
      *     <li>The activity is in fullscreen.
+     *     <li>The activity is portrait-only.
      * </ul>
      */
     // TODO(b/215316431): Add tests
     boolean isEligibleForLetterboxEducation() {
         return mWmService.mLetterboxConfiguration.getIsEducationEnabled()
                 && mIsEligibleForFixedOrientationLetterbox
-                && getWindowingMode() == WINDOWING_MODE_FULLSCREEN;
+                && getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                && getRequestedConfigurationOrientation() == ORIENTATION_PORTRAIT;
     }
 
     /**
