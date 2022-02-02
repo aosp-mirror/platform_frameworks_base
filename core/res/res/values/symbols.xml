@@ -2221,6 +2221,8 @@
   <java-symbol type="integer" name="config_dreamsBatteryLevelMinimumWhenNotPowered" />
   <java-symbol type="integer" name="config_dreamsBatteryLevelDrainCutoff" />
   <java-symbol type="string" name="config_dreamsDefaultComponent" />
+  <java-symbol type="array" name="config_supportedDreamComplications" />
+  <java-symbol type="array" name="config_dreamComplicationsEnabledByDefault" />
   <java-symbol type="drawable" name="default_dream_preview" />
   <java-symbol type="array" name="config_disabledDreamComponents" />
   <java-symbol type="string" name="config_dozeComponent" />

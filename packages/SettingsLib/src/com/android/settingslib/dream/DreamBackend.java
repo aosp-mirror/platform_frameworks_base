@@ -151,13 +151,13 @@ public class DreamBackend {
                 .map(ComponentName::unflattenFromString)
                 .collect(Collectors.toSet());
 
-        mSupportedComplications =
-                Arrays.stream(resources.getIntArray(R.array.config_supportedDreamComplications))
-                        .boxed()
-                        .collect(Collectors.toSet());
+        mSupportedComplications = Arrays.stream(resources.getIntArray(
+                        com.android.internal.R.array.config_supportedDreamComplications))
+                .boxed()
+                .collect(Collectors.toSet());
 
-        mDefaultEnabledComplications = Arrays.stream(
-                        resources.getIntArray(R.array.config_dreamComplicationsEnabledByDefault))
+        mDefaultEnabledComplications = Arrays.stream(resources.getIntArray(
+                        com.android.internal.R.array.config_dreamComplicationsEnabledByDefault))
                 .boxed()
                 // A complication can only be enabled by default if it is also supported.
                 .filter(mSupportedComplications::contains)
