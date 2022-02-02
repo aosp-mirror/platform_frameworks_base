@@ -51,6 +51,15 @@
         android:id="@+id/qs_detail"
         layout="@layout/qs_detail" />
 
+    <ViewStub
+        android:id="@+id/container_stub"
+        android:inflatedId="@+id/qs_footer_actions"
+        android:layout="@layout/new_footer_actions"
+        android:layout_height="@dimen/qs_footer_height"
+        android:layout_width="match_parent"
+        android:layout_gravity="bottom"
+        />
+
     <include
         android:id="@+id/qs_customize"
         layout="@layout/qs_customize_panel"

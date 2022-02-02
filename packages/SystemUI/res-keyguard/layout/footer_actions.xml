@@ -19,8 +19,10 @@
 <com.android.systemui.qs.FooterActionsView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="48dp"
-    android:gravity="center_vertical">
+    android:layout_height="@dimen/qs_footer_height"
+    android:gravity="center_vertical"
+    android:layout_gravity="bottom"
+>
 
     <com.android.systemui.statusbar.phone.MultiUserSwitch
         android:id="@+id/multi_user_switch"

@@ -19,7 +19,7 @@
 <com.android.systemui.qs.QSFooterView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/qs_footer"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/qs_footer_height"
+    android:layout_height="wrap_content"
     android:layout_marginStart="@dimen/qs_footer_margin"
     android:layout_marginEnd="@dimen/qs_footer_margin"
     android:layout_marginBottom="@dimen/qs_footers_margin_bottom"
@@ -36,7 +36,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="@dimen/qs_footer_height"
             android:layout_gravity="center_vertical">
 
             <TextView
@@ -80,8 +80,13 @@
 
         </LinearLayout>
 
-        <include layout="@layout/footer_actions"
-            android:id="@+id/qs_footer_actions"/>
+        <ViewStub
+            android:id="@+id/footer_stub"
+            android:inflatedId="@+id/qs_footer_actions"
+            android:layout="@layout/footer_actions"
+            android:layout_height="@dimen/qs_footer_height"
+            android:layout_width="match_parent"
+        />
 
     </LinearLayout>
 

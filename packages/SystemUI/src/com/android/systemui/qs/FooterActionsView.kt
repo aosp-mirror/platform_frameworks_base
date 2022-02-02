@@ -44,8 +44,6 @@ class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(
     private lateinit var multiUserAvatar: ImageView
     private lateinit var tunerIcon: View
 
-    private var settingsCogAnimator: TouchAnimator? = null
-
     private var qsDisabled = false
     private var expansionAmount = 0f
 
@@ -66,19 +64,6 @@ class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(
         importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
     }
 
-    fun updateAnimator(width: Int, numTiles: Int) {
-        val size = (mContext.resources.getDimensionPixelSize(R.dimen.qs_quick_tile_size) -
-                mContext.resources.getDimensionPixelSize(R.dimen.qs_tile_padding))
-        val remaining = (width - numTiles * size) / (numTiles - 1)
-        val defSpace = mContext.resources.getDimensionPixelOffset(R.dimen.default_gear_space)
-        val translation = if (isLayoutRtl) (remaining - defSpace) else -(remaining - defSpace)
-        settingsCogAnimator = TouchAnimator.Builder()
-                .addFloat(settingsButton, "translationX", translation.toFloat(), 0f)
-                .addFloat(settingsButton, "rotation", -120f, 0f)
-                .build()
-        setExpansion(expansionAmount)
-    }
-
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         updateResources()
@@ -93,15 +78,6 @@ class FooterActionsView(context: Context?, attrs: AttributeSet?) : LinearLayout(
         val tunerIconTranslation = mContext.resources
                 .getDimensionPixelOffset(R.dimen.qs_footer_tuner_icon_translation).toFloat()
         tunerIcon.translationX = if (isLayoutRtl) (-tunerIconTranslation) else tunerIconTranslation
-    }
-
-    fun setKeyguardShowing() {
-        setExpansion(expansionAmount)
-    }
-
-    fun setExpansion(headerExpansionFraction: Float) {
-        expansionAmount = headerExpansionFraction
-        if (settingsCogAnimator != null) settingsCogAnimator!!.setPosition(headerExpansionFraction)
     }
 
     fun disable(
