@@ -32,7 +32,7 @@ apex_test {
     name: "test_com.android.server",
     manifest: "manifest.json",
     androidManifest: "AndroidManifest.xml",
-    java_libs: ["FakeApexSystemServices"],
+    java_libs: ["FakeApexSystemService"],
     file_contexts: ":apex.test-file_contexts",
     key: "test_com.android.server.key",
     updatable: false,
