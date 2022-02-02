@@ -459,7 +459,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * broadcasts
      */
     private static final boolean ENFORCE_DYNAMIC_RECEIVER_EXPLICIT_EXPORT =
-            SystemProperties.getBoolean("fw.enforce_dynamic_receiver_explicit_export", false);
+            SystemProperties.getBoolean("fw.enforce_dynamic_receiver_explicit_export", true);
 
     static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityManagerService" : TAG_AM;
     static final String TAG_BACKUP = TAG + POSTFIX_BACKUP;
