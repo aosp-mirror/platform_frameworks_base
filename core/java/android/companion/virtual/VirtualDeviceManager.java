@@ -249,6 +249,7 @@ public final class VirtualDeviceManager {
          * Closes the virtual device, stopping and tearing down any virtual displays,
          * audio policies, and event injection that's currently in progress.
          */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void close() {
             try {
                 mVirtualDevice.close();
