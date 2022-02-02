@@ -18,38 +18,27 @@
 -->
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shareInterpolator="false">
-
+    android:shareInterpolator="false"
+    android:zAdjustment="top">
     <alpha
-        android:fromAlpha="1.0"
-        android:toAlpha="1.0"
+        android:fromAlpha="1"
+        android:toAlpha="0.0"
         android:fillEnabled="true"
         android:fillBefore="true"
         android:fillAfter="true"
         android:interpolator="@interpolator/linear"
-        android:startOffset="0"
-        android:duration="450" />
-
-    <translate
-        android:fromXDelta="-10%"
-        android:toXDelta="0"
+        android:startOffset="33"
+        android:duration="50"/>
+    <scale
+        android:fromXScale="1"
+        android:toXScale="0.9"
+        android:fromYScale="1"
+        android:toYScale="0.9"
+        android:pivotX="50%"
+        android:pivotY="50%"
         android:fillEnabled="true"
         android:fillBefore="true"
         android:fillAfter="true"
         android:interpolator="@interpolator/fast_out_extra_slow_in"
-        android:startOffset="0"
-        android:duration="450" />
-
-    <extend
-        android:fromExtendLeft="0"
-        android:fromExtendTop="0"
-        android:fromExtendRight="10%"
-        android:fromExtendBottom="0"
-        android:toExtendLeft="0"
-        android:toExtendTop="0"
-        android:toExtendRight="10%"
-        android:toExtendBottom="0"
-        android:interpolator="@interpolator/fast_out_extra_slow_in"
-        android:startOffset="0"
-        android:duration="450" />
+        android:duration="400"/>
 </set>
