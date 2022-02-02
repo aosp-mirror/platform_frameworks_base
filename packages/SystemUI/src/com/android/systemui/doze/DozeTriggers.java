@@ -41,6 +41,7 @@ import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.DozeMachine.State;
 import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.statusbar.phone.DozeParameters;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.Assert;
@@ -96,6 +97,7 @@ public class DozeTriggers implements DozeMachine.Part {
     private final AuthController mAuthController;
     private final DelayableExecutor mMainExecutor;
     private final KeyguardStateController mKeyguardStateController;
+    private final BatteryController mBatteryController;
     private final UiEventLogger mUiEventLogger;
     private final DevicePostureController mDevicePostureController;
 
@@ -187,7 +189,8 @@ public class DozeTriggers implements DozeMachine.Part {
             @Main DelayableExecutor mainExecutor,
             UiEventLogger uiEventLogger,
             KeyguardStateController keyguardStateController,
-            DevicePostureController devicePostureController) {
+            DevicePostureController devicePostureController,
+            BatteryController batteryController) {
         mContext = context;
         mDozeHost = dozeHost;
         mConfig = config;
@@ -210,6 +213,7 @@ public class DozeTriggers implements DozeMachine.Part {
         mMainExecutor = mainExecutor;
         mUiEventLogger = uiEventLogger;
         mKeyguardStateController = keyguardStateController;
+        mBatteryController = batteryController;
     }
     private final DevicePostureController.Callback mDevicePostureCallback =
             posture -> {
@@ -320,7 +324,12 @@ public class DozeTriggers implements DozeMachine.Part {
                     gentleWakeUp(pulseReason);
                 } else if (isPickup) {
                     if (shouldDropPickupEvent())  {
-                        mDozeLog.traceSensorEventDropped(pulseReason, "keyguard occluded");
+                        mDozeLog.traceSensorEventDropped(
+                                pulseReason,
+                                "keyguardOccluded="
+                                        + mKeyguardStateController.isOccluded()
+                                        + " pluggedInWireless="
+                                        + mBatteryController.isPluggedInWireless());
                         return;
                     }
                     gentleWakeUp(pulseReason);
@@ -351,7 +360,7 @@ public class DozeTriggers implements DozeMachine.Part {
     }
 
     private boolean shouldDropPickupEvent() {
-        return mKeyguardStateController.isOccluded();
+        return mKeyguardStateController.isOccluded() || mBatteryController.isPluggedInWireless();
     }
 
     private void gentleWakeUp(int reason) {
