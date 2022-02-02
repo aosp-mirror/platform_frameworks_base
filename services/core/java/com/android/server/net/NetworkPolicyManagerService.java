@@ -5438,6 +5438,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         try {
             mNetworkManager.setUidOnMeteredNetworkDenylist(uid, enable);
             mLogger.meteredAllowlistChanged(uid, enable);
+            if (Process.isApplicationUid(uid)) {
+                final int sdkSandboxUid = Process.toSdkSandboxUid(uid);
+                mNetworkManager.setUidOnMeteredNetworkDenylist(sdkSandboxUid, enable);
+                mLogger.meteredAllowlistChanged(sdkSandboxUid, enable);
+            }
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem setting denylist (" + enable + ") rules for " + uid, e);
         } catch (RemoteException e) {
@@ -5450,6 +5455,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         try {
             mNetworkManager.setUidOnMeteredNetworkAllowlist(uid, enable);
             mLogger.meteredDenylistChanged(uid, enable);
+            if (Process.isApplicationUid(uid)) {
+                final int sdkSandboxUid = Process.toSdkSandboxUid(uid);
+                mNetworkManager.setUidOnMeteredNetworkAllowlist(sdkSandboxUid, enable);
+                mLogger.meteredDenylistChanged(sdkSandboxUid, enable);
+            }
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem setting allowlist (" + enable + ") rules for " + uid, e);
         } catch (RemoteException e) {
@@ -5488,12 +5498,31 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    private void addSdkSandboxUidsIfNeeded(SparseIntArray uidRules) {
+        final int size = uidRules.size();
+        final SparseIntArray sdkSandboxUids = new SparseIntArray();
+        for (int index = 0; index < size; index++) {
+            final int uid = uidRules.keyAt(index);
+            final int rule = uidRules.valueAt(index);
+            if (Process.isApplicationUid(uid)) {
+                sdkSandboxUids.put(Process.toSdkSandboxUid(uid), rule);
+            }
+        }
+
+        for (int index = 0; index < sdkSandboxUids.size(); index++) {
+            final int uid = sdkSandboxUids.keyAt(index);
+            final int rule = sdkSandboxUids.valueAt(index);
+            uidRules.put(uid, rule);
+        }
+    }
+
     /**
      * Set uid rules on a particular firewall chain. This is going to synchronize the rules given
      * here to netd.  It will clean up dead rules and make sure the target chain only contains rules
      * specified here.
      */
     private void setUidFirewallRulesUL(int chain, SparseIntArray uidRules) {
+        addSdkSandboxUidsIfNeeded(uidRules);
         try {
             int size = uidRules.size();
             int[] uids = new int[size];
@@ -5536,6 +5565,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             try {
                 mNetworkManager.setFirewallUidRule(chain, uid, rule);
                 mLogger.uidFirewallRuleChanged(chain, uid, rule);
+                if (Process.isApplicationUid(uid)) {
+                    final int sdkSandboxUid = Process.toSdkSandboxUid(uid);
+                    mNetworkManager.setFirewallUidRule(chain, sdkSandboxUid, rule);
+                    mLogger.uidFirewallRuleChanged(chain, sdkSandboxUid, rule);
+                }
             } catch (IllegalStateException e) {
                 Log.wtf(TAG, "problem setting firewall uid rules", e);
             } catch (RemoteException e) {
@@ -5572,15 +5606,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      */
     private void resetUidFirewallRules(int uid) {
         try {
-            mNetworkManager.setFirewallUidRule(FIREWALL_CHAIN_DOZABLE, uid, FIREWALL_RULE_DEFAULT);
-            mNetworkManager.setFirewallUidRule(FIREWALL_CHAIN_STANDBY, uid, FIREWALL_RULE_DEFAULT);
-            mNetworkManager
-                    .setFirewallUidRule(FIREWALL_CHAIN_POWERSAVE, uid, FIREWALL_RULE_DEFAULT);
-            mNetworkManager
-                    .setFirewallUidRule(FIREWALL_CHAIN_RESTRICTED, uid, FIREWALL_RULE_DEFAULT);
-            mNetworkManager
-                    .setFirewallUidRule(FIREWALL_CHAIN_LOW_POWER_STANDBY, uid,
-                            FIREWALL_RULE_DEFAULT);
+            mNetworkManager.setFirewallUidRule(FIREWALL_CHAIN_DOZABLE, uid,
+                    FIREWALL_RULE_DEFAULT);
+            mNetworkManager.setFirewallUidRule(FIREWALL_CHAIN_STANDBY, uid,
+                    FIREWALL_RULE_DEFAULT);
+            mNetworkManager.setFirewallUidRule(FIREWALL_CHAIN_POWERSAVE, uid,
+                    FIREWALL_RULE_DEFAULT);
+            mNetworkManager.setFirewallUidRule(FIREWALL_CHAIN_RESTRICTED, uid,
+                    FIREWALL_RULE_DEFAULT);
+            mNetworkManager.setFirewallUidRule(FIREWALL_CHAIN_LOW_POWER_STANDBY, uid,
+                    FIREWALL_RULE_DEFAULT);
             mNetworkManager.setUidOnMeteredNetworkAllowlist(uid, false);
             mLogger.meteredAllowlistChanged(uid, false);
             mNetworkManager.setUidOnMeteredNetworkDenylist(uid, false);
@@ -5589,6 +5624,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             Log.wtf(TAG, "problem resetting firewall uid rules for " + uid, e);
         } catch (RemoteException e) {
             // ignored; service lives in system_server
+        }
+        if (Process.isApplicationUid(uid)) {
+            resetUidFirewallRules(Process.toSdkSandboxUid(uid));
         }
     }
 
