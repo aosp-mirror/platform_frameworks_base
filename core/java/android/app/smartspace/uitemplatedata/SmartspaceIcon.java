@@ -42,14 +42,19 @@ public final class SmartspaceIcon implements Parcelable {
     @Nullable
     private final CharSequence mContentDescription;
 
+    private final boolean mShouldTint;
+
     SmartspaceIcon(@NonNull Parcel in) {
         mIcon = in.readTypedObject(Icon.CREATOR);
         mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mShouldTint = in.readBoolean();
     }
 
-    private SmartspaceIcon(@NonNull Icon icon, @Nullable CharSequence contentDescription) {
+    private SmartspaceIcon(@NonNull Icon icon, @Nullable CharSequence contentDescription,
+            boolean shouldTint) {
         mIcon = icon;
         mContentDescription = contentDescription;
+        mShouldTint = shouldTint;
     }
 
     @NonNull
@@ -60,6 +65,11 @@ public final class SmartspaceIcon implements Parcelable {
     @Nullable
     public CharSequence getContentDescription() {
         return mContentDescription;
+    }
+
+    /** Return shouldTint value. The default value is true. */
+    public boolean shouldTint() {
+        return mShouldTint;
     }
 
     @NonNull
@@ -80,13 +90,14 @@ public final class SmartspaceIcon implements Parcelable {
         if (this == o) return true;
         if (!(o instanceof SmartspaceIcon)) return false;
         SmartspaceIcon that = (SmartspaceIcon) o;
-        return mIcon.equals(that.mIcon) && SmartspaceUtils.isEqual(mContentDescription,
-                that.mContentDescription);
+        return mIcon.toString().equals(that.mIcon.toString()) && SmartspaceUtils.isEqual(
+                mContentDescription,
+                that.mContentDescription) && mShouldTint == that.mShouldTint;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mIcon, mContentDescription);
+        return Objects.hash(mIcon.toString(), mContentDescription, mShouldTint);
     }
 
     @Override
@@ -98,13 +109,15 @@ public final class SmartspaceIcon implements Parcelable {
     public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeTypedObject(mIcon, flags);
         TextUtils.writeToParcel(mContentDescription, out, flags);
+        out.writeBoolean(mShouldTint);
     }
 
     @Override
     public String toString() {
         return "SmartspaceIcon{"
-                + "mImage=" + mIcon
-                + ", mContentDescription='" + mContentDescription + '\''
+                + "mIcon=" + mIcon
+                + ", mContentDescription=" + mContentDescription
+                + ", mShouldTint=" + mShouldTint
                 + '}';
     }
 
@@ -118,14 +131,16 @@ public final class SmartspaceIcon implements Parcelable {
 
         private Icon mIcon;
         private CharSequence mContentDescription;
+        private boolean mShouldTint;
 
         /**
-         * A builder for {@link SmartspaceIcon}.
+         * A builder for {@link SmartspaceIcon}, which sets shouldTint to true by default.
          *
-         * @param icon the icon image of this smartspace icon.
+         * @param icon the icon image of this {@link SmartspaceIcon} instance.
          */
         public Builder(@NonNull Icon icon) {
             mIcon = Objects.requireNonNull(icon);
+            mShouldTint = true;
         }
 
         /**
@@ -138,11 +153,20 @@ public final class SmartspaceIcon implements Parcelable {
         }
 
         /**
+         * Sets should tint icon.
+         */
+        @NonNull
+        public Builder setShouldTint(boolean shouldTint) {
+            mShouldTint = shouldTint;
+            return this;
+        }
+
+        /**
          * Builds a new SmartspaceIcon instance.
          */
         @NonNull
         public SmartspaceIcon build() {
-            return new SmartspaceIcon(mIcon, mContentDescription);
+            return new SmartspaceIcon(mIcon, mContentDescription, mShouldTint);
         }
     }
 }

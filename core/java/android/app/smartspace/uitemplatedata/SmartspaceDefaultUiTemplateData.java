@@ -24,7 +24,6 @@ import android.app.smartspace.SmartspaceTarget.UiTemplateType;
 import android.app.smartspace.SmartspaceUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
 
 import java.util.Objects;
 
@@ -50,17 +49,17 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
      * will be used, which has its own tap action applied to the title area.
      */
     @Nullable
-    private final CharSequence mTitleText;
+    private final SmartspaceText mTitleText;
 
     @Nullable
     private final SmartspaceIcon mTitleIcon;
 
     /** Subtitle text and icon are shown at the second row. */
     @Nullable
-    private final CharSequence mSubtitleText;
+    private final SmartspaceText mSubtitleText;
 
     @Nullable
-    private final SmartspaceIcon mSubTitleIcon;
+    private final SmartspaceIcon mSubtitleIcon;
 
     /**
      * Primary tap action for the entire card, including the blank spaces, except: 1. When title is
@@ -75,7 +74,7 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
      * Mainly used for weather info on non-weather card.
      */
     @Nullable
-    private final CharSequence mSupplementalSubtitleText;
+    private final SmartspaceText mSupplementalSubtitleText;
 
     @Nullable
     private final SmartspaceIcon mSupplementalSubtitleIcon;
@@ -92,19 +91,19 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
      * alarm".
      */
     @Nullable
-    private final CharSequence mSupplementalAlarmText;
+    private final SmartspaceText mSupplementalAlarmText;
 
     SmartspaceDefaultUiTemplateData(@NonNull Parcel in) {
         mTemplateType = in.readInt();
-        mTitleText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mTitleText = in.readTypedObject(SmartspaceText.CREATOR);
         mTitleIcon = in.readTypedObject(SmartspaceIcon.CREATOR);
-        mSubtitleText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-        mSubTitleIcon = in.readTypedObject(SmartspaceIcon.CREATOR);
+        mSubtitleText = in.readTypedObject(SmartspaceText.CREATOR);
+        mSubtitleIcon = in.readTypedObject(SmartspaceIcon.CREATOR);
         mPrimaryTapAction = in.readTypedObject(SmartspaceTapAction.CREATOR);
-        mSupplementalSubtitleText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mSupplementalSubtitleText = in.readTypedObject(SmartspaceText.CREATOR);
         mSupplementalSubtitleIcon = in.readTypedObject(SmartspaceIcon.CREATOR);
         mSupplementalSubtitleTapAction = in.readTypedObject(SmartspaceTapAction.CREATOR);
-        mSupplementalAlarmText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mSupplementalAlarmText = in.readTypedObject(SmartspaceText.CREATOR);
     }
 
     /**
@@ -112,20 +111,20 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
      * SmartspaceDefaultUiTemplateData.Builder.
      */
     SmartspaceDefaultUiTemplateData(@UiTemplateType int templateType,
-            @Nullable CharSequence titleText,
+            @Nullable SmartspaceText titleText,
             @Nullable SmartspaceIcon titleIcon,
-            @Nullable CharSequence subtitleText,
-            @Nullable SmartspaceIcon subTitleIcon,
+            @Nullable SmartspaceText subtitleText,
+            @Nullable SmartspaceIcon subtitleIcon,
             @Nullable SmartspaceTapAction primaryTapAction,
-            @Nullable CharSequence supplementalSubtitleText,
+            @Nullable SmartspaceText supplementalSubtitleText,
             @Nullable SmartspaceIcon supplementalSubtitleIcon,
             @Nullable SmartspaceTapAction supplementalSubtitleTapAction,
-            @Nullable CharSequence supplementalAlarmText) {
+            @Nullable SmartspaceText supplementalAlarmText) {
         mTemplateType = templateType;
         mTitleText = titleText;
         mTitleIcon = titleIcon;
         mSubtitleText = subtitleText;
-        mSubTitleIcon = subTitleIcon;
+        mSubtitleIcon = subtitleIcon;
         mPrimaryTapAction = primaryTapAction;
         mSupplementalSubtitleText = supplementalSubtitleText;
         mSupplementalSubtitleIcon = supplementalSubtitleIcon;
@@ -139,7 +138,7 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
     }
 
     @Nullable
-    public CharSequence getTitleText() {
+    public SmartspaceText getTitleText() {
         return mTitleText;
     }
 
@@ -149,17 +148,22 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
     }
 
     @Nullable
-    public CharSequence getSubtitleText() {
+    public SmartspaceText getSubtitleText() {
         return mSubtitleText;
     }
 
     @Nullable
-    public SmartspaceIcon getSubTitleIcon() {
-        return mSubTitleIcon;
+    public SmartspaceIcon getSubtitleIcon() {
+        return mSubtitleIcon;
     }
 
     @Nullable
-    public CharSequence getSupplementalSubtitleText() {
+    public SmartspaceTapAction getPrimaryTapAction() {
+        return mPrimaryTapAction;
+    }
+
+    @Nullable
+    public SmartspaceText getSupplementalSubtitleText() {
         return mSupplementalSubtitleText;
     }
 
@@ -169,17 +173,12 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
     }
 
     @Nullable
-    public SmartspaceTapAction getPrimaryTapAction() {
-        return mPrimaryTapAction;
-    }
-
-    @Nullable
     public SmartspaceTapAction getSupplementalSubtitleTapAction() {
         return mSupplementalSubtitleTapAction;
     }
 
     @Nullable
-    public CharSequence getSupplementalAlarmText() {
+    public SmartspaceText getSupplementalAlarmText() {
         return mSupplementalAlarmText;
     }
 
@@ -208,15 +207,15 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeInt(mTemplateType);
-        TextUtils.writeToParcel(mTitleText, out, flags);
+        out.writeTypedObject(mTitleText, flags);
         out.writeTypedObject(mTitleIcon, flags);
-        TextUtils.writeToParcel(mSubtitleText, out, flags);
-        out.writeTypedObject(mSubTitleIcon, flags);
+        out.writeTypedObject(mSubtitleText, flags);
+        out.writeTypedObject(mSubtitleIcon, flags);
         out.writeTypedObject(mPrimaryTapAction, flags);
-        TextUtils.writeToParcel(mSupplementalSubtitleText, out, flags);
+        out.writeTypedObject(mSupplementalSubtitleText, flags);
         out.writeTypedObject(mSupplementalSubtitleIcon, flags);
         out.writeTypedObject(mSupplementalSubtitleTapAction, flags);
-        TextUtils.writeToParcel(mSupplementalAlarmText, out, flags);
+        out.writeTypedObject(mSupplementalAlarmText, flags);
     }
 
     @Override
@@ -228,7 +227,7 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
                 that.mTitleText)
                 && Objects.equals(mTitleIcon, that.mTitleIcon)
                 && SmartspaceUtils.isEqual(mSubtitleText, that.mSubtitleText)
-                && Objects.equals(mSubTitleIcon, that.mSubTitleIcon)
+                && Objects.equals(mSubtitleIcon, that.mSubtitleIcon)
                 && Objects.equals(mPrimaryTapAction, that.mPrimaryTapAction)
                 && SmartspaceUtils.isEqual(mSupplementalSubtitleText,
                 that.mSupplementalSubtitleText)
@@ -240,7 +239,7 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mTemplateType, mTitleText, mTitleIcon, mSubtitleText, mSubTitleIcon,
+        return Objects.hash(mTemplateType, mTitleText, mTitleIcon, mSubtitleText, mSubtitleIcon,
                 mPrimaryTapAction, mSupplementalSubtitleText, mSupplementalSubtitleIcon,
                 mSupplementalSubtitleTapAction, mSupplementalAlarmText);
     }
@@ -252,7 +251,7 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
                 + ", mTitleText=" + mTitleText
                 + ", mTitleIcon=" + mTitleIcon
                 + ", mSubtitleText=" + mSubtitleText
-                + ", mSubTitleIcon=" + mSubTitleIcon
+                + ", mSubTitleIcon=" + mSubtitleIcon
                 + ", mPrimaryTapAction=" + mPrimaryTapAction
                 + ", mSupplementalSubtitleText=" + mSupplementalSubtitleText
                 + ", mSupplementalSubtitleIcon=" + mSupplementalSubtitleIcon
@@ -271,15 +270,15 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
     public static class Builder {
         @UiTemplateType
         private final int mTemplateType;
-        private CharSequence mTitleText;
+        private SmartspaceText mTitleText;
         private SmartspaceIcon mTitleIcon;
-        private CharSequence mSubtitleText;
-        private SmartspaceIcon mSubTitleIcon;
+        private SmartspaceText mSubtitleText;
+        private SmartspaceIcon mSubtitleIcon;
         private SmartspaceTapAction mPrimaryTapAction;
-        private CharSequence mSupplementalSubtitleText;
+        private SmartspaceText mSupplementalSubtitleText;
         private SmartspaceIcon mSupplementalSubtitleIcon;
         private SmartspaceTapAction mSupplementalSubtitleTapAction;
-        private CharSequence mSupplementalAlarmText;
+        private SmartspaceText mSupplementalAlarmText;
 
         /**
          * A builder for {@link SmartspaceDefaultUiTemplateData}.
@@ -300,7 +299,7 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
         /** Should ONLY be used by the subclasses */
         @Nullable
         @SuppressLint("GetterOnBuilder")
-        CharSequence getTitleText() {
+        SmartspaceText getTitleText() {
             return mTitleText;
         }
 
@@ -314,15 +313,15 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
         /** Should ONLY be used by the subclasses */
         @Nullable
         @SuppressLint("GetterOnBuilder")
-        CharSequence getSubtitleText() {
+        SmartspaceText getSubtitleText() {
             return mSubtitleText;
         }
 
         /** Should ONLY be used by the subclasses */
         @Nullable
         @SuppressLint("GetterOnBuilder")
-        SmartspaceIcon getSubTitleIcon() {
-            return mSubTitleIcon;
+        SmartspaceIcon getSubtitleIcon() {
+            return mSubtitleIcon;
         }
 
         /** Should ONLY be used by the subclasses */
@@ -335,7 +334,7 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
         /** Should ONLY be used by the subclasses */
         @Nullable
         @SuppressLint("GetterOnBuilder")
-        CharSequence getSupplementalSubtitleText() {
+        SmartspaceText getSupplementalSubtitleText() {
             return mSupplementalSubtitleText;
         }
 
@@ -356,7 +355,7 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
         /** Should ONLY be used by the subclasses */
         @Nullable
         @SuppressLint("GetterOnBuilder")
-        CharSequence getSupplementalAlarmText() {
+        SmartspaceText getSupplementalAlarmText() {
             return mSupplementalAlarmText;
         }
 
@@ -364,7 +363,7 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
          * Sets the card title.
          */
         @NonNull
-        public Builder setTitleText(@NonNull CharSequence titleText) {
+        public Builder setTitleText(@NonNull SmartspaceText titleText) {
             mTitleText = titleText;
             return this;
         }
@@ -382,7 +381,7 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
          * Sets the card subtitle.
          */
         @NonNull
-        public Builder setSubtitleText(@NonNull CharSequence subtitleText) {
+        public Builder setSubtitleText(@NonNull SmartspaceText subtitleText) {
             mSubtitleText = subtitleText;
             return this;
         }
@@ -391,8 +390,8 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
          * Sets the card subtitle icon.
          */
         @NonNull
-        public Builder setSubTitleIcon(@NonNull SmartspaceIcon subTitleIcon) {
-            mSubTitleIcon = subTitleIcon;
+        public Builder setSubtitleIcon(@NonNull SmartspaceIcon subtitleIcon) {
+            mSubtitleIcon = subtitleIcon;
             return this;
         }
 
@@ -409,7 +408,8 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
          * Sets the supplemental subtitle text.
          */
         @NonNull
-        public Builder setSupplementalSubtitleText(@NonNull CharSequence supplementalSubtitleText) {
+        public Builder setSupplementalSubtitleText(
+                @NonNull SmartspaceText supplementalSubtitleText) {
             mSupplementalSubtitleText = supplementalSubtitleText;
             return this;
         }
@@ -440,7 +440,7 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
          * Sets the supplemental alarm text.
          */
         @NonNull
-        public Builder setSupplementalAlarmText(@NonNull CharSequence supplementalAlarmText) {
+        public Builder setSupplementalAlarmText(@NonNull SmartspaceText supplementalAlarmText) {
             mSupplementalAlarmText = supplementalAlarmText;
             return this;
         }
@@ -451,7 +451,7 @@ public class SmartspaceDefaultUiTemplateData implements Parcelable {
         @NonNull
         public SmartspaceDefaultUiTemplateData build() {
             return new SmartspaceDefaultUiTemplateData(mTemplateType, mTitleText, mTitleIcon,
-                    mSubtitleText, mSubTitleIcon, mPrimaryTapAction, mSupplementalSubtitleText,
+                    mSubtitleText, mSubtitleIcon, mPrimaryTapAction, mSupplementalSubtitleText,
                     mSupplementalSubtitleIcon, mSupplementalSubtitleTapAction,
                     mSupplementalAlarmText);
         }

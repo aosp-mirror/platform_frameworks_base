@@ -47,15 +47,15 @@ public final class SmartspaceCombinedCardsUiTemplateData extends SmartspaceDefau
     }
 
     private SmartspaceCombinedCardsUiTemplateData(@SmartspaceTarget.UiTemplateType int templateType,
-            @Nullable CharSequence titleText,
+            @Nullable SmartspaceText titleText,
             @Nullable SmartspaceIcon titleIcon,
-            @Nullable CharSequence subtitleText,
+            @Nullable SmartspaceText subtitleText,
             @Nullable SmartspaceIcon subTitleIcon,
             @Nullable SmartspaceTapAction primaryTapAction,
-            @Nullable CharSequence supplementalSubtitleText,
+            @Nullable SmartspaceText supplementalSubtitleText,
             @Nullable SmartspaceIcon supplementalSubtitleIcon,
             @Nullable SmartspaceTapAction supplementalSubtitleTapAction,
-            @Nullable CharSequence supplementalAlarmText,
+            @Nullable SmartspaceText supplementalAlarmText,
             @NonNull List<SmartspaceDefaultUiTemplateData> combinedCardDataList) {
         super(templateType, titleText, titleIcon, subtitleText, subTitleIcon, primaryTapAction,
                 supplementalSubtitleText, supplementalSubtitleIcon, supplementalSubtitleTapAction,
@@ -146,7 +146,7 @@ public final class SmartspaceCombinedCardsUiTemplateData extends SmartspaceDefau
                 throw new IllegalStateException("Please assign a value to all @NonNull args.");
             }
             return new SmartspaceCombinedCardsUiTemplateData(getTemplateType(), getTitleText(),
-                    getTitleIcon(), getSubtitleText(), getSubTitleIcon(), getPrimaryTapAction(),
+                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(), getPrimaryTapAction(),
                     getSupplementalSubtitleText(), getSupplementalSubtitleIcon(),
                     getSupplementalSubtitleTapAction(), getSupplementalAlarmText(),
                     mCombinedCardDataList);

@@ -23,7 +23,6 @@ import android.app.smartspace.SmartspaceTarget;
 import android.app.smartspace.SmartspaceUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.text.TextUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -51,15 +50,15 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
     }
 
     private SmartspaceCarouselUiTemplateData(@SmartspaceTarget.UiTemplateType int templateType,
-            @Nullable CharSequence titleText,
+            @Nullable SmartspaceText titleText,
             @Nullable SmartspaceIcon titleIcon,
-            @Nullable CharSequence subtitleText,
+            @Nullable SmartspaceText subtitleText,
             @Nullable SmartspaceIcon subTitleIcon,
             @Nullable SmartspaceTapAction primaryTapAction,
-            @Nullable CharSequence supplementalSubtitleText,
+            @Nullable SmartspaceText supplementalSubtitleText,
             @Nullable SmartspaceIcon supplementalSubtitleIcon,
             @Nullable SmartspaceTapAction supplementalSubtitleTapAction,
-            @Nullable CharSequence supplementalAlarmText,
+            @Nullable SmartspaceText supplementalAlarmText,
             @NonNull List<CarouselItem> carouselItems,
             @Nullable SmartspaceTapAction carouselAction) {
         super(templateType, titleText, titleIcon, subtitleText, subTitleIcon, primaryTapAction,
@@ -170,11 +169,11 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
             if (mCarouselItems.isEmpty()) {
                 throw new IllegalStateException("Carousel data is empty");
             }
+
             return new SmartspaceCarouselUiTemplateData(getTemplateType(), getTitleText(),
-                    getTitleIcon(), getSubtitleText(), getSubTitleIcon(), getPrimaryTapAction(),
+                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(), getPrimaryTapAction(),
                     getSupplementalSubtitleText(), getSupplementalSubtitleIcon(),
-                    getSupplementalSubtitleTapAction(), getSupplementalAlarmText(),
-                    mCarouselItems,
+                    getSupplementalSubtitleTapAction(), getSupplementalAlarmText(), mCarouselItems,
                     mCarouselAction);
         }
     }
@@ -184,7 +183,7 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
 
         /** Text which is above the image item. */
         @Nullable
-        private final CharSequence mUpperText;
+        private final SmartspaceText mUpperText;
 
         /** Image item. Can be empty. */
         @Nullable
@@ -192,7 +191,7 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
 
         /** Text which is under the image item. */
         @Nullable
-        private final CharSequence mLowerText;
+        private final SmartspaceText mLowerText;
 
         /**
          * Tap action for this {@link CarouselItem} instance. {@code mCarouselAction} is used if not
@@ -202,14 +201,14 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
         private final SmartspaceTapAction mTapAction;
 
         CarouselItem(@NonNull Parcel in) {
-            mUpperText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+            mUpperText = in.readTypedObject(SmartspaceText.CREATOR);
             mImage = in.readTypedObject(SmartspaceIcon.CREATOR);
-            mLowerText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+            mLowerText = in.readTypedObject(SmartspaceText.CREATOR);
             mTapAction = in.readTypedObject(SmartspaceTapAction.CREATOR);
         }
 
-        private CarouselItem(@Nullable CharSequence upperText, @Nullable SmartspaceIcon image,
-                @Nullable CharSequence lowerText, @Nullable SmartspaceTapAction tapAction) {
+        private CarouselItem(@Nullable SmartspaceText upperText, @Nullable SmartspaceIcon image,
+                @Nullable SmartspaceText lowerText, @Nullable SmartspaceTapAction tapAction) {
             mUpperText = upperText;
             mImage = image;
             mLowerText = lowerText;
@@ -217,7 +216,7 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
         }
 
         @Nullable
-        public CharSequence getUpperText() {
+        public SmartspaceText getUpperText() {
             return mUpperText;
         }
 
@@ -227,7 +226,7 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
         }
 
         @Nullable
-        public CharSequence getLowerText() {
+        public SmartspaceText getLowerText() {
             return mLowerText;
         }
 
@@ -260,9 +259,9 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
 
         @Override
         public void writeToParcel(@NonNull Parcel out, int flags) {
-            TextUtils.writeToParcel(mUpperText, out, flags);
+            out.writeTypedObject(mUpperText, flags);
             out.writeTypedObject(mImage, flags);
-            TextUtils.writeToParcel(mLowerText, out, flags);
+            out.writeTypedObject(mLowerText, flags);
             out.writeTypedObject(mTapAction, flags);
         }
 
@@ -300,16 +299,16 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
         @SystemApi
         public static final class Builder {
 
-            private CharSequence mUpperText;
+            private SmartspaceText mUpperText;
             private SmartspaceIcon mImage;
-            private CharSequence mLowerText;
+            private SmartspaceText mLowerText;
             private SmartspaceTapAction mTapAction;
 
             /**
              * Sets the upper text.
              */
             @NonNull
-            public Builder setUpperText(@Nullable CharSequence upperText) {
+            public Builder setUpperText(@Nullable SmartspaceText upperText) {
                 mUpperText = upperText;
                 return this;
             }
@@ -328,7 +327,7 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
              * Sets the lower text.
              */
             @NonNull
-            public Builder setLowerText(@Nullable CharSequence lowerText) {
+            public Builder setLowerText(@Nullable SmartspaceText lowerText) {
                 mLowerText = lowerText;
                 return this;
             }
@@ -349,7 +348,8 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
              */
             @NonNull
             public CarouselItem build() {
-                if (TextUtils.isEmpty(mUpperText) && mImage == null && TextUtils.isEmpty(
+                if (SmartspaceUtils.isEmpty(mUpperText) && mImage == null
+                        && SmartspaceUtils.isEmpty(
                         mLowerText)) {
                     throw new IllegalStateException("Carousel data is empty");
                 }
