@@ -3556,7 +3556,8 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void acknowledgeNewUserDisclaimer() {
         if (mService != null) {
@@ -3566,6 +3567,25 @@ public class DevicePolicyManager {
                 throw e.rethrowFromSystemServer();
             }
         }
+    }
+
+    /**
+     * Checks whether the new managed user disclaimer was viewed by the current user.
+     *
+     * @hide
+     */
+    @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
+    @TestApi
+    public boolean isNewUserDisclaimerAcknowledged() {
+        if (mService != null) {
+            try {
+                return mService.isNewUserDisclaimerAcknowledged();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
     }
 
     /**
@@ -10146,7 +10166,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
-            android.Manifest.permission.CREATE_USERS})
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public @UserOperationResult int logoutUser() {
         // TODO(b/214336184): add CTS test
