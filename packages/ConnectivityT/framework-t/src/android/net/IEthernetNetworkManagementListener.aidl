@@ -16,10 +16,10 @@
 
 package android.net;
 
-import android.net.InternalNetworkManagementException;
+import android.net.EthernetNetworkManagementException;
 import android.net.Network;
 
 /** @hide */
-oneway interface IInternalNetworkManagementListener {
-    void onComplete(in Network network, in InternalNetworkManagementException exception);
+oneway interface IEthernetNetworkManagementListener {
+    void onComplete(in Network network, in EthernetNetworkManagementException exception);
 }
