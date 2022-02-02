@@ -5940,6 +5940,10 @@
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.READ_CLIPBOARD_IN_BACKGROUND"
         android:protectionLevel="signature" />
+    <!-- @hide Permission that suppresses the notification when the clipboard is accessed.
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.SUPPRESS_CLIPBOARD_ACCESS_NOTIFICATION"
+                android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows modifying accessibility state.
          @hide -->

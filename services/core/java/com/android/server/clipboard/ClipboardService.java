@@ -1090,6 +1090,10 @@ public class ClipboardService extends SystemService {
                 && mAutofillInternal.isAugmentedAutofillServiceForUser(uid, userId)) {
             return;
         }
+        if (mPm.checkPermission(Manifest.permission.SUPPRESS_CLIPBOARD_ACCESS_NOTIFICATION,
+                callingPackage) == PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
         // Don't notify if already notified for this uid and clip.
         if (clipboard.mNotifiedUids.get(uid)) {
             return;
