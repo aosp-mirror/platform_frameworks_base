@@ -178,10 +178,6 @@ cc_library_shared {
     name: "libandroid_servers",
     defaults: ["libservices.core-libs"],
     whole_static_libs: ["libservices.core"],
-    required: [
-        // TODO: remove after NetworkStatsService is moved to the mainline module.
-        "libcom_android_net_module_util_jni",
-    ],
 }
 
 platform_compat_config {

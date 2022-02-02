@@ -194,10 +194,9 @@ cc_library_shared {
         "jni/onload.cpp",
     ],
     shared_libs: [
+        "libandroid",
         "liblog",
-    ],
-    static_libs: [
-        "libnativehelper_compat_libc++",
+        "libnativehelper",
     ],
     stl: "none",
     apex_available: [
