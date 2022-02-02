@@ -23,6 +23,7 @@ import com.android.systemui.statusbar.notification.collection.render.NotifStackC
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
+import com.android.systemui.util.traceSection
 import javax.inject.Inject
 
 /**
@@ -38,10 +39,11 @@ class StackCoordinator @Inject internal constructor(
         pipeline.addOnAfterRenderListListener(::onAfterRenderList)
     }
 
-    fun onAfterRenderList(entries: List<ListEntry>, controller: NotifStackController) {
-        controller.setNotifStats(calculateNotifStats(entries))
-        notificationIconAreaController.updateNotificationIcons(entries)
-    }
+    fun onAfterRenderList(entries: List<ListEntry>, controller: NotifStackController) =
+        traceSection("StackCoordinator.onAfterRenderList") {
+            controller.setNotifStats(calculateNotifStats(entries))
+            notificationIconAreaController.updateNotificationIcons(entries)
+        }
 
     private fun calculateNotifStats(entries: List<ListEntry>): NotifStats {
         var hasNonClearableAlertingNotifs = false

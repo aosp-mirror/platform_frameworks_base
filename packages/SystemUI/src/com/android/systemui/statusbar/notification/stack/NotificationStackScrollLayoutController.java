@@ -35,6 +35,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.os.Trace;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -1199,6 +1200,7 @@ public class NotificationStackScrollLayoutController {
      * are true.
      */
     public void updateShowEmptyShadeView() {
+        Trace.beginSection("NSSLC.updateShowEmptyShadeView");
         mShowEmptyShadeView = mBarState != KEYGUARD
                 && (!mView.isQsExpanded() || mView.isUsingSplitNotificationShade())
                 && getVisibleNotificationCount() == 0;
@@ -1206,6 +1208,7 @@ public class NotificationStackScrollLayoutController {
         mView.updateEmptyShadeView(
                 mShowEmptyShadeView,
                 mZenModeController.areNotificationsHiddenInShade());
+        Trace.endSection();
     }
 
     public boolean areNotificationsHiddenInShade() {
@@ -1323,11 +1326,15 @@ public class NotificationStackScrollLayoutController {
         if (mNotifPipelineFlags.isNewPipelineEnabled()) {
             return;
         }
+        Trace.beginSection("NSSLC.updateSectionBoundaries");
         mView.updateSectionBoundaries(reason);
+        Trace.endSection();
     }
 
     public void updateFooter() {
+        Trace.beginSection("NSSLC.updateFooter");
         mView.updateFooter();
+        Trace.endSection();
     }
 
     public void onUpdateRowStates() {

@@ -426,14 +426,18 @@ public class ShadeListBuilder implements Dumpable {
         }
         Trace.endSection();
 
+        Trace.beginSection("ShadeListBuilder.logEndBuildList");
         // Step 9: We're done!
         mLogger.logEndBuildList(
                 mIterationCount,
                 mReadOnlyNotifList.size(),
                 countChildren(mReadOnlyNotifList));
         if (mAlwaysLogList || mIterationCount % 10 == 0) {
+            Trace.beginSection("ShadeListBuilder.logFinalList");
             mLogger.logFinalList(mNotifList);
+            Trace.endSection();
         }
+        Trace.endSection();
         mPipelineState.setState(STATE_IDLE);
         mIterationCount++;
         Trace.endSection();
@@ -996,16 +1000,20 @@ public class ShadeListBuilder implements Dumpable {
     }
 
     private void freeEmptyGroups() {
+        Trace.beginSection("ShadeListBuilder.freeEmptyGroups");
         mGroups.values().removeIf(ge -> ge.getSummary() == null && ge.getChildren().isEmpty());
+        Trace.endSection();
     }
 
     private void logChanges() {
+        Trace.beginSection("ShadeListBuilder.logChanges");
         for (NotificationEntry entry : mAllEntries) {
             logAttachStateChanges(entry);
         }
         for (GroupEntry group : mGroups.values()) {
             logAttachStateChanges(group);
         }
+        Trace.endSection();
     }
 
     private void logAttachStateChanges(ListEntry entry) {
@@ -1083,6 +1091,7 @@ public class ShadeListBuilder implements Dumpable {
     }
 
     private void cleanupPluggables() {
+        Trace.beginSection("ShadeListBuilder.cleanupPluggables");
         callOnCleanup(mNotifPreGroupFilters);
         callOnCleanup(mNotifPromoters);
         callOnCleanup(mNotifFinalizeFilters);
@@ -1093,6 +1102,7 @@ public class ShadeListBuilder implements Dumpable {
         }
 
         callOnCleanup(List.of(getStabilityManager()));
+        Trace.endSection();
     }
 
     private void callOnCleanup(List<? extends Pluggable<?>> pluggables) {
