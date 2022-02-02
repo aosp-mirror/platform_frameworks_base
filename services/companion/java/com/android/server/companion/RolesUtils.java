@@ -19,20 +19,23 @@ package com.android.server.companion;
 import static android.app.role.RoleManager.MANAGE_HOLDERS_FLAG_DONT_KILL_APP;
 
 import static com.android.server.companion.CompanionDeviceManagerService.DEBUG;
-import static com.android.server.companion.CompanionDeviceManagerService.LOG_TAG;
 
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.role.RoleManager;
 import android.companion.AssociationInfo;
 import android.content.Context;
 import android.os.UserHandle;
+import android.util.Log;
 import android.util.Slog;
 
 import java.util.List;
 
 /** Utility methods for accessing {@link RoleManager} APIs. */
+@SuppressLint("LongLogTag")
 final class RolesUtils {
+    private static final String TAG = CompanionDeviceManagerService.LOG_TAG;
 
     static boolean isRoleHolder(@NonNull Context context, @UserIdInt int userId,
             @NonNull String packageName, @NonNull String role) {
@@ -45,7 +48,7 @@ final class RolesUtils {
     static void addRoleHolderForAssociation(
             @NonNull Context context, @NonNull AssociationInfo associationInfo) {
         if (DEBUG) {
-            Slog.d(LOG_TAG, "addRoleHolderForAssociation() associationInfo=" + associationInfo);
+            Log.d(TAG, "addRoleHolderForAssociation() associationInfo=" + associationInfo);
         }
 
         final String deviceProfile = associationInfo.getDeviceProfile();
@@ -61,7 +64,7 @@ final class RolesUtils {
                 MANAGE_HOLDERS_FLAG_DONT_KILL_APP, userHandle, context.getMainExecutor(),
                 success -> {
                     if (!success) {
-                        Slog.e(LOG_TAG, "Failed to add u" + userId + "\\" + packageName
+                        Slog.e(TAG, "Failed to add u" + userId + "\\" + packageName
                                 + " to the list of " + deviceProfile + " holders.");
                     }
                 });
@@ -70,7 +73,7 @@ final class RolesUtils {
     static void removeRoleHolderForAssociation(
             @NonNull Context context, @NonNull AssociationInfo associationInfo) {
         if (DEBUG) {
-            Slog.d(LOG_TAG, "removeRoleHolderForAssociation() associationInfo=" + associationInfo);
+            Log.d(TAG, "removeRoleHolderForAssociation() associationInfo=" + associationInfo);
         }
 
         final String deviceProfile = associationInfo.getDeviceProfile();
@@ -86,7 +89,7 @@ final class RolesUtils {
                 MANAGE_HOLDERS_FLAG_DONT_KILL_APP, userHandle, context.getMainExecutor(),
                 success -> {
                     if (!success) {
-                        Slog.e(LOG_TAG, "Failed to remove u" + userId + "\\" + packageName
+                        Slog.e(TAG, "Failed to remove u" + userId + "\\" + packageName
                                 + " from the list of " + deviceProfile + " holders.");
                     }
                 });
