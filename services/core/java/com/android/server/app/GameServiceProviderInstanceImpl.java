@@ -50,6 +50,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.infra.ServiceConnector;
 import com.android.server.wm.WindowManagerInternal;
+import com.android.server.wm.WindowManagerInternal.TaskSystemBarsListener;
 import com.android.server.wm.WindowManagerService;
 
 import java.util.List;
@@ -61,6 +62,18 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
     private static final String TAG = "GameServiceProviderInstance";
     private static final int CREATE_GAME_SESSION_TIMEOUT_MS = 10_000;
     private static final boolean DEBUG = false;
+
+    private final TaskSystemBarsListener mTaskSystemBarsVisibilityListener =
+            new TaskSystemBarsListener() {
+                @Override
+                public void onTransientSystemBarsVisibilityChanged(
+                        int taskId,
+                        boolean visible,
+                        boolean wereRevealedFromSwipeOnSystemBar) {
+                    GameServiceProviderInstanceImpl.this.onTransientSystemBarsVisibilityChanged(
+                            taskId, visible, wereRevealedFromSwipeOnSystemBar);
+                }
+            };
 
     private final TaskStackListener mTaskStackListener = new TaskStackListener() {
         @Override
@@ -203,6 +216,8 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to register task stack listener", e);
         }
+
+        mWindowManagerInternal.registerTaskSystemBarsListener(mTaskSystemBarsVisibilityListener);
     }
 
     @GuardedBy("mLock")
@@ -217,6 +232,9 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to unregister task stack listener", e);
         }
+
+        mWindowManagerInternal.unregisterTaskSystemBarsListener(
+                mTaskSystemBarsVisibilityListener);
 
         for (GameSessionRecord gameSessionRecord : mGameSessions.values()) {
             destroyGameSessionFromRecord(gameSessionRecord);
@@ -304,6 +322,37 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
             }
 
             removeAndDestroyGameSessionIfNecessaryLocked(taskId);
+        }
+    }
+
+    private void onTransientSystemBarsVisibilityChanged(
+            int taskId,
+            boolean visible,
+            boolean wereRevealedFromSwipeOnSystemBar) {
+        if (visible && !wereRevealedFromSwipeOnSystemBar) {
+            return;
+        }
+
+        GameSessionRecord gameSessionRecord;
+        synchronized (mLock) {
+            gameSessionRecord = mGameSessions.get(taskId);
+        }
+
+        if (gameSessionRecord == null) {
+            return;
+        }
+
+        IGameSession gameSession = gameSessionRecord.getGameSession();
+        if (gameSession == null) {
+            return;
+        }
+
+        try {
+            gameSession.onTransientSystemBarVisibilityFromRevealGestureChanged(visible);
+        } catch (RemoteException ex) {
+            Slog.w(TAG,
+                    "Failed to send transient system bars visibility from reveal gesture for task: "
+                            + taskId);
         }
     }
 

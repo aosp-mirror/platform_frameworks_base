@@ -21,5 +21,6 @@ package android.service.games;
  */
 oneway interface IGameSession {
     void onDestroyed();
+    void onTransientSystemBarVisibilityFromRevealGestureChanged(boolean visibleDueToGesture);
     void onTaskFocusChanged(boolean focused);
 }

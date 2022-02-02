@@ -11093,6 +11093,7 @@ package android.service.games {
     method public void onCreate();
     method public void onDestroy();
     method public void onGameTaskFocusChanged(boolean);
+    method public void onTransientSystemBarVisibilityFromRevealGestureChanged(boolean);
     method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY) public final boolean restartGame();
     method public void setTaskOverlayView(@NonNull android.view.View, @NonNull android.view.ViewGroup.LayoutParams);
     method public void takeScreenshot(@NonNull java.util.concurrent.Executor, @NonNull android.service.games.GameSession.ScreenshotCallback);
