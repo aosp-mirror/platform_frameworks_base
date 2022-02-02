@@ -2436,6 +2436,23 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MMS_MESSAGE_SETTING = "android.settings.MMS_MESSAGE_SETTING";
 
+    /**
+     * Activity Action: Show a screen of bedtime settings, which is provided by the wellbeing app.
+     * <p>
+     * The handler of this intent action may not exist.
+     * <p>
+     * To start an activity with this intent, apps should set the wellbeing package explicitly in
+     * the intent together with this action. The wellbeing package is defined in
+     * {@code com.android.internal.R.string.config_defaultWellbeingPackage}.
+     * <p>
+     * Output: Nothing
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_BEDTIME_SETTINGS = "android.settings.BEDTIME_SETTINGS";
+
     // End of Intent actions for Settings
 
     /**
@@ -10048,6 +10065,13 @@ public final class Settings {
         public static final String QS_AUTO_ADDED_TILES = "qs_auto_tiles";
 
         /**
+         * The duration of timeout, in milliseconds, to switch from a non-primary user to the
+         * primary user when the device is docked.
+         * @hide
+         */
+        public static final String TIMEOUT_TO_USER_ZERO = "timeout_to_user_zero";
+
+        /**
          * Backup manager behavioral parameters.
          * This is encoded as a key=value list, separated by commas. Ex:
          *
@@ -10279,6 +10303,15 @@ public final class Settings {
          * @hide
          */
         public static final String NEARBY_SHARING_SLICE_URI = "nearby_sharing_slice_uri";
+
+        /**
+         * Current provider of Fast Pair saved devices page.
+         * Default value in @string/config_defaultNearbyFastPairSettingsDevicesComponent.
+         * No VALIDATOR as this setting will not be backed up.
+         * @hide
+         */
+        public static final String NEARBY_FAST_PAIR_SETTINGS_DEVICES_COMPONENT =
+                "nearby_fast_pair_settings_devices_component";
 
         /**
          * Controls whether aware is enabled.
@@ -10630,6 +10663,15 @@ public final class Settings {
         @SystemApi
         @Readable
         public static final String FAST_PAIR_SCAN_ENABLED = "fast_pair_scan_enabled";
+
+        /**
+         * Setting to store denylisted system languages by the CEC {@code <Set Menu Language>}
+         * confirmation dialog.
+         *
+         * @hide
+         */
+        public static final String HDMI_CEC_SET_MENU_LANGUAGE_DENYLIST =
+                "hdmi_cec_set_menu_language_denylist";
 
         /**
          * These entries are considered common between the personal and the managed profile,

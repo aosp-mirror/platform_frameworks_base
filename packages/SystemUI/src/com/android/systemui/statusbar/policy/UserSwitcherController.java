@@ -455,6 +455,13 @@ public class UserSwitcherController implements Dumpable {
         }
     }
 
+    /**
+     * Returns whether the current user is a system user.
+     */
+    public boolean isSystemUser() {
+        return mUserTracker.getUserId() == UserHandle.USER_SYSTEM;
+    }
+
     public void removeUserId(int userId) {
         if (userId == UserHandle.USER_SYSTEM) {
             Log.w(TAG, "User " + userId + " could not removed.");

@@ -42,6 +42,7 @@ import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityManager.ProcessState;
 import android.app.AppOpsManager;
 import android.app.IUidObserver;
 import android.app.PendingIntent;
@@ -3042,9 +3043,9 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void reportBroadcastDispatched(int sourceUid, @NonNull String targetPackage,
                 @NonNull UserHandle targetUser, long idForResponseEvent,
-                @ElapsedRealtimeLong long timestampMs) {
+                @ElapsedRealtimeLong long timestampMs, @ProcessState int targetUidProcState) {
             mResponseStatsTracker.reportBroadcastDispatchEvent(sourceUid, targetPackage,
-                    targetUser, idForResponseEvent, timestampMs);
+                    targetUser, idForResponseEvent, timestampMs, targetUidProcState);
         }
 
         @Override

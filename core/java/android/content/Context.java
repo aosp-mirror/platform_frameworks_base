@@ -37,6 +37,7 @@ import android.annotation.TestApi;
 import android.annotation.UiContext;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.BroadcastOptions;
 import android.app.GameManager;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
@@ -2257,6 +2258,27 @@ public abstract class Context {
     public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
             @NonNull String[] receiverPermissions, @Nullable Bundle options) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Version of {@link #sendBroadcastMultiplePermissions(Intent, String[])} that allows you to
+     * specify the {@link android.app.BroadcastOptions}.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     *               Intent will receive the broadcast.
+     * @param receiverPermissions Array of names of permissions that a receiver must hold
+     *                            in order to receive your broadcast.
+     *                            If empty, no permissions are required.
+     * @param options Additional sending options, generated from a
+     *                {@link android.app.BroadcastOptions}.
+     * @see #sendBroadcastMultiplePermissions(Intent, String[])
+     * @see android.app.BroadcastOptions
+     * @hide
+     */
+    @SystemApi
+    public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
+            @NonNull String[] receiverPermissions, @Nullable BroadcastOptions options) {
+       sendBroadcastMultiplePermissions(intent, receiverPermissions, options.toBundle());
     }
 
     /**
@@ -6684,21 +6706,27 @@ public abstract class Context {
             @NonNull Configuration overrideConfiguration);
 
     /**
-     * Returns a new <code>Context</code> object from the current context but with resources
-     * adjusted to match the metrics of <code>display</code>. Each call to this method
+     * Returns a new {@code Context} object from the current context but with resources
+     * adjusted to match the metrics of {@code display}. Each call to this method
      * returns a new instance of a context object. Context objects are not shared; however,
      * common state (such as the {@link ClassLoader} and other resources for the same
-     * configuration) can be shared, so the <code>Context</code> itself is lightweight.
+     * configuration) can be shared, so the {@code Context} itself is lightweight.
+     *
+     * <p><b>Note:</b>
+     * This {@code Context} is <b>not</b> expected to be updated with new configuration if the
+     * underlying display configuration changes and the cached {@code Resources} it returns
+     * could be stale. It is suggested to use
+     * {@link android.hardware.display.DisplayManager.DisplayListener} to listen for
+     * changes and re-create an instance if necessary. </p>
      * <p>
+     * This {@code Context} is <b>not</b> a UI context, do not use it to access UI components
+     * or obtain a {@link WindowManager} instance.
+     * </p><p>
      * To obtain an instance of {@link WindowManager} configured to show windows on the given
      * display, call {@link #createWindowContext(int, Bundle)} on the returned display context,
      * then call {@link #getSystemService(String)} or {@link #getSystemService(Class)} on the
      * returned window context.
-     * <p>
-     * <b>Note:</b> The context returned by <code>createDisplayContext(Display)</code> is not a UI
-     * context. Do not access UI components or obtain a {@link WindowManager} from the context
-     * created by <code>createDisplayContext(Display)</code>.
-     *
+     * </p>
      * @param display The display to which the current context's resources are adjusted.
      *
      * @return A context for the display.

@@ -105,6 +105,12 @@ public final class HdmiControlManager {
             "android.hardware.hdmi.extra.MESSAGE_EXTRA_PARAM1";
 
     /**
+     * Used as an extra field in the Set Menu Language intent. Contains the requested locale.
+     * @hide
+     */
+    public static final String EXTRA_LOCALE = "android.hardware.hdmi.extra.LOCALE";
+
+    /**
      * Volume value for mute state.
      */
     public static final int AVR_VOLUME_MUTED = 101;

@@ -23,8 +23,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.ComponentName;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.stats.devicepolicy.DevicePolicyEnums;
 
 /**
@@ -49,7 +51,7 @@ public final class ManagedProfileProvisioningParams implements Parcelable {
     private final boolean mLeaveAllSystemAppsEnabled;
     private final boolean mOrganizationOwnedProvisioning;
     private final boolean mKeepAccountOnMigration;
-
+    @NonNull private final PersistableBundle mAdminExtras;
 
     private ManagedProfileProvisioningParams(
             @NonNull ComponentName profileAdminComponentName,
@@ -58,7 +60,8 @@ public final class ManagedProfileProvisioningParams implements Parcelable {
             @Nullable Account accountToMigrate,
             boolean leaveAllSystemAppsEnabled,
             boolean organizationOwnedProvisioning,
-            boolean keepAccountOnMigration) {
+            boolean keepAccountOnMigration,
+            @NonNull PersistableBundle adminExtras) {
         this.mProfileAdminComponentName = requireNonNull(profileAdminComponentName);
         this.mOwnerName = requireNonNull(ownerName);
         this.mProfileName = profileName;
@@ -66,6 +69,7 @@ public final class ManagedProfileProvisioningParams implements Parcelable {
         this.mLeaveAllSystemAppsEnabled = leaveAllSystemAppsEnabled;
         this.mOrganizationOwnedProvisioning = organizationOwnedProvisioning;
         this.mKeepAccountOnMigration = keepAccountOnMigration;
+        this.mAdminExtras = adminExtras;
     }
 
     /**
@@ -124,6 +128,15 @@ public final class ManagedProfileProvisioningParams implements Parcelable {
     }
 
     /**
+     * Returns a copy of the admin extras bundle.
+     *
+     * @see DevicePolicyManager#EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE
+     */
+    public @NonNull PersistableBundle getAdminExtras() {
+        return new PersistableBundle(mAdminExtras);
+    }
+
+    /**
      * Logs the provisioning params using {@link DevicePolicyEventLogger}.
      *
      * @hide
@@ -160,6 +173,7 @@ public final class ManagedProfileProvisioningParams implements Parcelable {
         private boolean mLeaveAllSystemAppsEnabled;
         private boolean mOrganizationOwnedProvisioning;
         private boolean mKeepingAccountOnMigration;
+        @Nullable private PersistableBundle mAdminExtras;
 
         /**
          * Initialize a new {@link Builder) to construct a {@link ManagedProfileProvisioningParams}.
@@ -235,6 +249,17 @@ public final class ManagedProfileProvisioningParams implements Parcelable {
         }
 
         /**
+         * Sets a {@link Bundle} that contains admin-specific extras.
+         */
+        @NonNull
+        public Builder setAdminExtras(@NonNull PersistableBundle adminExtras) {
+            mAdminExtras = adminExtras != null
+                    ? new PersistableBundle(adminExtras)
+                    : new PersistableBundle();
+            return this;
+        }
+
+        /**
          * Combines all of the attributes that have been set on this {@code Builder}.
          *
          * @return a new {@link ManagedProfileProvisioningParams} object.
@@ -248,7 +273,8 @@ public final class ManagedProfileProvisioningParams implements Parcelable {
                     mAccountToMigrate,
                     mLeaveAllSystemAppsEnabled,
                     mOrganizationOwnedProvisioning,
-                    mKeepingAccountOnMigration);
+                    mKeepingAccountOnMigration,
+                    mAdminExtras);
         }
     }
 
@@ -270,6 +296,7 @@ public final class ManagedProfileProvisioningParams implements Parcelable {
                 + ", mLeaveAllSystemAppsEnabled=" + mLeaveAllSystemAppsEnabled
                 + ", mOrganizationOwnedProvisioning=" + mOrganizationOwnedProvisioning
                 + ", mKeepAccountOnMigration=" + mKeepAccountOnMigration
+                + ", mAdminExtras=" + mAdminExtras
                 + '}';
     }
 
@@ -282,6 +309,7 @@ public final class ManagedProfileProvisioningParams implements Parcelable {
         dest.writeBoolean(mLeaveAllSystemAppsEnabled);
         dest.writeBoolean(mOrganizationOwnedProvisioning);
         dest.writeBoolean(mKeepAccountOnMigration);
+        dest.writePersistableBundle(mAdminExtras);
     }
 
     public static final @NonNull Creator<ManagedProfileProvisioningParams> CREATOR =
@@ -295,6 +323,7 @@ public final class ManagedProfileProvisioningParams implements Parcelable {
                     boolean leaveAllSystemAppsEnabled = in.readBoolean();
                     boolean organizationOwnedProvisioning = in.readBoolean();
                     boolean keepAccountMigrated = in.readBoolean();
+                    PersistableBundle adminExtras = in.readPersistableBundle();
 
                     return new ManagedProfileProvisioningParams(
                             componentName,
@@ -303,7 +332,8 @@ public final class ManagedProfileProvisioningParams implements Parcelable {
                             account,
                             leaveAllSystemAppsEnabled,
                             organizationOwnedProvisioning,
-                            keepAccountMigrated);
+                            keepAccountMigrated,
+                            adminExtras);
                 }
 
                 @Override

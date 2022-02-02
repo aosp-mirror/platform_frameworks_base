@@ -93,6 +93,12 @@ import static android.app.admin.DevicePolicyResources.Strings.MediaProvider.BLOC
 import static android.app.admin.DevicePolicyResources.Strings.MediaProvider.SWITCH_TO_PERSONAL_MESSAGE;
 import static android.app.admin.DevicePolicyResources.Strings.MediaProvider.SWITCH_TO_WORK_MESSAGE;
 import static android.app.admin.DevicePolicyResources.Strings.MediaProvider.WORK_PROFILE_PAUSED_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.PermissionController.BACKGROUND_ACCESS_DISABLED_BY_ADMIN_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.PermissionController.BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.PermissionController.FOREGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.PermissionController.HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.PermissionController.LOCATION_AUTO_GRANTED_MESSAGE;
+import static android.app.admin.DevicePolicyResources.Strings.PermissionController.WORK_PROFILE_DEFAULT_APPS_TITLE;
 import static android.app.admin.DevicePolicyResources.Strings.Settings.ACCESSIBILITY_CATEGORY_PERSONAL;
 import static android.app.admin.DevicePolicyResources.Strings.Settings.ACCESSIBILITY_CATEGORY_WORK;
 import static android.app.admin.DevicePolicyResources.Strings.Settings.ACCESSIBILITY_PERSONAL_ACCOUNT_TITLE;
@@ -117,8 +123,8 @@ import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_ACT
 import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_CAN_LOCK_DEVICE;
 import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_CAN_SEE_APPS_WARNING;
 import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_CAN_SEE_BUG_REPORT_WARNING;
-import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_CAN_SEE_SECURITY_LOGS_WARNING;
 import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_CAN_SEE_NETWORK_LOGS_WARNING;
+import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_CAN_SEE_SECURITY_LOGS_WARNING;
 import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_CAN_SEE_USAGE_WARNING;
 import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_CAN_SEE_WORK_DATA_WARNING;
 import static android.app.admin.DevicePolicyResources.Strings.Settings.ADMIN_CAN_WIPE_DEVICE;
@@ -500,7 +506,13 @@ public final class DevicePolicyResources {
             WORK_PROFILE_PRIVACY_POLICY_INFO, CONNECTED_APPS_SEARCH_KEYWORDS,
             WORK_PROFILE_UNIFICATION_SEARCH_KEYWORDS, ACCOUNTS_SEARCH_KEYWORDS,
             CONTROLLED_BY_ADMIN_SUMMARY, WORK_PROFILE_USER_LABEL, WORK_CATEGORY_HEADER,
-            PERSONAL_CATEGORY_HEADER
+            PERSONAL_CATEGORY_HEADER,
+
+            // PermissionController Strings
+            WORK_PROFILE_DEFAULT_APPS_TITLE, HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE,
+            BACKGROUND_ACCESS_DISABLED_BY_ADMIN_MESSAGE, BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE,
+            BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE, FOREGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE,
+            LOCATION_AUTO_GRANTED_MESSAGE
     })
     public @interface UpdatableStringId {
     }
@@ -690,11 +702,13 @@ public final class DevicePolicyResources {
 
         private static Set<String> buildStringsSet() {
             Set<String> strings = new HashSet<>();
+            strings.addAll(Settings.buildStringsSet());
             strings.addAll(Launcher.buildStringsSet());
             strings.addAll(SystemUi.buildStringsSet());
             strings.addAll(Core.buildStringsSet());
             strings.addAll(DocumentsUi.buildStringsSet());
             strings.addAll(MediaProvider.buildStringsSet());
+            strings.addAll(PermissionController.buildStringsSet());
             return strings;
         }
 
@@ -2851,6 +2865,72 @@ public final class DevicePolicyResources {
                 strings.add(BLOCKED_FROM_WORK_MESSAGE);
                 strings.add(WORK_PROFILE_PAUSED_TITLE);
                 strings.add(WORK_PROFILE_PAUSED_MESSAGE);
+                return strings;
+            }
+        }
+
+        /**
+         * Class containing the identifiers used to update device management-related system strings
+         * in the PermissionController module.
+         */
+        public static final class PermissionController {
+
+            private PermissionController() {
+            }
+
+            private static final String PREFIX = "PermissionController.";
+
+            /**
+             * Title for settings page to show default apps for work.
+             */
+            public static final String WORK_PROFILE_DEFAULT_APPS_TITLE =
+                    PREFIX + "WORK_PROFILE_DEFAULT_APPS_TITLE";
+
+            /**
+             * Summary indicating that a home role holder app is missing work profile support.
+             */
+            public static final String HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE =
+                    PREFIX + "HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE";
+
+            /**
+             * Summary of a permission switch in Settings when the background access is denied by an
+             * admin.
+             */
+            public static final String BACKGROUND_ACCESS_DISABLED_BY_ADMIN_MESSAGE =
+                    PREFIX + "BACKGROUND_ACCESS_DISABLED_BY_ADMIN_MESSAGE";
+
+            /**
+             * Summary of a permission switch in Settings when the background access is enabled by
+             * an admin.
+             */
+            public static final String BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE =
+                    PREFIX + "BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE";
+
+            /**
+             * Summary of a permission switch in Settings when the foreground access is enabled by
+             * an admin.
+             */
+            public static final String FOREGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE =
+                    PREFIX + "FOREGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE";
+
+            /**
+             * Body of the notification shown to notify the user that the location permission has
+             * been granted to an app, accepts app name as a param.
+             */
+            public static final String LOCATION_AUTO_GRANTED_MESSAGE =
+                    PREFIX + "LOCATION_AUTO_GRANTED_MESSAGE";
+
+            /**
+             * @hide
+             */
+            static Set<String> buildStringsSet() {
+                Set<String> strings = new HashSet<>();
+                strings.add(WORK_PROFILE_DEFAULT_APPS_TITLE);
+                strings.add(HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE);
+                strings.add(BACKGROUND_ACCESS_DISABLED_BY_ADMIN_MESSAGE);
+                strings.add(BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE);
+                strings.add(FOREGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE);
+                strings.add(LOCATION_AUTO_GRANTED_MESSAGE);
                 return strings;
             }
         }

@@ -1,0 +1,253 @@
+#!/bin/bash
+#
+# Copyright 2019, The Android Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+DIR_IORAP_COMMON="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+APP_STARTUP_DIR="$DIR_IORAP_COMMON/../app_startup/"
+source "$APP_STARTUP_DIR/lib/common"
+
+IORAPD_DATA_PATH="/data/misc/iorapd"
+
+iorapd_start() {
+  verbose_print 'iorapd_start'
+  adb shell start iorapd
+  sleep 1
+  # TODO: block until logcat prints successfully connecting
+}
+
+iorapd_stop() {
+  verbose_print 'iorapd_stop'
+  adb shell stop iorapd
+}
+
+iorapd_reset() {
+  iorapd_stop
+  iorapd_start
+}
+
+# Enable perfetto tracing.
+# Subsequent launches of an application will record a perfetto trace protobuf.
+iorapd_perfetto_enable() {
+  verbose_print 'enable perfetto'
+  adb shell setprop iorapd.perfetto.enable true
+  iorapd_reset # iorapd only reads this flag when initializing
+}
+
+# Disable perfetto tracing.
+# Subsequent launches of applications will no longer record perfetto trace protobufs.
+iorapd_perfetto_disable() {
+  verbose_print 'disable perfetto'
+  adb shell setprop iorapd.perfetto.enable false
+  iorapd_reset # iorapd only reads this flag when initializing
+}
+
+# Enable readahead
+# Subsequent launches of an application will be sped up by iorapd readahead prefetching
+# (Provided an appropriate compiled trace exists for that application)
+iorapd_readahead_enable() {
+  if [[ "$(adb shell getprop iorapd.readahead.enable)" == true ]]; then
+    verbose_print 'enable readahead [already enabled]'
+    return 0
+  fi
+  verbose_print 'enable readahead [reset iorapd]'
+  adb shell setprop iorapd.readahead.enable true
+  iorapd_reset # iorapd only reads this flag when initializing
+}
+
+# Disable readahead
+# Subsequent launches of an application will be not be sped up by iorapd readahead prefetching.
+iorapd_readahead_disable() {
+  if [[ "$(adb shell getprop iorapd.readahead.enable)" == false ]]; then
+    verbose_print 'disable readahead [already disabled]'
+    return 0
+  fi
+  verbose_print 'disable readahead [reset iorapd]'
+  adb shell setprop iorapd.readahead.enable false
+  iorapd_reset # iorapd only reads this flag when initializing
+}
+
+_iorapd_path_to_data_file() {
+  local package="$1"
+  local activity="$2"
+  local suffix="$3"
+
+  # Match logic of 'AppComponentName' in iorap::compiler C++ code.
+  echo "${IORAPD_DATA_PATH}/${package}%2F${activity}.${suffix}"
+}
+
+iorapd_perfetto_wait_for_app_trace() {
+  local package="$1"
+  local activity="$2"
+  local timeout="$3"
+  local timestamp="$4"
+
+  local remote_path="$(_iorapd_path_to_data_file "$package" "$activity" "perfetto_trace.pb")"
+
+  verbose_print "iorapd_perfetto_wait_for_app_trace on file '$remote_path'"
+
+  # see event_manager.cc
+  local pattern="Perfetto TraceBuffer saved to file: $remote_path"
+  logcat_wait_for_pattern "$timeout" "$timestamp" "$pattern"
+}
+
+# Purge all perfetto traces for a given application.
+iorapd_perfetto_purge_app_trace() {
+  local package="$1"
+  local activity="$2"
+
+  local remote_path="$(_iorapd_path_to_data_file "$package" "$activity" "perfetto_trace.pb")"
+
+  verbose_print 'iorapd-perfetto: purge app trace in ' "$remote_path"
+  adb shell "[[ -f '$remote_path' ]] && rm -f '$remote_path' || exit 0"
+}
+
+# Pull the remote perfetto trace file into a local file.
+iorapd_perfetto_pull_trace_file() {
+  local package="$1"
+  local activity="$2"
+  local output_file="$3" # local path
+
+  local compiled_path="$(_iorapd_path_to_data_file "$package" "$activity" "perfetto_trace.pb")"
+
+  if ! adb shell "[[ -f '$compiled_path' ]]"; then
+    echo "Error: Remote path '$compiled_path' invalid" >&2
+    return 1
+  fi
+  if ! mkdir -p "$(dirname "$output_file")"; then
+    echo "Error: Fail to make output directory for '$output_file'" >&2
+    return 1
+  fi
+  verbose_print adb pull "$compiled_path" "$output_file"
+  adb pull "$compiled_path" "$output_file"
+}
+
+# Compile a perfetto trace for a given application.
+# This requires the app has run at least once with perfetto tracing enabled.
+iorapd_compiler_for_app_trace() {
+  local package="$1"
+  local activity="$2"
+  local inodes="$3" # local path
+
+  # remote path calculations
+  local input_path="$(_iorapd_path_to_data_file "$package" "$activity" "perfetto_trace.pb")"
+  local compiled_path="$(_iorapd_path_to_data_file "$package" "$activity" "compiled_trace.tmp.pb")"
+  local compiled_path_final="$(_iorapd_path_to_data_file "$package" "$activity" "compiled_trace.pb")"
+
+  if ! adb shell "[[ -f '$input_path' ]]"; then
+    echo "Error: Missing perfetto traces; nothing to compile. Expected: '$input_path'" >&2
+    return 1
+  fi
+
+  if ! [[ -f $inodes ]]; then
+    # We could compile using 'diskscan' but it's non-deterministic, so refuse instead.
+    echo "Error: Missing inodes textcache at '$inodes'; refusing to compile." >&2
+    return 1
+  fi
+
+  # inodes file needs to be on the device for iorap.cmd.compiler to access it
+  local remote_inodes=/data/local/tmp/prefetch/inodes.txt
+  adb shell "mkdir -p \"$(dirname "$remote_inodes")\"" || return 1
+  verbose_print adb push "$inodes" "$remote_inodes"
+  adb push "$inodes" "$remote_inodes"
+
+  verbose_print 'iorapd-compiler: compile app trace in ' "$input_path"
+  verbose_print adb shell "iorap.cmd.compiler '$input_path' --inode-textcache '$remote_inodes' --output-proto '$compiled_path'"
+  adb shell "iorap.cmd.compiler '$input_path' --inode-textcache '$remote_inodes' --output-proto '$compiled_path'"
+  retcode=$?
+
+  # Don't overwrite the true 'compiled_trace.pb' unless the compiler completed without error.
+  # TODO: The native compiler code should be handling its own transaction-safety.
+  if [[ $retcode -eq 0 ]]; then
+    adb shell "mv '$compiled_path' '$compiled_path_final'"
+  else
+    adb shell "[[ -f '$compiled_path' ]] && rm -f '$compiled_path'"
+  fi
+
+  # Clean up inodes file we just pushed.
+#  adb shell "[[ -f '$remote_inodes' ]] && rm -f '$remote_inodes'"
+
+  return $retcode
+}
+
+# Pull the remote compiled trace file into a local file.
+iorapd_compiler_pull_trace_file() {
+  local package="$1"
+  local activity="$2"
+  local output_file="$3" # local path
+
+  local compiled_path="$(_iorapd_path_to_data_file "$package" "$activity" "compiled_trace.pb")"
+
+  if ! adb shell "[[ -f '$compiled_path' ]]"; then
+    echo "Error: Remote path '$compiled_path' invalid" >&2
+    return 1
+  fi
+  if ! mkdir -p "$(dirname "$output_file")"; then
+    echo "Error: Fail to make output directory for '$output_file'" >&2
+    return 1
+  fi
+  verbose_print adb pull "$compiled_path" "$output_file"
+  adb pull "$compiled_path" "$output_file"
+}
+
+# Install a compiled trace file.
+iorapd_compiler_install_trace_file() {
+  local package="$1"
+  local activity="$2"
+  local input_file="$3" # local path
+
+  # remote path calculations
+  local compiled_path="$(_iorapd_path_to_data_file "$package" "$activity" "compiled_trace.pb")"
+
+  if ! [[ -f $input_file ]]; then
+    echo "Error: File '$input_file' does not exist." >&2
+    return 1
+  fi
+
+  adb shell "mkdir -p \"$(dirname "$compiled_path")\"" || return 1
+
+  verbose_print adb push "$input_file" "$compiled_path"
+  adb push "$input_file" "$compiled_path"
+}
+
+iorapd_compiler_purge_trace_file() {
+  local package="$1"
+  local activity="$2"
+  local input_file="$3" # local path
+
+  local remote_path="$(_iorapd_path_to_data_file "$package" "$activity" "compiled_trace.pb")"
+
+  adb shell "[[ -f '$remote_path' ]] && rm -f '$remote_path' || exit 0"
+}
+
+# Blocks until the readahead for the requested package/activity has finished.
+# This assumes that the trace file was already installed, and also that
+# the application launched but not completed yet.
+iorapd_readahead_wait_until_finished() {
+  local package="$1"
+  local activity="$2"
+  local timestamp="$3"
+  local timeout="$4"
+
+  if [[ $# -lt 4 ]]; then
+    echo "FATAL: Expected 4 arguments (actual $# $@)" >&2
+    exit 1
+  fi
+
+  local remote_path="$(_iorapd_path_to_data_file "$package" "$activity" "compiled_trace.pb")"
+
+  # See 'read_ahead.cc' LOG(INFO).
+  local pattern="Description = $remote_path"
+  logcat_wait_for_pattern "$timeout" "$timestamp" "$pattern"
+}

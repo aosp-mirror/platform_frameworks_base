@@ -17,6 +17,8 @@
 package com.android.server.biometrics.log;
 
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.common.OperationContext;
+import android.hardware.biometrics.common.OperationReason;
 import android.util.Slog;
 
 import com.android.internal.util.FrameworkStatsLog;
@@ -33,42 +35,49 @@ public class BiometricFrameworkStatsLogger {
 
     private BiometricFrameworkStatsLogger() {}
 
+    /** Shared instance. */
     public static BiometricFrameworkStatsLogger getInstance() {
         return sInstance;
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_ACQUIRED}. */
-    public void acquired(
+    public void acquired(OperationContext operationContext,
             int statsModality, int statsAction, int statsClient, boolean isDebug,
-            int acquiredInfo, int vendorCode, boolean isCrypto, int targetUserId) {
+            int acquiredInfo, int vendorCode, int targetUserId) {
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ACQUIRED,
                 statsModality,
                 targetUserId,
-                isCrypto,
+                operationContext.isCrypto,
                 statsAction,
                 statsClient,
                 acquiredInfo,
                 vendorCode,
                 isDebug,
-                -1 /* sensorId */);
+                -1 /* sensorId */,
+                operationContext.id,
+                sessionType(operationContext.reason),
+                operationContext.isAoD);
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_AUTHENTICATED}. */
-    public void authenticate(
+    public void authenticate(OperationContext operationContext,
             int statsModality, int statsAction, int statsClient, boolean isDebug, long latency,
-            boolean authenticated, int authState, boolean requireConfirmation, boolean isCrypto,
-            int targetUserId, boolean isBiometricPrompt, float ambientLightLux) {
+            int authState, boolean requireConfirmation,
+            int targetUserId, float ambientLightLux) {
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_AUTHENTICATED,
                 statsModality,
                 targetUserId,
-                isCrypto,
+                operationContext.isCrypto,
                 statsClient,
                 requireConfirmation,
                 authState,
                 sanitizeLatency(latency),
                 isDebug,
                 -1 /* sensorId */,
-                ambientLightLux);
+                ambientLightLux,
+                operationContext.id,
+                sessionType(operationContext.reason),
+                operationContext.isAoD);
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_ENROLLED}. */
@@ -84,20 +93,23 @@ public class BiometricFrameworkStatsLogger {
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_ERROR_OCCURRED}. */
-    public void error(
+    public void error(OperationContext operationContext,
             int statsModality, int statsAction, int statsClient, boolean isDebug, long latency,
-            int error, int vendorCode, boolean isCrypto, int targetUserId) {
+            int error, int vendorCode, int targetUserId) {
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ERROR_OCCURRED,
                 statsModality,
                 targetUserId,
-                isCrypto,
+                operationContext.isCrypto,
                 statsAction,
                 statsClient,
                 error,
                 vendorCode,
                 isDebug,
                 sanitizeLatency(latency),
-                -1 /* sensorId */);
+                -1 /* sensorId */,
+                operationContext.id,
+                sessionType(operationContext.reason),
+                operationContext.isAoD);
     }
 
     /** {@see FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED}. */
@@ -122,5 +134,15 @@ public class BiometricFrameworkStatsLogger {
             return -1;
         }
         return latency;
+    }
+
+    private static int sessionType(@OperationReason byte reason) {
+        if (reason == OperationReason.BIOMETRIC_PROMPT) {
+            return BiometricsProtoEnums.SESSION_TYPE_BIOMETRIC_PROMPT;
+        }
+        if (reason == OperationReason.KEYGUARD) {
+            return BiometricsProtoEnums.SESSION_TYPE_KEYGUARD_ENTRY;
+        }
+        return BiometricsProtoEnums.SESSION_TYPE_UNKNOWN;
     }
 }

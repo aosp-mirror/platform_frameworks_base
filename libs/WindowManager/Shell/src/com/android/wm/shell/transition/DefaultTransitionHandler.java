@@ -25,6 +25,11 @@ import static android.app.ActivityOptions.ANIM_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_RESOURCE_UPDATED;
+import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_TYPE_DRAWABLE;
+import static android.app.admin.DevicePolicyResources.Drawables.Source.PROFILE_SWITCH_ANIMATION;
+import static android.app.admin.DevicePolicyResources.Drawables.Style.OUTLINE;
+import static android.app.admin.DevicePolicyResources.Drawables.WORK_PROFILE_ICON;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
@@ -57,11 +62,17 @@ import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
+import android.app.admin.DevicePolicyManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.hardware.HardwareBuffer;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -118,6 +129,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
     private final ShellExecutor mMainExecutor;
     private final ShellExecutor mAnimExecutor;
     private final TransitionAnimation mTransitionAnimation;
+    private final DevicePolicyManager mDevicePolicyManager;
 
     private final SurfaceSession mSurfaceSession = new SurfaceSession();
 
@@ -132,9 +144,24 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
     private ScreenRotationAnimation mRotationAnimation;
 
+    private Drawable mEnterpriseThumbnailDrawable;
+
+    private BroadcastReceiver mEnterpriseResourceUpdatedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean isDrawable = intent.getBooleanExtra(
+                    EXTRA_RESOURCE_TYPE_DRAWABLE, /* default= */ false);
+            if (!isDrawable) {
+                return;
+            }
+            updateEnterpriseThumbnailDrawable();
+        }
+    };
+
     DefaultTransitionHandler(@NonNull DisplayController displayController,
             @NonNull TransactionPool transactionPool, Context context,
-            @NonNull ShellExecutor mainExecutor, @NonNull ShellExecutor animExecutor) {
+            @NonNull ShellExecutor mainExecutor, @NonNull Handler mainHandler,
+            @NonNull ShellExecutor animExecutor) {
         mDisplayController = displayController;
         mTransactionPool = transactionPool;
         mContext = context;
@@ -143,7 +170,21 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         mTransitionAnimation = new TransitionAnimation(context, false /* debug */, Transitions.TAG);
         mCurrentUserId = UserHandle.myUserId();
 
+        mDevicePolicyManager = context.getSystemService(DevicePolicyManager.class);
+        updateEnterpriseThumbnailDrawable();
+        mContext.registerReceiver(
+                mEnterpriseResourceUpdatedReceiver,
+                new IntentFilter(ACTION_DEVICE_POLICY_RESOURCE_UPDATED),
+                /* broadcastPermission = */ null,
+                mainHandler);
+
         AttributeCache.init(context);
+    }
+
+    private void updateEnterpriseThumbnailDrawable() {
+        mEnterpriseThumbnailDrawable = mDevicePolicyManager.getDrawable(
+                WORK_PROFILE_ICON, OUTLINE, PROFILE_SWITCH_ANIMATION,
+                () -> mContext.getDrawable(R.drawable.ic_corp_badge));
     }
 
     @VisibleForTesting
@@ -632,7 +673,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         final boolean isClose = Transitions.isClosingType(change.getMode());
         if (isOpen) {
             if (options.getType() == ANIM_OPEN_CROSS_PROFILE_APPS && isTask) {
-                attachCrossProfileThunmbnailAnimation(animations, finishCallback, change,
+                attachCrossProfileThumbnailAnimation(animations, finishCallback, change,
                         cornerRadius);
             } else if (options.getType() == ANIM_THUMBNAIL_SCALE_UP) {
                 attachThumbnailAnimation(animations, finishCallback, change, options, cornerRadius);
@@ -642,13 +683,14 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         }
     }
 
-    private void attachCrossProfileThunmbnailAnimation(@NonNull ArrayList<Animator> animations,
+    private void attachCrossProfileThumbnailAnimation(@NonNull ArrayList<Animator> animations,
             @NonNull Runnable finishCallback, TransitionInfo.Change change, float cornerRadius) {
-        final int thumbnailDrawableRes = change.getTaskInfo().userId == mCurrentUserId
-                ? R.drawable.ic_account_circle : R.drawable.ic_corp_badge;
         final Rect bounds = change.getEndAbsBounds();
+        // Show the right drawable depending on the user we're transitioning to.
+        final Drawable thumbnailDrawable = change.getTaskInfo().userId == mCurrentUserId
+                ? mContext.getDrawable(R.drawable.ic_account_circle) : mEnterpriseThumbnailDrawable;
         final HardwareBuffer thumbnail = mTransitionAnimation.createCrossProfileAppsThumbnail(
-                thumbnailDrawableRes, bounds);
+                thumbnailDrawable, bounds);
         if (thumbnail == null) {
             return;
         }

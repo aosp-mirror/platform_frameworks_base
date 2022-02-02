@@ -570,6 +570,14 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             ComponentName instanceName, String definingPackageName, int definingUid,
             Intent.FilterComparison intent, ServiceInfo sInfo, boolean callerIsFg,
             Runnable restarter) {
+        this(ams, name, instanceName, definingPackageName, definingUid, intent, sInfo, callerIsFg,
+                restarter, false);
+    }
+
+    ServiceRecord(ActivityManagerService ams, ComponentName name,
+            ComponentName instanceName, String definingPackageName, int definingUid,
+            Intent.FilterComparison intent, ServiceInfo sInfo, boolean callerIsFg,
+            Runnable restarter, boolean isSupplementalProcessService) {
         this.ams = ams;
         this.name = name;
         this.instanceName = instanceName;
@@ -580,7 +588,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         serviceInfo = sInfo;
         appInfo = sInfo.applicationInfo;
         packageName = sInfo.applicationInfo.packageName;
-        if ((sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0) {
+        if ((sInfo.flags & ServiceInfo.FLAG_ISOLATED_PROCESS) != 0
+                || isSupplementalProcessService) {
             processName = sInfo.processName + ":" + instanceName.getClassName();
         } else {
             processName = sInfo.processName;

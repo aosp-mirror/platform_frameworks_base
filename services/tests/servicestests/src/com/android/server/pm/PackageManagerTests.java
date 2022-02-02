@@ -70,7 +70,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.filters.Suppress;
 
 import com.android.frameworks.servicestests.R;
-import com.android.internal.content.PackageHelper;
+import com.android.internal.content.InstallLocationUtils;
 import com.android.server.pm.pkg.parsing.ParsingPackage;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
@@ -106,11 +106,11 @@ public class PackageManagerTests extends AndroidTestCase {
 
     private static final String SECURE_CONTAINERS_PREFIX = "/mnt/asec";
 
-    private static final int APP_INSTALL_AUTO = PackageHelper.APP_INSTALL_AUTO;
+    private static final int APP_INSTALL_AUTO = InstallLocationUtils.APP_INSTALL_AUTO;
 
-    private static final int APP_INSTALL_DEVICE = PackageHelper.APP_INSTALL_INTERNAL;
+    private static final int APP_INSTALL_DEVICE = InstallLocationUtils.APP_INSTALL_INTERNAL;
 
-    private static final int APP_INSTALL_SDCARD = PackageHelper.APP_INSTALL_EXTERNAL;
+    private static final int APP_INSTALL_SDCARD = InstallLocationUtils.APP_INSTALL_EXTERNAL;
 
     void failStr(String errMsg) {
         Log.w(TAG, "errMsg=" + errMsg);
@@ -1214,7 +1214,7 @@ public class PackageManagerTests extends AndroidTestCase {
         int origDefaultLoc = getDefaultInstallLoc();
         InstallParams ip = null;
         try {
-            setInstallLoc(PackageHelper.APP_INSTALL_AUTO);
+            setInstallLoc(InstallLocationUtils.APP_INSTALL_AUTO);
             // Install first
             ip = installFromRawResource("install.apk", rawResId, installFlags, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
@@ -1303,7 +1303,7 @@ public class PackageManagerTests extends AndroidTestCase {
         InstallParams ip = null;
         try {
             PackageManager pm = getPm();
-            setInstallLoc(PackageHelper.APP_INSTALL_AUTO);
+            setInstallLoc(InstallLocationUtils.APP_INSTALL_AUTO);
             // Install first
             ip = installFromRawResource("install.apk", R.raw.install, installFlags, false,
                     false, -1, PackageInfo.INSTALL_LOCATION_UNSPECIFIED);
@@ -1517,11 +1517,11 @@ public class PackageManagerTests extends AndroidTestCase {
         int iloc = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
         boolean enable = getUserSettingSetInstallLocation();
         if (enable) {
-            if (userSetting == PackageHelper.APP_INSTALL_AUTO) {
+            if (userSetting == InstallLocationUtils.APP_INSTALL_AUTO) {
                 iloc = PackageInfo.INSTALL_LOCATION_AUTO;
-            } else if (userSetting == PackageHelper.APP_INSTALL_EXTERNAL) {
+            } else if (userSetting == InstallLocationUtils.APP_INSTALL_EXTERNAL) {
                 iloc = PackageInfo.INSTALL_LOCATION_PREFER_EXTERNAL;
-            } else if (userSetting == PackageHelper.APP_INSTALL_INTERNAL) {
+            } else if (userSetting == InstallLocationUtils.APP_INSTALL_INTERNAL) {
                 iloc = PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY;
             }
         }
@@ -1552,7 +1552,7 @@ public class PackageManagerTests extends AndroidTestCase {
     }
     @LargeTest
     public void testExistingIUserI() throws Exception {
-        int userSetting = PackageHelper.APP_INSTALL_INTERNAL;
+        int userSetting = InstallLocationUtils.APP_INSTALL_INTERNAL;
         int iFlags = PackageManager.INSTALL_INTERNAL;
         setExistingXUserX(userSetting, iFlags, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
     }
@@ -1564,14 +1564,14 @@ public class PackageManagerTests extends AndroidTestCase {
             return;
         }
 
-        int userSetting = PackageHelper.APP_INSTALL_EXTERNAL;
+        int userSetting = InstallLocationUtils.APP_INSTALL_EXTERNAL;
         int iFlags = PackageManager.INSTALL_INTERNAL;
         setExistingXUserX(userSetting, iFlags, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
     }
 
     @LargeTest
     public void testExistingIUserA() throws Exception {
-        int userSetting = PackageHelper.APP_INSTALL_AUTO;
+        int userSetting = InstallLocationUtils.APP_INSTALL_AUTO;
         int iFlags = PackageManager.INSTALL_INTERNAL;
         setExistingXUserX(userSetting, iFlags, PackageInfo.INSTALL_LOCATION_INTERNAL_ONLY);
     }
@@ -1616,7 +1616,7 @@ public class PackageManagerTests extends AndroidTestCase {
     }
     @LargeTest
     public void testUserI() throws Exception {
-        int userSetting = PackageHelper.APP_INSTALL_INTERNAL;
+        int userSetting = InstallLocationUtils.APP_INSTALL_INTERNAL;
         int iloc = getExpectedInstallLocation(userSetting);
         setUserX(true, userSetting, iloc);
     }
@@ -1628,14 +1628,14 @@ public class PackageManagerTests extends AndroidTestCase {
             return;
         }
 
-        int userSetting = PackageHelper.APP_INSTALL_EXTERNAL;
+        int userSetting = InstallLocationUtils.APP_INSTALL_EXTERNAL;
         int iloc = getExpectedInstallLocation(userSetting);
         setUserX(true, userSetting, iloc);
     }
 
     @LargeTest
     public void testUserA() throws Exception {
-        int userSetting = PackageHelper.APP_INSTALL_AUTO;
+        int userSetting = InstallLocationUtils.APP_INSTALL_AUTO;
         int iloc = getExpectedInstallLocation(userSetting);
         setUserX(true, userSetting, iloc);
     }
@@ -1646,7 +1646,7 @@ public class PackageManagerTests extends AndroidTestCase {
      */
     @LargeTest
     public void testUserPrefOffUserI() throws Exception {
-        int userSetting = PackageHelper.APP_INSTALL_INTERNAL;
+        int userSetting = InstallLocationUtils.APP_INSTALL_INTERNAL;
         int iloc = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
         setUserX(false, userSetting, iloc);
     }
@@ -1658,14 +1658,14 @@ public class PackageManagerTests extends AndroidTestCase {
             return;
         }
 
-        int userSetting = PackageHelper.APP_INSTALL_EXTERNAL;
+        int userSetting = InstallLocationUtils.APP_INSTALL_EXTERNAL;
         int iloc = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
         setUserX(false, userSetting, iloc);
     }
 
     @LargeTest
     public void testUserPrefOffA() throws Exception {
-        int userSetting = PackageHelper.APP_INSTALL_AUTO;
+        int userSetting = InstallLocationUtils.APP_INSTALL_AUTO;
         int iloc = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
         setUserX(false, userSetting, iloc);
     }

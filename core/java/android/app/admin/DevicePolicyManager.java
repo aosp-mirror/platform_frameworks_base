@@ -633,7 +633,7 @@ public class DevicePolicyManager {
      * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} to signal that an update
      * to the role holder is required.
      *
-     * <p>This result code must be accompanied by {@link #EXTRA_ROLE_HOLDER_STATE}.
+     * <p>This result code can be accompanied by {@link #EXTRA_ROLE_HOLDER_STATE}.
      *
      * @hide
      */
@@ -641,14 +641,18 @@ public class DevicePolicyManager {
     public static final int RESULT_UPDATE_ROLE_HOLDER = 2;
 
     /**
-     * A {@link Bundle} extra which describes the state of the role holder at the time when it
-     * returns {@link #RESULT_UPDATE_ROLE_HOLDER}.
+     * A {@link PersistableBundle} extra which the role holder can use to describe its own state
+     * when it returns {@link #RESULT_UPDATE_ROLE_HOLDER}.
      *
-     * <p>After the update completes, the role holder's {@link
-     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_PROFILE} or {@link
+     * <p>If {@link #RESULT_UPDATE_ROLE_HOLDER} was accompanied by this extra, after the update
+     * completes, the role holder's {@link #ACTION_ROLE_HOLDER_PROVISION_MANAGED_PROFILE} or {@link
      * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent will be relaunched,
      * which will contain this extra. It is the role holder's responsibility to restore its
      * state from this extra.
+     *
+     * <p>The content of this {@link PersistableBundle} is entirely up to the role holder. It
+     * should contain anything the role holder needs to restore its original state when it gets
+     * restarted.
      *
      * @hide
      */
@@ -15014,7 +15018,7 @@ public class DevicePolicyManager {
      * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
      *                              the provided params.
      */
-    @NonNull
+    @Nullable
     public Drawable getDrawable(
             @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
             @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
@@ -15042,7 +15046,7 @@ public class DevicePolicyManager {
      * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
      *                              the provided params.
      */
-    @NonNull
+    @Nullable
     public Drawable getDrawable(
             @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
             @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
@@ -15099,7 +15103,7 @@ public class DevicePolicyManager {
      * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
      *                              the provided params.
      */
-    @NonNull
+    @Nullable
     public Drawable getDrawableForDensity(
             @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
             @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
@@ -15132,7 +15136,7 @@ public class DevicePolicyManager {
      * @param defaultDrawableLoader To get the default drawable if no updated drawable was set for
      *                              the provided params.
      */
-    @NonNull
+    @Nullable
     public Drawable getDrawableForDensity(
             @NonNull @DevicePolicyResources.UpdatableDrawableId String drawableId,
             @NonNull @DevicePolicyResources.UpdatableDrawableStyle String drawableStyle,
@@ -15254,7 +15258,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @NonNull
+    @Nullable
     public String getString(
             @NonNull @DevicePolicyResources.UpdatableStringId String stringId,
             @NonNull Callable<String> defaultStringLoader) {
@@ -15300,7 +15304,7 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    @NonNull
+    @Nullable
     @SuppressLint("SamShouldBeLast")
     public String getString(
             @NonNull @DevicePolicyResources.UpdatableStringId String stringId,

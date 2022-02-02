@@ -101,6 +101,7 @@ import android.content.pm.KeySet;
 import android.content.pm.ModuleInfo;
 import android.content.pm.PackageChangeEvent;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.ComponentEnabledSetting;
@@ -129,6 +130,7 @@ import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VersionedPackage;
 import android.content.pm.dex.IArtManager;
 import android.content.pm.overlay.OverlayPaths;
+import android.content.pm.parsing.PackageLite;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
@@ -189,7 +191,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.F2fsUtils;
-import com.android.internal.content.PackageHelper;
+import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.content.om.OverlayConfig;
 import com.android.internal.telephony.CarrierAppUtils;
 import com.android.internal.util.ArrayUtils;
@@ -2902,6 +2904,36 @@ public class PackageManagerService extends IPackageManager.Stub
         throw new IOException("Failed to free " + bytes + " on storage device at " + file);
     }
 
+    int freeCacheForInstallation(int recommendedInstallLocation, PackageLite pkgLite,
+            String resolvedPath, String mPackageAbiOverride, int installFlags) {
+        // TODO: focus freeing disk space on the target device
+        final StorageManager storage = StorageManager.from(mContext);
+        final long lowThreshold = storage.getStorageLowBytes(Environment.getDataDirectory());
+
+        final long sizeBytes = PackageManagerServiceUtils.calculateInstalledSize(resolvedPath,
+                mPackageAbiOverride);
+        if (sizeBytes >= 0) {
+            synchronized (mInstallLock) {
+                try {
+                    mInstaller.freeCache(null, sizeBytes + lowThreshold, 0);
+                    PackageInfoLite pkgInfoLite = PackageManagerServiceUtils.getMinimalPackageInfo(
+                            mContext, pkgLite, resolvedPath, installFlags,
+                            mPackageAbiOverride);
+                    // The cache free must have deleted the file we downloaded to install.
+                    if (pkgInfoLite.recommendedInstallLocation
+                            == InstallLocationUtils.RECOMMEND_FAILED_INVALID_URI) {
+                        pkgInfoLite.recommendedInstallLocation =
+                                InstallLocationUtils.RECOMMEND_FAILED_INSUFFICIENT_STORAGE;
+                    }
+                    return pkgInfoLite.recommendedInstallLocation;
+                } catch (Installer.InstallerException e) {
+                    Slog.w(TAG, "Failed to free cache", e);
+                }
+            }
+        }
+        return recommendedInstallLocation;
+    }
+
     /**
      * Update given flags when being used to request {@link PackageInfo}.
      */
@@ -3677,7 +3709,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         // Before everything else, see whether we need to fstrim.
         try {
-            IStorageManager sm = PackageHelper.getStorageManager();
+            IStorageManager sm = InstallLocationUtils.getStorageManager();
             if (sm != null) {
                 boolean doTrim = false;
                 final long interval = android.provider.Settings.Global.getLong(
@@ -6596,8 +6628,9 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstallLocation() == loc) {
             return true;
         }
-        if (loc == PackageHelper.APP_INSTALL_AUTO || loc == PackageHelper.APP_INSTALL_INTERNAL
-                || loc == PackageHelper.APP_INSTALL_EXTERNAL) {
+        if (loc == InstallLocationUtils.APP_INSTALL_AUTO
+                || loc == InstallLocationUtils.APP_INSTALL_INTERNAL
+                || loc == InstallLocationUtils.APP_INSTALL_EXTERNAL) {
             android.provider.Settings.Global.putInt(mContext.getContentResolver(),
                     android.provider.Settings.Global.DEFAULT_INSTALL_LOCATION, loc);
             return true;
@@ -6610,7 +6643,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // allow instant app access
         return android.provider.Settings.Global.getInt(mContext.getContentResolver(),
                 android.provider.Settings.Global.DEFAULT_INSTALL_LOCATION,
-                PackageHelper.APP_INSTALL_AUTO);
+                InstallLocationUtils.APP_INSTALL_AUTO);
     }
 
     /** Called by UserManagerService */

@@ -16,12 +16,13 @@
 
 package com.android.server.biometrics.sensors.face.aidl;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,6 +48,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -57,7 +59,6 @@ public class FaceAuthenticationClientTest {
 
     private static final int USER_ID = 12;
     private static final long OP_ID = 32;
-    private static final boolean HAS_AOD = true;
 
     @Rule
     public final TestableContext mContext = new TestableContext(
@@ -89,7 +90,8 @@ public class FaceAuthenticationClientTest {
 
     @Before
     public void setup() {
-        when(mBiometricContext.isAoD()).thenReturn(HAS_AOD);
+        when(mBiometricContext.updateContext(any(), anyBoolean())).thenAnswer(
+                i -> i.getArgument(0));
     }
 
     @Test
@@ -106,11 +108,12 @@ public class FaceAuthenticationClientTest {
         final FaceAuthenticationClient client = createClient(2);
         client.start(mCallback);
 
-        verify(mHal).authenticateWithContext(eq(OP_ID), mOperationContextCaptor.capture());
+        InOrder order = inOrder(mHal, mBiometricContext);
+        order.verify(mBiometricContext).updateContext(
+                mOperationContextCaptor.capture(), anyBoolean());
+        order.verify(mHal).authenticateWithContext(
+                eq(OP_ID), same(mOperationContextCaptor.getValue()));
         verify(mHal, never()).authenticate(anyLong());
-
-        final OperationContext opContext = mOperationContextCaptor.getValue();
-        assertThat(opContext.isAoD).isEqualTo(HAS_AOD);
     }
 
     private FaceAuthenticationClient createClient(int version) throws RemoteException {

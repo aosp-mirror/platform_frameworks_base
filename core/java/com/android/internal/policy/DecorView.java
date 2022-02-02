@@ -285,6 +285,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private Insets mBackgroundInsets = Insets.NONE;
     private Insets mLastBackgroundInsets = Insets.NONE;
     private boolean mDrawLegacyNavigationBarBackground;
+    private boolean mDrawLegacyNavigationBarBackgroundHandled;
 
     private PendingInsetsController mPendingInsetsController = new PendingInsetsController();
 
@@ -1035,10 +1036,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     public void onSystemBarAppearanceChanged(@WindowInsetsController.Appearance int appearance) {
         updateColorViews(null /* insets */, true /* animate */);
         if (mWindow != null) {
-            final Window.Callback callback = mWindow.getCallback();
-            if (callback != null) {
-                callback.onSystemBarAppearanceChanged(appearance);
-            }
+            mWindow.dispatchOnSystemBarAppearanceChanged(appearance);
         }
     }
 
@@ -1174,6 +1172,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             mDrawLegacyNavigationBarBackground = mNavigationColorViewState.visible
                     && (mWindow.getAttributes().flags & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) == 0;
             if (oldDrawLegacy != mDrawLegacyNavigationBarBackground) {
+                mDrawLegacyNavigationBarBackgroundHandled =
+                        mWindow.onDrawLegacyNavigationBarBackgroundChanged(
+                                mDrawLegacyNavigationBarBackground);
                 if (viewRoot != null) {
                     viewRoot.requestInvalidateRootRenderNode();
                 }
@@ -1266,7 +1267,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             }
         }
 
-        if (forceConsumingNavBar) {
+        if (forceConsumingNavBar && !mDrawLegacyNavigationBarBackgroundHandled) {
             mBackgroundInsets = Insets.of(mLastLeftInset, 0, mLastRightInset, mLastBottomInset);
         } else {
             mBackgroundInsets = Insets.NONE;
@@ -2491,7 +2492,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     }
 
     private void drawLegacyNavigationBarBackground(RecordingCanvas canvas) {
-        if (!mDrawLegacyNavigationBarBackground) {
+        if (!mDrawLegacyNavigationBarBackground || mDrawLegacyNavigationBarBackgroundHandled) {
             return;
         }
         View v = mNavigationColorViewState.view;

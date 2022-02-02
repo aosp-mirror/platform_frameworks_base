@@ -344,9 +344,11 @@ public class StackStateAnimator {
         for (NotificationStackScrollLayout.AnimationEvent event : animationEvents) {
             final ExpandableView changingView = (ExpandableView) event.mChangingView;
             boolean loggable = false;
+            boolean isHeadsUp = false;
             String key = null;
             if (changingView instanceof ExpandableNotificationRow && mLogger != null) {
                 loggable = true;
+                isHeadsUp = ((ExpandableNotificationRow) changingView).isHeadsUp();
                 key = ((ExpandableNotificationRow) changingView).getEntry().getKey();
             }
             if (event.animationType ==
@@ -357,6 +359,9 @@ public class StackStateAnimator {
                 if (viewState == null || viewState.gone) {
                     // The position for this child was never generated, let's continue.
                     continue;
+                }
+                if (loggable && isHeadsUp) {
+                    mLogger.logHUNViewAppearingWithAddEvent(key);
                 }
                 viewState.applyToView(changingView);
                 mNewAddChildren.add(changingView);
@@ -399,9 +404,18 @@ public class StackStateAnimator {
                     translationDirection = Math.max(Math.min(translationDirection, 1.0f),-1.0f);
 
                 }
+                Runnable postAnimation = changingView::removeFromTransientContainer;
+                if (loggable && isHeadsUp) {
+                    mLogger.logHUNViewDisappearingWithRemoveEvent(key);
+                    String finalKey = key;
+                    postAnimation = () -> {
+                        mLogger.disappearAnimationEnded(finalKey);
+                        changingView.removeFromTransientContainer();
+                    };
+                }
                 changingView.performRemoveAnimation(ANIMATION_DURATION_APPEAR_DISAPPEAR,
                         0 /* delay */, translationDirection, false /* isHeadsUpAppear */,
-                        0, changingView::removeFromTransientContainer, null);
+                        0, postAnimation, null);
             } else if (event.animationType ==
                 NotificationStackScrollLayout.AnimationEvent.ANIMATION_TYPE_REMOVE_SWIPED_OUT) {
                 if (mHostLayout.isFullySwipedOut(changingView)) {
@@ -431,8 +445,7 @@ public class StackStateAnimator {
                 // this only captures HEADS_UP_APPEAR animations, but HUNs can appear with normal
                 // ADD animations, which would not be logged here.
                 if (loggable) {
-                    mLogger.logHUNViewAppearing(
-                            ((ExpandableNotificationRow) changingView).getEntry().getKey());
+                    mLogger.logHUNViewAppearing(key);
                 }
 
                 mTmpState.applyToView(changingView);

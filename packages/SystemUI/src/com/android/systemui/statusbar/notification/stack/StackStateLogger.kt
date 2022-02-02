@@ -24,6 +24,22 @@ class StackStateLogger @Inject constructor(
         })
     }
 
+    fun logHUNViewDisappearingWithRemoveEvent(key: String) {
+        buffer.log(TAG, LogLevel.ERROR, {
+            str1 = key
+        }, {
+            "Heads up view disappearing $str1 for ANIMATION_TYPE_REMOVE"
+        })
+    }
+
+    fun logHUNViewAppearingWithAddEvent(key: String) {
+        buffer.log(TAG, LogLevel.ERROR, {
+            str1 = key
+        }, {
+            "Heads up view disappearing $str1 for ANIMATION_TYPE_ADD"
+        })
+    }
+
     fun disappearAnimationEnded(key: String) {
         buffer.log(TAG, LogLevel.INFO, {
             str1 = key

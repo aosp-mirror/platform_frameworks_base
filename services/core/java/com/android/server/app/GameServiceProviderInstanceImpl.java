@@ -98,7 +98,10 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
     private final IGameServiceController mGameServiceController =
             new IGameServiceController.Stub() {
                 @Override
+                @RequiresPermission(Manifest.permission.MANAGE_GAME_ACTIVITY)
                 public void createGameSession(int taskId) {
+                    mContext.enforceCallingPermission(Manifest.permission.MANAGE_GAME_ACTIVITY,
+                            "createGameSession()");
                     mBackgroundExecutor.execute(() -> {
                         GameServiceProviderInstanceImpl.this.createGameSession(taskId);
                     });

@@ -123,6 +123,18 @@
     <!-- Message of notification shown when trying to enable USB debugging but a secondary user is the current foreground user. -->
     <string name="usb_debugging_secondary_user_message">The user currently signed in to this device can\'t turn on USB debugging. To use this feature, switch to the primary user.</string>
 
+    <!-- Title of confirmation dialog for wireless debugging [CHAR LIMIT=80] -->
+    <string name="hdmi_cec_set_menu_language_title">Do you want to change the system language to <xliff:g id="language" example="German">%1$s</xliff:g>?</string>
+
+    <!-- Description for the <Set Menu Language> confirmation dialog [CHAR LIMIT=NONE] -->
+    <string name="hdmi_cec_set_menu_language_description">System language change requested by another device</string>
+
+    <!-- Button label for accepting language change [CHAR LIMIT=25] -->
+    <string name="hdmi_cec_set_menu_language_accept">Change language</string>
+
+    <!-- Button label for declining language change [CHAR LIMIT=25] -->
+    <string name="hdmi_cec_set_menu_language_decline">Keep current language</string>
+
     <!-- Title of confirmation dialog for wireless debugging [CHAR LIMIT=NONE] -->
     <string name="wifi_debugging_title">Allow wireless debugging on this network?</string>
 

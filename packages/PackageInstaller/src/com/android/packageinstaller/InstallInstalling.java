@@ -37,7 +37,7 @@ import android.view.View;
 import android.widget.Button;
 
 import com.android.internal.app.AlertActivity;
-import com.android.internal.content.PackageHelper;
+import com.android.internal.content.InstallLocationUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -154,8 +154,8 @@ public class InstallInstalling extends AlertActivity {
                         final PackageLite pkg = result.getResult();
                         params.setAppPackageName(pkg.getPackageName());
                         params.setInstallLocation(pkg.getInstallLocation());
-                        params.setSize(
-                                PackageHelper.calculateInstalledSize(pkg, params.abiOverride));
+                        params.setSize(InstallLocationUtils.calculateInstalledSize(pkg,
+                                params.abiOverride));
                     }
                 } catch (IOException e) {
                     Log.e(LOG_TAG,

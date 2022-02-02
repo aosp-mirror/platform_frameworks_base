@@ -64,8 +64,11 @@ public final class RouteDiscoveryPreference implements Parcelable {
 
     @NonNull
     private final List<String> mPreferredFeatures;
+    @NonNull
     private final List<String> mRequiredFeatures;
+    @NonNull
     private final List<String> mPackagesOrder;
+    @NonNull
     private final List<String> mAllowedPackages;
 
     private final boolean mShouldPerformActiveScan;
@@ -118,7 +121,6 @@ public final class RouteDiscoveryPreference implements Parcelable {
      * Gets the required features of routes that media router would like to discover.
      * <p>
      * Routes that have all the required features will be discovered.
-     * This precedes {@link #getPreferredFeatures()}.
      * They may include predefined features such as
      * {@link MediaRoute2Info#FEATURE_LIVE_AUDIO}, {@link MediaRoute2Info#FEATURE_LIVE_VIDEO},
      * or {@link MediaRoute2Info#FEATURE_REMOTE_PLAYBACK} or custom features defined by a provider.
@@ -133,12 +135,16 @@ public final class RouteDiscoveryPreference implements Parcelable {
     /**
      * Gets the ordered list of package names used to remove duplicate routes.
      * <p>
-     * When the app enables duplicate removal, all the routes that have the same deduplication ID
-     * except one from the provider whose package name appears first in the list will be removed.
+     * Duplicate route removal is enabled if the returned list is non-empty. Routes are deduplicated
+     * based on their {@link MediaRoute2Info#getDeduplicationIds() deduplication IDs}. If two routes
+     * have a deduplication ID in common, only the route from the provider whose package name is
+     * first in the provided list will remain.
+     *
+     * @see #shouldRemoveDuplicates()
      */
     @NonNull
     public List<String> getDeduplicationPackageOrder() {
-        return mPackagesOrder == null ? List.of() : mPackagesOrder;
+        return mPackagesOrder;
     }
 
     /**
@@ -164,10 +170,9 @@ public final class RouteDiscoveryPreference implements Parcelable {
     }
 
     /**
-     * Gets whether duplicate routes should be removed.
-     * <p>
-     * If it is {@code true}, only one of routes that have
-     * the same deduplication ID will be obtained.
+     * Gets whether duplicate routes removal is enabled.
+     *
+     * @see #getDeduplicationPackageOrder()
      */
     public boolean shouldRemoveDuplicates() {
         return !mPackagesOrder.isEmpty();
@@ -338,23 +343,20 @@ public final class RouteDiscoveryPreference implements Parcelable {
         }
 
         /**
-         * Sets the order of packages when removing duplicate routes.
+         * Sets the order of packages to use when removing duplicate routes.
          * <p>
-         * Routes are removed based on its
-         * {@link MediaRoute2Info#getDeduplicationIds() deduplication ID}.
-         * If two routes have the same ID, even if they are from different providers,
-         * one of them is removed from the list.
-         * <p>
-         * Routes from the provider whose package name appears first in the given package order
-         * will remain.
-         * If unspecified, any route can be selected.
+         * Routes are deduplicated based on their
+         * {@link MediaRoute2Info#getDeduplicationIds() deduplication IDs}.
+         * If two routes have a deduplication ID in common, only the route from the provider whose
+         * package name is first in the provided list will remain.
          *
-         * @param packageOrder list of package names for choosing routes to be removed or
-         *                     {@code null} not to remove duplicate routes.
+         * @param packageOrder ordered list of package names used to remove duplicate routes, or an
+         *                     empty list if deduplication should not be enabled.
          */
         @NonNull
-        public Builder setDeduplicationPackageOrder(@Nullable List<String> packageOrder) {
-            mPackageOrder = (packageOrder == null) ? null : List.copyOf(packageOrder);
+        public Builder setDeduplicationPackageOrder(@NonNull List<String> packageOrder) {
+            Objects.requireNonNull(packageOrder, "packageOrder must not be null");
+            mPackageOrder = List.copyOf(packageOrder);
             return this;
         }
 

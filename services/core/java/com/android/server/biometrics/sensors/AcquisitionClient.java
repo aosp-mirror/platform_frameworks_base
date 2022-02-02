@@ -110,8 +110,8 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
         // that do not handle lockout under the HAL. In these cases, ensure that the framework only
         // sends errors once per ClientMonitor.
         if (mShouldSendErrorToClient) {
-            getLogger().logOnError(getContext(), errorCode, vendorCode,
-                    isCryptoOperation(), getTargetUserId());
+            getLogger().logOnError(getContext(), getOperationContext(),
+                    errorCode, vendorCode, getTargetUserId());
             try {
                 if (getListener() != null) {
                     mShouldSendErrorToClient = false;
@@ -169,8 +169,8 @@ public abstract class AcquisitionClient<T> extends HalClientMonitor<T> implement
 
     protected final void onAcquiredInternal(int acquiredInfo, int vendorCode,
             boolean shouldSend) {
-        getLogger().logOnAcquired(getContext(), acquiredInfo, vendorCode,
-                isCryptoOperation(), getTargetUserId());
+        getLogger().logOnAcquired(getContext(), getOperationContext(),
+                acquiredInfo, vendorCode, getTargetUserId());
         if (DEBUG) {
             Slog.v(TAG, "Acquired: " + acquiredInfo + " " + vendorCode
                     + ", shouldSend: " + shouldSend);

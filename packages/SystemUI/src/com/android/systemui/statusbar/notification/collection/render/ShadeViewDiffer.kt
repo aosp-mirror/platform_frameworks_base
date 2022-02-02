@@ -104,19 +104,14 @@ class ShadeViewDiffer(
                 views.remove(childNode.controller.view)
             }
 
-            if (childCompletelyRemoved && parentSpec == null) {
-                // If both the child and the parent are being removed at the same time, then
-                // keep the child attached to the parent for animation purposes
-                logger.logSkippingDetach(childNode.label, parentNode.label)
-            } else {
-                logger.logDetachingChild(
-                        childNode.label,
-                        !childCompletelyRemoved,
-                        parentNode.label,
-                        newParentNode?.label)
-                parentNode.removeChild(childNode, !childCompletelyRemoved)
-                childNode.parent = null
-            }
+            logger.logDetachingChild(
+                key = childNode.label,
+                isTransfer = !childCompletelyRemoved,
+                isParentRemoved = parentSpec == null,
+                oldParent = parentNode.label,
+                newParent = newParentNode?.label)
+            parentNode.removeChild(childNode, isTransfer = !childCompletelyRemoved)
+            childNode.parent = null
         }
     }
 

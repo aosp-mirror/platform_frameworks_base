@@ -334,7 +334,7 @@ public final class BroadcastQueue {
         mService.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_START_RECEIVER);
 
         // Tell the application to launch this receiver.
-        maybeReportBroadcastDispatchedEventLocked(r);
+        maybeReportBroadcastDispatchedEventLocked(r, r.curReceiver.applicationInfo.uid);
         r.intent.setComponent(r.curComponent);
 
         boolean started = false;
@@ -927,7 +927,7 @@ public final class BroadcastQueue {
                 r.receiverTime = SystemClock.uptimeMillis();
                 maybeAddAllowBackgroundActivityStartsToken(filter.receiverList.app, r);
                 maybeScheduleTempAllowlistLocked(filter.owningUid, r, r.options);
-                maybeReportBroadcastDispatchedEventLocked(r);
+                maybeReportBroadcastDispatchedEventLocked(r, filter.owningUid);
                 performReceiveLocked(filter.receiverList.app, filter.receiverList.receiver,
                         new Intent(r.intent), r.resultCode, r.resultData,
                         r.resultExtras, r.ordered, r.initialSticky, r.userId);
@@ -1856,7 +1856,7 @@ public final class BroadcastQueue {
         return null;
     }
 
-    private void maybeReportBroadcastDispatchedEventLocked(BroadcastRecord r) {
+    private void maybeReportBroadcastDispatchedEventLocked(BroadcastRecord r, int targetUid) {
         final String targetPackage = getTargetPackage(r);
         // Ignore non-explicit broadcasts
         if (targetPackage == null) {
@@ -1867,11 +1867,10 @@ public final class BroadcastQueue {
         if (r.options == null || r.options.getIdForResponseEvent() <= 0) {
             return;
         }
-        // TODO (206518114): Only report this event when the broadcast is dispatched while the app
-        // is in the background state.
         getUsageStatsManagerInternal().reportBroadcastDispatched(
                 r.callingUid, targetPackage, UserHandle.of(r.userId),
-                r.options.getIdForResponseEvent(), SystemClock.elapsedRealtime());
+                r.options.getIdForResponseEvent(), SystemClock.elapsedRealtime(),
+                mService.getUidStateLocked(targetUid));
     }
 
     @NonNull

@@ -18,6 +18,9 @@ package com.android.server.am;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.TransactionTooLargeException;
 
 /**
  * Interface for in-process calls into
@@ -58,4 +61,24 @@ public interface ActivityManagerLocal {
      * @hide
      */
     void tempAllowWhileInUsePermissionInFgs(int uid, long durationMs);
+
+    /**
+     * Starts a supplemental process service and binds to it. You can through the arguments here
+     * have the system bring up multiple concurrent processes hosting their own instance of that
+     * service. The <var>userAppUid</var> you provide here identifies the different instances - each
+     * unique uid is attributed to a supplemental process.
+     *
+     * @param service Identifies the supplemental process service to connect to. The Intent must
+     *        specify an explicit component name. This value cannot be null.
+     * @param conn Receives information as the service is started and stopped.
+     *        This must be a valid ServiceConnection object; it must not be null.
+     * @param userAppUid Uid of the app for which the supplemental process needs to be spawned.
+     * @return {@code true} if the system is in the process of bringing up a
+     *         service that your client has permission to bind to; {@code false}
+     *         if the system couldn't find the service or if your client doesn't
+     *         have permission to bind to it.
+     */
+    boolean startAndBindSupplementalProcessService(@NonNull Intent service,
+            @NonNull ServiceConnection conn, int userAppUid) throws TransactionTooLargeException;
+
 }

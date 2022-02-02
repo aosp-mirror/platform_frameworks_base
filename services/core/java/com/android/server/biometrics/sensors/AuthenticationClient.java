@@ -166,8 +166,8 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     @Override
     public void onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> hardwareAuthToken) {
-        getLogger().logOnAuthenticated(getContext(), authenticated, mRequireConfirmation,
-                isCryptoOperation(), getTargetUserId(), isBiometricPrompt());
+        getLogger().logOnAuthenticated(getContext(), getOperationContext(),
+                authenticated, mRequireConfirmation, getTargetUserId(), isBiometricPrompt());
 
         final ClientMonitorCallbackConverter listener = getListener();
 

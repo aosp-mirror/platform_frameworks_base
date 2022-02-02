@@ -83,6 +83,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
@@ -815,7 +816,8 @@ public class FingerprintService extends SystemService {
                         UserHandle.USER_CURRENT) != 0) {
                     fingerprint21 = Fingerprint21UdfpsMock.newInstance(getContext(),
                             mFingerprintStateCallback, hidlSensor,
-                            mLockoutResetDispatcher, mGestureAvailabilityDispatcher);
+                            mLockoutResetDispatcher, mGestureAvailabilityDispatcher,
+                            BiometricContext.getInstance(getContext()));
                 } else {
                     fingerprint21 = Fingerprint21.newInstance(getContext(),
                             mFingerprintStateCallback, hidlSensor, mHandler,
@@ -843,7 +845,8 @@ public class FingerprintService extends SystemService {
                     final FingerprintProvider provider =
                             new FingerprintProvider(getContext(), mFingerprintStateCallback, props,
                                     instance, mLockoutResetDispatcher,
-                                    mGestureAvailabilityDispatcher);
+                                    mGestureAvailabilityDispatcher,
+                                    BiometricContext.getInstance(getContext()));
                     mServiceProviders.add(provider);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Remote exception in getSensorProps: " + fqName);

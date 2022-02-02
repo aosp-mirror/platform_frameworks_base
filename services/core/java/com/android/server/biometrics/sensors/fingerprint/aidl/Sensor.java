@@ -429,7 +429,8 @@ public class Sensor {
     Sensor(@NonNull String tag, @NonNull FingerprintProvider provider, @NonNull Context context,
             @NonNull Handler handler, @NonNull FingerprintSensorPropertiesInternal sensorProperties,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
-            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
+            @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
+            @NonNull BiometricContext biometricContext) {
         mTag = tag;
         mProvider = provider;
         mContext = context;
@@ -447,7 +448,7 @@ public class Sensor {
                     public StopUserClient<?> getStopUserClient(int userId) {
                         return new FingerprintStopUserClient(mContext, mLazySession, mToken,
                                 userId, mSensorProperties.sensorId,
-                                BiometricLogger.ofUnknown(mContext), BiometricContext.getInstance(),
+                                BiometricLogger.ofUnknown(mContext), biometricContext,
                                 () -> mCurrentSession = null);
                     }
 
@@ -484,7 +485,7 @@ public class Sensor {
 
                         return new FingerprintStartUserClient(mContext, provider::getHalInstance,
                                 mToken, newUserId, mSensorProperties.sensorId,
-                                BiometricLogger.ofUnknown(mContext), BiometricContext.getInstance(),
+                                BiometricLogger.ofUnknown(mContext), biometricContext,
                                 resultController, userStartedCallback);
                     }
                 });

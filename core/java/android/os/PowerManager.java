@@ -2770,6 +2770,23 @@ public final class PowerManager {
     public static final int PRE_IDLE_TIMEOUT_MODE_SHORT = 2;
 
     /**
+     * A listener interface to get notified when the wakelock is enabled/disabled.
+     */
+    public interface WakeLockStateListener {
+        /**
+         * Frameworks could disable the wakelock because either device's power allowlist has
+         * changed, or the app's wakelock has exceeded its quota, or the app goes into cached
+         * state.
+         * <p>
+         * This callback is called whenever the wakelock's state has changed.
+         * </p>
+         *
+         * @param enabled true is enabled, false is disabled.
+         */
+        void onStateChanged(boolean enabled);
+    }
+
+    /**
      * A wake lock is a mechanism to indicate that your application needs
      * to have the device stay on.
      * <p>
@@ -2800,6 +2817,8 @@ public final class PowerManager {
         private String mHistoryTag;
         private final String mTraceName;
         private final int mDisplayId;
+        private WakeLockStateListener mListener;
+        private IWakeLockCallback mCallback;
 
         private final Runnable mReleaser = () -> release(RELEASE_FLAG_TIMEOUT);
 
@@ -2890,7 +2909,7 @@ public final class PowerManager {
                 Trace.asyncTraceBegin(Trace.TRACE_TAG_POWER, mTraceName, 0);
                 try {
                     mService.acquireWakeLock(mToken, mFlags, mTag, mPackageName, mWorkSource,
-                            mHistoryTag, mDisplayId);
+                            mHistoryTag, mDisplayId, mCallback);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
@@ -3082,6 +3101,45 @@ public final class PowerManager {
                     release();
                 }
             };
+        }
+
+        /**
+         * Set the listener to get notified when the wakelock is enabled/disabled.
+         *
+         * @param executor {@link Executor} to handle listener callback.
+         * @param listener listener to be added, set the listener to null to cancel a listener.
+         */
+        public void setStateListener(@NonNull @CallbackExecutor Executor executor,
+                @Nullable WakeLockStateListener listener) {
+            Preconditions.checkNotNull(executor, "executor cannot be null");
+            synchronized (mToken) {
+                if (listener != mListener) {
+                    mListener = listener;
+                    if (listener != null) {
+                        mCallback = new IWakeLockCallback.Stub() {
+                            public void onStateChanged(boolean enabled) {
+                                final long token = Binder.clearCallingIdentity();
+                                try {
+                                    executor.execute(() -> {
+                                        listener.onStateChanged(enabled);
+                                    });
+                                } finally {
+                                    Binder.restoreCallingIdentity(token);
+                                }
+                            }
+                        };
+                    } else {
+                        mCallback = null;
+                    }
+                    if (mHeld) {
+                        try {
+                            mService.updateWakeLockCallback(mToken, mCallback);
+                        } catch (RemoteException e) {
+                            throw e.rethrowFromSystemServer();
+                        }
+                    }
+                }
+            }
         }
     }
 

@@ -24,7 +24,7 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricFingerprintConstants.FingerprintAcquired;
 import android.hardware.biometrics.common.ICancellationSignal;
-import android.hardware.biometrics.common.OperationReason;
+import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.fingerprint.PointerContext;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.ISidefpsController;
@@ -108,7 +108,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession> 
     @NonNull
     @Override
     protected ClientMonitorCallback wrapCallbackForStart(@NonNull ClientMonitorCallback callback) {
-        return new ClientMonitorCompositeCallback(mALSProbeCallback, callback);
+        return new ClientMonitorCompositeCallback(mALSProbeCallback,
+                getBiometricContextUnsubscriber(), callback);
     }
 
     @Override
@@ -178,12 +179,17 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession> 
         final AidlSession session = getFreshDaemon();
 
         if (session.hasContextMethods()) {
-            // TODO: add reason, id
-            mOperationContext.id = 0;
-            mOperationContext.reason = OperationReason.UNKNOWN;
-            mOperationContext.isAoD = getBiometricContext().isAoD();
-            mOperationContext.isCrypto = isCryptoOperation();
-            return session.getSession().authenticateWithContext(mOperationId, mOperationContext);
+            final OperationContext opContext = getOperationContext();
+            final ICancellationSignal cancel =  session.getSession().authenticateWithContext(
+                    mOperationId, opContext);
+            getBiometricContext().subscribe(opContext, ctx -> {
+                try {
+                    session.getSession().onContextChanged(ctx);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to notify context changed", e);
+                }
+            });
+            return cancel;
         } else {
             return session.getSession().authenticate(mOperationId);
         }
@@ -192,6 +198,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession> 
     @Override
     protected void stopHalOperation() {
         mSensorOverlays.hide(getSensorId());
+        unsubscribeBiometricContext();
+
         if (mCancellationSignal != null) {
             try {
                 mCancellationSignal.cancel();
@@ -221,7 +229,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession> 
                 context.y = y;
                 context.minor = minor;
                 context.major = major;
-                context.isAoD = false; // TODO; get value
+                context.isAoD = getBiometricContext().isAoD();
                 session.getSession().onPointerDownWithContext(context);
             } else {
                 session.getSession().onPointerDown(0 /* pointerId */, x, y, minor, major);
@@ -279,8 +287,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession> 
         mLockoutCache.setLockoutModeForUser(getTargetUserId(), LockoutTracker.LOCKOUT_TIMED);
         // Lockout metrics are logged as an error code.
         final int error = BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT;
-        getLogger().logOnError(getContext(), error, 0 /* vendorCode */,
-                isCryptoOperation(), getTargetUserId());
+        getLogger().logOnError(getContext(), getOperationContext(),
+                error, 0 /* vendorCode */, getTargetUserId());
 
         try {
             getListener().onError(getSensorId(), getCookie(), error, 0 /* vendorCode */);
@@ -298,8 +306,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession> 
         mLockoutCache.setLockoutModeForUser(getTargetUserId(), LockoutTracker.LOCKOUT_PERMANENT);
         // Lockout metrics are logged as an error code.
         final int error = BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT_PERMANENT;
-        getLogger().logOnError(getContext(), error, 0 /* vendorCode */,
-                isCryptoOperation(), getTargetUserId());
+        getLogger().logOnError(getContext(), getOperationContext(),
+                error, 0 /* vendorCode */, getTargetUserId());
 
         try {
             getListener().onError(getSensorId(), getCookie(), error, 0 /* vendorCode */);

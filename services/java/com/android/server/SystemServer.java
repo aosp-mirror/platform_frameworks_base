@@ -214,6 +214,8 @@ import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
 
+import com.google.android.startop.iorap.IorapForwardingService;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -1621,6 +1623,10 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("PinnerService");
             mSystemServiceManager.startService(PinnerService.class);
+            t.traceEnd();
+
+            t.traceBegin("IorapForwardingService");
+            mSystemServiceManager.startService(IorapForwardingService.class);
             t.traceEnd();
 
             if (Build.IS_DEBUGGABLE && ProfcollectForwardingService.enabled()) {

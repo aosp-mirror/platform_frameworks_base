@@ -104,7 +104,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker
     private static final int MAX_NUM_LOGGED_PREDICTIONS = 10;
     private static final int MAX_NUM_LOGGED_GESTURES = 10;
 
-    static final boolean DEBUG_MISSING_GESTURE = false;
+    // Temporary log until b/202433017 is resolved
+    static final boolean DEBUG_MISSING_GESTURE = true;
     static final String DEBUG_MISSING_GESTURE_TAG = "NoBackGesture";
 
     private ISystemGestureExclusionListener mGestureExclusionListener =

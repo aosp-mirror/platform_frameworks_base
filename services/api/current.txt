@@ -39,6 +39,7 @@ package com.android.server.am {
 
   public interface ActivityManagerLocal {
     method public boolean canStartForegroundService(int, int, @NonNull String);
+    method public boolean startAndBindSupplementalProcessService(@NonNull android.content.Intent, @NonNull android.content.ServiceConnection, int) throws android.os.TransactionTooLargeException;
   }
 
 }

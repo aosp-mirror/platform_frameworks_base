@@ -31,6 +31,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.common.OperationContext;
 import android.hardware.input.InputSensorInfo;
 import android.platform.test.annotations.Presubmit;
 import android.testing.TestableContext;
@@ -68,10 +69,12 @@ public class BiometricLoggerTest {
     @Mock
     private BaseClientMonitor mClient;
 
+    private OperationContext mOpContext;
     private BiometricLogger mLogger;
 
     @Before
     public void setUp() {
+        mOpContext = new OperationContext();
         mContext.addMockSystemService(SensorManager.class, mSensorManager);
         when(mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)).thenReturn(
                 new Sensor(new InputSensorInfo("", "", 0, 0, Sensor.TYPE_LIGHT, 0, 0, 0, 0, 0, 0,
@@ -93,14 +96,13 @@ public class BiometricLoggerTest {
 
         final int acquiredInfo = 2;
         final int vendorCode = 3;
-        final boolean isCrypto = true;
         final int targetUserId = 9;
 
-        mLogger.logOnAcquired(mContext, acquiredInfo, vendorCode, isCrypto, targetUserId);
+        mLogger.logOnAcquired(mContext, mOpContext, acquiredInfo, vendorCode, targetUserId);
 
-        verify(mSink).acquired(
+        verify(mSink).acquired(eq(mOpContext),
                 eq(DEFAULT_MODALITY), eq(DEFAULT_ACTION), eq(DEFAULT_CLIENT), anyBoolean(),
-                eq(acquiredInfo), eq(vendorCode), eq(isCrypto), eq(targetUserId));
+                eq(acquiredInfo), eq(vendorCode), eq(targetUserId));
     }
 
     @Test
@@ -109,17 +111,16 @@ public class BiometricLoggerTest {
 
         final boolean authenticated = true;
         final boolean requireConfirmation = false;
-        final boolean isCrypto = false;
         final int targetUserId = 11;
         final boolean isBiometricPrompt = true;
 
-        mLogger.logOnAuthenticated(mContext,
-                authenticated, requireConfirmation, isCrypto, targetUserId, isBiometricPrompt);
+        mLogger.logOnAuthenticated(mContext, mOpContext,
+                authenticated, requireConfirmation, targetUserId, isBiometricPrompt);
 
-        verify(mSink).authenticate(
+        verify(mSink).authenticate(eq(mOpContext),
                 eq(DEFAULT_MODALITY), eq(DEFAULT_ACTION), eq(DEFAULT_CLIENT), anyBoolean(),
-                anyLong(), eq(authenticated), anyInt(), eq(requireConfirmation), eq(isCrypto),
-                eq(targetUserId), eq(isBiometricPrompt), anyFloat());
+                anyLong(), anyInt(), eq(requireConfirmation),
+                eq(targetUserId), anyFloat());
     }
 
     @Test
@@ -143,14 +144,13 @@ public class BiometricLoggerTest {
 
         final int error = 7;
         final int vendorCode = 11;
-        final boolean isCrypto = false;
         final int targetUserId = 9;
 
-        mLogger.logOnError(mContext, error, vendorCode, isCrypto, targetUserId);
+        mLogger.logOnError(mContext, mOpContext, error, vendorCode, targetUserId);
 
-        verify(mSink).error(
+        verify(mSink).error(eq(mOpContext),
                 eq(DEFAULT_MODALITY), eq(DEFAULT_ACTION), eq(DEFAULT_CLIENT), anyBoolean(),
-                anyLong(), eq(error), eq(vendorCode), eq(isCrypto), eq(targetUserId));
+                anyLong(), eq(error), eq(vendorCode), eq(targetUserId));
     }
 
     @Test
@@ -175,38 +175,34 @@ public class BiometricLoggerTest {
 
     private void testDisabledMetrics(boolean isBadConfig) {
         mLogger.disableMetrics();
-        mLogger.logOnAcquired(mContext,
+        mLogger.logOnAcquired(mContext, mOpContext,
                 0 /* acquiredInfo */,
                 1 /* vendorCode */,
-                true /* isCrypto */,
                 8 /* targetUserId */);
-        mLogger.logOnAuthenticated(mContext,
+        mLogger.logOnAuthenticated(mContext, mOpContext,
                 true /* authenticated */,
                 true /* requireConfirmation */,
-                false /* isCrypto */,
                 4 /* targetUserId */,
                 true/* isBiometricPrompt */);
         mLogger.logOnEnrolled(2 /* targetUserId */,
                 10 /* latency */,
                 true /* enrollSuccessful */);
-        mLogger.logOnError(mContext,
+        mLogger.logOnError(mContext, mOpContext,
                 4 /* error */,
                 0 /* vendorCode */,
-                false /* isCrypto */,
                 6 /* targetUserId */);
 
-        verify(mSink, never()).acquired(
+        verify(mSink, never()).acquired(eq(mOpContext),
                 anyInt(), anyInt(), anyInt(), anyBoolean(),
-                anyInt(), anyInt(), anyBoolean(), anyInt());
-        verify(mSink, never()).authenticate(
+                anyInt(), anyInt(), anyInt());
+        verify(mSink, never()).authenticate(eq(mOpContext),
                 anyInt(), anyInt(), anyInt(), anyBoolean(),
-                anyLong(), anyBoolean(), anyInt(), anyBoolean(),
-                anyBoolean(), anyInt(), anyBoolean(), anyFloat());
+                anyLong(), anyInt(), anyBoolean(), anyInt(), anyFloat());
         verify(mSink, never()).enroll(
                 anyInt(), anyInt(), anyInt(), anyInt(), anyLong(), anyBoolean(), anyFloat());
-        verify(mSink, never()).error(
+        verify(mSink, never()).error(eq(mOpContext),
                 anyInt(), anyInt(), anyInt(), anyBoolean(),
-                anyLong(), anyInt(), anyInt(), anyBoolean(), anyInt());
+                anyLong(), anyInt(), anyInt(), anyInt());
 
         mLogger.logUnknownEnrollmentInFramework();
         mLogger.logUnknownEnrollmentInHal();

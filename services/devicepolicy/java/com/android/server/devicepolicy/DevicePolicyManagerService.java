@@ -17680,6 +17680,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     ? Collections.emptySet()
                     : mOverlayPackagesProvider.getNonRequiredApps(
                             admin, caller.getUserId(), ACTION_PROVISION_MANAGED_PROFILE);
+            if (nonRequiredApps.isEmpty()) {
+                Slogf.i(LOG_TAG, "No disallowed packages for the managed profile.");
+            } else {
+                for (String packageName : nonRequiredApps) {
+                    Slogf.i(LOG_TAG, "Disallowed package [" + packageName + "]");
+                }
+            }
             userInfo = mUserManager.createProfileForUserEvenWhenDisallowed(
                     provisioningParams.getProfileName(),
                     UserManager.USER_TYPE_PROFILE_MANAGED,
@@ -17697,6 +17704,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     DevicePolicyEnums.PLATFORM_PROVISIONING_CREATE_PROFILE_MS,
                     startTime,
                     callerPackage);
+
+            onCreateAndProvisionManagedProfileStarted(provisioningParams);
 
             installExistingAdminPackage(userInfo.id, admin.getPackageName());
             if (!enableAdminAndSetProfileOwner(
@@ -17718,6 +17727,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
             }
 
+            onCreateAndProvisionManagedProfileCompleted(provisioningParams);
+
             sendProvisioningCompletedBroadcast(
                     userInfo.id,
                     ACTION_PROVISION_MANAGED_PROFILE,
@@ -17738,6 +17749,29 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Binder.restoreCallingIdentity(identity);
         }
     }
+
+    /**
+     * Callback called at the beginning of {@link #createAndProvisionManagedProfile(
+     * ManagedProfileProvisioningParams, String)} after the relevant prechecks have passed.
+     *
+     * <p>The logic in this method blocks provisioning.
+     *
+     * <p>This method is meant to be overridden by OEMs.
+     */
+    private void onCreateAndProvisionManagedProfileStarted(
+            ManagedProfileProvisioningParams provisioningParams) {}
+
+    /**
+     * Callback called at the end of {@link #createAndProvisionManagedProfile(
+     * ManagedProfileProvisioningParams, String)} after all the other provisioning tasks
+     * have completed successfully.
+     *
+     * <p>The logic in this method blocks provisioning.
+     *
+     * <p>This method is meant to be overridden by OEMs.
+     */
+    private void onCreateAndProvisionManagedProfileCompleted(
+            ManagedProfileProvisioningParams provisioningParams) {}
 
     private void resetInteractAcrossProfilesAppOps() {
         mInjector.getCrossProfileApps().clearInteractAcrossProfilesAppOps();
@@ -17978,6 +18012,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         ERROR_PRE_CONDITION_FAILED,
                         "Provisioning preconditions failed with result: " + result);
             }
+            onProvisionFullyManagedDeviceStarted(provisioningParams);
             setTimeAndTimezone(provisioningParams.getTimeZone(), provisioningParams.getLocalTime());
             setLocale(provisioningParams.getLocale());
 
@@ -18003,6 +18038,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             disallowAddUser();
             setAdminCanGrantSensorsPermissionForUserUnchecked(deviceOwnerUserId,
                     provisioningParams.canDeviceOwnerGrantSensorsPermissions());
+            onProvisionFullyManagedDeviceCompleted(provisioningParams);
             sendProvisioningCompletedBroadcast(
                     deviceOwnerUserId,
                     ACTION_PROVISION_MANAGED_DEVICE,
@@ -18017,6 +18053,29 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Binder.restoreCallingIdentity(identity);
         }
     }
+
+    /**
+     * Callback called at the beginning of {@link #provisionFullyManagedDevice(
+     * FullyManagedDeviceProvisioningParams, String)} after the relevant prechecks have passed.
+     *
+     * <p>The logic in this method blocks provisioning.
+     *
+     * <p>This method is meant to be overridden by OEMs.
+     */
+    private void onProvisionFullyManagedDeviceStarted(
+            FullyManagedDeviceProvisioningParams provisioningParams) {}
+
+    /**
+     * Callback called at the end of {@link #provisionFullyManagedDevice(
+     * FullyManagedDeviceProvisioningParams, String)} after all the other provisioning tasks
+     * have completed successfully.
+     *
+     * <p>The logic in this method blocks provisioning.
+     *
+     * <p>This method is meant to be overridden by OEMs.
+     */
+    private void onProvisionFullyManagedDeviceCompleted(
+            FullyManagedDeviceProvisioningParams provisioningParams) {}
 
     private void setTimeAndTimezone(String timeZone, long localTime) {
         try {
@@ -18271,12 +18330,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private void setDeviceOwnerTypeLocked(ComponentName admin,
             @DeviceOwnerType int deviceOwnerType) {
         String packageName = admin.getPackageName();
+        boolean isAdminTestOnly;
 
         verifyDeviceOwnerTypePreconditionsLocked(admin);
-        Preconditions.checkState(!mOwners.isDeviceOwnerTypeSetForDeviceOwner(packageName),
-                "The device owner type has already been set for " + packageName);
 
-        mOwners.setDeviceOwnerType(packageName, deviceOwnerType);
+        isAdminTestOnly = isAdminTestOnlyLocked(admin, mOwners.getDeviceOwnerUserId());
+        Preconditions.checkState(isAdminTestOnly
+                        || !mOwners.isDeviceOwnerTypeSetForDeviceOwner(packageName),
+                "Test only admins can only set the device owner type more than once");
+
+        mOwners.setDeviceOwnerType(packageName, deviceOwnerType, isAdminTestOnly);
     }
 
     @Override
@@ -18452,9 +18515,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(
                 isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller)
-                        || isSystemUid(caller),
+                        || canQueryAdminPolicy(caller),
                 "SSID allowlist can only be retrieved by a device owner or "
-                        + "a profile owner on an organization-owned device or a system app.");
+                        + "a profile owner on an organization-owned device or "
+                        + "an app with the QUERY_ADMIN_POLICY permission.");
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
                     UserHandle.USER_SYSTEM);
@@ -18490,9 +18554,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(
                 isDefaultDeviceOwner(caller) || isProfileOwnerOfOrganizationOwnedDevice(caller)
-                        || isSystemUid(caller),
+                        || canQueryAdminPolicy(caller),
                 "SSID denylist can only be retrieved by a device owner or "
-                        + "a profile owner on an organization-owned device or a system app.");
+                        + "a profile owner on an organization-owned device or "
+                        + "an app with the QUERY_ADMIN_POLICY permission.");
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
                     UserHandle.USER_SYSTEM);

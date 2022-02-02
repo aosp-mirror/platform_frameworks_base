@@ -103,6 +103,7 @@ cc_defaults {
         "libappfuse",
         "libbinder_ndk",
         "libbinder",
+        "libchrome",
         "libcutils",
         "libcrypto",
         "liblog",

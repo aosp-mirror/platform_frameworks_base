@@ -146,6 +146,7 @@ public class VibrationEffectTest {
 
     @Test
     public void testValidateWaveformBuilder() {
+        // Cover builder methods
         VibrationEffect.startWaveform(targetAmplitude(1))
                 .addTransition(Duration.ofSeconds(1), targetAmplitude(0.5f), targetFrequency(100))
                 .addTransition(Duration.ZERO, targetAmplitude(0f), targetFrequency(200))
@@ -155,6 +156,39 @@ public class VibrationEffectTest {
                 .addTransition(Duration.ZERO, targetFrequency(150))
                 .addSustain(Duration.ofMillis(2))
                 .addTransition(Duration.ofSeconds(15), targetAmplitude(1))
+                .build()
+                .validate();
+
+        // Make sure class summary javadoc examples compile and are valid.
+        // NOTE: IF THIS IS UPDATED, PLEASE ALSO UPDATE WaveformBuilder javadocs.
+        VibrationEffect.startWaveform(targetFrequency(60))
+                .addTransition(Duration.ofMillis(100), targetAmplitude(1), targetFrequency(120))
+                .addSustain(Duration.ofMillis(200))
+                .addTransition(Duration.ofMillis(100), targetAmplitude(0), targetFrequency(60))
+                .build()
+                .validate();
+        VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK)
+                .addOffDuration(Duration.ofMillis(20))
+                .repeatEffectIndefinitely(
+                        VibrationEffect.startWaveform(targetAmplitude(0.2f))
+                                .addSustain(Duration.ofMillis(10))
+                                .addTransition(Duration.ofMillis(20), targetAmplitude(0.4f))
+                                .addSustain(Duration.ofMillis(30))
+                                .addTransition(Duration.ofMillis(40), targetAmplitude(0.8f))
+                                .addSustain(Duration.ofMillis(50))
+                                .addTransition(Duration.ofMillis(60), targetAmplitude(0.2f))
+                                .build())
+                .compose()
+                .validate();
+        VibrationEffect.createWaveform(new long[]{10, 20, 30}, new int[]{51, 102, 204}, -1)
+                .validate();
+        VibrationEffect.startWaveform(targetAmplitude(0.2f))
+                .addSustain(Duration.ofMillis(10))
+                .addTransition(Duration.ZERO, targetAmplitude(0.4f))
+                .addSustain(Duration.ofMillis(20))
+                .addTransition(Duration.ZERO, targetAmplitude(0.8f))
+                .addSustain(Duration.ofMillis(30))
                 .build()
                 .validate();
 
@@ -171,6 +205,7 @@ public class VibrationEffectTest {
 
     @Test
     public void testValidateComposed() {
+        // Cover builder methods
         VibrationEffect.startComposition()
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK)
                 .addEffect(TEST_ONE_SHOT)
@@ -178,11 +213,28 @@ public class VibrationEffectTest {
                 .addOffDuration(Duration.ofMillis(100))
                 .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 0.5f, 10)
                 .addEffect(VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
+                .addEffect(VibrationEffect.createWaveform(new long[]{10, 20}, /* repeat= */ 0))
+                .compose()
+                .validate();
+        VibrationEffect.startComposition()
+                .repeatEffectIndefinitely(TEST_ONE_SHOT)
                 .compose()
                 .validate();
 
+        // Make sure class summary javadoc examples compile and are valid.
+        // NOTE: IF THIS IS UPDATED, PLEASE ALSO UPDATE Composition javadocs.
         VibrationEffect.startComposition()
-                .repeatEffectIndefinitely(TEST_ONE_SHOT)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_SLOW_RISE, 0.5f)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_QUICK_FALL, 0.5f)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_TICK, 1.0f, 100)
+                .compose()
+                .validate();
+        VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK)
+                .addOffDuration(Duration.ofMillis(10))
+                .addEffect(VibrationEffect.createPredefined(VibrationEffect.EFFECT_DOUBLE_CLICK))
+                .addOffDuration(Duration.ofMillis(50))
+                .addEffect(VibrationEffect.createWaveform(new long[]{10, 20}, /* repeat= */ 0))
                 .compose()
                 .validate();
 
