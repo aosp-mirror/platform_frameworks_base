@@ -30358,6 +30358,7 @@ package android.os {
     method public void setDataCapacity(int);
     method public void setDataPosition(int);
     method public void setDataSize(int);
+    method public void setPropagateAllowBlocking();
     method public void unmarshall(@NonNull byte[], int, int);
     method public void writeArray(@Nullable Object[]);
     method public void writeBinderArray(@Nullable android.os.IBinder[]);
