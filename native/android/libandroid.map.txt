@@ -309,6 +309,9 @@ LIBANDROID {
     android_res_nquery; # introduced=29
     android_res_nresult; # introduced=29
     android_res_nsend; # introduced=29
+    android_tag_socket_with_uid; # introduced=Tiramisu
+    android_tag_socket; # introduced=Tiramisu
+    android_untag_socket; # introduced=Tiramisu
     AThermal_acquireManager; # introduced=30
     AThermal_releaseManager; # introduced=30
     AThermal_getCurrentThermalStatus; # introduced=30
