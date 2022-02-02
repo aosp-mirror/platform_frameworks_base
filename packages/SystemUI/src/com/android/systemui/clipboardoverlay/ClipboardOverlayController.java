@@ -74,7 +74,7 @@ import android.widget.TextView;
 import com.android.internal.policy.PhoneWindow;
 import com.android.systemui.R;
 import com.android.systemui.screenshot.FloatingWindowUtil;
-import com.android.systemui.screenshot.ScreenshotActionChip;
+import com.android.systemui.screenshot.OverlayActionChip;
 import com.android.systemui.screenshot.TimeoutHandler;
 
 import java.io.IOException;
@@ -106,12 +106,12 @@ public class ClipboardOverlayController {
     private final DraggableConstraintLayout mView;
     private final ImageView mImagePreview;
     private final TextView mTextPreview;
-    private final ScreenshotActionChip mEditChip;
-    private final ScreenshotActionChip mRemoteCopyChip;
+    private final OverlayActionChip mEditChip;
+    private final OverlayActionChip mRemoteCopyChip;
     private final View mActionContainerBackground;
     private final View mDismissButton;
     private final LinearLayout mActionContainer;
-    private final ArrayList<ScreenshotActionChip> mActionChips = new ArrayList<>();
+    private final ArrayList<OverlayActionChip> mActionChips = new ArrayList<>();
 
     private Runnable mOnSessionCompleteListener;
 
@@ -251,7 +251,7 @@ public class ClipboardOverlayController {
             for (RemoteAction action : actions) {
                 Intent targetIntent = action.getActionIntent().getIntent();
                 if (!TextUtils.equals(source, targetIntent.getComponent().getPackageName())) {
-                    ScreenshotActionChip chip = constructActionChip(action);
+                    OverlayActionChip chip = constructActionChip(action);
                     mActionContainer.addView(chip);
                     mActionChips.add(chip);
                 }
@@ -259,9 +259,9 @@ public class ClipboardOverlayController {
         });
     }
 
-    private ScreenshotActionChip constructActionChip(RemoteAction action) {
-        ScreenshotActionChip chip = (ScreenshotActionChip) LayoutInflater.from(mContext).inflate(
-                R.layout.screenshot_action_chip, mActionContainer, false);
+    private OverlayActionChip constructActionChip(RemoteAction action) {
+        OverlayActionChip chip = (OverlayActionChip) LayoutInflater.from(mContext).inflate(
+                R.layout.overlay_action_chip, mActionContainer, false);
         chip.setText(action.getTitle());
         chip.setIcon(action.getIcon(), false);
         chip.setPendingIntent(action.getActionIntent(), this::animateOut);
@@ -341,7 +341,7 @@ public class ClipboardOverlayController {
         mEditChip.setAlpha(1f);
         ContentResolver resolver = mContext.getContentResolver();
         try {
-            int size = mContext.getResources().getDimensionPixelSize(R.dimen.screenshot_x_scale);
+            int size = mContext.getResources().getDimensionPixelSize(R.dimen.overlay_x_scale);
             // The width of the view is capped, height maintains aspect ratio, so allow it to be
             // taller if needed.
             Bitmap thumbnail = resolver.loadThumbnail(uri, new Size(size, size * 4), null);
@@ -365,7 +365,7 @@ public class ClipboardOverlayController {
     }
 
     private void animateOut() {
-        getExitAnimation().start();
+        mView.dismiss();
     }
 
     private ValueAnimator getEnterAnimation() {
@@ -401,28 +401,6 @@ public class ClipboardOverlayController {
         return anim;
     }
 
-    private ValueAnimator getExitAnimation() {
-        ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
-
-        anim.addUpdateListener(animation -> {
-            mView.setAlpha(1 - animation.getAnimatedFraction());
-            final View actionBackground = requireNonNull(
-                    mView.findViewById(R.id.actions_container_background));
-            mView.setTranslationX(
-                    -animation.getAnimatedFraction() * actionBackground.getWidth() / 2);
-        });
-
-        anim.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                hideImmediate();
-            }
-        });
-
-        return anim;
-    }
-
     private void hideImmediate() {
         // Note this may be called multiple times if multiple dismissal events happen at the same
         // time.
@@ -453,7 +431,7 @@ public class ClipboardOverlayController {
     }
 
     private void resetActionChips() {
-        for (ScreenshotActionChip chip : mActionChips) {
+        for (OverlayActionChip chip : mActionChips) {
             mActionContainer.removeView(chip);
         }
         mActionChips.clear();

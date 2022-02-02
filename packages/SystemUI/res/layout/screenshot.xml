@@ -17,7 +17,7 @@
 <com.android.systemui.screenshot.ScreenshotView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/screenshot_frame"
-    android:theme="@style/Screenshot"
+    android:theme="@style/FloatingOverlay"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:importantForAccessibility="no">
@@ -30,11 +30,11 @@
         android:importantForAccessibility="no"/>
     <ImageView
         android:id="@+id/screenshot_actions_background"
-        android:layout_height="@dimen/screenshot_bg_protection_height"
+        android:layout_height="@dimen/overlay_bg_protection_height"
         android:layout_width="match_parent"
         android:layout_gravity="bottom"
         android:alpha="0.0"
-        android:src="@drawable/screenshot_actions_background_protection"/>
+        android:src="@drawable/overlay_actions_background_protection"/>
     <ImageView
         android:id="@+id/screenshot_flash"
         android:layout_width="match_parent"

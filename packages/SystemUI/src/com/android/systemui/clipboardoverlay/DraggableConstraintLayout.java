@@ -98,10 +98,23 @@ public class DraggableConstraintLayout extends ConstraintLayout {
         return mSwipeDetector.onTouchEvent(ev);
     }
 
+    /**
+     * Dismiss the view, with animation controlled by SwipeDismissHandler
+     */
+    public void dismiss() {
+        mSwipeDismissHandler.dismiss();
+    }
+
+    /**
+     * Set the callback to be run after view is dismissed
+     */
     public void setOnDismissCallback(Runnable callback) {
         mOnDismiss = callback;
     }
 
+    /**
+     * Set the callback to be run when the view is interacted with (e.g. tapped)
+     */
     public void setOnInteractionCallback(Runnable callback) {
         mOnInteraction = callback;
     }

@@ -16,6 +16,8 @@
 
 package com.android.systemui.screenshot;
 
+import static java.util.Objects.requireNonNull;
+
 import android.app.PendingIntent;
 import android.content.Context;
 import android.graphics.drawable.Icon;
@@ -28,10 +30,11 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 
+
 /**
  * View for a chip with an icon and text.
  */
-public class ScreenshotActionChip extends FrameLayout {
+public class OverlayActionChip extends FrameLayout {
 
     private static final String TAG = "ScreenshotActionChip";
 
@@ -39,27 +42,27 @@ public class ScreenshotActionChip extends FrameLayout {
     private TextView mTextView;
     private boolean mIsPending = false;
 
-    public ScreenshotActionChip(Context context) {
+    public OverlayActionChip(Context context) {
         this(context, null);
     }
 
-    public ScreenshotActionChip(Context context, AttributeSet attrs) {
+    public OverlayActionChip(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public ScreenshotActionChip(Context context, AttributeSet attrs, int defStyleAttr) {
+    public OverlayActionChip(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public ScreenshotActionChip(
+    public OverlayActionChip(
             Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     @Override
     protected void onFinishInflate() {
-        mIconView = findViewById(R.id.screenshot_action_chip_icon);
-        mTextView = findViewById(R.id.screenshot_action_chip_text);
+        mIconView = requireNonNull(findViewById(R.id.overlay_action_chip_icon));
+        mTextView = requireNonNull(findViewById(R.id.overlay_action_chip_text));
         updatePadding(mTextView.getText().length() > 0);
     }
 
@@ -116,15 +119,15 @@ public class ScreenshotActionChip extends FrameLayout {
                 (LinearLayout.LayoutParams) mTextView.getLayoutParams();
         if (hasText) {
             int paddingHorizontal = mContext.getResources().getDimensionPixelSize(
-                    R.dimen.screenshot_action_chip_padding_horizontal);
+                    R.dimen.overlay_action_chip_padding_horizontal);
             int spacing = mContext.getResources().getDimensionPixelSize(
-                    R.dimen.screenshot_action_chip_spacing);
+                    R.dimen.overlay_action_chip_spacing);
             iconParams.setMarginStart(paddingHorizontal);
             iconParams.setMarginEnd(spacing);
             textParams.setMarginEnd(paddingHorizontal);
         } else {
             int paddingHorizontal = mContext.getResources().getDimensionPixelSize(
-                    R.dimen.screenshot_action_chip_icon_only_padding_horizontal);
+                    R.dimen.overlay_action_chip_icon_only_padding_horizontal);
             iconParams.setMarginStart(paddingHorizontal);
             iconParams.setMarginEnd(paddingHorizontal);
         }
