@@ -385,6 +385,16 @@ public class HdmiCecConfig {
                 R.bool.config_cecTvSendStandbyOnSleepDisabled_allowed,
                 R.bool.config_cecTvSendStandbyOnSleepDisabled_default);
 
+        Setting setMenuLanguage = registerSetting(
+                HdmiControlManager.CEC_SETTING_NAME_SET_MENU_LANGUAGE,
+                R.bool.config_cecSetMenuLanguage_userConfigurable);
+        setMenuLanguage.registerValue(HdmiControlManager.SET_MENU_LANGUAGE_ENABLED,
+                R.bool.config_cecSetMenuLanguageEnabled_allowed,
+                R.bool.config_cecSetMenuLanguageEnabled_default);
+        setMenuLanguage.registerValue(HdmiControlManager.SET_MENU_LANGUAGE_DISABLED,
+                R.bool.config_cecSetMenuLanguageDisabled_allowed,
+                R.bool.config_cecSetMenuLanguageDisabled_default);
+
         Setting rcProfileTv = registerSetting(
                 HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV,
                 R.bool.config_cecRcProfileTv_userConfigurable);
@@ -697,6 +707,8 @@ public class HdmiCecConfig {
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP:
                 return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_SET_MENU_LANGUAGE:
+                return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV:
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU:
@@ -767,6 +779,8 @@ public class HdmiCecConfig {
             case HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP:
+                return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_SET_MENU_LANGUAGE:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV:
                 return setting.getName();

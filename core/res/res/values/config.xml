@@ -5276,6 +5276,12 @@
     <bool name="config_cecTvSendStandbyOnSleepDisabled_allowed">true</bool>
     <bool name="config_cecTvSendStandbyOnSleepDisabled_default">false</bool>
 
+    <bool name="config_cecSetMenuLanguage_userConfigurable">true</bool>
+    <bool name="config_cecSetMenuLanguageEnabled_allowed">true</bool>
+    <bool name="config_cecSetMenuLanguageEnabled_default">true</bool>
+    <bool name="config_cecSetMenuLanguageDisabled_allowed">true</bool>
+    <bool name="config_cecSetMenuLanguageDisabled_default">false</bool>
+
     <bool name="config_cecRcProfileTv_userConfigurable">true</bool>
     <bool name="config_cecRcProfileTvNone_allowed">true</bool>
     <bool name="config_cecRcProfileTvNone_default">true</bool>
