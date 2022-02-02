@@ -107,6 +107,8 @@ package android.app {
     method public final boolean addDumpable(@NonNull android.util.Dumpable);
     method public void dumpInternal(@NonNull String, @Nullable java.io.FileDescriptor, @NonNull java.io.PrintWriter, @Nullable String[]);
     method public void onMovedToDisplay(int, android.content.res.Configuration);
+    field public static final String DUMP_ARG_DUMP_DUMPABLE = "--dump-dumpable";
+    field public static final String DUMP_ARG_LIST_DUMPABLES = "--list-dumpables";
   }
 
   public class ActivityManager {
@@ -2949,6 +2951,7 @@ package android.view.contentcapture {
     field public static final String DEVICE_CONFIG_PROPERTY_MAX_BUFFER_SIZE = "max_buffer_size";
     field public static final String DEVICE_CONFIG_PROPERTY_SERVICE_EXPLICITLY_ENABLED = "service_explicitly_enabled";
     field public static final String DEVICE_CONFIG_PROPERTY_TEXT_CHANGE_FLUSH_FREQUENCY = "text_change_flush_frequency";
+    field public static final String DUMPABLE_NAME = "ContentCaptureManager";
     field public static final int LOGGING_LEVEL_DEBUG = 1; // 0x1
     field public static final int LOGGING_LEVEL_OFF = 0; // 0x0
     field public static final int LOGGING_LEVEL_VERBOSE = 2; // 0x2

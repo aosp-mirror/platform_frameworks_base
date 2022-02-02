@@ -809,6 +809,13 @@ public class Activity extends ContextThemeWrapper
         Dialog mDialog;
         Bundle mArgs;
     }
+
+    /** @hide */ public static final String DUMP_ARG_AUTOFILL = "--autofill";
+    /** @hide */ public static final String DUMP_ARG_CONTENT_CAPTURE = "--contentcapture";
+    /** @hide */ public static final String DUMP_ARG_TRANSLATION = "--translation";
+    /** @hide */ @TestApi public static final String DUMP_ARG_LIST_DUMPABLES = "--list-dumpables";
+    /** @hide */ @TestApi public static final String DUMP_ARG_DUMP_DUMPABLE = "--dump-dumpable";
+
     private SparseArray<ManagedDialog> mManagedDialogs;
 
     // set by the thread after the constructor and before onCreate(Bundle savedInstanceState) is called.
@@ -7223,25 +7230,30 @@ public class Activity extends ContextThemeWrapper
             boolean isSpecialCase = true;
             // Handle special cases
             switch (arg) {
-                case "--autofill":
-                    dumpAutofillManager(prefix, writer, args);
-                    break;
-                case "--contentcapture":
-                    dumpContentCaptureManager(prefix, writer);
-                    break;
-                case "--translation":
-                    dumpUiTranslation(prefix, writer);
-                    break;
-                case "--list-dumpables":
+                case DUMP_ARG_AUTOFILL:
+                    dumpLegacyDumpable(prefix, writer, arg,
+                            AutofillClientController.DUMPABLE_NAME);
+                    return;
+                case DUMP_ARG_CONTENT_CAPTURE:
+                    dumpLegacyDumpable(prefix, writer, arg,
+                            ContentCaptureManager.DUMPABLE_NAME);
+                    return;
+                case DUMP_ARG_TRANSLATION:
+                    dumpLegacyDumpable(prefix, writer, arg,
+                            UiTranslationController.DUMPABLE_NAME);
+                    return;
+                case DUMP_ARG_LIST_DUMPABLES:
                     if (mDumpableContainer == null) {
                         writer.print(prefix); writer.println("No dumpables");
                     } else {
                         mDumpableContainer.listDumpables(prefix, writer);
                     }
-                    break;
-                case "--dump-dumpable":
+                    mDumpableContainer.listDumpables(prefix, writer);
+                    return;
+                case DUMP_ARG_DUMP_DUMPABLE:
                     if (args.length == 1) {
-                        writer.println("--dump-dumpable requires the dumpable name");
+                        writer.print(DUMP_ARG_DUMP_DUMPABLE);
+                        writer.println(" requires the dumpable name");
                     } else if (mDumpableContainer == null) {
                         writer.println("no dumpables");
                     } else {
@@ -7308,25 +7320,10 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
-    private void dumpContentCaptureManager(String prefix, PrintWriter writer) {
-        dumpLegacyDumpable(prefix, writer, ContentCaptureManager.DUMPABLE_NAME, /* args= */ null);
-    }
-
-    private void dumpUiTranslation(String prefix, PrintWriter writer) {
-        dumpLegacyDumpable(prefix, writer, UiTranslationController.DUMPABLE_NAME, /* args= */ null);
-    }
-
-    private void dumpAutofillManager(String prefix, PrintWriter writer, String[] args) {
-        dumpLegacyDumpable(prefix, writer, AutofillClientController.DUMPABLE_NAME, args);
-    }
-
-    private void dumpLegacyDumpable(@NonNull String prefix, @NonNull PrintWriter writer,
-            @NonNull String dumpableName, @Nullable String[] args) {
-        if (mDumpableContainer == null) {
-            writer.print(prefix); writer.print("no "); writer.println(dumpableName);
-            return;
-        }
-        mDumpableContainer.dumpOneDumpable(prefix, writer, dumpableName, args);
+    private void dumpLegacyDumpable(String prefix, PrintWriter writer, String legacyOption,
+            String dumpableName) {
+        writer.printf("%s%s option deprecated. Use %s %s instead\n", prefix, legacyOption,
+                DUMP_ARG_DUMP_DUMPABLE, dumpableName);
     }
 
     /**
