@@ -320,8 +320,10 @@ public final class HdmiCecConfigTest {
     @Test
     public void getDefaultStringValue_MultipleDefaults() {
         setBooleanResource(R.bool.config_cecPowerControlModeBroadcast_default, true);
-        assertThrows(RuntimeException.class,
-                () -> new HdmiCecConfig(mContext, mStorageAdapter));
+        HdmiCecConfig hdmiCecConfig = new HdmiCecConfig(mContext, mStorageAdapter);
+        assertThat(hdmiCecConfig.getDefaultStringValue(
+                HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE))
+                .isEqualTo(HdmiControlManager.POWER_CONTROL_MODE_BROADCAST);
     }
 
     @Test
