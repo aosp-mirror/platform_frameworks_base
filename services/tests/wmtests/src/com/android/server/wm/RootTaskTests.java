@@ -80,7 +80,6 @@ import android.app.IApplicationThread;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
-import android.graphics.Rect;
 import android.os.Binder;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
@@ -228,34 +227,6 @@ public class RootTaskTests extends WindowTestsBase {
         final int stack2PositionInParent = rootTask1.getParent().mChildren.indexOf(rootTask2);
         assertEquals(stack1PositionInParent, stack2PositionInParent + 1);
         verify(task1, times(1)).onDisplayChanged(any());
-    }
-
-    @Test
-    public void testTaskOutset() {
-        final Task task = createTask(mDisplayContent);
-        final int taskOutset = 10;
-        spyOn(task);
-        doReturn(taskOutset).when(task).getTaskOutset();
-        doReturn(true).when(task).inMultiWindowMode();
-
-        // Mock the resolved override windowing mode to non-fullscreen
-        final WindowConfiguration windowConfiguration =
-                task.getResolvedOverrideConfiguration().windowConfiguration;
-        spyOn(windowConfiguration);
-        doReturn(WINDOWING_MODE_MULTI_WINDOW)
-                .when(windowConfiguration).getWindowingMode();
-
-        // Prevent adjust task dimensions
-        doNothing().when(task).adjustForMinimalTaskDimensions(any(), any(), any());
-
-        final Rect taskBounds = new Rect(200, 200, 800, 1000);
-        // Update surface position and size by the given bounds.
-        task.setBounds(taskBounds);
-
-        assertEquals(taskBounds.width() + 2 * taskOutset, task.getLastSurfaceSize().x);
-        assertEquals(taskBounds.height() + 2 * taskOutset, task.getLastSurfaceSize().y);
-        assertEquals(taskBounds.left - taskOutset, task.getLastSurfacePosition().x);
-        assertEquals(taskBounds.top - taskOutset, task.getLastSurfacePosition().y);
     }
 
     @Test
