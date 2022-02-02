@@ -60,6 +60,8 @@ public class A2dpProfileTest {
     private BluetoothDevice mDevice;
     @Mock
     private BluetoothA2dp mBluetoothA2dp;
+    @Mock
+    private BluetoothAdapter mBluetoothAdapter;
     private BluetoothProfile.ServiceListener mServiceListener;
 
     private A2dpProfile mProfile;
@@ -72,7 +74,8 @@ public class A2dpProfileTest {
         mProfile = new A2dpProfile(mContext, mDeviceManager, mProfileManager);
         mServiceListener = mShadowBluetoothAdapter.getServiceListener();
         mServiceListener.onServiceConnected(BluetoothProfile.A2DP, mBluetoothA2dp);
-        when(mBluetoothA2dp.getActiveDevice()).thenReturn(mDevice);
+        when(mBluetoothAdapter.getActiveDevices(eq(BluetoothProfile.A2DP)))
+                .thenReturn(Arrays.asList(mDevice));
     }
 
     @Test
