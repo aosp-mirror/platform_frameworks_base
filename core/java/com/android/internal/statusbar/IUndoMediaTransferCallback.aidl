@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shared.mediattt;
+package com.android.internal.statusbar;
 
-parcelable DeviceInfo;
+/**
+ * An interface that will be invoked if the user chooses to undo a transfer.
+ */
+interface IUndoMediaTransferCallback {
+
+    /**
+     * Invoked to notify callers that the user has chosen to undo the media transfer that just
+     * occurred.
+     *
+     * Implementors of this method are repsonsible for actually undoing the transfer.
+     */
+    oneway void onUndoTriggered();
+}

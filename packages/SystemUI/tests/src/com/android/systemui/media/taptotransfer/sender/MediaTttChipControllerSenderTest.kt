@@ -24,9 +24,10 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.test.filters.SmallTest
+import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.shared.mediattt.IUndoTransferCallback
+import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -46,12 +47,14 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Mock
     private lateinit var windowManager: WindowManager
+    @Mock
+    private lateinit var commandQueue: CommandQueue
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         appIconDrawable = Icon.createWithResource(context, R.drawable.ic_cake).loadDrawable(context)
-        controllerSender = MediaTttChipControllerSender(context, windowManager)
+        controllerSender = MediaTttChipControllerSender(context, windowManager, commandQueue)
     }
 
     @Test
@@ -133,7 +136,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferToReceiverSucceeded_withUndoRunnable_undoWithClick() {
-        val undoCallback = object : IUndoTransferCallback.Stub() {
+        val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {}
         }
         controllerSender.displayChip(transferToReceiverSucceeded(undoCallback))
@@ -146,7 +149,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     @Test
     fun transferToReceiverSucceeded_withUndoRunnable_undoButtonClickRunsRunnable() {
         var undoCallbackCalled = false
-        val undoCallback = object : IUndoTransferCallback.Stub() {
+        val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {
                 undoCallbackCalled = true
             }
@@ -160,7 +163,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferToReceiverSucceeded_undoButtonClick_switchesToTransferToThisDeviceTriggered() {
-        val undoCallback = object : IUndoTransferCallback.Stub() {
+        val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {}
         }
         controllerSender.displayChip(transferToReceiverSucceeded(undoCallback))
@@ -194,7 +197,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferToThisDeviceSucceeded_withUndoRunnable_undoWithClick() {
-        val undoCallback = object : IUndoTransferCallback.Stub() {
+        val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {}
         }
         controllerSender.displayChip(transferToThisDeviceSucceeded(undoCallback))
@@ -207,7 +210,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     @Test
     fun transferToThisDeviceSucceeded_withUndoRunnable_undoButtonClickRunsRunnable() {
         var undoCallbackCalled = false
-        val undoCallback = object : IUndoTransferCallback.Stub() {
+        val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {
                 undoCallbackCalled = true
             }
@@ -221,7 +224,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferToThisDeviceSucceeded_undoButtonClick_switchesToTransferToReceiverTriggered() {
-        val undoCallback = object : IUndoTransferCallback.Stub() {
+        val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {}
         }
         controllerSender.displayChip(transferToThisDeviceSucceeded(undoCallback))
@@ -267,7 +270,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         controllerSender.displayChip(transferToReceiverTriggered())
         controllerSender.displayChip(
             transferToReceiverSucceeded(
-                object : IUndoTransferCallback.Stub() {
+                object : IUndoMediaTransferCallback.Stub() {
                     override fun onUndoTriggered() {}
                 }
             )
@@ -327,13 +330,13 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         TransferToThisDeviceTriggered(appIconDrawable, APP_ICON_CONTENT_DESC)
 
     /** Helper method providing default parameters to not clutter up the tests. */
-    private fun transferToReceiverSucceeded(undoCallback: IUndoTransferCallback? = null) =
+    private fun transferToReceiverSucceeded(undoCallback: IUndoMediaTransferCallback? = null) =
         TransferToReceiverSucceeded(
             appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME, undoCallback
         )
 
     /** Helper method providing default parameters to not clutter up the tests. */
-    private fun transferToThisDeviceSucceeded(undoCallback: IUndoTransferCallback? = null) =
+    private fun transferToThisDeviceSucceeded(undoCallback: IUndoMediaTransferCallback? = null) =
         TransferToThisDeviceSucceeded(
             appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME, undoCallback
         )

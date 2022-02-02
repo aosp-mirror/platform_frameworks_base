@@ -31,7 +31,7 @@ import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.MediaTttFlags;
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver;
 import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender;
-import com.android.systemui.media.taptotransfer.sender.MediaTttSenderService;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 
 import java.util.Optional;
@@ -100,11 +100,12 @@ public interface MediaModule {
     static Optional<MediaTttChipControllerSender> providesMediaTttChipControllerSender(
             MediaTttFlags mediaTttFlags,
             Context context,
-            WindowManager windowManager) {
+            WindowManager windowManager,
+            CommandQueue commandQueue) {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
         }
-        return Optional.of(new MediaTttChipControllerSender(context, windowManager));
+        return Optional.of(new MediaTttChipControllerSender(context, windowManager, commandQueue));
     }
 
     /** */
@@ -137,12 +138,6 @@ public interface MediaModule {
                         context,
                         mediaTttChipControllerReceiver));
     }
-
-    /** Inject into MediaTttSenderService. */
-    @Binds
-    @IntoMap
-    @ClassKey(MediaTttSenderService.class)
-    Service bindMediaTttSenderService(MediaTttSenderService service);
 
     /** Inject into NearbyMediaDevicesService. */
     @Binds
