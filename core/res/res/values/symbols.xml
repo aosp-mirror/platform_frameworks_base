@@ -1599,6 +1599,13 @@
   <java-symbol type="layout" name="resolver_list_per_profile" />
   <java-symbol type="layout" name="chooser_list_per_profile" />
   <java-symbol type="layout" name="resolver_empty_states" />
+  <java-symbol type="id" name="open_cross_profile" />
+  <java-symbol type="string" name="miniresolver_open_in_personal" />
+  <java-symbol type="string" name="miniresolver_open_in_work" />
+  <java-symbol type="string" name="miniresolver_use_personal_browser" />
+  <java-symbol type="string" name="miniresolver_use_work_browser" />
+  <java-symbol type="id" name="button_open" />
+  <java-symbol type="id" name="use_same_profile_browser" />
 
   <java-symbol type="anim" name="slide_in_child_bottom" />
   <java-symbol type="anim" name="slide_in_right" />
@@ -2715,6 +2722,7 @@
   <java-symbol type="bool" name="config_allow_ussd_over_ims" />
   <java-symbol type="attr" name="touchscreenBlocksFocus" />
   <java-symbol type="layout" name="resolver_list_with_default" />
+  <java-symbol type="layout" name="miniresolver" />
   <java-symbol type="string" name="activity_resolver_use_always" />
   <java-symbol type="string" name="whichApplicationNamed" />
   <java-symbol type="string" name="whichApplicationLabel" />
