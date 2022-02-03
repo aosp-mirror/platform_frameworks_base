@@ -83,7 +83,7 @@ import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
-import android.media.BtProfileConnectionInfo;
+import android.media.BluetoothProfileConnectionInfo;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioModeDispatcher;
 import android.media.IAudioRoutesObserver;
@@ -6341,14 +6341,14 @@ public class AudioService extends IAudioService.Stub
      * See AudioManager.handleBluetoothActiveDeviceChanged(...)
      */
     public void handleBluetoothActiveDeviceChanged(BluetoothDevice newDevice,
-            BluetoothDevice previousDevice, @NonNull BtProfileConnectionInfo info) {
+            BluetoothDevice previousDevice, @NonNull BluetoothProfileConnectionInfo info) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.BLUETOOTH_STACK)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Bluetooth is the only caller allowed");
         }
         if (info == null) {
-            throw new IllegalArgumentException("Illegal null BtProfileConnectionInfo for device "
-                    + previousDevice + " -> " + newDevice);
+            throw new IllegalArgumentException("Illegal null BluetoothProfileConnectionInfo for"
+                    + " device " + previousDevice + " -> " + newDevice);
         }
         final int profile = info.getProfile();
         if (profile != BluetoothProfile.A2DP && profile != BluetoothProfile.A2DP_SINK
