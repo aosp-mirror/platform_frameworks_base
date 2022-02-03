@@ -29,7 +29,6 @@ import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.logging.nano.MetricsProto
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.flags.FeatureFlags
@@ -89,11 +88,6 @@ class FooterActionsController @Inject constructor(
             field = value
             updateVisibility()
         }
-
-    init {
-        view.elevation = resources.displayMetrics.density * 4f
-        view.setBackgroundColor(Utils.getColorAttrDefaultColor(context, R.attr.underSurfaceColor))
-    }
 
     private val settingsButton: SettingsButton = view.findViewById(R.id.settings_button)
     private val settingsButtonContainer: View? = view.findViewById(R.id.settings_button_container)
