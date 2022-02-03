@@ -39,8 +39,7 @@ import java.lang.annotation.RetentionPolicy;
 public class Atsc3FrontendSettings extends FrontendSettings {
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "BANDWIDTH_",
+    @IntDef(prefix = "BANDWIDTH_",
             value = {BANDWIDTH_UNDEFINED, BANDWIDTH_AUTO, BANDWIDTH_BANDWIDTH_6MHZ,
                     BANDWIDTH_BANDWIDTH_7MHZ, BANDWIDTH_BANDWIDTH_8MHZ})
     @Retention(RetentionPolicy.SOURCE)
@@ -69,8 +68,7 @@ public class Atsc3FrontendSettings extends FrontendSettings {
 
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "MODULATION_",
+    @IntDef(prefix = "MODULATION_",
             value = {MODULATION_UNDEFINED, MODULATION_AUTO,
                     MODULATION_MOD_QPSK, MODULATION_MOD_16QAM,
                     MODULATION_MOD_64QAM, MODULATION_MOD_256QAM,
@@ -113,8 +111,7 @@ public class Atsc3FrontendSettings extends FrontendSettings {
 
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "TIME_INTERLEAVE_MODE_",
+    @IntDef(prefix = "TIME_INTERLEAVE_MODE_",
             value = {TIME_INTERLEAVE_MODE_UNDEFINED, TIME_INTERLEAVE_MODE_AUTO,
                     TIME_INTERLEAVE_MODE_CTI, TIME_INTERLEAVE_MODE_HTI})
     @Retention(RetentionPolicy.SOURCE)
@@ -140,8 +137,7 @@ public class Atsc3FrontendSettings extends FrontendSettings {
 
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "CODERATE_",
+    @IntDef(prefix = "CODERATE_",
             value = {CODERATE_UNDEFINED, CODERATE_AUTO, CODERATE_2_15, CODERATE_3_15, CODERATE_4_15,
                     CODERATE_5_15, CODERATE_6_15, CODERATE_7_15, CODERATE_8_15, CODERATE_9_15,
                     CODERATE_10_15, CODERATE_11_15, CODERATE_12_15, CODERATE_13_15})
@@ -207,8 +203,7 @@ public class Atsc3FrontendSettings extends FrontendSettings {
 
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "FEC_",
+    @IntDef(prefix = "FEC_",
             value = {FEC_UNDEFINED, FEC_AUTO, FEC_BCH_LDPC_16K, FEC_BCH_LDPC_64K, FEC_CRC_LDPC_16K,
                     FEC_CRC_LDPC_64K, FEC_LDPC_16K, FEC_LDPC_64K})
     @Retention(RetentionPolicy.SOURCE)
@@ -249,8 +244,7 @@ public class Atsc3FrontendSettings extends FrontendSettings {
 
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "DEMOD_OUTPUT_FORMAT_",
+    @IntDef(prefix = "DEMOD_OUTPUT_FORMAT_",
             value = {DEMOD_OUTPUT_FORMAT_UNDEFINED, DEMOD_OUTPUT_FORMAT_ATSC3_LINKLAYER_PACKET,
                     DEMOD_OUTPUT_FORMAT_BASEBAND_PACKET})
     @Retention(RetentionPolicy.SOURCE)

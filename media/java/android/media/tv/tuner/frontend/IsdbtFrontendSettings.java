@@ -40,8 +40,7 @@ import java.lang.annotation.RetentionPolicy;
 @SystemApi
 public class IsdbtFrontendSettings extends FrontendSettings {
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "MODULATION_",
+    @IntDef(prefix = "MODULATION_",
             value = {MODULATION_UNDEFINED, MODULATION_AUTO, MODULATION_MOD_DQPSK,
                     MODULATION_MOD_QPSK, MODULATION_MOD_16QAM, MODULATION_MOD_64QAM})
     @Retention(RetentionPolicy.SOURCE)
@@ -74,8 +73,7 @@ public class IsdbtFrontendSettings extends FrontendSettings {
 
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "MODE_",
+    @IntDef(prefix = "MODE_",
             value = {MODE_UNDEFINED, MODE_AUTO, MODE_1, MODE_2, MODE_3})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Mode {}
@@ -103,8 +101,7 @@ public class IsdbtFrontendSettings extends FrontendSettings {
 
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "BANDWIDTH_",
+    @IntDef(prefix = "BANDWIDTH_",
             value = {BANDWIDTH_UNDEFINED, BANDWIDTH_AUTO, BANDWIDTH_8MHZ, BANDWIDTH_7MHZ,
                     BANDWIDTH_6MHZ})
     @Retention(RetentionPolicy.SOURCE)
@@ -132,7 +129,7 @@ public class IsdbtFrontendSettings extends FrontendSettings {
     public static final int BANDWIDTH_6MHZ = FrontendIsdbtBandwidth.BANDWIDTH_6MHZ;
 
     /** @hide */
-    @IntDef(flag = true, prefix = "PARTIAL_RECEPTION_FLAG_",
+    @IntDef(prefix = "PARTIAL_RECEPTION_FLAG_",
             value = {PARTIAL_RECEPTION_FLAG_UNDEFINED, PARTIAL_RECEPTION_FLAG_FALSE,
                     PARTIAL_RECEPTION_FLAG_TRUE})
     @Retention(RetentionPolicy.SOURCE)
@@ -153,7 +150,7 @@ public class IsdbtFrontendSettings extends FrontendSettings {
     public static final int PARTIAL_RECEPTION_FLAG_TRUE = FrontendIsdbtPartialReceptionFlag.TRUE;
 
     /** @hide */
-    @IntDef(flag = true, prefix = "TIME_INTERLEAVE_MODE_",
+    @IntDef(prefix = "TIME_INTERLEAVE_MODE_",
             value = {TIME_INTERLEAVE_MODE_UNDEFINED, TIME_INTERLEAVE_MODE_AUTO,
                     TIME_INTERLEAVE_MODE_1_0, TIME_INTERLEAVE_MODE_1_4, TIME_INTERLEAVE_MODE_1_8,
                     TIME_INTERLEAVE_MODE_1_16, TIME_INTERLEAVE_MODE_2_0, TIME_INTERLEAVE_MODE_2_2,

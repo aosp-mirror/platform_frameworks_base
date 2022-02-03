@@ -36,8 +36,7 @@ import java.lang.annotation.RetentionPolicy;
 @SystemApi
 public class Isdbs3FrontendSettings extends FrontendSettings {
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "MODULATION_",
+    @IntDef(prefix = "MODULATION_",
             value = {MODULATION_UNDEFINED, MODULATION_AUTO, MODULATION_MOD_BPSK,
             MODULATION_MOD_QPSK, MODULATION_MOD_8PSK, MODULATION_MOD_16APSK,
             MODULATION_MOD_32APSK})
@@ -75,8 +74,7 @@ public class Isdbs3FrontendSettings extends FrontendSettings {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true,
-            prefix = "CODERATE_",
+    @IntDef(prefix = "CODERATE_",
             value = {CODERATE_UNDEFINED, CODERATE_AUTO, CODERATE_1_3, CODERATE_2_5, CODERATE_1_2,
                     CODERATE_3_5, CODERATE_2_3, CODERATE_3_4, CODERATE_7_9, CODERATE_4_5,
                     CODERATE_5_6, CODERATE_7_8, CODERATE_9_10})
