@@ -17,6 +17,7 @@
 package com.android.server.dreams;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -49,6 +50,7 @@ public class DreamServiceTest {
 
             assertEquals(0, metadata.settingsActivity.compareTo(
                     ComponentName.unflattenFromString(testSettingsActivity)));
+            assertFalse(metadata.showComplications);
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
