@@ -43,6 +43,8 @@ public class WallpaperManagerShellCommand extends ShellCommand {
         switch(cmd) {
             case "set-dim-amount":
                 return setWallpaperDimAmount();
+            case "dim-with-uid":
+                return setDimmingWithUid();
             case "get-dim-amount":
                 return getWallpaperDimAmount();
             case "-h":
@@ -63,6 +65,10 @@ public class WallpaperManagerShellCommand extends ShellCommand {
         pw.println();
         pw.println("  set-dim-amount DIMMING");
         pw.println("    Sets the current dimming value to DIMMING (a number between 0 and 1).");
+        pw.println();
+        pw.println("  dim-with-uid UID DIMMING");
+        pw.println("    Sets the wallpaper dim amount to DIMMING as if an app with uid, UID, "
+                + "called it.");
         pw.println();
         pw.println("  get-dim-amount");
         pw.println("    Get the current wallpaper dim amount.");
@@ -90,6 +96,19 @@ public class WallpaperManagerShellCommand extends ShellCommand {
     private int getWallpaperDimAmount() {
         float dimAmount = mService.getWallpaperDimAmount();
         getOutPrintWriter().println("The current wallpaper dim amount is: " + dimAmount);
+        return 0;
+    }
+
+    /**
+     * Sets the wallpaper dim amount for an arbitrary UID to simulate multiple applications setting
+     * a dim amount on the wallpaper.
+     */
+    private int setDimmingWithUid() {
+        int mockUid = Integer.parseInt(getNextArgRequired());
+        float mockDimAmount = Float.parseFloat(getNextArgRequired());
+        mService.setWallpaperDimAmountForUid(mockUid, mockDimAmount);
+        getOutPrintWriter().println("Dimming the wallpaper for UID: " + mockUid + " to: "
+                + mockDimAmount);
         return 0;
     }
 }
