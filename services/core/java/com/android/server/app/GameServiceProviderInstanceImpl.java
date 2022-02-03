@@ -473,7 +473,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         }
 
         try {
-            mWindowManagerInternal.addTaskOverlay(
+            mWindowManagerInternal.addTrustedTaskOverlay(
                     taskId,
                     createGameSessionResult.getSurfacePackage());
         } catch (IllegalArgumentException ex) {
@@ -519,7 +519,7 @@ final class GameServiceProviderInstanceImpl implements GameServiceProviderInstan
         SurfacePackage surfacePackage = gameSessionRecord.getSurfacePackage();
         if (surfacePackage != null) {
             try {
-                mWindowManagerInternal.removeTaskOverlay(
+                mWindowManagerInternal.removeTrustedTaskOverlay(
                         gameSessionRecord.getTaskId(),
                         surfacePackage);
             } catch (IllegalArgumentException ex) {

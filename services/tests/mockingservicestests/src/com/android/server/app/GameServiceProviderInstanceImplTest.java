@@ -406,7 +406,7 @@ public final class GameServiceProviderInstanceImplTest {
         mFakeGameSessionService.removePendingFutureForTaskId(10)
                 .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
 
-        verify(mMockWindowManagerInternal).addTaskOverlay(eq(10), eq(mockSurfacePackage10));
+        verify(mMockWindowManagerInternal).addTrustedTaskOverlay(eq(10), eq(mockSurfacePackage10));
     }
 
     @Test
@@ -556,8 +556,9 @@ public final class GameServiceProviderInstanceImplTest {
 
         stopTask(10);
 
-        verify(mMockWindowManagerInternal).addTaskOverlay(eq(10), eq(mockSurfacePackage10));
-        verify(mMockWindowManagerInternal).removeTaskOverlay(eq(10), eq(mockSurfacePackage10));
+        verify(mMockWindowManagerInternal).addTrustedTaskOverlay(eq(10), eq(mockSurfacePackage10));
+        verify(mMockWindowManagerInternal).removeTrustedTaskOverlay(eq(10),
+                eq(mockSurfacePackage10));
     }
 
     @Test
