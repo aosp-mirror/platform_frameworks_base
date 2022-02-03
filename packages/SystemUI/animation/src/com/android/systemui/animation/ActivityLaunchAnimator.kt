@@ -301,6 +301,7 @@ class ActivityLaunchAnimator(
          * The intent was started. If [willAnimate] is false, nothing else will happen and the
          * animation will not be started.
          */
+        @JvmDefault
         fun onIntentStarted(willAnimate: Boolean) {}
 
         /**
@@ -308,6 +309,7 @@ class ActivityLaunchAnimator(
          * this if the animation was already started, i.e. if [onLaunchAnimationStart] was called
          * before the cancellation.
          */
+        @JvmDefault
         fun onLaunchAnimationCancelled() {}
     }
 
