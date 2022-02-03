@@ -59,7 +59,7 @@ sealed class ChipStateSender(
  *
  * @property otherDeviceName the name of the other device involved in the transfer.
  */
-class MoveCloserToStartCast(
+class AlmostCloseToStartCast(
     appIconDrawable: Drawable,
     appIconContentDescription: String,
     private val otherDeviceName: String,
@@ -76,7 +76,7 @@ class MoveCloserToStartCast(
  *
  * @property otherDeviceName the name of the other device involved in the transfer.
  */
-class MoveCloserToEndCast(
+class AlmostCloseToEndCast(
     appIconDrawable: Drawable,
     appIconContentDescription: String,
     private val otherDeviceName: String,

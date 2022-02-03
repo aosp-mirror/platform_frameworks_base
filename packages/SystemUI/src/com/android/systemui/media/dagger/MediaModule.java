@@ -21,6 +21,7 @@ import android.content.Context;
 import android.view.WindowManager;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
@@ -35,6 +36,7 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 import javax.inject.Named;
 
@@ -99,13 +101,13 @@ public interface MediaModule {
     @SysUISingleton
     static Optional<MediaTttChipControllerSender> providesMediaTttChipControllerSender(
             MediaTttFlags mediaTttFlags,
+            CommandQueue commandQueue,
             Context context,
-            WindowManager windowManager,
-            CommandQueue commandQueue) {
+            WindowManager windowManager) {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
         }
-        return Optional.of(new MediaTttChipControllerSender(context, windowManager, commandQueue));
+        return Optional.of(new MediaTttChipControllerSender(commandQueue, context, windowManager));
     }
 
     /** */
@@ -128,6 +130,7 @@ public interface MediaModule {
             MediaTttFlags mediaTttFlags,
             CommandRegistry commandRegistry,
             Context context,
+            @Main Executor mainExecutor,
             MediaTttChipControllerReceiver mediaTttChipControllerReceiver) {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
@@ -136,6 +139,7 @@ public interface MediaModule {
                 new MediaTttCommandLineHelper(
                         commandRegistry,
                         context,
+                        mainExecutor,
                         mediaTttChipControllerReceiver));
     }
 
