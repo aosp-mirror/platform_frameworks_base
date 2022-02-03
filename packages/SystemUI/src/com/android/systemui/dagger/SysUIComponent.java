@@ -23,6 +23,7 @@ import com.android.systemui.InitController;
 import com.android.systemui.SystemUIAppComponentFactory;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
+import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionCli;
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver;
 import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender;
@@ -144,6 +145,7 @@ public interface SysUIComponent {
         getMediaTttChipControllerSender();
         getMediaTttChipControllerReceiver();
         getMediaTttCommandLineHelper();
+        getMediaMuteAwaitConnectionCli();
         getUnfoldLatencyTracker().init();
         getFoldStateLoggingProvider().ifPresent(FoldStateLoggingProvider::init);
         getFoldStateLogger().ifPresent(FoldStateLogger::init);
@@ -219,6 +221,9 @@ public interface SysUIComponent {
 
     /** */
     Optional<MediaTttCommandLineHelper> getMediaTttCommandLineHelper();
+
+    /** */
+    Optional<MediaMuteAwaitConnectionCli> getMediaMuteAwaitConnectionCli();
 
     /**
      * Member injection into the supplied argument.

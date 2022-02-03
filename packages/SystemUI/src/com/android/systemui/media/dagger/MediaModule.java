@@ -23,10 +23,12 @@ import android.view.WindowManager;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.media.MediaDataManager;
+import com.android.systemui.media.MediaFlags;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.media.MediaHostStatesManager;
 import com.android.systemui.media.dream.dagger.MediaComplicationComponent;
+import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionCli;
 import com.android.systemui.media.nearby.NearbyMediaDevicesService;
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.MediaTttFlags;
@@ -138,6 +140,20 @@ public interface MediaModule {
         }
         return Optional.of(
                 new MediaTttCommandLineHelper(commandRegistry, context, mainExecutor));
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    static Optional<MediaMuteAwaitConnectionCli> providesMediaMuteAwaitConnectionCli(
+            MediaFlags mediaFlags,
+            CommandRegistry commandRegistry,
+            Context context
+    ) {
+        if (!mediaFlags.areMuteAwaitConnectionsEnabled()) {
+            return Optional.empty();
+        }
+        return Optional.of(new MediaMuteAwaitConnectionCli(commandRegistry, context));
     }
 
     /** Inject into NearbyMediaDevicesService. */

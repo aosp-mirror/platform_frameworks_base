@@ -37,4 +37,9 @@ class MediaFlags @Inject constructor(private val featureFlags: FeatureFlags) {
         return featureFlags.isEnabled(Flags.MEDIA_SESSION_ACTIONS) &&
             featureFlags.isEnabled(Flags.MEDIA_SESSION_LAYOUT)
     }
+
+    /**
+     * Check whether we support displaying information about mute await connections.
+     */
+    fun areMuteAwaitConnectionsEnabled() = featureFlags.isEnabled(Flags.MEDIA_MUTE_AWAIT)
 }

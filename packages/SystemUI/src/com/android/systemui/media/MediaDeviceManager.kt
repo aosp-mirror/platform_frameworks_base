@@ -16,6 +16,7 @@
 
 package com.android.systemui.media
 
+import android.graphics.drawable.Drawable
 import android.media.MediaRouter2Manager
 import android.media.session.MediaController
 import androidx.annotation.AnyThread
@@ -27,6 +28,7 @@ import com.android.systemui.Dumpable
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManagerFactory
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.util.concurrent.Executor
@@ -41,6 +43,7 @@ class MediaDeviceManager @Inject constructor(
     private val controllerFactory: MediaControllerFactory,
     private val localMediaManagerFactory: LocalMediaManagerFactory,
     private val mr2manager: MediaRouter2Manager,
+    private val muteAwaitConnectionManagerFactory: MediaMuteAwaitConnectionManagerFactory,
     @Main private val fgExecutor: Executor,
     @Background private val bgExecutor: Executor,
     dumpManager: DumpManager
@@ -80,8 +83,16 @@ class MediaDeviceManager @Inject constructor(
             val controller = data.token?.let {
                 controllerFactory.create(it)
             }
-            entry = Entry(key, oldKey, controller,
-                    localMediaManagerFactory.create(data.packageName))
+            val localMediaManager = localMediaManagerFactory.create(data.packageName)
+            // We don't need to set this muteAwaitConnectionManager anywhere; it will just notify
+            // [localMediaManager] on the appropriate events.
+            muteAwaitConnectionManagerFactory.create(localMediaManager)
+            entry = Entry(
+                key,
+                oldKey,
+                controller,
+                localMediaManager
+            )
             entries[key] = entry
             entry.start()
         }
@@ -142,6 +153,9 @@ class MediaDeviceManager @Inject constructor(
                     }
                 }
             }
+        // A device that is not yet connected but is expected to connect imminently. Because it's
+        // expected to connect imminently, it should be displayed as the current device.
+        private var aboutToConnectDeviceOverride: MediaDeviceData? = null
 
         @AnyThread
         fun start() = bgExecutor.execute {
@@ -197,8 +211,21 @@ class MediaDeviceManager @Inject constructor(
             }
         }
 
+        override fun onAboutToConnectDeviceChanged(deviceName: String?, deviceIcon: Drawable?) {
+            aboutToConnectDeviceOverride = if (deviceName == null || deviceIcon == null) {
+                null
+            } else {
+                MediaDeviceData(enabled = true, deviceIcon, deviceName)
+            }
+            updateCurrent()
+        }
+
         @WorkerThread
         private fun updateCurrent() {
+            if (aboutToConnectDeviceOverride != null) {
+                current = aboutToConnectDeviceOverride
+                return
+            }
             val device = localMediaManager.currentConnectedDevice
             val route = controller?.let { mr2manager.getRoutingSessionForMediaController(it) }
 

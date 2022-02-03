@@ -30,6 +30,7 @@ import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManagerFactory
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 
@@ -44,6 +45,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.any
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
@@ -71,6 +73,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Mock private lateinit var lmmFactory: LocalMediaManagerFactory
     @Mock private lateinit var lmm: LocalMediaManager
     @Mock private lateinit var mr2: MediaRouter2Manager
+    @Mock private lateinit var muteAwaitFactory: MediaMuteAwaitConnectionManagerFactory
     private lateinit var fakeFgExecutor: FakeExecutor
     private lateinit var fakeBgExecutor: FakeExecutor
     @Mock private lateinit var dumpster: DumpManager
@@ -88,8 +91,15 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     fun setUp() {
         fakeFgExecutor = FakeExecutor(FakeSystemClock())
         fakeBgExecutor = FakeExecutor(FakeSystemClock())
-        manager = MediaDeviceManager(controllerFactory, lmmFactory, mr2, fakeFgExecutor,
-                fakeBgExecutor, dumpster)
+        manager = MediaDeviceManager(
+                controllerFactory,
+                lmmFactory,
+                mr2,
+                muteAwaitFactory,
+                fakeFgExecutor,
+                fakeBgExecutor,
+                dumpster
+        )
         manager.addListener(listener)
 
         // Configure mocks.
@@ -261,6 +271,51 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         assertThat(fakeBgExecutor.runAllReady()).isEqualTo(1)
         assertThat(fakeFgExecutor.runAllReady()).isEqualTo(1)
         // THEN the update is dispatched to the listener
+        val data = captureDeviceData(KEY)
+        assertThat(data.enabled).isTrue()
+        assertThat(data.name).isEqualTo(DEVICE_NAME)
+        assertThat(data.icon).isEqualTo(icon)
+    }
+
+    @Test
+    fun onAboutToConnectDeviceChangedWithNonNullParams() {
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        // Run and reset the executors and listeners so we only focus on new events.
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+        reset(listener)
+
+        val deviceCallback = captureCallback()
+        // WHEN the about-to-connect device changes to non-null
+        val name = "AboutToConnectDeviceName"
+        val mockIcon = mock(Drawable::class.java)
+        deviceCallback.onAboutToConnectDeviceChanged(name, mockIcon)
+        assertThat(fakeFgExecutor.runAllReady()).isEqualTo(1)
+        // THEN the about-to-connect device is returned
+        val data = captureDeviceData(KEY)
+        assertThat(data.enabled).isTrue()
+        assertThat(data.name).isEqualTo(name)
+        assertThat(data.icon).isEqualTo(mockIcon)
+    }
+
+    @Test
+    fun onAboutToConnectDeviceChangedWithNullParams() {
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        val deviceCallback = captureCallback()
+        // First set a non-null about-to-connect device
+        deviceCallback.onAboutToConnectDeviceChanged(
+            "AboutToConnectDeviceName", mock(Drawable::class.java)
+        )
+        // Run and reset the executors and listeners so we only focus on new events.
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+        reset(listener)
+
+        // WHEN the about-to-connect device changes to null
+        deviceCallback.onAboutToConnectDeviceChanged(null, null)
+        assertThat(fakeFgExecutor.runAllReady()).isEqualTo(1)
+        // THEN the normal device is returned
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isTrue()
         assertThat(data.name).isEqualTo(DEVICE_NAME)
