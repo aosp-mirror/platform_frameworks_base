@@ -66,7 +66,122 @@ import java.util.List;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 /**
- * Reads and stores display-specific configurations.
+ *  Reads and stores display-specific configurations.
+ *  File format:
+ *  <pre>
+ *  {@code
+ *    <displayConfiguration>
+ *      <densityMap>
+ *        <density>
+ *          <height>480</height>
+ *          <width>720</width>
+ *          <density>120</density>
+ *        </density>
+ *        <density>
+ *          <height>720</height>
+ *          <width>1280</width>
+ *          <density>213</density>
+ *        </density>
+ *        <density>
+ *          <height>1080</height>
+ *          <width>1920</width>
+ *          <density>320</density>
+ *        </density>
+ *        <density>
+ *          <height>2160</height>
+ *          <width>3840</width>
+ *          <density>640</density>
+ *        </density>
+ *      </densityMap>
+ *
+ *      <screenBrightnessMap>
+ *        <point>
+ *          <value>0.0</value>
+ *          <nits>2.0</nits>
+ *        </point>
+ *        <point>
+ *          <value>0.62</value>
+ *          <nits>500.0</nits>
+ *        </point>
+ *        <point>
+ *          <value>1.0</value>
+ *          <nits>800.0</nits>
+ *        </point>
+ *      </screenBrightnessMap>
+ *
+ *      <screenBrightnessDefault>0.65</screenBrightnessDefault>
+ *
+ *      <thermalThrottling>
+ *        <brightnessThrottlingMap>
+ *          <brightnessThrottlingPoint>
+ *            <thermalStatus>severe</thermalStatus>
+ *            <brightness>0.1</brightness>
+ *          </brightnessThrottlingPoint>
+ *          <brightnessThrottlingPoint>
+ *            <thermalStatus>critical</thermalStatus>
+ *            <brightness>0.01</brightness>
+ *          </brightnessThrottlingPoint>
+ *        </brightnessThrottlingMap>
+ *      </thermalThrottling>
+ *
+ *      <highBrightnessMode enabled="true">
+ *        <transitionPoint>0.62</transitionPoint>
+ *        <minimumLux>10000</minimumLux>
+ *        <timing>
+ *          <timeWindowSecs>1800</timeWindowSecs> // Window in which we restrict HBM.
+ *          <timeMaxSecs>300</timeMaxSecs>        // Maximum time of HBM allowed in that window.
+ *          <timeMinSecs>60</timeMinSecs>         // Minimum time remaining required to switch
+ *        </timing>                               //   HBM on for.
+ *        <refreshRate>
+ *          <minimum>120</minimum>
+ *          <maximum>120</maximum>
+ *        </refreshRate>
+ *        <thermalStatusLimit>light</thermalStatusLimit>
+ *        <allowInLowPowerMode>false</allowInLowPowerMode>
+ *      </highBrightnessMode>
+ *
+ *      <quirks>
+ *       <quirk>canSetBrightnessViaHwc</quirk>
+ *      </quirks>
+ *
+ *      <screenBrightnessRampFastDecrease>0.01</screenBrightnessRampFastDecrease>
+ *      <screenBrightnessRampFastIncrease>0.02</screenBrightnessRampFastIncrease>
+ *      <screenBrightnessRampSlowDecrease>0.03</screenBrightnessRampSlowDecrease>
+ *      <screenBrightnessRampSlowIncrease>0.04</screenBrightnessRampSlowIncrease>
+ *
+ *      <lightSensor>
+ *        <type>android.sensor.light</type>
+ *        <name>1234 Ambient Light Sensor</name>
+ *      </lightSensor>
+ *      <proxSensor>
+ *        <type>android.sensor.proximity</type>
+ *        <name>1234 Proximity Sensor</name>
+ *      </proxSensor>
+ *
+ *      <ambientLightHorizonLong>10001</ambientLightHorizonLong>
+ *      <ambientLightHorizonShort>2001</ambientLightHorizonShort>
+ *
+ *      <displayBrightnessChangeThresholds>
+ *        <brighteningThresholds>
+ *          <minimum>0.001</minimum>  // Minimum change needed in screen brightness to brighten.
+ *        </brighteningThresholds>
+ *        <darkeningThresholds>
+ *          <minimum>0.002</minimum>  // Minimum change needed in screen brightness to darken.
+ *        </darkeningThresholds>
+ *      </displayBrightnessChangeThresholds>
+ *
+ *      <ambientBrightnessChangeThresholds>
+ *        <brighteningThresholds>
+ *          <minimum>0.003</minimum>  // Minimum change needed in ambient brightness to brighten.
+ *        </brighteningThresholds>
+ *        <darkeningThresholds>
+ *          <minimum>0.004</minimum>  // Minimum change needed in ambient brightness to darken.
+ *        </darkeningThresholds>
+ *      </ambientBrightnessChangeThresholds>
+ *
+ *    </displayConfiguration>
+ *  }
+ *  </pre>
  */
 public class DisplayDeviceConfig {
     private static final String TAG = "DisplayDeviceConfig";
