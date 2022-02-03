@@ -131,6 +131,13 @@ public interface MediaSessionRecordImpl extends AutoCloseable {
             KeyEvent ke, int sequenceId, ResultReceiver cb);
 
     /**
+     * Returns whether the media session can handle volume key events.
+     *
+     * @return True if this media session can handle volume key events, false otherwise.
+     */
+    boolean canHandleVolumeKey();
+
+    /**
      * Get session policies from custom policy provider set when MediaSessionRecord is instantiated.
      * If custom policy does not exist, will return null.
      */

@@ -157,7 +157,7 @@
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"Подтверждено"</string>
     <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"Нажмите \"Подтвердить\""</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Аутентификация выполнена"</string>
-    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Использовать PIN-код"</string>
+    <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"PIN-код"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Использовать графический ключ"</string>
     <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Использовать пароль"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"Неверный PIN-код."</string>

@@ -219,7 +219,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"უსადენო კავშირის ჩართვა"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"უსადენო ინტერნეტის გამორთვა"</string>
     <string name="screen_lock" msgid="2072642720826409809">"ეკრანის დაბლოკვა"</string>
-    <string name="power_off" msgid="4111692782492232778">"გამორთვ."</string>
+    <string name="power_off" msgid="4111692782492232778">"გამორთვა"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"მრეკავი გათიშულია"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"ვიბრაციის რეჟიმი"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"ზარი ჩართულია"</string>

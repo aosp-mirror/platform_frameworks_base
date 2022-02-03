@@ -223,7 +223,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"Vklopi brezžično omrežje"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"Izklopi brezžično omrežje"</string>
     <string name="screen_lock" msgid="2072642720826409809">"Zaklep zaslona"</string>
-    <string name="power_off" msgid="4111692782492232778">"Izklopi"</string>
+    <string name="power_off" msgid="4111692782492232778">"Izklop"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"Izklopi zvonjenje"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"Zvonjenje z vibriranjem"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"Vklopi zvonjenje"</string>

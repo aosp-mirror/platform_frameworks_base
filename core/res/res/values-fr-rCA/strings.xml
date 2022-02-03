@@ -551,10 +551,10 @@
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Autorise l\'application à apprendre le niveau de complexité de l\'écran de verrouillage (élevé, moyen, faible ou aucun), qui indique la gamme possible de longueur et de type de verrouillage d\'écran. L\'application peut aussi suggérer aux utilisateurs de mettre à jour l\'écran de verrouillage afin d\'utiliser un certain niveau de complexité, mais ils peuvent ignorer la suggestion. Notez que le verrouillage d\'écran n\'est pas stocké en texte brut pour de manière à ce que l\'application n\'ait pas accès au mot de passe exact."</string>
     <string name="permlab_useBiometric" msgid="6314741124749633786">"utiliser le matériel biométrique"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Permet à l\'application d\'utiliser du matériel biométrique pour l\'authentification"</string>
-    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"gérer le matériel d\'empreinte digitale"</string>
+    <string name="permlab_manageFingerprint" msgid="7432667156322821178">"gérer le lecteur d\'empreintes digitales"</string>
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Permet à l\'application de faire appel à des méthodes d\'ajout et de suppression de modèles d\'empreinte digitale que vous pouvez utiliser."</string>
-    <string name="permlab_useFingerprint" msgid="1001421069766751922">"utiliser le matériel d\'empreinte digitale"</string>
-    <string name="permdesc_useFingerprint" msgid="412463055059323742">"Permet à l\'application d\'utiliser du matériel d\'empreinte digitale pour l\'authentification"</string>
+    <string name="permlab_useFingerprint" msgid="1001421069766751922">"utiliser le lecteur d\'empreintes digitales"</string>
+    <string name="permdesc_useFingerprint" msgid="412463055059323742">"Permet à l\'application d\'utiliser le lecteur d\'empreintes digitales pour l\'authentification"</string>
     <string name="permlab_audioWrite" msgid="8501705294265669405">"modifier votre collection de musique"</string>
     <string name="permdesc_audioWrite" msgid="8057399517013412431">"Autorise l\'application à modifier votre collection de musique."</string>
     <string name="permlab_videoWrite" msgid="5940738769586451318">"modifier votre collection de vidéos"</string>
@@ -590,7 +590,7 @@
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Empreinte digitale authentifiée"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Visage authentifié"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Visage authentifié, veuillez appuyer sur le bouton Confirmer"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Matériel d\'empreinte digitale numérique indisponible."</string>
+    <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Lecteur d\'empreintes digitales indisponible."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Impossible de configurer l\'empreinte digitale"</string>
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Le temps attribué pour lire l\'empreinte digitale est écoulé. Veuillez réessayer."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Opération d\'empreinte digitale numérique annulée."</string>
@@ -1721,7 +1721,7 @@
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Réduction supplémentaire de la luminosité"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Touches de volume maintenues enfoncées. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> activé."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Touches de volume maintenues enfoncées. Service <xliff:g id="SERVICE_NAME">%1$s</xliff:g> désactivé."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Maintenez enfoncées les deux touches de volume pendant trois secondes pour utiliser <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Maintenez les deux touches de volume enfoncées pendant trois secondes pour utiliser <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Choisissez une fonctionnalité à utiliser lorsque vous touchez le bouton d\'accessibilité :"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Choisissez une fonctionnalité à utiliser lorsque vous utilisez le geste d\'accessibilité (balayer l\'écran de bas en haut avec deux doigts) :"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Choisissez une fonctionnalité à utiliser lorsque vous utilisez le geste d\'accessibilité (balayer l\'écran de bas en haut avec trois doigts) :"</string>

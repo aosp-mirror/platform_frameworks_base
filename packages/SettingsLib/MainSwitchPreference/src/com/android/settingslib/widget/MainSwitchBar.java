@@ -109,7 +109,7 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
             a.recycle();
         }
 
-        setBackground(true);
+        setBackground(mSwitch.isChecked());
     }
 
     @Override

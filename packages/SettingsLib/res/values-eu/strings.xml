@@ -220,7 +220,7 @@
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Konektatuta daudenak"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Gailuaren xehetasunak"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"Ahaztu"</string>
-    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Gailuaren erreferentzia-gako digitala: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
+    <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Gailuaren aztarna digitala: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Ezin izan da konektatu"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Ziurtatu <xliff:g id="DEVICE_NAME">%1$s</xliff:g> sare berera konektatuta dagoela"</string>
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Parekatu gailuarekin"</string>
@@ -524,7 +524,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Oraintxe"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Telefonoaren bozgorailua"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Telefono hau"</string>
-    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Arazoren bat izan da konektatzean. Itzali gailua eta pitz ezazu berriro."</string>
+    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Arazo bat izan da konektatzean. Itzali gailua eta pitz ezazu berriro."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Audio-gailu kableduna"</string>
     <string name="help_label" msgid="3528360748637781274">"Laguntza eta iritziak"</string>
     <string name="storage_category" msgid="2287342585424631813">"Biltegiratzea"</string>

@@ -26,7 +26,9 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.MediaMetadata;
+import android.media.MediaRouter2Manager;
 import android.media.Rating;
+import android.media.RoutingSessionInfo;
 import android.media.VolumeProvider;
 import android.media.session.ISession;
 import android.media.session.ISessionCallback;
@@ -50,6 +52,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 
@@ -121,6 +124,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
     private final SessionCb mSessionCb;
     private final MediaSessionService mService;
     private final Context mContext;
+    private final boolean mVolumeAdjustmentForRemoteGroupSessions;
 
     private final Object mLock = new Object();
     private final CopyOnWriteArrayList<ISessionControllerCallbackHolder>
@@ -180,6 +184,8 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mAudioAttrs = DEFAULT_ATTRIBUTES;
         mPolicies = policies;
+        mVolumeAdjustmentForRemoteGroupSessions = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_volumeAdjustmentForRemoteGroupSessions);
 
         // May throw RemoteException if the session app is killed.
         mSessionCb.mCb.asBinder().linkToDeath(this, 0);
@@ -285,35 +291,39 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                     asSystemService, useSuggested, previousFlagPlaySound);
         } else {
             if (mVolumeControlType == VolumeProvider.VOLUME_CONTROL_FIXED) {
-                // Nothing to do, the volume cannot be changed
-                return;
-            }
-            if (direction == AudioManager.ADJUST_TOGGLE_MUTE
+                if (DEBUG) {
+                    Log.d(TAG, "Session does not support volume adjustment");
+                }
+            } else if (direction == AudioManager.ADJUST_TOGGLE_MUTE
                     || direction == AudioManager.ADJUST_MUTE
                     || direction == AudioManager.ADJUST_UNMUTE) {
                 Log.w(TAG, "Muting remote playback is not supported");
-                return;
-            }
-            if (DEBUG) {
-                Log.w(TAG, "adjusting volume, pkg=" + packageName + ", asSystemService="
-                        + asSystemService + ", dir=" + direction);
-            }
-            mSessionCb.adjustVolume(packageName, pid, uid, asSystemService, direction);
+            } else {
+                if (DEBUG) {
+                    Log.w(TAG, "adjusting volume, pkg=" + packageName + ", asSystemService="
+                            + asSystemService + ", dir=" + direction);
+                }
+                mSessionCb.adjustVolume(packageName, pid, uid, asSystemService, direction);
 
-            int volumeBefore = (mOptimisticVolume < 0 ? mCurrentVolume : mOptimisticVolume);
-            mOptimisticVolume = volumeBefore + direction;
-            mOptimisticVolume = Math.max(0, Math.min(mOptimisticVolume, mMaxVolume));
-            mHandler.removeCallbacks(mClearOptimisticVolumeRunnable);
-            mHandler.postDelayed(mClearOptimisticVolumeRunnable, OPTIMISTIC_VOLUME_TIMEOUT);
-            if (volumeBefore != mOptimisticVolume) {
-                pushVolumeUpdate();
+                int volumeBefore = (mOptimisticVolume < 0 ? mCurrentVolume : mOptimisticVolume);
+                mOptimisticVolume = volumeBefore + direction;
+                mOptimisticVolume = Math.max(0, Math.min(mOptimisticVolume, mMaxVolume));
+                mHandler.removeCallbacks(mClearOptimisticVolumeRunnable);
+                mHandler.postDelayed(mClearOptimisticVolumeRunnable, OPTIMISTIC_VOLUME_TIMEOUT);
+                if (volumeBefore != mOptimisticVolume) {
+                    pushVolumeUpdate();
+                }
+
+                if (DEBUG) {
+                    Log.d(TAG, "Adjusted optimistic volume to " + mOptimisticVolume + " max is "
+                            + mMaxVolume);
+                }
             }
+            // Always notify, even if the volume hasn't changed. This is important to ensure that
+            // System UI receives an event if a hardware volume key is pressed but the session that
+            // handles it does not allow volume adjustment. Without such an event, System UI would
+            // not show volume controls to the user.
             mService.notifyRemoteVolumeChanged(flags, this);
-
-            if (DEBUG) {
-                Log.d(TAG, "Adjusted optimistic volume to " + mOptimisticVolume + " max is "
-                        + mMaxVolume);
-            }
         }
     }
 
@@ -337,25 +347,28 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             });
         } else {
             if (mVolumeControlType != VolumeProvider.VOLUME_CONTROL_ABSOLUTE) {
-                // Nothing to do. The volume can't be set directly.
-                return;
-            }
-            value = Math.max(0, Math.min(value, mMaxVolume));
-            mSessionCb.setVolumeTo(packageName, pid, uid, value);
+                if (DEBUG) {
+                    Log.d(TAG, "Session does not support setting volume");
+                }
+            } else {
+                value = Math.max(0, Math.min(value, mMaxVolume));
+                mSessionCb.setVolumeTo(packageName, pid, uid, value);
 
-            int volumeBefore = (mOptimisticVolume < 0 ? mCurrentVolume : mOptimisticVolume);
-            mOptimisticVolume = Math.max(0, Math.min(value, mMaxVolume));
-            mHandler.removeCallbacks(mClearOptimisticVolumeRunnable);
-            mHandler.postDelayed(mClearOptimisticVolumeRunnable, OPTIMISTIC_VOLUME_TIMEOUT);
-            if (volumeBefore != mOptimisticVolume) {
-                pushVolumeUpdate();
+                int volumeBefore = (mOptimisticVolume < 0 ? mCurrentVolume : mOptimisticVolume);
+                mOptimisticVolume = Math.max(0, Math.min(value, mMaxVolume));
+                mHandler.removeCallbacks(mClearOptimisticVolumeRunnable);
+                mHandler.postDelayed(mClearOptimisticVolumeRunnable, OPTIMISTIC_VOLUME_TIMEOUT);
+                if (volumeBefore != mOptimisticVolume) {
+                    pushVolumeUpdate();
+                }
+
+                if (DEBUG) {
+                    Log.d(TAG, "Set optimistic volume to " + mOptimisticVolume + " max is "
+                            + mMaxVolume);
+                }
             }
+            // Always notify, even if the volume hasn't changed.
             mService.notifyRemoteVolumeChanged(flags, this);
-
-            if (DEBUG) {
-                Log.d(TAG, "Set optimistic volume to " + mOptimisticVolume + " max is "
-                        + mMaxVolume);
-            }
         }
     }
 
@@ -446,6 +459,33 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             KeyEvent ke, int sequenceId, ResultReceiver cb) {
         return mSessionCb.sendMediaButton(packageName, pid, uid, asSystemService, ke, sequenceId,
                 cb);
+    }
+
+    @Override
+    public boolean canHandleVolumeKey() {
+        if (isPlaybackTypeLocal() || mVolumeAdjustmentForRemoteGroupSessions) {
+            return true;
+        }
+        MediaRouter2Manager mRouter2Manager = MediaRouter2Manager.getInstance(mContext);
+        List<RoutingSessionInfo> sessions =
+                mRouter2Manager.getRoutingSessions(mPackageName);
+        boolean foundNonSystemSession = false;
+        boolean isGroup = false;
+        for (RoutingSessionInfo session : sessions) {
+            if (!session.isSystemSession()) {
+                foundNonSystemSession = true;
+                int selectedRouteCount = session.getSelectedRoutes().size();
+                if (selectedRouteCount > 1) {
+                    isGroup = true;
+                    break;
+                }
+            }
+        }
+        if (!foundNonSystemSession) {
+            Log.d(TAG, "No routing session for " + mPackageName);
+            return false;
+        }
+        return !isGroup;
     }
 
     @Override

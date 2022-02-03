@@ -105,9 +105,9 @@
     <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"పరికరాన్ని పునఃప్రారంభించిన తర్వాత నమూనాను గీయాలి"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"డివైజ్‌ను పునఃప్రారంభించిన తర్వాత పిన్ నమోదు చేయాలి"</string>
     <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"పరికరాన్ని పునఃప్రారంభించిన తర్వాత పాస్‌వర్డ్‌ను నమోదు చేయాలి"</string>
-    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"అదనపు భద్రత కోసం నమూనాని గీయాలి"</string>
-    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"అదనపు భద్రత కోసం పిన్ నమోదు చేయాలి"</string>
-    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"అదనపు భద్రత కోసం పాస్‌వర్డ్‌ని నమోదు చేయాలి"</string>
+    <string name="kg_prompt_reason_timeout_pattern" msgid="9170360502528959889">"అదనపు సెక్యూరిటీ కోసం ఆకృతి అవసరం"</string>
+    <string name="kg_prompt_reason_timeout_pin" msgid="5945186097160029201">"అదనపు సెక్యూరిటీ కోసం పిన్ ఎంటర్ చేయాలి"</string>
+    <string name="kg_prompt_reason_timeout_password" msgid="2258263949430384278">"అదనపు సెక్యూరిటీ కోసం పాస్‌వర్డ్‌ను ఎంటర్ చేయాలి"</string>
     <string name="kg_prompt_reason_switch_profiles_pattern" msgid="1922016914701991230">"మీరు ప్రొఫైల్‌లను మార్చినప్పుడు నమూనాని గీయాలి"</string>
     <string name="kg_prompt_reason_switch_profiles_pin" msgid="6490434826361055400">"మీరు ప్రొఫైల్‌లను మార్చినప్పుడు పిన్‌ను నమోదు చేయాలి"</string>
     <string name="kg_prompt_reason_switch_profiles_password" msgid="1680374696393804441">"మీరు ప్రొఫైల్‌లను మార్చినప్పుడు పాస్‌వర్డ్‌ని నమోదు చేయాలి"</string>

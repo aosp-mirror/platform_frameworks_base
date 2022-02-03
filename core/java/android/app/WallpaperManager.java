@@ -226,6 +226,14 @@ public class WallpaperManager {
      */
     public static final String EXTRA_NEW_WALLPAPER_ID = "android.service.wallpaper.extra.ID";
 
+    /**
+     * Extra passed on {@link Intent.ACTION_WALLPAPER_CHANGED} indicating if wallpaper was set from
+     * a foreground app.
+     * @hide
+     */
+    public static final String EXTRA_FROM_FOREGROUND_APP =
+            "android.service.wallpaper.extra.FROM_FOREGROUND_APP";
+
     // flags for which kind of wallpaper to act on
 
     /** @hide */
