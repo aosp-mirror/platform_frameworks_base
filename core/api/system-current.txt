@@ -166,6 +166,7 @@ package android {
     field public static final String MANAGE_CONTENT_SUGGESTIONS = "android.permission.MANAGE_CONTENT_SUGGESTIONS";
     field public static final String MANAGE_DEBUGGING = "android.permission.MANAGE_DEBUGGING";
     field public static final String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
+    field public static final String MANAGE_ETHERNET_NETWORKS = "android.permission.MANAGE_ETHERNET_NETWORKS";
     field public static final String MANAGE_FACTORY_RESET_PROTECTION = "android.permission.MANAGE_FACTORY_RESET_PROTECTION";
     field public static final String MANAGE_GAME_ACTIVITY = "android.permission.MANAGE_GAME_ACTIVITY";
     field public static final String MANAGE_GAME_MODE = "android.permission.MANAGE_GAME_MODE";
