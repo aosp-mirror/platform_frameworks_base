@@ -11600,6 +11600,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
+                || isFinancedDeviceOwner(caller)
                 || isProfileOwner(caller)
                 || (parent && isProfileOwnerOfOrganizationOwnedDevice(caller)));
 
@@ -13975,7 +13976,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         synchronized (getLockObject()) {
             if (isFinancedDeviceOwner(caller)) {
-                enforceCanSetPermissionGrantOnFinancedDevice(packageName, permission);
+                enforcePermissionGrantStateOnFinancedDevice(packageName, permission);
             }
             long ident = mInjector.binderClearCallingIdentity();
             try {
@@ -14036,14 +14037,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void enforceCanSetPermissionGrantOnFinancedDevice(
+    private void enforcePermissionGrantStateOnFinancedDevice(
             String packageName, String permission) {
         if (!Manifest.permission.READ_PHONE_STATE.equals(permission)) {
-            throw new SecurityException("Cannot grant " + permission
-                    + " when managing a financed device");
+            throw new SecurityException(permission + " cannot be used when managing a financed"
+                    + " device for permission grant state");
         } else if (!mOwners.getDeviceOwnerPackageName().equals(packageName)) {
-            throw new SecurityException("Cannot grant permission to a package that is not"
-                    + " the device owner");
+            throw new SecurityException("Device owner package is the only package that can be used"
+                    + " for permission grant state when managing a financed device");
         }
     }
 
@@ -14052,10 +14053,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             String packageName, String permission) throws RemoteException {
         final CallerIdentity caller = getCallerIdentity(admin, callerPackage);
         Preconditions.checkCallAuthorization(isSystemUid(caller) || (caller.hasAdminComponent()
-                && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
+                && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)
+                || isFinancedDeviceOwner(caller)))
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_PERMISSION_GRANT)));
 
         synchronized (getLockObject()) {
+            if (isFinancedDeviceOwner(caller)) {
+                enforcePermissionGrantStateOnFinancedDevice(packageName, permission);
+            }
             return mInjector.binderWithCleanCallingIdentity(() -> {
                 int granted;
                 if (getTargetSdk(caller.getPackageName(), caller.getUserId())
