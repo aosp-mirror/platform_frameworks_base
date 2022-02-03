@@ -204,5 +204,7 @@
         <attr name="singleLineVerticalPadding" format="dimension" />
         <attr name="textViewId" format="reference" />
     </declare-styleable>
+
+    <attr name="overlayButtonTextColor" format="color" />
 </resources>
 

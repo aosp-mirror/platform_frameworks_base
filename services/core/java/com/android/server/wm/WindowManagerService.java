@@ -222,6 +222,7 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.MergedConfiguration;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 import android.util.TypedValue;
@@ -586,6 +587,20 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<WindowState> mResizingWindows = new ArrayList<>();
 
     /**
+     * Windows whose animations have ended and now must be removed.
+     */
+    final ArrayList<WindowState> mPendingRemove = new ArrayList<>();
+
+    /**
+     * Used when processing mPendingRemove to avoid working on the original array.
+     */
+    WindowState[] mPendingRemoveTmp = new WindowState[20];
+
+    // TODO: use WindowProcessController once go/wm-unified is done.
+    /** Mapping of process pids to configurations */
+    final SparseArray<Configuration> mProcessConfigurations = new SparseArray<>();
+
+    /**
      * Mapping of displayId to {@link DisplayImePolicy}.
      * Note that this can be accessed without holding the lock.
      */
@@ -683,6 +698,7 @@ public class WindowManagerService extends IWindowManager.Stub
             () -> mDisplayRotationController = null;
 
     final DisplayWindowListenerController mDisplayNotificationController;
+    final TaskSystemBarsListenerController mTaskSystemBarsListenerController;
 
     boolean mDisplayFrozen = false;
     long mDisplayFreezeTime = 0;
@@ -1265,6 +1281,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mScreenFrozenLock.setReferenceCounted(false);
 
         mDisplayNotificationController = new DisplayWindowListenerController(this);
+        mTaskSystemBarsListenerController = new TaskSystemBarsListenerController();
 
         mActivityManager = ActivityManager.getService();
         mActivityTaskManager = ActivityTaskManager.getService();
@@ -2036,6 +2053,7 @@ public class WindowManagerService extends IWindowManager.Stub
             dc.mWinRemovedSinceNullFocus.add(win);
         }
         mEmbeddedWindowController.onWindowRemoved(win);
+        mPendingRemove.remove(win);
         mResizingWindows.remove(win);
         updateNonSystemOverlayWindowsVisibilityIfNeeded(win, false /* surfaceShown */);
         mWindowsChanged = true;
@@ -6364,6 +6382,23 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         }
+        if (mPendingRemove.size() > 0) {
+            pw.println();
+            pw.println("  Remove pending for:");
+            for (int i=mPendingRemove.size()-1; i>=0; i--) {
+                WindowState w = mPendingRemove.get(i);
+                if (windows == null || windows.contains(w)) {
+                    pw.print("  Remove #"); pw.print(i); pw.print(' ');
+                            pw.print(w);
+                    if (dumpAll) {
+                        pw.println(":");
+                        w.dump(pw, "    ", true);
+                    } else {
+                        pw.println();
+                    }
+                }
+            }
+        }
         if (mForceRemoves != null && mForceRemoves.size() > 0) {
             pw.println();
             pw.println("  Windows force removing:");
@@ -7587,6 +7622,20 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mGlobalLock) {
                 getDefaultDisplayContentLocked().mAppTransition.registerListenerLocked(listener);
                 mAtmService.getTransitionController().registerLegacyListener(listener);
+            }
+        }
+
+        @Override
+        public void registerTaskSystemBarsListener(TaskSystemBarsListener listener) {
+            synchronized (mGlobalLock) {
+                mTaskSystemBarsListenerController.registerListener(listener);
+            }
+        }
+
+        @Override
+        public void unregisterTaskSystemBarsListener(TaskSystemBarsListener listener) {
+            synchronized (mGlobalLock) {
+                mTaskSystemBarsListenerController.unregisterListener(listener);
             }
         }
 

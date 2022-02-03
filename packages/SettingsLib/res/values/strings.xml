@@ -1562,4 +1562,8 @@
 
     <!-- Title for a screen allowing the user to choose a profile picture. [CHAR LIMIT=NONE] -->
     <string name="avatar_picker_title">Choose a profile picture</string>
+
+    <!-- Content description for a default user icon. [CHAR LIMIT=NONE] -->
+    <string name="default_user_icon_description">Default user icon</string>
+
 </resources>

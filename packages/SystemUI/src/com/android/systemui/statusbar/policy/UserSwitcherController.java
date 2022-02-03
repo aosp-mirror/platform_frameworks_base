@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.policy;
 import static android.os.UserManager.SWITCHABILITY_STATUS_OK;
 
 import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
-import static com.android.systemui.DejankUtils.whitelistIpcs;
 
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -425,22 +424,6 @@ public class UserSwitcherController implements Dumpable {
 
     public boolean isSimpleUserSwitcher() {
         return mSimpleUserSwitcher;
-    }
-
-    public boolean useFullscreenUserSwitcher() {
-        // Use adb to override:
-        // adb shell settings put system enable_fullscreen_user_switcher 0  # Turn it off.
-        // adb shell settings put system enable_fullscreen_user_switcher 1  # Turn it on.
-        // Restart SystemUI or adb reboot.
-        final int DEFAULT = -1;
-        final int overrideUseFullscreenUserSwitcher =
-                whitelistIpcs(() -> Settings.System.getInt(mContext.getContentResolver(),
-                        "enable_fullscreen_user_switcher", DEFAULT));
-        if (overrideUseFullscreenUserSwitcher != DEFAULT) {
-            return overrideUseFullscreenUserSwitcher != 0;
-        }
-        // Otherwise default to the build setting.
-        return mContext.getResources().getBoolean(R.bool.config_enableFullscreenUserSwitcher);
     }
 
     public void setResumeUserOnGuestLogout(boolean resume) {

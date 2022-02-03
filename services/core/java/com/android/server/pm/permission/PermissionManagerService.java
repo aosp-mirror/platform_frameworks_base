@@ -51,6 +51,7 @@ import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -613,11 +614,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             int granted = PermissionManagerService.this.checkUidPermission(uid,
                     POST_NOTIFICATIONS);
             AndroidPackage pkg = mPackageManagerInt.getPackage(uid);
-            if (granted != PermissionManager.PERMISSION_GRANTED) {
+            if (granted != PackageManager.PERMISSION_GRANTED
+                    && pkg.getTargetSdkVersion() >= Build.VERSION_CODES.M) {
                 int flags = PermissionManagerService.this.getPermissionFlags(pkg.getPackageName(),
                         POST_NOTIFICATIONS, UserHandle.getUserId(uid));
                 if ((flags & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
-                    return PermissionManager.PERMISSION_GRANTED;
+                    return PackageManager.PERMISSION_GRANTED;
                 }
             }
             return granted;

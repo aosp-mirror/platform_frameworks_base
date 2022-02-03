@@ -38,6 +38,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.testing.TestableResources;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
@@ -110,6 +111,8 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     @Mock
     private SessionTracker mSessionTracker;
+    @Mock
+    private LatencyTracker mLatencyTracker;
     private BiometricUnlockController mBiometricUnlockController;
 
     @Before
@@ -133,7 +136,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 mMetricsLogger, mDumpManager, mPowerManager,
                 mNotificationMediaManager, mWakefulnessLifecycle, mScreenLifecycle,
                 mAuthController, mStatusBarStateController, mKeyguardUnlockAnimationController,
-                mSessionTracker);
+                mSessionTracker, mLatencyTracker);
         mBiometricUnlockController.setKeyguardViewController(mStatusBarKeyguardViewManager);
         mBiometricUnlockController.setBiometricModeListener(mBiometricModeListener);
     }

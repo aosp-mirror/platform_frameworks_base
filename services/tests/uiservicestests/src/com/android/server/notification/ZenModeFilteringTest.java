@@ -50,11 +50,13 @@ import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.ArraySet;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.util.NotificationMessagingUtil;
 import com.android.server.UiServiceTestCase;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -72,6 +74,8 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
 
     @Mock private TelephonyManager mTelephonyManager;
 
+    private long mTestStartTime;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -79,6 +83,13 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
 
         // for repeat callers / matchesCallFilter
         mContext.addMockSystemService(TelephonyManager.class, mTelephonyManager);
+        mTestStartTime = System.currentTimeMillis();
+    }
+
+    @After
+    public void tearDown() {
+        // make sure to get rid of any data stored in repeat callers
+        mZenModeFiltering.cleanUpCallersAfter(mTestStartTime);
     }
 
     private NotificationRecord getNotificationRecord() {
@@ -108,7 +119,10 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         return extras;
     }
 
-    private NotificationRecord getNotificationRecordWithPeople(String[] people) {
+    // Create a notification record with the people String array as the
+    // bundled extras, and the numbers ArraySet as additional phone numbers.
+    private NotificationRecord getRecordWithPeopleInfo(String[] people,
+            ArraySet<String> numbers) {
         // set up notification record
         NotificationRecord r = mock(NotificationRecord.class);
         StatusBarNotification sbn = mock(StatusBarNotification.class);
@@ -116,6 +130,7 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         notification.extras = makeExtrasBundleWithPeople(people);
         when(sbn.getNotification()).thenReturn(notification);
         when(r.getSbn()).thenReturn(sbn);
+        when(r.getPhoneNumbers()).thenReturn(numbers);
         return r;
     }
 
@@ -339,7 +354,7 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         // after calls given an email with an exact string match, make sure that
         // matchesCallFilter returns the right thing
         String[] mailSource = new String[]{"mailto:hello.world"};
-        mZenModeFiltering.recordCall(getNotificationRecordWithPeople(mailSource));
+        mZenModeFiltering.recordCall(getRecordWithPeopleInfo(mailSource, null));
 
         // set up policy to only allow repeat callers
         Policy policy = new Policy(
@@ -362,7 +377,7 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         when(mTelephonyManager.getNetworkCountryIso()).thenReturn("us");
 
         String[] telSource = new String[]{"tel:+1-617-555-1212"};
-        mZenModeFiltering.recordCall(getNotificationRecordWithPeople(telSource));
+        mZenModeFiltering.recordCall(getRecordWithPeopleInfo(telSource, null));
 
         // set up policy to only allow repeat callers
         Policy policy = new Policy(
@@ -406,7 +421,7 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         when(mTelephonyManager.getNetworkCountryIso()).thenReturn("us");
 
         String[] telSource = new String[]{"tel:%2B16175551212"};
-        mZenModeFiltering.recordCall(getNotificationRecordWithPeople(telSource));
+        mZenModeFiltering.recordCall(getRecordWithPeopleInfo(telSource, null));
 
         // set up policy to only allow repeat callers
         Policy policy = new Policy(
@@ -419,25 +434,64 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         Bundle different1 = makeExtrasBundleWithPeople(new String[]{"tel:%2B16175553434"});
         Bundle different2 = makeExtrasBundleWithPeople(new String[]{"tel:+16175553434"});
 
-        assertTrue("same number should match",
+        assertTrue("same number 1 should match",
                 ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                         policy, UserHandle.SYSTEM,
                         same1, null, 0, 0));
-        assertTrue("same number should match",
+        assertTrue("same number 2 should match",
                 ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                         policy, UserHandle.SYSTEM,
                         same2, null, 0, 0));
-        assertTrue("same number should match",
+        assertTrue("same number 3 should match",
                 ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                         policy, UserHandle.SYSTEM,
                         same3, null, 0, 0));
-        assertFalse("different number should not match",
+        assertFalse("different number 1 should not match",
                 ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                         policy, UserHandle.SYSTEM,
                         different1, null, 0, 0));
-        assertFalse("different number should not match",
+        assertFalse("different number 2 should not match",
                 ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                         policy, UserHandle.SYSTEM,
                         different2, null, 0, 0));
+    }
+
+    @Test
+    public void testMatchesCallFilter_repeatCallers_viaRecordPhoneNumbers() {
+        // make sure that phone numbers that are passed in via the NotificationRecord's
+        // cached phone numbers field (from a contact lookup if the record is provided a contact
+        // uri) also get recorded in the repeat callers list.
+
+        // set up telephony manager behavior
+        when(mTelephonyManager.getNetworkCountryIso()).thenReturn("us");
+
+        String[] contactSource = new String[]{"content://contacts/lookup/uri-here"};
+        ArraySet<String> contactNumbers = new ArraySet<>(
+                new String[]{"1-617-555-1212", "1-617-555-3434"});
+        NotificationRecord record = getRecordWithPeopleInfo(contactSource, contactNumbers);
+        record.mergePhoneNumbers(contactNumbers);
+        mZenModeFiltering.recordCall(record);
+
+        // set up policy to only allow repeat callers
+        Policy policy = new Policy(
+                PRIORITY_CATEGORY_REPEAT_CALLERS, 0, 0, 0, CONVERSATION_SENDERS_NONE);
+
+        // both phone numbers should register here
+        Bundle tel1 = makeExtrasBundleWithPeople(new String[]{"tel:+1-617-555-1212"});
+        Bundle tel2 = makeExtrasBundleWithPeople(new String[]{"tel:16175553434"});
+        Bundle different = makeExtrasBundleWithPeople(new String[]{"tel:16175555656"});
+
+        assertTrue("contact number 1 should match",
+                ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                        policy, UserHandle.SYSTEM,
+                        tel1, null, 0, 0));
+        assertTrue("contact number 2 should match",
+                ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                        policy, UserHandle.SYSTEM,
+                        tel2, null, 0, 0));
+        assertFalse("different number should not match",
+                ZenModeFiltering.matchesCallFilter(mContext, ZEN_MODE_IMPORTANT_INTERRUPTIONS,
+                        policy, UserHandle.SYSTEM,
+                        different, null, 0, 0));
     }
 }

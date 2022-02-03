@@ -24,8 +24,6 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.res.Resources;
 
-import com.android.settingslib.R;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,10 +51,15 @@ public final class DreamBackendTest {
 
         final Resources res = mock(Resources.class);
         when(mContext.getResources()).thenReturn(res);
-        when(res.getIntArray(R.array.config_supportedDreamComplications)).thenReturn(
+        when(res.getIntArray(
+                com.android.internal.R.array.config_supportedDreamComplications)).thenReturn(
                 SUPPORTED_DREAM_COMPLICATIONS);
-        when(res.getIntArray(R.array.config_dreamComplicationsEnabledByDefault)).thenReturn(
+        when(res.getIntArray(
+                com.android.internal.R.array.config_dreamComplicationsEnabledByDefault)).thenReturn(
                 DEFAULT_DREAM_COMPLICATIONS);
+        when(res.getStringArray(
+                com.android.internal.R.array.config_disabledDreamComponents)).thenReturn(
+                new String[]{});
         mBackend = new DreamBackend(mContext);
     }
 

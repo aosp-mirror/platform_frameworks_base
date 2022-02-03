@@ -2885,7 +2885,7 @@
              <code>public void sayHello(View v)</code> method of your context
              (typically, your Activity).
              {@deprecated View actually traverses the Context
-             hierarchy looking for the relevant method, which is fragile (an intermediate 
+             hierarchy looking for the relevant method, which is fragile (an intermediate
              ContextWrapper adding a same-named method would change behavior) and restricts
              bytecode optimizers such as R8. Instead, use View.setOnClickListener.}-->
         <attr name="onClick" format="string" />
@@ -6975,6 +6975,34 @@
         <attr name="toBottom" format="fraction" />
     </declare-styleable>
 
+    <!-- Defines the ExtendAnimation used to extend windows during animations -->
+    <declare-styleable name="ExtendAnimation">
+        <!-- Defines the amount a window should be extended outward from the left at
+             the start of the animation. -->
+        <attr name="fromExtendLeft" format="float|fraction" />
+        <!-- Defines the amount a window should be extended outward from the top at
+             the start of the animation. -->
+        <attr name="fromExtendTop" format="float|fraction" />
+        <!-- Defines the amount a window should be extended outward from the right at
+             the start of the animation. -->
+        <attr name="fromExtendRight" format="float|fraction" />
+        <!-- Defines the amount a window should be extended outward from the bottom at
+             the start of the animation. -->
+        <attr name="fromExtendBottom" format="float|fraction" />
+        <!-- Defines the amount a window should be extended outward from the left by
+             the end of the animation by transitioning from the fromExtendLeft amount. -->
+        <attr name="toExtendLeft" format="float|fraction" />
+        <!-- Defines the amount a window should be extended outward from the top by
+             the end of the animation by transitioning from the fromExtendTop amount. -->
+        <attr name="toExtendTop" format="float|fraction" />
+        <!-- Defines the amount a window should be extended outward from the right by
+             the end of the animation by transitioning from the fromExtendRight amount. -->
+        <attr name="toExtendRight" format="float|fraction" />
+        <!-- Defines the amount a window should be extended outward from the bottom by
+             the end of the animation by transitioning from the fromExtendBottom amount. -->
+        <attr name="toExtendBottom" format="float|fraction" />
+    </declare-styleable>
+
     <declare-styleable name="LayoutAnimation">
         <!-- Fraction of the animation duration used to delay the beginning of
          the animation of each child. -->
@@ -7827,7 +7855,7 @@
 
         <!-- Name of a method on the Context used to inflate the menu that will be
              called when the item is clicked.
-             {@deprecated Menu actually traverses the Context hierarchy looking for the 
+             {@deprecated Menu actually traverses the Context hierarchy looking for the
              relevant method, which is fragile (an intermediate ContextWrapper adding a
              same-named method would change behavior) and restricts bytecode optimizers
              such as R8. Instead, use MenuItem.setOnMenuItemClickListener.} -->
@@ -8845,6 +8873,22 @@
     <declare-styleable name="GameService">
         <!-- The service that hosts active game sessions.  This is required. -->
         <attr name="gameSessionService" format="string" />
+    </declare-styleable>
+
+    <!-- Use <code>game-mode-config</code> as the root tag of the XML resource that
+         describes a GameModeConfig.
+         Described here are the attributes that can be included in that tag. -->
+    <declare-styleable name="GameModeConfig">
+        <!-- Set true to opt in BATTERY mode. -->
+        <attr name="supportsBatteryGameMode" format="boolean" />
+        <!-- Set true to opt in PERFORMANCE mode. -->
+        <attr name="supportsPerformanceGameMode" format="boolean" />
+        <!-- Set true to enable ANGLE. -->
+        <attr name="allowGameAngleDriver" format="boolean" />
+        <!-- Set true to allow resolution downscaling intervention. -->
+        <attr name="allowGameDownscaling" format="boolean" />
+        <!-- Set true to allow FPS override intervention. -->
+        <attr name="allowGameFpsOverride" format="boolean" />
     </declare-styleable>
 
     <!-- Use <code>voice-enrollment-application</code>

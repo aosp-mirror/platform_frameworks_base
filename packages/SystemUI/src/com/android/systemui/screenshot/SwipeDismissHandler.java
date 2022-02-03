@@ -16,6 +16,7 @@
 
 package com.android.systemui.screenshot;
 
+import static com.android.systemui.screenshot.LogConfig.DEBUG_ANIM;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS;
 
 import android.animation.Animator;
@@ -137,10 +138,20 @@ public class SwipeDismissHandler implements View.OnTouchListener {
     }
 
     /**
+     * Return whether the view is currently being dismissed
+     */
+    public boolean isDismissing() {
+        return (mDismissAnimation != null && mDismissAnimation.isRunning());
+    }
+
+    /**
      * Cancel the currently-running dismissal animation, if any.
      */
     public void cancel() {
-        if (mDismissAnimation != null && mDismissAnimation.isRunning()) {
+        if (isDismissing()) {
+            if (DEBUG_ANIM) {
+                Log.d(TAG, "cancelling dismiss animation");
+            }
             mDismissAnimation.cancel();
         }
     }
@@ -182,7 +193,13 @@ public class SwipeDismissHandler implements View.OnTouchListener {
         // make sure the UI gets all the way off the screen in the direction of movement
         // (the actions container background is guaranteed to be both the leftmost and
         // rightmost UI element in LTR and RTL)
-        float finalX = startX <= 0 ? -1 * mView.getRight() : mDisplayMetrics.widthPixels;
+        float finalX;
+        int layoutDir = mView.getContext().getResources().getConfiguration().getLayoutDirection();
+        if (startX > 0 || (startX == 0 && layoutDir == View.LAYOUT_DIRECTION_RTL)) {
+            finalX = mDisplayMetrics.widthPixels;
+        } else {
+            finalX = -1 * mView.getRight();
+        }
         float distance = Math.abs(finalX - startX);
 
         anim.addUpdateListener(animation -> {

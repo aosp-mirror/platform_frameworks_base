@@ -35,6 +35,7 @@ import android.hardware.lights.Light;
 import android.hardware.lights.LightState;
 import android.hardware.lights.LightsManager;
 import android.hardware.lights.LightsRequest;
+import android.os.Binder;
 import android.os.BlockUntrustedTouchesMode;
 import android.os.Build;
 import android.os.CombinedVibration;
@@ -1211,7 +1212,7 @@ public final class InputManager {
      */
     public InputMonitor monitorGestureInput(String name, int displayId) {
         try {
-            return mIm.monitorGestureInput(name, displayId);
+            return mIm.monitorGestureInput(new Binder(), name, displayId);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

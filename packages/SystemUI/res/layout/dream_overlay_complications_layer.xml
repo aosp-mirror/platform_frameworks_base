@@ -20,34 +20,6 @@
     android:id="@+id/dream_overlay_complications_layer"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <TextClock
-        android:id="@+id/time_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-thin"
-        android:format12Hour="h:mm"
-        android:format24Hour="kk:mm"
-        android:shadowColor="#B2000000"
-        android:shadowRadius="2.0"
-        android:singleLine="true"
-        android:textSize="72sp"
-        android:textColor="@android:color/white"
-        app:layout_constraintBottom_toTopOf="@+id/date_view"
-        app:layout_constraintStart_toStartOf="parent" />
-    <TextClock
-        android:id="@+id/date_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:shadowColor="#B2000000"
-        android:shadowRadius="2.0"
-        android:format12Hour="EEE, MMM d"
-        android:format24Hour="EEE, MMM d"
-        android:singleLine="true"
-        android:textSize="18sp"
-        android:textColor="@android:color/white"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/time_view"
-        app:layout_constraintStart_toStartOf="@+id/time_view" />
     <androidx.constraintlayout.widget.Guideline
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

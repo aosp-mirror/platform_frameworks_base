@@ -125,8 +125,9 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var settings: View
     private lateinit var settingsText: TextView
     private lateinit var cancel: View
+    private lateinit var cancelText: TextView
     private lateinit var dismiss: FrameLayout
-    private lateinit var dismissLabel: View
+    private lateinit var dismissText: TextView
 
     private lateinit var session: MediaSession
     private val device = MediaDeviceData(true, null, DEVICE_NAME)
@@ -163,8 +164,9 @@ public class MediaControlPanelTest : SysuiTestCase() {
         settings = View(context)
         settingsText = TextView(context)
         cancel = View(context)
+        cancelText = TextView(context)
         dismiss = FrameLayout(context)
-        dismissLabel = View(context)
+        dismissText = TextView(context)
         initPlayerHolderMocks()
         initSessionHolderMocks()
 
@@ -244,13 +246,15 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(holder.settings).thenReturn(settings)
         whenever(holder.settingsText).thenReturn(settingsText)
         whenever(holder.cancel).thenReturn(cancel)
+        whenever(holder.cancelText).thenReturn(cancelText)
         whenever(holder.dismiss).thenReturn(dismiss)
-        whenever(holder.dismissLabel).thenReturn(dismissLabel)
+        whenever(holder.dismissText).thenReturn(dismissText)
     }
 
     /** Mock view holder for session player */
     private fun initSessionHolderMocks() {
         whenever(sessionHolder.player).thenReturn(view)
+        whenever(sessionHolder.albumView).thenReturn(albumView)
         whenever(sessionHolder.appIcon).thenReturn(appIcon)
         whenever(sessionHolder.titleText).thenReturn(titleText)
         whenever(sessionHolder.artistText).thenReturn(artistText)
@@ -284,8 +288,9 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(sessionHolder.settings).thenReturn(settings)
         whenever(sessionHolder.settingsText).thenReturn(settingsText)
         whenever(sessionHolder.cancel).thenReturn(cancel)
+        whenever(sessionHolder.cancelText).thenReturn(cancelText)
         whenever(sessionHolder.dismiss).thenReturn(dismiss)
-        whenever(sessionHolder.dismissLabel).thenReturn(dismissLabel)
+        whenever(sessionHolder.dismissText).thenReturn(dismissText)
     }
 
     @After

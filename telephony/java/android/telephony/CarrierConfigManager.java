@@ -4540,9 +4540,7 @@ public class CarrierConfigManager {
      * Passing this value as {@link #KEY_SUBSCRIPTION_GROUP_UUID_STRING} will remove the
      * subscription from a group instead of adding it to a group.
      *
-     * TODO: Expose in a future release.
-     *
-     * @hide
+     * <p>This value will work all the way back to {@link android.os.Build.VERSION_CODES#Q}.
      */
     public static final String REMOVE_GROUP_UUID_STRING = "00000000-0000-0000-0000-000000000000";
 
@@ -4555,9 +4553,7 @@ public class CarrierConfigManager {
      * <p>If set to {@link #REMOVE_GROUP_UUID_STRING}, then the subscription will be removed from
      * its current group.
      *
-     * TODO: unhide this key.
-     *
-     * @hide
+     * <p>This key will work all the way back to {@link android.os.Build.VERSION_CODES#Q}.
      */
     public static final String KEY_SUBSCRIPTION_GROUP_UUID_STRING =
             "subscription_group_uuid_string";
@@ -4605,17 +4601,15 @@ public class CarrierConfigManager {
             "data_switch_validation_min_gap_long";
 
     /**
-    * A boolean property indicating whether this subscription should be managed as an opportunistic
-    * subscription.
-    *
-    * If true, then this subscription will be selected based on available coverage and will not be
-    * available for a user in settings menus for selecting macro network providers. If unset,
-    * defaults to “false”.
-    *
-    * TODO: unhide this key.
-    *
-    * @hide
-    */
+     * A boolean property indicating whether this subscription should be managed as an opportunistic
+     * subscription.
+     *
+     * If true, then this subscription will be selected based on available coverage and will not be
+     * available for a user in settings menus for selecting macro network providers. If unset,
+     * defaults to “false”.
+     *
+     * <p>This key will work all the way back to {@link android.os.Build.VERSION_CODES#Q}.
+     */
     public static final String KEY_IS_OPPORTUNISTIC_SUBSCRIPTION_BOOL =
             "is_opportunistic_subscription_bool";
 

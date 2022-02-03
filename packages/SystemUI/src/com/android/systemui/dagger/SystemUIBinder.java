@@ -27,6 +27,9 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.clipboardoverlay.ClipboardListener;
 import com.android.systemui.dreams.DreamOverlayRegistrant;
 import com.android.systemui.dreams.SmartSpaceComplication;
+import com.android.systemui.dreams.complication.DreamClockDateComplication;
+import com.android.systemui.dreams.complication.DreamClockTimeComplication;
+import com.android.systemui.dreams.complication.DreamWeatherComplication;
 import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
@@ -234,4 +237,25 @@ public abstract class SystemUIBinder {
     @ClassKey(MediaDreamSentinel.class)
     public abstract CoreStartable bindMediaDreamSentinel(
             MediaDreamSentinel sentinel);
+
+    /** Inject into DreamClockTimeComplication.Registrant */
+    @Binds
+    @IntoMap
+    @ClassKey(DreamClockTimeComplication.Registrant.class)
+    public abstract CoreStartable bindDreamClockTimeComplicationRegistrant(
+            DreamClockTimeComplication.Registrant registrant);
+
+    /** Inject into DreamClockDateComplication.Registrant */
+    @Binds
+    @IntoMap
+    @ClassKey(DreamClockDateComplication.Registrant.class)
+    public abstract CoreStartable bindDreamClockDateComplicationRegistrant(
+            DreamClockDateComplication.Registrant registrant);
+
+    /** Inject into DreamWeatherComplication.Registrant */
+    @Binds
+    @IntoMap
+    @ClassKey(DreamWeatherComplication.Registrant.class)
+    public abstract CoreStartable bindDreamWeatherComplicationRegistrant(
+            DreamWeatherComplication.Registrant registrant);
 }

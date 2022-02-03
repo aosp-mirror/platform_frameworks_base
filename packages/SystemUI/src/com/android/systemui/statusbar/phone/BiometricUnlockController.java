@@ -180,6 +180,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private final MetricsLogger mMetricsLogger;
     private final AuthController mAuthController;
     private final StatusBarStateController mStatusBarStateController;
+    private final LatencyTracker mLatencyTracker;
 
     private long mLastFpFailureUptimeMillis;
     private int mNumConsecutiveFpFailures;
@@ -281,7 +282,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             AuthController authController,
             StatusBarStateController statusBarStateController,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
-            SessionTracker sessionTracker) {
+            SessionTracker sessionTracker,
+            LatencyTracker latencyTracker) {
         mContext = context;
         mPowerManager = powerManager;
         mShadeController = shadeController;
@@ -289,6 +291,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mDozeParameters = dozeParameters;
         mUpdateMonitor.registerCallback(this);
         mMediaManager = notificationMediaManager;
+        mLatencyTracker = latencyTracker;
         wakefulnessLifecycle.addObserver(mWakefulnessObserver);
         screenLifecycle.addObserver(mScreenObserver);
 
@@ -343,13 +346,13 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     public void onBiometricAcquired(BiometricSourceType biometricSourceType) {
         Trace.beginSection("BiometricUnlockController#onBiometricAcquired");
         releaseBiometricWakeLock();
-        if (!mUpdateMonitor.isDeviceInteractive()) {
-            if (LatencyTracker.isEnabled(mContext)) {
+        if (isWakeAndUnlock()) {
+            if (mLatencyTracker.isEnabled()) {
                 int action = LatencyTracker.ACTION_FINGERPRINT_WAKE_AND_UNLOCK;
                 if (biometricSourceType == BiometricSourceType.FACE) {
                     action = LatencyTracker.ACTION_FACE_WAKE_AND_UNLOCK;
                 }
-                LatencyTracker.getInstance(mContext).onActionStart(action);
+                mLatencyTracker.onActionStart(action);
             }
             mWakeLock = mPowerManager.newWakeLock(
                     PowerManager.PARTIAL_WAKE_LOCK, BIOMETRIC_WAKE_LOCK_NAME);
@@ -651,6 +654,14 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
                 .setType(MetricsEvent.TYPE_FAILURE).setSubtype(toSubtype(biometricSourceType)));
         Optional.ofNullable(BiometricUiEvent.FAILURE_EVENT_BY_SOURCE_TYPE.get(biometricSourceType))
                 .ifPresent(event -> UI_EVENT_LOGGER.log(event, getSessionId()));
+
+        if (mLatencyTracker.isEnabled()) {
+            int action = LatencyTracker.ACTION_FINGERPRINT_WAKE_AND_UNLOCK;
+            if (biometricSourceType == BiometricSourceType.FACE) {
+                action = LatencyTracker.ACTION_FACE_WAKE_AND_UNLOCK;
+            }
+            mLatencyTracker.onActionCancel(action);
+        }
 
         if (biometricSourceType == BiometricSourceType.FINGERPRINT
                 && mUpdateMonitor.isUdfpsSupported()) {

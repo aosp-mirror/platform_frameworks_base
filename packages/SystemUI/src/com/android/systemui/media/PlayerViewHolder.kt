@@ -20,7 +20,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.TextView
 import com.android.systemui.R
 
@@ -28,9 +27,6 @@ import com.android.systemui.R
  * ViewHolder for a media player.
  */
 class PlayerViewHolder private constructor(itemView: View) : MediaViewHolder(itemView) {
-
-    // Player information
-    val albumView = itemView.requireViewById<ImageView>(R.id.album_art)
 
     // Seek bar
     val progressTimes = itemView.requireViewById<ViewGroup>(R.id.notification_media_progress_time)

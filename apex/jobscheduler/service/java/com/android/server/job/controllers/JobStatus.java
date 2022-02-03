@@ -17,6 +17,7 @@
 package com.android.server.job.controllers;
 
 import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
+import static com.android.server.job.JobSchedulerService.EXEMPTED_INDEX;
 import static com.android.server.job.JobSchedulerService.NEVER_INDEX;
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.WORKING_INDEX;
@@ -844,12 +845,15 @@ public final class JobStatus {
      * exemptions.
      */
     public int getEffectiveStandbyBucket() {
+        final int actualBucket = getStandbyBucket();
+        if (actualBucket == EXEMPTED_INDEX) {
+            return actualBucket;
+        }
         if (uidActive || getJob().isExemptedFromAppStandby()) {
             // Treat these cases as if they're in the ACTIVE bucket so that they get throttled
             // like other ACTIVE apps.
             return ACTIVE_INDEX;
         }
-        final int actualBucket = getStandbyBucket();
         if (actualBucket != RESTRICTED_INDEX && actualBucket != NEVER_INDEX
                 && mHasMediaBackupExemption) {
             // Cap it at WORKING_INDEX as media back up jobs are important to the user, and the

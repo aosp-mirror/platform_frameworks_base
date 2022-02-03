@@ -576,19 +576,20 @@ public final class SystemServiceManager implements Dumpable {
         return () -> {
             final TimingsTraceAndSlog t = new TimingsTraceAndSlog(oldTrace);
             final String serviceName = service.getClass().getName();
+            final int curUserId = curUser.getUserIdentifier();
+            t.traceBegin("ssm.on" + USER_STARTING + "User-" + curUserId + "_" + serviceName);
             try {
-                final int curUserId = curUser.getUserIdentifier();
-                t.traceBegin("ssm.on" + USER_STARTING + "User-" + curUserId + "_" + serviceName);
                 long time = SystemClock.elapsedRealtime();
                 service.onUserStarting(curUser);
                 warnIfTooLong(SystemClock.elapsedRealtime() - time, service,
                         "on" + USER_STARTING + "User-" + curUserId);
-                t.traceEnd();
             } catch (Exception e) {
                 Slog.wtf(TAG, "Failure reporting " + USER_STARTING + " of user " + curUser
                         + " to service " + serviceName, e);
                 Slog.e(TAG, "Disabling thread pool - please capture a bug report.");
                 sUseLifecycleThreadPool = false;
+            } finally {
+                t.traceEnd();
             }
         };
     }
@@ -601,11 +602,18 @@ public final class SystemServiceManager implements Dumpable {
             final int curUserId = curUser.getUserIdentifier();
             t.traceBegin("ssm.on" + USER_COMPLETED_EVENT + "User-" + curUserId
                     + "_" + eventType + "_" + serviceName);
-            long time = SystemClock.elapsedRealtime();
-            service.onUserCompletedEvent(curUser, eventType);
-            warnIfTooLong(SystemClock.elapsedRealtime() - time, service,
-                    "on" + USER_COMPLETED_EVENT + "User-" + curUserId);
-            t.traceEnd();
+            try {
+                long time = SystemClock.elapsedRealtime();
+                service.onUserCompletedEvent(curUser, eventType);
+                warnIfTooLong(SystemClock.elapsedRealtime() - time, service,
+                        "on" + USER_COMPLETED_EVENT + "User-" + curUserId);
+            } catch (Exception e) {
+                Slog.wtf(TAG, "Failure reporting " + USER_COMPLETED_EVENT + " of user " + curUser
+                        + " to service " + serviceName, e);
+                throw e;
+            } finally {
+                t.traceEnd();
+            }
         };
     }
 

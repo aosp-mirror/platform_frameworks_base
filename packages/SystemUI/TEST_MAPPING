@@ -1,7 +1,7 @@
 {
   // Looking for unit test presubmit configuration?
   // This currently lives in ATP config apct/system_ui/unit_test
-  "presubmit": [
+  "presubmit-large": [
     {
       "name": "PlatformScenarioTests",
       "options": [
@@ -24,7 +24,9 @@
             "exclude-annotation": "android.platform.test.scenario.annotation.FoldableOnly"
         }
       ]
-    },
+    }
+  ],
+  "presubmit": [
     {
       "name": "SystemUIGoogleTests",
       "options": [

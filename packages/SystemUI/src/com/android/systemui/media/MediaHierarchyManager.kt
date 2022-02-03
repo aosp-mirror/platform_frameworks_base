@@ -567,8 +567,7 @@ class MediaHierarchyManager @Inject constructor(
                 previousLocation = this.desiredLocation
             } else if (forceStateUpdate) {
                 val onLockscreen = (!bypassController.bypassEnabled &&
-                        (statusbarState == StatusBarState.KEYGUARD ||
-                            statusbarState == StatusBarState.FULLSCREEN_USER_SWITCHER))
+                        (statusbarState == StatusBarState.KEYGUARD))
                 if (desiredLocation == LOCATION_QS && previousLocation == LOCATION_LOCKSCREEN &&
                         !onLockscreen) {
                     // If media active state changed and the device is now unlocked, update the
@@ -955,8 +954,7 @@ class MediaHierarchyManager @Inject constructor(
             return desiredLocation
         }
         val onLockscreen = (!bypassController.bypassEnabled &&
-            (statusbarState == StatusBarState.KEYGUARD ||
-                statusbarState == StatusBarState.FULLSCREEN_USER_SWITCHER))
+            (statusbarState == StatusBarState.KEYGUARD))
         val allowedOnLockscreen = notifLockscreenUserManager.shouldShowLockscreenNotifications()
         val location = when {
             dreamOverlayActive -> LOCATION_DREAM_OVERLAY

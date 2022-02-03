@@ -546,17 +546,21 @@ public abstract class Vibrator {
     @VibrationEffectSupport
     public final int areAllEffectsSupported(
             @NonNull @VibrationEffect.EffectType int... effectIds) {
-        int support = VIBRATION_EFFECT_SUPPORT_YES;
-        for (int supported : areEffectsSupported(effectIds)) {
-            if (supported == VIBRATION_EFFECT_SUPPORT_NO) {
-                return VIBRATION_EFFECT_SUPPORT_NO;
-            } else if (supported == VIBRATION_EFFECT_SUPPORT_UNKNOWN) {
-                support = VIBRATION_EFFECT_SUPPORT_UNKNOWN;
+        VibratorInfo info = getInfo();
+        int allSupported = VIBRATION_EFFECT_SUPPORT_YES;
+        for (int effectId : effectIds) {
+            switch (info.isEffectSupported(effectId)) {
+                case VIBRATION_EFFECT_SUPPORT_NO:
+                    return VIBRATION_EFFECT_SUPPORT_NO;
+                case VIBRATION_EFFECT_SUPPORT_YES:
+                    continue;
+                default: // VIBRATION_EFFECT_SUPPORT_UNKNOWN
+                    allSupported = VIBRATION_EFFECT_SUPPORT_UNKNOWN;
+                    break;
             }
         }
-        return support;
+        return allSupported;
     }
-
 
     /**
      * Query whether the vibrator supports the given primitives.
@@ -598,8 +602,9 @@ public abstract class Vibrator {
      */
     public final boolean areAllPrimitivesSupported(
             @NonNull @VibrationEffect.Composition.PrimitiveType int... primitiveIds) {
-        for (boolean supported : arePrimitivesSupported(primitiveIds)) {
-            if (!supported) {
+        VibratorInfo info = getInfo();
+        for (int primitiveId : primitiveIds) {
+            if (!info.isPrimitiveSupported(primitiveId)) {
                 return false;
             }
         }

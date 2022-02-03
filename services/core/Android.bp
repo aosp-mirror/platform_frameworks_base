@@ -134,6 +134,7 @@ java_library_static {
         "app-compat-annotations",
         "framework-tethering.stubs.module_lib",
         "service-permission.stubs.system_server",
+        "service-supplementalprocess.stubs.system_server",
     ],
 
     required: [

@@ -359,6 +359,34 @@ public final class GameSessionTest {
                 LifecycleTrackingGameSession.LifecycleMethodCall.ON_DESTROY).inOrder();
     }
 
+    @Test
+    public void dispatchTransientVisibilityChanged_valueUnchanged_doesNotInvokeCallback() {
+        mGameSession.dispatchTransientSystemBarVisibilityFromRevealGestureChanged(false);
+
+        assertThat(mGameSession.mCapturedTransientSystemBarVisibilityFromRevealGestures).hasSize(0);
+    }
+
+    @Test
+    public void dispatchTransientVisibilityChanged_valueChanged_invokesCallback() {
+        mGameSession.dispatchTransientSystemBarVisibilityFromRevealGestureChanged(true);
+
+        assertThat(mGameSession.mCapturedTransientSystemBarVisibilityFromRevealGestures)
+                .containsExactly(true).inOrder();
+    }
+
+    @Test
+    public void dispatchTransientVisibilityChanged_manyTimes_invokesCallbackWhenValueChanges() {
+        mGameSession.dispatchTransientSystemBarVisibilityFromRevealGestureChanged(false);
+        mGameSession.dispatchTransientSystemBarVisibilityFromRevealGestureChanged(true);
+        mGameSession.dispatchTransientSystemBarVisibilityFromRevealGestureChanged(false);
+        mGameSession.dispatchTransientSystemBarVisibilityFromRevealGestureChanged(false);
+        mGameSession.dispatchTransientSystemBarVisibilityFromRevealGestureChanged(true);
+        mGameSession.dispatchTransientSystemBarVisibilityFromRevealGestureChanged(true);
+
+        assertThat(mGameSession.mCapturedTransientSystemBarVisibilityFromRevealGestures)
+                .containsExactly(true, false, true).inOrder();
+    }
+
     private static class LifecycleTrackingGameSession extends GameSession {
         private enum LifecycleMethodCall {
             ON_CREATE,
@@ -368,6 +396,8 @@ public final class GameSessionTest {
         }
 
         final List<LifecycleMethodCall> mLifecycleMethodCalls = new ArrayList<>();
+        final List<Boolean> mCapturedTransientSystemBarVisibilityFromRevealGestures =
+                new ArrayList<>();
 
         @Override
         public void onCreate() {
@@ -386,6 +416,12 @@ public final class GameSessionTest {
             } else {
                 mLifecycleMethodCalls.add(LifecycleMethodCall.ON_GAME_TASK_UNFOCUSED);
             }
+        }
+
+        @Override
+        public void onTransientSystemBarVisibilityFromRevealGestureChanged(
+                boolean visibleDueToGesture) {
+            mCapturedTransientSystemBarVisibilityFromRevealGestures.add(visibleDueToGesture);
         }
     }
 }

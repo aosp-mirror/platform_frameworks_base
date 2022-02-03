@@ -863,6 +863,18 @@ public class ApplicationPackageManager extends PackageManager {
         }
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public String getSupplementalProcessPackageName() {
+        try {
+            return mPM.getSupplementalProcessPackageName();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     @Override
     public boolean addPermission(PermissionInfo info) {
         return getPermissionManager().addPermission(info, false);

@@ -45,6 +45,7 @@ import com.google.android.setupdesign.GlifLayout;
 import com.google.android.setupdesign.util.ThemeHelper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -180,6 +181,7 @@ public class AvatarPickerActivity extends Activity {
         private final int mPreselectedImageStartPosition;
 
         private final List<Drawable> mImageDrawables;
+        private final List<String> mImageDescriptions;
         private final TypedArray mPreselectedImages;
         private final int[] mUserIconColors;
         private int mSelectedPosition = NONE;
@@ -196,6 +198,7 @@ public class AvatarPickerActivity extends Activity {
             mPreselectedImages = getResources().obtainTypedArray(R.array.avatar_images);
             mUserIconColors = UserIcons.getUserIconColors(getResources());
             mImageDrawables = buildDrawableList();
+            mImageDescriptions = buildDescriptionsList();
         }
 
         @NonNull
@@ -210,15 +213,24 @@ public class AvatarPickerActivity extends Activity {
         public void onBindViewHolder(@NonNull AvatarViewHolder viewHolder, int position) {
             if (position == mTakePhotoPosition) {
                 viewHolder.setDrawable(getDrawable(R.drawable.avatar_take_photo_circled));
+                viewHolder.setContentDescription(getString(R.string.user_image_take_photo));
                 viewHolder.setClickListener(view -> mAvatarPhotoController.takePhoto());
 
             } else if (position == mChoosePhotoPosition) {
                 viewHolder.setDrawable(getDrawable(R.drawable.avatar_choose_photo_circled));
+                viewHolder.setContentDescription(getString(R.string.user_image_choose_photo));
                 viewHolder.setClickListener(view -> mAvatarPhotoController.choosePhoto());
 
             } else if (position >= mPreselectedImageStartPosition) {
+                int index = indexFromPosition(position);
                 viewHolder.setSelected(position == mSelectedPosition);
-                viewHolder.setDrawable(mImageDrawables.get(indexFromPosition(position)));
+                viewHolder.setDrawable(mImageDrawables.get(index));
+                if (mImageDescriptions != null) {
+                    viewHolder.setContentDescription(mImageDescriptions.get(index));
+                } else {
+                    viewHolder.setContentDescription(
+                            getString(R.string.default_user_icon_description));
+                }
                 viewHolder.setClickListener(view -> {
                     if (mSelectedPosition == position) {
                         deselect(position);
@@ -254,6 +266,15 @@ public class AvatarPickerActivity extends Activity {
                 result.add(UserIcons.getDefaultUserIconInColor(getResources(), mUserIconColors[i]));
             }
             return result;
+        }
+
+        private List<String> buildDescriptionsList() {
+            if (mPreselectedImages.length() > 0) {
+                return Arrays.asList(
+                        getResources().getStringArray(R.array.avatar_image_descriptions));
+            }
+
+            return null;
         }
 
         private Drawable circularDrawableFrom(BitmapDrawable drawable) {
@@ -321,6 +342,10 @@ public class AvatarPickerActivity extends Activity {
 
         public void setDrawable(Drawable drawable) {
             mImageView.setImageDrawable(drawable);
+        }
+
+        public void setContentDescription(String desc) {
+            mImageView.setContentDescription(desc);
         }
 
         public void setClickListener(View.OnClickListener listener) {
