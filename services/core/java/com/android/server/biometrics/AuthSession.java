@@ -20,12 +20,8 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_DEFAULT;
-import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT;
+import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE;
 
-import static com.android.server.biometrics.BiometricServiceStateProto.MULTI_SENSOR_STATE_FACE_SCANNING;
-import static com.android.server.biometrics.BiometricServiceStateProto.MULTI_SENSOR_STATE_FP_SCANNING;
-import static com.android.server.biometrics.BiometricServiceStateProto.MULTI_SENSOR_STATE_SWITCHING;
-import static com.android.server.biometrics.BiometricServiceStateProto.MULTI_SENSOR_STATE_UNKNOWN;
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTHENTICATED_PENDING_SYSUI;
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTH_CALLED;
 import static com.android.server.biometrics.BiometricServiceStateProto.STATE_AUTH_IDLE;
@@ -100,14 +96,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
     @Retention(RetentionPolicy.SOURCE)
     @interface SessionState {}
 
-    /** Defined in biometrics.proto */
-    @IntDef({
-            MULTI_SENSOR_STATE_UNKNOWN,
-            MULTI_SENSOR_STATE_FACE_SCANNING,
-            MULTI_SENSOR_STATE_FP_SCANNING})
-    @Retention(RetentionPolicy.SOURCE)
-    @interface MultiSensorState {}
-
     /**
      * Notify the holder of the AuthSession that the caller/client's binder has died. The
      * holder (BiometricService) should schedule {@link AuthSession#onClientDied()} to be run
@@ -143,7 +131,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
     // The current state, which can be either idle, called, or started
     private @SessionState int mState = STATE_AUTH_IDLE;
     private @BiometricMultiSensorMode int mMultiSensorMode;
-    private @MultiSensorState int mMultiSensorState;
     private int[] mSensors;
     // TODO(b/197265902): merge into state
     private boolean mCancelled;
@@ -254,7 +241,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
             mState = STATE_SHOWING_DEVICE_CREDENTIAL;
             mSensors = new int[0];
             mMultiSensorMode = BIOMETRIC_MULTI_SENSOR_DEFAULT;
-            mMultiSensorState = MULTI_SENSOR_STATE_UNKNOWN;
 
             mStatusBarService.showAuthenticationDialog(
                     mPromptInfo,
@@ -307,7 +293,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     }
                     mMultiSensorMode = getMultiSensorModeForNewSession(
                             mPreAuthInfo.eligibleSensors);
-                    mMultiSensorState = MULTI_SENSOR_STATE_UNKNOWN;
 
                     mStatusBarService.showAuthenticationDialog(mPromptInfo,
                             mSysuiReceiver,
@@ -415,7 +400,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
         mErrorEscrow = error;
         mVendorCodeEscrow = vendorCode;
 
-        final @BiometricAuthenticator.Modality int modality = sensorIdToModality(sensorId);
+        @Modality final int modality = sensorIdToModality(sensorId);
 
         switch (mState) {
             case STATE_AUTH_CALLED: {
@@ -430,7 +415,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
 
                     mState = STATE_SHOWING_DEVICE_CREDENTIAL;
                     mMultiSensorMode = BIOMETRIC_MULTI_SENSOR_DEFAULT;
-                    mMultiSensorState = MULTI_SENSOR_STATE_UNKNOWN;
                     mSensors = new int[0];
 
                     mStatusBarService.showAuthenticationDialog(
@@ -468,12 +452,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
                     return true;
                 } else {
                     mState = STATE_ERROR_PENDING_SYSUI;
-                    if (mMultiSensorMode == BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT
-                            && mMultiSensorState == MULTI_SENSOR_STATE_FACE_SCANNING) {
-                        // wait for the UI to signal when modality should switch
-                        Slog.d(TAG, "onErrorReceived: waiting for modality switch callback");
-                        mMultiSensorState = MULTI_SENSOR_STATE_SWITCHING;
-                    }
                     mStatusBarService.onBiometricError(modality, error, vendorCode);
                 }
                 break;
@@ -538,34 +516,6 @@ public final class AuthSession implements IBinder.DeathRecipient {
 
         mState = STATE_AUTH_STARTED_UI_SHOWING;
 
-        if (mMultiSensorMode == BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT) {
-            mMultiSensorState = MULTI_SENSOR_STATE_FACE_SCANNING;
-        } else {
-            startFingerprintSensorsNow();
-        }
-    }
-
-    // call anytime after onDialogAnimatedIn() to indicate it's appropriate to start the
-    // fingerprint sensor (i.e. face auth has failed or is not available)
-    void onStartFingerprint() {
-        if (mMultiSensorMode != BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT) {
-            Slog.e(TAG, "onStartFingerprint, unexpected mode: " + mMultiSensorMode);
-            return;
-        }
-
-        if (mState != STATE_AUTH_STARTED
-                && mState != STATE_AUTH_STARTED_UI_SHOWING
-                && mState != STATE_AUTH_PAUSED
-                && mState != STATE_ERROR_PENDING_SYSUI) {
-            Slog.w(TAG, "onStartFingerprint, started from unexpected state: " + mState);
-        }
-
-        mMultiSensorState = MULTI_SENSOR_STATE_FP_SCANNING;
-        startFingerprintSensorsNow();
-    }
-
-    // unguarded helper for the above methods only
-    private void startFingerprintSensorsNow() {
         startAllPreparedFingerprintSensors();
         mState = STATE_AUTH_STARTED_UI_SHOWING;
     }
@@ -919,7 +869,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
         }
 
         if (hasFace && hasFingerprint) {
-            return BIOMETRIC_MULTI_SENSOR_FACE_THEN_FINGERPRINT;
+            return BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE;
         }
         return BIOMETRIC_MULTI_SENSOR_DEFAULT;
     }

@@ -31,7 +31,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 public interface AuthDialog {
 
-    String KEY_CONTAINER_STATE = "container_state";
+    String KEY_CONTAINER_GOING_AWAY = "container_going_away";
     String KEY_BIOMETRIC_SHOWING = "biometric_showing";
     String KEY_CREDENTIAL_SHOWING = "credential_showing";
 
@@ -64,7 +64,7 @@ public interface AuthDialog {
     @interface DialogSize {}
 
     /**
-     * Parameters used when laying out {@link AuthBiometricView}, its sublclasses, and
+     * Parameters used when laying out {@link AuthBiometricView}, its subclasses, and
      * {@link AuthPanelController}.
      */
     class LayoutParams {

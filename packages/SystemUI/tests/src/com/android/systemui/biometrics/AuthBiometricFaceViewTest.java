@@ -37,8 +37,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.android.systemui.R;
-
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
@@ -58,11 +56,14 @@ public class AuthBiometricFaceViewTest extends SysuiTestCase {
 
     @Mock private TextView mErrorView;
 
+    @Mock
+    private TestableFaceView.TestableIconController mIconController;
+
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mFaceView = new TestableFaceView(mContext);
-        mFaceView.mFaceIconController = mock(TestableFaceView.TestableIconController.class);
+        mFaceView.mFaceIconController = mIconController;
         mFaceView.setCallback(mCallback);
 
         mFaceView.mNegativeButton = mNegativeButton;
@@ -96,7 +97,7 @@ public class AuthBiometricFaceViewTest extends SysuiTestCase {
 
     public class TestableFaceView extends AuthBiometricFaceView {
 
-        public class TestableIconController extends IconController {
+        public class TestableIconController extends AuthBiometricFaceIconController {
             TestableIconController(Context context, ImageView iconView) {
                 super(context, iconView, mock(TextView.class));
             }

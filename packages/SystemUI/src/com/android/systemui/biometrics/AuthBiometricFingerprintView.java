@@ -33,7 +33,7 @@ import com.android.systemui.R;
 
 public class AuthBiometricFingerprintView extends AuthBiometricView {
 
-    private static final String TAG = "BiometricPrompt/AuthBiometricFingerprintView";
+    private static final String TAG = "AuthBiometricFingerprintView";
 
     private boolean mIsUdfps = false;
     @Nullable private UdfpsDialogMeasureAdapter mUdfpsAdapter;
@@ -65,8 +65,8 @@ public class AuthBiometricFingerprintView extends AuthBiometricView {
     }
 
     @Override
-    void onLayoutInternal() {
-        super.onLayoutInternal();
+    public void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
 
         if (mUdfpsAdapter != null) {
             // Move the UDFPS icon and indicator text if necessary. This probably only needs to happen
@@ -124,8 +124,8 @@ public class AuthBiometricFingerprintView extends AuthBiometricView {
     }
 
     @Override
-    void onAttachedToWindowInternal() {
-        super.onAttachedToWindowInternal();
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
         showTouchSensorString();
     }
 

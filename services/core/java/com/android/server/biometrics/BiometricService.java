@@ -106,7 +106,6 @@ public class BiometricService extends SystemService {
     private static final int MSG_ON_SYSTEM_EVENT = 13;
     private static final int MSG_CLIENT_DIED = 14;
     private static final int MSG_ON_DIALOG_ANIMATED_IN = 15;
-    private static final int MSG_ON_START_FINGERPRINT_NOW = 16;
 
     private final Injector mInjector;
     private final DevicePolicyManager mDevicePolicyManager;
@@ -241,11 +240,6 @@ public class BiometricService extends SystemService {
 
                 case MSG_ON_DIALOG_ANIMATED_IN: {
                     handleOnDialogAnimatedIn();
-                    break;
-                }
-
-                case MSG_ON_START_FINGERPRINT_NOW: {
-                    handleOnStartFingerprintNow();
                     break;
                 }
 
@@ -629,11 +623,6 @@ public class BiometricService extends SystemService {
         @Override
         public void onDialogAnimatedIn() {
             mHandler.obtainMessage(MSG_ON_DIALOG_ANIMATED_IN).sendToTarget();
-        }
-
-        @Override
-        public void onStartFingerprintNow() {
-            mHandler.obtainMessage(MSG_ON_START_FINGERPRINT_NOW).sendToTarget();
         }
     };
 
@@ -1342,16 +1331,6 @@ public class BiometricService extends SystemService {
         }
 
         mCurrentAuthSession.onDialogAnimatedIn();
-    }
-
-    private void handleOnStartFingerprintNow() {
-        Slog.d(TAG, "handleOnStartFingerprintNow");
-        if (mCurrentAuthSession == null) {
-            Slog.e(TAG, "handleOnStartFingerprintNow: AuthSession is null");
-            return;
-        }
-
-        mCurrentAuthSession.onStartFingerprint();
     }
 
     /**
