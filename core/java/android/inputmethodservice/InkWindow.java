@@ -102,11 +102,4 @@ final class InkWindow extends PhoneWindow {
         lp.token = token;
         setAttributes(lp);
     }
-
-    /**
-     * Returns {@code true} if Window was created and added to WM.
-     */
-    boolean isInitialized() {
-        return mIsViewAdded;
-    }
 }
