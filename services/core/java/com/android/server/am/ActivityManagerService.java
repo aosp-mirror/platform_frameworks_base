@@ -257,7 +257,6 @@ import android.os.BinderProxy;
 import android.os.BugreportParams;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.ConditionVariable;
 import android.os.Debug;
 import android.os.DropBoxManager;
 import android.os.FactoryTest;
@@ -15523,32 +15522,45 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @throws RemoteException
      */
     public void dumpAllResources(ParcelFileDescriptor fd, PrintWriter pw) throws RemoteException {
-        synchronized (mProcLock) {
-            mProcessList.forEachLruProcessesLOSP(true, app -> {
-                ConditionVariable lock = new ConditionVariable();
-                RemoteCallback
-                        finishCallback = new RemoteCallback(result -> lock.open(), null);
-
-                pw.println(String.format("------ DUMP RESOURCES %s (%s)  ------",
-                        app.processName,
-                        app.info.packageName));
-                pw.flush();
+        final ArrayList<ProcessRecord> processes = new ArrayList<>();
+        synchronized (mPidsSelfLocked) {
+            processes.addAll(mProcessList.getLruProcessesLOSP());
+        }
+        for (int i = 0, size = processes.size(); i < size; i++) {
+            ProcessRecord app = processes.get(i);
+            pw.println(String.format("------ DUMP RESOURCES %s (%s)  ------",
+                    app.processName,
+                    app.info.packageName));
+            pw.flush();
+            try {
+                TransferPipe tp = new TransferPipe();
                 try {
-                    app.getThread().dumpResources(fd.dup(), finishCallback);
-                    lock.block(2000);
-                } catch (Exception e) {
-                    pw.println(String.format(
-                            "------ EXCEPTION DUMPING RESOURCES for %s (%s): %s ------",
-                            app.processName,
-                            app.info.packageName,
-                            e.getMessage()));
-                    pw.flush();
+                    IApplicationThread thread = app.getThread();
+                    if (thread != null) {
+                        app.getThread().dumpResources(tp.getWriteFd(), null);
+                        tp.go(fd.getFileDescriptor(), 2000);
+                        pw.println(String.format("------ END DUMP RESOURCES %s (%s)  ------",
+                                app.processName,
+                                app.info.packageName));
+                        pw.flush();
+                    } else {
+                        pw.println(String.format(
+                                "------ DUMP RESOURCES %s (%s) failed, no thread ------",
+                                app.processName,
+                                app.info.packageName));
+                    }
+                } finally {
+                    tp.kill();
                 }
-                pw.println(String.format("------ END DUMP RESOURCES %s (%s)  ------",
+            } catch (IOException e) {
+                pw.println(String.format(
+                        "------ EXCEPTION DUMPING RESOURCES for %s (%s): %s ------",
                         app.processName,
-                        app.info.packageName));
+                        app.info.packageName,
+                        e.getMessage()));
                 pw.flush();
-            });
+            }
+
         }
     }
 
