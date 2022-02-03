@@ -9824,7 +9824,6 @@ package android.content {
     field public static final String STATUS_BAR_SERVICE = "statusbar";
     field public static final String STORAGE_SERVICE = "storage";
     field public static final String STORAGE_STATS_SERVICE = "storagestats";
-    field public static final String SUPPLEMENTAL_PROCESS_SERVICE = "supplemental_process";
     field public static final String SYSTEM_HEALTH_SERVICE = "systemhealth";
     field public static final String TELECOM_SERVICE = "telecom";
     field public static final String TELEPHONY_IMS_SERVICE = "telephony_ims";
