@@ -37,8 +37,11 @@ import android.util.Slog;
 import android.view.Display;
 import android.window.DisplayWindowPolicyController;
 
+import com.android.internal.app.BlockedAppStreamingActivity;
+
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 
 /**
@@ -47,6 +50,9 @@ import java.util.Set;
 class GenericWindowPolicyController extends DisplayWindowPolicyController {
 
     private static final String TAG = "VirtualDeviceManager";
+
+    private static final ComponentName BLOCKED_APP_STREAMING_COMPONENT =
+            new ComponentName("android", BlockedAppStreamingActivity.class.getName());
 
     /**
      * If required, allow the secure activity to display on remote device since
@@ -61,6 +67,7 @@ class GenericWindowPolicyController extends DisplayWindowPolicyController {
     private final ArraySet<ComponentName> mAllowedActivities;
     @Nullable
     private final ArraySet<ComponentName> mBlockedActivities;
+    private Consumer<ActivityInfo> mActivityBlockedCallback;
 
     @NonNull
     final ArraySet<Integer> mRunningUids = new ArraySet<>();
@@ -81,10 +88,12 @@ class GenericWindowPolicyController extends DisplayWindowPolicyController {
             @NonNull ArraySet<UserHandle> allowedUsers,
             @Nullable Set<ComponentName> allowedActivities,
             @Nullable Set<ComponentName> blockedActivities,
-            @NonNull ActivityListener activityListener) {
+            @NonNull ActivityListener activityListener,
+            @NonNull Consumer<ActivityInfo> activityBlockedCallback) {
         mAllowedUsers = allowedUsers;
         mAllowedActivities = allowedActivities == null ? null : new ArraySet<>(allowedActivities);
         mBlockedActivities = blockedActivities == null ? null : new ArraySet<>(blockedActivities);
+        mActivityBlockedCallback = activityBlockedCallback;
         setInterestedWindowFlags(windowFlags, systemWindowFlags);
         mActivityListener = activityListener;
     }
@@ -96,6 +105,7 @@ class GenericWindowPolicyController extends DisplayWindowPolicyController {
         for (int i = 0; i < activityCount; i++) {
             final ActivityInfo aInfo = activities.get(i);
             if (!canContainActivity(aInfo, /* windowFlags= */ 0, /* systemWindowFlags= */ 0)) {
+                mActivityBlockedCallback.accept(aInfo);
                 return false;
             }
         }
@@ -105,7 +115,11 @@ class GenericWindowPolicyController extends DisplayWindowPolicyController {
     @Override
     public boolean keepActivityOnWindowFlagsChanged(ActivityInfo activityInfo, int windowFlags,
             int systemWindowFlags) {
-        return canContainActivity(activityInfo, windowFlags, systemWindowFlags);
+        if (!canContainActivity(activityInfo, windowFlags, systemWindowFlags)) {
+            mActivityBlockedCallback.accept(activityInfo);
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -140,22 +154,23 @@ class GenericWindowPolicyController extends DisplayWindowPolicyController {
         if ((activityInfo.flags & FLAG_CAN_DISPLAY_ON_REMOTE_DEVICES) == 0) {
             return false;
         }
+        ComponentName activityComponent = activityInfo.getComponentName();
+        if (BLOCKED_APP_STREAMING_COMPONENT.equals(activityComponent)) {
+            // The error dialog alerting users that streaming is blocked is always allowed.
+            return true;
+        }
         final UserHandle activityUser =
                 UserHandle.getUserHandleForUid(activityInfo.applicationInfo.uid);
         if (!mAllowedUsers.contains(activityUser)) {
             Slog.d(TAG, "Virtual device activity not allowed from user " + activityUser);
             return false;
         }
-        if (mBlockedActivities != null
-                && mBlockedActivities.contains(activityInfo.getComponentName())) {
-            Slog.d(TAG,
-                    "Virtual device blocking launch of " + activityInfo.getComponentName());
+        if (mBlockedActivities != null && mBlockedActivities.contains(activityComponent)) {
+            Slog.d(TAG, "Virtual device blocking launch of " + activityComponent);
             return false;
         }
-        if (mAllowedActivities != null
-                && !mAllowedActivities.contains(activityInfo.getComponentName())) {
-            Slog.d(TAG,
-                    activityInfo.getComponentName() + " is not in the allowed list.");
+        if (mAllowedActivities != null && !mAllowedActivities.contains(activityComponent)) {
+            Slog.d(TAG, activityComponent + " is not in the allowed list.");
             return false;
         }
         if (!CompatChanges.isChangeEnabled(ALLOW_SECURE_ACTIVITY_DISPLAY_ON_REMOTE_DEVICE,
