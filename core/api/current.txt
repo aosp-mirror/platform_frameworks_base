@@ -18159,14 +18159,21 @@ package android.hardware.camera2.params {
     method @Nullable public android.view.Surface getSurface();
     method public int getSurfaceGroupId();
     method @NonNull public java.util.List<android.view.Surface> getSurfaces();
+    method public int getTimestampBase();
     method public void removeSensorPixelModeUsed(int);
     method public void removeSurface(@NonNull android.view.Surface);
     method public void setDynamicRangeProfile(int);
     method public void setPhysicalCameraId(@Nullable String);
     method public void setStreamUseCase(int);
+    method public void setTimestampBase(int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.camera2.params.OutputConfiguration> CREATOR;
     field public static final int SURFACE_GROUP_ID_NONE = -1; // 0xffffffff
+    field public static final int TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED = 4; // 0x4
+    field public static final int TIMESTAMP_BASE_DEFAULT = 0; // 0x0
+    field public static final int TIMESTAMP_BASE_MONOTONIC = 2; // 0x2
+    field public static final int TIMESTAMP_BASE_REALTIME = 3; // 0x3
+    field public static final int TIMESTAMP_BASE_SENSOR = 1; // 0x1
   }
 
   public final class RecommendedStreamConfigurationMap {
