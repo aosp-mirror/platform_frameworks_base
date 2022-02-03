@@ -299,6 +299,8 @@ public abstract class GameSession {
      * {@code View} may not be cleared once set, but may be replaced by invoking
      * {@link #setTaskOverlayView(View, ViewGroup.LayoutParams)} again.
      *
+     * <p><b>WARNING</b>: Callers <b>must</b> ensure that only trusted views are provided.
+     *
      * @param view         The desired content to display.
      * @param layoutParams Layout parameters for the view.
      */
