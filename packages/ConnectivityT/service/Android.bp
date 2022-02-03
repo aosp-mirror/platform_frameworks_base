@@ -83,7 +83,6 @@ filegroup {
     name: "services.connectivity-tiramisu-sources",
     srcs: [
         ":services.connectivity-ethernet-sources",
-        ":services.connectivity-ipsec-sources",
         ":services.connectivity-netstats-sources",
     ],
     path: "src",
@@ -93,6 +92,7 @@ filegroup {
 filegroup {
     name: "services.connectivity-tiramisu-updatable-sources",
     srcs: [
+        ":services.connectivity-ipsec-sources",
         ":services.connectivity-nsd-sources",
     ],
     path: "src",
