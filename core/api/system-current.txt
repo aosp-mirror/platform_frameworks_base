@@ -12235,6 +12235,7 @@ package android.telecom {
     field public static final int CALL_SOURCE_EMERGENCY_SHORTCUT = 2; // 0x2
     field public static final int CALL_SOURCE_UNSPECIFIED = 0; // 0x0
     field public static final String EXTRA_CALL_BACK_INTENT = "android.telecom.extra.CALL_BACK_INTENT";
+    field public static final String EXTRA_CALL_HAS_IN_BAND_RINGTONE = "android.telecom.extra.CALL_HAS_IN_BAND_RINGTONE";
     field public static final String EXTRA_CALL_SOURCE = "android.telecom.extra.CALL_SOURCE";
     field public static final String EXTRA_CALL_TECHNOLOGY_TYPE = "android.telecom.extra.CALL_TECHNOLOGY_TYPE";
     field public static final String EXTRA_CLEAR_MISSED_CALLS_INTENT = "android.telecom.extra.CLEAR_MISSED_CALLS_INTENT";
