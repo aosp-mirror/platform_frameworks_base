@@ -462,11 +462,6 @@ public class WindowManagerService extends IWindowManager.Stub
     int mVr2dDisplayId = INVALID_DISPLAY;
     boolean mVrModeEnabled = false;
 
-    /* If true, shadows drawn around the window will be rendered by the system compositor. If
-     * false, shadows will be drawn by the client by setting an elevation on the root view and
-     * the contents will be inset by the shadow radius. */
-    boolean mRenderShadowsInCompositor = false;
-
     /**
      * Tracks a map of input tokens to info that is used to decide whether to intercept
      * a key event.
@@ -811,8 +806,6 @@ public class WindowManagerService extends IWindowManager.Stub
             resolver.registerContentObserver(mForceResizableUri, false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(mDevEnableNonResizableMultiWindowUri, false, this,
                     UserHandle.USER_ALL);
-            resolver.registerContentObserver(mRenderShadowsInCompositorUri, false, this,
-                    UserHandle.USER_ALL);
             resolver.registerContentObserver(mDisplaySettingsPathUri, false, this,
                     UserHandle.USER_ALL);
         }
@@ -850,11 +843,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (mDevEnableNonResizableMultiWindowUri.equals(uri)) {
                 updateDevEnableNonResizableMultiWindow();
-                return;
-            }
-
-            if (mRenderShadowsInCompositorUri.equals(uri)) {
-                setShadowRenderer();
                 return;
             }
 
@@ -970,11 +958,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 });
             }
         }
-    }
-
-    private void setShadowRenderer() {
-        mRenderShadowsInCompositor = Settings.Global.getInt(mContext.getContentResolver(),
-                DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR, 1) != 0;
     }
 
     PowerManager mPowerManager;
@@ -1395,7 +1378,6 @@ public class WindowManagerService extends IWindowManager.Stub
         float[] spotColor = {0.f, 0.f, 0.f, spotShadowAlpha};
         SurfaceControl.setGlobalShadowSettings(ambientColor, spotColor, lightY, lightZ,
                 lightRadius);
-        setShadowRenderer();
     }
 
     /**

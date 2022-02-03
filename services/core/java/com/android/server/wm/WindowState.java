@@ -5398,17 +5398,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             outPoint.offset(-parentBounds.left, -parentBounds.top);
         }
 
-        Task rootTask = getRootTask();
-
-        // If we have root task outsets, that means the top-left
-        // will be outset, and we need to inset ourselves
-        // to account for it. If we actually have shadows we will
-        // then un-inset ourselves by the surfaceInsets.
-        if (rootTask != null) {
-            final int outset = rootTask.getTaskOutset();
-            outPoint.offset(outset, outset);
-        }
-
         // The surface size is larger than the window if the window has positive surface insets.
         transformSurfaceInsetsPosition(mTmpPoint, mAttrs.surfaceInsets);
         outPoint.offset(-mTmpPoint.x, -mTmpPoint.y);
