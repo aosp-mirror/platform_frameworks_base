@@ -34,7 +34,4 @@ public interface ParsedApexSystemService {
 
     @Nullable
     String getMaxSdkVersion();
-
-    int getInitOrder();
-
 }

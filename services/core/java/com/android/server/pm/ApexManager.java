@@ -32,6 +32,9 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.SigningDetails;
+import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
+import com.android.server.pm.pkg.component.ParsedApexSystemService;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Binder;
@@ -56,9 +59,6 @@ import com.android.modules.utils.build.UnboundedSdkLevel;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
-import com.android.server.pm.pkg.component.ParsedApexSystemService;
-import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.utils.TimingsTraceAndSlog;
 
 import com.google.android.collect.Lists;
@@ -414,11 +414,9 @@ public abstract class ApexManager {
             throws PackageManagerException;
 
     /**
-     * Get a list of apex system services implemented in an apex.
-     *
-     * <p>The list is sorted by initOrder for consistency.
+     * Get a map of system services defined in an apex mapped to the jar files they reside in.
      */
-    public abstract List<ApexSystemServiceInfo> getApexSystemServices();
+    public abstract Map<String, String> getApexSystemServices();
 
     /**
      * Dumps various state information to the provided {@link PrintWriter} object.
@@ -451,7 +449,7 @@ public abstract class ApexManager {
          * Map of all apex system services to the jar files they are contained in.
          */
         @GuardedBy("mLock")
-        private List<ApexSystemServiceInfo> mApexSystemServices = new ArrayList<>();
+        private Map<String, String> mApexSystemServices = new ArrayMap<>();
 
         /**
          * Contains the list of {@code packageName}s of apks-in-apex for given
@@ -607,19 +605,14 @@ public abstract class ApexManager {
                         }
 
                         String name = service.getName();
-                        for (ApexSystemServiceInfo info : mApexSystemServices) {
-                            if (info.getName().equals(name)) {
-                                throw new IllegalStateException(String.format(
-                                        "Duplicate apex-system-service %s from %s, %s",
-                                        name, info.mJarPath, service.getJarPath()));
-                            }
+                        if (mApexSystemServices.containsKey(name)) {
+                            throw new IllegalStateException(String.format(
+                                    "Duplicate apex-system-service %s from %s, %s",
+                                    name, mApexSystemServices.get(name), service.getJarPath()));
                         }
 
-                        ApexSystemServiceInfo info = new ApexSystemServiceInfo(
-                                service.getName(), service.getJarPath(), service.getInitOrder());
-                        mApexSystemServices.add(info);
+                        mApexSystemServices.put(name, service.getJarPath());
                     }
-                    Collections.sort(mApexSystemServices);
                     mPackageNameToApexModuleName.put(packageInfo.packageName, ai.moduleName);
                     if (ai.isActive) {
                         if (activePackagesSet.contains(packageInfo.packageName)) {
@@ -1140,7 +1133,7 @@ public abstract class ApexManager {
         }
 
         @Override
-        public List<ApexSystemServiceInfo> getApexSystemServices() {
+        public Map<String, String> getApexSystemServices() {
             synchronized (mLock) {
                 Preconditions.checkState(mApexSystemServices != null,
                         "APEX packages have not been scanned");
@@ -1430,10 +1423,10 @@ public abstract class ApexManager {
         }
 
         @Override
-        public List<ApexSystemServiceInfo> getApexSystemServices() {
+        public Map<String, String> getApexSystemServices() {
             // TODO(satayev): we can't really support flattened apex use case, and need to migrate
             // the manifest entries into system's manifest asap.
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
 
         @Override
