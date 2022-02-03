@@ -12197,7 +12197,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     EXTRA_DATA_RENDERING_INFO_KEY,
                     EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
             ));
-            info.setTextSelectable(isTextSelectable());
+            info.setTextSelectable(isTextSelectable() || isTextEditable());
         } else {
             info.setAvailableExtraData(Arrays.asList(
                     EXTRA_DATA_RENDERING_INFO_KEY
