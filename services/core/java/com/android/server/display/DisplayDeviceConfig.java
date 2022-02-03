@@ -30,6 +30,8 @@ import android.util.Slog;
 import android.util.Spline;
 import android.view.DisplayAddress;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import com.android.internal.R;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.server.display.config.BrightnessThresholds;
@@ -40,9 +42,12 @@ import com.android.server.display.config.DisplayConfiguration;
 import com.android.server.display.config.DisplayQuirks;
 import com.android.server.display.config.HbmTiming;
 import com.android.server.display.config.HighBrightnessMode;
+import com.android.server.display.config.Interpolation;
 import com.android.server.display.config.NitsMap;
 import com.android.server.display.config.Point;
 import com.android.server.display.config.RefreshRateRange;
+import com.android.server.display.config.SdrHdrRatioMap;
+import com.android.server.display.config.SdrHdrRatioPoint;
 import com.android.server.display.config.SensorDetails;
 import com.android.server.display.config.ThermalStatus;
 import com.android.server.display.config.ThermalThrottling;
@@ -185,6 +190,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  */
 public class DisplayDeviceConfig {
     private static final String TAG = "DisplayDeviceConfig";
+    private static final boolean DEBUG = false;
 
     public static final float HIGH_BRIGHTNESS_MODE_UNSUPPORTED = Float.NaN;
 
@@ -201,6 +207,9 @@ public class DisplayDeviceConfig {
     private static final String NO_SUFFIX_FORMAT = "%d";
     private static final long STABLE_FLAG = 1L << 62;
 
+    private static final int INTERPOLATION_DEFAULT = 0;
+    private static final int INTERPOLATION_LINEAR = 1;
+
     // Float.NaN (used as invalid for brightness) cannot be stored in config.xml
     // so -2 is used instead
     private static final float INVALID_BRIGHTNESS_IN_CONFIG = -2f;
@@ -213,6 +222,9 @@ public class DisplayDeviceConfig {
 
     // Length of the ambient light horizon used to calculate short-term estimate of ambient light.
     private static final int AMBIENT_LIGHT_SHORT_HORIZON_MILLIS = 2000;
+
+    @VisibleForTesting
+    static final float HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT = 0.5f;
 
     private final Context mContext;
 
@@ -229,6 +241,7 @@ public class DisplayDeviceConfig {
     // config.xml. These are the raw values and just used for the dumpsys
     private float[] mRawNits;
     private float[] mRawBacklight;
+    private int mInterpolationType;
 
     // These arrays are calculated from the raw arrays, but clamped to contain values equal to and
     // between mBacklightMinimum and mBacklightMaximum. These three arrays should all be the same
@@ -257,6 +270,7 @@ public class DisplayDeviceConfig {
     private Spline mBrightnessToBacklightSpline;
     private Spline mBacklightToBrightnessSpline;
     private Spline mBacklightToNitsSpline;
+    private Spline mNitsToBacklightSpline;
     private List<String> mQuirks;
     private boolean mIsHighBrightnessModeEnabled = false;
     private HighBrightnessModeData mHbmData;
@@ -264,6 +278,7 @@ public class DisplayDeviceConfig {
     private String mLoadedFrom = null;
 
     private BrightnessThrottlingData mBrightnessThrottlingData;
+    private Spline mSdrToHdrRatioSpline;
 
     private DisplayDeviceConfig(Context context) {
         mContext = context;
@@ -448,6 +463,45 @@ public class DisplayDeviceConfig {
     }
 
     /**
+     * Calculate the HDR brightness for the specified SDR brightenss.
+     *
+     * @return the HDR brightness or BRIGHTNESS_INVALID when no mapping exists.
+     */
+    public float getHdrBrightnessFromSdr(float brightness) {
+        if (mSdrToHdrRatioSpline == null) {
+            return PowerManager.BRIGHTNESS_INVALID;
+        }
+
+        float backlight = getBacklightFromBrightness(brightness);
+        float nits = getNitsFromBacklight(backlight);
+        if (nits == NITS_INVALID) {
+            return PowerManager.BRIGHTNESS_INVALID;
+        }
+
+        float ratio = mSdrToHdrRatioSpline.interpolate(nits);
+        float hdrNits = nits * ratio;
+        if (mNitsToBacklightSpline == null) {
+            return PowerManager.BRIGHTNESS_INVALID;
+        }
+
+        float hdrBacklight = mNitsToBacklightSpline.interpolate(hdrNits);
+        hdrBacklight = Math.max(mBacklightMinimum, Math.min(mBacklightMaximum, hdrBacklight));
+        float hdrBrightness = mBacklightToBrightnessSpline.interpolate(hdrBacklight);
+
+        if (DEBUG) {
+            Slog.d(TAG, "getHdrBrightnessFromSdr: sdr brightness " + brightness
+                + " backlight " + backlight
+                + " nits " + nits
+                + " ratio " + ratio
+                + " hdrNits " + hdrNits
+                + " hdrBacklight " + hdrBacklight
+                + " hdrBrightness " + hdrBrightness
+                );
+        }
+        return hdrBrightness;
+    }
+
+    /**
      * Return an array of equal length to backlight and nits, that covers the entire system
      * brightness range of 0.0-1.0.
      *
@@ -559,15 +613,18 @@ public class DisplayDeviceConfig {
                 + ", mNits=" + Arrays.toString(mNits)
                 + ", mRawBacklight=" + Arrays.toString(mRawBacklight)
                 + ", mRawNits=" + Arrays.toString(mRawNits)
+                + ", mInterpolationType=" + mInterpolationType
                 + ", mBrightness=" + Arrays.toString(mBrightness)
                 + ", mBrightnessToBacklightSpline=" + mBrightnessToBacklightSpline
                 + ", mBacklightToBrightnessSpline=" + mBacklightToBrightnessSpline
+                + ", mNitsToBacklightSpline=" + mNitsToBacklightSpline
                 + ", mBacklightMinimum=" + mBacklightMinimum
                 + ", mBacklightMaximum=" + mBacklightMaximum
                 + ", mBrightnessDefault=" + mBrightnessDefault
                 + ", mQuirks=" + mQuirks
                 + ", isHbmEnabled=" + mIsHighBrightnessModeEnabled
                 + ", mHbmData=" + mHbmData
+                + ", mSdrToHdrRatioSpline=" + mSdrToHdrRatioSpline
                 + ", mBrightnessThrottlingData=" + mBrightnessThrottlingData
                 + ", mBrightnessRampFastDecrease=" + mBrightnessRampFastDecrease
                 + ", mBrightnessRampFastIncrease=" + mBrightnessRampFastIncrease
@@ -768,6 +825,7 @@ public class DisplayDeviceConfig {
         float[] nits = new float[size];
         float[] backlight = new float[size];
 
+        mInterpolationType = convertInterpolationType(map.getInterpolation());
         int i = 0;
         for (Point point : points) {
             nits[i] = point.getNits().floatValue();
@@ -791,6 +849,40 @@ public class DisplayDeviceConfig {
         mRawNits = nits;
         mRawBacklight = backlight;
         constrainNitsAndBacklightArrays();
+    }
+
+    private Spline loadSdrHdrRatioMap(HighBrightnessMode hbmConfig) {
+        final SdrHdrRatioMap sdrHdrRatioMap = hbmConfig.getSdrHdrRatioMap_all();
+
+        if (sdrHdrRatioMap == null) {
+            return null;
+        }
+
+        final List<SdrHdrRatioPoint> points = sdrHdrRatioMap.getPoint();
+        final int size = points.size();
+        if (size <= 0) {
+            return null;
+        }
+
+        float[] nits = new float[size];
+        float[] ratios = new float[size];
+
+        int i = 0;
+        for (SdrHdrRatioPoint point : points) {
+            nits[i] = point.getSdrNits().floatValue();
+            if (i > 0) {
+                if (nits[i] < nits[i - 1]) {
+                    Slog.e(TAG, "sdrHdrRatioMap must be non-decreasing, ignoring rest "
+                                + " of configuration. nits: " + nits[i] + " < "
+                                + nits[i - 1]);
+                    return null;
+                }
+            }
+            ratios[i] = point.getHdrRatio().floatValue();
+            ++i;
+        }
+
+        return Spline.createSpline(nits, ratios);
     }
 
     private void loadBrightnessThrottlingMap(DisplayConfiguration config) {
@@ -938,9 +1030,18 @@ public class DisplayDeviceConfig {
                     mBacklight[mBacklight.length - 1],
                     PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX, mBacklight[i]);
         }
-        mBrightnessToBacklightSpline = Spline.createSpline(mBrightness, mBacklight);
-        mBacklightToBrightnessSpline = Spline.createSpline(mBacklight, mBrightness);
-        mBacklightToNitsSpline = Spline.createSpline(mBacklight, mNits);
+        mBrightnessToBacklightSpline = mInterpolationType == INTERPOLATION_LINEAR
+            ? Spline.createLinearSpline(mBrightness, mBacklight)
+            : Spline.createSpline(mBrightness, mBacklight);
+        mBacklightToBrightnessSpline = mInterpolationType == INTERPOLATION_LINEAR
+            ? Spline.createLinearSpline(mBacklight, mBrightness)
+            : Spline.createSpline(mBacklight, mBrightness);
+        mBacklightToNitsSpline = mInterpolationType == INTERPOLATION_LINEAR
+            ? Spline.createLinearSpline(mBacklight, mNits)
+            : Spline.createSpline(mBacklight, mNits);
+        mNitsToBacklightSpline = mInterpolationType == INTERPOLATION_LINEAR
+            ? Spline.createLinearSpline(mNits, mBacklight)
+            : Spline.createSpline(mNits, mBacklight);
     }
 
     private void loadQuirks(DisplayConfiguration config) {
@@ -977,6 +1078,20 @@ public class DisplayDeviceConfig {
                 mRefreshRateLimitations.add(new RefreshRateLimitation(
                         DisplayManagerInternal.REFRESH_RATE_LIMIT_HIGH_BRIGHTNESS_MODE, min, max));
             }
+            BigDecimal minHdrPctOfScreen = hbm.getMinimumHdrPercentOfScreen_all();
+            if (minHdrPctOfScreen != null) {
+                mHbmData.minimumHdrPercentOfScreen = minHdrPctOfScreen.floatValue();
+                if (mHbmData.minimumHdrPercentOfScreen > 1
+                        || mHbmData.minimumHdrPercentOfScreen < 0) {
+                    Slog.w(TAG, "Invalid minimum HDR percent of screen: "
+                                    + String.valueOf(mHbmData.minimumHdrPercentOfScreen));
+                    mHbmData.minimumHdrPercentOfScreen = HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT;
+                }
+            } else {
+                mHbmData.minimumHdrPercentOfScreen = HDR_PERCENT_OF_SCREEN_REQUIRED_DEFAULT;
+            }
+
+            mSdrToHdrRatioSpline = loadSdrHdrRatioMap(hbm);
         }
     }
 
@@ -1139,6 +1254,21 @@ public class DisplayDeviceConfig {
         }
     }
 
+    private int convertInterpolationType(Interpolation value) {
+        if (value == null) {
+            return INTERPOLATION_DEFAULT;
+        }
+        switch (value) {
+            case _default:
+                return INTERPOLATION_DEFAULT;
+            case linear:
+                return INTERPOLATION_LINEAR;
+            default:
+                Slog.wtf(TAG, "Unexpected Interpolation Type: " + value);
+                return INTERPOLATION_DEFAULT;
+        }
+    }
+
     private void loadAmbientHorizonFromDdc(DisplayConfiguration config) {
         final BigInteger configLongHorizon = config.getAmbientLightHorizonLong();
         if (configLongHorizon != null) {
@@ -1203,11 +1333,15 @@ public class DisplayDeviceConfig {
         /** Minimum time that HBM can be on before being enabled. */
         public long timeMinMillis;
 
+        /** Minimum HDR video size to enter high brightness mode */
+        public float minimumHdrPercentOfScreen;
+
         HighBrightnessModeData() {}
 
         HighBrightnessModeData(float minimumLux, float transitionPoint, long timeWindowMillis,
                 long timeMaxMillis, long timeMinMillis,
-                @PowerManager.ThermalStatus int thermalStatusLimit, boolean allowInLowPowerMode) {
+                @PowerManager.ThermalStatus int thermalStatusLimit, boolean allowInLowPowerMode,
+                float minimumHdrPercentOfScreen) {
             this.minimumLux = minimumLux;
             this.transitionPoint = transitionPoint;
             this.timeWindowMillis = timeWindowMillis;
@@ -1215,6 +1349,7 @@ public class DisplayDeviceConfig {
             this.timeMinMillis = timeMinMillis;
             this.thermalStatusLimit = thermalStatusLimit;
             this.allowInLowPowerMode = allowInLowPowerMode;
+            this.minimumHdrPercentOfScreen = minimumHdrPercentOfScreen;
         }
 
         /**
@@ -1229,6 +1364,7 @@ public class DisplayDeviceConfig {
             other.transitionPoint = transitionPoint;
             other.thermalStatusLimit = thermalStatusLimit;
             other.allowInLowPowerMode = allowInLowPowerMode;
+            other.minimumHdrPercentOfScreen = minimumHdrPercentOfScreen;
         }
 
         @Override
@@ -1241,6 +1377,7 @@ public class DisplayDeviceConfig {
                     + ", timeMin: " + timeMinMillis + "ms"
                     + ", thermalStatusLimit: " + thermalStatusLimit
                     + ", allowInLowPowerMode: " + allowInLowPowerMode
+                    + ", minimumHdrPercentOfScreen: " + minimumHdrPercentOfScreen
                     + "} ";
         }
     }

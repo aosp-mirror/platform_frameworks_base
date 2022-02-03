@@ -832,7 +832,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         setUpAutoBrightness(mContext.getResources(), mHandler);
         reloadReduceBrightColours();
         mHbmController.resetHbmData(info.width, info.height, token, info.uniqueId,
-                mDisplayDeviceConfig.getHighBrightnessModeData());
+                mDisplayDeviceConfig.getHighBrightnessModeData(),
+                new HighBrightnessModeController.HdrBrightnessDeviceConfig() {
+                    @Override
+                    public float getHdrBrightnessFromSdr(float sdrBrightness) {
+                        return mDisplayDeviceConfig.getHdrBrightnessFromSdr(sdrBrightness);
+                    }
+                });
         mBrightnessThrottler.resetThrottlingData(
                 mDisplayDeviceConfig.getBrightnessThrottlingData());
     }
@@ -1714,6 +1720,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         return new HighBrightnessModeController(mHandler, info.width, info.height, displayToken,
                 displayUniqueId, PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX, hbmData,
+                new HighBrightnessModeController.HdrBrightnessDeviceConfig() {
+                    @Override
+                    public float getHdrBrightnessFromSdr(float sdrBrightness) {
+                        return mDisplayDeviceConfig.getHdrBrightnessFromSdr(sdrBrightness);
+                    }
+                },
                 () -> {
                     sendUpdatePowerStateLocked();
                     postBrightnessChangeRunnable();
