@@ -37,7 +37,7 @@ import android.app.AppOpsManagerInternal;
 import android.app.TaskInfo;
 import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.EnabledSince;
+import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -58,6 +58,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.permission.PermissionControllerManager;
+import android.permission.PermissionManager;
 import android.provider.Settings;
 import android.provider.Telephony;
 import android.telecom.TelecomManager;
@@ -141,7 +142,7 @@ public final class PermissionPolicyService extends SystemService {
      * This change reflects the presence of the new Notification Permission
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.S_V2)
     private static final long NOTIFICATION_PERM_CHANGE_ID = 194833441L;
 
     private List<String> mAppOpPermissions;
@@ -149,7 +150,6 @@ public final class PermissionPolicyService extends SystemService {
     private Context mContext;
     private PackageManagerInternal mPackageManagerInternal;
     private NotificationManagerInternal mNotificationManager;
-    private PermissionManagerServiceInternal mPermissionManagerService;
     private final PackageManager mPackageManager;
 
     public PermissionPolicyService(@NonNull Context context) {
@@ -1001,13 +1001,48 @@ public final class PermissionPolicyService extends SystemService {
 
     private class Internal extends PermissionPolicyInternal {
 
-        private ActivityInterceptorCallback mActivityInterceptorCallback =
+        // UIDs that, if a grant dialog is shown for POST_NOTIFICATIONS before next reboot,
+        // should display a "continue allowing" message, rather than an "allow" message
+        private final ArraySet<Integer> mContinueNotifGrantMessageUids = new ArraySet<>();
+
+        private final ActivityInterceptorCallback mActivityInterceptorCallback =
                 new ActivityInterceptorCallback() {
                     @Nullable
                     @Override
                     public ActivityInterceptorCallback.ActivityInterceptResult intercept(
                             ActivityInterceptorInfo info) {
-                        return null;
+                        String action = info.intent.getAction();
+                        ActivityInterceptResult result = null;
+                        if (!PackageManager.ACTION_REQUEST_PERMISSIONS_FOR_OTHER.equals(action)
+                                && !PackageManager.ACTION_REQUEST_PERMISSIONS.equals(action)) {
+                            return null;
+                        }
+                        // Only this interceptor can add LEGACY_ACCESS_PERMISSION_NAMES
+                        if (info.intent.getStringArrayExtra(PackageManager
+                                .EXTRA_REQUEST_PERMISSIONS_LEGACY_ACCESS_PERMISSION_NAMES)
+                                != null) {
+                            result = new ActivityInterceptResult(
+                                    new Intent(info.intent), info.checkedOptions);
+                            result.intent.removeExtra(PackageManager
+                                    .EXTRA_REQUEST_PERMISSIONS_LEGACY_ACCESS_PERMISSION_NAMES);
+                        }
+                        if (PackageManager.ACTION_REQUEST_PERMISSIONS.equals(action)
+                                && !mContinueNotifGrantMessageUids.contains(info.realCallingUid)) {
+                            return result;
+                        }
+                        if (PackageManager.ACTION_REQUEST_PERMISSIONS_FOR_OTHER.equals(action)) {
+                            String otherPkg = info.intent.getStringExtra(Intent.EXTRA_PACKAGE_NAME);
+                            if (otherPkg == null || (mPackageManager.getPermissionFlags(
+                                    POST_NOTIFICATIONS, otherPkg, UserHandle.of(info.userId))
+                                    & FLAG_PERMISSION_REVIEW_REQUIRED) == 0) {
+                                return result;
+                            }
+                        }
+
+                        mContinueNotifGrantMessageUids.remove(info.realCallingUid);
+                        return new ActivityInterceptResult(info.intent.putExtra(PackageManager
+                                        .EXTRA_REQUEST_PERMISSIONS_LEGACY_ACCESS_PERMISSION_NAMES,
+                                new String[] { POST_NOTIFICATIONS }), info.checkedOptions);
                     }
 
                     @Override
@@ -1057,12 +1092,21 @@ public final class PermissionPolicyService extends SystemService {
             launchNotificationPermissionRequestDialog(packageName, user, taskId);
         }
 
-        private void clearNotificationReviewFlagsIfNeeded(String packageName, UserHandle userId) {
-            if (!CompatChanges.isChangeEnabled(NOTIFICATION_PERM_CHANGE_ID, packageName, userId)) {
+        private void clearNotificationReviewFlagsIfNeeded(String packageName, UserHandle user) {
+            if (!CompatChanges.isChangeEnabled(NOTIFICATION_PERM_CHANGE_ID, packageName, user)
+                    || ((mPackageManager.getPermissionFlags(POST_NOTIFICATIONS, packageName, user)
+                    & FLAG_PERMISSION_REVIEW_REQUIRED) == 0)) {
                 return;
             }
-            mPackageManager.updatePermissionFlags(POST_NOTIFICATIONS, packageName,
-                    FLAG_PERMISSION_REVIEW_REQUIRED, 0, userId);
+            try {
+                int uid = mPackageManager.getPackageUidAsUser(packageName, 0,
+                        user.getIdentifier());
+                mContinueNotifGrantMessageUids.add(uid);
+                mPackageManager.updatePermissionFlags(POST_NOTIFICATIONS, packageName,
+                        FLAG_PERMISSION_REVIEW_REQUIRED, 0, user);
+            } catch (PackageManager.NameNotFoundException e) {
+                // Do nothing
+            }
         }
 
         private void launchNotificationPermissionRequestDialog(String pkgName, UserHandle user,
@@ -1142,8 +1186,10 @@ public final class PermissionPolicyService extends SystemService {
             if (pkg == null || pkg.getPackageName() == null
                     || Objects.equals(pkgName, mPackageManager.getPermissionControllerPackageName())
                     || pkg.getTargetSdkVersion() < Build.VERSION_CODES.M) {
-                Slog.w(LOG_TAG, "Cannot check for Notification prompt, no package for "
-                        + pkgName + " or pkg is Permission Controller");
+                if (pkg == null) {
+                    Slog.w(LOG_TAG, "Cannot check for Notification prompt, no package for "
+                            + pkgName);
+                }
                 return false;
             }
 
@@ -1175,9 +1221,10 @@ public final class PermissionPolicyService extends SystemService {
             }
             boolean hasCreatedNotificationChannels = mNotificationManager
                     .getNumNotificationChannelsForPackage(pkg.getPackageName(), uid, true) > 0;
-            boolean needsReview = (mPackageManager.getPermissionFlags(POST_NOTIFICATIONS, pkgName,
-                    user) & FLAG_PERMISSION_REVIEW_REQUIRED) != 0;
-            return hasCreatedNotificationChannels && needsReview;
+            int flags = mPackageManager.getPermissionFlags(POST_NOTIFICATIONS, pkgName, user);
+            boolean explicitlySet = (flags & PermissionManager.EXPLICIT_SET_FLAGS) != 0;
+            boolean needsReview = (flags & FLAG_PERMISSION_REVIEW_REQUIRED) != 0;
+            return hasCreatedNotificationChannels && (needsReview || !explicitlySet);
         }
     }
 }

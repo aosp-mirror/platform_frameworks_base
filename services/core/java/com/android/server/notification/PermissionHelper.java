@@ -179,7 +179,7 @@ public final class PermissionHelper {
         assertFlag();
         final long callingId = Binder.clearCallingIdentity();
         try {
-            if (grant) {
+            if (grant && !reviewRequired) {
                 mPermManager.grantRuntimePermission(packageName, NOTIFICATION_PERMISSION, userId);
             } else {
                 mPermManager.revokeRuntimePermission(packageName, NOTIFICATION_PERMISSION, userId,
@@ -210,8 +210,10 @@ public final class PermissionHelper {
         if (pkgPerm == null || pkgPerm.packageName == null) {
             return;
         }
-        setNotificationPermission(pkgPerm.packageName, pkgPerm.userId, pkgPerm.granted,
-                pkgPerm.userSet, !pkgPerm.userSet);
+        if (!isPermissionFixed(pkgPerm.packageName, pkgPerm.userId)) {
+            setNotificationPermission(pkgPerm.packageName, pkgPerm.userId, pkgPerm.granted,
+                    pkgPerm.userSet, !pkgPerm.userSet);
+        }
     }
 
     public boolean isPermissionFixed(String packageName, @UserIdInt int userId) {
@@ -239,7 +241,8 @@ public final class PermissionHelper {
             try {
                 int flags = mPermManager.getPermissionFlags(packageName, NOTIFICATION_PERMISSION,
                         userId);
-                return (flags & PackageManager.FLAG_PERMISSION_USER_SET) != 0;
+                return (flags & (PackageManager.FLAG_PERMISSION_USER_SET
+                        | PackageManager.FLAG_PERMISSION_USER_FIXED)) != 0;
             } catch (RemoteException e) {
                 Slog.e(TAG, "Could not reach system server", e);
             }

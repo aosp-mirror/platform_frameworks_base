@@ -2059,7 +2059,7 @@ package android.permission {
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermGroupUsage> getIndicatorAppOpUsageData();
     method @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.permission.PermGroupUsage> getIndicatorAppOpUsageData(boolean);
     method @NonNull public android.content.AttributionSource registerAttributionSource(@NonNull android.content.AttributionSource);
-    method public void revokePostNotificationPermissionWithoutKillForTest(@NonNull String, int);
+    method @RequiresPermission(android.Manifest.permission.REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL) public void revokePostNotificationPermissionWithoutKillForTest(@NonNull String, int);
   }
 
 }
