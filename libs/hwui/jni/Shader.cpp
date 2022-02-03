@@ -264,7 +264,7 @@ static jlong RuntimeShader_getNativeFinalizer(JNIEnv*, jobject) {
 static jlong RuntimeShader_create(JNIEnv* env, jobject, jlong shaderBuilder, jlong matrixPtr) {
     SkRuntimeShaderBuilder* builder = reinterpret_cast<SkRuntimeShaderBuilder*>(shaderBuilder);
     const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
-    sk_sp<SkShader> shader = builder->makeShader(matrix, false);
+    sk_sp<SkShader> shader = builder->makeShader(matrix);
     ThrowIAE_IfNull(env, shader);
     return reinterpret_cast<jlong>(shader.release());
 }
