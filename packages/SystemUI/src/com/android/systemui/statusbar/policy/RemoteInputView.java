@@ -118,7 +118,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
     private boolean mColorized;
     private int mTint;
     private boolean mResetting;
-    private boolean mWasSpinning;
 
     // TODO(b/193539698): move these to a Controller
     private RemoteInputController mController;
@@ -440,10 +439,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
                 mEditText.requestFocus();
             }
         }
-        if (mWasSpinning) {
-            mController.addSpinning(mEntry.getKey(), mToken);
-            mWasSpinning = false;
-        }
     }
 
     @Override
@@ -452,7 +447,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         mEditText.removeTextChangedListener(mTextWatcher);
         mEditText.setOnEditorActionListener(null);
         mEditText.mRemoteInputView = null;
-        mWasSpinning = mController.isSpinning(mEntry.getKey(), mToken);
         if (mEntry.getRow().isChangingPosition() || isTemporarilyDetached()) {
             return;
         }
@@ -539,8 +533,6 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         if (isActive() && mWrapper != null) {
             mWrapper.setRemoteInputVisible(true);
         }
-
-        mWasSpinning = false;
     }
 
     private void reset() {
