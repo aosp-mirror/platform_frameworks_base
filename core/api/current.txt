@@ -3591,17 +3591,17 @@ package android.animation {
   }
 
   public static interface Animator.AnimatorListener {
-    method public void onAnimationCancel(android.animation.Animator);
-    method public default void onAnimationEnd(android.animation.Animator, boolean);
-    method public void onAnimationEnd(android.animation.Animator);
-    method public void onAnimationRepeat(android.animation.Animator);
-    method public default void onAnimationStart(android.animation.Animator, boolean);
-    method public void onAnimationStart(android.animation.Animator);
+    method public void onAnimationCancel(@NonNull android.animation.Animator);
+    method public default void onAnimationEnd(@NonNull android.animation.Animator, boolean);
+    method public void onAnimationEnd(@NonNull android.animation.Animator);
+    method public void onAnimationRepeat(@NonNull android.animation.Animator);
+    method public default void onAnimationStart(@NonNull android.animation.Animator, boolean);
+    method public void onAnimationStart(@NonNull android.animation.Animator);
   }
 
   public static interface Animator.AnimatorPauseListener {
-    method public void onAnimationPause(android.animation.Animator);
-    method public void onAnimationResume(android.animation.Animator);
+    method public void onAnimationPause(@NonNull android.animation.Animator);
+    method public void onAnimationResume(@NonNull android.animation.Animator);
   }
 
   public class AnimatorInflater {
@@ -3888,7 +3888,7 @@ package android.animation {
   }
 
   public static interface ValueAnimator.AnimatorUpdateListener {
-    method public void onAnimationUpdate(android.animation.ValueAnimator);
+    method public void onAnimationUpdate(@NonNull android.animation.ValueAnimator);
   }
 
 }
@@ -15766,9 +15766,9 @@ package android.graphics.drawable {
     method public final void copyBounds(@NonNull android.graphics.Rect);
     method @NonNull public final android.graphics.Rect copyBounds();
     method @Nullable public static android.graphics.drawable.Drawable createFromPath(String);
-    method public static android.graphics.drawable.Drawable createFromResourceStream(android.content.res.Resources, android.util.TypedValue, java.io.InputStream, String);
+    method @Nullable public static android.graphics.drawable.Drawable createFromResourceStream(@Nullable android.content.res.Resources, @Nullable android.util.TypedValue, @Nullable java.io.InputStream, @Nullable String);
     method @Deprecated @Nullable public static android.graphics.drawable.Drawable createFromResourceStream(@Nullable android.content.res.Resources, @Nullable android.util.TypedValue, @Nullable java.io.InputStream, @Nullable String, @Nullable android.graphics.BitmapFactory.Options);
-    method public static android.graphics.drawable.Drawable createFromStream(java.io.InputStream, String);
+    method @Nullable public static android.graphics.drawable.Drawable createFromStream(@Nullable java.io.InputStream, @Nullable String);
     method @NonNull public static android.graphics.drawable.Drawable createFromXml(@NonNull android.content.res.Resources, @NonNull org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method @NonNull public static android.graphics.drawable.Drawable createFromXml(@NonNull android.content.res.Resources, @NonNull org.xmlpull.v1.XmlPullParser, @Nullable android.content.res.Resources.Theme) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method @NonNull public static android.graphics.drawable.Drawable createFromXmlInner(@NonNull android.content.res.Resources, @NonNull org.xmlpull.v1.XmlPullParser, @NonNull android.util.AttributeSet) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
@@ -15806,10 +15806,10 @@ package android.graphics.drawable {
     method public final boolean isVisible();
     method public void jumpToCurrentState();
     method @NonNull public android.graphics.drawable.Drawable mutate();
-    method protected void onBoundsChange(android.graphics.Rect);
+    method protected void onBoundsChange(@NonNull android.graphics.Rect);
     method public boolean onLayoutDirectionChanged(int);
     method protected boolean onLevelChange(int);
-    method protected boolean onStateChange(int[]);
+    method protected boolean onStateChange(@NonNull int[]);
     method public static int resolveOpacity(int, int);
     method public void scheduleSelf(@NonNull Runnable, long);
     method public abstract void setAlpha(@IntRange(from=0, to=255) int);
@@ -15970,27 +15970,27 @@ package android.graphics.drawable {
   }
 
   public final class Icon implements android.os.Parcelable {
-    method public static android.graphics.drawable.Icon createWithAdaptiveBitmap(android.graphics.Bitmap);
+    method @NonNull public static android.graphics.drawable.Icon createWithAdaptiveBitmap(android.graphics.Bitmap);
     method @NonNull public static android.graphics.drawable.Icon createWithAdaptiveBitmapContentUri(@NonNull String);
     method @NonNull public static android.graphics.drawable.Icon createWithAdaptiveBitmapContentUri(@NonNull android.net.Uri);
-    method public static android.graphics.drawable.Icon createWithBitmap(android.graphics.Bitmap);
-    method public static android.graphics.drawable.Icon createWithContentUri(String);
-    method public static android.graphics.drawable.Icon createWithContentUri(android.net.Uri);
-    method public static android.graphics.drawable.Icon createWithData(byte[], int, int);
-    method public static android.graphics.drawable.Icon createWithFilePath(String);
-    method public static android.graphics.drawable.Icon createWithResource(android.content.Context, @DrawableRes int);
-    method public static android.graphics.drawable.Icon createWithResource(String, @DrawableRes int);
+    method @NonNull public static android.graphics.drawable.Icon createWithBitmap(android.graphics.Bitmap);
+    method @NonNull public static android.graphics.drawable.Icon createWithContentUri(String);
+    method @NonNull public static android.graphics.drawable.Icon createWithContentUri(android.net.Uri);
+    method @NonNull public static android.graphics.drawable.Icon createWithData(byte[], int, int);
+    method @NonNull public static android.graphics.drawable.Icon createWithFilePath(String);
+    method @NonNull public static android.graphics.drawable.Icon createWithResource(android.content.Context, @DrawableRes int);
+    method @NonNull public static android.graphics.drawable.Icon createWithResource(String, @DrawableRes int);
     method public int describeContents();
     method @DrawableRes public int getResId();
     method @NonNull public String getResPackage();
     method public int getType();
     method @NonNull public android.net.Uri getUri();
-    method public android.graphics.drawable.Drawable loadDrawable(android.content.Context);
-    method public void loadDrawableAsync(android.content.Context, android.os.Message);
-    method public void loadDrawableAsync(android.content.Context, android.graphics.drawable.Icon.OnDrawableLoadedListener, android.os.Handler);
-    method public android.graphics.drawable.Icon setTint(@ColorInt int);
+    method @Nullable public android.graphics.drawable.Drawable loadDrawable(android.content.Context);
+    method public void loadDrawableAsync(@NonNull android.content.Context, @NonNull android.os.Message);
+    method public void loadDrawableAsync(@NonNull android.content.Context, android.graphics.drawable.Icon.OnDrawableLoadedListener, android.os.Handler);
+    method @NonNull public android.graphics.drawable.Icon setTint(@ColorInt int);
     method @NonNull public android.graphics.drawable.Icon setTintBlendMode(@NonNull android.graphics.BlendMode);
-    method public android.graphics.drawable.Icon setTintList(android.content.res.ColorStateList);
+    method @NonNull public android.graphics.drawable.Icon setTintList(android.content.res.ColorStateList);
     method @NonNull public android.graphics.drawable.Icon setTintMode(@NonNull android.graphics.PorterDuff.Mode);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.graphics.drawable.Icon> CREATOR;
