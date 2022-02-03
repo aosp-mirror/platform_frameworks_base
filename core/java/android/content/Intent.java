@@ -5576,6 +5576,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * A String[] holding attribution tags when used with
      * {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     * and ACTION_MANAGE_PERMISSION_USAGE
      *
      * E.g. an attribution tag could be location_provider, com.google.android.gms.*, etc.
      */
@@ -5584,17 +5585,20 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * A long representing the start timestamp (epoch time in millis) of the permission usage
      * when used with {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     * and ACTION_MANAGE_PERMISSION_USAGE
      */
     public static final String EXTRA_START_TIME = "android.intent.extra.START_TIME";
 
     /**
      * A long representing the end timestamp (epoch time in millis) of the permission usage when
      * used with {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     * and ACTION_MANAGE_PERMISSION_USAGE
      */
     public static final String EXTRA_END_TIME = "android.intent.extra.END_TIME";
 
     /**
-     * A boolean extra, when used with {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD},
+     * A boolean extra, when used with {@link #ACTION_VIEW_PERMISSION_USAGE_FOR_PERIOD}
+     * and {@link #ACTION_MANAGE_PERMISSION_USAGE},
      * that specifies whether the permission usage system UI is showing attribution information
      * for the chosen entry.
      *
