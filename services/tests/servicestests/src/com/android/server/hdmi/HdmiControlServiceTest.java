@@ -892,6 +892,7 @@ public class HdmiControlServiceTest {
         int sourceAddress = Constants.ADDR_TV;
         byte[] params = {0x00, 0x01, 0x02, 0x03};
         int vendorId = 0x123456;
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
 
         VendorCommandListener vendorCmdListener =
                 new VendorCommandListener(sourceAddress, destAddress, params, vendorId);
@@ -913,6 +914,7 @@ public class HdmiControlServiceTest {
         int sourceAddress = Constants.ADDR_TV;
         byte[] params = {0x00, 0x01, 0x02, 0x03};
         int vendorId = 0x123456;
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
 
         VendorCommandListener vendorCmdListener =
                 new VendorCommandListener(sourceAddress, destAddress, params, vendorId);
@@ -936,6 +938,7 @@ public class HdmiControlServiceTest {
         byte[] params = {0x00, 0x01, 0x02, 0x03};
         int vendorId = 0x123456;
         int diffVendorId = 0x345678;
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_ON);
 
         VendorCommandListener vendorCmdListener =
                 new VendorCommandListener(sourceAddress, destAddress, params, vendorId);
