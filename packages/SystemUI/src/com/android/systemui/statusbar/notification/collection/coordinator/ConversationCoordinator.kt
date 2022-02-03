@@ -51,21 +51,18 @@ class ConversationCoordinator @Inject constructor(
     val sectioner = object : NotifSectioner("People", BUCKET_PEOPLE) {
         override fun isInSection(entry: ListEntry): Boolean =
                 isConversation(entry)
+
+        override fun getComparator() = object : NotifComparator("People") {
+            override fun compare(entry1: ListEntry, entry2: ListEntry): Int {
+                val type1 = getPeopleType(entry1)
+                val type2 = getPeopleType(entry2)
+                return type2.compareTo(type1)
+            }
+        }
+
         override fun getHeaderNodeController() =
                 // TODO: remove SHOW_ALL_SECTIONS, this redundant method, and peopleHeaderController
                 if (RankingCoordinator.SHOW_ALL_SECTIONS) peopleHeaderController else null
-    }
-
-    val comparator = object : NotifComparator("People") {
-        override fun compare(entry1: ListEntry, entry2: ListEntry): Int {
-            assert(entry1.section === entry2.section)
-            if (entry1.section?.sectioner !== sectioner) {
-                return 0
-            }
-            val type1 = getPeopleType(entry1)
-            val type2 = getPeopleType(entry2)
-            return type2.compareTo(type1)
-        }
     }
 
     override fun attach(pipeline: NotifPipeline) {

@@ -26,6 +26,7 @@ import com.android.systemui.statusbar.notification.collection.ListEntry
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
@@ -455,6 +456,13 @@ class HeadsUpCoordinator @Inject constructor(
         override fun isInSection(entry: ListEntry): Boolean =
             // TODO: This check won't notice if a child of the group is going to HUN...
             isGoingToShowHunNoRetract(entry)
+
+        override fun getComparator(): NotifComparator {
+            return object : NotifComparator("HeadsUp") {
+                override fun compare(o1: ListEntry, o2: ListEntry): Int =
+                    mHeadsUpManager.compare(o1.representativeEntry, o2.representativeEntry)
+            }
+        }
 
         override fun getHeaderNodeController(): NodeController? =
             // TODO: remove SHOW_ALL_SECTIONS, this redundant method, and mIncomingHeaderController
