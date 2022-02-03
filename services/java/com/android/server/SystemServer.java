@@ -3171,11 +3171,6 @@ public final class SystemServer implements Dumpable {
     }
 
     private void startAmbientContextService(@NonNull TimingsTraceAndSlog t) {
-        if (!AmbientContextManagerService.isDetectionServiceConfigured()) {
-            Slog.d(TAG, "AmbientContextDetectionService is not configured on this device");
-            return;
-        }
-
         t.traceBegin("StartAmbientContextService");
         mSystemServiceManager.startService(AmbientContextManagerService.class);
         t.traceEnd();
