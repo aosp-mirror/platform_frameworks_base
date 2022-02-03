@@ -131,9 +131,7 @@ public class DreamOverlayStateController implements
                 .filter(complication -> {
                     @Complication.ComplicationType
                     final int requiredTypes = complication.getRequiredTypeAvailability();
-
-                    return requiredTypes == Complication.COMPLICATION_TYPE_NONE
-                            || (requiredTypes & getAvailableComplicationTypes()) == requiredTypes;
+                    return (requiredTypes & getAvailableComplicationTypes()) == requiredTypes;
                 })
                 .collect(Collectors.toCollection(HashSet::new))
                 : mComplications);
