@@ -26,8 +26,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -35,21 +33,14 @@ import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.text.TextUtils;
-import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Xml;
 
 import com.android.settingslib.R;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
-import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -170,7 +161,7 @@ public class DreamBackend {
         PackageManager pm = mContext.getPackageManager();
         Intent dreamIntent = new Intent(DreamService.SERVICE_INTERFACE);
         List<ResolveInfo> resolveInfos = pm.queryIntentServices(dreamIntent,
-                PackageManager.GET_META_DATA);
+                PackageManager.ResolveInfoFlags.of(PackageManager.GET_META_DATA));
         List<DreamInfo> dreamInfos = new ArrayList<>(resolveInfos.size());
         for (ResolveInfo resolveInfo : resolveInfos) {
             final ComponentName componentName = getDreamComponentName(resolveInfo);
@@ -185,15 +176,18 @@ public class DreamBackend {
             dreamInfo.componentName = componentName;
             dreamInfo.isActive = dreamInfo.componentName.equals(activeDream);
 
-            final DreamMetadata dreamMetadata = getDreamMetadata(pm, resolveInfo);
-            dreamInfo.settingsComponentName = dreamMetadata.mSettingsActivity;
-            dreamInfo.previewImage = dreamMetadata.mPreviewImage;
+            final DreamService.DreamMetadata dreamMetadata = DreamService.getDreamMetadata(mContext,
+                    resolveInfo.serviceInfo);
+            if (dreamMetadata != null) {
+                dreamInfo.settingsComponentName = dreamMetadata.settingsActivity;
+                dreamInfo.previewImage = dreamMetadata.previewImage;
+            }
             if (dreamInfo.previewImage == null) {
                 dreamInfo.previewImage = mDreamPreviewDefault;
             }
             dreamInfos.add(dreamInfo);
         }
-        Collections.sort(dreamInfos, mComparator);
+        dreamInfos.sort(mComparator);
         return dreamInfos;
     }
 
@@ -481,67 +475,6 @@ public class DreamBackend {
             return null;
         }
         return new ComponentName(resolveInfo.serviceInfo.packageName, resolveInfo.serviceInfo.name);
-    }
-
-    private static final class DreamMetadata {
-        @Nullable
-        Drawable mPreviewImage;
-        @Nullable
-        ComponentName mSettingsActivity;
-    }
-
-    @Nullable
-    private static TypedArray readMetadata(PackageManager pm, ServiceInfo serviceInfo) {
-        if (serviceInfo == null || serviceInfo.metaData == null) {
-            return null;
-        }
-        try (XmlResourceParser parser =
-                     serviceInfo.loadXmlMetaData(pm, DreamService.DREAM_META_DATA)) {
-            if (parser == null) {
-                Log.w(TAG, "No " + DreamService.DREAM_META_DATA + " meta-data");
-                return null;
-            }
-            Resources res = pm.getResourcesForApplication(serviceInfo.applicationInfo);
-            AttributeSet attrs = Xml.asAttributeSet(parser);
-            while (true) {
-                final int type = parser.next();
-                if (type == XmlPullParser.END_DOCUMENT || type == XmlPullParser.START_TAG) {
-                    break;
-                }
-            }
-            String nodeName = parser.getName();
-            if (!"dream".equals(nodeName)) {
-                Log.w(TAG, "Meta-data does not start with dream tag");
-                return null;
-            }
-            return res.obtainAttributes(attrs, com.android.internal.R.styleable.Dream);
-        } catch (PackageManager.NameNotFoundException | IOException | XmlPullParserException e) {
-            Log.w(TAG, "Error parsing : " + serviceInfo.packageName, e);
-            return null;
-        }
-    }
-
-    private static ComponentName convertToComponentName(String flattenedString,
-            ServiceInfo serviceInfo) {
-        if (flattenedString == null) return null;
-
-        if (flattenedString.indexOf('/') < 0) {
-            flattenedString = serviceInfo.packageName + "/" + flattenedString;
-        }
-        return ComponentName.unflattenFromString(flattenedString);
-    }
-
-    private static DreamMetadata getDreamMetadata(PackageManager pm, ResolveInfo resolveInfo) {
-        DreamMetadata result = new DreamMetadata();
-        if (resolveInfo == null) return result;
-        TypedArray rawMetadata = readMetadata(pm, resolveInfo.serviceInfo);
-        if (rawMetadata == null) return result;
-        result.mSettingsActivity = convertToComponentName(rawMetadata.getString(
-                com.android.internal.R.styleable.Dream_settingsActivity), resolveInfo.serviceInfo);
-        result.mPreviewImage = rawMetadata.getDrawable(
-                com.android.internal.R.styleable.Dream_previewImage);
-        rawMetadata.recycle();
-        return result;
     }
 
     private static void logd(String msg, Object... args) {
