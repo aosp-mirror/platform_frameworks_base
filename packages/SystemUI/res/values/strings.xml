@@ -2379,6 +2379,8 @@
     <string name="fgs_manager_dialog_title">Active apps</string>
     <!-- Label of the button to stop an app from running [CHAR LIMIT=12]-->
     <string name="fgs_manager_app_item_stop_button_label">Stop</string>
+    <!-- Label of the button to stop an app from running but the app is already stopped and the button is disabled [CHAR LIMIT=12]-->
+    <string name="fgs_manager_app_item_stop_button_stopped_label">Stopped</string>
 
     <!-- Label for button to copy edited text back to the clipboard [CHAR LIMIT=20] -->
     <string name="clipboard_edit_text_copy">Copy</string>

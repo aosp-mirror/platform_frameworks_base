@@ -192,6 +192,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             refreshAllTiles();
         }
 
+        mQSFgsManagerFooter.setListening(listening);
         mQsSecurityFooter.setListening(listening);
 
         // Set the listening as soon as the QS fragment starts listening regardless of the

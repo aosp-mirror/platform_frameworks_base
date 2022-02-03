@@ -16,13 +16,9 @@
 
 package com.android.systemui.qs;
 
-import static android.provider.DeviceConfig.NAMESPACE_SYSTEMUI;
-
-import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_ENABLED;
 import static com.android.systemui.qs.dagger.QSFragmentModule.QS_FGS_MANAGER_FOOTER_VIEW;
 
 import android.content.Context;
-import android.provider.DeviceConfig;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -30,8 +26,6 @@ import android.widget.TextView;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.fgsmanager.FgsManagerDialogFactory;
-import com.android.systemui.statusbar.policy.RunningFgsController;
 
 import java.util.concurrent.Executor;
 
@@ -41,24 +35,25 @@ import javax.inject.Named;
 /**
  * Footer entry point for the foreground service manager
  */
-public class QSFgsManagerFooter implements View.OnClickListener {
+public class QSFgsManagerFooter implements View.OnClickListener,
+        FgsManagerController.OnDialogDismissedListener,
+        FgsManagerController.OnNumberOfPackagesChangedListener {
 
     private final View mRootView;
     private final TextView mFooterText;
     private final Context mContext;
     private final Executor mMainExecutor;
     private final Executor mExecutor;
-    private final RunningFgsController mRunningFgsController;
-    private final FgsManagerDialogFactory mFgsManagerDialogFactory;
+
+    private final FgsManagerController mFgsManagerController;
 
     private boolean mIsInitialized = false;
-    private boolean mIsAvailable = false;
+    private int mNumPackages;
 
     @Inject
     QSFgsManagerFooter(@Named(QS_FGS_MANAGER_FOOTER_VIEW) View rootView,
-            @Main Executor mainExecutor, RunningFgsController runningFgsController,
-            @Background Executor executor,
-            FgsManagerDialogFactory fgsManagerDialogFactory) {
+            @Main Executor mainExecutor, @Background Executor executor,
+            FgsManagerController fgsManagerController) {
         mRootView = rootView;
         mFooterText = mRootView.findViewById(R.id.footer_text);
         ImageView icon = mRootView.findViewById(R.id.primary_footer_icon);
@@ -66,8 +61,7 @@ public class QSFgsManagerFooter implements View.OnClickListener {
         mContext = rootView.getContext();
         mMainExecutor = mainExecutor;
         mExecutor = executor;
-        mRunningFgsController = runningFgsController;
-        mFgsManagerDialogFactory = fgsManagerDialogFactory;
+        mFgsManagerController = fgsManagerController;
     }
 
     public void init() {
@@ -75,22 +69,28 @@ public class QSFgsManagerFooter implements View.OnClickListener {
             return;
         }
 
+        mFgsManagerController.init();
+
         mRootView.setOnClickListener(this);
-
-        mRunningFgsController.addCallback(packages -> refreshState());
-
-        DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_SYSTEMUI, mExecutor,
-                (DeviceConfig.OnPropertiesChangedListener) properties -> {
-                    mIsAvailable = properties.getBoolean(TASK_MANAGER_ENABLED, mIsAvailable);
-                });
-        mIsAvailable = DeviceConfig.getBoolean(NAMESPACE_SYSTEMUI, TASK_MANAGER_ENABLED, false);
 
         mIsInitialized = true;
     }
 
+    public void setListening(boolean listening) {
+        if (listening) {
+            mFgsManagerController.addOnDialogDismissedListener(this);
+            mFgsManagerController.addOnNumberOfPackagesChangedListener(this);
+            mNumPackages = mFgsManagerController.getNumRunningPackages();
+            refreshState();
+        } else {
+            mFgsManagerController.removeOnDialogDismissedListener(this);
+            mFgsManagerController.removeOnNumberOfPackagesChangedListener(this);
+        }
+    }
+
     @Override
     public void onClick(View view) {
-        mFgsManagerDialogFactory.create(mRootView);
+        mFgsManagerController.showDialog(mRootView);
     }
 
     public void refreshState() {
@@ -101,17 +101,25 @@ public class QSFgsManagerFooter implements View.OnClickListener {
         return mRootView;
     }
 
-    private boolean isAvailable() {
-        return mIsAvailable;
-    }
-
     public void handleRefreshState() {
-        int numPackages = mRunningFgsController.getPackagesWithFgs().size();
         mMainExecutor.execute(() -> {
             mFooterText.setText(mContext.getResources().getQuantityString(
-                    R.plurals.fgs_manager_footer_label, numPackages, numPackages));
-            mRootView.setVisibility(numPackages > 0 && isAvailable() ? View.VISIBLE : View.GONE);
+                    R.plurals.fgs_manager_footer_label, mNumPackages, mNumPackages));
+            if (mFgsManagerController.shouldUpdateFooterVisibility()) {
+                mRootView.setVisibility(mNumPackages > 0
+                        && mFgsManagerController.isAvailable() ? View.VISIBLE : View.GONE);
+            }
         });
     }
 
+    @Override
+    public void onDialogDismissed() {
+        refreshState();
+    }
+
+    @Override
+    public void onNumberOfPackagesChanged(int numPackages) {
+        mNumPackages = numPackages;
+        refreshState();
+    }
 }
