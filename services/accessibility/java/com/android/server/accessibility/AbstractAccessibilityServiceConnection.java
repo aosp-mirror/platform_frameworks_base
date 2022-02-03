@@ -66,6 +66,7 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -269,6 +270,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         void onDoubleTap(int displayId);
 
         void onDoubleTapAndHold(int displayId);
+
     }
 
     public AbstractAccessibilityServiceConnection(Context context, ComponentName componentName,
@@ -2163,5 +2165,24 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     public void onDoubleTapAndHold(int displayId) {
         mSystemSupport.onDoubleTapAndHold(displayId);
+    }
+
+    /**
+     * Sets the scaling factor for animations.
+     */
+    public void setAnimationScale(float scale) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            Settings.Global.putFloat(
+                    mContext.getContentResolver(), Settings.Global.WINDOW_ANIMATION_SCALE, scale);
+            Settings.Global.putFloat(
+                    mContext.getContentResolver(),
+                    Settings.Global.TRANSITION_ANIMATION_SCALE,
+                    scale);
+            Settings.Global.putFloat(
+                    mContext.getContentResolver(), Settings.Global.ANIMATOR_DURATION_SCALE, scale);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 }

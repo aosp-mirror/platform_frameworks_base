@@ -780,6 +780,33 @@ public final class UiAutomation {
     }
 
     /**
+     * Sets the system settings values that control the scaling factor for animations. The scale
+     * controls the animation playback speed for animations that respect these settings. Animations
+     * that do not respect the settings values will not be affected by this function. A lower scale
+     * value results in a faster speed. A value of <code>0</code> disables animations entirely. When
+     * animations are disabled services receive window change events more quickly which can reduce
+     * the potential by confusion by reducing the time during which windows are in transition.
+     *
+     * @see AccessibilityEvent#TYPE_WINDOWS_CHANGED
+     * @see AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED
+     * @see android.provider.Settings.Global#WINDOW_ANIMATION_SCALE
+     * @see android.provider.Settings.Global#TRANSITION_ANIMATION_SCALE
+     * @see android.provider.Settings.Global#ANIMATOR_DURATION_SCALE
+     * @param scale The scaling factor for all animations.
+     */
+    public void setAnimationScale(float scale) {
+        final IAccessibilityServiceConnection connection =
+                AccessibilityInteractionClient.getInstance().getConnection(mConnectionId);
+        if (connection != null) {
+            try {
+                connection.setAnimationScale(scale);
+            } catch (RemoteException re) {
+                throw new RuntimeException(re);
+            }
+        }
+    }
+
+    /**
      * A request for WindowManagerService to wait until all animations have completed and input
      * information has been sent from WindowManager to native InputManager.
      *
