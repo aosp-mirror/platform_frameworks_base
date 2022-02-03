@@ -546,7 +546,8 @@ final class NavigationBarController {
         public String toDebugString() {
             return "{mRenderGesturalNavButtons=" + mRenderGesturalNavButtons
                     + " mNavigationBarFrame=" + mNavigationBarFrame
-                    + " mShouldShowImeSwitcherWhenImeIsShown" + mShouldShowImeSwitcherWhenImeIsShown
+                    + " mShouldShowImeSwitcherWhenImeIsShown="
+                    + mShouldShowImeSwitcherWhenImeIsShown
                     + " mAppearance=0x" + Integer.toHexString(mAppearance)
                     + " mDarkIntensity=" + mDarkIntensity
                     + " mDrawLegacyNavigationBarBackground=" + mDrawLegacyNavigationBarBackground
