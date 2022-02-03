@@ -75,7 +75,8 @@ public class BackAnimationControllerTest {
                 screenshotSurface,
                 hardwareBuffer,
                 new WindowConfiguration(),
-                new RemoteCallback((bundle) -> {}));
+                new RemoteCallback((bundle) -> {}),
+                null);
         try {
             doReturn(navigationInfo).when(mActivityTaskManager).startBackNavigation();
         } catch (RemoteException ex) {

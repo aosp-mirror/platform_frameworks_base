@@ -29,6 +29,7 @@ import android.os.SystemProperties;
 import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.BackNavigationInfo;
+import android.window.IOnBackInvokedCallback;
 import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -91,29 +92,41 @@ class BackNavigationController {
         HardwareBuffer screenshotBuffer = null;
         int prevTaskId;
         int prevUserId;
+        IOnBackInvokedCallback callback;
 
         synchronized (task.mWmService.mGlobalLock) {
             activityRecord = task.topRunningActivity();
             removedWindowContainer = activityRecord;
             taskWindowConfiguration = task.getTaskInfo().configuration.windowConfiguration;
 
-            ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation task=%s, topRunningActivity=%s",
-                    task, activityRecord);
+            WindowState topChild = activityRecord.getTopChild();
+            callback = topChild.getOnBackInvokedCallback();
 
-            // IME is visible, back gesture will dismiss it, nothing to preview.
-            if (task.getDisplayContent().getImeContainer().isVisible()) {
-                return null;
-            }
+            ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation task=%s, "
+                            + "topRunningActivity=%s, topWindow=%s backCallback=%s",
+                    task, activityRecord, topChild,
+                    callback != null ? callback.getClass().getSimpleName() : null);
 
-            // Current Activity is home, there is no previous activity to display
-            if (activityRecord.isActivityTypeHome()) {
-                return null;
+            // For IME and Home, either a callback is registered, or we do nothing. In both cases,
+            // we don't need to pass the leashes below.
+            if (task.getDisplayContent().getImeContainer().isVisible()
+                    || activityRecord.isActivityTypeHome()) {
+                if (callback != null) {
+                    return new BackNavigationInfo(BackNavigationInfo.TYPE_CALLBACK,
+                            null /* topWindowLeash */, null /* screenshotSurface */,
+                            null /* screenshotBuffer */, null /* taskWindowConfiguration */,
+                            null /* onBackNavigationDone */, callback /* onBackInvokedCallback */);
+                } else {
+                    return null;
+                }
             }
 
             prev = task.getActivity(
                     (r) -> !r.finishing && r.getTask() == task && !r.isTopRunningActivity());
 
-            if (prev != null) {
+            if (callback != null) {
+                backType = BackNavigationInfo.TYPE_CALLBACK;
+            } else if (prev != null) {
                 backType = BackNavigationInfo.TYPE_CROSS_ACTIVITY;
             } else if (task.returnsToHomeRootTask()) {
                 prevTask = null;
@@ -148,7 +161,7 @@ class BackNavigationController {
 
             // Prepare a leash to animate the current top window
             animLeash = removedWindowContainer.makeAnimationLeash()
-                    .setName("BackPreview Leash")
+                    .setName("BackPreview Leash for " + removedWindowContainer)
                     .setHidden(false)
                     .setBLASTLayer()
                     .build();
@@ -158,7 +171,7 @@ class BackNavigationController {
         }
 
         SurfaceControl.Builder builder = new SurfaceControl.Builder()
-                .setName("BackPreview Screenshot")
+                .setName("BackPreview Screenshot for " + prev)
                 .setParent(animationLeashParent)
                 .setHidden(false)
                 .setBLASTLayer();
@@ -171,6 +184,10 @@ class BackNavigationController {
                 screenshotBuffer = getTaskSnapshot(prevTaskId, prevUserId);
             }
         }
+
+        // The Animation leash needs to be above the screenshot surface, but the animation leash
+        // needs to be added before to be in the synchronized block.
+        tx.setLayer(animLeash, 1);
         tx.apply();
 
         WindowContainer<?> finalRemovedWindowContainer = removedWindowContainer;
@@ -183,13 +200,16 @@ class BackNavigationController {
             return null;
         }
 
+        RemoteCallback onBackNavigationDone = new RemoteCallback(
+                result -> resetSurfaces(finalRemovedWindowContainer
+                ));
         return new BackNavigationInfo(backType,
                 animLeash,
                 screenshotSurface,
                 screenshotBuffer,
                 taskWindowConfiguration,
-                new RemoteCallback(result -> resetSurfaces(finalRemovedWindowContainer
-                )));
+                onBackNavigationDone,
+                callback);
     }
 
 

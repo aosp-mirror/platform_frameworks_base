@@ -19,6 +19,7 @@ package android.view;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
+import android.os.Build;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -32,6 +33,13 @@ import java.lang.annotation.RetentionPolicy;
  * target (a.k.a. the callback to be invoked next), or its behavior.
  */
 public abstract class OnBackInvokedDispatcher {
+
+    /** @hide */
+    public static final String TAG = "OnBackInvokedDispatcher";
+
+    /** @hide */
+    public static final boolean DEBUG = Build.isDebuggable();
+
     /** @hide */
     @IntDef({
             PRIORITY_DEFAULT,

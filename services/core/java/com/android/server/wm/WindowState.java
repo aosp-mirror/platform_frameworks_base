@@ -106,6 +106,7 @@ import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_OFFSET;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BACK_PREVIEW;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
@@ -245,6 +246,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.window.ClientWindowFrames;
+import android.window.IOnBackInvokedCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.KeyInterceptionInfo;
@@ -845,6 +847,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     };
 
+    /**
+     * @see #setOnBackInvokedCallback(IOnBackInvokedCallback)
+     */
+    private IOnBackInvokedCallback mOnBackInvokedCallback;
+
     @Override
     WindowState asWindowState() {
         return this;
@@ -1059,6 +1066,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mKeepClearAreas.clear();
         mKeepClearAreas.addAll(keepClearAreas);
         return true;
+    }
+
+    /**
+     * Used by {@link android.window.WindowOnBackInvokedDispatcher} to set the callback to be
+     * called when a back navigation action is initiated.
+     * @see BackNavigationController
+     */
+    void setOnBackInvokedCallback(@Nullable IOnBackInvokedCallback onBackInvokedCallback) {
+        ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "%s: Setting back callback %s",
+                this, onBackInvokedCallback);
+        mOnBackInvokedCallback = onBackInvokedCallback;
+    }
+
+    @Nullable
+    IOnBackInvokedCallback getOnBackInvokedCallback() {
+        return mOnBackInvokedCallback;
     }
 
     interface PowerManagerWrapper {

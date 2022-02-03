@@ -727,12 +727,6 @@
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-1343787701": {
-      "message": "startBackNavigation task=%s, topRunningActivity=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
-    },
     "-1340540100": {
       "message": "Creating SnapshotStartingData",
       "level": "VERBOSE",
@@ -1764,6 +1758,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_SYNC_ENGINE",
       "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
+    },
+    "-228813488": {
+      "message": "%s: Setting back callback %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/WindowState.java"
     },
     "-208825711": {
       "message": "shouldWaitAnimatingExit: isWallpaperTarget: %s",
@@ -3690,6 +3690,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
+    },
+    "1898905572": {
+      "message": "startBackNavigation task=%s, topRunningActivity=%s, topWindow=%s backCallback=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "1903353011": {
       "message": "notifyAppStopped: %s",

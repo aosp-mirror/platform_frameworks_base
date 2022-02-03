@@ -236,7 +236,7 @@ import java.util.function.Consumer;
 @SuppressWarnings({"EmptyCatchBlock", "PointlessBooleanExpression"})
 public final class ViewRootImpl implements ViewParent,
         View.AttachInfo.Callbacks, ThreadedRenderer.DrawCallbacks,
-        AttachedSurfaceControl {
+        AttachedSurfaceControl, OnBackInvokedDispatcherOwner {
     private static final String TAG = "ViewRootImpl";
     private static final boolean DBG = false;
     private static final boolean LOCAL_LOGV = false;
@@ -313,9 +313,9 @@ public final class ViewRootImpl implements ViewParent,
     private @SurfaceControl.BufferTransform
             int mPreviousTransformHint = SurfaceControl.BUFFER_TRANSFORM_IDENTITY;
     /**
-     * The fallback {@link OnBackInvokedDispatcher} when the window doesn't have a decor view.
+     * The top level {@link OnBackInvokedDispatcher}.
      */
-    private WindowOnBackInvokedDispatcher mFallbackOnBackInvokedDispatcher =
+    private final WindowOnBackInvokedDispatcher mOnBackInvokedDispatcher =
             new WindowOnBackInvokedDispatcher();
 
     /**
@@ -893,7 +893,6 @@ public final class ViewRootImpl implements ViewParent,
         mFastScrollSoundEffectsEnabled = audioManager.areNavigationRepeatSoundEffectsEnabled();
 
         mScrollCaptureRequestTimeout = SCROLL_CAPTURE_REQUEST_TIMEOUT_MILLIS;
-        mFallbackOnBackInvokedDispatcher.attachToWindow(mWindowSession, mWindow);
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -1144,9 +1143,6 @@ public final class ViewRootImpl implements ViewParent,
                     if (pendingInsetsController != null) {
                         pendingInsetsController.replayAndAttach(mInsetsController);
                     }
-                    ((RootViewSurfaceTaker) mView)
-                            .provideWindowOnBackInvokedDispatcher()
-                            .attachToWindow(mWindowSession, mWindow);
                 }
 
                 try {
@@ -1193,6 +1189,7 @@ public final class ViewRootImpl implements ViewParent,
                         getAttachedWindowFrame(), 1f /* compactScale */,
                         mTmpFrames.displayFrame, mTempRect2, mTmpFrames.frame);
                 setFrame(mTmpFrames.frame);
+                registerBackCallbackOnWindow();
                 if (DEBUG_LAYOUT) Log.v(mTag, "Added window " + mWindow);
                 if (res < WindowManagerGlobal.ADD_OKAY) {
                     mAttachInfo.mRootView = null;
@@ -8417,6 +8414,7 @@ public final class ViewRootImpl implements ViewParent,
 
             mAdded = false;
         }
+        mOnBackInvokedDispatcher.detachFromWindow();
         WindowManagerGlobal.getInstance().doRemoveView(this);
     }
 
@@ -10771,12 +10769,17 @@ public final class ViewRootImpl implements ViewParent,
      * Returns the {@link OnBackInvokedDispatcher} on the decor view if one exists, or the
      * fallback {@link OnBackInvokedDispatcher} instance.
      */
-    @Nullable
-    public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
-        if (mView instanceof RootViewSurfaceTaker) {
-            return ((RootViewSurfaceTaker) mView).provideWindowOnBackInvokedDispatcher();
-        }
-        return mFallbackOnBackInvokedDispatcher;
+    @NonNull
+    public WindowOnBackInvokedDispatcher getOnBackInvokedDispatcher() {
+        return mOnBackInvokedDispatcher;
+    }
+
+    /**
+     * When this ViewRootImpl is added to the window manager, transfers the first
+     * {@link OnBackInvokedCallback} to be called to the server.
+     */
+    private void registerBackCallbackOnWindow() {
+        mOnBackInvokedDispatcher.attachToWindow(mWindowSession, mWindow);
     }
 
     @Override
