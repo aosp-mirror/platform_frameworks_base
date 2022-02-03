@@ -126,7 +126,7 @@ final class RippleShader extends RuntimeShader {
     private static final double PI_ROTATE_LEFT = Math.PI * -0.0078125;
 
     RippleShader() {
-        super(SHADER, false);
+        super(SHADER);
     }
 
     public void setShader(Shader shader) {
