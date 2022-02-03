@@ -31,7 +31,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.Manifest;
@@ -72,6 +71,7 @@ import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.FunctionalUtils.ThrowingConsumer;
 import com.android.internal.util.Preconditions;
 import com.android.server.wm.WindowManagerInternal;
+import com.android.server.wm.WindowManagerInternal.TaskSystemBarsListener;
 import com.android.server.wm.WindowManagerService;
 
 import org.junit.After;
@@ -112,6 +112,7 @@ public final class GameServiceProviderInstanceImplTest {
     private static final ComponentName GAME_B_MAIN_ACTIVITY =
             new ComponentName(GAME_B_PACKAGE, "com.package.game.b.MainActivity");
 
+
     private static final Bitmap TEST_BITMAP = Bitmap.createBitmap(32, 32, Bitmap.Config.ARGB_8888);
 
     private MockitoSession mMockingSession;
@@ -131,6 +132,7 @@ public final class GameServiceProviderInstanceImplTest {
     private FakeGameSessionService mFakeGameSessionService;
     private FakeServiceConnector<IGameSessionService> mFakeGameSessionServiceConnector;
     private ArrayList<ITaskStackListener> mTaskStackListeners;
+    private ArrayList<TaskSystemBarsListener> mTaskSystemBarsListeners;
     private ArrayList<RunningTaskInfo> mRunningTaskInfos;
 
     @Mock
@@ -159,15 +161,25 @@ public final class GameServiceProviderInstanceImplTest {
             mTaskStackListeners.add(invocation.getArgument(0));
             return null;
         }).when(mMockActivityTaskManager).registerTaskStackListener(any());
+        doAnswer(invocation -> {
+            mTaskStackListeners.remove(invocation.getArgument(0));
+            return null;
+        }).when(mMockActivityTaskManager).unregisterTaskStackListener(any());
+
+        mTaskSystemBarsListeners = new ArrayList<>();
+        doAnswer(invocation -> {
+            mTaskSystemBarsListeners.add(invocation.getArgument(0));
+            return null;
+        }).when(mMockWindowManagerInternal).registerTaskSystemBarsListener(any());
+        doAnswer(invocation -> {
+            mTaskSystemBarsListeners.remove(invocation.getArgument(0));
+            return null;
+        }).when(mMockWindowManagerInternal).unregisterTaskSystemBarsListener(any());
 
         mRunningTaskInfos = new ArrayList<>();
         when(mMockActivityTaskManager.getTasks(anyInt(), anyBoolean(), anyBoolean())).thenReturn(
                 mRunningTaskInfos);
 
-        doAnswer(invocation -> {
-            mTaskStackListeners.remove(invocation.getArgument(0));
-            return null;
-        }).when(mMockActivityTaskManager).unregisterTaskStackListener(any());
 
         mGameServiceProviderInstance = new GameServiceProviderInstanceImpl(
                 new UserHandle(USER_ID),
@@ -394,7 +406,60 @@ public final class GameServiceProviderInstanceImplTest {
                 .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
 
         verify(mMockWindowManagerInternal).addTaskOverlay(eq(10), eq(mockSurfacePackage10));
-        verifyNoMoreInteractions(mMockWindowManagerInternal);
+    }
+
+    @Test
+    public void taskSystemBarsListenerChanged_noAssociatedGameSession_doesNothing() {
+        mGameServiceProviderInstance.start();
+
+        dispatchTaskSystemBarsEvent(taskSystemBarsListener -> {
+            taskSystemBarsListener.onTransientSystemBarsVisibilityChanged(
+                    10,
+                    /* areVisible= */ false,
+                    /* wereRevealedFromSwipeOnSystemBar= */ false);
+        });
+    }
+
+    @Test
+    public void systemBarsTransientShownDueToGesture_hasGameSession_propagatesToGameSession() {
+        mGameServiceProviderInstance.start();
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
+        dispatchTaskSystemBarsEvent(taskSystemBarsListener -> {
+            taskSystemBarsListener.onTransientSystemBarsVisibilityChanged(
+                    10,
+                    /* areVisible= */ true,
+                    /* wereRevealedFromSwipeOnSystemBar= */ true);
+        });
+
+        assertThat(gameSession10.mAreTransientSystemBarsVisibleFromRevealGesture).isTrue();
+    }
+
+    @Test
+    public void systemBarsTransientShownButNotGesture_hasGameSession_notPropagatedToGameSession() {
+        mGameServiceProviderInstance.start();
+        startTask(10, GAME_A_MAIN_ACTIVITY);
+        mFakeGameService.requestCreateGameSession(10);
+
+        FakeGameSession gameSession10 = new FakeGameSession();
+        SurfacePackage mockSurfacePackage10 = Mockito.mock(SurfacePackage.class);
+        mFakeGameSessionService.removePendingFutureForTaskId(10)
+                .complete(new CreateGameSessionResult(gameSession10, mockSurfacePackage10));
+
+        dispatchTaskSystemBarsEvent(taskSystemBarsListener -> {
+            taskSystemBarsListener.onTransientSystemBarsVisibilityChanged(
+                    10,
+                    /* areVisible= */ true,
+                    /* wereRevealedFromSwipeOnSystemBar= */ false);
+        });
+
+        assertThat(gameSession10.mAreTransientSystemBarsVisibleFromRevealGesture).isFalse();
     }
 
     @Test
@@ -492,7 +557,6 @@ public final class GameServiceProviderInstanceImplTest {
 
         verify(mMockWindowManagerInternal).addTaskOverlay(eq(10), eq(mockSurfacePackage10));
         verify(mMockWindowManagerInternal).removeTaskOverlay(eq(10), eq(mockSurfacePackage10));
-        verifyNoMoreInteractions(mMockWindowManagerInternal);
     }
 
     @Test
@@ -830,6 +894,13 @@ public final class GameServiceProviderInstanceImplTest {
         mMockContext.setPermission(permission, PackageManager.PERMISSION_DENIED);
     }
 
+    private void dispatchTaskSystemBarsEvent(
+            ThrowingConsumer<TaskSystemBarsListener> taskSystemBarsListenerConsumer) {
+        for (TaskSystemBarsListener listener : mTaskSystemBarsListeners) {
+            taskSystemBarsListenerConsumer.accept(listener);
+        }
+    }
+
     static final class FakeGameService extends IGameService.Stub {
         private IGameServiceController mGameServiceController;
 
@@ -944,6 +1015,7 @@ public final class GameServiceProviderInstanceImplTest {
     private static class FakeGameSession extends IGameSession.Stub {
         boolean mIsDestroyed = false;
         boolean mIsFocused = false;
+        boolean mAreTransientSystemBarsVisibleFromRevealGesture = false;
 
         @Override
         public void onDestroyed() {
@@ -953,6 +1025,11 @@ public final class GameServiceProviderInstanceImplTest {
         @Override
         public void onTaskFocusChanged(boolean focused) {
             mIsFocused = focused;
+        }
+
+        @Override
+        public void onTransientSystemBarVisibilityFromRevealGestureChanged(boolean areVisible) {
+            mAreTransientSystemBarsVisibleFromRevealGesture = areVisible;
         }
     }
 
@@ -1005,5 +1082,4 @@ public final class GameServiceProviderInstanceImplTest {
             return mLastStartedIntent;
         }
     }
-
 }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.dreams.dagger;
 
+import com.android.systemui.dreams.complication.dagger.RegisteredComplicationsModule;
 import com.android.systemui.dreams.touch.dagger.DreamTouchModule;
 
 import dagger.Module;
@@ -25,6 +26,7 @@ import dagger.Module;
  */
 @Module(includes = {
             DreamTouchModule.class,
+            RegisteredComplicationsModule.class,
         },
         subcomponents = {
             DreamOverlayComponent.class,

@@ -76,7 +76,7 @@ public class StatusBarStateControllerImpl implements
     // Must be a power of 2
     private static final int HISTORY_SIZE = 32;
 
-    private static final int MAX_STATE = StatusBarState.FULLSCREEN_USER_SWITCHER;
+    private static final int MAX_STATE = StatusBarState.SHADE_LOCKED;
     private static final int MIN_STATE = StatusBarState.SHADE;
 
     private static final Comparator<RankedListener> sComparator =

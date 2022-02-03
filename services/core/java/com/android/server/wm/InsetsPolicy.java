@@ -32,6 +32,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityTaskManager;
 import android.app.StatusBarManager;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -134,7 +135,7 @@ class InsetsPolicy {
 
     /** Updates the target which can control system bars. */
     void updateBarControlTarget(@Nullable WindowState focusedWin) {
-        if (mFocusedWin != focusedWin){
+        if (mFocusedWin != focusedWin) {
             abortTransient();
         }
         mFocusedWin = focusedWin;
@@ -156,7 +157,7 @@ class InsetsPolicy {
     }
 
     boolean isHidden(@InternalInsetsType int type) {
-        final InsetsSourceProvider provider =  mStateController.peekSourceProvider(type);
+        final InsetsSourceProvider provider = mStateController.peekSourceProvider(type);
         return provider != null && provider.hasWindow() && !provider.getSource().isVisible();
     }
 
@@ -181,6 +182,10 @@ class InsetsPolicy {
                         mShowingTransientTypes.toArray(), isGestureOnSystemBar);
             }
             updateBarControlTarget(mFocusedWin);
+            dispatchTransientSystemBarsVisibilityChanged(
+                    mFocusedWin,
+                    isTransient(ITYPE_STATUS_BAR) || isTransient(ITYPE_NAVIGATION_BAR),
+                    isGestureOnSystemBar);
 
             // The leashes can be created while updating bar control target. The surface transaction
             // of the new leashes might not be applied yet. The callback posted here ensures we can
@@ -198,6 +203,12 @@ class InsetsPolicy {
         if (mShowingTransientTypes.size() == 0) {
             return;
         }
+
+        dispatchTransientSystemBarsVisibilityChanged(
+                mFocusedWin,
+                /* areVisible= */ false,
+                /* wereRevealedFromSwipeOnSystemBar= */ false);
+
         startAnimation(false /* show */, () -> {
             synchronized (mDisplayContent.mWmService.mGlobalLock) {
                 for (int i = mShowingTransientTypes.size() - 1; i >= 0; i--) {
@@ -373,6 +384,11 @@ class InsetsPolicy {
                     mDisplayContent.getDisplayId(), mShowingTransientTypes.toArray());
         }
         mShowingTransientTypes.clear();
+
+        dispatchTransientSystemBarsVisibilityChanged(
+                mFocusedWin,
+                /* areVisible= */ false,
+                /* wereRevealedFromSwipeOnSystemBar= */ false);
     }
 
     private @Nullable InsetsControlTarget getStatusControlTarget(@Nullable WindowState focusedWin,
@@ -519,6 +535,32 @@ class InsetsPolicy {
         InsetsPolicyAnimationControlListener listener =
                 new InsetsPolicyAnimationControlListener(show, callback, typesReady);
         listener.mControlCallbacks.controlAnimationUnchecked(typesReady, controls, show);
+    }
+
+    private void dispatchTransientSystemBarsVisibilityChanged(
+            @Nullable WindowState focusedWindow,
+            boolean areVisible,
+            boolean wereRevealedFromSwipeOnSystemBar) {
+        if (focusedWindow == null) {
+            return;
+        }
+
+        Task task = focusedWindow.getTask();
+        if (task == null) {
+            return;
+        }
+
+        int taskId = task.mTaskId;
+        boolean isValidTaskId = taskId != ActivityTaskManager.INVALID_TASK_ID;
+        if (!isValidTaskId) {
+            return;
+        }
+
+        mDisplayContent.mWmService.mTaskSystemBarsListenerController
+                .dispatchTransientSystemBarVisibilityChanged(
+                        taskId,
+                        areVisible,
+                        wereRevealedFromSwipeOnSystemBar);
     }
 
     private class BarWindow {

@@ -36,6 +36,7 @@ import android.view.ViewGroup;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardMessageArea;
 import com.android.keyguard.KeyguardMessageAreaController;
@@ -100,6 +101,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     private ShadeController mShadeController;
     @Mock
     private DreamOverlayStateController mDreamOverlayStateController;
+    @Mock
+    private LatencyTracker mLatencyTracker;
 
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
 
@@ -127,7 +130,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 mock(NotificationMediaManager.class),
                 mKeyguardBouncerFactory,
                 mKeyguardMessageAreaFactory,
-                () -> mShadeController);
+                () -> mShadeController,
+                mLatencyTracker);
         mStatusBarKeyguardViewManager.registerStatusBar(
                 mStatusBar,
                 mNotificationPanelView,
@@ -168,17 +172,6 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     public void showBouncer_showsTheBouncer() {
         mStatusBarKeyguardViewManager.showBouncer(true /* scrimmed */);
         verify(mBouncer).show(anyBoolean(), eq(true));
-    }
-
-    @Test
-    public void onPanelExpansionChanged_neverHidesFullscreenBouncer() {
-        // TODO: StatusBar should not be here, mBouncer.isFullscreenBouncer() should do the same.
-        when(mStatusBar.isFullScreenUserSwitcherState()).thenReturn(true);
-        mStatusBarKeyguardViewManager.onPanelExpansionChanged(
-                /* fraction= */ 0.5f,
-                /* expanded= */ false,
-                /* tracking= */ true);
-        verify(mBouncer).setExpansion(eq(KeyguardBouncer.EXPANSION_VISIBLE));
     }
 
     @Test

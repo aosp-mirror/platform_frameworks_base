@@ -51,6 +51,8 @@ import android.app.usage.IUsageStatsManager;
 import android.app.usage.NetworkStatsManager;
 import android.app.usage.StorageStatsManager;
 import android.app.usage.UsageStatsManager;
+import android.app.wallpapereffectsgeneration.IWallpaperEffectsGenerationManager;
+import android.app.wallpapereffectsgeneration.WallpaperEffectsGenerationManager;
 import android.apphibernation.AppHibernationManager;
 import android.appwidget.AppWidgetManager;
 import android.bluetooth.BluetoothFrameworkInitializer;
@@ -1294,6 +1296,20 @@ public final class SystemServiceRegistry {
                         IContentSuggestionsManager service =
                                 IContentSuggestionsManager.Stub.asInterface(b);
                         return new ContentSuggestionsManager(ctx.getUserId(), service);
+                    }
+                });
+
+        registerService(Context.WALLPAPER_EFFECTS_GENERATION_SERVICE,
+                WallpaperEffectsGenerationManager.class,
+                new CachedServiceFetcher<WallpaperEffectsGenerationManager>() {
+                    @Override
+                    public WallpaperEffectsGenerationManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getService(
+                                Context.WALLPAPER_EFFECTS_GENERATION_SERVICE);
+                        return b == null ? null :
+                                new WallpaperEffectsGenerationManager(
+                                        IWallpaperEffectsGenerationManager.Stub.asInterface(b));
                     }
                 });
 

@@ -710,6 +710,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final int BOOLEAN_PROPERTY_IS_TEXT_ENTRY_KEY = 0x0400000;
 
+    private static final int BOOLEAN_PROPERTY_IS_TEXT_SELECTABLE = 0x0800000;
+
     /**
      * Bits that provide the id of a virtual descendant of a view.
      */
@@ -2273,6 +2275,38 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setScrollable(boolean scrollable) {
         setBooleanProperty(BOOLEAN_PROPERTY_SCROLLABLE, scrollable);
+    }
+
+    /**
+     * Gets if the node has selectable text.
+     *
+     * <p>
+     *     Services should use {@link #ACTION_SET_SELECTION} for selection. Editable text nodes must
+     *     also be selectable. But not all UIs will populate this field, so services should consider
+     *     'isTextSelectable | isEditable' to ensure they don't miss nodes with selectable text.
+     * </p>
+     *
+     * @see #isEditable
+     * @return True if the node has selectable text.
+     */
+    public boolean isTextSelectable() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_IS_TEXT_SELECTABLE);
+    }
+
+    /**
+     * Sets if the node has selectable text.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param selectableText True if the node has selectable text, false otherwise.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setTextSelectable(boolean selectableText) {
+        setBooleanProperty(BOOLEAN_PROPERTY_IS_TEXT_SELECTABLE, selectableText);
     }
 
     /**
@@ -4327,8 +4361,12 @@ public class AccessibilityNodeInfo implements Parcelable {
                 return "ACTION_CANCEL_DRAG";
             case R.id.accessibilityActionDragDrop:
                 return "ACTION_DROP";
-            default:
+            default: {
+                if (action == R.id.accessibilityActionShowSuggestions) {
+                    return "ACTION_SHOW_SUGGESTIONS";
+                }
                 return "ACTION_UNKNOWN";
+            }
         }
     }
 
@@ -4462,6 +4500,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; importantForAccessibility: ").append(isImportantForAccessibility());
         builder.append("; visible: ").append(isVisibleToUser());
         builder.append("; actions: ").append(mActions);
+        builder.append("; isTextSelectable: ").append(isTextSelectable());
 
         return builder.toString();
     }

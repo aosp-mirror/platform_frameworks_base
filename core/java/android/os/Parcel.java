@@ -18,6 +18,7 @@ package android.os;
 
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -53,6 +54,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.Serializable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -228,6 +231,25 @@ public final class Parcel {
     private ArrayMap<Class, Object> mClassCookies;
 
     private RuntimeException mStack;
+
+    /** @hide */
+    @TestApi
+    public static final int FLAG_IS_REPLY_FROM_BLOCKING_ALLOWED_OBJECT = 1 << 0;
+
+    /** @hide */
+    @TestApi
+    public static final int FLAG_PROPAGATE_ALLOW_BLOCKING = 1 << 1;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "FLAG_" }, value = {
+            FLAG_IS_REPLY_FROM_BLOCKING_ALLOWED_OBJECT,
+            FLAG_PROPAGATE_ALLOW_BLOCKING,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ParcelFlags {}
+
+    @ParcelFlags
+    private int mFlags;
 
     /**
      * Whether or not to parcel the stack trace of an exception. This has a performance
@@ -583,6 +605,40 @@ public final class Parcel {
      */
     private void markForBinder(@NonNull IBinder binder) {
         nativeMarkForBinder(mNativePtr, binder);
+    }
+
+    /** @hide */
+    @ParcelFlags
+    @TestApi
+    public int getFlags() {
+        return mFlags;
+    }
+
+    /** @hide */
+    public void setFlags(@ParcelFlags int flags) {
+        mFlags = flags;
+    }
+
+    /** @hide */
+    public void addFlags(@ParcelFlags int flags) {
+        mFlags |= flags;
+    }
+
+    /** @hide */
+    private boolean hasFlags(@ParcelFlags int flags) {
+        return (mFlags & flags) == flags;
+    }
+
+    /**
+     * This method is used by the AIDL compiler for system components. Not intended to be
+     * used by non-system apps.
+     */
+    // Note: Ideally this method should be @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES),
+    // but we need to make this method public due to the way the aidl compiler is compiled.
+    // We don't really need to protect it; even if 3p / non-system apps, nothing would happen.
+    // This would only work when used on a reply parcel by a binder object that's allowed-blocking.
+    public void setPropagateAllowBlocking() {
+        addFlags(FLAG_PROPAGATE_ALLOW_BLOCKING);
     }
 
     /**
@@ -2088,6 +2144,102 @@ public final class Parcel {
     }
 
     /**
+     * Flatten a homogeneous multi-dimensional array with fixed-size.  This delegates to other
+     * APIs to write a one-dimensional array.  Use {@link #readFixedArray(Object)} or
+     * {@link #createFixedArray(Class, int[])} with the same dimensions to unmarshal.
+     *
+     * @param val The array to be written.
+     * @param parcelableFlags Contextual flags as per
+     *   {@link Parcelable#writeToParcel(Parcel, int) Parcelable.writeToParcel()}.
+     *   Used only if val is an array of Parcelable objects.
+     * @param dimensions an array of int representing length of each dimension. The array should be
+     *   sized with the exact size of dimensions.
+     *
+     * @see #readFixedArray
+     * @see #createFixedArray
+     * @see #writeBooleanArray
+     * @see #writeByteArray
+     * @see #writeCharArray
+     * @see #writeIntArray
+     * @see #writeLongArray
+     * @see #writeFloatArray
+     * @see #writeDoubleArray
+     * @see #writeBinderArray
+     * @see #writeInterfaceArray
+     * @see #writeTypedArray
+     * @throws BadParcelableException If the array's component type is not supported or if its
+     *   size doesn't match with the given dimensions.
+     */
+    public <T> void writeFixedArray(@Nullable T val, int parcelableFlags,
+            @NonNull int... dimensions) {
+        if (val == null) {
+            writeInt(-1);
+            return;
+        }
+        writeFixedArrayInternal(val, parcelableFlags, /*index=*/0, dimensions);
+    }
+
+    private <T> void writeFixedArrayInternal(T val, int parcelableFlags, int index,
+            int[] dimensions) {
+        if (index >= dimensions.length) {
+            throw new BadParcelableException("Array has more dimensions than expected: "
+                + dimensions.length);
+        }
+
+        int length = dimensions[index];
+
+        // val should be an array of length N
+        if (val == null) {
+            throw new BadParcelableException("Non-null array shouldn't have a null array.");
+        }
+        if (!val.getClass().isArray()) {
+            throw new BadParcelableException("Not an array: " + val);
+        }
+        if (Array.getLength(val) != length) {
+            throw new BadParcelableException("bad length: expected " + length + ", but got "
+                + Array.getLength(val));
+        }
+
+        // Delegates to other writers if this is a one-dimensional array.
+        // Otherwise, write component arrays with recursive calls.
+
+        final Class<?> componentType = val.getClass().getComponentType();
+        if (!componentType.isArray() && index + 1 != dimensions.length) {
+            throw new BadParcelableException("Array has fewer dimensions than expected: "
+                + dimensions.length);
+        }
+        if (componentType == boolean.class) {
+            writeBooleanArray((boolean[]) val);
+        } else if (componentType == byte.class) {
+            writeByteArray((byte[]) val);
+        } else if (componentType == char.class) {
+            writeCharArray((char[]) val);
+        } else if (componentType == int.class) {
+            writeIntArray((int[]) val);
+        } else if (componentType == long.class) {
+            writeLongArray((long[]) val);
+        } else if (componentType == float.class) {
+            writeFloatArray((float[]) val);
+        } else if (componentType == double.class) {
+            writeDoubleArray((double[]) val);
+        } else if (componentType == IBinder.class) {
+            writeBinderArray((IBinder[]) val);
+        } else if (IInterface.class.isAssignableFrom(componentType)) {
+            writeInterfaceArray((IInterface[]) val);
+        } else if (Parcelable.class.isAssignableFrom(componentType)) {
+            writeTypedArray((Parcelable[]) val, parcelableFlags);
+        } else if (componentType.isArray()) {
+            writeInt(length);
+            for (int i = 0; i < length; i++) {
+                writeFixedArrayInternal(Array.get(val, i), parcelableFlags, index + 1,
+                        dimensions);
+            }
+        } else {
+            throw new BadParcelableException("unknown type for fixed-size array: " + componentType);
+        }
+    }
+
+    /**
      * Flatten a generic object in to a parcel.  The given Object value may
      * currently be one of the following types:
      *
@@ -2949,7 +3101,15 @@ public final class Parcel {
      * Read an object from the parcel at the current dataPosition().
      */
     public final IBinder readStrongBinder() {
-        return nativeReadStrongBinder(mNativePtr);
+        final IBinder result = nativeReadStrongBinder(mNativePtr);
+
+        // If it's a reply from a method with @PropagateAllowBlocking, then inherit allow-blocking
+        // from the object that returned it.
+        if (result != null && hasFlags(
+                FLAG_IS_REPLY_FROM_BLOCKING_ALLOWED_OBJECT | FLAG_PROPAGATE_ALLOW_BLOCKING)) {
+            Binder.allowBlocking(result);
+        }
+        return result;
     }
 
     /**
@@ -3788,6 +3948,317 @@ public final class Parcel {
     }
 
     /**
+     * Read a new multi-dimensional array from a parcel.  If you want to read Parcelable or
+     * IInterface values, use {@link #readFixedArray(Object, Parcelable.Creator)} or
+     * {@link #readFixedArray(Object, Function)}.
+     * @param val the destination array to hold the read values.
+     *
+     * @see #writeTypedArray
+     * @see #readBooleanArray
+     * @see #readByteArray
+     * @see #readCharArray
+     * @see #readIntArray
+     * @see #readLongArray
+     * @see #readFloatArray
+     * @see #readDoubleArray
+     * @see #readBinderArray
+     * @see #readInterfaceArray
+     * @see #readTypedArray
+     */
+    public <T> void readFixedArray(@NonNull T val) {
+        Class<?> componentType = val.getClass().getComponentType();
+        if (componentType == boolean.class) {
+            readBooleanArray((boolean[]) val);
+        } else if (componentType == byte.class) {
+            readByteArray((byte[]) val);
+        } else if (componentType == char.class) {
+            readCharArray((char[]) val);
+        } else if (componentType == int.class) {
+            readIntArray((int[]) val);
+        } else if (componentType == long.class) {
+            readLongArray((long[]) val);
+        } else if (componentType == float.class) {
+            readFloatArray((float[]) val);
+        } else if (componentType == double.class) {
+            readDoubleArray((double[]) val);
+        } else if (componentType == IBinder.class) {
+            readBinderArray((IBinder[]) val);
+        } else if (componentType.isArray()) {
+            int length = readInt();
+            if (length != Array.getLength(val)) {
+                throw new BadParcelableException("Bad length: expected " + Array.getLength(val)
+                    + ", but got " + length);
+            }
+            for (int i = 0; i < length; i++) {
+                readFixedArray(Array.get(val, i));
+            }
+        } else {
+            throw new BadParcelableException("Unknown type for fixed-size array: " + componentType);
+        }
+    }
+
+    /**
+     * Read a new multi-dimensional array of typed interfaces from a parcel.
+     * If you want to read Parcelable values, use
+     * {@link #readFixedArray(Object, Parcelable.Creator)}. For values of other types, use
+     * {@link #readFixedArray(Object)}.
+     * @param val the destination array to hold the read values.
+     */
+    public <T, S extends IInterface> void readFixedArray(@NonNull T val,
+            @NonNull Function<IBinder, S> asInterface) {
+        Class<?> componentType = val.getClass().getComponentType();
+        if (IInterface.class.isAssignableFrom(componentType)) {
+            readInterfaceArray((S[]) val, asInterface);
+        } else if (componentType.isArray()) {
+            int length = readInt();
+            if (length != Array.getLength(val)) {
+                throw new BadParcelableException("Bad length: expected " + Array.getLength(val)
+                    + ", but got " + length);
+            }
+            for (int i = 0; i < length; i++) {
+                readFixedArray(Array.get(val, i), asInterface);
+            }
+        } else {
+            throw new BadParcelableException("Unknown type for fixed-size array: " + componentType);
+        }
+    }
+
+    /**
+     * Read a new multi-dimensional array of typed parcelables from a parcel.
+     * If you want to read IInterface values, use
+     * {@link #readFixedArray(Object, Function)}. For values of other types, use
+     * {@link #readFixedArray(Object)}.
+     * @param val the destination array to hold the read values.
+     */
+    public <T, S extends Parcelable> void readFixedArray(@NonNull T val,
+            @NonNull Parcelable.Creator<S> c) {
+        Class<?> componentType = val.getClass().getComponentType();
+        if (Parcelable.class.isAssignableFrom(componentType)) {
+            readTypedArray((S[]) val, c);
+        } else if (componentType.isArray()) {
+            int length = readInt();
+            if (length != Array.getLength(val)) {
+                throw new BadParcelableException("Bad length: expected " + Array.getLength(val)
+                    + ", but got " + length);
+            }
+            for (int i = 0; i < length; i++) {
+                readFixedArray(Array.get(val, i), c);
+            }
+        } else {
+            throw new BadParcelableException("Unknown type for fixed-size array: " + componentType);
+        }
+    }
+
+    private void ensureClassHasExpectedDimensions(@NonNull Class<?> cls, int numDimension) {
+        if (numDimension <= 0) {
+            throw new BadParcelableException("Fixed-size array should have dimensions.");
+        }
+
+        for (int i = 0; i < numDimension; i++) {
+            if (!cls.isArray()) {
+                throw new BadParcelableException("Array has fewer dimensions than expected: "
+                    + numDimension);
+            }
+            cls = cls.getComponentType();
+        }
+        if (cls.isArray()) {
+            throw new BadParcelableException("Array has more dimensions than expected: "
+                + numDimension);
+        }
+    }
+
+    /**
+     * Read and return a new multi-dimensional array from a parcel.  Returns null if the
+     * previously written array object is null.  If you want to read Parcelable or
+     * IInterface values, use {@link #createFixedArray(Class, Parcelable.Creator, int[])} or
+     * {@link #createFixedArray(Class, Function, int[])}.
+     * @param cls  the Class object for the target array type. (e.g. int[][].class)
+     * @param dimensions an array of int representing length of each dimension.
+     *
+     * @see #writeTypedArray
+     * @see #createBooleanArray
+     * @see #createByteArray
+     * @see #createCharArray
+     * @see #createIntArray
+     * @see #createLongArray
+     * @see #createFloatArray
+     * @see #createDoubleArray
+     * @see #createBinderArray
+     * @see #createInterfaceArray
+     * @see #createTypedArray
+     */
+    @Nullable
+    public <T> T createFixedArray(@NonNull Class<T> cls, @NonNull int... dimensions) {
+        // Check if type matches with dimensions
+        // If type is one-dimensional array, delegate to other creators
+        // Otherwise, create an multi-dimensional array at once and then fill it with readFixedArray
+
+        ensureClassHasExpectedDimensions(cls, dimensions.length);
+
+        T val = null;
+        final Class<?> componentType = cls.getComponentType();
+        if (componentType == boolean.class) {
+            val = (T) createBooleanArray();
+        } else if (componentType == byte.class) {
+            val = (T) createByteArray();
+        } else if (componentType == char.class) {
+            val = (T) createCharArray();
+        } else if (componentType == int.class) {
+            val = (T) createIntArray();
+        } else if (componentType == long.class) {
+            val = (T) createLongArray();
+        } else if (componentType == float.class) {
+            val = (T) createFloatArray();
+        } else if (componentType == double.class) {
+            val = (T) createDoubleArray();
+        } else if (componentType == IBinder.class) {
+            val = (T) createBinderArray();
+        } else if (componentType.isArray()) {
+            int length = readInt();
+            if (length < 0) {
+                return null;
+            }
+            if (length != dimensions[0]) {
+                throw new BadParcelableException("Bad length: expected " + dimensions[0]
+                    + ", but got " + length);
+            }
+
+            // Create a multi-dimensional array with an innermost component type and dimensions
+            Class<?> innermost = componentType.getComponentType();
+            while (innermost.isArray()) {
+                innermost = innermost.getComponentType();
+            }
+            val = (T) Array.newInstance(innermost, dimensions);
+            for (int i = 0; i < length; i++) {
+                readFixedArray(Array.get(val, i));
+            }
+            return val;
+        } else {
+            throw new BadParcelableException("Unknown type for fixed-size array: " + componentType);
+        }
+
+        // Check if val is null (which is OK) or has the expected size.
+        // This check doesn't have to be multi-dimensional because multi-dimensional arrays
+        // are created with expected dimensions.
+        if (val != null && Array.getLength(val) != dimensions[0]) {
+            throw new BadParcelableException("Bad length: expected " + dimensions[0] + ", but got "
+                + Array.getLength(val));
+        }
+        return val;
+    }
+
+    /**
+     * Read and return a new multi-dimensional array of typed interfaces from a parcel.
+     * Returns null if the previously written array object is null.  If you want to read
+     * Parcelable values, use {@link #createFixedArray(Class, Parcelable.Creator, int[])}.
+     * For values of other types use {@link #createFixedArray(Class, int[])}.
+     * @param cls  the Class object for the target array type. (e.g. IFoo[][].class)
+     * @param dimensions an array of int representing length of each dimension.
+     */
+    @Nullable
+    public <T, S extends IInterface> T createFixedArray(@NonNull Class<T> cls,
+            @NonNull Function<IBinder, S> asInterface, @NonNull int... dimensions) {
+        // Check if type matches with dimensions
+        // If type is one-dimensional array, delegate to other creators
+        // Otherwise, create an multi-dimensional array at once and then fill it with readFixedArray
+
+        ensureClassHasExpectedDimensions(cls, dimensions.length);
+
+        T val = null;
+        final Class<?> componentType = cls.getComponentType();
+        if (IInterface.class.isAssignableFrom(componentType)) {
+            val = (T) createInterfaceArray(n -> (S[]) Array.newInstance(componentType, n),
+                    asInterface);
+        } else if (componentType.isArray()) {
+            int length = readInt();
+            if (length < 0) {
+                return null;
+            }
+            if (length != dimensions[0]) {
+                throw new BadParcelableException("Bad length: expected " + dimensions[0]
+                    + ", but got " + length);
+            }
+
+            // Create a multi-dimensional array with an innermost component type and dimensions
+            Class<?> innermost = componentType.getComponentType();
+            while (innermost.isArray()) {
+                innermost = innermost.getComponentType();
+            }
+            val = (T) Array.newInstance(innermost, dimensions);
+            for (int i = 0; i < length; i++) {
+                readFixedArray(Array.get(val, i), asInterface);
+            }
+            return val;
+        } else {
+            throw new BadParcelableException("Unknown type for fixed-size array: " + componentType);
+        }
+
+        // Check if val is null (which is OK) or has the expected size.
+        // This check doesn't have to be multi-dimensional because multi-dimensional arrays
+        // are created with expected dimensions.
+        if (val != null && Array.getLength(val) != dimensions[0]) {
+            throw new BadParcelableException("Bad length: expected " + dimensions[0] + ", but got "
+                + Array.getLength(val));
+        }
+        return val;
+    }
+
+    /**
+     * Read and return a new multi-dimensional array of typed parcelables from a parcel.
+     * Returns null if the previously written array object is null.  If you want to read
+     * IInterface values, use {@link #createFixedArray(Class, Function, int[])}.
+     * For values of other types use {@link #createFixedArray(Class, int[])}.
+     * @param cls  the Class object for the target array type. (e.g. Foo[][].class)
+     * @param dimensions an array of int representing length of each dimension.
+     */
+    @Nullable
+    public <T, S extends Parcelable> T createFixedArray(@NonNull Class<T> cls,
+            @NonNull Parcelable.Creator<S> c, @NonNull int... dimensions) {
+        // Check if type matches with dimensions
+        // If type is one-dimensional array, delegate to other creators
+        // Otherwise, create an multi-dimensional array at once and then fill it with readFixedArray
+
+        ensureClassHasExpectedDimensions(cls, dimensions.length);
+
+        T val = null;
+        final Class<?> componentType = cls.getComponentType();
+        if (Parcelable.class.isAssignableFrom(componentType)) {
+            val = (T) createTypedArray(c);
+        } else if (componentType.isArray()) {
+            int length = readInt();
+            if (length < 0) {
+                return null;
+            }
+            if (length != dimensions[0]) {
+                throw new BadParcelableException("Bad length: expected " + dimensions[0]
+                    + ", but got " + length);
+            }
+
+            // Create a multi-dimensional array with an innermost component type and dimensions
+            Class<?> innermost = componentType.getComponentType();
+            while (innermost.isArray()) {
+                innermost = innermost.getComponentType();
+            }
+            val = (T) Array.newInstance(innermost, dimensions);
+            for (int i = 0; i < length; i++) {
+                readFixedArray(Array.get(val, i), c);
+            }
+            return val;
+        } else {
+            throw new BadParcelableException("Unknown type for fixed-size array: " + componentType);
+        }
+
+        // Check if val is null (which is OK) or has the expected size.
+        // This check doesn't have to be multi-dimensional because multi-dimensional arrays
+        // are created with expected dimensions.
+        if (val != null && Array.getLength(val) != dimensions[0]) {
+            throw new BadParcelableException("Bad length: expected " + dimensions[0] + ", but got "
+                + Array.getLength(val));
+        }
+        return val;
+    }
+
+    /**
      * Write a heterogeneous array of Parcelable objects into the Parcel.
      * Each object in the array is written along with its class name, so
      * that the correct class can later be instantiated.  As a result, this
@@ -4588,6 +5059,7 @@ public final class Parcel {
     }
 
     private void freeBuffer() {
+        mFlags = 0;
         resetSqaushingState();
         if (mOwnsNativeParcelObject) {
             nativeFreeBuffer(mNativePtr);

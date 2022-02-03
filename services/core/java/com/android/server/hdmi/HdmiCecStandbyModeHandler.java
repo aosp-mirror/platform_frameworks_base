@@ -133,6 +133,7 @@ public final class HdmiCecStandbyModeHandler {
         addHandler(Constants.MESSAGE_SET_OSD_NAME, mBypasser);
         addHandler(Constants.MESSAGE_DEVICE_VENDOR_ID, mBypasser);
         addHandler(Constants.MESSAGE_REPORT_POWER_STATUS, mBypasser);
+        addHandler(Constants.MESSAGE_GIVE_FEATURES, mBypasser);
 
         addHandler(Constants.MESSAGE_USER_CONTROL_PRESSED, mUserControlProcessedHandler);
 

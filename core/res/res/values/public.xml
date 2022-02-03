@@ -3255,11 +3255,24 @@
     <public name="showClockAndComplications" />
     <!-- @hide @SystemApi -->
     <public name="gameSessionService" />
+    <public name="supportsBatteryGameMode" />
+    <public name="supportsPerformanceGameMode" />
+    <public name="allowGameAngleDriver" />
+    <public name="allowGameDownscaling" />
+    <public name="allowGameFpsOverride" />
     <public name="localeConfig" />
     <public name="showBackground" />
     <public name="inheritKeyStoreKeys" />
     <public name="preferKeepClear" />
     <public name="autoHandwritingEnabled" />
+    <public name="fromExtendLeft" />
+    <public name="fromExtendTop" />
+    <public name="fromExtendRight" />
+    <public name="fromExtendBottom" />
+    <public name="toExtendLeft" />
+    <public name="toExtendTop" />
+    <public name="toExtendRight" />
+    <public name="toExtendBottom" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01de0000">

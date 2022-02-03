@@ -1697,7 +1697,13 @@
   <java-symbol type="anim" name="activity_translucent_open_enter" />
   <java-symbol type="anim" name="activity_translucent_close_exit" />
   <java-symbol type="anim" name="activity_open_enter" />
+  <java-symbol type="anim" name="activity_open_exit" />
+  <java-symbol type="anim" name="activity_close_enter" />
   <java-symbol type="anim" name="activity_close_exit" />
+  <java-symbol type="anim" name="activity_open_enter_legacy" />
+  <java-symbol type="anim" name="activity_open_exit_legacy" />
+  <java-symbol type="anim" name="activity_close_enter_legacy" />
+  <java-symbol type="anim" name="activity_close_exit_legacy" />
   <java-symbol type="anim" name="task_fragment_close_enter" />
   <java-symbol type="anim" name="task_fragment_close_exit" />
   <java-symbol type="anim" name="task_fragment_open_enter" />
@@ -2215,6 +2221,8 @@
   <java-symbol type="integer" name="config_dreamsBatteryLevelMinimumWhenNotPowered" />
   <java-symbol type="integer" name="config_dreamsBatteryLevelDrainCutoff" />
   <java-symbol type="string" name="config_dreamsDefaultComponent" />
+  <java-symbol type="array" name="config_supportedDreamComplications" />
+  <java-symbol type="array" name="config_dreamComplicationsEnabledByDefault" />
   <java-symbol type="drawable" name="default_dream_preview" />
   <java-symbol type="array" name="config_disabledDreamComponents" />
   <java-symbol type="string" name="config_dozeComponent" />
@@ -3673,6 +3681,7 @@
   <java-symbol type="string" name="config_defaultContentSuggestionsService" />
   <java-symbol type="string" name="config_defaultSearchUiService" />
   <java-symbol type="string" name="config_defaultSmartspaceService" />
+  <java-symbol type="string" name="config_defaultWallpaperEffectsGenerationService" />
   <java-symbol type="string" name="config_defaultMusicRecognitionService" />
   <java-symbol type="string" name="config_defaultAttentionService" />
   <java-symbol type="string" name="config_defaultRotationResolverService" />
@@ -4129,10 +4138,16 @@
   <java-symbol type="string" name="accessibility_system_action_quick_settings_label" />
   <java-symbol type="string" name="accessibility_system_action_recents_label" />
   <java-symbol type="string" name="accessibility_system_action_screenshot_label" />
+  <java-symbol type="string" name="accessibility_system_action_headset_hook_label" />
   <java-symbol type="string" name="accessibility_system_action_on_screen_a11y_shortcut_label" />
   <java-symbol type="string" name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" />
   <java-symbol type="string" name="accessibility_system_action_hardware_a11y_shortcut_label" />
   <java-symbol type="string" name="accessibility_system_action_dismiss_notification_shade" />
+  <java-symbol type="string" name="accessibility_system_action_dpad_up_label" />
+  <java-symbol type="string" name="accessibility_system_action_dpad_down_label" />
+  <java-symbol type="string" name="accessibility_system_action_dpad_left_label" />
+  <java-symbol type="string" name="accessibility_system_action_dpad_right_label" />
+  <java-symbol type="string" name="accessibility_system_action_dpad_center_label" />
 
   <java-symbol type="string" name="accessibility_freeform_caption" />
 
@@ -4452,6 +4467,12 @@
   <java-symbol type="bool" name="config_cecTvSendStandbyOnSleepEnabled_default" />
   <java-symbol type="bool" name="config_cecTvSendStandbyOnSleepDisabled_allowed" />
   <java-symbol type="bool" name="config_cecTvSendStandbyOnSleepDisabled_default" />
+
+  <java-symbol type="bool" name="config_cecSetMenuLanguage_userConfigurable" />
+  <java-symbol type="bool" name="config_cecSetMenuLanguageEnabled_allowed" />
+  <java-symbol type="bool" name="config_cecSetMenuLanguageEnabled_default" />
+  <java-symbol type="bool" name="config_cecSetMenuLanguageDisabled_allowed" />
+  <java-symbol type="bool" name="config_cecSetMenuLanguageDisabled_default" />
 
   <java-symbol type="bool" name="config_cecRcProfileTv_userConfigurable" />
   <java-symbol type="bool" name="config_cecRcProfileTvNone_allowed" />

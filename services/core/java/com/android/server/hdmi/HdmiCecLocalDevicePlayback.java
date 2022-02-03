@@ -50,9 +50,6 @@ import java.util.Locale;
 public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     private static final String TAG = "HdmiCecLocalDevicePlayback";
 
-    private static final boolean SET_MENU_LANGUAGE =
-            HdmiProperties.set_menu_language_enabled().orElse(false);
-
     // How long to wait after hotplug out before possibly going to Standby.
     @VisibleForTesting
     static final long STANDBY_AFTER_HOTPLUG_OUT_DELAY_MS = 30_000;
@@ -388,7 +385,9 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     @Constants.HandleMessageResult
     protected int handleSetMenuLanguage(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        if (!SET_MENU_LANGUAGE) {
+        if (mService.getHdmiCecConfig().getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_SET_MENU_LANGUAGE)
+                    == HdmiControlManager.SET_MENU_LANGUAGE_DISABLED) {
             return Constants.ABORT_UNRECOGNIZED_OPCODE;
         }
 

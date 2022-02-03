@@ -27,6 +27,7 @@ import android.os.Parcelable;
  */
 @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class BtProfileConnectionInfo implements Parcelable {
+
     private final int mProfile;
     private final boolean mSupprNoisy;
     private final int mVolume;

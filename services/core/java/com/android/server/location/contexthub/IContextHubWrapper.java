@@ -465,7 +465,7 @@ public abstract class IContextHubWrapper {
             try {
                 mHub.onHostEndpointConnected(info);
             } catch (RemoteException | ServiceSpecificException e) {
-                Log.e(TAG, "RemoteException in onHostEndpointConnected");
+                Log.e(TAG, "Exception in onHostEndpointConnected" + e.getMessage());
             }
         }
 
@@ -474,7 +474,7 @@ public abstract class IContextHubWrapper {
             try {
                 mHub.onHostEndpointDisconnected((char) hostEndpointId);
             } catch (RemoteException | ServiceSpecificException e) {
-                Log.e(TAG, "RemoteException in onHostEndpointDisconnected");
+                Log.e(TAG, "Exception in onHostEndpointDisconnected" + e.getMessage());
             }
         }
 
@@ -488,6 +488,8 @@ public abstract class IContextHubWrapper {
                 return ContextHubTransaction.RESULT_SUCCESS;
             } catch (RemoteException | ServiceSpecificException e) {
                 return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+            } catch (IllegalArgumentException e) {
+                return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
             }
         }
 
@@ -499,8 +501,10 @@ public abstract class IContextHubWrapper {
             try {
                 mHub.loadNanoapp(contextHubId, aidlNanoAppBinary, transactionId);
                 return ContextHubTransaction.RESULT_SUCCESS;
-            } catch (RemoteException | ServiceSpecificException e) {
+            } catch (RemoteException | ServiceSpecificException | UnsupportedOperationException e) {
                 return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+            } catch (IllegalArgumentException e) {
+                return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
             }
         }
 
@@ -510,8 +514,10 @@ public abstract class IContextHubWrapper {
             try {
                 mHub.unloadNanoapp(contextHubId, nanoappId, transactionId);
                 return ContextHubTransaction.RESULT_SUCCESS;
-            } catch (RemoteException | ServiceSpecificException e) {
+            } catch (RemoteException | ServiceSpecificException | UnsupportedOperationException e) {
                 return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+            } catch (IllegalArgumentException e) {
+                return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
             }
         }
 
@@ -521,8 +527,10 @@ public abstract class IContextHubWrapper {
             try {
                 mHub.enableNanoapp(contextHubId, nanoappId, transactionId);
                 return ContextHubTransaction.RESULT_SUCCESS;
-            } catch (RemoteException | ServiceSpecificException e) {
+            } catch (RemoteException | ServiceSpecificException | UnsupportedOperationException e) {
                 return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+            } catch (IllegalArgumentException e) {
+                return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
             }
         }
 
@@ -532,8 +540,10 @@ public abstract class IContextHubWrapper {
             try {
                 mHub.disableNanoapp(contextHubId, nanoappId, transactionId);
                 return ContextHubTransaction.RESULT_SUCCESS;
-            } catch (RemoteException | ServiceSpecificException e) {
+            } catch (RemoteException | ServiceSpecificException | UnsupportedOperationException e) {
                 return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+            } catch (IllegalArgumentException e) {
+                return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
             }
         }
 
@@ -542,8 +552,10 @@ public abstract class IContextHubWrapper {
             try {
                 mHub.queryNanoapps(contextHubId);
                 return ContextHubTransaction.RESULT_SUCCESS;
-            } catch (RemoteException | ServiceSpecificException e) {
+            } catch (RemoteException | ServiceSpecificException | UnsupportedOperationException e) {
                 return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+            } catch (IllegalArgumentException e) {
+                return ContextHubTransaction.RESULT_FAILED_BAD_PARAMS;
             }
         }
 
@@ -551,7 +563,7 @@ public abstract class IContextHubWrapper {
             mAidlCallbackMap.put(contextHubId, new ContextHubAidlCallback(contextHubId, callback));
             try {
                 mHub.registerCallback(contextHubId, mAidlCallbackMap.get(contextHubId));
-            } catch (RemoteException | ServiceSpecificException e) {
+            } catch (RemoteException | ServiceSpecificException | IllegalArgumentException e) {
                 Log.e(TAG, "Exception while registering callback: " + e.getMessage());
             }
         }

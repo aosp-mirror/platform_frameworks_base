@@ -35,6 +35,7 @@ abstract class MediaViewHolder constructor(itemView: View) {
     val player = itemView as TransitionLayout
 
     // Player information
+    val albumView = itemView.requireViewById<ImageView>(R.id.album_art)
     val appIcon = itemView.requireViewById<ImageView>(R.id.icon)
     val titleText = itemView.requireViewById<TextView>(R.id.header_title)
     val artistText = itemView.requireViewById<TextView>(R.id.header_artist)
@@ -53,8 +54,9 @@ abstract class MediaViewHolder constructor(itemView: View) {
     // Settings screen
     val longPressText = itemView.requireViewById<TextView>(R.id.remove_text)
     val cancel = itemView.requireViewById<View>(R.id.cancel)
+    val cancelText = itemView.requireViewById<TextView>(R.id.cancel_text)
     val dismiss = itemView.requireViewById<ViewGroup>(R.id.dismiss)
-    val dismissLabel = dismiss.getChildAt(0)
+    val dismissText = itemView.requireViewById<TextView>(R.id.dismiss_text)
     val settings = itemView.requireViewById<View>(R.id.settings)
     val settingsText = itemView.requireViewById<TextView>(R.id.settings_text)
 

@@ -49,29 +49,29 @@ class PhoneStatusBarViewController private constructor(
     }
 
     override fun onViewAttached() {
-        moveFromCenterAnimationController?.let { animationController ->
-            val statusBarLeftSide: View = mView.findViewById(R.id.status_bar_left_side)
-            val systemIconArea: ViewGroup = mView.findViewById(R.id.system_icon_area)
+        if (moveFromCenterAnimationController == null) return
 
-            val viewsToAnimate = arrayOf(
-                statusBarLeftSide,
-                systemIconArea
-            )
+        val statusBarLeftSide: View = mView.findViewById(R.id.status_bar_left_side)
+        val systemIconArea: ViewGroup = mView.findViewById(R.id.system_icon_area)
 
-            mView.viewTreeObserver.addOnPreDrawListener(object :
-                ViewTreeObserver.OnPreDrawListener {
-                override fun onPreDraw(): Boolean {
-                    animationController.onViewsReady(viewsToAnimate)
-                    mView.viewTreeObserver.removeOnPreDrawListener(this)
-                    return true
-                }
-            })
+        val viewsToAnimate = arrayOf(
+            statusBarLeftSide,
+            systemIconArea
+        )
 
-            mView.addOnLayoutChangeListener { _, left, _, right, _, oldLeft, _, oldRight, _ ->
-                val widthChanged = right - left != oldRight - oldLeft
-                if (widthChanged) {
-                    moveFromCenterAnimationController.onStatusBarWidthChanged()
-                }
+        mView.viewTreeObserver.addOnPreDrawListener(object :
+            ViewTreeObserver.OnPreDrawListener {
+            override fun onPreDraw(): Boolean {
+                moveFromCenterAnimationController.onViewsReady(viewsToAnimate)
+                mView.viewTreeObserver.removeOnPreDrawListener(this)
+                return true
+            }
+        })
+
+        mView.addOnLayoutChangeListener { _, left, _, right, _, oldLeft, _, oldRight, _ ->
+            val widthChanged = right - left != oldRight - oldLeft
+            if (widthChanged) {
+                moveFromCenterAnimationController.onStatusBarWidthChanged()
             }
         }
 
@@ -162,9 +162,7 @@ class PhoneStatusBarViewController private constructor(
             PhoneStatusBarViewController(
                 view,
                 progressProvider.getOrNull(),
-                unfoldComponent.map {
-                    it.getStatusBarMoveFromCenterAnimationController()
-                }.getOrNull(),
+                unfoldComponent.getOrNull()?.getStatusBarMoveFromCenterAnimationController(),
                 touchEventHandler,
                 configurationController
             )

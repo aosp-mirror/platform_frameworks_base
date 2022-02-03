@@ -67,7 +67,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Insets;
+import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -78,6 +82,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.view.Choreographer;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
@@ -103,6 +108,8 @@ import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 /** The default handler that handles anything not already handled. */
 public class DefaultTransitionHandler implements Transitions.TransitionHandler {
@@ -331,6 +338,9 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
         };
 
+        final List<Consumer<SurfaceControl.Transaction>> postStartTransactionCallbacks =
+                new ArrayList<>();
+
         @ColorInt int backgroundColorForTransition = 0;
         final int wallpaperTransit = getWallpaperTransitType(info);
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
@@ -402,13 +412,15 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     }
                 }
 
-                float cornerRadius = 0;
+                final float cornerRadius;
                 if (a.hasRoundedCorners() && isTask) {
                     // hasRoundedCorners is currently only enabled for tasks
                     final Context displayContext =
                             mDisplayController.getDisplayContext(change.getTaskInfo().displayId);
                     cornerRadius =
                             ScreenDecorationsUtils.getWindowCornerRadius(displayContext);
+                } else {
+                    cornerRadius = 0;
                 }
 
                 if (a.getShowBackground()) {
@@ -424,12 +436,37 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     }
                 }
 
+                boolean delayedEdgeExtension = false;
+                if (!isTask && a.hasExtension()) {
+                    if (!Transitions.isOpeningType(change.getMode())) {
+                        // Can screenshot now (before startTransaction is applied)
+                        edgeExtendWindow(change, a, startTransaction, finishTransaction);
+                    } else {
+                        // Need to screenshot after startTransaction is applied otherwise activity
+                        // may not be visible or ready yet.
+                        postStartTransactionCallbacks
+                                .add(t -> edgeExtendWindow(change, a, t, finishTransaction));
+                        delayedEdgeExtension = true;
+                    }
+                }
+
                 final Rect clipRect = Transitions.isClosingType(change.getMode())
                         ? mRotator.getEndBoundsInStartRotation(change)
                         : change.getEndAbsBounds();
-                startSurfaceAnimation(animations, a, change.getLeash(), onAnimFinish,
-                        mTransactionPool, mMainExecutor, mAnimExecutor, null /* position */,
-                        cornerRadius, clipRect);
+
+                if (delayedEdgeExtension) {
+                    // If the edge extension needs to happen after the startTransition has been
+                    // applied, then we want to only start the animation after the edge extension
+                    // postStartTransaction callback has been run
+                    postStartTransactionCallbacks.add(t ->
+                            startSurfaceAnimation(animations, a, change.getLeash(), onAnimFinish,
+                                    mTransactionPool, mMainExecutor, mAnimExecutor,
+                                    null /* position */, cornerRadius, clipRect));
+                } else {
+                    startSurfaceAnimation(animations, a, change.getLeash(), onAnimFinish,
+                            mTransactionPool, mMainExecutor, mAnimExecutor, null /* position */,
+                            cornerRadius, clipRect);
+                }
 
                 if (info.getAnimationOptions() != null) {
                     attachThumbnail(animations, onAnimFinish, change, info.getAnimationOptions(),
@@ -443,12 +480,136 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     startTransaction, finishTransaction);
         }
 
-        startTransaction.apply();
+        // postStartTransactionCallbacks require that the start transaction is already
+        // applied to run otherwise they may result in flickers and UI inconsistencies.
+        boolean waitForStartTransactionApply = postStartTransactionCallbacks.size() > 0;
+        startTransaction.apply(waitForStartTransactionApply);
+
+        // Run tasks that require startTransaction to already be applied
+        for (Consumer<SurfaceControl.Transaction> postStartTransactionCallback :
+                postStartTransactionCallbacks) {
+            final SurfaceControl.Transaction t = mTransactionPool.acquire();
+            postStartTransactionCallback.accept(t);
+            t.apply();
+            mTransactionPool.release(t);
+        }
+
         mRotator.cleanUp(finishTransaction);
         TransitionMetrics.getInstance().reportAnimationStart(transition);
         // run finish now in-case there are no animations
         onAnimFinish.run();
         return true;
+    }
+
+    private void edgeExtendWindow(TransitionInfo.Change change,
+            Animation a, SurfaceControl.Transaction startTransaction,
+            SurfaceControl.Transaction finishTransaction) {
+        final Transformation transformationAtStart = new Transformation();
+        a.getTransformationAt(0, transformationAtStart);
+        final Transformation transformationAtEnd = new Transformation();
+        a.getTransformationAt(1, transformationAtEnd);
+
+        // We want to create an extension surface that is the maximal size and the animation will
+        // take care of cropping any part that overflows.
+        final Insets maxExtensionInsets = Insets.min(
+                transformationAtStart.getInsets(), transformationAtEnd.getInsets());
+
+        final int targetSurfaceHeight = Math.max(change.getStartAbsBounds().height(),
+                change.getEndAbsBounds().height());
+        final int targetSurfaceWidth = Math.max(change.getStartAbsBounds().width(),
+                change.getEndAbsBounds().width());
+        if (maxExtensionInsets.left < 0) {
+            final Rect edgeBounds = new Rect(0, 0, 1, targetSurfaceHeight);
+            final Rect extensionRect = new Rect(0, 0,
+                    -maxExtensionInsets.left, targetSurfaceHeight);
+            final int xPos = maxExtensionInsets.left;
+            final int yPos = 0;
+            createExtensionSurface(change.getLeash(), edgeBounds, extensionRect, xPos, yPos,
+                    "Left Edge Extension", startTransaction, finishTransaction);
+        }
+
+        if (maxExtensionInsets.top < 0) {
+            final Rect edgeBounds = new Rect(0, 0, targetSurfaceWidth, 1);
+            final Rect extensionRect = new Rect(0, 0,
+                    targetSurfaceWidth, -maxExtensionInsets.top);
+            final int xPos = 0;
+            final int yPos = maxExtensionInsets.top;
+            createExtensionSurface(change.getLeash(), edgeBounds, extensionRect, xPos, yPos,
+                    "Top Edge Extension", startTransaction, finishTransaction);
+        }
+
+        if (maxExtensionInsets.right < 0) {
+            final Rect edgeBounds = new Rect(targetSurfaceWidth - 1, 0,
+                    targetSurfaceWidth, targetSurfaceHeight);
+            final Rect extensionRect = new Rect(0, 0,
+                    -maxExtensionInsets.right, targetSurfaceHeight);
+            final int xPos = targetSurfaceWidth;
+            final int yPos = 0;
+            createExtensionSurface(change.getLeash(), edgeBounds, extensionRect, xPos, yPos,
+                    "Right Edge Extension", startTransaction, finishTransaction);
+        }
+
+        if (maxExtensionInsets.bottom < 0) {
+            final Rect edgeBounds = new Rect(0, targetSurfaceHeight - 1,
+                    targetSurfaceWidth, targetSurfaceHeight);
+            final Rect extensionRect = new Rect(0, 0,
+                    targetSurfaceWidth, -maxExtensionInsets.bottom);
+            final int xPos = maxExtensionInsets.left;
+            final int yPos = targetSurfaceHeight;
+            createExtensionSurface(change.getLeash(), edgeBounds, extensionRect, xPos, yPos,
+                    "Bottom Edge Extension", startTransaction, finishTransaction);
+        }
+    }
+
+    private SurfaceControl createExtensionSurface(SurfaceControl surfaceToExtend, Rect edgeBounds,
+            Rect extensionRect, int xPos, int yPos, String layerName,
+            SurfaceControl.Transaction startTransaction,
+            SurfaceControl.Transaction finishTransaction) {
+        final SurfaceControl edgeExtensionLayer = new SurfaceControl.Builder()
+                .setName(layerName)
+                .setParent(surfaceToExtend)
+                .setHidden(true)
+                .setCallsite("DefaultTransitionHandler#startAnimation")
+                .setOpaque(true)
+                .setBufferSize(extensionRect.width(), extensionRect.height())
+                .build();
+
+        SurfaceControl.LayerCaptureArgs captureArgs =
+                new SurfaceControl.LayerCaptureArgs.Builder(surfaceToExtend)
+                        .setSourceCrop(edgeBounds)
+                        .setFrameScale(1)
+                        .setPixelFormat(PixelFormat.RGBA_8888)
+                        .setChildrenOnly(true)
+                        .setAllowProtected(true)
+                        .build();
+        final SurfaceControl.ScreenshotHardwareBuffer edgeBuffer =
+                SurfaceControl.captureLayers(captureArgs);
+
+        if (edgeBuffer == null) {
+            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                    "Failed to capture edge of window.");
+            return null;
+        }
+
+        android.graphics.BitmapShader shader =
+                new android.graphics.BitmapShader(edgeBuffer.asBitmap(),
+                        android.graphics.Shader.TileMode.CLAMP,
+                        android.graphics.Shader.TileMode.CLAMP);
+        final Paint paint = new Paint();
+        paint.setShader(shader);
+
+        final Surface surface = new Surface(edgeExtensionLayer);
+        Canvas c = surface.lockHardwareCanvas();
+        c.drawRect(extensionRect, paint);
+        surface.unlockCanvasAndPost(c);
+        surface.release();
+
+        startTransaction.setLayer(edgeExtensionLayer, Integer.MIN_VALUE);
+        startTransaction.setPosition(edgeExtensionLayer, xPos, yPos);
+        startTransaction.setVisibility(edgeExtensionLayer, true);
+        finishTransaction.remove(edgeExtensionLayer);
+
+        return edgeExtensionLayer;
     }
 
     private void addBackgroundToTransition(
@@ -778,9 +939,17 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         }
         t.setMatrix(leash, transformation.getMatrix(), matrix);
         t.setAlpha(leash, transformation.getAlpha());
+
+        Insets extensionInsets = Insets.min(transformation.getInsets(), Insets.NONE);
+        if (!extensionInsets.equals(Insets.NONE) && clipRect != null && !clipRect.isEmpty()) {
+            // Clip out any overflowing edge extension
+            clipRect.inset(extensionInsets);
+            t.setCrop(leash, clipRect);
+        }
+
         if (anim.hasRoundedCorners() && cornerRadius > 0 && clipRect != null) {
             // We can only apply rounded corner if a crop is set
-            t.setWindowCrop(leash, clipRect);
+            t.setCrop(leash, clipRect);
             t.setCornerRadius(leash, cornerRadius);
         }
 

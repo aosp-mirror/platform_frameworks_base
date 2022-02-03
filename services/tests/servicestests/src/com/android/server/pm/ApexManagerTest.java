@@ -61,7 +61,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Map;
+import java.util.List;
 
 @SmallTest
 @Presubmit
@@ -136,9 +136,10 @@ public class ApexManagerTest {
         mApexManager.scanApexPackagesTraced(mPackageParser2,
                 ParallelPackageParser.makeExecutorService());
 
-        Map<String, String> services = mApexManager.getApexSystemServices();
+        List<ApexSystemServiceInfo> services = mApexManager.getApexSystemServices();
         assertThat(services).hasSize(1);
-        assertThat(services).containsKey("com.android.apex.test.ApexSystemService");
+        assertThat(services.stream().map(ApexSystemServiceInfo::getName).findFirst().orElse(null))
+                .matches("com.android.apex.test.ApexSystemService");
     }
 
     @Test

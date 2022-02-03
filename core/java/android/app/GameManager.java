@@ -181,14 +181,18 @@ public final class GameManager {
     /**
      * Returns if ANGLE is enabled for a given package and user ID.
      * <p>
+     * ANGLE (Almost Native Graphics Layer Engine) can translate OpenGL ES commands to Vulkan
+     * commands. Enabling ANGLE may improve the performance and/or reduce the power consumption of
+     * applications.
      * The caller must have {@link android.Manifest.permission#MANAGE_GAME_MODE}.
      *
      * @hide
      */
+    @TestApi
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
-    public @GameMode boolean getAngleEnabled(@NonNull String packageName) {
+    public @GameMode boolean isAngleEnabled(@NonNull String packageName) {
         try {
-            return mService.getAngleEnabled(packageName, mContext.getUserId());
+            return mService.isAngleEnabled(packageName, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

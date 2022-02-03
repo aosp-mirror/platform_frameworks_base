@@ -54,6 +54,7 @@ import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -65,6 +66,7 @@ import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.Xml;
 import android.view.IWindowManager;
@@ -144,6 +146,21 @@ public class TrustManagerService extends SystemService {
 
     @GuardedBy("mUserIsTrusted")
     private final SparseBooleanArray mUserIsTrusted = new SparseBooleanArray();
+
+    //TODO(b/215724686): remove flag
+    public static final boolean ENABLE_ACTIVE_UNLOCK_FLAG = SystemProperties.getBoolean(
+            "fw.enable_active_unlock_flag", true);
+
+    private enum TrustState {
+        UNTRUSTED, // the phone is not unlocked by any trustagents
+        TRUSTABLE, // the phone is in a semi-locked state that can be unlocked if
+        // FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE is passed and a trustagent is trusted
+        TRUSTED // the phone is unlocked
+    };
+
+    @GuardedBy("mUserTrustState")
+    private final SparseArray<TrustManagerService.TrustState> mUserTrustState =
+            new SparseArray<>();
 
     /**
      * Stores the locked state for users on the device. There are three different type of users
@@ -228,7 +245,6 @@ public class TrustManagerService extends SystemService {
     }
 
     // Extend unlock config and logic
-
     private final class SettingsObserver extends ContentObserver {
         private final Uri TRUST_AGENTS_EXTEND_UNLOCK =
                 Settings.Secure.getUriFor(Settings.Secure.TRUST_AGENTS_EXTEND_UNLOCK);
@@ -396,6 +412,14 @@ public class TrustManagerService extends SystemService {
     }
 
     private void updateTrust(int userId, int flags, boolean isFromUnlock) {
+        if (ENABLE_ACTIVE_UNLOCK_FLAG) {
+            updateTrustWithRenewableUnlock(userId, flags, isFromUnlock);
+        } else {
+            updateTrustWithExtendUnlock(userId, flags, isFromUnlock);
+        }
+    }
+
+    private void updateTrustWithExtendUnlock(int userId, int flags, boolean isFromUnlock) {
         boolean managed = aggregateIsTrustManaged(userId);
         dispatchOnTrustManagedChanged(managed, userId);
         if (mStrongAuthTracker.isTrustAllowedForUser(userId)
@@ -441,6 +465,65 @@ public class TrustManagerService extends SystemService {
         }
     }
 
+    private void updateTrustWithRenewableUnlock(int userId, int flags, boolean isFromUnlock) {
+        boolean managed = aggregateIsTrustManaged(userId);
+        dispatchOnTrustManagedChanged(managed, userId);
+        if (mStrongAuthTracker.isTrustAllowedForUser(userId)
+                && isTrustUsuallyManagedInternal(userId) != managed) {
+            updateTrustUsuallyManaged(userId, managed);
+        }
+
+        boolean trustedByAtLeastOneAgent = aggregateIsTrusted(userId);
+        boolean trustableByAtLeastOneAgent = aggregateIsTrustable(userId);
+        boolean wasTrusted;
+        boolean wasTrustable;
+        TrustState pendingTrustState;
+
+        IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+        boolean alreadyUnlocked = false;
+        try {
+            alreadyUnlocked = !wm.isKeyguardLocked();
+        } catch (RemoteException e) {
+        }
+
+        synchronized (mUserTrustState) {
+            wasTrusted = (mUserTrustState.get(userId) == TrustState.TRUSTED);
+            wasTrustable = (mUserTrustState.get(userId) == TrustState.TRUSTABLE);
+            boolean renewingTrust = wasTrustable && (
+                    (flags & TrustAgentService.FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) != 0);
+            boolean canMoveToTrusted = alreadyUnlocked || isFromUnlock || renewingTrust;
+            boolean upgradingTrustForCurrentUser = (userId == mCurrentUser);
+
+            if (trustedByAtLeastOneAgent && wasTrusted) {
+                // no change
+                return;
+            } else if (trustedByAtLeastOneAgent && canMoveToTrusted
+                    && upgradingTrustForCurrentUser) {
+                pendingTrustState = TrustState.TRUSTED;
+            } else if (trustableByAtLeastOneAgent && (wasTrusted || wasTrustable)
+                    && upgradingTrustForCurrentUser) {
+                pendingTrustState = TrustState.TRUSTABLE;
+            } else {
+                pendingTrustState = TrustState.UNTRUSTED;
+            }
+
+            mUserTrustState.put(userId, pendingTrustState);
+        }
+        if (DEBUG) Slog.d(TAG, "pendingTrustState: " + pendingTrustState);
+
+        boolean isNowTrusted = pendingTrustState == TrustState.TRUSTED;
+        dispatchOnTrustChanged(isNowTrusted, userId, flags, getTrustGrantedMessages(userId));
+        if (isNowTrusted != wasTrusted) {
+            refreshDeviceLockedForUser(userId);
+            if (!isNowTrusted) {
+                maybeLockScreen(userId);
+            } else {
+                scheduleTrustTimeout(userId, false /* override */);
+            }
+        }
+    }
+
+
     private void updateTrustUsuallyManaged(int userId, boolean managed) {
         synchronized (mTrustUsuallyManagedForUser) {
             mTrustUsuallyManagedForUser.put(userId, managed);
@@ -470,6 +553,20 @@ public class TrustManagerService extends SystemService {
 
     public void unlockUserWithToken(long handle, byte[] token, int userId) {
         mLockPatternUtils.unlockUserWithToken(handle, token, userId);
+    }
+
+    /**
+     * Locks the phone and requires some auth (not trust) like a biometric or passcode before
+     * unlocking.
+     */
+    public void lockUser(int userId) {
+        mLockPatternUtils.requireStrongAuth(
+                StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST, userId);
+        try {
+            WindowManagerGlobal.getWindowManagerService().lockNow(null);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Error locking screen when called from trust agent");
+        }
     }
 
     void showKeyguardErrorMessage(CharSequence message) {
@@ -943,6 +1040,21 @@ public class TrustManagerService extends SystemService {
             AgentInfo info = mActiveAgents.valueAt(i);
             if (info.userId == userId) {
                 if (info.agent.isTrusted()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean aggregateIsTrustable(int userId) {
+        if (!mStrongAuthTracker.isTrustAllowedForUser(userId)) {
+            return false;
+        }
+        for (int i = 0; i < mActiveAgents.size(); i++) {
+            AgentInfo info = mActiveAgents.valueAt(i);
+            if (info.userId == userId) {
+                if (info.agent.isTrustable()) {
                     return true;
                 }
             }

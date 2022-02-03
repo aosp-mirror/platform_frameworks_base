@@ -119,16 +119,15 @@ public class TrustAgentService extends Service {
      * automatically remove trust after some conditions are met (detailed below) with the option for
      * the agent to renew the trust again later.
      *
-     * <p>After this is called, the agent will grant trust until the platform thinks an active user
-     * is no longer using that trust. For example, if the user dismisses keyguard, the platform will
-     * remove trust (this does not automatically lock the device).
+     * <p>After this is called, the agent will grant trust until the platform thinks an active
+     * user is no longer using that trust. This can happen for any reason as determined by the
+     * platform. For example, if the user dismisses keyguard, the platform will remove trust;
+     * since this does not automatically lock the device, this results in the device locking the
+     * next time the screen turns off.
      *
      * <p>When the platform internally removes the agent's trust in this manner, an agent can
      * re-grant it (via a call to grantTrust) without the user having to unlock the device through
      * another method (e.g. PIN). This renewable state only persists for a limited time.
-     *
-     * TODO(b/213631675): Remove @hide
-     * @hide
      */
     public static final int FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE = 1 << 2;
 
@@ -139,9 +138,6 @@ public class TrustAgentService extends Service {
      * Without this flag, the message passed to {@code grantTrust} is only used for debugging
      * purposes. With the flag, it may be displayed to the user as the reason why the device is
      * unlocked.
-     *
-     * TODO(b/213911325): Remove @hide
-     * @hide
      */
     public static final int FLAG_GRANT_TRUST_DISPLAY_MESSAGE = 1 << 3;
 
@@ -309,9 +305,6 @@ public class TrustAgentService extends Service {
      * {@link #grantTrust(CharSequence, long, int)}.
      *
      * @see #FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE
-     *
-     * TODO(b/213631672): Add CTS tests
-     * @hide
      */
     public void onUserRequestedUnlock() {
     }
@@ -624,11 +617,15 @@ public class TrustAgentService extends Service {
      *
      * If the user has no auth method specified, then keyguard will still be shown but can be
      * dismissed normally.
-     *
-     * TODO(b/213631675): Implement & make public
-     * @hide
      */
     public final void lockUser() {
+        if (mCallback != null) {
+            try {
+                mCallback.lockUser();
+            } catch (RemoteException e) {
+                onError("calling lockUser");
+            }
+        }
     }
 
     /**

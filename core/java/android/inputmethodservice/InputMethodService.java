@@ -346,7 +346,7 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     @AnyThread
     public static boolean canImeRenderGesturalNavButtons() {
-        return SystemProperties.getBoolean(PROP_CAN_RENDER_GESTURAL_NAV_BUTTONS, false);
+        return SystemProperties.getBoolean(PROP_CAN_RENDER_GESTURAL_NAV_BUTTONS, true);
     }
 
     /**

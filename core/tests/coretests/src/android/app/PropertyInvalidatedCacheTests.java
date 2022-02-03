@@ -37,9 +37,9 @@ import org.junit.Test;
 @SmallTest
 public class PropertyInvalidatedCacheTests {
 
-    // This property is never set.  The test process does not have permission to set any
-    // properties.
-    static final String CACHE_PROPERTY = "cache_key.cache_test_a";
+    // Configuration for creating caches
+    private static final int MODULE = PropertyInvalidatedCache.MODULE_TEST;
+    private static final String API = "testApi";
 
     // This class is a proxy for binder calls.  It contains a counter that increments
     // every time the class is queried.
@@ -64,6 +64,25 @@ public class PropertyInvalidatedCacheTests {
         }
     }
 
+    // The functions for querying the server.
+    private static class ServerQuery
+            extends PropertyInvalidatedCache.QueryHandler<Integer, Boolean> {
+        private final ServerProxy mServer;
+
+        ServerQuery(ServerProxy server) {
+            mServer = server;
+        }
+
+        @Override
+        public Boolean apply(Integer x) {
+            return mServer.query(x);
+        }
+        @Override
+        public boolean shouldBypassCache(Integer x) {
+            return x % 13 == 0;
+        }
+    }
+
     // Clear the test mode after every test, in case this process is used for other
     // tests. This also resets the test property map.
     @After
@@ -82,19 +101,11 @@ public class PropertyInvalidatedCacheTests {
 
         // Create a cache that uses simple arithmetic to computer its values.
         PropertyInvalidatedCache<Integer, Boolean> testCache =
-                new PropertyInvalidatedCache<>(4, CACHE_PROPERTY) {
-                    @Override
-                    public Boolean recompute(Integer x) {
-                        return tester.query(x);
-                    }
-                    @Override
-                    public boolean bypass(Integer x) {
-                        return x % 13 == 0;
-                    }
-                };
+                new PropertyInvalidatedCache<>(4, MODULE, API, "cache1",
+                        new ServerQuery(tester));
 
         PropertyInvalidatedCache.setTestMode(true);
-        PropertyInvalidatedCache.testPropertyName(CACHE_PROPERTY);
+        testCache.testPropertyName();
 
         tester.verify(0);
         assertEquals(tester.value(3), testCache.query(3));
@@ -136,26 +147,14 @@ public class PropertyInvalidatedCacheTests {
 
         // Three caches, all using the same system property but one uses a different name.
         PropertyInvalidatedCache<Integer, Boolean> cache1 =
-                new PropertyInvalidatedCache<>(4, CACHE_PROPERTY) {
-                    @Override
-                    public Boolean recompute(Integer x) {
-                        return tester.query(x);
-                    }
-                };
+            new PropertyInvalidatedCache<>(4, MODULE, API, "cache1",
+                        new ServerQuery(tester));
         PropertyInvalidatedCache<Integer, Boolean> cache2 =
-                new PropertyInvalidatedCache<>(4, CACHE_PROPERTY) {
-                    @Override
-                    public Boolean recompute(Integer x) {
-                        return tester.query(x);
-                    }
-                };
+            new PropertyInvalidatedCache<>(4, MODULE, API, "cache1",
+                        new ServerQuery(tester));
         PropertyInvalidatedCache<Integer, Boolean> cache3 =
-                new PropertyInvalidatedCache<>(4, CACHE_PROPERTY, "cache3") {
-                    @Override
-                    public Boolean recompute(Integer x) {
-                        return tester.query(x);
-                    }
-                };
+            new PropertyInvalidatedCache<>(4, MODULE, API, "cache3",
+                        new ServerQuery(tester));
 
         // Caches are enabled upon creation.
         assertEquals(false, cache1.getDisabledState());
@@ -176,45 +175,29 @@ public class PropertyInvalidatedCacheTests {
         assertEquals(false, cache3.getDisabledState());
 
         // Create a new cache1.  Verify that the new instance is disabled.
-        cache1 = new PropertyInvalidatedCache<>(4, CACHE_PROPERTY) {
-                    @Override
-                    public Boolean recompute(Integer x) {
-                        return tester.query(x);
-                    }
-                };
+        cache1 = new PropertyInvalidatedCache<>(4, MODULE, API, "cache1",
+                new ServerQuery(tester));
         assertEquals(true, cache1.getDisabledState());
 
         // Remove the record of caches being locally disabled.  This is a clean-up step.
-        cache1.clearDisableLocal();
+        cache1.forgetDisableLocal();
         assertEquals(true, cache1.getDisabledState());
         assertEquals(true, cache2.getDisabledState());
         assertEquals(false, cache3.getDisabledState());
 
         // Create a new cache1.  Verify that the new instance is not disabled.
-        cache1 = new PropertyInvalidatedCache<>(4, CACHE_PROPERTY) {
-                    @Override
-                    public Boolean recompute(Integer x) {
-                        return tester.query(x);
-                    }
-                };
+        cache1 = new PropertyInvalidatedCache<>(4, MODULE, API, "cache1",
+                new ServerQuery(tester));
         assertEquals(false, cache1.getDisabledState());
     }
 
-    private static final String UNSET_KEY = "Aiw7woh6ie4toh7W";
+    private static class TestQuery
+            extends PropertyInvalidatedCache.QueryHandler<Integer, String> {
 
-    private static class TestCache extends PropertyInvalidatedCache<Integer, String> {
-        TestCache() {
-            this(CACHE_PROPERTY);
-        }
-
-        TestCache(String key) {
-            super(4, key);
-            setTestMode(true);
-            testPropertyName(key);
-        }
+        private int mRecomputeCount = 0;
 
         @Override
-        public String recompute(Integer qv) {
+        public String apply(Integer qv) {
             mRecomputeCount += 1;
             return "foo" + qv.toString();
         }
@@ -222,15 +205,40 @@ public class PropertyInvalidatedCacheTests {
         int getRecomputeCount() {
             return mRecomputeCount;
         }
+    }
 
-        private int mRecomputeCount = 0;
+    private static class TestCache extends PropertyInvalidatedCache<Integer, String> {
+        private final TestQuery mQuery;
+
+        TestCache() {
+            this(MODULE, API);
+        }
+
+        TestCache(int module, String api) {
+            this(module, api, new TestQuery());
+            setTestMode(true);
+            testPropertyName();
+        }
+
+        TestCache(int module, String api, TestQuery query) {
+            super(4, module, api, api, query);
+            mQuery = query;
+            setTestMode(true);
+            testPropertyName();
+        }
+
+        public int getRecomputeCount() {
+            return mQuery.getRecomputeCount();
+        }
+
+
     }
 
     @Test
     public void testCacheRecompute() {
         TestCache cache = new TestCache();
         cache.invalidateCache();
-        assertEquals(cache.isDisabledLocal(), false);
+        assertEquals(cache.isDisabled(), false);
         assertEquals("foo5", cache.query(5));
         assertEquals(1, cache.getRecomputeCount());
         assertEquals("foo5", cache.query(5));
@@ -241,6 +249,11 @@ public class PropertyInvalidatedCacheTests {
         assertEquals("foo5", cache.query(5));
         assertEquals("foo5", cache.query(5));
         assertEquals(3, cache.getRecomputeCount());
+        // Invalidate the cache with a direct call to the property.
+        PropertyInvalidatedCache.invalidateCache(MODULE, API);
+        assertEquals("foo5", cache.query(5));
+        assertEquals("foo5", cache.query(5));
+        assertEquals(4, cache.getRecomputeCount());
     }
 
     @Test
@@ -257,7 +270,8 @@ public class PropertyInvalidatedCacheTests {
 
     @Test
     public void testCachePropertyUnset() {
-        TestCache cache = new TestCache(UNSET_KEY);
+        final String UNSET_API = "otherApi";
+        TestCache cache = new TestCache(MODULE, UNSET_API);
         assertEquals("foo5", cache.query(5));
         assertEquals("foo5", cache.query(5));
         assertEquals(2, cache.getRecomputeCount());
@@ -327,17 +341,40 @@ public class PropertyInvalidatedCacheTests {
     @Test
     public void testLocalProcessDisable() {
         TestCache cache = new TestCache();
-        assertEquals(cache.isDisabledLocal(), false);
+        assertEquals(cache.isDisabled(), false);
         cache.invalidateCache();
         assertEquals("foo5", cache.query(5));
         assertEquals(1, cache.getRecomputeCount());
         assertEquals("foo5", cache.query(5));
         assertEquals(1, cache.getRecomputeCount());
-        assertEquals(cache.isDisabledLocal(), false);
+        assertEquals(cache.isDisabled(), false);
         cache.disableLocal();
-        assertEquals(cache.isDisabledLocal(), true);
+        assertEquals(cache.isDisabled(), true);
         assertEquals("foo5", cache.query(5));
         assertEquals("foo5", cache.query(5));
         assertEquals(3, cache.getRecomputeCount());
+    }
+
+    @Test
+    public void testPropertyNames() {
+        String n1;
+        n1 = PropertyInvalidatedCache.createPropertyName(
+            PropertyInvalidatedCache.MODULE_SYSTEM, "getPackageInfo");
+        assertEquals(n1, "cache_key.system_server.get_package_info");
+        n1 = PropertyInvalidatedCache.createPropertyName(
+            PropertyInvalidatedCache.MODULE_SYSTEM, "get_package_info");
+        assertEquals(n1, "cache_key.system_server.get_package_info");
+        try {
+            n1 = PropertyInvalidatedCache.createPropertyName(
+                PropertyInvalidatedCache.MODULE_SYSTEM - 1, "get package_info");
+            // n1 is an invalid api name.
+            assertEquals(false, true);
+        } catch (IllegalArgumentException e) {
+            // An exception is expected here.
+        }
+
+        n1 = PropertyInvalidatedCache.createPropertyName(
+            PropertyInvalidatedCache.MODULE_BLUETOOTH, "getState");
+        assertEquals(n1, "cache_key.bluetooth.get_state");
     }
 }

@@ -326,6 +326,9 @@ package android {
     field public static final int allowClearUserData = 16842757; // 0x1010005
     field public static final int allowClickWhenDisabled = 16844312; // 0x1010618
     field public static final int allowEmbedded = 16843765; // 0x10103f5
+    field public static final int allowGameAngleDriver;
+    field public static final int allowGameDownscaling;
+    field public static final int allowGameFpsOverride;
     field public static final int allowNativeHeapPointerTagging = 16844306; // 0x1010612
     field public static final int allowParallelSyncs = 16843570; // 0x1010332
     field public static final int allowSingleTap = 16843353; // 0x1010259
@@ -729,6 +732,10 @@ package android {
     field public static final int freezesText = 16843116; // 0x101016c
     field public static final int fromAlpha = 16843210; // 0x10101ca
     field public static final int fromDegrees = 16843187; // 0x10101b3
+    field public static final int fromExtendBottom;
+    field public static final int fromExtendLeft;
+    field public static final int fromExtendRight;
+    field public static final int fromExtendTop;
     field public static final int fromId = 16843850; // 0x101044a
     field public static final int fromScene = 16843741; // 0x10103dd
     field public static final int fromXDelta = 16843206; // 0x10101c6
@@ -1431,10 +1438,12 @@ package android {
     field public static final int summaryOn = 16843247; // 0x10101ef
     field public static final int supportedTypes;
     field public static final int supportsAssist = 16844016; // 0x10104f0
+    field public static final int supportsBatteryGameMode;
     field public static final int supportsInlineSuggestions = 16844301; // 0x101060d
     field public static final int supportsLaunchVoiceAssistFromKeyguard = 16844017; // 0x10104f1
     field public static final int supportsLocalInteraction = 16844047; // 0x101050f
     field public static final int supportsMultipleDisplays = 16844182; // 0x1010596
+    field public static final int supportsPerformanceGameMode;
     field public static final int supportsPictureInPicture = 16844023; // 0x10104f7
     field public static final int supportsRtl = 16843695; // 0x10103af
     field public static final int supportsStylusHandwriting;
@@ -1574,6 +1583,10 @@ package android {
     field public static final int titleTextStyle = 16843512; // 0x10102f8
     field public static final int toAlpha = 16843211; // 0x10101cb
     field public static final int toDegrees = 16843188; // 0x10101b4
+    field public static final int toExtendBottom;
+    field public static final int toExtendLeft;
+    field public static final int toExtendRight;
+    field public static final int toExtendTop;
     field public static final int toId = 16843849; // 0x1010449
     field public static final int toScene = 16843742; // 0x10103de
     field public static final int toXDelta = 16843207; // 0x10101c7
@@ -3122,6 +3135,11 @@ package android.accessibilityservice {
     field public static final int GLOBAL_ACTION_ACCESSIBILITY_SHORTCUT = 13; // 0xd
     field public static final int GLOBAL_ACTION_BACK = 1; // 0x1
     field public static final int GLOBAL_ACTION_DISMISS_NOTIFICATION_SHADE = 15; // 0xf
+    field public static final int GLOBAL_ACTION_DPAD_CENTER = 20; // 0x14
+    field public static final int GLOBAL_ACTION_DPAD_DOWN = 17; // 0x11
+    field public static final int GLOBAL_ACTION_DPAD_LEFT = 18; // 0x12
+    field public static final int GLOBAL_ACTION_DPAD_RIGHT = 19; // 0x13
+    field public static final int GLOBAL_ACTION_DPAD_UP = 16; // 0x10
     field public static final int GLOBAL_ACTION_HOME = 2; // 0x2
     field public static final int GLOBAL_ACTION_KEYCODE_HEADSETHOOK = 10; // 0xa
     field public static final int GLOBAL_ACTION_LOCK_SCREEN = 8; // 0x8
@@ -31417,6 +31435,9 @@ package android.os {
     method @Nullable public byte[] createByteArray();
     method @Nullable public char[] createCharArray();
     method @Nullable public double[] createDoubleArray();
+    method @Nullable public <T> T createFixedArray(@NonNull Class<T>, @NonNull int...);
+    method @Nullable public <T, S extends android.os.IInterface> T createFixedArray(@NonNull Class<T>, @NonNull java.util.function.Function<android.os.IBinder,S>, @NonNull int...);
+    method @Nullable public <T, S extends android.os.Parcelable> T createFixedArray(@NonNull Class<T>, @NonNull android.os.Parcelable.Creator<S>, @NonNull int...);
     method @Nullable public float[] createFloatArray();
     method @Nullable public int[] createIntArray();
     method @Nullable public <T extends android.os.IInterface> T[] createInterfaceArray(@NonNull java.util.function.IntFunction<T[]>, @NonNull java.util.function.Function<android.os.IBinder,T>);
@@ -31458,6 +31479,9 @@ package android.os {
     method public void readException();
     method public void readException(int, String);
     method public android.os.ParcelFileDescriptor readFileDescriptor();
+    method public <T> void readFixedArray(@NonNull T);
+    method public <T, S extends android.os.IInterface> void readFixedArray(@NonNull T, @NonNull java.util.function.Function<android.os.IBinder,S>);
+    method public <T, S extends android.os.Parcelable> void readFixedArray(@NonNull T, @NonNull android.os.Parcelable.Creator<S>);
     method public float readFloat();
     method public void readFloatArray(@NonNull float[]);
     method @Deprecated @Nullable public java.util.HashMap readHashMap(@Nullable ClassLoader);
@@ -31501,6 +31525,7 @@ package android.os {
     method public void setDataCapacity(int);
     method public void setDataPosition(int);
     method public void setDataSize(int);
+    method public void setPropagateAllowBlocking();
     method public void unmarshall(@NonNull byte[], int, int);
     method public void writeArray(@Nullable Object[]);
     method public void writeBinderArray(@Nullable android.os.IBinder[]);
@@ -31518,6 +31543,7 @@ package android.os {
     method public void writeDoubleArray(@Nullable double[]);
     method public void writeException(@NonNull Exception);
     method public void writeFileDescriptor(@NonNull java.io.FileDescriptor);
+    method public <T> void writeFixedArray(@Nullable T, int, @NonNull int...);
     method public void writeFloat(float);
     method public void writeFloatArray(@Nullable float[]);
     method public void writeInt(int);
@@ -41213,6 +41239,7 @@ package android.telephony {
     field public static final String KEY_IMS_CONFERENCE_SIZE_LIMIT_INT = "ims_conference_size_limit_int";
     field public static final String KEY_IMS_DTMF_TONE_DELAY_INT = "ims_dtmf_tone_delay_int";
     field public static final String KEY_IS_IMS_CONFERENCE_SIZE_ENFORCED_BOOL = "is_ims_conference_size_enforced_bool";
+    field public static final String KEY_IS_OPPORTUNISTIC_SUBSCRIPTION_BOOL = "is_opportunistic_subscription_bool";
     field public static final String KEY_LTE_ENABLED_BOOL = "lte_enabled_bool";
     field public static final String KEY_LTE_RSRQ_THRESHOLDS_INT_ARRAY = "lte_rsrq_thresholds_int_array";
     field public static final String KEY_LTE_RSSNR_THRESHOLDS_INT_ARRAY = "lte_rssnr_thresholds_int_array";
@@ -41297,6 +41324,7 @@ package android.telephony {
     field public static final String KEY_SIM_NETWORK_UNLOCK_ALLOW_DISMISS_BOOL = "sim_network_unlock_allow_dismiss_bool";
     field public static final String KEY_SMDP_SERVER_ADDRESS_STRING = "smdp_server_address_string";
     field public static final String KEY_SMS_REQUIRES_DESTINATION_NUMBER_CONVERSION_BOOL = "sms_requires_destination_number_conversion_bool";
+    field public static final String KEY_SUBSCRIPTION_GROUP_UUID_STRING = "subscription_group_uuid_string";
     field public static final String KEY_SUPPORTS_CALL_COMPOSER_BOOL = "supports_call_composer_bool";
     field public static final String KEY_SUPPORTS_DEVICE_TO_DEVICE_COMMUNICATION_USING_DTMF_BOOL = "supports_device_to_device_communication_using_dtmf_bool";
     field public static final String KEY_SUPPORTS_DEVICE_TO_DEVICE_COMMUNICATION_USING_RTP_BOOL = "supports_device_to_device_communication_using_rtp_bool";
@@ -41340,6 +41368,7 @@ package android.telephony {
     field public static final String KEY_WFC_EMERGENCY_ADDRESS_CARRIER_APP_STRING = "wfc_emergency_address_carrier_app_string";
     field public static final String KEY_WORLD_MODE_ENABLED_BOOL = "world_mode_enabled_bool";
     field public static final String KEY_WORLD_PHONE_BOOL = "world_phone_bool";
+    field public static final String REMOVE_GROUP_UUID_STRING = "00000000-0000-0000-0000-000000000000";
     field public static final int SERVICE_CLASS_NONE = 0; // 0x0
     field public static final int SERVICE_CLASS_VOICE = 1; // 0x1
     field public static final int USSD_OVER_CS_ONLY = 2; // 0x2
@@ -51660,6 +51689,7 @@ package android.view.accessibility {
     method public boolean isSelected();
     method public boolean isShowingHintText();
     method public boolean isTextEntryKey();
+    method public boolean isTextSelectable();
     method public boolean isVisibleToUser();
     method @Deprecated public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View);
     method @Deprecated public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View, int);
@@ -51723,6 +51753,7 @@ package android.view.accessibility {
     method public void setStateDescription(@Nullable CharSequence);
     method public void setText(CharSequence);
     method public void setTextEntryKey(boolean);
+    method public void setTextSelectable(boolean);
     method public void setTextSelection(int, int);
     method public void setTooltipText(@Nullable CharSequence);
     method public void setTouchDelegateInfo(@NonNull android.view.accessibility.AccessibilityNodeInfo.TouchDelegateInfo);

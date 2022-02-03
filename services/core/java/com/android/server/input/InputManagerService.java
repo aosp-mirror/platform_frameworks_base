@@ -150,6 +150,8 @@ public class InputManagerService extends IInputManager.Stub
     static final String TAG = "InputManager";
     static final boolean DEBUG = false;
 
+    private static final boolean USE_SPY_WINDOW_GESTURE_MONITORS = false;
+
     private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
     private static final String PORT_ASSOCIATIONS_PATH = "etc/input-port-associations.xml";
 
@@ -276,6 +278,12 @@ public class InputManagerService extends IInputManager.Stub
     // Forces the MouseCursorController to target a specific display id.
     @GuardedBy("mPointerDisplayIdLock")
     private int mOverriddenPointerDisplayId = Display.INVALID_DISPLAY;
+
+
+    // Holds all the registered gesture monitors that are implemented as spy windows. The spy
+    // windows are mapped by their InputChannel tokens.
+    @GuardedBy("mInputMonitors")
+    final Map<IBinder, GestureMonitorSpyWindow> mInputMonitors = new HashMap<>();
 
     private static native long nativeInit(InputManagerService service,
             Context context, MessageQueue messageQueue);
@@ -716,33 +724,77 @@ public class InputManagerService extends IInputManager.Stub
                 inputChannelName, Binder.getCallingPid());
     }
 
+    @NonNull
+    private InputChannel createSpyWindowGestureMonitor(IBinder monitorToken, String name,
+            int displayId, int pid, int uid) {
+        final SurfaceControl sc = mWindowManagerCallbacks.createSurfaceForGestureMonitor(name,
+                displayId);
+        if (sc == null) {
+            throw new IllegalArgumentException(
+                    "Could not create gesture monitor surface on display: " + displayId);
+        }
+        final InputChannel channel = createInputChannel(name);
+
+        try {
+            monitorToken.linkToDeath(() -> removeSpyWindowGestureMonitor(channel.getToken()), 0);
+        } catch (RemoteException e) {
+            Slog.i(TAG, "Client died before '" + name + "' could be created.");
+            return null;
+        }
+        synchronized (mInputMonitors) {
+            mInputMonitors.put(channel.getToken(),
+                    new GestureMonitorSpyWindow(monitorToken, name, displayId, pid, uid, sc,
+                            channel));
+        }
+
+        final InputChannel outInputChannel = new InputChannel();
+        channel.copyTo(outInputChannel);
+        return outInputChannel;
+    }
+
+    private void removeSpyWindowGestureMonitor(IBinder inputChannelToken) {
+        final GestureMonitorSpyWindow monitor;
+        synchronized (mInputMonitors) {
+            monitor = mInputMonitors.remove(inputChannelToken);
+        }
+        removeInputChannel(inputChannelToken);
+        if (monitor == null) return;
+        monitor.remove();
+    }
+
     /**
      * Creates an input monitor that will receive pointer events for the purposes of system-wide
      * gesture interpretation.
      *
-     * @param inputChannelName The input channel name.
+     * @param requestedName The input channel name.
      * @param displayId Target display id.
      * @return The input channel.
      */
     @Override // Binder call
-    public InputMonitor monitorGestureInput(String inputChannelName, int displayId) {
+    public InputMonitor monitorGestureInput(IBinder monitorToken, @NonNull String requestedName,
+            int displayId) {
         if (!checkCallingPermission(android.Manifest.permission.MONITOR_INPUT,
-                "monitorInputRegion()")) {
+                "monitorGestureInput()")) {
             throw new SecurityException("Requires MONITOR_INPUT permission");
         }
-        Objects.requireNonNull(inputChannelName, "inputChannelName must not be null.");
+        Objects.requireNonNull(requestedName, "name must not be null.");
+        Objects.requireNonNull(monitorToken, "token must not be null.");
 
         if (displayId < Display.DEFAULT_DISPLAY) {
             throw new IllegalArgumentException("displayId must >= 0.");
         }
+        final String name = "[Gesture Monitor] " + requestedName;
         final int pid = Binder.getCallingPid();
+        final int uid = Binder.getCallingUid();
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            InputChannel inputChannel = nativeCreateInputMonitor(
-                    mPtr, displayId, true /*isGestureMonitor*/, inputChannelName, pid);
-            InputMonitorHost host = new InputMonitorHost(inputChannel.getToken());
-            return new InputMonitor(inputChannel, host);
+            final InputChannel inputChannel =
+                    USE_SPY_WINDOW_GESTURE_MONITORS
+                            ? createSpyWindowGestureMonitor(monitorToken, name, displayId, pid, uid)
+                            : nativeCreateInputMonitor(mPtr, displayId, true /*isGestureMonitor*/,
+                                    requestedName, pid);
+            return new InputMonitor(inputChannel, new InputMonitorHost(inputChannel.getToken()));
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -2563,33 +2615,47 @@ public class InputManagerService extends IInputManager.Stub
         String dumpStr = nativeDump(mPtr);
         if (dumpStr != null) {
             pw.println(dumpStr);
-            dumpAssociations(pw);
         }
+
+        pw.println("Input Manager Service (Java) State:");
+        dumpAssociations(pw, "  " /*prefix*/);
+        dumpSpyWindowGestureMonitors(pw, "  " /*prefix*/);
     }
 
-    private void dumpAssociations(PrintWriter pw) {
+    private void dumpAssociations(PrintWriter pw, String prefix) {
         if (!mStaticAssociations.isEmpty()) {
-            pw.println("Static Associations:");
+            pw.println(prefix + "Static Associations:");
             mStaticAssociations.forEach((k, v) -> {
-                pw.print("  port: " + k);
+                pw.print(prefix + "  port: " + k);
                 pw.println("  display: " + v);
             });
         }
 
         synchronized (mAssociationsLock) {
             if (!mRuntimeAssociations.isEmpty()) {
-                pw.println("Runtime Associations:");
+                pw.println(prefix + "Runtime Associations:");
                 mRuntimeAssociations.forEach((k, v) -> {
-                    pw.print("  port: " + k);
+                    pw.print(prefix + "  port: " + k);
                     pw.println("  display: " + v);
                 });
             }
             if (!mUniqueIdAssociations.isEmpty()) {
-                pw.println("Unique Id Associations:");
+                pw.println(prefix + "Unique Id Associations:");
                 mUniqueIdAssociations.forEach((k, v) -> {
-                    pw.print("  port: " + k);
+                    pw.print(prefix + "  port: " + k);
                     pw.println("  uniqueId: " + v);
                 });
+            }
+        }
+    }
+
+    private void dumpSpyWindowGestureMonitors(PrintWriter pw, String prefix) {
+        synchronized (mInputMonitors) {
+            if (mInputMonitors.isEmpty()) return;
+            pw.println(prefix + "Gesture Monitors (implemented as spy windows):");
+            int i = 0;
+            for (final GestureMonitorSpyWindow monitor : mInputMonitors.values()) {
+                pw.append(prefix + "  " + i++ + ": ").println(monitor.dump());
             }
         }
     }
@@ -2618,6 +2684,7 @@ public class InputManagerService extends IInputManager.Stub
         synchronized (mAssociationsLock) { /* Test if blocked by associations lock. */}
         synchronized (mLidSwitchLock) { /* Test if blocked by lid switch lock. */ }
         synchronized (mPointerDisplayIdLock) { /* Test if blocked by pointer display id lock */ }
+        synchronized (mInputMonitors) { /* Test if blocked by input monitor lock. */ }
         nativeMonitor(mPtr);
     }
 
@@ -2686,6 +2753,11 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     private void notifyInputChannelBroken(IBinder token) {
+        synchronized (mInputMonitors) {
+            if (mInputMonitors.containsKey(token)) {
+                removeSpyWindowGestureMonitor(token);
+            }
+        }
         mWindowManagerCallbacks.notifyInputChannelBroken(token);
     }
 
@@ -2721,6 +2793,17 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback
     private void notifyWindowUnresponsive(IBinder token, String reason) {
+        int gestureMonitorPid = -1;
+        synchronized (mInputMonitors) {
+            final GestureMonitorSpyWindow gestureMonitor = mInputMonitors.get(token);
+            if (gestureMonitor != null) {
+                gestureMonitorPid = gestureMonitor.mWindowHandle.ownerPid;
+            }
+        }
+        if (gestureMonitorPid != -1) {
+            mWindowManagerCallbacks.notifyGestureMonitorUnresponsive(gestureMonitorPid, reason);
+            return;
+        }
         mWindowManagerCallbacks.notifyWindowUnresponsive(token, reason);
     }
 
@@ -2731,6 +2814,17 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback
     private void notifyWindowResponsive(IBinder token) {
+        int gestureMonitorPid = -1;
+        synchronized (mInputMonitors) {
+            final GestureMonitorSpyWindow gestureMonitor = mInputMonitors.get(token);
+            if (gestureMonitor != null) {
+                gestureMonitorPid = gestureMonitor.mWindowHandle.ownerPid;
+            }
+        }
+        if (gestureMonitorPid != -1) {
+            mWindowManagerCallbacks.notifyGestureMonitorResponsive(gestureMonitorPid);
+            return;
+        }
         mWindowManagerCallbacks.notifyWindowResponsive(token);
     }
 
@@ -3184,6 +3278,16 @@ public class InputManagerService extends IInputManager.Stub
          * pointers such as the mouse cursor and touch spots for the given display.
          */
         SurfaceControl getParentSurfaceForPointers(int displayId);
+
+        /**
+         * Create a {@link SurfaceControl} that can be configured to receive input over the entire
+         * display to implement a gesture monitor. The surface will not have a graphical buffer.
+         * @param name the name of the gesture monitor
+         * @param displayId the display to create the window in
+         * @return the SurfaceControl of the new layer container surface
+         */
+        @Nullable
+        SurfaceControl createSurfaceForGestureMonitor(String name, int displayId);
     }
 
     /**
@@ -3258,20 +3362,24 @@ public class InputManagerService extends IInputManager.Stub
      * Interface for the system to handle request from InputMonitors.
      */
     private final class InputMonitorHost extends IInputMonitorHost.Stub {
-        private final IBinder mToken;
+        private final IBinder mInputChannelToken;
 
-        InputMonitorHost(IBinder token) {
-            mToken = token;
+        InputMonitorHost(IBinder inputChannelToken) {
+            mInputChannelToken = inputChannelToken;
         }
 
         @Override
         public void pilferPointers() {
-            nativePilferPointers(mPtr, mToken);
+            nativePilferPointers(mPtr, mInputChannelToken);
         }
 
         @Override
         public void dispose() {
-            nativeRemoveInputChannel(mPtr, mToken);
+            if (USE_SPY_WINDOW_GESTURE_MONITORS) {
+                removeSpyWindowGestureMonitor(mInputChannelToken);
+                return;
+            }
+            nativeRemoveInputChannel(mPtr, mInputChannelToken);
         }
     }
 

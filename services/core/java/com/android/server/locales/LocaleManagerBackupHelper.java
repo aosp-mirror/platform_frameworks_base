@@ -31,13 +31,11 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.os.BestClock;
 import android.os.Binder;
 import android.os.HandlerThread;
 import android.os.LocaleList;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -61,7 +59,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
-import java.time.ZoneOffset;
 import java.util.HashMap;
 
 /**
@@ -97,13 +94,8 @@ class LocaleManagerBackupHelper {
 
     LocaleManagerBackupHelper(LocaleManagerService localeManagerService,
             PackageManagerInternal pmInternal) {
-        this(localeManagerService.mContext, localeManagerService, pmInternal, getDefaultClock(),
+        this(localeManagerService.mContext, localeManagerService, pmInternal, Clock.systemUTC(),
                 new SparseArray<>());
-    }
-
-    private static @NonNull Clock getDefaultClock() {
-        return new BestClock(ZoneOffset.UTC, SystemClock.currentNetworkTimeClock(),
-                Clock.systemUTC());
     }
 
     @VisibleForTesting LocaleManagerBackupHelper(Context context,

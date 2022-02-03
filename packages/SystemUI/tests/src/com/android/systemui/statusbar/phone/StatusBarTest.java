@@ -885,15 +885,6 @@ public class StatusBarTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSetState_changesIsFullScreenUserSwitcherState() {
-        mStatusBar.setBarStateForTest(StatusBarState.KEYGUARD);
-        assertFalse(mStatusBar.isFullScreenUserSwitcherState());
-
-        mStatusBar.setBarStateForTest(StatusBarState.FULLSCREEN_USER_SWITCHER);
-        assertTrue(mStatusBar.isFullScreenUserSwitcherState());
-    }
-
-    @Test
     public void testShowKeyguardImplementation_setsState() {
         when(mLockscreenUserManager.getCurrentProfiles()).thenReturn(new SparseArray<>());
 
@@ -903,12 +894,6 @@ public class StatusBarTest extends SysuiTestCase {
         mStatusBar.showKeyguardImpl();
         verify(mStatusBarStateController).setState(
                 eq(StatusBarState.KEYGUARD), eq(false) /* force */);
-
-        // If useFullscreenUserSwitcher is true, state is set to FULLSCREEN_USER_SWITCHER.
-        when(mUserSwitcherController.useFullscreenUserSwitcher()).thenReturn(true);
-        mStatusBar.showKeyguardImpl();
-        verify(mStatusBarStateController).setState(
-                eq(StatusBarState.FULLSCREEN_USER_SWITCHER), eq(false) /* force */);
     }
 
     @Test

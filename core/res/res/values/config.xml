@@ -2376,6 +2376,12 @@
     <!-- ComponentNames of the dreams that we should hide -->
     <string-array name="config_disabledDreamComponents" translatable="false">
     </string-array>
+    <!-- The list of supported dream complications -->
+    <integer-array name="config_supportedDreamComplications">
+    </integer-array>
+    <!-- The list of dream complications which should be enabled by default -->
+    <integer-array name="config_dreamComplicationsEnabledByDefault">
+    </integer-array>
 
     <!-- Are we allowed to dream while not plugged in? -->
     <bool name="config_dreamsEnabledOnBattery">false</bool>
@@ -4173,6 +4179,15 @@
 
     <string name="config_defaultMusicRecognitionService" translatable="false"></string>
 
+    <!-- The package name for the system's wallpaper effects generation service.
+    This service returns wallpaper effects results.
+    This service must be trusted, as it can be activated without explicit consent of the user.
+    If no service with the specified name exists on the device, wallpaper effects
+    generation service will be disabled.
+    Example: "com.android.intelligence/.WallpaperEffectsGenerationService"
+-->
+    <string name="config_defaultWallpaperEffectsGenerationService" translatable="false"></string>
+
     <!-- The package name for the default retail demo app.
          This package must be trusted, as it has the permissions to query the usage stats on the
          device.
@@ -5266,6 +5281,12 @@
     <bool name="config_cecTvSendStandbyOnSleepEnabled_default">true</bool>
     <bool name="config_cecTvSendStandbyOnSleepDisabled_allowed">true</bool>
     <bool name="config_cecTvSendStandbyOnSleepDisabled_default">false</bool>
+
+    <bool name="config_cecSetMenuLanguage_userConfigurable">true</bool>
+    <bool name="config_cecSetMenuLanguageEnabled_allowed">true</bool>
+    <bool name="config_cecSetMenuLanguageEnabled_default">true</bool>
+    <bool name="config_cecSetMenuLanguageDisabled_allowed">true</bool>
+    <bool name="config_cecSetMenuLanguageDisabled_default">false</bool>
 
     <bool name="config_cecRcProfileTv_userConfigurable">true</bool>
     <bool name="config_cecRcProfileTvNone_allowed">true</bool>

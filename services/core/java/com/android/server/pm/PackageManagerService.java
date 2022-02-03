@@ -247,6 +247,7 @@ import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxy;
 import com.android.server.pm.verify.domain.proxy.DomainVerificationProxyV1;
 import com.android.server.storage.DeviceStorageMonitorInternal;
+import com.android.server.supplementalprocess.SupplementalProcessManagerLocal;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.utils.Watchable;
@@ -934,6 +935,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mOverlayConfigSignaturePackage;
     final @Nullable String mRecentsPackage;
     final @Nullable String mAmbientContextDetectionPackage;
+    private final @NonNull String mRequiredSupplementalProcessPackage;
 
     @GuardedBy("mLock")
     private final PackageUsage mPackageUsage = new PackageUsage();
@@ -944,7 +946,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private final BroadcastHelper mBroadcastHelper;
     private final RemovePackageHelper mRemovePackageHelper;
     private final DeletePackageHelper mDeletePackageHelper;
-    private final InitAppsHelper mInitAppsHelper;
+    private final InitAndSystemPackageHelper mInitAndSystemPackageHelper;
     private final AppDataHelper mAppDataHelper;
     private final InstallPackageHelper mInstallPackageHelper;
     private final PreferredActivityHelper mPreferredActivityHelper;
@@ -1671,6 +1673,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mSharedSystemSharedLibraryPackageName = testParams.sharedSystemSharedLibraryPackageName;
         mOverlayConfigSignaturePackage = testParams.overlayConfigSignaturePackage;
         mResolveComponentName = testParams.resolveComponentName;
+        mRequiredSupplementalProcessPackage = testParams.requiredSupplementalProcessPackage;
 
         mLiveComputer = createLiveComputer();
         mSnapshotComputer = null;
@@ -1689,12 +1692,13 @@ public class PackageManagerService extends IPackageManager.Stub
         mAppDataHelper = testParams.appDataHelper;
         mInstallPackageHelper = testParams.installPackageHelper;
         mRemovePackageHelper = testParams.removePackageHelper;
-        mInitAppsHelper = testParams.initAndSystemPackageHelper;
+        mInitAndSystemPackageHelper = testParams.initAndSystemPackageHelper;
         mDeletePackageHelper = testParams.deletePackageHelper;
         mPreferredActivityHelper = testParams.preferredActivityHelper;
         mResolveIntentHelper = testParams.resolveIntentHelper;
         mDexOptHelper = testParams.dexOptHelper;
         mSuspendPackageHelper = testParams.suspendPackageHelper;
+
         mSharedLibraries.setDeletePackageHelper(mDeletePackageHelper);
 
         registerObservers(false);
@@ -1836,8 +1840,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mAppDataHelper = new AppDataHelper(this);
         mInstallPackageHelper = new InstallPackageHelper(this, mAppDataHelper);
         mRemovePackageHelper = new RemovePackageHelper(this, mAppDataHelper);
-        mInitAppsHelper = new InitAppsHelper(this, mApexManager, mInstallPackageHelper,
-                mInjector.getScanningCachingPackageParser(), mInjector.getSystemPartitions());
+        mInitAndSystemPackageHelper = new InitAndSystemPackageHelper(this);
         mDeletePackageHelper = new DeletePackageHelper(this, mRemovePackageHelper,
                 mAppDataHelper);
         mSharedLibraries.setDeletePackageHelper(mDeletePackageHelper);
@@ -1967,8 +1970,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     mIsEngBuild, mIsUserDebugBuild, mIncrementalVersion);
 
             final int[] userIds = mUserManager.getUserIds();
-            mOverlayConfig = mInitAppsHelper.initSystemApps(packageSettings, userIds, startTime);
-            mInitAppsHelper.initNonSystemApps(userIds, startTime);
+            mOverlayConfig = mInitAndSystemPackageHelper.initPackages(packageSettings,
+                    userIds, startTime);
 
             // Resolve the storage manager.
             mStorageManagerPackage = getStorageManagerPackageName();
@@ -2138,6 +2141,9 @@ public class PackageManagerService extends IPackageManager.Stub
             mSettings.setPermissionControllerVersion(
                     getPackageInfo(mRequiredPermissionControllerPackage, 0,
                             UserHandle.USER_SYSTEM).getLongVersionCode());
+
+            // Resolve the supplemental process
+            mRequiredSupplementalProcessPackage = getRequiredSupplementalProcessPackageName();
 
             // Initialize InstantAppRegistry's Instant App list for all users.
             for (AndroidPackage pkg : mPackages.values()) {
@@ -3152,6 +3158,11 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         throw new IllegalStateException("PermissionController is not found");
+    }
+
+    @Override
+    public String getSupplementalProcessPackageName() {
+        return mRequiredSupplementalProcessPackage;
     }
 
     String getPackageInstallerPackageName() {
@@ -5516,6 +5527,24 @@ public class PackageManagerService extends IPackageManager.Stub
             Slog.w(TAG, "There should probably be exactly one storage manager; found "
                     + matches.size() + ": matches=" + matches);
             return null;
+        }
+    }
+
+    private @NonNull String getRequiredSupplementalProcessPackageName() {
+        final Intent intent = new Intent(SupplementalProcessManagerLocal.SERVICE_INTERFACE);
+
+        final List<ResolveInfo> matches = queryIntentServicesInternal(
+                intent,
+                /* resolvedType= */ null,
+                MATCH_SYSTEM_ONLY | MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE,
+                UserHandle.USER_SYSTEM,
+                /* callingUid= */ Process.myUid(),
+                /* includeInstantApps= */ false);
+        if (matches.size() == 1) {
+            return matches.get(0).getComponentInfo().packageName;
+        } else {
+            throw new RuntimeException("There should exactly one supplemental process; found "
+                    + matches.size() + ": matches=" + matches);
         }
     }
 
@@ -8677,7 +8706,7 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     boolean isExpectingBetter(String packageName) {
-        return mInitAppsHelper.isExpectingBetter(packageName);
+        return mInitAndSystemPackageHelper.isExpectingBetter(packageName);
     }
 
     int getDefParseFlags() {
@@ -8780,12 +8809,13 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     boolean isOverlayMutable(String packageName) {
-        return mOverlayConfig.isMutable(packageName);
+        return (mOverlayConfig != null ? mOverlayConfig
+                : OverlayConfig.getSystemInstance()).isMutable(packageName);
     }
 
     @ScanFlags int getSystemPackageScanFlags(File codePath) {
         List<ScanPartition> dirsToScanAsSystem =
-                mInitAppsHelper.getDirsToScanAsSystem();
+                mInitAndSystemPackageHelper.getDirsToScanAsSystem();
         @PackageManagerService.ScanFlags int scanFlags = SCAN_AS_SYSTEM;
         for (int i = dirsToScanAsSystem.size() - 1; i >= 0; i--) {
             ScanPartition partition = dirsToScanAsSystem.get(i);
@@ -8803,7 +8833,7 @@ public class PackageManagerService extends IPackageManager.Stub
     Pair<Integer, Integer> getSystemPackageRescanFlagsAndReparseFlags(File scanFile,
             int systemScanFlags, int systemParseFlags) {
         List<ScanPartition> dirsToScanAsSystem =
-                mInitAppsHelper.getDirsToScanAsSystem();
+                mInitAndSystemPackageHelper.getDirsToScanAsSystem();
         @ParsingPackageUtils.ParseFlags int reparseFlags = 0;
         @PackageManagerService.ScanFlags int rescanFlags = 0;
         for (int i1 = dirsToScanAsSystem.size() - 1; i1 >= 0; i1--) {

@@ -17,7 +17,7 @@
 <com.android.systemui.clipboardoverlay.DraggableConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:theme="@style/Screenshot"
+    android:theme="@style/FloatingOverlay"
     android:alpha="0"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -28,7 +28,7 @@
         android:layout_width="0dp"
         android:elevation="1dp"
         android:background="@drawable/action_chip_container_background"
-        android:layout_marginStart="@dimen/screenshot_action_container_margin_horizontal"
+        android:layout_marginStart="@dimen/overlay_action_container_margin_horizontal"
         app:layout_constraintBottom_toBottomOf="@+id/actions_container"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/actions_container"
@@ -37,9 +37,9 @@
         android:id="@+id/actions_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/screenshot_action_container_margin_horizontal"
-        android:paddingEnd="@dimen/screenshot_action_container_padding_right"
-        android:paddingVertical="@dimen/screenshot_action_container_padding_vertical"
+        android:layout_marginEnd="@dimen/overlay_action_container_margin_horizontal"
+        android:paddingEnd="@dimen/overlay_action_container_padding_right"
+        android:paddingVertical="@dimen/overlay_action_container_padding_vertical"
         android:elevation="1dp"
         android:scrollbars="none"
         app:layout_constraintHorizontal_bias="0"
@@ -53,9 +53,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:animateLayoutChanges="true">
-            <include layout="@layout/screenshot_action_chip"
+            <include layout="@layout/overlay_action_chip"
                      android:id="@+id/remote_copy_chip"/>
-            <include layout="@layout/screenshot_action_chip"
+            <include layout="@layout/overlay_action_chip"
                      android:id="@+id/edit_chip"/>
         </LinearLayout>
     </HorizontalScrollView>

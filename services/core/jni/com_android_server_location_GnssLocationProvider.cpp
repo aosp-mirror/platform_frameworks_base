@@ -244,6 +244,9 @@ bool hasLatLong(const GnssLocation_V2_0& location) {
     return hasLatLong(location.v1_0);
 }
 
+bool isSvStatusRegistered = false;
+bool isNmeaRegistered = false;
+
 }  // namespace
 
 static inline jboolean boolToJbool(bool value) {
@@ -505,6 +508,13 @@ uint32_t GnssCallback::getConstellationType(
 
 template <class T_list, class T_sv_info>
 Return<void> GnssCallback::gnssSvStatusCbImpl(const T_list& svStatus) {
+    // In HIDL or AIDL v1, if no listener is registered, do not report svInfoList to the framework.
+    if (gnssHalAidl == nullptr || gnssHalAidl->getInterfaceVersion() == 1) {
+        if (!isSvStatusRegistered) {
+            return Void();
+        }
+    }
+
     JNIEnv* env = getJniEnv();
 
     uint32_t listSize = getGnssSvInfoListSize(svStatus);
@@ -566,8 +576,12 @@ Return<void> GnssCallback::gnssSvStatusCbImpl(const T_list& svStatus) {
     return Void();
 }
 
-Return<void> GnssCallback::gnssNmeaCb(
-    int64_t timestamp, const ::android::hardware::hidl_string& nmea) {
+Return<void> GnssCallback::gnssNmeaCb(int64_t timestamp,
+                                      const ::android::hardware::hidl_string& nmea) {
+    // In HIDL, if no listener is registered, do not report nmea to the framework.
+    if (!isNmeaRegistered) {
+        return Void();
+    }
     JNIEnv* env = getJniEnv();
     /*
      * The Java code will call back to read these values.
@@ -680,6 +694,12 @@ Status GnssCallbackAidl::gnssLocationCb(const GnssLocationAidl& location) {
 }
 
 Status GnssCallbackAidl::gnssNmeaCb(const int64_t timestamp, const std::string& nmea) {
+    // In AIDL v1, if no listener is registered, do not report nmea to the framework.
+    if (gnssHalAidl != nullptr && gnssHalAidl->getInterfaceVersion() == 1) {
+        if (!isNmeaRegistered) {
+            return Status::ok();
+        }
+    }
     JNIEnv* env = getJniEnv();
     /*
      * The Java code will call back to read these values.
@@ -1562,6 +1582,58 @@ static jboolean android_location_gnss_hal_GnssNative_stop(JNIEnv* /* env */, jcl
     return checkHidlReturn(result, "IGnss stop() failed.");
 }
 
+static jboolean android_location_gnss_hal_GnssNative_start_sv_status_collection(JNIEnv* /* env */,
+                                                                                jclass) {
+    isSvStatusRegistered = true;
+    if (gnssHalAidl != nullptr && gnssHalAidl->getInterfaceVersion() >= 2) {
+        auto status = gnssHalAidl->startSvStatus();
+        return checkAidlStatus(status, "IGnssAidl startSvStatus() failed.");
+    }
+    if (gnssHal == nullptr) {
+        return JNI_FALSE;
+    }
+    return JNI_TRUE;
+}
+
+static jboolean android_location_gnss_hal_GnssNative_stop_sv_status_collection(JNIEnv* /* env */,
+                                                                               jclass) {
+    isSvStatusRegistered = false;
+    if (gnssHalAidl != nullptr && gnssHalAidl->getInterfaceVersion() >= 2) {
+        auto status = gnssHalAidl->stopSvStatus();
+        return checkAidlStatus(status, "IGnssAidl stopSvStatus() failed.");
+    }
+    if (gnssHal == nullptr) {
+        return JNI_FALSE;
+    }
+    return JNI_TRUE;
+}
+
+static jboolean android_location_gnss_hal_GnssNative_start_nmea_message_collection(
+        JNIEnv* /* env */, jclass) {
+    isNmeaRegistered = true;
+    if (gnssHalAidl != nullptr && gnssHalAidl->getInterfaceVersion() >= 2) {
+        auto status = gnssHalAidl->startNmea();
+        return checkAidlStatus(status, "IGnssAidl startNmea() failed.");
+    }
+    if (gnssHal == nullptr) {
+        return JNI_FALSE;
+    }
+    return JNI_TRUE;
+}
+
+static jboolean android_location_gnss_hal_GnssNative_stop_nmea_message_collection(JNIEnv* /* env */,
+                                                                                  jclass) {
+    isNmeaRegistered = false;
+    if (gnssHalAidl != nullptr && gnssHalAidl->getInterfaceVersion() >= 2) {
+        auto status = gnssHalAidl->stopNmea();
+        return checkAidlStatus(status, "IGnssAidl stopNmea() failed.");
+    }
+    if (gnssHal == nullptr) {
+        return JNI_FALSE;
+    }
+    return JNI_TRUE;
+}
+
 static void android_location_gnss_hal_GnssNative_delete_aiding_data(JNIEnv* /* env */, jclass,
                                                                     jint flags) {
     if (gnssHalAidl != nullptr && gnssHalAidl->getInterfaceVersion() >= 2) {
@@ -1989,7 +2061,7 @@ static SingleSatCorrection_V1_0 getSingleSatCorrection_1_0_withoutConstellation(
     jfloat eplMeters = env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatEpl);
     jfloat eplUncMeters = env->CallFloatMethod(singleSatCorrectionObj, method_correctionSatEplUnc);
     uint16_t corrFlags = static_cast<uint16_t>(correctionFlags);
-    jobject reflectingPlaneObj;
+    jobject reflectingPlaneObj = nullptr;
     bool has_ref_plane = (corrFlags & GnssSingleSatCorrectionFlags::HAS_REFLECTING_PLANE) != 0;
     if (has_ref_plane) {
         reflectingPlaneObj =
@@ -2013,6 +2085,7 @@ static SingleSatCorrection_V1_0 getSingleSatCorrection_1_0_withoutConstellation(
                 .azimuthDegrees = azimuthDegreeRefPlane,
         };
     }
+    env->DeleteLocalRef(reflectingPlaneObj);
 
     SingleSatCorrection_V1_0 singleSatCorrection = {
             .singleSatCorrectionFlags = corrFlags,
@@ -2044,6 +2117,7 @@ static void getSingleSatCorrectionList_1_1(JNIEnv* env, jobject singleSatCorrect
         };
 
         list[i] = singleSatCorrection_1_1;
+        env->DeleteLocalRef(singleSatCorrectionObj);
     }
 }
 
@@ -2061,6 +2135,7 @@ static void getSingleSatCorrectionList_1_0(JNIEnv* env, jobject singleSatCorrect
         singleSatCorrection.constellation = static_cast<GnssConstellationType_V1_0>(constType),
 
         list[i] = singleSatCorrection;
+        env->DeleteLocalRef(singleSatCorrectionObj);
     }
 }
 
@@ -2131,6 +2206,7 @@ static jboolean android_location_gnss_hal_GnssNative_inject_measurement_correcti
 
     hidl_vec<SingleSatCorrection_V1_0> list(len);
     getSingleSatCorrectionList_1_0(env, singleSatCorrectionList, list);
+    env->DeleteLocalRef(singleSatCorrectionList);
     measurementCorrections_1_0.satCorrections = list;
 
     auto result = gnssCorrectionsIface_V1_0->setCorrections(measurementCorrections_1_0);
@@ -2365,6 +2441,16 @@ static const JNINativeMethod sLocationProviderMethods[] = {
         {"native_is_gnss_visibility_control_supported", "()Z",
          reinterpret_cast<void*>(
                  android_location_gnss_hal_GnssNative_is_gnss_visibility_control_supported)},
+        {"native_start_sv_status_collection", "()Z",
+         reinterpret_cast<void*>(android_location_gnss_hal_GnssNative_start_sv_status_collection)},
+        {"native_stop_sv_status_collection", "()Z",
+         reinterpret_cast<void*>(android_location_gnss_hal_GnssNative_stop_sv_status_collection)},
+        {"native_start_nmea_message_collection", "()Z",
+         reinterpret_cast<void*>(
+                 android_location_gnss_hal_GnssNative_start_nmea_message_collection)},
+        {"native_stop_nmea_message_collection", "()Z",
+         reinterpret_cast<void*>(
+                 android_location_gnss_hal_GnssNative_stop_nmea_message_collection)},
 };
 
 static const JNINativeMethod sBatchingMethods[] = {

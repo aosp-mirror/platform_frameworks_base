@@ -278,6 +278,7 @@ package android.app {
   }
 
   public final class GameManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE) public boolean isAngleEnabled(@NonNull String);
     method public void setGameServiceProvider(@Nullable String);
   }
 
@@ -353,6 +354,32 @@ package android.app {
 
   public final class PictureInPictureUiState implements android.os.Parcelable {
     ctor public PictureInPictureUiState(boolean);
+  }
+
+  public class PropertyInvalidatedCache<Query, Result> {
+    ctor public PropertyInvalidatedCache(int, int, @NonNull String, @NonNull String, @NonNull android.app.PropertyInvalidatedCache.QueryHandler<Query,Result>);
+    method @NonNull public static String createPropertyName(int, @NonNull String);
+    method public final void disableForCurrentProcess();
+    method public static void disableForTestMode();
+    method public final void disableInstance();
+    method public final void disableSystemWide();
+    method public final void forgetDisableLocal();
+    method public boolean getDisabledState();
+    method public final void invalidateCache();
+    method public static void invalidateCache(int, @NonNull String);
+    method public final boolean isDisabled();
+    method @Nullable public final Result query(@NonNull Query);
+    method public static void setTestMode(boolean);
+    method public void testPropertyName();
+    field public static final int MODULE_BLUETOOTH = 2; // 0x2
+    field public static final int MODULE_SYSTEM = 1; // 0x1
+    field public static final int MODULE_TEST = 0; // 0x0
+  }
+
+  public abstract static class PropertyInvalidatedCache.QueryHandler<Q, R> {
+    ctor public PropertyInvalidatedCache.QueryHandler();
+    method @Nullable public abstract R apply(@NonNull Q);
+    method public boolean shouldBypassCache(@NonNull Q);
   }
 
   public class StatusBarManager {
@@ -471,6 +498,7 @@ package android.app.admin {
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS) public java.util.Set<java.lang.String> getPolicyExemptApps();
     method public boolean isCurrentInputMethodSetByOwner();
     method public boolean isFactoryResetProtectionPolicySupported();
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public boolean isNewUserDisclaimerAcknowledged();
     method @RequiresPermission(anyOf={android.Manifest.permission.MARK_DEVICE_ORGANIZATION_OWNED, android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS}, conditional=true) public void markProfileOwnerOnOrganizationOwnedDevice(@NonNull android.content.ComponentName);
     method @NonNull public static String operationSafetyReasonToString(int);
     method @NonNull public static String operationToString(int);
@@ -774,6 +802,7 @@ package android.content.pm {
     method @NonNull public String getPermissionControllerPackageName();
     method @NonNull public abstract String getServicesSystemSharedLibraryPackageName();
     method @NonNull public abstract String getSharedSystemSharedLibraryPackageName();
+    method @NonNull public String getSupplementalProcessPackageName();
     method @Nullable public String getSystemTextClassifierPackageName();
     method @Nullable public String getWellbeingPackageName();
     method public void holdLock(android.os.IBinder, int);
@@ -1712,8 +1741,11 @@ package android.os {
 
   public final class Parcel {
     method public boolean allowSquashing();
+    method public int getFlags();
     method public int readExceptionCode();
     method public void restoreAllowSquashing(boolean);
+    field public static final int FLAG_IS_REPLY_FROM_BLOCKING_ALLOWED_OBJECT = 1; // 0x1
+    field public static final int FLAG_PROPAGATE_ALLOW_BLOCKING = 2; // 0x2
   }
 
   public class ParcelFileDescriptor implements java.io.Closeable android.os.Parcelable {

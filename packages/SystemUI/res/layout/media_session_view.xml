@@ -28,6 +28,22 @@
     android:background="@drawable/qs_media_background"
     android:theme="@style/MediaPlayer">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="184dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:translationZ="0dp"
+        android:id="@+id/album_art"
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="true"
+        android:clipToOutline="true"
+        android:foreground="@drawable/qs_media_scrim"
+        android:background="@drawable/qs_media_scrim"
+        />
+
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/center_vertical_guideline"
         android:layout_width="wrap_content"
@@ -281,6 +297,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/remove_text">
         <TextView
+            android:id="@+id/cancel_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center|bottom"
@@ -304,6 +321,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/remove_text">
         <TextView
+            android:id="@+id/dismiss_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center|bottom"

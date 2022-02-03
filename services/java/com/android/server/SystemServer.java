@@ -154,6 +154,7 @@ import com.android.server.os.NativeTombstoneManagerService;
 import com.android.server.os.SchedulingPolicyService;
 import com.android.server.people.PeopleService;
 import com.android.server.pm.ApexManager;
+import com.android.server.pm.ApexSystemServiceInfo;
 import com.android.server.pm.CrossProfileAppsService;
 import com.android.server.pm.DataLoaderManagerService;
 import com.android.server.pm.DynamicCodeLoggingService;
@@ -224,8 +225,8 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
@@ -366,6 +367,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.adb.AdbService$Lifecycle";
     private static final String SPEECH_RECOGNITION_MANAGER_SERVICE_CLASS =
             "com.android.server.speech.SpeechRecognitionManagerService";
+    private static final String WALLPAPER_EFFECTS_GENERATION_MANAGER_SERVICE_CLASS =
+            "com.android.server.wallpapereffectsgeneration.WallpaperEffectsGenerationManagerService";
     private static final String APP_PREDICTION_MANAGER_SERVICE_CLASS =
             "com.android.server.appprediction.AppPredictionManagerService";
     private static final String CONTENT_SUGGESTIONS_SERVICE_CLASS =
@@ -1470,7 +1473,7 @@ public final class SystemServer implements Dumpable {
             // TelecomLoader hooks into classes with defined HFP logic,
             // so check for either telephony or microphone.
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_MICROPHONE) ||
-                mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+                    mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
                 t.traceBegin("StartTelecomLoaderService");
                 mSystemServiceManager.startService(TelecomLoaderService.class);
                 t.traceEnd();
@@ -1478,7 +1481,7 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("StartTelephonyRegistry");
             telephonyRegistry = new TelephonyRegistry(
-                context, new TelephonyRegistry.ConfigurationProvider());
+                    context, new TelephonyRegistry.ConfigurationProvider());
             ServiceManager.addService("telephony.registry", telephonyRegistry);
             t.traceEnd();
 
@@ -1895,7 +1898,6 @@ public final class SystemServer implements Dumpable {
             }
             t.traceEnd();
 
-
             t.traceBegin("StartIpSecService");
             try {
                 ipSecService = IpSecService.create(context);
@@ -2125,6 +2127,14 @@ public final class SystemServer implements Dumpable {
             } else {
                 Slog.i(TAG, "Wallpaper service disabled by config");
             }
+
+            // WallpaperEffectsGeneration manager service
+            // TODO (b/135218095): Use deviceHasConfigString(context,
+            //  R.string.config_defaultWallpaperEffectsGenerationService)
+            t.traceBegin("StartWallpaperEffectsGenerationService");
+            mSystemServiceManager.startService(
+                    WALLPAPER_EFFECTS_GENERATION_MANAGER_SERVICE_CLASS);
+            t.traceEnd();
 
             t.traceBegin("StartAudioService");
             if (!isArc) {
@@ -3008,7 +3018,9 @@ public final class SystemServer implements Dumpable {
             t.traceEnd();
             t.traceBegin("MakeTelephonyRegistryReady");
             try {
-                if (telephonyRegistryF != null) telephonyRegistryF.systemRunning();
+                if (telephonyRegistryF != null) {
+                    telephonyRegistryF.systemRunning();
+                }
             } catch (Throwable e) {
                 reportWtf("Notifying TelephonyRegistry running", e);
             }
@@ -3073,10 +3085,12 @@ public final class SystemServer implements Dumpable {
      */
     private void startApexServices(@NonNull TimingsTraceAndSlog t) {
         t.traceBegin("startApexServices");
-        Map<String, String> services = ApexManager.getInstance().getApexSystemServices();
-        // TODO(satayev): introduce android:order for services coming the same apexes
-        for (String name : new TreeSet<>(services.keySet())) {
-            String jarPath = services.get(name);
+        // TODO(b/192880996): get the list from "android" package, once the manifest entries
+        // are migrated to system manifest.
+        List<ApexSystemServiceInfo> services = ApexManager.getInstance().getApexSystemServices();
+        for (ApexSystemServiceInfo info : services) {
+            String name = info.getName();
+            String jarPath = info.getJarPath();
             t.traceBegin("starting " + name);
             if (TextUtils.isEmpty(jarPath)) {
                 mSystemServiceManager.startService(name);

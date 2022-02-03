@@ -256,6 +256,25 @@ public abstract class WindowManagerInternal {
     }
 
     /**
+     * An interface to be notified when the system bars for a task change.
+     */
+    public interface TaskSystemBarsListener {
+
+        /**
+         * Called when the visibility of the system bars of a task change.
+         *
+         * @param taskId the identifier of the task.
+         * @param visible if the transient system bars are visible.
+         * @param wereRevealedFromSwipeOnSystemBar if the transient bars were revealed due to a
+         *                                         swipe gesture on a system bar.
+         */
+        void onTransientSystemBarsVisibilityChanged(
+                int taskId,
+                boolean visible,
+                boolean wereRevealedFromSwipeOnSystemBar);
+    }
+
+    /**
      * An interface to be notified when keyguard exit animation should start.
      */
     public interface KeyguardExitAnimationStartListener {
@@ -517,6 +536,20 @@ public abstract class WindowManagerInternal {
      * @param listener The listener to register.
      */
     public abstract void registerAppTransitionListener(AppTransitionListener listener);
+
+    /**
+     * Registers a listener to be notified to when the system bars of a task changes.
+     *
+     * @param listener The listener to register.
+     */
+    public abstract void registerTaskSystemBarsListener(TaskSystemBarsListener listener);
+
+    /**
+     * Registers a listener to be notified to when the system bars of a task changes.
+     *
+     * @param listener The listener to unregister.
+     */
+    public abstract void unregisterTaskSystemBarsListener(TaskSystemBarsListener listener);
 
     /**
      * Registers a listener to be notified to start the keyguard exit animation.

@@ -258,36 +258,36 @@
 
     <!-- Dimensions related to screenshots -->
 
-    <!-- The padding on the global screenshot background image -->
-    <dimen name="screenshot_x_scale">80dp</dimen>
-    <dimen name="screenshot_bg_protection_height">242dp</dimen>
-    <dimen name="screenshot_action_container_corner_radius">18dp</dimen>
-    <dimen name="screenshot_action_container_padding_vertical">4dp</dimen>
-    <dimen name="screenshot_action_container_margin_horizontal">8dp</dimen>
-    <dimen name="screenshot_action_container_padding_right">8dp</dimen>
-    <!-- Radius of the chip background on global screenshot actions -->
-    <dimen name="screenshot_button_corner_radius">8dp</dimen>
-    <!-- Margin between successive chips -->
-    <dimen name="screenshot_action_chip_margin_start">8dp</dimen>
-    <!-- Padding to make tappable chip height 48dp (18+11+11+4+4) -->
-    <dimen name="screenshot_action_chip_margin_vertical">4dp</dimen>
-    <dimen name="screenshot_action_chip_padding_vertical">11dp</dimen>
-    <dimen name="screenshot_action_chip_icon_size">18sp</dimen>
-    <!-- Padding on each side of the icon for icon-only chips -->
-    <dimen name="screenshot_action_chip_icon_only_padding_horizontal">14dp</dimen>
-    <!-- Padding at the edges of the chip for icon-and-text chips -->
-    <dimen name="screenshot_action_chip_padding_horizontal">12dp</dimen>
-    <!-- Spacing between chip icon and chip text -->
-    <dimen name="screenshot_action_chip_spacing">8dp</dimen>
-    <dimen name="screenshot_action_chip_text_size">14sp</dimen>
-    <dimen name="screenshot_dismissal_height_delta">80dp</dimen>
+
     <dimen name="screenshot_crop_handle_thickness">3dp</dimen>
     <dimen name="long_screenshot_action_bar_top_margin">8dp</dimen>
 
     <!-- Dimensions shared between "overlays" (clipboard and screenshot preview UIs) -->
+    <!-- Constrained size of the floating overlay preview -->
+    <dimen name="overlay_x_scale">80dp</dimen>
+    <!-- Radius of the chip background on floating overlay actions -->
+    <dimen name="overlay_button_corner_radius">8dp</dimen>
+    <!-- Margin between successive chips -->
+    <dimen name="overlay_action_chip_margin_start">8dp</dimen>
+    <!-- Padding to make tappable chip height 48dp (18+11+11+4+4) -->
+    <dimen name="overlay_action_chip_margin_vertical">4dp</dimen>
+    <dimen name="overlay_action_chip_padding_vertical">11dp</dimen>
+    <dimen name="overlay_action_chip_icon_size">18sp</dimen>
+    <!-- Padding on each side of the icon for icon-only chips -->
+    <dimen name="overlay_action_chip_icon_only_padding_horizontal">14dp</dimen>
+    <!-- Padding at the edges of the chip for icon-and-text chips -->
+    <dimen name="overlay_action_chip_padding_horizontal">12dp</dimen>
+    <!-- Spacing between chip icon and chip text -->
+    <dimen name="overlay_action_chip_spacing">8dp</dimen>
+    <dimen name="overlay_action_chip_text_size">14sp</dimen>
     <dimen name="overlay_offset_y">8dp</dimen>
     <dimen name="overlay_offset_x">16dp</dimen>
     <dimen name="overlay_preview_elevation">4dp</dimen>
+    <dimen name="overlay_action_container_margin_horizontal">8dp</dimen>
+    <dimen name="overlay_bg_protection_height">242dp</dimen>
+    <dimen name="overlay_action_container_corner_radius">18dp</dimen>
+    <dimen name="overlay_action_container_padding_vertical">4dp</dimen>
+    <dimen name="overlay_action_container_padding_right">8dp</dimen>
     <dimen name="overlay_dismiss_button_elevation">7dp</dimen>
     <dimen name="overlay_dismiss_button_tappable_size">48dp</dimen>
     <dimen name="overlay_dismiss_button_margin">8dp</dimen>
@@ -295,7 +295,7 @@
     <!-- need a negative margin for some of the constraints. should be overlay_border_width * -1 -->
     <dimen name="overlay_border_width_neg">-4dp</dimen>
 
-    <dimen name="clipboard_preview_size">@dimen/screenshot_x_scale</dimen>
+    <dimen name="clipboard_preview_size">@dimen/overlay_x_scale</dimen>
 
 
     <!-- The width of the view containing navigation buttons -->
@@ -1345,6 +1345,16 @@
     <!-- Height of the area at the top of the dream overlay to allow dragging down the notifications
          shade. -->
     <dimen name="dream_overlay_notifications_drag_area_height">100dp</dimen>
+
+    <!-- Dream overlay complications related dimensions -->
+    <dimen name="dream_overlay_complication_clock_time_padding_left">50dp</dimen>
+    <dimen name="dream_overlay_complication_clock_time_text_size">72sp</dimen>
+    <dimen name="dream_overlay_complication_clock_date_padding_left">60dp</dimen>
+    <dimen name="dream_overlay_complication_clock_date_padding_bottom">50dp</dimen>
+    <dimen name="dream_overlay_complication_clock_date_text_size">18sp</dimen>
+    <dimen name="dream_overlay_complication_weather_padding_left">20dp</dimen>
+    <dimen name="dream_overlay_complication_weather_padding_bottom">50dp</dimen>
+    <dimen name="dream_overlay_complication_weather_text_size">18sp</dimen>
 
     <!-- The position of the end guide, which dream overlay complications can align their start with
          if their end is aligned with the parent end. Represented as the percentage over from the
