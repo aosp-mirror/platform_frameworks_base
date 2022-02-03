@@ -1649,7 +1649,10 @@ public class Activity extends ContextThemeWrapper
         }
         mRestoredFromBundle = savedInstanceState != null;
         mCalled = true;
-        if (!WindowOnBackInvokedDispatcher.shouldUseLegacyBack()) {
+
+        boolean aheadOfTimeBack = WindowOnBackInvokedDispatcher
+                .isOnBackInvokedCallbackEnabled(this);
+        if (aheadOfTimeBack) {
             // Add onBackPressed as default back behavior.
             mDefaultBackCallback = new OnBackInvokedCallback() {
                 @Override

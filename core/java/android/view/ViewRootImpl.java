@@ -1201,7 +1201,7 @@ public final class ViewRootImpl implements ViewParent,
                         mTmpFrames.displayFrame, mTempRect2, mTmpFrames.frame);
                 setFrame(mTmpFrames.frame);
                 registerBackCallbackOnWindow();
-                if (WindowOnBackInvokedDispatcher.shouldUseLegacyBack()) {
+                if (!WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
                     // For apps requesting legacy back behavior, we add a compat callback that
                     // dispatches {@link KeyEvent#KEYCODE_BACK} to their root views.
                     // This way from system point of view, these apps are providing custom
@@ -6507,7 +6507,7 @@ public final class ViewRootImpl implements ViewParent,
 
             if (isBack(event)
                     && mContext != null
-                    && !WindowOnBackInvokedDispatcher.shouldUseLegacyBack()) {
+                    && WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
                 // Invoke the appropriate {@link OnBackInvokedCallback} if the new back
                 // navigation should be used, and the key event is not handled by anything else.
                 OnBackInvokedCallback topCallback =

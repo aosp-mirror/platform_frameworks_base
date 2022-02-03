@@ -509,7 +509,12 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             ParsingPackage::setInheritKeyStoreKeys,
             true
         ),
-        getter(AndroidPackage::getKnownActivityEmbeddingCerts, setOf("TESTEMBEDDINGCERT"))
+        getter(AndroidPackage::getKnownActivityEmbeddingCerts, setOf("TESTEMBEDDINGCERT")),
+        getSetByValue(
+            AndroidPackage::isOnBackInvokedCallbackEnabled,
+            ParsingPackage::setOnBackInvokedCallbackEnabled,
+            true
+        )
     )
 
     override fun initialObject() = PackageImpl.forParsing(

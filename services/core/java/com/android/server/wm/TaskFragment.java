@@ -1695,7 +1695,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
         if (isAddingActivity && task != null) {
 
             // TODO(b/207481538): temporary per-activity screenshoting
-            if (r != null && BackNavigationController.isEnabled()) {
+            if (r != null && BackNavigationController.isScreenshotEnabled()) {
                 ProtoLog.v(WM_DEBUG_BACK_PREVIEW, "Screenshotting Activity %s",
                         r.mActivityComponent.flattenToString());
                 Rect outBounds = r.getBounds();
@@ -2298,7 +2298,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     void removeChild(WindowContainer child, boolean removeSelfIfPossible) {
         super.removeChild(child);
-        if (BackNavigationController.isEnabled()) {
+        if (BackNavigationController.isScreenshotEnabled()) {
             //TODO(b/207481538) Remove once the infrastructure to support per-activity screenshot is
             // implemented
             ActivityRecord r = child.asActivityRecord();
