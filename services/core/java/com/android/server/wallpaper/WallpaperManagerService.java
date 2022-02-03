@@ -429,7 +429,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         if (needsExtraction) {
             extractColors(wallpaper);
         }
-        notifyColorListeners(wallpaper.primaryColors, which, wallpaper.userId, displayId);
+        notifyColorListeners(getAdjustedWallpaperColorsOnDimming(wallpaper), which,
+                wallpaper.userId, displayId);
     }
 
     private static <T extends IInterface> boolean emptyCallbackList(RemoteCallbackList<T> list) {
@@ -1519,7 +1520,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 if (mWallpaper.mWallpaperDimAmount != 0f) {
                     try {
                         connector.mEngine.applyDimming(mWallpaper.mWallpaperDimAmount);
-                        notifyWallpaperColorsChanged(mWallpaper, FLAG_SYSTEM);
                     } catch (RemoteException e) {
                         Slog.w(TAG, "Failed to dim wallpaper", e);
                     }
@@ -2699,8 +2699,31 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             extractColors(wallpaperData);
         }
 
+        return getAdjustedWallpaperColorsOnDimming(wallpaperData);
+    }
+
+    /**
+     * Gets the adjusted {@link WallpaperColors} if the wallpaper colors were not extracted from
+     * bitmap (i.e. it's a live wallpaper) and the dim amount is not 0. If these conditions apply,
+     * default to using color hints that do not support dark theme and dark text.
+     *
+     * @param wallpaperData WallpaperData containing the WallpaperColors and mWallpaperDimAmount
+     */
+    WallpaperColors getAdjustedWallpaperColorsOnDimming(WallpaperData wallpaperData) {
         synchronized (mLock) {
-            return wallpaperData.primaryColors;
+            WallpaperColors wallpaperColors = wallpaperData.primaryColors;
+
+            if (wallpaperColors != null
+                    && (wallpaperColors.getColorHints() & WallpaperColors.HINT_FROM_BITMAP) == 0
+                    && wallpaperData.mWallpaperDimAmount != 0f) {
+                int adjustedColorHints = wallpaperColors.getColorHints()
+                        & ~WallpaperColors.HINT_SUPPORTS_DARK_TEXT
+                        & ~WallpaperColors.HINT_SUPPORTS_DARK_THEME;
+                return new WallpaperColors(
+                        wallpaperColors.getPrimaryColor(), wallpaperColors.getSecondaryColor(),
+                        wallpaperColors.getTertiaryColor(), adjustedColorHints);
+            }
+            return wallpaperColors;
         }
     }
 
@@ -2770,6 +2793,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     wallpaper.fromForegroundApp = fromForegroundApp;
                     wallpaper.cropHint.set(cropHint);
                     wallpaper.allowBackup = allowBackup;
+                    wallpaper.mWallpaperDimAmount = getWallpaperDimAmount();
                 }
                 return pfd;
             } finally {
