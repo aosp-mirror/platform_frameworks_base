@@ -5806,13 +5806,14 @@ public class AudioManager {
      * @param newDevice Bluetooth device connected or null if there is no new devices
      * @param previousDevice Bluetooth device disconnected or null if there is no disconnected
      * devices
-     * @param info contain all info related to the device. {@link BtProfileConnectionInfo}
+     * @param info contain all info related to the device. {@link BluetoothProfileConnectionInfo}
      * {@hide}
      */
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_STACK)
     public void handleBluetoothActiveDeviceChanged(@Nullable BluetoothDevice newDevice,
-            @Nullable BluetoothDevice previousDevice, @NonNull BtProfileConnectionInfo info) {
+            @Nullable BluetoothDevice previousDevice,
+            @NonNull BluetoothProfileConnectionInfo info) {
         final IAudioService service = getService();
         try {
             service.handleBluetoothActiveDeviceChanged(newDevice, previousDevice, info);

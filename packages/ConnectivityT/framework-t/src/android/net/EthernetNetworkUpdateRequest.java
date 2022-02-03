@@ -23,7 +23,7 @@ import android.os.Parcelable;
 import java.util.Objects;
 
 /** @hide */
-public final class InternalNetworkUpdateRequest implements Parcelable {
+public final class EthernetNetworkUpdateRequest implements Parcelable {
     @NonNull
     private final StaticIpConfiguration mIpConfig;
     @NonNull
@@ -40,7 +40,7 @@ public final class InternalNetworkUpdateRequest implements Parcelable {
     }
 
     /** @hide */
-    public InternalNetworkUpdateRequest(@NonNull final StaticIpConfiguration ipConfig,
+    public EthernetNetworkUpdateRequest(@NonNull final StaticIpConfiguration ipConfig,
             @NonNull final NetworkCapabilities networkCapabilities) {
         Objects.requireNonNull(ipConfig);
         Objects.requireNonNull(networkCapabilities);
@@ -48,7 +48,7 @@ public final class InternalNetworkUpdateRequest implements Parcelable {
         mNetworkCapabilities = new NetworkCapabilities(networkCapabilities);
     }
 
-    private InternalNetworkUpdateRequest(@NonNull final Parcel source) {
+    private EthernetNetworkUpdateRequest(@NonNull final Parcel source) {
         Objects.requireNonNull(source);
         mIpConfig = StaticIpConfiguration.CREATOR.createFromParcel(source);
         mNetworkCapabilities = NetworkCapabilities.CREATOR.createFromParcel(source);
@@ -56,7 +56,7 @@ public final class InternalNetworkUpdateRequest implements Parcelable {
 
     @Override
     public String toString() {
-        return "InternalNetworkUpdateRequest{"
+        return "EthernetNetworkUpdateRequest{"
                 + "mIpConfig=" + mIpConfig
                 + ", mNetworkCapabilities=" + mNetworkCapabilities + '}';
     }
@@ -65,7 +65,7 @@ public final class InternalNetworkUpdateRequest implements Parcelable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        InternalNetworkUpdateRequest that = (InternalNetworkUpdateRequest) o;
+        EthernetNetworkUpdateRequest that = (EthernetNetworkUpdateRequest) o;
 
         return Objects.equals(that.getIpConfig(), mIpConfig)
                 && Objects.equals(that.getNetworkCapabilities(), mNetworkCapabilities);
@@ -88,16 +88,16 @@ public final class InternalNetworkUpdateRequest implements Parcelable {
     }
 
     @NonNull
-    public static final Parcelable.Creator<InternalNetworkUpdateRequest> CREATOR =
-            new Parcelable.Creator<InternalNetworkUpdateRequest>() {
+    public static final Parcelable.Creator<EthernetNetworkUpdateRequest> CREATOR =
+            new Parcelable.Creator<EthernetNetworkUpdateRequest>() {
                 @Override
-                public InternalNetworkUpdateRequest[] newArray(int size) {
-                    return new InternalNetworkUpdateRequest[size];
+                public EthernetNetworkUpdateRequest[] newArray(int size) {
+                    return new EthernetNetworkUpdateRequest[size];
                 }
 
                 @Override
-                public InternalNetworkUpdateRequest createFromParcel(@NonNull Parcel source) {
-                    return new InternalNetworkUpdateRequest(source);
+                public EthernetNetworkUpdateRequest createFromParcel(@NonNull Parcel source) {
+                    return new EthernetNetworkUpdateRequest(source);
                 }
             };
 }
