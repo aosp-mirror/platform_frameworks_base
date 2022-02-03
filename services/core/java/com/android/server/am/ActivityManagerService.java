@@ -1892,6 +1892,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ProcessRecord app = mProcessList.newProcessRecordLocked(info, info.processName,
                         false,
                         0,
+                        false,
+                        0,
                         new HostingRecord("system"));
                 app.setPersistent(true);
                 app.setPid(MY_PID);
@@ -2780,9 +2782,22 @@ public class ActivityManagerService extends IActivityManager.Stub
                     false /* knownToBeDead */, 0 /* intentFlags */,
                     sNullHostingRecord  /* hostingRecord */, ZYGOTE_POLICY_FLAG_EMPTY,
                     true /* allowWhileBooting */, true /* isolated */,
-                    uid, abiOverride, entryPoint, entryPointArgs, crashHandler);
+                    uid, false /* supplemental */, 0 /* supplementalUid */,
+                    abiOverride, entryPoint, entryPointArgs, crashHandler);
             return proc != null;
         }
+    }
+
+    @GuardedBy("this")
+    final ProcessRecord startSupplementalProcessLocked(String processName,
+            ApplicationInfo info, boolean knownToBeDead, int intentFlags,
+            HostingRecord hostingRecord, int zygotePolicyFlags, int supplementalUid) {
+        return mProcessList.startProcessLocked(processName, info, knownToBeDead, intentFlags,
+                hostingRecord, zygotePolicyFlags, false /* allowWhileBooting */,
+                false /* isolated */, 0 /* isolatedUid */,
+                true /* supplemental */, supplementalUid,
+                null /* ABI override */, null /* entryPoint */,
+                null /* entryPointArgs */, null /* crashHandler */);
     }
 
     @GuardedBy("this")
@@ -2792,6 +2807,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean isolated) {
         return mProcessList.startProcessLocked(processName, info, knownToBeDead, intentFlags,
                 hostingRecord, zygotePolicyFlags, allowWhileBooting, isolated, 0 /* isolatedUid */,
+                false /* supplemental */, 0 /* supplementalUid */,
                 null /* ABI override */, null /* entryPoint */,
                 null /* entryPointArgs */, null /* crashHandler */);
     }
@@ -6521,6 +6537,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (app == null) {
             app = mProcessList.newProcessRecordLocked(info, customProcess, isolated, 0,
+                    false, 0,
                     new HostingRecord("added application",
                         customProcess != null ? customProcess : info.processName));
             updateLruProcessLocked(app, false, null);
@@ -12346,12 +12363,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             String resolvedType, IServiceConnection connection, int flags, String instanceName,
             String callingPackage, int userId) throws TransactionTooLargeException {
         return bindServiceInstance(caller, token, service, resolvedType, connection, flags,
-                instanceName, false, callingPackage, userId);
+                instanceName, false, 0, callingPackage, userId);
     }
 
     private int bindServiceInstance(IApplicationThread caller, IBinder token, Intent service,
             String resolvedType, IServiceConnection connection, int flags, String instanceName,
-            boolean isSupplementalProcessService, String callingPackage, int userId)
+            boolean isSupplementalProcessService, int supplementedAppUid, String callingPackage,
+            int userId)
             throws TransactionTooLargeException {
         enforceNotIsolatedCaller("bindService");
 
@@ -12382,7 +12400,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         synchronized(this) {
             return mServices.bindServiceLocked(caller, token, service, resolvedType, connection,
-                    flags, instanceName, isSupplementalProcessService, callingPackage, userId);
+                    flags, instanceName, isSupplementalProcessService, supplementedAppUid,
+                    callingPackage, userId);
         }
     }
 
@@ -15976,8 +15995,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             return ActivityManagerService.this.bindServiceInstance(
                     mContext.getIApplicationThread(), mContext.getActivityToken(), service,
                     service.resolveTypeIfNeeded(mContext.getContentResolver()), sd, flags,
-                    processName, /*isSupplementalProcessService*/ true, mContext.getOpPackageName(),
-                    UserHandle.getUserId(userAppUid)) != 0;
+                    processName, /*isSupplementalProcessService*/ true, userAppUid,
+                    mContext.getOpPackageName(), UserHandle.getUserId(userAppUid)) != 0;
         }
 
         @Override

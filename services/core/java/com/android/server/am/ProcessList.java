@@ -2525,6 +2525,7 @@ public final class ProcessList {
     ProcessRecord startProcessLocked(String processName, ApplicationInfo info,
             boolean knownToBeDead, int intentFlags, HostingRecord hostingRecord,
             int zygotePolicyFlags, boolean allowWhileBooting, boolean isolated, int isolatedUid,
+            boolean supplemental, int supplementalUid,
             String abiOverride, String entryPoint, String[] entryPointArgs, Runnable crashHandler) {
         long startTime = SystemClock.uptimeMillis();
         ProcessRecord app;
@@ -2618,7 +2619,8 @@ public final class ProcessList {
 
         if (app == null) {
             checkSlow(startTime, "startProcess: creating new process record");
-            app = newProcessRecordLocked(info, processName, isolated, isolatedUid, hostingRecord);
+            app = newProcessRecordLocked(info, processName, isolated, isolatedUid, supplemental,
+                    supplementalUid, hostingRecord);
             if (app == null) {
                 Slog.w(TAG, "Failed making new process record for "
                         + processName + "/" + info.uid + " isolated=" + isolated);
@@ -3113,10 +3115,14 @@ public final class ProcessList {
 
     @GuardedBy("mService")
     ProcessRecord newProcessRecordLocked(ApplicationInfo info, String customProcess,
-            boolean isolated, int isolatedUid, HostingRecord hostingRecord) {
+            boolean isolated, int isolatedUid, boolean supplemental, int supplementalUid,
+            HostingRecord hostingRecord) {
         String proc = customProcess != null ? customProcess : info.processName;
         final int userId = UserHandle.getUserId(info.uid);
         int uid = info.uid;
+        if (supplemental) {
+            uid = supplementalUid;
+        }
         if (isolated) {
             if (isolatedUid == 0) {
                 IsolatedUidRange uidRange = getOrCreateIsolatedUidRangeLocked(info, hostingRecord);
