@@ -2384,6 +2384,8 @@
     <string name="clipboard_edit_text_copy">Copy</string>
     <!-- Text informing user that content has been copied to the system clipboard [CHAR LIMIT=NONE] -->
     <string name="clipboard_overlay_text_copied">Copied</string>
+    <!-- Text informing user where text being edited was copied from [CHAR LIMIT=NONE] -->
+    <string name="clipboard_edit_source">From <xliff:g id="appName" example="Gmail">%1$s</xliff:g></string>
     <!-- Label for button to dismiss clipboard overlay [CHAR LIMIT=NONE] -->
     <string name="clipboard_dismiss_description">Dismiss copy UI</string>
 </resources>

@@ -103,6 +103,7 @@ public class ClipboardOverlayController {
     private final AccessibilityManager mAccessibilityManager;
     private final TextClassifier mTextClassifier;
 
+    private final FrameLayout mContainer;
     private final DraggableConstraintLayout mView;
     private final ImageView mImagePreview;
     private final TextView mTextPreview;
@@ -147,8 +148,9 @@ public class ClipboardOverlayController {
         mWindow = FloatingWindowUtil.getFloatingWindow(mContext);
         mWindow.setWindowManager(mWindowManager, null, null);
 
-        mView = (DraggableConstraintLayout)
+        mContainer = (FrameLayout)
                 LayoutInflater.from(mContext).inflate(R.layout.clipboard_overlay, null);
+        mView = requireNonNull(mContainer.findViewById(R.id.clipboard_ui));
         mActionContainerBackground =
                 requireNonNull(mView.findViewById(R.id.actions_container_background));
         mActionContainer = requireNonNull(mView.findViewById(R.id.actions));
@@ -180,7 +182,7 @@ public class ClipboardOverlayController {
 
         attachWindow();
         withWindowAttached(() -> {
-            mWindow.setContentView(mView);
+            mWindow.setContentView(mContainer);
             updateInsets(mWindowManager.getCurrentWindowMetrics().getWindowInsets());
             mView.requestLayout();
             mView.post(this::animateIn);
@@ -371,7 +373,7 @@ public class ClipboardOverlayController {
     private ValueAnimator getEnterAnimation() {
         ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
 
-        mView.setAlpha(0);
+        mContainer.setAlpha(0);
         mDismissButton.setVisibility(View.GONE);
         final View previewBorder = requireNonNull(mView.findViewById(R.id.preview_border));
         final View actionBackground = requireNonNull(
@@ -383,7 +385,7 @@ public class ClipboardOverlayController {
         }
 
         anim.addUpdateListener(animation -> {
-            mView.setAlpha(animation.getAnimatedFraction());
+            mContainer.setAlpha(animation.getAnimatedFraction());
             float scale = 0.6f + 0.4f * animation.getAnimatedFraction();
             mView.setPivotY(mView.getHeight() - previewBorder.getHeight() / 2f);
             mView.setPivotX(actionBackground.getWidth() / 2f);
@@ -394,7 +396,7 @@ public class ClipboardOverlayController {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                mView.setAlpha(1);
+                mContainer.setAlpha(1);
                 mTimeoutHandler.resetTimeout();
             }
         });
@@ -439,7 +441,7 @@ public class ClipboardOverlayController {
 
     private void reset() {
         mView.setTranslationX(0);
-        mView.setAlpha(0);
+        mContainer.setAlpha(0);
         resetActionChips();
         mTimeoutHandler.cancelTimeout();
     }
