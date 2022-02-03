@@ -79,7 +79,8 @@ public final class NetworkTemplate implements Parcelable {
             MATCH_WIFI,
             MATCH_ETHERNET,
             MATCH_BLUETOOTH,
-            MATCH_CARRIER
+            MATCH_PROXY,
+            MATCH_CARRIER,
     })
     public @interface TemplateMatchRule{}
 
@@ -104,9 +105,8 @@ public final class NetworkTemplate implements Parcelable {
     /** Match rule to match bluetooth networks. */
     public static final int MATCH_BLUETOOTH = 8;
     /**
-     * Match rule to match networks with {@link Connectivity#TYPE_PROXY} as the legacy network type.
-     *
-     * @hide
+     * Match rule to match networks with {@link ConnectivityManager#TYPE_PROXY} as the legacy
+     * network type.
      */
     public static final int MATCH_PROXY = 9;
     /**
