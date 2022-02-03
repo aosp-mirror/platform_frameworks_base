@@ -509,7 +509,7 @@ uint32_t GnssCallback::getConstellationType(
 template <class T_list, class T_sv_info>
 Return<void> GnssCallback::gnssSvStatusCbImpl(const T_list& svStatus) {
     // In HIDL or AIDL v1, if no listener is registered, do not report svInfoList to the framework.
-    if (gnssHalAidl == nullptr || gnssHalAidl->getInterfaceVersion() == 1) {
+    if (gnssHalAidl == nullptr || gnssHalAidl->getInterfaceVersion() <= 1) {
         if (!isSvStatusRegistered) {
             return Void();
         }
@@ -695,7 +695,7 @@ Status GnssCallbackAidl::gnssLocationCb(const GnssLocationAidl& location) {
 
 Status GnssCallbackAidl::gnssNmeaCb(const int64_t timestamp, const std::string& nmea) {
     // In AIDL v1, if no listener is registered, do not report nmea to the framework.
-    if (gnssHalAidl != nullptr && gnssHalAidl->getInterfaceVersion() == 1) {
+    if (gnssHalAidl != nullptr && gnssHalAidl->getInterfaceVersion() <= 1) {
         if (!isNmeaRegistered) {
             return Status::ok();
         }
