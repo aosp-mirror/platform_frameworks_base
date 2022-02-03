@@ -82,6 +82,13 @@ void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
     }
 }
 
+void callObjectMethodIgnoringResult(JNIEnv* env, jobject obj, jmethodID mid, ...) {
+    va_list args;
+    va_start(args, mid);
+    env->DeleteLocalRef(env->CallObjectMethodV(obj, mid, args));
+    va_end(args);
+}
+
 JavaObject::JavaObject(JNIEnv* env, jclass clazz, jmethodID defaultCtor)
       : env_(env), clazz_(clazz) {
     object_ = env_->NewObject(clazz_, defaultCtor);
