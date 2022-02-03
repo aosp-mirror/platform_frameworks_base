@@ -1330,7 +1330,10 @@ public class DevicePolicyManager {
      *
      * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_PROFILE} or
      * {@link #ACTION_PROVISION_MANAGED_DEVICE}
+     *
+     * @deprecated Logo customization is no longer supported in the provisioning flow.
      */
+    @Deprecated
     public static final String EXTRA_PROVISIONING_LOGO_URI =
             "android.app.extra.PROVISIONING_LOGO_URI";
 
