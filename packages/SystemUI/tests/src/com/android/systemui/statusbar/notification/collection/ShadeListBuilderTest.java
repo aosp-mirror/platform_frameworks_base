@@ -111,6 +111,8 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
     @Captor private ArgumentCaptor<CollectionReadyForBuildListener> mBuildListenerCaptor;
 
+    private final FakeNotifPipelineChoreographer mPipelineChoreographer =
+            new FakeNotifPipelineChoreographer();
     private CollectionReadyForBuildListener mReadyForBuildListener;
     private List<NotificationEntryBuilder> mPendingSet = new ArrayList<>();
     private List<NotificationEntry> mEntrySet = new ArrayList<>();
@@ -127,11 +129,12 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
 
         mListBuilder = new ShadeListBuilder(
-                mSystemClock,
-                mNotifPipelineFlags,
-                mLogger,
                 mDumpManager,
-                mInteractionTracker
+                mPipelineChoreographer,
+                mNotifPipelineFlags,
+                mInteractionTracker,
+                mLogger,
+                mSystemClock
         );
         mListBuilder.setOnRenderListListener(mOnRenderListListener);
 
@@ -567,6 +570,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         // WHEN the pipeline is kicked off
         mReadyForBuildListener.onBuildList(singletonList(entry));
+        mPipelineChoreographer.runIfScheduled();
 
         // THEN the entry's initialization time is reset
         assertFalse(entry.hasFinishedInitialization());
@@ -1024,26 +1028,38 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         clearInvocations(mOnRenderListListener);
         packageFilter.invalidateList();
+        assertTrue(mPipelineChoreographer.isScheduled());
+        mPipelineChoreographer.runIfScheduled();
         verify(mOnRenderListListener).onRenderList(anyList());
 
         clearInvocations(mOnRenderListListener);
         idPromoter.invalidateList();
+        assertTrue(mPipelineChoreographer.isScheduled());
+        mPipelineChoreographer.runIfScheduled();
         verify(mOnRenderListListener).onRenderList(anyList());
 
         clearInvocations(mOnRenderListListener);
         section.invalidateList();
+        assertTrue(mPipelineChoreographer.isScheduled());
+        mPipelineChoreographer.runIfScheduled();
         verify(mOnRenderListListener).onRenderList(anyList());
 
         clearInvocations(mOnRenderListListener);
         hypeComparator.invalidateList();
+        assertTrue(mPipelineChoreographer.isScheduled());
+        mPipelineChoreographer.runIfScheduled();
         verify(mOnRenderListListener).onRenderList(anyList());
 
         clearInvocations(mOnRenderListListener);
         sectionComparator.invalidateList();
+        assertTrue(mPipelineChoreographer.isScheduled());
+        mPipelineChoreographer.runIfScheduled();
         verify(mOnRenderListListener).onRenderList(anyList());
 
         clearInvocations(mOnRenderListListener);
         preRenderInvalidator.invalidateList();
+        assertTrue(mPipelineChoreographer.isScheduled());
+        mPipelineChoreographer.runIfScheduled();
         verify(mOnRenderListListener).onRenderList(anyList());
     }
 
@@ -1515,6 +1531,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         // WHEN visual stability manager allows group changes again
         mStabilityManager.setAllowGroupChanges(true);
         mStabilityManager.invalidateList();
+        mPipelineChoreographer.runIfScheduled();
 
         // THEN entries are grouped
         verifyBuiltList(
@@ -1553,6 +1570,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         // WHEN section changes are allowed again
         mStabilityManager.setAllowSectionChanges(true);
         mStabilityManager.invalidateList();
+        mPipelineChoreographer.runIfScheduled();
 
         // THEN the section updates
         assertEquals(newSectioner, mEntrySet.get(0).getSection().getSectioner());
@@ -1773,6 +1791,30 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
+    public void testMultipleInvalidationsCoalesce() {
+        // GIVEN a PreGroupFilter and a FinalizeFilter
+        NotifFilter filter1 = new PackageFilter(PACKAGE_5);
+        NotifFilter filter2 = new PackageFilter(PACKAGE_0);
+        mListBuilder.addPreGroupFilter(filter1);
+        mListBuilder.addFinalizeFilter(filter2);
+
+        // WHEN both filters invalidate
+        filter1.invalidateList();
+        filter2.invalidateList();
+
+        // THEN the pipeline choreographer is scheduled to evaluate, AND the pipeline hasn't
+        // actually run.
+        assertTrue(mPipelineChoreographer.isScheduled());
+        verify(mOnRenderListListener, never()).onRenderList(anyList());
+
+        // WHEN the pipeline choreographer actually runs
+        mPipelineChoreographer.runIfScheduled();
+
+        // THEN the pipeline runs
+        verify(mOnRenderListListener).onRenderList(anyList());
+    }
+
+    @Test
     public void testIsSorted() {
         Comparator<Integer> intCmp = Integer::compare;
         assertTrue(ShadeListBuilder.isSorted(Collections.emptyList(), intCmp));
@@ -1914,6 +1956,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         }
 
         mReadyForBuildListener.onBuildList(mEntrySet);
+        mPipelineChoreographer.runIfScheduled();
     }
 
     private void verifyBuiltList(ExpectedEntry ...expectedEntries) {
