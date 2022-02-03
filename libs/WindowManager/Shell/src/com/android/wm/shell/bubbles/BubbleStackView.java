@@ -787,7 +787,7 @@ public class BubbleStackView extends FrameLayout
         ta.recycle();
 
         final Runnable onBubbleAnimatedOut = () -> {
-            if (getBubbleCount() == 0 && !mBubbleData.isShowingOverflow()) {
+            if (getBubbleCount() == 0) {
                 mBubbleController.onAllBubblesAnimatedOut();
             }
         };
@@ -1651,7 +1651,6 @@ public class BubbleStackView extends FrameLayout
                 } else {
                     bubble.cleanupViews();
                 }
-                updatePointerPosition(false /* forIme */);
                 updateExpandedView();
                 logBubbleEvent(bubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
                 return;

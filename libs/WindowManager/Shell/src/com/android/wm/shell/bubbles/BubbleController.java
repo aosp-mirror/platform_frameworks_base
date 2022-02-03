@@ -618,7 +618,8 @@ public class BubbleController {
     }
 
     /** Contains information to help position things on the screen. */
-    BubblePositioner getPositioner() {
+    @VisibleForTesting
+    public BubblePositioner getPositioner() {
         return mBubblePositioner;
     }
 
