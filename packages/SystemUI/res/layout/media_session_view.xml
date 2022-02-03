@@ -29,14 +29,14 @@
     android:theme="@style/MediaPlayer">
 
     <ImageView
+        android:id="@+id/album_art"
         android:layout_width="match_parent"
-        android:layout_height="184dp"
+        android:layout_height="@dimen/qs_media_session_height_expanded"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:translationZ="0dp"
-        android:id="@+id/album_art"
         android:scaleType="centerCrop"
         android:adjustViewBounds="true"
         android:clipToOutline="true"
@@ -154,10 +154,7 @@
         android:layout_marginStart="@dimen/qs_media_padding"
         android:layout_marginEnd="@dimen/qs_media_padding"
         android:layout_marginTop="0dp"
-        android:layout_marginBottom="0dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/media_seamless"
-        app:layout_constraintBottom_toTopOf="@id/actionEnd" />
+        android:layout_marginBottom="0dp" />
 
     <ImageButton
         android:id="@+id/actionPrev"
@@ -168,11 +165,8 @@
         android:layout_marginEnd="0dp"
         android:layout_marginBottom="0dp"
         android:layout_marginTop="0dp"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/media_progress_bar"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/actionPlayPause" />
+        app:layout_constraintHorizontal_bias="1"
+        app:layout_constraintHorizontal_chainStyle="packed" />
 
     <!-- Seek Bar -->
     <!-- As per Material Design on Bidirectionality, this is forced to LTR in code -->
@@ -188,11 +182,7 @@
         android:layout_marginBottom="0dp"
         android:layout_marginTop="0dp"
         android:layout_marginStart="0dp"
-        android:layout_marginEnd="0dp"
-        app:layout_constraintStart_toEndOf="@id/actionPrev"
-        app:layout_constraintEnd_toStartOf="@id/actionNext"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/actionPlayPause" />
+        android:layout_marginEnd="0dp" />
 
     <ImageButton
         android:id="@+id/actionNext"
@@ -202,11 +192,7 @@
         android:layout_marginStart="0dp"
         android:layout_marginEnd="@dimen/qs_media_action_spacing"
         android:layout_marginBottom="0dp"
-        android:layout_marginTop="0dp"
-        app:layout_constraintStart_toEndOf="@id/media_progress_bar"
-        app:layout_constraintEnd_toStartOf="@id/actionStart"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/actionPlayPause" />
+        android:layout_marginTop="0dp" />
 
     <ImageButton
         android:id="@+id/actionStart"
@@ -216,11 +202,7 @@
         android:layout_marginStart="@dimen/qs_media_action_spacing"
         android:layout_marginEnd="@dimen/qs_media_action_spacing"
         android:layout_marginBottom="0dp"
-        android:layout_marginTop="0dp"
-        app:layout_constraintStart_toEndOf="@id/actionNext"
-        app:layout_constraintEnd_toStartOf="@id/actionEnd"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/actionPlayPause" />
+        android:layout_marginTop="0dp" />
 
     <ImageButton
         android:id="@+id/actionEnd"
@@ -231,11 +213,7 @@
         android:layout_marginEnd="4dp"
         android:layout_marginBottom="0dp"
         android:layout_marginTop="0dp"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toEndOf="@id/actionStart"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/actionPlayPause" />
+        app:layout_constraintHorizontal_chainStyle="packed" />
 
     <!-- Long press menu -->
     <TextView
