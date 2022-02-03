@@ -99,8 +99,9 @@
     <dimen name="update_user_photo_popup_min_width">300dp</dimen>
 
     <dimen name="add_a_photo_circled_padding">6dp</dimen>
-    <dimen name="user_photo_size_in_profile_info_dialog">112dp</dimen>
-    <dimen name="add_a_photo_icon_size_in_profile_info_dialog">32dp</dimen>
+    <dimen name="user_photo_size_in_user_info_dialog">112dp</dimen>
+    <dimen name="add_a_photo_icon_size_in_user_info_dialog">32dp</dimen>
+    <dimen name="user_name_height_in_user_info_dialog">48sp</dimen>
 
     <integer name="avatar_picker_columns">3</integer>
     <dimen name="avatar_size_in_picker">96dp</dimen>
