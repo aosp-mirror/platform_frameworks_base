@@ -47,7 +47,7 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
         gravity = Gravity.TOP.or(Gravity.CENTER_HORIZONTAL)
         type = WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY
         flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-        title = "Media Tap-To-Transfer Chip View"
+        title = WINDOW_TITLE
         format = PixelFormat.TRANSLUCENT
         setTrustedOverlay()
     }
@@ -106,3 +106,7 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
         }
     }
 }
+
+// Used in CTS tests UpdateMediaTapToTransferSenderDisplayTest and
+// UpdateMediaTapToTransferReceiverDisplayTest
+private const val WINDOW_TITLE = "Media Transfer Chip View"
