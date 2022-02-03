@@ -17905,6 +17905,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @Override
+    public boolean isAppFreezerEnabled() {
+        return mOomAdjuster.mCachedAppOptimizer.useFreezer();
+    }
+
     /**
      * Resets the state of the {@link com.android.server.am.AppErrors} instance.
      * This is intended for testing within the CTS only and is protected by

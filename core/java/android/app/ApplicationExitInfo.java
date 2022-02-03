@@ -156,6 +156,12 @@ public final class ApplicationExitInfo implements Parcelable {
     public static final int REASON_OTHER = 13;
 
     /**
+     * Application process was killed by App Freezer, for example, because it receives
+     * sync binder transactions while being frozen.
+     */
+    public static final int REASON_FREEZER = 14;
+
+    /**
      * Application process kills subreason is unknown.
      *
      * For internal use only.
@@ -487,6 +493,7 @@ public final class ApplicationExitInfo implements Parcelable {
         REASON_USER_STOPPED,
         REASON_DEPENDENCY_DIED,
         REASON_OTHER,
+        REASON_FREEZER,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Reason {}
@@ -1138,6 +1145,8 @@ public final class ApplicationExitInfo implements Parcelable {
                 return "DEPENDENCY DIED";
             case REASON_OTHER:
                 return "OTHER KILLS BY SYSTEM";
+            case REASON_FREEZER:
+                return "FREEZER";
             default:
                 return "UNKNOWN";
         }

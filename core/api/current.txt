@@ -4876,6 +4876,7 @@ package android.app {
     field public static final int REASON_DEPENDENCY_DIED = 12; // 0xc
     field public static final int REASON_EXCESSIVE_RESOURCE_USAGE = 9; // 0x9
     field public static final int REASON_EXIT_SELF = 1; // 0x1
+    field public static final int REASON_FREEZER = 14; // 0xe
     field public static final int REASON_INITIALIZATION_FAILURE = 7; // 0x7
     field public static final int REASON_LOW_MEMORY = 3; // 0x3
     field public static final int REASON_OTHER = 13; // 0xd
