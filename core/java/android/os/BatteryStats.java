@@ -52,6 +52,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BatteryUsageStatsProvider;
+import com.android.internal.os.PowerCalculator;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -4020,7 +4021,7 @@ public abstract class BatteryStats implements Parcelable {
             sb.append("     ");
             sb.append(controllerName);
             sb.append(" Battery drain: ").append(
-                    BatteryStatsHelper.makemAh(powerDrainMaMs / MILLISECONDS_IN_HOUR));
+                    PowerCalculator.formatCharge(powerDrainMaMs / MILLISECONDS_IN_HOUR));
             sb.append("mAh");
             pw.println(sb.toString());
         }
@@ -4402,10 +4403,10 @@ public abstract class BatteryStats implements Parcelable {
         final List<BatterySipper> sippers = helper.getUsageList();
         if (sippers != null && sippers.size() > 0) {
             dumpLine(pw, 0 /* uid */, category, POWER_USE_SUMMARY_DATA,
-                    BatteryStatsHelper.makemAh(helper.getPowerProfile().getBatteryCapacity()),
-                    BatteryStatsHelper.makemAh(helper.getComputedPower()),
-                    BatteryStatsHelper.makemAh(helper.getMinDrainedPower()),
-                    BatteryStatsHelper.makemAh(helper.getMaxDrainedPower()));
+                    PowerCalculator.formatCharge(helper.getPowerProfile().getBatteryCapacity()),
+                    PowerCalculator.formatCharge(helper.getComputedPower()),
+                    PowerCalculator.formatCharge(helper.getMinDrainedPower()),
+                    PowerCalculator.formatCharge(helper.getMaxDrainedPower()));
             int uid = 0;
             for (int i=0; i<sippers.size(); i++) {
                 final BatterySipper bs = sippers.get(i);
@@ -4459,10 +4460,10 @@ public abstract class BatteryStats implements Parcelable {
                         label = "???";
                 }
                 dumpLine(pw, uid, category, POWER_USE_ITEM_DATA, label,
-                        BatteryStatsHelper.makemAh(bs.totalPowerMah),
+                        PowerCalculator.formatCharge(bs.totalPowerMah),
                         bs.shouldHide ? 1 : 0,
-                        BatteryStatsHelper.makemAh(bs.screenPowerMah),
-                        BatteryStatsHelper.makemAh(bs.proportionalSmearMah));
+                        PowerCalculator.formatCharge(bs.screenPowerMah),
+                        PowerCalculator.formatCharge(bs.proportionalSmearMah));
             }
         }
 
@@ -4896,11 +4897,11 @@ public abstract class BatteryStats implements Parcelable {
     }
 
     private void printmAh(PrintWriter printer, double power) {
-        printer.print(BatteryStatsHelper.makemAh(power));
+        printer.print(PowerCalculator.formatCharge(power));
     }
 
     private void printmAh(StringBuilder sb, double power) {
-        sb.append(BatteryStatsHelper.makemAh(power));
+        sb.append(PowerCalculator.formatCharge(power));
     }
 
     /**
@@ -4947,7 +4948,7 @@ public abstract class BatteryStats implements Parcelable {
             sb.setLength(0);
             sb.append(prefix);
                 sb.append("  Estimated battery capacity: ");
-                sb.append(BatteryStatsHelper.makemAh(estimatedBatteryCapacity));
+            sb.append(PowerCalculator.formatCharge(estimatedBatteryCapacity));
                 sb.append(" mAh");
             pw.println(sb.toString());
         }
@@ -4957,7 +4958,7 @@ public abstract class BatteryStats implements Parcelable {
             sb.setLength(0);
             sb.append(prefix);
             sb.append("  Last learned battery capacity: ");
-            sb.append(BatteryStatsHelper.makemAh(lastLearnedBatteryCapacity / 1000));
+            sb.append(PowerCalculator.formatCharge(lastLearnedBatteryCapacity / 1000));
             sb.append(" mAh");
             pw.println(sb.toString());
         }
@@ -4966,7 +4967,7 @@ public abstract class BatteryStats implements Parcelable {
             sb.setLength(0);
             sb.append(prefix);
             sb.append("  Min learned battery capacity: ");
-            sb.append(BatteryStatsHelper.makemAh(minLearnedBatteryCapacity / 1000));
+            sb.append(PowerCalculator.formatCharge(minLearnedBatteryCapacity / 1000));
             sb.append(" mAh");
             pw.println(sb.toString());
         }
@@ -4975,7 +4976,7 @@ public abstract class BatteryStats implements Parcelable {
             sb.setLength(0);
             sb.append(prefix);
             sb.append("  Max learned battery capacity: ");
-            sb.append(BatteryStatsHelper.makemAh(maxLearnedBatteryCapacity / 1000));
+            sb.append(PowerCalculator.formatCharge(maxLearnedBatteryCapacity / 1000));
             sb.append(" mAh");
             pw.println(sb.toString());
         }
@@ -5039,7 +5040,7 @@ public abstract class BatteryStats implements Parcelable {
             sb.setLength(0);
             sb.append(prefix);
                 sb.append("  Discharge: ");
-                sb.append(BatteryStatsHelper.makemAh(dischargeCount / 1000.0));
+            sb.append(PowerCalculator.formatCharge(dischargeCount / 1000.0));
                 sb.append(" mAh");
             pw.println(sb.toString());
         }
@@ -5049,7 +5050,7 @@ public abstract class BatteryStats implements Parcelable {
             sb.setLength(0);
             sb.append(prefix);
                 sb.append("  Screen off discharge: ");
-                sb.append(BatteryStatsHelper.makemAh(dischargeScreenOffCount / 1000.0));
+            sb.append(PowerCalculator.formatCharge(dischargeScreenOffCount / 1000.0));
                 sb.append(" mAh");
             pw.println(sb.toString());
         }
@@ -5059,7 +5060,7 @@ public abstract class BatteryStats implements Parcelable {
             sb.setLength(0);
             sb.append(prefix);
             sb.append("  Screen doze discharge: ");
-            sb.append(BatteryStatsHelper.makemAh(dischargeScreenDozeCount / 1000.0));
+            sb.append(PowerCalculator.formatCharge(dischargeScreenDozeCount / 1000.0));
             sb.append(" mAh");
             pw.println(sb.toString());
         }
@@ -5069,7 +5070,7 @@ public abstract class BatteryStats implements Parcelable {
             sb.setLength(0);
             sb.append(prefix);
                 sb.append("  Screen on discharge: ");
-                sb.append(BatteryStatsHelper.makemAh(dischargeScreenOnCount / 1000.0));
+            sb.append(PowerCalculator.formatCharge(dischargeScreenOnCount / 1000.0));
                 sb.append(" mAh");
             pw.println(sb.toString());
         }
@@ -5079,7 +5080,7 @@ public abstract class BatteryStats implements Parcelable {
             sb.setLength(0);
             sb.append(prefix);
             sb.append("  Device light doze discharge: ");
-            sb.append(BatteryStatsHelper.makemAh(dischargeLightDozeCount / 1000.0));
+            sb.append(PowerCalculator.formatCharge(dischargeLightDozeCount / 1000.0));
             sb.append(" mAh");
             pw.println(sb.toString());
         }
@@ -5089,7 +5090,7 @@ public abstract class BatteryStats implements Parcelable {
             sb.setLength(0);
             sb.append(prefix);
             sb.append("  Device deep doze discharge: ");
-            sb.append(BatteryStatsHelper.makemAh(dischargeDeepDozeCount / 1000.0));
+            sb.append(PowerCalculator.formatCharge(dischargeDeepDozeCount / 1000.0));
             sb.append(" mAh");
             pw.println(sb.toString());
         }
@@ -5645,7 +5646,8 @@ public abstract class BatteryStats implements Parcelable {
                 sb.setLength(0);
                 sb.append(prefix); sb.append("    Uid ");
                 UserHandle.formatUid(sb, bs.uidObj.getUid());
-                sb.append(": "); sb.append(BatteryStatsHelper.makemAh(bs.mobilemspp));
+                sb.append(": ");
+                sb.append(PowerCalculator.formatCharge(bs.mobilemspp));
                 sb.append(" ("); sb.append(bs.mobileRxPackets+bs.mobileTxPackets);
                 sb.append(" packets over "); formatTimeMsNoSpace(sb, bs.mobileActive);
                 sb.append(") "); sb.append(bs.mobileActiveCount); sb.append("x");
@@ -5869,7 +5871,8 @@ public abstract class BatteryStats implements Parcelable {
                     packets = 1;
                 }
                 sb.append(" @ ");
-                sb.append(BatteryStatsHelper.makemAh(uidMobileActiveTime / 1000 / (double)packets));
+                sb.append(PowerCalculator.formatCharge(
+                        uidMobileActiveTime / 1000 / (double) packets));
                 sb.append(" mspp");
                 pw.println(sb.toString());
             }

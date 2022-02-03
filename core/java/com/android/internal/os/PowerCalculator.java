@@ -32,6 +32,7 @@ import java.util.Locale;
  * Calculates power use of a device subsystem for an app.
  */
 public abstract class PowerCalculator {
+    protected static final boolean DEBUG = false;
 
     protected static final double MILLIAMPHOUR_PER_MICROCOULOMB = 1.0 / 1000.0 / 60.0 / 60.0;
 

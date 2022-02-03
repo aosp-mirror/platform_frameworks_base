@@ -31,7 +31,7 @@ import java.util.List;
  */
 public class IdlePowerCalculator extends PowerCalculator {
     private static final String TAG = "IdlePowerCalculator";
-    private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final boolean DEBUG = PowerCalculator.DEBUG;
     private final double mAveragePowerCpuSuspendMahPerUs;
     private final double mAveragePowerCpuIdleMahPerUs;
     public long mDurationMs;
