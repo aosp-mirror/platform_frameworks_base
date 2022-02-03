@@ -1158,6 +1158,22 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         assertThat(mBubbleData.hasOverflowBubbleWithKey(entry.getKey())).isFalse();
     }
 
+    @Test
+    public void testStackViewOnBackPressed_updatesBubbleDataExpandState() {
+        mBubbleController.updateBubble(mBubbleEntry);
+
+        // Expand the stack
+        mBubbleData.setExpanded(true);
+        assertStackExpanded();
+
+        // Hit back
+        BubbleStackView stackView = mBubbleController.getStackView();
+        stackView.onBackPressed();
+
+        // Make sure we're collapsed
+        assertStackCollapsed();
+    }
+
     /**
      * Sets the bubble metadata flags for this entry. These flags are normally set by
      * NotificationManagerService when the notification is sent, however, these tests do not
