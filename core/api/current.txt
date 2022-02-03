@@ -47614,16 +47614,16 @@ package android.view {
   }
 
   public abstract class ActionProvider {
-    ctor public ActionProvider(android.content.Context);
+    ctor public ActionProvider(@NonNull android.content.Context);
     method public boolean hasSubMenu();
     method public boolean isVisible();
-    method @Deprecated public abstract android.view.View onCreateActionView();
-    method public android.view.View onCreateActionView(android.view.MenuItem);
+    method @Deprecated @NonNull public abstract android.view.View onCreateActionView();
+    method @NonNull public android.view.View onCreateActionView(@NonNull android.view.MenuItem);
     method public boolean onPerformDefaultAction();
-    method public void onPrepareSubMenu(android.view.SubMenu);
+    method public void onPrepareSubMenu(@NonNull android.view.SubMenu);
     method public boolean overridesItemVisibility();
     method public void refreshVisibility();
-    method public void setVisibilityListener(android.view.ActionProvider.VisibilityListener);
+    method public void setVisibilityListener(@Nullable android.view.ActionProvider.VisibilityListener);
   }
 
   public static interface ActionProvider.VisibilityListener {
@@ -47893,60 +47893,60 @@ package android.view {
   }
 
   public class GestureDetector {
-    ctor @Deprecated public GestureDetector(android.view.GestureDetector.OnGestureListener, android.os.Handler);
-    ctor @Deprecated public GestureDetector(android.view.GestureDetector.OnGestureListener);
-    ctor public GestureDetector(@UiContext android.content.Context, android.view.GestureDetector.OnGestureListener);
-    ctor public GestureDetector(@UiContext android.content.Context, android.view.GestureDetector.OnGestureListener, android.os.Handler);
-    ctor public GestureDetector(@UiContext android.content.Context, android.view.GestureDetector.OnGestureListener, android.os.Handler, boolean);
+    ctor @Deprecated public GestureDetector(@NonNull android.view.GestureDetector.OnGestureListener, @Nullable android.os.Handler);
+    ctor @Deprecated public GestureDetector(@NonNull android.view.GestureDetector.OnGestureListener);
+    ctor public GestureDetector(@Nullable @UiContext android.content.Context, @NonNull android.view.GestureDetector.OnGestureListener);
+    ctor public GestureDetector(@Nullable @UiContext android.content.Context, @NonNull android.view.GestureDetector.OnGestureListener, @Nullable android.os.Handler);
+    ctor public GestureDetector(@Nullable @UiContext android.content.Context, @NonNull android.view.GestureDetector.OnGestureListener, @Nullable android.os.Handler, boolean);
     method public boolean isLongpressEnabled();
-    method public boolean onGenericMotionEvent(android.view.MotionEvent);
-    method public boolean onTouchEvent(android.view.MotionEvent);
-    method public void setContextClickListener(android.view.GestureDetector.OnContextClickListener);
+    method public boolean onGenericMotionEvent(@NonNull android.view.MotionEvent);
+    method public boolean onTouchEvent(@NonNull android.view.MotionEvent);
+    method public void setContextClickListener(@Nullable android.view.GestureDetector.OnContextClickListener);
     method public void setIsLongpressEnabled(boolean);
-    method public void setOnDoubleTapListener(android.view.GestureDetector.OnDoubleTapListener);
+    method public void setOnDoubleTapListener(@Nullable android.view.GestureDetector.OnDoubleTapListener);
   }
 
   public static interface GestureDetector.OnContextClickListener {
-    method public boolean onContextClick(android.view.MotionEvent);
+    method public boolean onContextClick(@NonNull android.view.MotionEvent);
   }
 
   public static interface GestureDetector.OnDoubleTapListener {
-    method public boolean onDoubleTap(android.view.MotionEvent);
-    method public boolean onDoubleTapEvent(android.view.MotionEvent);
-    method public boolean onSingleTapConfirmed(android.view.MotionEvent);
+    method public boolean onDoubleTap(@NonNull android.view.MotionEvent);
+    method public boolean onDoubleTapEvent(@NonNull android.view.MotionEvent);
+    method public boolean onSingleTapConfirmed(@NonNull android.view.MotionEvent);
   }
 
   public static interface GestureDetector.OnGestureListener {
-    method public boolean onDown(android.view.MotionEvent);
-    method public boolean onFling(android.view.MotionEvent, android.view.MotionEvent, float, float);
-    method public void onLongPress(android.view.MotionEvent);
-    method public boolean onScroll(android.view.MotionEvent, android.view.MotionEvent, float, float);
-    method public void onShowPress(android.view.MotionEvent);
-    method public boolean onSingleTapUp(android.view.MotionEvent);
+    method public boolean onDown(@NonNull android.view.MotionEvent);
+    method public boolean onFling(@NonNull android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
+    method public void onLongPress(@NonNull android.view.MotionEvent);
+    method public boolean onScroll(@NonNull android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
+    method public void onShowPress(@NonNull android.view.MotionEvent);
+    method public boolean onSingleTapUp(@NonNull android.view.MotionEvent);
   }
 
   public static class GestureDetector.SimpleOnGestureListener implements android.view.GestureDetector.OnContextClickListener android.view.GestureDetector.OnDoubleTapListener android.view.GestureDetector.OnGestureListener {
     ctor public GestureDetector.SimpleOnGestureListener();
-    method public boolean onContextClick(android.view.MotionEvent);
-    method public boolean onDoubleTap(android.view.MotionEvent);
-    method public boolean onDoubleTapEvent(android.view.MotionEvent);
-    method public boolean onDown(android.view.MotionEvent);
-    method public boolean onFling(android.view.MotionEvent, android.view.MotionEvent, float, float);
-    method public void onLongPress(android.view.MotionEvent);
-    method public boolean onScroll(android.view.MotionEvent, android.view.MotionEvent, float, float);
-    method public void onShowPress(android.view.MotionEvent);
-    method public boolean onSingleTapConfirmed(android.view.MotionEvent);
-    method public boolean onSingleTapUp(android.view.MotionEvent);
+    method public boolean onContextClick(@NonNull android.view.MotionEvent);
+    method public boolean onDoubleTap(@NonNull android.view.MotionEvent);
+    method public boolean onDoubleTapEvent(@NonNull android.view.MotionEvent);
+    method public boolean onDown(@NonNull android.view.MotionEvent);
+    method public boolean onFling(@NonNull android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
+    method public void onLongPress(@NonNull android.view.MotionEvent);
+    method public boolean onScroll(@NonNull android.view.MotionEvent, @NonNull android.view.MotionEvent, float, float);
+    method public void onShowPress(@NonNull android.view.MotionEvent);
+    method public boolean onSingleTapConfirmed(@NonNull android.view.MotionEvent);
+    method public boolean onSingleTapUp(@NonNull android.view.MotionEvent);
   }
 
   public class Gravity {
     ctor public Gravity();
     method public static void apply(int, int, int, android.graphics.Rect, android.graphics.Rect);
-    method public static void apply(int, int, int, android.graphics.Rect, android.graphics.Rect, int);
-    method public static void apply(int, int, int, android.graphics.Rect, int, int, android.graphics.Rect);
-    method public static void apply(int, int, int, android.graphics.Rect, int, int, android.graphics.Rect, int);
-    method public static void applyDisplay(int, android.graphics.Rect, android.graphics.Rect);
-    method public static void applyDisplay(int, android.graphics.Rect, android.graphics.Rect, int);
+    method public static void apply(int, int, int, @NonNull android.graphics.Rect, @NonNull android.graphics.Rect, int);
+    method public static void apply(int, int, int, @NonNull android.graphics.Rect, int, int, @NonNull android.graphics.Rect);
+    method public static void apply(int, int, int, @NonNull android.graphics.Rect, int, int, @NonNull android.graphics.Rect, int);
+    method public static void applyDisplay(int, @NonNull android.graphics.Rect, @NonNull android.graphics.Rect);
+    method public static void applyDisplay(int, @NonNull android.graphics.Rect, @NonNull android.graphics.Rect, int);
     method public static int getAbsoluteGravity(int, int);
     method public static boolean isHorizontal(int);
     method public static boolean isVertical(int);
@@ -48678,60 +48678,60 @@ package android.view {
   public interface MenuItem {
     method public boolean collapseActionView();
     method public boolean expandActionView();
-    method public android.view.ActionProvider getActionProvider();
-    method public android.view.View getActionView();
+    method @Nullable public android.view.ActionProvider getActionProvider();
+    method @Nullable public android.view.View getActionView();
     method public default int getAlphabeticModifiers();
     method public char getAlphabeticShortcut();
-    method public default CharSequence getContentDescription();
+    method @Nullable public default CharSequence getContentDescription();
     method public int getGroupId();
-    method public android.graphics.drawable.Drawable getIcon();
+    method @Nullable public android.graphics.drawable.Drawable getIcon();
     method @Nullable public default android.graphics.BlendMode getIconTintBlendMode();
     method @Nullable public default android.content.res.ColorStateList getIconTintList();
     method @Nullable public default android.graphics.PorterDuff.Mode getIconTintMode();
-    method public android.content.Intent getIntent();
+    method @Nullable public android.content.Intent getIntent();
     method public int getItemId();
-    method public android.view.ContextMenu.ContextMenuInfo getMenuInfo();
+    method @Nullable public android.view.ContextMenu.ContextMenuInfo getMenuInfo();
     method public default int getNumericModifiers();
     method public char getNumericShortcut();
     method public int getOrder();
-    method public android.view.SubMenu getSubMenu();
-    method public CharSequence getTitle();
-    method public CharSequence getTitleCondensed();
-    method public default CharSequence getTooltipText();
+    method @Nullable public android.view.SubMenu getSubMenu();
+    method @Nullable public CharSequence getTitle();
+    method @Nullable public CharSequence getTitleCondensed();
+    method @Nullable public default CharSequence getTooltipText();
     method public boolean hasSubMenu();
     method public boolean isActionViewExpanded();
     method public boolean isCheckable();
     method public boolean isChecked();
     method public boolean isEnabled();
     method public boolean isVisible();
-    method public android.view.MenuItem setActionProvider(android.view.ActionProvider);
-    method public android.view.MenuItem setActionView(android.view.View);
-    method public android.view.MenuItem setActionView(@LayoutRes int);
-    method public android.view.MenuItem setAlphabeticShortcut(char);
-    method public default android.view.MenuItem setAlphabeticShortcut(char, int);
-    method public android.view.MenuItem setCheckable(boolean);
-    method public android.view.MenuItem setChecked(boolean);
-    method public default android.view.MenuItem setContentDescription(CharSequence);
-    method public android.view.MenuItem setEnabled(boolean);
-    method public android.view.MenuItem setIcon(android.graphics.drawable.Drawable);
-    method public android.view.MenuItem setIcon(@DrawableRes int);
+    method @NonNull public android.view.MenuItem setActionProvider(@Nullable android.view.ActionProvider);
+    method @NonNull public android.view.MenuItem setActionView(@Nullable android.view.View);
+    method @NonNull public android.view.MenuItem setActionView(@LayoutRes int);
+    method @NonNull public android.view.MenuItem setAlphabeticShortcut(char);
+    method @NonNull public default android.view.MenuItem setAlphabeticShortcut(char, int);
+    method @NonNull public android.view.MenuItem setCheckable(boolean);
+    method @NonNull public android.view.MenuItem setChecked(boolean);
+    method @NonNull public default android.view.MenuItem setContentDescription(@Nullable CharSequence);
+    method @NonNull public android.view.MenuItem setEnabled(boolean);
+    method @NonNull public android.view.MenuItem setIcon(@Nullable android.graphics.drawable.Drawable);
+    method @NonNull public android.view.MenuItem setIcon(@DrawableRes int);
     method @NonNull public default android.view.MenuItem setIconTintBlendMode(@Nullable android.graphics.BlendMode);
-    method public default android.view.MenuItem setIconTintList(@Nullable android.content.res.ColorStateList);
+    method @NonNull public default android.view.MenuItem setIconTintList(@Nullable android.content.res.ColorStateList);
     method @NonNull public default android.view.MenuItem setIconTintMode(@Nullable android.graphics.PorterDuff.Mode);
-    method public android.view.MenuItem setIntent(android.content.Intent);
-    method public android.view.MenuItem setNumericShortcut(char);
-    method public default android.view.MenuItem setNumericShortcut(char, int);
-    method public android.view.MenuItem setOnActionExpandListener(android.view.MenuItem.OnActionExpandListener);
-    method public android.view.MenuItem setOnMenuItemClickListener(android.view.MenuItem.OnMenuItemClickListener);
-    method public android.view.MenuItem setShortcut(char, char);
-    method public default android.view.MenuItem setShortcut(char, char, int, int);
+    method @NonNull public android.view.MenuItem setIntent(@Nullable android.content.Intent);
+    method @NonNull public android.view.MenuItem setNumericShortcut(char);
+    method @NonNull public default android.view.MenuItem setNumericShortcut(char, int);
+    method @NonNull public android.view.MenuItem setOnActionExpandListener(@Nullable android.view.MenuItem.OnActionExpandListener);
+    method @NonNull public android.view.MenuItem setOnMenuItemClickListener(@Nullable android.view.MenuItem.OnMenuItemClickListener);
+    method @NonNull public android.view.MenuItem setShortcut(char, char);
+    method @NonNull public default android.view.MenuItem setShortcut(char, char, int, int);
     method public void setShowAsAction(int);
-    method public android.view.MenuItem setShowAsActionFlags(int);
-    method public android.view.MenuItem setTitle(CharSequence);
-    method public android.view.MenuItem setTitle(@StringRes int);
-    method public android.view.MenuItem setTitleCondensed(CharSequence);
-    method public default android.view.MenuItem setTooltipText(CharSequence);
-    method public android.view.MenuItem setVisible(boolean);
+    method @NonNull public android.view.MenuItem setShowAsActionFlags(int);
+    method @NonNull public android.view.MenuItem setTitle(@Nullable CharSequence);
+    method @NonNull public android.view.MenuItem setTitle(@StringRes int);
+    method @NonNull public android.view.MenuItem setTitleCondensed(@Nullable CharSequence);
+    method @NonNull public default android.view.MenuItem setTooltipText(@Nullable CharSequence);
+    method @NonNull public android.view.MenuItem setVisible(boolean);
     field public static final int SHOW_AS_ACTION_ALWAYS = 2; // 0x2
     field public static final int SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW = 8; // 0x8
     field public static final int SHOW_AS_ACTION_IF_ROOM = 1; // 0x1
@@ -48740,12 +48740,12 @@ package android.view {
   }
 
   public static interface MenuItem.OnActionExpandListener {
-    method public boolean onMenuItemActionCollapse(android.view.MenuItem);
-    method public boolean onMenuItemActionExpand(android.view.MenuItem);
+    method public boolean onMenuItemActionCollapse(@NonNull android.view.MenuItem);
+    method public boolean onMenuItemActionExpand(@NonNull android.view.MenuItem);
   }
 
   public static interface MenuItem.OnMenuItemClickListener {
-    method public boolean onMenuItemClick(android.view.MenuItem);
+    method public boolean onMenuItemClick(@NonNull android.view.MenuItem);
   }
 
   public final class MotionEvent extends android.view.InputEvent implements android.os.Parcelable {
@@ -49021,10 +49021,10 @@ package android.view {
   }
 
   public final class PointerIcon implements android.os.Parcelable {
-    method public static android.view.PointerIcon create(@NonNull android.graphics.Bitmap, float, float);
+    method @NonNull public static android.view.PointerIcon create(@NonNull android.graphics.Bitmap, float, float);
     method public int describeContents();
-    method public static android.view.PointerIcon getSystemIcon(@NonNull android.content.Context, int);
-    method public static android.view.PointerIcon load(@NonNull android.content.res.Resources, @XmlRes int);
+    method @NonNull public static android.view.PointerIcon getSystemIcon(@NonNull android.content.Context, int);
+    method @NonNull public static android.view.PointerIcon load(@NonNull android.content.res.Resources, @XmlRes int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.PointerIcon> CREATOR;
     field public static final int TYPE_ALIAS = 1010; // 0x3f2
@@ -49067,8 +49067,8 @@ package android.view {
   }
 
   public class ScaleGestureDetector {
-    ctor public ScaleGestureDetector(android.content.Context, android.view.ScaleGestureDetector.OnScaleGestureListener);
-    ctor public ScaleGestureDetector(android.content.Context, android.view.ScaleGestureDetector.OnScaleGestureListener, android.os.Handler);
+    ctor public ScaleGestureDetector(@NonNull android.content.Context, @NonNull android.view.ScaleGestureDetector.OnScaleGestureListener);
+    ctor public ScaleGestureDetector(@NonNull android.content.Context, @NonNull android.view.ScaleGestureDetector.OnScaleGestureListener, @Nullable android.os.Handler);
     method public float getCurrentSpan();
     method public float getCurrentSpanX();
     method public float getCurrentSpanY();
@@ -49083,22 +49083,22 @@ package android.view {
     method public boolean isInProgress();
     method public boolean isQuickScaleEnabled();
     method public boolean isStylusScaleEnabled();
-    method public boolean onTouchEvent(android.view.MotionEvent);
+    method public boolean onTouchEvent(@NonNull android.view.MotionEvent);
     method public void setQuickScaleEnabled(boolean);
     method public void setStylusScaleEnabled(boolean);
   }
 
   public static interface ScaleGestureDetector.OnScaleGestureListener {
-    method public boolean onScale(android.view.ScaleGestureDetector);
-    method public boolean onScaleBegin(android.view.ScaleGestureDetector);
-    method public void onScaleEnd(android.view.ScaleGestureDetector);
+    method public boolean onScale(@NonNull android.view.ScaleGestureDetector);
+    method public boolean onScaleBegin(@NonNull android.view.ScaleGestureDetector);
+    method public void onScaleEnd(@NonNull android.view.ScaleGestureDetector);
   }
 
   public static class ScaleGestureDetector.SimpleOnScaleGestureListener implements android.view.ScaleGestureDetector.OnScaleGestureListener {
     ctor public ScaleGestureDetector.SimpleOnScaleGestureListener();
-    method public boolean onScale(android.view.ScaleGestureDetector);
-    method public boolean onScaleBegin(android.view.ScaleGestureDetector);
-    method public void onScaleEnd(android.view.ScaleGestureDetector);
+    method public boolean onScale(@NonNull android.view.ScaleGestureDetector);
+    method public boolean onScaleBegin(@NonNull android.view.ScaleGestureDetector);
+    method public void onScaleEnd(@NonNull android.view.ScaleGestureDetector);
   }
 
   @UiThread public interface ScrollCaptureCallback {
@@ -49469,7 +49469,7 @@ package android.view {
     method public boolean dispatchKeyShortcutEvent(android.view.KeyEvent);
     method public boolean dispatchNestedFling(float, float, boolean);
     method public boolean dispatchNestedPreFling(float, float);
-    method public boolean dispatchNestedPrePerformAccessibilityAction(int, android.os.Bundle);
+    method public boolean dispatchNestedPrePerformAccessibilityAction(int, @Nullable android.os.Bundle);
     method public boolean dispatchNestedPreScroll(int, int, @Nullable @Size(2) int[], @Nullable @Size(2) int[]);
     method public boolean dispatchNestedScroll(int, int, int, int, @Nullable @Size(2) int[]);
     method public void dispatchPointerCaptureChanged(boolean);
@@ -49831,7 +49831,7 @@ package android.view {
     method @Deprecated public void onWindowSystemUiVisibilityChanged(int);
     method protected void onWindowVisibilityChanged(int);
     method protected boolean overScrollBy(int, int, int, int, int, int, int, int, boolean);
-    method public boolean performAccessibilityAction(int, android.os.Bundle);
+    method public boolean performAccessibilityAction(int, @Nullable android.os.Bundle);
     method public boolean performClick();
     method public boolean performContextClick(float, float);
     method public boolean performContextClick();
@@ -50242,15 +50242,15 @@ package android.view {
   public static class View.AccessibilityDelegate {
     ctor public View.AccessibilityDelegate();
     method public void addExtraDataToAccessibilityNodeInfo(@NonNull android.view.View, @NonNull android.view.accessibility.AccessibilityNodeInfo, @NonNull String, @Nullable android.os.Bundle);
-    method public boolean dispatchPopulateAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
-    method public android.view.accessibility.AccessibilityNodeProvider getAccessibilityNodeProvider(android.view.View);
-    method public void onInitializeAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
-    method public void onInitializeAccessibilityNodeInfo(android.view.View, android.view.accessibility.AccessibilityNodeInfo);
-    method public void onPopulateAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
-    method public boolean onRequestSendAccessibilityEvent(android.view.ViewGroup, android.view.View, android.view.accessibility.AccessibilityEvent);
-    method public boolean performAccessibilityAction(android.view.View, int, android.os.Bundle);
-    method public void sendAccessibilityEvent(android.view.View, int);
-    method public void sendAccessibilityEventUnchecked(android.view.View, android.view.accessibility.AccessibilityEvent);
+    method public boolean dispatchPopulateAccessibilityEvent(@NonNull android.view.View, @NonNull android.view.accessibility.AccessibilityEvent);
+    method @Nullable public android.view.accessibility.AccessibilityNodeProvider getAccessibilityNodeProvider(@NonNull android.view.View);
+    method public void onInitializeAccessibilityEvent(@NonNull android.view.View, @NonNull android.view.accessibility.AccessibilityEvent);
+    method public void onInitializeAccessibilityNodeInfo(@NonNull android.view.View, @NonNull android.view.accessibility.AccessibilityNodeInfo);
+    method public void onPopulateAccessibilityEvent(@NonNull android.view.View, @NonNull android.view.accessibility.AccessibilityEvent);
+    method public boolean onRequestSendAccessibilityEvent(@NonNull android.view.ViewGroup, @NonNull android.view.View, @NonNull android.view.accessibility.AccessibilityEvent);
+    method public boolean performAccessibilityAction(@NonNull android.view.View, int, @Nullable android.os.Bundle);
+    method public void sendAccessibilityEvent(@NonNull android.view.View, int);
+    method public void sendAccessibilityEventUnchecked(@NonNull android.view.View, @NonNull android.view.accessibility.AccessibilityEvent);
   }
 
   public static class View.BaseSavedState extends android.view.AbsSavedState {
@@ -50280,12 +50280,12 @@ package android.view {
   }
 
   public static interface View.OnApplyWindowInsetsListener {
-    method public android.view.WindowInsets onApplyWindowInsets(android.view.View, android.view.WindowInsets);
+    method @NonNull public android.view.WindowInsets onApplyWindowInsets(@NonNull android.view.View, @NonNull android.view.WindowInsets);
   }
 
   public static interface View.OnAttachStateChangeListener {
-    method public void onViewAttachedToWindow(android.view.View);
-    method public void onViewDetachedFromWindow(android.view.View);
+    method public void onViewAttachedToWindow(@NonNull android.view.View);
+    method public void onViewDetachedFromWindow(@NonNull android.view.View);
   }
 
   public static interface View.OnCapturedPointerListener {
@@ -50354,7 +50354,7 @@ package android.view {
 
   public class ViewConfiguration {
     ctor @Deprecated public ViewConfiguration();
-    method public static android.view.ViewConfiguration get(@UiContext android.content.Context);
+    method public static android.view.ViewConfiguration get(@NonNull @UiContext android.content.Context);
     method @Deprecated @FloatRange(from=1.0) public static float getAmbiguousGestureMultiplier();
     method public static long getDefaultActionModeHideDuration();
     method public static int getDoubleTapTimeout();
@@ -50673,8 +50673,8 @@ package android.view {
     method public boolean canResolveLayoutDirection();
     method public boolean canResolveTextAlignment();
     method public boolean canResolveTextDirection();
-    method public void childDrawableStateChanged(android.view.View);
-    method public void childHasTransientStateChanged(android.view.View, boolean);
+    method public void childDrawableStateChanged(@NonNull android.view.View);
+    method public void childHasTransientStateChanged(@NonNull android.view.View, boolean);
     method public void clearChildFocus(android.view.View);
     method public void createContextMenu(android.view.ContextMenu);
     method public android.view.View focusSearch(android.view.View, int);
@@ -50692,23 +50692,23 @@ package android.view {
     method public boolean isTextAlignmentResolved();
     method public boolean isTextDirectionResolved();
     method public android.view.View keyboardNavigationClusterSearch(android.view.View, int);
-    method public void notifySubtreeAccessibilityStateChanged(android.view.View, @NonNull android.view.View, int);
+    method public void notifySubtreeAccessibilityStateChanged(@NonNull android.view.View, @NonNull android.view.View, int);
     method public default void onDescendantInvalidated(@NonNull android.view.View, @NonNull android.view.View);
-    method public boolean onNestedFling(android.view.View, float, float, boolean);
-    method public boolean onNestedPreFling(android.view.View, float, float);
-    method public boolean onNestedPrePerformAccessibilityAction(android.view.View, int, android.os.Bundle);
-    method public void onNestedPreScroll(android.view.View, int, int, int[]);
-    method public void onNestedScroll(android.view.View, int, int, int, int);
-    method public void onNestedScrollAccepted(android.view.View, android.view.View, int);
-    method public boolean onStartNestedScroll(android.view.View, android.view.View, int);
-    method public void onStopNestedScroll(android.view.View);
+    method public boolean onNestedFling(@NonNull android.view.View, float, float, boolean);
+    method public boolean onNestedPreFling(@NonNull android.view.View, float, float);
+    method public boolean onNestedPrePerformAccessibilityAction(@NonNull android.view.View, int, @Nullable android.os.Bundle);
+    method public void onNestedPreScroll(@NonNull android.view.View, int, int, @NonNull int[]);
+    method public void onNestedScroll(@NonNull android.view.View, int, int, int, int);
+    method public void onNestedScrollAccepted(@NonNull android.view.View, @NonNull android.view.View, int);
+    method public boolean onStartNestedScroll(@NonNull android.view.View, @NonNull android.view.View, int);
+    method public void onStopNestedScroll(@NonNull android.view.View);
     method public void recomputeViewAttributes(android.view.View);
     method public void requestChildFocus(android.view.View, android.view.View);
-    method public boolean requestChildRectangleOnScreen(android.view.View, android.graphics.Rect, boolean);
+    method public boolean requestChildRectangleOnScreen(@NonNull android.view.View, android.graphics.Rect, boolean);
     method public void requestDisallowInterceptTouchEvent(boolean);
     method public void requestFitSystemWindows();
     method public void requestLayout();
-    method public boolean requestSendAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
+    method public boolean requestSendAccessibilityEvent(@NonNull android.view.View, android.view.accessibility.AccessibilityEvent);
     method public void requestTransparentRegion(android.view.View);
     method public boolean showContextMenuForChild(android.view.View);
     method public boolean showContextMenuForChild(android.view.View, float, float);
@@ -50717,43 +50717,43 @@ package android.view {
   }
 
   public class ViewPropertyAnimator {
-    method public android.view.ViewPropertyAnimator alpha(@FloatRange(from=0.0f, to=1.0f) float);
-    method public android.view.ViewPropertyAnimator alphaBy(float);
+    method @NonNull public android.view.ViewPropertyAnimator alpha(@FloatRange(from=0.0f, to=1.0f) float);
+    method @NonNull public android.view.ViewPropertyAnimator alphaBy(float);
     method public void cancel();
     method public long getDuration();
-    method public android.animation.TimeInterpolator getInterpolator();
+    method @Nullable public android.animation.TimeInterpolator getInterpolator();
     method public long getStartDelay();
-    method public android.view.ViewPropertyAnimator rotation(float);
-    method public android.view.ViewPropertyAnimator rotationBy(float);
-    method public android.view.ViewPropertyAnimator rotationX(float);
-    method public android.view.ViewPropertyAnimator rotationXBy(float);
-    method public android.view.ViewPropertyAnimator rotationY(float);
-    method public android.view.ViewPropertyAnimator rotationYBy(float);
-    method public android.view.ViewPropertyAnimator scaleX(float);
-    method public android.view.ViewPropertyAnimator scaleXBy(float);
-    method public android.view.ViewPropertyAnimator scaleY(float);
-    method public android.view.ViewPropertyAnimator scaleYBy(float);
-    method public android.view.ViewPropertyAnimator setDuration(long);
-    method public android.view.ViewPropertyAnimator setInterpolator(android.animation.TimeInterpolator);
-    method public android.view.ViewPropertyAnimator setListener(android.animation.Animator.AnimatorListener);
-    method public android.view.ViewPropertyAnimator setStartDelay(long);
-    method public android.view.ViewPropertyAnimator setUpdateListener(android.animation.ValueAnimator.AnimatorUpdateListener);
+    method @NonNull public android.view.ViewPropertyAnimator rotation(float);
+    method @NonNull public android.view.ViewPropertyAnimator rotationBy(float);
+    method @NonNull public android.view.ViewPropertyAnimator rotationX(float);
+    method @NonNull public android.view.ViewPropertyAnimator rotationXBy(float);
+    method @NonNull public android.view.ViewPropertyAnimator rotationY(float);
+    method @NonNull public android.view.ViewPropertyAnimator rotationYBy(float);
+    method @NonNull public android.view.ViewPropertyAnimator scaleX(float);
+    method @NonNull public android.view.ViewPropertyAnimator scaleXBy(float);
+    method @NonNull public android.view.ViewPropertyAnimator scaleY(float);
+    method @NonNull public android.view.ViewPropertyAnimator scaleYBy(float);
+    method @NonNull public android.view.ViewPropertyAnimator setDuration(long);
+    method @NonNull public android.view.ViewPropertyAnimator setInterpolator(android.animation.TimeInterpolator);
+    method @NonNull public android.view.ViewPropertyAnimator setListener(@Nullable android.animation.Animator.AnimatorListener);
+    method @NonNull public android.view.ViewPropertyAnimator setStartDelay(long);
+    method @NonNull public android.view.ViewPropertyAnimator setUpdateListener(@Nullable android.animation.ValueAnimator.AnimatorUpdateListener);
     method public void start();
-    method public android.view.ViewPropertyAnimator translationX(float);
-    method public android.view.ViewPropertyAnimator translationXBy(float);
-    method public android.view.ViewPropertyAnimator translationY(float);
-    method public android.view.ViewPropertyAnimator translationYBy(float);
-    method public android.view.ViewPropertyAnimator translationZ(float);
-    method public android.view.ViewPropertyAnimator translationZBy(float);
-    method public android.view.ViewPropertyAnimator withEndAction(Runnable);
-    method public android.view.ViewPropertyAnimator withLayer();
-    method public android.view.ViewPropertyAnimator withStartAction(Runnable);
-    method public android.view.ViewPropertyAnimator x(float);
-    method public android.view.ViewPropertyAnimator xBy(float);
-    method public android.view.ViewPropertyAnimator y(float);
-    method public android.view.ViewPropertyAnimator yBy(float);
-    method public android.view.ViewPropertyAnimator z(float);
-    method public android.view.ViewPropertyAnimator zBy(float);
+    method @NonNull public android.view.ViewPropertyAnimator translationX(float);
+    method @NonNull public android.view.ViewPropertyAnimator translationXBy(float);
+    method @NonNull public android.view.ViewPropertyAnimator translationY(float);
+    method @NonNull public android.view.ViewPropertyAnimator translationYBy(float);
+    method @NonNull public android.view.ViewPropertyAnimator translationZ(float);
+    method @NonNull public android.view.ViewPropertyAnimator translationZBy(float);
+    method @NonNull public android.view.ViewPropertyAnimator withEndAction(Runnable);
+    method @NonNull public android.view.ViewPropertyAnimator withLayer();
+    method @NonNull public android.view.ViewPropertyAnimator withStartAction(Runnable);
+    method @NonNull public android.view.ViewPropertyAnimator x(float);
+    method @NonNull public android.view.ViewPropertyAnimator xBy(float);
+    method @NonNull public android.view.ViewPropertyAnimator y(float);
+    method @NonNull public android.view.ViewPropertyAnimator yBy(float);
+    method @NonNull public android.view.ViewPropertyAnimator z(float);
+    method @NonNull public android.view.ViewPropertyAnimator zBy(float);
   }
 
   public abstract class ViewStructure {
@@ -51944,10 +51944,10 @@ package android.view.accessibility {
   public abstract class AccessibilityNodeProvider {
     ctor public AccessibilityNodeProvider();
     method public void addExtraDataToAccessibilityNodeInfo(int, android.view.accessibility.AccessibilityNodeInfo, String, android.os.Bundle);
-    method public android.view.accessibility.AccessibilityNodeInfo createAccessibilityNodeInfo(int);
-    method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(String, int);
-    method public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
-    method public boolean performAction(int, int, android.os.Bundle);
+    method @Nullable public android.view.accessibility.AccessibilityNodeInfo createAccessibilityNodeInfo(int);
+    method @Nullable public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(String, int);
+    method @Nullable public android.view.accessibility.AccessibilityNodeInfo findFocus(int);
+    method public boolean performAction(int, int, @Nullable android.os.Bundle);
     field public static final int HOST_VIEW_ID = -1; // 0xffffffff
   }
 
@@ -51955,23 +51955,23 @@ package android.view.accessibility {
     ctor public AccessibilityRecord();
     ctor public AccessibilityRecord(@NonNull android.view.accessibility.AccessibilityRecord);
     method public int getAddedCount();
-    method public CharSequence getBeforeText();
-    method public CharSequence getClassName();
-    method public CharSequence getContentDescription();
+    method @Nullable public CharSequence getBeforeText();
+    method @Nullable public CharSequence getClassName();
+    method @Nullable public CharSequence getContentDescription();
     method public int getCurrentItemIndex();
     method public int getDisplayId();
     method public int getFromIndex();
     method public int getItemCount();
     method public int getMaxScrollX();
     method public int getMaxScrollY();
-    method public android.os.Parcelable getParcelableData();
+    method @Nullable public android.os.Parcelable getParcelableData();
     method public int getRemovedCount();
     method public int getScrollDeltaX();
     method public int getScrollDeltaY();
     method public int getScrollX();
     method public int getScrollY();
-    method public android.view.accessibility.AccessibilityNodeInfo getSource();
-    method public java.util.List<java.lang.CharSequence> getText();
+    method @Nullable public android.view.accessibility.AccessibilityNodeInfo getSource();
+    method @NonNull public java.util.List<java.lang.CharSequence> getText();
     method public int getToIndex();
     method public int getWindowId();
     method public boolean isChecked();
@@ -51979,14 +51979,14 @@ package android.view.accessibility {
     method public boolean isFullScreen();
     method public boolean isPassword();
     method public boolean isScrollable();
-    method @Deprecated public static android.view.accessibility.AccessibilityRecord obtain(android.view.accessibility.AccessibilityRecord);
-    method @Deprecated public static android.view.accessibility.AccessibilityRecord obtain();
+    method @Deprecated @NonNull public static android.view.accessibility.AccessibilityRecord obtain(@NonNull android.view.accessibility.AccessibilityRecord);
+    method @Deprecated @NonNull public static android.view.accessibility.AccessibilityRecord obtain();
     method @Deprecated public void recycle();
     method public void setAddedCount(int);
-    method public void setBeforeText(CharSequence);
+    method public void setBeforeText(@Nullable CharSequence);
     method public void setChecked(boolean);
-    method public void setClassName(CharSequence);
-    method public void setContentDescription(CharSequence);
+    method public void setClassName(@Nullable CharSequence);
+    method public void setContentDescription(@Nullable CharSequence);
     method public void setCurrentItemIndex(int);
     method public void setEnabled(boolean);
     method public void setFromIndex(int);
@@ -51994,7 +51994,7 @@ package android.view.accessibility {
     method public void setItemCount(int);
     method public void setMaxScrollX(int);
     method public void setMaxScrollY(int);
-    method public void setParcelableData(android.os.Parcelable);
+    method public void setParcelableData(@Nullable android.os.Parcelable);
     method public void setPassword(boolean);
     method public void setRemovedCount(int);
     method public void setScrollDeltaX(int);
@@ -52002,7 +52002,7 @@ package android.view.accessibility {
     method public void setScrollX(int);
     method public void setScrollY(int);
     method public void setScrollable(boolean);
-    method public void setSource(android.view.View);
+    method public void setSource(@Nullable android.view.View);
     method public void setSource(@Nullable android.view.View, int);
     method public void setToIndex(int);
   }
@@ -52325,7 +52325,7 @@ package android.view.animation {
   }
 
   public class PathInterpolator extends android.view.animation.BaseInterpolator {
-    ctor public PathInterpolator(android.graphics.Path);
+    ctor public PathInterpolator(@NonNull android.graphics.Path);
     ctor public PathInterpolator(float, float);
     ctor public PathInterpolator(float, float, float, float);
     ctor public PathInterpolator(android.content.Context, android.util.AttributeSet);

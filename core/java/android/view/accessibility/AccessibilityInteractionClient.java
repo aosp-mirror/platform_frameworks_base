@@ -526,9 +526,9 @@ public final class AccessibilityInteractionClient
      * @param prefetchFlags flags to guide prefetching.
      * @return An {@link AccessibilityNodeInfo} if found, null otherwise.
      */
-    public AccessibilityNodeInfo findAccessibilityNodeInfoByAccessibilityId(int connectionId,
-            int accessibilityWindowId, long accessibilityNodeId, boolean bypassCache,
-            int prefetchFlags, Bundle arguments) {
+    public @Nullable AccessibilityNodeInfo findAccessibilityNodeInfoByAccessibilityId(
+            int connectionId, int accessibilityWindowId, long accessibilityNodeId,
+            boolean bypassCache, int prefetchFlags, Bundle arguments) {
         if ((prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_SIBLINGS) != 0
                 && (prefetchFlags & AccessibilityNodeInfo.FLAG_PREFETCH_PREDECESSORS) == 0) {
             throw new IllegalArgumentException("FLAG_PREFETCH_SIBLINGS"

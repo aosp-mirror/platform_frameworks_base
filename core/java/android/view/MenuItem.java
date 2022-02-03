@@ -91,7 +91,7 @@ public interface MenuItem {
          * @return Return true to consume this click and prevent others from
          *         executing.
          */
-        public boolean onMenuItemClick(MenuItem item);
+        public boolean onMenuItemClick(@NonNull MenuItem item);
     }
 
     /**
@@ -110,7 +110,7 @@ public interface MenuItem {
          * @param item Item that was expanded
          * @return true if the item should expand, false if expansion should be suppressed.
          */
-        public boolean onMenuItemActionExpand(MenuItem item);
+        public boolean onMenuItemActionExpand(@NonNull MenuItem item);
 
         /**
          * Called when a menu item with {@link MenuItem#SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW}
@@ -118,7 +118,7 @@ public interface MenuItem {
          * @param item Item that was collapsed
          * @return true if the item should collapse, false if collapsing should be suppressed.
          */
-        public boolean onMenuItemActionCollapse(MenuItem item);
+        public boolean onMenuItemActionCollapse(@NonNull MenuItem item);
     }
 
     /**
@@ -159,7 +159,7 @@ public interface MenuItem {
      * @param title The new text to be displayed.
      * @return This Item so additional setters can be called.
      */
-    public MenuItem setTitle(CharSequence title);
+    public @NonNull MenuItem setTitle(@Nullable CharSequence title);
 
     /**
      * Change the title associated with this item.
@@ -173,14 +173,14 @@ public interface MenuItem {
      * @see #setTitleCondensed(CharSequence)
      */
     
-    public MenuItem setTitle(@StringRes int title);
+    public @NonNull MenuItem setTitle(@StringRes int title);
 
     /**
      * Retrieve the current title of the item.
      *
      * @return The title.
      */
-    public CharSequence getTitle();
+    public @Nullable CharSequence getTitle();
 
     /**
      * Change the condensed title associated with this item. The condensed
@@ -190,7 +190,7 @@ public interface MenuItem {
      * @param title The new text to be displayed as the condensed title.
      * @return This Item so additional setters can be called.
      */
-    public MenuItem setTitleCondensed(CharSequence title);
+    public @NonNull MenuItem setTitleCondensed(@Nullable CharSequence title);
 
     /**
      * Retrieve the current condensed title of the item. If a condensed
@@ -199,7 +199,7 @@ public interface MenuItem {
      * @return The condensed title, if it exists.
      *         Otherwise the normal title.
      */
-    public CharSequence getTitleCondensed();
+    public @Nullable CharSequence getTitleCondensed();
 
     /**
      * Change the icon associated with this item. This icon will not always be
@@ -209,7 +209,7 @@ public interface MenuItem {
      * @param icon The new icon (as a Drawable) to be displayed.
      * @return This Item so additional setters can be called.
      */
-    public MenuItem setIcon(Drawable icon);
+    public @NonNull MenuItem setIcon(@Nullable Drawable icon);
 
     /**
      * Change the icon associated with this item. This icon will not always be
@@ -222,7 +222,7 @@ public interface MenuItem {
      * @param iconRes The new icon (as a resource ID) to be displayed.
      * @return This Item so additional setters can be called.
      */
-    public MenuItem setIcon(@DrawableRes int iconRes);
+    public @NonNull MenuItem setIcon(@DrawableRes int iconRes);
     
     /**
      * Returns the icon for this item as a Drawable (getting it from resources if it hasn't been
@@ -233,7 +233,7 @@ public interface MenuItem {
      * 
      * @return The icon as a Drawable.
      */
-    public Drawable getIcon();
+    public @Nullable Drawable getIcon();
 
     /**
      * Applies a tint to this item's icon. Does not modify the
@@ -250,15 +250,14 @@ public interface MenuItem {
      * @see #getIconTintList()
      * @see Drawable#setTintList(ColorStateList)
      */
-    public default MenuItem setIconTintList(@Nullable ColorStateList tint) { return this; }
+    public default @NonNull MenuItem setIconTintList(@Nullable ColorStateList tint) { return this; }
 
     /**
      * @return the tint applied to this item's icon
      * @attr ref android.R.styleable#MenuItem_iconTint
      * @see #setIconTintList(ColorStateList)
      */
-    @Nullable
-    public default ColorStateList getIconTintList() { return null; }
+    public default @Nullable ColorStateList getIconTintList() { return null; }
 
     /**
      * Specifies the blending mode used to apply the tint specified by
@@ -304,8 +303,7 @@ public interface MenuItem {
      * @see #setIconTintBlendMode(BlendMode)
      *
      */
-    @Nullable
-    public default PorterDuff.Mode getIconTintMode() { return null; }
+    public default @Nullable PorterDuff.Mode getIconTintMode() { return null; }
 
     /**
      * Returns the blending mode used to apply the tint to this item's icon, if specified.
@@ -315,8 +313,7 @@ public interface MenuItem {
      * @see #setIconTintBlendMode(BlendMode)
      *
      */
-    @Nullable
-    default BlendMode getIconTintBlendMode() {
+    default @Nullable BlendMode getIconTintBlendMode() {
         PorterDuff.Mode mode = getIconTintMode();
         if (mode != null) {
             return BlendMode.fromValue(mode.nativeInt);
@@ -343,7 +340,7 @@ public interface MenuItem {
      *               modify it later.
      * @return This Item so additional setters can be called.
      */
-    public MenuItem setIntent(Intent intent);
+    public @NonNull MenuItem setIntent(@Nullable Intent intent);
 
     /**
      * Return the Intent associated with this item.  This returns a
@@ -354,7 +351,7 @@ public interface MenuItem {
      * @return Returns the last value supplied to {@link #setIntent}, or
      *         null.
      */
-    public Intent getIntent();
+    public @Nullable Intent getIntent();
 
     /**
      * Change both the numeric and alphabetic shortcut associated with this
@@ -372,7 +369,7 @@ public interface MenuItem {
      *        using a keyboard with alphabetic keys.
      * @return This Item so additional setters can be called.
      */
-    public MenuItem setShortcut(char numericChar, char alphaChar);
+    public @NonNull MenuItem setShortcut(char numericChar, char alphaChar);
 
     /**
      * Change both the numeric and alphabetic shortcut associated with this
@@ -397,8 +394,8 @@ public interface MenuItem {
      *        {@link KeyEvent#META_SYM_ON}, {@link KeyEvent#META_FUNCTION_ON}.
      * @return This Item so additional setters can be called.
      */
-    default public MenuItem setShortcut(char numericChar, char alphaChar, int numericModifiers,
-            int alphaModifiers) {
+    default public @NonNull MenuItem setShortcut(char numericChar, char alphaChar,
+            int numericModifiers, int alphaModifiers) {
         if ((alphaModifiers & Menu.SUPPORTED_MODIFIERS_MASK) == KeyEvent.META_CTRL_ON
                 && (numericModifiers & Menu.SUPPORTED_MODIFIERS_MASK) == KeyEvent.META_CTRL_ON) {
             return setShortcut(numericChar, alphaChar);
@@ -416,7 +413,7 @@ public interface MenuItem {
      *                 using a 12-key (numeric) keyboard.
      * @return This Item so additional setters can be called.
      */
-    public MenuItem setNumericShortcut(char numericChar);
+    public @NonNull MenuItem setNumericShortcut(char numericChar);
 
     /**
      * Change the numeric shortcut and modifiers associated with this item.
@@ -431,7 +428,7 @@ public interface MenuItem {
      *        {@link KeyEvent#META_SYM_ON}, {@link KeyEvent#META_FUNCTION_ON}.
      * @return This Item so additional setters can be called.
      */
-    default public MenuItem setNumericShortcut(char numericChar, int numericModifiers) {
+    default public @NonNull MenuItem setNumericShortcut(char numericChar, int numericModifiers) {
         if ((numericModifiers & Menu.SUPPORTED_MODIFIERS_MASK) == KeyEvent.META_CTRL_ON) {
             return setNumericShortcut(numericChar);
         } else {
@@ -475,7 +472,7 @@ public interface MenuItem {
      *        using a keyboard with alphabetic keys.
      * @return This Item so additional setters can be called.
      */
-    public MenuItem setAlphabeticShortcut(char alphaChar);
+    public @NonNull MenuItem setAlphabeticShortcut(char alphaChar);
 
     /**
      * Change the alphabetic shortcut associated with this item. The shortcut
@@ -495,7 +492,7 @@ public interface MenuItem {
      *        {@link KeyEvent#META_SYM_ON}, {@link KeyEvent#META_FUNCTION_ON}.
      * @return This Item so additional setters can be called.
      */
-    default public MenuItem setAlphabeticShortcut(char alphaChar, int alphaModifiers) {
+    default public @NonNull MenuItem setAlphabeticShortcut(char alphaChar, int alphaModifiers) {
         if ((alphaModifiers & Menu.SUPPORTED_MODIFIERS_MASK) == KeyEvent.META_CTRL_ON) {
             return setAlphabeticShortcut(alphaChar);
         } else {
@@ -539,7 +536,7 @@ public interface MenuItem {
      * @see Menu#setGroupCheckable
      * @return This Item so additional setters can be called.
      */
-    public MenuItem setCheckable(boolean checkable);
+    public @NonNull MenuItem setCheckable(boolean checkable);
 
     /**
      * Return whether the item can currently display a check mark.
@@ -566,7 +563,7 @@ public interface MenuItem {
      *                it.  The default value is false.
      * @return This Item so additional setters can be called.
      */
-    public MenuItem setChecked(boolean checked);
+    public @NonNull MenuItem setChecked(boolean checked);
 
     /**
      * Return whether the item is currently displaying a check mark.
@@ -586,7 +583,7 @@ public interface MenuItem {
      *        hidden.
      * @return This Item so additional setters can be called.
      */
-    public MenuItem setVisible(boolean visible);
+    public @NonNull MenuItem setVisible(boolean visible);
 
     /**
      * Return the visibility of the menu item.
@@ -604,7 +601,7 @@ public interface MenuItem {
      *        won't be invokable.
      * @return This Item so additional setters can be called.
      */
-    public MenuItem setEnabled(boolean enabled);
+    public @NonNull MenuItem setEnabled(boolean enabled);
 
     /**
      * Return the enabled state of the menu item.
@@ -628,7 +625,7 @@ public interface MenuItem {
      *
      * @return The associated menu if there is one, else null
      */
-    public SubMenu getSubMenu();
+    public @Nullable SubMenu getSubMenu();
 
     /**
      * Set a custom listener for invocation of this menu item. In most
@@ -641,7 +638,8 @@ public interface MenuItem {
      * @see Activity#onOptionsItemSelected(MenuItem)
      * @see Activity#onContextItemSelected(MenuItem)
      */
-    public MenuItem setOnMenuItemClickListener(MenuItem.OnMenuItemClickListener menuItemClickListener);
+    public @NonNull MenuItem setOnMenuItemClickListener(
+            @Nullable MenuItem.OnMenuItemClickListener menuItemClickListener);
 
     /**
      * Gets the extra information linked to this menu item.  This extra
@@ -652,7 +650,7 @@ public interface MenuItem {
      * @return The extra information linked to the View that added this
      *         menu item to the menu. This can be null.
      */
-    public ContextMenuInfo getMenuInfo();
+    public @Nullable ContextMenuInfo getMenuInfo();
     
     /**
      * Sets how this item should display in the presence of an Action Bar.
@@ -690,7 +688,7 @@ public interface MenuItem {
      * @see #setActionView(View)
      * @return This MenuItem instance for call chaining.
      */
-    public MenuItem setShowAsActionFlags(int actionEnum);
+    public @NonNull MenuItem setShowAsActionFlags(int actionEnum);
 
     /**
      * Set an action view for this menu item. An action view will be displayed in place
@@ -706,7 +704,7 @@ public interface MenuItem {
      *
      * @see #setShowAsAction(int)
      */
-    public MenuItem setActionView(View view);
+    public @NonNull MenuItem setActionView(@Nullable View view);
 
     /**
      * Set an action view for this menu item. An action view will be displayed in place
@@ -722,7 +720,7 @@ public interface MenuItem {
      *
      * @see #setShowAsAction(int)
      */
-    public MenuItem setActionView(@LayoutRes int resId);
+    public @NonNull MenuItem setActionView(@LayoutRes int resId);
 
     /**
      * Returns the currently set action view for this menu item.
@@ -732,7 +730,7 @@ public interface MenuItem {
      * @see #setActionView(View)
      * @see #setShowAsAction(int)
      */
-    public View getActionView();
+    public @Nullable View getActionView();
 
     /**
      * Sets the {@link ActionProvider} responsible for creating an action view if
@@ -748,7 +746,7 @@ public interface MenuItem {
      *
      * @see ActionProvider
      */
-    public MenuItem setActionProvider(ActionProvider actionProvider);
+    public @NonNull MenuItem setActionProvider(@Nullable ActionProvider actionProvider);
 
     /**
      * Gets the {@link ActionProvider}.
@@ -758,7 +756,7 @@ public interface MenuItem {
      * @see ActionProvider
      * @see #setActionProvider(ActionProvider)
      */
-    public ActionProvider getActionProvider();
+    public @Nullable ActionProvider getActionProvider();
 
     /**
      * Expand the action view associated with this menu item.
@@ -806,14 +804,14 @@ public interface MenuItem {
      * @param listener Listener that will respond to expand/collapse events
      * @return This menu item instance for call chaining
      */
-    public MenuItem setOnActionExpandListener(OnActionExpandListener listener);
+    public @NonNull MenuItem setOnActionExpandListener(@Nullable OnActionExpandListener listener);
 
     /**
      * Change the content description associated with this menu item.
      *
      * @param contentDescription The new content description.
      */
-    default MenuItem setContentDescription(CharSequence contentDescription) {
+    default @NonNull MenuItem setContentDescription(@Nullable CharSequence contentDescription) {
         return this;
     }
 
@@ -822,7 +820,7 @@ public interface MenuItem {
      *
      * @return The content description.
      */
-    default CharSequence getContentDescription() {
+    default @Nullable CharSequence getContentDescription() {
         return null;
     }
 
@@ -831,7 +829,7 @@ public interface MenuItem {
      *
      * @param tooltipText The new tooltip text.
      */
-    default MenuItem setTooltipText(CharSequence tooltipText) {
+    default @NonNull MenuItem setTooltipText(@Nullable CharSequence tooltipText) {
         return this;
     }
 
@@ -840,7 +838,7 @@ public interface MenuItem {
      *
      * @return The tooltip text.
      */
-    default CharSequence getTooltipText() {
+    default @Nullable CharSequence getTooltipText() {
         return null;
     }
 
