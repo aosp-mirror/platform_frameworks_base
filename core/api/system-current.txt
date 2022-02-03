@@ -10285,8 +10285,6 @@ package android.provider {
   }
 
   public static final class Settings.Secure extends android.provider.Settings.NameValueTable {
-    method public static int getIntForUser(@NonNull android.content.ContentResolver, @NonNull String, int, int);
-    method @Nullable public static String getStringForUser(@NonNull android.content.ContentResolver, @NonNull String, int);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static boolean putString(@NonNull android.content.ContentResolver, @NonNull String, @Nullable String, @Nullable String, boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public static void resetToDefaults(@NonNull android.content.ContentResolver, @Nullable String);
     field @Deprecated public static final String ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED = "accessibility_display_magnification_navbar_enabled";

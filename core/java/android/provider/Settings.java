@@ -6094,11 +6094,9 @@ public final class Settings {
         }
 
         /** @hide */
-        @SystemApi
-        @Nullable
-        @SuppressLint("VisiblySynchronized")
-        public static String getStringForUser(@NonNull ContentResolver resolver,
-                @NonNull String name, int userHandle) {
+        @UnsupportedAppUsage
+        public static String getStringForUser(ContentResolver resolver, String name,
+                int userHandle) {
             if (MOVED_TO_GLOBAL.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.Secure"
                         + " to android.provider.Settings.Global.");
@@ -6330,9 +6328,8 @@ public final class Settings {
         }
 
         /** @hide */
-        @SystemApi
-        public static int getIntForUser(@NonNull ContentResolver cr, @NonNull String name,
-                int def, int userHandle) {
+        @UnsupportedAppUsage
+        public static int getIntForUser(ContentResolver cr, String name, int def, int userHandle) {
             String v = getStringForUser(cr, name, userHandle);
             return parseIntSettingWithDefault(v, def);
         }
