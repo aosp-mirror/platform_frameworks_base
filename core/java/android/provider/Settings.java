@@ -9950,6 +9950,14 @@ public final class Settings {
         public static final String LOCKSCREEN_SHOW_CONTROLS = "lockscreen_show_controls";
 
         /**
+         * Whether trivial home controls can be used without authentication
+         *
+         * @hide
+         */
+        public static final String LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS =
+                "lockscreen_allow_trivial_controls";
+
+        /**
          * Whether wallet should be accessible from the lockscreen
          *
          * @hide
