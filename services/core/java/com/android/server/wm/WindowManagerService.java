@@ -21,6 +21,7 @@ import static android.Manifest.permission.INPUT_CONSUMER;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
+import static android.Manifest.permission.MODIFY_TOUCH_MODE_STATE;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
 import static android.Manifest.permission.RESTRICTED_VR_ACCESS;
@@ -38,6 +39,7 @@ import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
+import static android.os.Process.myUid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW;
@@ -1186,7 +1188,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_hasPermanentDpad);
         mInTouchMode = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_defaultInTouchMode);
-        inputManager.setInTouchMode(mInTouchMode);
+        inputManager.setInTouchMode(
+                mInTouchMode, myPid(), myUid(), /* hasPermission = */ true);
         mDrawLockTimeoutMillis = context.getResources().getInteger(
                 com.android.internal.R.integer.config_drawLockTimeoutMillis);
         mAllowAnimationsInLowPowerMode = context.getResources().getBoolean(
@@ -2652,7 +2655,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean checkCallingPermission(String permission, String func, boolean printLog) {
-        // Quick check: if the calling permission is me, it's all okay.
         if (Binder.getCallingPid() == myPid()) {
             return true;
         }
@@ -3692,12 +3694,33 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @Override
+    /**
+     * Sets the touch mode state.
+     *
+     * To be able to change touch mode state, the caller must either own the focused window, or must
+     * have the MODIFY_TOUCH_MODE_STATE permission.
+     *
+     * @param mode the touch mode to set
+     */
+    @Override // Binder call
     public void setInTouchMode(boolean mode) {
         synchronized (mGlobalLock) {
-            mInTouchMode = mode;
+            if (mInTouchMode == mode) {
+                return;
+            }
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final boolean hasPermission = checkCallingPermission(MODIFY_TOUCH_MODE_STATE,
+                    "setInTouchMode()");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if (mInputManager.setInTouchMode(mode, pid, uid, hasPermission)) {
+                    mInTouchMode = mode;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
-        mInputManager.setInTouchMode(mode);
     }
 
     boolean getInTouchMode() {

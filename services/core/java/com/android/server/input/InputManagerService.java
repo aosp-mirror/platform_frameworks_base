@@ -305,7 +305,8 @@ public class InputManagerService extends IInputManager.Stub
     private static native void nativeRemoveInputChannel(long ptr, IBinder connectionToken);
     private static native void nativePilferPointers(long ptr, IBinder token);
     private static native void nativeSetInputFilterEnabled(long ptr, boolean enable);
-    private static native void nativeSetInTouchMode(long ptr, boolean inTouchMode);
+    private static native boolean nativeSetInTouchMode(long ptr, boolean inTouchMode, int pid,
+            int uid, boolean hasPermission);
     private static native void nativeSetMaximumObscuringOpacityForTouch(long ptr, float opacity);
     private static native void nativeSetBlockUntrustedTouchesMode(long ptr, int mode);
     private static native int nativeInjectInputEvent(long ptr, InputEvent event,
@@ -866,12 +867,16 @@ public class InputManagerService extends IInputManager.Stub
      * other apps, when they become focused.
      *
      * When input dispatches focus to the apps, the touch mode state
-     * will be sent together with the focus change.
+     * will be sent together with the focus change (but each one in its own event).
      *
-     * @param inTouchMode true if the device is in touch mode.
+     * @param inTouchMode true if the device is in touch mode
+     * @param pid the pid of the process that requested to switch touch mode state
+     * @param uid the uid of the process that requested to switch touch mode state
+     * @param hasPermission if set to {@code true} then no further authorization will be performed
+     * @return {@code true} if the touch mode was successfully changed, {@code false} otherwise
      */
-    public void setInTouchMode(boolean inTouchMode) {
-        nativeSetInTouchMode(mPtr, inTouchMode);
+    public boolean setInTouchMode(boolean inTouchMode, int pid, int uid, boolean hasPermission) {
+        return nativeSetInTouchMode(mPtr, inTouchMode, pid, uid, hasPermission);
     }
 
     @Override // Binder call
