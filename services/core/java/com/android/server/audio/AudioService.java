@@ -127,6 +127,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HwBinder;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -10469,6 +10470,25 @@ public class AudioService extends IAudioService.Stub
             throw new IllegalStateException("AudioPolicy must have focus listener to change focus");
         }
         return mMediaFocusControl.sendFocusLoss(focusLoser);
+    }
+
+    private static final String[] HAL_VERSIONS = new String[] {"7.1", "7.0", "6.0", "4.0", "2.0"};
+
+    /** @see AudioManager#getHalVersion */
+    public @Nullable String getHalVersion() {
+        for (String version : HAL_VERSIONS) {
+            try {
+                HwBinder.getService(
+                        String.format("android.hardware.audio@%s::IDevicesFactory", version),
+                        "default");
+                return version;
+            } catch (NoSuchElementException e) {
+                // Ignore, the specified HAL interface is not found.
+            } catch (RemoteException re) {
+                Log.e(TAG, "Remote exception when getting hardware audio service:", re);
+            }
+        }
+        return null;
     }
 
     /** see AudioManager.hasRegisteredDynamicPolicy */

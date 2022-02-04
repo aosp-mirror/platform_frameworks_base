@@ -8450,6 +8450,22 @@ public class AudioManager {
         }
     }
 
+    /**
+     * Returns the audio HAL version in the form MAJOR.MINOR. If there is no audio HAL found, null
+     * will be returned.
+     *
+     * @hide
+     */
+    @TestApi
+    public static @Nullable String getHalVersion() {
+        try {
+            return getService().getHalVersion();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error querying getHalVersion", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private final Object mMuteAwaitConnectionListenerLock = new Object();
 
     @GuardedBy("mMuteAwaitConnectionListenerLock")
