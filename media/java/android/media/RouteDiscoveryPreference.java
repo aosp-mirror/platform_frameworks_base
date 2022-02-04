@@ -67,7 +67,7 @@ public final class RouteDiscoveryPreference implements Parcelable {
     @NonNull
     private final List<String> mRequiredFeatures;
     @NonNull
-    private final List<String> mPackagesOrder;
+    private final List<String> mPackageOrder;
     @NonNull
     private final List<String> mAllowedPackages;
 
@@ -86,7 +86,7 @@ public final class RouteDiscoveryPreference implements Parcelable {
     RouteDiscoveryPreference(@NonNull Builder builder) {
         mPreferredFeatures = builder.mPreferredFeatures;
         mRequiredFeatures = builder.mRequiredFeatures;
-        mPackagesOrder = builder.mPackageOrder;
+        mPackageOrder = builder.mPackageOrder;
         mAllowedPackages = builder.mAllowedPackages;
         mShouldPerformActiveScan = builder.mActiveScan;
         mExtras = builder.mExtras;
@@ -95,7 +95,7 @@ public final class RouteDiscoveryPreference implements Parcelable {
     RouteDiscoveryPreference(@NonNull Parcel in) {
         mPreferredFeatures = in.createStringArrayList();
         mRequiredFeatures = in.createStringArrayList();
-        mPackagesOrder = in.createStringArrayList();
+        mPackageOrder = in.createStringArrayList();
         mAllowedPackages = in.createStringArrayList();
         mShouldPerformActiveScan = in.readBoolean();
         mExtras = in.readBundle();
@@ -144,7 +144,7 @@ public final class RouteDiscoveryPreference implements Parcelable {
      */
     @NonNull
     public List<String> getDeduplicationPackageOrder() {
-        return mPackagesOrder;
+        return mPackageOrder;
     }
 
     /**
@@ -175,7 +175,7 @@ public final class RouteDiscoveryPreference implements Parcelable {
      * @see #getDeduplicationPackageOrder()
      */
     public boolean shouldRemoveDuplicates() {
-        return !mPackagesOrder.isEmpty();
+        return !mPackageOrder.isEmpty();
     }
 
     /**
@@ -194,7 +194,7 @@ public final class RouteDiscoveryPreference implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeStringList(mPreferredFeatures);
         dest.writeStringList(mRequiredFeatures);
-        dest.writeStringList(mPackagesOrder);
+        dest.writeStringList(mPackageOrder);
         dest.writeStringList(mAllowedPackages);
         dest.writeBoolean(mShouldPerformActiveScan);
         dest.writeBundle(mExtras);
@@ -225,14 +225,14 @@ public final class RouteDiscoveryPreference implements Parcelable {
         RouteDiscoveryPreference other = (RouteDiscoveryPreference) o;
         return Objects.equals(mPreferredFeatures, other.mPreferredFeatures)
                 && Objects.equals(mRequiredFeatures, other.mRequiredFeatures)
-                && Objects.equals(mPackagesOrder, other.mPackagesOrder)
+                && Objects.equals(mPackageOrder, other.mPackageOrder)
                 && Objects.equals(mAllowedPackages, other.mAllowedPackages)
                 && mShouldPerformActiveScan == other.mShouldPerformActiveScan;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mPreferredFeatures, mRequiredFeatures, mPackagesOrder, mAllowedPackages,
+        return Objects.hash(mPreferredFeatures, mRequiredFeatures, mPackageOrder, mAllowedPackages,
                 mShouldPerformActiveScan);
     }
 
@@ -271,21 +271,31 @@ public final class RouteDiscoveryPreference implements Parcelable {
         }
 
         /**
-         * A constructor to combine all the preferences into a single preference.
-         * It ignores extras of preferences.
+         * A constructor to combine multiple preferences into a single preference. The combined
+         * preference will discover a superset of the union of the routes discoverable by each of
+         * the individual preferences.
+         * <p>
+         * When routes need to be discovered for multiple preferences, the combined preference can
+         * be used to query route providers once and obtain all routes of interest. The obtained
+         * routes can then be filtered for each of the individual preferences. This is typically
+         * more efficient than querying route providers with each of the individual preferences.
          *
          * @hide
          */
         public Builder(@NonNull Collection<RouteDiscoveryPreference> preferences) {
             Objects.requireNonNull(preferences, "preferences must not be null");
 
-            Set<String> routeFeatureSet = new HashSet<>();
-            mActiveScan = false;
+            Set<String> preferredFeatures = new HashSet<>();
+            boolean activeScan = false;
             for (RouteDiscoveryPreference preference : preferences) {
-                routeFeatureSet.addAll(preference.mPreferredFeatures);
-                mActiveScan |= preference.mShouldPerformActiveScan;
+                preferredFeatures.addAll(preference.mPreferredFeatures);
+                activeScan |= preference.mShouldPerformActiveScan;
             }
-            mPreferredFeatures = new ArrayList<>(routeFeatureSet);
+            mPreferredFeatures = new ArrayList<>(preferredFeatures);
+            mRequiredFeatures = List.of();
+            mPackageOrder = List.of();
+            mAllowedPackages = List.of();
+            mActiveScan = activeScan;
         }
 
         /**
