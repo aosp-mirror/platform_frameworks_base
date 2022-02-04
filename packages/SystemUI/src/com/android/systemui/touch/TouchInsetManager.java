@@ -21,6 +21,10 @@ import android.graphics.Region;
 import android.view.View;
 import android.view.ViewRootImpl;
 
+import androidx.concurrent.futures.CallbackToFutureAdapter;
+
+import com.google.common.util.concurrent.ListenableFuture;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.concurrent.Executor;
@@ -139,6 +143,18 @@ public class TouchInsetManager {
      */
     public TouchInsetSession createSession() {
         return new TouchInsetSession(this, mExecutor);
+    }
+
+    /**
+     * Checks to see if the given point coordinates fall within an inset region.
+     */
+    public ListenableFuture<Boolean> checkWithinTouchRegion(int x, int y) {
+        return CallbackToFutureAdapter.getFuture(completer -> {
+            mExecutor.execute(() -> completer.set(
+                    mDefinedRegions.values().stream().anyMatch(region -> region.contains(x, y))));
+
+            return "DreamOverlayTouchMonitor::checkWithinTouchRegion";
+        });
     }
 
     private void updateTouchInset() {
