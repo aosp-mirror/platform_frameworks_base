@@ -64,6 +64,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.android.internal.R;
 import com.android.internal.util.DumpUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -256,13 +257,16 @@ public class DreamService extends Service implements Window.Callback {
             mRequests = new ArrayDeque<>();
         }
 
-        public void bind(Context context, @Nullable ComponentName overlayService) {
+        public void bind(Context context, @Nullable ComponentName overlayService,
+                ComponentName dreamService) {
             if (overlayService == null) {
                 return;
             }
 
             final Intent overlayIntent = new Intent();
             overlayIntent.setComponent(overlayService);
+            overlayIntent.putExtra(EXTRA_SHOW_COMPLICATIONS,
+                    fetchShouldShowComplications(context, dreamService));
 
             context.bindService(overlayIntent,
                     this, Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE);
@@ -984,7 +988,8 @@ public class DreamService extends Service implements Window.Callback {
 
         // Connect to the overlay service if present.
         if (!mWindowless) {
-            mOverlayConnection.bind(this, intent.getParcelableExtra(EXTRA_DREAM_OVERLAY_COMPONENT));
+            mOverlayConnection.bind(this, intent.getParcelableExtra(EXTRA_DREAM_OVERLAY_COMPONENT),
+                    new ComponentName(this, getClass()));
         }
 
         return mDreamServiceWrapper;
@@ -1116,7 +1121,9 @@ public class DreamService extends Service implements Window.Callback {
                 convertToComponentName(rawMetadata.getString(
                         com.android.internal.R.styleable.Dream_settingsActivity), serviceInfo),
                 rawMetadata.getDrawable(
-                        com.android.internal.R.styleable.Dream_previewImage));
+                        com.android.internal.R.styleable.Dream_previewImage),
+                rawMetadata.getBoolean(R.styleable.Dream_showClockAndComplications,
+                        DEFAULT_SHOW_COMPLICATIONS));
         rawMetadata.recycle();
         return metadata;
     }
@@ -1337,6 +1344,30 @@ public class DreamService extends Service implements Window.Callback {
         return (oldFlags&~mask) | (flags&mask);
     }
 
+    /**
+     * Fetches metadata of the dream indicated by the {@link ComponentName}, and returns whether
+     * the dream should show complications on the overlay. If not defined, returns
+     * {@link DreamService#DEFAULT_SHOW_COMPLICATIONS}.
+     */
+    private static boolean fetchShouldShowComplications(Context context,
+            ComponentName componentName) {
+        final PackageManager pm = context.getPackageManager();
+
+        try {
+            final ServiceInfo si = pm.getServiceInfo(componentName,
+                    PackageManager.ComponentInfoFlags.of(PackageManager.GET_META_DATA));
+            final DreamMetadata metadata = getDreamMetadata(context, si);
+
+            if (metadata != null) {
+                return metadata.showComplications;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            if (DEBUG) Log.w(TAG, "cannot find component " + componentName.flattenToShortString());
+        }
+
+        return DEFAULT_SHOW_COMPLICATIONS;
+    }
+
     @Override
     protected void dump(final FileDescriptor fd, PrintWriter pw, final String[] args) {
         DumpUtils.dumpAsync(mHandler, (pw1, prefix) -> dumpOnHandler(fd, pw1, args), pw, "", 1000);
@@ -1410,9 +1441,14 @@ public class DreamService extends Service implements Window.Callback {
         @Nullable
         public final Drawable previewImage;
 
-        DreamMetadata(ComponentName settingsActivity, Drawable previewImage) {
+        @NonNull
+        public final boolean showComplications;
+
+        DreamMetadata(ComponentName settingsActivity, Drawable previewImage,
+                boolean showComplications) {
             this.settingsActivity = settingsActivity;
             this.previewImage = previewImage;
+            this.showComplications = showComplications;
         }
     }
 }
