@@ -184,11 +184,6 @@ bool NativeInputWindowHandle::updateInfo() {
                 mInfo.inputConfig |= InputConfig::NOT_TOUCHABLE;
             }
             FALLTHROUGH_INTENDED;
-        case InputConfig::TOUCH_MODAL:
-            if (!flags.test(WindowInfo::Flag::NOT_TOUCH_MODAL)) {
-                mInfo.inputConfig |= InputConfig::TOUCH_MODAL;
-            }
-            FALLTHROUGH_INTENDED;
         case InputConfig::PREVENT_SPLITTING:
             if (!flags.test(WindowInfo::Flag::SPLIT_TOUCH)) {
                 mInfo.inputConfig |= InputConfig::PREVENT_SPLITTING;
