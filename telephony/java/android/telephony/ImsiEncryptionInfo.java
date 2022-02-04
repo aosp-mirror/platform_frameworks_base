@@ -46,16 +46,17 @@ public final class ImsiEncryptionInfo implements Parcelable {
     private final int keyType;
     //Date-Time in UTC when the key will expire.
     private final Date expirationTime;
+    private final int carrierId;
 
     /** @hide */
     public ImsiEncryptionInfo(String mcc, String mnc, int keyType, String keyIdentifier,
-                              byte[] key, Date expirationTime) {
-        this(mcc, mnc, keyType, keyIdentifier, makeKeyObject(key), expirationTime);
+            byte[] key, Date expirationTime, int carrierId) {
+        this(mcc, mnc, keyType, keyIdentifier, makeKeyObject(key), expirationTime, carrierId);
     }
 
     /** @hide */
     public ImsiEncryptionInfo(String mcc, String mnc, int keyType, String keyIdentifier,
-                              PublicKey publicKey, Date expirationTime) {
+            PublicKey publicKey, Date expirationTime, int carrierId) {
         // todo need to validate that ImsiEncryptionInfo is being created with the correct params.
         //      Including validating that the public key is in "X.509" format. This will be done in
         //      a subsequent CL.
@@ -65,6 +66,7 @@ public final class ImsiEncryptionInfo implements Parcelable {
         this.publicKey = publicKey;
         this.keyIdentifier = keyIdentifier;
         this.expirationTime = expirationTime;
+        this.carrierId = carrierId;
     }
 
     /** @hide */
@@ -78,6 +80,7 @@ public final class ImsiEncryptionInfo implements Parcelable {
         keyIdentifier = in.readString();
         keyType = in.readInt();
         expirationTime = new Date(in.readLong());
+        carrierId = in.readInt();
     }
 
     /** @hide */
@@ -88,6 +91,11 @@ public final class ImsiEncryptionInfo implements Parcelable {
     /** @hide */
     public String getMcc() {
         return this.mcc;
+    }
+
+    /** @hide */
+    public int getCarrierId() {
+        return carrierId;
     }
 
     /**
@@ -157,6 +165,7 @@ public final class ImsiEncryptionInfo implements Parcelable {
         dest.writeString(keyIdentifier);
         dest.writeInt(keyType);
         dest.writeLong(expirationTime.getTime());
+        dest.writeInt(carrierId);
     }
 
     @Override
@@ -164,10 +173,11 @@ public final class ImsiEncryptionInfo implements Parcelable {
         return "[ImsiEncryptionInfo "
                 + "mcc=" + mcc
                 + " mnc=" + mnc
-                + " publicKey=" + publicKey
+                + ", publicKey=" + publicKey
                 + ", keyIdentifier=" + keyIdentifier
                 + ", keyType=" + keyType
                 + ", expirationTime=" + expirationTime
+                + ", carrier_id=" + carrierId
                 + "]";
     }
 }
