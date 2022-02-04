@@ -104,6 +104,73 @@ public class ImsRegistrationImplBase {
     // yet.
     private static final int REGISTRATION_STATE_UNKNOWN = -1;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+        prefix = {"REASON_"},
+        value = {
+            REASON_UNKNOWN,
+            REASON_SIM_REMOVED,
+            REASON_SIM_REFRESH,
+            REASON_ALLOWED_NETWORK_TYPES_CHANGED,
+            REASON_NON_IMS_CAPABLE_NETWORK,
+            REASON_RADIO_POWER_OFF,
+            REASON_HANDOVER_FAILED,
+            REASON_VOPS_NOT_SUPPORTED,
+        })
+    public @interface ImsDeregistrationReason{}
+
+    /**
+     * Unspecified reason.
+     * @hide
+     */
+    public static final int REASON_UNKNOWN = 0;
+
+    /**
+     * Since SIM is removed, the credentials for IMS service is also removed.
+     * @hide
+     */
+    public static final int REASON_SIM_REMOVED = 1;
+
+    /**
+     * Detach from the network shall be performed due to the SIM refresh. IMS service should be
+     * deregistered before that procedure.
+     * @hide
+     */
+    public static final int REASON_SIM_REFRESH = 2;
+
+    /**
+     * The allowed network types have changed, resulting in a network type
+     * that does not support IMS.
+     * @hide
+     */
+    public static final int REASON_ALLOWED_NETWORK_TYPES_CHANGED = 3;
+
+   /**
+     * The device camped on a network that does not support IMS.
+     * @hide
+     */
+    public static final int REASON_NON_IMS_CAPABLE_NETWORK = 4;
+
+    /**
+     * IMS service should be deregistered from the network before turning off the radio.
+     * @hide
+     */
+    public static final int REASON_RADIO_POWER_OFF = 5;
+
+    /**
+     * Since the handover is failed or not allowed, the data service for IMS shall be
+     * disconnected.
+     * @hide
+     */
+    public static final int REASON_HANDOVER_FAILED = 6;
+
+    /**
+     * The network is changed to a network that does not support voice over IMS.
+     * @hide
+     */
+    public static final int REASON_VOPS_NOT_SUPPORTED = 7;
+
     private Executor mExecutor;
 
     /**
@@ -180,6 +247,12 @@ public class ImsRegistrationImplBase {
         public void triggerSipDelegateDeregistration() {
             executeMethodAsyncNoException(() -> ImsRegistrationImplBase.this
                     .triggerSipDelegateDeregistration(), "triggerSipDelegateDeregistration");
+        }
+
+        @Override
+        public void triggerDeregistration(@ImsDeregistrationReason int reason) {
+            executeMethodAsyncNoException(() -> ImsRegistrationImplBase.this
+                    .triggerDeregistration(reason), "triggerDeregistration");
         }
 
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
@@ -303,6 +376,19 @@ public class ImsRegistrationImplBase {
         // Stub implementation, ImsService should implement this
     }
 
+    /**
+     * Requests IMS stack to perform graceful IMS deregistration before radio performing
+     * network detach in the events of SIM remove, refresh or and so on. The radio waits for
+     * the IMS deregistration, which will be notified by telephony via
+     * {@link android.hardware.radio.ims.IRadioIms#updateImsRegistrationInfo()},
+     * or a certain timeout interval to start the network detach procedure.
+     *
+     * @param reason the reason why the deregistration is triggered.
+     * @hide
+     */
+    public void triggerDeregistration(@ImsDeregistrationReason int reason) {
+        // Stub Implementation, can be overridden by ImsService
+    }
 
     /**
      * Notify the framework that the device is connected to the IMS network.
