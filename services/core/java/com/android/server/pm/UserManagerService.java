@@ -2515,13 +2515,17 @@ public class UserManagerService extends IUserManager.Stub {
         return 0 < getRemainingCreatableProfileCount(userType, userId, allowedToRemoveOne);
     }
 
+    @Override
+    public int getRemainingCreatableProfileCount(@NonNull String userType, @UserIdInt int userId) {
+        return getRemainingCreatableProfileCount(userType, userId, false);
+    }
+
     /**
      * Returns the remaining number of profiles of the given type that can be added to the given
      * user. (taking into account the total number of users on the device as well as how many
      * profiles exist of that type both in general and for the given user)
      */
-    @Override
-    public int getRemainingCreatableProfileCount(@NonNull String userType, @UserIdInt int userId,
+    private int getRemainingCreatableProfileCount(@NonNull String userType, @UserIdInt int userId,
             boolean allowedToRemoveOne) {
         checkQueryOrCreateUsersPermission(
                 "get the remaining number of profiles that can be added to the given user.");
