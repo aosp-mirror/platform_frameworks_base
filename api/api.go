@@ -27,6 +27,7 @@ import (
 const art = "art.module.public.api"
 const conscrypt = "conscrypt.module.public.api"
 const i18n = "i18n.module.public.api"
+var core_libraries_modules = []string{art, conscrypt, i18n}
 
 // The intention behind this soong plugin is to generate a number of "merged"
 // API-related modules that would otherwise require a large amount of very
@@ -199,9 +200,28 @@ func createMergedSystemStubs(ctx android.LoadHookContext, modules []string) {
 	ctx.CreateModule(java.LibraryFactory, &props)
 }
 
-func createMergedModuleLibStubs(ctx android.LoadHookContext, modules []string) {
+func createMergedFrameworkImpl(ctx android.LoadHookContext, modules []string) {
+	// This module is for the "framework-all" module, which should not include the core libraries.
+	modules = removeAll(modules, core_libraries_modules)
+	// TODO(b/214988855): remove the line below when framework-bluetooth has an impl jar.
+	modules = remove(modules, "framework-bluetooth")
+	props := libraryProps{}
+	props.Name = proptools.StringPtr("all-framework-module-impl")
+	props.Static_libs = transformArray(modules, "", ".impl")
+	// Media module's impl jar is called "updatable-media"
+	for i, v := range props.Static_libs {
+		if v == "framework-media.impl" {
+			props.Static_libs[i] = "updatable-media"
+		}
+	}
+	props.Sdk_version = proptools.StringPtr("module_current")
+	props.Visibility = []string{"//frameworks/base"}
+	ctx.CreateModule(java.LibraryFactory, &props)
+}
+
+func createMergedFrameworkModuleLibStubs(ctx android.LoadHookContext, modules []string) {
 	// The user of this module compiles against the "core" SDK, so remove core libraries to avoid dupes.
-	modules = removeAll(modules, []string{art, conscrypt, i18n})
+	modules = removeAll(modules, core_libraries_modules)
 	props := libraryProps{}
 	props.Name = proptools.StringPtr("framework-updatable-stubs-module_libs_api")
 	props.Static_libs = transformArray(modules, "", ".stubs.module_lib")
@@ -269,7 +289,8 @@ func (a *CombinedApis) createInternalModules(ctx android.LoadHookContext) {
 
 	createMergedPublicStubs(ctx, bootclasspath)
 	createMergedSystemStubs(ctx, bootclasspath)
-	createMergedModuleLibStubs(ctx, bootclasspath)
+	createMergedFrameworkModuleLibStubs(ctx, bootclasspath)
+	createMergedFrameworkImpl(ctx, bootclasspath)
 
 	createMergedAnnotations(ctx, bootclasspath)
 
