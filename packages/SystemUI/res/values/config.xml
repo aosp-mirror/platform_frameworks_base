@@ -683,7 +683,7 @@
     <integer name="config_connectionMinDuration">1000</integer>
 
     <!-- Flag to activate notification to contents feature -->
-    <bool name="config_notificationToContents">false</bool>
+    <bool name="config_notificationToContents">true</bool>
 
     <!-- Respect drawable/rounded_secondary.xml intrinsic size for multiple radius corner path
          customization for secondary display-->
