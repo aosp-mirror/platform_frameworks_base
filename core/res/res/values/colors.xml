@@ -448,4 +448,7 @@
     <color name="accessibility_magnification_background">#F50D60</color>
     <color name="accessibility_daltonizer_background">#00BCD4</color>
     <color name="accessibility_color_inversion_background">#546E7A</color>
+
+    <!-- Color of camera light when camera is in use -->
+    <color name="camera_privacy_light">#FFFFFF</color>
 </resources>
