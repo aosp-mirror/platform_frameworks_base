@@ -16,17 +16,20 @@
 
 package com.android.systemui.media.taptotransfer.sender
 
+import android.app.StatusBarManager
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.Icon
+import android.media.MediaRoute2Info
 import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.test.filters.SmallTest
+import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.shared.mediattt.IUndoTransferCallback
+import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -34,6 +37,7 @@ import org.junit.Ignore
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -46,17 +50,150 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Mock
     private lateinit var windowManager: WindowManager
+    @Mock
+    private lateinit var commandQueue: CommandQueue
+    private lateinit var commandQueueCallback: CommandQueue.Callbacks
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         appIconDrawable = Icon.createWithResource(context, R.drawable.ic_cake).loadDrawable(context)
-        controllerSender = MediaTttChipControllerSender(context, windowManager)
+        controllerSender = MediaTttChipControllerSender(commandQueue, context, windowManager)
+
+        val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
+        verify(commandQueue).addCallback(callbackCaptor.capture())
+        commandQueueCallback = callbackCaptor.value!!
     }
 
     @Test
-    fun moveCloserToStartCast_appIcon_deviceName_noLoadingIcon_noUndo_noFailureIcon() {
-        val state = moveCloserToStartCast()
+    fun commandQueueCallback_almostCloseToStartCast_triggersCorrectChip() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
+            routeInfo,
+            null
+        )
+
+        assertThat(getChipView().getChipText())
+            .isEqualTo(almostCloseToStartCast().getChipTextString(context))
+    }
+
+    @Test
+    fun commandQueueCallback_almostCloseToEndCast_triggersCorrectChip() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST,
+            routeInfo,
+            null
+        )
+
+        assertThat(getChipView().getChipText())
+            .isEqualTo(almostCloseToEndCast().getChipTextString(context))
+    }
+
+    @Test
+    fun commandQueueCallback_transferToReceiverTriggered_triggersCorrectChip() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED,
+            routeInfo,
+            null
+        )
+
+        assertThat(getChipView().getChipText())
+            .isEqualTo(transferToReceiverTriggered().getChipTextString(context))
+    }
+
+    @Test
+    fun commandQueueCallback_transferToThisDeviceTriggered_triggersCorrectChip() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
+            routeInfo,
+            null
+        )
+
+        assertThat(getChipView().getChipText())
+            .isEqualTo(transferToThisDeviceTriggered().getChipTextString(context))
+    }
+
+    @Test
+    fun commandQueueCallback_transferToReceiverSucceeded_triggersCorrectChip() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+            routeInfo,
+            null
+        )
+
+        assertThat(getChipView().getChipText())
+            .isEqualTo(transferToReceiverSucceeded().getChipTextString(context))
+    }
+
+    @Test
+    fun commandQueueCallback_transferToThisDeviceSucceeded_triggersCorrectChip() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED,
+            routeInfo,
+            null
+        )
+
+        assertThat(getChipView().getChipText())
+            .isEqualTo(transferToThisDeviceSucceeded().getChipTextString(context))
+    }
+
+    @Test
+    fun commandQueueCallback_transferToReceiverFailed_triggersCorrectChip() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_FAILED,
+            routeInfo,
+            null
+        )
+
+        assertThat(getChipView().getChipText())
+            .isEqualTo(transferFailed().getChipTextString(context))
+    }
+
+    @Test
+    fun commandQueueCallback_transferToThisDeviceFailed_triggersCorrectChip() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED,
+            routeInfo,
+            null
+        )
+
+        assertThat(getChipView().getChipText())
+            .isEqualTo(transferFailed().getChipTextString(context))
+    }
+
+    @Test
+    fun commandQueueCallback_farFromReceiver_noChipShown() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+            routeInfo,
+            null
+        )
+
+        verify(windowManager, never()).addView(any(), any())
+    }
+
+    @Test
+    fun commandQueueCallback_almostCloseThenFarFromReceiver_chipShownThenHidden() {
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
+            routeInfo,
+            null
+        )
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER,
+            routeInfo,
+            null
+        )
+
+        val viewCaptor = ArgumentCaptor.forClass(View::class.java)
+        verify(windowManager).addView(viewCaptor.capture(), any())
+        verify(windowManager).removeView(viewCaptor.value)
+    }
+
+    @Test
+    fun almostCloseToStartCast_appIcon_deviceName_noLoadingIcon_noUndo_noFailureIcon() {
+        val state = almostCloseToStartCast()
         controllerSender.displayChip(state)
 
         val chipView = getChipView()
@@ -69,8 +206,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     }
 
     @Test
-    fun moveCloserToEndCast_appIcon_deviceName_noLoadingIcon_noUndo_noFailureIcon() {
-        val state = moveCloserToEndCast()
+    fun almostCloseToEndCast_appIcon_deviceName_noLoadingIcon_noUndo_noFailureIcon() {
+        val state = almostCloseToEndCast()
         controllerSender.displayChip(state)
 
         val chipView = getChipView()
@@ -133,7 +270,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferToReceiverSucceeded_withUndoRunnable_undoWithClick() {
-        val undoCallback = object : IUndoTransferCallback.Stub() {
+        val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {}
         }
         controllerSender.displayChip(transferToReceiverSucceeded(undoCallback))
@@ -146,7 +283,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     @Test
     fun transferToReceiverSucceeded_withUndoRunnable_undoButtonClickRunsRunnable() {
         var undoCallbackCalled = false
-        val undoCallback = object : IUndoTransferCallback.Stub() {
+        val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {
                 undoCallbackCalled = true
             }
@@ -160,7 +297,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferToReceiverSucceeded_undoButtonClick_switchesToTransferToThisDeviceTriggered() {
-        val undoCallback = object : IUndoTransferCallback.Stub() {
+        val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {}
         }
         controllerSender.displayChip(transferToReceiverSucceeded(undoCallback))
@@ -194,7 +331,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferToThisDeviceSucceeded_withUndoRunnable_undoWithClick() {
-        val undoCallback = object : IUndoTransferCallback.Stub() {
+        val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {}
         }
         controllerSender.displayChip(transferToThisDeviceSucceeded(undoCallback))
@@ -207,7 +344,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     @Test
     fun transferToThisDeviceSucceeded_withUndoRunnable_undoButtonClickRunsRunnable() {
         var undoCallbackCalled = false
-        val undoCallback = object : IUndoTransferCallback.Stub() {
+        val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {
                 undoCallbackCalled = true
             }
@@ -221,7 +358,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
     @Test
     fun transferToThisDeviceSucceeded_undoButtonClick_switchesToTransferToReceiverTriggered() {
-        val undoCallback = object : IUndoTransferCallback.Stub() {
+        val undoCallback = object : IUndoMediaTransferCallback.Stub() {
             override fun onUndoTriggered() {}
         }
         controllerSender.displayChip(transferToThisDeviceSucceeded(undoCallback))
@@ -247,8 +384,8 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     }
 
     @Test
-    fun changeFromCloserToStartToTransferTriggered_loadingIconAppears() {
-        controllerSender.displayChip(moveCloserToStartCast())
+    fun changeFromAlmostCloseToStartToTransferTriggered_loadingIconAppears() {
+        controllerSender.displayChip(almostCloseToStartCast())
         controllerSender.displayChip(transferToReceiverTriggered())
 
         assertThat(getChipView().getLoadingIconVisibility()).isEqualTo(View.VISIBLE)
@@ -267,7 +404,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         controllerSender.displayChip(transferToReceiverTriggered())
         controllerSender.displayChip(
             transferToReceiverSucceeded(
-                object : IUndoTransferCallback.Stub() {
+                object : IUndoMediaTransferCallback.Stub() {
                     override fun onUndoTriggered() {}
                 }
             )
@@ -277,9 +414,9 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     }
 
     @Test
-    fun changeFromTransferSucceededToMoveCloserToStart_undoButtonDisappears() {
+    fun changeFromTransferSucceededToAlmostCloseToStart_undoButtonDisappears() {
         controllerSender.displayChip(transferToReceiverSucceeded())
-        controllerSender.displayChip(moveCloserToStartCast())
+        controllerSender.displayChip(almostCloseToStartCast())
 
         assertThat(getChipView().getUndoButton().visibility).isEqualTo(View.GONE)
     }
@@ -311,12 +448,12 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
     }
 
     /** Helper method providing default parameters to not clutter up the tests. */
-    private fun moveCloserToStartCast() =
-        MoveCloserToStartCast(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME)
+    private fun almostCloseToStartCast() =
+        AlmostCloseToStartCast(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME)
 
     /** Helper method providing default parameters to not clutter up the tests. */
-    private fun moveCloserToEndCast() =
-        MoveCloserToEndCast(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME)
+    private fun almostCloseToEndCast() =
+        AlmostCloseToEndCast(appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME)
 
     /** Helper method providing default parameters to not clutter up the tests. */
     private fun transferToReceiverTriggered() =
@@ -327,13 +464,13 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
         TransferToThisDeviceTriggered(appIconDrawable, APP_ICON_CONTENT_DESC)
 
     /** Helper method providing default parameters to not clutter up the tests. */
-    private fun transferToReceiverSucceeded(undoCallback: IUndoTransferCallback? = null) =
+    private fun transferToReceiverSucceeded(undoCallback: IUndoMediaTransferCallback? = null) =
         TransferToReceiverSucceeded(
             appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME, undoCallback
         )
 
     /** Helper method providing default parameters to not clutter up the tests. */
-    private fun transferToThisDeviceSucceeded(undoCallback: IUndoTransferCallback? = null) =
+    private fun transferToThisDeviceSucceeded(undoCallback: IUndoMediaTransferCallback? = null) =
         TransferToThisDeviceSucceeded(
             appIconDrawable, APP_ICON_CONTENT_DESC, DEVICE_NAME, undoCallback
         )
@@ -344,3 +481,7 @@ class MediaTttChipControllerSenderTest : SysuiTestCase() {
 
 private const val DEVICE_NAME = "My Tablet"
 private const val APP_ICON_CONTENT_DESC = "Content description"
+
+private val routeInfo = MediaRoute2Info.Builder("id", "Test Name")
+    .addFeature("feature")
+    .build()

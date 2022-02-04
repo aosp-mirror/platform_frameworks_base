@@ -43,7 +43,6 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.IndentingPrintWriter;
@@ -696,8 +695,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 && mQsExpansionFraction != 1
                 && !mScreenOffAnimationController.shouldHideNotificationsFooter()
                 && !mIsRemoteInputActive;
-        boolean showHistory = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
+        boolean showHistory = mController.isHistoryEnabled();
 
         updateFooterView(showFooterView, showDismissView, showHistory);
     }
@@ -5243,11 +5241,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 R.layout.status_bar_no_notifications, this, false);
         view.setText(R.string.empty_shade_text);
         view.setOnClickListener(v -> {
-            final boolean showHistory = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                    Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
-            Intent intent = showHistory ? new Intent(
-                    Settings.ACTION_NOTIFICATION_HISTORY) : new Intent(
-                    Settings.ACTION_NOTIFICATION_SETTINGS);
+            final boolean showHistory = mController.isHistoryEnabled();
+            Intent intent = showHistory
+                    ? new Intent(Settings.ACTION_NOTIFICATION_HISTORY)
+                    : new Intent(Settings.ACTION_NOTIFICATION_SETTINGS);
             mStatusBar.startActivity(intent, true, true, Intent.FLAG_ACTIVITY_SINGLE_TOP);
         });
         setEmptyShadeView(view);

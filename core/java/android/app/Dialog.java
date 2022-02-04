@@ -1449,15 +1449,9 @@ public class Dialog implements DialogInterface, Window.Callback,
      *
      * Returns null if the dialog is not attached to a window with a decor.
      */
-    @Nullable
+    @NonNull
     @Override
     public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
-        if (mWindow != null) {
-            View decorView = mWindow.getDecorView();
-            if (decorView != null) {
-                return decorView.getOnBackInvokedDispatcher();
-            }
-        }
-        return null;
+        return ((OnBackInvokedDispatcherOwner) mWindow).getOnBackInvokedDispatcher();
     }
 }

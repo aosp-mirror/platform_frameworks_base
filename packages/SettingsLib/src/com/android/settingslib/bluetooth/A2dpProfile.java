@@ -173,8 +173,10 @@ public class A2dpProfile implements LocalBluetoothProfile {
     }
 
     public BluetoothDevice getActiveDevice() {
-        if (mService == null) return null;
-        return mService.getActiveDevice();
+        if (mBluetoothAdapter == null) return null;
+        final List<BluetoothDevice> activeDevices = mBluetoothAdapter
+                .getActiveDevices(BluetoothProfile.A2DP);
+        return (activeDevices.size() > 0) ? activeDevices.get(0) : null;
     }
 
     @Override
@@ -221,7 +223,7 @@ public class A2dpProfile implements LocalBluetoothProfile {
     }
 
     public boolean supportsHighQualityAudio(BluetoothDevice device) {
-        BluetoothDevice bluetoothDevice = (device != null) ? device : mService.getActiveDevice();
+        BluetoothDevice bluetoothDevice = (device != null) ? device : getActiveDevice();
         if (bluetoothDevice == null) {
             return false;
         }
@@ -234,7 +236,7 @@ public class A2dpProfile implements LocalBluetoothProfile {
      */
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     public boolean isHighQualityAudioEnabled(BluetoothDevice device) {
-        BluetoothDevice bluetoothDevice = (device != null) ? device : mService.getActiveDevice();
+        BluetoothDevice bluetoothDevice = (device != null) ? device : getActiveDevice();
         if (bluetoothDevice == null) {
             return false;
         }
@@ -260,7 +262,7 @@ public class A2dpProfile implements LocalBluetoothProfile {
     }
 
     public void setHighQualityAudioEnabled(BluetoothDevice device, boolean enabled) {
-        BluetoothDevice bluetoothDevice = (device != null) ? device : mService.getActiveDevice();
+        BluetoothDevice bluetoothDevice = (device != null) ? device : getActiveDevice();
         if (bluetoothDevice == null) {
             return;
         }
@@ -286,7 +288,7 @@ public class A2dpProfile implements LocalBluetoothProfile {
      */
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     public String getHighQualityAudioOptionLabel(BluetoothDevice device) {
-        BluetoothDevice bluetoothDevice = (device != null) ? device : mService.getActiveDevice();
+        BluetoothDevice bluetoothDevice = (device != null) ? device : getActiveDevice();
         int unknownCodecId = R.string.bluetooth_profile_a2dp_high_quality_unknown_codec;
         if (bluetoothDevice == null || !supportsHighQualityAudio(device)
                 || getConnectionStatus(device) != BluetoothProfile.STATE_CONNECTED) {

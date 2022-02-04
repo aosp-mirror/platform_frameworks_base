@@ -19,9 +19,9 @@ package com.android.systemui.media.taptotransfer.sender
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.view.View
+import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.R
 import com.android.systemui.media.taptotransfer.common.MediaTttChipState
-import com.android.systemui.shared.mediattt.IUndoTransferCallback
 
 /**
  * A class that stores all the information necessary to display the media tap-to-transfer chip on
@@ -59,7 +59,7 @@ sealed class ChipStateSender(
  *
  * @property otherDeviceName the name of the other device involved in the transfer.
  */
-class MoveCloserToStartCast(
+class AlmostCloseToStartCast(
     appIconDrawable: Drawable,
     appIconContentDescription: String,
     private val otherDeviceName: String,
@@ -76,7 +76,7 @@ class MoveCloserToStartCast(
  *
  * @property otherDeviceName the name of the other device involved in the transfer.
  */
-class MoveCloserToEndCast(
+class AlmostCloseToEndCast(
     appIconDrawable: Drawable,
     appIconContentDescription: String,
     private val otherDeviceName: String,
@@ -130,7 +130,7 @@ class TransferToReceiverSucceeded(
     appIconDrawable: Drawable,
     appIconContentDescription: String,
     private val otherDeviceName: String,
-    val undoCallback: IUndoTransferCallback? = null
+    val undoCallback: IUndoMediaTransferCallback? = null
 ) : ChipStateSender(appIconDrawable, appIconContentDescription) {
     override fun getChipTextString(context: Context): String {
         return context.getString(R.string.media_transfer_playing_different_device, otherDeviceName)
@@ -169,7 +169,7 @@ class TransferToThisDeviceSucceeded(
     appIconDrawable: Drawable,
     appIconContentDescription: String,
     private val otherDeviceName: String,
-    val undoCallback: IUndoTransferCallback? = null
+    val undoCallback: IUndoMediaTransferCallback? = null
 ) : ChipStateSender(appIconDrawable, appIconContentDescription) {
     override fun getChipTextString(context: Context): String {
         return context.getString(R.string.media_transfer_playing_this_device)

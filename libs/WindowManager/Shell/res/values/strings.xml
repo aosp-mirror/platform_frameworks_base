@@ -174,9 +174,6 @@
     <!-- The title of the letterbox education dialog. [CHAR LIMIT=NONE] -->
     <string name="letterbox_education_dialog_title">Get the most out of <xliff:g id="app_name" example="YouTube">%s</xliff:g></string>
 
-    <!-- The title of the letterbox education toast. [CHAR LIMIT=60] -->
-    <string name="letterbox_education_toast_title">Rotate your device for a full-screen view</string>
-
     <!-- Description of the rotate screen into portrait action. [CHAR LIMIT=NONE] -->
     <string name="letterbox_education_screen_rotation_portrait_text">Rotate your screen to portrait</string>
 
@@ -191,8 +188,5 @@
 
     <!-- Button text for dismissing the letterbox education dialog. [CHAR LIMIT=20] -->
     <string name="letterbox_education_got_it">Got it</string>
-
-    <!-- Accessibility description of the letterbox education toast expand to dialog button. [CHAR LIMIT=NONE] -->
-    <string name="letterbox_education_expand_button_description">Expand for more information.</string>
 
 </resources>

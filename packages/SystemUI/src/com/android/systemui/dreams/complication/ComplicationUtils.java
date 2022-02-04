@@ -25,6 +25,8 @@ import static com.android.systemui.dreams.complication.Complication.COMPLICATION
 
 import com.android.settingslib.dream.DreamBackend;
 
+import java.util.Set;
+
 /**
  * A collection of utility methods for working with {@link Complication}.
  */
@@ -49,5 +51,15 @@ public class ComplicationUtils {
             default:
                 return COMPLICATION_TYPE_NONE;
         }
+    }
+
+    /**
+     * Converts a set of {@link com.android.settingslib.dream.DreamBackend.ComplicationType} to
+     * a combined complications types state.
+     */
+    @Complication.ComplicationType
+    public static int convertComplicationTypes(@DreamBackend.ComplicationType Set<Integer> types) {
+        return types.stream().mapToInt(ComplicationUtils::convertComplicationType).reduce(
+                COMPLICATION_TYPE_NONE, (a, b) -> a | b);
     }
 }

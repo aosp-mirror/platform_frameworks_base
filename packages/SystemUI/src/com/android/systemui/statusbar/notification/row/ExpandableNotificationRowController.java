@@ -248,19 +248,25 @@ public class ExpandableNotificationRowController implements NotifViewController 
 
         mView.addChildNotification((ExpandableNotificationRow) child.getView(), index);
         mListContainer.notifyGroupChildAdded(childView);
+        childView.setChangingPosition(false);
     }
 
     @Override
     public void moveChildTo(NodeController child, int index) {
         ExpandableNotificationRow childView = (ExpandableNotificationRow) child.getView();
+        childView.setChangingPosition(true);
         mView.removeChildNotification(childView);
         mView.addChildNotification(childView, index);
+        childView.setChangingPosition(false);
     }
 
     @Override
     public void removeChild(NodeController child, boolean isTransfer) {
         ExpandableNotificationRow childView = (ExpandableNotificationRow) child.getView();
 
+        if (isTransfer) {
+            childView.setChangingPosition(true);
+        }
         mView.removeChildNotification(childView);
         if (!isTransfer) {
             mListContainer.notifyGroupChildRemoved(childView, mView);

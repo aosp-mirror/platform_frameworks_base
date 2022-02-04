@@ -32,6 +32,7 @@ import static com.android.server.companion.DataStoreUtils.writeToFileSafely;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.companion.AssociationInfo;
 import android.content.pm.UserInfo;
@@ -39,6 +40,7 @@ import android.net.MacAddress;
 import android.os.Environment;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TypedXmlPullParser;
@@ -146,8 +148,9 @@ import java.util.concurrent.ConcurrentMap;
  * </state>
  * }</pre>
  */
+@SuppressLint("LongLogTag")
 final class PersistentDataStore {
-    private static final String LOG_TAG = CompanionDeviceManagerService.LOG_TAG + ".DataStore";
+    private static final String TAG = "CompanionDevice_PersistentDataStore";
     private static final boolean DEBUG = CompanionDeviceManagerService.DEBUG;
 
     private static final int CURRENT_PERSISTENCE_VERSION = 1;
@@ -208,10 +211,9 @@ final class PersistentDataStore {
     void readStateForUser(@UserIdInt int userId,
             @NonNull Collection<AssociationInfo> associationsOut,
             @NonNull Map<String, Set<Integer>> previouslyUsedIdsPerPackageOut) {
-        Slog.i(LOG_TAG, "Reading associations for user " + userId + " from disk");
-
+        Slog.i(TAG, "Reading associations for user " + userId + " from disk");
         final AtomicFile file = getStorageFileForUser(userId);
-        if (DEBUG) Slog.d(LOG_TAG, "  > File=" + file.getBaseFile().getPath());
+        if (DEBUG) Log.d(TAG, "  > File=" + file.getBaseFile().getPath());
 
         // getStorageFileForUser() ALWAYS returns the SAME OBJECT, which allows us to synchronize
         // accesses to the file on the file system using this AtomicFile object.
@@ -220,12 +222,12 @@ final class PersistentDataStore {
             final AtomicFile readFrom;
             final String rootTag;
             if (!file.getBaseFile().exists()) {
-                if (DEBUG) Slog.d(LOG_TAG, "  > File does not exist -> Try to read legacy file");
+                if (DEBUG) Log.d(TAG, "  > File does not exist -> Try to read legacy file");
 
                 legacyBaseFile = getBaseLegacyStorageFileForUser(userId);
-                if (DEBUG) Slog.d(LOG_TAG, "  > Legacy file=" + legacyBaseFile.getPath());
+                if (DEBUG) Log.d(TAG, "  > Legacy file=" + legacyBaseFile.getPath());
                 if (!legacyBaseFile.exists()) {
-                    if (DEBUG) Slog.d(LOG_TAG, "  > Legacy file does not exist -> Abort");
+                    if (DEBUG) Log.d(TAG, "  > Legacy file does not exist -> Abort");
                     return;
                 }
 
@@ -236,13 +238,13 @@ final class PersistentDataStore {
                 rootTag = XML_TAG_STATE;
             }
 
-            if (DEBUG) Slog.d(LOG_TAG, "  > Reading associations...");
+            if (DEBUG) Log.d(TAG, "  > Reading associations...");
             final int version = readStateFromFileLocked(userId, readFrom, rootTag,
                     associationsOut, previouslyUsedIdsPerPackageOut);
             if (DEBUG) {
-                Slog.d(LOG_TAG, "  > Done reading: " + associationsOut);
+                Log.d(TAG, "  > Done reading: " + associationsOut);
                 if (version < CURRENT_PERSISTENCE_VERSION) {
-                    Slog.d(LOG_TAG, "  > File used old format: v." + version + " -> Re-write");
+                    Log.d(TAG, "  > File used old format: v." + version + " -> Re-write");
                 }
             }
 
@@ -250,13 +252,13 @@ final class PersistentDataStore {
                 // The data is either in the legacy file or in the legacy format, or both.
                 // Save the data to right file in using the current format.
                 if (DEBUG) {
-                    Slog.d(LOG_TAG, "  > Writing the data to " + file.getBaseFile().getPath());
+                    Log.d(TAG, "  > Writing the data to " + file.getBaseFile().getPath());
                 }
                 persistStateToFileLocked(file, associationsOut, previouslyUsedIdsPerPackageOut);
 
                 if (legacyBaseFile != null) {
                     // We saved the data to the right file, can delete the old file now.
-                    if (DEBUG) Slog.d(LOG_TAG, "  > Deleting legacy file");
+                    if (DEBUG) Log.d(TAG, "  > Deleting legacy file");
                     legacyBaseFile.delete();
                 }
             }
@@ -273,11 +275,11 @@ final class PersistentDataStore {
     void persistStateForUser(@UserIdInt int userId,
             @NonNull Collection<AssociationInfo> associations,
             @NonNull Map<String, Set<Integer>> previouslyUsedIdsPerPackage) {
-        Slog.i(LOG_TAG, "Writing associations for user " + userId + " to disk");
-        if (DEBUG) Slog.d(LOG_TAG, "  > " + associations);
+        Slog.i(TAG, "Writing associations for user " + userId + " to disk");
+        if (DEBUG) Slog.d(TAG, "  > " + associations);
 
         final AtomicFile file = getStorageFileForUser(userId);
-        if (DEBUG) Slog.d(LOG_TAG, "  > File=" + file.getBaseFile().getPath());
+        if (DEBUG) Log.d(TAG, "  > File=" + file.getBaseFile().getPath());
         // getStorageFileForUser() ALWAYS returns the SAME OBJECT, which allows us to synchronize
         // accesses to the file on the file system using this AtomicFile object.
         synchronized (file) {
@@ -312,7 +314,7 @@ final class PersistentDataStore {
             }
             return version;
         } catch (XmlPullParserException | IOException e) {
-            Slog.e(LOG_TAG, "Error while reading associations file", e);
+            Slog.e(TAG, "Error while reading associations file", e);
             return -1;
         }
     }
@@ -528,7 +530,7 @@ final class PersistentDataStore {
             associationInfo = new AssociationInfo(associationId, userId, appPackage, macAddress,
                     displayName, profile, selfManaged, notify, timeApproved, lastTimeConnected);
         } catch (Exception e) {
-            if (DEBUG) Slog.w(LOG_TAG, "Could not create AssociationInfo", e);
+            if (DEBUG) Log.w(TAG, "Could not create AssociationInfo", e);
         }
         return associationInfo;
     }

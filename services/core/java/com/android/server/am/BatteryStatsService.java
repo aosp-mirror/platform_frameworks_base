@@ -797,12 +797,19 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             final BatteryUsageStats bus;
             switch (atomTag) {
                 case FrameworkStatsLog.BATTERY_USAGE_STATS_SINCE_RESET:
-                    bus = getBatteryUsageStats(List.of(BatteryUsageStatsQuery.DEFAULT)).get(0);
+                    final BatteryUsageStatsQuery querySinceReset =
+                            new BatteryUsageStatsQuery.Builder()
+                                    .includeProcessStateData()
+                                    .build();
+                    bus = getBatteryUsageStats(List.of(querySinceReset)).get(0);
                     break;
                 case FrameworkStatsLog.BATTERY_USAGE_STATS_SINCE_RESET_USING_POWER_PROFILE_MODEL:
-                    final BatteryUsageStatsQuery powerProfileQuery =
-                            new BatteryUsageStatsQuery.Builder().powerProfileModeledOnly().build();
-                    bus = getBatteryUsageStats(List.of(powerProfileQuery)).get(0);
+                    final BatteryUsageStatsQuery queryPowerProfile =
+                            new BatteryUsageStatsQuery.Builder()
+                                    .includeProcessStateData()
+                                    .powerProfileModeledOnly()
+                                    .build();
+                    bus = getBatteryUsageStats(List.of(queryPowerProfile)).get(0);
                     break;
                 case FrameworkStatsLog.BATTERY_USAGE_STATS_BEFORE_RESET:
                     if (!BATTERY_USAGE_STORE_ENABLED) {
@@ -812,10 +819,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     final long sessionStart = mBatteryUsageStatsStore
                             .getLastBatteryUsageStatsBeforeResetAtomPullTimestamp();
                     final long sessionEnd = mStats.getStartClockTime();
-                    final BatteryUsageStatsQuery query = new BatteryUsageStatsQuery.Builder()
-                            .aggregateSnapshots(sessionStart, sessionEnd)
-                            .build();
-                    bus = getBatteryUsageStats(List.of(query)).get(0);
+                    final BatteryUsageStatsQuery queryBeforeReset =
+                            new BatteryUsageStatsQuery.Builder()
+                                    .includeProcessStateData()
+                                    .aggregateSnapshots(sessionStart, sessionEnd)
+                                    .build();
+                    bus = getBatteryUsageStats(List.of(queryBeforeReset)).get(0);
                     mBatteryUsageStatsStore
                             .setLastBatteryUsageStatsBeforeResetAtomPullTimestamp(sessionEnd);
                     break;

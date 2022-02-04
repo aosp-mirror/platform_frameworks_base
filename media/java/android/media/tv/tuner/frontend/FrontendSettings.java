@@ -89,8 +89,7 @@ public abstract class FrontendSettings {
 
 
     /** @hide */
-    @LongDef(flag = true,
-            prefix = "FEC_",
+    @LongDef(prefix = "FEC_",
             value = {FEC_UNDEFINED, FEC_AUTO, FEC_1_2, FEC_1_3, FEC_1_4, FEC_1_5, FEC_2_3, FEC_2_5,
             FEC_2_9, FEC_3_4, FEC_3_5, FEC_4_5, FEC_4_15, FEC_5_6, FEC_5_9, FEC_6_7, FEC_7_8,
             FEC_7_9, FEC_7_15, FEC_8_9, FEC_8_15, FEC_9_10, FEC_9_20, FEC_11_15, FEC_11_20,

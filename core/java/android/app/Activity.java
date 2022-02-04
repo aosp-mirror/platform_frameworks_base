@@ -6139,6 +6139,10 @@ public class Activity extends ContextThemeWrapper
      * you to specify a custom animation even when starting an activity from
      * outside the context of the current top activity.
      *
+     * <p>Af of {@link android.os.Build.VERSION_CODES#S} application can only specify
+     * a transition animation when the transition happens within the same task. System
+     * default animation is used for cross-task transition animations.
+     *
      * @param enterAnim A resource ID of the animation resource to use for
      * the incoming activity.  Use 0 for no animation.
      * @param exitAnim A resource ID of the animation resource to use for
@@ -8742,17 +8746,15 @@ public class Activity extends ContextThemeWrapper
      * Returns the {@link OnBackInvokedDispatcher} instance associated with the window that this
      * activity is attached to.
      *
-     * Returns null if the activity is not attached to a window with a decor.
+     * @throws IllegalStateException if this Activity is not visual.
      */
-    @Nullable
+    @NonNull
     @Override
     public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
-        if (mWindow != null) {
-            View decorView = mWindow.getDecorView();
-            if (decorView != null) {
-                return decorView.getOnBackInvokedDispatcher();
-            }
+        if (mWindow == null) {
+            throw new IllegalStateException("OnBackInvokedDispatcher are not available on "
+                    + "non-visual activities");
         }
-        return null;
+        return ((OnBackInvokedDispatcherOwner) mWindow).getOnBackInvokedDispatcher();
     }
 }

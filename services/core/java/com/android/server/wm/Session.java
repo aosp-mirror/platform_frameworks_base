@@ -885,8 +885,16 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public void setOnBackInvokedCallback(IWindow iWindow,
-            IOnBackInvokedCallback iOnBackInvokedCallback) throws RemoteException {
-        // TODO: Set the callback to the WindowState of the window.
+    public void setOnBackInvokedCallback(IWindow window,
+            IOnBackInvokedCallback onBackInvokedCallback) throws RemoteException {
+        synchronized (mService.mGlobalLock) {
+            WindowState windowState = mService.windowForClientLocked(this, window, false);
+            if (windowState == null) {
+                Slog.e(TAG_WM,
+                        "setOnBackInvokedCallback(): Can't find window state for window:" + window);
+            } else {
+                windowState.setOnBackInvokedCallback(onBackInvokedCallback);
+            }
+        }
     }
 }

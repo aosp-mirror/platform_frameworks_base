@@ -546,28 +546,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // Seed the cached brightness
         saveBrightnessInfo(getScreenBrightnessSetting());
 
-        setUpAutoBrightness(resources, handler);
-
-        mColorFadeEnabled = !ActivityManager.isLowRamDeviceStatic();
-        mColorFadeFadesConfig = resources.getBoolean(
-                com.android.internal.R.bool.config_animateScreenLights);
-
-        mDisplayBlanksAfterDozeConfig = resources.getBoolean(
-                com.android.internal.R.bool.config_displayBlanksAfterDoze);
-
-        mBrightnessBucketsInDozeConfig = resources.getBoolean(
-                com.android.internal.R.bool.config_displayBrightnessBucketsInDoze);
-
-        loadProximitySensor();
-
-        mCurrentScreenBrightnessSetting = getScreenBrightnessSetting();
-        mScreenBrightnessForVr = getScreenBrightnessForVrSetting();
-        mAutoBrightnessAdjustment = getAutoBrightnessAdjustmentSetting();
-        mTemporaryScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
-        mPendingScreenBrightnessSetting = PowerManager.BRIGHTNESS_INVALID_FLOAT;
-        mTemporaryAutoBrightnessAdjustment = PowerManager.BRIGHTNESS_INVALID_FLOAT;
-        mPendingAutoBrightnessAdjustment = PowerManager.BRIGHTNESS_INVALID_FLOAT;
-
         DisplayWhiteBalanceSettings displayWhiteBalanceSettings = null;
         DisplayWhiteBalanceController displayWhiteBalanceController = null;
         if (mDisplayId == Display.DEFAULT_DISPLAY) {
@@ -610,6 +588,29 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         } else {
             mCdsi = null;
         }
+
+        setUpAutoBrightness(resources, handler);
+
+        mColorFadeEnabled = !ActivityManager.isLowRamDeviceStatic();
+        mColorFadeFadesConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_animateScreenLights);
+
+        mDisplayBlanksAfterDozeConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_displayBlanksAfterDoze);
+
+        mBrightnessBucketsInDozeConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_displayBrightnessBucketsInDoze);
+
+        loadProximitySensor();
+
+        mCurrentScreenBrightnessSetting = getScreenBrightnessSetting();
+        mScreenBrightnessForVr = getScreenBrightnessForVrSetting();
+        mAutoBrightnessAdjustment = getAutoBrightnessAdjustmentSetting();
+        mTemporaryScreenBrightness = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        mPendingScreenBrightnessSetting = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        mTemporaryAutoBrightnessAdjustment = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        mPendingAutoBrightnessAdjustment = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+
     }
 
     private void applyReduceBrightColorsSplineAdjustment(
@@ -831,7 +832,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         setUpAutoBrightness(mContext.getResources(), mHandler);
         reloadReduceBrightColours();
         mHbmController.resetHbmData(info.width, info.height, token, info.uniqueId,
-                mDisplayDeviceConfig.getHighBrightnessModeData());
+                mDisplayDeviceConfig.getHighBrightnessModeData(),
+                new HighBrightnessModeController.HdrBrightnessDeviceConfig() {
+                    @Override
+                    public float getHdrBrightnessFromSdr(float sdrBrightness) {
+                        return mDisplayDeviceConfig.getHdrBrightnessFromSdr(sdrBrightness);
+                    }
+                });
         mBrightnessThrottler.resetThrottlingData(
                 mDisplayDeviceConfig.getBrightnessThrottlingData());
     }
@@ -901,7 +908,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final boolean isIdleScreenBrightnessEnabled = resources.getBoolean(
                 R.bool.config_enableIdleScreenBrightnessMode);
         mInteractiveModeBrightnessMapper = BrightnessMappingStrategy.create(resources,
-                mDisplayDeviceConfig);
+                mDisplayDeviceConfig, mDisplayWhiteBalanceController);
         if (isIdleScreenBrightnessEnabled) {
             mIdleModeBrightnessMapper = BrightnessMappingStrategy.createForIdleMode(resources,
                     mDisplayDeviceConfig, mDisplayWhiteBalanceController);
@@ -1713,6 +1720,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         final DisplayDeviceInfo info = device.getDisplayDeviceInfoLocked();
         return new HighBrightnessModeController(mHandler, info.width, info.height, displayToken,
                 displayUniqueId, PowerManager.BRIGHTNESS_MIN, PowerManager.BRIGHTNESS_MAX, hbmData,
+                new HighBrightnessModeController.HdrBrightnessDeviceConfig() {
+                    @Override
+                    public float getHdrBrightnessFromSdr(float sdrBrightness) {
+                        return mDisplayDeviceConfig.getHdrBrightnessFromSdr(sdrBrightness);
+                    }
+                },
                 () -> {
                     sendUpdatePowerStateLocked();
                     postBrightnessChangeRunnable();

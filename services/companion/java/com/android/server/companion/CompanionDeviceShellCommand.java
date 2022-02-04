@@ -16,16 +16,17 @@
 
 package com.android.server.companion;
 
-import static com.android.server.companion.CompanionDeviceManagerService.LOG_TAG;
-
 import android.companion.AssociationInfo;
+import android.os.ShellCommand;
 import android.util.Log;
 import android.util.Slog;
 
 import java.io.PrintWriter;
 import java.util.List;
 
-class CompanionDeviceShellCommand extends android.os.ShellCommand {
+class CompanionDeviceShellCommand extends ShellCommand {
+    private static final String TAG = "CompanionDevice_ShellCommand";
+
     private final CompanionDeviceManagerService mService;
     private final AssociationStore mAssociationStore;
 
@@ -84,7 +85,7 @@ class CompanionDeviceShellCommand extends android.os.ShellCommand {
             }
             return 0;
         } catch (Throwable t) {
-            Slog.e(LOG_TAG, "Error running a command: $ " + cmd, t);
+            Slog.e(TAG, "Error running a command: $ " + cmd, t);
             getErrPrintWriter().println(Log.getStackTraceString(t));
             return 1;
         }

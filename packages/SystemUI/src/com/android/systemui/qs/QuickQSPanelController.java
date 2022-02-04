@@ -17,7 +17,6 @@
 package com.android.systemui.qs;
 
 import static com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL;
-import static com.android.systemui.qs.dagger.QSFragmentModule.QQS_FOOTER;
 import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLAYER;
 
 import com.android.internal.logging.MetricsLogger;
@@ -54,7 +53,6 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
     // brightness is visible only in split shade
     private final QuickQSBrightnessController mBrightnessController;
     private final BrightnessMirrorHandler mBrightnessMirrorHandler;
-    private final FooterActionsController mFooterActionsController;
 
     @Inject
     QuickQSPanelController(QuickQSPanel view, QSTileHost qsTileHost,
@@ -63,14 +61,12 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
             @Named(QUICK_QS_PANEL) MediaHost mediaHost,
             MetricsLogger metricsLogger, UiEventLogger uiEventLogger, QSLogger qsLogger,
             DumpManager dumpManager,
-            QuickQSBrightnessController quickQSBrightnessController,
-            @Named(QQS_FOOTER) FooterActionsController footerActionsController
+            QuickQSBrightnessController quickQSBrightnessController
     ) {
         super(view, qsTileHost, qsCustomizerController, usingMediaPlayer, mediaHost, metricsLogger,
                 uiEventLogger, qsLogger, dumpManager);
         mBrightnessController = quickQSBrightnessController;
         mBrightnessMirrorHandler = new BrightnessMirrorHandler(mBrightnessController);
-        mFooterActionsController = footerActionsController;
     }
 
     @Override
@@ -80,8 +76,6 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
         mMediaHost.setShowsOnlyActiveMedia(true);
         mMediaHost.init(MediaHierarchyManager.LOCATION_QQS);
         mBrightnessController.init(mShouldUseSplitNotificationShade);
-        mFooterActionsController.init();
-        mFooterActionsController.refreshVisibility(mShouldUseSplitNotificationShade);
     }
 
     @Override
@@ -102,7 +96,6 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
     void setListening(boolean listening) {
         super.setListening(listening);
         mBrightnessController.setListening(listening);
-        mFooterActionsController.setListening(listening);
     }
 
     public boolean isListening() {
@@ -123,7 +116,6 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
     @Override
     protected void onConfigurationChanged() {
         mBrightnessController.refreshVisibility(mShouldUseSplitNotificationShade);
-        mFooterActionsController.refreshVisibility(mShouldUseSplitNotificationShade);
     }
 
     @Override

@@ -179,6 +179,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         if (!mNotifPipelineFlags.checkLegacyPipelineEnabled()) {
             return;
         }
+        Trace.beginSection("NotificationViewHierarchyManager.updateNotificationViews");
 
         beginUpdate();
 
@@ -353,6 +354,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         mListContainer.onNotificationViewUpdateFinished();
 
         endUpdate();
+        Trace.endSection();
     }
 
     /**
@@ -362,6 +364,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
      * {@link com.android.systemui.statusbar.notification.collection.coordinator.StackCoordinator}
      */
     private void updateNotifStats() {
+        Trace.beginSection("NotificationViewHierarchyManager.updateNotifStats");
         boolean hasNonClearableAlertingNotifs = false;
         boolean hasClearableAlertingNotifs = false;
         boolean hasNonClearableSilentNotifs = false;
@@ -403,6 +406,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
                 hasNonClearableSilentNotifs /* hasNonClearableSilentNotifs */,
                 hasClearableSilentNotifs /* hasClearableSilentNotifs */
         ));
+        Trace.endSection();
     }
 
     /**
@@ -520,7 +524,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     }
 
     private void updateRowStatesInternal() {
-        Trace.beginSection("NotificationViewHierarchyManager#updateRowStates");
+        Trace.beginSection("NotificationViewHierarchyManager.updateRowStates");
         final int N = mListContainer.getContainerChildCount();
 
         int visibleNotifications = 0;

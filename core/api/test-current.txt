@@ -1607,10 +1607,6 @@ package android.net {
     method public void setIncludeTestInterfaces(boolean);
   }
 
-  public final class IpSecManager {
-    field public static final int INVALID_SECURITY_PARAMETER_INDEX = 0; // 0x0
-  }
-
   public class NetworkPolicyManager {
     method public boolean getRestrictBackground();
     method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public boolean isUidNetworkingBlocked(int, boolean);
@@ -2744,6 +2740,7 @@ package android.view {
     method @NonNull public android.view.Display.Mode getDefaultMode();
     method @NonNull public int[] getReportedHdrTypes();
     method @NonNull public android.graphics.ColorSpace[] getSupportedWideColorGamut();
+    method @Nullable public android.view.Display.Mode getSystemPreferredDisplayMode();
     method public int getType();
     method @Nullable public android.view.Display.Mode getUserPreferredDisplayMode();
     method public boolean hasAccess(int);
@@ -2819,7 +2816,7 @@ package android.view {
     method public void setView(@NonNull android.view.View, @NonNull android.view.WindowManager.LayoutParams);
   }
 
-  @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback android.view.OnBackInvokedDispatcherOwner {
+  @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
     method public android.view.View getTooltipView();
     method public boolean isAutofilled();
     method public static boolean isDefaultFocusHighlightEnabled();

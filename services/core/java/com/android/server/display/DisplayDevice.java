@@ -222,6 +222,22 @@ abstract class DisplayDevice {
     }
 
     /**
+     * Returns the system preferred display mode.
+     */
+    public Display.Mode getSystemPreferredDisplayModeLocked() {
+        return EMPTY_DISPLAY_MODE;
+    }
+
+    /**
+     * Returns the display mode that was being used when this display was first found by
+     * display manager.
+     * @hide
+     */
+    public Display.Mode getActiveDisplayModeAtStartLocked() {
+        return EMPTY_DISPLAY_MODE;
+    }
+
+    /**
      * Sets the requested color mode.
      */
     public void setRequestedColorModeLocked(int colorMode) {

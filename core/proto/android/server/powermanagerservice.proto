@@ -452,16 +452,16 @@ message LowPowerStandbyControllerDumpProto {
     optional bool is_interactive = 5;
 
     // Time (in elapsedRealtime) when the device was last interactive
-    optional bool last_interactive_time = 6;
+    optional int64 last_interactive_time = 6;
 
-    // Time (in milliseconds) after becoming non-interactive that Low Power Standby can activate
+    // Timeout (in milliseconds) after becoming non-interactive that Low Power Standby can activate
     optional int32 standby_timeout_config = 7;
 
     // True if the device has entered idle mode since becoming non-interactive
-    optional int32 idle_since_non_interactive = 8;
+    optional bool idle_since_non_interactive = 8;
 
     // True if the device is currently in idle mode
-    optional int32 is_device_idle = 9;
+    optional bool is_device_idle = 9;
 
     // Set of app ids that are exempt form low power standby
     repeated int32 allowlist = 10;

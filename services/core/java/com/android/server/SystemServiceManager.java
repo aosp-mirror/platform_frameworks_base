@@ -509,8 +509,7 @@ public final class SystemServiceManager implements Dumpable {
                         throw new IllegalArgumentException(onWhat + " what?");
                 }
             } catch (Exception ex) {
-                Slog.wtf(TAG, "Failure reporting " + onWhat + " of user " + curUser
-                        + " to service " + serviceName, ex);
+                logFailure(onWhat, curUser, serviceName, ex);
             }
             if (!submitToThreadPool) {
                 warnIfTooLong(SystemClock.elapsedRealtime() - time, service,
@@ -584,8 +583,7 @@ public final class SystemServiceManager implements Dumpable {
                 warnIfTooLong(SystemClock.elapsedRealtime() - time, service,
                         "on" + USER_STARTING + "User-" + curUserId);
             } catch (Exception e) {
-                Slog.wtf(TAG, "Failure reporting " + USER_STARTING + " of user " + curUser
-                        + " to service " + serviceName, e);
+                logFailure(USER_STARTING, curUser, serviceName, e);
                 Slog.e(TAG, "Disabling thread pool - please capture a bug report.");
                 sUseLifecycleThreadPool = false;
             } finally {
@@ -608,13 +606,18 @@ public final class SystemServiceManager implements Dumpable {
                 warnIfTooLong(SystemClock.elapsedRealtime() - time, service,
                         "on" + USER_COMPLETED_EVENT + "User-" + curUserId);
             } catch (Exception e) {
-                Slog.wtf(TAG, "Failure reporting " + USER_COMPLETED_EVENT + " of user " + curUser
-                        + " to service " + serviceName, e);
+                logFailure(USER_COMPLETED_EVENT, curUser, serviceName, e);
                 throw e;
             } finally {
                 t.traceEnd();
             }
         };
+    }
+
+    /** Logs the failure. That's all. Tests may rely on parsing it, so only modify carefully. */
+    private void logFailure(String onWhat, TargetUser curUser, String serviceName, Exception ex) {
+        Slog.wtf(TAG, "SystemService failure: Failure reporting " + onWhat + " of user "
+                + curUser + " to service " + serviceName, ex);
     }
 
     /** Sets the safe mode flag for services to query. */

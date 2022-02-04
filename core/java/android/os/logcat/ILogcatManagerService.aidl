@@ -22,5 +22,7 @@ package android.os.logcat;
 interface ILogcatManagerService {
     void startThread(in int uid, in int gid, in int pid, in int fd);
     void finishThread(in int uid, in int gid, in int pid, in int fd);
+    void approve(in int uid, in int gid, in int pid, in int fd);
+    void decline(in int uid, in int gid, in int pid, in int fd);
 }
 

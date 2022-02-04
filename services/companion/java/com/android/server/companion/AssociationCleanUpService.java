@@ -36,7 +36,6 @@ import com.android.server.LocalServices;
  * will be killed if association/role are revoked.
  */
 public class AssociationCleanUpService extends JobService {
-    private static final String TAG = LOG_TAG + ".AssociationCleanUpService";
     private static final int JOB_ID = AssociationCleanUpService.class.hashCode();
     private static final long ONE_DAY_INTERVAL = 3 * 24 * 60 * 60 * 1000; // 1 Day
     private CompanionDeviceManagerServiceInternal mCdmServiceInternal = LocalServices.getService(
@@ -56,7 +55,7 @@ public class AssociationCleanUpService extends JobService {
 
     @Override
     public boolean onStopJob(final JobParameters params) {
-        Slog.d(TAG, "Association cleanup job stopped; id=" + params.getJobId()
+        Slog.i(LOG_TAG, "Association cleanup job stopped; id=" + params.getJobId()
                 + ", reason="
                 + JobParameters.getInternalReasonCodeDescription(
                 params.getInternalStopReasonCode()));

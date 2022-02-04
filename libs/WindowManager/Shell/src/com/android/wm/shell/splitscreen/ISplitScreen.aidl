@@ -89,9 +89,17 @@ interface ISplitScreen {
     /**
      * Version of startTasks using legacy transition system.
      */
-     oneway void startTasksWithLegacyTransition(int mainTaskId, in Bundle mainOptions,
-                            int sideTaskId, in Bundle sideOptions, int sidePosition,
-                            float splitRatio, in RemoteAnimationAdapter adapter) = 11;
+    oneway void startTasksWithLegacyTransition(int mainTaskId, in Bundle mainOptions,
+            int sideTaskId, in Bundle sideOptions, int sidePosition,
+            float splitRatio, in RemoteAnimationAdapter adapter) = 11;
+
+    /**
+     * Start a pair of intent and task using legacy transition system.
+     */
+    oneway void startIntentAndTaskWithLegacyTransition(in PendingIntent pendingIntent,
+            in Intent fillInIntent, int taskId, boolean intentFirst, in Bundle mainOptions,
+            in Bundle sideOptions, int sidePosition, float splitRatio,
+            in RemoteAnimationAdapter adapter) = 12;
 
     /**
      * Blocking call that notifies and gets additional split-screen targets when entering
@@ -100,5 +108,7 @@ interface ISplitScreen {
      * @param appTargets apps that will be re-parented to display area
      */
     RemoteAnimationTarget[] onGoingToRecentsLegacy(boolean cancel,
-                                                   in RemoteAnimationTarget[] appTargets) = 12;
+                                                   in RemoteAnimationTarget[] appTargets) = 13;
+
+
 }

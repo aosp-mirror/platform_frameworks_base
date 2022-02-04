@@ -16,4 +16,4 @@
 
  package android.net;
 
- parcelable InternalNetworkUpdateRequest;
+ parcelable EthernetNetworkUpdateRequest;

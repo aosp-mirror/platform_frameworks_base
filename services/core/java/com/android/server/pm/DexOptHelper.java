@@ -293,7 +293,8 @@ final class DexOptHelper {
     public ArraySet<String> getOptimizablePackages() {
         ArraySet<String> pkgs = new ArraySet<>();
         mPm.forEachPackageState(packageState -> {
-            if (mPm.mPackageDexOptimizer.canOptimizePackage(packageState.getPkg())) {
+            final AndroidPackage pkg = packageState.getPkg();
+            if (pkg != null && mPm.mPackageDexOptimizer.canOptimizePackage(pkg)) {
                 pkgs.add(packageState.getPackageName());
             }
         });

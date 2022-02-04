@@ -26,7 +26,15 @@
         <option name="shell-timeout" value="6600s" />
         <option name="test-timeout" value="6000s" />
         <option name="hidden-api-checks" value="false" />
+        <option name="device-listeners"
+                value="com.android.server.wm.flicker.TraceFileReadyListener" />
     </test>
+    <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
+        <option name="pull-pattern-keys" value="(\w)+\.winscope" />
+        <option name="pull-pattern-keys" value="(\w)+\.mp4" />
+        <option name="collect-on-run-ended-only" value="false" />
+        <option name="clean-up" value="true" />
+    </metrics_collector>
     <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
         <option name="directory-keys" value="/sdcard/flicker" />
         <option name="collect-on-run-ended-only" value="true" />

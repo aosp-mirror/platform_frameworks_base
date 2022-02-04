@@ -53,6 +53,7 @@ import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.media.MediaRoute2Info;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -92,6 +93,7 @@ import com.android.internal.statusbar.IAddTileResultCallback;
 import com.android.internal.statusbar.ISessionListener;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
+import com.android.internal.statusbar.IUndoMediaTransferCallback;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.RegisterStatusBarResult;
 import com.android.internal.statusbar.StatusBarIcon;
@@ -1265,6 +1267,12 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 "StatusBarManagerService");
     }
 
+    private void enforceMediaContentControl() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.MEDIA_CONTENT_CONTROL,
+                "StatusBarManagerService");
+    }
+
     /**
      *  For targetSdk S+ we require STATUS_BAR. For targetSdk < S, we only require EXPAND_STATUS_BAR
      *  but also require that it falls into one of the allowed use-cases to lock down abuse vector.
@@ -1985,6 +1993,53 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             }
         }
         return false;
+    }
+
+    /**
+     * Notifies the system of a new media tap-to-transfer state for the *sender* device. See
+     * {@link StatusBarManager.updateMediaTapToTransferSenderDisplay} for more information.
+     *
+     * @param undoCallback a callback that will be triggered if the user elects to undo a media
+     *                     transfer.
+     *
+     * Requires the caller to have the {@link android.Manifest.permission.MEDIA_CONTENT_CONTROL}
+     * permission.
+     */
+    @Override
+    public void updateMediaTapToTransferSenderDisplay(
+            @StatusBarManager.MediaTransferSenderState int displayState,
+            @NonNull MediaRoute2Info routeInfo,
+            @Nullable IUndoMediaTransferCallback undoCallback
+    ) {
+        enforceMediaContentControl();
+        if (mBar != null) {
+            try {
+                mBar.updateMediaTapToTransferSenderDisplay(displayState, routeInfo, undoCallback);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "updateMediaTapToTransferSenderDisplay", e);
+            }
+        }
+    }
+
+    /**
+     * Notifies the system of a new media tap-to-transfer state for the *receiver* device. See
+     * {@link StatusBarManager.updateMediaTapToTransferReceiverDisplay} for more information.
+     *
+     * Requires the caller to have the {@link android.Manifest.permission.MEDIA_CONTENT_CONTROL}
+     * permission.
+     */
+    @Override
+    public void updateMediaTapToTransferReceiverDisplay(
+            @StatusBarManager.MediaTransferReceiverState int displayState,
+            MediaRoute2Info routeInfo) {
+        enforceMediaContentControl();
+        if (mBar != null) {
+            try {
+                mBar.updateMediaTapToTransferReceiverDisplay(displayState, routeInfo);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "updateMediaTapToTransferReceiverDisplay", e);
+            }
+        }
     }
 
     /** @hide */

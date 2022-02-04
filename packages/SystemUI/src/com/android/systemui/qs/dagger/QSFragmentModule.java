@@ -21,15 +21,15 @@ import static com.android.systemui.util.Utils.useQsMediaPlayer;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewStub;
 
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.dagger.qualifiers.RootView;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.privacy.OngoingPrivacyChip;
-import com.android.systemui.qs.FooterActionsController;
-import com.android.systemui.qs.FooterActionsController.ExpansionState;
-import com.android.systemui.qs.FooterActionsControllerBuilder;
 import com.android.systemui.qs.FooterActionsView;
 import com.android.systemui.qs.QSContainerImpl;
 import com.android.systemui.qs.QSFooter;
@@ -55,8 +55,6 @@ import dagger.Provides;
 public interface QSFragmentModule {
     String QS_FGS_MANAGER_FOOTER_VIEW = "qs_fgs_manager_footer";
     String QS_SECURITY_FOOTER_VIEW = "qs_security_footer";
-    String QQS_FOOTER = "qqs_footer";
-    String QS_FOOTER = "qs_footer";
     String QS_USING_MEDIA_PLAYER = "qs_using_media_player";
 
     /**
@@ -122,42 +120,22 @@ public interface QSFragmentModule {
         return view.findViewById(R.id.qs_footer);
     }
 
-    /** */
+    /**
+     * Provides a {@link FooterActionsView}.
+     *
+     * This will replace a ViewStub either in {@link QSFooterView} or in {@link QSContainerImpl}.
+     */
     @Provides
-    @Named(QS_FOOTER)
-    static FooterActionsView providesQSFooterActionsView(@RootView View view) {
+    static FooterActionsView providesQSFooterActionsView(@RootView View view,
+            FeatureFlags featureFlags) {
+        ViewStub stub;
+        if (featureFlags.isEnabled(Flags.NEW_FOOTER)) {
+            stub = view.requireViewById(R.id.container_stub);
+        } else {
+            stub = view.requireViewById(R.id.footer_stub);
+        }
+        stub.inflate();
         return view.findViewById(R.id.qs_footer_actions);
-    }
-
-    /** */
-    @Provides
-    @Named(QQS_FOOTER)
-    static FooterActionsView providesQQSFooterActionsView(@RootView View view) {
-        return view.findViewById(R.id.qqs_footer_actions);
-    }
-
-    /** */
-    @Provides
-    @Named(QQS_FOOTER)
-    static FooterActionsController providesQQSFooterActionsController(
-            FooterActionsControllerBuilder footerActionsControllerBuilder,
-            @Named(QQS_FOOTER) FooterActionsView qqsFooterActionsView) {
-        return footerActionsControllerBuilder
-                .withView(qqsFooterActionsView)
-                .withButtonsVisibleWhen(ExpansionState.COLLAPSED)
-                .build();
-    }
-
-    /** */
-    @Provides
-    @Named(QS_FOOTER)
-    static FooterActionsController providesQSFooterActionsController(
-            FooterActionsControllerBuilder footerActionsControllerBuilder,
-            @Named(QS_FOOTER) FooterActionsView qsFooterActionsView) {
-        return footerActionsControllerBuilder
-                .withView(qsFooterActionsView)
-                .withButtonsVisibleWhen(ExpansionState.EXPANDED)
-                .build();
     }
 
     /** */

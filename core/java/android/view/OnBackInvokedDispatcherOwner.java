@@ -16,7 +16,7 @@
 
 package android.view;
 
-import android.annotation.Nullable;
+import android.annotation.NonNull;
 
 /**
  * A class that provides an {@link OnBackInvokedDispatcher} that allows you to register
@@ -28,6 +28,6 @@ public interface OnBackInvokedDispatcherOwner {
      * to its registered {@link OnBackInvokedCallback}s.
      * Returns null when the root view is not attached to a window or a view tree with a decor.
      */
-    @Nullable
+    @NonNull
     OnBackInvokedDispatcher getOnBackInvokedDispatcher();
 }

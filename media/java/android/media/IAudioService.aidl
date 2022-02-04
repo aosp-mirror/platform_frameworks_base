@@ -25,7 +25,7 @@ import android.media.AudioFocusInfo;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
-import android.media.BtProfileConnectionInfo;
+import android.media.BluetoothProfileConnectionInfo;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioModeDispatcher;
 import android.media.IAudioRoutesObserver;
@@ -276,7 +276,7 @@ interface IAudioService {
     oneway void playerHasOpPlayAudio(in int piid, in boolean hasOpPlayAudio);
 
     void handleBluetoothActiveDeviceChanged(in BluetoothDevice newDevice,
-            in BluetoothDevice previousDevice, in BtProfileConnectionInfo info);
+            in BluetoothDevice previousDevice, in BluetoothProfileConnectionInfo info);
 
     oneway void setFocusRequestResultFromExtPolicy(in AudioFocusInfo afi, int requestResult,
             in IAudioPolicyCallback pcb);

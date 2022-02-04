@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.listbuilder
 
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import com.android.systemui.statusbar.notification.collection.render.NodeController
 import com.android.systemui.statusbar.notification.stack.PriorityBucket
@@ -28,6 +29,8 @@ data class NotifSection(
         get() = "Section($index, $bucket, \"${sectioner.name}\")"
 
     val headerController: NodeController? = sectioner.headerNodeController
+
+    val comparator: NotifComparator? = sectioner.comparator
 
     @PriorityBucket val bucket: Int = sectioner.bucket
 }

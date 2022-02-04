@@ -1814,6 +1814,7 @@ public class UsageStatsService extends SystemService implements
                     synchronized (mLock) {
                         mResponseStatsTracker.dump(idpw);
                     }
+                    return;
                 } else if (arg != null && !arg.startsWith("-")) {
                     // Anything else that doesn't start with '-' is a pkg to filter
                     pkgs.add(arg);

@@ -462,11 +462,6 @@ public class WindowManagerService extends IWindowManager.Stub
     int mVr2dDisplayId = INVALID_DISPLAY;
     boolean mVrModeEnabled = false;
 
-    /* If true, shadows drawn around the window will be rendered by the system compositor. If
-     * false, shadows will be drawn by the client by setting an elevation on the root view and
-     * the contents will be inset by the shadow radius. */
-    boolean mRenderShadowsInCompositor = false;
-
     /**
      * Tracks a map of input tokens to info that is used to decide whether to intercept
      * a key event.
@@ -811,8 +806,6 @@ public class WindowManagerService extends IWindowManager.Stub
             resolver.registerContentObserver(mForceResizableUri, false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(mDevEnableNonResizableMultiWindowUri, false, this,
                     UserHandle.USER_ALL);
-            resolver.registerContentObserver(mRenderShadowsInCompositorUri, false, this,
-                    UserHandle.USER_ALL);
             resolver.registerContentObserver(mDisplaySettingsPathUri, false, this,
                     UserHandle.USER_ALL);
         }
@@ -850,11 +843,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (mDevEnableNonResizableMultiWindowUri.equals(uri)) {
                 updateDevEnableNonResizableMultiWindow();
-                return;
-            }
-
-            if (mRenderShadowsInCompositorUri.equals(uri)) {
-                setShadowRenderer();
                 return;
             }
 
@@ -970,11 +958,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 });
             }
         }
-    }
-
-    private void setShadowRenderer() {
-        mRenderShadowsInCompositor = Settings.Global.getInt(mContext.getContentResolver(),
-                DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR, 1) != 0;
     }
 
     PowerManager mPowerManager;
@@ -1395,7 +1378,6 @@ public class WindowManagerService extends IWindowManager.Stub
         float[] spotColor = {0.f, 0.f, 0.f, spotShadowAlpha};
         SurfaceControl.setGlobalShadowSettings(ambientColor, spotColor, lightY, lightZ,
                 lightRadius);
-        setShadowRenderer();
     }
 
     /**
@@ -3855,14 +3837,20 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
-     * Generates and returns an up-to-date {@link Bitmap} for the specified taskId. The returned
-     * bitmap will be full size and will not include any secure content.
+     * Generates and returns an up-to-date {@link Bitmap} for the specified taskId.
      *
-     * @param taskId The task ID of the task for which a snapshot is requested.
+     * @param taskId                  The task ID of the task for which a Bitmap is requested.
+     * @param layerCaptureArgsBuilder A {@link SurfaceControl.LayerCaptureArgs.Builder} with
+     *                                arguments for how to capture the Bitmap. The caller can
+     *                                specify any arguments, but this method will ensure that the
+     *                                specified task's SurfaceControl is used and the crop is set to
+     *                                the bounds of that task.
      * @return The Bitmap, or null if no task with the specified ID can be found or the bitmap could
      * not be generated.
      */
-    @Nullable public Bitmap captureTaskBitmap(int taskId) {
+    @Nullable
+    public Bitmap captureTaskBitmap(int taskId,
+            @NonNull SurfaceControl.LayerCaptureArgs.Builder layerCaptureArgsBuilder) {
         if (mTaskSnapshotController.shouldDisableSnapshots()) {
             return null;
         }
@@ -3876,9 +3864,7 @@ public class WindowManagerService extends IWindowManager.Stub
             task.getBounds(mTmpRect);
             final SurfaceControl sc = task.getSurfaceControl();
             final SurfaceControl.ScreenshotHardwareBuffer buffer = SurfaceControl.captureLayers(
-                    new SurfaceControl.LayerCaptureArgs.Builder(sc)
-                            .setSourceCrop(mTmpRect)
-                            .build());
+                    layerCaptureArgsBuilder.setLayer(sc).setSourceCrop(mTmpRect).build());
             if (buffer == null) {
                 Slog.w(TAG, "Could not get screenshot buffer for taskId: " + taskId);
                 return null;

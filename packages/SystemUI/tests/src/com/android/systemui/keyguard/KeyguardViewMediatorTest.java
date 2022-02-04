@@ -46,6 +46,7 @@ import com.android.keyguard.KeyguardDisplayManager;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.dreams.DreamOverlayStateController;
@@ -100,6 +101,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock ScreenOnCoordinator mScreenOnCoordinator;
     private @Mock Lazy<NotificationShadeWindowController> mNotificationShadeWindowControllerLazy;
     private @Mock DreamOverlayStateController mDreamOverlayStateController;
+    private @Mock ActivityLaunchAnimator mActivityLaunchAnimator;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -205,7 +207,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mScreenOnCoordinator,
                 mInteractionJankMonitor,
                 mDreamOverlayStateController,
-                mNotificationShadeWindowControllerLazy);
+                mNotificationShadeWindowControllerLazy,
+                () -> mActivityLaunchAnimator);
         mViewMediator.start();
     }
 }
