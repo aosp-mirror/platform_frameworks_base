@@ -1614,8 +1614,8 @@ public final class AutofillManagerService
                 @NonNull IBinder appCallback, @NonNull IResultReceiver receiver)
                 throws RemoteException {
             final int userId = UserHandle.getCallingUserId();
-            activityToken = Objects.requireNonNull(activityToken, "activityToken");
-            appCallback = Objects.requireNonNull(appCallback, "appCallback");
+            Objects.requireNonNull(activityToken, "activityToken");
+            Objects.requireNonNull(appCallback, "appCallback");
 
             boolean restored = false;
             synchronized (mLock) {
