@@ -806,7 +806,6 @@ public class NotificationPanelViewController extends PanelViewController
             QsFrameTranslateController qsFrameTranslateController,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController) {
         super(view,
-                featureFlags,
                 falsingManager,
                 dozeLog,
                 keyguardStateController,

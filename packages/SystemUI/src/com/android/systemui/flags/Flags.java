@@ -46,9 +46,6 @@ public class Flags {
     public static final BooleanFlag NOTIFICATION_PIPELINE_DEVELOPER_LOGGING =
             new BooleanFlag(103, false);
 
-    public static final ResourceBooleanFlag NOTIFICATION_SHADE_DRAG =
-            new ResourceBooleanFlag(104, R.bool.config_enableNotificationShadeDrag);
-
     public static final BooleanFlag NSSL_DEBUG_LINES =
             new BooleanFlag(105, false);
 
@@ -57,6 +54,9 @@ public class Flags {
 
     public static final BooleanFlag NEW_PIPELINE_CRASH_ON_CALL_TO_OLD_PIPELINE =
             new BooleanFlag(107, false);
+
+    public static final ResourceBooleanFlag NOTIFICATION_DRAG_TO_CONTENTS =
+            new ResourceBooleanFlag(108, R.bool.config_notificationToContents);
 
     /***************************************/
     // 200 - keyguard/lockscreen
