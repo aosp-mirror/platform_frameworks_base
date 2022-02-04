@@ -102,7 +102,7 @@ public final class DumpableContainerImpl implements DumpableContainer {
             ipw.println();
             return;
         }
-        ipw.println(": ");
+        ipw.println(":");
 
         for (int i = 0; i < size; i++) {
             String dumpableName = mDumpables.keyAt(i);
