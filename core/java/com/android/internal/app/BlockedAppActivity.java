@@ -17,7 +17,6 @@
 package com.android.internal.app;
 
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -36,9 +35,6 @@ public class BlockedAppActivity extends AlertActivity {
     private static final String TAG = "BlockedAppActivity";
     private static final String PACKAGE_NAME = "com.android.internal.app";
     private static final String EXTRA_BLOCKED_PACKAGE = PACKAGE_NAME + ".extra.BLOCKED_PACKAGE";
-    private static final String EXTRA_BLOCKED_ACTIVITY_INFO =
-            PACKAGE_NAME + ".extra.BLOCKED_ACTIVITY_INFO";
-    private static final String EXTRA_STREAMED_DEVICE = PACKAGE_NAME + ".extra.STREAMED_DEVICE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,30 +48,17 @@ public class BlockedAppActivity extends AlertActivity {
             return;
         }
 
-        CharSequence appLabel = null;
         String packageName = intent.getStringExtra(EXTRA_BLOCKED_PACKAGE);
-        ActivityInfo activityInfo = intent.getParcelableExtra(EXTRA_BLOCKED_ACTIVITY_INFO);
-        if (activityInfo != null) {
-            appLabel = activityInfo.loadLabel(getPackageManager());
-        } else if (!TextUtils.isEmpty(packageName)) {
-            appLabel = getAppLabel(userId, packageName);
-        }
-
-        if (TextUtils.isEmpty(appLabel)) {
-            Slog.wtf(TAG, "Invalid package: " + packageName + " or activity info: " + activityInfo);
+        if (TextUtils.isEmpty(packageName)) {
+            Slog.wtf(TAG, "Invalid package: " + packageName);
             finish();
             return;
         }
 
-        CharSequence streamedDeviceName = intent.getCharSequenceExtra(EXTRA_STREAMED_DEVICE);
-        if (!TextUtils.isEmpty(streamedDeviceName)) {
-            mAlertParams.mTitle = getString(R.string.app_streaming_blocked_title, appLabel);
-            mAlertParams.mMessage =
-                    getString(R.string.app_streaming_blocked_message, streamedDeviceName);
-        } else {
-            mAlertParams.mTitle = getString(R.string.app_blocked_title);
-            mAlertParams.mMessage = getString(R.string.app_blocked_message, appLabel);
-        }
+        CharSequence appLabel = getAppLabel(userId, packageName);
+
+        mAlertParams.mTitle = getString(R.string.app_blocked_title);
+        mAlertParams.mMessage = getString(R.string.app_blocked_message, appLabel);
         mAlertParams.mPositiveButtonText = getString(android.R.string.ok);
         setupAlert();
     }
@@ -99,20 +82,5 @@ public class BlockedAppActivity extends AlertActivity {
                 .setClassName("android", BlockedAppActivity.class.getName())
                 .putExtra(Intent.EXTRA_USER_ID, userId)
                 .putExtra(EXTRA_BLOCKED_PACKAGE, packageName);
-    }
-
-    /**
-     * Creates an intent that launches {@link BlockedAppActivity} when app streaming is blocked.
-     *
-     * Using this method and providing a non-empty {@code streamedDeviceName} will cause the dialog
-     * to use streaming-specific error messages.
-     */
-    public static Intent createStreamingBlockedIntent(int userId, ActivityInfo activityInfo,
-            CharSequence streamedDeviceName) {
-        return new Intent()
-                .setClassName("android", BlockedAppActivity.class.getName())
-                .putExtra(Intent.EXTRA_USER_ID, userId)
-                .putExtra(EXTRA_BLOCKED_ACTIVITY_INFO, activityInfo)
-                .putExtra(EXTRA_STREAMED_DEVICE, streamedDeviceName);
     }
 }
