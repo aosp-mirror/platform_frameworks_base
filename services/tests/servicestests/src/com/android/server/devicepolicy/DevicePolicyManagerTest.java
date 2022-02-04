@@ -7781,6 +7781,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
                 verify(getServices().userManagerInternal, never())
                         .setDevicePolicyUserRestrictions(anyInt(), any(), any(), anyBoolean());
+                DpmTestUtils.assertRestrictions(new Bundle(), dpm.getUserRestrictions(admin1));
             }
         }
     }
@@ -7811,6 +7812,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                                         UserHandle.USER_SYSTEM, localRestrictions),
                                 eq(true));
                 reset(getServices().userManagerInternal);
+
+                DpmTestUtils.assertRestrictions(DpmTestUtils.newRestrictions(restriction),
+                        dpm.getUserRestrictions(admin1));
 
                 dpm.clearUserRestriction(admin1, restriction);
                 reset(getServices().userManagerInternal);
@@ -8055,6 +8059,28 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 () -> dpm.setPermissionGrantState(admin1, "com.android.foo.package",
                         permission.READ_PHONE_STATE,
                         DevicePolicyManager.PERMISSION_GRANT_STATE_GRANTED));
+    }
+
+    @Test
+    public void testGetPermissionGrantState_financeDo_notReadPhoneStatePermission_throwsException()
+            throws Exception {
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.getPermissionGrantState(admin1, admin1.getPackageName(),
+                        permission.READ_CALENDAR));
+    }
+
+    @Test
+    public void testGetPermissionGrantState_financeDo_notDeviceOwnerPackage_throwsException()
+            throws Exception {
+        setDeviceOwner();
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        assertExpectException(SecurityException.class, /* messageRegex= */ null,
+                () -> dpm.getPermissionGrantState(admin1, "com.android.foo.package",
+                        permission.READ_PHONE_STATE));
     }
 
     @Test

@@ -465,7 +465,9 @@ public class DevicePolicyManager {
      * <li>{@link #setUserControlDisabledPackages(ComponentName, List)}</li>
      * <li>{@link #getUserControlDisabledPackages(ComponentName)}</li>
      * <li>{@link #setOrganizationName(ComponentName, CharSequence)}</li>
+     * <li>{@link #getOrganizationName(ComponentName)} </li>
      * <li>{@link #setShortSupportMessage(ComponentName, CharSequence)}</li>
+     * <li>{@link #getShortSupportMessage(ComponentName)}</li>
      * <li>{@link #isBackupServiceEnabled(ComponentName)}</li>
      * <li>{@link #setBackupServiceEnabled(ComponentName, boolean)}</li>
      * <li>{@link #isLockTaskPermitted(String)}</li>
@@ -478,7 +480,9 @@ public class DevicePolicyManager {
      *     <li>{@link #LOCK_TASK_FEATURE_GLOBAL_ACTIONS}</li>
      *     <li>{@link #LOCK_TASK_FEATURE_NOTIFICATIONS}</li>
      * </ul>
+     * <li>{@link #getLockTaskFeatures(ComponentName)}</li>
      * <li>{@link #setLockTaskPackages(ComponentName, String[])}</li>
+     * <li>{@link #getLockTaskPackages(ComponentName)}</li>
      * <li>{@link #addPersistentPreferredActivity(ComponentName, IntentFilter, ComponentName)}</li>
      * <li>{@link #clearPackagePersistentPreferredActivities(ComponentName, String)} </li>
      * <li>{@link #wipeData(int)}</li>
@@ -489,6 +493,10 @@ public class DevicePolicyManager {
      * {@link #PERMISSION_GRANT_STATE_GRANTED}, {@link #PERMISSION_GRANT_STATE_DENIED}, or
      * {@link #PERMISSION_GRANT_STATE_DEFAULT} and can <b>only</b> be applied to the device admin
      * app (otherwise a {@link SecurityException} will be thrown)</li>
+     * <li>{@link #getPermissionGrantState(ComponentName, String, String)}, where
+     * {@link permission#READ_PHONE_STATE} is the <b>only</b> permission that can be
+     * used and device admin app is the only package that can be used to retrieve the permission
+     * permission grant state for (otherwise a {@link SecurityException} will be thrown)</li>
      * <li>{@link #addUserRestriction(ComponentName, String)}, where the following user restrictions
      * are permitted (otherwise a {@link SecurityException} will be thrown):</li>
      * <ul>
@@ -499,7 +507,17 @@ public class DevicePolicyManager {
      *     <li>{@link UserManager#DISALLOW_CONFIG_DATE_TIME}</li>
      *     <li>{@link UserManager#DISALLOW_OUTGOING_CALLS}</li>
      * </ul>
-     * <li>{@link #clearUserRestriction(ComponentName, String)}</li>
+     * <li>{@link #getUserRestrictions(ComponentName)}</li>
+     * <li>{@link #clearUserRestriction(ComponentName, String)}, where the following user
+     * restrictions are permitted (otherwise a {@link SecurityException} will be thrown):</li>
+     * <ul>
+     *     <li>{@link UserManager#DISALLOW_ADD_USER}</li>
+     *     <li>{@link UserManager#DISALLOW_DEBUGGING_FEATURES}</li>
+     *     <li>{@link UserManager#DISALLOW_INSTALL_UNKNOWN_SOURCES}</li>
+     *     <li>{@link UserManager#DISALLOW_SAFE_BOOT}</li>
+     *     <li>{@link UserManager#DISALLOW_CONFIG_DATE_TIME}</li>
+     *     <li>{@link UserManager#DISALLOW_OUTGOING_CALLS}</li>
+     * </ul>
      * </ul>
      *
      * @hide
