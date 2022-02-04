@@ -7033,8 +7033,8 @@ package android.media.tv.tuner.filter {
     method @Nullable public String acquireSharedFilterToken();
     method public void close();
     method public int configure(@NonNull android.media.tv.tuner.filter.FilterConfiguration);
+    method public int delayCallbackForDurationMillis(long);
     method public int delayCallbackUntilBytesAccumulated(int);
-    method public int delayCallbackUntilMillisElapsed(long);
     method public int flush();
     method public void freeSharedFilterToken(@NonNull String);
     method @Deprecated public int getId();
