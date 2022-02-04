@@ -60,6 +60,13 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS =
             "settings_enable_monitor_phantom_procs";
 
+    /**
+     * Support dark theme activation at Bedtime.
+     * @hide
+     */
+    public static final String SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME =
+            "settings_app_allow_dark_theme_activation_at_bedtime";
+
     private static final Map<String, String> DEFAULT_FLAGS;
 
     static {
@@ -84,6 +91,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_search_always_expand", "false");
         DEFAULT_FLAGS.put(SETTINGS_APP_LANGUAGE_SELECTION, "false");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS, "true");
+        DEFAULT_FLAGS.put(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
@@ -92,6 +100,7 @@ public class FeatureFlagUtils {
         PERSISTENT_FLAGS.add(SETTINGS_APP_LANGUAGE_SELECTION);
         PERSISTENT_FLAGS.add(SETTINGS_SUPPORT_LARGE_SCREEN);
         PERSISTENT_FLAGS.add(SETTINGS_ENABLE_MONITOR_PHANTOM_PROCS);
+        PERSISTENT_FLAGS.add(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME);
     }
 
     /**
