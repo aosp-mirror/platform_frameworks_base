@@ -114,6 +114,12 @@ final class PermissionsUtils {
         context.enforceCallingPermission(INTERACT_ACROSS_USERS, null);
     }
 
+    static void enforceCallerIsSystemOrCanInteractWithUserId(@NonNull Context context, int userId) {
+        if (getCallingUid() == SYSTEM_UID) return;
+
+        enforceCallerCanInteractWithUserId(context, userId);
+    }
+
     static boolean checkCallerIsSystemOr(@UserIdInt int userId, @NonNull String packageName) {
         final int callingUid = getCallingUid();
         if (callingUid == SYSTEM_UID) return true;
