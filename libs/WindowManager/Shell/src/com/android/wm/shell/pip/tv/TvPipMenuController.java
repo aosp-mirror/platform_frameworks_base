@@ -103,7 +103,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         };
         context.registerReceiverForAllUsers(closeSystemDialogsBroadcastReceiver,
                 new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), null /* permission */,
-                mainHandler);
+                mainHandler, Context.RECEIVER_EXPORTED);
 
         pipMediaController.addActionListener(this::onMediaActionsChanged);
     }
