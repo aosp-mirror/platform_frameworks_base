@@ -871,7 +871,6 @@ public class NotificationPanelViewController extends PanelViewController
         mPulseExpansionHandler = pulseExpansionHandler;
         mDozeParameters = dozeParameters;
         mScrimController = scrimController;
-        mScrimController.setClipsQsScrim(!mShouldUseSplitNotificationShade);
         mUserManager = userManager;
         mMediaDataManager = mediaDataManager;
         mTapAgainViewController = tapAgainViewController;
@@ -1177,7 +1176,6 @@ public class NotificationPanelViewController extends PanelViewController
         int panelWidth = mResources.getDimensionPixelSize(R.dimen.notification_panel_width);
         mShouldUseSplitNotificationShade =
                 Utils.shouldUseSplitNotificationShade(mResources);
-        mScrimController.setClipsQsScrim(!mShouldUseSplitNotificationShade);
         if (mQs != null) {
             mQs.setInSplitShade(mShouldUseSplitNotificationShade);
         }
@@ -1394,6 +1392,7 @@ public class NotificationPanelViewController extends PanelViewController
 
     private void setIsFullWidth(boolean isFullWidth) {
         mIsFullWidth = isFullWidth;
+        mScrimController.setClipsQsScrim(isFullWidth);
         mNotificationStackScrollLayoutController.setIsFullWidth(isFullWidth);
     }
 
@@ -2534,15 +2533,23 @@ public class NotificationPanelViewController extends PanelViewController
      * and QS state.
      */
     private void setQSClippingBounds() {
-        int top;
-        int bottom;
-        int left;
-        int right;
-
         final int qsPanelBottomY = calculateQsBottomPosition(computeQsExpansionFraction());
         final boolean qsVisible = (computeQsExpansionFraction() > 0 || qsPanelBottomY > 0);
 
-        if (!mShouldUseSplitNotificationShade) {
+        int top = calculateTopQsClippingBound(qsPanelBottomY);
+        int bottom = calculateBottomQsClippingBound(top);
+        int left = calculateLeftQsClippingBound();
+        int right = calculateRightQsClippingBound();
+        // top should never be lower than bottom, otherwise it will be invisible.
+        top = Math.min(top, bottom);
+        applyQSClippingBounds(left, top, right, bottom, qsVisible);
+    }
+
+    private int calculateTopQsClippingBound(int qsPanelBottomY) {
+        int top;
+        if (mShouldUseSplitNotificationShade) {
+            top = Math.min(qsPanelBottomY, mSplitShadeStatusBarHeight);
+        } else {
             if (mTransitioningToFullShadeProgress > 0.0f) {
                 // If we're transitioning, let's use the actual value. The else case
                 // can be wrong during transitions when waiting for the keyguard to unlock
@@ -2569,20 +2576,34 @@ public class NotificationPanelViewController extends PanelViewController
                         (getExpandedFraction() - mMinFraction) / (1f - mMinFraction);
                 top *= MathUtils.saturate(realFraction / mMinFraction);
             }
-            bottom = getView().getBottom();
-            // notification bounds should take full screen width regardless of insets
-            left = 0;
-            right = getView().getRight() + mDisplayRightInset;
-        } else {
-            top = Math.min(qsPanelBottomY, mSplitShadeStatusBarHeight);
-            bottom = top + mNotificationStackScrollLayoutController.getHeight()
-                    - mSplitShadeNotificationsScrimMarginBottom;
-            left = mNotificationStackScrollLayoutController.getLeft();
-            right = mNotificationStackScrollLayoutController.getRight();
         }
-        // top should never be lower than bottom, otherwise it will be invisible.
-        top = Math.min(top, bottom);
-        applyQSClippingBounds(left, top, right, bottom, qsVisible);
+        return top;
+    }
+
+    private int calculateBottomQsClippingBound(int top) {
+        if (mShouldUseSplitNotificationShade) {
+            return top + mNotificationStackScrollLayoutController.getHeight()
+                    - mSplitShadeNotificationsScrimMarginBottom;
+        } else {
+            return getView().getBottom();
+        }
+    }
+
+    private int calculateLeftQsClippingBound() {
+        if (isFullWidth()) {
+            // left bounds can ignore insets, it should always reach the edge of the screen
+            return 0;
+        } else {
+            return mNotificationStackScrollLayoutController.getLeft();
+        }
+    }
+
+    private int calculateRightQsClippingBound() {
+        if (isFullWidth()) {
+            return getView().getRight() + mDisplayRightInset;
+        } else {
+            return mNotificationStackScrollLayoutController.getRight();
+        }
     }
 
     private void applyQSClippingBounds(int left, int top, int right, int bottom,
@@ -2639,7 +2660,7 @@ public class NotificationPanelViewController extends PanelViewController
         // Fancy clipping for quick settings
         int radius = mScrimCornerRadius;
         boolean clipStatusView = false;
-        if (!mShouldUseSplitNotificationShade) {
+        if (isFullWidth()) {
             // The padding on this area is large enough that we can use a cheaper clipping strategy
             mKeyguardStatusAreaClipBounds.set(left, top, right, bottom);
             clipStatusView = qsVisible;
@@ -2802,7 +2823,7 @@ public class NotificationPanelViewController extends PanelViewController
      * shade. 0.0f means we're not transitioning yet.
      */
     public void setTransitionToFullShadeAmount(float pxAmount, boolean animate, long delay) {
-        if (animate && !mShouldUseSplitNotificationShade) {
+        if (animate && isFullWidth()) {
             animateNextNotificationBounds(StackStateAnimator.ANIMATION_DURATION_GO_TO_FULL_SHADE,
                     delay);
             mIsQsTranslationResetAnimator = mQsTranslationForFullShadeTransition > 0.0f;
