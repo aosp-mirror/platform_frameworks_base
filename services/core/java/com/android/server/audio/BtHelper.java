@@ -31,7 +31,7 @@ import android.content.Intent;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
-import android.media.BtProfileConnectionInfo;
+import android.media.BluetoothProfileConnectionInfo;
 import android.os.Binder;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -40,6 +40,7 @@ import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -489,11 +490,13 @@ public class BtHelper {
         if (proxy.getConnectionState(btDevice) == BluetoothProfile.STATE_CONNECTED) {
             mDeviceBroker.queueOnBluetoothActiveDeviceChanged(
                     new AudioDeviceBroker.BtDeviceChangedData(btDevice, null,
-                        new BtProfileConnectionInfo(profile), "mBluetoothProfileServiceListener"));
+                        new BluetoothProfileConnectionInfo(profile),
+                        "mBluetoothProfileServiceListener"));
         } else {
             mDeviceBroker.queueOnBluetoothActiveDeviceChanged(
                     new AudioDeviceBroker.BtDeviceChangedData(null, btDevice,
-                        new BtProfileConnectionInfo(profile), "mBluetoothProfileServiceListener"));
+                        new BluetoothProfileConnectionInfo(profile),
+                        "mBluetoothProfileServiceListener"));
         }
     }
 
@@ -503,7 +506,12 @@ public class BtHelper {
         // Discard timeout message
         mDeviceBroker.handleCancelFailureToConnectToBtHeadsetService();
         mBluetoothHeadset = headset;
-        setBtScoActiveDevice(headset != null ? headset.getActiveDevice() : null);
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        List<BluetoothDevice> activeDevices = Collections.emptyList();
+        if (adapter != null) {
+            activeDevices = adapter.getActiveDevices(BluetoothProfile.HEADSET);
+        }
+        setBtScoActiveDevice((activeDevices.size() > 0) ? activeDevices.get(0) : null);
         // Refresh SCO audio state
         checkScoAudioState();
         if (mScoAudioState != SCO_STATE_ACTIVATE_REQ

@@ -103,6 +103,20 @@ enum class Style(internal val coreSpec: CoreSpec) {
             n1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 16.0)),
             n2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 32.0))
     )),
+    RAINBOW(CoreSpec(
+            a1 = TonalSpec(chroma = Chroma(ChromaStrategy.GTE, 48.0)),
+            a2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 16.0)),
+            a3 = TonalSpec(Hue(HueStrategy.ADD, 60.0), Chroma(ChromaStrategy.EQ, 24.0)),
+            n1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 0.0)),
+            n2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 0.0))
+    )),
+    FRUIT_SALAD(CoreSpec(
+            a1 = TonalSpec(Hue(HueStrategy.SUBTRACT, 50.0), Chroma(ChromaStrategy.GTE, 48.0)),
+            a2 = TonalSpec(Hue(HueStrategy.SUBTRACT, 50.0), Chroma(ChromaStrategy.EQ, 36.0)),
+            a3 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 36.0)),
+            n1 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 10.0)),
+            n2 = TonalSpec(chroma = Chroma(ChromaStrategy.EQ, 16.0))
+    )),
 }
 
 class ColorScheme(

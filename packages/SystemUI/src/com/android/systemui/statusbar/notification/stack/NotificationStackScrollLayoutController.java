@@ -35,6 +35,8 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.os.Trace;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -180,7 +182,6 @@ public class NotificationStackScrollLayoutController {
     private final NotificationLockscreenUserManager mLockscreenUserManager;
     // TODO: StatusBar should be encapsulated behind a Controller
     private final StatusBar mStatusBar;
-    private final NotificationGroupManagerLegacy mLegacyGroupManager;
     private final SectionHeaderController mSilentHeaderController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final InteractionJankMonitor mJankMonitor;
@@ -191,6 +192,7 @@ public class NotificationStackScrollLayoutController {
     private boolean mFadeNotificationsOnDismiss;
     private NotificationSwipeHelper mSwipeHelper;
     private boolean mShowEmptyShadeView;
+    @Nullable private Boolean mHistoryEnabled;
     private int mBarState;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
 
@@ -340,6 +342,8 @@ public class NotificationStackScrollLayoutController {
         @Override
         public void onUserChanged(int userId) {
             mView.updateSensitiveness(false, mLockscreenUserManager.isAnyProfilePublicMode());
+            mHistoryEnabled = null;
+            updateFooter();
         }
     };
 
@@ -699,8 +703,6 @@ public class NotificationStackScrollLayoutController {
             }
         });
         mNotifPipelineFlags = notifPipelineFlags;
-        mLegacyGroupManager = mNotifPipelineFlags.isNewPipelineEnabled()
-                ? null : legacyGroupManager;
         mSilentHeaderController = silentHeaderController;
         mNotifPipeline = notifPipeline;
         mNotifCollection = notifCollection;
@@ -802,6 +804,7 @@ public class NotificationStackScrollLayoutController {
                 (key, newValue) -> {
                     switch (key) {
                         case Settings.Secure.NOTIFICATION_HISTORY_ENABLED:
+                            mHistoryEnabled = null;  // invalidate
                             updateFooter();
                             break;
                         case HIGH_PRIORITY:
@@ -1009,6 +1012,20 @@ public class NotificationStackScrollLayoutController {
         return mNotifStats.getNumActiveNotifs();
     }
 
+    public boolean isHistoryEnabled() {
+        Boolean historyEnabled = mHistoryEnabled;
+        if (historyEnabled == null) {
+            if (mView == null || mView.getContext() == null) {
+                Log.wtf(TAG, "isHistoryEnabled failed to initialize its value");
+                return false;
+            }
+            mHistoryEnabled = historyEnabled =
+                    Settings.Secure.getIntForUser(mView.getContext().getContentResolver(),
+                    Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0, UserHandle.USER_CURRENT) == 1;
+        }
+        return historyEnabled;
+    }
+
     public int getIntrinsicContentHeight() {
         return mView.getIntrinsicContentHeight();
     }
@@ -1199,6 +1216,7 @@ public class NotificationStackScrollLayoutController {
      * are true.
      */
     public void updateShowEmptyShadeView() {
+        Trace.beginSection("NSSLC.updateShowEmptyShadeView");
         mShowEmptyShadeView = mBarState != KEYGUARD
                 && (!mView.isQsExpanded() || mView.isUsingSplitNotificationShade())
                 && getVisibleNotificationCount() == 0;
@@ -1206,6 +1224,7 @@ public class NotificationStackScrollLayoutController {
         mView.updateEmptyShadeView(
                 mShowEmptyShadeView,
                 mZenModeController.areNotificationsHiddenInShade());
+        Trace.endSection();
     }
 
     public boolean areNotificationsHiddenInShade() {
@@ -1323,11 +1342,15 @@ public class NotificationStackScrollLayoutController {
         if (mNotifPipelineFlags.isNewPipelineEnabled()) {
             return;
         }
+        Trace.beginSection("NSSLC.updateSectionBoundaries");
         mView.updateSectionBoundaries(reason);
+        Trace.endSection();
     }
 
     public void updateFooter() {
+        Trace.beginSection("NSSLC.updateFooter");
         mView.updateFooter();
+        Trace.endSection();
     }
 
     public void onUpdateRowStates() {

@@ -44,6 +44,11 @@ public class DreamClockDateComplication implements Complication {
         mComponentFactory = componentFactory;
     }
 
+    @Override
+    public int getRequiredTypeAvailability() {
+        return COMPLICATION_TYPE_DATE;
+    }
+
     /**
      * Create {@link DreamClockDateViewHolder}.
      */

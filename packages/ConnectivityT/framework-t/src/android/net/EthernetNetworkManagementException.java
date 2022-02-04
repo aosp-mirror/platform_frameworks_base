@@ -23,11 +23,11 @@ import android.os.Parcelable;
 import java.util.Objects;
 
 /** @hide */
-public final class InternalNetworkManagementException
+public final class EthernetNetworkManagementException
         extends RuntimeException implements Parcelable {
 
     /* @hide */
-    public InternalNetworkManagementException(@NonNull final String errorMessage) {
+    public EthernetNetworkManagementException(@NonNull final String errorMessage) {
         super(errorMessage);
     }
 
@@ -40,7 +40,7 @@ public final class InternalNetworkManagementException
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        final InternalNetworkManagementException that = (InternalNetworkManagementException) obj;
+        final EthernetNetworkManagementException that = (EthernetNetworkManagementException) obj;
 
         return Objects.equals(getMessage(), that.getMessage());
     }
@@ -56,16 +56,16 @@ public final class InternalNetworkManagementException
     }
 
     @NonNull
-    public static final Parcelable.Creator<InternalNetworkManagementException> CREATOR =
-            new Parcelable.Creator<InternalNetworkManagementException>() {
+    public static final Parcelable.Creator<EthernetNetworkManagementException> CREATOR =
+            new Parcelable.Creator<EthernetNetworkManagementException>() {
                 @Override
-                public InternalNetworkManagementException[] newArray(int size) {
-                    return new InternalNetworkManagementException[size];
+                public EthernetNetworkManagementException[] newArray(int size) {
+                    return new EthernetNetworkManagementException[size];
                 }
 
                 @Override
-                public InternalNetworkManagementException createFromParcel(@NonNull Parcel source) {
-                    return new InternalNetworkManagementException(source.readString());
+                public EthernetNetworkManagementException createFromParcel(@NonNull Parcel source) {
+                    return new EthernetNetworkManagementException(source.readString());
                 }
             };
 }

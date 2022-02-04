@@ -87,7 +87,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.OnBackInvokedDispatcher;
 import android.view.PendingInsetsController;
 import android.view.ThreadedRenderer;
 import android.view.View;
@@ -109,7 +108,6 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.PopupWindow;
-import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.R;
 import com.android.internal.graphics.drawable.BackgroundBlurDrawable;
@@ -297,7 +295,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         return true;
     };
     private Consumer<Boolean> mCrossWindowBlurEnabledListener;
-    private final WindowOnBackInvokedDispatcher mOnBackInvokedDispatcher;
 
     DecorView(Context context, int featureId, PhoneWindow window,
             WindowManager.LayoutParams params) {
@@ -326,7 +323,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         initResizingPaints();
 
         mLegacyNavigationBarBackgroundPaint.setColor(Color.BLACK);
-        mOnBackInvokedDispatcher = new WindowOnBackInvokedDispatcher();
     }
 
     void setBackgroundFallback(@Nullable Drawable fallbackDrawable) {
@@ -1880,7 +1876,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         }
 
         mPendingInsetsController.detach();
-        mOnBackInvokedDispatcher.detachFromWindow();
     }
 
     @Override
@@ -1923,11 +1918,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     @Override
     public PendingInsetsController providePendingInsetsController() {
         return mPendingInsetsController;
-    }
-
-    @Override
-    public WindowOnBackInvokedDispatcher provideWindowOnBackInvokedDispatcher() {
-        return mOnBackInvokedDispatcher;
     }
 
     private ActionMode createActionMode(
@@ -2384,7 +2374,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 }
             }
         }
-        mOnBackInvokedDispatcher.clear();
     }
 
     @Override
@@ -2664,15 +2653,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         } else {
             return mPendingInsetsController;
         }
-    }
-
-    /**
-     * Returns the {@link OnBackInvokedDispatcher} on the decor view.
-     */
-    @Override
-    @Nullable
-    public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
-        return mOnBackInvokedDispatcher;
     }
 
     @Override

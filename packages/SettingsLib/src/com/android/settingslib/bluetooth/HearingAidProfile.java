@@ -173,8 +173,10 @@ public class HearingAidProfile implements LocalBluetoothProfile {
     }
 
     public List<BluetoothDevice> getActiveDevices() {
-        if (mService == null) return new ArrayList<>();
-        return mService.getActiveDevices();
+        if (mBluetoothAdapter == null) {
+            return new ArrayList<>();
+        }
+        return mBluetoothAdapter.getActiveDevices(BluetoothProfile.HEARING_AID);
     }
 
     @Override

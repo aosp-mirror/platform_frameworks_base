@@ -40,8 +40,7 @@ public class RecordSettings extends Settings {
      *
      * @hide
      */
-    @IntDef(flag = true,
-            value = {TS_INDEX_INVALID, TS_INDEX_FIRST_PACKET, TS_INDEX_PAYLOAD_UNIT_START_INDICATOR,
+    @IntDef(value = {TS_INDEX_INVALID, TS_INDEX_FIRST_PACKET, TS_INDEX_PAYLOAD_UNIT_START_INDICATOR,
                     TS_INDEX_CHANGE_TO_NOT_SCRAMBLED, TS_INDEX_CHANGE_TO_EVEN_SCRAMBLED,
                     TS_INDEX_CHANGE_TO_ODD_SCRAMBLED, TS_INDEX_DISCONTINUITY_INDICATOR,
                     TS_INDEX_RANDOM_ACCESS_INDICATOR, TS_INDEX_PRIORITY_INDICATOR,
@@ -165,7 +164,6 @@ public class RecordSettings extends Settings {
      * @hide
      */
     @IntDef(prefix = "SC_INDEX_",
-            flag = true,
             value = {SC_INDEX_I_FRAME, SC_INDEX_P_FRAME, SC_INDEX_B_FRAME,
                     SC_INDEX_SEQUENCE, SC_INDEX_I_SLICE, SC_INDEX_P_SLICE,
                     SC_INDEX_B_SLICE, SC_INDEX_SI_SLICE, SC_INDEX_SP_SLICE})
@@ -214,8 +212,7 @@ public class RecordSettings extends Settings {
      *
      * @hide
      */
-    @IntDef(flag = true,
-            value = {SC_HEVC_INDEX_SPS, SC_HEVC_INDEX_AUD, SC_HEVC_INDEX_SLICE_CE_BLA_W_LP,
+    @IntDef(value = {SC_HEVC_INDEX_SPS, SC_HEVC_INDEX_AUD, SC_HEVC_INDEX_SLICE_CE_BLA_W_LP,
             SC_HEVC_INDEX_SLICE_BLA_W_RADL, SC_HEVC_INDEX_SLICE_BLA_N_LP,
             SC_HEVC_INDEX_SLICE_IDR_W_RADL, SC_HEVC_INDEX_SLICE_IDR_N_LP,
             SC_HEVC_INDEX_SLICE_TRAIL_CRA})
@@ -258,8 +255,7 @@ public class RecordSettings extends Settings {
     /**
      * @hide
      */
-    @IntDef(flag = true,
-            prefix = "SC_",
+    @IntDef(prefix = "SC_",
             value = {
                 SC_INDEX_I_FRAME,
                 SC_INDEX_P_FRAME,

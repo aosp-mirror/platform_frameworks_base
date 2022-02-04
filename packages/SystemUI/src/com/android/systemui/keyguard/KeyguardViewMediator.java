@@ -77,11 +77,13 @@ import android.view.IRemoteAnimationRunner;
 import android.view.RemoteAnimationTarget;
 import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -89,6 +91,7 @@ import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardStateCallback;
+import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardConstants;
@@ -102,7 +105,10 @@ import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
+import com.android.systemui.R;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.animation.LaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.UiBackground;
@@ -375,6 +381,9 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     private int mUnlockSoundId;
     private int mTrustedSoundId;
     private int mLockSoundStreamId;
+    private final float mPowerButtonY;
+    private final float mWindowCornerRadius;
+
     /**
      * The animation used for hiding keyguard. This is used to fetch the animation timings if
      * WindowManager is not providing us with them.
@@ -815,6 +824,109 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         }
     };
 
+    /**
+     * Animation launch controller for activities that occlude the keyguard.
+     */
+    private final ActivityLaunchAnimator.Controller mOccludeAnimationController =
+            new ActivityLaunchAnimator.Controller() {
+                @Override
+                public void onLaunchAnimationStart(boolean isExpandingFullyAbove) {
+                    setOccluded(true /* occluded */, false /* animate */);
+                }
+
+                @Override
+                public void onLaunchAnimationCancelled() {
+                    setOccluded(true /* occluded */, false /* animate */);
+                }
+
+                @NonNull
+                @Override
+                public ViewGroup getLaunchContainer() {
+                    return ((ViewGroup) mKeyguardViewControllerLazy.get()
+                            .getViewRootImpl().getView());
+                }
+
+                @Override
+                public void setLaunchContainer(@NonNull ViewGroup launchContainer) {
+                    // No-op, launch container is always the shade.
+                    Log.wtf(TAG, "Someone tried to change the launch container for the "
+                            + "ActivityLaunchAnimator, which should never happen.");
+                }
+
+                @NonNull
+                @Override
+                public LaunchAnimator.State createAnimatorState() {
+                    final int width = getLaunchContainer().getWidth();
+                    final int height = getLaunchContainer().getHeight();
+
+                    final float initialHeight = height / 3f;
+                    final float initialWidth = width / 3f;
+
+                    if (mUpdateMonitor.isSecureCameraLaunchedOverKeyguard()) {
+                        // Start the animation near the power button, at one-third size, since the
+                        // camera was launched from the power button.
+                        return new LaunchAnimator.State(
+                                (int) (mPowerButtonY - initialHeight / 2f) /* top */,
+                                (int) (mPowerButtonY + initialHeight / 2f) /* bottom */,
+                                (int) (width - initialWidth) /* left */,
+                                width /* right */,
+                                mWindowCornerRadius, mWindowCornerRadius);
+                    } else {
+                        // Start the animation in the center of the screen, scaled down.
+                        return new LaunchAnimator.State(
+                                height / 2, height / 2, width / 2, width / 2,
+                                mWindowCornerRadius, mWindowCornerRadius);
+                    }
+                }
+            };
+
+    /**
+     * Animation controller for activities that unocclude the keyguard. This will play the launch
+     * animation in reverse.
+     */
+    private final ActivityLaunchAnimator.Controller mUnoccludeAnimationController =
+            new ActivityLaunchAnimator.Controller() {
+                @Override
+                public void onLaunchAnimationEnd(boolean isExpandingFullyAbove) {
+                    setOccluded(false /* isOccluded */, false /* animate */);
+                }
+
+                @Override
+                public void onLaunchAnimationCancelled() {
+                    setOccluded(false /* isOccluded */, false /* animate */);
+                }
+
+                @NonNull
+                @Override
+                public ViewGroup getLaunchContainer() {
+                    return ((ViewGroup) mKeyguardViewControllerLazy.get()
+                            .getViewRootImpl().getView());
+                }
+
+                @Override
+                public void setLaunchContainer(@NonNull ViewGroup launchContainer) {
+                    // No-op, launch container is always the shade.
+                    Log.wtf(TAG, "Someone tried to change the launch container for the "
+                            + "ActivityLaunchAnimator, which should never happen.");
+                }
+
+                @NonNull
+                @Override
+                public LaunchAnimator.State createAnimatorState() {
+                    final int width = getLaunchContainer().getWidth();
+                    final int height = getLaunchContainer().getHeight();
+
+                    // TODO(b/207399883): Unocclude animation. This currently ends instantly.
+                    return new LaunchAnimator.State(
+                            0, height, 0, width, mWindowCornerRadius, mWindowCornerRadius);
+                }
+            };
+
+    private IRemoteAnimationRunner mOccludeAnimationRunner =
+            new ActivityLaunchRemoteAnimationRunner(mOccludeAnimationController);
+    private IRemoteAnimationRunner mUnoccludeAnimationRunner =
+            new ActivityLaunchRemoteAnimationRunner(mUnoccludeAnimationController);
+
     private DeviceConfigProxy mDeviceConfig;
     private DozeParameters mDozeParameters;
 
@@ -823,6 +935,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
     private final InteractionJankMonitor mInteractionJankMonitor;
     private boolean mWallpaperSupportsAmbientMode;
     private ScreenOnCoordinator mScreenOnCoordinator;
+
+    private Lazy<ActivityLaunchAnimator> mActivityLaunchAnimator;
 
     /**
      * Injected constructor. See {@link KeyguardModule}.
@@ -850,7 +964,8 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
             ScreenOnCoordinator screenOnCoordinator,
             InteractionJankMonitor interactionJankMonitor,
             DreamOverlayStateController dreamOverlayStateController,
-            Lazy<NotificationShadeWindowController> notificationShadeWindowControllerLazy) {
+            Lazy<NotificationShadeWindowController> notificationShadeWindowControllerLazy,
+            Lazy<ActivityLaunchAnimator> activityLaunchAnimator) {
         super(context);
         mFalsingCollector = falsingCollector;
         mLockPatternUtils = lockPatternUtils;
@@ -890,6 +1005,12 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         mScreenOffAnimationController = screenOffAnimationController;
         mInteractionJankMonitor = interactionJankMonitor;
         mDreamOverlayStateController = dreamOverlayStateController;
+
+        mActivityLaunchAnimator = activityLaunchAnimator;
+
+        mPowerButtonY = context.getResources().getDimensionPixelSize(
+                R.dimen.physical_power_button_center_screen_location_y);
+        mWindowCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context);
     }
 
     public void userActivity() {
@@ -1438,6 +1559,14 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         Message msg = mHandler.obtainMessage(SET_OCCLUDED, isOccluded ? 1 : 0, animate ? 1 : 0);
         mHandler.sendMessage(msg);
         Trace.endSection();
+    }
+
+    public IRemoteAnimationRunner getOccludeAnimationRunner() {
+        return mOccludeAnimationRunner;
+    }
+
+    public IRemoteAnimationRunner getUnoccludeAnimationRunner() {
+        return mUnoccludeAnimationRunner;
     }
 
     public boolean isHiding() {
@@ -2866,6 +2995,38 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
 
         public CharSequence getMessage() {
             return mMessage;
+        }
+    }
+
+    /**
+     * Implementation of RemoteAnimationRunner that creates a new
+     * {@link ActivityLaunchAnimator.Runner} whenever onAnimationStart is called, delegating the
+     * remote animation methods to that runner.
+     */
+    private class ActivityLaunchRemoteAnimationRunner extends IRemoteAnimationRunner.Stub {
+
+        private final ActivityLaunchAnimator.Controller mActivityLaunchController;
+        @Nullable private ActivityLaunchAnimator.Runner mRunner;
+
+        ActivityLaunchRemoteAnimationRunner(ActivityLaunchAnimator.Controller controller) {
+            mActivityLaunchController = controller;
+        }
+
+        @Override
+        public void onAnimationCancelled() throws RemoteException {
+            if (mRunner != null) {
+                mRunner.onAnimationCancelled();
+            }
+        }
+
+        @Override
+        public void onAnimationStart(int transit, RemoteAnimationTarget[] apps,
+                RemoteAnimationTarget[] wallpapers,
+                RemoteAnimationTarget[] nonApps,
+                IRemoteAnimationFinishedCallback finishedCallback)
+                throws RemoteException {
+            mRunner = mActivityLaunchAnimator.get().createRunner(mActivityLaunchController);
+            mRunner.onAnimationStart(transit, apps, wallpapers, nonApps, finishedCallback);
         }
     }
 }

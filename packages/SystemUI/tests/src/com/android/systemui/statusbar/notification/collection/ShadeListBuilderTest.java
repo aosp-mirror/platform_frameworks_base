@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.inOrder;
@@ -46,6 +47,7 @@ import android.testing.TestableLooper;
 import android.util.ArrayMap;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -872,6 +874,73 @@ public class ShadeListBuilderTest extends SysuiTestCase {
     }
 
     @Test
+    public void testThatSectionComparatorsAreCalled() {
+        // GIVEN a section with a comparator that elevates some packages over others
+        NotifComparator comparator = spy(new HypeComparator(PACKAGE_2, PACKAGE_4));
+        NotifSectioner sectioner = new PackageSectioner(
+                List.of(PACKAGE_1, PACKAGE_2, PACKAGE_4, PACKAGE_5), comparator);
+        mListBuilder.setSectioners(List.of(sectioner));
+
+        // WHEN the pipeline is kicked off on a bunch of notifications
+        addNotif(0, PACKAGE_0);
+        addNotif(1, PACKAGE_1);
+        addNotif(2, PACKAGE_2);
+        addNotif(3, PACKAGE_3);
+        addNotif(4, PACKAGE_4);
+        addNotif(5, PACKAGE_5);
+        dispatchBuild();
+
+        // THEN the notifs are sorted according to both sectioning and the section's comparator
+        verifyBuiltList(
+                notif(2),
+                notif(4),
+                notif(1),
+                notif(5),
+                notif(0),
+                notif(3)
+        );
+
+        // VERIFY that the comparator is invoked at least 3 times
+        verify(comparator, atLeast(3)).compare(any(), any());
+
+        // VERIFY that the comparator is never invoked with the entry from package 0 or 3.
+        final NotificationEntry package0Entry = mEntrySet.get(0);
+        verify(comparator, never()).compare(eq(package0Entry), any());
+        verify(comparator, never()).compare(any(), eq(package0Entry));
+        final NotificationEntry package3Entry = mEntrySet.get(3);
+        verify(comparator, never()).compare(eq(package3Entry), any());
+        verify(comparator, never()).compare(any(), eq(package3Entry));
+    }
+
+    @Test
+    public void testThatSectionComparatorsAreNotCalledForSectionWithSingleEntry() {
+        // GIVEN a section with a comparator that will have only 1 element
+        NotifComparator comparator = spy(new HypeComparator(PACKAGE_3));
+        NotifSectioner sectioner = new PackageSectioner(List.of(PACKAGE_3), comparator);
+        mListBuilder.setSectioners(List.of(sectioner));
+
+        // WHEN the pipeline is kicked off on a bunch of notifications
+        addNotif(0, PACKAGE_1);
+        addNotif(1, PACKAGE_2);
+        addNotif(2, PACKAGE_3);
+        addNotif(3, PACKAGE_4);
+        addNotif(4, PACKAGE_5);
+        dispatchBuild();
+
+        // THEN the notifs are sorted according to the sectioning
+        verifyBuiltList(
+                notif(2),
+                notif(0),
+                notif(1),
+                notif(3),
+                notif(4)
+        );
+
+        // VERIFY that the comparator is never invoked
+        verify(comparator, never()).compare(any(), any());
+    }
+
+    @Test
     public void testListenersAndPluggablesAreFiredInOrder() {
         // GIVEN a bunch of registered listeners and pluggables
         NotifFilter preGroupFilter = spy(new PackageFilter(PACKAGE_1));
@@ -934,7 +1003,8 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         // GIVEN a variety of pluggables
         NotifFilter packageFilter = new PackageFilter(PACKAGE_1);
         NotifPromoter idPromoter = new IdPromoter(4);
-        NotifSectioner section = new PackageSectioner(PACKAGE_1);
+        NotifComparator sectionComparator = new HypeComparator(PACKAGE_1);
+        NotifSectioner section = new PackageSectioner(List.of(PACKAGE_1), sectionComparator);
         NotifComparator hypeComparator = new HypeComparator(PACKAGE_2);
         Invalidator preRenderInvalidator = new Invalidator("PreRenderInvalidator") {};
 
@@ -966,6 +1036,10 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
         clearInvocations(mOnRenderListListener);
         hypeComparator.invalidateList();
+        verify(mOnRenderListListener).onRenderList(anyList());
+
+        clearInvocations(mOnRenderListListener);
+        sectionComparator.invalidateList();
         verify(mOnRenderListListener).onRenderList(anyList());
 
         clearInvocations(mOnRenderListListener);
@@ -2037,16 +2111,30 @@ public class ShadeListBuilderTest extends SysuiTestCase {
 
     /** Represents a section for the passed pkg */
     private static class PackageSectioner extends NotifSectioner {
-        private final String mPackage;
+        private final List<String> mPackages;
+        private final NotifComparator mComparator;
+
+        PackageSectioner(List<String> pkgs, NotifComparator comparator) {
+            super("PackageSection_" + pkgs, 0);
+            mPackages = pkgs;
+            mComparator = comparator;
+        }
 
         PackageSectioner(String pkg) {
             super("PackageSection_" + pkg, 0);
-            mPackage = pkg;
+            mPackages = List.of(pkg);
+            mComparator = null;
+        }
+
+        @Nullable
+        @Override
+        public NotifComparator getComparator() {
+            return mComparator;
         }
 
         @Override
         public boolean isInSection(ListEntry entry) {
-            return entry.getRepresentativeEntry().getSbn().getPackageName().equals(mPackage);
+            return mPackages.contains(entry.getRepresentativeEntry().getSbn().getPackageName());
         }
     }
 
@@ -2157,6 +2245,7 @@ public class ShadeListBuilderTest extends SysuiTestCase {
         }
     }
 
+    private static final String PACKAGE_0 = "com.test0";
     private static final String PACKAGE_1 = "com.test1";
     private static final String PACKAGE_2 = "com.test2";
     private static final String PACKAGE_3 = "org.test3";

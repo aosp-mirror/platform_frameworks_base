@@ -2901,14 +2901,29 @@ public class ActivityManagerService extends IActivityManager.Stub
         mActivityTaskManager.setPackageScreenCompatMode(packageName, mode);
     }
 
-    private boolean hasUsageStatsPermission(String callingPackage) {
+    private boolean hasUsageStatsPermission(String callingPackage, int callingUid, int callingPid) {
         final int mode = mAppOpsService.noteOperation(AppOpsManager.OP_GET_USAGE_STATS,
-                Binder.getCallingUid(), callingPackage, null, false, "", false).getOpMode();
+                callingUid, callingPackage, null, false, "", false).getOpMode();
         if (mode == AppOpsManager.MODE_DEFAULT) {
-            return checkCallingPermission(Manifest.permission.PACKAGE_USAGE_STATS)
+            return checkPermission(Manifest.permission.PACKAGE_USAGE_STATS, callingPid, callingUid)
                     == PackageManager.PERMISSION_GRANTED;
         }
         return mode == AppOpsManager.MODE_ALLOWED;
+    }
+
+    private boolean hasUsageStatsPermission(String callingPackage) {
+        return hasUsageStatsPermission(callingPackage,
+                Binder.getCallingUid(), Binder.getCallingPid());
+    }
+
+    private void enforceUsageStatsPermission(String callingPackage,
+            int callingUid, int callingPid, String operation) {
+        if (!hasUsageStatsPermission(callingPackage, callingUid, callingPid)) {
+            final String errorMsg = "Permission denial for <" + operation + "> from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                    + " which requires PACKAGE_USAGE_STATS permission";
+            throw new SecurityException(errorMsg);
+        }
     }
 
     @Override
@@ -12783,7 +12798,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 noAction.add(null);
                 actions = noAction.iterator();
             }
-            boolean onlyProtectedBroadcasts = actions.hasNext();
+            boolean onlyProtectedBroadcasts = true;
 
             // Collect stickies of users and check if broadcast is only registered for protected
             // broadcasts
@@ -12857,6 +12872,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // Change is not enabled, thus not targeting T+. Assume exported.
                     flags |= Context.RECEIVER_EXPORTED;
                 }
+            } else if ((flags & Context.RECEIVER_NOT_EXPORTED) == 0) {
+                flags |= Context.RECEIVER_EXPORTED;
             }
         }
 
@@ -13348,6 +13365,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // We set the token to null since if it wasn't for it we'd allow anyway here
                     backgroundActivityStartsToken = null;
                 }
+            }
+
+            // TODO (206518114): We need to use the "real" package name which sent the broadcast,
+            // in case the broadcast is sent via PendingIntent.
+            if (brOptions.getIdForResponseEvent() > 0) {
+                enforceUsageStatsPermission(callerPackage, realCallingUid, realCallingPid,
+                        "recordResponseEventWhileInBackground()");
             }
         }
 
@@ -16065,6 +16089,23 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         /**
+         * Returns package name by pid.
+         */
+        @Override
+        @Nullable
+        public String getPackageNameByPid(int pid) {
+            synchronized (mPidsSelfLocked) {
+                final ProcessRecord app = mPidsSelfLocked.get(pid);
+
+                if (app != null && app.info != null) {
+                    return app.info.packageName;
+                }
+
+                return null;
+            }
+        }
+
+        /**
          * Sets if the given pid has an overlay UI or not.
          *
          * @param pid The pid we are setting overlay UI for.
@@ -17862,6 +17903,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         } finally {
             Binder.restoreCallingIdentity(token);
         }
+    }
+
+    @Override
+    public boolean isAppFreezerEnabled() {
+        return mOomAdjuster.mCachedAppOptimizer.useFreezer();
     }
 
     /**

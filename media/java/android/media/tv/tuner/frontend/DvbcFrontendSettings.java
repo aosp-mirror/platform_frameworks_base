@@ -40,8 +40,7 @@ import java.lang.annotation.RetentionPolicy;
 public class DvbcFrontendSettings extends FrontendSettings {
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "MODULATION_",
+    @IntDef(prefix = "MODULATION_",
             value = {MODULATION_UNDEFINED, MODULATION_AUTO, MODULATION_MOD_16QAM,
                     MODULATION_MOD_32QAM, MODULATION_MOD_64QAM, MODULATION_MOD_128QAM,
                     MODULATION_MOD_256QAM})
@@ -98,8 +97,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
 
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "ANNEX_",
+    @IntDef(prefix = "ANNEX_",
             value = {ANNEX_UNDEFINED, ANNEX_A, ANNEX_B, ANNEX_C})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Annex {}
@@ -159,8 +157,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
             android.hardware.tv.tuner.FrontendSpectralInversion.INVERTED;
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "TIME_INTERLEAVE_MODE_",
+    @IntDef(prefix = "TIME_INTERLEAVE_MODE_",
             value = {TIME_INTERLEAVE_MODE_UNDEFINED, TIME_INTERLEAVE_MODE_AUTO,
                     TIME_INTERLEAVE_MODE_128_1_0, TIME_INTERLEAVE_MODE_128_1_1,
                     TIME_INTERLEAVE_MODE_64_2, TIME_INTERLEAVE_MODE_32_4,
@@ -226,8 +223,7 @@ public class DvbcFrontendSettings extends FrontendSettings {
             FrontendCableTimeInterleaveMode.INTERLEAVING_128_4;
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "BANDWIDTH_",
+    @IntDef(prefix = "BANDWIDTH_",
             value = {BANDWIDTH_UNDEFINED, BANDWIDTH_5MHZ, BANDWIDTH_6MHZ, BANDWIDTH_7MHZ,
                     BANDWIDTH_8MHZ})
     @Retention(RetentionPolicy.SOURCE)

@@ -69,8 +69,10 @@ public abstract class BrightnessMappingStrategy {
      */
     @Nullable
     public static BrightnessMappingStrategy create(Resources resources,
-            DisplayDeviceConfig displayDeviceConfig) {
-        return create(resources, displayDeviceConfig, /* isForIdleMode= */ false, null);
+            DisplayDeviceConfig displayDeviceConfig,
+            DisplayWhiteBalanceController displayWhiteBalanceController) {
+        return create(resources, displayDeviceConfig, /* isForIdleMode= */ false,
+                displayWhiteBalanceController);
     }
 
     /**
@@ -845,7 +847,7 @@ public abstract class BrightnessMappingStrategy {
             float nits = mBrightnessSpline.interpolate(lux);
 
             // Adjust nits to compensate for display white balance colour strength.
-            if (mDisplayWhiteBalanceController != null && isForIdleMode()) {
+            if (mDisplayWhiteBalanceController != null) {
                 nits = mDisplayWhiteBalanceController.calculateAdjustedBrightnessNits(nits);
             }
 

@@ -118,6 +118,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private QSPanelController mQSPanelController;
     private QuickQSPanelController mQuickQSPanelController;
     private QSCustomizerController mQSCustomizerController;
+    private FooterActionsController mQSFooterActionController;
     @Nullable
     private ScrollListener mScrollListener;
     /**
@@ -188,9 +189,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         QSFragmentComponent qsFragmentComponent = mQsComponentFactory.create(this);
         mQSPanelController = qsFragmentComponent.getQSPanelController();
         mQuickQSPanelController = qsFragmentComponent.getQuickQSPanelController();
+        mQSFooterActionController = qsFragmentComponent.getQSFooterActionController();
 
         mQSPanelController.init();
         mQuickQSPanelController.init();
+        mQSFooterActionController.init();
 
         mQSPanelScrollView = view.findViewById(R.id.expanded_qs_scroll_view);
         mQSPanelScrollView.addOnLayoutChangeListener(
@@ -380,6 +383,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mContainer.disable(state1, state2, animate);
         mHeader.disable(state1, state2, animate);
         mFooter.disable(state1, state2, animate);
+        mQSFooterActionController.disable(state2);
         updateQsState();
     }
 
@@ -396,10 +400,10 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 : View.INVISIBLE);
         mHeader.setExpanded((keyguardShowing && !mHeaderAnimating && !mShowCollapsedOnKeyguard)
                 || (expanded && !mStackScrollerOverscrolling), mQuickQSPanelController);
-        mFooter.setVisibility(!mQsDisabled && (expanded || !keyguardShowing || mHeaderAnimating
-                || mShowCollapsedOnKeyguard)
-                ? View.VISIBLE
-                : View.INVISIBLE);
+        boolean footerVisible = !mQsDisabled && (expanded || !keyguardShowing || mHeaderAnimating
+                || mShowCollapsedOnKeyguard);
+        mFooter.setVisibility(footerVisible ? View.VISIBLE : View.INVISIBLE);
+        mQSFooterActionController.setVisible(footerVisible);
         mFooter.setExpanded((keyguardShowing && !mHeaderAnimating && !mShowCollapsedOnKeyguard)
                 || (expanded && !mStackScrollerOverscrolling));
         mQSPanelController.setVisibility(
@@ -465,6 +469,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         }
 
         mFooter.setKeyguardShowing(keyguardShowing);
+        mQSFooterActionController.setKeyguardShowing(keyguardShowing);
         updateQsState();
     }
 
@@ -480,14 +485,13 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         if (DEBUG) Log.d(TAG, "setListening " + listening);
         mListening = listening;
         mQSContainerImplController.setListening(listening);
-        mFooter.setListening(listening);
+        mQSFooterActionController.setListening(listening);
         mQSPanelController.setListening(mListening, mQsExpanded);
     }
 
     @Override
     public void setHeaderListening(boolean listening) {
         mQSContainerImplController.setListening(listening);
-        mFooter.setListening(listening);
     }
 
     @Override
@@ -561,6 +565,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             }
         }
         mFooter.setExpansion(onKeyguardAndExpanded ? 1 : expansion);
+        mQSFooterActionController.setExpansion(onKeyguardAndExpanded ? 1 : expansion);
         mQSPanelController.setRevealExpansion(expansion);
         mQSPanelController.getTileLayout().setExpansion(expansion, proposedTranslation);
         mQuickQSPanelController.getTileLayout().setExpansion(expansion, proposedTranslation);
@@ -711,6 +716,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         boolean customizing = isCustomizing();
         mQSPanelScrollView.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
         mFooter.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
+        mQSFooterActionController.setVisible(!customizing);
         mHeader.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
         // Let the panel know the position changed and it needs to update where notifications
         // and whatnot are.

@@ -19,7 +19,6 @@ package com.android.server.inputmethod;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 
 import android.annotation.NonNull;
-import android.graphics.Rect;
 import android.os.Process;
 import android.view.InputApplicationHandle;
 import android.view.InputChannel;
@@ -33,8 +32,11 @@ final class HandwritingEventReceiverSurface {
     public static final String TAG = HandwritingEventReceiverSurface.class.getSimpleName();
     static final boolean DEBUG = HandwritingModeController.DEBUG;
 
-    private final int mClientPid;
-    private final int mClientUid;
+    // Place the layer below the highest layer to place it under gesture monitors. If the surface
+    // is above gesture monitors, then edge-back and swipe-up gestures won't work when this surface
+    // is intercepting.
+    // TODO(b/217538817): Specify the ordering in WM by usage.
+    private static final int HANDWRITING_SURFACE_LAYER = Integer.MAX_VALUE - 1;
 
     private final InputApplicationHandle mApplicationHandle;
     private final InputWindowHandle mWindowHandle;
@@ -44,9 +46,6 @@ final class HandwritingEventReceiverSurface {
 
     HandwritingEventReceiverSurface(String name, int displayId, @NonNull SurfaceControl sc,
             @NonNull InputChannel inputChannel) {
-        // Initialized the window as being owned by the system.
-        mClientPid = Process.myPid();
-        mClientUid = Process.myUid();
         mApplicationHandle = new InputApplicationHandle(null, name,
                 DEFAULT_DISPATCHING_TIMEOUT_MILLIS);
 
@@ -57,29 +56,26 @@ final class HandwritingEventReceiverSurface {
         mWindowHandle.name = name;
         mWindowHandle.token = mClientChannel.getToken();
         mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
-        mWindowHandle.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+        mWindowHandle.layoutParamsFlags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
         mWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
         mWindowHandle.visible = true;
         mWindowHandle.focusable = false;
         mWindowHandle.hasWallpaper = false;
         mWindowHandle.paused = false;
-        mWindowHandle.ownerPid = mClientPid;
-        mWindowHandle.ownerUid = mClientUid;
+        mWindowHandle.ownerPid = Process.myPid();
+        mWindowHandle.ownerUid = Process.myUid();
         mWindowHandle.inputFeatures = WindowManager.LayoutParams.INPUT_FEATURE_SPY
                 | WindowManager.LayoutParams.INPUT_FEATURE_INTERCEPTS_STYLUS;
         mWindowHandle.scaleFactor = 1.0f;
         mWindowHandle.trustedOverlay = true;
-        mWindowHandle.replaceTouchableRegionWithCrop(null /* use this surface as crop */);
+        mWindowHandle.replaceTouchableRegionWithCrop(null /* use this surface's bounds */);
 
         final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         t.setInputWindowInfo(mInputSurface, mWindowHandle);
-        t.setLayer(mInputSurface, Integer.MAX_VALUE);
+        t.setLayer(mInputSurface, HANDWRITING_SURFACE_LAYER);
         t.setPosition(mInputSurface, 0, 0);
-        // Use an arbitrarily large crop that is positioned at the origin. The crop determines the
-        // bounds and the coordinate space of the input events, so it must start at the origin to
-        // receive input in display space.
-        // TODO(b/210039666): fix this in SurfaceFlinger and avoid the hack.
-        t.setCrop(mInputSurface, new Rect(0, 0, 10000, 10000));
+        t.setCrop(mInputSurface, null /* crop to parent surface */);
         t.show(mInputSurface);
         t.apply();
 

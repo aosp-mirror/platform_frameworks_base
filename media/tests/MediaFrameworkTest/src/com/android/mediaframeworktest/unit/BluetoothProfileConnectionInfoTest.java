@@ -19,7 +19,7 @@ package com.android.mediaframeworktest.unit;
 import static org.junit.Assert.assertEquals;
 
 import android.bluetooth.BluetoothProfile;
-import android.media.BtProfileConnectionInfo;
+import android.media.BluetoothProfileConnectionInfo;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -27,22 +27,24 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
-public class BtProfileConnectionInfoTest {
+public class BluetoothProfileConnectionInfoTest {
 
     @Test
     public void testCoverageA2dp() {
         final boolean supprNoisy = false;
         final int volume = 42;
-        final BtProfileConnectionInfo info = BtProfileConnectionInfo.a2dpInfo(supprNoisy, volume);
+        final BluetoothProfileConnectionInfo info = BluetoothProfileConnectionInfo
+                .createA2dpInfo(supprNoisy, volume);
         assertEquals(info.getProfile(), BluetoothProfile.A2DP);
-        assertEquals(info.getSuppressNoisyIntent(), supprNoisy);
+        assertEquals(info.isSuppressNoisyIntent(), supprNoisy);
         assertEquals(info.getVolume(), volume);
     }
 
     @Test
     public void testCoverageA2dpSink() {
         final int volume = 42;
-        final BtProfileConnectionInfo info = BtProfileConnectionInfo.a2dpSinkInfo(volume);
+        final BluetoothProfileConnectionInfo info = BluetoothProfileConnectionInfo
+                .createA2dpSinkInfo(volume);
         assertEquals(info.getProfile(), BluetoothProfile.A2DP_SINK);
         assertEquals(info.getVolume(), volume);
     }
@@ -50,20 +52,21 @@ public class BtProfileConnectionInfoTest {
     @Test
     public void testCoveragehearingAid() {
         final boolean supprNoisy = true;
-        final BtProfileConnectionInfo info = BtProfileConnectionInfo.hearingAidInfo(supprNoisy);
+        final BluetoothProfileConnectionInfo info = BluetoothProfileConnectionInfo
+                .createHearingAidInfo(supprNoisy);
         assertEquals(info.getProfile(), BluetoothProfile.HEARING_AID);
-        assertEquals(info.getSuppressNoisyIntent(), supprNoisy);
+        assertEquals(info.isSuppressNoisyIntent(), supprNoisy);
     }
 
     @Test
     public void testCoverageLeAudio() {
         final boolean supprNoisy = false;
         final boolean isLeOutput = true;
-        final BtProfileConnectionInfo info = BtProfileConnectionInfo.leAudio(supprNoisy,
-                isLeOutput);
+        final BluetoothProfileConnectionInfo info = BluetoothProfileConnectionInfo
+                .createLeAudioInfo(supprNoisy, isLeOutput);
         assertEquals(info.getProfile(), BluetoothProfile.LE_AUDIO);
-        assertEquals(info.getSuppressNoisyIntent(), supprNoisy);
-        assertEquals(info.getIsLeOutput(), isLeOutput);
+        assertEquals(info.isSuppressNoisyIntent(), supprNoisy);
+        assertEquals(info.isLeOutput(), isLeOutput);
     }
 }
 

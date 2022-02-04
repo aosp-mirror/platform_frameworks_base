@@ -139,12 +139,10 @@ import android.net.ConnectivityFrameworkInitializer;
 import android.net.ConnectivityFrameworkInitializerTiramisu;
 import android.net.EthernetManager;
 import android.net.IEthernetManager;
-import android.net.IIpSecService;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.IPacProxyManager;
 import android.net.IVpnManager;
-import android.net.IpSecManager;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkScoreManager;
 import android.net.NetworkWatchlistManager;
@@ -439,15 +437,6 @@ public final class SystemServiceRegistry {
                 IBinder b = ServiceManager.getService(Context.VCN_MANAGEMENT_SERVICE);
                 IVcnManagementService service = IVcnManagementService.Stub.asInterface(b);
                 return new VcnManager(ctx, service);
-            }});
-
-        registerService(Context.IPSEC_SERVICE, IpSecManager.class,
-                new CachedServiceFetcher<IpSecManager>() {
-            @Override
-            public IpSecManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getService(Context.IPSEC_SERVICE);
-                IIpSecService service = IIpSecService.Stub.asInterface(b);
-                return new IpSecManager(ctx, service);
             }});
 
         registerService(Context.COUNTRY_DETECTOR, CountryDetector.class,

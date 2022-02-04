@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.collection.render
 
 import android.view.View
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 
@@ -41,6 +42,7 @@ class RootNodeController(
     override fun addChildAt(child: NodeController, index: Int) {
         listContainer.addContainerViewAt(child.view, index)
         listContainer.onNotificationViewUpdateFinished()
+        (child.view as? ExpandableNotificationRow)?.isChangingPosition = false
     }
 
     override fun moveChildTo(child: NodeController, index: Int) {
@@ -50,6 +52,7 @@ class RootNodeController(
     override fun removeChild(child: NodeController, isTransfer: Boolean) {
         if (isTransfer) {
             listContainer.setChildTransferInProgress(true)
+            (child.view as? ExpandableNotificationRow)?.isChangingPosition = true
         }
         listContainer.removeContainerView(child.view)
         if (isTransfer) {

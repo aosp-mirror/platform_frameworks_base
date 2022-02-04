@@ -25,6 +25,9 @@ import android.media.tv.tuner.Lnb;
 import android.media.tv.tuner.TunerVersionChecker;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A Frontend Status class that contains the metrics of the active frontend.
@@ -1086,22 +1089,26 @@ public class FrontendStatus {
     }
 
     /**
-     * Gets an array of all PLPs information of ATSC3 frontend, which includes both tuned and not
+     * Gets a list of all PLPs information of ATSC3 frontend, which includes both tuned and not
      * tuned PLPs for currently watching service.
      *
-     * <p>This query is only supported by Tuner HAL 2.0 or higher. Unsupported version or if HAL
-     * doesn't return all PLPs information will throw IllegalStateException. Use
-     * {@link TunerVersionChecker#getTunerVersion()} to check the version.
+     * <p>This query is only supported by Tuner HAL 2.0 or higher. Unsupported version will throw
+     * UnsupportedOperationException. Use {@link TunerVersionChecker#getTunerVersion()} to check
+     * the version.
+     *
+     * @return a list of all PLPs information. It is empty if HAL doesn't return all PLPs
+     *         information status.
      */
-    @SuppressLint("ArrayReturn")
     @NonNull
-    public Atsc3PlpInfo[] getAllAtsc3PlpInfo() {
-        TunerVersionChecker.checkHigherOrEqualVersionTo(
-                TunerVersionChecker.TUNER_VERSION_2_0, "Atsc3PlpInfo all status");
-        if (mAllPlpInfo == null) {
-            throw new IllegalStateException("Atsc3PlpInfo all status is empty");
+    public List<Atsc3PlpInfo> getAllAtsc3PlpInfo() {
+        if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
+                    TunerVersionChecker.TUNER_VERSION_2_0, "Atsc3PlpInfo all status")) {
+            throw new UnsupportedOperationException("Atsc3PlpInfo all status is empty");
         }
-        return mAllPlpInfo;
+        if (mAllPlpInfo == null) {
+            return Collections.EMPTY_LIST;
+        }
+        return Arrays.asList(mAllPlpInfo);
     }
 
     /**

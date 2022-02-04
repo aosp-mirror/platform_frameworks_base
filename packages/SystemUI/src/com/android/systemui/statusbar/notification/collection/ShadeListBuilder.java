@@ -226,8 +226,13 @@ public class ShadeListBuilder implements Dumpable {
 
         mNotifSections.clear();
         for (NotifSectioner sectioner : sectioners) {
-            mNotifSections.add(new NotifSection(sectioner, mNotifSections.size()));
+            final NotifSection section = new NotifSection(sectioner, mNotifSections.size());
+            final NotifComparator sectionComparator = section.getComparator();
+            mNotifSections.add(section);
             sectioner.setInvalidationListener(this::onNotifSectionInvalidated);
+            if (sectionComparator != null) {
+                sectionComparator.setInvalidationListener(this::onNotifComparatorInvalidated);
+            }
         }
 
         mNotifSections.add(new NotifSection(DEFAULT_SECTIONER, mNotifSections.size()));
@@ -426,14 +431,18 @@ public class ShadeListBuilder implements Dumpable {
         }
         Trace.endSection();
 
+        Trace.beginSection("ShadeListBuilder.logEndBuildList");
         // Step 9: We're done!
         mLogger.logEndBuildList(
                 mIterationCount,
                 mReadOnlyNotifList.size(),
                 countChildren(mReadOnlyNotifList));
         if (mAlwaysLogList || mIterationCount % 10 == 0) {
+            Trace.beginSection("ShadeListBuilder.logFinalList");
             mLogger.logFinalList(mNotifList);
+            Trace.endSection();
         }
+        Trace.endSection();
         mPipelineState.setState(STATE_IDLE);
         mIterationCount++;
         Trace.endSection();
@@ -996,16 +1005,20 @@ public class ShadeListBuilder implements Dumpable {
     }
 
     private void freeEmptyGroups() {
+        Trace.beginSection("ShadeListBuilder.freeEmptyGroups");
         mGroups.values().removeIf(ge -> ge.getSummary() == null && ge.getChildren().isEmpty());
+        Trace.endSection();
     }
 
     private void logChanges() {
+        Trace.beginSection("ShadeListBuilder.logChanges");
         for (NotificationEntry entry : mAllEntries) {
             logAttachStateChanges(entry);
         }
         for (GroupEntry group : mGroups.values()) {
             logAttachStateChanges(group);
         }
+        Trace.endSection();
     }
 
     private void logAttachStateChanges(ListEntry entry) {
@@ -1083,22 +1096,42 @@ public class ShadeListBuilder implements Dumpable {
     }
 
     private void cleanupPluggables() {
+        Trace.beginSection("ShadeListBuilder.cleanupPluggables");
         callOnCleanup(mNotifPreGroupFilters);
         callOnCleanup(mNotifPromoters);
         callOnCleanup(mNotifFinalizeFilters);
         callOnCleanup(mNotifComparators);
 
         for (int i = 0; i < mNotifSections.size(); i++) {
-            mNotifSections.get(i).getSectioner().onCleanup();
+            final NotifSection notifSection = mNotifSections.get(i);
+            notifSection.getSectioner().onCleanup();
+            final NotifComparator comparator = notifSection.getComparator();
+            if (comparator != null) {
+                comparator.onCleanup();
+            }
         }
 
         callOnCleanup(List.of(getStabilityManager()));
+        Trace.endSection();
     }
 
     private void callOnCleanup(List<? extends Pluggable<?>> pluggables) {
         for (int i = 0; i < pluggables.size(); i++) {
             pluggables.get(i).onCleanup();
         }
+    }
+
+    @Nullable
+    private NotifComparator getSectionComparator(
+            @NonNull ListEntry o1, @NonNull ListEntry o2) {
+        final NotifSection section = o1.getSection();
+        if (section != o2.getSection()) {
+            throw new RuntimeException("Entry ordering should only be done within sections");
+        }
+        if (section != null) {
+            return section.getComparator();
+        }
+        return null;
     }
 
     private final Comparator<ListEntry> mTopLevelComparator = (o1, o2) -> {
@@ -1111,6 +1144,12 @@ public class ShadeListBuilder implements Dumpable {
         int index2 = canReorder(o2) ? -1 : o2.getPreviousAttachState().getStableIndex();
         cmp = Integer.compare(index1, index2);
         if (cmp != 0) return cmp;
+
+        NotifComparator sectionComparator = getSectionComparator(o1, o2);
+        if (sectionComparator != null) {
+            cmp = sectionComparator.compare(o1, o2);
+            if (cmp != 0) return cmp;
+        }
 
         for (int i = 0; i < mNotifComparators.size(); i++) {
             cmp = mNotifComparators.get(i).compare(o1, o2);

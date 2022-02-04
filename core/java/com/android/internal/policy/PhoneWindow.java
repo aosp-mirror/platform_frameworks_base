@@ -91,6 +91,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.OnBackInvokedDispatcher;
+import android.view.OnBackInvokedDispatcherOwner;
 import android.view.ScrollCaptureCallback;
 import android.view.SearchEvent;
 import android.view.SurfaceHolder.Callback2;
@@ -110,6 +112,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.window.ProxyOnBackInvokedDispatcher;
 
 import com.android.internal.R;
 import com.android.internal.view.menu.ContextMenuBuilder;
@@ -134,7 +137,8 @@ import java.util.List;
  *
  * @hide
  */
-public class PhoneWindow extends Window implements MenuBuilder.Callback {
+public class PhoneWindow extends Window implements MenuBuilder.Callback,
+        OnBackInvokedDispatcherOwner {
 
     private final static String TAG = "PhoneWindow";
 
@@ -339,6 +343,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private ActivityConfigCallback mActivityConfigCallback;
 
     boolean mDecorFitsSystemWindows = true;
+
+    private ProxyOnBackInvokedDispatcher mProxyOnBackInvokedDispatcher =
+            new ProxyOnBackInvokedDispatcher();
 
     static class WindowManagerHolder {
         static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
@@ -2146,6 +2153,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     /** Notify when decor view is attached to window and {@link ViewRootImpl} is available. */
     void onViewRootImplSet(ViewRootImpl viewRoot) {
         viewRoot.setActivityConfigCallback(mActivityConfigCallback);
+        mProxyOnBackInvokedDispatcher.setActualDispatcherOwner(viewRoot);
         applyDecorFitsSystemWindows();
     }
 
@@ -3992,5 +4000,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public AttachedSurfaceControl getRootSurfaceControl() {
         return getViewRootImplOrNull();
+    }
+
+    @NonNull
+    @Override
+    public OnBackInvokedDispatcher getOnBackInvokedDispatcher() {
+        return mProxyOnBackInvokedDispatcher;
     }
 }

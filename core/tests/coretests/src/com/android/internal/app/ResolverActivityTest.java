@@ -731,6 +731,25 @@ public class ResolverActivityTest {
     }
 
     @Test
+    public void testMiniResolver() {
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTest(1);
+        List<ResolvedComponentInfo> workResolvedComponentInfos =
+                createResolvedComponentsForTest(1);
+        // Personal profile only has a browser
+        personalResolvedComponentInfos.get(0).getResolveInfoAt(0).handleAllWebDataURI = true;
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        Intent sendIntent = createSendImageIntent();
+        sendIntent.setType("TestType");
+
+        mActivityRule.launchActivity(sendIntent);
+        waitForIdle();
+        onView(withId(R.id.open_cross_profile)).check(matches(isDisplayed()));
+    }
+
+    @Test
     public void testWorkTab_noAppsAvailable_workOff_noAppsAvailableEmptyStateShown() {
         // enable the work tab feature flag
         ResolverActivity.ENABLE_TABBED_VIEW = true;

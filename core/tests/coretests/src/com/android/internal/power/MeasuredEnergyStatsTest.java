@@ -383,10 +383,10 @@ public class MeasuredEnergyStatsTest {
         assertEquals(13, stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_ON, 0));
         // 6 * (6000-4000)/(6000-2000)
         assertEquals(3, stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_ON, 1));
-
-        // POWER_BUCKET_SCREEN_OTHER was only present along with state=1
-        assertEquals(0, stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_OTHER, 0));
-        assertEquals(40, stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_OTHER, 1));
+        // 40 * (4000-1000)/(5000-1000)
+        assertEquals(30, stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_OTHER, 0));
+        // 40 * (5000-4000)/(5000-1000)
+        assertEquals(10, stats.getAccumulatedStandardBucketCharge(POWER_BUCKET_SCREEN_OTHER, 1));
     }
 
     @Test

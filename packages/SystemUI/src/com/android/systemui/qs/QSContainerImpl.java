@@ -19,10 +19,8 @@ package com.android.systemui.qs;
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.view.View;
@@ -41,7 +39,6 @@ import java.io.PrintWriter;
  */
 public class QSContainerImpl extends FrameLayout implements Dumpable {
 
-    private final Point mSizePoint = new Point();
     private int mFancyClippingTop;
     private int mFancyClippingBottom;
     private final float[] mFancyClippingRadii = new float[] {0, 0, 0, 0, 0, 0, 0, 0};
@@ -75,12 +72,6 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     @Override
     public boolean hasOverlappingRendering() {
         return false;
-    }
-
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        mSizePoint.set(0, 0); // Will be retrieved on next measure pass.
     }
 
     @Override
@@ -152,10 +143,10 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     void updateResources(QSPanelController qsPanelController,
             QuickStatusBarHeaderController quickStatusBarHeaderController) {
         mQSPanelContainer.setPaddingRelative(
-                getPaddingStart(),
+                mQSPanelContainer.getPaddingStart(),
                 Utils.getQsHeaderSystemIconsAreaHeight(mContext),
-                getPaddingEnd(),
-                getPaddingBottom()
+                mQSPanelContainer.getPaddingEnd(),
+                mQSPanelContainer.getPaddingBottom()
         );
 
         int sideMargins = getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
@@ -239,13 +230,6 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
                         view.getPaddingBottom());
             }
         }
-    }
-
-    private int getDisplayHeight() {
-        if (mSizePoint.y == 0) {
-            getDisplay().getRealSize(mSizePoint);
-        }
-        return mSizePoint.y;
     }
 
     /**

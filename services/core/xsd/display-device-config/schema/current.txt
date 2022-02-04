@@ -90,23 +90,35 @@ package com.android.server.display.config {
     ctor public HighBrightnessMode();
     method @NonNull public final boolean getAllowInLowPowerMode_all();
     method public boolean getEnabled();
+    method @Nullable public final java.math.BigDecimal getMinimumHdrPercentOfScreen_all();
     method @NonNull public final java.math.BigDecimal getMinimumLux_all();
     method @Nullable public final com.android.server.display.config.RefreshRateRange getRefreshRate_all();
+    method @Nullable public final com.android.server.display.config.SdrHdrRatioMap getSdrHdrRatioMap_all();
     method @NonNull public final com.android.server.display.config.ThermalStatus getThermalStatusLimit_all();
     method public com.android.server.display.config.HbmTiming getTiming_all();
     method @NonNull public final java.math.BigDecimal getTransitionPoint_all();
     method public final void setAllowInLowPowerMode_all(@NonNull boolean);
     method public void setEnabled(boolean);
+    method public final void setMinimumHdrPercentOfScreen_all(@Nullable java.math.BigDecimal);
     method public final void setMinimumLux_all(@NonNull java.math.BigDecimal);
     method public final void setRefreshRate_all(@Nullable com.android.server.display.config.RefreshRateRange);
+    method public final void setSdrHdrRatioMap_all(@Nullable com.android.server.display.config.SdrHdrRatioMap);
     method public final void setThermalStatusLimit_all(@NonNull com.android.server.display.config.ThermalStatus);
     method public void setTiming_all(com.android.server.display.config.HbmTiming);
     method public final void setTransitionPoint_all(@NonNull java.math.BigDecimal);
   }
 
+  public enum Interpolation {
+    method public String getRawName();
+    enum_constant public static final com.android.server.display.config.Interpolation _default;
+    enum_constant public static final com.android.server.display.config.Interpolation linear;
+  }
+
   public class NitsMap {
     ctor public NitsMap();
+    method public com.android.server.display.config.Interpolation getInterpolation();
     method @NonNull public final java.util.List<com.android.server.display.config.Point> getPoint();
+    method public void setInterpolation(com.android.server.display.config.Interpolation);
   }
 
   public class Point {
@@ -123,6 +135,19 @@ package com.android.server.display.config {
     method public final java.math.BigInteger getMinimum();
     method public final void setMaximum(java.math.BigInteger);
     method public final void setMinimum(java.math.BigInteger);
+  }
+
+  public class SdrHdrRatioMap {
+    ctor public SdrHdrRatioMap();
+    method @NonNull public final java.util.List<com.android.server.display.config.SdrHdrRatioPoint> getPoint();
+  }
+
+  public class SdrHdrRatioPoint {
+    ctor public SdrHdrRatioPoint();
+    method @NonNull public final java.math.BigDecimal getHdrRatio();
+    method @NonNull public final java.math.BigDecimal getSdrNits();
+    method public final void setHdrRatio(@NonNull java.math.BigDecimal);
+    method public final void setSdrNits(@NonNull java.math.BigDecimal);
   }
 
   public class SensorDetails {

@@ -38,7 +38,7 @@ import java.util.concurrent.Executor;
 @SystemApi
 public final class SharedFilter implements AutoCloseable {
     /** @hide */
-    @IntDef(flag = true, prefix = "STATUS_", value = {STATUS_INACCESSIBLE})
+    @IntDef(prefix = "STATUS_", value = {STATUS_INACCESSIBLE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Status {}
 

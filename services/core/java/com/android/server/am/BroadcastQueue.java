@@ -56,6 +56,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerExemptionManager;
 import android.os.PowerExemptionManager.ReasonCode;
 import android.os.PowerExemptionManager.TempAllowListType;
 import android.os.Process;
@@ -870,7 +871,7 @@ public final class BroadcastQueue {
                     + " due to receiver " + filter.receiverList.app
                     + " (uid " + filter.receiverList.uid + ")"
                     + " not specifying RECEIVER_EXPORTED");
-            // skip = true;
+            skip = true;
         }
 
         if (skip) {
@@ -1857,20 +1858,34 @@ public final class BroadcastQueue {
     }
 
     private void maybeReportBroadcastDispatchedEventLocked(BroadcastRecord r, int targetUid) {
+        // TODO (206518114): Only allow apps with ACCESS_PACKAGE_USAGE_STATS to set
+        // getIdForResponseEvent.
+        // TODO (217251579): Temporarily use temp-allowlist reason to identify
+        // push messages and record response events.
+        useTemporaryAllowlistReasonAsSignal(r);
+        if (r.options == null || r.options.getIdForResponseEvent() <= 0) {
+            return;
+        }
         final String targetPackage = getTargetPackage(r);
         // Ignore non-explicit broadcasts
         if (targetPackage == null) {
-            return;
-        }
-        // TODO (206518114): Only allow apps with ACCESS_PACKAGE_USAGE_STATS to set
-        // getIdForResponseEvent.
-        if (r.options == null || r.options.getIdForResponseEvent() <= 0) {
             return;
         }
         getUsageStatsManagerInternal().reportBroadcastDispatched(
                 r.callingUid, targetPackage, UserHandle.of(r.userId),
                 r.options.getIdForResponseEvent(), SystemClock.elapsedRealtime(),
                 mService.getUidStateLocked(targetUid));
+    }
+
+    private void useTemporaryAllowlistReasonAsSignal(BroadcastRecord r) {
+        if (r.options == null || r.options.getIdForResponseEvent() > 0) {
+            return;
+        }
+        final int reasonCode = r.options.getTemporaryAppAllowlistReasonCode();
+        if (reasonCode == PowerExemptionManager.REASON_PUSH_MESSAGING
+                || reasonCode == PowerExemptionManager.REASON_PUSH_MESSAGING_OVER_QUOTA) {
+            r.options.recordResponseEventWhileInBackground(reasonCode);
+        }
     }
 
     @NonNull

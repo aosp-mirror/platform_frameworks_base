@@ -680,6 +680,13 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
+     * Whether the secure camera is currently showing over the keyguard.
+     */
+    public boolean isSecureCameraLaunchedOverKeyguard() {
+        return mSecureCameraLaunched;
+    }
+
+    /**
      * @return a cached version of DreamManager.isDreaming()
      */
     public boolean isDreaming() {

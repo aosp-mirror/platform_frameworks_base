@@ -46,7 +46,6 @@ import com.android.systemui.R;
 public class QSFooterView extends FrameLayout {
     private PageIndicator mPageIndicator;
     private TextView mBuildText;
-    private View mActionsContainer;
     private View mEditButton;
 
     @Nullable
@@ -78,7 +77,6 @@ public class QSFooterView extends FrameLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mPageIndicator = findViewById(R.id.footer_page_indicator);
-        mActionsContainer = requireViewById(R.id.qs_footer_actions);
         mBuildText = findViewById(R.id.build);
         mEditButton = findViewById(android.R.id.edit);
 
@@ -105,10 +103,6 @@ public class QSFooterView extends FrameLayout {
         }
     }
 
-    void updateExpansion() {
-        setExpansion(mExpansionAmount);
-    }
-
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -129,7 +123,6 @@ public class QSFooterView extends FrameLayout {
     @Nullable
     private TouchAnimator createFooterAnimator() {
         TouchAnimator.Builder builder = new TouchAnimator.Builder()
-                .addFloat(mActionsContainer, "alpha", 0, 1)
                 .addFloat(mPageIndicator, "alpha", 0, 1)
                 .addFloat(mBuildText, "alpha", 0, 1)
                 .addFloat(mEditButton, "alpha", 0, 1)

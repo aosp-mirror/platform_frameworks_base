@@ -1330,7 +1330,10 @@ public class DevicePolicyManager {
      *
      * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_PROFILE} or
      * {@link #ACTION_PROVISION_MANAGED_DEVICE}
+     *
+     * @deprecated Logo customization is no longer supported in the provisioning flow.
      */
+    @Deprecated
     public static final String EXTRA_PROVISIONING_LOGO_URI =
             "android.app.extra.PROVISIONING_LOGO_URI";
 
@@ -10133,7 +10136,9 @@ public class DevicePolicyManager {
 
     /**
      * Called by a profile owner of secondary user that is affiliated with the device to stop the
-     * calling user and switch back to primary user.
+     * calling user and switch back to primary user (when the user was
+     * {@link #switchUser(ComponentName, UserHandle)} switched to) or stop the user (when it was
+     * {@link #startUserInBackground(ComponentName, UserHandle) started in background}.
      *
      * <p>Notice that on devices running with
      * {@link UserManager#isHeadlessSystemUserMode() headless system user mode}, there is no primary
@@ -10161,7 +10166,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Same as {@link #logoutUser(ComponentName)}, but called by system (like Settings), not admin.
+     * Similar to {@link #logoutUser(ComponentName)}, except:
+     *
+     * <ul>
+     *   <li>Called by system (like Settings), not admin.
+     *   <li>It logs out the current user, not the caller.
+     * </ul>
      *
      * @hide
      */
@@ -10178,7 +10188,10 @@ public class DevicePolicyManager {
     }
     /**
      * Gets the user a {@link #logoutUser(ComponentName)} call would switch to,
-     * or {@code null} if the current user is not in a session.
+     * or {@code null} if the current user is not in a session (i.e., if it was not
+     * {@link #switchUser(ComponentName, UserHandle) switched} or
+     * {@link #startUserInBackground(ComponentName, UserHandle) started in background} by the
+     * device admin.
      *
      * @hide
      */

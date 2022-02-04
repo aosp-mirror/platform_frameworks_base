@@ -139,9 +139,14 @@ package android.content {
 
 package android.content.pm {
 
+  public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
+    method @NonNull public java.util.List<android.content.pm.SharedLibraryInfo> getSharedLibraryInfos();
+  }
+
   public abstract class PackageManager {
     method @NonNull public String getPermissionControllerPackageName();
     method @NonNull public String getSupplementalProcessPackageName();
+    field public static final int MATCH_STATIC_SHARED_AND_SDK_LIBRARIES = 67108864; // 0x4000000
   }
 
 }
@@ -192,7 +197,7 @@ package android.media {
     method public void adjustSuggestedStreamVolumeForUid(int, int, int, @NonNull String, int, int, int);
     method @NonNull public java.util.List<android.bluetooth.BluetoothCodecConfig> getHwOffloadFormatsSupportedForA2dp();
     method @NonNull public java.util.List<android.bluetooth.BluetoothLeAudioCodecConfig> getHwOffloadFormatsSupportedForLeAudio();
-    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void handleBluetoothActiveDeviceChanged(@Nullable android.bluetooth.BluetoothDevice, @Nullable android.bluetooth.BluetoothDevice, @NonNull android.media.BtProfileConnectionInfo);
+    method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void handleBluetoothActiveDeviceChanged(@Nullable android.bluetooth.BluetoothDevice, @Nullable android.bluetooth.BluetoothDevice, @NonNull android.media.BluetoothProfileConnectionInfo);
     method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setA2dpSuspended(boolean);
     method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setBluetoothHeadsetProperties(@NonNull String, boolean, boolean);
     method @RequiresPermission("android.permission.BLUETOOTH_STACK") public void setHfpEnabled(boolean);
@@ -202,18 +207,18 @@ package android.media {
     field public static final int FLAG_FROM_KEY = 4096; // 0x1000
   }
 
-  public final class BtProfileConnectionInfo implements android.os.Parcelable {
-    method @NonNull public static android.media.BtProfileConnectionInfo a2dpInfo(boolean, int);
-    method @NonNull public static android.media.BtProfileConnectionInfo a2dpSinkInfo(int);
+  public final class BluetoothProfileConnectionInfo implements android.os.Parcelable {
+    method @NonNull public static android.media.BluetoothProfileConnectionInfo createA2dpInfo(boolean, int);
+    method @NonNull public static android.media.BluetoothProfileConnectionInfo createA2dpSinkInfo(int);
+    method @NonNull public static android.media.BluetoothProfileConnectionInfo createHearingAidInfo(boolean);
+    method @NonNull public static android.media.BluetoothProfileConnectionInfo createLeAudioInfo(boolean, boolean);
     method public int describeContents();
-    method public boolean getIsLeOutput();
     method public int getProfile();
-    method public boolean getSuppressNoisyIntent();
     method public int getVolume();
-    method @NonNull public static android.media.BtProfileConnectionInfo hearingAidInfo(boolean);
-    method @NonNull public static android.media.BtProfileConnectionInfo leAudio(boolean, boolean);
+    method public boolean isLeOutput();
+    method public boolean isSuppressNoisyIntent();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.media.BtProfileConnectionInfo> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.BluetoothProfileConnectionInfo> CREATOR;
   }
 
   public class MediaMetadataRetriever implements java.lang.AutoCloseable {
@@ -276,14 +281,6 @@ package android.net {
     method @Nullable public String getInterfaceName();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkSpecifier> CREATOR;
-  }
-
-  public final class IpSecManager {
-    field public static final int DIRECTION_FWD = 2; // 0x2
-  }
-
-  public static final class IpSecManager.UdpEncapsulationSocket implements java.lang.AutoCloseable {
-    method public int getResourceId();
   }
 
   public class LocalSocket implements java.io.Closeable {

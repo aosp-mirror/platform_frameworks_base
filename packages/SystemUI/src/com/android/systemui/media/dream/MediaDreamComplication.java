@@ -37,6 +37,11 @@ public class MediaDreamComplication implements Complication {
     }
 
     @Override
+    public int getRequiredTypeAvailability() {
+        return COMPLICATION_TYPE_CAST_INFO;
+    }
+
+    @Override
     public ViewHolder createView(ComplicationViewModel model) {
         return mComponentFactory.create().getViewHolder();
     }

@@ -61,11 +61,7 @@ public class QSFooterViewControllerTest extends LeakCheckedTest {
     @Mock
     private ClipboardManager mClipboardManager;
     @Mock
-    private QuickQSPanelController mQuickQSPanelController;
-    @Mock
     private TextView mBuildText;
-    @Mock
-    private FooterActionsController mFooterActionsController;
     @Mock
     private FalsingManager mFalsingManager;
     @Mock
@@ -93,8 +89,7 @@ public class QSFooterViewControllerTest extends LeakCheckedTest {
         when(mView.findViewById(android.R.id.edit)).thenReturn(mEditButton);
 
         mController = new QSFooterViewController(mView, mUserTracker, mFalsingManager,
-                mActivityStarter, mQSPanelController, mQuickQSPanelController,
-                mFooterActionsController);
+                mActivityStarter, mQSPanelController);
 
         mController.init();
     }

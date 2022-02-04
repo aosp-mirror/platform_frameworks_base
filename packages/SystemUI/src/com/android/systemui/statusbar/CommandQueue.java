@@ -43,6 +43,7 @@ import android.hardware.biometrics.PromptInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.fingerprint.IUdfpsHbmListener;
 import android.inputmethodservice.InputMethodService.BackDispositionMode;
+import android.media.MediaRoute2Info;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -63,6 +64,7 @@ import androidx.annotation.NonNull;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IAddTileResultCallback;
 import com.android.internal.statusbar.IStatusBar;
+import com.android.internal.statusbar.IUndoMediaTransferCallback;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.GcUtils;
 import com.android.internal.view.AppearanceRegion;
@@ -156,6 +158,8 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_TILE_SERVICE_REQUEST_ADD = 61 << MSG_SHIFT;
     private static final int MSG_TILE_SERVICE_REQUEST_CANCEL = 62 << MSG_SHIFT;
     private static final int MSG_SET_BIOMETRICS_LISTENER = 63 << MSG_SHIFT;
+    private static final int MSG_MEDIA_TRANSFER_SENDER_STATE = 64 << MSG_SHIFT;
+    private static final int MSG_MEDIA_TRANSFER_RECEIVER_STATE = 65 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -439,6 +443,17 @@ public class CommandQueue extends IStatusBar.Stub implements
          * @see IStatusBar#cancelRequestAddTile
          */
         default void cancelRequestAddTile(@NonNull String packageName) {}
+
+        /** @see IStatusBar#updateMediaTapToTransferSenderDisplay */
+        default void updateMediaTapToTransferSenderDisplay(
+                @StatusBarManager.MediaTransferSenderState int displayState,
+                @NonNull MediaRoute2Info routeInfo,
+                @Nullable IUndoMediaTransferCallback undoCallback) {}
+
+        /** @see IStatusBar#updateMediaTapToTransferReceiverDisplay */
+        default void updateMediaTapToTransferReceiverDisplay(
+                @StatusBarManager.MediaTransferReceiverState int displayState,
+                @NonNull MediaRoute2Info routeInfo) {}
     }
 
     public CommandQueue(Context context) {
@@ -1177,6 +1192,29 @@ public class CommandQueue extends IStatusBar.Stub implements
         mHandler.obtainMessage(MSG_TILE_SERVICE_REQUEST_CANCEL, s).sendToTarget();
     }
 
+    @Override
+    public void updateMediaTapToTransferSenderDisplay(
+            @StatusBarManager.MediaTransferSenderState int displayState,
+            MediaRoute2Info routeInfo,
+            IUndoMediaTransferCallback undoCallback
+    ) throws RemoteException {
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = displayState;
+        args.arg2 = routeInfo;
+        args.arg3 = undoCallback;
+        mHandler.obtainMessage(MSG_MEDIA_TRANSFER_SENDER_STATE, args).sendToTarget();
+    }
+
+    @Override
+    public void updateMediaTapToTransferReceiverDisplay(
+            int displayState,
+            MediaRoute2Info routeInfo) {
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = displayState;
+        args.arg2 = routeInfo;
+        mHandler.obtainMessage(MSG_MEDIA_TRANSFER_RECEIVER_STATE, args).sendToTarget();
+    }
+
     private final class H extends Handler {
         private H(Looper l) {
             super(l);
@@ -1574,6 +1612,29 @@ public class CommandQueue extends IStatusBar.Stub implements
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).cancelRequestAddTile(packageName);
                     }
+                    break;
+                case MSG_MEDIA_TRANSFER_SENDER_STATE:
+                    args = (SomeArgs) msg.obj;
+                    int displayState = (int) args.arg1;
+                    MediaRoute2Info routeInfo = (MediaRoute2Info) args.arg2;
+                    IUndoMediaTransferCallback undoCallback =
+                            (IUndoMediaTransferCallback) args.arg3;
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).updateMediaTapToTransferSenderDisplay(
+                                displayState, routeInfo, undoCallback);
+                    }
+                    args.recycle();
+                    break;
+                case MSG_MEDIA_TRANSFER_RECEIVER_STATE:
+                    args = (SomeArgs) msg.obj;
+                    int receiverDisplayState = (int) args.arg1;
+                    MediaRoute2Info receiverRouteInfo = (MediaRoute2Info) args.arg2;
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).updateMediaTapToTransferReceiverDisplay(
+                                receiverDisplayState, receiverRouteInfo);
+                    }
+                    args.recycle();
+                    break;
             }
         }
     }

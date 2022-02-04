@@ -182,7 +182,7 @@ public class PackageDexOptimizer {
         mInjector = injector;
     }
 
-    boolean canOptimizePackage(AndroidPackage pkg) {
+    boolean canOptimizePackage(@NonNull AndroidPackage pkg) {
         // We do not dexopt a package with no code.
         // Note that the system package is marked as having no code, however we can
         // still optimize it via dexoptSystemServerPath.

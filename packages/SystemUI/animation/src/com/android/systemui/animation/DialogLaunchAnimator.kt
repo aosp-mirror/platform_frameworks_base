@@ -19,6 +19,7 @@ package com.android.systemui.animation
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
+import android.app.ActivityManager
 import android.app.Dialog
 import android.graphics.Color
 import android.graphics.Rect
@@ -45,7 +46,8 @@ private const val TAG = "DialogLaunchAnimator"
 class DialogLaunchAnimator @JvmOverloads constructor(
     private val dreamManager: IDreamManager,
     private val launchAnimator: LaunchAnimator = LaunchAnimator(TIMINGS, INTERPOLATORS),
-    private var isForTesting: Boolean = false
+    // TODO(b/217621394): Remove special handling for low-RAM devices after animation sync is fixed
+    private var forceDisableSynchronization: Boolean = ActivityManager.isLowRamDeviceStatic()
 ) {
     private companion object {
         private val TIMINGS = ActivityLaunchAnimator.TIMINGS
@@ -111,7 +113,7 @@ class DialogLaunchAnimator @JvmOverloads constructor(
                 dialog = dialog,
                 animateBackgroundBoundsChange,
                 animatedParent,
-                isForTesting
+                forceDisableSynchronization
         )
 
         openedDialogs.add(animatedDialog)
@@ -187,10 +189,9 @@ private class AnimatedDialog(
     private val parentAnimatedDialog: AnimatedDialog? = null,
 
     /**
-     * Whether we are currently running in a test, in which case we need to disable
-     * synchronization.
+     * Whether synchronization should be disabled, which can be useful if we are running in a test.
      */
-    private val isForTesting: Boolean
+    private val forceDisableSynchronization: Boolean
 ) {
     /**
      * The DecorView of this dialog window.
@@ -420,8 +421,9 @@ private class AnimatedDialog(
      * (or inversely, removed from the UI when the touch surface is made visible).
      */
     private fun synchronizeNextDraw(then: () -> Unit) {
-        if (isForTesting || !touchSurface.isAttachedToWindow || touchSurface.viewRootImpl == null ||
-            !decorView.isAttachedToWindow || decorView.viewRootImpl == null) {
+        if (forceDisableSynchronization ||
+                !touchSurface.isAttachedToWindow || touchSurface.viewRootImpl == null ||
+                !decorView.isAttachedToWindow || decorView.viewRootImpl == null) {
             // No need to synchronize if either the touch surface or dialog view is not attached
             // to a window.
             then()

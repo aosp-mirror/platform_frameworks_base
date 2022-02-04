@@ -125,14 +125,14 @@ filegroup {
     name: "framework-connectivity-ethernet-sources",
     srcs: [
         "src/android/net/EthernetManager.java",
+        "src/android/net/EthernetNetworkManagementException.java",
+        "src/android/net/EthernetNetworkManagementException.aidl",
         "src/android/net/EthernetNetworkSpecifier.java",
+        "src/android/net/EthernetNetworkUpdateRequest.java",
+        "src/android/net/EthernetNetworkUpdateRequest.aidl",
         "src/android/net/IEthernetManager.aidl",
+        "src/android/net/IEthernetNetworkManagementListener.aidl",
         "src/android/net/IEthernetServiceListener.aidl",
-        "src/android/net/IInternalNetworkManagementListener.aidl",
-        "src/android/net/InternalNetworkUpdateRequest.java",
-        "src/android/net/InternalNetworkUpdateRequest.aidl",
-        "src/android/net/InternalNetworkManagementException.java",
-        "src/android/net/InternalNetworkManagementException.aidl",
         "src/android/net/ITetheredInterfaceCallback.aidl",
     ],
     path: "src",
@@ -158,7 +158,6 @@ filegroup {
     name: "framework-connectivity-tiramisu-sources",
     srcs: [
         ":framework-connectivity-ethernet-sources",
-        ":framework-connectivity-ipsec-sources",
         ":framework-connectivity-netstats-sources",
     ],
     visibility: ["//frameworks/base"],
@@ -167,6 +166,7 @@ filegroup {
 filegroup {
     name: "framework-connectivity-tiramisu-updatable-sources",
     srcs: [
+        ":framework-connectivity-ipsec-sources",
         ":framework-connectivity-nsd-sources",
         ":framework-connectivity-tiramisu-internal-sources",
     ],

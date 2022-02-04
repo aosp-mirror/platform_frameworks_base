@@ -25,7 +25,7 @@ import android.os.Environment;
 import android.util.AtomicFile;
 import android.util.Slog;
 
-import com.android.internal.util.FunctionalUtils;
+import com.android.internal.util.FunctionalUtils.ThrowingConsumer;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -34,8 +34,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 final class DataStoreUtils {
-
-    private static final String LOG_TAG = DataStoreUtils.class.getSimpleName();
+    private static final String TAG = "CompanionDevice_DataStoreUtils";
 
     static boolean isStartOfTag(@NonNull XmlPullParser parser, @NonNull String tag)
             throws XmlPullParserException {
@@ -71,12 +70,12 @@ final class DataStoreUtils {
      * Writing to file could fail, for example, if the user has been recently removed and so was
      * their DE (/data/system_de/<user-id>/) directory.
      */
-    static void writeToFileSafely(@NonNull AtomicFile file,
-            @NonNull FunctionalUtils.ThrowingConsumer<FileOutputStream> consumer) {
+    static void writeToFileSafely(
+            @NonNull AtomicFile file, @NonNull ThrowingConsumer<FileOutputStream> consumer) {
         try {
             file.write(consumer);
         } catch (Exception e) {
-            Slog.e(LOG_TAG, "Error while writing to file " + file, e);
+            Slog.e(TAG, "Error while writing to file " + file, e);
         }
     }
 

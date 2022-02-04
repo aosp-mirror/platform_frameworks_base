@@ -34,8 +34,7 @@ import java.lang.annotation.RetentionPolicy;
 public class AtscFrontendSettings extends FrontendSettings {
 
     /** @hide */
-    @IntDef(flag = true,
-            prefix = "MODULATION_",
+    @IntDef(prefix = "MODULATION_",
             value = {MODULATION_UNDEFINED, MODULATION_AUTO, MODULATION_MOD_8VSB,
                     MODULATION_MOD_16VSB})
     @Retention(RetentionPolicy.SOURCE)
