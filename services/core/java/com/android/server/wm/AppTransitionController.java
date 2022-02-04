@@ -249,7 +249,7 @@ public class AppTransitionController {
             overrideWithRemoteAnimationIfSet(animLpActivity, transit, activityTypes);
         }
 
-        final boolean voiceInteraction = containsVoiceInteraction(mDisplayContent.mOpeningApps)
+        final boolean voiceInteraction = containsVoiceInteraction(mDisplayContent.mClosingApps)
                 || containsVoiceInteraction(mDisplayContent.mOpeningApps);
 
         final int layoutRedo;
