@@ -15459,7 +15459,7 @@ package android.graphics {
     ctor public SurfaceTexture(boolean);
     method public void attachToGLContext(int);
     method public void detachFromGLContext();
-    method public long getDataSpace();
+    method public int getDataSpace();
     method public long getTimestamp();
     method public void getTransformMatrix(float[]);
     method public boolean isReleased();
@@ -16694,49 +16694,49 @@ package android.hardware {
   }
 
   public final class DataSpace {
-    method public static long getRange(long);
-    method public static long getStandard(long);
-    method public static long getTransfer(long);
-    method public static long pack(long, long, long);
-    field public static final long DATASPACE_ADOBE_RGB = 151715840L; // 0x90b0000L
-    field public static final long DATASPACE_BT2020 = 147193856L; // 0x8c60000L
-    field public static final long DATASPACE_BT2020_PQ = 163971072L; // 0x9c60000L
-    field public static final long DATASPACE_BT601_525 = 281280512L; // 0x10c40000L
-    field public static final long DATASPACE_BT601_625 = 281149440L; // 0x10c20000L
-    field public static final long DATASPACE_BT709 = 281083904L; // 0x10c10000L
-    field public static final long DATASPACE_DCI_P3 = 155844608L; // 0x94a0000L
-    field public static final long DATASPACE_DISPLAY_P3 = 143261696L; // 0x88a0000L
-    field public static final long DATASPACE_JFIF = 146931712L; // 0x8c20000L
-    field public static final long DATASPACE_SCRGB = 411107328L; // 0x18810000L
-    field public static final long DATASPACE_SCRGB_LINEAR = 406913024L; // 0x18410000L
-    field public static final long DATASPACE_SRGB = 142671872L; // 0x8810000L
-    field public static final long DATASPACE_SRGB_LINEAR = 138477568L; // 0x8410000L
-    field public static final long DATASPACE_UNKNOWN = 0L; // 0x0L
-    field public static final long RANGE_EXTENDED = 402653184L; // 0x18000000L
-    field public static final long RANGE_FULL = 134217728L; // 0x8000000L
-    field public static final long RANGE_LIMITED = 268435456L; // 0x10000000L
-    field public static final long RANGE_UNSPECIFIED = 0L; // 0x0L
-    field public static final long STANDARD_ADOBE_RGB = 720896L; // 0xb0000L
-    field public static final long STANDARD_BT2020 = 393216L; // 0x60000L
-    field public static final long STANDARD_BT2020_CONSTANT_LUMINANCE = 458752L; // 0x70000L
-    field public static final long STANDARD_BT470M = 524288L; // 0x80000L
-    field public static final long STANDARD_BT601_525 = 262144L; // 0x40000L
-    field public static final long STANDARD_BT601_525_UNADJUSTED = 327680L; // 0x50000L
-    field public static final long STANDARD_BT601_625 = 131072L; // 0x20000L
-    field public static final long STANDARD_BT601_625_UNADJUSTED = 196608L; // 0x30000L
-    field public static final long STANDARD_BT709 = 65536L; // 0x10000L
-    field public static final long STANDARD_DCI_P3 = 655360L; // 0xa0000L
-    field public static final long STANDARD_FILM = 589824L; // 0x90000L
-    field public static final long STANDARD_UNSPECIFIED = 0L; // 0x0L
-    field public static final long TRANSFER_GAMMA2_2 = 16777216L; // 0x1000000L
-    field public static final long TRANSFER_GAMMA2_6 = 20971520L; // 0x1400000L
-    field public static final long TRANSFER_GAMMA2_8 = 25165824L; // 0x1800000L
-    field public static final long TRANSFER_HLG = 33554432L; // 0x2000000L
-    field public static final long TRANSFER_LINEAR = 4194304L; // 0x400000L
-    field public static final long TRANSFER_SMPTE_170M = 12582912L; // 0xc00000L
-    field public static final long TRANSFER_SRGB = 8388608L; // 0x800000L
-    field public static final long TRANSFER_ST2084 = 29360128L; // 0x1c00000L
-    field public static final long TRANSFER_UNSPECIFIED = 0L; // 0x0L
+    method public static int getRange(int);
+    method public static int getStandard(int);
+    method public static int getTransfer(int);
+    method public static int pack(int, int, int);
+    field public static final int DATASPACE_ADOBE_RGB = 151715840; // 0x90b0000
+    field public static final int DATASPACE_BT2020 = 147193856; // 0x8c60000
+    field public static final int DATASPACE_BT2020_PQ = 163971072; // 0x9c60000
+    field public static final int DATASPACE_BT601_525 = 281280512; // 0x10c40000
+    field public static final int DATASPACE_BT601_625 = 281149440; // 0x10c20000
+    field public static final int DATASPACE_BT709 = 281083904; // 0x10c10000
+    field public static final int DATASPACE_DCI_P3 = 155844608; // 0x94a0000
+    field public static final int DATASPACE_DISPLAY_P3 = 143261696; // 0x88a0000
+    field public static final int DATASPACE_JFIF = 146931712; // 0x8c20000
+    field public static final int DATASPACE_SCRGB = 411107328; // 0x18810000
+    field public static final int DATASPACE_SCRGB_LINEAR = 406913024; // 0x18410000
+    field public static final int DATASPACE_SRGB = 142671872; // 0x8810000
+    field public static final int DATASPACE_SRGB_LINEAR = 138477568; // 0x8410000
+    field public static final int DATASPACE_UNKNOWN = 0; // 0x0
+    field public static final int RANGE_EXTENDED = 402653184; // 0x18000000
+    field public static final int RANGE_FULL = 134217728; // 0x8000000
+    field public static final int RANGE_LIMITED = 268435456; // 0x10000000
+    field public static final int RANGE_UNSPECIFIED = 0; // 0x0
+    field public static final int STANDARD_ADOBE_RGB = 720896; // 0xb0000
+    field public static final int STANDARD_BT2020 = 393216; // 0x60000
+    field public static final int STANDARD_BT2020_CONSTANT_LUMINANCE = 458752; // 0x70000
+    field public static final int STANDARD_BT470M = 524288; // 0x80000
+    field public static final int STANDARD_BT601_525 = 262144; // 0x40000
+    field public static final int STANDARD_BT601_525_UNADJUSTED = 327680; // 0x50000
+    field public static final int STANDARD_BT601_625 = 131072; // 0x20000
+    field public static final int STANDARD_BT601_625_UNADJUSTED = 196608; // 0x30000
+    field public static final int STANDARD_BT709 = 65536; // 0x10000
+    field public static final int STANDARD_DCI_P3 = 655360; // 0xa0000
+    field public static final int STANDARD_FILM = 589824; // 0x90000
+    field public static final int STANDARD_UNSPECIFIED = 0; // 0x0
+    field public static final int TRANSFER_GAMMA2_2 = 16777216; // 0x1000000
+    field public static final int TRANSFER_GAMMA2_6 = 20971520; // 0x1400000
+    field public static final int TRANSFER_GAMMA2_8 = 25165824; // 0x1800000
+    field public static final int TRANSFER_HLG = 33554432; // 0x2000000
+    field public static final int TRANSFER_LINEAR = 4194304; // 0x400000
+    field public static final int TRANSFER_SMPTE_170M = 12582912; // 0xc00000
+    field public static final int TRANSFER_SRGB = 8388608; // 0x800000
+    field public static final int TRANSFER_ST2084 = 29360128; // 0x1c00000
+    field public static final int TRANSFER_UNSPECIFIED = 0; // 0x0
   }
 
   public class GeomagneticField {
@@ -20836,7 +20836,7 @@ package android.media {
   public abstract class Image implements java.lang.AutoCloseable {
     method public abstract void close();
     method public android.graphics.Rect getCropRect();
-    method public long getDataSpace();
+    method public int getDataSpace();
     method @NonNull public android.hardware.SyncFence getFence() throws java.io.IOException;
     method public abstract int getFormat();
     method @Nullable public android.hardware.HardwareBuffer getHardwareBuffer();
@@ -20845,7 +20845,7 @@ package android.media {
     method public abstract long getTimestamp();
     method public abstract int getWidth();
     method public void setCropRect(android.graphics.Rect);
-    method public void setDataSpace(long);
+    method public void setDataSpace(int);
     method public void setFence(@NonNull android.hardware.SyncFence) throws java.io.IOException;
     method public void setTimestamp(long);
   }
@@ -20861,7 +20861,7 @@ package android.media {
     method public android.media.Image acquireNextImage();
     method public void close();
     method public void discardFreeBuffers();
-    method public long getDataSpace();
+    method public int getDataSpace();
     method public int getHardwareBufferFormat();
     method public int getHeight();
     method public int getImageFormat();
@@ -20877,7 +20877,7 @@ package android.media {
   public static final class ImageReader.Builder {
     ctor public ImageReader.Builder(@IntRange(from=1) int, @IntRange(from=1) int);
     method @NonNull public android.media.ImageReader build();
-    method @NonNull public android.media.ImageReader.Builder setDefaultDataSpace(long);
+    method @NonNull public android.media.ImageReader.Builder setDefaultDataSpace(int);
     method @NonNull public android.media.ImageReader.Builder setDefaultHardwareBufferFormat(int);
     method @NonNull public android.media.ImageReader.Builder setImageFormat(int);
     method @NonNull public android.media.ImageReader.Builder setMaxImages(int);
@@ -20891,7 +20891,7 @@ package android.media {
   public class ImageWriter implements java.lang.AutoCloseable {
     method public void close();
     method public android.media.Image dequeueInputImage();
-    method public long getDataSpace();
+    method public int getDataSpace();
     method public int getFormat();
     method public int getHardwareBufferFormat();
     method public int getHeight();
@@ -20907,7 +20907,7 @@ package android.media {
   public static final class ImageWriter.Builder {
     ctor public ImageWriter.Builder(@NonNull android.view.Surface);
     method @NonNull public android.media.ImageWriter build();
-    method @NonNull public android.media.ImageWriter.Builder setDataSpace(long);
+    method @NonNull public android.media.ImageWriter.Builder setDataSpace(int);
     method @NonNull public android.media.ImageWriter.Builder setHardwareBufferFormat(int);
     method @NonNull public android.media.ImageWriter.Builder setImageFormat(int);
     method @NonNull public android.media.ImageWriter.Builder setMaxImages(@IntRange(from=1) int);
@@ -49166,6 +49166,7 @@ package android.view {
     method @NonNull public android.view.SurfaceControl.Transaction setBufferTransform(@NonNull android.view.SurfaceControl, int);
     method @NonNull public android.view.SurfaceControl.Transaction setCrop(@NonNull android.view.SurfaceControl, @Nullable android.graphics.Rect);
     method @NonNull public android.view.SurfaceControl.Transaction setDamageRegion(@NonNull android.view.SurfaceControl, @Nullable android.graphics.Region);
+    method @NonNull public android.view.SurfaceControl.Transaction setDataSpace(@NonNull android.view.SurfaceControl, int);
     method @NonNull public android.view.SurfaceControl.Transaction setFrameRate(@NonNull android.view.SurfaceControl, @FloatRange(from=0.0) float, int);
     method @NonNull public android.view.SurfaceControl.Transaction setFrameRate(@NonNull android.view.SurfaceControl, @FloatRange(from=0.0) float, int, int);
     method @NonNull public android.view.SurfaceControl.Transaction setGeometry(@NonNull android.view.SurfaceControl, @Nullable android.graphics.Rect, @Nullable android.graphics.Rect, int);

@@ -44,6 +44,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.gui.DropInputMode;
+import android.hardware.DataSpace;
 import android.hardware.HardwareBuffer;
 import android.hardware.display.DeviceProductInfo;
 import android.hardware.display.DisplayedContentSample;
@@ -210,8 +211,8 @@ public final class SurfaceControl implements Parcelable {
             HardwareBuffer buffer);
     private static native void nativeSetBufferTransform(long transactionObj, long nativeObject,
             int transform);
-    private static native void nativeSetColorSpace(long transactionObj, long nativeObject,
-            int colorSpace);
+    private static native void nativeSetDataSpace(long transactionObj, long nativeObject,
+            @DataSpace.NamedDataSpace int dataSpace);
     private static native void nativeSetDamageRegion(long transactionObj, long nativeObject,
             Region region);
 
@@ -3719,10 +3720,31 @@ public final class SurfaceControl implements Parcelable {
          * SurfaceControls that were created as type {@link #FX_SURFACE_BLAST}
          *
          * @hide
+         * @deprecated use {@link #setDataSpace(SurfaceControl, long)} instead
          */
+        @Deprecated
         public Transaction setColorSpace(SurfaceControl sc, ColorSpace colorSpace) {
             checkPreconditions(sc);
-            nativeSetColorSpace(mNativeObject, sc.mNativeObject, colorSpace.getId());
+            if (colorSpace.getId() == ColorSpace.Named.DCI_P3.ordinal()) {
+                setDataSpace(sc, DataSpace.DATASPACE_DCI_P3);
+            } else {
+                setDataSpace(sc, DataSpace.DATASPACE_SRGB);
+            }
+            return this;
+        }
+
+        /**
+         * Set the dataspace for the SurfaceControl. This will control how the buffer
+         * set with {@link #setBuffer(SurfaceControl, HardwareBuffer)} is displayed.
+         *
+         * @param sc The SurfaceControl to update
+         * @param dataspace The dataspace to set it to
+         * @return this
+         */
+        public @NonNull Transaction setDataSpace(@NonNull SurfaceControl sc,
+                @DataSpace.NamedDataSpace int dataspace) {
+            checkPreconditions(sc);
+            nativeSetDataSpace(mNativeObject, sc.mNativeObject, dataspace);
             return this;
         }
 

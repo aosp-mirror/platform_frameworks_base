@@ -322,7 +322,7 @@ static void ImageReader_classInit(JNIEnv* env, jclass clazz)
                         ANDROID_MEDIA_SURFACEIMAGE_TS_JNI_ID);
 
     gSurfaceImageClassInfo.mDataSpace = env->GetFieldID(
-            imageClazz, ANDROID_MEDIA_SURFACEIMAGE_DS_JNI_ID, "J");
+            imageClazz, ANDROID_MEDIA_SURFACEIMAGE_DS_JNI_ID, "I");
     LOG_ALWAYS_FATAL_IF(gSurfaceImageClassInfo.mDataSpace == NULL,
                         "can't find android/graphics/ImageReader.%s",
                         ANDROID_MEDIA_SURFACEIMAGE_DS_JNI_ID);
@@ -375,7 +375,7 @@ static void ImageReader_classInit(JNIEnv* env, jclass clazz)
 }
 
 static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz, jint width, jint height,
-                             jint maxImages, jlong ndkUsage, jint nativeFormat, jlong dataSpace) {
+                             jint maxImages, jlong ndkUsage, jint nativeFormat, jint dataSpace) {
     status_t res;
 
     ALOGV("%s: width:%d, height: %d, nativeFormat: %d, maxImages:%d",
@@ -624,7 +624,7 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz, jobject image,
     env->SetLongField(image, gSurfaceImageClassInfo.mTimestamp,
             static_cast<jlong>(buffer->mTimestamp));
     env->SetLongField(image, gSurfaceImageClassInfo.mDataSpace,
-            static_cast<jlong>(buffer->mDataSpace));
+            static_cast<jint>(buffer->mDataSpace));
     auto transform = buffer->mTransform;
     if (buffer->mTransformToDisplayInverse) {
         transform |= NATIVE_WINDOW_TRANSFORM_INVERSE_DISPLAY;
@@ -954,7 +954,7 @@ static jobject Image_getHardwareBuffer(JNIEnv* env, jobject thiz) {
 
 static const JNINativeMethod gImageReaderMethods[] = {
     {"nativeClassInit",        "()V",                        (void*)ImageReader_classInit },
-    {"nativeInit",             "(Ljava/lang/Object;IIIJIJ)V",   (void*)ImageReader_init },
+    {"nativeInit",             "(Ljava/lang/Object;IIIJII)V",   (void*)ImageReader_init },
     {"nativeClose",            "()V",                        (void*)ImageReader_close },
     {"nativeReleaseImage",     "(Landroid/media/Image;)V",   (void*)ImageReader_imageRelease },
     {"nativeImageSetup",       "(Landroid/media/Image;Z)I",   (void*)ImageReader_imageSetup },
