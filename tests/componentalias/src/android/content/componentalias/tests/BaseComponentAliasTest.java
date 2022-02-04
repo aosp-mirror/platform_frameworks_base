@@ -17,6 +17,7 @@ package android.content.componentalias.tests;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Build;
 import android.provider.DeviceConfig;
 import android.util.Log;
 
@@ -27,6 +28,7 @@ import com.android.compatibility.common.util.ShellUtils;
 import com.android.compatibility.common.util.TestUtils;
 
 import org.junit.AfterClass;
+import org.junit.Assume;
 import org.junit.Before;
 
 import java.util.function.Consumer;
@@ -37,7 +39,11 @@ public class BaseComponentAliasTest {
     protected static final DeviceConfigStateHelper sDeviceConfig = new DeviceConfigStateHelper(
             DeviceConfig.NAMESPACE_ACTIVITY_MANAGER);
     @Before
-    public void enableComponentAlias() throws Exception {
+    public void enableComponentAliasWithCompatFlag() throws Exception {
+        Assume.assumeTrue(Build.isDebuggable());
+        ShellUtils.runShellCommand(
+                "am compat enable --no-kill USE_EXPERIMENTAL_COMPONENT_ALIAS android");
+        sDeviceConfig.set("enable_experimental_component_alias", "");
         sDeviceConfig.set("component_alias_overrides", "");
 
         // Make sure the feature is actually enabled.
@@ -49,6 +55,8 @@ public class BaseComponentAliasTest {
 
     @AfterClass
     public static void restoreDeviceConfig() throws Exception {
+        ShellUtils.runShellCommand(
+                "am compat disable --no-kill USE_EXPERIMENTAL_COMPONENT_ALIAS android");
         sDeviceConfig.close();
     }
 
