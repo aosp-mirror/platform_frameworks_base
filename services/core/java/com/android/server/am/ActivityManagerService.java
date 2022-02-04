@@ -8503,6 +8503,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             sb.append("Process: ").append(processName).append("\n");
             sb.append("PID: ").append(process.getPid()).append("\n");
             sb.append("UID: ").append(process.uid).append("\n");
+            if (process.mOptRecord != null) {
+                sb.append("Frozen: ").append(process.mOptRecord.isFrozen()).append("\n");
+            }
             int flags = process.info.flags;
             final IPackageManager pm = AppGlobals.getPackageManager();
             sb.append("Flags: 0x").append(Integer.toHexString(flags)).append("\n");
