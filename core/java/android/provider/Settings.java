@@ -17322,6 +17322,12 @@ public final class Settings {
                     "clockwork_long_press_to_assistant_enabled";
 
             /*
+             * Whether the device has Cooldown Mode enabled.
+             * @hide
+             */
+            public static final String COOLDOWN_MODE_ON = "cooldown_mode_on";
+
+            /*
              * Whether the device has Wet Mode/ Touch Lock Mode enabled.
              * @hide
              */
