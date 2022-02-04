@@ -1251,18 +1251,19 @@ public abstract class Animation implements Cloneable {
         public float value;
 
         /**
-         * Size descriptions can appear inthree forms:
+         * Size descriptions can appear in four forms:
          * <ol>
          * <li>An absolute size. This is represented by a number.</li>
          * <li>A size relative to the size of the object being animated. This
-         * is represented by a number followed by "%".</li> *
+         * is represented by a number followed by "%".</li>
          * <li>A size relative to the size of the parent of object being
          * animated. This is represented by a number followed by "%p".</li>
+         * <li>(Starting from API 32) A complex number.</li>
          * </ol>
          * @param value The typed value to parse
          * @return The parsed version of the description
          */
-        static Description parseValue(TypedValue value) {
+        static Description parseValue(TypedValue value, Context context) {
             Description d = new Description();
             if (value == null) {
                 d.type = ABSOLUTE;
@@ -1282,6 +1283,11 @@ public abstract class Animation implements Cloneable {
                         value.type <= TypedValue.TYPE_LAST_INT) {
                     d.type = ABSOLUTE;
                     d.value = value.data;
+                    return d;
+                } else if (value.type == TypedValue.TYPE_DIMENSION) {
+                    d.type = ABSOLUTE;
+                    d.value = TypedValue.complexToDimension(value.data,
+                            context.getResources().getDisplayMetrics());
                     return d;
                 }
             }
