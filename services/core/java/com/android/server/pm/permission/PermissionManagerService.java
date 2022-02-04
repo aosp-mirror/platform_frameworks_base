@@ -1318,7 +1318,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                 if (op < 0) {
                     // Bg location is one-off runtime modifier permission and has no app op
-                    if (sPlatformPermissions.contains(permission)
+                    if (sPlatformPermissions.containsKey(permission)
                             && !Manifest.permission.ACCESS_BACKGROUND_LOCATION.equals(permission)
                             && !Manifest.permission.BODY_SENSORS_BACKGROUND.equals(permission)) {
                         Slog.wtf(LOG_TAG, "Platform runtime permission " + permission
