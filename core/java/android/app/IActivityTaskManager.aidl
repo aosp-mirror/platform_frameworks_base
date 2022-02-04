@@ -130,6 +130,9 @@ interface IActivityTaskManager {
             in ProfilerInfo profilerInfo, in Bundle options, int userId);
     int startAssistantActivity(in String callingPackage, in String callingFeatureId, int callingPid,
             int callingUid, in Intent intent, in String resolvedType, in Bundle options, int userId);
+    int startActivityFromGameSession(IApplicationThread caller, in String callingPackage,
+            in String callingFeatureId, int callingPid, int callingUid, in Intent intent,
+            int taskId, int userId);
     void startRecentsActivity(in Intent intent, in long eventTime,
             in IRecentsAnimationRunner recentsAnimationRunner);
     int startActivityFromRecents(int taskId, in Bundle options);
