@@ -6847,7 +6847,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 String.format(NOT_SYSTEM_CALLER_MSG, "call isAlwaysOnVpnLockdownEnabledForUser"));
         synchronized (getLockObject()) {
             ActiveAdmin admin = getDeviceOrProfileOwnerAdminLocked(userHandle);
-            return admin != null ? admin.mAlwaysOnVpnLockdown : null;
+            return admin != null && admin.mAlwaysOnVpnLockdown;
         }
     }
 
