@@ -478,7 +478,6 @@ interface IAudioService {
 
     boolean sendFocusLoss(in AudioFocusInfo focusLoser, in IAudioPolicyCallback apcb);
 
-
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)")
     void addAssistantServicesUids(in int[] assistantUID);
 
@@ -499,4 +498,6 @@ interface IAudioService {
             in IAudioDeviceVolumeDispatcher cb,
             in String packageName,
             in AudioDeviceAttributes device, in List<VolumeInfo> volumes);
+
+    String getHalVersion();
 }
