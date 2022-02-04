@@ -873,7 +873,7 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
             const char* exceptionToThrow;
             char msg[128];
             // TransactionTooLargeException is a checked exception, only throw from certain methods.
-            // FIXME: Transaction too large is the most common reason for FAILED_TRANSACTION
+            // TODO(b/28321379): Transaction size is the most common cause for FAILED_TRANSACTION
             //        but it is not the only one.  The Binder driver can return BR_FAILED_REPLY
             //        for other reasons also, such as if the transaction is malformed or
             //        refers to an FD that has been closed.  We should change the driver
@@ -890,8 +890,9 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
                 exceptionToThrow = (canThrowRemoteException)
                         ? "android/os/DeadObjectException"
                         : "java/lang/RuntimeException";
-                snprintf(msg, sizeof(msg)-1,
-                        "Transaction failed on small parcel; remote process probably died");
+                snprintf(msg, sizeof(msg) - 1,
+                         "Transaction failed on small parcel; remote process probably died, but "
+                         "this could also be caused by running out of binder buffer space");
             }
             jniThrowException(env, exceptionToThrow, msg);
         } break;
