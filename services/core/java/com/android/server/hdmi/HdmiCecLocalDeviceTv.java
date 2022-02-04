@@ -41,7 +41,10 @@ import android.hardware.hdmi.HdmiRecordSources;
 import android.hardware.hdmi.HdmiTimerRecordSources;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
-import android.media.AudioSystem;
+import android.media.AudioDescriptor;
+import android.media.AudioDeviceAttributes;
+import android.media.AudioDeviceInfo;
+import android.media.AudioProfile;
 import android.media.tv.TvInputInfo;
 import android.media.tv.TvInputManager.TvInputCallback;
 import android.util.Slog;
@@ -58,6 +61,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Represent a logical device of type TV residing in Android system.
@@ -816,12 +820,23 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
 
         HdmiLogger.debug("Set Arc Status[old:%b new:%b]", mArcEstablished, enabled);
         boolean oldStatus = mArcEstablished;
-        // 1. Enable/disable ARC circuit.
-        enableAudioReturnChannel(enabled);
-        // 2. Notify arc status to audio service.
-        notifyArcStatusToAudioService(enabled);
-        // 3. Update arc status;
-        mArcEstablished = enabled;
+        if (enabled) {
+            RequestSadAction action = new RequestSadAction(
+                    this, Constants.ADDR_AUDIO_SYSTEM,
+                    new RequestSadAction.RequestSadCallback() {
+                        @Override
+                        public void onRequestSadDone(List<byte[]> supportedSads) {
+                            enableAudioReturnChannel(enabled);
+                            notifyArcStatusToAudioService(enabled, supportedSads);
+                            mArcEstablished = enabled;
+                        }
+                    });
+            addAndStartAction(action);
+        } else {
+            enableAudioReturnChannel(enabled);
+            notifyArcStatusToAudioService(enabled, new ArrayList<>());
+            mArcEstablished = enabled;
+        }
         return oldStatus;
     }
 
@@ -843,11 +858,15 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return mService.isConnected(portId);
     }
 
-    private void notifyArcStatusToAudioService(boolean enabled) {
+    private void notifyArcStatusToAudioService(boolean enabled, List<byte[]> supportedSads) {
         // Note that we don't set any name to ARC.
-        mService.getAudioManager().setWiredDeviceConnectionState(
-                AudioSystem.DEVICE_OUT_HDMI_ARC,
-                enabled ? 1 : 0, "", "");
+        AudioDeviceAttributes attributes = new AudioDeviceAttributes(
+                AudioDeviceAttributes.ROLE_OUTPUT, AudioDeviceInfo.TYPE_HDMI_ARC, "", "",
+                new ArrayList<AudioProfile>(), supportedSads.stream()
+                .map(sad -> new AudioDescriptor(AudioDescriptor.STANDARD_EDID,
+                        AudioProfile.AUDIO_ENCAPSULATION_TYPE_NONE, sad))
+                .collect(Collectors.toList()));
+        mService.getAudioManager().setWiredDeviceConnectionState(attributes, enabled ? 1 : 0);
     }
 
     /**

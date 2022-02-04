@@ -19679,10 +19679,13 @@ package android.media {
     method public android.media.AudioAttributes.Builder setUsage(int);
   }
 
-  public class AudioDescriptor {
+  public class AudioDescriptor implements android.os.Parcelable {
+    method public int describeContents();
     method @NonNull public byte[] getDescriptor();
     method public int getEncapsulationType();
     method public int getStandard();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioDescriptor> CREATOR;
     field public static final int STANDARD_EDID = 1; // 0x1
     field public static final int STANDARD_NONE = 0; // 0x0
   }
@@ -20198,14 +20201,17 @@ package android.media {
     method @NonNull public android.media.AudioPresentation.Builder setProgramId(int);
   }
 
-  public class AudioProfile {
+  public class AudioProfile implements android.os.Parcelable {
+    method public int describeContents();
     method @NonNull public int[] getChannelIndexMasks();
     method @NonNull public int[] getChannelMasks();
     method public int getEncapsulationType();
     method public int getFormat();
     method @NonNull public int[] getSampleRates();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int AUDIO_ENCAPSULATION_TYPE_IEC61937 = 1; // 0x1
     field public static final int AUDIO_ENCAPSULATION_TYPE_NONE = 0; // 0x0
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.AudioProfile> CREATOR;
   }
 
   public class AudioRecord implements android.media.AudioRecordingMonitor android.media.AudioRouting android.media.MicrophoneDirection {

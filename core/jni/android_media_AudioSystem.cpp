@@ -18,25 +18,25 @@
 //#define LOG_NDEBUG 0
 
 #define LOG_TAG "AudioSystem-JNI"
-#include <utils/Log.h>
-
-#include <sstream>
-#include <vector>
-#include <jni.h>
-#include <nativehelper/JNIHelp.h>
-#include "core_jni_helpers.h"
-
 #include <android/media/AudioVibratorInfo.h>
 #include <android/media/INativeSpatializerCallback.h>
 #include <android/media/ISpatializer.h>
+#include <android_os_Parcel.h>
 #include <audiomanager/AudioManager.h>
+#include <jni.h>
 #include <media/AudioContainers.h>
 #include <media/AudioPolicy.h>
 #include <media/AudioSystem.h>
 #include <media/MicrophoneInfo.h>
+#include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
 #include <system/audio.h>
 #include <system/audio_policy.h>
+#include <utils/Log.h>
+
+#include <sstream>
+#include <vector>
+
 #include "android_media_AudioAttributes.h"
 #include "android_media_AudioDescriptor.h"
 #include "android_media_AudioDeviceAttributes.h"
@@ -46,6 +46,7 @@
 #include "android_media_AudioProfile.h"
 #include "android_media_MicrophoneInfo.h"
 #include "android_util_Binder.h"
+#include "core_jni_helpers.h"
 
 // ----------------------------------------------------------------------------
 
@@ -584,18 +585,26 @@ android_media_AudioSystem_routing_callback()
     env->DeleteLocalRef(clazz);
 }
 
-static jint
-android_media_AudioSystem_setDeviceConnectionState(JNIEnv *env, jobject thiz, jint device, jint state, jstring device_address, jstring device_name,
-                                                   jint codec)
-{
-    const char *c_address = env->GetStringUTFChars(device_address, NULL);
-    const char *c_name = env->GetStringUTFChars(device_name, NULL);
-    int status = check_AudioSystem_Command(AudioSystem::setDeviceConnectionState(static_cast <audio_devices_t>(device),
-                                          static_cast <audio_policy_dev_state_t>(state),
-                                          c_address, c_name,
-                                          static_cast <audio_format_t>(codec)));
-    env->ReleaseStringUTFChars(device_address, c_address);
-    env->ReleaseStringUTFChars(device_name, c_name);
+static jint android_media_AudioSystem_setDeviceConnectionState(JNIEnv *env, jobject thiz,
+                                                               jint state, jobject jParcel,
+                                                               jint codec) {
+    int status;
+    if (Parcel *parcel = parcelForJavaObject(env, jParcel); parcel != nullptr) {
+        android::media::audio::common::AudioPort port{};
+        if (status_t statusOfParcel = port.readFromParcel(parcel); statusOfParcel == OK) {
+            status = check_AudioSystem_Command(
+                    AudioSystem::setDeviceConnectionState(static_cast<audio_policy_dev_state_t>(
+                                                                  state),
+                                                          port,
+                                                          static_cast<audio_format_t>(codec)));
+        } else {
+            ALOGE("Failed to read from parcel: %s", statusToString(statusOfParcel).c_str());
+            status = kAudioStatusError;
+        }
+    } else {
+        ALOGE("Failed to retrieve the native parcel from Java parcel");
+        status = kAudioStatusError;
+    }
     return (jint) status;
 }
 
@@ -2912,7 +2921,7 @@ static const JNINativeMethod gMethods[] =
          {"newAudioSessionId", "()I", (void *)android_media_AudioSystem_newAudioSessionId},
          {"newAudioPlayerId", "()I", (void *)android_media_AudioSystem_newAudioPlayerId},
          {"newAudioRecorderId", "()I", (void *)android_media_AudioSystem_newAudioRecorderId},
-         {"setDeviceConnectionState", "(IILjava/lang/String;Ljava/lang/String;I)I",
+         {"setDeviceConnectionState", "(ILandroid/os/Parcel;I)I",
           (void *)android_media_AudioSystem_setDeviceConnectionState},
          {"getDeviceConnectionState", "(ILjava/lang/String;)I",
           (void *)android_media_AudioSystem_getDeviceConnectionState},

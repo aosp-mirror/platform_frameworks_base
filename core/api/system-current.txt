@@ -5933,11 +5933,20 @@ package android.media {
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioAttributes.Builder setSystemUsage(int);
   }
 
+  public class AudioDescriptor implements android.os.Parcelable {
+    ctor public AudioDescriptor(int, int, @NonNull byte[]);
+  }
+
   public final class AudioDeviceAttributes implements android.os.Parcelable {
     ctor public AudioDeviceAttributes(@NonNull android.media.AudioDeviceInfo);
     ctor public AudioDeviceAttributes(int, int, @NonNull String);
+    ctor public AudioDeviceAttributes(int, int, @NonNull String, @NonNull String, @NonNull java.util.List<android.media.AudioProfile>, @NonNull java.util.List<android.media.AudioDescriptor>);
     method public int describeContents();
+    method public boolean equalTypeAddress(@Nullable Object);
     method @NonNull public String getAddress();
+    method @NonNull public java.util.List<android.media.AudioDescriptor> getAudioDescriptors();
+    method @NonNull public java.util.List<android.media.AudioProfile> getAudioProfiles();
+    method @NonNull public String getName();
     method public int getRole();
     method public int getType();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -6092,6 +6101,10 @@ package android.media {
     field public static final int PLAYER_TYPE_SLES_AUDIOPLAYER_BUFFERQUEUE = 11; // 0xb
     field public static final int PLAYER_TYPE_SLES_AUDIOPLAYER_URI_FD = 12; // 0xc
     field public static final int PLAYER_TYPE_UNKNOWN = -1; // 0xffffffff
+  }
+
+  public class AudioProfile implements android.os.Parcelable {
+    ctor public AudioProfile(int, @NonNull int[], @NonNull int[], @NonNull int[], int);
   }
 
   public class AudioRecord implements android.media.AudioRecordingMonitor android.media.AudioRouting android.media.MicrophoneDirection {
