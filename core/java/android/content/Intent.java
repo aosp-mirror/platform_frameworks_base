@@ -5976,6 +5976,14 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_PREVIOUS_UID = "android.intent.extra.PREVIOUS_UID";
 
     /**
+     * Used as an optional int extra field in {@link android.content.Intent#ACTION_PACKAGE_REMOVED}
+     * intents to supply the new uid the package will be assigned.
+     * This would only be set when a package is leaving sharedUserId in an upgrade, or when a
+     * system app upgrade that had left sharedUserId is getting uninstalled.
+     */
+    public static final String EXTRA_NEW_UID = "android.intent.extra.NEW_UID";
+
+    /**
      * @hide String array of package names.
      */
     @SystemApi

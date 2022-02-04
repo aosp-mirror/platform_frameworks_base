@@ -930,9 +930,6 @@ final class InstallPackageHelper {
                                         + " in multi-package install request.");
                         return;
                     }
-                    if (result.needsNewAppId()) {
-                        request.mInstallResult.mRemovedInfo.mAppIdChanging = true;
-                    }
                     if (!checkNoAppStorageIsConsistent(
                             result.mRequest.mOldPkg, result.mPkgSetting.getPkg())) {
                         // TODO: INSTALL_FAILED_UPDATE_INCOMPATIBLE is about incomptabible
@@ -946,6 +943,10 @@ final class InstallPackageHelper {
                     createdAppId.put(packageName, optimisticallyRegisterAppId(result));
                     versionInfos.put(result.mPkgSetting.getPkg().getPackageName(),
                             mPm.getSettingsVersionForPackage(result.mPkgSetting.getPkg()));
+                    if (result.needsNewAppId()) {
+                        request.mInstallResult.mRemovedInfo.mNewAppId =
+                                result.mPkgSetting.getAppId();
+                    }
                 } catch (PackageManagerException e) {
                     request.mInstallResult.setError("Scanning Failed.", e);
                     return;
@@ -2573,7 +2574,7 @@ final class InstallPackageHelper {
         final int dataLoaderType = installArgs.mDataLoaderType;
         final boolean succeeded = res.mReturnCode == PackageManager.INSTALL_SUCCEEDED;
         final boolean update = res.mRemovedInfo != null && res.mRemovedInfo.mRemovedPackage != null;
-        final int previousAppId = (res.mRemovedInfo != null && res.mRemovedInfo.mAppIdChanging)
+        final int previousAppId = (res.mRemovedInfo != null && res.mRemovedInfo.mNewAppId >= 0)
                 ? res.mRemovedInfo.mUid : Process.INVALID_UID;
         final String packageName = res.mName;
         final PackageStateInternal pkgSetting =
