@@ -2411,7 +2411,8 @@ public class StatsPullAtomService extends SystemService {
                         metrics.unaccountedKb,
                         metrics.gpuTotalUsageKb,
                         metrics.gpuPrivateAllocationsKb,
-                        metrics.dmaBufTotalExportedKb));
+                        metrics.dmaBufTotalExportedKb,
+                        metrics.shmemKb));
         return StatsManager.PULL_SUCCESS;
     }
 
