@@ -471,14 +471,16 @@ class MediaViewController @Inject constructor(
 
     private fun updateMediaViewControllerType(type: TYPE) {
         this.type = type
+
+        // These XML resources contain ConstraintSets that will apply to this player type's layout
         when (type) {
             TYPE.PLAYER -> {
                 collapsedLayout.load(context, R.xml.media_collapsed)
                 expandedLayout.load(context, R.xml.media_expanded)
             }
             TYPE.PLAYER_SESSION -> {
-                collapsedLayout.clone(context, R.layout.media_session_view)
-                expandedLayout.clone(context, R.layout.media_session_view)
+                collapsedLayout.load(context, R.xml.media_session_collapsed)
+                expandedLayout.load(context, R.xml.media_session_expanded)
             }
             TYPE.RECOMMENDATION -> {
                 collapsedLayout.load(context, R.xml.media_recommendation_collapsed)

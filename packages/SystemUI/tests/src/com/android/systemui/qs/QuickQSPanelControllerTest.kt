@@ -23,11 +23,14 @@ import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.media.MediaFlags
 import com.android.systemui.media.MediaHost
+import com.android.systemui.media.MediaHostState
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.qs.QSTileView
 import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.util.leak.RotationUtils
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -55,6 +58,8 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var mediaHost: MediaHost
     @Mock
+    private lateinit var mediaFlags: MediaFlags
+    @Mock
     private lateinit var metricsLogger: MetricsLogger
     private val uiEventLogger = UiEventLoggerFake()
     @Mock
@@ -71,7 +76,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     @Captor
     private lateinit var captor: ArgumentCaptor<QSPanel.OnConfigurationChangedListener>
 
-    private lateinit var controller: QuickQSPanelController
+    private lateinit var controller: TestQuickQSPanelController
 
     @Before
     fun setUp() {
@@ -82,13 +87,16 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         `when`(quickQSPanel.dumpableTag).thenReturn("")
         `when`(quickQSPanel.resources).thenReturn(mContext.resources)
         `when`(qsTileHost.createTileView(any(), any(), anyBoolean())).thenReturn(tileView)
+        `when`(mediaFlags.useMediaSessionLayout()).thenReturn(false)
 
-        controller = QuickQSPanelController(
+        controller = TestQuickQSPanelController(
                 quickQSPanel,
                 qsTileHost,
                 qsCustomizerController,
                 false,
                 mediaHost,
+                true,
+                mediaFlags,
                 metricsLogger,
                 uiEventLogger,
                 qsLogger,
@@ -132,5 +140,50 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         captor.allValues.forEach { it.onConfigurationChange(Configuration.EMPTY) }
 
         verify(quickQsBrightnessController).refreshVisibility(anyBoolean())
+    }
+
+    @Test
+    fun testMediaExpansionUpdatedWhenConfigurationChanged() {
+        `when`(mediaFlags.useMediaSessionLayout()).thenReturn(true)
+
+        // times(2) because both controller and base controller are registering their listeners
+        verify(quickQSPanel, times(2)).addOnConfigurationChangedListener(captor.capture())
+
+        captor.allValues.forEach { it.onConfigurationChange(Configuration.EMPTY) }
+        verify(mediaHost).expansion = MediaHostState.EXPANDED
+
+        // Rotate device, verify media size updated
+        controller.setRotation(RotationUtils.ROTATION_LANDSCAPE)
+        captor.allValues.forEach { it.onConfigurationChange(Configuration.EMPTY) }
+
+        // times(2) because init will have set to collapsed because the flag was off
+        verify(mediaHost, times(2)).expansion = MediaHostState.COLLAPSED
+    }
+
+    class TestQuickQSPanelController(
+        view: QuickQSPanel,
+        qsTileHost: QSTileHost,
+        qsCustomizerController: QSCustomizerController,
+        usingMediaPlayer: Boolean,
+        mediaHost: MediaHost,
+        usingCollapsedLandscapeMedia: Boolean,
+        mediaFlags: MediaFlags,
+        metricsLogger: MetricsLogger,
+        uiEventLogger: UiEventLoggerFake,
+        qsLogger: QSLogger,
+        dumpManager: DumpManager,
+        quickQSBrightnessController: QuickQSBrightnessController
+    ) : QuickQSPanelController(view, qsTileHost, qsCustomizerController, usingMediaPlayer,
+        mediaHost, usingCollapsedLandscapeMedia, mediaFlags, metricsLogger, uiEventLogger, qsLogger,
+        dumpManager, quickQSBrightnessController) {
+
+        private var rotation = RotationUtils.ROTATION_NONE
+
+        @Override
+        override fun getRotation(): Int = rotation
+
+        fun setRotation(newRotation: Int) {
+            rotation = newRotation
+        }
     }
 }
