@@ -61,8 +61,7 @@ public final class DrawableInflater {
      * @param id the identifier of the drawable resource
      * @return a drawable, or {@code null} if the drawable failed to load
      */
-    @Nullable
-    public static Drawable loadDrawable(@NonNull Context context, @DrawableRes int id) {
+    public static @Nullable Drawable loadDrawable(@NonNull Context context, @DrawableRes int id) {
         return loadDrawable(context.getResources(), context.getTheme(), id);
     }
 
@@ -74,9 +73,8 @@ public final class DrawableInflater {
      * @param id the identifier of the drawable resource
      * @return a drawable, or {@code null} if the drawable failed to load
      */
-    @Nullable
-    public static Drawable loadDrawable(
-            @NonNull Resources resources, @Nullable Theme theme, @DrawableRes int id) {
+    public static @Nullable Drawable loadDrawable(@NonNull Resources resources,
+            @Nullable Theme theme, @DrawableRes int id) {
         return resources.getDrawable(id, theme);
     }
 
@@ -111,8 +109,7 @@ public final class DrawableInflater {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    @NonNull
-    public Drawable inflateFromXml(@NonNull String name, @NonNull XmlPullParser parser,
+    public @NonNull Drawable inflateFromXml(@NonNull String name, @NonNull XmlPullParser parser,
             @NonNull AttributeSet attrs, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
         return inflateFromXmlForDensity(name, parser, attrs, 0, theme);
@@ -122,8 +119,7 @@ public final class DrawableInflater {
      * Version of {@link #inflateFromXml(String, XmlPullParser, AttributeSet, Theme)} that accepts
      * an override density.
      */
-    @NonNull
-    Drawable inflateFromXmlForDensity(@NonNull String name, @NonNull XmlPullParser parser,
+    @NonNull Drawable inflateFromXmlForDensity(@NonNull String name, @NonNull XmlPullParser parser,
             @NonNull AttributeSet attrs, int density, @Nullable Theme theme)
             throws XmlPullParserException, IOException {
         // Inner classes must be referenced as Outer$Inner, but XML tag names
@@ -146,9 +142,8 @@ public final class DrawableInflater {
         return drawable;
     }
 
-    @NonNull
     @SuppressWarnings("deprecation")
-    private Drawable inflateFromTag(@NonNull String name) {
+    private @Nullable Drawable inflateFromTag(@NonNull String name) {
         switch (name) {
             case "selector":
                 return new StateListDrawable();
@@ -195,8 +190,7 @@ public final class DrawableInflater {
         }
     }
 
-    @NonNull
-    private Drawable inflateFromClass(@NonNull String className) {
+    private @NonNull Drawable inflateFromClass(@NonNull String className) {
         try {
             Constructor<? extends Drawable> constructor;
             synchronized (CONSTRUCTOR_MAP) {

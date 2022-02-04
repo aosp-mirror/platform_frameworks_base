@@ -987,7 +987,7 @@ package android.database.sqlite {
 package android.graphics {
 
   public final class ImageDecoder implements java.lang.AutoCloseable {
-    method @AnyThread @NonNull public static android.graphics.ImageDecoder.Source createSource(android.content.res.Resources, java.io.InputStream, int);
+    method @AnyThread @NonNull public static android.graphics.ImageDecoder.Source createSource(android.content.res.Resources, @NonNull java.io.InputStream, int);
   }
 
   public final class Rect implements android.os.Parcelable {
