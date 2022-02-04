@@ -8338,7 +8338,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSetSsidAllowlist_noDeviceOwnerOrPoOfOrgOwnedDevice() {
         final Set<WifiSsid> ssids = new ArraySet<>(
                 Arrays.asList(WifiSsid.fromBytes("ssid1".getBytes(StandardCharsets.UTF_8))));
-        WifiSsidPolicy policy = WifiSsidPolicy.createAllowlistPolicy(ssids);
+        WifiSsidPolicy policy = new WifiSsidPolicy(
+                WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST, ssids);
         assertThrows(SecurityException.class, () -> dpm.setWifiSsidPolicy(policy));
     }
 
@@ -8348,7 +8349,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         final Set<WifiSsid> ssids = new ArraySet<>(
                 Arrays.asList(WifiSsid.fromBytes("ssid1".getBytes(StandardCharsets.UTF_8))));
-        WifiSsidPolicy policy = WifiSsidPolicy.createAllowlistPolicy(ssids);
+        WifiSsidPolicy policy = new WifiSsidPolicy(
+                WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST, ssids);
         dpm.setWifiSsidPolicy(policy);
         assertThat(dpm.getWifiSsidPolicy().getSsids()).isEqualTo(ssids);
         assertThat(dpm.getWifiSsidPolicy().getPolicyType()).isEqualTo(
@@ -8367,7 +8369,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 Arrays.asList(WifiSsid.fromBytes("ssid1".getBytes(StandardCharsets.UTF_8)),
                         WifiSsid.fromBytes("ssid2".getBytes(StandardCharsets.UTF_8)),
                         WifiSsid.fromBytes("ssid3".getBytes(StandardCharsets.UTF_8))));
-        WifiSsidPolicy policy = WifiSsidPolicy.createAllowlistPolicy(ssids);
+        WifiSsidPolicy policy = new WifiSsidPolicy(
+                WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST, ssids);
         dpm.setWifiSsidPolicy(policy);
         assertThat(dpm.getWifiSsidPolicy().getSsids()).isEqualTo(ssids);
         assertThat(dpm.getWifiSsidPolicy().getPolicyType()).isEqualTo(
@@ -8380,14 +8383,15 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         final Set<WifiSsid> ssids = new ArraySet<>();
         assertThrows(IllegalArgumentException.class,
-                () -> WifiSsidPolicy.createAllowlistPolicy(ssids));
+                () -> new WifiSsidPolicy(WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST, ssids));
     }
 
     @Test
     public void testSetSsidDenylist_noDeviceOwnerOrPoOfOrgOwnedDevice() {
         final Set<WifiSsid> ssids = new ArraySet<>(
                 Arrays.asList(WifiSsid.fromBytes("ssid1".getBytes(StandardCharsets.UTF_8))));
-        WifiSsidPolicy policy = WifiSsidPolicy.createDenylistPolicy(ssids);
+        WifiSsidPolicy policy = new WifiSsidPolicy(
+                WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_DENYLIST, ssids);
         assertThrows(SecurityException.class, () -> dpm.setWifiSsidPolicy(policy));
     }
 
@@ -8397,7 +8401,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         final Set<WifiSsid> ssids = new ArraySet<>(
                 Arrays.asList(WifiSsid.fromBytes("ssid1".getBytes(StandardCharsets.UTF_8))));
-        WifiSsidPolicy policy = WifiSsidPolicy.createDenylistPolicy(ssids);
+        WifiSsidPolicy policy = new WifiSsidPolicy(
+                WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_DENYLIST, ssids);
         dpm.setWifiSsidPolicy(policy);
         assertThat(dpm.getWifiSsidPolicy().getSsids()).isEqualTo(ssids);
         assertThat(dpm.getWifiSsidPolicy().getPolicyType()).isEqualTo(
@@ -8416,7 +8421,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 Arrays.asList(WifiSsid.fromBytes("ssid1".getBytes(StandardCharsets.UTF_8)),
                         WifiSsid.fromBytes("ssid2".getBytes(StandardCharsets.UTF_8)),
                         WifiSsid.fromBytes("ssid3".getBytes(StandardCharsets.UTF_8))));
-        WifiSsidPolicy policy = WifiSsidPolicy.createDenylistPolicy(ssids);
+        WifiSsidPolicy policy = new WifiSsidPolicy(
+                WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_DENYLIST, ssids);
         dpm.setWifiSsidPolicy(policy);
         assertThat(dpm.getWifiSsidPolicy().getSsids()).isEqualTo(ssids);
         assertThat(dpm.getWifiSsidPolicy().getPolicyType()).isEqualTo(
@@ -8429,7 +8435,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         final Set<WifiSsid> ssids = new ArraySet<>();
         assertThrows(IllegalArgumentException.class,
-                () -> WifiSsidPolicy.createDenylistPolicy(ssids));
+                () -> new WifiSsidPolicy(WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_DENYLIST, ssids));
     }
 
     @Test

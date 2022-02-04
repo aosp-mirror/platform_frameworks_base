@@ -73,7 +73,21 @@ public final class WifiSsidPolicy implements Parcelable {
     private @WifiSsidPolicyType int mPolicyType;
     private ArraySet<WifiSsid> mSsids;
 
-    private WifiSsidPolicy(@WifiSsidPolicyType int policyType, @NonNull Set<WifiSsid> ssids) {
+    /**
+     * Create the Wi-Fi SSID Policy.
+     *
+     * @param policyType indicate whether the policy is an allowlist or a denylist
+     * @param ssids set of {@link WifiSsid}
+     * @throws IllegalArgumentException if the input ssids set is empty or the policyType is invalid
+     */
+    public WifiSsidPolicy(@WifiSsidPolicyType int policyType, @NonNull Set<WifiSsid> ssids) {
+        if (ssids.isEmpty()) {
+            throw new IllegalArgumentException("SSID list cannot be empty");
+        }
+        if (policyType != WIFI_SSID_POLICY_TYPE_ALLOWLIST
+                && policyType != WIFI_SSID_POLICY_TYPE_DENYLIST) {
+            throw new IllegalArgumentException("Invalid policy type");
+        }
         mPolicyType = policyType;
         mSsids = new ArraySet<>(ssids);
     }
@@ -81,33 +95,6 @@ public final class WifiSsidPolicy implements Parcelable {
     private WifiSsidPolicy(Parcel in) {
         mPolicyType = in.readInt();
         mSsids = (ArraySet<WifiSsid>) in.readArraySet(null);
-    }
-    /**
-     * Create the allowlist Wi-Fi SSID Policy.
-     *
-     * @param ssids allowlist of {@link WifiSsid}
-     * @throws IllegalArgumentException if the input ssids list is empty
-     */
-    @NonNull
-    public static WifiSsidPolicy createAllowlistPolicy(@NonNull Set<WifiSsid> ssids) {
-        if (ssids.isEmpty()) {
-            throw new IllegalArgumentException("SSID list cannot be empty");
-        }
-        return new WifiSsidPolicy(WIFI_SSID_POLICY_TYPE_ALLOWLIST, ssids);
-    }
-
-    /**
-     * Create the denylist Wi-Fi SSID Policy.
-     *
-     * @param ssids denylist of {@link WifiSsid}
-     * @throws IllegalArgumentException if the input ssids list is empty
-     */
-    @NonNull
-    public static WifiSsidPolicy createDenylistPolicy(@NonNull Set<WifiSsid> ssids) {
-        if (ssids.isEmpty()) {
-            throw new IllegalArgumentException("SSID list cannot be empty");
-        }
-        return new WifiSsidPolicy(WIFI_SSID_POLICY_TYPE_DENYLIST, ssids);
     }
 
     /**
