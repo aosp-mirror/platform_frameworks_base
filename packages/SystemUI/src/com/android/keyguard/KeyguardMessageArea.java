@@ -31,6 +31,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.policy.SystemBarUtils;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
@@ -58,6 +60,11 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
     private ColorStateList mNextMessageColorState = ColorStateList.valueOf(DEFAULT_COLOR);
     private boolean mBouncerVisible;
     private boolean mAltBouncerShowing;
+    /**
+     * Container that wraps the KeyguardMessageArea - may be null if current view hierarchy doesn't
+     * contain {@link R.id.keyguard_message_area_container}.
+     */
+    @Nullable
     private ViewGroup mContainer;
     private int mContainerTopMargin;
     private int mLastOrientation = -1;
@@ -77,6 +84,9 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
     }
 
     void onConfigChanged(Configuration newConfig) {
+        if (mContainer == null) {
+            return;
+        }
         final int newTopMargin = SystemBarUtils.getStatusBarHeight(getContext());
         if (mContainerTopMargin != newTopMargin) {
             mContainerTopMargin = newTopMargin;
