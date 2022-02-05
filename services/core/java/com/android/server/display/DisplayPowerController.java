@@ -75,6 +75,7 @@ import com.android.server.display.whitebalance.DisplayWhiteBalanceSettings;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
+import java.util.Objects;
 
 /**
  * Controls the power state of the display.
@@ -2824,11 +2825,16 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
         @Override
         public boolean equals(Object obj) {
-            if (obj == null || !(obj instanceof BrightnessReason)) {
+            if (!(obj instanceof BrightnessReason)) {
                 return false;
             }
             BrightnessReason other = (BrightnessReason) obj;
             return other.reason == reason && other.modifier == modifier;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(reason, modifier);
         }
 
         @Override
