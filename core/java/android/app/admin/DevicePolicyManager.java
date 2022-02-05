@@ -59,6 +59,7 @@ import android.graphics.drawable.Drawable;
 import android.net.PrivateDnsConnectivityChecker;
 import android.net.ProxyInfo;
 import android.net.Uri;
+import android.net.wifi.WifiSsid;
 import android.nfc.NfcAdapter;
 import android.os.Binder;
 import android.os.Build;
@@ -111,6 +112,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -463,7 +465,9 @@ public class DevicePolicyManager {
      * <li>{@link #setUserControlDisabledPackages(ComponentName, List)}</li>
      * <li>{@link #getUserControlDisabledPackages(ComponentName)}</li>
      * <li>{@link #setOrganizationName(ComponentName, CharSequence)}</li>
+     * <li>{@link #getOrganizationName(ComponentName)} </li>
      * <li>{@link #setShortSupportMessage(ComponentName, CharSequence)}</li>
+     * <li>{@link #getShortSupportMessage(ComponentName)}</li>
      * <li>{@link #isBackupServiceEnabled(ComponentName)}</li>
      * <li>{@link #setBackupServiceEnabled(ComponentName, boolean)}</li>
      * <li>{@link #isLockTaskPermitted(String)}</li>
@@ -476,7 +480,9 @@ public class DevicePolicyManager {
      *     <li>{@link #LOCK_TASK_FEATURE_GLOBAL_ACTIONS}</li>
      *     <li>{@link #LOCK_TASK_FEATURE_NOTIFICATIONS}</li>
      * </ul>
+     * <li>{@link #getLockTaskFeatures(ComponentName)}</li>
      * <li>{@link #setLockTaskPackages(ComponentName, String[])}</li>
+     * <li>{@link #getLockTaskPackages(ComponentName)}</li>
      * <li>{@link #addPersistentPreferredActivity(ComponentName, IntentFilter, ComponentName)}</li>
      * <li>{@link #clearPackagePersistentPreferredActivities(ComponentName, String)} </li>
      * <li>{@link #wipeData(int)}</li>
@@ -487,6 +493,10 @@ public class DevicePolicyManager {
      * {@link #PERMISSION_GRANT_STATE_GRANTED}, {@link #PERMISSION_GRANT_STATE_DENIED}, or
      * {@link #PERMISSION_GRANT_STATE_DEFAULT} and can <b>only</b> be applied to the device admin
      * app (otherwise a {@link SecurityException} will be thrown)</li>
+     * <li>{@link #getPermissionGrantState(ComponentName, String, String)}, where
+     * {@link permission#READ_PHONE_STATE} is the <b>only</b> permission that can be
+     * used and device admin app is the only package that can be used to retrieve the permission
+     * permission grant state for (otherwise a {@link SecurityException} will be thrown)</li>
      * <li>{@link #addUserRestriction(ComponentName, String)}, where the following user restrictions
      * are permitted (otherwise a {@link SecurityException} will be thrown):</li>
      * <ul>
@@ -497,7 +507,17 @@ public class DevicePolicyManager {
      *     <li>{@link UserManager#DISALLOW_CONFIG_DATE_TIME}</li>
      *     <li>{@link UserManager#DISALLOW_OUTGOING_CALLS}</li>
      * </ul>
-     * <li>{@link #clearUserRestriction(ComponentName, String)}</li>
+     * <li>{@link #getUserRestrictions(ComponentName)}</li>
+     * <li>{@link #clearUserRestriction(ComponentName, String)}, where the following user
+     * restrictions are permitted (otherwise a {@link SecurityException} will be thrown):</li>
+     * <ul>
+     *     <li>{@link UserManager#DISALLOW_ADD_USER}</li>
+     *     <li>{@link UserManager#DISALLOW_DEBUGGING_FEATURES}</li>
+     *     <li>{@link UserManager#DISALLOW_INSTALL_UNKNOWN_SOURCES}</li>
+     *     <li>{@link UserManager#DISALLOW_SAFE_BOOT}</li>
+     *     <li>{@link UserManager#DISALLOW_CONFIG_DATE_TIME}</li>
+     *     <li>{@link UserManager#DISALLOW_OUTGOING_CALLS}</li>
+     * </ul>
      * </ul>
      *
      * @hide
@@ -3257,6 +3277,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public static final int DEVICE_OWNER_TYPE_DEFAULT = 0;
 
     /**
@@ -3264,6 +3285,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public static final int DEVICE_OWNER_TYPE_FINANCED = 1;
 
     /**
@@ -14909,10 +14931,14 @@ public class DevicePolicyManager {
                     mService.setSsidAllowlist(new ArrayList<>());
                 } else {
                     int policyType = policy.getPolicyType();
+                    List<String> ssidList = new ArrayList<>();
+                    for (WifiSsid ssid : policy.getSsids()) {
+                        ssidList.add(new String(ssid.getBytes(), StandardCharsets.UTF_8));
+                    }
                     if (policyType == WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST) {
-                        mService.setSsidAllowlist(new ArrayList<>(policy.getSsids()));
+                        mService.setSsidAllowlist(ssidList);
                     } else {
-                        mService.setSsidDenylist(new ArrayList<>(policy.getSsids()));
+                        mService.setSsidDenylist(ssidList);
                     }
                 }
             } catch (RemoteException e) {
@@ -14938,11 +14964,21 @@ public class DevicePolicyManager {
         try {
             List<String> allowlist = mService.getSsidAllowlist();
             if (!allowlist.isEmpty()) {
-                return WifiSsidPolicy.createAllowlistPolicy(new ArraySet<>(allowlist));
+                List<WifiSsid> wifiSsidAllowlist = new ArrayList<>();
+                for (String ssid : allowlist) {
+                    wifiSsidAllowlist.add(
+                            WifiSsid.fromBytes(ssid.getBytes(StandardCharsets.UTF_8)));
+                }
+                return WifiSsidPolicy.createAllowlistPolicy(new ArraySet<>(wifiSsidAllowlist));
             }
             List<String> denylist = mService.getSsidDenylist();
             if (!denylist.isEmpty()) {
-                return WifiSsidPolicy.createDenylistPolicy(new ArraySet<>(denylist));
+                List<WifiSsid> wifiSsidDenylist = new ArrayList<>();
+                for (String ssid : denylist) {
+                    wifiSsidDenylist.add(
+                            WifiSsid.fromBytes(ssid.getBytes(StandardCharsets.UTF_8)));
+                }
+                return WifiSsidPolicy.createDenylistPolicy(new ArraySet<>(wifiSsidDenylist));
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -15366,5 +15402,46 @@ public class DevicePolicyManager {
             }
         }
         return ParcelableResource.loadDefaultString(defaultStringLoader);
+    }
+
+    /**
+     * Returns a boolean for whether the DPC has been downloaded during provisioning.
+     *
+     * <p>If true is returned, then any attempts to begin setup again should result in factory reset
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public boolean isDpcDownloaded() {
+        throwIfParentInstance("isDpcDownloaded");
+        if (mService != null) {
+            try {
+                return mService.isDpcDownloaded();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Use to indicate that the DPC has or has not been downloaded during provisioning.
+     *
+     * @param downloaded {@code true} if the dpc has been downloaded during provisioning. false otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void setDpcDownloaded(boolean downloaded) {
+        throwIfParentInstance("setDpcDownloaded");
+        if (mService != null) {
+            try {
+                mService.setDpcDownloaded(downloaded);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 }

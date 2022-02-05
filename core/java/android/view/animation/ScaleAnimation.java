@@ -118,12 +118,12 @@ public class ScaleAnimation extends Animation {
         }
 
         Description d = Description.parseValue(a.peekValue(
-                com.android.internal.R.styleable.ScaleAnimation_pivotX));
+                com.android.internal.R.styleable.ScaleAnimation_pivotX), context);
         mPivotXType = d.type;
         mPivotXValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-            com.android.internal.R.styleable.ScaleAnimation_pivotY));
+                com.android.internal.R.styleable.ScaleAnimation_pivotY), context);
         mPivotYType = d.type;
         mPivotYValue = d.value;
 

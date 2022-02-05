@@ -258,19 +258,16 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback {
     }
 
     /**
-     * Same as {@link AudioSystem#setDeviceConnectionState(int, int, String, String, int)}
-     * @param device
+     * Same as {@link AudioSystem#setDeviceConnectionState(AudioDeviceAttributes, int, int)}
+     * @param attributes
      * @param state
-     * @param deviceAddress
-     * @param deviceName
      * @param codecFormat
      * @return
      */
-    public int setDeviceConnectionState(int device, int state, String deviceAddress,
-                                        String deviceName, int codecFormat) {
+    public int setDeviceConnectionState(AudioDeviceAttributes attributes, int state,
+            int codecFormat) {
         invalidateRoutingCache();
-        return AudioSystem.setDeviceConnectionState(device, state, deviceAddress, deviceName,
-                codecFormat);
+        return AudioSystem.setDeviceConnectionState(attributes, state, codecFormat);
     }
 
     /**

@@ -421,7 +421,7 @@ public final class AudioDeviceInfo {
      */
     public CharSequence getProductName() {
         String portName = mPort.name();
-        return portName.length() != 0 ? portName : android.os.Build.MODEL;
+        return (portName != null && portName.length() != 0) ? portName : android.os.Build.MODEL;
     }
 
     /**

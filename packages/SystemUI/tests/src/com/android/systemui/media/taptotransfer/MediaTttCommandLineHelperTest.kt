@@ -21,8 +21,6 @@ import android.content.Context
 import android.media.MediaRoute2Info
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.media.taptotransfer.receiver.ChipStateReceiver
-import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver
 import com.android.systemui.media.taptotransfer.sender.AlmostCloseToEndCast
 import com.android.systemui.media.taptotransfer.sender.AlmostCloseToStartCast
 import com.android.systemui.media.taptotransfer.sender.TransferFailed
@@ -62,8 +60,6 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
 
     @Mock
     private lateinit var statusBarManager: StatusBarManager
-    @Mock
-    private lateinit var mediaTttChipControllerReceiver: MediaTttChipControllerReceiver
 
     @Before
     fun setUp() {
@@ -74,7 +70,6 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
                 commandRegistry,
                 context,
                 FakeExecutor(FakeSystemClock()),
-                mediaTttChipControllerReceiver,
             )
     }
 
@@ -86,21 +81,10 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     }
 
     @Test(expected = IllegalStateException::class)
-    fun constructor_addReceiverCommandAlreadyRegistered() {
-        // Since creating the chip controller should automatically register the add command, it
+    fun constructor_receiverCommandAlreadyRegistered() {
+        // Since creating the chip controller should automatically register the receiver command, it
         // should throw when registering it again.
-        commandRegistry.registerCommand(
-            ADD_CHIP_COMMAND_RECEIVER_TAG
-        ) { EmptyCommand() }
-    }
-
-    @Test(expected = IllegalStateException::class)
-    fun constructor_removeReceiverCommandAlreadyRegistered() {
-        // Since creating the chip controller should automatically register the remove command, it
-        // should throw when registering it again.
-        commandRegistry.registerCommand(
-            REMOVE_CHIP_COMMAND_RECEIVER_TAG
-        ) { EmptyCommand() }
+        commandRegistry.registerCommand(RECEIVER_COMMAND) { EmptyCommand() }
     }
 
     @Test
@@ -214,21 +198,30 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
     }
 
     @Test
-    fun receiver_addCommand_chipAdded() {
-        commandRegistry.onShellCommand(pw, arrayOf(ADD_CHIP_COMMAND_RECEIVER_TAG))
+    fun receiver_closeToSender_serviceCallbackCalled() {
+        commandRegistry.onShellCommand(pw, getReceiverCommand(CLOSE_TO_SENDER_STATE))
 
-        verify(mediaTttChipControllerReceiver).displayChip(any(ChipStateReceiver::class.java))
+        verify(statusBarManager).updateMediaTapToTransferReceiverDisplay(
+            eq(StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER),
+            any()
+        )
     }
 
     @Test
-    fun receiver_removeCommand_chipRemoved() {
-        commandRegistry.onShellCommand(pw, arrayOf(REMOVE_CHIP_COMMAND_RECEIVER_TAG))
+    fun receiver_farFromSender_serviceCallbackCalled() {
+        commandRegistry.onShellCommand(pw, getReceiverCommand(FAR_FROM_SENDER_STATE))
 
-        verify(mediaTttChipControllerReceiver).removeChip()
+        verify(statusBarManager).updateMediaTapToTransferReceiverDisplay(
+            eq(StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER),
+            any()
+        )
     }
 
     private fun getSenderCommand(displayState: String): Array<String> =
         arrayOf(SENDER_COMMAND, DEVICE_NAME, displayState)
+
+    private fun getReceiverCommand(displayState: String): Array<String> =
+        arrayOf(RECEIVER_COMMAND, displayState)
 
     class EmptyCommand : Command {
         override fun execute(pw: PrintWriter, args: List<String>) {

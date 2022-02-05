@@ -17,6 +17,7 @@
 package com.android.server.usb;
 
 import android.annotation.NonNull;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.os.RemoteException;
@@ -213,24 +214,25 @@ public final class UsbAlsaDevice {
                 int outputState = (enable && connected) ? 1 : 0;
                 if (outputState != mOutputState) {
                     mOutputState = outputState;
-                    mAudioService.setWiredDeviceConnectionState(device, outputState,
-                                                                alsaCardDeviceString,
-                                                                mDeviceName, TAG);
+                    AudioDeviceAttributes attributes = new AudioDeviceAttributes(device,
+                            alsaCardDeviceString, mDeviceName);
+                    mAudioService.setWiredDeviceConnectionState(attributes, outputState, TAG);
                 }
             }
 
             // Input Device
             if (mHasInput) {
-                int device = mIsInputHeadset ? AudioSystem.DEVICE_IN_USB_HEADSET
+                int device = mIsInputHeadset
+                        ? AudioSystem.DEVICE_IN_USB_HEADSET
                         : AudioSystem.DEVICE_IN_USB_DEVICE;
                 boolean connected = isInputJackConnected();
                 Slog.i(TAG, "INPUT JACK connected: " + connected);
                 int inputState = (enable && connected) ? 1 : 0;
                 if (inputState != mInputState) {
                     mInputState = inputState;
-                    mAudioService.setWiredDeviceConnectionState(
-                            device, inputState, alsaCardDeviceString,
-                            mDeviceName, TAG);
+                    AudioDeviceAttributes attributes = new AudioDeviceAttributes(device,
+                            alsaCardDeviceString, mDeviceName);
+                    mAudioService.setWiredDeviceConnectionState(attributes, inputState, TAG);
                 }
             }
         } catch (RemoteException e) {

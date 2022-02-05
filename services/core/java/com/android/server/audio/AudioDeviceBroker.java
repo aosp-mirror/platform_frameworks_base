@@ -500,12 +500,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
     }
 
-    /*package*/ void setWiredDeviceConnectionState(int type,
-            @AudioService.ConnectionState int state, String address, String name,
-            String caller) {
+    /*package*/ void setWiredDeviceConnectionState(AudioDeviceAttributes attributes,
+            @AudioService.ConnectionState int state, String caller) {
         //TODO move logging here just like in setBluetooth* methods
         synchronized (mDeviceStateLock) {
-            mDeviceInventory.setWiredDeviceConnectionState(type, state, address, name, caller);
+            mDeviceInventory.setWiredDeviceConnectionState(attributes, state, caller);
         }
     }
 
@@ -1013,11 +1012,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
     }
 
-    /*package*/ boolean handleDeviceConnection(boolean connect, int device, String address,
-                                                       String deviceName) {
+    /*package*/ boolean handleDeviceConnection(AudioDeviceAttributes attributes, boolean connect) {
         synchronized (mDeviceStateLock) {
-            return mDeviceInventory.handleDeviceConnection(connect, device, address, deviceName,
-                    false /*for test*/);
+            return mDeviceInventory.handleDeviceConnection(attributes, connect, false /*for test*/);
         }
     }
 

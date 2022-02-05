@@ -42,7 +42,7 @@ public class AccessibilityEventTest {
     // and assertAccessibilityEventCleared
 
     /** The number of properties of the {@link AccessibilityEvent} class. */
-    private static final int A11Y_EVENT_NON_STATIC_FIELD_COUNT = 32;
+    private static final int A11Y_EVENT_NON_STATIC_FIELD_COUNT = 33;
 
     // The number of fields tested in the corresponding CTS AccessibilityRecordTest:
     // assertAccessibilityRecordCleared, fullyPopulateAccessibilityRecord,

@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.dagger;
 
+import static com.android.systemui.util.Utils.useCollapsedMediaInLandscape;
 import static com.android.systemui.util.Utils.useQsMediaPlayer;
 
 import android.content.Context;
@@ -56,6 +57,7 @@ public interface QSFragmentModule {
     String QS_FGS_MANAGER_FOOTER_VIEW = "qs_fgs_manager_footer";
     String QS_SECURITY_FOOTER_VIEW = "qs_security_footer";
     String QS_USING_MEDIA_PLAYER = "qs_using_media_player";
+    String QS_USING_COLLAPSED_LANDSCAPE_MEDIA = "qs_using_collapsed_landscape_media";
 
     /**
      * Provide a context themed using the QS theme
@@ -169,6 +171,13 @@ public interface QSFragmentModule {
     @Named(QS_USING_MEDIA_PLAYER)
     static boolean providesQSUsingMediaPlayer(Context context) {
         return useQsMediaPlayer(context);
+    }
+
+    /** */
+    @Provides
+    @Named(QS_USING_COLLAPSED_LANDSCAPE_MEDIA)
+    static boolean providesQSUsingCollapsedLandscapeMedia(Context context) {
+        return useCollapsedMediaInLandscape(context.getResources());
     }
 
     /** */

@@ -17,11 +17,16 @@
 package android.media.audio.common;
 
 import android.annotation.NonNull;
+import android.media.AudioDescriptor;
+import android.media.AudioDeviceAttributes;
 import android.media.AudioFormat;
+import android.media.AudioSystem;
 import android.media.MediaFormat;
 import android.os.Parcel;
 
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.stream.Collectors;
 
 /**
  * This class provides utility functions for converting between
@@ -523,6 +528,351 @@ public class AidlConversion {
             default:
                 return AudioFormat.ENCODING_INVALID;
         }
+    }
+
+    /**
+     * Convert from SDK AudioDeviceAttributes to AIDL AudioPort.
+     */
+    public static AudioPort api2aidl_AudioDeviceAttributes_AudioPort(
+            @NonNull AudioDeviceAttributes attributes) {
+        AudioPort port = new AudioPort();
+        port.name = attributes.getName();
+        // TO DO: b/211611504 Convert attributes.getAudioProfiles() to AIDL as well.
+        port.profiles = new AudioProfile[]{};
+        port.extraAudioDescriptors = attributes.getAudioDescriptors().stream()
+                .map(descriptor -> api2aidl_AudioDescriptor_ExtraAudioDescriptor(descriptor))
+                .collect(Collectors.toList()).toArray(ExtraAudioDescriptor[]::new);
+        port.flags = new AudioIoFlags();
+        port.gains = new AudioGain[]{};
+        AudioPortDeviceExt deviceExt = new AudioPortDeviceExt();
+        deviceExt.device = new AudioDevice();
+        deviceExt.encodedFormats = new AudioFormatDescription[]{};
+        deviceExt.device.type =
+                api2aidl_NativeType_AudioDeviceDescription(attributes.getInternalType());
+        deviceExt.device.address = AudioDeviceAddress.id(attributes.getAddress());
+        port.ext = AudioPortExt.device(deviceExt);
+        return port;
+    }
+
+    /**
+     * Convert from SDK AudioDescriptor to AIDL ExtraAudioDescriptor.
+     */
+    public static ExtraAudioDescriptor api2aidl_AudioDescriptor_ExtraAudioDescriptor(
+            @NonNull AudioDescriptor descriptor) {
+        ExtraAudioDescriptor extraDescriptor = new ExtraAudioDescriptor();
+        extraDescriptor.standard =
+                api2aidl_AudioDescriptorStandard_AudioStandard(descriptor.getStandard());
+        extraDescriptor.audioDescriptor = descriptor.getDescriptor();
+        extraDescriptor.encapsulationType =
+                api2aidl_AudioProfileEncapsulationType_AudioEncapsulationType(
+                        descriptor.getEncapsulationType());
+        return extraDescriptor;
+    }
+
+    /**
+     * Convert from SDK AudioDescriptor to AIDL ExtraAudioDescriptor.
+     */
+    public static @NonNull AudioDescriptor aidl2api_ExtraAudioDescriptor_AudioDescriptor(
+            @NonNull ExtraAudioDescriptor extraDescriptor) {
+        AudioDescriptor descriptor = new AudioDescriptor(
+                aidl2api_AudioStandard_AudioDescriptorStandard(extraDescriptor.standard),
+                aidl2api_AudioEncapsulationType_AudioProfileEncapsulationType(
+                        extraDescriptor.encapsulationType),
+                extraDescriptor.audioDescriptor);
+        return descriptor;
+    }
+
+    /**
+     * Convert from SDK AudioDescriptor#mStandard to AIDL AudioStandard
+     */
+    @AudioStandard
+    public static int api2aidl_AudioDescriptorStandard_AudioStandard(
+            @AudioDescriptor.AudioDescriptorStandard int standard) {
+        switch (standard) {
+            case AudioDescriptor.STANDARD_EDID:
+                return AudioStandard.EDID;
+            case AudioDescriptor.STANDARD_NONE:
+            default:
+                return AudioStandard.NONE;
+        }
+    }
+
+    /**
+     * Convert from AIDL AudioStandard to SDK AudioDescriptor#mStandard
+     */
+    @AudioDescriptor.AudioDescriptorStandard
+    public static int aidl2api_AudioStandard_AudioDescriptorStandard(@AudioStandard int standard) {
+        switch (standard) {
+            case AudioStandard.EDID:
+                return AudioDescriptor.STANDARD_EDID;
+            case AudioStandard.NONE:
+            default:
+                return AudioDescriptor.STANDARD_NONE;
+        }
+    }
+
+    /**
+     * Convert from SDK AudioProfile.EncapsulationType to AIDL AudioEncapsulationType
+     */
+    @AudioEncapsulationType
+    public static int api2aidl_AudioProfileEncapsulationType_AudioEncapsulationType(
+            @android.media.AudioProfile.EncapsulationType int type) {
+        switch (type) {
+            case android.media.AudioProfile.AUDIO_ENCAPSULATION_TYPE_IEC61937:
+                return AudioEncapsulationType.IEC61937;
+            case android.media.AudioProfile.AUDIO_ENCAPSULATION_TYPE_NONE:
+            default:
+                return AudioEncapsulationType.NONE;
+        }
+    }
+
+    /**
+     * Convert from AIDL AudioEncapsulationType to SDK AudioProfile.EncapsulationType
+     */
+    @android.media.AudioProfile.EncapsulationType
+    public static int aidl2api_AudioEncapsulationType_AudioProfileEncapsulationType(
+            @AudioEncapsulationType int type) {
+        switch (type) {
+            case AudioEncapsulationType.IEC61937:
+                return android.media.AudioProfile.AUDIO_ENCAPSULATION_TYPE_IEC61937;
+            case AudioEncapsulationType.NONE:
+            default:
+                return android.media.AudioProfile.AUDIO_ENCAPSULATION_TYPE_NONE;
+        }
+    }
+
+    /**
+     * Convert from SDK native type to AIDL AudioDeviceDescription
+     */
+    public static AudioDeviceDescription api2aidl_NativeType_AudioDeviceDescription(
+            int nativeType) {
+        AudioDeviceDescription aidl = new AudioDeviceDescription();
+        aidl.connection = "";
+        switch (nativeType) {
+            case AudioSystem.DEVICE_OUT_EARPIECE:
+                aidl.type = AudioDeviceType.OUT_SPEAKER_EARPIECE;
+                break;
+            case AudioSystem.DEVICE_OUT_SPEAKER:
+                aidl.type = AudioDeviceType.OUT_SPEAKER;
+                break;
+            case AudioSystem.DEVICE_OUT_WIRED_HEADPHONE:
+                aidl.type = AudioDeviceType.OUT_HEADPHONE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_ANALOG;
+                break;
+            case AudioSystem.DEVICE_OUT_BLUETOOTH_SCO:
+                aidl.type = AudioDeviceType.OUT_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_BT_SCO;
+                break;
+            case AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_CARKIT:
+                aidl.type = AudioDeviceType.OUT_CARKIT;
+                aidl.connection = AudioDeviceDescription.CONNECTION_BT_SCO;
+                break;
+            case AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES:
+                aidl.type = AudioDeviceType.OUT_HEADPHONE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_BT_A2DP;
+                break;
+            case AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER:
+                aidl.type = AudioDeviceType.OUT_SPEAKER;
+                aidl.connection = AudioDeviceDescription.CONNECTION_BT_A2DP;
+                break;
+            case AudioSystem.DEVICE_OUT_TELEPHONY_TX:
+                aidl.type = AudioDeviceType.OUT_TELEPHONY_TX;
+                break;
+            case AudioSystem.DEVICE_OUT_AUX_LINE:
+                aidl.type = AudioDeviceType.OUT_LINE_AUX;
+                break;
+            case AudioSystem.DEVICE_OUT_SPEAKER_SAFE:
+                aidl.type = AudioDeviceType.OUT_SPEAKER_SAFE;
+                break;
+            case AudioSystem.DEVICE_OUT_HEARING_AID:
+                aidl.type = AudioDeviceType.OUT_HEARING_AID;
+                aidl.connection = AudioDeviceDescription.CONNECTION_WIRELESS;
+                break;
+            case AudioSystem.DEVICE_OUT_ECHO_CANCELLER:
+                aidl.type = AudioDeviceType.OUT_ECHO_CANCELLER;
+                break;
+            case AudioSystem.DEVICE_OUT_BLE_SPEAKER:
+                aidl.type = AudioDeviceType.OUT_SPEAKER;
+                aidl.connection = AudioDeviceDescription.CONNECTION_BT_LE;
+                break;
+            case AudioSystem.DEVICE_IN_BUILTIN_MIC:
+                aidl.type = AudioDeviceType.IN_MICROPHONE;
+                break;
+            case AudioSystem.DEVICE_IN_BACK_MIC:
+                aidl.type = AudioDeviceType.IN_MICROPHONE_BACK;
+                break;
+            case AudioSystem.DEVICE_IN_TELEPHONY_RX:
+                aidl.type = AudioDeviceType.IN_TELEPHONY_RX;
+                break;
+            case AudioSystem.DEVICE_IN_TV_TUNER:
+                aidl.type = AudioDeviceType.IN_TV_TUNER;
+                break;
+            case AudioSystem.DEVICE_IN_LOOPBACK:
+                aidl.type = AudioDeviceType.IN_LOOPBACK;
+                break;
+            case AudioSystem.DEVICE_IN_BLUETOOTH_BLE:
+                aidl.type = AudioDeviceType.IN_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_BT_LE;
+                break;
+            case AudioSystem.DEVICE_IN_ECHO_REFERENCE:
+                aidl.type = AudioDeviceType.IN_ECHO_REFERENCE;
+                break;
+            case AudioSystem.DEVICE_IN_WIRED_HEADSET:
+                aidl.type = AudioDeviceType.IN_HEADSET;
+                aidl.connection = AudioDeviceDescription.CONNECTION_ANALOG;
+                break;
+            case AudioSystem.DEVICE_OUT_WIRED_HEADSET:
+                aidl.type = AudioDeviceType.OUT_HEADSET;
+                aidl.connection = AudioDeviceDescription.CONNECTION_ANALOG;
+                break;
+            case AudioSystem.DEVICE_IN_BLUETOOTH_SCO_HEADSET:
+                aidl.type = AudioDeviceType.IN_HEADSET;
+                aidl.connection = AudioDeviceDescription.CONNECTION_BT_SCO;
+                break;
+            case AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_HEADSET:
+                aidl.type = AudioDeviceType.OUT_HEADSET;
+                aidl.connection = AudioDeviceDescription.CONNECTION_BT_SCO;
+                break;
+            case AudioSystem.DEVICE_IN_HDMI:
+                aidl.type = AudioDeviceType.IN_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_HDMI;
+                break;
+            case AudioSystem.DEVICE_OUT_HDMI:
+                aidl.type = AudioDeviceType.OUT_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_HDMI;
+                break;
+            case AudioSystem.DEVICE_IN_REMOTE_SUBMIX:
+                aidl.type = AudioDeviceType.IN_SUBMIX;
+                break;
+            case AudioSystem.DEVICE_OUT_REMOTE_SUBMIX:
+                aidl.type = AudioDeviceType.OUT_SUBMIX;
+                break;
+            case AudioSystem.DEVICE_IN_ANLG_DOCK_HEADSET:
+                aidl.type = AudioDeviceType.IN_DOCK;
+                aidl.connection = AudioDeviceDescription.CONNECTION_ANALOG;
+                break;
+            case AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET:
+                aidl.type = AudioDeviceType.OUT_DOCK;
+                aidl.connection = AudioDeviceDescription.CONNECTION_ANALOG;
+                break;
+            case AudioSystem.DEVICE_IN_DGTL_DOCK_HEADSET:
+                aidl.type = AudioDeviceType.IN_DOCK;
+                aidl.connection = AudioDeviceDescription.CONNECTION_USB;
+                break;
+            case AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET:
+                aidl.type = AudioDeviceType.OUT_DOCK;
+                aidl.connection = AudioDeviceDescription.CONNECTION_USB;
+                break;
+            case AudioSystem.DEVICE_IN_USB_ACCESSORY:
+                aidl.type = AudioDeviceType.IN_ACCESSORY;
+                aidl.connection = AudioDeviceDescription.CONNECTION_USB;
+                break;
+            case AudioSystem.DEVICE_OUT_USB_ACCESSORY:
+                aidl.type = AudioDeviceType.OUT_ACCESSORY;
+                aidl.connection = AudioDeviceDescription.CONNECTION_USB;
+                break;
+            case AudioSystem.DEVICE_IN_USB_DEVICE:
+                aidl.type = AudioDeviceType.IN_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_USB;
+                break;
+            case AudioSystem.DEVICE_OUT_USB_DEVICE:
+                aidl.type = AudioDeviceType.OUT_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_USB;
+                break;
+            case AudioSystem.DEVICE_IN_FM_TUNER:
+                aidl.type = AudioDeviceType.IN_FM_TUNER;
+                break;
+            case AudioSystem.DEVICE_OUT_FM:
+                aidl.type = AudioDeviceType.OUT_FM;
+                break;
+            case AudioSystem.DEVICE_IN_LINE:
+                aidl.type = AudioDeviceType.IN_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_ANALOG;
+                break;
+            case AudioSystem.DEVICE_OUT_LINE:
+                aidl.type = AudioDeviceType.OUT_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_ANALOG;
+                break;
+            case AudioSystem.DEVICE_IN_SPDIF:
+                aidl.type = AudioDeviceType.IN_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_SPDIF;
+                break;
+            case AudioSystem.DEVICE_OUT_SPDIF:
+                aidl.type = AudioDeviceType.OUT_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_SPDIF;
+                break;
+            case AudioSystem.DEVICE_IN_BLUETOOTH_A2DP:
+                aidl.type = AudioDeviceType.IN_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_BT_A2DP;
+                break;
+            case AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP:
+                aidl.type = AudioDeviceType.OUT_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_BT_A2DP;
+                break;
+            case AudioSystem.DEVICE_IN_IP:
+                aidl.type = AudioDeviceType.IN_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_IP_V4;
+                break;
+            case AudioSystem.DEVICE_OUT_IP:
+                aidl.type = AudioDeviceType.OUT_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_IP_V4;
+                break;
+            case AudioSystem.DEVICE_IN_BUS:
+                aidl.type = AudioDeviceType.IN_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_BUS;
+                break;
+            case AudioSystem.DEVICE_OUT_BUS:
+                aidl.type = AudioDeviceType.OUT_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_BUS;
+                break;
+            case AudioSystem.DEVICE_IN_PROXY:
+                aidl.type = AudioDeviceType.IN_AFE_PROXY;
+                break;
+            case AudioSystem.DEVICE_OUT_PROXY:
+                aidl.type = AudioDeviceType.OUT_AFE_PROXY;
+                break;
+            case AudioSystem.DEVICE_IN_USB_HEADSET:
+                aidl.type = AudioDeviceType.IN_HEADSET;
+                aidl.connection = AudioDeviceDescription.CONNECTION_USB;
+                break;
+            case AudioSystem.DEVICE_OUT_USB_HEADSET:
+                aidl.type = AudioDeviceType.OUT_HEADSET;
+                aidl.connection = AudioDeviceDescription.CONNECTION_USB;
+                break;
+            case AudioSystem.DEVICE_IN_HDMI_ARC:
+                aidl.type = AudioDeviceType.IN_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_HDMI_ARC;
+                break;
+            case AudioSystem.DEVICE_OUT_HDMI_ARC:
+                aidl.type = AudioDeviceType.OUT_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_HDMI_ARC;
+                break;
+            case AudioSystem.DEVICE_IN_HDMI_EARC:
+                aidl.type = AudioDeviceType.IN_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_HDMI_EARC;
+                break;
+            case AudioSystem.DEVICE_OUT_HDMI_EARC:
+                aidl.type = AudioDeviceType.OUT_DEVICE;
+                aidl.connection = AudioDeviceDescription.CONNECTION_HDMI_EARC;
+                break;
+            case AudioSystem.DEVICE_IN_BLE_HEADSET:
+                aidl.type = AudioDeviceType.IN_HEADSET;
+                aidl.connection = AudioDeviceDescription.CONNECTION_BT_LE;
+                break;
+            case AudioSystem.DEVICE_OUT_BLE_HEADSET:
+                aidl.type = AudioDeviceType.OUT_HEADSET;
+                aidl.connection = AudioDeviceDescription.CONNECTION_BT_LE;
+                break;
+            case AudioSystem.DEVICE_IN_DEFAULT:
+                aidl.type = AudioDeviceType.IN_DEFAULT;
+                break;
+            case AudioSystem.DEVICE_OUT_DEFAULT:
+                aidl.type = AudioDeviceType.OUT_DEFAULT;
+                break;
+            default:
+                aidl.type = AudioDeviceType.NONE;
+        }
+        return aidl;
     }
 
     private static native int aidl2legacy_AudioChannelLayout_Parcel_audio_channel_mask_t(

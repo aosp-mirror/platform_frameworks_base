@@ -6953,10 +6953,10 @@
     </declare-styleable>
 
     <declare-styleable name="TranslateAnimation">
-        <attr name="fromXDelta" format="float|fraction" />
-        <attr name="toXDelta" format="float|fraction" />
-        <attr name="fromYDelta" format="float|fraction" />
-        <attr name="toYDelta" format="float|fraction" />
+        <attr name="fromXDelta" format="float|fraction|dimension" />
+        <attr name="toXDelta" format="float|fraction|dimension" />
+        <attr name="fromYDelta" format="float|fraction|dimension" />
+        <attr name="toYDelta" format="float|fraction|dimension" />
     </declare-styleable>
 
     <declare-styleable name="AlphaAnimation">

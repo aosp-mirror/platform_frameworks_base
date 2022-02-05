@@ -32,14 +32,20 @@ import java.util.ArrayList;
  *
  * Also handles multiplexing of event dispatch and tracking of overlays
  * to make things easier for WindowContainer.
+ *
+ * These overlays are to be used for various types of System UI and UI
+ * under the systems control. Provided SurfacePackages will be able
+ * to overlay application content, without engaging the usual cross process
+ * obscured touch filtering mechanisms. It's imperative that all UI provided
+ * be under complete control of the system.
  */
-class OverlayHost {
+class TrustedOverlayHost {
     // Lazily initialized when required
     SurfaceControl mSurfaceControl;
     final ArrayList<SurfaceControlViewHost.SurfacePackage> mOverlays = new ArrayList<>();
     final WindowManagerService mWmService;
 
-    OverlayHost(WindowManagerService wms) {
+    TrustedOverlayHost(WindowManagerService wms) {
         mWmService = wms;
     }
 
@@ -51,6 +57,8 @@ class OverlayHost {
                 .setName("Overlay Host Leash");
 
             mSurfaceControl = b.build();
+            SurfaceControl.Transaction t = mWmService.mTransactionFactory.get();
+            t.setTrustedOverlay(mSurfaceControl, true).apply();
         }
     }
 

@@ -58,6 +58,10 @@ import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_
 import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_DELETED_GENERIC_MESSAGE;
 import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_DELETED_ORG_OWNED_MESSAGE;
 import static android.app.admin.DevicePolicyResources.Strings.Core.WORK_PROFILE_DELETED_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Dialer.NOTIFICATION_INCOMING_WORK_CALL_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Dialer.NOTIFICATION_MISSED_WORK_CALL_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Dialer.NOTIFICATION_ONGOING_WORK_CALL_TITLE;
+import static android.app.admin.DevicePolicyResources.Strings.Dialer.NOTIFICATION_WIFI_WORK_CALL_LABEL;
 import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.CANT_SAVE_TO_PERSONAL_MESSAGE;
 import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.CANT_SAVE_TO_PERSONAL_TITLE;
 import static android.app.admin.DevicePolicyResources.Strings.DocumentsUi.CANT_SAVE_TO_WORK_MESSAGE;
@@ -512,7 +516,11 @@ public final class DevicePolicyResources {
             WORK_PROFILE_DEFAULT_APPS_TITLE, HOME_MISSING_WORK_PROFILE_SUPPORT_MESSAGE,
             BACKGROUND_ACCESS_DISABLED_BY_ADMIN_MESSAGE, BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE,
             BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE, FOREGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE,
-            LOCATION_AUTO_GRANTED_MESSAGE
+            LOCATION_AUTO_GRANTED_MESSAGE,
+
+            // Dialer Strings
+            NOTIFICATION_INCOMING_WORK_CALL_TITLE, NOTIFICATION_ONGOING_WORK_CALL_TITLE,
+            NOTIFICATION_MISSED_WORK_CALL_TITLE, NOTIFICATION_WIFI_WORK_CALL_LABEL,
     })
     public @interface UpdatableStringId {
     }
@@ -709,6 +717,7 @@ public final class DevicePolicyResources {
             strings.addAll(DocumentsUi.buildStringsSet());
             strings.addAll(MediaProvider.buildStringsSet());
             strings.addAll(PermissionController.buildStringsSet());
+            strings.addAll(Dialer.buildStringsSet());
             return strings;
         }
 
@@ -2931,6 +2940,55 @@ public final class DevicePolicyResources {
                 strings.add(BACKGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE);
                 strings.add(FOREGROUND_ACCESS_ENABLED_BY_ADMIN_MESSAGE);
                 strings.add(LOCATION_AUTO_GRANTED_MESSAGE);
+                return strings;
+            }
+        }
+
+        /**
+         * Class containing the identifiers used to update device management-related system strings
+         * in the Dialer app.
+         */
+        public static final class Dialer {
+
+            private Dialer() {
+            }
+
+            private static final String PREFIX = "Dialer.";
+
+            /**
+             * The title of the in-call notification for an incoming work call.
+             */
+            public static final String NOTIFICATION_INCOMING_WORK_CALL_TITLE =
+                    PREFIX + "NOTIFICATION_INCOMING_WORK_CALL_TITLE";
+
+            /**
+             * The title of the in-call notification for an ongoing work call.
+             */
+            public static final String NOTIFICATION_ONGOING_WORK_CALL_TITLE =
+                    PREFIX + "NOTIFICATION_ONGOING_WORK_CALL_TITLE";
+
+            /**
+             * Missed call notification label, used when there's exactly one missed call from work
+             * contact.
+             */
+            public static final String NOTIFICATION_MISSED_WORK_CALL_TITLE =
+                    PREFIX + "NOTIFICATION_MISSED_WORK_CALL_TITLE";
+
+            /**
+             * Label for notification indicating that call is being made over wifi.
+             */
+            public static final String NOTIFICATION_WIFI_WORK_CALL_LABEL =
+                    PREFIX + "NOTIFICATION_WIFI_WORK_CALL_LABEL";
+
+            /**
+             * @hide
+             */
+            static Set<String> buildStringsSet() {
+                Set<String> strings = new HashSet<>();
+                strings.add(NOTIFICATION_INCOMING_WORK_CALL_TITLE);
+                strings.add(NOTIFICATION_ONGOING_WORK_CALL_TITLE);
+                strings.add(NOTIFICATION_MISSED_WORK_CALL_TITLE);
+                strings.add(NOTIFICATION_WIFI_WORK_CALL_LABEL);
                 return strings;
             }
         }

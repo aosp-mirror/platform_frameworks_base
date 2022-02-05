@@ -8066,7 +8066,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             // Load the component aliases.
             t.traceBegin("componentAlias");
-            mComponentAliasResolver.onSystemReady(mConstants.mComponentAliasOverrides);
+            mComponentAliasResolver.onSystemReady(mConstants.mEnableComponentAlias,
+                    mConstants.mComponentAliasOverrides);
             t.traceEnd(); // componentAlias
 
             t.traceEnd(); // PhaseActivityManagerReady

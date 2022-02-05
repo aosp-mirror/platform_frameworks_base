@@ -5874,7 +5874,7 @@ public class AudioManager {
         return false;
     }
 
-     /**
+    /**
      * Indicate wired accessory connection state change.
      * @param device type of device connected/disconnected (AudioManager.DEVICE_OUT_xxx)
      * @param state  new connection state: 1 connected, 0 disconnected
@@ -5883,10 +5883,29 @@ public class AudioManager {
      */
     @UnsupportedAppUsage
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
-    public void setWiredDeviceConnectionState(int type, int state, String address, String name) {
+    public void setWiredDeviceConnectionState(int device, int state, String address,
+            String name) {
+        final IAudioService service = getService();
+        int role = isOutputDevice(device)
+                ? AudioDeviceAttributes.ROLE_OUTPUT : AudioDeviceAttributes.ROLE_INPUT;
+        AudioDeviceAttributes attributes = new AudioDeviceAttributes(
+                role, AudioDeviceInfo.convertInternalDeviceToDeviceType(device), address,
+                name, new ArrayList<>()/*mAudioProfiles*/, new ArrayList<>()/*mAudioDescriptors*/);
+        setWiredDeviceConnectionState(attributes, state);
+    }
+
+    /**
+     * Indicate wired accessory connection state change and attributes.
+     * @param state      new connection state: 1 connected, 0 disconnected
+     * @param attributes attributes of the connected device
+     * {@hide}
+     */
+    @UnsupportedAppUsage
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void setWiredDeviceConnectionState(AudioDeviceAttributes attributes, int state) {
         final IAudioService service = getService();
         try {
-            service.setWiredDeviceConnectionState(type, state, address, name,
+            service.setWiredDeviceConnectionState(attributes, state,
                     mApplicationContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

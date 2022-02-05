@@ -484,7 +484,9 @@ public class BootReceiver extends BroadcastReceiver {
         HashMap<String, Long> timestamps = readTimestamps();
         try {
             if (proto) {
-                db.addFile(TAG_TOMBSTONE_PROTO, tombstone, 0);
+                if (recordFileTimestamp(tombstone, timestamps)) {
+                    db.addFile(TAG_TOMBSTONE_PROTO, tombstone, 0);
+                }
             } else {
                 final String headers = getBootHeadersToLogAndUpdate();
                 addFileToDropBox(db, timestamps, headers, tombstone.getPath(), LOG_SIZE,
@@ -526,15 +528,9 @@ public class BootReceiver extends BroadcastReceiver {
         if (db == null || !db.isTagEnabled(tag)) return;  // Logging disabled
 
         File file = new File(filename);
-        long fileTime = file.lastModified();
-        if (fileTime <= 0) return;  // File does not exist
-
-        if (timestamps.containsKey(filename) && timestamps.get(filename) == fileTime) {
-            return;  // Already logged this particular file
+        if (!recordFileTimestamp(file, timestamps)) {
+            return;
         }
-
-        timestamps.put(filename, fileTime);
-
 
         String fileContents = FileUtils.readTextFile(file, maxSize, TAG_TRUNCATED);
         String text = headers + fileContents + footers;
@@ -546,6 +542,19 @@ public class BootReceiver extends BroadcastReceiver {
             FrameworkStatsLog.write(FrameworkStatsLog.TOMB_STONE_OCCURRED);
         }
         addTextToDropBox(db, tag, text, filename, maxSize);
+    }
+
+    private static boolean recordFileTimestamp(File file, HashMap<String, Long> timestamps) {
+        final long fileTime = file.lastModified();
+        if (fileTime <= 0) return false;  // File does not exist
+
+        final String filename = file.getPath();
+        if (timestamps.containsKey(filename) && timestamps.get(filename) == fileTime) {
+            return false;  // Already logged this particular file
+        }
+
+        timestamps.put(filename, fileTime);
+        return true;
     }
 
     private static void addTextToDropBox(DropBoxManager db, String tag, String text,

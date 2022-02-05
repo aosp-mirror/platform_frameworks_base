@@ -115,12 +115,14 @@ public interface MediaModule {
     @SysUISingleton
     static Optional<MediaTttChipControllerReceiver> providesMediaTttChipControllerReceiver(
             MediaTttFlags mediaTttFlags,
+            CommandQueue commandQueue,
             Context context,
             WindowManager windowManager) {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
         }
-        return Optional.of(new MediaTttChipControllerReceiver(context, windowManager));
+        return Optional.of(
+                new MediaTttChipControllerReceiver(commandQueue, context, windowManager));
     }
 
     /** */
@@ -130,17 +132,12 @@ public interface MediaModule {
             MediaTttFlags mediaTttFlags,
             CommandRegistry commandRegistry,
             Context context,
-            @Main Executor mainExecutor,
-            MediaTttChipControllerReceiver mediaTttChipControllerReceiver) {
+            @Main Executor mainExecutor) {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
         }
         return Optional.of(
-                new MediaTttCommandLineHelper(
-                        commandRegistry,
-                        context,
-                        mainExecutor,
-                        mediaTttChipControllerReceiver));
+                new MediaTttCommandLineHelper(commandRegistry, context, mainExecutor));
     }
 
     /** Inject into NearbyMediaDevicesService. */

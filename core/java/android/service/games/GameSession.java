@@ -20,15 +20,23 @@ import android.annotation.Hide;
 import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.app.ActivityTaskManager;
+import android.app.Instrumentation;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
@@ -41,6 +49,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -120,6 +129,7 @@ public abstract class GameSession {
     private LifecycleState mLifecycleState = LifecycleState.INITIALIZED;
     private boolean mAreTransientInsetsVisibleDueToGesture = false;
     private IGameSessionController mGameSessionController;
+    private Context mContext;
     private int mTaskId;
     private GameSessionRootView mGameSessionRootView;
     private SurfaceControlViewHost mSurfaceControlViewHost;
@@ -137,6 +147,7 @@ public abstract class GameSession {
             int heightPx) {
         mGameSessionController = gameSessionController;
         mTaskId = taskId;
+        mContext = context;
         mSurfaceControlViewHost = surfaceControlViewHost;
         mGameSessionRootView = new GameSessionRootView(context, mSurfaceControlViewHost);
         surfaceControlViewHost.setView(mGameSessionRootView, widthPx, heightPx);
@@ -299,6 +310,8 @@ public abstract class GameSession {
      * {@code View} may not be cleared once set, but may be replaced by invoking
      * {@link #setTaskOverlayView(View, ViewGroup.LayoutParams)} again.
      *
+     * <p><b>WARNING</b>: Callers <b>must</b> ensure that only trusted views are provided.
+     *
      * @param view         The desired content to display.
      * @param layoutParams Layout parameters for the view.
      */
@@ -454,6 +467,69 @@ public abstract class GameSession {
                 callback.onFailure(
                         ScreenshotCallback.ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR);
                 break;
+        }
+    }
+
+    /**
+     * Launches an activity within the same activity stack as the {@link GameSession}. When the
+     * target activity exits, {@link GameSessionActivityCallback#onActivityResult(int, Intent)} will
+     * be invoked with the result code and result data directly from the target activity (in other
+     * words, the result code and data set via the target activity's
+     * {@link android.app.Activity#startActivityForResult} call). The caller is expected to handle
+     * the results that the target activity returns.
+     *
+     * <p>Any activity that an app would normally be able to start via {@link
+     * android.app.Activity#startActivityForResult} will be startable via this method.
+     *
+     * <p>Started activities may see a different calling package than the game session's package
+     * when calling {@link android.app.Activity#getCallingPackage()}.
+     *
+     * <p> If an exception is thrown while handling {@code intent},
+     * {@link GameSessionActivityCallback#onActivityStartFailed(Throwable)} will be called instead
+     * of {@link GameSessionActivityCallback#onActivityResult(int, Intent)}.
+     *
+     * @param intent   The intent to start.
+     * @param options  Additional options for how the Activity should be started. See
+     *                 {@link android.app.Activity#startActivityForResult(Intent, int, Bundle)} for
+     *                 more details. This value may be null.
+     * @param executor Executor on which {@code callback} should be invoked.
+     * @param callback Callback to be invoked once the started activity has finished.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_GAME_ACTIVITY)
+    public final void startActivityFromGameSessionForResult(
+            @NonNull Intent intent, @Nullable Bundle options, @NonNull Executor executor,
+            @NonNull GameSessionActivityCallback callback) {
+        Objects.requireNonNull(intent);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+
+        AndroidFuture<GameSessionActivityResult> future =
+                new AndroidFuture<GameSessionActivityResult>()
+                        .whenCompleteAsync((result, ex) -> {
+                            if (ex != null) {
+                                callback.onActivityStartFailed(ex);
+                                return;
+                            }
+                            callback.onActivityResult(result.getResultCode(), result.getData());
+                        }, executor);
+
+        final Intent trampolineIntent = new Intent();
+        trampolineIntent.setComponent(
+                new ComponentName(
+                        "android", "android.service.games.GameSessionTrampolineActivity"));
+        trampolineIntent.putExtra(GameSessionTrampolineActivity.INTENT_KEY, intent);
+        trampolineIntent.putExtra(GameSessionTrampolineActivity.OPTIONS_KEY, options);
+        trampolineIntent.putExtra(
+                GameSessionTrampolineActivity.FUTURE_KEY, future);
+
+        try {
+            int result = ActivityTaskManager.getService().startActivityFromGameSession(
+                    mContext.getIApplicationThread(), mContext.getPackageName(), "GameSession",
+                    Binder.getCallingPid(), Binder.getCallingUid(), trampolineIntent, mTaskId,
+                    UserHandle.myUserId());
+            Instrumentation.checkStartActivityResult(result, trampolineIntent);
+        } catch (Throwable t) {
+            executor.execute(() -> callback.onActivityStartFailed(t));
         }
     }
 }

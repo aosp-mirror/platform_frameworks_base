@@ -1195,6 +1195,13 @@ public class NotificationStackScrollLayoutController {
         mView.setUnlockHintRunning(running);
     }
 
+    /**
+     * @param isFlinging Whether we are flinging the shade open or close.
+     */
+    public void setIsFlinging(boolean isFlinging) {
+        mView.setIsFlinging(isFlinging);
+    }
+
     public boolean isFooterViewNotGone() {
         return mView.isFooterViewNotGone();
     }

@@ -314,7 +314,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     private final List<WindowContainerListener> mListeners = new ArrayList<>();
 
-    protected OverlayHost mOverlayHost;
+    protected TrustedOverlayHost mOverlayHost;
 
     WindowContainer(WindowManagerService wms) {
         mWmService = wms;
@@ -3600,9 +3600,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 @AnimationType int type, @Nullable AnimationAdapter snapshotAnim);
     }
 
-    void addOverlay(SurfaceControlViewHost.SurfacePackage overlay) {
+    void addTrustedOverlay(SurfaceControlViewHost.SurfacePackage overlay) {
         if (mOverlayHost == null) {
-            mOverlayHost = new OverlayHost(mWmService);
+            mOverlayHost = new TrustedOverlayHost(mWmService);
         }
         mOverlayHost.addOverlay(overlay, mSurfaceControl);
 
@@ -3613,11 +3613,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             overlay.getRemoteInterface().onConfigurationChanged(getConfiguration());
         } catch (Exception e) {
             Slog.e(TAG, "Error sending initial configuration change to WindowContainer overlay");
-            removeOverlay(overlay);
+            removeTrustedOverlay(overlay);
         }
     }
 
-    void removeOverlay(SurfaceControlViewHost.SurfacePackage overlay) {
+    void removeTrustedOverlay(SurfaceControlViewHost.SurfacePackage overlay) {
         if (mOverlayHost != null && !mOverlayHost.removeOverlay(overlay)) {
             mOverlayHost.release();
             mOverlayHost = null;

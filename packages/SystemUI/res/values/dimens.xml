@@ -990,6 +990,8 @@
     <!-- Sizes for alternate session-based layout -->
     <dimen name="qs_media_session_enabled_seekbar_vertical_padding">15dp</dimen>
     <dimen name="qs_media_session_disabled_seekbar_vertical_padding">16dp</dimen>
+    <dimen name="qs_media_session_height_expanded">184dp</dimen>
+    <dimen name="qs_media_session_height_collapsed">128dp</dimen>
 
     <!-- Size of Smartspace media recommendations cards in the QSPanel carousel -->
     <dimen name="qs_aa_media_rec_album_size_collapsed">72dp</dimen>
