@@ -66,7 +66,7 @@
     <string name="wifi_debugging_title" msgid="7300007687492186076">"اشکال‌زدایی بی‌سیم در این شبکه مجاز شود؟"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"‏نام شبکه (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nنشانی Wi‑Fi (BSSID)‎\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"همیشه در این شبکه مجاز شود"</string>
-    <string name="wifi_debugging_allow" msgid="4573224609684957886">"مجاز بودن"</string>
+    <string name="wifi_debugging_allow" msgid="4573224609684957886">"مجاز است"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"اشکال‌زدایی بی‌سیم مجاز نیست"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"کاربری که درحال‌حاضر در این دستگاه به سیستم وارد شده است نمی‌تواند اشکال‌زدایی بی‌سیم را روشن کند. برای استفاده از این ویژگی، به کاربر اصلی بروید."</string>
     <string name="usb_contaminant_title" msgid="894052515034594113">"‏درگاه USB غیرفعال شده است"</string>
@@ -775,7 +775,7 @@
     <string name="feedback_ok" msgid="6481426753298857144">"تأیید"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"کنترل‌های اعلان برای <xliff:g id="APP_NAME">%1$s</xliff:g> باز شد"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"کنترل‌های اعلان برای <xliff:g id="APP_NAME">%1$s</xliff:g> بسته شد"</string>
-    <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"مجاز بودن اعلان‌های این کانال"</string>
+    <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"اعلان‌ها این کانال مجاز است"</string>
     <string name="notification_more_settings" msgid="4936228656989201793">"تنظیمات بیشتر"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"سفارشی کردن"</string>
     <string name="notification_done" msgid="6215117625922713976">"تمام"</string>
