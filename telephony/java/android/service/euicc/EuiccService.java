@@ -257,6 +257,13 @@ public abstract class EuiccService extends Service {
             "android.service.euicc.extra.RESOLUTION_CARD_ID";
 
     /**
+     * Intent extra set for resolution requests containing an int indicating the subscription id
+     * to be enabled.
+     */
+    public static final String EXTRA_RESOLUTION_SUBSCRIPTION_ID =
+            "android.service.euicc.extra.RESOLUTION_SUBSCRIPTION_ID";
+
+    /**
      * Intent extra set for resolution requests containing an int indicating the current port index.
      */
     public static final String EXTRA_RESOLUTION_PORT_INDEX =
