@@ -76,4 +76,10 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"የካሜራ ችግሮች አሉ?\nዳግም ለማበጀት መታ ያድርጉ"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"አልተስተካከለም?\nለማህደር መታ ያድርጉ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"ምንም የካሜራ ችግሮች የሉም? ለማሰናበት መታ ያድርጉ።"</string>
+    <string name="letterbox_education_dialog_title" msgid="3924745395335329810">"ከ<xliff:g id="APP_NAME">%s</xliff:g> ማግኘት የሚችሉትን ያግኙ"</string>
+    <string name="letterbox_education_screen_rotation_portrait_text" msgid="9005616635100891260">"የቁመት አቀማመጥ ለማድረግ ማያ ገጽዎን ያሽከርክሩት"</string>
+    <string name="letterbox_education_screen_rotation_landscape_text" msgid="7619609293250631225">"የአግድም አቀማመጥ ለማድረግ ማያ ገጽዎን ያሽከርክሩት"</string>
+    <string name="letterbox_education_split_screen_text" msgid="3906978051324735033">"የተከፈለ ማያ ገጽ ለመጠቀም ሌላ መተግበሪያ ይጎትቱ"</string>
+    <string name="letterbox_education_reposition_text" msgid="8597800472592539168">"ቦታ ለመቀየር ሁለቴ መታ ያድርጉ"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"ገባኝ"</string>
 </resources>
