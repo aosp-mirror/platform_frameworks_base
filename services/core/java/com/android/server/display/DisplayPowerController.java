@@ -237,42 +237,42 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     // True if we should fade the screen while turning it off, false if we should play
     // a stylish color fade animation instead.
-    private boolean mColorFadeFadesConfig;
+    private final boolean mColorFadeFadesConfig;
 
     // True if we need to fake a transition to off when coming out of a doze state.
     // Some display hardware will blank itself when coming out of doze in order to hide
     // artifacts. For these displays we fake a transition into OFF so that policy can appropriately
     // blank itself and begin an appropriate power on animation.
-    private boolean mDisplayBlanksAfterDozeConfig;
+    private final boolean mDisplayBlanksAfterDozeConfig;
 
     // True if there are only buckets of brightness values when the display is in the doze state,
     // rather than a full range of values. If this is true, then we'll avoid animating the screen
     // brightness since it'd likely be multiple jarring brightness transitions instead of just one
     // to reach the final state.
-    private boolean mBrightnessBucketsInDozeConfig;
+    private final boolean mBrightnessBucketsInDozeConfig;
 
     // The pending power request.
     // Initially null until the first call to requestPowerState.
-    // Guarded by mLock.
+    @GuardedBy("mLock")
     private DisplayPowerRequest mPendingRequestLocked;
 
     // True if a request has been made to wait for the proximity sensor to go negative.
-    // Guarded by mLock.
+    @GuardedBy("mLock")
     private boolean mPendingWaitForNegativeProximityLocked;
 
     // True if the pending power request or wait for negative proximity flag
     // has been changed since the last update occurred.
-    // Guarded by mLock.
+    @GuardedBy("mLock")
     private boolean mPendingRequestChangedLocked;
 
     // Set to true when the important parts of the pending power request have been applied.
     // The important parts are mainly the screen state.  Brightness changes may occur
     // concurrently.
-    // Guarded by mLock.
+    @GuardedBy("mLock")
     private boolean mDisplayReadyLocked;
 
     // Set to true if a power state update is required.
-    // Guarded by mLock.
+    @GuardedBy("mLock")
     private boolean mPendingUpdatePowerStateLocked;
 
     /* The following state must only be accessed by the handler thread. */
@@ -353,8 +353,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     // information.
     // At the time of this writing, this value is changed within updatePowerState() only, which is
     // limited to the thread used by DisplayControllerHandler.
-    private BrightnessReason mBrightnessReason = new BrightnessReason();
-    private BrightnessReason mBrightnessReasonTemp = new BrightnessReason();
+    private final BrightnessReason mBrightnessReason = new BrightnessReason();
+    private final BrightnessReason mBrightnessReasonTemp = new BrightnessReason();
 
     // Brightness animation ramp rates in brightness units per second
     private float mBrightnessRampRateFastDecrease;
@@ -850,6 +850,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
+    @GuardedBy("mLock")
     private void sendUpdatePowerStateLocked() {
         if (!mStopped && !mPendingUpdatePowerStateLocked) {
             mPendingUpdatePowerStateLocked = true;
@@ -2319,6 +2320,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         return mAutomaticBrightnessController.convertToNits(brightness);
     }
 
+    @GuardedBy("mLock")
     private void updatePendingProximityRequestsLocked() {
         mWaitingForNegativeProximity |= mPendingWaitForNegativeProximityLocked;
         mPendingWaitForNegativeProximityLocked = false;
@@ -2422,12 +2424,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         pw.println("  mDisplayBlanksAfterDozeConfig=" + mDisplayBlanksAfterDozeConfig);
         pw.println("  mBrightnessBucketsInDozeConfig=" + mBrightnessBucketsInDozeConfig);
 
-        mHandler.runWithScissors(new Runnable() {
-            @Override
-            public void run() {
-                dumpLocal(pw);
-            }
-        }, 1000);
+        mHandler.runWithScissors(() -> dumpLocal(pw), 1000);
     }
 
     private void dumpLocal(PrintWriter pw) {
@@ -2459,6 +2456,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         pw.println("  mAppliedThrottling=" + mAppliedThrottling);
         pw.println("  mAppliedScreenBrightnessOverride=" + mAppliedScreenBrightnessOverride);
         pw.println("  mAppliedTemporaryBrightness=" + mAppliedTemporaryBrightness);
+        pw.println("  mAppliedTemporaryAutoBrightnessAdjustment="
+                + mAppliedTemporaryAutoBrightnessAdjustment);
+        pw.println("  mAppliedBrightnessBoost=" + mAppliedBrightnessBoost);
         pw.println("  mDozing=" + mDozing);
         pw.println("  mSkipRampState=" + skipRampStateToString(mSkipRampState));
         pw.println("  mScreenOnBlockStartRealTime=" + mScreenOnBlockStartRealTime);
@@ -2466,21 +2466,21 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         pw.println("  mPendingScreenOnUnblocker=" + mPendingScreenOnUnblocker);
         pw.println("  mPendingScreenOffUnblocker=" + mPendingScreenOffUnblocker);
         pw.println("  mPendingScreenOff=" + mPendingScreenOff);
-        pw.println("  mReportedToPolicy=" +
-                reportedToPolicyToString(mReportedScreenStateToPolicy));
+        pw.println("  mReportedToPolicy="
+                + reportedToPolicyToString(mReportedScreenStateToPolicy));
 
         if (mScreenBrightnessRampAnimator != null) {
-            pw.println("  mScreenBrightnessRampAnimator.isAnimating()=" +
-                    mScreenBrightnessRampAnimator.isAnimating());
+            pw.println("  mScreenBrightnessRampAnimator.isAnimating()="
+                    + mScreenBrightnessRampAnimator.isAnimating());
         }
 
         if (mColorFadeOnAnimator != null) {
-            pw.println("  mColorFadeOnAnimator.isStarted()=" +
-                    mColorFadeOnAnimator.isStarted());
+            pw.println("  mColorFadeOnAnimator.isStarted()="
+                    + mColorFadeOnAnimator.isStarted());
         }
         if (mColorFadeOffAnimator != null) {
-            pw.println("  mColorFadeOffAnimator.isStarted()=" +
-                    mColorFadeOffAnimator.isStarted());
+            pw.println("  mColorFadeOffAnimator.isStarted()="
+                    + mColorFadeOffAnimator.isStarted());
         }
 
         if (mPowerState != null) {
@@ -2606,7 +2606,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
-    private final void logHbmBrightnessStats(float brightness, int displayStatsId) {
+    private void logHbmBrightnessStats(float brightness, int displayStatsId) {
         synchronized (mHandler) {
             FrameworkStatsLog.write(
                     FrameworkStatsLog.DISPLAY_HBM_BRIGHTNESS_CHANGED, displayStatsId, brightness);
