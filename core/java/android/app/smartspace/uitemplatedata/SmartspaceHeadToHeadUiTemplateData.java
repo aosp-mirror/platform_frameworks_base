@@ -22,7 +22,6 @@ import android.annotation.SystemApi;
 import android.app.smartspace.SmartspaceTarget;
 import android.app.smartspace.SmartspaceUtils;
 import android.os.Parcel;
-import android.text.TextUtils;
 
 import java.util.Objects;
 
@@ -35,15 +34,15 @@ import java.util.Objects;
 public final class SmartspaceHeadToHeadUiTemplateData extends SmartspaceDefaultUiTemplateData {
 
     @Nullable
-    private final CharSequence mHeadToHeadTitle;
+    private final SmartspaceText mHeadToHeadTitle;
     @Nullable
     private final SmartspaceIcon mHeadToHeadFirstCompetitorIcon;
     @Nullable
     private final SmartspaceIcon mHeadToHeadSecondCompetitorIcon;
     @Nullable
-    private final CharSequence mHeadToHeadFirstCompetitorText;
+    private final SmartspaceText mHeadToHeadFirstCompetitorText;
     @Nullable
-    private final CharSequence mHeadToHeadSecondCompetitorText;
+    private final SmartspaceText mHeadToHeadSecondCompetitorText;
 
     /** Tap action for the head-to-head secondary card. */
     @Nullable
@@ -51,29 +50,29 @@ public final class SmartspaceHeadToHeadUiTemplateData extends SmartspaceDefaultU
 
     SmartspaceHeadToHeadUiTemplateData(@NonNull Parcel in) {
         super(in);
-        mHeadToHeadTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mHeadToHeadTitle = in.readTypedObject(SmartspaceText.CREATOR);
         mHeadToHeadFirstCompetitorIcon = in.readTypedObject(SmartspaceIcon.CREATOR);
         mHeadToHeadSecondCompetitorIcon = in.readTypedObject(SmartspaceIcon.CREATOR);
-        mHeadToHeadFirstCompetitorText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-        mHeadToHeadSecondCompetitorText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mHeadToHeadFirstCompetitorText = in.readTypedObject(SmartspaceText.CREATOR);
+        mHeadToHeadSecondCompetitorText = in.readTypedObject(SmartspaceText.CREATOR);
         mHeadToHeadAction = in.readTypedObject(SmartspaceTapAction.CREATOR);
     }
 
     private SmartspaceHeadToHeadUiTemplateData(@SmartspaceTarget.UiTemplateType int templateType,
-            @Nullable CharSequence titleText,
+            @Nullable SmartspaceText titleText,
             @Nullable SmartspaceIcon titleIcon,
-            @Nullable CharSequence subtitleText,
+            @Nullable SmartspaceText subtitleText,
             @Nullable SmartspaceIcon subTitleIcon,
             @Nullable SmartspaceTapAction primaryTapAction,
-            @Nullable CharSequence supplementalSubtitleText,
+            @Nullable SmartspaceText supplementalSubtitleText,
             @Nullable SmartspaceIcon supplementalSubtitleIcon,
             @Nullable SmartspaceTapAction supplementalSubtitleTapAction,
-            @Nullable CharSequence supplementalAlarmText,
-            @Nullable CharSequence headToHeadTitle,
+            @Nullable SmartspaceText supplementalAlarmText,
+            @Nullable SmartspaceText headToHeadTitle,
             @Nullable SmartspaceIcon headToHeadFirstCompetitorIcon,
             @Nullable SmartspaceIcon headToHeadSecondCompetitorIcon,
-            @Nullable CharSequence headToHeadFirstCompetitorText,
-            @Nullable CharSequence headToHeadSecondCompetitorText,
+            @Nullable SmartspaceText headToHeadFirstCompetitorText,
+            @Nullable SmartspaceText headToHeadSecondCompetitorText,
             @Nullable SmartspaceTapAction headToHeadAction) {
         super(templateType, titleText, titleIcon, subtitleText, subTitleIcon, primaryTapAction,
                 supplementalSubtitleText, supplementalSubtitleIcon, supplementalSubtitleTapAction,
@@ -87,7 +86,7 @@ public final class SmartspaceHeadToHeadUiTemplateData extends SmartspaceDefaultU
     }
 
     @Nullable
-    public CharSequence getHeadToHeadTitle() {
+    public SmartspaceText getHeadToHeadTitle() {
         return mHeadToHeadTitle;
     }
 
@@ -102,12 +101,12 @@ public final class SmartspaceHeadToHeadUiTemplateData extends SmartspaceDefaultU
     }
 
     @Nullable
-    public CharSequence getHeadToHeadFirstCompetitorText() {
+    public SmartspaceText getHeadToHeadFirstCompetitorText() {
         return mHeadToHeadFirstCompetitorText;
     }
 
     @Nullable
-    public CharSequence getHeadToHeadSecondCompetitorText() {
+    public SmartspaceText getHeadToHeadSecondCompetitorText() {
         return mHeadToHeadSecondCompetitorText;
     }
 
@@ -141,11 +140,11 @@ public final class SmartspaceHeadToHeadUiTemplateData extends SmartspaceDefaultU
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
         super.writeToParcel(out, flags);
-        TextUtils.writeToParcel(mHeadToHeadTitle, out, flags);
+        out.writeTypedObject(mHeadToHeadTitle, flags);
         out.writeTypedObject(mHeadToHeadFirstCompetitorIcon, flags);
         out.writeTypedObject(mHeadToHeadSecondCompetitorIcon, flags);
-        TextUtils.writeToParcel(mHeadToHeadFirstCompetitorText, out, flags);
-        TextUtils.writeToParcel(mHeadToHeadSecondCompetitorText, out, flags);
+        out.writeTypedObject(mHeadToHeadFirstCompetitorText, flags);
+        out.writeTypedObject(mHeadToHeadSecondCompetitorText, flags);
         out.writeTypedObject(mHeadToHeadAction, flags);
     }
 
@@ -195,11 +194,11 @@ public final class SmartspaceHeadToHeadUiTemplateData extends SmartspaceDefaultU
     @SystemApi
     public static final class Builder extends SmartspaceDefaultUiTemplateData.Builder {
 
-        private CharSequence mHeadToHeadTitle;
+        private SmartspaceText mHeadToHeadTitle;
         private SmartspaceIcon mHeadToHeadFirstCompetitorIcon;
         private SmartspaceIcon mHeadToHeadSecondCompetitorIcon;
-        private CharSequence mHeadToHeadFirstCompetitorText;
-        private CharSequence mHeadToHeadSecondCompetitorText;
+        private SmartspaceText mHeadToHeadFirstCompetitorText;
+        private SmartspaceText mHeadToHeadSecondCompetitorText;
         private SmartspaceTapAction mHeadToHeadAction;
 
         /**
@@ -213,7 +212,7 @@ public final class SmartspaceHeadToHeadUiTemplateData extends SmartspaceDefaultU
          * Sets the head-to-head card's title
          */
         @NonNull
-        public Builder setHeadToHeadTitle(@Nullable CharSequence headToHeadTitle) {
+        public Builder setHeadToHeadTitle(@Nullable SmartspaceText headToHeadTitle) {
             mHeadToHeadTitle = headToHeadTitle;
             return this;
         }
@@ -243,7 +242,7 @@ public final class SmartspaceHeadToHeadUiTemplateData extends SmartspaceDefaultU
          */
         @NonNull
         public Builder setHeadToHeadFirstCompetitorText(
-                @Nullable CharSequence headToHeadFirstCompetitorText) {
+                @Nullable SmartspaceText headToHeadFirstCompetitorText) {
             mHeadToHeadFirstCompetitorText = headToHeadFirstCompetitorText;
             return this;
         }
@@ -253,7 +252,7 @@ public final class SmartspaceHeadToHeadUiTemplateData extends SmartspaceDefaultU
          */
         @NonNull
         public Builder setHeadToHeadSecondCompetitorText(
-                @Nullable CharSequence headToHeadSecondCompetitorText) {
+                @Nullable SmartspaceText headToHeadSecondCompetitorText) {
             mHeadToHeadSecondCompetitorText = headToHeadSecondCompetitorText;
             return this;
         }
@@ -273,7 +272,7 @@ public final class SmartspaceHeadToHeadUiTemplateData extends SmartspaceDefaultU
         @NonNull
         public SmartspaceHeadToHeadUiTemplateData build() {
             return new SmartspaceHeadToHeadUiTemplateData(getTemplateType(), getTitleText(),
-                    getTitleIcon(), getSubtitleText(), getSubTitleIcon(), getPrimaryTapAction(),
+                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(), getPrimaryTapAction(),
                     getSupplementalSubtitleText(), getSupplementalSubtitleIcon(),
                     getSupplementalSubtitleTapAction(), getSupplementalAlarmText(),
                     mHeadToHeadTitle,
