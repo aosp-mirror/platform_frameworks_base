@@ -493,7 +493,7 @@ public final class SplashScreenView extends FrameLayout {
             Log.d(TAG, "Transferring surface " + mSurfaceView.toString());
         }
 
-        mSurfaceView.setChildSurfacePackageOnDraw(mSurfacePackage);
+        mSurfaceView.setChildSurfacePackage(mSurfacePackage);
     }
 
     void initIconAnimation(Drawable iconDrawable, long duration) {
