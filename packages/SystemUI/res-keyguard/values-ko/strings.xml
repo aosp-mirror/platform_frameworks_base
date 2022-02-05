@@ -26,6 +26,7 @@
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"유효하지 않은 카드"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"충전됨"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 무선 충전 중"</string>
+    <string name="keyguard_plugged_in_dock" msgid="449722738270908674">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 충전 도크"</string>
     <string name="keyguard_plugged_in" msgid="8169926454348380863">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 충전 중"</string>
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 고속 충전 중"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • 저속 충전 중"</string>
@@ -52,10 +53,7 @@
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"잘못된 패턴"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"잘못된 비밀번호"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"PIN 오류"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="991400408675793914">
-      <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g>초 후에 다시 시도하세요.</item>
-      <item quantity="one">1초 후에 다시 시도하세요.</item>
-    </plurals>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{#초 후에 다시 시도하세요.}other{#초 후에 다시 시도하세요.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"SIM PIN을 입력하세요."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"\'<xliff:g id="CARRIER">%1$s</xliff:g>\'의 SIM PIN을 입력하세요."</string>
     <string name="kg_sim_lock_esim_instructions" msgid="5577169988158738030">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> 모바일 서비스 없이 기기를 사용하려면 eSIM을 사용 중지하세요."</string>
