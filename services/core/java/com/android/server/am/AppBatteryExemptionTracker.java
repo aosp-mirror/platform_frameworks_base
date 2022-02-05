@@ -29,6 +29,7 @@ import android.os.SystemClock;
 import android.util.Pair;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.am.AppBatteryExemptionTracker.AppBatteryExemptionPolicy;
 import com.android.server.am.AppBatteryExemptionTracker.UidBatteryStates;
@@ -454,7 +455,8 @@ final class AppBatteryExemptionTracker
             super(injector, tracker,
                     KEY_BG_BATTERY_EXEMPTION_ENABLED, DEFAULT_BG_BATTERY_EXEMPTION_ENABLED,
                     AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_WINDOW,
-                    AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_WINDOW_MS);
+                    tracker.mContext.getResources()
+                    .getInteger(R.integer.config_bg_current_drain_window));
         }
 
         @Override
