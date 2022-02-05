@@ -657,7 +657,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * @throws IllegalArgumentException if metadataClass is not a subclass of CameraMetadata
      */
-    private <TKey> List<TKey>
+    <TKey> List<TKey>
     getAvailableKeyList(Class<?> metadataClass, Class<TKey> keyClass, int[] filterTags,
             boolean includeSynthetic) {
 

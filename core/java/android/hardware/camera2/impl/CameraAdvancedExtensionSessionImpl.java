@@ -105,7 +105,7 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
     @RequiresPermission(android.Manifest.permission.CAMERA)
     public static CameraAdvancedExtensionSessionImpl createCameraAdvancedExtensionSession(
             @NonNull CameraDevice cameraDevice, @NonNull Context ctx,
-            @NonNull ExtensionSessionConfiguration config)
+            @NonNull ExtensionSessionConfiguration config, int sessionId)
             throws CameraAccessException, RemoteException {
         long clientId = CameraExtensionCharacteristics.registerClient(ctx);
         if (clientId < 0) {
