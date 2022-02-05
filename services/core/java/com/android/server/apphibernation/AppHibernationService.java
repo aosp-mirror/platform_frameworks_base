@@ -35,6 +35,8 @@ import android.app.ActivityThread;
 import android.app.IActivityManager;
 import android.app.StatsManager;
 import android.app.StatsManager.StatsPullAtomCallback;
+import android.app.usage.StorageStats;
+import android.app.usage.StorageStatsManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.UsageEventListener;
@@ -78,6 +80,7 @@ import com.android.server.SystemService;
 
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -111,6 +114,7 @@ public final class AppHibernationService extends SystemService {
     private final PackageManagerInternal mPackageManagerInternal;
     private final IActivityManager mIActivityManager;
     private final UserManager mUserManager;
+    private final StorageStatsManager mStorageStatsManager;
 
     @GuardedBy("mLock")
     private final SparseArray<Map<String, UserLevelState>> mUserStates = new SparseArray<>();
@@ -147,6 +151,7 @@ public final class AppHibernationService extends SystemService {
         mPackageManagerInternal = injector.getPackageManagerInternal();
         mIActivityManager = injector.getActivityManager();
         mUserManager = injector.getUserManager();
+        mStorageStatsManager = injector.getStorageStatsManager();
         mGlobalLevelHibernationDiskStore = injector.getGlobalLevelDiskStore();
         mBackgroundExecutor = injector.getBackgroundExecutor();
         mOatArtifactDeletionEnabled = injector.isOatArtifactDeletionEnabled();
@@ -297,7 +302,8 @@ public final class AppHibernationService extends SystemService {
 
             pkgState.hibernated = isHibernating;
             if (isHibernating) {
-                mBackgroundExecutor.execute(() -> hibernatePackageForUser(packageName, realUserId));
+                mBackgroundExecutor.execute(
+                        () -> hibernatePackageForUser(packageName, realUserId, pkgState));
             } else {
                 mBackgroundExecutor.execute(
                         () -> unhibernatePackageForUser(packageName, realUserId));
@@ -415,8 +421,9 @@ public final class AppHibernationService extends SystemService {
                                     + "the package was uninstalled? ", pkgName, userId));
                     continue;
                 }
-                HibernationStats stats = new HibernationStats(
-                        mGlobalHibernationStates.get(pkgName).savedByte);
+                long diskBytesSaved = mGlobalHibernationStates.get(pkgName).savedByte
+                        + userPackageStates.get(pkgName).savedByte;
+                HibernationStats stats = new HibernationStats(diskBytesSaved);
                 statsMap.put(pkgName, stats);
             }
         }
@@ -427,16 +434,28 @@ public final class AppHibernationService extends SystemService {
      * Put an app into hibernation for a given user, allowing user-level optimizations to occur. Do
      * not hold {@link #mLock} while calling this to avoid deadlock scenarios.
      */
-    private void hibernatePackageForUser(@NonNull String packageName, int userId) {
+    private void hibernatePackageForUser(@NonNull String packageName, int userId,
+            UserLevelState state) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "hibernatePackage");
         final long caller = Binder.clearCallingIdentity();
         try {
+            ApplicationInfo info = mIPackageManager.getApplicationInfo(
+                    packageName, PACKAGE_MATCH_FLAGS, userId);
+            StorageStats stats = mStorageStatsManager.queryStatsForPackage(
+                    info.storageUuid, packageName, new UserHandle(userId));
             mIActivityManager.forceStopPackage(packageName, userId);
             mIPackageManager.deleteApplicationCacheFilesAsUser(packageName, userId,
                     null /* observer */);
+            synchronized (mLock) {
+                state.savedByte = stats.getCacheBytes();
+            }
         } catch (RemoteException e) {
             throw new IllegalStateException(
                     "Failed to hibernate due to manager not being available", e);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.e(TAG, "Package name not found when querying storage stats", e);
+        } catch (IOException e) {
+            Slog.e(TAG, "Storage device not found", e);
         } finally {
             Binder.restoreCallingIdentity(caller);
             Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
@@ -920,6 +939,8 @@ public final class AppHibernationService extends SystemService {
 
         UserManager getUserManager();
 
+        StorageStatsManager getStorageStatsManager();
+
         Executor getBackgroundExecutor();
 
         UsageStatsManagerInternal getUsageStatsManagerInternal();
@@ -966,6 +987,11 @@ public final class AppHibernationService extends SystemService {
         @Override
         public UserManager getUserManager() {
             return mContext.getSystemService(UserManager.class);
+        }
+
+        @Override
+        public StorageStatsManager getStorageStatsManager() {
+            return mContext.getSystemService(StorageStatsManager.class);
         }
 
         @Override
