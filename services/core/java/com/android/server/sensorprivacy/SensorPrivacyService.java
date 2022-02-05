@@ -154,6 +154,8 @@ public final class SensorPrivacyService extends SystemService {
     private final AppOpsManagerInternal mAppOpsManagerInternal;
     private final TelephonyManager mTelephonyManager;
 
+    private CameraPrivacyLightController mCameraPrivacyLightController;
+
     private final IBinder mAppOpsRestrictionToken = new Binder();
 
     private SensorPrivacyManagerInternalImpl mSensorPrivacyManagerInternal;
@@ -190,6 +192,8 @@ public final class SensorPrivacyService extends SystemService {
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             mKeyguardManager = mContext.getSystemService(KeyguardManager.class);
             mEmergencyCallHelper = new EmergencyCallHelper();
+        } else if (phase == PHASE_ACTIVITY_MANAGER_READY) {
+            mCameraPrivacyLightController = new CameraPrivacyLightController(mContext);
         }
     }
 

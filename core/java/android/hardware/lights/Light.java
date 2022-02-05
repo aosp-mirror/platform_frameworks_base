@@ -38,6 +38,12 @@ public final class Light implements Parcelable {
     /** Type for lights that indicate microphone usage */
     public static final int LIGHT_TYPE_MICROPHONE = 8;
 
+    /** Type for lights that indicate camera usage
+     *
+     * @hide
+     */
+    public static final int LIGHT_TYPE_CAMERA = 9;
+
     // These enum values start from 10001 to avoid collision with expanding of HAL light types.
     /**
      * Type for lights that indicate a monochrome color LED light.
