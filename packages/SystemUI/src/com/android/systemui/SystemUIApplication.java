@@ -272,7 +272,7 @@ public class SystemUIApplication extends Application implements
         mServicesStarted = true;
     }
 
-    // TODO(b/149254050): add unit tests? There doesn't seem to be a SystemUiApplicationTest...
+    // TODO(b/217567642): add unit tests? There doesn't seem to be a SystemUiApplicationTest...
     @Override
     public boolean addDumpable(Dumpable dumpable) {
         String name = dumpable.getDumpableName();
@@ -288,11 +288,19 @@ public class SystemUIApplication extends Application implements
         if (DEBUG) Log.d(TAG, "addDumpable(): adding '" + name + "' = " + dumpable);
         mDumpables.put(name, dumpable);
 
-        // TODO(b/149254050): replace com.android.systemui.dump.Dumpable by
+        // TODO(b/217567642): replace com.android.systemui.dump.Dumpable by
         // com.android.util.Dumpable and get rid of the intermediate lambda
         mDumpManager.registerDumpable(dumpable.getDumpableName(),
                 (fd, pw, args) -> dumpable.dump(pw, args));
         return true;
+    }
+
+    // TODO(b/217567642): implement
+    @Override
+    public boolean removeDumpable(Dumpable dumpable) {
+        Log.w(TAG, "removeDumpable(" + dumpable + "): not implemented");
+
+        return false;
     }
 
     @Override
