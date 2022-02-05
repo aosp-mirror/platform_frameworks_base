@@ -417,7 +417,13 @@ cc_library_shared {
         ],
         stl: "libc++_static",
         ldflags: ["-static-libgcc"],
-      }
+      },
+      linux_glibc_x86_64: {
+        dist: {
+          targets: ["robolectric_native_runtime"],
+          dir: "robolectric/nativeruntime",
+        },
+      },
     },
     export_include_dirs: [
         ".",
