@@ -217,7 +217,7 @@ public final class AppHibernationService extends SystemService {
      */
     boolean isHibernatingForUser(String packageName, int userId) {
         String methodName = "isHibernatingForUser";
-        if (!checkHibernationEnabled(methodName)) {
+        if (!sIsServiceEnabled) {
             return false;
         }
         getContext().enforceCallingOrSelfPermission(
@@ -246,7 +246,7 @@ public final class AppHibernationService extends SystemService {
      * @param packageName package to check
      */
     boolean isHibernatingGlobally(String packageName) {
-        if (!checkHibernationEnabled("isHibernatingGlobally")) {
+        if (!sIsServiceEnabled) {
             return false;
         }
         getContext().enforceCallingOrSelfPermission(
@@ -272,7 +272,7 @@ public final class AppHibernationService extends SystemService {
      */
     void setHibernatingForUser(String packageName, int userId, boolean isHibernating) {
         String methodName = "setHibernatingForUser";
-        if (!checkHibernationEnabled(methodName)) {
+        if (!sIsServiceEnabled) {
             return;
         }
         getContext().enforceCallingOrSelfPermission(
@@ -326,7 +326,7 @@ public final class AppHibernationService extends SystemService {
      * @param isHibernating new hibernation state
      */
     void setHibernatingGlobally(String packageName, boolean isHibernating) {
-        if (!checkHibernationEnabled("setHibernatingGlobally")) {
+        if (!sIsServiceEnabled) {
             return;
         }
         getContext().enforceCallingOrSelfPermission(
@@ -359,7 +359,7 @@ public final class AppHibernationService extends SystemService {
     @NonNull List<String> getHibernatingPackagesForUser(int userId) {
         ArrayList<String> hibernatingPackages = new ArrayList<>();
         String methodName = "getHibernatingPackagesForUser";
-        if (!checkHibernationEnabled(methodName)) {
+        if (!sIsServiceEnabled) {
             return hibernatingPackages;
         }
         getContext().enforceCallingOrSelfPermission(
@@ -390,6 +390,9 @@ public final class AppHibernationService extends SystemService {
             @Nullable Set<String> packageNames, int userId) {
         Map<String, HibernationStats> statsMap = new ArrayMap<>();
         String methodName = "getHibernationStatsForUser";
+        if (!sIsServiceEnabled) {
+            return statsMap;
+        }
         getContext().enforceCallingOrSelfPermission(
                 android.Manifest.permission.MANAGE_APP_HIBERNATION,
                 "Caller does not have MANAGE_APP_HIBERNATION permission.");
@@ -677,6 +680,7 @@ public final class AppHibernationService extends SystemService {
         for (String key : properties.getKeyset()) {
             if (TextUtils.equals(KEY_APP_HIBERNATION_ENABLED, key)) {
                 sIsServiceEnabled = isDeviceConfigAppHibernationEnabled();
+                Slog.d(TAG, "App hibernation changed to enabled=" + sIsServiceEnabled);
                 break;
             }
         }
@@ -719,13 +723,6 @@ public final class AppHibernationService extends SystemService {
             return false;
         }
         return true;
-    }
-
-    private boolean checkHibernationEnabled(String methodName) {
-        if (!sIsServiceEnabled) {
-            Slog.w(TAG, String.format("Attempted to call %s on unsupported device.", methodName));
-        }
-        return sIsServiceEnabled;
     }
 
     private void dump(PrintWriter pw) {
