@@ -1327,7 +1327,7 @@
     <!-- no translation found for network_available_sign_in_detailed (7520423801613396556) -->
     <skip />
     <string name="wifi_no_internet" msgid="1386911698276448061">"Tīklā <xliff:g id="NETWORK_SSID">%1$s</xliff:g> nav piekļuves internetam"</string>
-    <string name="wifi_no_internet_detailed" msgid="634938444133558942">"Pieskarieties, lai skatītu iespējas."</string>
+    <string name="wifi_no_internet_detailed" msgid="634938444133558942">"Pieskarieties, lai skatītu opcijas."</string>
     <string name="mobile_no_internet" msgid="4014455157529909781">"Mobilajā tīklā nav piekļuves internetam."</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Tīklā nav piekļuves internetam."</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Nevar piekļūt privātam DNS serverim."</string>
@@ -1388,7 +1388,7 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Ieslēgta USB piesaiste"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Ieslēgts MIDI režīms, izmantojot USB savienojumu"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB piederums ir pievienots"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Pieskarieties, lai skatītu citas iespējas."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Pieskarieties, lai skatītu citas opcijas."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Pievienotā ierīce tiek uzlādēta. Pieskarieties, lai skatītu citas opcijas."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Konstatēts analogs audio piederums"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Pievienotā ierīce nav saderīga ar šo tālruni. Pieskarieties, lai uzzinātu vairāk."</string>
