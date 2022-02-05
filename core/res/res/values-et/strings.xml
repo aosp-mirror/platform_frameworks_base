@@ -70,7 +70,6 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Kolmesuunaline kõne"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Soovimatute tüütute kõnede hülgamine"</string>
     <string name="CndMmi" msgid="185136449405618437">"Helistaja numbri kohaletoimetamine"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"Mitte häirida"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Helistaja ID vaikimisi piiratud. Järgmine kõne: piiratud"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Helistaja ID vaikimisi piiratud. Järgmine kõne: pole piiratud"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Vaikimisi pole helistaja ID piiratud. Järgmine kõne: piiratud"</string>
@@ -180,10 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"Kella talletusruum on täis. Ruumi vabastamiseks kustutage mõned failid."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Android TV seadme salvestusruum on täis. Ruumi vabastamiseks kustutage mõned failid."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"Telefonimälu on täis. Ruumi vabastamiseks kustutage mõned failid."</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="other">Sertifikaadi volitused on installitud</item>
-      <item quantity="one">Sertifikaadi volitus on installitud</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Sertifikaadi volitus on installitud}other{Sertifikaadi volitused on installitud}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Tundmatu kolmas osapool:"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Teie tööprofiili administraator"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Domeen: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -203,6 +199,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"Anduri märguande teenus"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Teenus Twilight"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS-i aja värskendamise teenus"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"Seadme eeskirjahalduri teenus"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Muusikatuvastuse halduri teenus"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Seade kustutatakse"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Administraatori rakendust ei saa kasutada. Teie seade tühjendatakse nüüd.\n\nKui teil on küsimusi, võtke ühendust organisatsiooni administraatoriga."</string>
@@ -256,10 +253,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Kasutage seda enamikul juhtudel. See võimaldab jälgida aruande edenemist, sisestada probleemi kohta täpsemat teavet ja jäädvustada ekraanipilte. Vahele võivad jääda mõned vähem kasutatud jaotised, millest teavitamine võtab rohkem aega."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Täielik aruanne"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Kasutage seda valikut süsteemihäirete minimeerimiseks, kui seade ei reageeri, on liiga aeglane või vajate aruande kõiki jaotisi. Teil ei lubata sisestada lisateavet ega jäädvustada lisaekraanipilte."</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="other">Veaaruande jaoks ekraanipildi jäädvustamine <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast.</item>
-      <item quantity="one">Veaaruande jaoks ekraanipildi jäädvustamine <xliff:g id="NUMBER_0">%d</xliff:g> sekundi pärast.</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Veaaruande jaoks ekraanipildi jäädvustamine # sekundi pärast.}other{Veaaruande jaoks ekraanipildi jäädvustamine # sekundi pärast.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Veaaruandega koos jäädvustati ekraanipilt"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Ekraanipildi jäädvustamine koos veaaruandega ebaõnnestus"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Hääletu režiim"</string>
@@ -310,8 +304,14 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"juurdepääs kalendrile"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"saata ja vaadata SMS-sõnumeid"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"Failid ja meedia"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"juurdepääs seadmesse salvestatud fotodele, meediasisule ja failidele"</string>
+    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
+    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Muusika ja muud helifailid"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"pääseda juurde teie seadmes olevatele helifailidele"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotod ja videod"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"pääseda juurde teie seadmes olevatele pildi- ja videofailidele"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"heli salvestamine"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Füüsiline tegevus"</string>
@@ -683,6 +683,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Võimaldab rakendusel lugeda konto sünkroonimisstatistikat, sh sünkroonimissündmuste ajalugu ja sünkroonitud andmete hulka."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"Jagatud salvestusruumi sisu lugemine"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Lubab rakendusel lugeda jagatud salvestusruumi sisu."</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"lugeda teie jagatud salvestusruumis olevaid helifaile"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Võimaldab rakendusel lugeda teie jagatud salvestusruumis olevaid helifaile."</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"lugeda teie jagatud salvestusruumis olevaid videofaile"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Võimaldab rakendusel lugeda teie jagatud salvestusruumis olevaid videofaile."</string>
+    <string name="permlab_readMediaImage" msgid="1507059005825769856">"lugeda teie jagatud salvestusruumis olevaid pildifaile"</string>
+    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Võimaldab rakendusel lugeda teie jagatud salvestusruumis olevaid pildifaile."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"Jagatud salvestusruumi sisu muutmine või kustutamine"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Lubab rakendusel kirjutada jagatud salvestusruumi sisu."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP-kõnede tegemine/vastuvõtmine"</string>
@@ -729,8 +735,6 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Lubab omanikul luua seose operaatori sõnumisideteenuse ülataseme liidesega. Pole kunagi vajalik tavalise rakenduse puhul."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"sidumine operaatoriteenustega"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Lubab omanikul siduda operaatoriteenustega. Seda ei tohiks tavarakenduste puhul kunagi tarvis minna."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"juurdepääs funktsioonile Mitte segada"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Võimaldab rakendusel lugeda ja kirjutada funktsiooni Mitte segada seadistusi."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"vaatamisloa kasutamise alustamine"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Võimaldab omanikul rakenduse puhul alustada loa kasutamist. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"Alustada lubade otsuste vaatamist."</string>
@@ -1072,10 +1076,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> soovib lubada puudutusega uurimise. Kui puudutusega uurimine on sisse lülitatud, kuulete või näete kirjeldusi asjade kohta, mis on teie sõrme all, või saate suhelda telefoniga liigutuste abil."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 kuu tagasi"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Varem kui 1 kuu tagasi"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="other">Viimased <xliff:g id="COUNT_1">%d</xliff:g> päeva</item>
-      <item quantity="one">Viimane <xliff:g id="COUNT_0">%d</xliff:g> päev</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Viimane päev}other{Viimased # päeva}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Eelmisel kuul"</string>
     <string name="older" msgid="1645159827884647400">"Vanem"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"kuupäeval <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1094,70 +1095,22 @@
     <string name="year" msgid="5182610307741238982">"aasta"</string>
     <string name="years" msgid="5797714729103773425">"aastat"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"praegu"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>m</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>h</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>h</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>p</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>p</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>a</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>a</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>m pärast</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>m pärast</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>h pärast</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>h pärast</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>p pärast</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>p pärast</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>a pärast</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>a pärast</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> minutit tagasi</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> minut tagasi</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> tundi tagasi</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> tund tagasi</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> päeva tagasi</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> päev tagasi</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> aastat tagasi</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> aasta tagasi</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> minuti pärast</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> minuti pärast</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> tunni pärast</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> tunni pärast</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> päeva pärast</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> päeva pärast</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> aasta pärast</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> aasta pärast</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g> p"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g> a"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"<xliff:g id="COUNT">%d</xliff:g> min pärast"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> h pärast"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> p pärast"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> a pärast"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# minut tagasi}other{# minutit tagasi}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# tund tagasi}other{# tundi tagasi}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# päev tagasi}other{# päeva tagasi}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{# aasta tagasi}other{# aastat tagasi}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minut}other{# minutit}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# tund}other{# tundi}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# päev}other{# päeva}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# aasta}other{# aastat}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Probleem videoga"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"See video ei sobi voogesituseks selles seadmes."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"Videot ei saa esitada."</string>
@@ -1187,10 +1140,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Kustuta"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Sisestusmeetod"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Tekstitoimingud"</string>
-    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
-    <skip />
-    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
-    <skip />
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Tagasi"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Sisestusmeetodi vahetamine"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Talletusruum saab täis"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Mõned süsteemifunktsioonid ei pruugi töötada"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Süsteemis pole piisavalt talletusruumi. Veenduge, et seadmes oleks 250 MB vaba ruumi, ja käivitage seade uuesti."</string>
@@ -1411,6 +1362,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Testrakendirežiimi keelamiseks taastage tehaseseaded."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Seeriakonsool on lubatud"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"See mõjutab toimivust. Keelamiseks kontrollige käivituslaadurit."</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"Katseline MTE on lubatud"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"Toimivus ja stabiilsus võivad olla mõjutatud. Keelamiseks taaskäivitage. Kui see on lubatud atribuudiga arm64.memtag.bootctl, määrake enne selle väärtuseks None."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"USB-pordis on vedelik või mustus"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB-port on automaatselt keelatud. Puudutage lisateabe saamiseks."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB-porti tohib kasutada"</string>
@@ -1547,10 +1500,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Jäta vahele"</string>
     <string name="no_matches" msgid="6472699895759164599">"Vasted puuduvad"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Otsige lehelt"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> vastet <xliff:g id="TOTAL">%d</xliff:g>-st</item>
-      <item quantity="one">1 vaste</item>
-    </plurals>
+    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{# vaste}other{#/{total}}} }"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Valmis"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Jagatud salvestusruumi tühjendamine …"</string>
     <string name="share" msgid="4157615043345227321">"Jaga"</string>
@@ -1680,10 +1630,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Vale muster"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"Vale parool"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Vale PIN-kood"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="other">Proovige uuesti <xliff:g id="NUMBER">%d</xliff:g> sekundi pärast.</item>
-      <item quantity="one">Proovige uuesti 1 sekundi pärast.</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Joonistage oma muster"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Sisestage SIM-i PIN-kood"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Sisestage PIN-kood"</string>
@@ -1880,10 +1826,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Looge PIN-kood piirangute muutmiseks"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN-kood ei sobi. Proovige uuesti."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN-kood on liiga lühike. Peab olema vähemalt 4-kohaline."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="other">Proovige uuesti <xliff:g id="COUNT">%d</xliff:g> sekundi pärast</item>
-      <item quantity="one">Proovige uuesti 1 sekundi pärast</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Proovige hiljem uuesti"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Kuvamine täisekraanil"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Väljumiseks pühkige ülevalt alla."</string>
@@ -1911,46 +1853,20 @@
     <string name="data_saver_description" msgid="4995164271550590517">"Andmekasutuse vähendamiseks keelab andmemahu säästja mõne rakenduse puhul andmete taustal saatmise ja vastuvõtmise. Rakendus, mida praegu kasutate, pääseb andmesidele juurde, kuid võib seda teha väiksema sagedusega. Seetõttu võidakse näiteks pildid kuvada alles siis, kui neid puudutate."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Lülitada andmemahu säästja sisse?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Lülita sisse"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="other">%1$d minutiks (kuni <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Üheks minutiks (kuni <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="other">%1$d min (kuni <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">1 min (kuni <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="other">%1$d tunniks (kuni <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">1 tunniks (kuni <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="other">%1$d h (kuni <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">1 h (kuni <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="other">%d minutiks</item>
-      <item quantity="one">Üheks minutiks</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="other">%d min</item>
-      <item quantity="one">1 min</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="other">%d tunniks</item>
-      <item quantity="one">1 tunniks</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="other">%d h</item>
-      <item quantity="one">1 h</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{1 minutiks (kuni {formattedTime})}other{# minutiks (kuni {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{1 min (kuni {formattedTime})}other{# min (kuni {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{1 tunniks (kuni {formattedTime})}other{# tunniks (kuni {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{1 h (kuni{formattedTime})}other{# h (kuni{formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{1 minutiks}other{# minutiks}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{1 min}other{# min}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{1 tunniks}other{# tunniks}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{1 h}other{# h}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Kuni <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Kuni <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Kuni <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (järgmine äratus)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Kuni välja lülitate"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Kuni lülitate välja valiku Mitte segada"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Ahendamine"</string>
-    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Mitte segada"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Puhkeaeg"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Argiõhtu"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Nädalavahetus"</string>
@@ -1989,10 +1905,6 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Sissetulev kõne"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Käimasolev kõne"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Sissetuleva kõne filtreerimine"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> on valitud</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> on valitud</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Kategoriseerimata"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Teie määrasite nende märguannete tähtsuse."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"See on tähtis osalevate inimeste tõttu."</string>
@@ -2058,10 +1970,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Automaattäitesse salvestamine"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Sisu ei saa automaatselt täita"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Automaatse täitmise soovitusi pole"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> automaatse täitmise soovitust</item>
-      <item quantity="one">Üks automaatse täitmise soovitus</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{Üks automaattäite soovitus}other{# automaattäite soovitust}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"Kas salvestada teenuses "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Kas salvestada <xliff:g id="TYPE">%1$s</xliff:g> teenuses "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Kas salvestada <xliff:g id="TYPE_0">%1$s</xliff:g> ja <xliff:g id="TYPE_1">%2$s</xliff:g> teenuses "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
@@ -2108,15 +2017,22 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"DESINSTALLI"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"AVA IKKA"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Tuvastati kahjulik rakendus"</string>
+    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
+    <skip />
+    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
+    <skip />
     <string name="slices_permission_request" msgid="3677129866636153406">"Rakendus <xliff:g id="APP_0">%1$s</xliff:g> soovib näidata rakenduse <xliff:g id="APP_2">%2$s</xliff:g> lõike"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Muuda"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Kõnede ja märguannete puhul seade vibreerib"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Kõned ja märguanded on vaigistatud"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Süsteemi muudatused"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Mitte segada"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Uus: režiim Mitte segada peidab märguandeid"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Puudutage lisateabe vaatamiseks ja muutmiseks."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Režiimi Mitte segada muudeti"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Puudutage, et kontrollida, mis on blokeeritud."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Süsteem"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Seaded"</string>
@@ -2133,7 +2049,6 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Lülita välja"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Lisateave"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Androidi versioonis 12 asendasid täiustatud märguanded Androidi kohanduvad märguanded. See funktsioon näitab soovitatud toiminguid ja vastuseid ning korrastab teie märguandeid.\n\nTäiustatud märguanded pääsevad juurde märguande sisule, sh isiklikule teabele, nagu kontaktide nimed ja sõnumid. Samuti saab selle funktsiooni abil märguannetest loobuda või neile vastata (nt vastata telefonikõnedele ja juhtida funktsiooni Mitte segada)."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rutiinirežiimi teabe märguanne"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Aku võib enne tavapärast laadimist tühjaks saada"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Akusäästja aktiveeriti aku tööea pikendamiseks"</string>
@@ -2162,10 +2077,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g>-esitlusefail"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth jääb lennukirežiimi ajal sisselülitatuks"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Laadimine"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> faili</item>
-      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> fail</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # fail}other{{file_name} + # faili}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Ei ole ühtki soovitatud inimest, kellega jagada"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Rakenduste loend"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Sellele rakendusele pole antud salvestamise luba, kuid see saab heli jäädvustada selle USB-seadme kaudu."</string>
@@ -2177,10 +2089,22 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Energiasäästja dialoog"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Lukustuskuva"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Ekraanipilt"</string>
+    <!-- no translation found for accessibility_system_action_headset_hook_label (8524691721287425468) -->
+    <skip />
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Ekraanil kuvatav juurdepääsetavuse otsetee"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Ekraanil kuvatav juurdepääsetavuse otsetee valija"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Juurdepääsetavuse otsetee"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Loobu märguandealast"</string>
+    <!-- no translation found for accessibility_system_action_dpad_up_label (1029042950229333782) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_down_label (3441918448624921461) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_left_label (6557647179116479152) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_right_label (9180196950365804081) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_center_label (8149791419358224893) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> pealkirjariba."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> on lisatud salve PIIRANGUTEGA"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2201,8 +2125,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Puudutage sisselülitamiseks"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Töörakendusi pole"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Isiklikke rakendusi pole"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Kas avada rakendus <xliff:g id="APP">%s</xliff:g> isiklikul profiilil?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Kas avada rakendus <xliff:g id="APP">%s</xliff:g> tööprofiilil?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Kasuta isiklikku brauserit"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Kasuta tööbrauserit"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM-kaardi võrgu avamise PIN-kood"</string>
@@ -2332,4 +2258,9 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> saab vaadata ja hallata teie ekraanikuva. Puudutage ülevaatamiseks."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Sõnum „<xliff:g id="MESSAGE">%1$s</xliff:g>” on tõlgitud."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Sõnum on tõlgitud <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> keelest <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> keelde."</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Tegevus taustal"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Tegevus taustal"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> töötab taustal ja kulutab akut. Puudutage ülevaatamiseks."</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> on taustal töötanud kaua aega. Puudutage ülevaatamiseks."</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Vaadake aktiivseid rakendusi"</string>
 </resources>

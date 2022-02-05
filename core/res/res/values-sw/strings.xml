@@ -70,7 +70,6 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Upigaji simu kwa njia tatu"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Ukataaji wa simu zinazokera zisizohitajika"</string>
     <string name="CndMmi" msgid="185136449405618437">"Kuonyeshwa kwa nambari inayopiga"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"Usinisumbue"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Chaguomsingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo: Imezuiliwa"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Chaguomsingi za kitambulisho cha mpigaji simu huwa kuzuiwa. Simu ifuatayo: Haijazuiliwa"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Chaguomsingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo:Imezuiliwa"</string>
@@ -180,10 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"Hifadhi ya saa imejaa. Futa baadhi ya faili ili uweze kupata nafasi."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Nafasi ya hifadhi ya kifaa chako cha Android TV imejaa. Futa baadhi ya faili ili upate nafasi."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"Hifadhi ya simu imejaa. Futa baadhi ya faili ili uweze kupata nafasi."</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="other">Imesakinisha mamlaka ya cheti</item>
-      <item quantity="one">Imesakinisha mamlaka ya cheti</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Imesakinisha mamlaka ya cheti}other{Imesakinisha mamlaka ya cheti}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Na mtu mwingine asiyejulikana"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Na msimamizi wa wasifu wako wa kazini"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Na <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -203,6 +199,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"Huduma ya Arifa ya Kitambuzi"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight Service"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Huduma ya Kusasisha Saa za GNSS"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"Huduma ya Kidhibiti cha Sera ya Kifaa"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Huduma ya Kidhibiti cha Utambuzi wa Muziki"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Data iliyomo kwenye kifaa chako itafutwa"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Huwezi kutumia programu ya msimamizi. Sasa data iliyo kwenye kifaa chako itafutwa.\n\nIkiwa una maswali yoyote, wasiliana na msimamizi wa shirika lako."</string>
@@ -256,10 +253,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Tumia chaguo hili katika hali nyingi. Hukuruhusu kufuatilia jinsi ripoti yako inavyoendelea, kuandika maelezo zaidi kuhusu tatizo na kupiga picha za skrini. Huenda ikaacha baadhi ya sehemu ambazo hazitumiki sana na zinachukua muda mrefu kuripoti."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Ripoti kamili"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Tumia chaguo hili ili upunguze kukatizwa kwa mfumo wakati kifaa chako kinapokwama au kinapofanya kazi polepole au unapohitaji sehemu zote za ripoti. Haikuruhusu kuandika maelezo zaidi au kupiga picha zaidi za skrini."</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="other">Inapiga picha ya skrini ili iripoti hitilafu baada ya sekunde <xliff:g id="NUMBER_1">%d</xliff:g>.</item>
-      <item quantity="one">Inapiga picha ya skrini ili iripoti hitilafu baada ya sekunde <xliff:g id="NUMBER_0">%d</xliff:g>.</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Inapiga picha ya skrini ili iripoti hitilafu baada ya sekunde #.}other{Inapiga picha ya skrini ili iripoti hitilafu baada ya sekunde #.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Umepiga picha ya skrini ya ripoti ya hitilafu"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Imeshindwa kupiga picha ya skrini ya ripoti ya hitilafu"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Mtindo wa kimya"</string>
@@ -310,8 +304,14 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"ifikie kalenda yako"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"itume na iangalie SMS"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"Faili na maudhui"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"ifikie picha, maudhui na faili kwenye kifaa chako"</string>
+    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
+    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Muziki na sauti nyingine"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"fikia faili za sauti kwenye kifaa chako"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Picha na video"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"fikia faili za picha na video kwenye kifaa chako"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Maikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"irekodi sauti"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Mazoezi ya mwili"</string>
@@ -683,6 +683,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Inaruhusu programu kusoma takwimu za upatanishi za akaunti, ikiwa ni pamoja na historia ya matukio ya upatanishi na kiasi cha data kimepatanishwa."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"isome maudhui ya hifadhi unayoshiriki"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Huruhusu programu isome maudhui ya hifadhi unayoshiriki."</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"soma faili za sauti kutoka kwenye hifadhi ya kushiriki"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Huruhusu programu kusoma faili za sauti kutoka kwenye hifadhi unayoshiriki."</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"soma faili za video kutoka kwenye hifadhi ya kushiriki"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Huruhusu programu kusoma faili za video kutoka kwenye hifadhi unayoshiriki."</string>
+    <string name="permlab_readMediaImage" msgid="1507059005825769856">"soma faili za picha kutoka kwenye hifadhi ya kushiriki"</string>
+    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Huruhusu programu kusoma faili za picha kutoka kwenye hifadhi unayoshiriki."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"irekebishe au ifute maudhui ya hifadhi unayoshiriki"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Huruhusu programu iandike maudhui ya hifadhi unayoshiriki."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"piga/pokea simu za SIP"</string>
@@ -729,8 +735,6 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Huruhusu kishikiliaji kushurutisha kwa kiolesura cha hali ya juu cha huduma ya ujumbe ya mtoa huduma. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"bandika kwenye huduma ya mtoa huduma"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Huruhusu mmiliki kubandika kwenye huduma ya mtoa huduma. Haipaswi kuhitajika kwa programu za kawaida."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"fikia kipengee cha Usinisumbue"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Inaruhusu programu kusoma na kuandika usanidi wa kipengee cha Usinisumbue."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"anzisha kipengele cha kuona matumizi ya ruhusa"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Huruhusu kishikiliaji kuanzisha matumizi ya ruhusa ya programu. Haipaswi kuhitajika kwa ajili ya programu za kawaida."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"kuanzisha uamuzi wa ruhusa za kuangalia"</string>
@@ -1072,10 +1076,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> inataka kuwezesha Kuchunguza kwa Kugusa. Wakati Kuchunguza kwa Kugusa kumewezeshwa, unaweza kusikia au kuona maelezo ya kilicho chini ya kidole chako au kutumia ishara ili kuingiliana na simu."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"Mwezi 1 uliopita"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Kabla ya mwezi 1 uliopita"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="other">Siku <xliff:g id="COUNT_1">%d</xliff:g> zilizopita</item>
-      <item quantity="one">Siku <xliff:g id="COUNT_0">%d</xliff:g> iliyopita</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Siku # iliyopita}other{Siku # zilizopita}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Mwezi uliopita"</string>
     <string name="older" msgid="1645159827884647400">"Kuukuu zaidi"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"mnamo <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1094,70 +1095,22 @@
     <string name="year" msgid="5182610307741238982">"mwaka"</string>
     <string name="years" msgid="5797714729103773425">"miaka"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"sasa"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>m</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>h</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>h</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>d</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>d</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>y</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>y</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="other">dak <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="one">dak <xliff:g id="COUNT_0">%d</xliff:g></item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="other">saa <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="one">saa <xliff:g id="COUNT_0">%d</xliff:g></item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="other">siku <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="one">siku <xliff:g id="COUNT_0">%d</xliff:g></item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="other">miaka <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="one">mwaka <xliff:g id="COUNT_0">%d</xliff:g></item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="other">Dakika <xliff:g id="COUNT_1">%d</xliff:g> zilizopita</item>
-      <item quantity="one">Dakika <xliff:g id="COUNT_0">%d</xliff:g> iliyopita</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="other">Saa <xliff:g id="COUNT_1">%d</xliff:g> zilizopita</item>
-      <item quantity="one">Saa <xliff:g id="COUNT_0">%d</xliff:g> iliyopita</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="other">Siku <xliff:g id="COUNT_1">%d</xliff:g> zilizopita</item>
-      <item quantity="one">Siku <xliff:g id="COUNT_0">%d</xliff:g> iliyopita</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="other">Miaka <xliff:g id="COUNT_1">%d</xliff:g> iliyopita</item>
-      <item quantity="one">Mwaka <xliff:g id="COUNT_0">%d</xliff:g> uliopita</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="other">baada ya dakika <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="one">baada ya dakika <xliff:g id="COUNT_0">%d</xliff:g></item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="other">baada ya saa <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="one">baada ya saa <xliff:g id="COUNT_0">%d</xliff:g></item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="other">baada ya siku <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="one">baada ya siku <xliff:g id="COUNT_0">%d</xliff:g></item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="other">baada ya miaka <xliff:g id="COUNT_1">%d</xliff:g></item>
-      <item quantity="one">baada ya mwaka <xliff:g id="COUNT_0">%d</xliff:g></item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"Dak <xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"Saa <xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"Siku <xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"Mwaka <xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"baada ya dak <xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"baada ya saa <xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"baada ya siku <xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"baada ya mwaka <xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Dakika # iliyopita}other{Dakika # zilizopita}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Saa # iliyopita}other{Saa # zilizopita}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Siku # iliyopita}other{Siku # zilizopita}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{Mwaka # uliopita}other{Miaka # iliyopita}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{Dakika #}other{Dakika #}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{Saa #}other{Saa #}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{Siku #}other{Siku #}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{Mwaka #}other{Miaka #}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Shida ya video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"Video hii hairuhusiwi kutiririshwa kwenye kifaa hiki."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"Haiwezi kucheza video hii."</string>
@@ -1187,10 +1140,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Futa"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Mbinu ya uingizaji"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Vitendo vya maandishi"</string>
-    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
-    <skip />
-    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
-    <skip />
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Rudi nyuma"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Badilisha mbinu ya kuingiza data"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Nafasi ya kuhifadhi inakaribia kujaa"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Baadhi ya vipengee vya mfumo huenda visifanye kazi"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Hifadhi haitoshi kwa ajili ya mfumo. Hakikisha una MB 250 za nafasi ya hifadhi isiyotumika na uanzishe upya."</string>
@@ -1411,6 +1362,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Rejesha mipangilio iliyotoka nayo kiwandani ili uzime hali ya Muunganisho wa Majaribio."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Muunganisho kupitia mlango umewashwa"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Utendaji unaathirika. lli uzime, teua programu ya kuwasha mfumo wa uendeshaji."</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"Kipengele cha majaribio cha MTE kimeruhusiwa"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"Utendaji na uthabiti unaweza kuathiriwa. Washa tena ili uzime. Ikiwa imeruhusiwa kwa kutumia arm64.memtag.bootctl, iweke kuwa hakuna kabla ya kuanza."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Unyevu au uchafu katika mlango wa USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"Mlango wa USB umezimwa kiotomatiki. Gusa ili upate maelezo zaidi."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"Ni sawa kutumia mlango wa USB"</string>
@@ -1547,10 +1500,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Ruka"</string>
     <string name="no_matches" msgid="6472699895759164599">"Hakuna vinavyolingana"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Pata kwenye ukurasa"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> kati ya <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">1 inayolingana</item>
-    </plurals>
+    <string name="matches_found" msgid="7912910457231705587">"Mechi{count,plural, =1{#}other{# kati ya {total}}} }"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Nimemaliza"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Inafuta hifadhi iliyoshirikiwa…"</string>
     <string name="share" msgid="4157615043345227321">"Shiriki"</string>
@@ -1680,10 +1630,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Mchoro huo si sahihi"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"Nenosiri Lisilo sahihi"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Nambari ya PIN si sahihi"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="other">Jaribu tena baada ya sekunde <xliff:g id="NUMBER">%d</xliff:g>.</item>
-      <item quantity="one">Jaribu tena baada ya sekunde 1.</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Chora ruwaza yako"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Ingiza PIN ya SIM"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Weka PIN"</string>
@@ -1880,10 +1826,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Unda PIN ya kurekebisha vikwazo"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN hazilingani. Jaribu tena."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN ni fupi mno. Lazima iwe angalau tarakimu 4."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="other">Jaribu tena baada ya sekunde <xliff:g id="COUNT">%d</xliff:g></item>
-      <item quantity="one">Jaribu tena baada ya sekunde 1</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Jaribu tena baadaye"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Unatazama skrini nzima"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Ili kuondoka, telezesha kidole kutoka juu hadi chini."</string>
@@ -1911,46 +1853,20 @@
     <string name="data_saver_description" msgid="4995164271550590517">"Ili kusaidia kupunguza matumizi ya data, Kiokoa Data huzuia baadhi ya programu kupokea na kutuma data chinichini. Programu ambayo unatumia sasa inaweza kufikia data, lakini si kila wakati. Kwa mfano, haitaonyesha picha hadi utakapozifungua."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ungependa Kuwasha Kiokoa Data?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Washa"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="other">Kwa dakika %1$d (hadi <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Kwa dakika moja (hadi <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="other">Kwa dakika %1$d (mpaka <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Kwa dakika 1 (mpaka <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="other">Kwa saa %1$d (hadi <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Kwa saa 1 (hadi <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="other">Kwa saa %1$d (mpaka <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Kwa saa 1 (mpaka <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="other">Kwa dakika %d</item>
-      <item quantity="one">Kwa dakika moja</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="other">Kwa dakika %d</item>
-      <item quantity="one">Kwa dakika 1</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="other">Kwa saa %d</item>
-      <item quantity="one">Kwa saa 1</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="other">Kwa saa %d </item>
-      <item quantity="one">Kwa saa 1 </item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Kwa dakika moja (hadi {formattedTime})}other{Kwa dakika # (hadi {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Kwa dakika 1 (hadi {formattedTime})}other{Kwa dakika # (hadi {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Kwa saa 1 (hadi {formattedTime})}other{Kwa saa # (hadi {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Kwa saa 1 (hadi {formattedTime})}other{Kwa saa # (hadi {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Kwa dakika moja}other{Kwa dakika #}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Kwa dakika 1}other{Kwa dakika #}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Kwa saa 1}other{Kwa saa #}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Kwa saa 1}other{Kwa saa #}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Hadi <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Hadi <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Mpaka <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (kengele inayofuata)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Hadi utakapoizima"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Hadi utakapozima Usinisumbue"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Kunja"</string>
-    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Usinisumbue"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Wakati wa hali tuli"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Usiku wa wiki"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Wikendi"</string>
@@ -1989,10 +1905,6 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Simu uliyopigiwa"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Simu inayoendelea"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Inachuja simu unayopigiwa"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> vimechaguliwa</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> kimechaguliwa</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Ambazo aina haijabainishwa"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Uliweka mipangilio ya umuhimu wa arifa hizi."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Hii ni muhimu kwa sababu ya watu waliohusika."</string>
@@ -2058,10 +1970,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Hifadhi kwa ajili ya Kujaza Kiotomatiki"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Maudhui hayawezi kujazwa kiotomatiki"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Hakuna mapendekezo ya kujaza kiotomatiki"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="other">Mapendekezo <xliff:g id="COUNT">%1$s</xliff:g> ya kujaza kiotomatiki</item>
-      <item quantity="one">Pendekezo moja la kujaza kiotomatiki</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{Pendekezo moja la kujaza otomatiki}other{Mapendekezo # ya kujaza otomatiki}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"Ungependa kuhifadhi kwenye "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Ungependa kuhifadhi <xliff:g id="TYPE">%1$s</xliff:g> kwenye "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Ungependa kuhifadhi <xliff:g id="TYPE_0">%1$s</xliff:g> na <xliff:g id="TYPE_1">%2$s</xliff:g> kwenye "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
@@ -2108,15 +2017,22 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ONDOA"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"FUNGUA TU"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Imetambua programu hatari"</string>
+    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
+    <skip />
+    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
+    <skip />
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> inataka kuonyesha vipengee <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Badilisha"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Itatetema arifa ikitumwa au simu ikipigwa"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Haitatoa mlio arifa ikitumwa au simu ikipigwa"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Mabadiliko kwenye mfumo"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Usinisumbue"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Mpya: Kipengele cha Usinisumbue kinaficha arifa"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Gusa ili upate maelezo zaidi na ubadilishe."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Kipengele cha Usinisumbue kimebadilishwa"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Gusa ili uangalie kipengee ambacho kimezuiwa."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Mfumo"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Mipangilio"</string>
@@ -2133,7 +2049,6 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Sawa"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Zima"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Pata maelezo zaidi"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Kipengele cha Arifa Zilizoboreshwa kilichukua nafasi ya Arifa Zinazojirekebisha za Android katika Android 12. Kipengele hiki kinaonyesha majibu na vitendo vinavyopendekezwa na kupanga arifa zako.\n\nKipengele cha Arifa zilizoboreshwa kinaweza kufikia maudhui ya arifa, ikiwa ni pamoja na taarifa binafsi kama vile majina ya anwani na ujumbe. Kipengele hiki kinaweza pia kuondoa au kujibu arifa, kama vile kujibu simu na kudhibiti kipengele cha Usinisumbue."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Arifa ya maelezo ya Hali ya Kawaida"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Huenda betri itakwisha chaji mapema"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Imewasha Kiokoa Betri ili kurefusha muda wa matumizi ya betri"</string>
@@ -2162,10 +2077,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"Wasilisho la <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth haitazima katika hali ya ndegeni"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Inapakia"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="other">Faili <xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g></item>
-      <item quantity="one">Faili <xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g></item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + faili #}other{{file_name} + faili #}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Hujapendekezewa watu wa kushiriki nao"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Orodha ya programu"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Programu hii haijapewa ruhusa ya kurekodi lakini inaweza kurekodi sauti kupitia kifaa hiki cha USB."</string>
@@ -2177,10 +2089,22 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Kidirisha cha Nishati"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Skrini Iliyofungwa"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Picha ya skrini"</string>
+    <!-- no translation found for accessibility_system_action_headset_hook_label (8524691721287425468) -->
+    <skip />
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Njia ya Mkato ya Ufikivu kwenye Skrini"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Kichagua Njia ya Mkato ya Ufikivu kwenye Skrini"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Njia ya Mkato ya Ufikivu"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Ondoa Sehemu ya Arifa"</string>
+    <!-- no translation found for accessibility_system_action_dpad_up_label (1029042950229333782) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_down_label (3441918448624921461) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_left_label (6557647179116479152) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_right_label (9180196950365804081) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_center_label (8149791419358224893) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Upau wa manukuu wa <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> kimewekwa katika kikundi KILICHODHIBITIWA"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2201,8 +2125,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Gusa ili uwashe"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Hakuna programu za kazini"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Hakuna programu za binafsi"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Ungependa kufungua katika <xliff:g id="APP">%s</xliff:g> kwenye wasifu wa binafsi?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Ungependa kufungua katika <xliff:g id="APP">%s</xliff:g> kwenye wasifu wa kazini?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Tumia kivinjari cha binafsi"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Tumia kivinjari cha kazini"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN ya kufungua mtandao wa SIM"</string>
@@ -2332,4 +2258,9 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> inaweza kuangalia na kudhibiti skrini yako. Gusa ili ukague."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> Imetafsiriwa."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Ujumbe umetafsiriwa kwa <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> kutoka <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>."</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Shughuli za Chinichini"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Shughuli za Chinichini"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> inatumika chinichini na kumaliza nishati ya betri. Gusa ili ukague."</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> inatumika chinichini kwa muda mrefu. Gusa ili ukague."</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Angalia programu zinazotumika"</string>
 </resources>

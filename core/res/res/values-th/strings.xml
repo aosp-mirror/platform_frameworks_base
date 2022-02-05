@@ -70,7 +70,6 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"การโทรสามสาย"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"การปฏิเสธสายรบกวนที่ไม่ต้องการ"</string>
     <string name="CndMmi" msgid="185136449405618437">"การส่งหมายเลขที่โทร"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"ห้ามรบกวน"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"หมายเลขผู้โทรได้รับการตั้งค่าเริ่มต้นเป็นถูกจำกัด การโทรครั้งต่อไป: ถูกจำกัด"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"หมายเลขผู้โทรได้รับการตั้งค่าเริ่มต้นเป็นถูกจำกัด การโทรครั้งต่อไป: ไม่จำกัด"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"หมายเลขผู้โทรได้รับการตั้งค่าเริ่มต้นเป็นไม่จำกัด การโทรครั้งต่อไป: ถูกจำกัด"</string>
@@ -180,10 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"ที่เก็บข้อมูลนาฬิกาเต็ม โปรดลบไฟล์บางไฟล์เพื่อเพิ่มพื้นที่ว่าง"</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"พื้นที่เก็บข้อมูลของอุปกรณ์ Android TV เต็มแล้ว โปรดลบบางไฟล์เพื่อเพิ่มพื้นที่ว่าง"</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"ที่เก็บข้อมูลโทรศัพท์เต็ม ลบบางไฟล์เพื่อเพิ่มที่ว่าง"</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="other">ติดตั้งใบรับรอง CA แล้ว</item>
-      <item quantity="one">ติดตั้งใบรับรอง CA แล้ว</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{ติดตั้งผู้ออกใบรับรองแล้ว}other{ติดตั้งผู้ออกใบรับรองแล้ว}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"โดยบุคคลที่สามที่ไม่รู้จัก"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"โดยผู้ดูแลระบบโปรไฟล์งานของคุณ"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"โดย <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -203,6 +199,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"บริการแจ้งเตือนเกี่ยวกับเซ็นเซอร์"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight Service"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"บริการอัปเดตเวลาของ GNSS"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"บริการตัวจัดการนโยบายด้านอุปกรณ์"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"บริการโปรแกรมจัดการการหาเพลง"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"ระบบจะลบข้อมูลในอุปกรณ์ของคุณ"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"ใช้แอปผู้ดูแลระบบนี้ไม่ได้ ขณะนี้ระบบจะลบข้อมูลในอุปกรณ์ของคุณ\n\nโปรดติดต่อผู้ดูแลระบบขององค์กรหากมีคำถาม"</string>
@@ -256,10 +253,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"ใช้ตัวเลือกนี้ได้เกือบทุกสถานการณ์ โดยจะอนุญาตให้คุณติดตามความคืบหน้าของรายงาน ป้อนรายละเอียดเพิ่มเติมของปัญหา และถ่ายภาพหน้าจอ หัวข้อที่ใช้งานน้อยแต่ใช้เวลานานในการรายงานอาจถูกข้ามไป"</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"รายงานฉบับเต็ม"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"ใช้ตัวเลือกนี้เพื่อให้มีการรบกวนระบบน้อยที่สุดเมื่ออุปกรณ์ของคุณไม่ตอบสนองหรือตอบสนองช้ามาก หรือเมื่อคุณต้องการทุกหัวข้อในรายงาน ตัวเลือกนี้จะไม่อนุญาตให้คุณป้อนรายละเอียดเพิ่มเติมหรือถ่ายภาพหน้าจอเพิ่มเติม"</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="other">จะจับภาพหน้าจอสำหรับรายงานข้อบกพร่องใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที</item>
-      <item quantity="one">จะจับภาพหน้าจอสำหรับรายงานข้อบกพร่องใน <xliff:g id="NUMBER_0">%d</xliff:g> วินาที</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{จะจับภาพหน้าจอสำหรับรายงานข้อบกพร่องใน # วินาที}other{จะจับภาพหน้าจอสำหรับรายงานข้อบกพร่องใน # วินาที}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"ถ่ายภาพหน้าจอด้วยรายงานข้อบกพร่องแล้ว"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"ถ่ายภาพหน้าจอด้วยรายงานข้อบกพร่องไม่สำเร็จ"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"โหมดปิดเสียง"</string>
@@ -310,8 +304,14 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"เข้าถึงปฏิทิน"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"ส่งและดูข้อความ SMS"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"ไฟล์และสื่อ"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"เข้าถึงรูปภาพ สื่อ และไฟล์บนอุปกรณ์ของคุณ"</string>
+    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
+    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"เพลงและเสียงอื่นๆ"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"เข้าถึงไฟล์เสียงในอุปกรณ์"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"รูปภาพและวิดีโอ"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"เข้าถึงไฟล์ภาพและวิดีโอในอุปกรณ์"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"ไมโครโฟน"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"บันทึกเสียง"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"การเคลื่อนไหวร่างกาย"</string>
@@ -683,6 +683,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"อนุญาตให้แอปพลิเคชันอ่านสถานะการซิงค์ของบัญชี ซึ่งรวมถึงประวัติกิจกรรมการซิงค์และปริมาณข้อมูลที่ซิงค์"</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"อ่านเนื้อหาในพื้นที่จัดเก็บข้อมูลที่ใช้ร่วมกัน"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"อนุญาตให้แอปอ่านเนื้อหาในพื้นที่จัดเก็บข้อมูลที่ใช้ร่วมกัน"</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"อ่านไฟล์เสียงจากพื้นที่เก็บข้อมูลที่แชร์"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"อนุญาตให้แอปอ่านไฟล์เสียงจากพื้นที่เก็บข้อมูลที่แชร์"</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"อ่านไฟล์วิดีโอจากพื้นที่เก็บข้อมูลที่แชร์"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"อนุญาตให้แอปอ่านไฟล์วิดีโอจากพื้นที่เก็บข้อมูลที่แชร์"</string>
+    <string name="permlab_readMediaImage" msgid="1507059005825769856">"อ่านไฟล์ภาพจากพื้นที่เก็บข้อมูลที่แชร์"</string>
+    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"อนุญาตให้แอปอ่านไฟล์ภาพจากพื้นที่เก็บข้อมูลที่แชร์"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"แก้ไขหรือลบเนื้อหาในพื้นที่จัดเก็บข้อมูลที่ใช้ร่วมกัน"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"อนุญาตให้แอปเขียนเนื้อหาในพื้นที่จัดเก็บข้อมูลที่ใช้ร่วมกัน"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"โทร/รับสาย SIP"</string>
@@ -729,8 +735,6 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"อนุญาตให้แอปพลิเคชันเชื่อมโยงกับอินเทอร์เฟซระดับบนสุดของบริการรับส่งข้อความของผู้ให้บริการ ไม่ควรใช้สำหรับแอปธรรมดาทั่วไป"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"เชื่อมโยงกับบริการของผู้ให้บริการ"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"อนุญาตให้เจ้าของเชื่อมโยงกับบริการของผู้ให้บริการ ไม่ควรต้องใช้สำหรับแอปทั่วไป"</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"เข้าถึงโหมดห้ามรบกวน"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"อนุญาตให้แอปอ่านและเขียนการกำหนดค่าโหมดห้ามรบกวน"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"เริ่มการใช้สิทธิ์การดู"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"อนุญาตให้เจ้าของเริ่มการใช้สิทธิ์ของแอป ไม่จำเป็นสำหรับแอปทั่วไป"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"เริ่มดูสิทธิ์ที่เลือกไว้"</string>
@@ -1072,10 +1076,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ต้องการเปิดใช้งาน \"สำรวจโดยการแตะ\" เมื่อเปิดใช้งานแล้ว คุณสามารถฟังหรือดูคำอธิบายของสิ่งที่อยู่ใต้นิ้วข​​องคุณ หรือใช้ท่าทางสัมผัสต่างๆ เพื่อโต้ตอบกับโทรศัพท์ได้"</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 เดือนที่ผ่านมา"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"ก่อน 1 เดือนที่แล้ว"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="other"> <xliff:g id="COUNT_1">%d</xliff:g> วันที่แล้ว</item>
-      <item quantity="one"> <xliff:g id="COUNT_0">%d</xliff:g> วันที่แล้ว</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{# วันที่ผ่านมา}other{# วันที่ผ่านมา}}"</string>
     <string name="last_month" msgid="1528906781083518683">"เดือนที่แล้ว"</string>
     <string name="older" msgid="1645159827884647400">"เก่ากว่า"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"ในวันที่ <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1094,70 +1095,22 @@
     <string name="year" msgid="5182610307741238982">"ปี"</string>
     <string name="years" msgid="5797714729103773425">" ปี"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"ขณะนี้"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> นาที</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> นาที</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ชม.</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ชม.</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> วัน</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> วัน</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ปี</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ปี</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="other">ใน <xliff:g id="COUNT_1">%d</xliff:g> นาที</item>
-      <item quantity="one">ใน <xliff:g id="COUNT_0">%d</xliff:g> นาที</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="other">ใน <xliff:g id="COUNT_1">%d</xliff:g> ชม.</item>
-      <item quantity="one">ใน <xliff:g id="COUNT_0">%d</xliff:g> ชม.</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="other">ใน <xliff:g id="COUNT_1">%d</xliff:g> วัน</item>
-      <item quantity="one">ใน <xliff:g id="COUNT_0">%d</xliff:g> วัน</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="other">ใน <xliff:g id="COUNT_1">%d</xliff:g> ปี</item>
-      <item quantity="one">ใน <xliff:g id="COUNT_0">%d</xliff:g> ปี</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> นาทีที่ผ่านมา</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> นาทีที่ผ่านมา</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ชั่วโมงที่ผ่านมา</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ชั่วโมงที่ผ่านมา</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> วันที่ผ่านมา</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> วันที่ผ่านมา</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ปีที่ผ่านมา</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ปีที่ผ่านมา</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="other">ใน <xliff:g id="COUNT_1">%d</xliff:g> นาที</item>
-      <item quantity="one">ใน <xliff:g id="COUNT_0">%d</xliff:g> นาที</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="other">ใน <xliff:g id="COUNT_1">%d</xliff:g> ชั่วโมง</item>
-      <item quantity="one">ใน <xliff:g id="COUNT_0">%d</xliff:g> ชั่วโมง</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="other">ใน <xliff:g id="COUNT_1">%d</xliff:g> วัน</item>
-      <item quantity="one">ใน <xliff:g id="COUNT_0">%d</xliff:g> วัน</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="other">ใน <xliff:g id="COUNT_1">%d</xliff:g> ปี</item>
-      <item quantity="one">ใน <xliff:g id="COUNT_0">%d</xliff:g> ปี</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> นาที"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> ชม."</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g> วัน"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g> ปี"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"ใน <xliff:g id="COUNT">%d</xliff:g> นาที"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"ใน <xliff:g id="COUNT">%d</xliff:g> ชม."</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"ใน <xliff:g id="COUNT">%d</xliff:g> วัน"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"ใน <xliff:g id="COUNT">%d</xliff:g> ปี"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# นาทีที่ผ่านมา}other{# นาทีที่ผ่านมา}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ชั่วโมงที่ผ่านมา}other{# ชั่วโมงที่ผ่านมา}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# วันที่ผ่านมา}other{# วันที่ผ่านมา}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{# ปีที่ผ่านมา}other{# ปีที่ผ่านมา}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# นาที}other{# นาที}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# ชั่วโมง}other{# ชั่วโมง}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# วัน}other{# วัน}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# ปี}other{# ปี}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"ปัญหาเกี่ยวกับวิดีโอ"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"วิดีโอนี้ไม่สามารถสตรีมไปยังอุปกรณ์นี้"</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"ไม่สามารถเล่นวิดีโอนี้"</string>
@@ -1187,10 +1140,8 @@
     <string name="deleteText" msgid="4200807474529938112">"ลบ"</string>
     <string name="inputMethod" msgid="1784759500516314751">"วิธีป้อนข้อมูล"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"การทำงานของข้อความ"</string>
-    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
-    <skip />
-    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
-    <skip />
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"กลับ"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"สลับวิธีการป้อนข้อมูล"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"พื้นที่จัดเก็บเหลือน้อย"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"บางฟังก์ชันระบบอาจไม่ทำงาน"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"พื้นที่เก็บข้อมูลไม่เพียงพอสำหรับระบบ โปรดตรวจสอบว่าคุณมีพื้นที่ว่าง 250 MB แล้วรีสตาร์ท"</string>
@@ -1411,6 +1362,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"รีเซ็ตเป็นค่าเริ่มต้นเพื่อปิดใช้โหมดโปรแกรมทดสอบอัตโนมัติ"</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"เปิดใช้คอนโซลการเรียงอันดับแล้ว"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"ประสิทธิภาพได้รับผลกระทบ ตรวจสอบ Bootloader เพื่อปิดใช้งาน"</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"เปิดใช้ MTE เชิงทดสอบอยู่"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"อาจส่งผลกระทบต่อประสิทธิภาพและความเสถียร รีบูตเพื่อปิดใช้ หากเปิดใช้ด้วย arm64.memtag.bootctl ให้ตั้งค่าเป็น \"ไม่มี\" ก่อน"</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"มีของเหลวหรือฝุ่นละอองในพอร์ต USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"พอร์ต USB ปิดใช้โดยอัตโนมัติ แตะเพื่อดูข้อมูลเพิ่มเติม"</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"ใช้พอร์ต USB ได้แล้ว"</string>
@@ -1547,10 +1500,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"ข้าม"</string>
     <string name="no_matches" msgid="6472699895759164599">"ไม่พบรายการที่ตรงกัน"</string>
     <string name="find_on_page" msgid="5400537367077438198">"ค้นหาบนหน้า"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> จาก <xliff:g id="TOTAL">%d</xliff:g> รายการ</item>
-      <item quantity="one">ตรงกัน 1 รายการ</item>
-    </plurals>
+    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{ตรงกัน # รายการ}other{# จาก {total}}} }"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"เสร็จสิ้น"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"กำลังลบพื้นที่เก็บข้อมูลที่แชร์…"</string>
     <string name="share" msgid="4157615043345227321">"แชร์"</string>
@@ -1680,10 +1630,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"รูปแบบไม่ถูกต้อง"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"รหัสผ่านไม่ถูกต้อง"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"PIN ไม่ถูกต้อง"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="other">ลองอีกครั้งใน <xliff:g id="NUMBER">%d</xliff:g> วินาที</item>
-      <item quantity="one">ลองอีกครั้งใน 1 วินาที</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"ลากรูปแบบของคุณ"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"ป้อน PIN ของซิม"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"ป้อน PIN"</string>
@@ -1880,10 +1826,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"สร้าง PIN สำหรับการแก้ไขข้อจำกัด"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN ไม่ตรงกัน โปรดลองอีกครั้ง"</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN สั้นเกินไป ต้องมีอย่างน้อย 4 หลัก"</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="other">ลองอีกครั้งใน <xliff:g id="COUNT">%d</xliff:g> วินาที</item>
-      <item quantity="one">ลองอีกครั้งใน 1 วินาที</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"ลองอีกครั้งในภายหลัง"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"กำลังดูแบบเต็มหน้าจอ"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"หากต้องการออก ให้เลื่อนลงจากด้านบน"</string>
@@ -1911,46 +1853,20 @@
     <string name="data_saver_description" msgid="4995164271550590517">"เพื่อช่วยลดปริมาณการใช้อินเทอร์เน็ต โปรแกรมประหยัดอินเทอร์เน็ตจะช่วยป้องกันไม่ให้บางแอปส่งหรือรับข้อมูลโดยการใช้อินเทอร์เน็ตอยู่เบื้องหลัง แอปที่คุณกำลังใช้งานสามารถเข้าถึงอินเทอร์เน็ตได้ แต่อาจไม่บ่อยเท่าเดิม ตัวอย่างเช่น ภาพต่างๆ จะไม่แสดงจนกว่าคุณจะแตะที่ภาพเหล่านั้น"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"เปิดการประหยัดอินเทอร์เน็ตไหม"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"เปิด"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="other">ระยะเวลา %1$d นาที (จนถึงเวลา <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">ระยะเวลา 1 นาที (จนถึงเวลา <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="other">เป็นเวลา %1$d นาที (จนถึง <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">เป็นเวลา 1 นาที (จนถึง <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="other">ระยะเวลา %1$d ชั่วโมง (จนถึง <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">ระยะเวลา 1 ชั่วโมง (จนถึง <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="other">เป็นเวลา %1$d ชม. (จนถึง <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">เป็นเวลา 1 ชม. (จนถึง <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="other">ระยะเวลา %d นาที</item>
-      <item quantity="one">ระยะเวลา 1 นาที</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="other">เป็นเวลา %d นาที</item>
-      <item quantity="one">เป็นเวลา 1 นาที</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="other">ระยะเวลา %d ชั่วโมง</item>
-      <item quantity="one">ระยะเวลา 1 ชั่วโมง</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="other">เป็นเวลา %d ชม.</item>
-      <item quantity="one">เป็นเวลา 1 ชม.</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{ระยะเวลา 1 นาที (จนถึง {formattedTime})}other{ระยะเวลา # นาที (จนถึง {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{ระยะเวลา 1 นาที (จนถึง {formattedTime})}other{ระยะเวลา # นาที (จนถึง {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{ระยะเวลา 1 ชั่วโมง (จนถึง {formattedTime})}other{ระยะเวลา # ชั่วโมง (จนถึง {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{ระยะเวลา 1 ชม. (จนถึง {formattedTime})}other{ระยะเวลา # ชม. (จนถึง {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{ระยะเวลา 1 นาที}other{ระยะเวลา # นาที}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{ระยะเวลา 1 นาที}other{ระยะเวลา # นาที}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{ระยะเวลา 1 ชั่วโมง}other{ระยะเวลา # ชั่วโมง}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{ระยะเวลา 1 ชม.}other{ระยะเวลา # ชม.}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"จนถึง <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"จนถึงเวลา <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"จนถึงเวลา <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (การปลุกครั้งถัดไป)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"จนกว่าคุณจะปิด"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"จนกว่าคุณจะปิดห้ามรบกวน"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"ยุบ"</string>
-    <string name="zen_mode_feature_name" msgid="3785547207263754500">"ห้ามรบกวน"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ช่วงเวลาเครื่องไม่ทำงาน"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"คืนวันธรรมดา"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"สุดสัปดาห์"</string>
@@ -1989,10 +1905,6 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"สายเรียกเข้า"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"สายที่สนทนาอยู่"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"กำลังสกรีนสายเรียกเข้า"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="other">เลือกไว้ <xliff:g id="COUNT_1">%1$d</xliff:g> รายการ</item>
-      <item quantity="one">เลือกไว้ <xliff:g id="COUNT_0">%1$d</xliff:g> รายการ</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"ไม่จัดอยู่ในหมวดหมู่ใดๆ"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"คุณตั้งค่าความสำคัญของการแจ้งเตือนเหล่านี้"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ข้อความนี้สำคัญเนื่องจากบุคคลที่เกี่ยวข้อง"</string>
@@ -2058,10 +1970,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"บันทึกไว้ป้อนอัตโนมัติ"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"ไม่สามารถป้อนเนื้อหาอัตโนมัติ"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"ไม่มีคำแนะนำสำหรับการป้อนอัตโนมัติ"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="other">คำแนะนำสำหรับการป้อนอัตโนมัติ <xliff:g id="COUNT">%1$s</xliff:g> รายการ</item>
-      <item quantity="one">คำแนะนำสำหรับการป้อนอัตโนมัติ 1 รายการ</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{คำแนะนำการป้อนข้อความอัตโนมัติ 1 รายการ}other{คำแนะนำการป้อนข้อความอัตโนมัติ # รายการ}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"บันทึกลงใน "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ไหม"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"บันทึก<xliff:g id="TYPE">%1$s</xliff:g>ลงใน "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ไหม"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"บันทึก<xliff:g id="TYPE_0">%1$s</xliff:g>และ<xliff:g id="TYPE_1">%2$s</xliff:g>ลงใน "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ไหม"</string>
@@ -2108,15 +2017,22 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ถอนการติดตั้ง"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"เปิดต่อไป"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ตรวจพบแอปที่เป็นอันตราย"</string>
+    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
+    <skip />
+    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
+    <skip />
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ต้องการแสดงส่วนต่างๆ ของ <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"แก้ไข"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"สายเรียกเข้าและการแจ้งเตือนจะสั่น"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"สายเรียกเข้าและการแจ้งเตือนจะไม่ส่งเสียง"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"การเปลี่ยนแปลงระบบ"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ห้ามรบกวน"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"ใหม่: โหมดห้ามรบกวนซ่อนการแจ้งเตือนไว้"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"แตะเพื่อดูข้อมูลเพิ่มเติมและเปลี่ยนแปลง"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"เปลี่ยน \"ห้ามรบกวน\" แล้ว"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"แตะเพื่อดูรายการที่ถูกบล็อก"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ระบบ"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"การตั้งค่า"</string>
@@ -2133,7 +2049,6 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ตกลง"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ปิด"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ดูข้อมูลเพิ่มเติม"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"การแจ้งเตือนที่เพิ่มประสิทธิภาพมาแทนที่การแจ้งเตือนแบบปรับอัตโนมัติของ Android ใน Android 12 ฟีเจอร์นี้จะแสดงการดำเนินการและการตอบกลับที่แนะนำ ตลอดจนจัดระเบียบการแจ้งเตือน\n\nการแจ้งเตือนที่เพิ่มประสิทธิภาพจะเข้าถึงเนื้อหาของการแจ้งเตือนได้ ซึ่งรวมถึงข้อมูลส่วนบุคคล เช่น ชื่อผู้ติดต่อและข้อความ ฟีเจอร์นี้ยังปิดหรือตอบสนองต่อการแจ้งเตือนได้ด้วย เช่น การรับสายโทรศัพท์และการควบคุมโหมดห้ามรบกวน"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"การแจ้งเตือนข้อมูลโหมดกิจวัตร"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"แบตเตอรี่อาจหมดก่อนการชาร์จปกติ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"เปิดใช้งานโหมดประหยัดแบตเตอรี่แล้วเพื่อยืดอายุการใช้งานแบตเตอรี่"</string>
@@ -2162,10 +2077,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"ไฟล์งานนำเสนอ <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"บลูทูธจะเปิดอยู่ในโหมดบนเครื่องบิน"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"กำลังโหลด"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> และอีก <xliff:g id="COUNT_3">%d</xliff:g> ไฟล์</item>
-      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> และอีก <xliff:g id="COUNT_1">%d</xliff:g> ไฟล์</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # ไฟล์}other{{file_name} + # ไฟล์}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ไม่พบใครที่แนะนำให้แชร์ด้วย"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"รายชื่อแอป"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"แอปนี้ไม่ได้รับอนุญาตให้บันทึกเสียงแต่จะบันทึกเสียงผ่านอุปกรณ์ USB นี้ได้"</string>
@@ -2177,10 +2089,22 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"กล่องโต้ตอบพลังงาน"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"หน้าจอล็อก"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"ภาพหน้าจอ"</string>
+    <!-- no translation found for accessibility_system_action_headset_hook_label (8524691721287425468) -->
+    <skip />
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"ทางลัดการช่วยเหลือพิเศษบนหน้าจอ"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"ตัวเลือกทางลัดการช่วยเหลือพิเศษบนหน้าจอ"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ทางลัดการช่วยเหลือพิเศษ"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"ปิดหน้าต่างแจ้งเตือน"</string>
+    <!-- no translation found for accessibility_system_action_dpad_up_label (1029042950229333782) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_down_label (3441918448624921461) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_left_label (6557647179116479152) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_right_label (9180196950365804081) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_center_label (8149791419358224893) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"แถบคำบรรยาย <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"ใส่ <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ในที่เก็บข้อมูลที่ถูกจำกัดแล้ว"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2201,8 +2125,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"แตะเพื่อเปิด"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ไม่มีแอปงาน"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ไม่มีแอปส่วนตัว"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"เปิดใน <xliff:g id="APP">%s</xliff:g> ในโปรไฟล์ส่วนตัวไหม"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"เปิดใน <xliff:g id="APP">%s</xliff:g> ในโปรไฟล์งานไหม"</string>
+    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ใช้เบราว์เซอร์ส่วนตัว"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ใช้เบราว์เซอร์งาน"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN ปลดล็อกเครือข่ายที่ใช้กับ SIM"</string>
@@ -2332,4 +2258,9 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> จะดูและควบคุมหน้าจอของคุณได้ แตะเพื่อตรวจสอบ"</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> แปลแล้ว"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"แปลข้อความจากภาษา<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>เป็นภาษา<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>แล้ว"</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"กิจกรรมในเบื้องหลัง"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"กิจกรรมในเบื้องหลัง"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> กำลังทำงานอยู่ในเบื้องหลังและทำให้เปลืองแบตเตอรี่ แตะเพื่อตรวจสอบ"</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ทำงานอยู่ในเบื้องหลังเป็นเวลานาน แตะเพื่อตรวจสอบ"</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ตรวจสอบแอปที่ใช้งานอยู่"</string>
 </resources>
