@@ -115,8 +115,9 @@ class UserUsageStatsService {
         mSystemTimeSnapshot = System.currentTimeMillis();
     }
 
-    void init(final long currentTimeMillis, HashMap<String, Long> installedPackages) {
-        readPackageMappingsLocked(installedPackages);
+    void init(final long currentTimeMillis, HashMap<String, Long> installedPackages,
+            boolean deleteObsoleteData) {
+        readPackageMappingsLocked(installedPackages, deleteObsoleteData);
         mDatabase.init(currentTimeMillis);
         if (mDatabase.wasUpgradePerformed()) {
             mDatabase.prunePackagesDataOnUpgrade(installedPackages);
@@ -180,12 +181,13 @@ class UserUsageStatsService {
         return mDatabase.onPackageRemoved(packageName, timeRemoved);
     }
 
-    private void readPackageMappingsLocked(HashMap<String, Long> installedPackages) {
+    private void readPackageMappingsLocked(HashMap<String, Long> installedPackages,
+            boolean deleteObsoleteData) {
         mDatabase.readMappingsLocked();
         // Package mappings for the system user are updated after 24 hours via a job scheduled by
         // UsageStatsIdleService to ensure restored data is not lost on first boot. Additionally,
         // this makes user service initialization a little quicker on subsequent boots.
-        if (mUserId != UserHandle.USER_SYSTEM) {
+        if (mUserId != UserHandle.USER_SYSTEM && deleteObsoleteData) {
             updatePackageMappingsLocked(installedPackages);
         }
     }
