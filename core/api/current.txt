@@ -48950,10 +48950,9 @@ package android.view {
     method public default void onBackInvoked();
   }
 
-  public abstract class OnBackInvokedDispatcher {
-    ctor public OnBackInvokedDispatcher();
-    method public abstract void registerOnBackInvokedCallback(@NonNull android.view.OnBackInvokedCallback, int);
-    method public abstract void unregisterOnBackInvokedCallback(@NonNull android.view.OnBackInvokedCallback);
+  public interface OnBackInvokedDispatcher {
+    method public void registerOnBackInvokedCallback(@NonNull android.view.OnBackInvokedCallback, @IntRange(from=0) int);
+    method public void unregisterOnBackInvokedCallback(@NonNull android.view.OnBackInvokedCallback);
     field public static final int PRIORITY_DEFAULT = 0; // 0x0
     field public static final int PRIORITY_OVERLAY = 1000000; // 0xf4240
   }

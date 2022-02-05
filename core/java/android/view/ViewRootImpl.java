@@ -317,6 +317,11 @@ public final class ViewRootImpl implements ViewParent,
      */
     private final WindowOnBackInvokedDispatcher mOnBackInvokedDispatcher =
             new WindowOnBackInvokedDispatcher();
+    /**
+     * Compatibility {@link OnBackInvokedCallback} that dispatches KEYCODE_BACK events
+     * to view root for apps using legacy back behavior.
+     */
+    private OnBackInvokedCallback mCompatOnBackInvokedCallback;
 
     /**
      * Callback for notifying about global configuration changes.
@@ -1190,6 +1195,14 @@ public final class ViewRootImpl implements ViewParent,
                         mTmpFrames.displayFrame, mTempRect2, mTmpFrames.frame);
                 setFrame(mTmpFrames.frame);
                 registerBackCallbackOnWindow();
+                if (WindowOnBackInvokedDispatcher.shouldUseLegacyBack()) {
+                    // For apps requesting legacy back behavior, we add a compat callback that
+                    // dispatches {@link KeyEvent#KEYCODE_BACK} to their root views.
+                    // This way from system point of view, these apps are providing custom
+                    // {@link OnBackInvokedCallback}s, and will not play system back animations
+                    // for them.
+                    registerCompatOnBackInvokedCallback();
+                }
                 if (DEBUG_LAYOUT) Log.v(mTag, "Added window " + mWindow);
                 if (res < WindowManagerGlobal.ADD_OKAY) {
                     mAttachInfo.mRootView = null;
@@ -5931,7 +5944,7 @@ public final class ViewRootImpl implements ViewParent,
             }
         }
 
-        private boolean isBack(InputEvent event) {
+        boolean isBack(InputEvent event) {
             if (event instanceof KeyEvent) {
                 return ((KeyEvent) event).getKeyCode() == KeyEvent.KEYCODE_BACK;
             } else {
@@ -6469,6 +6482,19 @@ public final class ViewRootImpl implements ViewParent,
 
             if (shouldDropInputEvent(q)) {
                 return FINISH_NOT_HANDLED;
+            }
+
+            if (isBack(event)
+                    && mContext != null
+                    && !WindowOnBackInvokedDispatcher.shouldUseLegacyBack()) {
+                // Invoke the appropriate {@link OnBackInvokedCallback} if the new back
+                // navigation should be used, and the key event is not handled by anything else.
+                OnBackInvokedCallback topCallback =
+                        getOnBackInvokedDispatcher().getTopCallback();
+                if (topCallback != null) {
+                    topCallback.onBackInvoked();
+                    return FINISH_HANDLED;
+                }
             }
 
             // This dispatch is for windows that don't have a Window.Callback. Otherwise,
@@ -8414,6 +8440,7 @@ public final class ViewRootImpl implements ViewParent,
 
             mAdded = false;
         }
+        unregisterCompatOnBackInvokedCallback();
         mOnBackInvokedDispatcher.detachFromWindow();
         WindowManagerGlobal.getInstance().doRemoveView(this);
     }
@@ -10780,6 +10807,38 @@ public final class ViewRootImpl implements ViewParent,
      */
     private void registerBackCallbackOnWindow() {
         mOnBackInvokedDispatcher.attachToWindow(mWindowSession, mWindow);
+    }
+
+    private void sendBackKeyEvent(int action) {
+        long when = SystemClock.uptimeMillis();
+        final KeyEvent ev = new KeyEvent(when, when, action,
+                KeyEvent.KEYCODE_BACK, 0 /* repeat */, 0 /* metaState */,
+                KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /* scancode */,
+                KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
+                InputDevice.SOURCE_KEYBOARD);
+
+        ev.setDisplayId(mContext.getDisplay().getDisplayId());
+        if (mView != null) {
+            mView.dispatchKeyEvent(ev);
+        }
+    }
+
+    private void registerCompatOnBackInvokedCallback() {
+        mCompatOnBackInvokedCallback = new OnBackInvokedCallback() {
+            @Override
+            public void onBackInvoked() {
+                sendBackKeyEvent(KeyEvent.ACTION_DOWN);
+                sendBackKeyEvent(KeyEvent.ACTION_UP);
+            }
+        };
+        mOnBackInvokedDispatcher.registerOnBackInvokedCallback(
+                mCompatOnBackInvokedCallback, OnBackInvokedDispatcher.PRIORITY_DEFAULT);
+    }
+
+    private void unregisterCompatOnBackInvokedCallback() {
+        if (mCompatOnBackInvokedCallback != null) {
+            mOnBackInvokedDispatcher.unregisterOnBackInvokedCallback(mCompatOnBackInvokedCallback);
+        }
     }
 
     @Override
