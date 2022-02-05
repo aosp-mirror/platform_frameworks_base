@@ -26,6 +26,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_RECENT_TASKS;
+import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_BACK_ANIMATION;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_ONE_HANDED;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_PIP;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_SHELL_TRANSITIONS;
@@ -104,6 +105,7 @@ import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.statusbar.policy.CallbackController;
+import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
@@ -163,6 +165,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final Optional<StartingSurface> mStartingSurface;
     private final KeyguardUnlockAnimationController mSysuiUnlockAnimationController;
     private final Optional<RecentTasks> mRecentTasks;
+    private final Optional<BackAnimation> mBackAnimation;
     private final UiEventLogger mUiEventLogger;
 
     private Region mActiveNavBarRegion;
@@ -508,6 +511,9 @@ public class OverviewProxyService extends CurrentUserTracker implements
             mRecentTasks.ifPresent(recentTasks -> params.putBinder(
                     KEY_EXTRA_RECENT_TASKS,
                     recentTasks.createExternalInterface().asBinder()));
+            mBackAnimation.ifPresent((backAnimation) -> params.putBinder(
+                    KEY_EXTRA_SHELL_BACK_ANIMATION,
+                    backAnimation.createExternalInterface().asBinder()));
 
             try {
                 mOverviewProxy.onInitialize(params);
@@ -566,6 +572,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
             Optional<SplitScreen> splitScreenOptional,
             Optional<OneHanded> oneHandedOptional,
             Optional<RecentTasks> recentTasks,
+            Optional<BackAnimation> backAnimation,
             Optional<StartingSurface> startingSurface,
             BroadcastDispatcher broadcastDispatcher,
             ShellTransitions shellTransitions,
@@ -593,6 +600,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         mOneHandedOptional = oneHandedOptional;
         mShellTransitions = shellTransitions;
         mRecentTasks = recentTasks;
+        mBackAnimation = backAnimation;
         mUiEventLogger = uiEventLogger;
 
         // Assumes device always starts with back button until launcher tells it that it does not

@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.back;
 
+import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
 
 import android.animation.Animator;
@@ -26,6 +27,7 @@ import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.WindowConfiguration;
+import android.content.Context;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.hardware.HardwareBuffer;
@@ -35,16 +37,18 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.window.BackNavigationInfo;
+import android.window.IOnBackInvokedCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 
 /**
  * Controls the window animation run when a user initiates a back gesture.
  */
-public class BackAnimationController {
+public class BackAnimationController implements RemoteCallable<BackAnimationController> {
 
     private static final String BACK_PREDICTABILITY_PROP = "persist.debug.back_predictability";
     public static final boolean IS_ENABLED = SystemProperties
@@ -72,18 +76,26 @@ public class BackAnimationController {
     private BackNavigationInfo mBackNavigationInfo;
     private final SurfaceControl.Transaction mTransaction;
     private final IActivityTaskManager mActivityTaskManager;
+    private final Context mContext;
+    @Nullable
+    private IOnBackInvokedCallback mBackToLauncherCallback;
 
-    public BackAnimationController(@ShellMainThread ShellExecutor shellExecutor) {
-        this(shellExecutor, new SurfaceControl.Transaction(), ActivityTaskManager.getService());
+    public BackAnimationController(
+            @ShellMainThread ShellExecutor shellExecutor,
+            Context context) {
+        this(shellExecutor, new SurfaceControl.Transaction(), ActivityTaskManager.getService(),
+                context);
     }
 
     @VisibleForTesting
     BackAnimationController(@NonNull ShellExecutor shellExecutor,
             @NonNull SurfaceControl.Transaction transaction,
-            @NonNull IActivityTaskManager activityTaskManager) {
+            @NonNull IActivityTaskManager activityTaskManager,
+            Context context) {
         mShellExecutor = shellExecutor;
         mTransaction = transaction;
         mActivityTaskManager = activityTaskManager;
+        mContext = context;
     }
 
     public BackAnimation getBackAnimationImpl() {
@@ -92,7 +104,27 @@ public class BackAnimationController {
 
     private final BackAnimation mBackAnimation = new BackAnimationImpl();
 
+    @Override
+    public Context getContext() {
+        return mContext;
+    }
+
+    @Override
+    public ShellExecutor getRemoteCallExecutor() {
+        return mShellExecutor;
+    }
+
     private class BackAnimationImpl implements BackAnimation {
+        private IBackAnimationImpl mBackAnimation;
+
+        @Override
+        public IBackAnimation createExternalInterface() {
+            if (mBackAnimation != null) {
+                mBackAnimation.invalidate();
+            }
+            mBackAnimation = new IBackAnimationImpl(BackAnimationController.this);
+            return mBackAnimation;
+        }
 
         @Override
         public void onBackMotion(MotionEvent event) {
@@ -103,6 +135,48 @@ public class BackAnimationController {
         public void setTriggerBack(boolean triggerBack) {
             mShellExecutor.execute(() -> BackAnimationController.this.setTriggerBack(triggerBack));
         }
+    }
+
+    private static class IBackAnimationImpl extends IBackAnimation.Stub {
+        private BackAnimationController mController;
+
+        IBackAnimationImpl(BackAnimationController controller) {
+            mController = controller;
+        }
+
+        @Override
+        public void setBackToLauncherCallback(IOnBackInvokedCallback callback) {
+            executeRemoteCallWithTaskPermission(mController, "setBackToLauncherCallback",
+                    (controller) -> mController.setBackToLauncherCallback(callback));
+        }
+
+        @Override
+        public void clearBackToLauncherCallback() {
+            executeRemoteCallWithTaskPermission(mController, "clearBackToLauncherCallback",
+                    (controller) -> mController.clearBackToLauncherCallback());
+        }
+
+        @Override
+        public void onBackToLauncherAnimationFinished() {
+            executeRemoteCallWithTaskPermission(mController, "onBackToLauncherAnimationFinished",
+                    (controller) -> mController.onBackToLauncherAnimationFinished());
+        }
+
+        void invalidate() {
+            mController = null;
+        }
+    }
+
+    private void setBackToLauncherCallback(IOnBackInvokedCallback callback) {
+        mBackToLauncherCallback = callback;
+    }
+
+    private void clearBackToLauncherCallback() {
+        mBackToLauncherCallback = null;
+    }
+
+    private void onBackToLauncherAnimationFinished() {
+        finishAnimation();
     }
 
     /**
