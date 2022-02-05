@@ -171,9 +171,4 @@
     <item msgid="146088982397753810">"முடக்கப்பட்டுள்ளது"</item>
     <item msgid="460891964396502657">"இயக்கப்பட்டுள்ளது"</item>
   </string-array>
-  <string-array name="tile_states_fgsmanager">
-    <item msgid="3054341646818213094">"கிடைக்கவில்லை"</item>
-    <item msgid="5581384648880018330">"ஆஃப்"</item>
-    <item msgid="8000850843692192257">"ஆன்"</item>
-  </string-array>
 </resources>
