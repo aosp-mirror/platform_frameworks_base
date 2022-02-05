@@ -1517,7 +1517,6 @@ public class UserManagerService extends IUserManager.Stub {
         return userTypeDetails.getBadgeNoBackground();
     }
 
-    @Override
     public boolean isProfile(@UserIdInt int userId) {
         checkQueryOrInteractPermissionIfCallerInOtherProfileGroup(userId, "isProfile");
         synchronized (mUsersLock) {
@@ -1526,21 +1525,19 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    /**
+     * Returns the user type (if it is a profile), empty string (if it isn't a profile),
+     * or null (if the user doesn't exist).
+     */
     @Override
-    public boolean isManagedProfile(@UserIdInt int userId) {
-        checkQueryOrInteractPermissionIfCallerInOtherProfileGroup(userId, "isManagedProfile");
+    public @Nullable String getProfileType(@UserIdInt int userId) {
+        checkQueryOrInteractPermissionIfCallerInOtherProfileGroup(userId, "getProfileType");
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
-            return userInfo != null && userInfo.isManagedProfile();
-        }
-    }
-
-    @Override
-    public boolean isCloneProfile(@UserIdInt int userId) {
-        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId, "isCloneProfile");
-        synchronized (mUsersLock) {
-            UserInfo userInfo = getUserInfoLU(userId);
-            return userInfo != null && userInfo.isCloneProfile();
+            if (userInfo != null) {
+                return userInfo.isProfile() ? userInfo.userType : "";
+            }
+            return null;
         }
     }
 
@@ -5163,6 +5160,8 @@ public class UserManagerService extends IUserManager.Stub {
                 nextId = scanNextAvailableIdLocked();
             }
         }
+        // If we got here, we probably recycled user ids, so invalidate any caches.
+        UserManager.invalidateStaticUserProperties();
         if (nextId < 0) {
             throw new IllegalStateException("No user id available!");
         }

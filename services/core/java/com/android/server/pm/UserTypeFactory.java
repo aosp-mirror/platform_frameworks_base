@@ -332,13 +332,13 @@ public final class UserTypeFactory {
                 }
 
                 String typeName = parser.getAttributeValue(null, "name");
-                if (typeName == null) {
+                if (typeName == null || typeName.equals("")) {
                     Slog.w(LOG_TAG, "Skipping user type with no name in "
                             + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
                     continue;
                 }
-                typeName.intern();
+                typeName = typeName.intern();
 
                 UserTypeDetails.Builder builder;
                 if (typeName.startsWith("android.")) {

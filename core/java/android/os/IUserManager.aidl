@@ -107,9 +107,7 @@ interface IUserManager {
     void clearSeedAccountData(int userId);
     boolean someUserHasSeedAccount(in String accountName, in String accountType);
     boolean someUserHasAccount(in String accountName, in String accountType);
-    boolean isProfile(int userId);
-    boolean isManagedProfile(int userId);
-    boolean isCloneProfile(int userId);
+    String getProfileType(int userId);
     boolean isMediaSharedWithParent(int userId);
     boolean isCredentialSharedWithParent(int userId);
     boolean isDemoUser(int userId);
