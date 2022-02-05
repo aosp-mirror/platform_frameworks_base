@@ -8012,27 +8012,29 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public boolean shouldRestoreImeVisibility(IBinder imeTargetWindowToken) {
             return WindowManagerService.this.shouldRestoreImeVisibility(imeTargetWindowToken);
-        }
+       }
 
         @Override
-        public void addTaskOverlay(int taskId, SurfaceControlViewHost.SurfacePackage overlay) {
+        public void addTrustedTaskOverlay(int taskId,
+                SurfaceControlViewHost.SurfacePackage overlay) {
             synchronized (mGlobalLock) {
                 final Task task = mRoot.getRootTask(taskId);
                 if (task == null) {
                     throw new IllegalArgumentException("no task with taskId" + taskId);
                 }
-                task.addOverlay(overlay);
+                task.addTrustedOverlay(overlay);
             }
         }
 
         @Override
-        public void removeTaskOverlay(int taskId, SurfaceControlViewHost.SurfacePackage overlay) {
+        public void removeTrustedTaskOverlay(int taskId,
+                SurfaceControlViewHost.SurfacePackage overlay) {
             synchronized (mGlobalLock) {
                 final Task task = mRoot.getRootTask(taskId);
                 if (task == null) {
                     throw new IllegalArgumentException("no task with taskId" + taskId);
                 }
-                task.removeOverlay(overlay);
+                task.removeTrustedOverlay(overlay);
             }
         }
 
