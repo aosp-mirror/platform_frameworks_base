@@ -28,12 +28,12 @@
     <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"ချိတ်ဆက်ထားသည့်အခါ ဤစက်တွင် ထည့်သွင်းထားသော အပလီကေးရှင်းများကို သုံးခွင့်ရရန်အတွက် &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ကိုအဝေးမှ သုံးခွင့်ပေးနိုင်ရန် &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; အားခွင့်ပြုပါ။"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
+    <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ကို သင့်ဖုန်းမှ ဤအချက်အလက် သုံးခွင့်ပြုမည်"</string>
+    <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="profile_name_generic" msgid="6851028682723034988">"စက်"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"ခွင့်ပြုရန်"</string>
     <string name="consent_no" msgid="2640796915611404382">"ခွင့်မပြုပါ"</string>
-    <!-- no translation found for permission_sync_confirmation_title (667074294393493186) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (8873391306499120778) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"သင်၏နာရီသို့ အက်ပ်ခွင့်ပြုချက်များ လွှဲပြောင်းရန်"</string>
+    <string name="permission_sync_summary" msgid="8873391306499120778">"သင်၏နာရီ စနစ်ထည့်သွင်းရာတွင် ပိုလွယ်ကူစေရန် စနစ်ထည့်သွင်းနေစဉ်အတွင်း နာရီတွင်ထည့်သွင်းသော အက်ပ်များသည် သင့်ဖုန်းနှင့် အလားတူခွင့်ပြုချက်များကို သုံးပါမည်။\n\n ဤခွင့်ပြုချက်များတွင် သင့်နာရီ၏ မိုက်ခရိုဖုန်းနှင့် တည်နေရာတို့ကို သုံးခွင့် ပါဝင်နိုင်သည်။"</string>
 </resources>

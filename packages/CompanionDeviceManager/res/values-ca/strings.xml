@@ -28,12 +28,12 @@
     <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"Permet que &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; proporcioni accés remot a &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; per accedir a les aplicacions instal·lades en aquest dispositiu quan estigui connectat."</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
+    <string name="title_computer" msgid="4693714143506569253">"Permet que &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; accedeixi a aquesta informació del telèfon"</string>
+    <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="profile_name_generic" msgid="6851028682723034988">"dispositiu"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"Permet"</string>
     <string name="consent_no" msgid="2640796915611404382">"No permetis"</string>
-    <!-- no translation found for permission_sync_confirmation_title (667074294393493186) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (8873391306499120778) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Transfereix els permisos de les aplicacions al teu rellotge"</string>
+    <string name="permission_sync_summary" msgid="8873391306499120778">"Per facilitar la configuració del rellotge, les aplicacions instal·lades al rellotge durant la configuració utilitzaran els mateixos permisos que al teu telèfon.\n\n Aquests permisos poden incloure l\'accés al micròfon i a la ubicació del rellotge."</string>
 </resources>
