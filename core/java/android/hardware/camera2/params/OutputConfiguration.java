@@ -159,6 +159,17 @@ public final class OutputConfiguration implements Parcelable {
           CameraMetadata.SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION})
      public @interface SensorPixelMode {};
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"STREAM_USE_CASE_"}, value =
+        {CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT,
+         CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW,
+         CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_STILL_CAPTURE,
+         CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD,
+         CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW_VIDEO_STILL,
+         CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL})
+    public @interface StreamUseCase {};
+
     /**
      * Create a new {@link OutputConfiguration} instance with a {@link Surface}.
      *
@@ -355,6 +366,7 @@ public final class OutputConfiguration implements Parcelable {
         mIsMultiResolution = false;
         mSensorPixelModesUsed = new ArrayList<Integer>();
         mDynamicRangeProfile = DynamicRangeProfiles.STANDARD;
+        mStreamUseCase = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT;
     }
 
     /**
@@ -453,6 +465,7 @@ public final class OutputConfiguration implements Parcelable {
         mIsMultiResolution = false;
         mSensorPixelModesUsed = new ArrayList<Integer>();
         mDynamicRangeProfile = DynamicRangeProfiles.STANDARD;
+        mStreamUseCase = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT;
     }
 
     /**
@@ -730,6 +743,73 @@ public final class OutputConfiguration implements Parcelable {
     }
 
     /**
+     * Set stream use case for this OutputConfiguration
+     *
+     * <p>Stream use case is used to describe the purpose of the stream, whether it's for live
+     * preview, still image capture, video recording, or their combinations. This flag is useful
+     * for scenarios where the immediate consumer target isn't sufficient to indicate the stream's
+     * usage.</p>
+     *
+     * <p>The main difference beteween stream use case and capture intent is that the former
+     * enables the camera device to optimize camera hardware and software pipelines based on user
+     * scenarios for each stream, whereas the latter is mainly a hint to camera to decide
+     * optimal 3A strategy that's applicable to the whole session. The camera device carries out
+     * configurations such as selecting tuning parameters, choosing camera sensor mode, and
+     * constructing image processing pipeline based on the streams's use cases. Capture intents are
+     * then used to fine tune 3A behaviors such as adjusting AE/AF convergence speed, and capture
+     * intents may change during the lifetime of a session. For example, for a session with a
+     * PREVIEW_VIDEO_STILL use case stream and a STILL_CAPTURE use case stream, the capture intents
+     * may be PREVIEW with fast 3A convergence speed and flash metering with automatic control for
+     * live preview, STILL_CAPTURE with best 3A parameters for still photo capture, or VIDEO_RECORD
+     * with slower 3A convergence speed for better video playback experience.</p>
+     *
+     * <p>The supported stream use cases supported by a camera device can be queried by
+     * {@link android.hardware.camera2.CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES}.</p>
+     *
+     * <p>The mandatory stream combinations involving stream use cases can be found at {@link
+     * android.hardware.camera2.CameraDevice#createCaptureSession}, as well as queried via
+     * {@link android.hardware.camera2.params.MandatoryStreamCombination}. The application is
+     * strongly recommended to select one of the guaranteed stream combinations where all streams'
+     * use cases are set to non-DEFAULT values. If the application chooses a stream combination
+     * not in the mandatory list, the camera device may ignore some use case flags due to
+     * hardware constraints or implementation details.</p>
+     *
+     * <p>This function must be called before {@link CameraDevice#createCaptureSession} or {@link
+     * CameraDevice#createCaptureSessionByOutputConfigurations}. Calling this function after
+     * {@link CameraDevice#createCaptureSession} or
+     * {@link CameraDevice#createCaptureSessionByOutputConfigurations} has no effect to the camera
+     * session.</p>
+     *
+     * @param streamUseCase The stream use case to be set.
+     *
+     * @throws IllegalArgumentException If the streamUseCase isn't within the range of valid
+     *                                  values.
+     */
+    public void setStreamUseCase(@StreamUseCase int streamUseCase) {
+        // Verify that the value is in range
+        int maxUseCaseValue = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL;
+        if (streamUseCase > maxUseCaseValue &&
+                streamUseCase < CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VENDOR_START) {
+            throw new IllegalArgumentException("Not a valid stream use case value " +
+                    streamUseCase);
+        }
+
+        mStreamUseCase = streamUseCase;
+    }
+
+    /**
+     * Get the current stream use case
+     *
+     * <p>If no {@link #setStreamUseCase} is called first, this function returns
+     * {@link CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT DEFAULT}.</p>
+     *
+     * @return the currently set stream use case
+     */
+    public int getStreamUseCase() {
+        return mStreamUseCase;
+    }
+
+    /**
      * Create a new {@link OutputConfiguration} instance with another {@link OutputConfiguration}
      * instance.
      *
@@ -756,6 +836,7 @@ public final class OutputConfiguration implements Parcelable {
         this.mIsMultiResolution = other.mIsMultiResolution;
         this.mSensorPixelModesUsed = other.mSensorPixelModesUsed;
         this.mDynamicRangeProfile = other.mDynamicRangeProfile;
+        this.mStreamUseCase = other.mStreamUseCase;
     }
 
     /**
@@ -774,6 +855,8 @@ public final class OutputConfiguration implements Parcelable {
         String physicalCameraId = source.readString();
         boolean isMultiResolutionOutput = source.readInt() == 1;
         int[] sensorPixelModesUsed = source.createIntArray();
+        int streamUseCase = source.readInt();
+
         checkArgumentInRange(rotation, ROTATION_0, ROTATION_270, "Rotation constant");
         int dynamicRangeProfile = source.readInt();
         DynamicRangeProfiles.checkProfileValue(dynamicRangeProfile);
@@ -801,6 +884,7 @@ public final class OutputConfiguration implements Parcelable {
         mIsMultiResolution = isMultiResolutionOutput;
         mSensorPixelModesUsed = convertIntArrayToIntegerList(sensorPixelModesUsed);
         mDynamicRangeProfile = dynamicRangeProfile;
+        mStreamUseCase = streamUseCase;
     }
 
     /**
@@ -917,6 +1001,7 @@ public final class OutputConfiguration implements Parcelable {
         // writeList doesn't seem to work well with Integer list.
         dest.writeIntArray(convertIntegerToIntList(mSensorPixelModesUsed));
         dest.writeInt(mDynamicRangeProfile);
+        dest.writeInt(mStreamUseCase);
     }
 
     /**
@@ -947,7 +1032,8 @@ public final class OutputConfiguration implements Parcelable {
                     mConfiguredDataspace != other.mConfiguredDataspace ||
                     mConfiguredGenerationId != other.mConfiguredGenerationId ||
                     !Objects.equals(mPhysicalCameraId, other.mPhysicalCameraId) ||
-                    mIsMultiResolution != other.mIsMultiResolution)
+                    mIsMultiResolution != other.mIsMultiResolution ||
+                    mStreamUseCase != other.mStreamUseCase)
                 return false;
             if (mSensorPixelModesUsed.size() != other.mSensorPixelModesUsed.size()) {
                 return false;
@@ -985,7 +1071,7 @@ public final class OutputConfiguration implements Parcelable {
                     mSurfaceGroupId, mSurfaceType, mIsShared ? 1 : 0,
                     mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
                     mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode(),
-                    mDynamicRangeProfile);
+                    mDynamicRangeProfile, mStreamUseCase);
         }
 
         return HashCodeHelpers.hashCode(
@@ -994,7 +1080,7 @@ public final class OutputConfiguration implements Parcelable {
                 mConfiguredDataspace, mSurfaceGroupId, mIsShared ? 1 : 0,
                 mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
                 mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode(),
-                mDynamicRangeProfile);
+                mDynamicRangeProfile, mStreamUseCase);
     }
 
     private static final String TAG = "OutputConfiguration";
@@ -1028,4 +1114,6 @@ public final class OutputConfiguration implements Parcelable {
     private ArrayList<Integer> mSensorPixelModesUsed;
     // Dynamic range profile
     private int mDynamicRangeProfile;
+    // Stream use case
+    private int mStreamUseCase;
 }

@@ -17342,12 +17342,14 @@ package android.hardware.camera2 {
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_RECOMMENDED_TEN_BIT_DYNAMIC_RANGE_PROFILE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Float> SCALER_AVAILABLE_MAX_DIGITAL_ZOOM;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> SCALER_AVAILABLE_ROTATE_AND_CROP_MODES;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> SCALER_AVAILABLE_STREAM_USE_CASES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> SCALER_CROPPING_TYPE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Size> SCALER_DEFAULT_SECURE_IMAGE_SIZE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_CONCURRENT_STREAM_COMBINATIONS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_MAXIMUM_RESOLUTION_STREAM_COMBINATIONS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_STREAM_COMBINATIONS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_TEN_BIT_OUTPUT_STREAM_COMBINATIONS;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_USE_CASE_STREAM_COMBINATIONS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MultiResolutionStreamConfigurationMap> SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.StreamConfigurationMap> SCALER_STREAM_CONFIGURATION_MAP;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.StreamConfigurationMap> SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION;
@@ -17676,9 +17678,16 @@ package android.hardware.camera2 {
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS = 5; // 0x5
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_REMOSAIC_REPROCESSING = 17; // 0x11
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_SECURE_IMAGE_DATA = 13; // 0xd
+    field public static final int REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE = 19; // 0x13
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_SYSTEM_CAMERA = 14; // 0xe
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR = 16; // 0x10
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING = 7; // 0x7
+    field public static final int SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT = 0; // 0x0
+    field public static final int SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW = 1; // 0x1
+    field public static final int SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW_VIDEO_STILL = 4; // 0x4
+    field public static final int SCALER_AVAILABLE_STREAM_USE_CASES_STILL_CAPTURE = 2; // 0x2
+    field public static final int SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL = 5; // 0x5
+    field public static final int SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD = 3; // 0x3
     field public static final int SCALER_CROPPING_TYPE_CENTER_ONLY = 0; // 0x0
     field public static final int SCALER_CROPPING_TYPE_FREEFORM = 1; // 0x1
     field public static final int SCALER_ROTATE_AND_CROP_180 = 2; // 0x2
@@ -18086,6 +18095,7 @@ package android.hardware.camera2.params {
     method public int get10BitFormat();
     method @NonNull public java.util.List<android.util.Size> getAvailableSizes();
     method public int getFormat();
+    method public int getStreamUseCase();
     method public boolean is10BitCapable();
     method public boolean isInput();
     method public boolean isMaximumSize();
@@ -18142,6 +18152,7 @@ package android.hardware.camera2.params {
     method public void enableSurfaceSharing();
     method public int getDynamicRangeProfile();
     method public int getMaxSharedSurfaceCount();
+    method public int getStreamUseCase();
     method @Nullable public android.view.Surface getSurface();
     method public int getSurfaceGroupId();
     method @NonNull public java.util.List<android.view.Surface> getSurfaces();
@@ -18149,6 +18160,7 @@ package android.hardware.camera2.params {
     method public void removeSurface(@NonNull android.view.Surface);
     method public void setDynamicRangeProfile(int);
     method public void setPhysicalCameraId(@Nullable String);
+    method public void setStreamUseCase(int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.camera2.params.OutputConfiguration> CREATOR;
     field public static final int SURFACE_GROUP_ID_NONE = -1; // 0xffffffff

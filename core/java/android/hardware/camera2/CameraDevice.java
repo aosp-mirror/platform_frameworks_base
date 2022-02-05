@@ -404,7 +404,10 @@ public abstract class CameraDevice implements AutoCloseable {
      *                                  (output format)/(surface type), or if the extension is not
      *                                  supported, or if any of the output configurations select
      *                                  a dynamic range different from
-     *                                  {@link android.hardware.camera2.params.DynamicRangeProfiles#STANDARD}
+     *                                  {@link android.hardware.camera2.params.DynamicRangeProfiles#STANDARD},
+     *                                  or if any of the output configurations sets a stream use
+     *                                  case different from {@link
+     *                                  android.hardware.camera2.CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT}.
      * @see CameraExtensionCharacteristics#getSupportedExtensions
      * @see CameraExtensionCharacteristics#getExtensionSupportedSizes
      */
@@ -853,6 +856,31 @@ public abstract class CameraDevice implements AutoCloseable {
      * Do note that invalid combinations such as having a camera surface configured to use pixel
      * format {@link android.graphics.ImageFormat#YUV_420_888} with a 10-bit profile
      * will cause a capture session initialization failure.
+     * </p>
+     *
+     * <p>Devices with the STREAM_USE_CASE capability ({@link
+     * CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES} includes {@link
+     * CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE}) support below additional
+     * stream combinations:
+     *
+     * <table>
+     * <tr><th colspan="10">STREAM_USE_CASE capability additional guaranteed configurations</th></tr>
+     * <tr><th colspan="3" id="rb">Target 1</th><th colspan="3" id="rb">Target 2</th><th colspan="3" id="rb">Target 3</th> <th rowspan="2">Sample use case(s)</th> </tr>
+     * <tr><th>Type</th><th id="rb">Max size</th><th>Usecase</th><th>Type</th><th id="rb">Max size</th><th>Usecase</th><th>Type</th><th id="rb">Max size</th><th>Usecase</th> </tr>
+     * <tr> <td>{@code YUV / PRIV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td colspan="3" id="rb"></td> <td colspan="3" id="rb"></td> <td>Simple preview or in-app image processing</td> </tr>
+     * <tr> <td>{@code YUV / PRIV}</td><td id="rb">{@code RECORD}</td><td id="rb">{@code VIDEO_RECORD}</td> <td colspan="3" id="rb"></td> <td colspan="3" id="rb"></td> <td>Simple video recording or in-app video processing</td> </tr>
+     * <tr> <td>{@code YUV / JPEG}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code STILL_CAPTURE}</td> <td colspan="3" id="rb"></td> <td colspan="3" id="rb"></td> <td>Simple JPEG or YUV still image capture</td> </tr>
+     * <tr> <td>{@code YUV / PRIV}</td><td id="rb">{@code s1440p}</td><td id="rb">{@code PREVIEW_VIDEO_STILL}</td> <td colspan="3" id="rb"></td> <td colspan="3" id="rb"></td> <td>Multi-purpose stream for preview, video and still image capture</td> </tr>
+     * <tr> <td>{@code YUV / PRIV}</td><td id="rb">{@code s1440p}</td><td id="rb">{@code VIDEO_CALL}</td> <td colspan="3" id="rb"></td> <td colspan="3" id="rb"></td> <td>Simple video call</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV / JPEG}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code STILL_CAPTURE}</td> <td colspan="3" id="rb"></td> <td>Preview with JPEG or YUV still image capture</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV / PRIV}</td><td id="rb">{@code RECORD}</td><td id="rb">{@code VIDEO_RECORD}</td> <td colspan="3" id="rb"></td> <td>Preview with video recording or in-app video processing</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td colspan="3" id="rb"></td> <td>Preview with in-application image processing</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV / PRIV}</td><td id="rb">{@code s1440p}</td><td id="rb">{@code VIDEO_CALL}</td> <td colspan="3" id="rb"></td> <td>Preview with video call</td> </tr>
+     * <tr> <td>{@code YUV / PRIV}</td><td id="rb">{@code s1440p}</td><td id="rb">{@code PREVIEW_VIDEO_STILL}</td> <td>{@code YUV / JPEG}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code STILL_CAPTURE}</td> <td colspan="3" id="rb"></td> <td>Multi-purpose stream with JPEG or YUV still capture</td> </tr>
+     * <tr> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code STILL_CAPTURE}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code STILL_CAPTURE}</td> <td colspan="3" id="rb"></td> <td>YUV and JPEG concurrent still image capture (for testing)</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV / PRIV}</td><td id="rb">{@code RECORD}</td><td id="rb">{@code VIDEO_RECORD}</td> <td>{@code YUV / JPEG}</td><td id="rb">{@code RECORD}</td><td id="rb">{@code STILL_CAPTURE}</td> <td>Preview, video record and JPEG or YUV video snapshot</td> </tr>
+     * <tr> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV}</td><td id="rb">{@code PREVIEW}</td><td id="rb">{@code PREVIEW}</td> <td>{@code YUV / JPEG}</td><td id="rb">{@code MAXIMUM}</td><td id="rb">{@code STILL_CAPTURE}</td> <td>Preview, in-application image processing, and JPEG or YUV still image capture</td> </tr>
+     * </table><br>
      * </p>
      *
      * <p>Since the capabilities of camera devices vary greatly, a given camera device may support

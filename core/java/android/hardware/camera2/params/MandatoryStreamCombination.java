@@ -26,6 +26,9 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.params.OutputConfiguration;
+import android.hardware.camera2.params.OutputConfiguration.StreamUseCase;
+import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.media.CamcorderProfile;
 import android.util.Log;
@@ -63,6 +66,7 @@ public final class MandatoryStreamCombination {
         private final boolean mIsUltraHighResolution;
         private final boolean mIsMaximumSize;
         private final boolean mIs10BitCapable;
+        private final int mStreamUseCase;
 
         /**
          * Create a new {@link MandatoryStreamInformation}.
@@ -141,6 +145,30 @@ public final class MandatoryStreamCombination {
         public MandatoryStreamInformation(@NonNull List<Size> availableSizes, @Format int format,
                 boolean isMaximumSize, boolean isInput, boolean isUltraHighResolution,
                 boolean is10BitCapable) {
+            this(availableSizes, format, isMaximumSize, isInput, isUltraHighResolution,
+                    is10BitCapable, CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT);
+        }
+
+        /**
+         * Create a new {@link MandatoryStreamInformation}.
+         *
+         * @param availableSizes List of possible stream sizes.
+         * @param format Image format.
+         * @param isMaximumSize Whether this is a maximum size stream.
+         * @param isInput Flag indicating whether this stream is input.
+         * @param isUltraHighResolution Flag indicating whether this is a ultra-high resolution
+         *                              stream.
+         * @param is10BitCapable Flag indicating whether this stream is able to support 10-bit
+         * @param streamUseCase The stream use case.
+         *
+         * @throws IllegalArgumentException
+         *              if sizes is empty or if the format was not user-defined in
+         *              ImageFormat/PixelFormat.
+         * @hide
+         */
+        public MandatoryStreamInformation(@NonNull List<Size> availableSizes, @Format int format,
+                boolean isMaximumSize, boolean isInput, boolean isUltraHighResolution,
+                boolean is10BitCapable, @StreamUseCase int streamUseCase) {
             if (availableSizes.isEmpty()) {
                 throw new IllegalArgumentException("No available sizes");
             }
@@ -150,6 +178,7 @@ public final class MandatoryStreamCombination {
             mIsInput = isInput;
             mIsUltraHighResolution = isUltraHighResolution;
             mIs10BitCapable = is10BitCapable;
+            mStreamUseCase = streamUseCase;
         }
 
         /**
@@ -272,6 +301,20 @@ public final class MandatoryStreamCombination {
         }
 
         /**
+         * Retrieve the mandatory stream use case.
+         *
+         * <p>If this {@link MandatoryStreamInformation} is part of a mandatory stream
+         * combination for stream use cases, the return value will be a non-DEFAULT value.
+         * For {@link MandatoryStreamInformation} belonging to other mandatory stream
+         * combinations, the return value will be DEFAULT. </p>
+         *
+         * @return the integer stream use case.
+         */
+        public @StreamUseCase int getStreamUseCase() {
+            return mStreamUseCase;
+        }
+
+        /**
          * Check if this {@link MandatoryStreamInformation} is equal to another
          * {@link MandatoryStreamInformation}.
          *
@@ -292,6 +335,7 @@ public final class MandatoryStreamCombination {
                 final MandatoryStreamInformation other = (MandatoryStreamInformation) obj;
                 if ((mFormat != other.mFormat) || (mIsInput != other.mIsInput) ||
                         (mIsUltraHighResolution != other.mIsUltraHighResolution) ||
+                        (mStreamUseCase != other.mStreamUseCase) ||
                         (mAvailableSizes.size() != other.mAvailableSizes.size())) {
                     return false;
                 }
@@ -308,7 +352,8 @@ public final class MandatoryStreamCombination {
         @Override
         public int hashCode() {
             return HashCodeHelpers.hashCode(mFormat, Boolean.hashCode(mIsInput),
-                    Boolean.hashCode(mIsUltraHighResolution), mAvailableSizes.hashCode());
+                    Boolean.hashCode(mIsUltraHighResolution), mAvailableSizes.hashCode(),
+                    mStreamUseCase);
         }
     }
 
@@ -316,6 +361,21 @@ public final class MandatoryStreamCombination {
     private final boolean mIsReprocessable;
     private final ArrayList<MandatoryStreamInformation> mStreamsInformation =
             new ArrayList<MandatoryStreamInformation>();
+
+    /**
+     * Short hand for stream use cases
+     */
+    private static final int STREAM_USE_CASE_PREVIEW =
+            CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW;
+    private static final int STREAM_USE_CASE_STILL_CAPTURE =
+            CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_STILL_CAPTURE;
+    private static final int STREAM_USE_CASE_RECORD =
+            CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD;
+    private static final int STREAM_USE_CASE_PREVIEW_VIDEO_STILL =
+            CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW_VIDEO_STILL;
+    private static final int STREAM_USE_CASE_VIDEO_CALL =
+            CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL;
+
     /**
      * Create a new {@link MandatoryStreamCombination}.
      *
@@ -411,15 +471,15 @@ public final class MandatoryStreamCombination {
     private static final class StreamTemplate {
         public int mFormat;
         public SizeThreshold mSizeThreshold;
-        public boolean mIsInput;
+        public int mStreamUseCase;
         public StreamTemplate(int format, SizeThreshold sizeThreshold) {
-            this(format, sizeThreshold, /*isInput*/false);
+            this(format, sizeThreshold, CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT);
         }
         public StreamTemplate(@Format int format, @NonNull SizeThreshold sizeThreshold,
-                boolean isInput) {
+                @StreamUseCase int streamUseCase) {
             mFormat = format;
             mSizeThreshold = sizeThreshold;
-            mIsInput = isInput;
+            mStreamUseCase = streamUseCase;
         }
     }
 
@@ -1034,6 +1094,174 @@ public final class MandatoryStreamCombination {
                     "High-resolution recording with video snapshot"),
     };
 
+    private static StreamCombinationTemplate sStreamUseCaseCombinations[] = {
+        // Single stream combinations
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW) },
+                "Simple preview"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW) },
+                "Simple in-application image processing"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.RECORD,
+                        STREAM_USE_CASE_RECORD) },
+                "Simple video recording"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD,
+                        STREAM_USE_CASE_RECORD) },
+                "Simple in-application video processing"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_STILL_CAPTURE) },
+                "Simple JPEG still capture"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_STILL_CAPTURE) },
+                "Simple YUV still capture"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s1440p,
+                        STREAM_USE_CASE_PREVIEW_VIDEO_STILL) },
+                "Multi-purpose stream for preview, video and still capture"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s1440p,
+                        STREAM_USE_CASE_PREVIEW_VIDEO_STILL) },
+                "Multi-purpose YUV stream for preview, video and still capture"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s1440p,
+                        STREAM_USE_CASE_VIDEO_CALL) },
+                "Simple video call"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s1440p,
+                        STREAM_USE_CASE_VIDEO_CALL) },
+                "Simple YUV video call"),
+
+        // 2-stream combinations
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_STILL_CAPTURE)},
+                "Preview with JPEG still image capture"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_STILL_CAPTURE)},
+                "Preview with YUV still image capture"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.RECORD,
+                        STREAM_USE_CASE_RECORD)},
+                "Preview with video recording"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD,
+                        STREAM_USE_CASE_RECORD)},
+                "Preview with in-application video processing"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW)},
+                "Preview with in-application image processing"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s1440p,
+                        STREAM_USE_CASE_VIDEO_CALL)},
+                "Preview with video call"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s1440p,
+                        STREAM_USE_CASE_VIDEO_CALL)},
+                "Preview with YUV video call"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s1440p,
+                        STREAM_USE_CASE_PREVIEW_VIDEO_STILL),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_STILL_CAPTURE)},
+                "Multi-purpose stream with JPEG still capture"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.s1440p,
+                        STREAM_USE_CASE_PREVIEW_VIDEO_STILL),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_STILL_CAPTURE)},
+                "Multi-purpose stream with YUV still capture"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s1440p,
+                        STREAM_USE_CASE_PREVIEW_VIDEO_STILL),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_STILL_CAPTURE)},
+                "Multi-purpose YUV stream with JPEG still capture"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.s1440p,
+                        STREAM_USE_CASE_PREVIEW_VIDEO_STILL),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_STILL_CAPTURE)},
+                "Multi-purpose YUV stream with YUV still capture"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_STILL_CAPTURE),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_STILL_CAPTURE)},
+                "YUV and JPEG concurrent still image capture (for testing)"),
+
+        // 3-stream combinations
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.RECORD,
+                        STREAM_USE_CASE_RECORD),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.RECORD,
+                        STREAM_USE_CASE_STILL_CAPTURE)},
+                "Preview, video record and JPEG video snapshot"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.RECORD,
+                        STREAM_USE_CASE_RECORD),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD,
+                        STREAM_USE_CASE_STILL_CAPTURE)},
+                "Preview, video record and YUV video snapshot"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD,
+                        STREAM_USE_CASE_RECORD),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.RECORD,
+                        STREAM_USE_CASE_STILL_CAPTURE)},
+                "Preview, in-application video processing and JPEG video snapshot"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD,
+                        STREAM_USE_CASE_RECORD),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD,
+                        STREAM_USE_CASE_STILL_CAPTURE)},
+                "Preview, in-application video processing and YUV video snapshot"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_STILL_CAPTURE)},
+                "Preview, in-application image processing, and JPEG still image capture"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW,
+                        STREAM_USE_CASE_PREVIEW),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.MAXIMUM,
+                        STREAM_USE_CASE_STILL_CAPTURE)},
+                "Preview, in-application image processing, and YUV still image capture"),
+    };
+
     /**
      * Helper builder class to generate a list of available mandatory stream combinations.
      * @hide
@@ -1127,6 +1355,76 @@ public final class MandatoryStreamCombination {
                                 isMaximumSize, /*isInput*/ false,
                                 /*isUltraHighResolution*/ false,
                                 /*is10BitCapable*/ template.mFormat != ImageFormat.JPEG);
+                    } catch (IllegalArgumentException e) {
+                        Log.e(TAG, "No available sizes found for format: " + template.mFormat +
+                                " size threshold: " + template.mSizeThreshold + " combination: " +
+                                combTemplate.mDescription);
+                        return null;
+                    }
+                    streamsInfo.add(streamInfo);
+                }
+
+                MandatoryStreamCombination streamCombination;
+                try {
+                    streamCombination = new MandatoryStreamCombination(streamsInfo,
+                            combTemplate.mDescription, /*isReprocessable*/ false);
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, "No stream information for mandatory combination: "
+                            + combTemplate.mDescription);
+                    return null;
+                }
+
+                availableStreamCombinations.add(streamCombination);
+            }
+
+            return Collections.unmodifiableList(availableStreamCombinations);
+        }
+
+        /**
+          * Retrieve a list of all available mandatory stream combinations with stream use cases.
+          * when the camera device has {@link
+          * CameraMetdata.REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE} capability.
+          *
+          * @return a non-modifiable list of supported mandatory stream combinations with stream
+          *         use cases. Null in case the device doesn't have {@link
+          *         CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE}
+          *         capability.
+          */
+        public @NonNull List<MandatoryStreamCombination>
+                getAvailableMandatoryStreamUseCaseCombinations() {
+            if (!isCapabilitySupported(
+                    CameraCharacteristics.REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE)) {
+                return null;
+            }
+
+            HashMap<Pair<SizeThreshold, Integer>, List<Size>> availableSizes =
+                    enumerateAvailableSizes();
+            if (availableSizes == null) {
+                Log.e(TAG, "Available size enumeration failed!");
+                return null;
+            }
+
+            ArrayList<MandatoryStreamCombination> availableStreamCombinations = new ArrayList<>();
+            availableStreamCombinations.ensureCapacity(sStreamUseCaseCombinations.length);
+            for (StreamCombinationTemplate combTemplate : sStreamUseCaseCombinations) {
+                ArrayList<MandatoryStreamInformation> streamsInfo =
+                        new ArrayList<MandatoryStreamInformation>();
+                streamsInfo.ensureCapacity(combTemplate.mStreamTemplates.length);
+
+                for (StreamTemplate template : combTemplate.mStreamTemplates) {
+                    List<Size> sizes = null;
+                    Pair<SizeThreshold, Integer> pair;
+                    pair = new Pair<SizeThreshold, Integer>(template.mSizeThreshold,
+                            new Integer(template.mFormat));
+                    sizes = availableSizes.get(pair);
+
+                    MandatoryStreamInformation streamInfo;
+                    boolean isMaximumSize =
+                            (template.mSizeThreshold == SizeThreshold.MAXIMUM);
+                    try {
+                        streamInfo = new MandatoryStreamInformation(sizes, template.mFormat,
+                                isMaximumSize, /*isInput*/false, /*isUltraHighResolution*/false,
+                                /*is10BitCapable*/ false, template.mStreamUseCase);
                     } catch (IllegalArgumentException e) {
                         Log.e(TAG, "No available sizes found for format: " + template.mFormat +
                                 " size threshold: " + template.mSizeThreshold + " combination: " +
@@ -1632,6 +1930,8 @@ public final class MandatoryStreamCombination {
             Size recordingMaxSize = new Size(0, 0);
             Size previewMaxSize = new Size(0, 0);
             Size vgaSize = new Size(640, 480);
+            Size s720pSize = new Size(1280, 720);
+            Size s1440pSize = new Size(1920, 1440);
             // For external camera, or hidden physical camera, CamcorderProfile may not be
             // available, so get maximum recording size using stream configuration map.
             if (isExternalCamera() || mIsHiddenPhysicalCamera) {
@@ -1682,6 +1982,12 @@ public final class MandatoryStreamCombination {
 
                 pair = new Pair<SizeThreshold, Integer>(SizeThreshold.MAXIMUM, intFormat);
                 availableSizes.put(pair, Arrays.asList(sizes));
+
+                pair = new Pair<SizeThreshold, Integer>(SizeThreshold.s720p, intFormat);
+                availableSizes.put(pair, getSizesWithinBound(sizes, s720pSize));
+
+                pair = new Pair<SizeThreshold, Integer>(SizeThreshold.s1440p, intFormat);
+                availableSizes.put(pair, getSizesWithinBound(sizes, s1440pSize));
             }
 
             return availableSizes;

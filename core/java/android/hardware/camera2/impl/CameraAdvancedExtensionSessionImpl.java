@@ -135,6 +135,11 @@ public final class CameraAdvancedExtensionSessionImpl extends CameraExtensionSes
                 throw new IllegalArgumentException("Unsupported dynamic range profile: " +
                         c.getDynamicRangeProfile());
             }
+            if (c.getStreamUseCase() !=
+                    CameraCharacteristics.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT) {
+                throw new IllegalArgumentException("Unsupported stream use case: " +
+                        c.getStreamUseCase());
+            }
         }
 
         int suitableSurfaceCount = 0;

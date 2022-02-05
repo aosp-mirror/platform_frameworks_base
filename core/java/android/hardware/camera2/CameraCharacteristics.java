@@ -2214,6 +2214,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR ULTRA_HIGH_RESOLUTION_SENSOR}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_REMOSAIC_REPROCESSING REMOSAIC_REPROCESSING}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT DYNAMIC_RANGE_TEN_BIT}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE STREAM_USE_CASE}</li>
      * </ul>
      *
      * <p>This key is available on all devices.</p>
@@ -2238,6 +2239,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR
      * @see #REQUEST_AVAILABLE_CAPABILITIES_REMOSAIC_REPROCESSING
      * @see #REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE
      */
     @PublicKey
     @NonNull
@@ -3473,6 +3475,90 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     public static final Key<Boolean> SCALER_MULTI_RESOLUTION_STREAM_SUPPORTED =
             new Key<Boolean>("android.scaler.multiResolutionStreamSupported", boolean.class);
+
+    /**
+     * <p>The stream use cases supported by this camera device.</p>
+     * <p>The stream use case indicates the purpose of a particular camera stream from
+     * the end-user perspective. Some examples of camera use cases are: preview stream for
+     * live viewfinder shown to the user, still capture for generating high quality photo
+     * capture, video record for encoding the camera output for the purpose of future playback,
+     * and video call for live realtime video conferencing.</p>
+     * <p>With this flag, the camera device can optimize the image processing pipeline
+     * parameters, such as tuning, sensor mode, and ISP settings, indepedent of
+     * the properties of the immediate camera output surface. For example, if the output
+     * surface is a SurfaceTexture, the stream use case flag can be used to indicate whether
+     * the camera frames eventually go to display, video encoder,
+     * still image capture, or all of them combined.</p>
+     * <p>The application sets the use case of a camera stream by calling
+     * {@link android.hardware.camera2.params.OutputConfiguration#setStreamUseCase }.</p>
+     * <p>A camera device with
+     * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE }
+     * capability must support the following stream use cases:</p>
+     * <ul>
+     * <li>DEFAULT</li>
+     * <li>PREVIEW</li>
+     * <li>STILL_CAPTURE</li>
+     * <li>VIDEO_RECORD</li>
+     * <li>PREVIEW_VIDEO_STILL</li>
+     * <li>VIDEO_CALL</li>
+     * </ul>
+     * <p>The guaranteed stream combinations related to stream use case for a camera device with
+     * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE }
+     * capability is documented in the camera device
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession guideline}. The
+     * application is strongly recommended to use one of the guaranteed stream combintations.
+     * If the application creates a session with a stream combination not in the guaranteed
+     * list, or with mixed DEFAULT and non-DEFAULT use cases within the same session,
+     * the camera device may ignore some stream use cases due to hardware constraints
+     * and implementation details.</p>
+     * <p>For stream combinations not covered by the stream use case mandatory lists, such as
+     * reprocessable session, constrained high speed session, or RAW stream combinations, the
+     * application should leave stream use cases within the session as DEFAULT.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT DEFAULT}</li>
+     *   <li>{@link #SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW PREVIEW}</li>
+     *   <li>{@link #SCALER_AVAILABLE_STREAM_USE_CASES_STILL_CAPTURE STILL_CAPTURE}</li>
+     *   <li>{@link #SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD VIDEO_RECORD}</li>
+     *   <li>{@link #SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW_VIDEO_STILL PREVIEW_VIDEO_STILL}</li>
+     *   <li>{@link #SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL VIDEO_CALL}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @see #SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT
+     * @see #SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW
+     * @see #SCALER_AVAILABLE_STREAM_USE_CASES_STILL_CAPTURE
+     * @see #SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD
+     * @see #SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW_VIDEO_STILL
+     * @see #SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<int[]> SCALER_AVAILABLE_STREAM_USE_CASES =
+            new Key<int[]>("android.scaler.availableStreamUseCases", int[].class);
+
+    /**
+     * <p>An array of mandatory stream combinations with stream use cases.
+     * This is an app-readable conversion of the mandatory stream combination
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession tables} with
+     * each stream's use case being set.</p>
+     * <p>The array of
+     * {@link android.hardware.camera2.params.MandatoryStreamCombination combinations} is
+     * generated according to the documented
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession guideline} for a
+     * camera device with
+     * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE }
+     * capability.
+     * The mandatory stream combination array will be {@code null} in case the device doesn't
+     * have {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE }
+     * capability.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    @NonNull
+    @SyntheticKey
+    public static final Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_USE_CASE_STREAM_COMBINATIONS =
+            new Key<android.hardware.camera2.params.MandatoryStreamCombination[]>("android.scaler.mandatoryUseCaseStreamCombinations", android.hardware.camera2.params.MandatoryStreamCombination[].class);
 
     /**
      * <p>The area of the image sensor which corresponds to active pixels after any geometric
