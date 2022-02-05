@@ -657,7 +657,10 @@ class MediaDataManager(
                 }
                 val runnable = if (action.actionIntent != null) {
                     Runnable {
-                        if (action.isAuthenticationRequired()) {
+                        if (action.actionIntent.isActivity) {
+                            activityStarter.startPendingIntentDismissingKeyguard(
+                                action.actionIntent)
+                        } else if (action.isAuthenticationRequired()) {
                             activityStarter.dismissKeyguardThenExecute({
                                 var result = sendPendingIntent(action.actionIntent)
                                 result

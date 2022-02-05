@@ -2034,6 +2034,11 @@ class UserController implements Handler.Callback {
         }
     }
 
+    /**
+     * Tell WindowManager we're ready to unfreeze the screen, at its leisure. Note that there is
+     * likely a lot going on, and WM won't unfreeze until the drawing is all done, so
+     * the actual unfreeze may still not happen for a long time; this is expected.
+     */
     @VisibleForTesting
     void unfreezeScreen() {
         TimingsTraceAndSlog t = new TimingsTraceAndSlog();

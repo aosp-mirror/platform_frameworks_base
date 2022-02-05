@@ -134,6 +134,7 @@ import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPR
 import static android.net.NetworkCapabilities.NET_ENTERPRISE_ID_1;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
+import static android.provider.Settings.Secure.MANAGED_PROVISIONING_DPC_DOWNLOADED;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.provider.Telephony.Carriers.DPC_URI;
 import static android.provider.Telephony.Carriers.ENFORCE_KEY;
@@ -222,6 +223,7 @@ import android.compat.annotation.EnabledSince;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -11613,6 +11615,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
+                || isFinancedDeviceOwner(caller)
                 || isProfileOwner(caller)
                 || (parent && isProfileOwnerOfOrganizationOwnedDevice(caller)));
 
@@ -13988,7 +13991,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         synchronized (getLockObject()) {
             if (isFinancedDeviceOwner(caller)) {
-                enforceCanSetPermissionGrantOnFinancedDevice(packageName, permission);
+                enforcePermissionGrantStateOnFinancedDevice(packageName, permission);
             }
             long ident = mInjector.binderClearCallingIdentity();
             try {
@@ -14049,14 +14052,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void enforceCanSetPermissionGrantOnFinancedDevice(
+    private void enforcePermissionGrantStateOnFinancedDevice(
             String packageName, String permission) {
         if (!Manifest.permission.READ_PHONE_STATE.equals(permission)) {
-            throw new SecurityException("Cannot grant " + permission
-                    + " when managing a financed device");
+            throw new SecurityException(permission + " cannot be used when managing a financed"
+                    + " device for permission grant state");
         } else if (!mOwners.getDeviceOwnerPackageName().equals(packageName)) {
-            throw new SecurityException("Cannot grant permission to a package that is not"
-                    + " the device owner");
+            throw new SecurityException("Device owner package is the only package that can be used"
+                    + " for permission grant state when managing a financed device");
         }
     }
 
@@ -14065,10 +14068,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             String packageName, String permission) throws RemoteException {
         final CallerIdentity caller = getCallerIdentity(admin, callerPackage);
         Preconditions.checkCallAuthorization(isSystemUid(caller) || (caller.hasAdminComponent()
-                && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)))
+                && (isProfileOwner(caller) || isDefaultDeviceOwner(caller)
+                || isFinancedDeviceOwner(caller)))
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_PERMISSION_GRANT)));
 
         synchronized (getLockObject()) {
+            if (isFinancedDeviceOwner(caller)) {
+                enforcePermissionGrantStateOnFinancedDevice(packageName, permission);
+            }
             return mInjector.binderWithCleanCallingIdentity(() -> {
                 int granted;
                 if (getTargetSdk(caller.getPackageName(), caller.getUserId())
@@ -18668,5 +18675,27 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             UserHandle user = users.get(i).getUserHandle();
             mContext.sendBroadcastAsUser(intent, user);
         }
+    }
+
+    public boolean isDpcDownloaded() {
+        Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
+
+        ContentResolver cr = mContext.getContentResolver();
+
+        return mInjector.binderWithCleanCallingIdentity(() -> Settings.Secure.getIntForUser(
+                cr, MANAGED_PROVISIONING_DPC_DOWNLOADED,
+                /* def= */ 0, /* userHandle= */ cr.getUserId())
+                == 1);
+    }
+
+    public void setDpcDownloaded(boolean downloaded) {
+        Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
+
+        int setTo = downloaded ? 1 : 0;
+
+        mInjector.binderWithCleanCallingIdentity(() -> Settings.Secure.putInt(
+                mContext.getContentResolver(), MANAGED_PROVISIONING_DPC_DOWNLOADED, setTo));
     }
 }

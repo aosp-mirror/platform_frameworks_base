@@ -21,6 +21,7 @@ import static android.Manifest.permission.INPUT_CONSUMER;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
+import static android.Manifest.permission.MODIFY_TOUCH_MODE_STATE;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
 import static android.Manifest.permission.RESTRICTED_VR_ACCESS;
@@ -38,6 +39,7 @@ import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.Parcelable.PARCELABLE_WRITE_RETURN_VALUE;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
+import static android.os.Process.myUid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW;
@@ -706,6 +708,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final static int WINDOWS_FREEZING_SCREENS_TIMEOUT = 2;
     int mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_NONE;
 
+    /** Indicates that the system server is actively demanding the screen be frozen. */
     boolean mClientFreezingScreen = false;
     int mAppsFreezingScreen = 0;
 
@@ -1185,7 +1188,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_hasPermanentDpad);
         mInTouchMode = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_defaultInTouchMode);
-        inputManager.setInTouchMode(mInTouchMode);
+        inputManager.setInTouchMode(
+                mInTouchMode, myPid(), myUid(), /* hasPermission = */ true);
         mDrawLockTimeoutMillis = context.getResources().getInteger(
                 com.android.internal.R.integer.config_drawLockTimeoutMillis);
         mAllowAnimationsInLowPowerMode = context.getResources().getBoolean(
@@ -2651,7 +2655,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean checkCallingPermission(String permission, String func, boolean printLog) {
-        // Quick check: if the calling permission is me, it's all okay.
         if (Binder.getCallingPid() == myPid()) {
             return true;
         }
@@ -3091,6 +3094,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // Misc IWindowSession methods
     // -------------------------------------------------------------
 
+    /** Freeze the screen during a user-switch event. Called by UserController. */
     @Override
     public void startFreezingScreen(int exitAnim, int enterAnim) {
         if (!checkCallingPermission(android.Manifest.permission.FREEZE_SCREEN,
@@ -3113,6 +3117,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /**
+     * No longer actively demand that the screen remain frozen.
+     * Called by UserController after a user-switch.
+     * This doesn't necessarily immediately unlock the screen; it just allows it if we're ready.
+     */
     @Override
     public void stopFreezingScreen() {
         if (!checkCallingPermission(android.Manifest.permission.FREEZE_SCREEN,
@@ -3685,12 +3694,33 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @Override
+    /**
+     * Sets the touch mode state.
+     *
+     * To be able to change touch mode state, the caller must either own the focused window, or must
+     * have the MODIFY_TOUCH_MODE_STATE permission.
+     *
+     * @param mode the touch mode to set
+     */
+    @Override // Binder call
     public void setInTouchMode(boolean mode) {
         synchronized (mGlobalLock) {
-            mInTouchMode = mode;
+            if (mInTouchMode == mode) {
+                return;
+            }
+            final int pid = Binder.getCallingPid();
+            final int uid = Binder.getCallingUid();
+            final boolean hasPermission = checkCallingPermission(MODIFY_TOUCH_MODE_STATE,
+                    "setInTouchMode()");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if (mInputManager.setInTouchMode(mode, pid, uid, hasPermission)) {
+                    mInTouchMode = mode;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
         }
-        mInputManager.setInTouchMode(mode);
     }
 
     boolean getInTouchMode() {
@@ -5863,6 +5893,13 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WMS.doStartFreezingDisplay");
+        doStartFreezingDisplay(exitAnim, enterAnim, displayContent, overrideOriginalRotation);
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+    }
+
+    private void doStartFreezingDisplay(int exitAnim, int enterAnim, DisplayContent displayContent,
+            int overrideOriginalRotation) {
         ProtoLog.d(WM_DEBUG_ORIENTATION,
                             "startFreezingDisplayLocked: exitAnim=%d enterAnim=%d called by %s",
                             exitAnim, enterAnim, Debug.getCallers(8));
@@ -5933,9 +5970,15 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WMS.doStopFreezingDisplayLocked-"
+                + mLastFinishedFreezeSource);
+        doStopFreezingDisplayLocked(displayContent);
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+    }
+
+    private void doStopFreezingDisplayLocked(DisplayContent displayContent) {
         ProtoLog.d(WM_DEBUG_ORIENTATION,
                     "stopFreezingDisplayLocked: Unfreezing now");
-
 
         // We must make a local copy of the displayId as it can be potentially overwritten later on
         // in this method. For example, {@link startFreezingDisplayLocked} may be called as a result
@@ -7969,27 +8012,29 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public boolean shouldRestoreImeVisibility(IBinder imeTargetWindowToken) {
             return WindowManagerService.this.shouldRestoreImeVisibility(imeTargetWindowToken);
-        }
+       }
 
         @Override
-        public void addTaskOverlay(int taskId, SurfaceControlViewHost.SurfacePackage overlay) {
+        public void addTrustedTaskOverlay(int taskId,
+                SurfaceControlViewHost.SurfacePackage overlay) {
             synchronized (mGlobalLock) {
                 final Task task = mRoot.getRootTask(taskId);
                 if (task == null) {
                     throw new IllegalArgumentException("no task with taskId" + taskId);
                 }
-                task.addOverlay(overlay);
+                task.addTrustedOverlay(overlay);
             }
         }
 
         @Override
-        public void removeTaskOverlay(int taskId, SurfaceControlViewHost.SurfacePackage overlay) {
+        public void removeTrustedTaskOverlay(int taskId,
+                SurfaceControlViewHost.SurfacePackage overlay) {
             synchronized (mGlobalLock) {
                 final Task task = mRoot.getRootTask(taskId);
                 if (task == null) {
                     throw new IllegalArgumentException("no task with taskId" + taskId);
                 }
-                task.removeOverlay(overlay);
+                task.removeTrustedOverlay(overlay);
             }
         }
 

@@ -827,6 +827,11 @@ public abstract class WindowManagerInternal {
      * Internal methods for other parts of SystemServer to manage
      * SurfacePackage based overlays on tasks.
      *
+     * Since these overlays will overlay application content, they exist
+     * in a container with setTrustedOverlay(true). This means its imperative
+     * that this overlay feature only be used with UI completely under the control
+     * of the system, without 3rd party content.
+     *
      * Callers prepare a view hierarchy with SurfaceControlViewHost
      * and send the package to WM here. The remote view hierarchy will receive
      * configuration change, lifecycle events, etc, forwarded over the
@@ -837,8 +842,10 @@ public abstract class WindowManagerInternal {
      * The embedded hierarchy exists in a coordinate space relative to the task
      * bounds.
      */
-    public abstract void addTaskOverlay(int taskId, SurfaceControlViewHost.SurfacePackage overlay);
-    public abstract void removeTaskOverlay(int taskId, SurfaceControlViewHost.SurfacePackage overlay);
+    public abstract void addTrustedTaskOverlay(int taskId,
+            SurfaceControlViewHost.SurfacePackage overlay);
+    public abstract void removeTrustedTaskOverlay(int taskId,
+            SurfaceControlViewHost.SurfacePackage overlay);
 
     /**
      * Get a SurfaceControl that is the container layer that should be used to receive input to

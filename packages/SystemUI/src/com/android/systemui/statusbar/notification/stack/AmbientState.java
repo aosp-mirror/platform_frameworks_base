@@ -76,7 +76,10 @@ public class AmbientState {
     private float mHideAmount;
     private boolean mAppearing;
     private float mPulseHeight = MAX_PULSE_HEIGHT;
+
+    /** How we much we are sleeping. 1f fully dozing (AOD), 0f fully awake (for all other states) */
     private float mDozeAmount = 0.0f;
+
     private Runnable mOnPulseHeightChangedListener;
     private ExpandableNotificationRow mTrackedHeadsUpRow;
     private float mAppearFraction;
@@ -95,6 +98,9 @@ public class AmbientState {
 
     /** Height of the notifications panel without top padding when expansion completes. */
     private float mStackEndHeight;
+
+    /** Whether we are swiping up. */
+    private boolean mIsSwipingUp;
 
     /**
      * @return Height of the notifications panel without top padding when expansion completes.
@@ -130,6 +136,20 @@ public class AmbientState {
      */
     public void setExpansionFraction(float expansionFraction) {
         mExpansionFraction = expansionFraction;
+    }
+
+    /**
+     * @param isSwipingUp Whether we are swiping up.
+     */
+    public void setSwipingUp(boolean isSwipingUp) {
+        mIsSwipingUp = isSwipingUp;
+    }
+
+    /**
+     * @return Whether we are swiping up.
+     */
+    public boolean isSwipingUp() {
+        return mIsSwipingUp;
     }
 
     /**

@@ -553,8 +553,20 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_ASSIST_READING_CONTEXT = 0x01000000;
 
     /**
-     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
-     * The type of change is not defined.
+     * Represents a change in the speech state defined by the content-change types. A change in the
+     * speech state occurs when another service is either speaking or listening for human speech.
+     * This event helps avoid conflicts where two services want to speak or one listens
+     * when another speaks.
+     * @see #SPEECH_STATE_SPEAKING_START
+     * @see #SPEECH_STATE_SPEAKING_END
+     * @see #SPEECH_STATE_LISTENING_START
+     * @see #SPEECH_STATE_LISTENING_END
+     */
+    public static final int TYPE_SPEECH_STATE_CHANGE = 0x02000000;
+
+    /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event: The type of change is not
+     * defined.
      */
     public static final int CONTENT_CHANGE_TYPE_UNDEFINED = 0x00000000;
 
@@ -640,6 +652,27 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @see AccessibilityNodeInfo.AccessibilityAction#ACTION_DRAG_CANCEL
      */
     public static final int CONTENT_CHANGE_TYPE_DRAG_CANCELLED = 0x0000200;
+
+    /** Change type for {@link #TYPE_SPEECH_STATE_CHANGE} event: another service is speaking. */
+    public static final int SPEECH_STATE_SPEAKING_START = 0x00000001;
+
+    /**
+     * Change type for {@link #TYPE_SPEECH_STATE_CHANGE} event: another service is no longer
+     * speaking.
+     */
+    public static final int SPEECH_STATE_SPEAKING_END = 0x00000002;
+
+    /**
+     * Change type for {@link #TYPE_SPEECH_STATE_CHANGE} event: another service is listening to the
+     * microphone.
+     */
+    public static final int SPEECH_STATE_LISTENING_START = 0x00000004;
+
+    /**
+     * Change type for {@link #TYPE_SPEECH_STATE_CHANGE} event: another service is no longer
+     * listening to the microphone.
+     */
+    public static final int SPEECH_STATE_LISTENING_END = 0x00000008;
 
     /**
      * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
@@ -730,50 +763,69 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(flag = true, prefix = { "CONTENT_CHANGE_TYPE_" },
+    @IntDef(
+            flag = true,
+            prefix = {"CONTENT_CHANGE_TYPE_"},
             value = {
-                    CONTENT_CHANGE_TYPE_UNDEFINED,
-                    CONTENT_CHANGE_TYPE_SUBTREE,
-                    CONTENT_CHANGE_TYPE_TEXT,
-                    CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION,
-                    CONTENT_CHANGE_TYPE_STATE_DESCRIPTION,
-                    CONTENT_CHANGE_TYPE_PANE_TITLE,
-                    CONTENT_CHANGE_TYPE_PANE_APPEARED,
-                    CONTENT_CHANGE_TYPE_PANE_DISAPPEARED,
-                    CONTENT_CHANGE_TYPE_DRAG_STARTED,
-                    CONTENT_CHANGE_TYPE_DRAG_DROPPED,
-                    CONTENT_CHANGE_TYPE_DRAG_CANCELLED
+                CONTENT_CHANGE_TYPE_UNDEFINED,
+                CONTENT_CHANGE_TYPE_SUBTREE,
+                CONTENT_CHANGE_TYPE_TEXT,
+                CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION,
+                CONTENT_CHANGE_TYPE_STATE_DESCRIPTION,
+                CONTENT_CHANGE_TYPE_PANE_TITLE,
+                CONTENT_CHANGE_TYPE_PANE_APPEARED,
+                CONTENT_CHANGE_TYPE_PANE_DISAPPEARED,
+                CONTENT_CHANGE_TYPE_DRAG_STARTED,
+                CONTENT_CHANGE_TYPE_DRAG_DROPPED,
+                CONTENT_CHANGE_TYPE_DRAG_CANCELLED,
             })
     public @interface ContentChangeTypes {}
 
     /** @hide */
-    @IntDef(flag = true, prefix = { "TYPE_" }, value = {
-            TYPE_VIEW_CLICKED,
-            TYPE_VIEW_LONG_CLICKED,
-            TYPE_VIEW_SELECTED,
-            TYPE_VIEW_FOCUSED,
-            TYPE_VIEW_TEXT_CHANGED,
-            TYPE_WINDOW_STATE_CHANGED,
-            TYPE_NOTIFICATION_STATE_CHANGED,
-            TYPE_VIEW_HOVER_ENTER,
-            TYPE_VIEW_HOVER_EXIT,
-            TYPE_TOUCH_EXPLORATION_GESTURE_START,
-            TYPE_TOUCH_EXPLORATION_GESTURE_END,
-            TYPE_WINDOW_CONTENT_CHANGED,
-            TYPE_VIEW_SCROLLED,
-            TYPE_VIEW_TEXT_SELECTION_CHANGED,
-            TYPE_ANNOUNCEMENT,
-            TYPE_VIEW_ACCESSIBILITY_FOCUSED,
-            TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED,
-            TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY,
-            TYPE_GESTURE_DETECTION_START,
-            TYPE_GESTURE_DETECTION_END,
-            TYPE_TOUCH_INTERACTION_START,
-            TYPE_TOUCH_INTERACTION_END,
-            TYPE_WINDOWS_CHANGED,
-            TYPE_VIEW_CONTEXT_CLICKED,
-            TYPE_ASSIST_READING_CONTEXT
-    })
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(
+            flag = true,
+            prefix = {"SPEECH_STATE_"},
+            value = {
+                SPEECH_STATE_SPEAKING_START,
+                SPEECH_STATE_SPEAKING_END,
+                SPEECH_STATE_LISTENING_START,
+                SPEECH_STATE_LISTENING_END
+            })
+    public @interface SpeechStateChangeTypes {}
+
+    /** @hide */
+    @IntDef(
+            flag = true,
+            prefix = {"TYPE_"},
+            value = {
+                TYPE_VIEW_CLICKED,
+                TYPE_VIEW_LONG_CLICKED,
+                TYPE_VIEW_SELECTED,
+                TYPE_VIEW_FOCUSED,
+                TYPE_VIEW_TEXT_CHANGED,
+                TYPE_WINDOW_STATE_CHANGED,
+                TYPE_NOTIFICATION_STATE_CHANGED,
+                TYPE_VIEW_HOVER_ENTER,
+                TYPE_VIEW_HOVER_EXIT,
+                TYPE_TOUCH_EXPLORATION_GESTURE_START,
+                TYPE_TOUCH_EXPLORATION_GESTURE_END,
+                TYPE_WINDOW_CONTENT_CHANGED,
+                TYPE_VIEW_SCROLLED,
+                TYPE_VIEW_TEXT_SELECTION_CHANGED,
+                TYPE_ANNOUNCEMENT,
+                TYPE_VIEW_ACCESSIBILITY_FOCUSED,
+                TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED,
+                TYPE_VIEW_TEXT_TRAVERSED_AT_MOVEMENT_GRANULARITY,
+                TYPE_GESTURE_DETECTION_START,
+                TYPE_GESTURE_DETECTION_END,
+                TYPE_TOUCH_INTERACTION_START,
+                TYPE_TOUCH_INTERACTION_END,
+                TYPE_WINDOWS_CHANGED,
+                TYPE_VIEW_CONTEXT_CLICKED,
+                TYPE_ASSIST_READING_CONTEXT,
+                TYPE_SPEECH_STATE_CHANGE
+            })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType {}
 
@@ -814,6 +866,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     int mAction;
     int mContentChangeTypes;
     int mWindowChangeTypes;
+    int mSpeechStateChangeTypes;
 
     /**
      * The stack trace describing where this event originated from on the app side.
@@ -867,6 +920,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mMovementGranularity = event.mMovementGranularity;
         mAction = event.mAction;
         mContentChangeTypes = event.mContentChangeTypes;
+        mSpeechStateChangeTypes = event.mSpeechStateChangeTypes;
         mWindowChangeTypes = event.mWindowChangeTypes;
         mEventTime = event.mEventTime;
         mPackageName = event.mPackageName;
@@ -1005,6 +1059,51 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public void setContentChangeTypes(@ContentChangeTypes int changeTypes) {
         enforceNotSealed();
         mContentChangeTypes = changeTypes;
+    }
+
+    /**
+     * Gets the speech state signaled by a {@link #TYPE_SPEECH_STATE_CHANGE} event
+     *
+     * @see #SPEECH_STATE_SPEAKING_START
+     * @see #SPEECH_STATE_SPEAKING_END
+     * @see #SPEECH_STATE_LISTENING_START
+     * @see #SPEECH_STATE_LISTENING_END
+     */
+    public int getSpeechStateChangeTypes() {
+        return mSpeechStateChangeTypes;
+    }
+
+    private static String speechStateChangedTypesToString(int types) {
+        return BitUtils.flagsToString(
+                types, AccessibilityEvent::singleSpeechStateChangeTypeToString);
+    }
+
+    private static String singleSpeechStateChangeTypeToString(int type) {
+        switch (type) {
+            case SPEECH_STATE_SPEAKING_START:
+                return "SPEECH_STATE_SPEAKING_START";
+            case SPEECH_STATE_LISTENING_START:
+                return "SPEECH_STATE_LISTENING_START";
+            case SPEECH_STATE_SPEAKING_END:
+                return "SPEECH_STATE_SPEAKING_END";
+            case SPEECH_STATE_LISTENING_END:
+                return "SPEECH_STATE_LISTENING_END";
+            default:
+                return Integer.toHexString(type);
+        }
+    }
+
+    /**
+     * Sets the speech state type signaled by a {@link #TYPE_SPEECH_STATE_CHANGE} event
+     *
+     * @see #SPEECH_STATE_SPEAKING_START
+     * @see #SPEECH_STATE_SPEAKING_END
+     * @see #SPEECH_STATE_LISTENING_START
+     * @see #SPEECH_STATE_LISTENING_END
+     */
+    public void setSpeechStateChangeTypes(int state) {
+        enforceNotSealed();
+        mSpeechStateChangeTypes = state;
     }
 
     /**
@@ -1239,6 +1338,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mAction = 0;
         mContentChangeTypes = 0;
         mWindowChangeTypes = 0;
+        mSpeechStateChangeTypes = 0;
         mPackageName = null;
         mEventTime = 0;
         if (mRecords != null) {
@@ -1261,6 +1361,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         mAction = parcel.readInt();
         mContentChangeTypes = parcel.readInt();
         mWindowChangeTypes = parcel.readInt();
+        mSpeechStateChangeTypes = parcel.readInt();
         mPackageName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
         mEventTime = parcel.readLong();
         mConnectionId = parcel.readInt();
@@ -1332,6 +1433,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         parcel.writeInt(mAction);
         parcel.writeInt(mContentChangeTypes);
         parcel.writeInt(mWindowChangeTypes);
+        parcel.writeInt(mSpeechStateChangeTypes);
         TextUtils.writeToParcel(mPackageName, parcel, 0);
         parcel.writeLong(mEventTime);
         parcel.writeInt(mConnectionId);
@@ -1500,6 +1602,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
             case TYPE_WINDOWS_CHANGED: return "TYPE_WINDOWS_CHANGED";
             case TYPE_VIEW_CONTEXT_CLICKED: return "TYPE_VIEW_CONTEXT_CLICKED";
             case TYPE_ASSIST_READING_CONTEXT: return "TYPE_ASSIST_READING_CONTEXT";
+            case TYPE_SPEECH_STATE_CHANGE: return "TYPE_SPEECH_STATE_CHANGE";
             default: return Integer.toHexString(eventType);
         }
     }

@@ -63,43 +63,43 @@ public class ExtendAnimation extends Animation {
                 com.android.internal.R.styleable.ExtendAnimation);
 
         Description d = Description.parseValue(a.peekValue(
-                com.android.internal.R.styleable.ExtendAnimation_fromExtendLeft));
+                com.android.internal.R.styleable.ExtendAnimation_fromExtendLeft), context);
         mFromLeftType = d.type;
         mFromLeftValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-                com.android.internal.R.styleable.ExtendAnimation_fromExtendTop));
+                com.android.internal.R.styleable.ExtendAnimation_fromExtendTop), context);
         mFromTopType = d.type;
         mFromTopValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-                com.android.internal.R.styleable.ExtendAnimation_fromExtendRight));
+                com.android.internal.R.styleable.ExtendAnimation_fromExtendRight), context);
         mFromRightType = d.type;
         mFromRightValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-                com.android.internal.R.styleable.ExtendAnimation_fromExtendBottom));
+                com.android.internal.R.styleable.ExtendAnimation_fromExtendBottom), context);
         mFromBottomType = d.type;
         mFromBottomValue = d.value;
 
 
         d = Description.parseValue(a.peekValue(
-                com.android.internal.R.styleable.ExtendAnimation_toExtendLeft));
+                com.android.internal.R.styleable.ExtendAnimation_toExtendLeft), context);
         mToLeftType = d.type;
         mToLeftValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-                com.android.internal.R.styleable.ExtendAnimation_toExtendTop));
+                com.android.internal.R.styleable.ExtendAnimation_toExtendTop), context);
         mToTopType = d.type;
         mToTopValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-                com.android.internal.R.styleable.ExtendAnimation_toExtendRight));
+                com.android.internal.R.styleable.ExtendAnimation_toExtendRight), context);
         mToRightType = d.type;
         mToRightValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-                com.android.internal.R.styleable.ExtendAnimation_toExtendBottom));
+                com.android.internal.R.styleable.ExtendAnimation_toExtendBottom), context);
         mToBottomType = d.type;
         mToBottomValue = d.value;
 

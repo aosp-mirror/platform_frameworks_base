@@ -73,22 +73,22 @@ public class TranslateAnimation extends Animation {
                 com.android.internal.R.styleable.TranslateAnimation);
 
         Description d = Description.parseValue(a.peekValue(
-            com.android.internal.R.styleable.TranslateAnimation_fromXDelta));
+                com.android.internal.R.styleable.TranslateAnimation_fromXDelta), context);
         mFromXType = d.type;
         mFromXValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-                com.android.internal.R.styleable.TranslateAnimation_toXDelta));
+                com.android.internal.R.styleable.TranslateAnimation_toXDelta), context);
         mToXType = d.type;
         mToXValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-            com.android.internal.R.styleable.TranslateAnimation_fromYDelta));
+                com.android.internal.R.styleable.TranslateAnimation_fromYDelta), context);
         mFromYType = d.type;
         mFromYValue = d.value;
 
         d = Description.parseValue(a.peekValue(
-            com.android.internal.R.styleable.TranslateAnimation_toYDelta));
+                com.android.internal.R.styleable.TranslateAnimation_toYDelta), context);
         mToYType = d.type;
         mToYValue = d.value;
 

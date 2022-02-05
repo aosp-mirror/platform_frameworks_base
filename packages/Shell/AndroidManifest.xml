@@ -562,12 +562,14 @@
     <!-- Permissions required for CTS test - TrustTestCases -->
     <uses-permission android:name="android.permission.PROVIDE_TRUST_AGENT" />
     <uses-permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE" />
+    <uses-permission android:name="android.permission.TRUST_LISTENER" />
 
     <!-- Permission required for CTS test - CtsGameManagerTestCases -->
     <uses-permission android:name="android.permission.MANAGE_GAME_MODE" />
 
     <!-- Permission required for CTS test - CtsGameServiceTestCases -->
     <uses-permission android:name="android.permission.SET_GAME_SERVICE" />
+    <uses-permission android:name="android.permission.MANAGE_GAME_ACTIVITY" />
 
     <!-- Permission required for CTS test - ClipboardManagerTest -->
     <uses-permission android:name="android.permission.SET_CLIP_SOURCE" />

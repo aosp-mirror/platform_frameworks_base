@@ -302,7 +302,7 @@ public final class Icon implements Parcelable {
      *                is available. The {@link android.os.Message#obj obj}
      *                property is populated with the Drawable.
      */
-    public void loadDrawableAsync(Context context, Message andThen) {
+    public void loadDrawableAsync(@NonNull Context context, @NonNull Message andThen) {
         if (andThen.getTarget() == null) {
             throw new IllegalArgumentException("callback message must have a target handler");
         }
@@ -320,7 +320,7 @@ public final class Icon implements Parcelable {
      *                 {@link #loadDrawable(Context)} finished
      * @param handler {@link Handler} on which to notify the {@code listener}
      */
-    public void loadDrawableAsync(Context context, final OnDrawableLoadedListener listener,
+    public void loadDrawableAsync(@NonNull Context context, final OnDrawableLoadedListener listener,
             Handler handler) {
         new LoadDrawableTask(context, handler, listener).runAsync();
     }
@@ -335,7 +335,7 @@ public final class Icon implements Parcelable {
      *                to access {@link android.content.res.Resources Resources}, for example.
      * @return A fresh instance of a drawable for this image, yours to keep.
      */
-    public Drawable loadDrawable(Context context) {
+    public @Nullable Drawable loadDrawable(Context context) {
         final Drawable result = loadDrawableInner(context);
         if (result != null && hasTint()) {
             result.mutate();
@@ -415,7 +415,7 @@ public final class Icon implements Parcelable {
         return null;
     }
 
-    private InputStream getUriInputStream(Context context) {
+    private @Nullable InputStream getUriInputStream(Context context) {
         final Uri uri = getUri();
         final String scheme = uri.getScheme();
         if (ContentResolver.SCHEME_CONTENT.equals(scheme)
@@ -496,7 +496,7 @@ public final class Icon implements Parcelable {
      * @param stream The stream on which to serialize the Icon.
      * @hide
      */
-    public void writeToStream(OutputStream stream) throws IOException {
+    public void writeToStream(@NonNull OutputStream stream) throws IOException {
         DataOutputStream dataStream = new DataOutputStream(stream);
 
         dataStream.writeInt(VERSION_STREAM_SERIALIZER);
@@ -532,7 +532,7 @@ public final class Icon implements Parcelable {
      * @param stream The input stream from which to reconstruct the Icon.
      * @hide
      */
-    public static Icon createFromStream(InputStream stream) throws IOException {
+    public static @Nullable Icon createFromStream(@NonNull InputStream stream) throws IOException {
         DataInputStream inputStream = new DataInputStream(stream);
 
         final int version = inputStream.readInt();
@@ -571,7 +571,7 @@ public final class Icon implements Parcelable {
      * @return whether this icon is the same as the another one
      * @hide
      */
-    public boolean sameAs(Icon otherIcon) {
+    public boolean sameAs(@NonNull Icon otherIcon) {
         if (otherIcon == this) {
             return true;
         }
@@ -602,7 +602,7 @@ public final class Icon implements Parcelable {
      *                given resource ID.
      * @param resId ID of the drawable resource
      */
-    public static Icon createWithResource(Context context, @DrawableRes int resId) {
+    public static @NonNull Icon createWithResource(Context context, @DrawableRes int resId) {
         if (context == null) {
             throw new IllegalArgumentException("Context must not be null.");
         }
@@ -617,7 +617,7 @@ public final class Icon implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static Icon createWithResource(Resources res, @DrawableRes int resId) {
+    public static @NonNull Icon createWithResource(Resources res, @DrawableRes int resId) {
         if (res == null) {
             throw new IllegalArgumentException("Resource must not be null.");
         }
@@ -632,7 +632,7 @@ public final class Icon implements Parcelable {
      * @param resPackage Name of the package containing the resource in question
      * @param resId ID of the drawable resource
      */
-    public static Icon createWithResource(String resPackage, @DrawableRes int resId) {
+    public static @NonNull Icon createWithResource(String resPackage, @DrawableRes int resId) {
         if (resPackage == null) {
             throw new IllegalArgumentException("Resource package name must not be null.");
         }
@@ -646,7 +646,7 @@ public final class Icon implements Parcelable {
      * Create an Icon pointing to a bitmap in memory.
      * @param bits A valid {@link android.graphics.Bitmap} object
      */
-    public static Icon createWithBitmap(Bitmap bits) {
+    public static @NonNull Icon createWithBitmap(Bitmap bits) {
         if (bits == null) {
             throw new IllegalArgumentException("Bitmap must not be null.");
         }
@@ -660,7 +660,7 @@ public final class Icon implements Parcelable {
      * by {@link AdaptiveIconDrawable}.
      * @param bits A valid {@link android.graphics.Bitmap} object
      */
-    public static Icon createWithAdaptiveBitmap(Bitmap bits) {
+    public static @NonNull Icon createWithAdaptiveBitmap(Bitmap bits) {
         if (bits == null) {
             throw new IllegalArgumentException("Bitmap must not be null.");
         }
@@ -677,7 +677,7 @@ public final class Icon implements Parcelable {
      * @param offset Offset into <code>data</code> at which the bitmap data starts
      * @param length Length of the bitmap data
      */
-    public static Icon createWithData(byte[] data, int offset, int length) {
+    public static @NonNull Icon createWithData(byte[] data, int offset, int length) {
         if (data == null) {
             throw new IllegalArgumentException("Data must not be null.");
         }
@@ -693,7 +693,7 @@ public final class Icon implements Parcelable {
      *
      * @param uri A uri referring to local content:// or file:// image data.
      */
-    public static Icon createWithContentUri(String uri) {
+    public static @NonNull Icon createWithContentUri(String uri) {
         if (uri == null) {
             throw new IllegalArgumentException("Uri must not be null.");
         }
@@ -707,7 +707,7 @@ public final class Icon implements Parcelable {
      *
      * @param uri A uri referring to local content:// or file:// image data.
      */
-    public static Icon createWithContentUri(Uri uri) {
+    public static @NonNull Icon createWithContentUri(Uri uri) {
         if (uri == null) {
             throw new IllegalArgumentException("Uri must not be null.");
         }
@@ -720,8 +720,7 @@ public final class Icon implements Parcelable {
      *
      * @param uri A uri referring to local content:// or file:// image data.
      */
-    @NonNull
-    public static Icon createWithAdaptiveBitmapContentUri(@NonNull String uri) {
+    public static @NonNull Icon createWithAdaptiveBitmapContentUri(@NonNull String uri) {
         if (uri == null) {
             throw new IllegalArgumentException("Uri must not be null.");
         }
@@ -750,7 +749,7 @@ public final class Icon implements Parcelable {
      * @param tint a color, as in {@link Drawable#setTint(int)}
      * @return this same object, for use in chained construction
      */
-    public Icon setTint(@ColorInt int tint) {
+    public @NonNull Icon setTint(@ColorInt int tint) {
         return setTintList(ColorStateList.valueOf(tint));
     }
 
@@ -760,7 +759,7 @@ public final class Icon implements Parcelable {
      * @param tintList as in {@link Drawable#setTintList(ColorStateList)}, null to remove tint
      * @return this same object, for use in chained construction
      */
-    public Icon setTintList(ColorStateList tintList) {
+    public @NonNull Icon setTintList(ColorStateList tintList) {
         mTintList = tintList;
         return this;
     }
@@ -809,7 +808,7 @@ public final class Icon implements Parcelable {
      * @param path A path to a file that contains compressed bitmap data of
      *           a type that {@link android.graphics.BitmapFactory} can decode.
      */
-    public static Icon createWithFilePath(String path) {
+    public static @NonNull Icon createWithFilePath(String path) {
         if (path == null) {
             throw new IllegalArgumentException("Path must not be null.");
         }

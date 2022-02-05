@@ -18,6 +18,7 @@ package android.animation;
 
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -1626,7 +1627,7 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
          *
          * @param animation The animation which was repeated.
          */
-        void onAnimationUpdate(ValueAnimator animation);
+        void onAnimationUpdate(@NonNull ValueAnimator animation);
 
     }
 

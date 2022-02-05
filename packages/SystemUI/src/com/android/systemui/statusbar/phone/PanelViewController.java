@@ -461,7 +461,7 @@ public abstract class PanelViewController {
             boolean expands = onEmptySpaceClick(mInitialTouchX);
             onTrackingStopped(expands);
         }
-
+        mAmbientState.setSwipingUp(false);
         mVelocityTracker.clear();
     }
 
@@ -708,7 +708,7 @@ public abstract class PanelViewController {
         animator.start();
     }
 
-    private void onFlingEnd(boolean cancelled) {
+    void onFlingEnd(boolean cancelled) {
         mIsFlinging = false;
         // No overshoot when the animation ends
         setOverExpansionInternal(0, false /* isFromGesture */);
@@ -1393,6 +1393,10 @@ public abstract class PanelViewController {
                         mUpwardsWhenThresholdReached = isDirectionUpwards(x, y);
                     }
                     if ((!mGestureWaitForTouchSlop || mTracking) && !isTrackingBlocked()) {
+                        // Count h==0 as part of swipe-up,
+                        // otherwise {@link NotificationStackScrollLayout}
+                        // wrongly enables stack height updates at the start of lockscreen swipe-up
+                        mAmbientState.setSwipingUp(h <= 0);
                         setExpandedHeightInternal(newHeight);
                     }
                     break;

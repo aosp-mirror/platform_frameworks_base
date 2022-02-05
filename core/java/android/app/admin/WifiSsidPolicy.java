@@ -18,6 +18,7 @@ package android.app.admin;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.net.wifi.WifiSsid;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
@@ -70,25 +71,25 @@ public final class WifiSsidPolicy implements Parcelable {
     public @interface WifiSsidPolicyType {}
 
     private @WifiSsidPolicyType int mPolicyType;
-    private ArraySet<String> mSsids;
+    private ArraySet<WifiSsid> mSsids;
 
-    private WifiSsidPolicy(@WifiSsidPolicyType int policyType, @NonNull Set<String> ssids) {
+    private WifiSsidPolicy(@WifiSsidPolicyType int policyType, @NonNull Set<WifiSsid> ssids) {
         mPolicyType = policyType;
         mSsids = new ArraySet<>(ssids);
     }
 
     private WifiSsidPolicy(Parcel in) {
         mPolicyType = in.readInt();
-        mSsids = (ArraySet<String>) in.readArraySet(null);
+        mSsids = (ArraySet<WifiSsid>) in.readArraySet(null);
     }
     /**
      * Create the allowlist Wi-Fi SSID Policy.
      *
-     * @param ssids allowlist of SSIDs in UTF-8 without double quotes format
+     * @param ssids allowlist of {@link WifiSsid}
      * @throws IllegalArgumentException if the input ssids list is empty
      */
     @NonNull
-    public static WifiSsidPolicy createAllowlistPolicy(@NonNull Set<String> ssids) {
+    public static WifiSsidPolicy createAllowlistPolicy(@NonNull Set<WifiSsid> ssids) {
         if (ssids.isEmpty()) {
             throw new IllegalArgumentException("SSID list cannot be empty");
         }
@@ -98,11 +99,11 @@ public final class WifiSsidPolicy implements Parcelable {
     /**
      * Create the denylist Wi-Fi SSID Policy.
      *
-     * @param ssids denylist of SSIDs in UTF-8 without double quotes format
+     * @param ssids denylist of {@link WifiSsid}
      * @throws IllegalArgumentException if the input ssids list is empty
      */
     @NonNull
-    public static WifiSsidPolicy createDenylistPolicy(@NonNull Set<String> ssids) {
+    public static WifiSsidPolicy createDenylistPolicy(@NonNull Set<WifiSsid> ssids) {
         if (ssids.isEmpty()) {
             throw new IllegalArgumentException("SSID list cannot be empty");
         }
@@ -110,10 +111,10 @@ public final class WifiSsidPolicy implements Parcelable {
     }
 
     /**
-     * Returns the set of SSIDs in UTF-8 without double quotes format.
+     * Returns the set of {@link WifiSsid}
      */
     @NonNull
-    public Set<String> getSsids() {
+    public Set<WifiSsid> getSsids() {
         return mSsids;
     }
 

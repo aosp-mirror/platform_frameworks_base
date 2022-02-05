@@ -108,7 +108,6 @@ import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.compat.IPlatformCompat;
-import com.android.internal.infra.AndroidFuture;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.os.RoSystemProperties;
@@ -1592,8 +1591,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public void revokeOwnPermissionsOnKill(String packageName, List<String> permissions,
-            AndroidFuture<Void> callback) {
+    public void revokeOwnPermissionsOnKill(String packageName, List<String> permissions) {
         final int callingUid = Binder.getCallingUid();
         int callingUserId = UserHandle.getUserId(callingUid);
         int targetPackageUid = mPackageManagerInt.getPackageUid(packageName, 0, callingUserId);
@@ -1608,8 +1606,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                         + permName + " because it does not hold that permission");
             }
         }
-        mPermissionControllerManager.revokeOwnPermissionsOnKill(packageName, permissions,
-                callback);
+        mPermissionControllerManager.revokeOwnPermissionsOnKill(packageName, permissions);
     }
 
     private boolean mayManageRolePermission(int uid) {

@@ -6094,11 +6094,9 @@ public final class Settings {
         }
 
         /** @hide */
-        @SystemApi
-        @Nullable
-        @SuppressLint("VisiblySynchronized")
-        public static String getStringForUser(@NonNull ContentResolver resolver,
-                @NonNull String name, int userHandle) {
+        @UnsupportedAppUsage
+        public static String getStringForUser(ContentResolver resolver, String name,
+                int userHandle) {
             if (MOVED_TO_GLOBAL.contains(name)) {
                 Log.w(TAG, "Setting " + name + " has moved from android.provider.Settings.Secure"
                         + " to android.provider.Settings.Global.");
@@ -6330,9 +6328,8 @@ public final class Settings {
         }
 
         /** @hide */
-        @SystemApi
-        public static int getIntForUser(@NonNull ContentResolver cr, @NonNull String name,
-                int def, int userHandle) {
+        @UnsupportedAppUsage
+        public static int getIntForUser(ContentResolver cr, String name, int def, int userHandle) {
             String v = getStringForUser(cr, name, userHandle);
             return parseIntSettingWithDefault(v, def);
         }
@@ -17323,6 +17320,12 @@ public final class Settings {
              */
             public static final String CLOCKWORK_LONG_PRESS_TO_ASSISTANT_ENABLED =
                     "clockwork_long_press_to_assistant_enabled";
+
+            /*
+             * Whether the device has Cooldown Mode enabled.
+             * @hide
+             */
+            public static final String COOLDOWN_MODE_ON = "cooldown_mode_on";
 
             /*
              * Whether the device has Wet Mode/ Touch Lock Mode enabled.

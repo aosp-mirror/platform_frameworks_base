@@ -20,6 +20,7 @@ import static android.os.Build.VERSION_CODES.S;
 
 import android.Manifest;
 import android.annotation.CheckResult;
+import android.annotation.DurationMillisLong;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1282,6 +1283,22 @@ public final class PermissionManager {
     }
 
     /**
+     * Starts a one-time permission session for a given package.
+     * @see #startOneTimePermissionSession(String, long, long, int, int)
+     * @hide
+     * @deprecated Use {@link #startOneTimePermissionSession(String, long, long, int, int)} instead
+     */
+    @Deprecated
+    @SystemApi
+    @RequiresPermission(Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS)
+    public void startOneTimePermissionSession(@NonNull String packageName, long timeoutMillis,
+            @ActivityManager.RunningAppProcessInfo.Importance int importanceToResetTimer,
+            @ActivityManager.RunningAppProcessInfo.Importance int importanceToKeepSessionAlive) {
+        startOneTimePermissionSession(packageName, timeoutMillis, -1,
+                importanceToResetTimer, importanceToKeepSessionAlive);
+    }
+
+    /**
      * Starts a one-time permission session for a given package. A one-time permission session is
      * ended if app becomes inactive. Inactivity is defined as the package's uid importance level
      * staying > importanceToResetTimer for timeoutMillis milliseconds. If the package's uid
@@ -1301,25 +1318,33 @@ public final class PermissionManager {
      * {@link PermissionControllerService#onOneTimePermissionSessionTimeout(String)} is invoked.
      * </p>
      * <p>
-     * Note that if there is currently an active session for a package a new one isn't created and
-     * the existing one isn't changed.
+     * Note that if there is currently an active session for a package a new one isn't created but
+     * each parameter of the existing one will be updated to the more aggressive of both sessions.
+     * This means that durations will be set to the shortest parameter and importances will be set
+     * to the lowest one.
      * </p>
      * @param packageName The package to start a one-time permission session for
      * @param timeoutMillis Number of milliseconds for an app to be in an inactive state
+     * @param revokeAfterKilledDelayMillis Number of milliseconds to wait before revoking on the
+     *                                     event an app is terminated. Set to -1 to use default
+     *                                     value for the device.
      * @param importanceToResetTimer The least important level to uid must be to reset the timer
      * @param importanceToKeepSessionAlive The least important level the uid must be to keep the
-     *                                    session alive
+     *                                     session alive
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS)
-    public void startOneTimePermissionSession(@NonNull String packageName, long timeoutMillis,
+    public void startOneTimePermissionSession(@NonNull String packageName,
+            @DurationMillisLong long timeoutMillis,
+            @DurationMillisLong long revokeAfterKilledDelayMillis,
             @ActivityManager.RunningAppProcessInfo.Importance int importanceToResetTimer,
             @ActivityManager.RunningAppProcessInfo.Importance int importanceToKeepSessionAlive) {
         try {
             mPermissionManager.startOneTimePermissionSession(packageName, mContext.getUserId(),
-                    timeoutMillis, importanceToResetTimer, importanceToKeepSessionAlive);
+                    timeoutMillis, revokeAfterKilledDelayMillis, importanceToResetTimer,
+                    importanceToKeepSessionAlive);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

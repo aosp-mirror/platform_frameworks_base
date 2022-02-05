@@ -155,32 +155,9 @@ java_library_with_nonpublic_deps {
     name: "framework-all",
     installable: false,
     static_libs: [
-        "android.net.ipsec.ike.impl",
+        "all-framework-module-impl",
         "framework-minus-apex",
-        "framework-appsearch.impl",
-        "framework-connectivity.impl",
-        "framework-connectivity-tiramisu.impl",
-        "framework-graphics.impl",
-        "framework-mediaprovider.impl",
-        "framework-permission.impl",
-        "framework-permission-s.impl",
-        "framework-scheduling.impl",
-        "framework-sdkextensions.impl",
-        "framework-statsd.impl",
-        "framework-supplementalprocess.impl",
-        "framework-tethering.impl",
-        "framework-uwb.impl",
-        "framework-wifi.impl",
-        "updatable-media",
     ],
-    soong_config_variables: {
-        include_nonpublic_framework_api: {
-            static_libs: [
-                "framework-auxiliary.impl",
-                "framework-supplementalapi.impl",
-            ],
-        },
-    },
     apex_available: ["//apex_available:platform"],
     sdk_version: "core_platform",
     visibility: [
@@ -418,7 +395,6 @@ java_library {
     static_libs: [
         "app-compat-annotations",
         "framework-minus-apex",
-        "framework-appsearch.impl", // TODO(b/146218515): should be removed
         "framework-updatable-stubs-module_libs_api",
     ],
     sdk_version: "core_platform",

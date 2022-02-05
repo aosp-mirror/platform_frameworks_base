@@ -203,6 +203,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private float mQsExpansionFraction;
     private final int mSplitShadeMinContentHeight;
 
+    /** Whether we are flinging the shade open or closed. */
+    private boolean mIsFlinging;
+
     /**
      * The algorithm which calculates the properties for our children
      */
@@ -1270,6 +1273,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     /**
+     * @return Whether we should skip stack height update for lockscreen swipe-up or unlock hint.
+     */
+    private boolean shouldSkipHeightUpdate() {
+        // After the user swipes up on lockscreen and lets go,
+        // {@link PanelViewController) flings the shade back down.
+        return mAmbientState.isOnKeyguard() && (
+                mAmbientState.isUnlockHintRunning() || mAmbientState.isSwipingUp() || mIsFlinging);
+    }
+
+    /**
      * Apply expansion fraction to the y position and height of the notifications panel.
      * @param listenerNeedsAnimation does the listener need to animate?
      */
@@ -1283,7 +1296,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mOnStackYChanged != null) {
             mOnStackYChanged.accept(listenerNeedsAnimation);
         }
-        if (mQsExpansionFraction <= 0) {
+        if (mQsExpansionFraction <= 0 && !shouldSkipHeightUpdate()) {
             final float endHeight = updateStackEndHeight(
                     getHeight(), getEmptyBottomMargin(), mTopPadding);
             updateStackHeight(endHeight, fraction);
@@ -1325,22 +1338,27 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public void setExpandedHeight(float height) {
         final float shadeBottom = getHeight() - getEmptyBottomMargin();
-        final float expansionFraction = MathUtils.saturate(height / shadeBottom);
-        mAmbientState.setExpansionFraction(expansionFraction);
+        final boolean skipHeightUpdate = shouldSkipHeightUpdate();
+        if (!skipHeightUpdate) {
+            final float expansionFraction = MathUtils.saturate(height / shadeBottom);
+            mAmbientState.setExpansionFraction(expansionFraction);
+        }
         updateStackPosition();
 
-        mExpandedHeight = height;
-        setIsExpanded(height > 0);
-        int minExpansionHeight = getMinExpansionHeight();
-        if (height < minExpansionHeight) {
-            mClipRect.left = 0;
-            mClipRect.right = getWidth();
-            mClipRect.top = 0;
-            mClipRect.bottom = (int) height;
-            height = minExpansionHeight;
-            setRequestedClipBounds(mClipRect);
-        } else {
-            setRequestedClipBounds(null);
+        if (!skipHeightUpdate) {
+            mExpandedHeight = height;
+            setIsExpanded(height > 0);
+            int minExpansionHeight = getMinExpansionHeight();
+            if (height < minExpansionHeight) {
+                mClipRect.left = 0;
+                mClipRect.right = getWidth();
+                mClipRect.top = 0;
+                mClipRect.bottom = (int) height;
+                height = minExpansionHeight;
+                setRequestedClipBounds(mClipRect);
+            } else {
+                setRequestedClipBounds(null);
+            }
         }
         int stackHeight;
         float translationY;
@@ -1368,7 +1386,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                     }
                 }
             } else {
-                stackHeight = (int) height;
+                stackHeight = (int) (skipHeightUpdate ? mExpandedHeight : height);
             }
         } else {
             appearFraction = calculateAppearFraction(height);
@@ -1386,7 +1404,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             }
         }
         mAmbientState.setAppearFraction(appearFraction);
-        if (stackHeight != mCurrentStackHeight) {
+        if (stackHeight != mCurrentStackHeight && !skipHeightUpdate) {
             mCurrentStackHeight = stackHeight;
             updateAlgorithmHeightAndPadding();
             requestChildrenUpdate();
@@ -4999,6 +5017,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setUnlockHintRunning(boolean running) {
         mAmbientState.setUnlockHintRunning(running);
+    }
+
+    /**
+     * @param isFlinging Whether we are flinging the shade open or closed.
+     */
+    public void setIsFlinging(boolean isFlinging) {
+        mIsFlinging = isFlinging;
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)

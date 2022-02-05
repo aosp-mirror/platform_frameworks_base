@@ -18,16 +18,11 @@ package com.android.systemui.media.taptotransfer
 
 import android.app.StatusBarManager
 import android.content.Context
-import android.graphics.Color
-import android.graphics.drawable.Icon
 import android.media.MediaRoute2Info
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver
-import com.android.systemui.media.taptotransfer.receiver.ChipStateReceiver
 import com.android.systemui.media.taptotransfer.sender.AlmostCloseToEndCast
 import com.android.systemui.media.taptotransfer.sender.AlmostCloseToStartCast
 import com.android.systemui.media.taptotransfer.sender.TransferFailed
@@ -49,14 +44,8 @@ import javax.inject.Inject
 class MediaTttCommandLineHelper @Inject constructor(
     commandRegistry: CommandRegistry,
     private val context: Context,
-    @Main private val mainExecutor: Executor,
-    private val mediaTttChipControllerReceiver: MediaTttChipControllerReceiver,
+    @Main private val mainExecutor: Executor
 ) {
-    private val appIconDrawable =
-        Icon.createWithResource(context, R.drawable.ic_avatar_user).loadDrawable(context).also {
-            it.setTint(Color.YELLOW)
-        }
-
     /**
      * A map from a display state string typed in the command line to the display int it represents.
      */
@@ -81,10 +70,7 @@ class MediaTttCommandLineHelper @Inject constructor(
 
     init {
         commandRegistry.registerCommand(SENDER_COMMAND) { SenderCommand() }
-        commandRegistry.registerCommand(
-            ADD_CHIP_COMMAND_RECEIVER_TAG) { AddChipCommandReceiver() }
-        commandRegistry.registerCommand(
-            REMOVE_CHIP_COMMAND_RECEIVER_TAG) { RemoveChipCommandReceiver() }
+        commandRegistry.registerCommand(RECEIVER_COMMAND) { ReceiverCommand() }
     }
 
     /** All commands for the sender device. */
@@ -94,10 +80,11 @@ class MediaTttCommandLineHelper @Inject constructor(
                     .addFeature("feature")
                     .build()
 
+            val commandName = args[1]
             @StatusBarManager.MediaTransferSenderState
-            val displayState = stateStringToStateInt[args[1]]
+            val displayState = stateStringToStateInt[commandName]
             if (displayState == null) {
-                pw.println("Invalid command name")
+                pw.println("Invalid command name $commandName")
                 return
             }
 
@@ -145,27 +132,29 @@ class MediaTttCommandLineHelper @Inject constructor(
         }
     }
 
-    // TODO(b/216318437): Migrate the receiver callbacks to StatusBarManager.
-
-    /** A command to DISPLAY the media ttt chip on the RECEIVER device. */
-    inner class AddChipCommandReceiver : Command {
+    /** All commands for the receiver device. */
+    inner class ReceiverCommand : Command {
         override fun execute(pw: PrintWriter, args: List<String>) {
-            mediaTttChipControllerReceiver.displayChip(
-                ChipStateReceiver(appIconDrawable, APP_ICON_CONTENT_DESCRIPTION)
-            )
+            val statusBarManager = context.getSystemService(Context.STATUS_BAR_SERVICE)
+                    as StatusBarManager
+            when(val commandName = args[0]) {
+                CLOSE_TO_SENDER_STATE ->
+                    statusBarManager.updateMediaTapToTransferReceiverDisplay(
+                        StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
+                        routeInfo
+                    )
+                FAR_FROM_SENDER_STATE ->
+                    statusBarManager.updateMediaTapToTransferReceiverDisplay(
+                        StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER,
+                        routeInfo
+                    )
+                else ->
+                    pw.println("Invalid command name $commandName")
+            }
         }
-        override fun help(pw: PrintWriter) {
-            pw.println("Usage: adb shell cmd statusbar $ADD_CHIP_COMMAND_RECEIVER_TAG")
-        }
-    }
 
-    /** A command to REMOVE the media ttt chip on the RECEIVER device. */
-    inner class RemoveChipCommandReceiver : Command {
-        override fun execute(pw: PrintWriter, args: List<String>) {
-            mediaTttChipControllerReceiver.removeChip()
-        }
         override fun help(pw: PrintWriter) {
-            pw.println("Usage: adb shell cmd statusbar $REMOVE_CHIP_COMMAND_RECEIVER_TAG")
+            pw.println("Usage: adb shell cmd statusbar $RECEIVER_COMMAND <chipState>")
         }
     }
 }
@@ -173,13 +162,13 @@ class MediaTttCommandLineHelper @Inject constructor(
 @VisibleForTesting
 const val SENDER_COMMAND = "media-ttt-chip-sender"
 @VisibleForTesting
-const val ADD_CHIP_COMMAND_RECEIVER_TAG = "media-ttt-chip-add-receiver"
+const val RECEIVER_COMMAND = "media-ttt-chip-receiver"
 @VisibleForTesting
-const val REMOVE_CHIP_COMMAND_RECEIVER_TAG = "media-ttt-chip-remove-receiver"
+const val FAR_FROM_RECEIVER_STATE = "FarFromReceiver"
 @VisibleForTesting
-val FAR_FROM_RECEIVER_STATE = "FarFromReceiver"
-
-private const val APP_ICON_CONTENT_DESCRIPTION = "Fake media app icon"
+const val CLOSE_TO_SENDER_STATE = "CloseToSender"
+@VisibleForTesting
+const val FAR_FROM_SENDER_STATE = "FarFromSender"
 private const val CLI_TAG = "MediaTransferCli"
 
 private val routeInfo = MediaRoute2Info.Builder("id", "Test Name")

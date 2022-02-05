@@ -56,6 +56,8 @@ public abstract class BroadcastInfoRequest implements Parcelable {
                     switch (type) {
                         case TvInputManager.BROADCAST_INFO_TYPE_TS:
                             return TsRequest.createFromParcelBody(source);
+                        case TvInputManager.BROADCAST_INFO_TYPE_TABLE:
+                            return TableRequest.createFromParcelBody(source);
                         case TvInputManager.BROADCAST_INFO_TYPE_SECTION:
                             return SectionRequest.createFromParcelBody(source);
                         case TvInputManager.BROADCAST_INFO_TYPE_PES:

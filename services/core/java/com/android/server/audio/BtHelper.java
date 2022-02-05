@@ -595,8 +595,9 @@ public class BtHelper {
         String btDeviceName =  getName(btDevice);
         boolean result = false;
         if (isActive) {
-            result |= mDeviceBroker.handleDeviceConnection(isActive, audioDevice.getInternalType(),
-                    audioDevice.getAddress(), btDeviceName);
+            result |= mDeviceBroker.handleDeviceConnection(new AudioDeviceAttributes(
+                    audioDevice.getInternalType(), audioDevice.getAddress(), btDeviceName),
+                    isActive);
         } else {
             int[] outDeviceTypes = {
                     AudioSystem.DEVICE_OUT_BLUETOOTH_SCO,
@@ -604,13 +605,15 @@ public class BtHelper {
                     AudioSystem.DEVICE_OUT_BLUETOOTH_SCO_CARKIT
             };
             for (int outDeviceType : outDeviceTypes) {
-                result |= mDeviceBroker.handleDeviceConnection(
-                        isActive, outDeviceType, audioDevice.getAddress(), btDeviceName);
+                result |= mDeviceBroker.handleDeviceConnection(new AudioDeviceAttributes(
+                        outDeviceType, audioDevice.getAddress(), btDeviceName),
+                        isActive);
             }
         }
         // handleDeviceConnection() && result to make sure the method get executed
-        result = mDeviceBroker.handleDeviceConnection(
-                isActive, inDevice, audioDevice.getAddress(), btDeviceName) && result;
+        result = mDeviceBroker.handleDeviceConnection(new AudioDeviceAttributes(
+                        inDevice, audioDevice.getAddress(), btDeviceName),
+                isActive) && result;
         return result;
     }
 

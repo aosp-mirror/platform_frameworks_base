@@ -26,10 +26,12 @@ import android.bluetooth.BluetoothLeAudioCodecConfig;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.media.audio.common.AidlConversion;
 import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.os.Vibrator;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -1555,9 +1557,24 @@ public class AudioSystem
      *     {@link #AUDIO_STATUS_ERROR} or {@link #AUDIO_STATUS_SERVER_DIED}
      */
     @UnsupportedAppUsage
-    public static native int setDeviceConnectionState(int device, int state,
-                                                      String device_address, String device_name,
-                                                      int codecFormat);
+    public static int setDeviceConnectionState(AudioDeviceAttributes attributes, int state,
+            int codecFormat) {
+        android.media.audio.common.AudioPort port =
+                AidlConversion.api2aidl_AudioDeviceAttributes_AudioPort(attributes);
+        Parcel parcel = Parcel.obtain();
+        port.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        try {
+            return setDeviceConnectionState(state, parcel, codecFormat);
+        } finally {
+            parcel.recycle();
+        }
+    }
+    /**
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public static native int setDeviceConnectionState(int state, Parcel parcel, int codecFormat);
     /** @hide */
     @UnsupportedAppUsage
     public static native int getDeviceConnectionState(int device, String device_address);

@@ -4055,9 +4055,6 @@ public class UserManager {
      * <p>Note that is applicable to any profile type (currently not including Restricted profiles).
      *
      * @param userType the type of profile, such as {@link UserManager#USER_TYPE_PROFILE_MANAGED}.
-     * @param allowedToRemoveOne whether removing an existing profile of given type -if there is-
-     *                           from the context user to make up space should be taken into account
-     *                           for the calculation.
      * @return how many additional profiles can be created.
      * @hide
      */
@@ -4068,13 +4065,11 @@ public class UserManager {
             android.Manifest.permission.QUERY_USERS
     })
     @UserHandleAware
-    public int getRemainingCreatableProfileCount(@NonNull String userType,
-            boolean allowedToRemoveOne) {
+    public int getRemainingCreatableProfileCount(@NonNull String userType) {
         Objects.requireNonNull(userType, "userType must not be null");
         try {
             // TODO(b/142482943): Perhaps let the following code apply to restricted users too.
-            return mService.getRemainingCreatableProfileCount(userType, mUserId,
-                    allowedToRemoveOne);
+            return mService.getRemainingCreatableProfileCount(userType, mUserId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

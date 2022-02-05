@@ -6371,23 +6371,23 @@ public class AudioService extends IAudioService.Stub
     /**
      * see AudioManager.setWiredDeviceConnectionState()
      */
-    public void setWiredDeviceConnectionState(int type,
-            @ConnectionState int state, String address, String name,
-            String caller) {
+    public void setWiredDeviceConnectionState(AudioDeviceAttributes attributes,
+            @ConnectionState int state, String caller) {
         enforceModifyAudioRoutingPermission();
         if (state != CONNECTION_STATE_CONNECTED
                 && state != CONNECTION_STATE_DISCONNECTED) {
             throw new IllegalArgumentException("Invalid state " + state);
         }
         new MediaMetrics.Item(mMetricsId + "setWiredDeviceConnectionState")
-                .set(MediaMetrics.Property.ADDRESS, address)
+                .set(MediaMetrics.Property.ADDRESS, attributes.getAddress())
                 .set(MediaMetrics.Property.CLIENT_NAME, caller)
-                .set(MediaMetrics.Property.DEVICE, AudioSystem.getDeviceName(type))
-                .set(MediaMetrics.Property.NAME, name)
+                .set(MediaMetrics.Property.DEVICE,
+                        AudioSystem.getDeviceName(attributes.getInternalType()))
+                .set(MediaMetrics.Property.NAME, attributes.getName())
                 .set(MediaMetrics.Property.STATE,
                         state == CONNECTION_STATE_CONNECTED ? "connected" : "disconnected")
                 .record();
-        mDeviceBroker.setWiredDeviceConnectionState(type, state, address, name, caller);
+        mDeviceBroker.setWiredDeviceConnectionState(attributes, state, caller);
     }
 
     /** @see AudioManager#setTestDeviceConnectionState(AudioDeviceAttributes, boolean) */
