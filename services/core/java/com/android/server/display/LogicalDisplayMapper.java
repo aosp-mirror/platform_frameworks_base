@@ -825,7 +825,6 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
      *
      * @param device The device to associate with the LogicalDisplay.
      * @param displayId The display ID to give the new display. If invalid, a new ID is assigned.
-     * @param isDefault Indicates if we are creating the default display.
      * @return The new logical display if created, null otherwise.
      */
     private LogicalDisplay createNewLogicalDisplayLocked(DisplayDevice device, int displayId) {
