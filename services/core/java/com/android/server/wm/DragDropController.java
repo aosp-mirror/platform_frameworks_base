@@ -81,8 +81,8 @@ class DragDropController {
         return mDragState != null && !mDragState.isClosing();
     }
 
-    boolean dragSurfaceRelinquished() {
-        return mDragState != null && mDragState.mRelinquishDragSurface;
+    boolean dragSurfaceRelinquishedToDropTarget() {
+        return mDragState != null && mDragState.mRelinquishDragSurfaceToDropTarget;
     }
 
     void registerCallback(IDragDropCallback callback) {
@@ -245,7 +245,7 @@ class DragDropController {
                 }
 
                 mDragState.mDragResult = consumed;
-                mDragState.mRelinquishDragSurface = consumed
+                mDragState.mRelinquishDragSurfaceToDropTarget = consumed
                         && mDragState.targetInterceptsGlobalDrag(callingWin);
                 mDragState.endDragLocked();
             }
@@ -419,7 +419,7 @@ class DragDropController {
                     synchronized (mService.mGlobalLock) {
                         if (mDragState == null) {
                             Slog.wtf(TAG_WM, "mDragState unexpectedly became null while " +
-                                    "plyaing animation");
+                                    "playing animation");
                             return;
                         }
                         mDragState.closeLocked();
