@@ -320,15 +320,15 @@ public class EthernetManager {
     }
 
     private static final class InternalNetworkManagementListener
-            extends IInternalNetworkManagementListener.Stub {
+            extends IEthernetNetworkManagementListener.Stub {
         @NonNull
         private final Executor mExecutor;
         @NonNull
-        private final BiConsumer<Network, InternalNetworkManagementException> mListener;
+        private final BiConsumer<Network, EthernetNetworkManagementException> mListener;
 
         InternalNetworkManagementListener(
                 @NonNull final Executor executor,
-                @NonNull final BiConsumer<Network, InternalNetworkManagementException> listener) {
+                @NonNull final BiConsumer<Network, EthernetNetworkManagementException> listener) {
             Objects.requireNonNull(executor, "Pass a non-null executor");
             Objects.requireNonNull(listener, "Pass a non-null listener");
             mExecutor = executor;
@@ -338,14 +338,14 @@ public class EthernetManager {
         @Override
         public void onComplete(
                 @Nullable final Network network,
-                @Nullable final InternalNetworkManagementException e) {
+                @Nullable final EthernetNetworkManagementException e) {
             mExecutor.execute(() -> mListener.accept(network, e));
         }
     }
 
     private InternalNetworkManagementListener getInternalNetworkManagementListener(
             @Nullable final Executor executor,
-            @Nullable final BiConsumer<Network, InternalNetworkManagementException> listener) {
+            @Nullable final BiConsumer<Network, EthernetNetworkManagementException> listener) {
         if (null != listener) {
             Objects.requireNonNull(executor, "Pass a non-null executor, or a null listener");
         }
@@ -358,11 +358,12 @@ public class EthernetManager {
         return proxy;
     }
 
+    @RequiresPermission(android.Manifest.permission.MANAGE_ETHERNET_NETWORKS)
     private void updateConfiguration(
             @NonNull String iface,
-            @NonNull InternalNetworkUpdateRequest request,
+            @NonNull EthernetNetworkUpdateRequest request,
             @Nullable @CallbackExecutor Executor executor,
-            @Nullable BiConsumer<Network, InternalNetworkManagementException> listener) {
+            @Nullable BiConsumer<Network, EthernetNetworkManagementException> listener) {
         final InternalNetworkManagementListener proxy = getInternalNetworkManagementListener(
                 executor, listener);
         try {
@@ -372,10 +373,11 @@ public class EthernetManager {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.MANAGE_ETHERNET_NETWORKS)
     private void connectNetwork(
             @NonNull String iface,
             @Nullable @CallbackExecutor Executor executor,
-            @Nullable BiConsumer<Network, InternalNetworkManagementException> listener) {
+            @Nullable BiConsumer<Network, EthernetNetworkManagementException> listener) {
         final InternalNetworkManagementListener proxy = getInternalNetworkManagementListener(
                 executor, listener);
         try {
@@ -385,10 +387,11 @@ public class EthernetManager {
         }
     }
 
+    @RequiresPermission(android.Manifest.permission.MANAGE_ETHERNET_NETWORKS)
     private void disconnectNetwork(
             @NonNull String iface,
             @Nullable @CallbackExecutor Executor executor,
-            @Nullable BiConsumer<Network, InternalNetworkManagementException> listener) {
+            @Nullable BiConsumer<Network, EthernetNetworkManagementException> listener) {
         final InternalNetworkManagementListener proxy = getInternalNetworkManagementListener(
                 executor, listener);
         try {

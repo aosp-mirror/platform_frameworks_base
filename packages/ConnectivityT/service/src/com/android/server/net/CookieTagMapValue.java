@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,24 @@
  * limitations under the License.
  */
 
- package android.net;
+package com.android.server.net;
 
- parcelable InternalNetworkManagementException;
+import com.android.net.module.util.Struct;
+import com.android.net.module.util.Struct.Field;
+import com.android.net.module.util.Struct.Type;
+
+/**
+ * Value for cookie tag map.
+ */
+public class CookieTagMapValue extends Struct {
+    @Field(order = 0, type = Type.U32)
+    public final long uid;
+
+    @Field(order = 1, type = Type.U32)
+    public final long tag;
+
+    public CookieTagMapValue(final long uid, final long tag) {
+        this.uid = uid;
+        this.tag = tag;
+    }
+}

@@ -145,6 +145,7 @@ package android {
     field public static final String MANAGE_CONTENT_CAPTURE = "android.permission.MANAGE_CONTENT_CAPTURE";
     field public static final String MANAGE_CONTENT_SUGGESTIONS = "android.permission.MANAGE_CONTENT_SUGGESTIONS";
     field public static final String MANAGE_DEBUGGING = "android.permission.MANAGE_DEBUGGING";
+    field public static final String MANAGE_ETHERNET_NETWORKS = "android.permission.MANAGE_ETHERNET_NETWORKS";
     field public static final String MANAGE_FACTORY_RESET_PROTECTION = "android.permission.MANAGE_FACTORY_RESET_PROTECTION";
     field public static final String MANAGE_HOTWORD_DETECTION = "android.permission.MANAGE_HOTWORD_DETECTION";
     field public static final String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
@@ -1995,6 +1996,7 @@ package android.content {
     field public static final String HDMI_CONTROL_SERVICE = "hdmi_control";
     field public static final String MEDIA_TRANSCODING_SERVICE = "media_transcoding";
     field public static final String MUSIC_RECOGNITION_SERVICE = "music_recognition";
+    field public static final String NEARBY_SERVICE = "nearby";
     field public static final String NETD_SERVICE = "netd";
     field public static final String NETWORK_SCORE_SERVICE = "network_score";
     field public static final String OEM_LOCK_SERVICE = "oem_lock";
@@ -2953,6 +2955,7 @@ package android.hardware.hdmi {
     method public void sendKeyEvent(int, boolean);
     method public void sendVendorCommand(int, byte[], boolean);
     method public void setVendorCommandListener(@NonNull android.hardware.hdmi.HdmiControlManager.VendorCommandListener);
+    method public void setVendorCommandListener(@NonNull android.hardware.hdmi.HdmiControlManager.VendorCommandListener, int);
   }
 
   public final class HdmiControlManager {
@@ -7828,6 +7831,7 @@ package android.os {
   }
 
   public static class Build.VERSION {
+    field @NonNull public static final java.util.Set<java.lang.String> KNOWN_CODENAMES;
     field @NonNull public static final String PREVIEW_SDK_FINGERPRINT;
   }
 

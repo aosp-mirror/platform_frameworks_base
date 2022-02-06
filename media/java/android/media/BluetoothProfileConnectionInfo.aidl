@@ -16,5 +16,5 @@
 
 package android.media;
 
-parcelable BtProfileConnectionInfo;
+parcelable BluetoothProfileConnectionInfo;
 

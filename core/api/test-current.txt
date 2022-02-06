@@ -1707,8 +1707,11 @@ package android.os {
 
   public final class Parcel {
     method public boolean allowSquashing();
+    method public int getFlags();
     method public int readExceptionCode();
     method public void restoreAllowSquashing(boolean);
+    field public static final int FLAG_IS_REPLY_FROM_BLOCKING_ALLOWED_OBJECT = 1; // 0x1
+    field public static final int FLAG_PROPAGATE_ALLOW_BLOCKING = 2; // 0x2
   }
 
   public class ParcelFileDescriptor implements java.io.Closeable android.os.Parcelable {

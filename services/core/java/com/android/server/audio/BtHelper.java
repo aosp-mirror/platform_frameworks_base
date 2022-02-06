@@ -31,7 +31,7 @@ import android.content.Intent;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioManager;
 import android.media.AudioSystem;
-import android.media.BtProfileConnectionInfo;
+import android.media.BluetoothProfileConnectionInfo;
 import android.os.Binder;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -495,11 +495,13 @@ public class BtHelper {
         if (state == BluetoothProfile.STATE_CONNECTED) {
             mDeviceBroker.queueOnBluetoothActiveDeviceChanged(
                     new AudioDeviceBroker.BtDeviceChangedData(btDevice, null,
-                        new BtProfileConnectionInfo(profile), "mBluetoothProfileServiceListener"));
+                        new BluetoothProfileConnectionInfo(profile),
+                        "mBluetoothProfileServiceListener"));
         } else {
             mDeviceBroker.queueOnBluetoothActiveDeviceChanged(
                     new AudioDeviceBroker.BtDeviceChangedData(null, btDevice,
-                        new BtProfileConnectionInfo(profile), "mBluetoothProfileServiceListener"));
+                        new BluetoothProfileConnectionInfo(profile),
+                        "mBluetoothProfileServiceListener"));
         }
     }
 

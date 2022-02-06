@@ -4347,7 +4347,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * pixel" units.  This size is adjusted based on the current density and
      * user font size preference.
      *
-     * <p>Note: if this TextView has the auto-size feature enabled than this function is no-op.
+     * <p>Note: if this TextView has the auto-size feature enabled, then this function is no-op.
      *
      * @param size The scaled pixel size.
      *
@@ -4362,7 +4362,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Set the default text size to a given unit and value. See {@link
      * TypedValue} for the possible dimension units.
      *
-     * <p>Note: if this TextView has the auto-size feature enabled than this function is no-op.
+     * <p>Note: if this TextView has the auto-size feature enabled, then this function is no-op.
      *
      * @param unit The desired dimension unit.
      * @param size The desired size in the given units.
