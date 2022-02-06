@@ -1210,6 +1210,36 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_DYNAMIC_RANGE_TEN_BIT = 18;
 
+    /**
+     * <p>The camera device supports selecting a per-stream use case via
+     * {@link android.hardware.camera2.params.OutputConfiguration#setStreamUseCase }
+     * so that the device can optimize camera pipeline parameters such as tuning, sensor
+     * mode, or ISP settings for a specific user scenario.
+     * Some sample usages of this capability are:
+     * * Distinguish high quality YUV captures from a regular YUV stream where
+     *   the image quality may not be as good as the JPEG stream, or
+     * * Use one stream to serve multiple purposes: viewfinder, video recording and
+     *   still capture. This is common with applications that wish to apply edits equally
+     *   to preview, saved images, and saved videos.</p>
+     * <p>This capability requires the camera device to support the following
+     * stream use cases:
+     * * DEFAULT for backward compatibility where the application doesn't set
+     *   a stream use case
+     * * PREVIEW for live viewfinder and in-app image analysis
+     * * STILL_CAPTURE for still photo capture
+     * * VIDEO_RECORD for recording video clips
+     * * PREVIEW_VIDEO_STILL for one single stream used for viewfinder, video
+     *   recording, and still capture.
+     * * VIDEO_CALL for long running video calls</p>
+     * <p>{@link android.hardware.camera2.CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES }
+     * lists all of the supported stream use cases.</p>
+     * <p>Refer to {@link android.hardware.camera2.CameraDevice#createCaptureSession } for the
+     * mandatory stream combinations involving stream use cases, which can also be queried
+     * via {@link android.hardware.camera2.params.MandatoryStreamCombination }.</p>
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE = 19;
+
     //
     // Enumeration values for CameraCharacteristics#REQUEST_AVAILABLE_DYNAMIC_RANGE_PROFILES_MAP
     //
@@ -1334,6 +1364,89 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#SCALER_CROPPING_TYPE
      */
     public static final int SCALER_CROPPING_TYPE_FREEFORM = 1;
+
+    //
+    // Enumeration values for CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES
+    //
+
+    /**
+     * <p>Default stream use case.</p>
+     * <p>This use case is the same as when the application doesn't set any use case for
+     * the stream. The camera device uses the properties of the output target, such as
+     * format, dataSpace, or surface class type, to optimize the image processing pipeline.</p>
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES
+     */
+    public static final int SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT = 0x0;
+
+    /**
+     * <p>Live stream shown to the user.</p>
+     * <p>Optimized for performance and usability as a viewfinder, but not necessarily for
+     * image quality. The output is not meant to be persisted as saved images or video.</p>
+     * <p>No stall if android.control.<em> are set to FAST; may have stall if android.control.</em>
+     * are set to HIGH_QUALITY. This use case has the same behavior as the default
+     * SurfaceView and SurfaceTexture targets. Additionally, this use case can be used for
+     * in-app image analysis.</p>
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES
+     */
+    public static final int SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW = 0x1;
+
+    /**
+     * <p>Still photo capture.</p>
+     * <p>Optimized for high-quality high-resolution capture, and not expected to maintain
+     * preview-like frame rates.</p>
+     * <p>The stream may have stalls regardless of whether android.control.* is HIGH_QUALITY.
+     * This use case has the same behavior as the default JPEG and RAW related formats.</p>
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES
+     */
+    public static final int SCALER_AVAILABLE_STREAM_USE_CASES_STILL_CAPTURE = 0x2;
+
+    /**
+     * <p>Recording video clips.</p>
+     * <p>Optimized for high-quality video capture, including high-quality image stabilization
+     * if supported by the device and enabled by the application. As a result, may produce
+     * output frames with a substantial lag from real time, to allow for highest-quality
+     * stabilization or other processing. As such, such an output is not suitable for drawing
+     * to screen directly, and is expected to be persisted to disk or similar for later
+     * playback or processing. Only streams that set the VIDEO_RECORD use case are guaranteed
+     * to have video stabilization applied when the video stabilization control is set
+     * to ON, as opposed to PREVIEW_STABILIZATION.</p>
+     * <p>This use case has the same behavior as the default MediaRecorder and MediaCodec
+     * targets.</p>
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES
+     */
+    public static final int SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD = 0x3;
+
+    /**
+     * <p>One single stream used for combined purposes of preview, video, and still capture.</p>
+     * <p>For such multi-purpose streams, the camera device aims to make the best tradeoff
+     * between the individual use cases. For example, the STILL_CAPTURE use case by itself
+     * may have stalls for achieving best image quality. But if combined with PREVIEW and
+     * VIDEO_RECORD, the camera device needs to trade off the additional image processing
+     * for speed so that preview and video recording aren't slowed down.</p>
+     * <p>Similarly, VIDEO_RECORD may produce frames with a substantial lag, but
+     * PREVIEW_VIDEO_STILL must have minimal output delay. This means that to enable video
+     * stabilization with this use case, the device must support and the app must select the
+     * PREVIEW_STABILIZATION mode for video stabilization.</p>
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES
+     */
+    public static final int SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW_VIDEO_STILL = 0x4;
+
+    /**
+     * <p>Long-running video call optimized for both power efficienty and video quality.</p>
+     * <p>The camera sensor may run in a lower-resolution mode to reduce power consumption
+     * at the cost of some image and digital zoom quality. Unlike VIDEO_RECORD, VIDEO_CALL
+     * outputs are expected to work in dark conditions, so are usually accompanied with
+     * variable frame rate settings to allow sufficient exposure time in low light.</p>
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES
+     */
+    public static final int SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL = 0x5;
+
+    /**
+     * <p>Vendor defined use cases. These depend on the vendor implementation.</p>
+     * @see CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES
+     * @hide
+     */
+    public static final int SCALER_AVAILABLE_STREAM_USE_CASES_VENDOR_START = 0x10000;
 
     //
     // Enumeration values for CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT

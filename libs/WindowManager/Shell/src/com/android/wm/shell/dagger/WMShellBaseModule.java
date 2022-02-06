@@ -696,11 +696,12 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static Optional<BackAnimationController> provideBackAnimationController(
+            Context context,
             @ShellMainThread ShellExecutor shellExecutor
     ) {
         if (BackAnimationController.IS_ENABLED) {
             return Optional.of(
-                    new BackAnimationController(shellExecutor));
+                    new BackAnimationController(shellExecutor, context));
         }
         return Optional.empty();
     }

@@ -49,7 +49,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
- * Controls to show/update restart-activity buttons on Tasks based on whether the foreground
+ * Controller to show/update compat UI components on Tasks based on whether the foreground
  * activities are in compatibility mode.
  */
 public class CompatUIController implements OnDisplaysChangedListener,
@@ -228,8 +228,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
         final CompatUIWindowManager compatUIWindowManager =
                 createLayout(context, taskInfo, taskListener);
         mActiveLayouts.put(taskInfo.taskId, compatUIWindowManager);
-        compatUIWindowManager.createLayout(showOnDisplay(taskInfo.displayId),
-                taskInfo.topActivityInSizeCompat, taskInfo.cameraCompatControlState);
+        compatUIWindowManager.createLayout(showOnDisplay(taskInfo.displayId), taskInfo);
     }
 
     @VisibleForTesting
@@ -254,9 +253,7 @@ public class CompatUIController implements OnDisplaysChangedListener,
         if (layout == null) {
             return;
         }
-        layout.updateCompatInfo(taskInfo.configuration, taskListener,
-                showOnDisplay(layout.getDisplayId()), taskInfo.topActivityInSizeCompat,
-                taskInfo.cameraCompatControlState);
+        layout.updateCompatInfo(taskInfo, taskListener, showOnDisplay(layout.getDisplayId()));
     }
 
     private void removeLayout(int taskId) {

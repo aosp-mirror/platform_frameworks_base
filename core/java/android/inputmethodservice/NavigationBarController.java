@@ -219,7 +219,7 @@ final class NavigationBarController {
                     // TODO(b/213337792): Set NAVIGATION_HINT_IME_SHOWN only when necessary.
                     final int hints = StatusBarManager.NAVIGATION_HINT_BACK_ALT
                             | (mShouldShowImeSwitcherWhenImeIsShown
-                                    ? StatusBarManager.NAVIGATION_HINT_IME_SHOWN
+                                    ? StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN
                                     : 0);
                     navigationBarView.setNavigationIconHints(hints);
                 }
@@ -470,7 +470,7 @@ final class NavigationBarController {
             }
             final int hints = StatusBarManager.NAVIGATION_HINT_BACK_ALT
                     | (shouldShowImeSwitcherWhenImeIsShown
-                    ? StatusBarManager.NAVIGATION_HINT_IME_SHOWN : 0);
+                    ? StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN : 0);
             navigationBarView.setNavigationIconHints(hints);
         }
 

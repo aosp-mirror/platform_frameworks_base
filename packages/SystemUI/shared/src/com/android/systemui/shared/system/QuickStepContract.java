@@ -59,6 +59,7 @@ public class QuickStepContract {
     public static final String KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER = "unlock_animation";
     // See IRecentTasks.aidl
     public static final String KEY_EXTRA_RECENT_TASKS = "recent_tasks";
+    public static final String KEY_EXTRA_SHELL_BACK_ANIMATION = "extra_shell_back_animation";
 
     public static final String NAV_BAR_MODE_3BUTTON_OVERLAY =
             WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;

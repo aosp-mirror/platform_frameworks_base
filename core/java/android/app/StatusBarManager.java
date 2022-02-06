@@ -180,6 +180,8 @@ public class StatusBarManager {
     public static final int NAVIGATION_HINT_BACK_ALT      = 1 << 0;
     /** @hide */
     public static final int NAVIGATION_HINT_IME_SHOWN     = 1 << 1;
+    /** @hide */
+    public static final int NAVIGATION_HINT_IME_SWITCHER_SHOWN = 1 << 2;
 
     /** @hide */
     public static final int WINDOW_STATUS_BAR = 1;

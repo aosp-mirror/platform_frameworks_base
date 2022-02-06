@@ -26,9 +26,9 @@
     android:layout_marginEnd="0dp"
     android:layout_gravity="center_vertical | start">
 
-    <TextView
+    <com.android.systemui.util.SafeMarqueeTextView
         android:id="@+id/tile_label"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="start"
         android:textDirection="locale"
@@ -37,9 +37,9 @@
         android:singleLine="true"
         android:textAppearance="@style/TextAppearance.QS.TileLabel"/>
 
-    <TextView
+    <com.android.systemui.util.SafeMarqueeTextView
         android:id="@+id/app_label"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="start"
         android:textDirection="locale"

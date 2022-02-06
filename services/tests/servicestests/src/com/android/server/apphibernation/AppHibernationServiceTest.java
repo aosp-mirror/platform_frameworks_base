@@ -29,6 +29,8 @@ import static org.mockito.AdditionalAnswers.returnsArgAt;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.longThat;
 import static org.mockito.Mockito.doAnswer;
@@ -38,6 +40,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.IActivityManager;
+import android.app.usage.StorageStats;
+import android.app.usage.StorageStatsManager;
 import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.UsageEventListener;
@@ -48,6 +52,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
@@ -68,10 +73,12 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 
 /**
@@ -104,6 +111,8 @@ public final class AppHibernationServiceTest {
     @Mock
     private UserManager mUserManager;
     @Mock
+    private StorageStatsManager mStorageStatsManager;
+    @Mock
     private HibernationStateDiskStore<UserLevelState> mUserLevelDiskStore;
     @Mock
     private UsageStatsManagerInternal mUsageStatsManagerInternal;
@@ -115,7 +124,7 @@ public final class AppHibernationServiceTest {
     private ArgumentCaptor<UsageEventListener> mUsageEventListenerCaptor;
 
     @Before
-    public void setUp() throws RemoteException {
+    public void setUp() throws RemoteException, PackageManager.NameNotFoundException, IOException {
         // Share class loader to allow access to package-private classes
         System.setProperty("dexmaker.share_classloader", "true");
         MockitoAnnotations.initMocks(this);
@@ -140,6 +149,11 @@ public final class AppHibernationServiceTest {
         packages.add(makePackageInfo(PACKAGE_NAME_3));
         doReturn(new ParceledListSlice<>(packages)).when(mIPackageManager).getInstalledPackages(
                 longThat(arg -> (arg & MATCH_ANY_USER) != 0), anyInt());
+        doReturn(mock(ApplicationInfo.class)).when(mIPackageManager).getApplicationInfo(
+                any(), anyLong(), anyInt());
+        StorageStats storageStats = new StorageStats();
+        doReturn(storageStats).when(mStorageStatsManager).queryStatsForPackage(
+                (UUID) any(), anyString(), any());
         mAppHibernationService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
 
         UserInfo userInfo = addUser(USER_ID_1);
@@ -381,18 +395,31 @@ public final class AppHibernationServiceTest {
     }
 
     @Test
-    public void testGetHibernationStatsForUser_getsStatsForPackage() {
-        // GIVEN a package is hibernating globally and for a user
+    public void testGetHibernationStatsForUser_getsStatsForPackage()
+            throws PackageManager.NameNotFoundException, IOException, RemoteException {
+        // GIVEN a package is hibernating globally and for a user with some storage saved
+        final long cacheSavings = 1000;
+        StorageStats storageStats = new StorageStats();
+        storageStats.cacheBytes = cacheSavings;
+        doReturn(storageStats).when(mStorageStatsManager).queryStatsForPackage(
+                (UUID) any(), eq(PACKAGE_NAME_1), any());
+        final long oatDeletionSavings = 2000;
+        doReturn(oatDeletionSavings).when(mPackageManagerInternal).deleteOatArtifactsOfPackage(
+                PACKAGE_NAME_1);
+
         mAppHibernationService.setHibernatingGlobally(PACKAGE_NAME_1, true);
         mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_1, true);
 
         // WHEN we ask for the hibernation stats for the package
-        Map<String, HibernationStats> stats =
+        Map<String, HibernationStats> statsMap =
                 mAppHibernationService.getHibernationStatsForUser(
                         Set.of(PACKAGE_NAME_1), USER_ID_1);
 
-        // THEN the stats exist for the package
-        assertTrue(stats.containsKey(PACKAGE_NAME_1));
+        // THEN the stats exist for the package and add up to the OAT deletion and cache deletion
+        // savings
+        HibernationStats stats = statsMap.get(PACKAGE_NAME_1);
+        assertNotNull(stats);
+        assertEquals(cacheSavings + oatDeletionSavings, stats.getDiskBytesSaved());
     }
 
     @Test
@@ -516,6 +543,11 @@ public final class AppHibernationServiceTest {
         @Override
         public UserManager getUserManager() {
             return mUserManager;
+        }
+
+        @Override
+        public StorageStatsManager getStorageStatsManager() {
+            return mStorageStatsManager;
         }
 
         @Override

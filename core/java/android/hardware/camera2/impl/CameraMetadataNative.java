@@ -333,6 +333,7 @@ public class CameraMetadataNative implements Parcelable {
     private static final int MANDATORY_STREAM_CONFIGURATIONS_MAX_RESOLUTION = 1;
     private static final int MANDATORY_STREAM_CONFIGURATIONS_CONCURRENT = 2;
     private static final int MANDATORY_STREAM_CONFIGURATIONS_10BIT = 3;
+    private static final int MANDATORY_STREAM_CONFIGURATIONS_USE_CASE = 4;
 
     private static String translateLocationProviderToProcess(final String provider) {
         if (provider == null) {
@@ -696,6 +697,16 @@ public class CameraMetadataNative implements Parcelable {
                     @SuppressWarnings("unchecked")
                     public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
                         return (T) metadata.getMandatoryMaximumResolutionStreamCombinations();
+                    }
+                });
+
+        sGetCommandMap.put(
+                CameraCharacteristics.SCALER_MANDATORY_USE_CASE_STREAM_COMBINATIONS.getNativeKey(),
+                        new GetCommand() {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                    public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
+                        return (T) metadata.getMandatoryUseCaseStreamCombinations();
                     }
                 });
 
@@ -1413,6 +1424,9 @@ public class CameraMetadataNative implements Parcelable {
             case MANDATORY_STREAM_CONFIGURATIONS_10BIT:
                 combs = build.getAvailableMandatory10BitStreamCombinations();
                 break;
+            case MANDATORY_STREAM_CONFIGURATIONS_USE_CASE:
+                combs = build.getAvailableMandatoryStreamUseCaseCombinations();
+                break;
             default:
                 combs = build.getAvailableMandatoryStreamCombinations();
         }
@@ -1444,6 +1458,10 @@ public class CameraMetadataNative implements Parcelable {
 
     private MandatoryStreamCombination[] getMandatoryStreamCombinations() {
         return getMandatoryStreamCombinationsHelper(MANDATORY_STREAM_CONFIGURATIONS_DEFAULT);
+    }
+
+    private MandatoryStreamCombination[] getMandatoryUseCaseStreamCombinations() {
+        return getMandatoryStreamCombinationsHelper(MANDATORY_STREAM_CONFIGURATIONS_USE_CASE);
     }
 
     private StreamConfigurationMap getStreamConfigurationMap() {

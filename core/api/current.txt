@@ -17342,12 +17342,14 @@ package android.hardware.camera2 {
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> REQUEST_RECOMMENDED_TEN_BIT_DYNAMIC_RANGE_PROFILE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Float> SCALER_AVAILABLE_MAX_DIGITAL_ZOOM;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> SCALER_AVAILABLE_ROTATE_AND_CROP_MODES;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<int[]> SCALER_AVAILABLE_STREAM_USE_CASES;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<java.lang.Integer> SCALER_CROPPING_TYPE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.util.Size> SCALER_DEFAULT_SECURE_IMAGE_SIZE;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_CONCURRENT_STREAM_COMBINATIONS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_MAXIMUM_RESOLUTION_STREAM_COMBINATIONS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_STREAM_COMBINATIONS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_TEN_BIT_OUTPUT_STREAM_COMBINATIONS;
+    field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_USE_CASE_STREAM_COMBINATIONS;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.MultiResolutionStreamConfigurationMap> SCALER_MULTI_RESOLUTION_STREAM_CONFIGURATION_MAP;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.StreamConfigurationMap> SCALER_STREAM_CONFIGURATION_MAP;
     field @NonNull public static final android.hardware.camera2.CameraCharacteristics.Key<android.hardware.camera2.params.StreamConfigurationMap> SCALER_STREAM_CONFIGURATION_MAP_MAXIMUM_RESOLUTION;
@@ -17441,6 +17443,8 @@ package android.hardware.camera2 {
   }
 
   public final class CameraExtensionCharacteristics {
+    method @NonNull public java.util.Set<android.hardware.camera2.CaptureRequest.Key> getAvailableCaptureRequestKeys(int);
+    method @NonNull public java.util.Set<android.hardware.camera2.CaptureResult.Key> getAvailableCaptureResultKeys(int);
     method @Nullable public android.util.Range<java.lang.Long> getEstimatedCaptureLatencyRangeMillis(int, @NonNull android.util.Size, int);
     method @NonNull public <T> java.util.List<android.util.Size> getExtensionSupportedSizes(int, @NonNull Class<T>);
     method @NonNull public java.util.List<android.util.Size> getExtensionSupportedSizes(int, int);
@@ -17465,6 +17469,7 @@ package android.hardware.camera2 {
     ctor public CameraExtensionSession.ExtensionCaptureCallback();
     method public void onCaptureFailed(@NonNull android.hardware.camera2.CameraExtensionSession, @NonNull android.hardware.camera2.CaptureRequest);
     method public void onCaptureProcessStarted(@NonNull android.hardware.camera2.CameraExtensionSession, @NonNull android.hardware.camera2.CaptureRequest);
+    method public void onCaptureResultAvailable(@NonNull android.hardware.camera2.CameraExtensionSession, @NonNull android.hardware.camera2.CaptureRequest, @NonNull android.hardware.camera2.TotalCaptureResult);
     method public void onCaptureSequenceAborted(@NonNull android.hardware.camera2.CameraExtensionSession, int);
     method public void onCaptureSequenceCompleted(@NonNull android.hardware.camera2.CameraExtensionSession, int);
     method public void onCaptureStarted(@NonNull android.hardware.camera2.CameraExtensionSession, @NonNull android.hardware.camera2.CaptureRequest, long);
@@ -17676,9 +17681,16 @@ package android.hardware.camera2 {
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_READ_SENSOR_SETTINGS = 5; // 0x5
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_REMOSAIC_REPROCESSING = 17; // 0x11
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_SECURE_IMAGE_DATA = 13; // 0xd
+    field public static final int REQUEST_AVAILABLE_CAPABILITIES_STREAM_USE_CASE = 19; // 0x13
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_SYSTEM_CAMERA = 14; // 0xe
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR = 16; // 0x10
     field public static final int REQUEST_AVAILABLE_CAPABILITIES_YUV_REPROCESSING = 7; // 0x7
+    field public static final int SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT = 0; // 0x0
+    field public static final int SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW = 1; // 0x1
+    field public static final int SCALER_AVAILABLE_STREAM_USE_CASES_PREVIEW_VIDEO_STILL = 4; // 0x4
+    field public static final int SCALER_AVAILABLE_STREAM_USE_CASES_STILL_CAPTURE = 2; // 0x2
+    field public static final int SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_CALL = 5; // 0x5
+    field public static final int SCALER_AVAILABLE_STREAM_USE_CASES_VIDEO_RECORD = 3; // 0x3
     field public static final int SCALER_CROPPING_TYPE_CENTER_ONLY = 0; // 0x0
     field public static final int SCALER_CROPPING_TYPE_FREEFORM = 1; // 0x1
     field public static final int SCALER_ROTATE_AND_CROP_180 = 2; // 0x2
@@ -18086,6 +18098,7 @@ package android.hardware.camera2.params {
     method public int get10BitFormat();
     method @NonNull public java.util.List<android.util.Size> getAvailableSizes();
     method public int getFormat();
+    method public int getStreamUseCase();
     method public boolean is10BitCapable();
     method public boolean isInput();
     method public boolean isMaximumSize();
@@ -18142,6 +18155,7 @@ package android.hardware.camera2.params {
     method public void enableSurfaceSharing();
     method public int getDynamicRangeProfile();
     method public int getMaxSharedSurfaceCount();
+    method public int getStreamUseCase();
     method @Nullable public android.view.Surface getSurface();
     method public int getSurfaceGroupId();
     method @NonNull public java.util.List<android.view.Surface> getSurfaces();
@@ -18149,6 +18163,7 @@ package android.hardware.camera2.params {
     method public void removeSurface(@NonNull android.view.Surface);
     method public void setDynamicRangeProfile(int);
     method public void setPhysicalCameraId(@Nullable String);
+    method public void setStreamUseCase(int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.camera2.params.OutputConfiguration> CREATOR;
     field public static final int SURFACE_GROUP_ID_NONE = -1; // 0xffffffff
@@ -43049,7 +43064,8 @@ package android.telephony {
     method public void setSubscriptionOverrideCongested(int, boolean, @NonNull int[], long);
     method public void setSubscriptionOverrideUnmetered(int, boolean, long);
     method public void setSubscriptionOverrideUnmetered(int, boolean, @NonNull int[], long);
-    method public void setSubscriptionPlans(int, @NonNull java.util.List<android.telephony.SubscriptionPlan>);
+    method @Deprecated public void setSubscriptionPlans(int, @NonNull java.util.List<android.telephony.SubscriptionPlan>);
+    method public void setSubscriptionPlans(int, @NonNull java.util.List<android.telephony.SubscriptionPlan>, long);
     method @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void switchToSubscription(int, @NonNull android.app.PendingIntent);
     field public static final String ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED = "android.telephony.action.DEFAULT_SMS_SUBSCRIPTION_CHANGED";
     field public static final String ACTION_DEFAULT_SUBSCRIPTION_CHANGED = "android.telephony.action.DEFAULT_SUBSCRIPTION_CHANGED";
@@ -48934,10 +48950,9 @@ package android.view {
     method public default void onBackInvoked();
   }
 
-  public abstract class OnBackInvokedDispatcher {
-    ctor public OnBackInvokedDispatcher();
-    method public abstract void registerOnBackInvokedCallback(@NonNull android.view.OnBackInvokedCallback, int);
-    method public abstract void unregisterOnBackInvokedCallback(@NonNull android.view.OnBackInvokedCallback);
+  public interface OnBackInvokedDispatcher {
+    method public void registerOnBackInvokedCallback(@NonNull android.view.OnBackInvokedCallback, @IntRange(from=0) int);
+    method public void unregisterOnBackInvokedCallback(@NonNull android.view.OnBackInvokedCallback);
     field public static final int PRIORITY_DEFAULT = 0; // 0x0
     field public static final int PRIORITY_OVERLAY = 1000000; // 0xf4240
   }

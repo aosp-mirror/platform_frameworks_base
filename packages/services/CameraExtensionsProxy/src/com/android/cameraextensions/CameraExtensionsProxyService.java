@@ -43,6 +43,7 @@ import android.hardware.camera2.extension.IImageProcessorImpl;
 import android.hardware.camera2.extension.IInitializeSessionCallback;
 import android.hardware.camera2.extension.IPreviewExtenderImpl;
 import android.hardware.camera2.extension.IPreviewImageProcessorImpl;
+import android.hardware.camera2.extension.IProcessResultImpl;
 import android.hardware.camera2.extension.IRequestCallback;
 import android.hardware.camera2.extension.IRequestProcessorImpl;
 import android.hardware.camera2.extension.IRequestUpdateProcessorImpl;
@@ -90,6 +91,7 @@ import androidx.camera.extensions.impl.NightPreviewExtenderImpl;
 import androidx.camera.extensions.impl.PreviewExtenderImpl;
 import androidx.camera.extensions.impl.PreviewExtenderImpl.ProcessorType;
 import androidx.camera.extensions.impl.PreviewImageProcessorImpl;
+import androidx.camera.extensions.impl.ProcessResultImpl;
 import androidx.camera.extensions.impl.RequestUpdateProcessorImpl;
 import androidx.camera.extensions.impl.advanced.AdvancedExtenderImpl;
 import androidx.camera.extensions.impl.advanced.AutoAdvancedExtenderImpl;
@@ -124,14 +126,17 @@ public class CameraExtensionsProxyService extends Service {
     private static final String LATEST_VERSION = "1.2.0";
     private static final String NON_INIT_VERSION_PREFIX = "1.0";
     private static final String ADVANCED_VERSION_PREFIX = "1.2";
-    private static final String[] SUPPORTED_VERSION_PREFIXES = {ADVANCED_VERSION_PREFIX,
-            "1.1", NON_INIT_VERSION_PREFIX};
+    private static final String RESULTS_VERSION_PREFIX = "1.3";
+    private static final String[] SUPPORTED_VERSION_PREFIXES = {RESULTS_VERSION_PREFIX,
+            ADVANCED_VERSION_PREFIX, "1.1", NON_INIT_VERSION_PREFIX};
     private static final boolean EXTENSIONS_PRESENT = checkForExtensions();
     private static final String EXTENSIONS_VERSION = EXTENSIONS_PRESENT ?
             (new ExtensionVersionImpl()).checkApiVersion(LATEST_VERSION) : null;
     private static final boolean ADVANCED_API_SUPPORTED = checkForAdvancedAPI();
     private static final boolean INIT_API_SUPPORTED = EXTENSIONS_PRESENT &&
             (!EXTENSIONS_VERSION.startsWith(NON_INIT_VERSION_PREFIX));
+    private static final boolean RESULT_API_SUPPORTED = EXTENSIONS_PRESENT &&
+            (EXTENSIONS_VERSION.startsWith(RESULTS_VERSION_PREFIX));
 
     private HashMap<String, CameraCharacteristics> mCharacteristicsHashMap = new HashMap<>();
     private HashMap<String, Long> mMetadataVendorIdMap = new HashMap<>();
@@ -1242,7 +1247,7 @@ public class CameraExtensionsProxyService extends Service {
             }
 
             if (processor != null) {
-                return new PreviewImageProcessorImplStub(processor);
+                return new PreviewImageProcessorImplStub(processor, mCameraId);
             }
 
             return null;
@@ -1332,7 +1337,7 @@ public class CameraExtensionsProxyService extends Service {
         public ICaptureProcessorImpl getCaptureProcessor() {
             CaptureProcessorImpl captureProcessor = mImageExtender.getCaptureProcessor();
             if (captureProcessor != null) {
-                return new CaptureProcessorImplStub(captureProcessor);
+                return new CaptureProcessorImplStub(captureProcessor, mCameraId);
             }
 
             return null;
@@ -1390,13 +1395,97 @@ public class CameraExtensionsProxyService extends Service {
 
             return null;
         }
+
+        @Override
+        public CameraMetadataNative getAvailableCaptureRequestKeys() {
+            if (RESULT_API_SUPPORTED) {
+                List<CaptureRequest.Key> supportedCaptureKeys =
+                        mImageExtender.getAvailableCaptureRequestKeys();
+
+                if ((supportedCaptureKeys != null) && !supportedCaptureKeys.isEmpty()) {
+                    CameraMetadataNative ret = new CameraMetadataNative();
+                    long vendorId = mMetadataVendorIdMap.containsKey(mCameraId) ?
+                            mMetadataVendorIdMap.get(mCameraId) : Long.MAX_VALUE;
+                    ret.setVendorId(vendorId);
+                    int requestKeyTags [] = new int[supportedCaptureKeys.size()];
+                    int i = 0;
+                    for (CaptureRequest.Key key : supportedCaptureKeys) {
+                        requestKeyTags[i++] = CameraMetadataNative.getTag(key.getName(), vendorId);
+                    }
+                    ret.set(CameraCharacteristics.REQUEST_AVAILABLE_REQUEST_KEYS, requestKeyTags);
+
+                    return ret;
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        public CameraMetadataNative getAvailableCaptureResultKeys() {
+            if (RESULT_API_SUPPORTED) {
+                List<CaptureResult.Key> supportedResultKeys =
+                        mImageExtender.getAvailableCaptureResultKeys();
+
+                if ((supportedResultKeys != null) && !supportedResultKeys.isEmpty()) {
+                    CameraMetadataNative ret = new CameraMetadataNative();
+                    long vendorId = mMetadataVendorIdMap.containsKey(mCameraId) ?
+                            mMetadataVendorIdMap.get(mCameraId) : Long.MAX_VALUE;
+                    ret.setVendorId(vendorId);
+                    int resultKeyTags [] = new int[supportedResultKeys.size()];
+                    int i = 0;
+                    for (CaptureResult.Key key : supportedResultKeys) {
+                        resultKeyTags[i++] = CameraMetadataNative.getTag(key.getName(), vendorId);
+                    }
+                    ret.set(CameraCharacteristics.REQUEST_AVAILABLE_RESULT_KEYS, resultKeyTags);
+
+                    return ret;
+                }
+            }
+
+            return null;
+        }
+    }
+
+    private class ProcessResultCallback implements ProcessResultImpl {
+        private final IProcessResultImpl mProcessResult;
+        private final String mCameraId;
+
+        private ProcessResultCallback(IProcessResultImpl processResult, String cameraId) {
+            mProcessResult = processResult;
+            mCameraId = cameraId;
+        }
+
+        @Override
+        public void onCaptureCompleted(long shutterTimestamp,
+                List<Pair<CaptureResult.Key, Object>> result) {
+            if (result == null) {
+                Log.e(TAG, "Invalid capture result received!");
+            }
+
+            CameraMetadataNative captureResults = new CameraMetadataNative();
+            if (mMetadataVendorIdMap.containsKey(mCameraId)) {
+                captureResults.setVendorId(mMetadataVendorIdMap.get(mCameraId));
+            }
+            for (Pair<CaptureResult.Key, Object> pair : result) {
+                captureResults.set(pair.first, pair.second);
+            }
+
+            try {
+                mProcessResult.onCaptureCompleted(shutterTimestamp, captureResults);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Remote client doesn't respond to capture results!");
+            }
+        }
     }
 
     private class CaptureProcessorImplStub extends ICaptureProcessorImpl.Stub {
         private final CaptureProcessorImpl mCaptureProcessor;
+        private final String mCameraId;
 
-        public CaptureProcessorImplStub(CaptureProcessorImpl captureProcessor) {
+        public CaptureProcessorImplStub(CaptureProcessorImpl captureProcessor, String cameraId) {
             mCaptureProcessor = captureProcessor;
+            mCameraId = cameraId;
         }
 
         @Override
@@ -1415,7 +1504,7 @@ public class CameraExtensionsProxyService extends Service {
         }
 
         @Override
-        public void process(List<CaptureBundle> captureList) {
+        public void process(List<CaptureBundle> captureList, IProcessResultImpl resultCallback) {
             HashMap<Integer, Pair<Image, TotalCaptureResult>> captureMap = new HashMap<>();
             for (CaptureBundle captureBundle : captureList) {
                 captureMap.put(captureBundle.stage, new Pair<> (
@@ -1424,7 +1513,14 @@ public class CameraExtensionsProxyService extends Service {
                                 captureBundle.sequenceId)));
             }
             if (!captureMap.isEmpty()) {
-                mCaptureProcessor.process(captureMap);
+                if ((resultCallback != null) && (RESULT_API_SUPPORTED)) {
+                    mCaptureProcessor.process(captureMap, new ProcessResultCallback(resultCallback,
+                                    mCameraId), null /*executor*/);
+                } else if (resultCallback == null) {
+                    mCaptureProcessor.process(captureMap);
+                } else {
+                    Log.e(TAG, "Process requests with capture results are not supported!");
+                }
             } else {
                 Log.e(TAG, "Process request with absent capture stages!");
             }
@@ -1433,9 +1529,11 @@ public class CameraExtensionsProxyService extends Service {
 
     private class PreviewImageProcessorImplStub extends IPreviewImageProcessorImpl.Stub {
         private final PreviewImageProcessorImpl mProcessor;
+        private final String mCameraId;
 
-        public PreviewImageProcessorImplStub(PreviewImageProcessorImpl processor) {
+        public PreviewImageProcessorImplStub(PreviewImageProcessorImpl processor, String cameraId) {
             mProcessor = processor;
+            mCameraId = cameraId;
         }
 
         @Override
@@ -1455,9 +1553,17 @@ public class CameraExtensionsProxyService extends Service {
 
         @Override
         public void process(android.hardware.camera2.extension.ParcelImage image,
-                CameraMetadataNative result, int sequenceId) {
-            mProcessor.process(new ExtensionImage(image),
-                    new TotalCaptureResult(result, sequenceId));
+                CameraMetadataNative result, int sequenceId, IProcessResultImpl resultCallback) {
+            if ((resultCallback != null) && RESULT_API_SUPPORTED) {
+                mProcessor.process(new ExtensionImage(image),
+                        new TotalCaptureResult(result, sequenceId),
+                        new ProcessResultCallback(resultCallback, mCameraId), null /*executor*/);
+            } else if (resultCallback == null) {
+                mProcessor.process(new ExtensionImage(image),
+                        new TotalCaptureResult(result, sequenceId));
+            } else {
+
+            }
         }
     }
 

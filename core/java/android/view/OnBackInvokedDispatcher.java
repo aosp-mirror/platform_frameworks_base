@@ -17,8 +17,13 @@
 package android.view;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.annotation.TestApi;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.os.Build;
 
 import java.lang.annotation.Retention;
@@ -32,13 +37,29 @@ import java.lang.annotation.RetentionPolicy;
  * Attribute updates are proactively pushed to the window manager if they change the dispatch
  * target (a.k.a. the callback to be invoked next), or its behavior.
  */
-public abstract class OnBackInvokedDispatcher {
+public interface OnBackInvokedDispatcher {
+    /**
+     * Enables dispatching the "back" action via {@link android.view.OnBackInvokedDispatcher}.
+     *
+     * When enabled, the following APIs are no longer invoked:
+     * <ul>
+     * <li> {@link android.app.Activity#onBackPressed}
+     * <li> {@link android.app.Dialog#onBackPressed}
+     * <li> {@link android.view.KeyEvent#KEYCODE_BACK} is no longer dispatched.
+     * </ul>
+     *
+     * @hide
+     */
+    @TestApi
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    long DISPATCH_BACK_INVOCATION_AHEAD_OF_TIME = 195946584L;
 
     /** @hide */
-    public static final String TAG = "OnBackInvokedDispatcher";
+    String TAG = "OnBackInvokedDispatcher";
 
     /** @hide */
-    public static final boolean DEBUG = Build.isDebuggable();
+    boolean DEBUG = Build.isDebuggable();
 
     /** @hide */
     @IntDef({
@@ -46,18 +67,26 @@ public abstract class OnBackInvokedDispatcher {
             PRIORITY_OVERLAY,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface Priority{}
+    @interface Priority{}
 
     /**
      * Priority level of {@link OnBackInvokedCallback}s for overlays such as menus and
      * navigation drawers that should receive back dispatch before non-overlays.
      */
-    public static final int PRIORITY_OVERLAY = 1000000;
+    int PRIORITY_OVERLAY = 1000000;
 
     /**
      * Default priority level of {@link OnBackInvokedCallback}s.
      */
-    public static final int PRIORITY_DEFAULT = 0;
+    int PRIORITY_DEFAULT = 0;
+
+    /**
+     * Priority level of {@link OnBackInvokedCallback}s registered by the system.
+     *
+     * System back animation will play when the callback to receive dispatch has this priority.
+     * @hide
+     */
+    int PRIORITY_SYSTEM = -1;
 
     /**
      * Registers a {@link OnBackInvokedCallback}.
@@ -69,10 +98,11 @@ public abstract class OnBackInvokedDispatcher {
      *                 registered, the existing instance (no matter its priority) will be
      *                 unregistered and registered again.
      * @param priority The priority of the callback.
+     * @throws {@link IllegalArgumentException} if the priority is negative.
      */
     @SuppressLint("SamShouldBeLast")
-    public abstract void registerOnBackInvokedCallback(
-            @NonNull OnBackInvokedCallback callback, @Priority int priority);
+    void registerOnBackInvokedCallback(
+            @NonNull OnBackInvokedCallback callback, @Priority @IntRange(from = 0) int priority);
 
     /**
      * Unregisters a {@link OnBackInvokedCallback}.
@@ -80,5 +110,20 @@ public abstract class OnBackInvokedDispatcher {
      * @param callback The callback to be unregistered. Does nothing if the callback has not been
      *                 registered.
      */
-    public abstract void unregisterOnBackInvokedCallback(@NonNull OnBackInvokedCallback callback);
+    void unregisterOnBackInvokedCallback(@NonNull OnBackInvokedCallback callback);
+
+    /**
+     * Returns the most prioritized callback to receive back dispatch next.
+     * @hide
+     */
+    @Nullable
+    default OnBackInvokedCallback getTopCallback() {
+        return null;
+    }
+
+    /**
+     * Registers a {@link OnBackInvokedCallback} with system priority.
+     * @hide
+     */
+    default void registerSystemOnBackInvokedCallback(@NonNull OnBackInvokedCallback callback) { }
 }

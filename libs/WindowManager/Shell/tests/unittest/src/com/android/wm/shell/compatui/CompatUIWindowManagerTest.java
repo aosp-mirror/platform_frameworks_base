@@ -26,8 +26,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -35,6 +35,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.app.ActivityManager;
+import android.app.TaskInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
@@ -75,47 +77,45 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
     @Mock private ShellTaskOrganizer.TaskListener mTaskListener;
     @Mock private CompatUILayout mCompatUILayout;
     @Mock private SurfaceControlViewHost mViewHost;
-    private Configuration mTaskConfig;
 
     private CompatUIWindowManager mWindowManager;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mTaskConfig = new Configuration();
 
         mWindowManager = new CompatUIWindowManager(mContext, new Configuration(),
                 mSyncTransactionQueue, mCallback, TASK_ID, mTaskListener, new DisplayLayout(),
                 false /* hasShownSizeCompatHint */, false /* hasShownSizeCompatHint */);
 
         spyOn(mWindowManager);
-        doReturn(mCompatUILayout).when(mWindowManager).inflateCompatUILayout();
+        doReturn(mCompatUILayout).when(mWindowManager).inflateLayout();
         doReturn(mViewHost).when(mWindowManager).createSurfaceViewHost();
     }
 
     @Test
     public void testCreateSizeCompatButton() {
         // Not create layout if show is false.
-        mWindowManager.createLayout(false /* show */, true /* hasSizeCompat */,
-                CAMERA_COMPAT_CONTROL_HIDDEN);
+        mWindowManager.createLayout(false /* canShow */, createTaskInfo(true /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_HIDDEN));
 
-        verify(mWindowManager, never()).inflateCompatUILayout();
+        verify(mWindowManager, never()).inflateLayout();
 
         // Not create hint popup.
         mWindowManager.mShouldShowSizeCompatHint = false;
-        mWindowManager.createLayout(true /* show */, true /* hasSizeCompat */,
-                CAMERA_COMPAT_CONTROL_HIDDEN);
+        mWindowManager.createLayout(true /* canShow */, createTaskInfo(true /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_HIDDEN));
 
-        verify(mWindowManager).inflateCompatUILayout();
+        verify(mWindowManager).inflateLayout();
         verify(mCompatUILayout, never()).setSizeCompatHintVisibility(true /* show */);
 
         // Create hint popup.
         mWindowManager.release();
         mWindowManager.mShouldShowSizeCompatHint = true;
-        mWindowManager.createLayout(true /* show */, true /* hasSizeCompat */,
-                CAMERA_COMPAT_CONTROL_HIDDEN);
+        mWindowManager.createLayout(true /* canShow */, createTaskInfo(true /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_HIDDEN));
 
-        verify(mWindowManager, times(2)).inflateCompatUILayout();
+        verify(mWindowManager, times(2)).inflateLayout();
         assertNotNull(mCompatUILayout);
         verify(mCompatUILayout).setSizeCompatHintVisibility(true /* show */);
         assertFalse(mWindowManager.mShouldShowSizeCompatHint);
@@ -123,10 +123,10 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
 
     @Test
     public void testRelease() {
-        mWindowManager.createLayout(true /* show */, true /* hasSizeCompat */,
-                CAMERA_COMPAT_CONTROL_HIDDEN);
+        mWindowManager.createLayout(true /* canShow */, createTaskInfo(true /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_HIDDEN));
 
-        verify(mWindowManager).inflateCompatUILayout();
+        verify(mWindowManager).inflateLayout();
 
         mWindowManager.release();
 
@@ -135,62 +135,101 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
 
     @Test
     public void testUpdateCompatInfo() {
-        mWindowManager.createLayout(true /* show */, true /* hasSizeCompat */,
-                CAMERA_COMPAT_CONTROL_HIDDEN);
+        TaskInfo taskInfo = createTaskInfo(true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN);
+        mWindowManager.createLayout(true /* canShow */, taskInfo);
 
         // No diff
         clearInvocations(mWindowManager);
-        mWindowManager.updateCompatInfo(mTaskConfig, mTaskListener, true /* show */,
-                true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN);
+        mWindowManager.updateCompatInfo(taskInfo, mTaskListener, true /* canShow */);
 
         verify(mWindowManager, never()).updateSurfacePosition();
         verify(mWindowManager, never()).release();
-        verify(mWindowManager, never()).createLayout(anyBoolean(), anyBoolean(), anyInt());
+        verify(mWindowManager, never()).createLayout(anyBoolean());
 
         // Change task listener, recreate button.
         clearInvocations(mWindowManager);
         final ShellTaskOrganizer.TaskListener newTaskListener = mock(
                 ShellTaskOrganizer.TaskListener.class);
-        mWindowManager.updateCompatInfo(mTaskConfig, newTaskListener,
-                true /* show */, true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN);
+        mWindowManager.updateCompatInfo(taskInfo, newTaskListener, true /* canShow */);
 
         verify(mWindowManager).release();
-        verify(mWindowManager).createLayout(anyBoolean(), anyBoolean(), anyInt());
+        verify(mWindowManager).createLayout(true);
+
+        // Change in Size Compat to false, hides restart button.
+        clearInvocations(mWindowManager);
+        taskInfo = createTaskInfo(false /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN);
+        mWindowManager.updateCompatInfo(taskInfo, newTaskListener, true /* canShow */);
+
+        verify(mCompatUILayout).setRestartButtonVisibility(/* show */ false);
+
+        // Change in Size Compat to true, shows restart button.
+        clearInvocations(mWindowManager);
+        clearInvocations(mCompatUILayout);
+        taskInfo = createTaskInfo(true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN);
+        mWindowManager.updateCompatInfo(taskInfo, newTaskListener, true /* canShow */);
+
+        verify(mCompatUILayout).setRestartButtonVisibility(/* show */ true);
 
         // Change Camera Compat state, show a control.
-        mWindowManager.updateCompatInfo(mTaskConfig, newTaskListener, true /* show */,
-                true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED);
+        clearInvocations(mWindowManager);
+        clearInvocations(mCompatUILayout);
+        taskInfo = createTaskInfo(true /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED);
+        mWindowManager.updateCompatInfo(taskInfo, newTaskListener, true /* canShow */);
 
         verify(mCompatUILayout).setCameraControlVisibility(/* show */ true);
         verify(mCompatUILayout).updateCameraTreatmentButton(
                 CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED);
 
+        // Change Camera Compat state, update a control.
         clearInvocations(mWindowManager);
         clearInvocations(mCompatUILayout);
-        // Change Camera Compat state, update a control.
-        mWindowManager.updateCompatInfo(mTaskConfig, newTaskListener, true /* show */,
-                true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
+        taskInfo = createTaskInfo(true /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
+        mWindowManager.updateCompatInfo(taskInfo, newTaskListener, true /* canShow */);
 
         verify(mCompatUILayout).setCameraControlVisibility(/* show */ true);
         verify(mCompatUILayout).updateCameraTreatmentButton(
                 CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
 
+        // Change Camera Compat state to hidden, hide a control.
         clearInvocations(mWindowManager);
         clearInvocations(mCompatUILayout);
-        // Change Camera Compat state to hidden, hide a control.
-        mWindowManager.updateCompatInfo(mTaskConfig, newTaskListener,
-                true /* show */, true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN);
+        taskInfo = createTaskInfo(true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN);
+        mWindowManager.updateCompatInfo(taskInfo, newTaskListener, true /* canShow */);
 
         verify(mCompatUILayout).setCameraControlVisibility(/* show */ false);
 
         // Change task bounds, update position.
         clearInvocations(mWindowManager);
-        final Configuration newTaskConfiguration = new Configuration();
-        newTaskConfiguration.windowConfiguration.setBounds(new Rect(0, 1000, 0, 2000));
-        mWindowManager.updateCompatInfo(newTaskConfiguration, newTaskListener,
-                true /* show */, true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN);
+        taskInfo = createTaskInfo(true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN);
+        taskInfo.configuration.windowConfiguration.setBounds(new Rect(0, 1000, 0, 2000));
+        mWindowManager.updateCompatInfo(taskInfo, newTaskListener, true /* canShow */);
 
         verify(mWindowManager).updateSurfacePosition();
+    }
+
+    @Test
+    public void testUpdateCompatInfoLayoutNotInflatedYet() {
+        TaskInfo taskInfo = createTaskInfo(true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN);
+        mWindowManager.createLayout(false /* canShow */, taskInfo);
+
+        verify(mWindowManager, never()).inflateLayout();
+
+        // Change topActivityInSizeCompat to false and pass canShow true, layout shouldn't be
+        // inflated
+        clearInvocations(mWindowManager);
+        taskInfo = createTaskInfo(false /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN);
+        mWindowManager.updateCompatInfo(taskInfo, mTaskListener, true /* canShow */);
+
+        verify(mWindowManager, never()).inflateLayout();
+
+        // Change topActivityInSizeCompat to true and pass canShow true, layout should be inflated.
+        clearInvocations(mWindowManager);
+        taskInfo = createTaskInfo(true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN);
+        mWindowManager.updateCompatInfo(taskInfo, mTaskListener, true /* canShow */);
+
+        verify(mWindowManager).inflateLayout();
     }
 
     @Test
@@ -237,26 +276,25 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
     @Test
     public void testUpdateVisibility() {
         // Create button if it is not created.
-        mWindowManager.mCompatUILayout = null;
+        mWindowManager.mLayout = null;
         mWindowManager.mHasSizeCompat = true;
-        mWindowManager.updateVisibility(true /* show */);
+        mWindowManager.updateVisibility(true /* canShow */);
 
-        verify(mWindowManager).createLayout(true /* show */, true /* hasSizeCompat */,
-                CAMERA_COMPAT_CONTROL_HIDDEN);
+        verify(mWindowManager).createLayout(true /* canShow */);
 
         // Hide button.
         clearInvocations(mWindowManager);
         doReturn(View.VISIBLE).when(mCompatUILayout).getVisibility();
-        mWindowManager.updateVisibility(false /* show */);
+        mWindowManager.updateVisibility(false /* canShow */);
 
-        verify(mWindowManager, never()).createLayout(anyBoolean(), anyBoolean(), anyInt());
+        verify(mWindowManager, never()).createLayout(anyBoolean(), any());
         verify(mCompatUILayout).setVisibility(View.GONE);
 
         // Show button.
         doReturn(View.GONE).when(mCompatUILayout).getVisibility();
-        mWindowManager.updateVisibility(true /* show */);
+        mWindowManager.updateVisibility(true /* canShow */);
 
-        verify(mWindowManager, never()).createLayout(anyBoolean(), anyBoolean(), anyInt());
+        verify(mWindowManager, never()).createLayout(anyBoolean(), any());
         verify(mCompatUILayout).setVisibility(View.VISIBLE);
     }
 
@@ -270,8 +308,8 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
 
     @Test
     public void testOnCameraDismissButtonClicked() {
-        mWindowManager.createLayout(true /* show */, true /* hasSizeCompat */,
-                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
+        mWindowManager.createLayout(true /* canShow */, createTaskInfo(true /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED));
         clearInvocations(mCompatUILayout);
         mWindowManager.onCameraDismissButtonClicked();
 
@@ -281,8 +319,8 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
 
     @Test
     public void testOnCameraTreatmentButtonClicked() {
-        mWindowManager.createLayout(true /* show */, true /* hasSizeCompat */,
-                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
+        mWindowManager.createLayout(true /* canShow */, createTaskInfo(true /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED));
         clearInvocations(mCompatUILayout);
         mWindowManager.onCameraTreatmentButtonClicked();
 
@@ -310,10 +348,10 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
     public void testOnRestartButtonLongClicked_showHint() {
        // Not create hint popup.
         mWindowManager.mShouldShowSizeCompatHint = false;
-        mWindowManager.createLayout(true /* show */, true /* hasSizeCompat */,
-                CAMERA_COMPAT_CONTROL_HIDDEN);
+        mWindowManager.createLayout(true /* canShow */, createTaskInfo(true /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_HIDDEN));
 
-        verify(mWindowManager).inflateCompatUILayout();
+        verify(mWindowManager).inflateLayout();
         verify(mCompatUILayout, never()).setSizeCompatHintVisibility(true /* show */);
 
         mWindowManager.onRestartButtonLongClicked();
@@ -325,10 +363,10 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
     public void testOnCamerControlLongClicked_showHint() {
        // Not create hint popup.
         mWindowManager.mShouldShowCameraCompatHint = false;
-        mWindowManager.createLayout(true /* show */, false /* hasSizeCompat */,
-                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
+        mWindowManager.createLayout(true /* canShow */, createTaskInfo(false /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED));
 
-        verify(mWindowManager).inflateCompatUILayout();
+        verify(mWindowManager).inflateLayout();
         verify(mCompatUILayout, never()).setCameraCompatHintVisibility(true /* show */);
 
         mWindowManager.onCameraButtonLongClicked();
@@ -339,30 +377,37 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
     @Test
     public void testCreateCameraCompatControl() {
         // Not create layout if show is false.
-        mWindowManager.createLayout(false /* show */, false /* hasSizeCompat */,
-                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
+        mWindowManager.createLayout(false /* canShow */, createTaskInfo(false /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED));
 
-        verify(mWindowManager, never()).inflateCompatUILayout();
+        verify(mWindowManager, never()).inflateLayout();
 
         // Not create hint popup.
         mWindowManager.mShouldShowCameraCompatHint = false;
-        mWindowManager.createLayout(true /* show */, false /* hasSizeCompat */,
-                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
+        mWindowManager.createLayout(true /* canShow */, createTaskInfo(false /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED));
 
-        verify(mWindowManager).inflateCompatUILayout();
+        verify(mWindowManager).inflateLayout();
         verify(mCompatUILayout, never()).setCameraCompatHintVisibility(true /* show */);
         verify(mCompatUILayout).setCameraControlVisibility(true /* show */);
 
         // Create hint popup.
         mWindowManager.release();
         mWindowManager.mShouldShowCameraCompatHint = true;
-        mWindowManager.createLayout(true /* show */, false /* hasSizeCompat */,
-                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
+        mWindowManager.createLayout(true /* canShow */, createTaskInfo(false /* hasSizeCompat */,
+                CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED));
 
-        verify(mWindowManager, times(2)).inflateCompatUILayout();
+        verify(mWindowManager, times(2)).inflateLayout();
         assertNotNull(mCompatUILayout);
         verify(mCompatUILayout, times(2)).setCameraControlVisibility(true /* show */);
         assertFalse(mWindowManager.mShouldShowCameraCompatHint);
     }
 
+    private static TaskInfo createTaskInfo(boolean hasSizeCompat,
+            @TaskInfo.CameraCompatControlState int cameraCompatControlState) {
+        ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
+        taskInfo.topActivityInSizeCompat = hasSizeCompat;
+        taskInfo.cameraCompatControlState = cameraCompatControlState;
+        return taskInfo;
+    }
 }

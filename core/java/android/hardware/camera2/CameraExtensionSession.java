@@ -172,6 +172,32 @@ public abstract class CameraExtensionSession implements AutoCloseable {
                 int sequenceId) {
             // default empty implementation
         }
+
+        /**
+         * This method is called when an image capture has fully completed and all the
+         * result metadata is available.
+         *
+         * <p>This callback will only be called in case
+         * {@link CameraExtensionCharacteristics#getAvailableCaptureResultKeys} returns a valid
+         * non-empty list.</p>
+         *
+         * <p>The default implementation of this method does nothing.</p>
+         *
+         * @param session The session received during
+         *                {@link StateCallback#onConfigured(CameraExtensionSession)}
+         * @param request The request that was given to the CameraDevice
+         * @param result The total output metadata from the capture, which only includes the
+         * capture result keys advertised as supported in
+         * {@link CameraExtensionCharacteristics#getAvailableCaptureResultKeys}.
+         *
+         * @see #capture
+         * @see #setRepeatingRequest
+         * @see CameraExtensionCharacteristics#getAvailableCaptureResultKeys
+         */
+        public void onCaptureResultAvailable(@NonNull CameraExtensionSession session,
+                @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
+            // default empty implementation
+        }
     }
 
     /**

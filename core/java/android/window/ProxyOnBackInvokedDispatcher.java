@@ -42,7 +42,7 @@ import java.util.List;
  *
  * @hide
  */
-public class ProxyOnBackInvokedDispatcher extends OnBackInvokedDispatcher {
+public class ProxyOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
     /**
      * List of pair representing an {@link OnBackInvokedCallback} and its associated priority.
@@ -60,14 +60,16 @@ public class ProxyOnBackInvokedDispatcher extends OnBackInvokedDispatcher {
             Log.v(TAG, String.format("Pending register %s. Actual=%s", callback,
                     mActualDispatcherOwner));
         }
-        synchronized (mLock) {
-            mCallbacks.add(Pair.create(callback, priority));
-            if (mActualDispatcherOwner != null) {
-                mActualDispatcherOwner.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
-                        callback, priority);
-            }
-
+        if (priority < 0) {
+            throw new IllegalArgumentException("Application registered OnBackInvokedCallback "
+                    + "cannot have negative priority. Priority: " + priority);
         }
+        registerOnBackInvokedCallbackUnchecked(callback, priority);
+    }
+
+    @Override
+    public void registerSystemOnBackInvokedCallback(@NonNull OnBackInvokedCallback callback) {
+        registerOnBackInvokedCallbackUnchecked(callback, PRIORITY_SYSTEM);
     }
 
     @Override
@@ -79,6 +81,17 @@ public class ProxyOnBackInvokedDispatcher extends OnBackInvokedDispatcher {
         }
         synchronized (mLock) {
             mCallbacks.removeIf((p) -> p.first.equals(callback));
+        }
+    }
+
+    private void registerOnBackInvokedCallbackUnchecked(
+            @NonNull OnBackInvokedCallback callback, int priority) {
+        synchronized (mLock) {
+            mCallbacks.add(Pair.create(callback, priority));
+            if (mActualDispatcherOwner != null) {
+                mActualDispatcherOwner.getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                        callback, priority);
+            }
         }
     }
 
@@ -99,8 +112,12 @@ public class ProxyOnBackInvokedDispatcher extends OnBackInvokedDispatcher {
                     dispatcher));
         }
         for (Pair<OnBackInvokedCallback, Integer> callbackPair : mCallbacks) {
-            dispatcher.registerOnBackInvokedCallback(callbackPair.first,
-                    callbackPair.second);
+            int priority = callbackPair.second;
+            if (priority >= 0) {
+                dispatcher.registerOnBackInvokedCallback(callbackPair.first, priority);
+            } else {
+                dispatcher.registerSystemOnBackInvokedCallback(callbackPair.first);
+            }
         }
         mCallbacks.clear();
     }
