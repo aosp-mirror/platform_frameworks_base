@@ -372,9 +372,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 "android.permission.WRITE_DEVICE_CONFIG",
                 "android.permission.READ_DEVICE_CONFIG",
                 "android.permission.READ_CONTACTS");
-        Settings.Secure.putIntForUser(
-                getContext().getContentResolver(),
-                Settings.Secure.NOTIFICATION_PERMISSION_ENABLED, 0, USER_SYSTEM);
 
         MockitoAnnotations.initMocks(this);
 
