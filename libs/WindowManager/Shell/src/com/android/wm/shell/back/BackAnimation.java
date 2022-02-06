@@ -18,9 +18,12 @@ package com.android.wm.shell.back;
 
 import android.view.MotionEvent;
 
+import com.android.wm.shell.common.annotations.ExternalThread;
+
 /**
- * Interface for SysUI to get access to the Back animation related methods.
+ * Interface for external process to get access to the Back animation related methods.
  */
+@ExternalThread
 public interface BackAnimation {
 
     /**
@@ -32,4 +35,11 @@ public interface BackAnimation {
      * Sets whether the back gesture is past the trigger threshold or not.
      */
     void setTriggerBack(boolean triggerBack);
+
+    /**
+     * Returns a binder that can be passed to an external process to update back animations.
+     */
+    default IBackAnimation createExternalInterface() {
+        return null;
+    }
 }

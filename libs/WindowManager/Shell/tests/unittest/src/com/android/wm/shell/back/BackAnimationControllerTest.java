@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verify;
 
 import android.app.IActivityTaskManager;
 import android.app.WindowConfiguration;
+import android.content.Context;
 import android.hardware.HardwareBuffer;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -52,6 +53,9 @@ public class BackAnimationControllerTest {
     private final ShellExecutor mShellExecutor = new TestShellExecutor();
 
     @Mock
+    private Context mContext;
+
+    @Mock
     private SurfaceControl.Transaction mTransaction;
 
     @Mock
@@ -63,7 +67,7 @@ public class BackAnimationControllerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mController = new BackAnimationController(
-                mShellExecutor, mTransaction, mActivityTaskManager);
+                mShellExecutor, mTransaction, mActivityTaskManager, mContext);
     }
 
     private void createNavigationInfo(SurfaceControl topWindowLeash,

@@ -18,8 +18,10 @@ package android.window;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.compat.CompatChanges;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.view.IWindow;
 import android.view.IWindowSession;
@@ -31,7 +33,7 @@ import java.util.HashMap;
 import java.util.TreeMap;
 
 /**
- * Provides window based implementation of {@link OnBackInvokedDispatcher}.
+ * Provides window based implementation of {@link android.view.OnBackInvokedDispatcher}.
  *
  * Callbacks with higher priorities receive back dispatching first.
  * Within the same priority, callbacks receive back dispatching in the reverse order
@@ -39,16 +41,19 @@ import java.util.TreeMap;
  *
  * When the top priority callback is updated, the new callback is propagated to the Window Manager
  * if the window the instance is associated with has been attached. It is allowed to register /
- * unregister {@link OnBackInvokedCallback}s before the window is attached, although callbacks
- * will not receive dispatches until window attachment.
+ * unregister {@link android.view.OnBackInvokedCallback}s before the window is attached, although
+ * callbacks will not receive dispatches until window attachment.
  *
  * @hide
  */
-public class WindowOnBackInvokedDispatcher extends OnBackInvokedDispatcher {
+public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     private IWindowSession mWindowSession;
     private IWindow mWindow;
     private static final String TAG = "WindowOnBackDispatcher";
     private static final boolean DEBUG = false;
+    private static final String BACK_PREDICTABILITY_PROP = "persist.debug.back_predictability";
+    private static final boolean IS_BACK_PREDICTABILITY_ENABLED = SystemProperties
+            .getInt(BACK_PREDICTABILITY_PROP, 0) > 0;
 
     /** The currently most prioritized callback. */
     @Nullable
@@ -81,6 +86,15 @@ public class WindowOnBackInvokedDispatcher extends OnBackInvokedDispatcher {
     // TODO: Take an Executor for the callback to run on.
     @Override
     public void registerOnBackInvokedCallback(
+            @NonNull OnBackInvokedCallback callback, @Priority int priority) {
+        if (priority < 0) {
+            throw new IllegalArgumentException("Application registered OnBackInvokedCallback "
+                    + "cannot have negative priority. Priority: " + priority);
+        }
+        registerOnBackInvokedCallbackUnchecked(callback, priority);
+    }
+
+    private void registerOnBackInvokedCallbackUnchecked(
             @NonNull OnBackInvokedCallback callback, @Priority int priority) {
         if (!mOnBackInvokedCallbacks.containsKey(priority)) {
             mOnBackInvokedCallbacks.put(priority, new ArrayList<>());
@@ -118,6 +132,11 @@ public class WindowOnBackInvokedDispatcher extends OnBackInvokedDispatcher {
         if (mTopCallback != null && mTopCallback.getCallback() == callback) {
             findAndSetTopOnBackInvokedCallback();
         }
+    }
+
+    @Override
+    public void registerSystemOnBackInvokedCallback(@NonNull OnBackInvokedCallback callback) {
+        registerOnBackInvokedCallbackUnchecked(callback, OnBackInvokedDispatcher.PRIORITY_SYSTEM);
     }
 
     /** Clears all registered callbacks on the instance. */
@@ -197,5 +216,22 @@ public class WindowOnBackInvokedDispatcher extends OnBackInvokedDispatcher {
         public void onBackInvoked() throws RemoteException {
             Handler.getMain().post(() -> mCallback.onBackInvoked());
         }
+    }
+
+    @Override
+    public OnBackInvokedCallback getTopCallback() {
+        return mTopCallback == null ? null : mTopCallback.getCallback();
+    }
+
+    /**
+     * Returns if the legacy back behavior should be used.
+     *
+     * Legacy back behavior dispatches KEYCODE_BACK instead of invoking the application registered
+     * {@link android.view.OnBackInvokedCallback}.
+     *
+     */
+    public static boolean shouldUseLegacyBack() {
+        return !CompatChanges.isChangeEnabled(DISPATCH_BACK_INVOCATION_AHEAD_OF_TIME)
+                || !IS_BACK_PREDICTABILITY_ENABLED;
     }
 }

@@ -65,4 +65,6 @@ message CameraStreamProto {
 
     // The dynamic range profile of the stream
     optional int32 dynamic_range_profile = 14;
+    // The stream use case
+    optional int32 stream_use_case = 15;
 }

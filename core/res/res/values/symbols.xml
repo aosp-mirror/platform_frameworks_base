@@ -4722,4 +4722,6 @@
   <java-symbol type="bool" name="config_lowPowerStandbySupported" />
   <java-symbol type="bool" name="config_lowPowerStandbyEnabledByDefault" />
   <java-symbol type="integer" name="config_lowPowerStandbyNonInteractiveTimeout" />
+
+  <java-symbol type="color" name="camera_privacy_light"/>
 </resources>

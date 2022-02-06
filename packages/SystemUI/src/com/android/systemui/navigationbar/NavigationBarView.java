@@ -774,11 +774,12 @@ public class NavigationBarView extends FrameLayout implements
         updateRecentsIcon();
 
         boolean isImeRenderingNavButtons = isGesturalMode(mNavBarMode)
-                && mImeCanRenderGesturalNavButtons;
+                && mImeCanRenderGesturalNavButtons
+                && (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0;
 
         // Update IME button visibility, a11y and rotate button always overrides the appearance
         boolean disableImeSwitcher =
-                (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) == 0
+                (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_SHOWN) == 0
                 || isImeRenderingNavButtons;
         mContextualButtonGroup.setButtonVisibility(R.id.ime_switcher, !disableImeSwitcher);
 

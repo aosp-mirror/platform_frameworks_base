@@ -115,6 +115,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.OnBackInvokedCallback;
 import android.view.OnBackInvokedDispatcher;
 import android.view.OnBackInvokedDispatcherOwner;
 import android.view.RemoteAnimationDefinition;
@@ -144,6 +145,7 @@ import android.widget.AdapterView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 import android.window.SplashScreen;
+import android.window.WindowOnBackInvokedDispatcher;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -791,6 +793,7 @@ public class Activity extends ContextThemeWrapper
     private static final int LOG_AM_ON_ACTIVITY_RESULT_CALLED = 30062;
     private static final int LOG_AM_ON_TOP_RESUMED_GAINED_CALLED = 30064;
     private static final int LOG_AM_ON_TOP_RESUMED_LOST_CALLED = 30065;
+    private OnBackInvokedCallback mDefaultBackCallback;
 
     /**
      * After {@link Build.VERSION_CODES#TIRAMISU},
@@ -1617,7 +1620,16 @@ public class Activity extends ContextThemeWrapper
         }
         mRestoredFromBundle = savedInstanceState != null;
         mCalled = true;
-
+        if (!WindowOnBackInvokedDispatcher.shouldUseLegacyBack()) {
+            // Add onBackPressed as default back behavior.
+            mDefaultBackCallback = new OnBackInvokedCallback() {
+                @Override
+                public void onBackInvoked() {
+                    navigateBack();
+                }
+            };
+            getOnBackInvokedDispatcher().registerSystemOnBackInvokedCallback(mDefaultBackCallback);
+        }
     }
 
     /**
@@ -2652,6 +2664,10 @@ public class Activity extends ContextThemeWrapper
 
         if (mUiTranslationController != null) {
             mUiTranslationController.onActivityDestroyed();
+        }
+
+        if (mDefaultBackCallback != null) {
+            getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mDefaultBackCallback);
         }
     }
 
@@ -3773,10 +3789,13 @@ public class Activity extends ContextThemeWrapper
      * @see KeyEvent
      */
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (getApplicationInfo().targetSdkVersion
-                >= Build.VERSION_CODES.ECLAIR) {
-            if (keyCode == KeyEvent.KEYCODE_BACK && event.isTracking()
-                    && !event.isCanceled()) {
+        int sdkVersion = getApplicationInfo().targetSdkVersion;
+        if (sdkVersion >= Build.VERSION_CODES.ECLAIR) {
+            if (keyCode == KeyEvent.KEYCODE_BACK
+                    && event.isTracking()
+                    && !event.isCanceled()
+                    && mDefaultBackCallback == null) {
+                // Using legacy back handling.
                 onBackPressed();
                 return true;
             }
@@ -3841,6 +3860,10 @@ public class Activity extends ContextThemeWrapper
         if (!fragmentManager.isStateSaved() && fragmentManager.popBackStackImmediate()) {
             return;
         }
+        navigateBack();
+    }
+
+    private void navigateBack() {
         if (!isTaskRoot()) {
             // If the activity is not the root of the task, allow finish to proceed normally.
             finishAfterTransition();

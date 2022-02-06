@@ -2463,7 +2463,7 @@ public class NotificationManagerService extends SystemService {
         };
         mAllowFgsDismissal = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.TASK_MANAGER_ENABLED, false);
+                SystemUiDeviceConfigFlags.TASK_MANAGER_ENABLED, true);
         DeviceConfig.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 new HandlerExecutor(mHandler),

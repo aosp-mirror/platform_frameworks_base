@@ -39,6 +39,8 @@ import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.systemui.animation.Interpolators;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -82,6 +84,7 @@ public class SwipeHelper implements Gefingerpoken {
     private final int mSwipeDirection;
     private final VelocityTracker mVelocityTracker;
     private final FalsingManager mFalsingManager;
+    private final FeatureFlags mFeatureFlags;
 
     private float mInitialTouchPos;
     private float mPerpendicularInitialTouchPos;
@@ -128,7 +131,8 @@ public class SwipeHelper implements Gefingerpoken {
 
     public SwipeHelper(
             int swipeDirection, Callback callback, Resources resources,
-            ViewConfiguration viewConfiguration, FalsingManager falsingManager) {
+            ViewConfiguration viewConfiguration, FalsingManager falsingManager,
+            FeatureFlags featureFlags) {
         mCallback = callback;
         mHandler = new Handler();
         mSwipeDirection = swipeDirection;
@@ -146,6 +150,7 @@ public class SwipeHelper implements Gefingerpoken {
         mFadeDependingOnAmountSwiped = resources.getBoolean(
                 R.bool.config_fadeDependingOnAmountSwiped);
         mFalsingManager = falsingManager;
+        mFeatureFlags = featureFlags;
         mFlingAnimationUtils = new FlingAnimationUtils(resources.getDisplayMetrics(),
                 getMaxEscapeAnimDuration() / 1000f);
     }
@@ -795,7 +800,7 @@ public class SwipeHelper implements Gefingerpoken {
     }
 
     private boolean isAvailableToDragAndDrop(View v) {
-        if (v.getResources().getBoolean(R.bool.config_notificationToContents)) {
+        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_DRAG_TO_CONTENTS)) {
             if (v instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow enr = (ExpandableNotificationRow) v;
                 boolean canBubble = enr.getEntry().canBubble();
