@@ -1,11 +1,11 @@
-/**
- * Copyright (c) 2021, The Android Open Source Project
+/*
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,12 +14,20 @@
  * limitations under the License.
  */
 
-package android.net;
+package com.android.server.net;
 
-import android.net.InternalNetworkManagementException;
-import android.net.Network;
+import com.android.net.module.util.Struct;
+import com.android.net.module.util.Struct.Field;
+import com.android.net.module.util.Struct.Type;
 
-/** @hide */
-oneway interface IInternalNetworkManagementListener {
-    void onComplete(in Network network, in InternalNetworkManagementException exception);
+/**
+ * Key for uid stats map.
+ */
+public class UidStatsMapKey extends Struct {
+    @Field(order = 0, type = Type.U32)
+    public final long uid;
+
+    public UidStatsMapKey(final long uid) {
+        this.uid = uid;
+    }
 }

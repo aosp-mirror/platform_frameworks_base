@@ -16,6 +16,9 @@
 
 package android.net.nsd;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
@@ -23,15 +26,22 @@ import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.ConnectivityManager.NetworkCallback;
+import android.net.Network;
+import android.net.NetworkRequest;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.text.TextUtils;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Objects;
@@ -278,8 +288,179 @@ public final class NsdManager {
     private final SparseArray mListenerMap = new SparseArray();
     private final SparseArray<NsdServiceInfo> mServiceMap = new SparseArray<>();
     private final Object mMapLock = new Object();
+    // Map of listener key sent by client -> per-network discovery tracker
+    @GuardedBy("mPerNetworkDiscoveryMap")
+    private final ArrayMap<Integer, PerNetworkDiscoveryTracker>
+            mPerNetworkDiscoveryMap = new ArrayMap<>();
 
     private final ServiceHandler mHandler;
+
+    private class PerNetworkDiscoveryTracker {
+        final String mServiceType;
+        final int mProtocolType;
+        final DiscoveryListener mBaseListener;
+        final ArrayMap<Network, DelegatingDiscoveryListener> mPerNetworkListeners =
+                new ArrayMap<>();
+
+        final NetworkCallback mNetworkCb = new NetworkCallback() {
+            @Override
+            public void onAvailable(@NonNull Network network) {
+                final DelegatingDiscoveryListener wrappedListener = new DelegatingDiscoveryListener(
+                        network, mBaseListener);
+                mPerNetworkListeners.put(network, wrappedListener);
+                discoverServices(mServiceType, mProtocolType, network, wrappedListener);
+            }
+
+            @Override
+            public void onLost(@NonNull Network network) {
+                final DelegatingDiscoveryListener listener = mPerNetworkListeners.get(network);
+                if (listener == null) return;
+                listener.notifyAllServicesLost();
+                // Listener will be removed from map in discovery stopped callback
+                stopServiceDiscovery(listener);
+            }
+        };
+
+        // Accessed from mHandler
+        private boolean mStopRequested;
+
+        public void start(@NonNull NetworkRequest request) {
+            final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
+            cm.registerNetworkCallback(request, mNetworkCb, mHandler);
+            mHandler.post(() -> mBaseListener.onDiscoveryStarted(mServiceType));
+        }
+
+        /**
+         * Stop discovery on all networks tracked by this class.
+         *
+         * This will request all underlying listeners to stop, and the last one to stop will call
+         * onDiscoveryStopped or onStopDiscoveryFailed.
+         *
+         * Must be called on the handler thread.
+         */
+        public void requestStop() {
+            mHandler.post(() -> {
+                mStopRequested = true;
+                final ConnectivityManager cm = mContext.getSystemService(ConnectivityManager.class);
+                cm.unregisterNetworkCallback(mNetworkCb);
+                if (mPerNetworkListeners.size() == 0) {
+                    mBaseListener.onDiscoveryStopped(mServiceType);
+                    return;
+                }
+                for (int i = 0; i < mPerNetworkListeners.size(); i++) {
+                    final DelegatingDiscoveryListener listener = mPerNetworkListeners.valueAt(i);
+                    stopServiceDiscovery(listener);
+                }
+            });
+        }
+
+        private PerNetworkDiscoveryTracker(String serviceType, int protocolType,
+                DiscoveryListener baseListener) {
+            mServiceType = serviceType;
+            mProtocolType = protocolType;
+            mBaseListener = baseListener;
+        }
+
+        /**
+         * Subset of NsdServiceInfo that is tracked to generate service lost notifications when a
+         * network is lost.
+         *
+         * Service lost notifications only contain service name, type and network, so only track
+         * that information (Network is known from the listener). This also implements
+         * equals/hashCode for usage in maps.
+         */
+        private class TrackedNsdInfo {
+            private final String mServiceName;
+            private final String mServiceType;
+            TrackedNsdInfo(NsdServiceInfo info) {
+                mServiceName = info.getServiceName();
+                mServiceType = info.getServiceType();
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(mServiceName, mServiceType);
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (!(obj instanceof TrackedNsdInfo)) return false;
+                final TrackedNsdInfo other = (TrackedNsdInfo) obj;
+                return Objects.equals(mServiceName, other.mServiceName)
+                        && Objects.equals(mServiceType, other.mServiceType);
+            }
+        }
+
+        private class DelegatingDiscoveryListener implements DiscoveryListener {
+            private final Network mNetwork;
+            private final DiscoveryListener mWrapped;
+            private final ArraySet<TrackedNsdInfo> mFoundInfo = new ArraySet<>();
+
+            private DelegatingDiscoveryListener(Network network, DiscoveryListener listener) {
+                mNetwork = network;
+                mWrapped = listener;
+            }
+
+            void notifyAllServicesLost() {
+                for (int i = 0; i < mFoundInfo.size(); i++) {
+                    final TrackedNsdInfo trackedInfo = mFoundInfo.valueAt(i);
+                    final NsdServiceInfo serviceInfo = new NsdServiceInfo(
+                            trackedInfo.mServiceName, trackedInfo.mServiceType);
+                    serviceInfo.setNetwork(mNetwork);
+                    mWrapped.onServiceLost(serviceInfo);
+                }
+            }
+
+            @Override
+            public void onStartDiscoveryFailed(String serviceType, int errorCode) {
+                // The delegated listener is used when NsdManager takes care of starting/stopping
+                // discovery on multiple networks. Failure to start on one network is not a global
+                // failure to be reported up, as other networks may succeed: just log.
+                Log.e(TAG, "Failed to start discovery for " + serviceType + " on " + mNetwork
+                        + " with code " + errorCode);
+                mPerNetworkListeners.remove(mNetwork);
+            }
+
+            @Override
+            public void onDiscoveryStarted(String serviceType) {
+                // Wrapped listener was called upon registration, it is not called for discovery
+                // on each network
+            }
+
+            @Override
+            public void onStopDiscoveryFailed(String serviceType, int errorCode) {
+                Log.e(TAG, "Failed to stop discovery for " + serviceType + " on " + mNetwork
+                        + " with code " + errorCode);
+                mPerNetworkListeners.remove(mNetwork);
+                if (mStopRequested && mPerNetworkListeners.size() == 0) {
+                    // Do not report onStopDiscoveryFailed when some underlying listeners failed:
+                    // this does not mean that all listeners did, and onStopDiscoveryFailed is not
+                    // actionable anyway. Just report that discovery stopped.
+                    mWrapped.onDiscoveryStopped(serviceType);
+                }
+            }
+
+            @Override
+            public void onDiscoveryStopped(String serviceType) {
+                mPerNetworkListeners.remove(mNetwork);
+                if (mStopRequested && mPerNetworkListeners.size() == 0) {
+                    mWrapped.onDiscoveryStopped(serviceType);
+                }
+            }
+
+            @Override
+            public void onServiceFound(NsdServiceInfo serviceInfo) {
+                mFoundInfo.add(new TrackedNsdInfo(serviceInfo));
+                mWrapped.onServiceFound(serviceInfo);
+            }
+
+            @Override
+            public void onServiceLost(NsdServiceInfo serviceInfo) {
+                mFoundInfo.remove(new TrackedNsdInfo(serviceInfo));
+                mWrapped.onServiceLost(serviceInfo);
+            }
+        }
+    }
 
     /**
      * Create a new Nsd instance. Applications use
@@ -634,6 +815,14 @@ public final class NsdManager {
     }
 
     /**
+     * Same as {@link #discoverServices(String, int, Network, DiscoveryListener)} with a null
+     * {@link Network}.
+     */
+    public void discoverServices(String serviceType, int protocolType, DiscoveryListener listener) {
+        discoverServices(serviceType, protocolType, (Network) null, listener);
+    }
+
+    /**
      * Initiate service discovery to browse for instances of a service type. Service discovery
      * consumes network bandwidth and will continue until the application calls
      * {@link #stopServiceDiscovery}.
@@ -657,11 +846,13 @@ public final class NsdManager {
      * @param serviceType The service type being discovered. Examples include "_http._tcp" for
      * http services or "_ipp._tcp" for printers
      * @param protocolType The service discovery protocol
+     * @param network Network to discover services on, or null to discover on all available networks
      * @param listener  The listener notifies of a successful discovery and is used
      * to stop discovery on this serviceType through a call on {@link #stopServiceDiscovery}.
      * Cannot be null. Cannot be in use for an active service discovery.
      */
-    public void discoverServices(String serviceType, int protocolType, DiscoveryListener listener) {
+    public void discoverServices(@NonNull String serviceType, int protocolType,
+            @Nullable Network network, @NonNull DiscoveryListener listener) {
         if (TextUtils.isEmpty(serviceType)) {
             throw new IllegalArgumentException("Service type cannot be empty");
         }
@@ -669,12 +860,74 @@ public final class NsdManager {
 
         NsdServiceInfo s = new NsdServiceInfo();
         s.setServiceType(serviceType);
+        s.setNetwork(network);
 
         int key = putListener(listener, s);
         try {
             mService.discoverServices(key, s);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Initiate service discovery to browse for instances of a service type. Service discovery
+     * consumes network bandwidth and will continue until the application calls
+     * {@link #stopServiceDiscovery}.
+     *
+     * <p> The function call immediately returns after sending a request to start service
+     * discovery to the framework. The application is notified of a success to initiate
+     * discovery through the callback {@link DiscoveryListener#onDiscoveryStarted} or a failure
+     * through {@link DiscoveryListener#onStartDiscoveryFailed}.
+     *
+     * <p> Upon successful start, application is notified when a service is found with
+     * {@link DiscoveryListener#onServiceFound} or when a service is lost with
+     * {@link DiscoveryListener#onServiceLost}.
+     *
+     * <p> Upon failure to start, service discovery is not active and application does
+     * not need to invoke {@link #stopServiceDiscovery}
+     *
+     * <p> The application should call {@link #stopServiceDiscovery} when discovery of this
+     * service type is no longer required, and/or whenever the application is paused or
+     * stopped.
+     *
+     * <p> During discovery, new networks may connect or existing networks may disconnect - for
+     * example if wifi is reconnected. When a service was found on a network that disconnects,
+     * {@link DiscoveryListener#onServiceLost} will be called. If a new network connects that
+     * matches the {@link NetworkRequest}, {@link DiscoveryListener#onServiceFound} will be called
+     * for services found on that network. Applications that do not want to track networks
+     * themselves are encouraged to use this method instead of other overloads of
+     * {@code discoverServices}, as they will receive proper notifications when a service becomes
+     * available or unavailable due to network changes.
+     *
+     * @param serviceType The service type being discovered. Examples include "_http._tcp" for
+     * http services or "_ipp._tcp" for printers
+     * @param protocolType The service discovery protocol
+     * @param networkRequest Request specifying networks that should be considered when discovering
+     * @param listener  The listener notifies of a successful discovery and is used
+     * to stop discovery on this serviceType through a call on {@link #stopServiceDiscovery}.
+     * Cannot be null. Cannot be in use for an active service discovery.
+     */
+    @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)
+    public void discoverServices(@NonNull String serviceType, int protocolType,
+            @NonNull NetworkRequest networkRequest, @NonNull DiscoveryListener listener) {
+        if (TextUtils.isEmpty(serviceType)) {
+            throw new IllegalArgumentException("Service type cannot be empty");
+        }
+        Objects.requireNonNull(networkRequest, "NetworkRequest cannot be null");
+        checkProtocol(protocolType);
+
+        NsdServiceInfo s = new NsdServiceInfo();
+        s.setServiceType(serviceType);
+
+        final int baseListenerKey = putListener(listener, s);
+
+        final PerNetworkDiscoveryTracker discoveryInfo = new PerNetworkDiscoveryTracker(
+                serviceType, protocolType, listener);
+
+        synchronized (mPerNetworkDiscoveryMap) {
+            mPerNetworkDiscoveryMap.put(baseListenerKey, discoveryInfo);
+            discoveryInfo.start(networkRequest);
         }
     }
 
@@ -696,6 +949,14 @@ public final class NsdManager {
      */
     public void stopServiceDiscovery(DiscoveryListener listener) {
         int id = getListenerKey(listener);
+        // If this is a PerNetworkDiscovery request, handle it as such
+        synchronized (mPerNetworkDiscoveryMap) {
+            final PerNetworkDiscoveryTracker info = mPerNetworkDiscoveryMap.get(id);
+            if (info != null) {
+                info.requestStop();
+                return;
+            }
+        }
         try {
             mService.stopDiscovery(id);
         } catch (RemoteException e) {
