@@ -58,8 +58,8 @@ import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 
@@ -90,7 +90,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     private final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
     private final boolean mAboveStatusbar;
     private final boolean mVolumeAdjustmentForRemoteGroupSessions;
-    private final NotificationEntryManager mNotificationEntryManager;
+    private final CommonNotifCollection mNotifCollection;
     @VisibleForTesting
     final List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
 
@@ -107,7 +107,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     public MediaOutputController(@NonNull Context context, String packageName,
             boolean aboveStatusbar, MediaSessionManager mediaSessionManager, LocalBluetoothManager
             lbm, ShadeController shadeController, ActivityStarter starter,
-            NotificationEntryManager notificationEntryManager, UiEventLogger uiEventLogger,
+            CommonNotifCollection notifCollection, UiEventLogger uiEventLogger,
             DialogLaunchAnimator dialogLaunchAnimator, SystemUIDialogManager dialogManager) {
         mContext = context;
         mPackageName = packageName;
@@ -116,7 +116,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         mShadeController = shadeController;
         mActivityStarter = starter;
         mAboveStatusbar = aboveStatusbar;
-        mNotificationEntryManager = notificationEntryManager;
+        mNotifCollection = notifCollection;
         InfoMediaManager imm = new InfoMediaManager(mContext, packageName, null, lbm);
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
@@ -287,8 +287,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         if (TextUtils.isEmpty(mPackageName)) {
             return null;
         }
-        for (NotificationEntry entry
-                : mNotificationEntryManager.getActiveNotificationsForCurrentUser()) {
+        for (NotificationEntry entry : mNotifCollection.getAllNotifs()) {
             final Notification notification = entry.getSbn().getNotification();
             if (notification.isMediaNotification()
                     && TextUtils.equals(entry.getSbn().getPackageName(), mPackageName)) {
@@ -523,7 +522,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         // We show the output group dialog from the output dialog.
         MediaOutputController controller = new MediaOutputController(mContext, mPackageName,
                 mAboveStatusbar, mMediaSessionManager, mLocalBluetoothManager, mShadeController,
-                mActivityStarter, mNotificationEntryManager, mUiEventLogger, mDialogLaunchAnimator,
+                mActivityStarter, mNotifCollection, mUiEventLogger, mDialogLaunchAnimator,
                 mDialogManager);
         MediaOutputGroupDialog dialog = new MediaOutputGroupDialog(mContext, mAboveStatusbar,
                 controller, mDialogManager);

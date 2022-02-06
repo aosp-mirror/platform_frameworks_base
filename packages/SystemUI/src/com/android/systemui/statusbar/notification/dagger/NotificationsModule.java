@@ -62,6 +62,7 @@ import com.android.systemui.statusbar.notification.collection.legacy.VisualStabi
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.collection.provider.NotificationVisibilityProviderImpl;
+import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
@@ -200,12 +201,14 @@ public interface NotificationsModule {
     @Provides
     static VisualStabilityManager provideVisualStabilityManager(
             NotificationEntryManager notificationEntryManager,
+            VisualStabilityProvider visualStabilityProvider,
             Handler handler,
             StatusBarStateController statusBarStateController,
             WakefulnessLifecycle wakefulnessLifecycle,
             DumpManager dumpManager) {
         return new VisualStabilityManager(
                 notificationEntryManager,
+                visualStabilityProvider,
                 handler,
                 statusBarStateController,
                 wakefulnessLifecycle,

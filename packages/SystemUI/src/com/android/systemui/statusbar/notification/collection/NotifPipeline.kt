@@ -94,6 +94,10 @@ class NotifPipeline @Inject constructor(
         mNotifCollection.addCollectionListener(listener)
     }
 
+    override fun removeCollectionListener(listener: NotifCollectionListener) {
+        mNotifCollection.removeCollectionListener(listener)
+    }
+
     /**
      * Returns the NotificationEntry associated with [key].
      */
