@@ -284,6 +284,21 @@ public interface Computer extends PackageDataSnapshot {
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     long updateFlagsForResolve(long flags, int userId, int callingUid, boolean wantInstantApps,
             boolean onlyExposedExplicitly, boolean isImplicitImageCaptureIntentAndNotSetByDpc);
+
+    /**
+     * Checks if the request is from the system or an app that has the appropriate cross-user
+     * permissions defined as follows:
+     * <ul>
+     * <li>INTERACT_ACROSS_USERS_FULL if {@code requireFullPermission} is true.</li>
+     * <li>INTERACT_ACROSS_USERS if the given {@code userId} is in a different profile group
+     * to the caller.</li>
+     * <li>Otherwise, INTERACT_ACROSS_PROFILES if the given {@code userId} is in the same profile
+     * group as the caller.</li>
+     * </ul>
+     *
+     * @param checkShell whether to prevent shell from access if there's a debugging restriction
+     * @param message the message to log on security exception
+     */
     @Computer.LiveImplementation(override = Computer.LiveImplementation.NOT_ALLOWED)
     void enforceCrossUserOrProfilePermission(int callingUid, @UserIdInt int userId,
             boolean requireFullPermission, boolean checkShell, String message);
