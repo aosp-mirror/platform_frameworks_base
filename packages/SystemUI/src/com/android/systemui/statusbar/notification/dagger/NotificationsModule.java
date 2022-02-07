@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStoreImpl;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
+import com.android.systemui.statusbar.notification.collection.NotifPipelineChoreographerModule;
 import com.android.systemui.statusbar.notification.collection.coordinator.ShadeEventCoordinator;
 import com.android.systemui.statusbar.notification.collection.coordinator.VisualStabilityCoordinator;
 import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorsModule;
@@ -103,6 +104,7 @@ import dagger.Provides;
  */
 @Module(includes = {
         CoordinatorsModule.class,
+        NotifPipelineChoreographerModule.class,
         NotifPanelEventSourceModule.class,
         NotificationSectionHeadersModule.class,
 })
