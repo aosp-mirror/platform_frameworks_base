@@ -41,6 +41,8 @@ cc_library_shared {
         "GnssNavigationMessageCallback.cpp",
         "GnssVisibilityControl.cpp",
         "GnssVisibilityControlCallback.cpp",
+        "MeasurementCorrections.cpp",
+        "MeasurementCorrectionsCallback.cpp",
         "Utils.cpp",
     ],
 }
