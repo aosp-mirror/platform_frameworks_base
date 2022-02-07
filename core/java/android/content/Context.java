@@ -3434,7 +3434,7 @@ public abstract class Context {
     public abstract boolean stopServiceAsUser(Intent service, UserHandle user);
 
     /**
-     * Connect to an application service, creating it if needed.  This defines
+     * Connects to an application service, creating it if needed.  This defines
      * a dependency between your application and the service.  The given
      * <var>conn</var> will receive the service object when it is created and be
      * told if it dies and restarts.  The service will be considered required
@@ -3449,11 +3449,8 @@ public abstract class Context {
      * will be invoked instead of
      * {@link ServiceConnection#onServiceConnected(ComponentName, IBinder) onServiceConnected()}.
      *
-     * <p>This method will throw {@link SecurityException} if the calling app does not
-     * have permission to bind to the given service.
-     *
-     * <p class="note">Note: this method <em>cannot be called from a
-     * {@link BroadcastReceiver} component</em>.  A pattern you can use to
+     * <p class="note"><b>Note:</b> This method <em>cannot</em> be called from a
+     * {@link BroadcastReceiver} component.  A pattern you can use to
      * communicate from a BroadcastReceiver to a Service is to call
      * {@link #startService} with the arguments containing the command to be
      * sent, with the service calling its
@@ -3468,34 +3465,34 @@ public abstract class Context {
      *      specify an explicit component name.
      * @param conn Receives information as the service is started and stopped.
      *      This must be a valid ServiceConnection object; it must not be null.
-     * @param flags Operation options for the binding.  May be 0,
-     *          {@link #BIND_AUTO_CREATE}, {@link #BIND_DEBUG_UNBIND},
-     *          {@link #BIND_NOT_FOREGROUND}, {@link #BIND_ABOVE_CLIENT},
-     *          {@link #BIND_ALLOW_OOM_MANAGEMENT}, {@link #BIND_WAIVE_PRIORITY}.
-     *          {@link #BIND_IMPORTANT}, {@link #BIND_ADJUST_WITH_ACTIVITY},
-     *          {@link #BIND_NOT_PERCEPTIBLE}, or {@link #BIND_INCLUDE_CAPABILITIES}.
-     * @return {@code true} if the system is in the process of bringing up a
+     * @param flags Operation options for the binding. Can be:
+     *      <ul>
+     *          <li>0
+     *          <li>{@link #BIND_AUTO_CREATE}
+     *          <li>{@link #BIND_DEBUG_UNBIND}
+     *          <li>{@link #BIND_NOT_FOREGROUND}
+     *          <li>{@link #BIND_ABOVE_CLIENT}
+     *          <li>{@link #BIND_ALLOW_OOM_MANAGEMENT}
+     *          <li>{@link #BIND_WAIVE_PRIORITY}
+     *          <li>{@link #BIND_IMPORTANT}
+     *          <li>{@link #BIND_ADJUST_WITH_ACTIVITY}
+     *          <li>{@link #BIND_NOT_PERCEPTIBLE}
+     *          <li>{@link #BIND_INCLUDE_CAPABILITIES}
+     *      </ul>
+     *
+      * @return {@code true} if the system is in the process of bringing up a
      *         service that your client has permission to bind to; {@code false}
      *         if the system couldn't find the service or if your client doesn't
-     *         have permission to bind to it. If this value is {@code true}, you
-     *         should later call {@link #unbindService} to release the
-     *         connection.
+     *         have permission to bind to it. You should call {@link #unbindService}
+     *         to release the connection even if this method returned {@code false}.
      *
-     * @throws SecurityException If the caller does not have permission to access the service
-     * or the service can not be found.
+     * @throws SecurityException If the caller does not have permission to
+     *      access the service or the service cannot be found. Call
+     *      {@link #unbindService} to release the connection when this exception
+     *      is thrown.
      *
      * @see #unbindService
      * @see #startService
-     * @see #BIND_AUTO_CREATE
-     * @see #BIND_DEBUG_UNBIND
-     * @see #BIND_NOT_FOREGROUND
-     * @see #BIND_ABOVE_CLIENT
-     * @see #BIND_ALLOW_OOM_MANAGEMENT
-     * @see #BIND_WAIVE_PRIORITY
-     * @see #BIND_IMPORTANT
-     * @see #BIND_ADJUST_WITH_ACTIVITY
-     * @see #BIND_NOT_PERCEPTIBLE
-     * @see #BIND_INCLUDE_CAPABILITIES
      */
     public abstract boolean bindService(@RequiresPermission Intent service,
             @NonNull ServiceConnection conn, @BindServiceFlags int flags);
