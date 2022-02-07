@@ -11924,6 +11924,7 @@ package android.content.pm {
     field public static final String FEATURE_TELEPHONY_CDMA = "android.hardware.telephony.cdma";
     field public static final String FEATURE_TELEPHONY_DATA = "android.hardware.telephony.data";
     field public static final String FEATURE_TELEPHONY_EUICC = "android.hardware.telephony.euicc";
+    field public static final String FEATURE_TELEPHONY_EUICC_MEP = "android.hardware.telephony.euicc.mep";
     field public static final String FEATURE_TELEPHONY_GSM = "android.hardware.telephony.gsm";
     field public static final String FEATURE_TELEPHONY_IMS = "android.hardware.telephony.ims";
     field public static final String FEATURE_TELEPHONY_MBMS = "android.hardware.telephony.mbms";
