@@ -160,7 +160,6 @@ java_library {
 filegroup {
     name: "framework-services-net-module-wifi-shared-srcs",
     srcs: [
-        "android/net/DhcpResults.java",
         "android/util/LocalLog.java",
     ],
 }
