@@ -720,6 +720,125 @@ public class DevicePolicyManager {
             "android.app.extra.PROVISIONING_ALLOW_OFFLINE";
 
     /**
+     * A String extra holding a url that specifies the download location of the device manager
+     * role holder package.
+     *
+     * <p>This is only meant to be used in cases when a specific variant of the role holder package
+     * is needed (such as a debug variant). If not provided, the default variant of the device
+     * manager role holder package is downloaded.
+     *
+     * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
+     * or in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_ROLE_HOLDER_PACKAGE_DOWNLOAD_LOCATION =
+            "android.app.extra.PROVISIONING_ROLE_HOLDER_PACKAGE_DOWNLOAD_LOCATION";
+
+    /**
+     * A String extra holding the URL-safe base64 encoded SHA-256 checksum of any signature of the
+     * android package archive at the download location specified in {@link
+     * #EXTRA_PROVISIONING_ROLE_HOLDER_PACKAGE_DOWNLOAD_LOCATION}.
+     *
+     * <p>The signatures of an android package archive can be obtained using
+     * {@link android.content.pm.PackageManager#getPackageArchiveInfo} with flag
+     * {@link android.content.pm.PackageManager#GET_SIGNING_CERTIFICATES}.
+     *
+     * <p>If {@link #EXTRA_PROVISIONING_ROLE_HOLDER_PACKAGE_DOWNLOAD_LOCATION} is provided, it must
+     * be accompanied by this extra. The provided checksum must match the checksum of any signature
+     * of the file at the download location. If the checksum does not match an error will be shown
+     * to the user and the user will be asked to factory reset the device.
+     *
+     * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
+     * or in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_ROLE_HOLDER_SIGNATURE_CHECKSUM =
+            "android.app.extra.PROVISIONING_ROLE_HOLDER_SIGNATURE_CHECKSUM";
+
+    /**
+     * A String extra holding a http cookie header which should be used in the http request to the
+     * url specified in {@link #EXTRA_PROVISIONING_ROLE_HOLDER_PACKAGE_DOWNLOAD_LOCATION}.
+     *
+     * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
+     * or in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_ROLE_HOLDER_PACKAGE_DOWNLOAD_COOKIE_HEADER =
+            "android.app.extra.PROVISIONING_ROLE_HOLDER_PACKAGE_DOWNLOAD_COOKIE_HEADER";
+
+    /**
+     * An extra of type {@link android.os.PersistableBundle} that allows the provisioning initiator
+     * to pass data to the device manager role holder.
+     *
+     * <p>The device manager role holder will receive this extra via the {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE} intent.
+     *
+     * <p>The contents of this extra are up to the contract between the provisioning initiator
+     * and the device manager role holder.
+     *
+     * <p>Use in an intent with action {@link #ACTION_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}
+     * or in an NFC record with {@link #MIME_TYPE_PROVISIONING_NFC} that starts device owner
+     * provisioning via an NFC bump.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_PROVISIONING_ROLE_HOLDER_EXTRAS_BUNDLE =
+            "android.app.extra.PROVISIONING_ROLE_HOLDER_EXTRAS_BUNDLE";
+
+    /**
+     * A String extra containing the package name of the provisioning initiator.
+     *
+     * <p>Use in an intent with action {@link
+     * #ACTION_ROLE_HOLDER_PROVISION_MANAGED_DEVICE_FROM_TRUSTED_SOURCE}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_ROLE_HOLDER_PROVISIONING_INITIATOR_PACKAGE =
+            "android.app.extra.ROLE_HOLDER_PROVISIONING_INITIATOR_PACKAGE";
+
+    /**
+     * An {@link Intent} result extra specifying the {@link Intent} to be launched after
+     * provisioning is finalized.
+     *
+     * <p>If {@link #EXTRA_PROVISIONING_SHOULD_LAUNCH_RESULT_INTENT} is set to {@code false},
+     * this result will be supplied as part of the result {@link Intent} for provisioning actions
+     * such as {@link #ACTION_PROVISION_MANAGED_PROFILE}. This result will also be supplied as
+     * part of the result {@link Intent} for the device manager role holder provisioning actions.
+     */
+    public static final String EXTRA_RESULT_LAUNCH_INTENT =
+            "android.app.extra.RESULT_LAUNCH_INTENT";
+
+    /**
+     * A boolean extra that determines whether the provisioning flow should launch the resulting
+     * launch intent, if one is supplied by the device manager role holder via {@link
+     * #EXTRA_RESULT_LAUNCH_INTENT}. Default value is {@code false}.
+     *
+     * <p>If {@code true}, the resulting intent will be launched by the provisioning flow, if one
+     * is supplied by the device manager role holder.
+     *
+     * <p>If {@code false}, the resulting intent will be returned as {@link
+     * #EXTRA_RESULT_LAUNCH_INTENT} to the provisioning initiator, if one is supplied by the device
+     * manager role holder. It will be the responsibility of the provisioning initiator to launch
+     * this {@link Intent} after provisioning completes.
+     *
+     * <p>This extra is respected when provided via the provisioning intent actions such as {@link
+     * #ACTION_PROVISION_MANAGED_PROFILE}.
+     */
+    public static final String EXTRA_PROVISIONING_SHOULD_LAUNCH_RESULT_INTENT =
+            "android.app.extra.PROVISIONING_SHOULD_LAUNCH_RESULT_INTENT";
+
+    /**
      * Action: Bugreport sharing with device owner has been accepted by the user.
      *
      * @hide
