@@ -91,6 +91,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -656,7 +657,7 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
         when(mPermissionHelper.hasPermission(anyInt())).thenReturn(false);
 
         NotificationManagerService.PostNotificationRunnable runnable =
-                mService.new PostNotificationRunnable(r.getKey());
+                mService.new PostNotificationRunnable(r.getKey(), SystemClock.elapsedRealtime());
         runnable.run();
         waitForIdle();
 
@@ -789,7 +790,7 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
 
         mService.addEnqueuedNotification(r);
         NotificationManagerService.PostNotificationRunnable runnable =
-                mService.new PostNotificationRunnable(r.getKey());
+                mService.new PostNotificationRunnable(r.getKey(), SystemClock.elapsedRealtime());
         runnable.run();
         waitForIdle();
 
@@ -805,7 +806,7 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
         r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         mService.addEnqueuedNotification(r);
-        runnable = mService.new PostNotificationRunnable(r.getKey());
+        runnable = mService.new PostNotificationRunnable(r.getKey(), SystemClock.elapsedRealtime());
         runnable.run();
         waitForIdle();
 
@@ -821,7 +822,7 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
         r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         mService.addEnqueuedNotification(r);
-        runnable = mService.new PostNotificationRunnable(r.getKey());
+        runnable = mService.new PostNotificationRunnable(r.getKey(), SystemClock.elapsedRealtime());
         runnable.run();
         waitForIdle();
 
