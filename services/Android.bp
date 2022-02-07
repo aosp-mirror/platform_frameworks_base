@@ -17,6 +17,7 @@ java_defaults {
             "-Xep:AndroidFrameworkCompatChange:ERROR",
             // "-Xep:AndroidFrameworkUid:ERROR",
             "-Xep:SelfEquals:ERROR",
+            "-Xep:NullTernary:ERROR",
             // NOTE: only enable to generate local patchfiles
             // "-XepPatchChecks:refaster:frameworks/base/errorprone/refaster/EfficientXml.java.refaster",
             // "-XepPatchLocation:/tmp/refaster/",
