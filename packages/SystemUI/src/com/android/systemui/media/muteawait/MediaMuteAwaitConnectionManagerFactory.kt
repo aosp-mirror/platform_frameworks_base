@@ -17,6 +17,7 @@
 package com.android.systemui.media.muteawait
 
 import android.content.Context
+import com.android.settingslib.media.DeviceIconUtil
 import com.android.settingslib.media.LocalMediaManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
@@ -31,11 +32,15 @@ class MediaMuteAwaitConnectionManagerFactory @Inject constructor(
     private val context: Context,
     @Main private val mainExecutor: Executor
 ) {
+    private val deviceIconUtil = DeviceIconUtil()
+
     /** Creates a [MediaMuteAwaitConnectionManager]. */
     fun create(localMediaManager: LocalMediaManager): MediaMuteAwaitConnectionManager? {
         if (!mediaFlags.areMuteAwaitConnectionsEnabled()) {
             return null
         }
-        return MediaMuteAwaitConnectionManager(mainExecutor, localMediaManager, context)
+        return MediaMuteAwaitConnectionManager(
+                mainExecutor, localMediaManager, context, deviceIconUtil
+        )
     }
 }

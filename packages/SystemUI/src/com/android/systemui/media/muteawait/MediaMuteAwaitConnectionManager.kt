@@ -21,8 +21,8 @@ import android.graphics.drawable.Drawable
 import android.media.AudioAttributes.USAGE_MEDIA
 import android.media.AudioDeviceAttributes
 import android.media.AudioManager
+import com.android.settingslib.media.DeviceIconUtil
 import com.android.settingslib.media.LocalMediaManager
-import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Main
 import java.util.concurrent.Executor
 
@@ -39,7 +39,8 @@ import java.util.concurrent.Executor
 class MediaMuteAwaitConnectionManager constructor(
     @Main mainExecutor: Executor,
     localMediaManager: LocalMediaManager,
-    private val context: Context
+    private val context: Context,
+    private val deviceIconUtil: DeviceIconUtil
 ) {
     var currentMutedDevice: AudioDeviceAttributes? = null
 
@@ -51,7 +52,7 @@ class MediaMuteAwaitConnectionManager constructor(
                 // There should only be one device that's mutedUntilConnection at a time, so we can
                 // safely override any previous value.
                 currentMutedDevice = device
-                localMediaManager.dispatchAboutToConnectDeviceChanged(device.name, getIcon())
+                localMediaManager.dispatchAboutToConnectDeviceChanged(device.name, device.getIcon())
             }
         }
 
@@ -75,12 +76,13 @@ class MediaMuteAwaitConnectionManager constructor(
         val currentDevice = audioManager.mutingExpectedDevice
         if (currentDevice != null) {
             currentMutedDevice = currentDevice
-            localMediaManager.dispatchAboutToConnectDeviceChanged(currentDevice.name, getIcon())
+            localMediaManager.dispatchAboutToConnectDeviceChanged(
+                currentDevice.name, currentDevice.getIcon()
+            )
         }
     }
 
-    private fun getIcon(): Drawable {
-        // TODO(b/206614671): Choose the icon based on device type.
-        return context.getDrawable(R.drawable.ic_headphone)!!
+    private fun AudioDeviceAttributes.getIcon(): Drawable {
+        return deviceIconUtil.getIconFromAudioDeviceType(this.type, context)
     }
 }

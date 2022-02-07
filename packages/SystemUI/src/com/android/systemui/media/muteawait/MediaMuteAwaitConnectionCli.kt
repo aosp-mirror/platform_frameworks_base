@@ -19,7 +19,6 @@ package com.android.systemui.media.muteawait
 import android.content.Context
 import android.media.AudioAttributes.USAGE_MEDIA
 import android.media.AudioDeviceAttributes
-import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.commandline.Command
@@ -42,13 +41,13 @@ class MediaMuteAwaitConnectionCli @Inject constructor(
         override fun execute(pw: PrintWriter, args: List<String>) {
             val device = AudioDeviceAttributes(
                 AudioDeviceAttributes.ROLE_OUTPUT,
-                AudioDeviceInfo.TYPE_USB_HEADSET,
+                /* type= */ Integer.parseInt(args[0]),
                 ADDRESS,
-                /* name= */ args[0],
+                /* name= */ args[1],
                 listOf(),
                 listOf(),
             )
-            val startOrCancel = args[1]
+            val startOrCancel = args[2]
 
             val audioManager: AudioManager =
                 context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -58,12 +57,12 @@ class MediaMuteAwaitConnectionCli @Inject constructor(
                             intArrayOf(USAGE_MEDIA), device, TIMEOUT, TIMEOUT_UNITS
                     )
                 CANCEL -> audioManager.cancelMuteAwaitConnection(device)
-                else -> pw.println("Must specify $START or $CANCEL")
+                else -> pw.println("Must specify `$START` or `$CANCEL`; was $startOrCancel")
             }
         }
         override fun help(pw: PrintWriter) {
             pw.println("Usage: adb shell cmd statusbar $MEDIA_MUTE_AWAIT_COMMAND " +
-                    "[name] [$START|$CANCEL]")
+                    "[type] [name] [$START|$CANCEL]")
         }
     }
 }

@@ -16,7 +16,9 @@
 
 package com.android.systemui.media.muteawait
 
+import android.annotation.DrawableRes
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.media.AudioAttributes.USAGE_MEDIA
 import android.media.AudioAttributes.USAGE_UNKNOWN
 import android.media.AudioDeviceAttributes
@@ -24,7 +26,9 @@ import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.media.AudioManager.MuteAwaitConnectionCallback.EVENT_CONNECTION
 import android.test.suitebuilder.annotation.SmallTest
+import com.android.settingslib.media.DeviceIconUtil
 import com.android.settingslib.media.LocalMediaManager
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -47,13 +51,18 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
     @Mock
     private lateinit var audioManager: AudioManager
     @Mock
+    private lateinit var deviceIconUtil: DeviceIconUtil
+    @Mock
     private lateinit var localMediaManager: LocalMediaManager
     private lateinit var muteAwaitListener: AudioManager.MuteAwaitConnectionCallback
+    private lateinit var icon: Drawable
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         context.addMockSystemService(Context.AUDIO_SERVICE, audioManager)
+        icon = context.getDrawable(R.drawable.ic_cake)!!
+        whenever(deviceIconUtil.getIconFromAudioDeviceType(any(), any())).thenReturn(icon)
     }
 
     @Test
@@ -71,7 +80,7 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
 
         instantiateManager()
 
-        verify(localMediaManager).dispatchAboutToConnectDeviceChanged(eq(DEVICE_NAME), any())
+        verify(localMediaManager).dispatchAboutToConnectDeviceChanged(eq(DEVICE_NAME), eq(icon))
     }
 
     @Test
@@ -89,7 +98,7 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
 
         muteAwaitListener.onMutedUntilConnection(DEVICE, intArrayOf(USAGE_MEDIA))
 
-        verify(localMediaManager).dispatchAboutToConnectDeviceChanged(eq(DEVICE_NAME), any())
+        verify(localMediaManager).dispatchAboutToConnectDeviceChanged(eq(DEVICE_NAME), eq(icon))
     }
 
     @Test
@@ -146,7 +155,8 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
         muteAwaitConnectionManager = MediaMuteAwaitConnectionManager(
                 FakeExecutor(FakeSystemClock()),
                 localMediaManager,
-                context
+                context,
+                deviceIconUtil
         )
 
         val listenerCaptor = ArgumentCaptor.forClass(
