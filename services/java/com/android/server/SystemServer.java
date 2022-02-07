@@ -1504,6 +1504,10 @@ public final class SystemServer implements Dumpable {
             SQLiteCompatibilityWalFlags.reset();
             t.traceEnd();
 
+            t.traceBegin("UpdateWatchdogTimeout");
+            Watchdog.getInstance().registerSettingsObserver(context);
+            t.traceEnd();
+
             // Records errors and logs, for example wtf()
             // Currently this service indirectly depends on SettingsProvider so do this after
             // InstallSystemProviders.
