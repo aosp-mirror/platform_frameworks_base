@@ -43,6 +43,7 @@ import android.media.midi.MidiManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.ParcelUuid;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -64,6 +65,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
+
+// NOTE about locking order:
+// if there is a path that syncs on BOTH mDevicesByInfo AND mDeviceConnections,
+// this order must be observed
+//   1. synchronized (mDevicesByInfo)
+//   2. synchronized (mDeviceConnections)
+//TODO Introduce a single lock object to lock the whole state and avoid the requirement above.
 
 public class MidiService extends IMidiManager.Stub {
 
@@ -116,6 +125,9 @@ public class MidiService extends IMidiManager.Stub {
 
     // UID of BluetoothMidiService
     private int mBluetoothServiceUid;
+
+    private static final UUID MIDI_SERVICE = UUID.fromString(
+            "03B80E5A-EDE8-4B33-A751-6CE34EC4C700");
 
     // PackageMonitor for listening to package changes
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
@@ -421,14 +433,19 @@ public class MidiService extends IMidiManager.Stub {
                         public void onServiceConnected(ComponentName name, IBinder service) {
                             IMidiDeviceServer server = null;
                             if (mBluetoothDevice != null) {
-                                IBluetoothMidiService mBluetoothMidiService = IBluetoothMidiService.Stub.asInterface(service);
-                                try {
-                                    // We need to explicitly add the device in a separate method
-                                    // because onBind() is only called once.
-                                    IBinder deviceBinder = mBluetoothMidiService.addBluetoothDevice(mBluetoothDevice);
-                                    server = IMidiDeviceServer.Stub.asInterface(deviceBinder);
-                                } catch(RemoteException e) {
-                                    Log.e(TAG, "Could not call addBluetoothDevice()", e);
+                                IBluetoothMidiService mBluetoothMidiService =
+                                        IBluetoothMidiService.Stub.asInterface(service);
+                                if (mBluetoothMidiService != null) {
+                                    try {
+                                        // We need to explicitly add the device in a separate method
+                                        // because onBind() is only called once.
+                                        IBinder deviceBinder =
+                                                mBluetoothMidiService.addBluetoothDevice(
+                                                        mBluetoothDevice);
+                                        server = IMidiDeviceServer.Stub.asInterface(deviceBinder);
+                                    } catch (RemoteException e) {
+                                        Log.e(TAG, "Could not call addBluetoothDevice()", e);
+                                    }
                                 }
                             } else {
                                 server = IMidiDeviceServer.Stub.asInterface(service);
@@ -469,19 +486,19 @@ public class MidiService extends IMidiManager.Stub {
         }
 
         public void removeDeviceConnection(DeviceConnection connection) {
-            synchronized (mDeviceConnections) {
-                mDeviceConnections.remove(connection);
+            synchronized (mDevicesByInfo) {
+                synchronized (mDeviceConnections) {
+                    mDeviceConnections.remove(connection);
 
-                if (mDeviceConnections.size() == 0 && mServiceConnection != null) {
-                    mContext.unbindService(mServiceConnection);
-                    mServiceConnection = null;
-                    if (mBluetoothDevice != null) {
-                        // Bluetooth devices are ephemeral - remove when no clients exist
-                        synchronized (mDevicesByInfo) {
+                    if (mDeviceConnections.size() == 0 && mServiceConnection != null) {
+                        mContext.unbindService(mServiceConnection);
+                        mServiceConnection = null;
+                        if (mBluetoothDevice != null) {
+                            // Bluetooth devices are ephemeral - remove when no clients exist
                             closeLocked();
+                        } else {
+                            setDeviceServer(null);
                         }
-                    } else {
-                        setDeviceServer(null);
                     }
                 }
             }
@@ -576,6 +593,20 @@ public class MidiService extends IMidiManager.Stub {
         }
     }
 
+    // Note, this isn't useful at connect-time because the service UUIDs haven't
+    // been gathered yet.
+    private boolean isBLEMIDIDevice(BluetoothDevice btDevice) {
+        ParcelUuid[] uuids = btDevice.getUuids();
+        if (uuids != null) {
+            for (ParcelUuid uuid : uuids) {
+                if (uuid.getUuid().equals(MIDI_SERVICE)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private final BroadcastReceiver mBleMidiReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -590,6 +621,8 @@ public class MidiService extends IMidiManager.Stub {
                     Log.d(TAG, "ACTION_ACL_CONNECTED");
                     BluetoothDevice btDevice =
                             intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    // We can't determine here if this is a BLD-MIDI device, so go ahead and try
+                    // to open as a MIDI device, further down it will get figured out.
                     openBluetoothDevice(btDevice);
                 }
                 break;
@@ -598,7 +631,11 @@ public class MidiService extends IMidiManager.Stub {
                     Log.d(TAG, "ACTION_ACL_DISCONNECTED");
                     BluetoothDevice btDevice =
                             intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    closeBluetoothDevice(btDevice);
+                    // We DO know at this point if we are disconnecting a MIDI device, so
+                    // don't bother if we are not.
+                    if (isBLEMIDIDevice(btDevice)) {
+                        closeBluetoothDevice(btDevice);
+                    }
                 }
                 break;
             }
