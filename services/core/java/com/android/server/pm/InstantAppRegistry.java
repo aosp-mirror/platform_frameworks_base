@@ -444,14 +444,14 @@ public class InstantAppRegistry implements Watchable, Snappable {
     }
 
     public void onPackageUninstalled(@NonNull AndroidPackage pkg, @NonNull PackageSetting ps,
-            @NonNull int[] userIds) {
+            @NonNull int[] userIds, boolean packageInstalledForSomeUsers) {
         if (ps == null) {
             return;
         }
 
         synchronized (mLock) {
             for (int userId : userIds) {
-                if (ps.getInstalled(userId)) {
+                if (packageInstalledForSomeUsers && ps.getInstalled(userId)) {
                     continue;
                 }
 
