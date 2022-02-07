@@ -779,6 +779,16 @@ public abstract class ActivityManagerInternal {
          * @param started {@code true} if the process transits from non-FGS state to FGS state.
          */
         void onForegroundServiceStateChanged(String packageName, int uid, int pid, boolean started);
+
+        /**
+         * Call when the notification of the foreground service is updated.
+         *
+         * @param packageName The package name of the process.
+         * @param uid The UID of the process.
+         * @param foregroundId The current foreground service notification ID, a negative value
+         *                     means this notification is being removed.
+         */
+        void onForegroundServiceNotificationUpdated(String packageName, int uid, int foregroundId);
     }
 
     /**

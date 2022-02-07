@@ -36,6 +36,7 @@ import android.util.Slog;
 
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
+import com.android.server.notification.NotificationManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
@@ -183,6 +184,7 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
         AppOpsManager mAppOpsManager;
         MediaSessionManager mMediaSessionManager;
         RoleManager mRoleManager;
+        NotificationManagerInternal mNotificationManagerInternal;
 
         void setPolicy(T policy) {
             mAppStatePolicy = policy;
@@ -201,6 +203,8 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
             mAppOpsManager = context.getSystemService(AppOpsManager.class);
             mMediaSessionManager = context.getSystemService(MediaSessionManager.class);
             mRoleManager = context.getSystemService(RoleManager.class);
+            mNotificationManagerInternal = LocalServices.getService(
+                    NotificationManagerInternal.class);
 
             getPolicy().onSystemReady();
         }
@@ -258,6 +262,10 @@ public abstract class BaseAppStateTracker<T extends BaseAppStatePolicy> {
 
         RoleManager getRoleManager() {
             return mRoleManager;
+        }
+
+        NotificationManagerInternal getNotificationManagerInternal() {
+            return mNotificationManagerInternal;
         }
     }
 }

@@ -5758,4 +5758,10 @@
          current drain threshold.
     -->
     <integer name="config_bg_current_drain_location_min_duration">1800</integer>
+
+    <!-- The behavior for an app with a FGS and its notification is still showing, when the system
+         detects it's abusive and should be put into bg restricted level. True - we'll
+         show the prompt to user, False - we'll not show it.
+    -->
+    <bool name="config_bg_prompt_fgs_with_noti_to_bg_restricted">false</bool>
 </resources>

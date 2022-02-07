@@ -127,6 +127,7 @@ import com.android.server.am.AppRestrictionController.NotificationHelper;
 import com.android.server.am.AppRestrictionController.UidBatteryUsageProvider;
 import com.android.server.am.BaseAppStateTimeEvents.BaseTimeEvent;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
+import com.android.server.notification.NotificationManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.usage.AppStandbyInternal;
@@ -215,6 +216,7 @@ public final class BackgroundRestrictionTest {
     @Mock private PackageManager mPackageManager;
     @Mock private PackageManagerInternal mPackageManagerInternal;
     @Mock private NotificationManager mNotificationManager;
+    @Mock private NotificationManagerInternal mNotificationManagerInternal;
     @Mock private PermissionManagerServiceInternal mPermissionManagerServiceInternal;
     @Mock private MediaSessionManager mMediaSessionManager;
     @Mock private RoleManager mRoleManager;
@@ -536,11 +538,14 @@ public final class BackgroundRestrictionTest {
         final float bgRestrictedThreshold = 4.0f;
         final float bgRestrictedThresholdMah =
                 BATTERY_FULL_CHARGE_MAH * bgRestrictedThreshold / 100.0f;
+        final int testPid = 1234;
+        final int notificationId = 1000;
 
         DeviceConfigSession<Boolean> bgCurrentDrainMonitor = null;
         DeviceConfigSession<Long> bgCurrentDrainWindow = null;
         DeviceConfigSession<Float> bgCurrentDrainRestrictedBucketThreshold = null;
         DeviceConfigSession<Float> bgCurrentDrainBgRestrictedThreshold = null;
+        DeviceConfigSession<Boolean> bgPromptFgsWithNotiToBgRestricted = null;
 
         mBgRestrictionController.addAppBackgroundRestrictionListener(listener);
 
@@ -587,10 +592,24 @@ public final class BackgroundRestrictionTest {
                             isLowRamDeviceStatic() ? 1 : 0]);
             bgCurrentDrainBgRestrictedThreshold.set(bgRestrictedThreshold);
 
+            bgPromptFgsWithNotiToBgRestricted = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    ConstantsObserver.KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_TO_BG_RESTRICTED,
+                    DeviceConfig::getBoolean,
+                    mContext.getResources().getBoolean(
+                            R.bool.config_bg_prompt_fgs_with_noti_to_bg_restricted));
+            bgPromptFgsWithNotiToBgRestricted.set(true);
+
             mCurrentTimeMillis = 10_000L;
             doReturn(mCurrentTimeMillis - windowMs).when(stats).getStatsStartTimestamp();
             doReturn(mCurrentTimeMillis).when(stats).getStatsEndTimestamp();
             doReturn(statsList).when(mBatteryStatsInternal).getBatteryUsageStats(anyObject());
+            doReturn(true).when(mNotificationManagerInternal).isNotificationShown(
+                    testPkgName, null, notificationId, testUser);
+            mAppFGSTracker.onForegroundServiceStateChanged(testPkgName, testUid,
+                    testPid, true);
+            mAppFGSTracker.onForegroundServiceNotificationUpdated(
+                    testPkgName, testUid, notificationId);
 
             runTestBgCurrentDrainMonitorOnce(listener, stats, uids,
                     new double[]{restrictBucketThresholdMah - 1, 0},
@@ -721,6 +740,85 @@ public final class BackgroundRestrictionTest {
             Thread.sleep(windowMs);
             clearInvocations(mInjector.getAppStandbyInternal());
             clearInvocations(mBgRestrictionController);
+
+            // We're not going to prompt the user if the abusive app has a FGS with notification.
+            bgPromptFgsWithNotiToBgRestricted.set(false);
+
+            runTestBgCurrentDrainMonitorOnce(listener, stats, uids,
+                    new double[]{bgRestrictedThresholdMah + 1, 0},
+                    new double[]{0, restrictBucketThresholdMah - 1}, zeros,
+                    () -> {
+                        doReturn(mCurrentTimeMillis).when(stats).getStatsStartTimestamp();
+                        doReturn(mCurrentTimeMillis + windowMs)
+                                .when(stats).getStatsEndTimestamp();
+                        mCurrentTimeMillis += windowMs + 1;
+                        // We won't change restriction level automatically because it needs
+                        // user consent.
+                        try {
+                            listener.verify(timeout, testUid, testPkgName,
+                                    RESTRICTION_LEVEL_BACKGROUND_RESTRICTED);
+                            fail("There shouldn't be level change event like this");
+                        } catch (Exception e) {
+                            // Expected.
+                        }
+                        verify(mInjector.getAppStandbyInternal(), never()).setAppStandbyBucket(
+                                eq(testPkgName),
+                                eq(STANDBY_BUCKET_RARE),
+                                eq(testUser),
+                                anyInt(), anyInt());
+                        // We should have requested to goto background restricted level.
+                        verify(mBgRestrictionController, times(1)).handleRequestBgRestricted(
+                                eq(testPkgName),
+                                eq(testUid));
+                        // However, we won't have the prompt to user posted because the policy
+                        // is not to show that for FGS with notification.
+                        checkNotificationShown(new String[] {testPkgName}, never(), false);
+                    });
+
+            // Pretend we have the notification dismissed.
+            mAppFGSTracker.onForegroundServiceNotificationUpdated(
+                    testPkgName, testUid, -notificationId);
+            clearInvocations(mInjector.getAppStandbyInternal());
+            clearInvocations(mBgRestrictionController);
+
+            runTestBgCurrentDrainMonitorOnce(listener, stats, uids,
+                    new double[]{bgRestrictedThresholdMah + 1, 0},
+                    new double[]{0, restrictBucketThresholdMah - 1}, zeros,
+                    () -> {
+                        doReturn(mCurrentTimeMillis).when(stats).getStatsStartTimestamp();
+                        doReturn(mCurrentTimeMillis + windowMs)
+                                .when(stats).getStatsEndTimestamp();
+                        mCurrentTimeMillis += windowMs + 1;
+                        // We won't change restriction level automatically because it needs
+                        // user consent.
+                        try {
+                            listener.verify(timeout, testUid, testPkgName,
+                                    RESTRICTION_LEVEL_BACKGROUND_RESTRICTED);
+                            fail("There shouldn't be level change event like this");
+                        } catch (Exception e) {
+                            // Expected.
+                        }
+                        verify(mInjector.getAppStandbyInternal(), never()).setAppStandbyBucket(
+                                eq(testPkgName),
+                                eq(STANDBY_BUCKET_RARE),
+                                eq(testUser),
+                                anyInt(), anyInt());
+                        // We should have requested to goto background restricted level.
+                        verify(mBgRestrictionController, times(1)).handleRequestBgRestricted(
+                                eq(testPkgName),
+                                eq(testUid));
+                        // Verify we have the notification posted now because its FGS is invisible.
+                        checkNotificationShown(new String[] {testPkgName}, atLeast(1), true);
+                    });
+
+            // Pretend notification is back on.
+            mAppFGSTracker.onForegroundServiceNotificationUpdated(
+                    testPkgName, testUid, notificationId);
+            // Now we'll prompt the user even it has a FGS with notification.
+            bgPromptFgsWithNotiToBgRestricted.set(true);
+            clearInvocations(mInjector.getAppStandbyInternal());
+            clearInvocations(mBgRestrictionController);
+
             runTestBgCurrentDrainMonitorOnce(listener, stats, uids,
                     new double[]{bgRestrictedThresholdMah + 1, 0},
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros,
@@ -785,6 +883,7 @@ public final class BackgroundRestrictionTest {
             closeIfNotNull(bgCurrentDrainWindow);
             closeIfNotNull(bgCurrentDrainRestrictedBucketThreshold);
             closeIfNotNull(bgCurrentDrainBgRestrictedThreshold);
+            closeIfNotNull(bgPromptFgsWithNotiToBgRestricted);
         }
     }
 
@@ -2458,6 +2557,11 @@ public final class BackgroundRestrictionTest {
         @Override
         MediaSessionManager getMediaSessionManager() {
             return BackgroundRestrictionTest.this.mMediaSessionManager;
+        }
+
+        @Override
+        NotificationManagerInternal getNotificationManagerInternal() {
+            return BackgroundRestrictionTest.this.mNotificationManagerInternal;
         }
 
         @Override

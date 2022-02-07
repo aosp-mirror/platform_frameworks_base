@@ -1454,16 +1454,18 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                         notifyController = true;
                     } else {
                         excessive = true;
-                        if (brPercentage >= mBgCurrentDrainBgRestrictedThreshold[thresholdIndex]) {
+                        if (brPercentage >= mBgCurrentDrainBgRestrictedThreshold[thresholdIndex]
+                                && curLevel == RESTRICTION_LEVEL_RESTRICTED_BUCKET) {
                             // If we're in the restricted standby bucket but still seeing high
                             // current drains, tell the controller again.
-                            if (curLevel == RESTRICTION_LEVEL_RESTRICTED_BUCKET
-                                    && ts[TIME_STAMP_INDEX_BG_RESTRICTED] == 0) {
-                                if (now > ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET]
-                                        + mBgCurrentDrainWindowMs) {
-                                    ts[TIME_STAMP_INDEX_BG_RESTRICTED] = now;
-                                    notifyController = true;
-                                }
+                            final long lastResbucket = ts[TIME_STAMP_INDEX_RESTRICTED_BUCKET];
+                            final long lastBgRes = ts[TIME_STAMP_INDEX_BG_RESTRICTED];
+                            // If it has been a while since restricting the app and since the last
+                            // time we notify the controller, notify it again.
+                            if ((now >= lastResbucket + mBgCurrentDrainWindowMs) && (lastBgRes == 0
+                                    || (now >= lastBgRes + mBgCurrentDrainWindowMs))) {
+                                ts[TIME_STAMP_INDEX_BG_RESTRICTED] = now;
+                                notifyController = true;
                             }
                         }
                     }

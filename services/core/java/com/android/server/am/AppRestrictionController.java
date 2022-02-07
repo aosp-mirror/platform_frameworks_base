@@ -547,8 +547,21 @@ public final class AppRestrictionController {
         static final String KEY_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL =
                 DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "abusive_notification_minimal_interval";
 
+        /**
+         * The behavior for an app with a FGS and its notification is still showing, when the system
+         * detects it's abusive and should be put into bg restricted level. {@code true} - we'll
+         * show the prompt to user, {@code false} - we'll not show it.
+         */
+        static final String KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_TO_BG_RESTRICTED =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "prompt_fgs_with_noti_to_bg_restricted";
+
         static final boolean DEFAULT_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION = false;
         static final long DEFAULT_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL_MS = 24 * 60 * 60 * 1000;
+
+        /**
+         * Default value to {@link #mBgPromptFgsWithNotiToBgRestricted}.
+         */
+        final boolean mDefaultBgPromptFgsWithNotiToBgRestricted;
 
         volatile boolean mBgAutoRestrictedBucket;
 
@@ -556,8 +569,15 @@ public final class AppRestrictionController {
 
         volatile long mBgNotificationMinIntervalMs;
 
-        ConstantsObserver(Handler handler) {
+        /**
+         * @see #KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_TO_BG_RESTRICTED.
+         */
+        volatile boolean mBgPromptFgsWithNotiToBgRestricted;
+
+        ConstantsObserver(Handler handler, Context context) {
             super(handler);
+            mDefaultBgPromptFgsWithNotiToBgRestricted = context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_bg_prompt_fgs_with_noti_to_bg_restricted);
         }
 
         @Override
@@ -572,6 +592,9 @@ public final class AppRestrictionController {
                         break;
                     case KEY_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL:
                         updateBgAbusiveNotificationMinimalInterval();
+                        break;
+                    case KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_TO_BG_RESTRICTED:
+                        updateBgPromptFgsWithNotiToBgRestricted();
                         break;
                 }
                 AppRestrictionController.this.onPropertiesChanged(name);
@@ -604,6 +627,7 @@ public final class AppRestrictionController {
         void updateDeviceConfig() {
             updateBgAutoRestrictedBucketChanged();
             updateBgAbusiveNotificationMinimalInterval();
+            updateBgPromptFgsWithNotiToBgRestricted();
         }
 
         private void updateBgAutoRestrictedBucketChanged() {
@@ -622,6 +646,32 @@ public final class AppRestrictionController {
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL,
                     DEFAULT_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL_MS);
+        }
+
+        private void updateBgPromptFgsWithNotiToBgRestricted() {
+            mBgPromptFgsWithNotiToBgRestricted = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_TO_BG_RESTRICTED,
+                    mDefaultBgPromptFgsWithNotiToBgRestricted);
+        }
+
+        void dump(PrintWriter pw, String prefix) {
+            pw.print(prefix);
+            pw.println("BACKGROUND RESTRICTION POLICY SETTINGS:");
+            final String indent = "  ";
+            prefix = indent + prefix;
+            pw.print(prefix);
+            pw.print(KEY_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION);
+            pw.print('=');
+            pw.println(mBgAutoRestrictedBucket);
+            pw.print(prefix);
+            pw.print(KEY_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL);
+            pw.print('=');
+            pw.println(mBgNotificationMinIntervalMs);
+            pw.print(prefix);
+            pw.print(KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_TO_BG_RESTRICTED);
+            pw.print('=');
+            pw.println(mBgPromptFgsWithNotiToBgRestricted);
         }
     }
 
@@ -704,7 +754,7 @@ public final class AppRestrictionController {
         mBgHandlerThread.start();
         mBgHandler = new BgHandler(mBgHandlerThread.getLooper(), injector);
         mBgExecutor = new HandlerExecutor(mBgHandler);
-        mConstantsObserver = new ConstantsObserver(mBgHandler);
+        mConstantsObserver = new ConstantsObserver(mBgHandler, mContext);
         mNotificationHelper = new NotificationHelper(this);
         injector.initAppStateTrackers(this);
     }
@@ -1074,6 +1124,20 @@ public final class AppRestrictionController {
     }
 
     /**
+     * @return If the given package/uid has a foreground service notification or not.
+     */
+    boolean hasForegroundServiceNotifications(String packageName, int uid) {
+        return mInjector.getAppFGSTracker().hasForegroundServiceNotifications(packageName, uid);
+    }
+
+    /**
+     * @return If the given uid has a foreground service notification or not.
+     */
+    boolean hasForegroundServiceNotifications(int uid) {
+        return mInjector.getAppFGSTracker().hasForegroundServiceNotifications(uid);
+    }
+
+    /**
      * @return The to-be-exempted battery usage of the given UID in the given duration; it could
      *         be considered as "exempted" due to various use cases, i.e. media playback.
      */
@@ -1098,11 +1162,14 @@ public final class AppRestrictionController {
 
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix);
-        pw.println("BACKGROUND RESTRICTION LEVEL SETTINGS");
+        pw.println("APP BACKGROUND RESTRICTIONS");
         prefix = "  " + prefix;
+        pw.print(prefix);
+        pw.println("BACKGROUND RESTRICTION LEVEL SETTINGS");
         synchronized (mLock) {
-            mRestrictionSettings.dumpLocked(pw, prefix);
+            mRestrictionSettings.dumpLocked(pw, "  " + prefix);
         }
+        mConstantsObserver.dump(pw, "  " + prefix);
         for (int i = 0, size = mAppStateTrackers.size(); i < size; i++) {
             pw.println();
             mAppStateTrackers.get(i).dump(pw, prefix);
@@ -1366,8 +1433,21 @@ public final class AppRestrictionController {
                     intent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE, null,
                     UserHandle.of(UserHandle.getUserId(uid)));
             Notification.Action[] actions = null;
-            if (ENABLE_SHOW_FOREGROUND_SERVICE_MANAGER
-                    && mBgController.hasForegroundServices(packageName, uid)) {
+            final boolean hasForegroundServices =
+                    mBgController.hasForegroundServices(packageName, uid);
+            final boolean hasForegroundServiceNotifications =
+                    mBgController.hasForegroundServiceNotifications(packageName, uid);
+            if (!mBgController.mConstantsObserver.mBgPromptFgsWithNotiToBgRestricted) {
+                // We're not going to prompt the user if the FGS is active and its notification
+                // is still showing (not dismissed/silenced/denied).
+                if (hasForegroundServices && hasForegroundServiceNotifications) {
+                    if (DEBUG_BG_RESTRICTION_CONTROLLER) {
+                        Slog.i(TAG, "Not requesting bg-restriction due to FGS with notification");
+                    }
+                    return;
+                }
+            }
+            if (ENABLE_SHOW_FOREGROUND_SERVICE_MANAGER && hasForegroundServices) {
                 final Intent trampoline = new Intent(ACTION_FGS_MANAGER_TRAMPOLINE);
                 trampoline.setPackage("android");
                 trampoline.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
