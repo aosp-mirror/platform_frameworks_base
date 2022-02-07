@@ -23,6 +23,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
 #include <binder/IPCThreadState.h>
+#include <ftl/cast.h>
 #include <gui/SurfaceControl.h>
 #include <gui/WindowInfo.h>
 #include <nativehelper/JNIHelp.h>
@@ -63,16 +64,11 @@ static struct {
     jfieldID surfaceInset;
     jfieldID scaleFactor;
     jfieldID touchableRegion;
-    jfieldID visible;
-    jfieldID focusable;
-    jfieldID hasWallpaper;
-    jfieldID paused;
-    jfieldID trustedOverlay;
     jfieldID touchOcclusionMode;
     jfieldID ownerPid;
     jfieldID ownerUid;
     jfieldID packageName;
-    jfieldID inputFeatures;
+    jfieldID inputConfig;
     jfieldID displayId;
     jfieldID replaceTouchableRegionWithCrop;
     WeakRefHandleField touchableRegionSurfaceControl;
@@ -162,95 +158,8 @@ bool NativeInputWindowHandle::updateInfo() {
     mInfo.layoutParamsFlags = flags;
     mInfo.layoutParamsType = type;
 
-    // TODO(b/216806304): Expose InputConfig as InputWindowHandle API so we don't have to use
-    //  WindowManager.LayoutParams.InputFeatureFlags here.
-    const auto inputFeatures =
-            static_cast<uint32_t>(env->GetIntField(obj, gInputWindowHandleClassInfo.inputFeatures));
-
-    using InputConfig = gui::WindowInfo::InputConfig;
-    // Determine the value for each of the InputConfig flags. We rely on a switch statement and
-    // -Wswitch-enum to give us a build error if we forget to explicitly handle an InputConfig flag.
-    mInfo.inputConfig = InputConfig::DEFAULT;
-    InputConfig enumerationStart = InputConfig::DEFAULT;
-    switch (enumerationStart) {
-        case InputConfig::DEFAULT:
-            FALLTHROUGH_INTENDED;
-        case InputConfig::NO_INPUT_CHANNEL:
-            if ((inputFeatures & 0x00000001) != 0) {
-                mInfo.inputConfig |= InputConfig::NO_INPUT_CHANNEL;
-            }
-            FALLTHROUGH_INTENDED;
-        case InputConfig::NOT_VISIBLE:
-            if (env->GetBooleanField(obj, gInputWindowHandleClassInfo.visible) == JNI_FALSE) {
-                mInfo.inputConfig |= InputConfig::NOT_VISIBLE;
-            }
-            FALLTHROUGH_INTENDED;
-        case InputConfig::NOT_FOCUSABLE:
-            if (env->GetBooleanField(obj, gInputWindowHandleClassInfo.focusable) == JNI_FALSE) {
-                mInfo.inputConfig |= InputConfig::NOT_FOCUSABLE;
-            }
-            FALLTHROUGH_INTENDED;
-        case InputConfig::NOT_TOUCHABLE:
-            if (flags.test(WindowInfo::Flag::NOT_TOUCHABLE)) {
-                mInfo.inputConfig |= InputConfig::NOT_TOUCHABLE;
-            }
-            FALLTHROUGH_INTENDED;
-        case InputConfig::PREVENT_SPLITTING:
-            if (!flags.test(WindowInfo::Flag::SPLIT_TOUCH)) {
-                mInfo.inputConfig |= InputConfig::PREVENT_SPLITTING;
-            }
-            FALLTHROUGH_INTENDED;
-        case InputConfig::DUPLICATE_TOUCH_TO_WALLPAPER:
-            if (env->GetBooleanField(obj, gInputWindowHandleClassInfo.hasWallpaper) == JNI_TRUE) {
-                mInfo.inputConfig |= InputConfig::DUPLICATE_TOUCH_TO_WALLPAPER;
-            }
-            FALLTHROUGH_INTENDED;
-        case InputConfig::IS_WALLPAPER:
-            if (type == WindowInfo::Type::WALLPAPER) {
-                mInfo.inputConfig |= InputConfig::IS_WALLPAPER;
-            }
-            FALLTHROUGH_INTENDED;
-        case InputConfig::PAUSE_DISPATCHING:
-            if (env->GetBooleanField(obj, gInputWindowHandleClassInfo.paused) == JNI_TRUE) {
-                mInfo.inputConfig |= InputConfig::PAUSE_DISPATCHING;
-            }
-            FALLTHROUGH_INTENDED;
-        case InputConfig::TRUSTED_OVERLAY:
-            if (env->GetBooleanField(obj, gInputWindowHandleClassInfo.trustedOverlay) == JNI_TRUE) {
-                mInfo.inputConfig |= InputConfig::TRUSTED_OVERLAY;
-            }
-            FALLTHROUGH_INTENDED;
-        case InputConfig::WATCH_OUTSIDE_TOUCH:
-            if (flags.test(WindowInfo::Flag::WATCH_OUTSIDE_TOUCH)) {
-                mInfo.inputConfig |= InputConfig::WATCH_OUTSIDE_TOUCH;
-            }
-            FALLTHROUGH_INTENDED;
-        case InputConfig::SLIPPERY:
-            if (flags.test(WindowInfo::Flag::SLIPPERY)) {
-                mInfo.inputConfig |= InputConfig::SLIPPERY;
-            }
-            FALLTHROUGH_INTENDED;
-        case InputConfig::DISABLE_USER_ACTIVITY:
-            if ((inputFeatures & 0x00000002) != 0) {
-                mInfo.inputConfig |= InputConfig::DISABLE_USER_ACTIVITY;
-            }
-            FALLTHROUGH_INTENDED;
-        case InputConfig::DROP_INPUT:
-            // This flag cannot be set from Java.
-            FALLTHROUGH_INTENDED;
-        case InputConfig::DROP_INPUT_IF_OBSCURED:
-            // This flag cannot be set from Java.
-            FALLTHROUGH_INTENDED;
-        case InputConfig::SPY:
-            if ((inputFeatures & 0x00000004) != 0) {
-                mInfo.inputConfig |= InputConfig::SPY;
-            }
-            FALLTHROUGH_INTENDED;
-        case InputConfig::INTERCEPTS_STYLUS:
-            if ((inputFeatures & 0x00000008) != 0) {
-                mInfo.inputConfig |= InputConfig::INTERCEPTS_STYLUS;
-            }
-    }
+    mInfo.inputConfig = static_cast<gui::WindowInfo::InputConfig>(
+            env->GetIntField(obj, gInputWindowHandleClassInfo.inputConfig));
 
     mInfo.touchOcclusionMode = static_cast<TouchOcclusionMode>(
             env->GetIntField(obj, gInputWindowHandleClassInfo.touchOcclusionMode));
@@ -388,17 +297,6 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.touchableRegion,
                         regionObj.get());
 
-    using InputConfig = gui::WindowInfo::InputConfig;
-    env->SetBooleanField(inputWindowHandle, gInputWindowHandleClassInfo.visible,
-                         !windowInfo.inputConfig.test(InputConfig::NOT_VISIBLE));
-    env->SetBooleanField(inputWindowHandle, gInputWindowHandleClassInfo.focusable,
-                         !windowInfo.inputConfig.test(gui::WindowInfo::InputConfig::NOT_FOCUSABLE));
-    env->SetBooleanField(inputWindowHandle, gInputWindowHandleClassInfo.hasWallpaper,
-                         windowInfo.inputConfig.test(InputConfig::DUPLICATE_TOUCH_TO_WALLPAPER));
-    env->SetBooleanField(inputWindowHandle, gInputWindowHandleClassInfo.paused,
-                         windowInfo.inputConfig.test(InputConfig::PAUSE_DISPATCHING));
-    env->SetBooleanField(inputWindowHandle, gInputWindowHandleClassInfo.trustedOverlay,
-                         windowInfo.inputConfig.test(InputConfig::TRUSTED_OVERLAY));
     env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.touchOcclusionMode,
                      static_cast<int32_t>(windowInfo.touchOcclusionMode));
     env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.ownerPid, windowInfo.ownerPid);
@@ -406,8 +304,11 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
     ScopedLocalRef<jstring> packageName(env, env->NewStringUTF(windowInfo.packageName.data()));
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.packageName,
                         packageName.get());
-    // TODO(b/216806304): Write InputConfig flag to Java once it's exposed as an InputWindowHandle
-    //  API.
+
+    const auto inputConfig = windowInfo.inputConfig.get();
+    static_assert(sizeof(inputConfig) == sizeof(int32_t));
+    env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.inputConfig,
+                     static_cast<int32_t>(inputConfig));
 
     float transformVals[9];
     for (int i = 0; i < 9; i++) {
@@ -510,19 +411,6 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
     GET_FIELD_ID(gInputWindowHandleClassInfo.touchableRegion, clazz,
             "touchableRegion", "Landroid/graphics/Region;");
 
-    GET_FIELD_ID(gInputWindowHandleClassInfo.visible, clazz,
-            "visible", "Z");
-
-    GET_FIELD_ID(gInputWindowHandleClassInfo.focusable, clazz, "focusable", "Z");
-
-    GET_FIELD_ID(gInputWindowHandleClassInfo.hasWallpaper, clazz,
-            "hasWallpaper", "Z");
-
-    GET_FIELD_ID(gInputWindowHandleClassInfo.paused, clazz,
-            "paused", "Z");
-
-    GET_FIELD_ID(gInputWindowHandleClassInfo.trustedOverlay, clazz, "trustedOverlay", "Z");
-
     GET_FIELD_ID(gInputWindowHandleClassInfo.touchOcclusionMode, clazz, "touchOcclusionMode", "I");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.ownerPid, clazz,
@@ -534,8 +422,7 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
     GET_FIELD_ID(gInputWindowHandleClassInfo.packageName, clazz, "packageName",
                  "Ljava/lang/String;");
 
-    GET_FIELD_ID(gInputWindowHandleClassInfo.inputFeatures, clazz,
-            "inputFeatures", "I");
+    GET_FIELD_ID(gInputWindowHandleClassInfo.inputConfig, clazz, "inputConfig", "I");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.displayId, clazz,
             "displayId", "I");

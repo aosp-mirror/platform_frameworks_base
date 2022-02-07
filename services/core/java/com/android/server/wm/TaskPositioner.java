@@ -40,6 +40,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.InputConfig;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.Trace;
@@ -219,29 +220,16 @@ class TaskPositioner implements IBinder.DeathRecipient {
                 displayContent.getDisplayId());
         mDragWindowHandle.name = TAG;
         mDragWindowHandle.token = mClientChannel.getToken();
-        mDragWindowHandle.layoutParamsFlags = 0;
         mDragWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;
         mDragWindowHandle.dispatchingTimeoutMillis = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
-        mDragWindowHandle.visible = true;
-        // When dragging the window around, we do not want to steal focus for the window.
-        mDragWindowHandle.focusable = false;
-        mDragWindowHandle.hasWallpaper = false;
-        mDragWindowHandle.paused = false;
         mDragWindowHandle.ownerPid = Process.myPid();
         mDragWindowHandle.ownerUid = Process.myUid();
-        mDragWindowHandle.inputFeatures = 0;
         mDragWindowHandle.scaleFactor = 1.0f;
+        // When dragging the window around, we do not want to steal focus for the window.
+        mDragWindowHandle.inputConfig = InputConfig.NOT_FOCUSABLE;
 
         // The drag window cannot receive new touches.
         mDragWindowHandle.touchableRegion.setEmpty();
-
-        // The drag window covers the entire display.
-        final Rect displayBounds = mTmpRect;
-        displayContent.getBounds(mTmpRect);
-        mDragWindowHandle.frameLeft = displayBounds.left;
-        mDragWindowHandle.frameTop = displayBounds.top;
-        mDragWindowHandle.frameRight = displayBounds.right;
-        mDragWindowHandle.frameBottom = displayBounds.bottom;
 
         // Pause rotations before a drag.
         ProtoLog.d(WM_DEBUG_ORIENTATION, "Pausing rotation during re-position");
@@ -250,6 +238,8 @@ class TaskPositioner implements IBinder.DeathRecipient {
         // Notify InputMonitor to take mDragWindowHandle.
         mService.mTaskPositioningController.showInputSurface(win.getDisplayId());
 
+        final Rect displayBounds = mTmpRect;
+        displayContent.getBounds(displayBounds);
         final DisplayMetrics displayMetrics = displayContent.getDisplayMetrics();
         mMinVisibleWidth = dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, displayMetrics);
         mMinVisibleHeight = dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, displayMetrics);
