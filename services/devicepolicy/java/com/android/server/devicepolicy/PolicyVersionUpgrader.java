@@ -184,7 +184,7 @@ public class PolicyVersionUpgrader {
             Files.write(file.toPath(), versionBytes);
             versionFile.commit();
         } catch (IOException e) {
-            Slog.e(LOG_TAG, String.format("Writing version %d failed: %s", version), e);
+            Slog.e(LOG_TAG, String.format("Writing version %d failed", version), e);
             versionFile.rollback();
         }
     }
