@@ -2583,6 +2583,8 @@
   <java-symbol type="string" name="fingerprint_error_timeout" />
   <java-symbol type="array" name="fingerprint_error_vendor" />
   <java-symbol type="string" name="fingerprint_error_vendor_unknown" />
+  <java-symbol type="string" name="fingerprint_error_not_match" />
+  <java-symbol type="string" name="fingerprint_udfps_error_not_match" />
   <java-symbol type="string" name="fingerprint_acquired_partial" />
   <java-symbol type="string" name="fingerprint_acquired_insufficient" />
   <java-symbol type="string" name="fingerprint_acquired_imager_dirty" />
