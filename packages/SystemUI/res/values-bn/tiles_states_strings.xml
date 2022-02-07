@@ -171,9 +171,4 @@
     <item msgid="146088982397753810">"বন্ধ আছে"</item>
     <item msgid="460891964396502657">"চালু আছে"</item>
   </string-array>
-  <string-array name="tile_states_fgsmanager">
-    <item msgid="3054341646818213094">"উপলভ্য নেই"</item>
-    <item msgid="5581384648880018330">"বন্ধ আছে"</item>
-    <item msgid="8000850843692192257">"চালু আছে"</item>
-  </string-array>
 </resources>
