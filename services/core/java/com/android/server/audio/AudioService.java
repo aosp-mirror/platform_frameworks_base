@@ -8570,6 +8570,30 @@ public class AudioService extends IAudioService.Stub
         return mSpatializerHelper.isAvailable();
     }
 
+    /** @see Spatializer#isAvailableForDevice(AudioDeviceAttributes) */
+    public boolean isSpatializerAvailableForDevice(@NonNull AudioDeviceAttributes device)  {
+        enforceModifyDefaultAudioEffectsPermission();
+        return mSpatializerHelper.isAvailableForDevice(Objects.requireNonNull(device));
+    }
+
+    /** @see Spatializer#hasHeadTracker(AudioDeviceAttributes) */
+    public boolean hasHeadTracker(@NonNull AudioDeviceAttributes device) {
+        enforceModifyDefaultAudioEffectsPermission();
+        return mSpatializerHelper.hasHeadTracker(Objects.requireNonNull(device));
+    }
+
+    /** @see Spatializer#setHeadTrackerEnabled(boolean, AudioDeviceAttributes) */
+    public void setHeadTrackerEnabled(boolean enabled, @NonNull AudioDeviceAttributes device) {
+        enforceModifyDefaultAudioEffectsPermission();
+        mSpatializerHelper.setHeadTrackerEnabled(enabled, Objects.requireNonNull(device));
+    }
+
+    /** @see Spatializer#isHeadTrackerEnabled(AudioDeviceAttributes) */
+    public boolean isHeadTrackerEnabled(@NonNull AudioDeviceAttributes device) {
+        enforceModifyDefaultAudioEffectsPermission();
+        return mSpatializerHelper.isHeadTrackerEnabled(Objects.requireNonNull(device));
+    }
+
     /** @see Spatializer#setSpatializerEnabled(boolean) */
     public void setSpatializerEnabled(boolean enabled) {
         enforceModifyDefaultAudioEffectsPermission();
