@@ -856,10 +856,9 @@ public class KeyguardSecurityContainer extends FrameLayout {
         }
 
         private void setupUserSwitcher() {
-            String currentUserName = mUserSwitcherController.getCurrentUserName();
-            mUserSwitcher.setText(currentUserName);
+            final UserRecord currentUser = mUserSwitcherController.getCurrentUserRecord();
+            mUserSwitcher.setText(mUserSwitcherController.getCurrentUserName());
 
-            final UserRecord currentUser = getCurrentUser();
             ViewGroup anchor = mView.findViewById(R.id.user_switcher_anchor);
             BaseUserAdapter adapter = new BaseUserAdapter(mUserSwitcherController) {
                 @Override
@@ -959,16 +958,6 @@ public class KeyguardSecurityContainer extends FrameLayout {
                     });
                 mPopup.show();
             });
-        }
-
-        private UserRecord getCurrentUser() {
-            for (int i = 0; i < mUserSwitcherController.getUsers().size(); ++i) {
-                UserRecord userRecord = mUserSwitcherController.getUsers().get(i);
-                if (userRecord.isCurrent) {
-                    return userRecord;
-                }
-            }
-            return null;
         }
 
         /**

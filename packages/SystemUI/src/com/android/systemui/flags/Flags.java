@@ -110,6 +110,8 @@ public class Flags {
     public static final BooleanFlag NEW_FOOTER = new BooleanFlag(504, false);
 
     public static final BooleanFlag NEW_HEADER = new BooleanFlag(505, false);
+    public static final ResourceBooleanFlag FULL_SCREEN_USER_SWITCHER =
+            new ResourceBooleanFlag(506, R.bool.config_enableFullscreenUserSwitcher);
 
     /***************************************/
     // 600- status bar

@@ -18,13 +18,16 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
+import android.content.Intent;
 import android.os.UserManager;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.R;
+import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.FooterActionsView;
@@ -32,6 +35,7 @@ import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.user.UserSwitchDialogController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+import com.android.systemui.user.UserSwitcherActivity;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
@@ -43,6 +47,7 @@ public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
     private final QSDetailDisplayer mQsDetailDisplayer;
     private final FalsingManager mFalsingManager;
     private final UserSwitchDialogController mUserSwitchDialogController;
+    private final ActivityStarter mActivityStarter;
     private final FeatureFlags mFeatureFlags;
 
     private UserSwitcherController.BaseUserAdapter mUserListener;
@@ -54,7 +59,14 @@ public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
                 return;
             }
 
-            if (mFeatureFlags.isEnabled(Flags.NEW_USER_SWITCHER)) {
+            if (mFeatureFlags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)) {
+                Intent intent = new Intent(v.getContext(), UserSwitcherActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+                mActivityStarter.startActivity(intent, true /* dismissShade */,
+                        ActivityLaunchAnimator.Controller.fromView(v, null),
+                        true /* showOverlockscreenwhenlocked */);
+            } else if (mFeatureFlags.isEnabled(Flags.NEW_USER_SWITCHER)) {
                 mUserSwitchDialogController.showDialog(v);
             } else {
                 View center = mView.getChildCount() > 0 ? mView.getChildAt(0) : mView;
@@ -76,31 +88,35 @@ public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
         private final QSDetailDisplayer mQsDetailDisplayer;
         private final FalsingManager mFalsingManager;
         private final UserSwitchDialogController mUserSwitchDialogController;
+        private final ActivityStarter mActivityStarter;
         private final FeatureFlags mFeatureFlags;
 
         @Inject
         public Factory(UserManager userManager, UserSwitcherController userSwitcherController,
                 QSDetailDisplayer qsDetailDisplayer, FalsingManager falsingManager,
-                UserSwitchDialogController userSwitchDialogController, FeatureFlags featureFlags) {
+                UserSwitchDialogController userSwitchDialogController, FeatureFlags featureFlags,
+                ActivityStarter activityStarter) {
             mUserManager = userManager;
             mUserSwitcherController = userSwitcherController;
             mQsDetailDisplayer = qsDetailDisplayer;
             mFalsingManager = falsingManager;
             mUserSwitchDialogController = userSwitchDialogController;
+            mActivityStarter = activityStarter;
             mFeatureFlags = featureFlags;
         }
 
         public MultiUserSwitchController create(FooterActionsView view) {
             return new MultiUserSwitchController(view.findViewById(R.id.multi_user_switch),
                     mUserManager, mUserSwitcherController, mQsDetailDisplayer,
-                    mFalsingManager, mUserSwitchDialogController, mFeatureFlags);
+                    mFalsingManager, mUserSwitchDialogController, mFeatureFlags,
+                    mActivityStarter);
         }
     }
 
     private MultiUserSwitchController(MultiUserSwitch view, UserManager userManager,
             UserSwitcherController userSwitcherController, QSDetailDisplayer qsDetailDisplayer,
             FalsingManager falsingManager, UserSwitchDialogController userSwitchDialogController,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags, ActivityStarter activityStarter) {
         super(view);
         mUserManager = userManager;
         mUserSwitcherController = userSwitcherController;
@@ -108,6 +124,7 @@ public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
         mFalsingManager = falsingManager;
         mUserSwitchDialogController = userSwitchDialogController;
         mFeatureFlags = featureFlags;
+        mActivityStarter = activityStarter;
     }
 
     @Override
@@ -166,5 +183,4 @@ public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
         return whitelistIpcs(() -> mUserManager.isUserSwitcherEnabled(
                 getResources().getBoolean(R.bool.qs_show_user_switcher_for_single_user)));
     }
-
 }
