@@ -767,7 +767,7 @@ public class ShortcutManager {
      * order to make sure shortcuts exist and are up-to-date, without the need to explicitly handle
      * the shortcut count limit.
      * @see android.app.NotificationManager#notify(int, Notification)
-     * @see Notification.Builder#setShortcutId(String)
+     * @see android.app.Notification.Builder#setShortcutId(String)
      *
      * <p>If {@link #getMaxShortcutCountPerActivity()} is already reached, an existing shortcut with
      * the lowest rank will be removed to add space for the new shortcut.
