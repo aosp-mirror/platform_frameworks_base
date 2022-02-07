@@ -1099,7 +1099,7 @@ public final class QuotaController extends StateController {
         final long maxExecutionTimeRemainingMs =
                 mMaxExecutionTimeMs - stats.executionTimeInMaxPeriodMs;
 
-        if (allowedTimeRemainingMs <= 0 || maxExecutionTimeRemainingMs <= 0) {
+        if (maxExecutionTimeRemainingMs <= 0) {
             return 0;
         }
 
@@ -1108,6 +1108,10 @@ public final class QuotaController extends StateController {
         if (stats.windowSizeMs == mAllowedTimePerPeriodMs[standbyBucket]) {
             return calculateTimeUntilQuotaConsumedLocked(
                     sessions, startMaxElapsed, maxExecutionTimeRemainingMs);
+        }
+
+        if (allowedTimeRemainingMs <= 0) {
+            return 0;
         }
 
         // Need to check both max time and period time in case one is less than the other.
@@ -2147,6 +2151,7 @@ public final class QuotaController extends StateController {
                 Slog.v(TAG, "Starting to track " + jobStatus.toShortString());
             }
             // Always maintain list of running jobs, even when quota is free.
+            final boolean priorityLowered = mLowestPriority > jobStatus.getEffectivePriority();
             mLowestPriority = Math.min(mLowestPriority, jobStatus.getEffectivePriority());
             if (mRunningBgJobs.add(jobStatus) && shouldTrackLocked()) {
                 mBgJobCount++;
@@ -2162,6 +2167,8 @@ public final class QuotaController extends StateController {
                         // incorrect.
                         invalidateAllExecutionStatsLocked(mPkg.userId, mPkg.packageName);
                     }
+                    scheduleCutoff();
+                } else if (mRegularJobTimer && priorityLowered) {
                     scheduleCutoff();
                 }
             }
@@ -2188,11 +2195,17 @@ public final class QuotaController extends StateController {
                     emitSessionLocked(nowElapsed);
                     cancelCutoff();
                     mLowestPriority = JobInfo.PRIORITY_MAX;
-                } else if (mLowestPriority == jobStatus.getEffectivePriority()) {
+                } else if (mRegularJobTimer
+                        && mLowestPriority == jobStatus.getEffectivePriority()) {
+                    // Lowest priority doesn't matter for EJ timers.
+                    final int oldPriority = mLowestPriority;
                     mLowestPriority = JobInfo.PRIORITY_MAX;
                     for (int i = mRunningBgJobs.size() - 1; i >= 0; --i) {
                         mLowestPriority = Math.min(mLowestPriority,
                                 mRunningBgJobs.valueAt(i).getEffectivePriority());
+                    }
+                    if (mLowestPriority != oldPriority) {
+                        scheduleCutoff();
                     }
                 }
             }
