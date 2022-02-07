@@ -888,10 +888,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             }
 
             if (releaseSurfacePackage && mSurfacePackage != null) {
-                final SurfaceControl sc = mSurfacePackage.getSurfaceControl();
-                if (sc != null && sc.isValid()) {
-                    transaction.reparent(sc, null).apply();
-                }
                 mSurfacePackage.release();
                 mSurfacePackage = null;
             }
