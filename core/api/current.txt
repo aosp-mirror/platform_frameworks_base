@@ -17054,6 +17054,14 @@ package android.hardware {
     field public static final int MICROPHONE = 1; // 0x1
   }
 
+  public final class SyncFence implements java.io.Closeable android.os.Parcelable {
+    method public void close() throws java.io.IOException;
+    method public int describeContents();
+    method public boolean isValid();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.SyncFence> CREATOR;
+  }
+
   public final class TriggerEvent {
     field public android.hardware.Sensor sensor;
     field public long timestamp;
@@ -20829,6 +20837,7 @@ package android.media {
     method public abstract void close();
     method public android.graphics.Rect getCropRect();
     method public long getDataSpace();
+    method @NonNull public android.hardware.SyncFence getFence() throws java.io.IOException;
     method public abstract int getFormat();
     method @Nullable public android.hardware.HardwareBuffer getHardwareBuffer();
     method public abstract int getHeight();
@@ -20837,6 +20846,7 @@ package android.media {
     method public abstract int getWidth();
     method public void setCropRect(android.graphics.Rect);
     method public void setDataSpace(long);
+    method public void setFence(@NonNull android.hardware.SyncFence) throws java.io.IOException;
     method public void setTimestamp(long);
   }
 
