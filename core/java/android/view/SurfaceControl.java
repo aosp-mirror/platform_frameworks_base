@@ -41,6 +41,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.gui.DropInputMode;
 import android.hardware.HardwareBuffer;
 import android.hardware.display.DeviceProductInfo;
 import android.hardware.display.DisplayedContentSample;
@@ -150,7 +151,8 @@ public final class SurfaceControl implements Parcelable {
             float childRelativeTop, float childRelativeRight, float childRelativeBottom);
     private static native void nativeSetTrustedOverlay(long transactionObj, long nativeObject,
             boolean isTrustedOverlay);
-
+    private static native void nativeSetDropInputMode(
+            long transactionObj, long nativeObject, int flags);
     private static native boolean nativeClearContentFrameStats(long nativeObject);
     private static native boolean nativeGetContentFrameStats(long nativeObject, WindowContentFrameStats outStats);
     private static native boolean nativeClearAnimationFrameStats();
@@ -3423,6 +3425,17 @@ public final class SurfaceControl implements Parcelable {
         public Transaction setTrustedOverlay(SurfaceControl sc, boolean isTrustedOverlay) {
             checkPreconditions(sc);
             nativeSetTrustedOverlay(mNativeObject, sc.mNativeObject, isTrustedOverlay);
+            return this;
+        }
+
+        /**
+         * Sets the input event drop mode on this SurfaceControl and its children. The caller must
+         * hold the ACCESS_SURFACE_FLINGER permission. See {@code InputEventDropMode}.
+         * @hide
+         */
+        public Transaction setDropInputMode(SurfaceControl sc, @DropInputMode int mode) {
+            checkPreconditions(sc);
+            nativeSetDropInputMode(mNativeObject, sc.mNativeObject, mode);
             return this;
         }
 
