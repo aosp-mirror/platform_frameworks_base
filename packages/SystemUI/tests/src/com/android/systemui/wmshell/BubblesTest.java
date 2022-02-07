@@ -1275,6 +1275,22 @@ public class BubblesTest extends SysuiTestCase {
         assertSysuiStates(false /* stackExpanded */, false /* mangeMenuExpanded */);
     }
 
+    @Test
+    public void testStackViewOnBackPressed_updatesBubbleDataExpandState() {
+        mBubbleController.updateBubble(mBubbleEntry);
+
+        // Expand the stack
+        mBubbleData.setExpanded(true);
+        assertStackExpanded();
+
+        // Hit back
+        BubbleStackView stackView = mBubbleController.getStackView();
+        stackView.onBackPressed();
+
+        // Make sure we're collapsed
+        assertStackCollapsed();
+    }
+
     /** Creates a bubble using the userId and package. */
     private Bubble createBubble(int userId, String pkg) {
         final UserHandle userHandle = new UserHandle(userId);
