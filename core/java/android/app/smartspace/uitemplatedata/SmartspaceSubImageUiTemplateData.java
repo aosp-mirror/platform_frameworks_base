@@ -22,8 +22,6 @@ import android.annotation.SystemApi;
 import android.app.smartspace.SmartspaceTarget;
 import android.os.Parcel;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,7 +35,7 @@ public final class SmartspaceSubImageUiTemplateData extends SmartspaceDefaultUiT
 
     /** Texts are shown next to the image as a vertical list */
     @NonNull
-    private final List<CharSequence> mSubImageTexts;
+    private final List<SmartspaceText> mSubImageTexts;
 
     /** If multiple images are passed in, they will be rendered as GIF. */
     @NonNull
@@ -49,22 +47,22 @@ public final class SmartspaceSubImageUiTemplateData extends SmartspaceDefaultUiT
 
     SmartspaceSubImageUiTemplateData(@NonNull Parcel in) {
         super(in);
-        mSubImageTexts = Arrays.asList(in.readCharSequenceArray());
+        mSubImageTexts = in.createTypedArrayList(SmartspaceText.CREATOR);
         mSubImages = in.createTypedArrayList(SmartspaceIcon.CREATOR);
         mSubImageAction = in.readTypedObject(SmartspaceTapAction.CREATOR);
     }
 
     private SmartspaceSubImageUiTemplateData(@SmartspaceTarget.UiTemplateType int templateType,
-            @Nullable CharSequence titleText,
+            @Nullable SmartspaceText titleText,
             @Nullable SmartspaceIcon titleIcon,
-            @Nullable CharSequence subtitleText,
+            @Nullable SmartspaceText subtitleText,
             @Nullable SmartspaceIcon subTitleIcon,
             @Nullable SmartspaceTapAction primaryTapAction,
-            @Nullable CharSequence supplementalSubtitleText,
+            @Nullable SmartspaceText supplementalSubtitleText,
             @Nullable SmartspaceIcon supplementalSubtitleIcon,
             @Nullable SmartspaceTapAction supplementalSubtitleTapAction,
-            @Nullable CharSequence supplementalAlarmText,
-            @NonNull List<CharSequence> subImageTexts,
+            @Nullable SmartspaceText supplementalAlarmText,
+            @NonNull List<SmartspaceText> subImageTexts,
             @NonNull List<SmartspaceIcon> subImages,
             @Nullable SmartspaceTapAction subImageAction) {
         super(templateType, titleText, titleIcon, subtitleText, subTitleIcon, primaryTapAction,
@@ -76,7 +74,7 @@ public final class SmartspaceSubImageUiTemplateData extends SmartspaceDefaultUiT
     }
 
     @NonNull
-    public List<CharSequence> getSubImageTexts() {
+    public List<SmartspaceText> getSubImageTexts() {
         return mSubImageTexts;
     }
 
@@ -115,7 +113,7 @@ public final class SmartspaceSubImageUiTemplateData extends SmartspaceDefaultUiT
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
         super.writeToParcel(out, flags);
-        out.writeCharSequenceList(new ArrayList<>(mSubImageTexts));
+        out.writeTypedList(mSubImageTexts);
         out.writeTypedList(mSubImages);
         out.writeTypedObject(mSubImageAction, flags);
     }
@@ -153,14 +151,14 @@ public final class SmartspaceSubImageUiTemplateData extends SmartspaceDefaultUiT
     @SystemApi
     public static final class Builder extends SmartspaceDefaultUiTemplateData.Builder {
 
-        private final List<CharSequence> mSubImageTexts;
+        private final List<SmartspaceText> mSubImageTexts;
         private final List<SmartspaceIcon> mSubImages;
         private SmartspaceTapAction mSubImageAction;
 
         /**
          * A builder for {@link SmartspaceSubImageUiTemplateData}.
          */
-        public Builder(@NonNull List<CharSequence> subImageTexts,
+        public Builder(@NonNull List<SmartspaceText> subImageTexts,
                 @NonNull List<SmartspaceIcon> subImages) {
             super(SmartspaceTarget.UI_TEMPLATE_SUB_IMAGE);
             mSubImageTexts = Objects.requireNonNull(subImageTexts);
@@ -171,7 +169,7 @@ public final class SmartspaceSubImageUiTemplateData extends SmartspaceDefaultUiT
          * Sets the card tap action.
          */
         @NonNull
-        public Builder setCarouselAction(@NonNull SmartspaceTapAction subImageAction) {
+        public Builder setSubImageAction(@NonNull SmartspaceTapAction subImageAction) {
             mSubImageAction = subImageAction;
             return this;
         }
@@ -182,7 +180,7 @@ public final class SmartspaceSubImageUiTemplateData extends SmartspaceDefaultUiT
         @NonNull
         public SmartspaceSubImageUiTemplateData build() {
             return new SmartspaceSubImageUiTemplateData(getTemplateType(), getTitleText(),
-                    getTitleIcon(), getSubtitleText(), getSubTitleIcon(), getPrimaryTapAction(),
+                    getTitleIcon(), getSubtitleText(), getSubtitleIcon(), getPrimaryTapAction(),
                     getSupplementalSubtitleText(), getSupplementalSubtitleIcon(),
                     getSupplementalSubtitleTapAction(), getSupplementalAlarmText(), mSubImageTexts,
                     mSubImages,

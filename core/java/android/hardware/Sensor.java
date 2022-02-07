@@ -726,6 +726,74 @@ public final class Sensor {
     public static final String STRING_TYPE_HEAD_TRACKER = "android.sensor.head_tracker";
 
     /**
+     * A constant describing a limited axes accelerometer sensor.
+     *
+     * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
+     *
+     */
+    public static final int TYPE_ACCELEROMETER_LIMITED_AXES = 38;
+
+    /**
+     * A constant string describing a limited axes accelerometer sensor.
+     *
+     * @see #TYPE_ACCELEROMETER_LIMITED_AXES
+     *
+     */
+    public static final String STRING_TYPE_ACCELEROMETER_LIMITED_AXES =
+            "android.sensor.accelerometer_limited_axes";
+
+    /**
+     * A constant describing a limited axes gyroscope sensor.
+     *
+     * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
+     *
+     */
+    public static final int TYPE_GYROSCOPE_LIMITED_AXES = 39;
+
+    /**
+     * A constant string describing a limited axes gyroscope sensor.
+     *
+     * @see #TYPE_GYROSCOPE_LIMITED_AXES
+     *
+     */
+    public static final String STRING_TYPE_GYROSCOPE_LIMITED_AXES =
+            "android.sensor.gyroscope_limited_axes";
+
+    /**
+     * A constant describing an uncalibrated limited axes accelerometer sensor.
+     *
+     * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
+     *
+     */
+    public static final int TYPE_ACCELEROMETER_LIMITED_AXES_UNCALIBRATED = 40;
+
+    /**
+     * A constant string describing an uncalibrated limited axes accelerometer sensor.
+     *
+     * @see #TYPE_ACCELEROMETER_LIMITED_AXES_UNCALIBRATED
+     *
+     */
+    public static final String STRING_TYPE_ACCELEROMETER_LIMITED_AXES_UNCALIBRATED =
+            "android.sensor.accelerometer_limited_axes_uncalibrated";
+
+    /**
+     * A constant describing an uncalibrated limited axes gyroscope sensor.
+     *
+     * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
+     *
+     */
+    public static final int TYPE_GYROSCOPE_LIMITED_AXES_UNCALIBRATED = 41;
+
+    /**
+     * A constant string describing an uncalibrated limited axes gyroscope sensor.
+     *
+     * @see #TYPE_GYROSCOPE_LIMITED_AXES_UNCALIBRATED
+     *
+     */
+    public static final String STRING_TYPE_GYROSCOPE_LIMITED_AXES_UNCALIBRATED =
+            "android.sensor.gyroscope_limited_axes_uncalibrated";
+
+    /**
      * A constant describing all sensor types.
      */
 
@@ -846,6 +914,10 @@ public final class Sensor {
             6, // SENSOR_TYPE_ACCELEROMETER_UNCALIBRATED
             1, // SENSOR_TYPE_HINGE_ANGLE
             6, // SENSOR_TYPE_HEAD_TRACKER (discontinuity count is excluded)
+            6, // SENSOR_TYPE_ACCELEROMETER_LIMITED_AXES
+            6, // SENSOR_TYPE_GYROSCOPE_LIMITED_AXES
+            9, // SENSOR_TYPE_ACCELEROMETER_LIMITED_AXES_UNCALIBRATED
+            9, // SENSOR_TYPE_GYROSCOPE_LIMITED_AXES_UNCALIBRATED
     };
 
     /**
@@ -1300,6 +1372,18 @@ public final class Sensor {
                 return true;
             case TYPE_HEAD_TRACKER:
                 mStringType = STRING_TYPE_HEAD_TRACKER;
+                return true;
+            case TYPE_ACCELEROMETER_LIMITED_AXES:
+                mStringType = STRING_TYPE_ACCELEROMETER_LIMITED_AXES;
+                return true;
+            case TYPE_GYROSCOPE_LIMITED_AXES:
+                mStringType = STRING_TYPE_GYROSCOPE_LIMITED_AXES;
+                return true;
+            case TYPE_ACCELEROMETER_LIMITED_AXES_UNCALIBRATED:
+                mStringType = STRING_TYPE_ACCELEROMETER_LIMITED_AXES_UNCALIBRATED;
+                return true;
+            case TYPE_GYROSCOPE_LIMITED_AXES_UNCALIBRATED:
+                mStringType = STRING_TYPE_GYROSCOPE_LIMITED_AXES_UNCALIBRATED;
                 return true;
             default:
                 return false;
