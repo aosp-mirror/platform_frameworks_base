@@ -261,11 +261,9 @@ public final class JobStatus {
      *
      * Doesn't exempt jobs with a deadline constraint, as they can be started without any content or
      * network changes, in which case this exemption does not make sense.
-     *
-     * TODO(b/149519887): Use a more explicit signal, maybe an API flag, that the scheduling package
-     * needs to provide at the time of scheduling a job.
      */
-    private final boolean mHasMediaBackupExemption;
+    private boolean mHasMediaBackupExemption;
+    private final boolean mHasExemptedMediaUrisOnly;
 
     // Set to true if doze constraint was satisfied due to app being whitelisted.
     boolean appHasDozeExemption;
@@ -508,11 +506,9 @@ public final class JobStatus {
         this.mOriginalLatestRunTimeElapsedMillis = latestRunTimeElapsedMillis;
         this.numFailures = numFailures;
 
-        boolean requiresNetwork = false;
         int requiredConstraints = job.getConstraintFlags();
         if (job.getRequiredNetwork() != null) {
             requiredConstraints |= CONSTRAINT_CONNECTIVITY;
-            requiresNetwork = true;
         }
         if (earliestRunTimeElapsedMillis != NO_EARLIEST_RUNTIME) {
             requiredConstraints |= CONSTRAINT_TIMING_DELAY;
@@ -531,6 +527,7 @@ public final class JobStatus {
                 }
             }
         }
+        mHasExemptedMediaUrisOnly = exemptedMediaUrisOnly;
         this.requiredConstraints = requiredConstraints;
         mRequiredConstraintsOfInterest = requiredConstraints & CONSTRAINTS_OF_INTEREST;
         addDynamicConstraints(dynamicConstraints);
@@ -563,9 +560,7 @@ public final class JobStatus {
             job = builder.build(false);
         }
 
-        final JobSchedulerInternal jsi = LocalServices.getService(JobSchedulerInternal.class);
-        mHasMediaBackupExemption = !job.hasLateConstraint() && exemptedMediaUrisOnly
-                && requiresNetwork && this.sourcePackageName.equals(jsi.getMediaBackupPackage());
+        updateMediaBackupExemptionStatus();
     }
 
     /** Copy constructor: used specifically when cloning JobStatus objects for persistence,
@@ -912,6 +907,25 @@ public final class JobStatus {
 
     public void setFirstForceBatchedTimeElapsed(long now) {
         mFirstForceBatchedTimeElapsed = now;
+    }
+
+    /**
+     * Re-evaluates the media backup exemption status.
+     *
+     * @return true if the exemption status changed
+     */
+    public boolean updateMediaBackupExemptionStatus() {
+        final JobSchedulerInternal jsi = LocalServices.getService(JobSchedulerInternal.class);
+        boolean hasMediaExemption = mHasExemptedMediaUrisOnly
+                && !job.hasLateConstraint()
+                && job.getRequiredNetwork() != null
+                && getEffectivePriority() >= JobInfo.PRIORITY_DEFAULT
+                && sourcePackageName.equals(jsi.getCloudMediaProviderPackage(sourceUserId));
+        if (mHasMediaBackupExemption == hasMediaExemption) {
+            return false;
+        }
+        mHasMediaBackupExemption = hasMediaExemption;
+        return true;
     }
 
     public String getSourceTag() {
@@ -2027,6 +2041,7 @@ public final class JobStatus {
                     TimeUtils.formatDuration(job.getTriggerContentMaxDelay(), pw);
                     pw.println();
                 }
+                pw.print("Has media backup exemption", mHasMediaBackupExemption).println();
             }
             if (job.getExtras() != null && !job.getExtras().isDefinitelyEmpty()) {
                 pw.print("Extras: ");

@@ -203,4 +203,6 @@ interface IStorageManager {
     void notifyAppIoResumed(in String volumeUuid, int uid, int tid, int reason) = 93;
     int getExternalStorageMountMode(int uid, in String packageName) = 94;
     boolean isAppIoBlocked(in String volumeUuid, int uid, int tid, int reason) = 95;
+    void setCloudMediaProvider(in String authority) = 96;
+    String getCloudMediaProvider() = 97;
 }

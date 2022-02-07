@@ -3002,6 +3002,35 @@ public class StorageManager {
         }
     }
 
+    /**
+     * Notify the system of the current cloud media provider.
+     *
+     * This can only be called by the {@link android.service.storage.ExternalStorageService}
+     * holding the {@link android.Manifest.permission#WRITE_MEDIA_STORAGE} permission.
+     *
+     * @param authority the authority of the content provider
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public void setCloudMediaProvider(@Nullable String authority) {
+        try {
+            mStorageManager.setCloudMediaProvider(authority);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    @TestApi
+    @Nullable
+    public String getCloudMediaProvider() {
+        try {
+            return mStorageManager.getCloudMediaProvider();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private final Object mFuseAppLoopLock = new Object();
 
     @GuardedBy("mFuseAppLoopLock")
