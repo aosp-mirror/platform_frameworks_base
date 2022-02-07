@@ -24,7 +24,6 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings.Secure;
-import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
@@ -50,7 +49,6 @@ import com.android.systemui.qs.external.CustomTileStatePersister;
 import com.android.systemui.qs.external.TileLifecycleManager;
 import com.android.systemui.qs.external.TileServiceKey;
 import com.android.systemui.qs.external.TileServiceRequestController;
-import com.android.systemui.qs.external.TileServices;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -89,7 +87,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private final Context mContext;
     private final LinkedHashMap<String, QSTile> mTiles = new LinkedHashMap<>();
     protected final ArrayList<String> mTileSpecs = new ArrayList<>();
-    private final TileServices mServices;
     private final TunerService mTunerService;
     private final PluginManager mPluginManager;
     private final DumpManager mDumpManager;
@@ -111,6 +108,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     private SecureSettings mSecureSettings;
 
     private final TileServiceRequestController mTileServiceRequestController;
+    private TileLifecycleManager.Factory mTileLifeCycleManagerFactory;
 
     @Inject
     public QSTileHost(Context context,
@@ -129,7 +127,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             UserTracker userTracker,
             SecureSettings secureSettings,
             CustomTileStatePersister customTileStatePersister,
-            TileServiceRequestController.Builder tileServiceRequestControllerBuilder
+            TileServiceRequestController.Builder tileServiceRequestControllerBuilder,
+            TileLifecycleManager.Factory tileLifecycleManagerFactory
     ) {
         mIconController = iconController;
         mContext = context;
@@ -141,9 +140,9 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mUiEventLogger = uiEventLogger;
         mBroadcastDispatcher = broadcastDispatcher;
         mTileServiceRequestController = tileServiceRequestControllerBuilder.create(this);
+        mTileLifeCycleManagerFactory = tileLifecycleManagerFactory;
 
         mInstanceIdSequence = new InstanceIdSequence(MAX_QS_INSTANCE_ID);
-        mServices = new TileServices(this, bgLooper, mBroadcastDispatcher, userTracker);
         mStatusBarOptional = statusBarOptional;
 
         mQsFactories.add(defaultFactory);
@@ -177,7 +176,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mTiles.values().forEach(tile -> tile.destroy());
         mAutoTiles.destroy();
         mTunerService.removeTunable(this);
-        mServices.destroy();
         mPluginManager.removePluginListener(this);
         mDumpManager.unregisterDumpable(TAG);
         mTileServiceRequestController.destroy();
@@ -255,11 +253,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     @Override
     public int getUserId() {
         return mCurrentUser;
-    }
-
-    @Override
-    public TileServices getTileServices() {
-        return mServices;
     }
 
     public int indexOf(String spec) {
@@ -460,10 +453,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
             if (!newTiles.contains(tileSpec)) {
                 ComponentName component = CustomTile.getComponentFromSpec(tileSpec);
                 Intent intent = new Intent().setComponent(component);
-                TileLifecycleManager lifecycleManager = new TileLifecycleManager(new Handler(),
-                        mContext, mServices, new Tile(), intent,
-                        new UserHandle(mCurrentUser),
-                        mBroadcastDispatcher);
+                TileLifecycleManager lifecycleManager = mTileLifeCycleManagerFactory.create(
+                        intent, new UserHandle(mCurrentUser));
                 lifecycleManager.onStopListening();
                 lifecycleManager.onTileRemoved();
                 mCustomTileStatePersister.removeState(new TileServiceKey(component, mCurrentUser));

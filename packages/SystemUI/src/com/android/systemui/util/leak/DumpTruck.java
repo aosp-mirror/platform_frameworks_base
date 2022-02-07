@@ -50,7 +50,7 @@ public class DumpTruck {
     private static final int BUFSIZ = 1024 * 1024; // 1MB
 
     private final Context context;
-    private GarbageMonitor mGarbageMonitor;
+    private final GarbageMonitor mGarbageMonitor;
     private Uri hprofUri;
     private long rss;
     final StringBuilder body = new StringBuilder();
