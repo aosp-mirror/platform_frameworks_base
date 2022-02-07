@@ -3701,7 +3701,7 @@ final class InstallPackageHelper {
                     && sharedUserSetting != null) {
                 Log.d(TAG, "Shared UserID " + parsedPackage.getSharedUserId()
                         + " (uid=" + sharedUserSetting.mAppId + "):"
-                        + " packages=" + sharedUserSetting.packages);
+                        + " packages=" + sharedUserSetting.getPackageStates());
             }
             if (installedPkgSetting != null) {
                 oldSharedUserSetting = mPm.mSettings.getSharedUserSettingLPr(installedPkgSetting);

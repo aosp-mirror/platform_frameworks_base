@@ -1382,7 +1382,7 @@ public class AppsFilter implements Watchable, Snappable {
                 }
             } else {
                 callingPkgSetting = null;
-                callingSharedPkgSettings = ((SharedUserSetting) callingSetting).packages;
+                callingSharedPkgSettings = ((SharedUserSetting) callingSetting).getPackageStates();
             }
             if (DEBUG_TRACING) {
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);

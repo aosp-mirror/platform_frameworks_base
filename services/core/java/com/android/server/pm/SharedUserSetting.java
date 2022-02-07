@@ -33,6 +33,7 @@ import com.android.server.pm.pkg.component.ComponentMutateUtils;
 import com.android.server.pm.pkg.component.ParsedProcess;
 import com.android.server.pm.pkg.component.ParsedProcessImpl;
 import com.android.server.utils.SnapshotCache;
+import com.android.server.utils.WatchedArraySet;
 
 import libcore.util.EmptyArray;
 
@@ -56,14 +57,14 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
     /** @see SharedUserApi#getSeInfoTargetSdkVersion() **/
     int seInfoTargetSdkVersion;
 
-    final ArraySet<PackageSetting> packages;
-    private ArraySet<PackageStateInternal> mPackagesSnapshot;
+    private final WatchedArraySet<PackageSetting> mPackages;
+    private final SnapshotCache<WatchedArraySet<PackageSetting>> mPackagesSnapshot;
 
     // It is possible for a system app to leave shared user ID by an update.
     // We need to keep track of the shadowed PackageSettings so that it is possible to uninstall
     // the update and revert the system app back into the original shared user ID.
-    final ArraySet<PackageSetting> mDisabledPackages;
-    private ArraySet<PackageStateInternal> mDisabledPackagesSnapshot;
+    final WatchedArraySet<PackageSetting> mDisabledPackages;
+    private final SnapshotCache<WatchedArraySet<PackageSetting>> mDisabledPackagesSnapshot;
 
     final PackageSignatures signatures = new PackageSignatures();
     Boolean signaturesChanged;
@@ -89,8 +90,12 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
         uidPrivateFlags = _pkgPrivateFlags;
         name = _name;
         seInfoTargetSdkVersion = android.os.Build.VERSION_CODES.CUR_DEVELOPMENT;
-        packages = new ArraySet<>();
-        mDisabledPackages = new ArraySet<>();
+        mPackages = new WatchedArraySet<>();
+        mPackagesSnapshot = new SnapshotCache.Auto<>(mPackages, mPackages,
+                "SharedUserSetting.packages");
+        mDisabledPackages = new WatchedArraySet<>();
+        mDisabledPackagesSnapshot = new SnapshotCache.Auto<>(mDisabledPackages, mDisabledPackages,
+                "SharedUserSetting.mDisabledPackages");
         processes = new ArrayMap<>();
         mSnapshot = makeCache();
     }
@@ -102,20 +107,10 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
         mAppId = orig.mAppId;
         uidFlags = orig.uidFlags;
         uidPrivateFlags = orig.uidPrivateFlags;
-        packages = new ArraySet<>(orig.packages);
-        if (!packages.isEmpty()) {
-            mPackagesSnapshot = new ArraySet<>();
-            for (int index = 0; index < packages.size(); index++) {
-                mPackagesSnapshot.add(new PackageSetting(packages.valueAt(index)));
-            }
-        }
-        mDisabledPackages = new ArraySet<>(orig.mDisabledPackages);
-        if (!mDisabledPackages.isEmpty()) {
-            mDisabledPackagesSnapshot = new ArraySet<>();
-            for (int index = 0; index < mDisabledPackages.size(); index++) {
-                mDisabledPackagesSnapshot.add(new PackageSetting(mDisabledPackages.valueAt(index)));
-            }
-        }
+        mPackages = orig.mPackagesSnapshot.snapshot();
+        mPackagesSnapshot = new SnapshotCache.Sealed<>();
+        mDisabledPackages = orig.mDisabledPackagesSnapshot.snapshot();
+        mDisabledPackagesSnapshot = new SnapshotCache.Sealed<>();
         // A SigningDetails seems to consist solely of final attributes, so
         // it is safe to copy the reference.
         signatures.mSigningDetails = orig.signatures.mSigningDetails;
@@ -161,20 +156,22 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
     }
 
     boolean removePackage(PackageSetting packageSetting) {
-        if (!packages.remove(packageSetting)) {
+        if (!mPackages.remove(packageSetting)) {
             return false;
         }
         // recalculate the pkgFlags for this shared user if needed
         if ((this.getFlags() & packageSetting.getFlags()) != 0) {
             int aggregatedFlags = uidFlags;
-            for (PackageSetting ps : packages) {
+            for (int i = 0; i < mPackages.size(); i++) {
+                PackageSetting ps = mPackages.valueAt(i);
                 aggregatedFlags |= ps.getFlags();
             }
             setFlags(aggregatedFlags);
         }
         if ((this.getPrivateFlags() & packageSetting.getPrivateFlags()) != 0) {
             int aggregatedPrivateFlags = uidPrivateFlags;
-            for (PackageSetting ps : packages) {
+            for (int i = 0; i < mPackages.size(); i++) {
+                PackageSetting ps = mPackages.valueAt(i);
                 aggregatedPrivateFlags |= ps.getPrivateFlags();
             }
             setPrivateFlags(aggregatedPrivateFlags);
@@ -188,10 +185,10 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
     void addPackage(PackageSetting packageSetting) {
         // If this is the first package added to this shared user, temporarily (until next boot) use
         // its targetSdkVersion when assigning seInfo for the shared user.
-        if ((packages.size() == 0) && (packageSetting.getPkg() != null)) {
+        if ((mPackages.size() == 0) && (packageSetting.getPkg() != null)) {
             seInfoTargetSdkVersion = packageSetting.getPkg().getTargetSdkVersion();
         }
-        if (packages.add(packageSetting)) {
+        if (mPackages.add(packageSetting)) {
             setFlags(this.getFlags() | packageSetting.getFlags());
             setPrivateFlags(this.getPrivateFlags() | packageSetting.getPrivateFlags());
             onChanged();
@@ -204,11 +201,12 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
     @NonNull
     @Override
     public List<AndroidPackage> getPackages() {
-        if (packages == null || packages.size() == 0) {
+        if (mPackages == null || mPackages.size() == 0) {
             return Collections.emptyList();
         }
-        final ArrayList<AndroidPackage> pkgList = new ArrayList<>(packages.size());
-        for (PackageSetting ps : packages) {
+        final ArrayList<AndroidPackage> pkgList = new ArrayList<>(mPackages.size());
+        for (int i = 0; i < mPackages.size(); i++) {
+            PackageSetting ps = mPackages.valueAt(i);
             if ((ps == null) || (ps.getPkg() == null)) {
                 continue;
             }
@@ -229,10 +227,11 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
      * restrictive selinux domain.
      */
     public void fixSeInfoLocked() {
-        if (packages == null || packages.size() == 0) {
+        if (mPackages == null || mPackages.size() == 0) {
             return;
         }
-        for (PackageSetting ps : packages) {
+        for (int i = 0; i < mPackages.size(); i++) {
+            PackageSetting ps = mPackages.valueAt(i);
             if ((ps == null) || (ps.getPkg() == null)) {
                 continue;
             }
@@ -242,7 +241,8 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
             }
         }
 
-        for (PackageSetting ps : packages) {
+        for (int i = 0; i < mPackages.size(); i++) {
+            PackageSetting ps = mPackages.valueAt(i);
             if ((ps == null) || (ps.getPkg() == null)) {
                 continue;
             }
@@ -258,8 +258,8 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
      */
     public void updateProcesses() {
         processes.clear();
-        for (int i = packages.size() - 1; i >= 0; i--) {
-            final AndroidPackage pkg = packages.valueAt(i).getPkg();
+        for (int i = mPackages.size() - 1; i >= 0; i--) {
+            final AndroidPackage pkg = mPackages.valueAt(i).getPkg();
             if (pkg != null) {
                 addProcesses(pkg.getProcesses());
             }
@@ -269,7 +269,8 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
     /** Returns userIds which doesn't have any packages with this sharedUserId */
     public int[] getNotInstalledUserIds() {
         int[] excludedUserIds = null;
-        for (PackageSetting ps : packages) {
+        for (int i = 0; i < mPackages.size(); i++) {
+            PackageSetting ps = mPackages.valueAt(i);
             final int[] userIds = ps.getNotInstalledUserIds();
             if (excludedUserIds == null) {
                 excludedUserIds = userIds;
@@ -291,8 +292,8 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
         this.uidFlags = sharedUser.uidFlags;
         this.uidPrivateFlags = sharedUser.uidPrivateFlags;
         this.seInfoTargetSdkVersion = sharedUser.seInfoTargetSdkVersion;
-        this.packages.clear();
-        this.packages.addAll(sharedUser.packages);
+        this.mPackages.clear();
+        this.mPackages.addAll(sharedUser.mPackages);
         this.signaturesChanged = sharedUser.signaturesChanged;
         if (sharedUser.processes != null) {
             final int numProcs = sharedUser.processes.size();
@@ -335,22 +336,24 @@ public final class SharedUserSetting extends SettingBase implements SharedUserAp
         return seInfoTargetSdkVersion;
     }
 
+    public WatchedArraySet<PackageSetting> getPackageSettings() {
+        return mPackages;
+    }
+
+    public WatchedArraySet<PackageSetting> getDisabledPackageSettings() {
+        return mDisabledPackages;
+    }
+
     @NonNull
     @Override
     public ArraySet<? extends PackageStateInternal> getPackageStates() {
-        if (mPackagesSnapshot != null) {
-            return mPackagesSnapshot;
-        }
-        return packages;
+        return mPackages.untrackedStorage();
     }
 
     @NonNull
     @Override
     public ArraySet<? extends PackageStateInternal> getDisabledPackageStates() {
-        if (mDisabledPackagesSnapshot != null) {
-            return mDisabledPackagesSnapshot;
-        }
-        return mDisabledPackages;
+        return mDisabledPackages.untrackedStorage();
     }
 
     @NonNull

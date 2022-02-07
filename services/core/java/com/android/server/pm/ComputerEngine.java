@@ -2176,11 +2176,13 @@ public class ComputerEngine implements Computer {
                 return null;
             }
             final SharedUserSetting sus = (SharedUserSetting) obj;
-            final int n = sus.packages.size();
+            final ArraySet<PackageStateInternal> packageStates =
+                    (ArraySet<PackageStateInternal>) sus.getPackageStates();
+            final int n = packageStates.size();
             String[] res = new String[n];
             int i = 0;
             for (int index = 0; index < n; index++) {
-                final PackageStateInternal ps = sus.packages.valueAt(index);
+                final PackageStateInternal ps = packageStates.valueAt(index);
                 if (ps.getUserStateOrDefault(userId).isInstalled()
                         && !shouldFilterApplication(ps, callingUid, userId)) {
                     res[i++] = ps.getPackageName();
@@ -2710,8 +2712,10 @@ public class ComputerEngine implements Computer {
     public final boolean shouldFilterApplication(@NonNull SharedUserSetting sus,
             int callingUid, int userId) {
         boolean filterApp = true;
-        for (int index = sus.packages.size() - 1; index >= 0 && filterApp; index--) {
-            filterApp &= shouldFilterApplication(sus.packages.valueAt(index),
+        final ArraySet<PackageStateInternal> packageStates =
+                (ArraySet<PackageStateInternal>) sus.getPackageStates();
+        for (int index = packageStates.size() - 1; index >= 0 && filterApp; index--) {
+            filterApp &= shouldFilterApplication(packageStates.valueAt(index),
                     callingUid, /* component */ null, TYPE_UNKNOWN, userId);
         }
         return filterApp;
@@ -4468,9 +4472,11 @@ public class ComputerEngine implements Computer {
         final Object obj = mSettings.getSettingBase(appId);
         if (obj instanceof SharedUserSetting) {
             final SharedUserSetting sus = (SharedUserSetting) obj;
-            final int numPackages = sus.packages.size();
+            final ArraySet<PackageStateInternal> packageStates =
+                    (ArraySet<PackageStateInternal>) sus.getPackageStates();
+            final int numPackages = packageStates.size();
             for (int index = 0; index < numPackages; index++) {
-                final PackageSetting ps = sus.packages.valueAt(index);
+                final PackageStateInternal ps = packageStates.valueAt(index);
                 if (ps.isPrivileged()) {
                     return true;
                 }
@@ -5290,8 +5296,9 @@ public class ComputerEngine implements Computer {
             final AndroidPackage pkg = ((PackageSetting) setting).getPkg();
             return pkg != null && mAppsFilter.canQueryPackage(pkg, targetPackageName);
         } else {
-            final ArraySet<PackageSetting> callingSharedPkgSettings =
-                    ((SharedUserSetting) setting).packages;
+            final ArraySet<PackageStateInternal> callingSharedPkgSettings =
+                    (ArraySet<PackageStateInternal>)
+                            ((SharedUserSetting) setting).getPackageStates();
             for (int i = callingSharedPkgSettings.size() - 1; i >= 0; i--) {
                 final AndroidPackage pkg = callingSharedPkgSettings.valueAt(i).getPkg();
                 if (pkg != null && mAppsFilter.canQueryPackage(pkg, targetPackageName)) {
@@ -5595,10 +5602,12 @@ public class ComputerEngine implements Computer {
         final SettingBase settingBase = mSettings.getSettingBase(appId);
         if (settingBase instanceof SharedUserSetting) {
             final SharedUserSetting sus = (SharedUserSetting) settingBase;
+            final ArraySet<PackageStateInternal> packageStates =
+                    (ArraySet<PackageStateInternal>) sus.getPackageStates();
             int vers = Build.VERSION_CODES.CUR_DEVELOPMENT;
-            final int numPackages = sus.packages.size();
+            final int numPackages = packageStates.size();
             for (int index = 0; index < numPackages; index++) {
-                final PackageSetting ps = sus.packages.valueAt(index);
+                final PackageStateInternal ps = packageStates.valueAt(index);
                 if (ps.getPkg() != null) {
                     int v = ps.getPkg().getTargetSdkVersion();
                     if (v < vers) vers = v;

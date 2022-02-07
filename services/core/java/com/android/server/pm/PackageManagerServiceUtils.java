@@ -573,9 +573,10 @@ public class PackageManagerServiceUtils {
             // Special case: if the sharedUserId capability check failed it could be due to this
             // being the only package in the sharedUserId so far and the lineage being updated to
             // deny the sharedUserId capability of the previous key in the lineage.
-            if (!match && sharedUserSetting.packages.size() == 1
-                    && sharedUserSetting.packages
-                            .valueAt(0).getPackageName().equals(packageName)) {
+            final ArraySet<PackageStateInternal> susPackageStates =
+                    (ArraySet<PackageStateInternal>) sharedUserSetting.getPackageStates();
+            if (!match && susPackageStates.size() == 1
+                    && susPackageStates.valueAt(0).getPackageName().equals(packageName)) {
                 match = true;
             }
             if (!match && compareCompat) {
@@ -605,7 +606,8 @@ public class PackageManagerServiceUtils {
             // Iterate over all of the packages in the sharedUserId and ensure any that are signed
             // with a key in this package's lineage have the SHARED_USER_ID capability granted.
             if (parsedSignatures.hasPastSigningCertificates()) {
-                for (PackageSetting shUidPkgSetting : sharedUserSetting.packages) {
+                for (int i = 0; i < susPackageStates.size(); i++) {
+                    PackageStateInternal shUidPkgSetting = susPackageStates.valueAt(i);
                     // if the current package in the sharedUserId is the package being updated then
                     // skip this check as the update may revoke the sharedUserId capability from
                     // the key with which this app was previously signed.
