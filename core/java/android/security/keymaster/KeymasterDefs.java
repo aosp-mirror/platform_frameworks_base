@@ -317,16 +317,35 @@ public final class KeymasterDefs {
             ErrorCode.MISSING_MIN_MAC_LENGTH; // -58;
     public static final int KM_ERROR_UNSUPPORTED_MIN_MAC_LENGTH =
             ErrorCode.UNSUPPORTED_MIN_MAC_LENGTH; // -59;
+    public static final int KM_ERROR_UNSUPPORTED_KDF = ErrorCode.UNSUPPORTED_KDF; // -60
+    public static final int KM_ERROR_UNSUPPORTED_EC_CURVE = ErrorCode.UNSUPPORTED_EC_CURVE; // -61
+    // -62 is KEY_REQUIRES_UPGRADE and is handled by Keystore.
+    public static final int KM_ERROR_ATTESTATION_CHALLENGE_MISSING =
+            ErrorCode.ATTESTATION_CHALLENGE_MISSING; // -63
+    public static final int KM_ERROR_KEYMINT_NOT_CONFIGURED =
+            ErrorCode.KEYMINT_NOT_CONFIGURED; // -64
+    public static final int KM_ERROR_ATTESTATION_APPLICATION_ID_MISSING =
+            ErrorCode.ATTESTATION_APPLICATION_ID_MISSING; // -65;
     public static final int KM_ERROR_CANNOT_ATTEST_IDS =
             ErrorCode.CANNOT_ATTEST_IDS; // -66;
+    public static final int KM_ERROR_ROLLBACK_RESISTANCE_UNAVAILABLE =
+            ErrorCode.ROLLBACK_RESISTANCE_UNAVAILABLE; // -67;
     public static final int KM_ERROR_HARDWARE_TYPE_UNAVAILABLE =
             ErrorCode.HARDWARE_TYPE_UNAVAILABLE; // -68;
     public static final int KM_ERROR_DEVICE_LOCKED =
             ErrorCode.DEVICE_LOCKED; // -72;
+    public static final int KM_ERROR_STORAGE_KEY_UNSUPPORTED =
+            ErrorCode.STORAGE_KEY_UNSUPPORTED; // -77,
+    public static final int KM_ERROR_INCOMPATIBLE_MGF_DIGEST =
+            ErrorCode.INCOMPATIBLE_MGF_DIGEST; // -78,
+    public static final int KM_ERROR_UNSUPPORTED_MGF_DIGEST =
+            ErrorCode.UNSUPPORTED_MGF_DIGEST; // -79,
     public static final int KM_ERROR_MISSING_NOT_BEFORE =
             ErrorCode.MISSING_NOT_BEFORE; // -80;
     public static final int KM_ERROR_MISSING_NOT_AFTER =
             ErrorCode.MISSING_NOT_AFTER; // -80;
+    public static final int KM_ERROR_HARDWARE_NOT_YET_AVAILABLE =
+            ErrorCode.HARDWARE_NOT_YET_AVAILABLE; // -85
     public static final int KM_ERROR_UNIMPLEMENTED =
             ErrorCode.UNIMPLEMENTED; // -100;
     public static final int KM_ERROR_VERSION_MISMATCH =
