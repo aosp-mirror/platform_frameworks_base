@@ -437,7 +437,7 @@ class ControlsUiControllerImpl @Inject constructor (
      * number of columns. This helps prevent text truncation on these devices.
      */
     private fun findMaxColumns(): Int {
-        val res = context.resources
+        val res = activityContext.resources
         var maxColumns = res.getInteger(R.integer.controls_max_columns)
         val maxColumnsAdjustWidth =
             res.getInteger(R.integer.controls_max_columns_adjust_below_width_dp)
