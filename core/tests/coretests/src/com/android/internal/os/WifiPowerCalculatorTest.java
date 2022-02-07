@@ -17,6 +17,9 @@
 package com.android.internal.os;
 
 
+import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
+import static android.net.NetworkStats.METERED_NO;
+import static android.net.NetworkStats.ROAMING_NO;
 import static android.os.BatteryStats.POWER_DATA_UNAVAILABLE;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -77,8 +80,12 @@ public class WifiPowerCalculatorTest {
     private NetworkStats buildNetworkStats(long elapsedRealtime, int rxBytes, int rxPackets,
             int txBytes, int txPackets) {
         return new NetworkStats(elapsedRealtime, 1)
-                .insertEntry("wifi", APP_UID, 0, 0, rxBytes, rxPackets, txBytes, txPackets, 100)
-                .insertEntry("wifi", Process.WIFI_UID, 0, 0, 1111, 111, 2222, 22, 111);
+                .addEntry(new NetworkStats.Entry("wifi", APP_UID, 0, 0,
+                        METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO, rxBytes, rxPackets,
+                        txBytes, txPackets, 100))
+                .addEntry(new NetworkStats.Entry("wifi", Process.WIFI_UID, 0, 0,
+                        METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO, 1111, 111,
+                        2222, 22, 111));
     }
 
     /** Sets up an WifiActivityEnergyInfo for ActivityController-model-based tests. */
