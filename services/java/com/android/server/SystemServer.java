@@ -84,6 +84,7 @@ import android.system.Os;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
+import android.util.Dumpable;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
@@ -663,7 +664,12 @@ public final class SystemServer implements Dumpable {
     }
 
     @Override
-    public void dump(IndentingPrintWriter pw, String[] args) {
+    public String getDumpableName() {
+        return SystemServer.class.getSimpleName();
+    }
+
+    @Override
+    public void dump(PrintWriter pw, String[] args) {
         pw.printf("Runtime restart: %b\n", mRuntimeRestart);
         pw.printf("Start count: %d\n", mStartCount);
         pw.print("Runtime start-up time: ");
