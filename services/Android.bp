@@ -21,6 +21,8 @@ java_defaults {
             "-Xep:TryFailThrowable:ERROR",
             "-Xep:HashtableContains:ERROR",
             "-Xep:FormatString:ERROR",
+            "-Xep:ArrayHashCode:ERROR",
+            "-Xep:SelfAssignment:ERROR",
             // NOTE: only enable to generate local patchfiles
             // "-XepPatchChecks:refaster:frameworks/base/errorprone/refaster/EfficientXml.java.refaster",
             // "-XepPatchLocation:/tmp/refaster/",
