@@ -338,6 +338,22 @@ public final class VirtualDeviceManager {
         }
 
         /**
+         * Sets the visibility of the pointer icon for this VirtualDevice's associated displays.
+         *
+         * @param showPointerIcon True if the pointer should be shown; false otherwise. The default
+         *                        visibility is true.
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @NonNull
+        public void setShowPointerIcon(boolean showPointerIcon) {
+            try {
+                mVirtualDevice.setShowPointerIcon(showPointerIcon);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Returns the display flags that should be added to a particular virtual display.
          * Additional device-level flags from {@link
          * com.android.server.companion.virtual.VirtualDeviceImpl#getBaseVirtualDisplayFlags()} will
