@@ -4745,9 +4745,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         private List<Rect> mSystemGestureExclusionRects = null;
         private List<Rect> mKeepClearRects = null;
         private boolean mPreferKeepClear = false;
+        private Rect mHandwritingArea = null;
 
         /**
-         * Used to track {@link #mSystemGestureExclusionRects} and {@link #mKeepClearRects}
+         * Used to track {@link #mSystemGestureExclusionRects}, {@link #mKeepClearRects} and
+         * {@link #mHandwritingArea}.
          */
         public RenderNode.PositionUpdateListener mPositionUpdateListener;
         private Runnable mPositionChangedUpdate;
@@ -11692,7 +11694,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private void updatePositionUpdateListener() {
         final ListenerInfo info = getListenerInfo();
         if (getSystemGestureExclusionRects().isEmpty()
-                && collectPreferKeepClearRects().isEmpty()) {
+                && collectPreferKeepClearRects().isEmpty()
+                && (info.mHandwritingArea == null || !isAutoHandwritingEnabled())) {
             if (info.mPositionUpdateListener != null) {
                 mRenderNode.removePositionUpdateListener(info.mPositionUpdateListener);
                 info.mPositionChangedUpdate = null;
@@ -11702,6 +11705,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 info.mPositionChangedUpdate = () -> {
                     updateSystemGestureExclusionRects();
                     updateKeepClearRects();
+                    updateHandwritingArea();
                 };
                 info.mPositionUpdateListener = new RenderNode.PositionUpdateListener() {
                     @Override
@@ -11855,6 +11859,51 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         return Collections.emptyList();
+    }
+
+    /**
+     * Set a list of handwriting areas in this view. If there is any stylus {@link MotionEvent}
+     * occurs within those areas, it will trigger stylus handwriting mode. This can be disabled by
+     * disabling the auto handwriting initiation by calling
+     * {@link #setAutoHandwritingEnabled(boolean)} with false.
+     *
+     * @attr rects a list of handwriting area in the view's local coordiniates.
+     *
+     * @see android.view.inputmethod.InputMethodManager#startStylusHandwriting(View)
+     * @see #setAutoHandwritingEnabled(boolean)
+     *
+     * @hide
+     */
+    public void setHandwritingArea(@Nullable Rect rect) {
+        final ListenerInfo info = getListenerInfo();
+        info.mHandwritingArea = rect;
+        updatePositionUpdateListener();
+        postUpdate(this::updateHandwritingArea);
+    }
+
+    /**
+     * Return the handwriting areas set on this view, in its local coordinates.
+     * Notice: the caller of this method should not modify the Rect returned.
+     * @see #setHandwritingArea(Rect)
+     *
+     * @hide
+     */
+    @Nullable
+    public Rect getHandwritingArea() {
+        final ListenerInfo info = mListenerInfo;
+        if (info != null) {
+            return info.mHandwritingArea;
+        }
+        return null;
+    }
+
+    void updateHandwritingArea() {
+        // If autoHandwritingArea is not enabled, do nothing.
+        if (!isAutoHandwritingEnabled()) return;
+        final AttachInfo ai = mAttachInfo;
+        if (ai != null) {
+            ai.mViewRootImpl.getHandwritingInitiator().updateHandwritingAreasForView(this);
+        }
     }
 
     /**
@@ -31154,6 +31203,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             mPrivateFlags4 &= ~PFLAG4_AUTO_HANDWRITING_ENABLED;
         }
+        updatePositionUpdateListener();
+        postUpdate(this::updateHandwritingArea);
     }
 
     /**
