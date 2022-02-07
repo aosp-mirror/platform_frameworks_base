@@ -49,7 +49,6 @@ import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.view.SurfaceControl;
-import android.view.TransactionCommittedListener;
 import android.window.IDisplayAreaOrganizer;
 import android.window.ITaskOrganizer;
 import android.window.ITransitionPlayer;
@@ -533,8 +532,8 @@ public class TransitionTests extends WindowTestsBase {
         assertTrue(asyncRotationController.isTargetToken(statusBar.mToken));
 
         final SurfaceControl.Transaction startTransaction = mock(SurfaceControl.Transaction.class);
-        final ArgumentCaptor<TransactionCommittedListener> listenerCaptor =
-                ArgumentCaptor.forClass(TransactionCommittedListener.class);
+        final ArgumentCaptor<SurfaceControl.TransactionCommittedListener> listenerCaptor =
+                ArgumentCaptor.forClass(SurfaceControl.TransactionCommittedListener.class);
         player.onTransactionReady(startTransaction);
 
         verify(startTransaction).addTransactionCommittedListener(any(), listenerCaptor.capture());
