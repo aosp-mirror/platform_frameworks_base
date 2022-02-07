@@ -15419,8 +15419,6 @@ package android.graphics {
 
   public class RuntimeShader extends android.graphics.Shader {
     ctor public RuntimeShader(@NonNull String);
-    ctor public RuntimeShader(@NonNull String, boolean);
-    method public boolean isForceOpaque();
     method public void setColorUniform(@NonNull String, @ColorInt int);
     method public void setColorUniform(@NonNull String, @ColorLong long);
     method public void setColorUniform(@NonNull String, @NonNull android.graphics.Color);

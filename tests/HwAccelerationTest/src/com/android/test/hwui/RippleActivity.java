@@ -109,7 +109,7 @@ public class RippleActivity extends Activity {
             p.setColor(mColor);
             mPaint = CanvasProperty.createPaint(p);
 
-            mRuntimeShader = new RuntimeShader(sSkSL, false);
+            mRuntimeShader = new RuntimeShader(sSkSL);
             mRuntimeShader.setFloatUniform("in_maxRadius", MAX_RADIUS);
         }
 
