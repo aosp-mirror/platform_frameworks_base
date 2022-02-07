@@ -39,6 +39,7 @@ import android.os.RemoteException;
 import android.util.ExceptionUtils;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.widget.Toast;
 import android.window.DisplayWindowPolicyController;
 
 import com.android.internal.annotations.GuardedBy;
@@ -62,8 +63,10 @@ public class VirtualDeviceManagerService extends SystemService {
 
     private final Object mVirtualDeviceManagerLock = new Object();
     private final VirtualDeviceManagerImpl mImpl;
+    private VirtualDeviceManagerInternal mLocalService;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private final PendingTrampolineMap mPendingTrampolines = new PendingTrampolineMap(mHandler);
+    private final CameraAccessController mCameraAccessController;
 
     /**
      * Mapping from CDM association IDs to virtual devices. Only one virtual device is allowed for
@@ -90,6 +93,9 @@ public class VirtualDeviceManagerService extends SystemService {
     public VirtualDeviceManagerService(Context context) {
         super(context);
         mImpl = new VirtualDeviceManagerImpl();
+        mLocalService = new LocalService();
+        mCameraAccessController = new CameraAccessController(getContext(), mLocalService,
+                this::onCameraAccessBlocked);
     }
 
     private final ActivityInterceptorCallback mActivityInterceptorCallback =
@@ -118,8 +124,7 @@ public class VirtualDeviceManagerService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.VIRTUAL_DEVICE_SERVICE, mImpl);
-        publishLocalService(VirtualDeviceManagerInternal.class, new LocalService());
-
+        publishLocalService(VirtualDeviceManagerInternal.class, mLocalService);
         ActivityTaskManagerInternal activityTaskManagerInternal = getLocalService(
                 ActivityTaskManagerInternal.class);
         activityTaskManagerInternal.registerActivityStartInterceptor(
@@ -169,6 +174,16 @@ public class VirtualDeviceManagerService extends SystemService {
         }
     }
 
+    void onCameraAccessBlocked(int appUid) {
+        synchronized (mVirtualDeviceManagerLock) {
+            int size = mVirtualDevices.size();
+            for (int i = 0; i < size; i++) {
+                mVirtualDevices.valueAt(i).showToastWhereUidIsRunning(appUid,
+                        com.android.internal.R.string.vdm_camera_access_denied, Toast.LENGTH_LONG);
+            }
+        }
+    }
+
     class VirtualDeviceManagerImpl extends IVirtualDeviceManager.Stub implements
             VirtualDeviceImpl.PendingTrampolineCallback {
 
@@ -205,10 +220,14 @@ public class VirtualDeviceManagerService extends SystemService {
                             public void onClose(int associationId) {
                                 synchronized (mVirtualDeviceManagerLock) {
                                     mVirtualDevices.remove(associationId);
+                                    if (mVirtualDevices.size() == 0) {
+                                        mCameraAccessController.stopObserving();
+                                    }
                                 }
                             }
                         },
                         this, activityListener, params);
+                mCameraAccessController.startObservingIfNeeded();
                 mVirtualDevices.put(associationInfo.getId(), virtualDevice);
                 return virtualDevice;
             }
