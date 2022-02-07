@@ -109,6 +109,8 @@ public class Flags {
 
     public static final BooleanFlag NEW_FOOTER = new BooleanFlag(504, false);
 
+    public static final BooleanFlag NEW_HEADER = new BooleanFlag(505, false);
+
     /***************************************/
     // 600- status bar
     public static final BooleanFlag COMBINED_STATUS_BAR_SIGNAL_ICONS =
