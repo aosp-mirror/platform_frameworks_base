@@ -10357,6 +10357,7 @@ package android.content {
     field public static final String EXTRA_LOCAL_ONLY = "android.intent.extra.LOCAL_ONLY";
     field public static final String EXTRA_LOCUS_ID = "android.intent.extra.LOCUS_ID";
     field public static final String EXTRA_MIME_TYPES = "android.intent.extra.MIME_TYPES";
+    field public static final String EXTRA_NEW_UID = "android.intent.extra.NEW_UID";
     field public static final String EXTRA_NOT_UNKNOWN_SOURCE = "android.intent.extra.NOT_UNKNOWN_SOURCE";
     field public static final String EXTRA_ORIGINATING_URI = "android.intent.extra.ORIGINATING_URI";
     field public static final String EXTRA_PACKAGE_NAME = "android.intent.extra.PACKAGE_NAME";
