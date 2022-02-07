@@ -97,6 +97,7 @@ import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ER
 import static android.window.WindowProviderService.isWindowProviderService;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_BOOT;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
@@ -2560,7 +2561,9 @@ public class WindowManagerService extends IWindowManager.Stub
             transit = WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
         }
 
+        String reason = null;
         if (win.isWinVisibleLw() && winAnimator.applyAnimationLocked(transit, false)) {
+            reason = "applyAnimation";
             focusMayChange = true;
             win.mAnimatingExit = true;
         } else if (win.mDisplayContent.okToAnimate() && win.isExitAnimationRunningSelfOrParent()) {
@@ -2570,6 +2573,7 @@ public class WindowManagerService extends IWindowManager.Stub
         } else if (win.mDisplayContent.okToAnimate()
                 && win.mDisplayContent.mWallpaperController.isWallpaperTarget(win)
                 && win.mAttrs.type != TYPE_NOTIFICATION_SHADE) {
+            reason = "isWallpaperTarget";
             // If the wallpaper is currently behind this app window, we need to change both of them
             // inside of a transaction to avoid artifacts.
             // For NotificationShade, sysui is in charge of running window animation and it updates
@@ -2584,6 +2588,10 @@ public class WindowManagerService extends IWindowManager.Stub
             // this to the exit animation.
             win.mDestroying = true;
             win.destroySurface(false, stopped);
+        }
+        if (reason != null) {
+            ProtoLog.d(WM_DEBUG_ANIM, "Set animatingExit: reason=startExitingAnimation/%s win=%s",
+                    reason, win);
         }
         if (mAccessibilityController.hasCallbacks()) {
             mAccessibilityController.onWindowTransition(win, transit);
