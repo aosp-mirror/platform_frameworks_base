@@ -117,6 +117,34 @@ public final class MediaMetricsManager {
     }
 
     /**
+     * Creates a transcoding session.
+     */
+    @NonNull
+    public TranscodingSession createTranscodingSession() {
+        try {
+            String id = mService.getTranscodingSessionId(mUserId);
+            TranscodingSession session = new TranscodingSession(id, this);
+            return session;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Creates a editing session.
+     */
+    @NonNull
+    public EditingSession createEditingSession() {
+        try {
+            String id = mService.getEditingSessionId(mUserId);
+            EditingSession session = new EditingSession(id, this);
+            return session;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Reports error event.
      * @hide
      */

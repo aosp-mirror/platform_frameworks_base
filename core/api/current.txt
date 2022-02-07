@@ -24363,6 +24363,11 @@ package android.media.effect {
 
 package android.media.metrics {
 
+  public final class EditingSession implements java.lang.AutoCloseable {
+    method public void close();
+    method @NonNull public android.media.metrics.LogSessionId getSessionId();
+  }
+
   public abstract class Event {
     method @NonNull public android.os.Bundle getMetricsBundle();
     method @IntRange(from=0xffffffff) public long getTimeSinceCreatedMillis();
@@ -24374,8 +24379,10 @@ package android.media.metrics {
   }
 
   public final class MediaMetricsManager {
+    method @NonNull public android.media.metrics.EditingSession createEditingSession();
     method @NonNull public android.media.metrics.PlaybackSession createPlaybackSession();
     method @NonNull public android.media.metrics.RecordingSession createRecordingSession();
+    method @NonNull public android.media.metrics.TranscodingSession createTranscodingSession();
     field public static final long INVALID_TIMESTAMP = -1L; // 0xffffffffffffffffL
   }
 
@@ -24621,6 +24628,11 @@ package android.media.metrics {
     method @NonNull public android.media.metrics.TrackChangeEvent.Builder setTrackState(int);
     method @NonNull public android.media.metrics.TrackChangeEvent.Builder setVideoFrameRate(@FloatRange(from=0xffffffff, to=java.lang.Float.MAX_VALUE) float);
     method @NonNull public android.media.metrics.TrackChangeEvent.Builder setWidth(@IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) int);
+  }
+
+  public final class TranscodingSession implements java.lang.AutoCloseable {
+    method public void close();
+    method @NonNull public android.media.metrics.LogSessionId getSessionId();
   }
 
 }
