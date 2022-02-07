@@ -30,6 +30,10 @@
                 }
             ],
             "file_patterns": ["SensorPrivacyService\\.java"]
+        },
+        {
+            "name": "BinaryTransparencyServiceTest",
+            "file_patterns": ["BinaryTransparencyService\\.java"]
         }
     ],
     "presubmit-large": [
