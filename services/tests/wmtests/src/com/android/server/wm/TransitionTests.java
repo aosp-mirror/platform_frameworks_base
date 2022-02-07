@@ -739,6 +739,9 @@ public class TransitionTests extends WindowTestsBase {
             }
             from = from.getParent();
         }
+        if (end.asDisplayArea() != null) {
+            end.asDisplayArea().mOrganizer = organizer;
+        }
     }
 
     /** Fill the change map with all the parents of top. Change maps are usually fully populated */

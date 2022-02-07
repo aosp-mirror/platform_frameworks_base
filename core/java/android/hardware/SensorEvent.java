@@ -676,6 +676,109 @@ public class SensorEvent {
      *  <li> values[5] : Z component of Euler vector representing angular velocity</li>
      * </ul>
      *
+     * <h4>{@link android.hardware.Sensor#TYPE_ACCELEROMETER_LIMITED_AXES
+     * Sensor.TYPE_ACCELEROMETER_LIMITED_AXES}:
+     * </h4> Equivalent to TYPE_ACCELEROMETER, but supporting cases where one
+     * or two axes are not supported.
+     *
+     * The last three values represent whether the acceleration value for a
+     * given axis is supported. A value of 1.0 indicates that the axis is
+     * supported, while a value of 0 means it isn't supported. The supported
+     * axes should be determined at build time and these values do not change
+     * during runtime.
+     *
+     * The acceleration values for axes that are not supported are set to 0.
+     *
+     * Similar to {@link android.hardware.Sensor#TYPE_ACCELEROMETER}.
+     *
+     * <ul>
+     * <li> values[0]: Acceleration minus Gx on the x-axis (if supported)</li>
+     * <li> values[1]: Acceleration minus Gy on the y-axis (if supported)</li>
+     * <li> values[2]: Acceleration minus Gz on the z-axis (if supported)</li>
+     * <li> values[3]: Acceleration supported for x-axis</li>
+     * <li> values[4]: Acceleration supported for y-axis</li>
+     * <li> values[5]: Acceleration supported for z-axis</li>
+     * </ul>
+     *
+     * <h4>{@link android.hardware.Sensor#TYPE_GYROSCOPE_LIMITED_AXES
+     * Sensor.TYPE_GYROSCOPE_LIMITED_AXES}:
+     * </h4> Equivalent to TYPE_GYROSCOPE, but supporting cases where one or two
+     * axes are not supported.
+     *
+     * The last three values represent whether the angular speed value for a
+     * given axis is supported. A value of 1.0 indicates that the axis is
+     * supported, while a value of 0 means it isn't supported. The supported
+     * axes should be determined at build time and these values do not change
+     * during runtime.
+     *
+     * The angular speed values for axes that are not supported are set to 0.
+     *
+     * Similar to {@link android.hardware.Sensor#TYPE_GYROSCOPE}.
+     *
+     * <ul>
+     * <li> values[0]: Angular speed around the x-axis (if supported)</li>
+     * <li> values[1]: Angular speed around the y-axis (if supported)</li>
+     * <li> values[2]: Angular speed around the z-axis (if supported)</li>
+     * <li> values[3]: Angular speed supported for x-axis</li>
+     * <li> values[4]: Angular speed supported for y-axis</li>
+     * <li> values[5]: Angular speed supported for z-axis</li>
+     * </ul>
+     * <p>
+     *
+     * <h4>{@link android.hardware.Sensor#TYPE_ACCELEROMETER_LIMITED_AXES_UNCALIBRATED
+     * Sensor.TYPE_ACCELEROMETER_LIMITED_AXES_UNCALIBRATED}:
+     * </h4> Equivalent to TYPE_ACCELEROMETER_UNCALIBRATED, but supporting cases
+     * where one or two axes are not supported.
+     *
+     * The last three values represent whether the acceleration value for a
+     * given axis is supported. A value of 1.0 indicates that the axis is
+     * supported, while a value of 0 means it isn't supported. The supported
+     * axes should be determined at build time and these values do not change
+     * during runtime.
+     *
+     * The acceleration values and bias values for axes that are not supported
+     * are set to 0.
+     *
+     * <ul>
+     * <li> values[0]: x_uncalib without bias compensation (if supported)</li>
+     * <li> values[1]: y_uncalib without bias compensation (if supported)</li>
+     * <li> values[2]: z_uncalib without bias compensation (if supported)</li>
+     * <li> values[3]: estimated x_bias (if supported)</li>
+     * <li> values[4]: estimated y_bias (if supported)</li>
+     * <li> values[5]: estimated z_bias (if supported)</li>
+     * <li> values[6]: Acceleration supported for x-axis</li>
+     * <li> values[7]: Acceleration supported for y-axis</li>
+     * <li> values[8]: Acceleration supported for z-axis</li>
+     * </ul>
+     * </p>
+     *
+     * <h4> {@link android.hardware.Sensor#TYPE_GYROSCOPE_LIMITED_AXES_UNCALIBRATED
+     * Sensor.TYPE_GYROSCOPE_LIMITED_AXES_UNCALIBRATED}:
+     * </h4> Equivalent to TYPE_GYROSCOPE_UNCALIBRATED, but supporting cases
+     * where one or two axes are not supported.
+     *
+     * The last three values represent whether the angular speed value for a
+     * given axis is supported. A value of 1.0 indicates that the axis is
+     * supported, while a value of 0 means it isn't supported. The supported
+     * axes should be determined at build time and these values do not change
+     * during runtime.
+     *
+     * The angular speed values and drift values for axes that are not supported
+     * are set to 0.
+     *
+     * <ul>
+     * <li> values[0]: Angular speed (w/o drift compensation) around the X axis (if supported)</li>
+     * <li> values[1]: Angular speed (w/o drift compensation) around the Y axis (if supported)</li>
+     * <li> values[2]: Angular speed (w/o drift compensation) around the Z axis (if supported)</li>
+     * <li> values[3]: estimated drift around X axis (if supported)</li>
+     * <li> values[4]: estimated drift around Y axis (if supported)</li>
+     * <li> values[5]: estimated drift around Z axis (if supported)</li>
+     * <li> values[6]: Angular speed supported for x-axis</li>
+     * <li> values[7]: Angular speed supported for y-axis</li>
+     * <li> values[8]: Angular speed supported for z-axis</li>
+     * </ul>
+     * </p>
+     *
      * @see GeomagneticField
      */
     public final float[] values;
