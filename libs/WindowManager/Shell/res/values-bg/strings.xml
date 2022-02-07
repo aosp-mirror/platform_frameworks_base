@@ -76,4 +76,10 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Имате проблеми с камерата?\nДокоснете за ремонтиране"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Проблемът не се отстрани?\nДокоснете за връщане в предишното състояние"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Нямате проблеми с камерата? Докоснете, за да отхвърлите."</string>
+    <string name="letterbox_education_dialog_title" msgid="3924745395335329810">"Използване на <xliff:g id="APP_NAME">%s</xliff:g> в пълна степен"</string>
+    <string name="letterbox_education_screen_rotation_portrait_text" msgid="9005616635100891260">"Завъртете екрана си вертикално"</string>
+    <string name="letterbox_education_screen_rotation_landscape_text" msgid="7619609293250631225">"Завъртете екрана си хоризонтално"</string>
+    <string name="letterbox_education_split_screen_text" msgid="3906978051324735033">"Преместете друго приложение с плъзгане, за да използвате режима за разделен екран"</string>
+    <string name="letterbox_education_reposition_text" msgid="8597800472592539168">"Докоснете два пъти за промяна на позицията"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"Разбрах"</string>
 </resources>

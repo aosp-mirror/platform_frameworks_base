@@ -76,4 +76,10 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"相机有问题？\n点按即可整修"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"没有解决此问题？\n点按即可恢复"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"相机没有问题？点按即可忽略。"</string>
+    <string name="letterbox_education_dialog_title" msgid="3924745395335329810">"充分利用 <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <string name="letterbox_education_screen_rotation_portrait_text" msgid="9005616635100891260">"将屏幕旋转成纵向模式"</string>
+    <string name="letterbox_education_screen_rotation_landscape_text" msgid="7619609293250631225">"将屏幕旋转成横向模式"</string>
+    <string name="letterbox_education_split_screen_text" msgid="3906978051324735033">"拖入另一个应用，即可使用分屏模式"</string>
+    <string name="letterbox_education_reposition_text" msgid="8597800472592539168">"点按两次即可调整位置"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"知道了"</string>
 </resources>
