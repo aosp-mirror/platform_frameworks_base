@@ -18,6 +18,7 @@ package com.android.server.adb;
 
 import static com.android.internal.util.dump.DumpUtils.writeStringIfNotNull;
 
+import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.app.ActivityManager;
 import android.app.Notification;
@@ -168,6 +169,12 @@ public class AdbDebuggingManager {
         mConnectedKeys = new HashMap<String, Integer>();
         mWifiConnectedKeys = new HashSet<String>();
         mAdbConnectionInfo = new AdbConnectionInfo();
+    }
+
+    static void sendBroadcastWithDebugPermission(@NonNull Context context, @NonNull Intent intent,
+            @NonNull UserHandle userHandle) {
+        context.sendBroadcastAsUser(intent, userHandle,
+                android.Manifest.permission.MANAGE_DEBUGGING);
     }
 
     class PairingThread extends Thread implements NsdManager.RegistrationListener {
@@ -1278,7 +1285,7 @@ public class AdbDebuggingManager {
                     ? AdbManager.WIRELESS_STATUS_CONNECTED
                     : AdbManager.WIRELESS_STATUS_DISCONNECTED);
             intent.putExtra(AdbManager.WIRELESS_DEBUG_PORT_EXTRA, port);
-            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+            AdbDebuggingManager.sendBroadcastWithDebugPermission(mContext, intent, UserHandle.ALL);
         }
 
         private void onAdbdWifiServerConnected(int port) {
@@ -1350,7 +1357,8 @@ public class AdbDebuggingManager {
             if (publicKey == null) {
                 Intent intent = new Intent(AdbManager.WIRELESS_DEBUG_PAIRING_RESULT_ACTION);
                 intent.putExtra(AdbManager.WIRELESS_STATUS_EXTRA, AdbManager.WIRELESS_STATUS_FAIL);
-                mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+                AdbDebuggingManager.sendBroadcastWithDebugPermission(mContext, intent,
+                        UserHandle.ALL);
             } else {
                 Intent intent = new Intent(AdbManager.WIRELESS_DEBUG_PAIRING_RESULT_ACTION);
                 intent.putExtra(AdbManager.WIRELESS_STATUS_EXTRA,
@@ -1366,7 +1374,8 @@ public class AdbDebuggingManager {
                 device.guid = hostname;
                 device.connected = false;
                 intent.putExtra(AdbManager.WIRELESS_PAIR_DEVICE_EXTRA, device);
-                mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+                AdbDebuggingManager.sendBroadcastWithDebugPermission(mContext, intent,
+                        UserHandle.ALL);
                 // Add the key into the keystore
                 mAdbKeyStore.setLastConnectionTime(publicKey,
                         System.currentTimeMillis());
@@ -1380,14 +1389,14 @@ public class AdbDebuggingManager {
             intent.putExtra(AdbManager.WIRELESS_STATUS_EXTRA,
                     AdbManager.WIRELESS_STATUS_CONNECTED);
             intent.putExtra(AdbManager.WIRELESS_DEBUG_PORT_EXTRA, port);
-            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+            AdbDebuggingManager.sendBroadcastWithDebugPermission(mContext, intent, UserHandle.ALL);
         }
 
         private void sendPairedDevicesToUI(Map<String, PairDevice> devices) {
             Intent intent = new Intent(AdbManager.WIRELESS_DEBUG_PAIRED_DEVICES_ACTION);
             // Map is not serializable, so need to downcast
             intent.putExtra(AdbManager.WIRELESS_DEVICES_EXTRA, (HashMap) devices);
-            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+            AdbDebuggingManager.sendBroadcastWithDebugPermission(mContext, intent, UserHandle.ALL);
         }
 
         private void updateUIPairCode(String code) {
@@ -1397,7 +1406,7 @@ public class AdbDebuggingManager {
             intent.putExtra(AdbManager.WIRELESS_PAIRING_CODE_EXTRA, code);
             intent.putExtra(AdbManager.WIRELESS_STATUS_EXTRA,
                     AdbManager.WIRELESS_STATUS_PAIRING_CODE);
-            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+            AdbDebuggingManager.sendBroadcastWithDebugPermission(mContext, intent, UserHandle.ALL);
         }
     }
 
