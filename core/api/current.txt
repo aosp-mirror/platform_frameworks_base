@@ -41306,7 +41306,7 @@ package android.telephony {
   public static final class CarrierConfigManager.Bsf {
     field public static final String KEY_BSF_SERVER_FQDN_STRING = "bsf.bsf_server_fqdn_string";
     field public static final String KEY_BSF_SERVER_PORT_INT = "bsf.bsf_server_port_int";
-    field public static final String KEY_BSF_TRANSPORT_TYPE_INT = "bsf.bsf_transport type_int";
+    field public static final String KEY_BSF_TRANSPORT_TYPE_INT = "bsf.bsf_transport_type_int";
     field public static final String KEY_PREFIX = "bsf.";
   }
 
