@@ -179,11 +179,6 @@ public class SurfaceSyncerValidatorTestCase implements ISurfaceValidatorTestCase
                             mSurfaceHolder.unlockCanvasAndPost(c);
                         }
 
-                        if (mFrameCallback != null) {
-                            Log.d(TAG, "onFrameComplete");
-                            mFrameCallback.onFrameComplete();
-                        }
-
                         mFrameCallback = null;
                     }
                 }
