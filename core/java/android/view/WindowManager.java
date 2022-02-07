@@ -106,7 +106,6 @@ import android.graphics.Region;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.IInputConstants;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -3360,8 +3359,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
-        public static final int INPUT_FEATURE_NO_INPUT_CHANNEL =
-                IInputConstants.InputFeature.NO_INPUT_CHANNEL;
+        public static final int INPUT_FEATURE_NO_INPUT_CHANNEL = 1 << 0;
 
         /**
          * When this window has focus, does not call user activity for all input events so
@@ -3374,18 +3372,16 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        public static final int INPUT_FEATURE_DISABLE_USER_ACTIVITY =
-                IInputConstants.InputFeature.DISABLE_USER_ACTIVITY;
+        public static final int INPUT_FEATURE_DISABLE_USER_ACTIVITY = 1 << 1;
 
         /**
          * An input spy window. This window will receive all pointer events within its touchable
-         * area, but will will not stop events from being sent to other windows below it in z-order.
+         * area, but will not stop events from being sent to other windows below it in z-order.
          * An input event will be dispatched to all spy windows above the top non-spy window at the
          * event's coordinates.
          * @hide
          */
-        public static final int INPUT_FEATURE_SPY =
-                IInputConstants.InputFeature.SPY;
+        public static final int INPUT_FEATURE_SPY = 1 << 2;
 
         /**
          * When used with the window flag {@link #FLAG_NOT_TOUCHABLE}, this window will continue
@@ -3401,8 +3397,7 @@ public interface WindowManager extends ViewManager {
          *
          * @hide
          */
-        public static final int INPUT_FEATURE_INTERCEPTS_STYLUS =
-                IInputConstants.InputFeature.INTERCEPTS_STYLUS;
+        public static final int INPUT_FEATURE_INTERCEPTS_STYLUS = 1 << 3;
 
         /**
          * An internal annotation for flags that can be specified to {@link #inputFeatures}.

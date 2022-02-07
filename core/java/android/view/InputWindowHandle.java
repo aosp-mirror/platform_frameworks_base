@@ -106,6 +106,7 @@ public final class InputWindowHandle {
     public String packageName;
 
     // Window input features.
+    @WindowManager.LayoutParams.InputFeatureFlags
     public int inputFeatures;
 
     // Display this input is on.

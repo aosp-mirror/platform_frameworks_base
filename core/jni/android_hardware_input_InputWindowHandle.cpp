@@ -162,13 +162,23 @@ bool NativeInputWindowHandle::updateInfo() {
     mInfo.layoutParamsFlags = flags;
     mInfo.layoutParamsType = type;
 
+    // TODO(b/216806304): Expose InputConfig as InputWindowHandle API so we don't have to use
+    //  WindowManager.LayoutParams.InputFeatureFlags here.
+    const auto inputFeatures =
+            static_cast<uint32_t>(env->GetIntField(obj, gInputWindowHandleClassInfo.inputFeatures));
+
     using InputConfig = gui::WindowInfo::InputConfig;
     // Determine the value for each of the InputConfig flags. We rely on a switch statement and
     // -Wswitch-enum to give us a build error if we forget to explicitly handle an InputConfig flag.
-    mInfo.inputConfig = InputConfig::NONE;
-    InputConfig enumerationStart = InputConfig::NONE;
+    mInfo.inputConfig = InputConfig::DEFAULT;
+    InputConfig enumerationStart = InputConfig::DEFAULT;
     switch (enumerationStart) {
-        case InputConfig::NONE:
+        case InputConfig::DEFAULT:
+            FALLTHROUGH_INTENDED;
+        case InputConfig::NO_INPUT_CHANNEL:
+            if ((inputFeatures & 0x00000001) != 0) {
+                mInfo.inputConfig |= InputConfig::NO_INPUT_CHANNEL;
+            }
             FALLTHROUGH_INTENDED;
         case InputConfig::NOT_VISIBLE:
             if (env->GetBooleanField(obj, gInputWindowHandleClassInfo.visible) == JNI_FALSE) {
@@ -219,6 +229,27 @@ bool NativeInputWindowHandle::updateInfo() {
             if (flags.test(WindowInfo::Flag::SLIPPERY)) {
                 mInfo.inputConfig |= InputConfig::SLIPPERY;
             }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::DISABLE_USER_ACTIVITY:
+            if ((inputFeatures & 0x00000002) != 0) {
+                mInfo.inputConfig |= InputConfig::DISABLE_USER_ACTIVITY;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::DROP_INPUT:
+            // This flag cannot be set from Java.
+            FALLTHROUGH_INTENDED;
+        case InputConfig::DROP_INPUT_IF_OBSCURED:
+            // This flag cannot be set from Java.
+            FALLTHROUGH_INTENDED;
+        case InputConfig::SPY:
+            if ((inputFeatures & 0x00000004) != 0) {
+                mInfo.inputConfig |= InputConfig::SPY;
+            }
+            FALLTHROUGH_INTENDED;
+        case InputConfig::INTERCEPTS_STYLUS:
+            if ((inputFeatures & 0x00000008) != 0) {
+                mInfo.inputConfig |= InputConfig::INTERCEPTS_STYLUS;
+            }
     }
 
     mInfo.touchOcclusionMode = static_cast<TouchOcclusionMode>(
@@ -228,8 +259,6 @@ bool NativeInputWindowHandle::updateInfo() {
     mInfo.ownerUid = env->GetIntField(obj,
             gInputWindowHandleClassInfo.ownerUid);
     mInfo.packageName = getStringField(env, obj, gInputWindowHandleClassInfo.packageName, "<null>");
-    mInfo.inputFeatures = static_cast<WindowInfo::Feature>(
-            env->GetIntField(obj, gInputWindowHandleClassInfo.inputFeatures));
     mInfo.displayId = env->GetIntField(obj,
             gInputWindowHandleClassInfo.displayId);
 
@@ -377,8 +406,8 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
     ScopedLocalRef<jstring> packageName(env, env->NewStringUTF(windowInfo.packageName.data()));
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.packageName,
                         packageName.get());
-    env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.inputFeatures,
-                     static_cast<int32_t>(windowInfo.inputFeatures.get()));
+    // TODO(b/216806304): Write InputConfig flag to Java once it's exposed as an InputWindowHandle
+    //  API.
 
     float transformVals[9];
     for (int i = 0; i < 9; i++) {
