@@ -623,21 +623,21 @@ public class Filter implements AutoCloseable {
      * <p>This functionality is only available in Tuner version 2.0 and higher and will otherwise
      * be a no-op. Use {@link TunerVersionChecker#getTunerVersion()} to get the version information.
      *
-     * @param delayInMs specifies the duration of the delay in milliseconds.
+     * @param durationInMs specifies the duration of the delay in milliseconds.
      * @return one of the following results: {@link Tuner#RESULT_SUCCESS},
      * {@link Tuner#RESULT_UNAVAILABLE}, {@link Tuner#RESULT_NOT_INITIALIZED},
      * {@link Tuner#RESULT_INVALID_STATE}, {@link Tuner#RESULT_INVALID_ARGUMENT},
      * {@link Tuner#RESULT_OUT_OF_MEMORY}, or {@link Tuner#RESULT_UNKNOWN_ERROR}.
      */
-    public int delayCallbackUntilMillisElapsed(long delayInMs) {
+    public int delayCallbackForDurationMillis(long durationInMs) {
         if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
                   TunerVersionChecker.TUNER_VERSION_2_0, "setTimeDelayHint")) {
             return Tuner.RESULT_UNAVAILABLE;
         }
 
-        if (delayInMs >= 0 && delayInMs <= Integer.MAX_VALUE) {
+        if (durationInMs >= 0 && durationInMs <= Integer.MAX_VALUE) {
             synchronized (mLock) {
-                return nativeSetTimeDelayHint((int) delayInMs);
+                return nativeSetTimeDelayHint((int) durationInMs);
             }
         }
         return Tuner.RESULT_INVALID_ARGUMENT;
@@ -653,20 +653,20 @@ public class Filter implements AutoCloseable {
      * <p>This functionality is only available in Tuner version 2.0 and higher and will otherwise
      * be a no-op. Use {@link TunerVersionChecker#getTunerVersion()} to get the version information.
      *
-     * @param delayInBytes specifies the duration of the delay in bytes.
+     * @param bytesAccumulated specifies the delay condition in bytes.
      * @return one of the following results: {@link Tuner#RESULT_SUCCESS},
      * {@link Tuner#RESULT_UNAVAILABLE}, {@link Tuner#RESULT_NOT_INITIALIZED},
      * {@link Tuner#RESULT_INVALID_STATE}, {@link Tuner#RESULT_INVALID_ARGUMENT},
      * {@link Tuner#RESULT_OUT_OF_MEMORY}, or {@link Tuner#RESULT_UNKNOWN_ERROR}.
      */
-    public int delayCallbackUntilBytesAccumulated(int delayInBytes) {
+    public int delayCallbackUntilBytesAccumulated(int bytesAccumulated) {
         if (!TunerVersionChecker.checkHigherOrEqualVersionTo(
                   TunerVersionChecker.TUNER_VERSION_2_0, "setTimeDelayHint")) {
             return Tuner.RESULT_UNAVAILABLE;
         }
 
         synchronized (mLock) {
-            return nativeSetDataSizeDelayHint(delayInBytes);
+            return nativeSetDataSizeDelayHint(bytesAccumulated);
         }
     }
 }
