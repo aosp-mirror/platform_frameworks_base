@@ -142,6 +142,10 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     // allow while-in-use permissions in foreground service or not.
     // while-in-use permissions in FGS started from background might be restricted.
     boolean mAllowWhileInUsePermissionInFgs;
+    // The number of times Service.startForeground() is called;
+    int mStartForegroundCount;
+    // Last time mAllowWhileInUsePermissionInFgs is set.
+    long mLastSetFgsRestrictionTime;
 
     // the most recent package that start/bind this service.
     String mRecentCallingPackage;
@@ -406,6 +410,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
         pw.print(prefix); pw.print("allowWhileInUsePermissionInFgs=");
                 pw.println(mAllowWhileInUsePermissionInFgs);
+        pw.print(prefix); pw.print("startForegroundCount=");
+        pw.println(mStartForegroundCount);
         pw.print(prefix); pw.print("recentCallingPackage=");
                 pw.println(mRecentCallingPackage);
         if (delayed) {
