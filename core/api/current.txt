@@ -39305,6 +39305,7 @@ package android.speech {
   public interface RecognitionListener {
     method public void onBeginningOfSpeech();
     method public void onBufferReceived(byte[]);
+    method public default void onEndOfSegmentedSession();
     method public void onEndOfSpeech();
     method public void onError(int);
     method public void onEvent(int, android.os.Bundle);
@@ -39312,6 +39313,7 @@ package android.speech {
     method public void onReadyForSpeech(android.os.Bundle);
     method public void onResults(android.os.Bundle);
     method public void onRmsChanged(float);
+    method public default void onSegmentResults(@NonNull android.os.Bundle);
   }
 
   public abstract class RecognitionService extends android.app.Service {
@@ -39329,6 +39331,7 @@ package android.speech {
   public class RecognitionService.Callback {
     method public void beginningOfSpeech() throws android.os.RemoteException;
     method public void bufferReceived(byte[]) throws android.os.RemoteException;
+    method public void endOfSegmentedSession() throws android.os.RemoteException;
     method public void endOfSpeech() throws android.os.RemoteException;
     method public void error(int) throws android.os.RemoteException;
     method @NonNull public android.content.AttributionSource getCallingAttributionSource();
@@ -39337,6 +39340,7 @@ package android.speech {
     method public void readyForSpeech(android.os.Bundle) throws android.os.RemoteException;
     method public void results(android.os.Bundle) throws android.os.RemoteException;
     method public void rmsChanged(float) throws android.os.RemoteException;
+    method public void segmentResults(@NonNull android.os.Bundle) throws android.os.RemoteException;
   }
 
   public static class RecognitionService.SupportCallback {
@@ -39392,6 +39396,7 @@ package android.speech {
     field public static final String EXTRA_RESULTS_PENDINGINTENT = "android.speech.extra.RESULTS_PENDINGINTENT";
     field public static final String EXTRA_RESULTS_PENDINGINTENT_BUNDLE = "android.speech.extra.RESULTS_PENDINGINTENT_BUNDLE";
     field public static final String EXTRA_SECURE = "android.speech.extras.EXTRA_SECURE";
+    field public static final String EXTRA_SEGMENT_SESSION = "android.speech.extra.SEGMENT_SESSION";
     field public static final String EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS = "android.speech.extras.SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS";
     field public static final String EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS = "android.speech.extras.SPEECH_INPUT_MINIMUM_LENGTH_MILLIS";
     field public static final String EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS = "android.speech.extras.SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS";
