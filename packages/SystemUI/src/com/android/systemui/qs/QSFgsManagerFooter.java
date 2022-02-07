@@ -20,12 +20,17 @@ import static com.android.systemui.qs.dagger.QSFragmentModule.QS_FGS_MANAGER_FOO
 
 import android.content.Context;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.qs.dagger.QSScope;
 
 import java.util.concurrent.Executor;
 
@@ -35,9 +40,11 @@ import javax.inject.Named;
 /**
  * Footer entry point for the foreground service manager
  */
+@QSScope
 public class QSFgsManagerFooter implements View.OnClickListener,
         FgsManagerController.OnDialogDismissedListener,
-        FgsManagerController.OnNumberOfPackagesChangedListener {
+        FgsManagerController.OnNumberOfPackagesChangedListener,
+        VisibilityChangedDispatcher {
 
     private final View mRootView;
     private final TextView mFooterText;
@@ -50,18 +57,41 @@ public class QSFgsManagerFooter implements View.OnClickListener,
     private boolean mIsInitialized = false;
     private int mNumPackages;
 
+    private final View mTextContainer;
+    private final View mNumberContainer;
+    private final TextView mNumberView;
+    private final ImageView mDotView;
+
+    @Nullable
+    private VisibilityChangedDispatcher.OnVisibilityChangedListener mVisibilityChangedListener;
+
     @Inject
     QSFgsManagerFooter(@Named(QS_FGS_MANAGER_FOOTER_VIEW) View rootView,
             @Main Executor mainExecutor, @Background Executor executor,
             FgsManagerController fgsManagerController) {
         mRootView = rootView;
         mFooterText = mRootView.findViewById(R.id.footer_text);
-        ImageView icon = mRootView.findViewById(R.id.primary_footer_icon);
-        icon.setImageResource(R.drawable.ic_info_outline);
+        mTextContainer = mRootView.findViewById(R.id.fgs_text_container);
+        mNumberContainer = mRootView.findViewById(R.id.fgs_number_container);
+        mNumberView = mRootView.findViewById(R.id.fgs_number);
+        mDotView = mRootView.findViewById(R.id.fgs_new);
         mContext = rootView.getContext();
         mMainExecutor = mainExecutor;
         mExecutor = executor;
         mFgsManagerController = fgsManagerController;
+    }
+
+    /**
+     * Whether to show the footer in collapsed mode (just a number) or not (text).
+     * @param collapsed
+     */
+    public void setCollapsed(boolean collapsed) {
+        mTextContainer.setVisibility(collapsed ? View.GONE : View.VISIBLE);
+        mNumberContainer.setVisibility(collapsed ? View.VISIBLE : View.GONE);
+        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) mRootView.getLayoutParams();
+        lp.width = collapsed ? ViewGroup.LayoutParams.WRAP_CONTENT : 0;
+        lp.weight = collapsed ? 0f : 1f;
+        mRootView.setLayoutParams(lp);
     }
 
     public void init() {
@@ -89,6 +119,12 @@ public class QSFgsManagerFooter implements View.OnClickListener,
     }
 
     @Override
+    public void setOnVisibilityChangedListener(
+            @Nullable OnVisibilityChangedListener onVisibilityChangedListener) {
+        mVisibilityChangedListener = onVisibilityChangedListener;
+    }
+
+    @Override
     public void onClick(View view) {
         mFgsManagerController.showDialog(mRootView);
     }
@@ -103,11 +139,19 @@ public class QSFgsManagerFooter implements View.OnClickListener,
 
     public void handleRefreshState() {
         mMainExecutor.execute(() -> {
-            mFooterText.setText(mContext.getResources().getQuantityString(
-                    R.plurals.fgs_manager_footer_label, mNumPackages, mNumPackages));
+            CharSequence text = mContext.getResources().getQuantityString(
+                    R.plurals.fgs_manager_footer_label, mNumPackages, mNumPackages);
+            mFooterText.setText(text);
+            mNumberView.setText(Integer.toString(mNumPackages));
+            mNumberView.setContentDescription(text);
             if (mFgsManagerController.shouldUpdateFooterVisibility()) {
                 mRootView.setVisibility(mNumPackages > 0
                         && mFgsManagerController.isAvailable() ? View.VISIBLE : View.GONE);
+                mDotView.setVisibility(
+                        mFgsManagerController.getChangesSinceDialog() ? View.VISIBLE : View.GONE);
+                if (mVisibilityChangedListener != null) {
+                    mVisibilityChangedListener.onVisibilityChanged(mRootView.getVisibility());
+                }
             }
         });
     }

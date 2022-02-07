@@ -40,6 +40,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.TASK_MANAGER_ENABLED
 import com.android.systemui.R
 import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.phone.SystemUIDialog
@@ -50,6 +51,7 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlin.math.max
 
+@SysUISingleton
 class FgsManagerController @Inject constructor(
     private val context: Context,
     @Main private val mainExecutor: Executor,
@@ -64,6 +66,9 @@ class FgsManagerController @Inject constructor(
     companion object {
         private val LOG_TAG = FgsManagerController::class.java.simpleName
     }
+
+    var changesSinceDialog = false
+        private set
 
     private var isAvailable = false
 
@@ -137,6 +142,7 @@ class FgsManagerController @Inject constructor(
             val numPackagesAfter = getNumRunningPackagesLocked()
 
             if (numPackagesAfter != numPackagesBefore) {
+                changesSinceDialog = true
                 onNumberOfPackagesChangedListeners.forEach {
                     backgroundExecutor.execute { it.onNumberOfPackagesChanged(numPackagesAfter) }
                 }
@@ -210,6 +216,7 @@ class FgsManagerController @Inject constructor(
                 this.dialog = dialog
 
                 dialog.setOnDismissListener {
+                    changesSinceDialog = false
                     synchronized(lock) {
                         this.dialog = null
                         updateAppItemsLocked()

@@ -29,11 +29,13 @@
     android:layout_gravity="bottom"
 >
 
-    <View
-        android:layout_height="1dp"
+    <LinearLayout
+        android:id="@+id/security_footers_container"
+        android:orientation="horizontal"
+        android:layout_height="@dimen/qs_footer_action_button_size"
         android:layout_width="0dp"
         android:layout_weight="1"
-        />
+    />
 
     <!-- Negative margin equal to -->
     <LinearLayout

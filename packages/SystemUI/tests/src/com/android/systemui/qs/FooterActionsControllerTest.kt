@@ -64,6 +64,10 @@ class FooterActionsControllerTest : LeakCheckedTest() {
     private lateinit var uiEventLogger: UiEventLogger
     @Mock
     private lateinit var featureFlags: FeatureFlags
+    @Mock
+    private lateinit var securityFooterController: QSSecurityFooter
+    @Mock
+    private lateinit var fgsManagerController: QSFgsManagerFooter
 
     private lateinit var controller: FooterActionsController
 
@@ -90,7 +94,8 @@ class FooterActionsControllerTest : LeakCheckedTest() {
 
         controller = FooterActionsController(view, multiUserSwitchControllerFactory,
                 activityStarter, userManager, userTracker, userInfoController,
-                deviceProvisionedController, falsingManager, metricsLogger, fakeTunerService,
+                deviceProvisionedController, securityFooterController, fgsManagerController,
+                falsingManager, metricsLogger, fakeTunerService,
                 globalActionsDialog, uiEventLogger, showPMLiteButton = true, fakeSettings,
                 Handler(testableLooper.looper), featureFlags)
         controller.init()
