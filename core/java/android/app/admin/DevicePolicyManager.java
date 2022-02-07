@@ -14969,7 +14969,8 @@ public class DevicePolicyManager {
                     wifiSsidAllowlist.add(
                             WifiSsid.fromBytes(ssid.getBytes(StandardCharsets.UTF_8)));
                 }
-                return WifiSsidPolicy.createAllowlistPolicy(new ArraySet<>(wifiSsidAllowlist));
+                return new WifiSsidPolicy(WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_ALLOWLIST,
+                        new ArraySet<>(wifiSsidAllowlist));
             }
             List<String> denylist = mService.getSsidDenylist();
             if (!denylist.isEmpty()) {
@@ -14978,7 +14979,8 @@ public class DevicePolicyManager {
                     wifiSsidDenylist.add(
                             WifiSsid.fromBytes(ssid.getBytes(StandardCharsets.UTF_8)));
                 }
-                return WifiSsidPolicy.createDenylistPolicy(new ArraySet<>(wifiSsidDenylist));
+                return new WifiSsidPolicy(WifiSsidPolicy.WIFI_SSID_POLICY_TYPE_DENYLIST,
+                        new ArraySet<>(wifiSsidDenylist));
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
