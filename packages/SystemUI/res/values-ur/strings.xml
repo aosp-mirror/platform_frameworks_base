@@ -46,6 +46,10 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"اجازت دیں"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"‏USB ڈیبگ کرنے کی اجازت نہیں ہے"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"‏اس آلہ پر فی الحال سائن ان کردہ صارف USB ڈیبگنگ آن نہیں کر سکتا۔ اس خصوصیت کا استعمال کرنے کیلئے، ابتدائی صارف پر سوئچ کریں۔"</string>
+    <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"کیا آپ سسٹم کی زبان کو <xliff:g id="LANGUAGE">%1$s</xliff:g> میں تبدیل کرنا چاہتے ہیں؟"</string>
+    <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"کسی دوسرے آلے کے ذریعے سسٹم کی زبان میں تبدیلی کی درخواست کی گئی"</string>
+    <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"زبان تبدیل کریں"</string>
+    <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"موجودہ زبان برقرار رکھیں"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"اس نیٹ ورک پر وائرلیس ڈیبگنگ کرنے کی اجازت دیں؟"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"‏نیٹ ورک کا نام (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\n‏ Wi-Fi کا پتہ (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"اس نیٹ ورک پر ہمیشہ اجازت دیں"</string>
@@ -177,7 +181,6 @@
     <string name="accessibility_desc_close" msgid="8293708213442107755">"بند کریں"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"مکمل خاموشی"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"صرف الارمز"</string>
-    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"ڈسٹرب نہ کریں۔"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"بلوٹوتھ۔"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"بلوٹوتھ آن ہے۔"</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"الارم <xliff:g id="TIME">%s</xliff:g> کیلئے سیٹ ہے۔"</string>
@@ -202,7 +205,6 @@
     <string name="dessert_case" msgid="9104973640704357717">"ڈیزرٹ کیس"</string>
     <string name="start_dreams" msgid="9131802557946276718">"اسکرین سیور"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"ایتھرنیٹ"</string>
-    <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ڈسٹرب نہ کریں"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"بلوٹوتھ"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"کوئی جوڑا بنائے ہوئے آلات دستیاب نہیں ہیں"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> بیٹری"</string>
@@ -269,10 +271,8 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"طلوع آفتاب تک"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"آن ہوگی بوقت <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"<xliff:g id="TIME">%s</xliff:g> تک"</string>
-    <!-- no translation found for quick_settings_dark_mode_secondary_label_on_at_bedtime (2274300599408864897) -->
-    <skip />
-    <!-- no translation found for quick_settings_dark_mode_secondary_label_until_bedtime_ends (1790772410777123685) -->
-    <skip />
+    <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime" msgid="2274300599408864897">"سونے کے وقت میں آن کریں"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_bedtime_ends" msgid="1790772410777123685">"سونے کا وقت ختم ہونے تک"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"‏NFC غیر فعال ہے"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"‏NFC فعال ہے"</string>
@@ -316,6 +316,7 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • چارج ہو رہا ہے • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> میں مکمل"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • تیزی سے چارج ہو رہا ہے • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> میں مکمل"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • آہستہ چارج ہو رہا ہے • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> میں مکمل"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ڈاک چارج ہو رہا ہے • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> میں مکمل"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"صارف سوئچ کریں"</string>
     <string name="user_add_user" msgid="4336657383006913022">"صارف کو شامل کریں"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"نیا صارف"</string>
@@ -348,7 +349,6 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"اطلاعات"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"گفتگوئیں"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"سبھی خاموش اطلاعات کو صاف کریں"</string>
-    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'ڈسٹرب نہ کریں\' کے ذریعے اطلاعات کو موقوف کیا گیا"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ابھی شروع کریں"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"کوئی اطلاعات نہیں ہیں"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"یہ آلہ آپ کے والدین کے زیر انتظام ہے"</string>
@@ -493,8 +493,6 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"‏&lt;b&gt;اسٹیٹس:&lt;/b&gt; کو کم درجہ دیا گیا"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"یہ گفتگو کی اطلاعات کے اوپری حصّے پر اور مقفل اسکرین پر پروفائل کی تصویر کے بطور دکھائی دیتا ہے"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"یہ گفتگو کی اطلاعات کے اوپری حصّے پر اور مقفل اسکرین پر پروفائل کی تصویر کے بطور دکھائی دیتا ہے، بلبلے کے بطور ظاہر ہوتا ہے"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"یہ گفتگو کی اطلاعات کے اوپری حصّے پر اور مقفل اسکرین پر پروفائل کی تصویر کے بطور دکھائی دیتا ہے، \'ڈسٹرب نہ کریں\' میں مداخلت کرتا ہے"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"یہ گفتگو کی اطلاعات کے اوپری حصّے پر اور مقفل اسکرین پر پروفائل کی تصویر کے بطور دکھائی دیتا ہے، بلبلے کے بطور ظاہر ہوتا ہے، \'ڈسٹرب نہ کریں\' میں مداخلت کرتا ہے"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ترجیح"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ایپ گفتگو کی خصوصیات کو سپورٹ نہیں کرتی ہے"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ان اطلاعات کی ترمیم نہیں کی جا سکتی۔"</string>
@@ -570,7 +568,6 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"موسیقی"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"کیلنڈر"</string>
-    <string name="volume_and_do_not_disturb" msgid="502044092739382832">"ڈسٹرب نہ کریں"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"والیوم بٹنز کے شارٹ کٹ"</string>
     <string name="battery" msgid="769686279459897127">"بیٹری"</string>
     <string name="headset" msgid="4485892374984466437">"ہیڈ سیٹ"</string>
@@ -690,10 +687,6 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>، <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"‏Wi-Fi آف ہے"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"بلوٹوتھ آف ہے"</string>
-    <string name="dnd_is_off" msgid="3185706903793094463">"\'ڈسٹرب نہ کریں\' آف ہے"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"\'ڈسٹرب نہ کریں\' کسی خودکار اصول (<xliff:g id="ID_1">%s</xliff:g>) کے ذریعہ آن ہو گیا تھا۔"</string>
-    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"\'ڈسٹرب نہ کریں\' کسی ایپ (<xliff:g id="ID_1">%s</xliff:g>) کے ذریعہ آن ہو گیا تھا۔"</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"\'ڈسٹرب نہ کریں\' کسی خودکار اصول یا ایپ کے ذریعے آن ہو گیا تھا۔"</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"ایپس پس منظر میں چل رہی ہیں"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"بیٹری اور ڈیٹا استعمال کے بارے میں تفصیلات کے لیے تھپتھپائیں"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"موبائل ڈیٹا آف کریں؟"</string>
@@ -796,14 +789,10 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="APP_LABEL">%2$s</xliff:g> سے <xliff:g id="SONG_NAME">%1$s</xliff:g> چلائیں"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"کالعدم کریں"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> پر چلانے کے لیے قریب کریں"</string>
-    <!-- no translation found for media_move_closer_to_end_cast (6495907340926563656) -->
-    <skip />
-    <!-- no translation found for media_transfer_playing_different_device (7186806382609785610) -->
-    <skip />
-    <!-- no translation found for media_transfer_playing_this_device (1856890686844499172) -->
-    <skip />
-    <!-- no translation found for media_transfer_failed (2640354446629980227) -->
-    <skip />
+    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"یہاں چلانے کے ليے <xliff:g id="DEVICENAME">%1$s</xliff:g> کے قریب جائیں"</string>
+    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"<xliff:g id="DEVICENAME">%1$s</xliff:g> پر چل رہا ہے"</string>
+    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"اس فون پر چل رہا ہے"</string>
+    <string name="media_transfer_failed" msgid="2640354446629980227">"کچھ غلط ہو گیا"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"غیر فعال، ایپ چیک کریں"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"نہیں ملا"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"کنٹرول دستیاب نہیں ہے"</string>
@@ -853,7 +842,6 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"+<xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"حالیہ پیغامات، چھوٹی ہوئی کالز اور اسٹیٹس اپ ڈیٹس دیکھیں"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"گفتگو"</string>
-    <string name="paused_by_dnd" msgid="7856941866433556428">"\'ڈسٹرب نہ کریں\' کے ذریعے موقوف کیا گیا"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> نے ایک پیغام بھیجا: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> نے ایک تصویر بھیجی"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"<xliff:g id="NAME">%1$s</xliff:g> نے اسٹیٹس کو اپ ڈیٹ کر دیا ہے: <xliff:g id="STATUS">%2$s</xliff:g>"</string>
@@ -888,8 +876,17 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"ٹائل شامل کریں"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"ٹائل شامل نہ کریں"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"صارف منتخب کریں"</string>
-    <string name="fgs_manager_dialog_title" msgid="656091833603337197">"ایپس پس منظر میں چل رہی ہیں"</string>
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> فعال ایپس</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> فعال ایپ</item>
+    </plurals>
+    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"فعال ایپس"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"روکیں"</string>
+    <!-- no translation found for fgs_manager_app_item_stop_button_stopped_label (6950382004441263922) -->
+    <skip />
     <string name="clipboard_edit_text_copy" msgid="770856373439969178">"کاپی کریں"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"کاپی کر دیا گیا ہے"</string>
+    <!-- no translation found for clipboard_edit_source (9156488177277788029) -->
+    <skip />
+    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"‏کاپی شدہ UI کو برخاست کریں"</string>
 </resources>
