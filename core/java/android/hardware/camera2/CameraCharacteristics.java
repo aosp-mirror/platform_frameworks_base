@@ -1678,6 +1678,9 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * with PRIMARY_CAMERA.</p>
      * <p>When {@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference} is UNDEFINED, this position cannot be accurately
      * represented by the camera device, and will be represented as <code>(0, 0, 0)</code>.</p>
+     * <p>When {@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference} is AUTOMOTIVE, then this position is relative to the
+     * origin of the automotive sensor coordinate system, which is at the center of the rear
+     * axle.</p>
      * <p><b>Units</b>: Meters</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
@@ -1824,6 +1827,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #LENS_POSE_REFERENCE_PRIMARY_CAMERA PRIMARY_CAMERA}</li>
      *   <li>{@link #LENS_POSE_REFERENCE_GYROSCOPE GYROSCOPE}</li>
      *   <li>{@link #LENS_POSE_REFERENCE_UNDEFINED UNDEFINED}</li>
+     *   <li>{@link #LENS_POSE_REFERENCE_AUTOMOTIVE AUTOMOTIVE}</li>
      * </ul>
      *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
@@ -1834,6 +1838,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #LENS_POSE_REFERENCE_PRIMARY_CAMERA
      * @see #LENS_POSE_REFERENCE_GYROSCOPE
      * @see #LENS_POSE_REFERENCE_UNDEFINED
+     * @see #LENS_POSE_REFERENCE_AUTOMOTIVE
      */
     @PublicKey
     @NonNull
@@ -5165,6 +5170,135 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     public static final Key<android.hardware.camera2.params.StreamConfigurationDuration[]> HEIC_AVAILABLE_HEIC_STALL_DURATIONS_MAXIMUM_RESOLUTION =
             new Key<android.hardware.camera2.params.StreamConfigurationDuration[]>("android.heic.availableHeicStallDurationsMaximumResolution", android.hardware.camera2.params.StreamConfigurationDuration[].class);
+
+    /**
+     * <p>The direction of the camera faces relative to the vehicle body frame and the
+     * passenger seats.</p>
+     * <p>This enum defines the lens facing characteristic of the cameras on the automotive
+     * devices with locations {@link CameraCharacteristics#AUTOMOTIVE_LOCATION android.automotive.location} defines.  If the system has
+     * FEATURE_AUTOMOTIVE, the camera will have this entry in its static metadata.</p>
+     * <p>When {@link CameraCharacteristics#AUTOMOTIVE_LOCATION android.automotive.location} is INTERIOR, this has one or more INTERIOR_*
+     * values or a single EXTERIOR_* value.  When this has more than one INTERIOR_*,
+     * the first value must be the one for the seat closest to the optical axis. If this
+     * contains INTERIOR_OTHER, all other values will be ineffective.</p>
+     * <p>When {@link CameraCharacteristics#AUTOMOTIVE_LOCATION android.automotive.location} is EXTERIOR_* or EXTRA, this has a single
+     * EXTERIOR_* value.</p>
+     * <p>If a camera has INTERIOR_OTHER or EXTERIOR_OTHER, or more than one camera is at the
+     * same location and facing the same direction, their static metadata will list the
+     * following entries, so that applications can determain their lenses' exact facing
+     * directions:</p>
+     * <ul>
+     * <li>{@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}</li>
+     * </ul>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #AUTOMOTIVE_LENS_FACING_EXTERIOR_OTHER EXTERIOR_OTHER}</li>
+     *   <li>{@link #AUTOMOTIVE_LENS_FACING_EXTERIOR_FRONT EXTERIOR_FRONT}</li>
+     *   <li>{@link #AUTOMOTIVE_LENS_FACING_EXTERIOR_REAR EXTERIOR_REAR}</li>
+     *   <li>{@link #AUTOMOTIVE_LENS_FACING_EXTERIOR_LEFT EXTERIOR_LEFT}</li>
+     *   <li>{@link #AUTOMOTIVE_LENS_FACING_EXTERIOR_RIGHT EXTERIOR_RIGHT}</li>
+     *   <li>{@link #AUTOMOTIVE_LENS_FACING_INTERIOR_OTHER INTERIOR_OTHER}</li>
+     *   <li>{@link #AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_1_LEFT INTERIOR_SEAT_ROW_1_LEFT}</li>
+     *   <li>{@link #AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_1_CENTER INTERIOR_SEAT_ROW_1_CENTER}</li>
+     *   <li>{@link #AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_1_RIGHT INTERIOR_SEAT_ROW_1_RIGHT}</li>
+     *   <li>{@link #AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_2_LEFT INTERIOR_SEAT_ROW_2_LEFT}</li>
+     *   <li>{@link #AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_2_CENTER INTERIOR_SEAT_ROW_2_CENTER}</li>
+     *   <li>{@link #AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_2_RIGHT INTERIOR_SEAT_ROW_2_RIGHT}</li>
+     *   <li>{@link #AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_3_LEFT INTERIOR_SEAT_ROW_3_LEFT}</li>
+     *   <li>{@link #AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_3_CENTER INTERIOR_SEAT_ROW_3_CENTER}</li>
+     *   <li>{@link #AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_3_RIGHT INTERIOR_SEAT_ROW_3_RIGHT}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#AUTOMOTIVE_LOCATION
+     * @see CameraCharacteristics#LENS_POSE_REFERENCE
+     * @see CameraCharacteristics#LENS_POSE_ROTATION
+     * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see #AUTOMOTIVE_LENS_FACING_EXTERIOR_OTHER
+     * @see #AUTOMOTIVE_LENS_FACING_EXTERIOR_FRONT
+     * @see #AUTOMOTIVE_LENS_FACING_EXTERIOR_REAR
+     * @see #AUTOMOTIVE_LENS_FACING_EXTERIOR_LEFT
+     * @see #AUTOMOTIVE_LENS_FACING_EXTERIOR_RIGHT
+     * @see #AUTOMOTIVE_LENS_FACING_INTERIOR_OTHER
+     * @see #AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_1_LEFT
+     * @see #AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_1_CENTER
+     * @see #AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_1_RIGHT
+     * @see #AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_2_LEFT
+     * @see #AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_2_CENTER
+     * @see #AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_2_RIGHT
+     * @see #AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_3_LEFT
+     * @see #AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_3_CENTER
+     * @see #AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_3_RIGHT
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<int[]> AUTOMOTIVE_LENS_FACING =
+            new Key<int[]>("android.automotive.lens.facing", int[].class);
+
+    /**
+     * <p>Location of the cameras on the automotive devices.</p>
+     * <p>This enum defines the locations of the cameras relative to the vehicle body frame on
+     * <a href="https://source.android.com/devices/sensors/sensor-types#auto_axes">the automotive sensor coordinate system</a>.
+     * If the system has FEATURE_AUTOMOTIVE, the camera will have this entry in its static
+     * metadata.</p>
+     * <ul>
+     * <li>INTERIOR is the inside of the vehicle body frame (or the passenger cabin).</li>
+     * <li>EXTERIOR is the outside of the vehicle body frame.</li>
+     * <li>EXTRA is the extra vehicle such as a trailer.</li>
+     * </ul>
+     * <p>Each side of the vehicle body frame on this coordinate system is defined as below:</p>
+     * <ul>
+     * <li>FRONT is where the Y-axis increases toward.</li>
+     * <li>REAR is where the Y-axis decreases toward.</li>
+     * <li>LEFT is where the X-axis decreases toward.</li>
+     * <li>RIGHT is where the X-axis increases toward.</li>
+     * </ul>
+     * <p>If the camera has either EXTERIOR_OTHER or EXTRA_OTHER, its static metadata will list
+     * the following entries, so that applications can determine the camera's exact location:</p>
+     * <ul>
+     * <li>{@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}</li>
+     * </ul>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #AUTOMOTIVE_LOCATION_INTERIOR INTERIOR}</li>
+     *   <li>{@link #AUTOMOTIVE_LOCATION_EXTERIOR_OTHER EXTERIOR_OTHER}</li>
+     *   <li>{@link #AUTOMOTIVE_LOCATION_EXTERIOR_FRONT EXTERIOR_FRONT}</li>
+     *   <li>{@link #AUTOMOTIVE_LOCATION_EXTERIOR_REAR EXTERIOR_REAR}</li>
+     *   <li>{@link #AUTOMOTIVE_LOCATION_EXTERIOR_LEFT EXTERIOR_LEFT}</li>
+     *   <li>{@link #AUTOMOTIVE_LOCATION_EXTERIOR_RIGHT EXTERIOR_RIGHT}</li>
+     *   <li>{@link #AUTOMOTIVE_LOCATION_EXTRA_OTHER EXTRA_OTHER}</li>
+     *   <li>{@link #AUTOMOTIVE_LOCATION_EXTRA_FRONT EXTRA_FRONT}</li>
+     *   <li>{@link #AUTOMOTIVE_LOCATION_EXTRA_REAR EXTRA_REAR}</li>
+     *   <li>{@link #AUTOMOTIVE_LOCATION_EXTRA_LEFT EXTRA_LEFT}</li>
+     *   <li>{@link #AUTOMOTIVE_LOCATION_EXTRA_RIGHT EXTRA_RIGHT}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#LENS_POSE_REFERENCE
+     * @see CameraCharacteristics#LENS_POSE_ROTATION
+     * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see #AUTOMOTIVE_LOCATION_INTERIOR
+     * @see #AUTOMOTIVE_LOCATION_EXTERIOR_OTHER
+     * @see #AUTOMOTIVE_LOCATION_EXTERIOR_FRONT
+     * @see #AUTOMOTIVE_LOCATION_EXTERIOR_REAR
+     * @see #AUTOMOTIVE_LOCATION_EXTERIOR_LEFT
+     * @see #AUTOMOTIVE_LOCATION_EXTERIOR_RIGHT
+     * @see #AUTOMOTIVE_LOCATION_EXTRA_OTHER
+     * @see #AUTOMOTIVE_LOCATION_EXTRA_FRONT
+     * @see #AUTOMOTIVE_LOCATION_EXTRA_REAR
+     * @see #AUTOMOTIVE_LOCATION_EXTRA_LEFT
+     * @see #AUTOMOTIVE_LOCATION_EXTRA_RIGHT
+     */
+    @PublicKey
+    @NonNull
+    public static final Key<Integer> AUTOMOTIVE_LOCATION =
+            new Key<Integer>("android.automotive.location", int.class);
 
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
