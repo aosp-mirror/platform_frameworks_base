@@ -15,6 +15,8 @@
  */
 package android.media;
 
+import android.hardware.DataSpace;
+
 /**
  * Package private utility class for PublicFormat related methods.
  */
@@ -22,13 +24,13 @@ class PublicFormatUtils {
     public static int getHalFormat(int imageFormat) {
         return nativeGetHalFormat(imageFormat);
     }
-    public static long getHalDataspace(int imageFormat) {
+    public static int getHalDataspace(int imageFormat) {
         return nativeGetHalDataspace(imageFormat);
     }
-    public static int getPublicFormat(int imageFormat, long dataspace) {
+    public static int getPublicFormat(int imageFormat, @DataSpace.NamedDataSpace int dataspace) {
         return nativeGetPublicFormat(imageFormat, dataspace);
     }
     private static native int nativeGetHalFormat(int imageFormat);
-    private static native long nativeGetHalDataspace(int imageFormat);
-    private static native int nativeGetPublicFormat(int imageFormat, long dataspace);
+    private static native int nativeGetHalDataspace(int imageFormat);
+    private static native int nativeGetPublicFormat(int imageFormat, int dataspace);
 }

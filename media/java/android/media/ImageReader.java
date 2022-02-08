@@ -277,7 +277,7 @@ public class ImageReader implements AutoCloseable {
     }
 
     private void initializeImageReader(int width, int height, int imageFormat, int maxImages,
-            long usage, int hardwareBufferFormat, long dataSpace, boolean useLegacyImageFormat) {
+            long usage, int hardwareBufferFormat, int dataSpace, boolean useLegacyImageFormat) {
         if (width < 1 || height < 1) {
             throw new IllegalArgumentException(
                 "The image dimensions must be positive");
@@ -330,7 +330,7 @@ public class ImageReader implements AutoCloseable {
     }
 
     private ImageReader(int width, int height, int maxImages, long usage,
-            MultiResolutionImageReader parent, int hardwareBufferFormat, long dataSpace) {
+            MultiResolutionImageReader parent, int hardwareBufferFormat, int dataSpace) {
         mWidth = width;
         mHeight = height;
         mFormat = ImageFormat.UNKNOWN; // set default image format value as UNKNOWN
@@ -417,7 +417,7 @@ public class ImageReader implements AutoCloseable {
      * @return the expected dataspace of an Image.
      */
     @SuppressLint("MethodNameUnits")
-    public @NamedDataSpace long getDataSpace() {
+    public @NamedDataSpace int getDataSpace() {
         return mDataSpace;
     }
 
@@ -925,7 +925,7 @@ public class ImageReader implements AutoCloseable {
         private int mMaxImages = 1;
         private int mImageFormat = ImageFormat.UNKNOWN;
         private int mHardwareBufferFormat = HardwareBuffer.RGBA_8888;
-        private long mDataSpace = DataSpace.DATASPACE_UNKNOWN;
+        private int mDataSpace = DataSpace.DATASPACE_UNKNOWN;
         private long mUsage = HardwareBuffer.USAGE_CPU_READ_OFTEN;
         private boolean mUseLegacyImageFormat = false;
 
@@ -1042,7 +1042,7 @@ public class ImageReader implements AutoCloseable {
          * @see #setDefaultHardwareBufferFormat
          */
         @SuppressLint("MissingGetterMatchingBuilder")
-        public @NonNull Builder setDefaultDataSpace(@NamedDataSpace long dataSpace) {
+        public @NonNull Builder setDefaultDataSpace(@NamedDataSpace int dataSpace) {
             mDataSpace = dataSpace;
             mUseLegacyImageFormat = false;
             mImageFormat = ImageFormat.UNKNOWN;
@@ -1089,7 +1089,7 @@ public class ImageReader implements AutoCloseable {
 
     private final int mHardwareBufferFormat;
 
-    private final long mDataSpace;
+    private final @NamedDataSpace int mDataSpace;
 
     private final boolean mUseLegacyImageFormat;
 
@@ -1131,7 +1131,7 @@ public class ImageReader implements AutoCloseable {
             mDataSpace = ImageReader.this.mDataSpace;
         }
 
-        SurfaceImage(int hardwareBufferFormat, long dataSpace) {
+        SurfaceImage(int hardwareBufferFormat, int dataSpace) {
             mHardwareBufferFormat = hardwareBufferFormat;
             mDataSpace = dataSpace;
             mFormat = PublicFormatUtils.getPublicFormat(mHardwareBufferFormat, mDataSpace);
@@ -1240,7 +1240,7 @@ public class ImageReader implements AutoCloseable {
         }
 
         @Override
-        public long getDataSpace() {
+        public @NamedDataSpace int getDataSpace() {
             throwISEIfImageIsInvalid();
             return mDataSpace;
         }
@@ -1383,7 +1383,7 @@ public class ImageReader implements AutoCloseable {
         private SurfacePlane[] mPlanes;
         private int mFormat = ImageFormat.UNKNOWN;
         private int mHardwareBufferFormat = HardwareBuffer.RGBA_8888;
-        private long mDataSpace = DataSpace.DATASPACE_UNKNOWN;
+        private int mDataSpace = DataSpace.DATASPACE_UNKNOWN;
         // If this image is detached from the ImageReader.
         private AtomicBoolean mIsDetached = new AtomicBoolean(false);
 
@@ -1397,7 +1397,7 @@ public class ImageReader implements AutoCloseable {
     }
 
     private synchronized native void nativeInit(Object weakSelf, int w, int h, int maxImgs,
-            long consumerUsage, int hardwareBufferFormat, long dataSpace);
+            long consumerUsage, int hardwareBufferFormat, int dataSpace);
     private synchronized native void nativeClose();
     private synchronized native void nativeReleaseImage(Image i);
     private synchronized native Surface nativeGetSurface();

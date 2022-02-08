@@ -263,15 +263,6 @@ constexpr jint fromDataspaceToNamedColorSpaceValue(const ui::Dataspace dataspace
     }
 }
 
-constexpr ui::Dataspace fromNamedColorSpaceValueToDataspace(const jint colorSpace) {
-    switch (colorSpace) {
-        case JNamedColorSpace::DISPLAY_P3:
-            return ui::Dataspace::DISPLAY_P3;
-        default:
-            return ui::Dataspace::V0_SRGB;
-    }
-}
-
 constexpr ui::Dataspace pickDataspaceFromColorMode(const ui::ColorMode colorMode) {
     switch (colorMode) {
         case ui::ColorMode::DISPLAY_P3:
@@ -645,11 +636,11 @@ static void nativeSetBufferTransform(JNIEnv* env, jclass clazz, jlong transactio
     transaction->setTransformToDisplayInverse(ctrl, transformToInverseDisplay);
 }
 
-static void nativeSetColorSpace(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
-                                jint colorSpace) {
+static void nativeSetDataSpace(JNIEnv* env, jclass clazz, jlong transactionObj, jlong nativeObject,
+                               jint dataSpace) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
-    ui::Dataspace dataspace = fromNamedColorSpaceValueToDataspace(colorSpace);
+    ui::Dataspace dataspace = static_cast<ui::Dataspace>(dataSpace);
     transaction->setDataspace(ctrl, dataspace);
 }
 
@@ -2122,8 +2113,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
     {"nativeSetBuffer", "(JJLandroid/hardware/HardwareBuffer;)V",
             (void*)nativeSetBuffer },
     {"nativeSetBufferTransform", "(JJI)V", (void*) nativeSetBufferTransform},
-    {"nativeSetColorSpace", "(JJI)V",
-            (void*)nativeSetColorSpace },
+    {"nativeSetDataSpace", "(JJI)V",
+            (void*)nativeSetDataSpace },
     {"nativeSyncInputWindows", "(J)V",
             (void*)nativeSyncInputWindows },
     {"nativeGetDisplayBrightnessSupport", "(Landroid/os/IBinder;)Z",

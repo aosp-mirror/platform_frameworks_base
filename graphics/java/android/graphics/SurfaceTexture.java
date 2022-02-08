@@ -353,7 +353,7 @@ public class SurfaceTexture {
      * Retrieve the dataspace associated with the texture image.
      */
     @SuppressLint("MethodNameUnits")
-    public @NamedDataSpace long getDataSpace() {
+    public @NamedDataSpace int getDataSpace() {
         return nativeGetDataSpace();
     }
 
@@ -426,7 +426,7 @@ public class SurfaceTexture {
     private native void nativeFinalize();
     private native void nativeGetTransformMatrix(float[] mtx);
     private native long nativeGetTimestamp();
-    private native long nativeGetDataSpace();
+    private native int nativeGetDataSpace();
     private native void nativeSetDefaultBufferSize(int width, int height);
     private native void nativeUpdateTexImage();
     private native void nativeReleaseTexImage();
