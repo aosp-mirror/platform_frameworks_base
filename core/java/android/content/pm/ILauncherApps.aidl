@@ -56,8 +56,8 @@ interface ILauncherApps {
     void startActivityAsUser(in IApplicationThread caller, String callingPackage,
             String callingFeatureId, in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
-    PendingIntent getActivityLaunchIntent(in ComponentName component, in Bundle opts,
-            in UserHandle user);
+    PendingIntent getActivityLaunchIntent(String callingPackage, in ComponentName component,
+            in Bundle opts, in UserHandle user);
     void showAppDetailsAsUser(in IApplicationThread caller, String callingPackage,
             String callingFeatureId, in ComponentName component, in Rect sourceBounds,
             in Bundle opts, in UserHandle user);
