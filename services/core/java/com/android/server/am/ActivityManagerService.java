@@ -15644,9 +15644,23 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mUserController.startUser(userId, /* foreground */ true, unlockListener);
     }
 
+    /**
+     * Unlocks the given user.
+     *
+     * @param userId The ID of the user to unlock.
+     * @param token No longer used.  (This parameter cannot be removed because
+     *              this method is marked with UnsupportedAppUsage, so its
+     *              signature might not be safe to change.)
+     * @param secret The secret needed to unlock the user's credential-encrypted
+     *               storage, or null if no secret is needed.
+     * @param listener An optional progress listener.
+     *
+     * @return true if the user was successfully unlocked, otherwise false.
+     */
     @Override
-    public boolean unlockUser(int userId, byte[] token, byte[] secret, IProgressListener listener) {
-        return mUserController.unlockUser(userId, token, secret, listener);
+    public boolean unlockUser(int userId, @Nullable byte[] token, @Nullable byte[] secret,
+            @Nullable IProgressListener listener) {
+        return mUserController.unlockUser(userId, secret, listener);
     }
 
     @Override

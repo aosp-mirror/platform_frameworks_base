@@ -1127,8 +1127,7 @@ class StorageManagerService extends IStorageManager.Stub
                     if (initLocked) {
                         mVold.lockUserKey(user.id);
                     } else {
-                        mVold.unlockUserKey(user.id, user.serialNumber, encodeBytes(null),
-                                encodeBytes(null));
+                        mVold.unlockUserKey(user.id, user.serialNumber, encodeBytes(null));
                     }
                 } catch (Exception e) {
                     Slog.wtf(TAG, e);
@@ -3470,43 +3469,45 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     /*
-     * Add this token/secret pair to the set of ways we can recover a disk encryption key.
-     * Changing the token/secret for a disk encryption key is done in two phases: first, adding
-     * a new token/secret pair with this call, then delting all other pairs with
-     * fixateNewestUserKeyAuth. This allows other places where a credential is used, such as
-     * Gatekeeper, to be updated between the two calls.
+     * Add this secret to the set of ways we can recover a user's disk
+     * encryption key.  Changing the secret for a disk encryption key is done in
+     * two phases.  First, this method is called to add the new secret binding.
+     * Second, fixateNewestUserKeyAuth is called to delete all other bindings.
+     * This allows other places where a credential is used, such as Gatekeeper,
+     * to be updated between the two calls.
      */
     @Override
-    public void addUserKeyAuth(int userId, int serialNumber, byte[] token, byte[] secret) {
+    public void addUserKeyAuth(int userId, int serialNumber, byte[] secret) {
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
         try {
-            mVold.addUserKeyAuth(userId, serialNumber, encodeBytes(token), encodeBytes(secret));
+            mVold.addUserKeyAuth(userId, serialNumber, encodeBytes(secret));
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
     }
 
     /*
-     * Clear disk encryption key bound to the associated token / secret pair. Removing the user
-     * binding of the Disk encryption key is done in two phases: first, this call will retrieve
-     * the disk encryption key using the provided token / secret pair and store it by
-     * encrypting it with a keymaster key not bound to the user, then fixateNewestUserKeyAuth
-     * is called to delete all other bindings of the disk encryption key.
+     * Store a user's disk encryption key without secret binding.  Removing the
+     * secret for a disk encryption key is done in two phases.  First, this
+     * method is called to retrieve the key using the provided secret and store
+     * it encrypted with a keystore key not bound to the user.  Second,
+     * fixateNewestUserKeyAuth is called to delete the key's other bindings.
      */
     @Override
-    public void clearUserKeyAuth(int userId, int serialNumber, byte[] token, byte[] secret) {
+    public void clearUserKeyAuth(int userId, int serialNumber, byte[] secret) {
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
         try {
-            mVold.clearUserKeyAuth(userId, serialNumber, encodeBytes(token), encodeBytes(secret));
+            mVold.clearUserKeyAuth(userId, serialNumber, encodeBytes(secret));
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
     }
 
     /*
-     * Delete all disk encryption token/secret pairs except the most recently added one
+     * Delete all bindings of a user's disk encryption key except the most
+     * recently added one.
      */
     @Override
     public void fixateNewestUserKeyAuth(int userId) {
@@ -3520,11 +3521,10 @@ class StorageManagerService extends IStorageManager.Stub
     }
 
     @Override
-    public void unlockUserKey(int userId, int serialNumber, byte[] token, byte[] secret) {
+    public void unlockUserKey(int userId, int serialNumber, byte[] secret) {
         boolean isFsEncrypted = StorageManager.isFileEncryptedNativeOrEmulated();
         Slog.d(TAG, "unlockUserKey: " + userId
                 + " isFileEncryptedNativeOrEmulated: " + isFsEncrypted
-                + " hasToken: " + (token != null)
                 + " hasSecret: " + (secret != null));
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
@@ -3544,8 +3544,7 @@ class StorageManagerService extends IStorageManager.Stub
                 return;
             }
             try {
-                mVold.unlockUserKey(userId, serialNumber, encodeBytes(token),
-                        encodeBytes(secret));
+                mVold.unlockUserKey(userId, serialNumber, encodeBytes(secret));
             } catch (Exception e) {
                 Slog.wtf(TAG, e);
                 return;
