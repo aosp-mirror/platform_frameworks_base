@@ -16,15 +16,19 @@
   -->
 
 <resources>
-    <style name="CutoutDefault">
+    <style name="DefaultTheme" parent="@android:style/Theme.DeviceDefault">
+        <item name="android:windowBackground">@android:color/darker_gray</item>
+    </style>
+
+    <style name="CutoutDefault" parent="@style/DefaultTheme">
         <item name="android:windowLayoutInDisplayCutoutMode">default</item>
     </style>
 
-    <style name="CutoutShortEdges">
+    <style name="CutoutShortEdges" parent="@style/DefaultTheme">
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
 
-    <style name="CutoutNever">
+    <style name="CutoutNever" parent="@style/DefaultTheme">
         <item name="android:windowLayoutInDisplayCutoutMode">never</item>
     </style>
 </resources>
