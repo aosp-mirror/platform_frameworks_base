@@ -1650,7 +1650,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         public void onSessionChanged(PackageInstallerSession session) {
             session.markUpdated();
             mSettingsWriteRequest.schedule();
-            if (mOkToSendBroadcasts && !session.isDestroyed()) {
+            // TODO(b/210359798): Remove the session.isStaged() check. Some apps assume this
+            // broadcast is sent by only staged sessions and call isStagedSessionApplied() without
+            // checking if it is a staged session or not and cause exception.
+            if (mOkToSendBroadcasts && !session.isDestroyed() && session.isStaged()) {
                 // we don't scrub the data here as this is sent only to the installer several
                 // privileged system packages
                 sendSessionUpdatedBroadcast(
