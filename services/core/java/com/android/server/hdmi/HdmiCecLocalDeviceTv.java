@@ -1202,6 +1202,13 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         return mService.getHdmiCecNetwork().getSafeCecDeviceInfo(Constants.ADDR_AUDIO_SYSTEM);
     }
 
+    /**
+     * Returns the audio output device used for System Audio Mode.
+     */
+    AudioDeviceAttributes getSystemAudioOutputDevice() {
+        return HdmiControlService.AUDIO_OUTPUT_DEVICE_HDMI_ARC;
+    }
+
 
     @ServiceThreadOnly
     void handleRemoveActiveRoutingPath(int path) {
@@ -1296,6 +1303,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         removeAction(OneTouchRecordAction.class);
         removeAction(TimerRecordingAction.class);
         removeAction(NewDeviceAction.class);
+        removeAction(AbsoluteVolumeAudioStatusAction.class);
 
         disableSystemAudioIfExist();
         disableArcIfExist();
@@ -1318,7 +1326,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         removeAction(SystemAudioActionFromAvr.class);
         removeAction(SystemAudioActionFromTv.class);
         removeAction(SystemAudioAutoInitiationAction.class);
-        removeAction(SystemAudioStatusAction.class);
         removeAction(VolumeControlAction.class);
 
         if (!mService.isControlEnabled()) {
