@@ -226,8 +226,8 @@ public class InputMethodPreference extends PrimarySwitchPreference
             setSwitchEnabled(false);
         } else if (!mIsAllowedByOrganization) {
             EnforcedAdmin admin =
-                    RestrictedLockUtilsInternal.checkIfInputMethodDisallowed(getContext(),
-                            mImi.getPackageName(), UserHandle.myUserId());
+                    RestrictedLockUtilsInternal.checkIfInputMethodDisallowed(
+                            getContext(), mImi.getPackageName(), mUserId);
             setDisabledByAdmin(admin);
         } else {
             setEnabled(true);
