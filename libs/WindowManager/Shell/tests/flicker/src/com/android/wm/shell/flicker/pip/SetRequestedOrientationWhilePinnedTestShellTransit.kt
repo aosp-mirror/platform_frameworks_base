@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,54 +14,32 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.flicker.bubble
+package com.android.wm.shell.flicker.pip
 
-import android.platform.test.annotations.Presubmit
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.annotation.Group4
-import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import org.junit.Assume
 import org.junit.Before
+import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
-import org.junit.Test
+import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
-/**
- * Test creating a bubble notification
- *
- * To run this test: `atest WMShellFlickerTests:LaunchBubbleScreen`
- *
- * Actions:
- *     Launch an app and enable app's bubble notification
- *     Send a bubble notification
- */
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
-open class LaunchBubbleScreen(testSpec: FlickerTestParameter) : BaseBubbleScreen(testSpec) {
-
+@FlakyTest(bugId = 217777115)
+class SetRequestedOrientationWhilePinnedTestShellTransit(
+    testSpec: FlickerTestParameter
+) : SetRequestedOrientationWhilePinnedTest(testSpec) {
     @Before
-    open fun before() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-    }
-
-    override val transition: FlickerBuilder.() -> Unit
-        get() = buildTransition {
-            transitions {
-                val addBubbleBtn = waitAndGetAddBubbleBtn()
-                addBubbleBtn?.click() ?: error("Bubble widget not found")
-            }
-        }
-
-    @Presubmit
-    @Test
-    open fun testAppIsAlwaysVisible() {
-        testSpec.assertLayers {
-            this.isVisible(testApp.component)
-        }
+    override fun before() {
+        Assume.assumeTrue(isShellTransitionsEnabled)
     }
 }
