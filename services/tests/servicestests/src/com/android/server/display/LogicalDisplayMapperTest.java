@@ -28,7 +28,9 @@ import static com.android.server.display.LogicalDisplayMapper.LOGICAL_DISPLAY_EV
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.verify;
@@ -70,6 +72,8 @@ import java.util.Set;
 @RunWith(AndroidJUnit4.class)
 public class LogicalDisplayMapperTest {
     private static int sUniqueTestDisplayId = 0;
+    private static final int DEVICE_STATE_CLOSED = 0;
+    private static final int DEVICE_STATE_OPEN = 2;
 
     private DisplayDeviceRepository mDisplayDeviceRepo;
     private LogicalDisplayMapper mLogicalDisplayMapper;
@@ -113,6 +117,7 @@ public class LogicalDisplayMapperTest {
 
         mPowerManager = new PowerManager(mContextMock, mIPowerManagerMock, mIThermalServiceMock,
                 null);
+
         when(mContextMock.getSystemServiceName(PowerManager.class))
                 .thenReturn(Context.POWER_SERVICE);
         when(mContextMock.getSystemService(PowerManager.class)).thenReturn(mPowerManager);
@@ -120,6 +125,12 @@ public class LogicalDisplayMapperTest {
         when(mResourcesMock.getBoolean(
                 com.android.internal.R.bool.config_supportsConcurrentInternalDisplays))
                 .thenReturn(true);
+        when(mResourcesMock.getIntArray(
+                com.android.internal.R.array.config_deviceStatesOnWhichToWakeUp))
+                .thenReturn(new int[]{1, 2});
+        when(mResourcesMock.getIntArray(
+                com.android.internal.R.array.config_deviceStatesOnWhichToSleep))
+                .thenReturn(new int[]{0});
 
         mLooper = new TestLooper();
         mHandler = new Handler(mLooper.getLooper());
@@ -310,6 +321,49 @@ public class LogicalDisplayMapperTest {
         // Verify the new group is correct.
         assertEquals(DEFAULT_DISPLAY_GROUP,
                 mLogicalDisplayMapper.getDisplayGroupIdFromDisplayIdLocked(id(display3)));
+    }
+
+    @Test
+    public void testDeviceShouldBeWoken() {
+        assertTrue(mLogicalDisplayMapper.shouldDeviceBeWoken(DEVICE_STATE_OPEN,
+                DEVICE_STATE_CLOSED,
+                /* isInteractive= */false,
+                /* isBootCompleted= */true));
+    }
+
+    @Test
+    public void testDeviceShouldNotBeWoken() {
+        assertFalse(mLogicalDisplayMapper.shouldDeviceBeWoken(DEVICE_STATE_CLOSED,
+                DEVICE_STATE_OPEN,
+                /* isInteractive= */false,
+                /* isBootCompleted= */true));
+    }
+
+    @Test
+    public void testDeviceShouldBePutToSleep() {
+        assertTrue(mLogicalDisplayMapper.shouldDeviceBePutToSleep(DEVICE_STATE_CLOSED,
+                DEVICE_STATE_OPEN,
+                /* isOverrideActive= */false,
+                /* isInteractive= */true,
+                /* isBootCompleted= */true));
+    }
+
+    @Test
+    public void testDeviceShouldNotBePutToSleep() {
+        assertFalse(mLogicalDisplayMapper.shouldDeviceBePutToSleep(DEVICE_STATE_OPEN,
+                DEVICE_STATE_CLOSED,
+                /* isOverrideActive= */false,
+                /* isInteractive= */true,
+                /* isBootCompleted= */true));
+    }
+
+    @Test
+    public void testDeviceShouldNotBePutToSleepDifferentBaseState() {
+        assertFalse(mLogicalDisplayMapper.shouldDeviceBePutToSleep(DEVICE_STATE_CLOSED,
+                DEVICE_STATE_OPEN,
+                /* isOverrideActive= */true,
+                /* isInteractive= */true,
+                /* isBootCompleted= */true));
     }
 
     /////////////////
