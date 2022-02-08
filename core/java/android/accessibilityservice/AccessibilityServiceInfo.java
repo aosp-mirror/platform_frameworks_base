@@ -569,6 +569,11 @@ public class AccessibilityServiceInfo implements Parcelable {
     private String mNonLocalizedSummary;
 
     /**
+     * Resource id of the intro of the accessibility service.
+     */
+    private int mIntroResId;
+
+    /**
      * Resource id of the description of the accessibility service.
      */
     private int mDescriptionResId;
@@ -737,6 +742,11 @@ public class AccessibilityServiceInfo implements Parcelable {
                     R.styleable.AccessibilityService_isAccessibilityTool, false);
             mTileServiceClassName = asAttributes.getString(
                     com.android.internal.R.styleable.AccessibilityService_tileService);
+            peekedValue = asAttributes.peekValue(
+                    com.android.internal.R.styleable.AccessibilityService_intro);
+            if (peekedValue != null) {
+                mIntroResId = peekedValue.resourceId;
+            }
             asAttributes.recycle();
         } catch (NameNotFoundException e) {
             throw new XmlPullParserException( "Unable to create context for: "
@@ -957,6 +967,29 @@ public class AccessibilityServiceInfo implements Parcelable {
     }
 
     /**
+     * The localized intro of the accessibility service.
+     * <p>
+     *    <strong>Statically set from
+     *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
+     * </p>
+     * @return The localized intro if available, and {@code null} if a intro
+     * has not been provided.
+     */
+    @Nullable
+    public CharSequence loadIntro(@NonNull PackageManager packageManager) {
+        if (mIntroResId == /* invalid */ 0) {
+            return null;
+        }
+        ServiceInfo serviceInfo = mResolveInfo.serviceInfo;
+        CharSequence intro = packageManager.getText(serviceInfo.packageName,
+                mIntroResId, serviceInfo.applicationInfo);
+        if (intro != null) {
+            return intro.toString().trim();
+        }
+        return null;
+    }
+
+    /**
      * Gets the non-localized description of the accessibility service.
      * <p>
      *    <strong>Statically set from
@@ -1114,6 +1147,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         parcel.writeString(mNonLocalizedDescription);
         parcel.writeBoolean(mIsAccessibilityTool);
         parcel.writeString(mTileServiceClassName);
+        parcel.writeInt(mIntroResId);
     }
 
     private void initFromParcel(Parcel parcel) {
@@ -1137,6 +1171,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         mNonLocalizedDescription = parcel.readString();
         mIsAccessibilityTool = parcel.readBoolean();
         mTileServiceClassName = parcel.readString();
+        mIntroResId = parcel.readInt();
     }
 
     @Override

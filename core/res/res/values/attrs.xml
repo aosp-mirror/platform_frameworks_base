@@ -3989,31 +3989,34 @@
         <attr name="isAccessibilityTool" format="boolean" />
 
         <!-- Animated image of the accessibility service purpose or behavior, to help users
-             understand how the service can help them.-->
+             understand how the service can help them. -->
         <attr name="animatedImageDrawable" format="reference"/>
-        <!-- Html description of the accessibility service, to help users understand
-             how the service can help them.-->
+        <!-- Html description of the accessibility service usage, availability, or limitations (e.g.
+             isn't supported by all apps). -->
         <attr name="htmlDescription" format="reference"/>
-
-        <!-- Short description of the accessibility service purpose or behavior.-->
+        <!-- Description of the accessibility service usage, availability, or limitations (e.g.
+             isn't supported by all apps). -->
         <attr name="description" />
         <!-- Brief summary of the accessibility service purpose or behavior. -->
         <attr name="summary" />
+        <!-- Detailed intro of the accessibility service purpose or behavior. -->
+        <attr name="intro" format="reference" />
     </declare-styleable>
 
     <!-- Use <code>accessibility-shortcut-target</code> as the root tag of the XML resource that
          describes an activity, which is referenced from the
          <code>android.accessibilityshortcut.target</code> meta-data entry. -->
     <declare-styleable name="AccessibilityShortcutTarget">
-        <!-- Short description of the target of accessibility shortcut purpose or behavior.-->
+        <!-- Description of the target of accessibility shortcut usage, availability, or limitations
+             (e.g. isn't supported by all apps). -->
         <attr name="description" />
         <!-- Brief summary of the target of accessibility shortcut purpose or behavior. -->
         <attr name="summary" />
         <!-- Animated image of the target of accessibility shortcut purpose or behavior, to help
              users understand how the target of accessibility shortcut can help them.-->
         <attr name="animatedImageDrawable" format="reference"/>
-        <!-- Html description of the target of accessibility shortcut purpose or behavior, to help
-             users understand how the target of accessibility shortcut can help them. -->
+        <!-- Html description of the target of accessibility shortcut usage, availability, or
+             limitations (e.g. isn't supported by all apps). -->
         <attr name="htmlDescription" format="reference"/>
         <!-- Component name of an activity that allows the user to modify the settings for this
              target of accessibility shortcut. -->
@@ -4023,6 +4026,8 @@
              settings to remind users this accessibility service has a
              {@link android.service.quicksettings.TileService}. -->
         <attr name="tileService" format="string" />
+        <!-- Detailed intro of the target of accessibility shortcut purpose or behavior. -->
+        <attr name="intro" format="reference" />
     </declare-styleable>
 
     <!-- Use <code>print-service</code> as the root tag of the XML resource that

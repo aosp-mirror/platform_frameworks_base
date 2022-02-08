@@ -143,6 +143,9 @@
     <!-- ResourcesLocaleResolutionTest -->
     <string name="dummy_string">dummy string</string>
 
+    <!-- Intro of the accessibility shortcut [CHAR LIMIT=NONE] -->
+    <string name="accessibility_shortcut_intro">Accessibility shortcut intro</string>
+
     <!-- Description of the accessibility shortcut [CHAR LIMIT=NONE] -->
     <string name="accessibility_shortcut_description">Accessibility shortcut description</string>
 

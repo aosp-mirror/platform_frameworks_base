@@ -70,6 +70,11 @@ public final class AccessibilityShortcutInfo {
     private final ActivityInfo mActivityInfo;
 
     /**
+     * Resource id of the intro of the accessibility shortcut target.
+     */
+    private final int mIntroResId;
+
+    /**
      * Resource id of the summary of the accessibility shortcut target.
      */
     private final int mSummaryResId;
@@ -160,6 +165,9 @@ public final class AccessibilityShortcutInfo {
             // Get tile service class name
             mTileServiceClassName = asAttributes.getString(
                     com.android.internal.R.styleable.AccessibilityShortcutTarget_tileService);
+            // Gets intro
+            mIntroResId = asAttributes.getResourceId(
+                    com.android.internal.R.styleable.AccessibilityShortcutTarget_intro, 0);
             asAttributes.recycle();
 
             if ((mDescriptionResId == 0 && mHtmlDescriptionRes == 0) || mSummaryResId == 0) {
@@ -200,6 +208,16 @@ public final class AccessibilityShortcutInfo {
     @Nullable
     public String loadSummary(@NonNull PackageManager packageManager) {
         return loadResourceString(packageManager, mActivityInfo, mSummaryResId);
+    }
+
+    /**
+     * The localized intro of the accessibility shortcut target.
+     *
+     * @return The localized intro.
+     */
+    @Nullable
+    public String loadIntro(@NonNull PackageManager packageManager) {
+        return loadResourceString(packageManager, mActivityInfo, mIntroResId);
     }
 
     /**
