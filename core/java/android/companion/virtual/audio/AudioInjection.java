@@ -43,13 +43,20 @@ public final class AudioInjection {
     private static final String TAG = "AudioInjection";
 
     private final Object mLock = new Object();
-
     @GuardedBy("mLock")
     @Nullable
     private AudioTrack mAudioTrack;
-
     @GuardedBy("mLock")
     private int mPlayState = PLAYSTATE_STOPPED;
+    @GuardedBy("mLock")
+    private boolean mIsSilent;
+
+    /** Sets if the injected microphone sound is silent. */
+    void setSilent(boolean isSilent) {
+        synchronized (mLock) {
+            mIsSilent = isSilent;
+        }
+    }
 
     /**
      * Sets the {@link AudioTrack} to handle audio injection.
@@ -86,7 +93,7 @@ public final class AudioInjection {
     public int write(@NonNull ByteBuffer audioBuffer, int sizeInBytes, int writeMode) {
         final int sizeWrite;
         synchronized (mLock) {
-            if (mAudioTrack != null) {
+            if (mAudioTrack != null && !mIsSilent) {
                 sizeWrite = mAudioTrack.write(audioBuffer, sizeInBytes, writeMode);
             } else {
                 sizeWrite = 0;

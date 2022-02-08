@@ -19,6 +19,7 @@ package android.companion.virtual.audio;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.companion.virtual.audio.UserRestrictionsDetector.UserRestrictionsCallback;
 import android.companion.virtual.audio.VirtualAudioDevice.AudioConfigurationChangeCallback;
 import android.content.Context;
 import android.media.AudioFormat;
@@ -50,10 +51,11 @@ import java.util.concurrent.Executor;
  */
 @VisibleForTesting
 public final class VirtualAudioSession extends IAudioSessionCallback.Stub implements
-        Closeable {
+        UserRestrictionsCallback, Closeable {
     private static final String TAG = "VirtualAudioSession";
 
     private final Context mContext;
+    private final UserRestrictionsDetector mUserRestrictionsDetector;
     /** The {@link Executor} for sending {@link AudioConfigurationChangeCallback} to the caller */
     private final Executor mExecutor;
     @Nullable
@@ -81,6 +83,7 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
     public VirtualAudioSession(Context context,
             @Nullable AudioConfigurationChangeCallback callback, @Nullable Executor executor) {
         mContext = context;
+        mUserRestrictionsDetector = new UserRestrictionsDetector(context);
         mCallback = callback;
         mExecutor = executor != null ? executor : context.getMainExecutor();
     }
@@ -117,7 +120,7 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
     @NonNull
     public AudioInjection startAudioInjection(@NonNull AudioFormat injectionFormat) {
         Objects.requireNonNull(injectionFormat, "injectionFormat must not be null");
-
+        mUserRestrictionsDetector.register(/* callback= */ this);
         synchronized (mLock) {
             if (mAudioInjection != null) {
                 throw new IllegalStateException(
@@ -127,6 +130,7 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
             mInjectionFormat = injectionFormat;
             mAudioInjection = new AudioInjection();
             mAudioInjection.play();
+            mAudioInjection.setSilent(mUserRestrictionsDetector.isUnmuteMicrophoneDisallowed());
             return mAudioInjection;
         }
     }
@@ -170,12 +174,22 @@ public final class VirtualAudioSession extends IAudioSessionCallback.Stub implem
     @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     @Override
     public void close() {
+        mUserRestrictionsDetector.unregister();
         releaseAudioStreams();
         synchronized (mLock) {
             mAudioCapture = null;
             mAudioInjection = null;
             mCaptureFormat = null;
             mInjectionFormat = null;
+        }
+    }
+
+    @Override
+    public void onMicrophoneRestrictionChanged(boolean isUnmuteMicDisallowed) {
+        synchronized (mLock) {
+            if (mAudioInjection != null) {
+                mAudioInjection.setSilent(isUnmuteMicDisallowed);
+            }
         }
     }
 
