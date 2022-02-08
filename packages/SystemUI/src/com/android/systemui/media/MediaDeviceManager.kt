@@ -77,6 +77,12 @@ class MediaDeviceManager @Inject constructor(
         var entry = entries[key]
         if (entry == null || entry?.token != data.token) {
             entry?.stop()
+            if (data.device != null) {
+                // If we were already provided device info (e.g. from RCN), keep that and don't
+                // listen for updates, but process once to push updates to listeners
+                processDevice(key, oldKey, data.device)
+                return
+            }
             val controller = data.token?.let {
                 controllerFactory.create(it)
             }

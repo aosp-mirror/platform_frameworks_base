@@ -299,6 +299,9 @@ package android.app {
 
   public class Notification implements android.os.Parcelable {
     method public boolean shouldShowForegroundImmediately();
+    field public static final String EXTRA_MEDIA_REMOTE_DEVICE = "android.mediaRemoteDevice";
+    field public static final String EXTRA_MEDIA_REMOTE_ICON = "android.mediaRemoteIcon";
+    field public static final String EXTRA_MEDIA_REMOTE_INTENT = "android.mediaRemoteIntent";
   }
 
   public final class NotificationChannel implements android.os.Parcelable {
