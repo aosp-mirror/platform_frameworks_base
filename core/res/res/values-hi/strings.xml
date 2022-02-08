@@ -70,7 +70,6 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"त्रिमार्गी कॉलिंग"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"अवांछित कष्टप्रद कॉल की अस्वीकृति"</string>
     <string name="CndMmi" msgid="185136449405618437">"कॉलिंग नंबर वितरण"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"परेशान न करें"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"कॉलर आईडी डिफ़ॉल्ट रूप से सीमित है. अगली कॉल: सीमित"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"कॉलर आईडी डिफ़ॉल्ट रूप से सीमित है. अगली कॉल: सीमित नहीं"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"कॉलर आईडी डिफ़ॉल्ट रूप से सीमित नहीं है. अगली कॉल: सीमित"</string>
@@ -180,10 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"घड़ी का स्टोरेज भर गया है. स्‍थान खाली करने के लिए कुछ फ़ाइलें मिटाएं."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Android TV डिवाइस के स्टोरेज में जगह नहीं बची है. जगह बनाने के लिए कुछ फाइलें मिटाएं."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"फ़ोन मेमोरी भर गयी है. जगह खाली करने के लिए कुछ फ़ाइलें मिटाएं."</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="one">प्रमाणपत्र अनुमतियों को इंस्टॉल किया गया</item>
-      <item quantity="other">प्रमाणपत्र अनुमतियों को इंस्टॉल किया गया</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{सर्टिफ़िकेट देने वाली संस्था का सर्टिफ़िकेट इंस्टॉल किया गया है}one{सर्टिफ़िकेट देने वाली संस्था का सर्टिफ़िकेट इंस्टॉल किया गया है}other{सर्टिफ़िकेट देने वाली संस्थाओं के सर्टिफ़िकेट इंस्टॉल किए गए हैं}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"किसी अज्ञात तृतीय पक्ष के द्वारा"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"आपकी वर्क प्रोफ़ाइल का व्यवस्थापक करता है"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> के द्वारा"</string>
@@ -203,6 +199,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"सेंसर से जुड़ी सूचना सेवा"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ट्वाइलाइट समय बताने वाली सेवा"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS समय अपडेट सेवा"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"Device Policy Manager की सेवा"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Music Recognition Manager Service"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"आपके डिवाइस को मिटा दिया जाएगा"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"एडमिन ऐप्लिकेशन का इस्तेमाल नहीं किया जा सकता. आपके डिवाइस पर मौजूद डेटा अब मिटा दिया जाएगा.\n\nअगर आप कुछ पूछना चाहते हैं तो, अपने संगठन के एडमिन से संपर्क करें."</string>
@@ -256,10 +253,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"ज़्यादातर परिस्थितियों में इसका उपयोग करें. यह आपको रिपोर्ट की प्रगति ट्रैक करने देता है, समस्या के बारे में ज़्यादा विवरण डालने देता है और स्क्रीनशॉट लेने देता है. यह आपको ऐसे कम उपयोग किए गए अनुभाग मिटाने दे सकता है जिनकी रिपोर्ट करने में ज़्यादा समय लगता है."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"पूरी रिपोर्ट"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"जब आपका डिवाइस ठीक से काम नहीं कर रहा हो या बहुत धीमा हो या जब आपको रिपोर्ट के सभी भागों की ज़रूरत हो, तो सिस्टम से कम से कम रोक-टोक के लिए इस विकल्प का इस्तेमाल करें. यह आपको ज़्यादा जानकारी डालने या अतिरिक्त स्क्रीनशॉट लेने नहीं देता."</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="one">गड़बड़ी की रिपोर्ट के लिए <xliff:g id="NUMBER_1">%d</xliff:g> सेकंड में स्‍क्रीनशॉट लिया जा रहा है.</item>
-      <item quantity="other">गड़बड़ी की रिपोर्ट के लिए <xliff:g id="NUMBER_1">%d</xliff:g> सेकंड में स्‍क्रीनशॉट लिया जा रहा है.</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{गड़बड़ी की रिपोर्ट के लिए स्क्रीनशॉट, # सेकंड में लिया जाएगा.}one{गड़बड़ी की रिपोर्ट के लिए स्क्रीनशॉट, # सेकंड में लिया जाएगा.}other{गड़बड़ी की रिपोर्ट के लिए स्क्रीनशॉट, # सेकंड में लिया जाएगा.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"गड़बड़ी की रिपोर्ट का स्क्रीनशॉट लिया गया"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"गड़बड़ी की रिपोर्ट का स्क्रीनशॉट नहीं लिया जा सका"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"साइलेंट मोड (खामोश)"</string>
@@ -310,8 +304,14 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"अपने कैलेंडर को ऐक्सेस करें"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"मैसेज (एसएमएस)"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"मैसेज (एसएमएस) भेजें और देखें"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"फ़ाइलें और मीडिया"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"अपने डिवाइस पर मौजूद फ़ोटो, मीडिया, और फ़ाइलें ऐक्सेस करें"</string>
+    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
+    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"संगीत और अन्य ऑडियो"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"आपके डिवाइस पर मौजूद, ऑडियो फ़ाइलों का ऐक्सेस"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"फ़ोटो और वीडियो"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"आपके डिवाइस पर मौजूद, इमेज और वीडियो फ़ाइलों का ऐक्सेस"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"माइक्रोफ़ोन"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ऑडियो रिकॉर्ड करें"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"शारीरिक गतिविधि"</string>
@@ -683,6 +683,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"ऐप्स  को किसी खाते के समन्वयन आंकड़े, साथ ही समन्‍वयित इवेंट का इतिहास और समन्‍वयित डेटा की मात्रा पढ़ने देता है."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"आपकी शेयर की गई मेमोरी की सामग्री पढ़ना"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"ऐप्‍लिकेशन को आपकी शेयर की गई मेमोरी की सामग्री पढ़ने देती है."</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"डिवाइस के शेयर किए गए स्टोरेज से, ऑडियो फ़ाइलें पढ़ने की अनुमति"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"अपने डिवाइस के शेयर किए गए स्टोरेज से, ऐप्लिकेशन को ऑडियो फ़ाइलें पढ़ने की अनुमति दें."</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"डिवाइस के शेयर किए गए स्टोरेज से, वीडियो फ़ाइलें पढ़ने की अनुमति"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"अपने डिवाइस के शेयर किए गए स्टोरेज से, ऐप्लिकेशन को वीडियो फ़ाइलें पढ़ने की अनुमति दें."</string>
+    <string name="permlab_readMediaImage" msgid="1507059005825769856">"डिवाइस के शेयर किए गए स्टोरेज से, इमेज फ़ाइलें पढ़ने की अनुमति"</string>
+    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"अपने डिवाइस के शेयर किए गए स्टोरेज से, ऐप्लिकेशन को इमेज फ़ाइलें पढ़ने की अनुमति दें."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"आपकी शेयर की गई मेमोरी की सामग्री में बदलाव करना या उसे मिटाना"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"ऐप्लिकेशन को आपकी शेयर की गई मेमोरी की सामग्री लिखने देती है."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP कॉल करें/पाएं"</string>
@@ -729,8 +735,6 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"उपयोगकर्ता को किसी मोबाइल और इंटरनेट सेवा देने वाली कंपनी की मैसेज सेवा के सबसे बढ़िया इंटरफ़ेस से जोड़ता है. सामान्‍य ऐप के लिए इसकी कभी ज़रूरत नहीं होती."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"किसी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से जुड़ें"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"उपयोगकर्ता को किसी मोबाइल और इंटरनेट सेवा देने वाली कंपनी से जोड़ता है. सामान्‍य ऐप के लिए इसकी कभी ज़रूरत नहीं होती."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"\'परेशान न करें\' को ऐक्सेस करें"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"ऐप को परेशान न करें कॉन्फ़िगरेशन पढ़ने और लिखने देती है."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"देखने की अनुमतियां चालू करें"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"इस्तेमाल करने वाले को किसी ऐप्लिकेशन के लिए अनुमतियों का इस्तेमाल शुरू करने देता है. सामान्य ऐप्लिकेशन के लिए इसकी ज़रूरत कभी नहीं पड़ती."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"अनुमतियों को देखना चालू करना"</string>
@@ -1072,10 +1076,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> छूकर, उससे जुड़ी जानकारी सुनना चालू करना चाहती है. छूकर, उससे जुड़ी जानकारी सुनना चालू होने पर, जो भी आपकी उंगली के नीचे है आप उसकी जानकारी सुन या देख सकते हैं या फ़ोन के ज़रिये बातचीत करने के लिए हाथ के जेश्चर (स्पर्श) का इस्तेमाल कर सकते हैं."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 महीने पहले"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"1 माह से पहले"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="one">पिछले <xliff:g id="COUNT_1">%d</xliff:g> दिनों में</item>
-      <item quantity="other">पिछले <xliff:g id="COUNT_1">%d</xliff:g> दिनों में</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{पिछला # दिन}one{पिछला # दिन}other{पिछले # दिन}}"</string>
     <string name="last_month" msgid="1528906781083518683">"पिछला महीना"</string>
     <string name="older" msgid="1645159827884647400">"इससे पुराना"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"<xliff:g id="DATE">%s</xliff:g> को"</string>
@@ -1094,70 +1095,22 @@
     <string name="year" msgid="5182610307741238982">"वर्ष"</string>
     <string name="years" msgid="5797714729103773425">"वर्ष"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"अभी"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> मि</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> मि</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> घं</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> घं</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> दिन</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> दिन</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> वर्ष</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> वर्ष</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> मि में</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> मि में</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> घं में</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> घं में</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> दिन में</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> दिन में</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> वर्ष में</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> वर्ष में</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> मिनट पहले</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> मिनट पहले</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> घंटे पहले</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> घंटे पहले</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> दिन पहले</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> दिन पहले</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> वर्ष पहले</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> वर्ष पहले</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> मिनट में</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> मिनट में</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> घंटे में</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> घंटे में</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> दिनों में</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> दिनों में</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> वर्षों में</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> वर्षों में</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> मिनट"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> घंटे"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g> दिन"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g> साल"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"<xliff:g id="COUNT">%d</xliff:g> मिनट में"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> घंटे में"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> दिन में"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> साल में"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# मिनट पहले}one{# मिनट पहले}other{# मिनट पहले}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# घंटा पहले}one{# घंटा पहले}other{# घंटे पहले}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# दिन पहले}one{# दिन पहले}other{# दिन पहले}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{# साल पहले}one{# साल पहले}other{# साल पहले}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# मिनट}one{# मिनट}other{# मिनट}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# घंटा}one{# घंटा}other{# घंटे}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# दिन}one{# दिन}other{# दिन}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# साल}one{# साल}other{# साल}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"वीडियो समस्‍याएं"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"यह वीडियो इस डिवाइस पर स्ट्रीमिंग के लिए मान्‍य नहीं है."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"यह वीडियो नहीं चलाया जा सकता."</string>
@@ -1187,10 +1140,8 @@
     <string name="deleteText" msgid="4200807474529938112">"मिटाएं"</string>
     <string name="inputMethod" msgid="1784759500516314751">"इनपुट विधि"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"लेख क्रियाएं"</string>
-    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
-    <skip />
-    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
-    <skip />
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"वापस जाएं"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"इनपुट का तरीका बदलें"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"मेमोरी में जगह नहीं बची है"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"हो सकता है कुछ सिस्टम फ़ंक्शन काम नहीं करें"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"सिस्टम के लिए ज़रूरी मेमोरी नहीं है. पक्का करें कि आपके पास 250एमबी की खाली जगह है और फिर से शुरू करें."</string>
@@ -1411,6 +1362,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"टेस्ट हार्नेस मोड बंद करने के लिए फ़ैक्ट्री रीसेट करें."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"सीरियल कंसोल को चालू करें"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"परफ़ॉर्मेंस पर असर पड़ा है. बंद करने के लिए बूटलोडर चुनें."</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"आज़माने के लिए एमटीई चालू है"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"परफ़ॉर्मेंस और स्थिरता पर इसका असर पड़ सकता है. इसे बंद करने के लिए, डिवाइस को फिर से चालू करें. अगर arm64.memtag.bootctl का इस्तेमाल करके इसे चालू किया गया है, तो पहले इसे \'कोई नहीं\' पर सेट करें."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"यूएसबी पोर्ट में तरल चीज़ या कचरा है"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"यूएसबी पोर्ट अपने आप बंद हो गया है. ज़्यादा जानने के लिए टैप करें."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"यूएसबी पोर्ट का इस्तेमाल करना सुरक्षित है"</string>
@@ -1547,10 +1500,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"अभी नहीं"</string>
     <string name="no_matches" msgid="6472699895759164599">"कोई मिलान नहीं"</string>
     <string name="find_on_page" msgid="5400537367077438198">"पेज पर ढूंढें"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="one"><xliff:g id="TOTAL">%d</xliff:g> में से <xliff:g id="INDEX">%d</xliff:g></item>
-      <item quantity="other"><xliff:g id="TOTAL">%d</xliff:g> में से <xliff:g id="INDEX">%d</xliff:g></item>
-    </plurals>
+    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{# नतीजा{total} में से }one{# {total} में से }other{# }} }"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"हो गया"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"शेयर की गई मेमोरी हमेशा के लिए मिटाई जा रही है…"</string>
     <string name="share" msgid="4157615043345227321">"शेयर करें"</string>
@@ -1680,10 +1630,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"गलत पैटर्न डाला गया है"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"गलत पासवर्ड"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"गलत PIN"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="one"><xliff:g id="NUMBER">%d</xliff:g> सेकंड में फिर से कोशिश करें.</item>
-      <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> सेकंड में फिर से कोशिश करें.</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"अपना आकार आरेखित करें"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"सिम PIN डालें"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"PIN डालें"</string>
@@ -1880,10 +1826,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"प्रतिबंधों को बदलने के लिए PIN बनाएं"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN मेल नहीं खाते हैं. फिर से कोशिश करें."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN बहुत छोटा है. कम से कम 4 अंकों का होना चाहिए."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="one"><xliff:g id="COUNT">%d</xliff:g> सेकंड में फिर से प्रयास करें</item>
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> सेकंड में फिर से प्रयास करें</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"बाद में फिर से प्रयास करें"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"आप पूरे स्क्रीन पर देख रहे हैं"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"बाहर निकलने के लिए, ऊपर से नीचे स्वा‍इप करें."</string>
@@ -1911,46 +1853,20 @@
     <string name="data_saver_description" msgid="4995164271550590517">"डेटा खर्च को कम करने के लिए, डेटा बचाने की सेटिंग कुछ ऐप्लिकेशन को बैकग्राउंड में डेटा भेजने या डेटा पाने से रोकती है. फ़िलहाल, आप जिस ऐप्लिकेशन का इस्तेमाल कर रहे हैं वह डेटा ऐक्सेस कर सकता है, लेकिन ऐसा कभी-कभी ही हो पाएगा. उदाहरण के लिए, इमेज तब तक दिखाई नहीं देंगी, जब तक आप उन पर टैप नहीं करते."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा बचाने की सेटिंग चालू करें?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"चालू करें"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="one">%1$d मिनट के लिए (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> तक)</item>
-      <item quantity="other">%1$d मिनट के लिए (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> तक)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="one">%1$d मिनट के लिए (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> तक)</item>
-      <item quantity="other">%1$d मिनट के लिए (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> तक)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="one">%1$d घंटे के लिए (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> तक)</item>
-      <item quantity="other">%1$d घंटों के लिए (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> तक)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="one">%1$d घंटे के लिए (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> तक)</item>
-      <item quantity="other">%1$d घंटे के लिए (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> तक)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="one">%d मिनट के लिए</item>
-      <item quantity="other">%d मिनट के लिए</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="one">%d मिनट के लिए</item>
-      <item quantity="other">%d मिनट के लिए</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="one">%d घंटे के लिए</item>
-      <item quantity="other">%d घंटों के लिए</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="one">%d घंटे के लिए</item>
-      <item quantity="other">%d घंटे के लिए</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{एक मिनट के लिए ({formattedTime} तक)}one{# मिनट के लिए ({formattedTime} तक)}other{# मिनट के लिए ({formattedTime} तक)}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{1 मिनट के लिए ({formattedTime} तक)}one{# मिनट के लिए ({formattedTime} तक)}other{# मिनट के लिए ({formattedTime} तक)}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{1 घंटे के लिए ({formattedTime} तक)}one{# घंटे के लिए ({formattedTime} तक)}other{# घंटे के लिए ({formattedTime} तक)}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{1 घंटे के लिए ({formattedTime} तक)}one{# घंटे के लिए ({formattedTime} तक)}other{# घंटे के लिए ({formattedTime} तक)}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{एक मिनट के लिए}one{# मिनट के लिए}other{# मिनट के लिए}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{1 मिनट के लिए}one{# मिनट के लिए}other{# मिनट के लिए}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{1 घंटे के लिए}one{# घंटे के लिए}other{# घंटे के लिए}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{1 घंटे के लिए}one{# घंटे के लिए}other{# घंटे के लिए}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> तक"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> तक"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (अगले अलार्म) तक"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"जब तक आप बंद नहीं करते"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"जब तक कि आप परेशान ना करें को बंद नहीं कर देते"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"छोटा करें"</string>
-    <string name="zen_mode_feature_name" msgid="3785547207263754500">"परेशान ना करें"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"बंद रहने का समय"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"हफ़्ते की रात"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"सप्ताहांत"</string>
@@ -1989,10 +1905,6 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"आने वाला (इनकमिंग) कॉल"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"पहले से जारी कॉल"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"इनकमिंग कॉल को स्क्रीन किया जा रहा है"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> चयनित</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> चयनित</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"बिना किसी श्रेणी के"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"आपने इन सूचनाओं की अहमियत सेट की है."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"यह मौजूद व्यक्तियों के कारण महत्वपूर्ण है."</string>
@@ -2058,10 +1970,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"अपने आप भरने के लिए सेव करें"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"सामग्रियां ऑटोमैटिक रूप से भरी जा सकती हैं"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"ऑटोमैटिक भरने का कोई सुझाव नहीं"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="one">ऑटोमैटिक भरने के <xliff:g id="COUNT">%1$s</xliff:g> सुझाव</item>
-      <item quantity="other">ऑटोमैटिक भरने के <xliff:g id="COUNT">%1$s</xliff:g> सुझाव</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{जानकारी अपने-आप भरने के लिए एक सुझाव}one{जानकारी अपने-आप भरने के लिए # सुझाव}other{जानकारी अपने-आप भरने के लिए # सुझाव}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"क्या आप "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" में सेव करना चाहते हैं?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"क्या आप "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" में <xliff:g id="TYPE">%1$s</xliff:g> सेव करना चाहते हैं?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"क्या आप "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" में <xliff:g id="TYPE_0">%1$s</xliff:g> और <xliff:g id="TYPE_1">%2$s</xliff:g> सेव करना चाहते हैं?"</string>
@@ -2108,15 +2017,22 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"अनइंस्‍टॉल करें"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"फिर भी खोलें"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"नुकसान पहुंचाने वाले ऐप का पता चला"</string>
+    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
+    <skip />
+    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
+    <skip />
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>, <xliff:g id="APP_2">%2$s</xliff:g> के हिस्से (स्लाइस) दिखाना चाहता है"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"बदलाव करें"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"कॉल और सूचनाओं के लिए डिवाइस वाइब्रेट हाेगा"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"कॉल और सूचनाओं के लिए डिवाइस म्यूट रहेगा"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"सिस्टम में हुए बदलाव"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"परेशान न करें"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"नई सुविधा: परेशान न करें सुविधा चालू होने की वजह से सूचनाएं नहीं दिखाई जा रही हैं"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ज़्यादा जानने और बदलाव करने के लिए टैप करें."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"परेशान न करें की सुविधा बदल गई है"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"टैप करके देखें कि किन चीज़ों पर रोक लगाई गई है."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"सिस्टम"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"सेटिंग"</string>
@@ -2133,7 +2049,6 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"चालू करें"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"बंद करें"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ज़्यादा जानें"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 में, ज़रूरत के हिसाब से सूचनाएं पाने की सुविधा की जगह अब \'बेहतर सूचनाएं\' सुविधा काम करेगी. यह सुविधा आपको कार्रवाइयों और जवाबों के सुझाव दिखाती है. साथ ही, आपके डिवाइस पर मिलने वाली सूचनाओं को व्यवस्थित करती है.\n\n\'बेहतर सूचनाएं\' सुविधा, डिवाइस पर मिलने वाली सभी सूचनाओं का कॉन्टेंट ऐक्सेस कर सकती है. इसमें आपकी निजी जानकारी, जैसे कि संपर्कों के नाम और मैसेज शामिल हैं. यह सुविधा, सूचनाओं को खारिज कर सकती है या उनका जवाब भी दे सकती है, जैसे कि फ़ोन कॉल का जवाब देना और \'परेशान न करें\' को कंट्रोल करना."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"रूटीन मोड जानकारी की सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"बैटरी आम तौर पर जितने समय चलती है, उससे पहले खत्म हो सकती है"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"बैटरी लाइफ़ बढ़ाने के लिए \'बैटरी सेवर\' चालू हो गया है"</string>
@@ -2162,10 +2077,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> प्रज़ेंटेशन"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"हवाई जहाज़ मोड के दौरान ब्लूटूथ चालू रहेगा"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"प्राेफ़ाइल लोड हो रही है"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> फ़ाइलें</item>
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> फ़ाइलें</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # फ़ाइल}one{{file_name} + # फ़ाइल}other{{file_name} + # फ़ाइलें}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"शेयर करने के लिए, किसी व्यक्ति का सुझाव नहीं दिया गया है"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"ऐप्लिकेशन की सूची"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"इस ऐप्लिकेशन को रिकॉर्ड करने की अनुमति नहीं दी गई है. हालांकि, ऐप्लिकेशन इस यूएसबी डिवाइस से ऐसा कर सकता है."</string>
@@ -2177,10 +2089,16 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"पावर डायलॉग खोलें"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"स्क्रीन लॉक करें"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"स्क्रीनशॉट लें"</string>
+    <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"हेडसेट का हुक बटन"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"स्क्रीन पर दिखने वाला सुलभता का शॉर्टकट"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"स्क्रीन पर दिखने वाले सुलभता के शॉर्टकट को चुनने का मेन्यू"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"सुलभता का शॉर्टकट"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"नोटिफ़िकेशन शेड खारिज करें"</string>
+    <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"डी-पैड का ऊपर वाला बटन"</string>
+    <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"डी-पैड का नीचे वाला बटन"</string>
+    <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"डी-पैड का बाईं ओर वाला बटन"</string>
+    <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"डी-पैड का दाईं ओर वाला बटन"</string>
+    <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"डी-पैड का बीच वाला बटन"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> का कैप्शन बार."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> को प्रतिबंधित बकेट में रखा गया है"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2201,8 +2119,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"वर्क प्रोफ़ाइल चालू करने के लिए टैप करें"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"यह कॉन्टेंट, ऑफ़िस के काम से जुड़े आपके किसी भी ऐप्लिकेशन पर खोला नहीं जा सकता"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"यह कॉन्टेंट आपके किसी भी निजी ऐप्लिकेशन पर खोला नहीं जा सकता"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"क्या आप <xliff:g id="APP">%s</xliff:g> ऐप्लिकेशन को निजी प्रोफ़ाइल में खोलना चाहते हैं?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"क्या आप <xliff:g id="APP">%s</xliff:g> ऐप्लिकेशन को वर्क प्रोफ़ाइल में खोलना चाहते हैं?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"निजी ब्राउज़र का इस्तेमाल करें"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ऑफ़िस के काम से जुड़े ब्राउज़र का इस्तेमाल करें"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"सिम नेटवर्क को अनलॉक करने का पिन"</string>
@@ -2332,4 +2252,9 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> आपकी स्क्रीन को देख सकता है और कंट्रोल कर सकता है. ऐक्सेस की समीक्षा करने के लिए टैप करें."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> का अनुवाद किया गया."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"मैसेज का <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> से <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> में अनुवाद किया गया."</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"बैकग्राउंड में हो रही गतिविधि"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"बैकग्राउंड में हो रही गतिविधि"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> बैकग्राउंड में चल रहा है और बैटरी खर्च कर रहा है. देखने के लिए टैप करें."</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> बैकग्राउंड में बहुत देर से चल रहा है. देखने के लिए टैप करें."</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"चालू ऐप्लिकेशन देखें"</string>
 </resources>

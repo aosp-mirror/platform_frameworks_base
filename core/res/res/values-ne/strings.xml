@@ -70,7 +70,6 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"कल गर्ने तिन तरिका"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"नचाहिएका रिसउठ्दा कलहरूको अस्वीकार"</string>
     <string name="CndMmi" msgid="185136449405618437">"कलिङ नम्बर प्रदान गर्ने"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"बाधा नगर्नुहोस्"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"सीमति गर्न डिफल्ट कलर ID, अर्को कल: सीमति गरिएको"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"कलर ID पूर्वनिर्धारितको लागि रोकावट छ। अर्को कल: रोकावट छैन"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"कलर ID पूर्वनिर्धारितदेखि प्रतिबन्धित छैन। अर्को कल: प्रतिबन्धित छ"</string>
@@ -180,10 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"भण्डारण भरिएको छ हेर्नुहोस्। ठाउँ खाली गर्न केही फाइलहरू मेटाउनुहोस्।"</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Android टिभी डिभाइसको भण्डारण भरिएको छ। ठाउँ खाली गर्न केही फाइलहरू मेट्नुहोस्।"</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"फोन भण्डारण भरिएको छ! ठाउँ खाली गर्नको लागि केही फाइलहरू मेटाउनुहोस्।"</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="other">प्रमाणपत्रका अख्तियारीहरूलाई स्थापना गरियो</item>
-      <item quantity="one">प्रमाणपत्रको अख्तियारीलाई स्थापना गरियो</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{प्रमाणपत्र जारी गर्ने निकाय इन्स्टल गरियो}other{प्रमाणपत्र जारी गर्ने निकायहरू इन्स्टल गरियो}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"अज्ञात तेस्रो पक्ष द्वारा"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"तपाईंको कार्य प्रोफाइलका प्रशासकद्वारा"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> द्वारा"</string>
@@ -203,6 +199,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"सेन्सरको सूचनासम्बन्धी सेवा"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ट्वाइलाइट सेवा"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS को समय अपडेट गर्ने सेवा"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"डिभाइससम्बन्धी नीति व्यवस्थापन गर्ने सेवा"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"सङ्गीत पहिचान गर्ने सुविधा व्यवस्थापन गर्ने सेवा"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"तपाईंको यन्त्र मेटिनेछ"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"प्रशासकको एप प्रयोग गर्न मिल्दैन। तपाईंको डिभाइसको डेटा अब मेटाइने छ।\n\nतपाईंसँग प्रश्नहरू भएका खण्डमा आफ्नो संगठनका प्रशासकसँग सम्पर्क गर्नुहोस्।"</string>
@@ -256,10 +253,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"बढी भन्दा बढी परिस्थितिहरूमा यसको प्रयोग गर्नुहोस्। यसले तपाईँलाई रिपोर्टको प्रगति ट्र्याक गर्न, समस्याका बारे थप विवरणहरू प्रविष्ट गर्न र स्क्रिनसटहरू लिन अनुमति दिन्छ। यसले रिपोर्ट गर्न लामो समय लिने केही कम प्रयोग हुने खण्डहरूलाई समावेश नगर्न सक्छ।"</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"पूर्ण रिपोर्ट"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"तपाईँको यन्त्रले प्रतिक्रिया नदिँदा वा धेरै सुस्त चल्दा वा तपाईँलाई सबै रिपोर्ट सम्बन्धी खण्डहरूको आवश्यकता पर्दा प्रणालीमा न्यूनतम हस्तक्षेपका लागि यस विकल्पको प्रयोग गर्नुहोस्। यसले तपाईँलाई थप विवरणहरू प्रविष्ट गर्न वा स्क्रिनसटहरू लिन अनुमति दिँदैन।"</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="other"> बग रिपोर्टको लागि <xliff:g id="NUMBER_1">%d</xliff:g> सेकेन्डमा स्क्रिसट लिँदै।</item>
-      <item quantity="one"> बग रिपोर्टको लागि <xliff:g id="NUMBER_0">%d</xliff:g> सेकेन्डमा स्क्रिसट लिँदै।</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{त्रुटि/समस्याको रिपोर्टको स्क्रिनसट # सेकेन्डमा लिइने छ।}other{त्रुटि/समस्याको रिपोर्टको स्क्रिनसट # सेकेन्डमा लिइने छ।}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"बग रिपोर्टको स्क्रिनसट खिचियो"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"बग रिपोर्टको स्क्रिनसट खिच्न सकिएन"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"मौन मोड"</string>
@@ -310,8 +304,14 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"तपाईंको पात्रोमाथि पहुँच गर्नुहोस्"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS सन्देशहरू पठाउनुहोस् र हेर्नुहोस्"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"फाइल र मिडिया"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"तपाईंको डिभाइसमा फोटो, मिडिया, र फाइलहरूमाथि पहुँच गर्नुहोस्"</string>
+    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
+    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"सङ्गीत तथा अन्य अडियो"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"तपाईंको डिभाइसमा भएका अडियो फाइलहरू प्रयोग गर्ने"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"फोटो तथा भिडियोहरू"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"तपाईंको डिभाइसमा भएका फोटो तथा भिडियो फाइलहरू प्रयोग गर्ने"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"माइक्रोफोन"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"अडियो रेकर्ड गर्नुहोस्"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"शारीरिक क्रियाकलाप"</string>
@@ -683,6 +683,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"एपलाई खाताको लागि समीकरणको आँकडा समीकरण घटनाहरूको  इतिहास र समीकरण गरिएको डेटाको मापन समेत, पढ्न अनुमति दिन्छ।"</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"आफ्नो आदान प्रदान गरिएको भण्डारणको सामग्रीहरूहरू पढ्नुहोस्"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"एपलाई तपाईंको आदान प्रदान गरिएको भण्डारणको सामग्री पढ्न अनुमति दिन्छ।"</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"साझा भण्डारणमा भएका अडियो फाइलहरू पढ्ने"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"एपलाई तपाईंको साझा भण्डारणमा भएका अडियो फाइलहरू पढ्ने अनुमति दिन्छ।"</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"साझा भण्डारणमा भएका भिडियो फाइलहरू पढ्ने"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"एपलाई तपाईंको साझा भण्डारणमा भएका भिडियो फाइलहरू पढ्ने अनुमति दिन्छ।"</string>
+    <string name="permlab_readMediaImage" msgid="1507059005825769856">"साझा भण्डारणमा भएका फोटो फाइलहरू पढ्ने"</string>
+    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"एपलाई तपाईंको साझा भण्डारणमा भएका फोटो फाइलहरू पढ्ने अनुमति दिन्छ।"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"तपाईंको आदान प्रदान गरिएको भण्डारणको विषयवस्तुहरूलाई परिमार्जन गर्नहोस् वा मेटाउनुहोस्"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"एपलाई तपाईंको आदान प्रदान गरिएको भण्डारणको सामग्री लेख्न अनुमति दिन्छ।"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP कलहरू प्राप्त/बनाउन"</string>
@@ -729,8 +735,6 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"धारकलाई वाहक मेसेजिङ सेवाको उच्च-स्तरको इन्टरफेसमा आबद्ध हुन अनुमति दिनुहोस्। सामान्य एपहरूको लागि कहिल्यै आवश्यकता पर्दैन।"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"वाहक सेवाहरु बाँध्न"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"होल्डरलाई वाहक सेवाहरु बाँध्न अनुमति दिनुहोस्। सामान्य अनुप्रयोगहरूको लागि यो कहिल्यै आवश्यक पर्दैन।"</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"बाधा नपुर्याउँनुहोस् पहुँच गर्नुहोस्"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"बाधा नपुर्याउँनुहोस् कन्फिगरेसन पढ्न र लेख्‍नको लागि एपलाई अनुमति दिनुहोस्।"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"हेर्ने अनुमतिको प्रयोग सुरु गर्नुहोस्"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"वाहकलाई कुनै एपसम्बन्धी अनुमतिको प्रयोग सुरु गर्न दिन्छ। साधारण एपहरूलाई कहिल्यै आवश्यक नपर्नु पर्ने हो।"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"अनुमतिसम्बन्धी निर्णयहरू हेर्न सुरु गर्नुहोस्"</string>
@@ -1072,10 +1076,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>ले स्पर्षद्वारा अन्वेषण सक्षम गर्न चाहन्छ। स्पर्षद्वारा अन्वेषण सक्षम भएको बेला तपाईं आफ्नो औँलाको मुनि भएका विषयवस्तुहरू बारे सुन्न वा विवरण हेर्न सक्नुहुन्छ वा फोनसँग अन्तर्क्रिया गर्न इशारा गर्नुहोस्।"</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"१ महिना अघि"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"१ महिना अघि"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="other"> अन्तिम <xliff:g id="COUNT_1">%d</xliff:g> दिन</item>
-      <item quantity="one"> अन्तिम <xliff:g id="COUNT_0">%d</xliff:g> दिन</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{पछिल्लो # दिन}other{पछिल्ला # दिन}}"</string>
     <string name="last_month" msgid="1528906781083518683">"अन्तिम महिना"</string>
     <string name="older" msgid="1645159827884647400">"पुरानो"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"<xliff:g id="DATE">%s</xliff:g> मा"</string>
@@ -1094,70 +1095,22 @@
     <string name="year" msgid="5182610307741238982">"वर्ष"</string>
     <string name="years" msgid="5797714729103773425">"वर्षहरू"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"अहिले"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>मिनेट</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> मिनेट</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>घन्टा</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> घन्टा</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>दिन</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> दिन</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>वर्ष</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> वर्ष</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>मिनेटमा</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>मिनेटमा</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> घन्टामा</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>घन्टामा</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>दिनमा</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>दिनमा</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>वर्षमा</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>वर्षमा</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> मिनेटअघि</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> मिनेटअघि</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> घन्टा अघि</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> घन्टा अघि</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> दिन अघि</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> दिन अघि</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> वर्ष अघि</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> वर्ष अघि</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> मिनेटमा</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> मिनेटमा</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> घन्टामा</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> घन्टामा</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> दिनमा</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> दिनमा</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> वर्षमा</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> वर्षमा</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> मिनेट"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> घण्टा"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g> दिन"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g> वर्ष"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"<xliff:g id="COUNT">%d</xliff:g> मिनेटभित्र"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> घण्टाभित्र"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> दिनभित्र"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> वर्षभित्र"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# मिनेटअघि}other{# मिनेटअघि}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# घण्टाअघि}other{# घण्टाअघि}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# दिनअघि}other{# दिनअघि}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{# वर्षअघि}other{# वर्षअघि}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# मिनेट}other{# मिनेट}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# घण्टा}other{# घण्टा}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# दिन}other{# दिन}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# वर्ष}other{# वर्ष}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"भिडियो समस्या"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"यो भिडियो यस उपकरणको लागि स्ट्रिमिङ गर्न मान्य छैन।"</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"यो भिडियो चलाउन सक्दैन।"</string>
@@ -1187,10 +1140,8 @@
     <string name="deleteText" msgid="4200807474529938112">"मेट्नुहोस्"</string>
     <string name="inputMethod" msgid="1784759500516314751">"निवेश विधि"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"पाठ कार्यहरू"</string>
-    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
-    <skip />
-    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
-    <skip />
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"पछाडि"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"इनपुट विधि बदल्नुहोस्"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"भण्डारण ठाउँ सकिँदै छ"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"सायद केही प्रणाली कार्यक्रमहरूले काम गर्दैनन्"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"प्रणालीको लागि पर्याप्त भण्डारण छैन। तपाईँसँग २५० मेगा बाइट ठाउँ खाली भएको निश्चित गर्नुहोस् र फेरि सुरु गर्नुहोस्।"</string>
@@ -1411,6 +1362,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"परीक्षण प्याकेज मोड असक्षम पार्न फ्याक्ट्री रिसेट गर्नुहोस्।"</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"क्रमसम्बन्धी कन्सोल सक्षम पारियो"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"कार्यसम्पादनमा प्रभाव परेको छ। यसलाई असक्षम पार्न बुटलोडरको जाँच गर्नुहोस्।"</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"परीक्षणका क्रममा रहेको MTE अन गरियो"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"पर्फर्मेन्स र स्थिरता प्रभावित हुन सक्छ। अफ गर्न रिबुट गर्नुहोस्। तपाईंले arm64.memtag.bootctl प्रयोग गरी अन गर्नुभएको थियो भने अफ गर्नुअघि यसलाई परिवर्तन गरी \"कुनै पनि होइन\" बनाउनुहोस्।"</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"USB पोर्टमा तरल पदार्थ वा धुलो भएको कुरा पत्ता लाग्यो"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB पोर्ट स्वतः असक्षम पारियो। थप जान्न ट्याप गर्नुहोस्।"</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB पोर्ट प्रयोग गर्दा हुन्छ"</string>
@@ -1547,10 +1500,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"छोड्नुहोस्"</string>
     <string name="no_matches" msgid="6472699895759164599">"कुनै मिलेन"</string>
     <string name="find_on_page" msgid="5400537367077438198">"पृष्ठमा फेला पार्नुहोस्"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> को<xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">1 मेल</item>
-    </plurals>
+    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{# खेल{total} वटा खेलमध्ये }other{# औँ खेल}} }"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"भयो"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"साझेदारी गरिएको भण्डारण मेट्दै…"</string>
     <string name="share" msgid="4157615043345227321">"सेयर गर्नुहोस्"</string>
@@ -1680,10 +1630,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"प्याटर्न मिलेन"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"गलत पासवर्ड"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"गलत PIN"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> सेकेन्डपछि फेरि प्रयास गर्नुहोस्।</item>
-      <item quantity="one">१ सेकेन्डपछि फेरि प्रयास गर्नुहोस्।</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"आफ्नो ढाँचा कोर्नुहोस्"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"SIM PIN प्रविष्टि गर्नुहोस्"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"PIN प्रविष्टि गर्नुहोस्"</string>
@@ -1880,10 +1826,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"प्रतिबन्धहरूलाई परिवर्तन गर्नको लागि एउटा PIN बनाउनुहोस्"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN हरू मेल खाएनन्। पुनः प्रयास गर्नुहोस्।"</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN अति छोटो भयो। कम्तीमा ४ अङ्क हुन आवश्यक छ।"</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="other"> फेरि <xliff:g id="COUNT">%d</xliff:g> सेकेन्डमा प्रयास गर्नुहोस्</item>
-      <item quantity="one">1 सेकेन्ड पछि पुनः प्रयास गर्नुहोस्।</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"पछि पुनः प्रयास गर्नुहोस्"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"पूरा पर्दा हेर्दै"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"बाहिर निस्कन, माथिबाट तल स्वाइप गर्नुहोस्।"</string>
@@ -1911,46 +1853,20 @@
     <string name="data_saver_description" msgid="4995164271550590517">"डेटा सेभरले डेटा खपत कम गर्न केही एपहरूलाई ब्याकग्राउन्डमा डेटा पठाउन वा प्राप्त गर्न दिँदैन। तपाईंले अहिले प्रयोग गरिरहनुभएको एपले सीमित रूपमा मात्र डेटा चलाउन पाउँछ। उदाहरणका लागि, तपाईंले फोटोमा ट्याप गर्नुभयो भने मात्र फोटो देखिन्छ नत्र देखिँदैन।"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"डेटा सेभर अन गर्ने हो?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"सक्रिय गर्नुहोस्"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="other"> %1$d मिनेटको लागि (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> सम्म)</item>
-      <item quantity="one">एक मिनेटको लागि (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> सम्म)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="other">%1$d मिनेटका लागि (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> सम्म)</item>
-      <item quantity="one">१ मिनेटको लागि (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> सम्म)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="other"> %1$d घन्टाका लागि (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> सम्म)</item>
-      <item quantity="one">१ घन्टाका लागि (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> सम्म)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="other">%1$d घन्टाको लागि (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> सम्म)</item>
-      <item quantity="one">१ घन्टाको लागि (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> सम्म)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="other">%d मिनेटको लागि</item>
-      <item quantity="one">एक मिनेटको लागि</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="other">%d मिनेटका लागि</item>
-      <item quantity="one">१ मिनेटको लागि</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="other">%d घन्टाका लागि</item>
-      <item quantity="one">१ घन्टाका लागि</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="other">%d घन्टाका लागि</item>
-      <item quantity="one">१ घन्टाको लागि</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{एक मिनेटका लागि ({formattedTime} सम्म)}other{# मिनेटका लागि ({formattedTime} सम्म)}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{१ मिनेटका लागि ({formattedTime} सम्म)}other{# मिनेटका लागि ({formattedTime} सम्म)}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{१ घण्टाका लागि ({formattedTime} सम्म)}other{# घण्टाका लागि ({formattedTime} सम्म)}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{१ घण्टाका लागि ({formattedTime} सम्म)}other{# घण्टाका लागि ({formattedTime} सम्म)}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{एक मिनेटका लागि}other{# मिनेटका लागि}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{१ मिनेटका लागि}other{# मिनेटका लागि}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{१ घण्टाका लागि}other{# घण्टाका लागि}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{१ घण्टाका लागि}other{# घण्टाका लागि}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> सम्म"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> सम्म"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (अर्को अलार्म) सम्म"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"तपाईंले निष्क्रिय नपार्नुभएसम्म"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"तपाईँले बन्द नगरे सम्म बाधा नपुर्याउँनुहोस्"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"संक्षिप्त पार्नुहोस्"</string>
-    <string name="zen_mode_feature_name" msgid="3785547207263754500">"अवरोध नपुर्याउँनुहोस्"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"डाउनटाइम"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"हरेक हप्तादिनको राति"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"शनिबार"</string>
@@ -1989,10 +1905,6 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"आगमन कल"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"भइरहेको कल"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"आगमन कल जाँचिँदै छ"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> चयन गरियो</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> चयन गरियो</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"वर्गीकरण नगरिएको"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"तपाईंले यी सूचनाहरूको महत्त्व सेट गर्नुहोस् ।"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"यसमा सङ्लग्न भएका मानिसहरूको कारणले गर्दा यो महत्वपूर्ण छ।"</string>
@@ -2058,10 +1970,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"स्वत: भरणका लागि सेभ गर्नुहोस्‌"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"सामग्रीहरूलाई स्वत: भरण गर्न मिल्दैन"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"कुनै स्वत: भरण सुझाव छैन"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> स्वत: भरण सुझावहरू</item>
-      <item quantity="one">एउटा स्वत: भरण सुझाव</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{स्वतः भर्ने एउटा सुझाव}other{स्वतः भर्ने # वटा सुझाव}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" मा सुरक्षित गर्ने हो?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"<xliff:g id="TYPE">%1$s</xliff:g> लाई "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" मा सुरक्षित गर्ने हो?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"<xliff:g id="TYPE_0">%1$s</xliff:g> र <xliff:g id="TYPE_1">%2$s</xliff:g> लाई "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" मा सुरक्षित गर्ने हो?"</string>
@@ -2108,15 +2017,22 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"स्थापना रद्द गर्नु…"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"जे भए पनि खोल्नुहोस्"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"हानिकारक एप भेटियो"</string>
+    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
+    <skip />
+    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
+    <skip />
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> ले <xliff:g id="APP_2">%2$s</xliff:g> का स्लाइसहरू देखाउन चाहन्छ"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"सम्पादन गर्नुहोस्"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"कल तथा सूचनाहरू आउँदा कम्पन हुने छ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"कल तथा सूचनाहरूलाई म्युट गरिने छ"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"प्रणालीसम्बन्धी परिवर्तनहरू"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"बाधा नपुऱ्याउनुहोस्"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"नयाँ: बाधा नपुर्‍याउनुहोस् नामक मोडले सूचनाहरू लुकाइरहेको छ"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"थप जान्न र परिवर्तन गर्न ट्याप गर्नुहोस्।"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"बाधा नपुर्‍याउनुहोस् मोड परिवर्तन भएको छ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"रोक लगाइएका कुराहरू जाँच गर्न ट्याप गर्नुहोस्‌।"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"प्रणाली"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"सेटिङहरू"</string>
@@ -2133,7 +2049,6 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ठिक छ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"अफ गर्नुहोस्"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"थप जान्नुहोस्"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android १२ मा Android को अनुकूल पार्न मिल्ने सूचनाहरू नामक सुविधालाई परिष्कृत सूचनाहरू नामक सुविधाले प्रतिस्थापन गरेको छ। यो सुविधाले कारबाही तथा जवाफसम्बन्धी सुझाव देखाउँछ र तपाईंका सूचनाहरू व्यवस्थित गर्छ।\n\nपरिष्कृत सूचनाहरू नामक सुविधाले सूचनामा उल्लिखित सम्पर्क व्यक्तिको नाम र म्यासेज जस्ता व्यक्तिगत जानकारीलगायतका सामग्री हेर्न तथा प्रयोग गर्न सक्छ। यो सुविधाले फोन उठाउने तथा \'बाधा नपुऱ्याउनुहोस्\' मोड नियन्त्रण गर्ने कार्यसहित सूचनाहरू हटाउने वा सूचनाहरूको जवाफ दिने कार्य पनि गर्न सक्छ।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"दिनचर्या मोडको जानकारीमूलक सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"प्रायः चार्ज गर्ने समय हुनुभन्दा पहिले नै ब्याट्री सकिन सक्छ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ब्याट्रीको आयु बढाउन ब्याट्री सेभर सक्रिय गरियो"</string>
@@ -2162,10 +2077,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> प्रस्तुति"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"हवाइजहाज मोडमा ब्लुटुथ सक्रिय रहने छ"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"लोड गर्दै"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> फाइलहरू</item>
-      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> फाइल</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # फाइल}other{{file_name} + # वटा फाइल}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"कुनै पनि व्यक्तिसँग सेयर गर्ने सिफारिस गरिएको छैन"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"अनुप्रयोगहरूको सूची"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"यो एपलाई रेकर्ड गर्ने अनुमति प्रदान गरिएको छैन तर यसले यो USB यन्त्रमार्फत अडियो क्याप्चर गर्न सक्छ।"</string>
@@ -2177,10 +2089,16 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"पावर संवाद"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"लक स्क्रिन"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"स्क्रिनसट"</string>
+    <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"हेडसेट हुक"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"सहज पहुँचका लागि स्क्रिनमा राखिने सर्टकट"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"सहज पहुँचका लागि स्क्रिनमा राखिने सर्टकट छान्ने मेनु"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"पहुँचको सर्टकट"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"सूचना कक्ष खारेज गर्नुहोस्"</string>
+    <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad को माथिको बटन"</string>
+    <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad को तलको बटन"</string>
+    <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad को बायाँको बटन"</string>
+    <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad को दायाँको बटन"</string>
+    <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad को बिचको बटन"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> को क्याप्सन बार।"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> लाई प्रतिबन्धित बाल्टीमा राखियो"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2201,8 +2119,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"अन गर्न ट्याप गर्नुहोस्"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"यो सामग्री खोल्न मिल्ने कुनै पनि कामसम्बन्धी एप छैन"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"यो सामग्री खोल्न मिल्ने कुनै पनि व्यक्तिगत एप छैन"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"व्यक्तिगत प्रोफाइल प्रयोग गरी <xliff:g id="APP">%s</xliff:g> मा खोल्ने हो?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"कार्य प्रोफाइल प्रयोग गरी <xliff:g id="APP">%s</xliff:g> मा खोल्ने हो?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"व्यक्तिगत ब्राउजर प्रयोग गर्नुहोस्"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"कार्य ब्राउजर प्रयोग गर्नुहोस्"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM को नेटवर्क अनलक गर्ने PIN"</string>
@@ -2332,4 +2252,9 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> तपाईंको स्क्रिन हेर्न र नियन्त्रण गर्न सक्छ। सेटिङ मिलाउन ट्याप गर्नुहोस्।"</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> अनुवाद गरिएको छ।"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"म्यासेज <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> भाषाबाट <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> भाषामा अनुवाद गरिएको छ।"</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"ब्याकग्राउन्डमा गरिएको क्रियाकलाप"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"ब्याकग्राउन्डमा गरिएको क्रियाकलाप"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ब्याकग्राउन्डमा चलिरहेको हुनाले ब्याट्री खपत भइरहेको छ। तपाईं यसका सम्बन्धमा समीक्षा गर्न चाहनुहुन्छ भने ट्याप गर्नुहोस्।"</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> लामो समयदेखि ब्याकग्राउन्डमा चलिरहेको छ। तपाईं यसका सम्बन्धमा समीक्षा गर्न चाहनुहुन्छ भने ट्याप गर्नुहोस्।"</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"कुन कुन एप सक्रिय छ भन्ने कुरा जाँच्नुहोस्"</string>
 </resources>

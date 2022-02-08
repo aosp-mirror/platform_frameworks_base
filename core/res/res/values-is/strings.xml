@@ -70,7 +70,6 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Þriggja manna símafundur"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Óæskilegum símtölum hafnað"</string>
     <string name="CndMmi" msgid="185136449405618437">"Númerabirting"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"Ónáðið ekki"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Númerabirting er sjálfgefið með takmörkunum. Næsta símtal: Með takmörkunum"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Númerabirting er sjálfgefið með takmörkunum. Næsta símtal: Án takmarkana"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Númerabirting er sjálfgefið án takmarkana. Næsta símtal: Með takmörkunum"</string>
@@ -180,10 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"Geymsla úrsins er full. Eyddu einhverjum skrám til að búa til pláss."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Geymsla Android TV tækisins er full. Eyddu einhverjum skrám til að losa um pláss."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"Geymslurými símans er fullt. Eyddu einhverjum skrám til að losa um pláss."</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="one">CA-vottorð hafa verið sett upp</item>
-      <item quantity="other">CA-vottorð hafa verið sett upp</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Vottunaraðili settur upp}one{Vottunaraðilar settir upp}other{Vottunaraðilar settir upp}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Af óþekktum þriðja aðila"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Af kerfisstjóra vinnusniðsins þíns"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Af <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -203,6 +199,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"Tilkynningaþjónusta nema"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Ljósaskiptaþjónusta"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Tímastillingarþjónusta hnattræna gervihnattaleiðsögukerfisins (GNSS)"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"Þjónusta Device Policy Manager"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Umsjónarþjónusta tónlistargreiningar"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Tækið verður hreinsað"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Ekki er hægt að nota stjórnunarforritið. Tækinu verður eytt.\n\nEf spurningar vakna skaltu hafa samband við kerfisstjóra fyrirtækisins."</string>
@@ -256,10 +253,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Þú getur notað þetta í flestum tilvikum. Með þessu móti geturðu fylgst með framgangi tilkynningarinnar og slegið inn viðbótarupplýsingar um vandamálið. Hugsanlegt er að lítið notuðum hlutum verði sleppt til að spara tíma."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Heildarskýrsla"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Notaðu þennan valmöguleika til að lágmarka truflun frá kerfinu þegar tækið þitt svarar ekki eða er of hægt, eða þegar þú þarft alla hluta tilkynningarinnar. Leyfir þér ekki að slá inn viðbótarupplýsingar eða taka skjámyndir."</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="one">Tekur skjámynd fyrir villutilkynningu eftir <xliff:g id="NUMBER_1">%d</xliff:g> sekúndu.</item>
-      <item quantity="other">Tekur skjámynd fyrir villutilkynningu eftir <xliff:g id="NUMBER_1">%d</xliff:g> sekúndur.</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Tekur skjámynd fyrir villutilkynningu eftir # sekúndu.}one{Tekur skjámynd fyrir villutilkynningu eftir # sekúndu.}other{Tekur skjámynd fyrir villutilkynningu eftir # sekúndur.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Skjámynd með villutilkynningu tekin"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Mistókst að taka skjámynd með villutilkynningu"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Hljóðlaus stilling"</string>
@@ -310,8 +304,14 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"fá aðgang að dagatalinu þínu"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"senda og skoða SMS-skilaboð"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"Skrár og margmiðlunarefni"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"fá aðgang að myndum, efni og skrám í tækinu"</string>
+    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
+    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Tónlist og annað hljóð"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"fá aðgang að hljóðskrám í tækinu þínu"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Myndir og myndskeið"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"fá aðgang að myndum og myndskeiðaskrám í tækinu þínu"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Hljóðnemi"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"taka upp hljóð"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Hreyfing"</string>
@@ -683,6 +683,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Leyfir forriti að lesa talnagögn samstillingar fyrir reikning, þ. á m. feril samstillingaratvika og samstillt gagnamagn."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"lesa innihald samnýtta geymslurýmisins"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Leyfir forritinu að lesa innihald samnýtta geymslurýmisins."</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"lesa hljóðskrár úr samnýttu geymslurými"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Leyfir forritinu að lesa hljóðskrár úr samnýtta geymslurýminu þínu."</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"lesa myndskeiðaskrár úr samnýttu geymslurými"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Leyfir forritinu að lesa myndskeiðaskrár úr samnýtta geymslurýminu þínu."</string>
+    <string name="permlab_readMediaImage" msgid="1507059005825769856">"lesa myndskrár úr samnýttu geymslurými"</string>
+    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Leyfir forritinu að lesa myndskrár úr samnýtta geymslurýminu þínu."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"breyta eða eyða innihaldi samnýtta geymslurýmisins"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Leyfir forriti að skrifa í innihald samnýtta geymslurýmisins."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"hringja/svara SIP-símtölum"</string>
@@ -729,8 +735,6 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Leyfir forriti að bindast efsta viðmótslagi skilaboðaþjónustu símafyrirtækis. Ætti aldrei að vera nauðsynlegt fyrir venjuleg forrit."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"bindast þjónustu símafyrirtækis"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Leyfir handhafa að bindast þjónustu símafyrirtækis. Ætti aldrei að vera nauðsynlegt fyrir venjuleg forrit."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"aðgangur að „Ónáðið ekki“"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Leyfir forriti að lesa og skrifa í grunnstillingu „Ónáðið ekki“."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"heimildanotkun upphafsyfirlits"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Leyfir handhafa að byrja heimildanotkun fyrir forrit. Ætti aldrei að þurfa fyrir venjuleg forrit."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"opna ákvarðanir um skoðunarheimildir"</string>
@@ -1072,10 +1076,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> vill kveikja á snertikönnun. Þegar kveikt er á snertikönnun geturðu heyrt eða séð lýsingu á því sem er á skjánum undir fingrinum hverju sinni eða notað bendingar til að stjórna símanum."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"Fyrir mánuði"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Fyrir meira en mánuði"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="one">Undanfarinn <xliff:g id="COUNT_1">%d</xliff:g> dag</item>
-      <item quantity="other">Undanfarna <xliff:g id="COUNT_1">%d</xliff:g> daga</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Undanfarinn # dag}one{Undanfarinn # dag}other{Undanfarna # daga}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Í síðasta mánuði"</string>
     <string name="older" msgid="1645159827884647400">"Eldra"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"<xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1094,70 +1095,22 @@
     <string name="year" msgid="5182610307741238982">"ár"</string>
     <string name="years" msgid="5797714729103773425">"ár"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"nú"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> m.</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> m.</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> k.</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> k.</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> d.</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> d.</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> á.</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> á.</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="one">eftir <xliff:g id="COUNT_1">%d</xliff:g> m.</item>
-      <item quantity="other">eftir <xliff:g id="COUNT_1">%d</xliff:g> m.</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="one">eftir <xliff:g id="COUNT_1">%d</xliff:g> k.</item>
-      <item quantity="other">eftir <xliff:g id="COUNT_1">%d</xliff:g> k.</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="one">eftir <xliff:g id="COUNT_1">%d</xliff:g> d.</item>
-      <item quantity="other">eftir <xliff:g id="COUNT_1">%d</xliff:g> d.</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="one">eftir <xliff:g id="COUNT_1">%d</xliff:g> ár</item>
-      <item quantity="other">eftir <xliff:g id="COUNT_1">%d</xliff:g> ár</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="one">fyrir <xliff:g id="COUNT_1">%d</xliff:g> mínútu</item>
-      <item quantity="other">fyrir <xliff:g id="COUNT_1">%d</xliff:g> mínútum</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="one">fyrir <xliff:g id="COUNT_1">%d</xliff:g> klukkustund</item>
-      <item quantity="other">fyrir <xliff:g id="COUNT_1">%d</xliff:g> klukkustundum</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="one">fyrir <xliff:g id="COUNT_1">%d</xliff:g> degi</item>
-      <item quantity="other">fyrir <xliff:g id="COUNT_1">%d</xliff:g> dögum</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="one">fyrir <xliff:g id="COUNT_1">%d</xliff:g> ári</item>
-      <item quantity="other">fyrir <xliff:g id="COUNT_1">%d</xliff:g> árum</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="one">eftir <xliff:g id="COUNT_1">%d</xliff:g> mínútu</item>
-      <item quantity="other">eftir <xliff:g id="COUNT_1">%d</xliff:g> mínútur</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="one">eftir <xliff:g id="COUNT_1">%d</xliff:g> klukkustund</item>
-      <item quantity="other">eftir <xliff:g id="COUNT_1">%d</xliff:g> klukkustundir</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="one">eftir <xliff:g id="COUNT_1">%d</xliff:g> dag</item>
-      <item quantity="other">eftir <xliff:g id="COUNT_1">%d</xliff:g> daga</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="one">eftir <xliff:g id="COUNT_1">%d</xliff:g> ár</item>
-      <item quantity="other">eftir <xliff:g id="COUNT_1">%d</xliff:g> ár</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> mín."</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> klst."</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g> d."</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g> ár"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"eftir <xliff:g id="COUNT">%d</xliff:g> mín."</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"eftir <xliff:g id="COUNT">%d</xliff:g> klst."</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"eftir <xliff:g id="COUNT">%d</xliff:g> d."</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"eftir <xliff:g id="COUNT">%d</xliff:g> ár"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Fyrir # mínútu}one{Fyrir # mínútu}other{Fyrir # mínútum}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Fyrir # klukkustund}one{Fyrir # klukkustund}other{Fyrir # klukkustundum}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Fyrir # degi}one{Fyrir # degi}other{Fyrir # dögum}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{Fyrir # ári}one{Fyrir # ári}other{Fyrir # árum}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# mínúta}one{# mínúta}other{# mínútur}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# klukkustund}one{# klukkustund}other{# klukkustundir}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# dagur}one{# dagur}other{# dagar}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# ár}one{# ár}other{# ár}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Vandamál með myndskeið"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"Þetta myndskeið er ekki gjaldgengt fyrir straumspilun í þessu tæki."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"Ekki er hægt að spila þetta myndskeið."</string>
@@ -1187,10 +1140,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Eyða"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Innsláttaraðferð"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Textaaðgerðir"</string>
-    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
-    <skip />
-    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
-    <skip />
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Til baka"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Skipta um innfærsluaðferð"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Geymslurýmið er senn á þrotum"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Sumir kerfiseiginleikar kunna að vera óvirkir"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Ekki nægt geymslurými fyrir kerfið. Gakktu úr skugga um að 250 MB séu laus og endurræstu."</string>
@@ -1411,6 +1362,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Núllstilltu til að slökkva á stillingu prófunarvangs."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Raðstjórnborð virkjað"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Þetta hefur áhrif á afköst. Athugaðu ræsiforritið ef þú vilt gera þetta óvirkt."</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"Kveikt á MTE á tilraunarstigi"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"Þetta kann að hafa áhrif á afköst og stöðugleika. Endurræstu til að slökkva. Ef arm64.memtag.bootctl er notað til að kveikja þarf að stilla það á „none“ fyrirfram."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Vökvi eða óhreinindi í USB-tengi"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB-tengi er gert óvirkt sjálfkrafa. Ýttu til að fá frekari upplýsingar."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"Óhætt að nota USB-tengi"</string>
@@ -1547,10 +1500,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Sleppa"</string>
     <string name="no_matches" msgid="6472699895759164599">"Engar samsvaranir"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Finna á síðu"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="one"><xliff:g id="INDEX">%d</xliff:g> af <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> af <xliff:g id="TOTAL">%d</xliff:g></item>
-    </plurals>
+    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{# samsvörun}one{# af {total}}other{# af {total}}} }"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Lokið"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Eyðir samnýttri geymslu…"</string>
     <string name="share" msgid="4157615043345227321">"Deila"</string>
@@ -1680,10 +1630,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Rangt mynstur"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"Rangt aðgangsorð"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Rangt PIN-númer"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="one">Reyndu aftur eftir <xliff:g id="NUMBER">%d</xliff:g> sekúndu.</item>
-      <item quantity="other">Reyndu aftur eftir <xliff:g id="NUMBER">%d</xliff:g> sekúndur.</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Teiknaðu mynstrið þitt"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Sláðu inn PIN-númer SIM-kortsins"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Sláðu inn PIN-númer"</string>
@@ -1880,10 +1826,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Búðu til PIN-númer til að breyta takmörkunum"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN-númerin stemma ekki. Reyndu aftur."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN-númerið er of stutt. Það verður að vera a.m.k. 4 tölustafir."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="one">Reyndu aftur eftir <xliff:g id="COUNT">%d</xliff:g> sekúndu</item>
-      <item quantity="other">Reyndu aftur eftir <xliff:g id="COUNT">%d</xliff:g> sekúndur</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Reyndu aftur síðar"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Notar allan skjáinn"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Strjúktu niður frá efri brún til að hætta."</string>
@@ -1911,46 +1853,20 @@
     <string name="data_saver_description" msgid="4995164271550590517">"Gagnasparnaður getur hjálpað til við að draga úr gagnanotkun með því að hindra forrit í að senda eða sækja gögn í bakgrunni. Forrit sem er í notkun getur náð í gögn, en gerir það kannski sjaldnar. Niðurstaðan getur verið að myndir eru ekki birtar fyrr en þú ýtir á þær, svo dæmi sé tekið."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Kveikja á gagnasparnaði?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Kveikja"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="one">Í %1$d mínútu (til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">Í %1$d mínútur (til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="one">Í %1$d mín. (fram til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">Í %1$d mín. (fram til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="one">Í %1$d klukkustund (til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">Í %1$d klukkustundir (til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="one">Í %1$d klst. (fram til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">Í %1$d klst. (fram til <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="one">Í %d mínútu</item>
-      <item quantity="other">Í %d mínútur</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="one">Í %d mín.</item>
-      <item quantity="other">Í %d mín.</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="one">Í %d klukkustund</item>
-      <item quantity="other">Í %d klukkustundir</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="one">Í %d klst.</item>
-      <item quantity="other">Í %d klst.</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Í eina mínútu (til {formattedTime})}one{Í # mínútu (til {formattedTime})}other{Í # mínútur (til {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Í 1 mín. (til {formattedTime})}one{Í # mín. (til {formattedTime})}other{Í # mín. (til {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Í 1 klukkustund (til {formattedTime})}one{Í # klukkustund (til {formattedTime})}other{Í # klukkustundir (til {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Í 1 klst. (til {formattedTime})}one{Í # klst. (til {formattedTime})}other{Í # klst. (til {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Í eina mínútu}one{Í # mínútu}other{Í # mínútur}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Í 1 mín.}one{Í # mín.}other{Í # mín.}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Í 1 klukkustund}one{Í # klukkustund}other{Í # klukkustundir}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Í 1 klst.}one{Í # klst.}other{Í # klst.}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Til <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Til <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Þangað til <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (næsta viðvörun)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Þar til þú slekkur"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Þar til þú slekkur á „Ónáðið ekki“"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Minnka"</string>
-    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Ónáðið ekki"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Hvíldartími"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Virkt kvöld"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Helgi"</string>
@@ -1989,10 +1905,6 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Símtal berst"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Símtal í gangi"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Síar símtal sem berst"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> valið</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> valin</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Óflokkað"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Þú stilltir mikilvægi þessara tilkynninga."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Þetta er mikilvægt vegna fólksins sem tekur þátt í þessu."</string>
@@ -2058,10 +1970,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Vista fyrir sjálfvirka útfyllingu"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Ekki er hægt að fylla innihald út sjálfkrafa"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Engar tillögur fyrir sjálfvirka útfyllingu"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="one"><xliff:g id="COUNT">%1$s</xliff:g> tillaga fyrir sjálfvirka útfyllingu</item>
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> tillögur fyrir sjálfvirka útfyllingu</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{Ein tillaga um sjálfvirka útfyllingu}one{# tillaga um sjálfvirka útfyllingu}other{# tillögur um sjálfvirka útfyllingu}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"Vista í "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Vista <xliff:g id="TYPE">%1$s</xliff:g> í "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Vista <xliff:g id="TYPE_0">%1$s</xliff:g> og <xliff:g id="TYPE_1">%2$s</xliff:g> í "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
@@ -2108,15 +2017,22 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"FJARLÆGJA"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"OPNA SAMT"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Skaðlegt forrit fannst"</string>
+    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
+    <skip />
+    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
+    <skip />
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> vill sýna sneiðar úr <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Breyta"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Titringur er virkur fyrir símtöl og tilkynningar"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Slökkt verður á hljóði símtala og tilkynninga"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Breytingar á kerfi"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Ónáðið ekki"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nýtt: „Ónáðið ekki“ er að fela tilkynningar"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Ýttu til að fá frekari upplýsingar og breyta."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"„Ónáðið ekki“ var breytt"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Ýttu til að skoða hvað lokað hefur verið á."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Kerfi"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Stillingar"</string>
@@ -2133,7 +2049,6 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Í lagi"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Slökkva"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Nánar"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Auknar tilkynningar hafa leyst breytilegar tilkynningar í Android af hólmi í Android 12. Eiginleikinn birtir tillögur að aðgerðum og svörum og flokkar tilkynningar.\n\nAuknar tilkynningar hafa aðgang að efni tilkynninga, þ. á m. persónuupplýsingum á borð við nöfn tengiliða og skilaboð. Eiginleikinn getur einnig hunsað eða svarað tilkynningum, til dæmis svarað símtölum og stjórnað „Ónáðið ekki“."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Upplýsingatilkynning aðgerðastillingar"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Rafhlaðan kann að tæmast áður en hún kemst í hleðslu"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Kveikt á rafhlöðusparnaði til að lengja endingu rafhlöðunnar"</string>
@@ -2162,10 +2077,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g>-kynning"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Áfram verður kveikt á Bluetooth í flugstillingu"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Hleður"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> skrá</item>
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> skrá</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # skrá}one{{file_name} + # skrá}other{{file_name} + # skrár}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Engar tillögur um fólk til að deila með"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Forritalisti"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Þetta forrit hefur ekki fengið heimild fyrir upptöku en gæti tekið upp hljóð í gegnum þetta USB-tæki."</string>
@@ -2177,10 +2089,22 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Gluggi til að slökkva/endurræsa"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Lásskjár"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Skjámynd"</string>
+    <!-- no translation found for accessibility_system_action_headset_hook_label (8524691721287425468) -->
+    <skip />
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Flýtileið í aðgengiseiginleika á skjánum"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Val um flýtileið í aðgengiseiginleika á skjánum"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Flýtileið aðgengisstillingar"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Loka tilkynningaglugga"</string>
+    <!-- no translation found for accessibility_system_action_dpad_up_label (1029042950229333782) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_down_label (3441918448624921461) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_left_label (6557647179116479152) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_right_label (9180196950365804081) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_center_label (8149791419358224893) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Skjátextastika <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> var sett í flokkinn TAKMARKAÐ"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2201,8 +2125,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Ýttu til að kveikja"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Engin vinnuforrit"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Engin forrit til einkanota"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Opna <xliff:g id="APP">%s</xliff:g> á eigin sniði?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Opna <xliff:g id="APP">%s</xliff:g> á vinnusniði?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Nota einkavafra"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Nota vinnuvafra"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-númer fyrir opnun á SIM-korti netkerfis"</string>
@@ -2332,4 +2258,9 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> getur skoðað og stjórnað skjánum hjá þér. Ýttu til að skoða."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> var þýtt."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Skilaboð þýdd úr <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> á <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Bakgrunnsvirkni"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Bakgrunnsvirkni"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> keyrir í bakgrunni og eyðir rafhlöðuorku. Ýttu til að skoða."</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> hefur keyrt lengi í bakgrunni. Ýttu til að skoða."</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Skoða virk forrit"</string>
 </resources>

@@ -70,7 +70,6 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"የሦስትዮሽ ጥሪ"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"የሚያበሳጭ የማይፈለጉ ጥሪዎች አለመቀበል።"</string>
     <string name="CndMmi" msgid="185136449405618437">"መደወያ ቁጥር አስረከበ"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"አትረብሽ"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"የደዋይID  ወደ ተከልክሏል ነባሪዎች።ጥሪ ቀጥሎ ተከልክሏል፡"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"የደዋይ  ID  ወደ ተከልክሏል ነባሪዎች።ቀጥሎ ጥሪ፡ አልተከለከለም"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"የደዋይ  ID  ወደ አልተከለከለም ነባሪዎች።ቀጥሎ ጥሪ፡ ተከልክሏል"</string>
@@ -180,10 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"የእጅ ሰዓት ማከማቻ ሙሉ ነው። ቦታ ለማስለቀቅ አንዳንድ ፋይሎችን ይሰርዙ።"</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Android TV መሣሪያ ማከማቻ ሙሉ ነው። ባዶ ቦታን ነጻ ለማድረግ አንዳንድ ፋይሎችን ይሰርዙ።"</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"የስልክ ማከማቻ ሙሉ ነው! ቦታ ነፃ ለማድረግ አንዳንድ ፋይሎች ሰርዝ።"</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="one">የእውቅና ማረጋገጫ ባለስልጣናት ተጭነዋል</item>
-      <item quantity="other">የእውቅና ማረጋገጫ ባለስልጣናት ተጭነዋል</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{የእውቅና ማረጋገጫ ባለስልጣን ተጭኗል}one{የእውቅና ማረጋገጫ ባለስልጣናት ተጭነዋል}other{የእውቅና ማረጋገጫ ባለስልጣናት ተጭነዋል}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"ባልታወቀ ሶስተኛ ወገን"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"በእርስዎ የሥራ መገለጫ አስተዳዳሪ"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"በ<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -203,6 +199,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"የዳሳሽ ማሳወቂያ አገልግሎት"</string>
     <string name="twilight_service" msgid="8964898045693187224">"የውጋገን አገልግሎት"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"የGNSS ጊዜ ዝመኔ አገልግሎት"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"የመሣሪያ መመሪያ አስተዳዳሪ አገልግሎት"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"የሙዚቃ ለይቶ ማወቅ አስተዳዳሪ አገልግሎት"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"የእርስዎ መሣሪያ ይደመሰሳል"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"የአስተዳዳሪ መተግበሪያ ስራ ላይ ሊውል አይችልም። የእርስዎን መሣሪያ አሁን ይደመሰሳል።\n\nጥያቄዎች ካለዎት የድርጅትዎን አስተዳዳሪ ያነጋግሩ።"</string>
@@ -256,10 +253,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"በአብዛኛዎቹ ሁኔታዎች ላይ ይህን ይጠቀሙ። የሪፖርቱን ሂደት እንዲከታተሉ፣ ስለችግሩ ተጨማሪ ዝርዝሮችን እንዲያስገቡ እና ቅጽበታዊ ገጽ እይታዎችን እንዲያነሱ ያስችልዎታል። ሪፖርት ለማድረግ ረዥም ጊዜ የሚወስዱ አንዳንድ ብዙም ጥቅም ላይ የማይውሉ ክፍሎችን ሊያልፋቸው ይችላል።"</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"ሙሉ ሪፖርት"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"መሣሪያዎ ምላሽ የማይሰጥ ወይም በጣም ቀርፋፋ ከሆነ፣ ወይም ሁሉንም የሪፖርት ክፍሎች የሚያስፈልገዎት ከሆነ ለዝቅተኛ የስርዓት ጣልቃ-ገብነት ይህን አማራጭ ይጠቀሙ። ተጨማሪ ዝርዝሮችን እንዲያስገቡ ወይም ተጨማሪ ቅጽበታዊ ገጽ እይታዎችን እንዲያነሱ አያስችልዎትም።"</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="one">በ<xliff:g id="NUMBER_1">%d</xliff:g> ሰከንዶች ውስጥ ለሳንካ ሪፖርት ቅጽበታዊ ገጽ ዕይታን በማንሳት ላይ።</item>
-      <item quantity="other">በ<xliff:g id="NUMBER_1">%d</xliff:g> ሰከንዶች ውስጥ ለሳንካ ሪፖርት ቅጽበታዊ ገጽ ዕይታን በማንሳት ላይ።</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{በ# ሰከንድ ውስጥ ለሳንካ ሪፖርት ቅጽበታዊ ገጽ ዕይታን በማንሳት ላይ።}one{በ# ሰከንዶች ውስጥ ለሳንካ ሪፖርት ቅጽበታዊ ገጽ ዕይታን በማንሳት ላይ።}other{በ# ሰከንዶች ውስጥ ለሳንካ ሪፖርት ቅጽበታዊ ገጽ ዕይታን በማንሳት ላይ።}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"ቅጽበታዊ ገጽ እይታ ከሳንካ ሪፖርት ጋር ተነስቷል"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"ቅጽበታዊ ገጽ እይታን ከሳንካ ሪፖርት ጋር ማንሳት አልተሳካም"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"የፀጥታ ሁነታ"</string>
@@ -310,8 +304,14 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"የእርስዎን ቀን መቁጠሪያ ይድረሱበት"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"ኤስኤምኤስ"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"የኤስኤምኤስ መልዕክቶችን ይላኩና ይመልከቱ"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"ፋይሎች እና ሚዲያ"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"በመሳሪያዎ ላይ ያሉ ፎቶዎችን፣ ማህደረመረጃን እና ፋይሎችን ይድረሱ"</string>
+    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
+    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"ሙዚቃ እና ሌላ ኦዲዮ"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"በመሳሪያዎ ላይ የድምጽ ፋይሎችን ይድረሱ"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"ፎቶዎች እና ቪዲዮዎች"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"በመሣሪያዎ ላይ ምስሎችን እና የቪዲዮ ፋይሎችን ይድረሱ"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"ማይክሮፎን"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ኦዲዮ ይቅዱ"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"አካላዊ እንቅስቃሴ"</string>
@@ -683,6 +683,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"መተግበሪያው የማመሳሰል ክስተቶችን ታሪክ እና የተመሳሰለውን የውሂብ መጠን ጨምሮ የመለያን የማመሳሰል ስታትስቲክስ እንዲያነብ ይፈቅድለታል።"</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"የእርስዎን የተጋራ ማከማቻ ይዘቶችን ያንብብ"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"መተግበሪያው የእርስዎን የተጋራ ማከማቻ ይዘቶችን እንዲያነብ ያስችለዋል።"</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"የድምጽ ፋይሎችን ከተጋራ ማከማቻ አንብብ"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"መተግበሪያው ከእርስዎ የተጋራ ማከማቻ የድምጽ ፋይሎችን እንዲያነብ ይፈቅድለታል።"</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"የቪዲዮ ፋይሎችን ከተጋራ ማከማቻ አንብብ"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"መተግበሪያው ከእርስዎ የተጋራ ማከማቻ የቪዲዮ ፋይሎችን እንዲያነብ ይፈቅድለታል።"</string>
+    <string name="permlab_readMediaImage" msgid="1507059005825769856">"ከጋራ ማከማቻ የምስል ፋይሎችን አንብብ"</string>
+    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"መተግበሪያው ከእርስዎ የተጋራ ማከማቻ የምስል ፋይሎችን እንዲያነብ ይፈቅድለታል።"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"የተጋራ ማከማቻዎን ይዘቶች ይቀይሩ ወይም ይሰርዙ"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"መተግበሪያው የእርስዎን የተጋራ ማከማቻ ይዘቶችን እንዲጽፍ ያስችለዋል።"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"የSIP ጥሪዎችን ያድርጉ/ይቀበሉ"</string>
@@ -729,8 +735,6 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"ያዢው በሞባይል አገልግሎት ሰጪ የመልዕክት አላላክ አገልግሎት ላይ ከፍተኛውን ደረጃ በይነ ገጽ እንዲይዝ ይፈቅድለታል። ለመደበኛ መተግበሪያ በጭራሽ አያስፈልግም።"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"ከአገልግሎት አቅራቢ አገልግሎቶች ጋር እሰር"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"ያዢው የአገልግሎት አቅራቢ አገልግሎቶችን እንዲያስር ይፈቅድለታል። ለመደበኛ መተግበሪያዎች በጭራሽ ሊያስፈልግ አይገባም።"</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"አትረብሽን ድረስበት"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"መተግበሪያው የአትረብሽ ውቅረትን እንዲያነብብ እና እንዲጸፍ ይፈቅዳል።"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"የእይታ ፈቃድ መጠቀምን መጀመር"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ያዢው ለአንድ መተግበሪያ የፈቃድ አጠቃቀሙን እንዲያስጀምር ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ ሊያስፈልግ አይገባም።"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"የእይታ ፈቃድ ውሳኔዎችን ይጀምሩ"</string>
@@ -1072,10 +1076,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>  ማሰስን በንኪ ማንቃት ይፈልጋል። አስስ በንኪ በሚበራበት ጊዜ፣ ከስልኩ ጋር ለመግባባት ምን በጣትዎ ስር ወይም ምልክቶችን ማከናወን እንዳለብዎ ማብራሪያ ሊመለከቱ ወይም ሊሰሙ ይችላሉ።"</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"ከ1 ወር በፊት"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"ከ1 ወር በፊት"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="one">የመጨረሻዎቹ <xliff:g id="COUNT_1">%d</xliff:g> ቀኖች</item>
-      <item quantity="other">የመጨረሻዎቹ <xliff:g id="COUNT_1">%d</xliff:g> ቀኖች</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{ያለፈው # ቀን}one{ያለፈው # ቀን}other{ያለፉት # ቀናት}}"</string>
     <string name="last_month" msgid="1528906781083518683">" ያለፈው ወር"</string>
     <string name="older" msgid="1645159827884647400">"የድሮ"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"በ <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1094,70 +1095,22 @@
     <string name="year" msgid="5182610307741238982">"ዓመት"</string>
     <string name="years" msgid="5797714729103773425">"ዓመታት"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"አሁን"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="one"> በ<xliff:g id="COUNT_1">%d</xliff:g> ደ  ውስጥ </item>
-      <item quantity="other"> በ<xliff:g id="COUNT_1">%d</xliff:g> ደ  ውስጥ </item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="one"> በ<xliff:g id="COUNT_1">%d</xliff:g> ሰ  ውስጥ </item>
-      <item quantity="other"> በ<xliff:g id="COUNT_1">%d</xliff:g>  ሰ  ውስጥ </item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="one"> በ<xliff:g id="COUNT_1">%d</xliff:g>  ቀ ውስጥ </item>
-      <item quantity="other"> በ<xliff:g id="COUNT_1">%d</xliff:g> ቀ ውስጥ </item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="one"> በ<xliff:g id="COUNT_1">%d</xliff:g> ዓ  ውስጥ </item>
-      <item quantity="other"> በ<xliff:g id="COUNT_1">%d</xliff:g> ዓ  ውስጥ </item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="one"> በ<xliff:g id="COUNT_1">%d</xliff:g> ደቂቃ ውስጥ</item>
-      <item quantity="other"> በ <xliff:g id="COUNT_1">%d</xliff:g> ደቂቃዎች ውስጥ</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="one"> በ<xliff:g id="COUNT_1">%d</xliff:g> ሰ ውስጥ</item>
-      <item quantity="other"> በ<xliff:g id="COUNT_1">%d</xliff:g> ሰ ውስጥ</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="one"> በ<xliff:g id="COUNT_1">%d</xliff:g> ቀ ውስጥ</item>
-      <item quantity="other"> በ<xliff:g id="COUNT_1">%d</xliff:g> ቀ ውስጥ</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="one"> በ<xliff:g id="COUNT_1">%d</xliff:g> ዓ ውስጥ</item>
-      <item quantity="other"> በ<xliff:g id="COUNT_1">%d</xliff:g> ዓ ውስጥ</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="one">ከ<xliff:g id="COUNT_1">%d</xliff:g> ደቂቃዎች በፊት</item>
-      <item quantity="other">ከ<xliff:g id="COUNT_1">%d</xliff:g> ደቂቃዎች በፊት</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="one">ከ<xliff:g id="COUNT_1">%d</xliff:g> ሰዓቶች በፊት</item>
-      <item quantity="other">ከ<xliff:g id="COUNT_1">%d</xliff:g> ሰዓቶች በፊት</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="one">ከ<xliff:g id="COUNT_1">%d</xliff:g> ቀኖች በፊት</item>
-      <item quantity="other">ከ<xliff:g id="COUNT_1">%d</xliff:g> ቀኖች በፊት</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="one">ከ<xliff:g id="COUNT_1">%d</xliff:g> ዓመቶች በፊት</item>
-      <item quantity="other">ከ<xliff:g id="COUNT_1">%d</xliff:g> ዓመቶች በፊት</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="one">በ<xliff:g id="COUNT_1">%d</xliff:g> ደቂቃዎች ውስጥ</item>
-      <item quantity="other">በ<xliff:g id="COUNT_1">%d</xliff:g> ደቂቃዎች ውስጥ</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="one">በ<xliff:g id="COUNT_1">%d</xliff:g> ሰዓቶች ውስጥ</item>
-      <item quantity="other">በ<xliff:g id="COUNT_1">%d</xliff:g> ሰዓቶች ውስጥ</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="one">በ<xliff:g id="COUNT_1">%d</xliff:g> ቀኖች ውስጥ</item>
-      <item quantity="other">በ<xliff:g id="COUNT_1">%d</xliff:g> ቀኖች ውስጥ</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="one">በ<xliff:g id="COUNT_1">%d</xliff:g> ዓመቶች ውስጥ</item>
-      <item quantity="other">በ<xliff:g id="COUNT_1">%d</xliff:g> ዓመቶች ውስጥ</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> ደ"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> ሰ"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g> ቀ"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g> ዓ"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"በ<xliff:g id="COUNT">%d</xliff:g> ደ ውስጥ"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"በ<xliff:g id="COUNT">%d</xliff:g> ሰ ውስጥ"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"በ<xliff:g id="COUNT">%d</xliff:g> ቀ ውስጥ"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"በ<xliff:g id="COUNT">%d</xliff:g> ዓ ውስጥ"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{ከ# ደቂቃ በፊት}one{# ደቂቃ በፊት}other{# ደቂቃዎች በፊት}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{ከ# ሰዓት በፊት}one{ከ# ሰዓት በፊት}other{ከ# ሰዓታት በፊት}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{ከ# ቀን በፊት}one{ከ# ቀን በፊት}other{ከ# ቀናት በፊት}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{ከ# ዓመት በፊት}one{ከ# ዓመት በፊት}other{ከ# ዓመታት በፊት}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# ደቂቃ}one{# ደቂቃ}other{# ደቂቃዎች}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# ሰዓት}one{# ሰዓት}other{# ሰዓታት}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# ቀን}one{# ቀናት}other{# ቀናት}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# ዓመት}one{# ዓመት}other{# ዓመታት}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"የቪዲዮ ችግር"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"ይቅርታ፣ ይህ ቪዲዮ በዚህ መሣሪያ ለመልቀቅ ትክክል አይደለም።"</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"ይሄን ቪዲዮ ማጫወት አልተቻለም።"</string>
@@ -1187,10 +1140,8 @@
     <string name="deleteText" msgid="4200807474529938112">"ሰርዝ"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ግቤት ስልት"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"የፅሁፍ እርምጃዎች"</string>
-    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
-    <skip />
-    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
-    <skip />
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"ተመለስ"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"የግቤት ስልትን ቀይር"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"የማከማቻ ቦታ እያለቀ ነው"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"አንዳንድ የስርዓት ተግባራት ላይሰሩ ይችላሉ"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"ለስርዓቱ የሚሆን በቂ ቦታ የለም። 250 ሜባ ነጻ ቦታ እንዳለዎት ያረጋግጡና ዳግም ያስጀምሩ።"</string>
@@ -1411,6 +1362,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"የመሞከሪያ ጥቅል ሁነታን ለማሰናከል የፋብሪካ ዳግም ቅንብርን ይሞክሩ።"</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"ተከታታይ ኮንሶል ነቅቷል"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"አፈጻጸም ተጽዕኖ አርፎበታል። ለማሰናከል፣ bootloader ን ይፈትሹ።"</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"የሙከራ MTE ነቅቷል።"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"በአፈጻጸም እና መረጋጋት ላይ ተጽዕኖ ሊኖር ይችላል። ለማሰናከል ዳግም ያስነሱ። arm64.memtag.bootctl ን በመጠቀም ከነቃ አስቀድመው ወደ ምንም ያቀናብሩት።"</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"በዩኤስቢ ወደብ ውስጥ ፈሳሽ ወይም ፍርስራሽ"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"የዩኤስቢ ወደብ በራስ-ሰር ተሰናክሏል። የበለጠ ለመረዳት መታ ያድርጉ።"</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"የዩኤስቢ ወደቡን መጠቀም ችግር የለውም"</string>
@@ -1547,10 +1500,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"ዝለል"</string>
     <string name="no_matches" msgid="6472699895759164599">"ምንም ተመሳሳይ የለም።"</string>
     <string name="find_on_page" msgid="5400537367077438198">"በገፅ ላይ አግኝ"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="one"><xliff:g id="INDEX">%d</xliff:g> ከ<xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> ከ<xliff:g id="TOTAL">%d</xliff:g></item>
-    </plurals>
+    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{# ተዛማጅ}one{# ከ{total}}other{# ከ{total}}} }"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"ተከናውኗል"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"የተጋራ ማከማቻን በመደምሰስ ላይ…"</string>
     <string name="share" msgid="4157615043345227321">"አጋራ"</string>
@@ -1680,10 +1630,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"የተሳሳተ ስርዓተ ጥለት"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"የተሳሳተ ይለፍ ቃል"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"የተሳሳተ ፒን"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="one">በ<xliff:g id="NUMBER">%d</xliff:g> ሰኮንዶች ውስጥ እንደገና ይሞክሩ።</item>
-      <item quantity="other">በ<xliff:g id="NUMBER">%d</xliff:g> ሰኮንዶች ውስጥ እንደገና ይሞክሩ።</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"ስርዓተ ጥለትዎን ይሳሉ"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"የሲም ፒን ያስገቡ"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"ፒን ያስገቡ"</string>
@@ -1880,10 +1826,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"ገደቦችን ለመቀየር ፒን ይፍጠሩ"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"ፒኖች አይዛመዱም። እንደገና ይሞክሩ።"</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"ፒን በጣም አጭር ነው። ቢያንስ 4 አኃዝ መሆን አለበት።"</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="one">በ<xliff:g id="COUNT">%d</xliff:g> ሰከንዶች ውስጥ እንደገና ይሞክሩ</item>
-      <item quantity="other">በ<xliff:g id="COUNT">%d</xliff:g> ሰከንዶች ውስጥ እንደገና ይሞክሩ</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"ቆይተው እንደገና ይሞክሩ"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"ሙሉ ገጽ በማሳየት ላይ"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"ለመውጣት፣ ከላይ ወደታች ጠረግ ያድርጉ።"</string>
@@ -1911,46 +1853,20 @@
     <string name="data_saver_description" msgid="4995164271550590517">"የውሂብ አጠቃቀም እንዲቀንስ ለማገዝ ውሂብ ቆጣቢ አንዳንድ መተግበሪያዎች ከበስተጀርባ ሆነው ውሂብ እንዳይልኩ ወይም እንዳይቀበሉ ይከለክላቸዋል። በአሁኑ ጊዜ እየተጠቀሙበት ያለ መተግበሪያ ውሂብ ሊደርስ ይችላል፣ ነገር ግን ባነሰ ተደጋጋሚነት ሊሆን ይችላል። ይሄ ማለት ለምሳሌ ምስሎችን መታ እስኪያደርጓቸው ድረስ ላይታዩ ይችላሉ ማለት ነው።"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ውሂብ ቆጣቢ ይጥፋ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"አብራ"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="one">ለ%1$d ደቂቃዎች (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ድረስ)</item>
-      <item quantity="other">ለ%1$d ደቂቃዎች (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ድረስ)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="one">ለ%1$d ደቂቃ (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">ለ%1$d ደቂቃ (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="one">ለ1 ሰዓቶች (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ድረስ)</item>
-      <item quantity="other">ለ1 ሰዓቶች (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ድረስ)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="one">ለ%1$d ሰዓት (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">ለ%1$d ሰዓት (እስከ <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="one">ለ%d ደቂቃዎች</item>
-      <item quantity="other">ለ%d ደቂቃዎች</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="one">ለ%d ደቂቃ</item>
-      <item quantity="other">ለ%d ደቂቃ</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="one">ለ%d ሰዓቶች</item>
-      <item quantity="other">ለ%d ሰዓቶች</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="one">ለ%d ሰዓት</item>
-      <item quantity="other">ለ%d ሰዓት</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{ለአንድ ደቂቃ (እስከ {formattedTime} ድረስ)}one{ለ# ደቂቃ (እስከ {formattedTime} ድረስ)}other{ለ# ደቂቃዎች (እስከ {formattedTime} ድረስ)}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{ለ1 ደቂቃ (እስከ {formattedTime} ድረስ)}one{ለ# ደቂቃ (እስከ {formattedTime} ድረስ)}other{ለ# ደቂቃዎች (እስከ {formattedTime} ድረስ)}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{ለ1 ሰዓት (እስከ {formattedTime} ድረስ)}one{ለ# ሰዓት (እስከ {formattedTime} ድረስ)}other{ለ# ሰዓታት (እስከ {formattedTime} ድረስ)}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{ለ1 ሰዓ (እስከ {formattedTime} ድረስ)}one{ለ# ሰዓ (እስከ {formattedTime} ድረስ)}other{ለ# ሰዓ (እስከ {formattedTime} ድረስ)}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{ለአንድ ደቂቃ}one{ለ# ደቂቃ}other{ለ# ደቂቃዎች}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{ለ1 ደቂቃ}one{ለ# ደቂቃ}other{ለ# ደቂቃዎች}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{ለ1 ሰዓት}one{ለ# ሰዓት}other{ለ# ሰዓታት}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{ለ1 ሰዓ}one{ለ# ሰዓ}other{ለ# ሰዓ}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"እስከ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"እስከ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ድረስ"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"እስከ <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ቀጣይ ማንቂያ)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"እስኪያጠፉት ድረስ"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"አትረብሽን እስኪያጠፉ ድረስ"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"ሰብስብ"</string>
-    <string name="zen_mode_feature_name" msgid="3785547207263754500">"አትረብሽ"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"የማይገኝበት ጊዜ"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"የሳምንት ለሊት"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"የሳምንት እረፍት ቀናት"</string>
@@ -1989,10 +1905,6 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"ገቢ ጥሪ"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"እየተካሄደ ያለ ጥሪ"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"ገቢ ጥሪ ማጣራት"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ተመርጧል</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ተመርጠዋል</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"ያልተመደቡ"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"የእነዚህን ማሳወቂያዎች አስፈላጊነት አዘጋጅተዋል።"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ይሄ በሚሳተፉ ሰዎች ምክንያት አስፈላጊ ነው።"</string>
@@ -2058,10 +1970,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"ለራስ-ሙላ አስቀምጥ"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"ይዘቶች በራስ-ሰር ሊሞሉ አይችሉም"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"ራስ-ሙላ ጥቆማዎች የሉም"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="one"><xliff:g id="COUNT">%1$s</xliff:g> ራስ-ሙላ ጥቆማዎች</item>
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> ራስ-ሙላ ጥቆማዎች</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{አንድ የራስ-ሙላ አስተያየት}one{# የራስ-ሙላ አስተያየቶች}other{# የራስ-ሙላ አስተያየቶች}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"ወደ "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ይቀመጥ?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"<xliff:g id="TYPE">%1$s</xliff:g> ወደ "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ይቀመጡ?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"<xliff:g id="TYPE_0">%1$s</xliff:g> እና <xliff:g id="TYPE_1">%2$s</xliff:g> ወደ "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ይቀመጡ?"</string>
@@ -2108,15 +2017,22 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"አራግፍ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ለማንኛውም ክፈት"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ጎጂ መተግበሪያ ተገኝቷል"</string>
+    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
+    <skip />
+    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
+    <skip />
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> የ<xliff:g id="APP_2">%2$s</xliff:g> ቁራጮችን ማሳየት ይፈልጋል"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"አርትዕ"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ጥሪዎች እና ማሳወቂያዎች ይነዝራሉ"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ጥሪዎች እና ማሳወቂያዎች ድምፀ-ከል ይሆናሉ"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"የሥርዓት ለውጦች"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"አትረብሽ"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"አዲስ፦ አትረብሽ ማሳወቂያዎችን እየደበቀ ነው"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"የበለጠ ለመረዳት እና ለመለወጥ መታ ያድርጉ።"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"አትረብሽ ተቀይሯል"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ምን እንደታገደ ለመፈተሽ መታ ያድርጉ።"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"ሥርዓት"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ቅንብሮች"</string>
@@ -2133,7 +2049,6 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"እሺ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"አጥፋ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"የበለጠ ለመረዳት"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"የተሻሻሉ ማሳወቂያዎች በAndroid 12 ውስጥ Android ራስ-አስማሚ ማሳወቂያዎችን ተክተዋል። ይህ ባህሪ የተጠቆሙ እርምጃዎችን እና ምላሾችን ያሳያል እንዲሁም ማሳወቂያዎችዎን ያደራጃል።\n\nየተሻሻሉ ማሳወቂያዎች እንደ የእውቂያ ስሞች እና መልዕክቶች ያሉ የግል መረጃዎችን ጨምሮ የማሳወቂያ ይዘቶችን መድረስ ይችላሉ። ይህ ባህሪ እንደ የስልክ ጥሪዎችን መመለስ እና አትረብሽን መቆጣጠርን ያሉ ማሳወቂያዎችን ማሰናበት ወይም ምላሽ መስጠት ይችላል።"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"የዕለት ተዕለት ሁነታ መረጃ ማሳወቂያዎች"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ባትሪ ከተለመደው ኃይል መሙላት በፊት ሊያልቅ ይችላል"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"የባትሪ ቆጣቢ የባትሪ ዕድሜን ለማራዘም ገብሯል።"</string>
@@ -2162,10 +2077,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"የ<xliff:g id="EXTENSION">%1$s</xliff:g> ዝግጅት አቀራረብ"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"ብሉቱዝ በአውሮፕላን ሁነታ ጊዜ እንደበራ ይቆያል"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"በመጫን ላይ"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ፋይሎች</item>
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ፋይሎች</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # ፋይል}one{{file_name} + # ፋይል}other{{file_name} + # ፋይሎች}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"የሚያጋሯቸው ምንም የሚመከሩ ሰዎች የሉም"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"የመተግበሪያዎች ዝርዝር"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"ይህ መተግበሪያ የመቅረጽ ፈቃድ አልተሰጠውም፣ ነገር ግን በዚህ ዩኤስቢ መሣሪያ በኩል ኦዲዮን መቅረጽ ይችላል።"</string>
@@ -2177,10 +2089,22 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"የኃይል መገናኛ"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"የማያ ገጽ ቁልፍ"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"ቅጽበታዊ ገጽ እይታ"</string>
+    <!-- no translation found for accessibility_system_action_headset_hook_label (8524691721287425468) -->
+    <skip />
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"የማያ ገጽ ላይ ተደራሽነት አቋራጭ"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"የማያ ገጽ ላይ ተደራሽነት አቋራጭ መራጭ"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"የተደራሽነት አቋራጭ"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"የማሳወቂያ ጥላን አሰናብት"</string>
+    <!-- no translation found for accessibility_system_action_dpad_up_label (1029042950229333782) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_down_label (3441918448624921461) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_left_label (6557647179116479152) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_right_label (9180196950365804081) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_center_label (8149791419358224893) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"የ<xliff:g id="APP_NAME">%1$s</xliff:g> የሥዕል ገላጭ ጽሑፍ አሞሌ።"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ወደ የRESTRICTED ባልዲ ተከትቷል"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>፦"</string>
@@ -2201,8 +2125,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"ለማብራት መታ ያድርጉ"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ምንም የሥራ መተግበሪያዎች የሉም"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ምንም የግል መተግበሪያዎች የሉም"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"<xliff:g id="APP">%s</xliff:g> በግል መገለጫ ውስጥ ይከፈት?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"<xliff:g id="APP">%s</xliff:g> በስራ መገለጫ ውስጥ ይከፈት?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"የግል አሳሽ ተጠቀም"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"የስራ አሳሽ ተጠቀም"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"የሲም አውታረ መረብ መክፈቻ ፒን"</string>
@@ -2332,4 +2258,9 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ማያ ገጽዎን ማየት እና መቆጣጠር ይችላል። ለመገምገም መታ ያድርጉ።"</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> ተተርጉሟል።"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"መልዕክት ከ<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> ወደ <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> ተተርጉሟል።"</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"የበስተጀርባ እንቅስቃሴ"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"የበስተጀርባ እንቅስቃሴ"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ከበስተጀርባ በማሄድ ላይ ነው እና ባትሪ እየጨረሰ ነው። ለመገምገም መታ ያድርጉ።"</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> ከበስተጀርባ ለረጅም ጊዜ በማሄድ ላይ ነው። ለመገምገም መታ ያድርጉ።"</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ንቁ መተግበሪያዎችን ይፈትሹ"</string>
 </resources>

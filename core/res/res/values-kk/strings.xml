@@ -70,7 +70,6 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Қоңырау шалудың үш жолы"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Мазаны алатын, қалаусыз қоңыраулардан бас тарту"</string>
     <string name="CndMmi" msgid="185136449405618437">"Қоңырау шалған нөмірді жеткізу"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"Мазаламау"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелген. Келесі қоңырау: Шектелген"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелген. Келесі қоңырау: Шектелмеген"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелмеген. Келесі қоңырау: Шектелген"</string>
@@ -180,10 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"Сағат жады толы. Орын босату үшін кейбір файлдарды жойыңыз."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Android TV құрылғысының жады толы. Орын босату үшін кейбір файлдарды өшіріп тастаңыз."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"Телефон жады толы. Орын босату үшін кейбір файлдарды жойыңыз."</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="other"> Сертификат құқықтары орнатылды</item>
-      <item quantity="one"> Сертификат құқығы орнатылды</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Сертификат құқығы орнатылды.}other{Сертификат құқықтары орнатылды.}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Белгісіз үшінші жақ арқылы"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Жұмыс профиліңіздің әкімшісі"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> арқылы"</string>
@@ -203,6 +199,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"Датчик хабарландыруы қызметі"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight қызметі"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS уақыт жаңарту жүйесі"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"Құрылғы саясаты бойынша басқарушы қызметі"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Музыканы анықтау менеджері қызметі"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Құрылғыңыздағы деректер өшіріледі"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Әкімші қолданбасын пайдалану мүмкін емес. Қазір құрылғыдағы деректер өшіріледі\n\nСұрақтарыңыз болса, ұйым әкімшісіне хабарласыңыз."</string>
@@ -256,10 +253,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Бұл көптеген жағдайларда пайдаланылады. Ол есептің орындалу барысын бақылауға, мәселе туралы қосымша мәліметтер енгізуге және скриншоттар алуға мүмкіндік береді. Ол есеп беруіне ұзақ уақыт кететін кейбір азырақ пайдаланылатын бөлімдерді өткізіп жіберуі мүмкін."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Толық есеп"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Бұл параметрді құрылғы жауап бермей жатқанда немесе тым баяу істеген кезде, болмаса, барлық есеп бөлімдері керек болған кезде кедергілерді барынша азайту үшін пайдаланыңыз. Қосымша мәліметтер енгізуге немесе скриншот алуға рұқсат етілмейді."</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қате туралы есептің скриншоты түсіріледі.</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> секундтан кейін қате туралы есептің скриншоты түсіріледі.</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{# секундтан кейін қате туралы есептің скриншоты түсіріледі.}other{# секундтан кейін қате туралы есептің скриншоты түсіріледі.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Қате туралы есеп түсірілген скриншот"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Қате туралы есеп скриншоты түсірілмеді."</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Үнсіз режимі"</string>
@@ -310,8 +304,14 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"күнтізбеге кіру"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS хабарларын жіберу және көру"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"Файлдар және мультимедиа"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"құрылғыдағы фотосуреттерге, мультимедиаға және файлдарға қол жеткізу"</string>
+    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
+    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Музыка және басқа аудио"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"құрылғыдағы аудиофайлдарды пайдалану"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Фотосуреттер және бейнелер"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"құрылғыдағы кескіндер мен бейнефайлдарды пайдалану"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"аудио жазу"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Іс-қимыл"</string>
@@ -683,6 +683,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Қолданбаға аккаунттың синхрондалу статистикаларын, оның ішінде синхрондау шараларының тарихы және қанша дерек синхрондалғаны жайлы, оқу мүмкіндігін береді."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"ортақ жадтың мазмұнын оқу"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Қолданбаға ортақ жадтың мазмұнын оқуға мүмкіндік береді."</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"ортақ жадтың аудиофайлдарын оқу"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Қолданбаға ортақ жадтың аудиофайлдарын оқуға мүмкіндік береді."</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"ортақ жадтың бейнефайлдарын оқу"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Қолданбаға ортақ жадтың бейнефайлдарын оқуға мүмкіндік береді."</string>
+    <string name="permlab_readMediaImage" msgid="1507059005825769856">"ортақ жадтың кескін файлдарын оқу"</string>
+    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Қолданбаға ортақ жадтың кескін файлдарын оқуға мүмкіндік береді."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ортақ жадтың мазмұнын өзгерту немесе жою"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Қолданбаға ортақ жадтың мазмұнын жазуға мүмкіндік береді."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP қоңырауларын шалу/қабылдау"</string>
@@ -729,8 +735,6 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Иесіне оператордың хабар алмасу қызметінің жоғарғы деңгейлі интерфейсіне байластыруға рұқсат етеді. Қалыпты қолданбалар үшін ешқашан қажет болмайды."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"оператор қызметтеріне қосылу"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Иесіне оператор қызметтеріне қосылуға мүмкіндік береді. Қалыпты қолданбалар үшін қажет болмайды."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"Мазаламау режиміне кіру"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Қолданбаға «Мазаламау» конфигурациясын оқу және жазу мүмкіндігін береді."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"рұқсаттарды пайдалану туралы деректерді көру"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Пайдаланушы қолданбаға берілетін рұқсаттарды басқара алады. Ондай рұқсаттар әдеттегі қолданбаларға керек емес."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"Рұқсаттары бар әрекеттерді көру"</string>
@@ -1072,10 +1076,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> қызметі Түртілген элементтерді дыбыстау функциясын қосуға рұқсат сұрап тұр. Ол қосылған кезде, саусағыңыздың астындағы элементтің сипаттамасын естіп не көріп тұрасыз немесе телефонды қимылмен басқарасыз."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 ай бұрын"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Осыған дейін 1 ай бұрын"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="other">Соңғы <xliff:g id="COUNT_1">%d</xliff:g> күн</item>
-      <item quantity="one">Соңғы <xliff:g id="COUNT_0">%d</xliff:g> күн</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Соңғы # күн}other{Соңғы # күн}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Соңғы ай"</string>
     <string name="older" msgid="1645159827884647400">"Ескілеу"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"<xliff:g id="DATE">%s</xliff:g> күні"</string>
@@ -1094,70 +1095,22 @@
     <string name="year" msgid="5182610307741238982">"жыл"</string>
     <string name="years" msgid="5797714729103773425">"жылдар"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"қазір"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>м</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>м</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>с</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>с</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>к</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>к</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ж</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ж</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>м</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>м</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>с</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>с</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>к</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>к</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ж</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ж</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> минут бұрын</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> минут бұрын</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> сағат бұрын</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> сағат бұрын</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> күн бұрын</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> күн бұрын</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> жыл бұрын</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> жыл бұрын</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> минутта</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> минутта</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> сағатта</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> сағатта</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> күнде</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> күнде</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> жылда</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> жылда</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> мин"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> сағ"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g> күн"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g> жыл"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"<xliff:g id="COUNT">%d</xliff:g> мин кейін"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> сағ кейін"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> күннен кейін"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> жылдан кейін"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# минут бұрын}other{# минут бұрын}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# сағат бұрын}other{# сағат бұрын}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# күн бұрын}other{# күн бұрын}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{# жыл бұрын}other{# жыл бұрын}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# минут}other{# минут}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# сағат}other{# сағат}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# күн}other{# күн}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# жыл}other{# жыл}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Бейне ақаулығы"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"Бұл бейне осы құрылғыға ағынын жіберуге жарамсыз."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"Бұл бейне таспаны ойната алмайды."</string>
@@ -1187,10 +1140,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Жою"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Енгізу әдісі"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Мәтін әрекеттері"</string>
-    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
-    <skip />
-    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
-    <skip />
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Артқа"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Енгізу әдісін ауыстыру"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Жадта орын азайып барады"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Жүйенің кейбір функциялары жұмыс істемеуі мүмкін"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Жүйе үшін жад жеткіліксіз. 250 МБ бос орын бар екенін тексеріп, қайта іске қосыңыз."</string>
@@ -1411,6 +1362,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Сынақ бағдарламасы режимін өшіру үшін зауыттық күйіне қайтарыңыз."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Сериялық консоль қосылды"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Өнімділікке әсер етеді. Өшіру үшін жүктегішті тексеріңіз."</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"Эксперименттік MTE қосылды"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"Өнімділік пен тұрақтылыққа әсер етуі мүмкін. Кеңейтімді жабу үшін құрылғыны өшіріп қосыңыз. Егер arm64.memtag.bootctl арқылы қосылса, оған алдын ала \"none\" мәнін тағайындаңыз."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"USB портына сұйықтық немесе қоқыс кірді"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB порты автоматты түрде өшірілді. Толығырақ ақпарат алу үшін түртіңіз."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB портын пайдалана беруге болады"</string>
@@ -1547,10 +1500,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Өткізіп жіберу"</string>
     <string name="no_matches" msgid="6472699895759164599">"Сәйкес табылмады"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Беттен табу"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="other"><xliff:g id="TOTAL">%d</xliff:g> ішінен <xliff:g id="INDEX">%d</xliff:g></item>
-      <item quantity="one">1 сәйкестік</item>
-    </plurals>
+    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{# матч}other{#/{total}}} }"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Дайын"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Ортақ жад тазартылуда…"</string>
     <string name="share" msgid="4157615043345227321">"Бөлісу"</string>
@@ -1680,10 +1630,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Қате өрнек"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"Қате кілтсөз"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Қате PIN"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="other"> <xliff:g id="NUMBER">%d</xliff:g> секундтан кейін қайталап көріңіз.</item>
-      <item quantity="one">1 секундтан кейін қайталап көріңіз.</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Кескініңізді салыңыз"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"SIM PIN кодын енгізіңіз"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"PIN кодын енгізіңіз"</string>
@@ -1880,10 +1826,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Шектеулерді өзгертуге арналған PIN жасақтау"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN кодтар сәйкес емес. Қайта әрекеттеніңіз."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN тым қысқа. Кем дегенде 4 бірлік болуы тиіс."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="other">Әрекетті <xliff:g id="COUNT">%d</xliff:g> секундтан кейін қайталаңыз</item>
-      <item quantity="one">Әрекетті 1 секундтан кейін қайталаңыз</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Кейінірек қайта әрекеттеніңіз."</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Толық экранда көру"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Шығу үшін жоғарыдан төмен қарай сырғытыңыз."</string>
@@ -1911,46 +1853,20 @@
     <string name="data_saver_description" msgid="4995164271550590517">"Дерек шығынын азайту үшін Трафикті үнемдеу режимінде кейбір қолданбаларға деректі фондық режимде жіберуге және алуға тыйым салынады. Ашық тұрған қолданба деректі шектеулі шамада пайдаланады (мысалы, кескіндер оларды түрткенге дейін көрсетілмейді)."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Трафикті үнемдеу режимі қосылсын ба?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Қосу"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="other">%1$d минут бойы (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> дейін)</item>
-      <item quantity="one">Бір минут бойы (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> дейін)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="other">%1$d минут (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> дейін)</item>
-      <item quantity="one">1 минут (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> дейін)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="other">%1$d сағат бойы (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> дейін)</item>
-      <item quantity="one">1 сағат бойы (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> дейін)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="other">%1$d сағат (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> дейін)</item>
-      <item quantity="one">1 сағат (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> дейін)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="other">%d минут бойы</item>
-      <item quantity="one">Бір минут бойы</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="other">%d минут</item>
-      <item quantity="one">1 минут</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="other">%d сағат бойы</item>
-      <item quantity="one">1 сағат бойы</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="other">%d сағат</item>
-      <item quantity="one">1 сағат</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Бір минут ({formattedTime} дейін)}other{# минут ({formattedTime} дейін)}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{1 мин ({formattedTime} дейін)}other{# мин ({formattedTime} дейін)}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{1 сағат ({formattedTime} дейін)}other{# сағат ({formattedTime} дейін)}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{1 сағ ({formattedTime} дейін)}other{# сағ ({formattedTime} дейін)}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Бір минут}other{# минут}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{1 мин}other{# мин}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{1 сағат}other{# сағат}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{1 сағ}other{# сағ}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> дейін"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> дейін"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> дейін (келесі дабыл)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Өшірілгенге дейін"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Мазаламау режимін өшіргенше"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Тасалау"</string>
-    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Мазаламау"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Бос тұру уақыты"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Жұмыс күндері кешке"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Демалыс күндері"</string>
@@ -1989,10 +1905,6 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Кіріс қоңырау"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Қоңырау"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Келген қоңырауды сүзу"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> таңдалды</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> таңдалды</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Санатқа жатқызылмаған"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Сіз осы хабарландырулардың маңыздылығын орнатасыз."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Қатысты адамдарға байланысты бұл маңызды."</string>
@@ -2058,10 +1970,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Автотолтыру үшін сақтау"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Мазмұндар автотолтырылмайды"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Автотолтыру ұсыныстары жоқ"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> автотолтыру ұсынысы</item>
-      <item quantity="one">Бір автотолтыру ұсынысы</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{Бір автотолтыру ұсынысы}other{# автотолтыру ұсынысы}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" қызметіне сақталсын ба?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"<xliff:g id="TYPE">%1$s</xliff:g> деректері "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" қызметіне сақталсын ба?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"<xliff:g id="TYPE_0">%1$s</xliff:g> және <xliff:g id="TYPE_1">%2$s</xliff:g> деректері "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" қызметіне сақталсын ба?"</string>
@@ -2108,15 +2017,22 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ЖОЮ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"БӘРІБІР АШУ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Зиянды қолданба анықталды"</string>
+    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
+    <skip />
+    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
+    <skip />
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> қолданбасы <xliff:g id="APP_2">%2$s</xliff:g> қолданбасының үзінділерін көрсеткісі келеді"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Өзгерту"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Қоңыраулар мен хабарландырулардың вибрациясы болады"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Қоңыраулар мен хабарландырулардың дыбыстық сигналы өшіріледі"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Жүйе өзгерістері"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Мазаламау режимі"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Жаңа: Мазаламау режимі хабарландыруларды жасыруда"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Толығырақ ақпарат алу және өзгерту үшін түртіңіз."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Мазаламау режимі өзгерді"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Түймені түртіп, неге тыйым салынатынын көріңіз."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Жүйе"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Параметрлер"</string>
@@ -2133,7 +2049,6 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Жарайды"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Өшіру"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Толығырақ"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 жүйесінде кеңейтілген хабарландырулар функциясы бейімделетін хабарландырулар функциясын алмастырды. Бұл функция ұсынылған әрекеттер мен жауаптарды көрсетіп, хабарландыруларыңызды ретке келтіреді.\n\nОл хабарландыру мазмұнын, соның ішінде жеке ақпаратыңызды (мысалы, контакт аттары мен хабарлар) пайдалана алады. Сондай-ақ бұл функция арқылы хабарландыруларды жабуға немесе оларға жауап беруге (мысалы, телефон қоңырауларына жауап беру және Мазаламау режимін басқару) болады."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Режим туралы хабарландыру"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея заряды азаюы мүмкін"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Батарея ұзаққа жетуі үшін, Батареяны үнемдеу режимі іске қосылды"</string>
@@ -2162,10 +2077,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> презентациясы"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth ұшақ режимінде қосулы болады."</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Жүктелуде"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> файл</item>
-      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> файл</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # файл}other{{file_name} + # файл}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Бөлісу үшін ұсынылатын адамдар жоқ."</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Қолданбалар тізімі"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Қолданбаға жазу рұқсаты берілмеді, бірақ ол осы USB құрылғысы арқылы дыбыс жаза алады."</string>
@@ -2177,10 +2089,22 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Қуат диалогтік терезесі"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Құлып экраны"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Скриншот"</string>
+    <!-- no translation found for accessibility_system_action_headset_hook_label (8524691721287425468) -->
+    <skip />
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Экрандағы арнайы мүмкіндіктерді жылдам қосу"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Экрандағы арнайы мүмкіндіктерді жылдам қосу әрекетін таңдау"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Арнайы мүмкіндіктерді жылдам қосу"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Хабарландыру тақтасын жабу"</string>
+    <!-- no translation found for accessibility_system_action_dpad_up_label (1029042950229333782) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_down_label (3441918448624921461) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_left_label (6557647179116479152) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_right_label (9180196950365804081) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_center_label (8149791419358224893) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасының жазу жолағы."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ШЕКТЕЛГЕН себетке салынды."</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2201,8 +2125,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Қосу үшін түртіңіз"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Жұмыс қолданбалары жоқ."</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Жеке қолданбалар жоқ."</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Жеке профильдегі <xliff:g id="APP">%s</xliff:g> қолданбасында ашу керек пе?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Жұмыс профиліндегі <xliff:g id="APP">%s</xliff:g> қолданбасында ашу керек пе?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Жеке браузерді пайдалану"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Жұмыс браузерін пайдалану"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM желісінің құлпын ашатын PIN коды"</string>
@@ -2332,4 +2258,9 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> экраныңызды көріп, оны басқара алады. Өту үшін түртіңіз."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"\"<xliff:g id="MESSAGE">%1$s</xliff:g>\" хабары аударылды."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Хабар мына тілге аударылды: <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>. Түпнұсқаның тілі: <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>."</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Фондық режимдегі әрекет"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Фондық режимдегі әрекет"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> қолданбасы фондық режимде жұмыс істеуде және батарея жұмсауда. Көру үшін түртіңіз."</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> қолданбасы ұзақ уақыт бойы фондық режимде жұмыс істеуде. Көру үшін түртіңіз."</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Белсенді қолданбаларды тексеру"</string>
 </resources>

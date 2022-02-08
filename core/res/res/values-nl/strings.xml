@@ -70,7 +70,6 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Driewegs bellen"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Ongewenste, vervelende gesprekken weigeren"</string>
     <string name="CndMmi" msgid="185136449405618437">"Weergave van nummer van beller"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"Niet storen"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Beller-ID standaard ingesteld op \'beperkt\'. Volgend gesprek: beperkt."</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Beller-ID standaard ingesteld op \'beperkt\'. Volgend gesprek: onbeperkt."</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Beller-ID standaard ingesteld op \'onbeperkt\'. Volgend gesprek: beperkt."</string>
@@ -180,10 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"Horlogegeheugen is vol. Verwijder enkele bestanden om ruimte vrij te maken."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Opslag van Android TV-apparaat is vol. Verwijder enkele bestanden om ruimte vrij te maken."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"Telefoongeheugen is vol. Verwijder enkele bestanden om ruimte vrij te maken."</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="other">Certificeringsinstanties geïnstalleerd</item>
-      <item quantity="one">Certificeringsinstantie geïnstalleerd</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Certificeringsinstantie geïnstalleerd}other{Certificeringsinstanties geïnstalleerd}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Door een onbekende derde partij"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Door de beheerder van je werkprofiel"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Door <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -203,6 +199,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"Service voor sensormeldingen"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Service voor schemering"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Updateservice voor GNSS-tijd"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"Device Policy Manager-service"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Beheerservice voor muziekherkenning"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Je apparaat wordt gewist"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"De beheer-app kan niet worden gebruikt. Je apparaat wordt nu gewist.\n\nNeem contact op met de beheerder van je organisatie als je vragen hebt."</string>
@@ -256,10 +253,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Gebruik deze optie in de meeste situaties. Hiermee kun je de voortgang van het rapport bijhouden, meer gegevens over het probleem opgeven en screenshots maken. Mogelijk worden bepaalde minder vaak gebruikte gedeelten weggelaten (waarvoor het lang zou duren om een rapport te genereren)."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Volledig rapport"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Gebruik deze optie voor minimale systeemverstoring wanneer je apparaat niet reageert of te langzaam is, of wanneer je alle rapportgedeelten nodig hebt. Je kunt niet meer gegevens opgeven of extra screenshots maken."</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="other">Er wordt over <xliff:g id="NUMBER_1">%d</xliff:g> seconden een screenshot gemaakt voor het bugrapport.</item>
-      <item quantity="one">Er wordt over <xliff:g id="NUMBER_0">%d</xliff:g> seconde een screenshot gemaakt voor het bugrapport.</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Er wordt over # seconde een screenshot gemaakt voor het bugrapport.}other{Er wordt over # seconden een screenshot gemaakt voor het bugrapport.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Screenshot gemaakt voor bugrapport"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Kan geen screenshot maken voor bugrapport"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Stille modus"</string>
@@ -310,8 +304,14 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"toegang krijgen tot je agenda"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Sms"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"sms\'jes verzenden en bekijken"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"Bestanden en media"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"toegang krijgen tot foto\'s, media en bestanden op je apparaat"</string>
+    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
+    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Muziek en andere audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"toegang krijgen tot audiobestanden op je apparaat"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Foto\'s en video\'s"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"toegang krijgen tot afbeeldingen en videobestanden op je apparaat"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microfoon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"audio opnemen"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fysieke activiteit"</string>
@@ -683,6 +683,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Hiermee kan een app de synchronisatiestatistieken voor een account lezen, inclusief de geschiedenis van synchronisatie-activiteiten en hoeveel gegevens zijn gesynchroniseerd."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"de content van je gedeelde opslag lezen"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Hiermee kan de app de content van je gedeelde opslag lezen."</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"audiobestanden in gedeelde opslag lezen"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Hiermee kan de app audiobestanden in je gedeelde opslag lezen."</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"videobestanden in gedeelde opslag lezen"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Hiermee kan de app videobestanden in je gedeelde opslag lezen."</string>
+    <string name="permlab_readMediaImage" msgid="1507059005825769856">"afbeeldingsbestanden in gedeelde opslag lezen"</string>
+    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Hiermee kan de app afbeeldingsbestanden in je gedeelde opslag lezen."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"de content van je gedeelde opslag aanpassen of verwijderen"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Hiermee kan de app de content van je gedeelde opslag schrijven."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"Bellen of gebeld worden via SIP"</string>
@@ -729,8 +735,6 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Hiermee wordt de houder toegestaan te binden aan de berichteninterface van een provider. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"binden aan providerservices"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Hiermee kan de houder binden aan providerservices. Nooit gebruikt voor normale apps."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"toegang tot Niet storen"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Hiermee kan de app configuratie voor Niet storen lezen en schrijven."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"rechtengebruik starten"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Hiermee kan de houder het rechtengebruik voor een app starten. Nooit vereist voor normale apps."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"bekijken van rechtenbeslissingen starten"</string>
@@ -1072,10 +1076,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> wil Verkennen via aanraking aanzetten. Als Verkennen via aanraking aanstaat, kun je beschrijvingen beluisteren of bekijken van wat er onder je vinger staat of aanraakbewerkingen uitvoeren op de telefoon."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 maand geleden"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Meer dan 1 maand geleden"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="other">Afgelopen <xliff:g id="COUNT_1">%d</xliff:g> dagen</item>
-      <item quantity="one">Afgelopen <xliff:g id="COUNT_0">%d</xliff:g> dag</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Afgelopen dag}other{Afgelopen # dagen}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Afgelopen maand"</string>
     <string name="older" msgid="1645159827884647400">"Ouder"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"op <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1094,70 +1095,22 @@
     <string name="year" msgid="5182610307741238982">"jaar"</string>
     <string name="years" msgid="5797714729103773425">"jaren"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"nu"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>m</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>u</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>u</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>d</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>d</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>j</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>j</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="other">over <xliff:g id="COUNT_1">%d</xliff:g>m</item>
-      <item quantity="one">over <xliff:g id="COUNT_0">%d</xliff:g>m</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="other">over <xliff:g id="COUNT_1">%d</xliff:g>u</item>
-      <item quantity="one">over <xliff:g id="COUNT_0">%d</xliff:g>u</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="other">over <xliff:g id="COUNT_1">%d</xliff:g>d</item>
-      <item quantity="one">over <xliff:g id="COUNT_0">%d</xliff:g>d</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="other">over <xliff:g id="COUNT_1">%d</xliff:g>j</item>
-      <item quantity="one">over <xliff:g id="COUNT_0">%d</xliff:g>j</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> minuten geleden</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> minuut geleden</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> uur geleden</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> uur geleden</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> dagen geleden</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> dag geleden</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> jaar geleden</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> jaar geleden</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="other">over <xliff:g id="COUNT_1">%d</xliff:g> minuten</item>
-      <item quantity="one">over <xliff:g id="COUNT_0">%d</xliff:g> minuut</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="other">over <xliff:g id="COUNT_1">%d</xliff:g> uur</item>
-      <item quantity="one">over <xliff:g id="COUNT_0">%d</xliff:g> uur</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="other">over <xliff:g id="COUNT_1">%d</xliff:g> dagen</item>
-      <item quantity="one">over <xliff:g id="COUNT_0">%d</xliff:g> dag</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="other">over <xliff:g id="COUNT_1">%d</xliff:g> jaar</item>
-      <item quantity="one">over <xliff:g id="COUNT_0">%d</xliff:g> jaar</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> m"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> u"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g> d"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g> j"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"over <xliff:g id="COUNT">%d</xliff:g> m"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"over <xliff:g id="COUNT">%d</xliff:g> u"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"over <xliff:g id="COUNT">%d</xliff:g> d"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"over <xliff:g id="COUNT">%d</xliff:g> j"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# minuut geleden}other{# minuten geleden}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# uur geleden}other{# uur geleden}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# dag geleden}other{# dagen geleden}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{# jaar geleden}other{# jaar geleden}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minuut}other{# minuten}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# uur}other{# uur}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# dag}other{# dagen}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# jaar}other{# jaar}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Probleem met video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"Deze video kan niet worden gestreamd naar dit apparaat."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"Deze video kan niet worden afgespeeld."</string>
@@ -1187,10 +1140,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Verwijderen"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Invoermethode"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Tekstacties"</string>
-    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
-    <skip />
-    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
-    <skip />
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Terug"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Invoermethode wijzigen"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Opslagruimte is bijna vol"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Bepaalde systeemfuncties werken mogelijk niet"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Onvoldoende opslagruimte voor het systeem. Zorg ervoor dat je 250 MB vrije ruimte hebt en start opnieuw."</string>
@@ -1411,6 +1362,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Reset de fabrieksinstellingen om de test harness-modus uit te zetten."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Seriële console staat aan"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Dit is van invloed op de prestaties. Controleer de bootloader om dit uit te zetten."</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"Experimentele MTE aangezet"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"Dit kan effect hebben op prestaties en stabiliteit. Start opnieuw op om de functie uit te zetten. Als deze optie is aangezet via arm64.memtag.bootctl, stel je deze van tevoren in op \'none\'."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Vloeistof of vuil in USB-poort"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB-poort is automatisch uitgezet. Tik voor meer informatie."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB-poort kan worden gebruikt"</string>
@@ -1547,10 +1500,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Overslaan"</string>
     <string name="no_matches" msgid="6472699895759164599">"Geen overeenkomsten"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Zoeken op pagina"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> van <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">1 overeenkomst</item>
-    </plurals>
+    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{# overeenkomst}other{# van {total}}} }"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Klaar"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Gedeelde opslag wissen…"</string>
     <string name="share" msgid="4157615043345227321">"Delen"</string>
@@ -1680,10 +1630,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Onjuist patroon"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"Onjuist wachtwoord"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Onjuiste pincode"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="other">Probeer het over <xliff:g id="NUMBER">%d</xliff:g> seconden opnieuw.</item>
-      <item quantity="one">Probeer het over één seconde opnieuw.</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Teken je patroon"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Geef de pincode van de simkaart op"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Pincode opgeven"</string>
@@ -1880,10 +1826,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Maak een pincode voor het aanpassen van beperkingen"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"De pincodes komen niet overeen. Probeer het opnieuw."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"Pincode is te kort. Moet ten minste vier cijfers lang zijn."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="other">Probeer het over <xliff:g id="COUNT">%d</xliff:g> seconden opnieuw</item>
-      <item quantity="one">Probeer het over 1 seconde opnieuw</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Probeer het later opnieuw"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Volledig scherm wordt getoond"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Swipe omlaag vanaf de bovenkant van het scherm om af te sluiten."</string>
@@ -1911,46 +1853,20 @@
     <string name="data_saver_description" msgid="4995164271550590517">"Databesparing beperkt het datagebruik door te voorkomen dat sommige apps gegevens sturen of ontvangen op de achtergrond. De apps die je open hebt, kunnen nog steeds data verbruiken, maar doen dit minder vaak. Afbeeldingen worden dan bijvoorbeeld niet getoond totdat je erop tikt."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Databesparing aanzetten?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aanzetten"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="other">%1$d minuten (tot <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Eén minuut (tot <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="other">Gedurende %1$d min (tot <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Gedurende 1 min (tot <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="other">Gedurende %1$d uur (tot <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Gedurende 1 uur (tot <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="other">Gedurende %1$d u (tot <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Gedurende 1 u (tot <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="other">%d minuten</item>
-      <item quantity="one">Eén minuut</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="other">Gedurende %d min</item>
-      <item quantity="one">Gedurende 1 min</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="other">Gedurende %d uur</item>
-      <item quantity="one">Gedurende 1 uur</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="other">Gedurende %d u</item>
-      <item quantity="one">Gedurende 1 u</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Gedurende 1 minuut (tot {formattedTime})}other{Gedurende # minuten (tot {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Gedurende 1 min (tot {formattedTime})}other{Gedurende # min (tot {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Gedurende 1 uur (tot {formattedTime})}other{Gedurende # uur (tot {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Gedurende 1 u (tot {formattedTime})}other{Gedurende # u (tot {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Gedurende 1 minuut}other{Gedurende # minuten}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Gedurende 1 min}other{Gedurende # min}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Gedurende 1 uur}other{Gedurende # uur}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Gedurende 1 u}other{Gedurende # u}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Tot <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (volgende wekker)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Totdat je uitzet"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Totdat je Niet storen uitzet"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Samenvouwen"</string>
-    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Niet storen"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Downtime"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Doordeweekse avond"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
@@ -1989,10 +1905,6 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Inkomend gesprek"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Actief gesprek"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Een inkomend gesprek screenen"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> geselecteerd</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> geselecteerd</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Geen categorie"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Je stelt het belang van deze meldingen in."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Dit is belangrijk vanwege de betrokken mensen."</string>
@@ -2058,10 +1970,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Opslaan voor Automatisch invullen"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Content kan niet automatisch worden aangevuld"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Geen suggesties van Automatisch invullen"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> suggesties van Automatisch invullen</item>
-      <item quantity="one">Eén suggestie van Automatisch invullen</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{1 suggestie voor automatisch invullen}other{# suggesties voor automatisch invullen}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"Opslaan in "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"<xliff:g id="TYPE">%1$s</xliff:g> opslaan in "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"<xliff:g id="TYPE_0">%1$s</xliff:g> en <xliff:g id="TYPE_1">%2$s</xliff:g> opslaan in "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
@@ -2108,15 +2017,22 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"VERWIJDEREN"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"TOCH OPENEN"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Schadelijke app gevonden"</string>
+    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
+    <skip />
+    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
+    <skip />
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> wil segmenten van <xliff:g id="APP_2">%2$s</xliff:g> tonen"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Bewerken"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Trillen bij gesprekken en meldingen"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Telefoon- en meldingsgeluid wordt uitgezet"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Systeemwijzigingen"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Niet storen"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Nieuw: \'Niet storen\' verbergt meldingen"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Tik voor meer informatie en om te wijzigen."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'Niet storen\' is gewijzigd"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Tik om te controleren wat er is geblokkeerd."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Systeem"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Instellingen"</string>
@@ -2133,7 +2049,6 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Uitzetten"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Meer informatie"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"In Android 12 hebben verbeterde meldingen aanpasbare Android-meldingen vervangen. Deze functie laat voorgestelde acties en antwoorden zien en ordent je meldingen.\n\nVerbeterde meldingen hebben toegang tot meldingscontent, waaronder persoonlijke informatie zoals contactnamen en berichten. Deze functie kan ook meldingen sluiten of erop reageren, zoals telefoongesprekken aannemen, en Niet storen beheren."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Informatiemelding voor routinemodus"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"De batterij raakt mogelijk leeg voordat deze normaal gesproken wordt opgeladen"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Batterijbesparing is geactiveerd om de batterijduur te verlengen"</string>
@@ -2162,10 +2077,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g>-presentatie"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth blijft aan in de vliegtuigmodus"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Laden"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> bestanden</item>
-      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> bestand</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # bestand}other{{file_name} + # bestanden}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Geen aanbevolen mensen om mee te delen"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lijst met apps"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Deze app heeft geen opnamerechten gekregen, maar zou audio kunnen vastleggen via dit USB-apparaat."</string>
@@ -2177,10 +2089,22 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Voedingsdialoogvenster"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Scherm vergrendelen"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Screenshot"</string>
+    <!-- no translation found for accessibility_system_action_headset_hook_label (8524691721287425468) -->
+    <skip />
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Snelkoppeling voor toegankelijkheid op scherm"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Kiezer voor snelkoppeling voor toegankelijkheid op scherm"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Snelkoppeling voor toegankelijkheid"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Meldingenpaneel sluiten"</string>
+    <!-- no translation found for accessibility_system_action_dpad_up_label (1029042950229333782) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_down_label (3441918448624921461) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_left_label (6557647179116479152) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_right_label (9180196950365804081) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_center_label (8149791419358224893) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Ondertitelingsbalk van <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> is in de bucket RESTRICTED geplaatst"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2201,8 +2125,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Tik om aan te zetten"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Geen werk-apps"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Geen persoonlijke apps"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Openen in <xliff:g id="APP">%s</xliff:g> in persoonlijk profiel?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Openen in <xliff:g id="APP">%s</xliff:g> in werkprofiel?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Persoonlijke browser gebruiken"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Werkbrowser gebruiken"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Ontgrendelingspincode voor SIM-netwerk"</string>
@@ -2332,4 +2258,9 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> kan je scherm bekijken en bedienen. Tik om te checken."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> vertaald."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Bericht vertaald vanuit het <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> naar het <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Achtergrondactiviteit"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Achtergrondactiviteit"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> wordt uitgevoerd op de achtergrond en verbruikt veel batterijlading. Tik om te bekijken."</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> wordt al lange tijd uitgevoerd op de achtergrond. Tik om te bekijken."</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Actieve apps checken"</string>
 </resources>
