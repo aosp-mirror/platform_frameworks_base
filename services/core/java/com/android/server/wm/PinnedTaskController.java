@@ -92,6 +92,7 @@ class PinnedTaskController {
 
     // The set of actions and aspect-ratio for the that are currently allowed on the PiP activity
     private ArrayList<RemoteAction> mActions = new ArrayList<>();
+    private RemoteAction mCloseAction;
     private float mAspectRatio = -1f;
     private float mExpandedAspectRatio = 0f;
 
@@ -154,7 +155,7 @@ class PinnedTaskController {
             mPinnedTaskListener = listener;
             notifyImeVisibilityChanged(mIsImeShowing, mImeHeight);
             notifyMovementBoundsChanged(false /* fromImeAdjustment */);
-            notifyActionsChanged(mActions);
+            notifyActionsChanged(mActions, mCloseAction);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register pinned task listener", e);
         }
@@ -408,12 +409,13 @@ class PinnedTaskController {
     /**
      * Sets the current set of actions.
      */
-    void setActions(List<RemoteAction> actions) {
+    void setActions(List<RemoteAction> actions, RemoteAction closeAction) {
         mActions.clear();
         if (actions != null) {
             mActions.addAll(actions);
         }
-        notifyActionsChanged(mActions);
+        mCloseAction = closeAction;
+        notifyActionsChanged(mActions, closeAction);
     }
 
     /**
@@ -450,10 +452,10 @@ class PinnedTaskController {
     /**
      * Notifies listeners that the PIP actions have changed.
      */
-    private void notifyActionsChanged(List<RemoteAction> actions) {
+    private void notifyActionsChanged(List<RemoteAction> actions, RemoteAction closeAction) {
         if (mPinnedTaskListener != null) {
             try {
-                mPinnedTaskListener.onActionsChanged(new ParceledListSlice(actions));
+                mPinnedTaskListener.onActionsChanged(new ParceledListSlice(actions), closeAction);
             } catch (RemoteException e) {
                 Slog.e(TAG_WM, "Error delivering actions changed event.", e);
             }

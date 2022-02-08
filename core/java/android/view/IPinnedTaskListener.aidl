@@ -47,7 +47,7 @@ oneway interface IPinnedTaskListener {
      * Called when the set of actions for the current PiP activity changes, or when the listener
      * is first registered to allow the listener to synchronize its state with the controller.
      */
-    void onActionsChanged(in ParceledListSlice<RemoteAction> actions);
+    void onActionsChanged(in ParceledListSlice<RemoteAction> actions, in RemoteAction closeAction);
 
     /**
      * Called by the window manager to notify the listener that Activity (was or is in pinned mode)

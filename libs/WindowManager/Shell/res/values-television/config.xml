@@ -39,4 +39,8 @@
 
     <!-- Duration (in milliseconds) the PiP stays stashed before automatically unstashing. -->
     <integer name="config_pipStashDuration">5000</integer>
+
+    <!-- Time (duration in milliseconds) that the shell waits for an app to close the PiP by itself
+    if a custom action is present before closing it. -->
+    <integer name="config_pipForceCloseDelay">5000</integer>
 </resources>

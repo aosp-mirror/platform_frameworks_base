@@ -6098,7 +6098,7 @@ class Task extends TaskFragment {
     /**
      * Sets the current picture-in-picture actions.
      */
-    void setPictureInPictureActions(List<RemoteAction> actions) {
+    void setPictureInPictureActions(List<RemoteAction> actions, RemoteAction closeAction) {
         if (!mWmService.mAtmService.mSupportsPictureInPicture) {
             return;
         }
@@ -6107,7 +6107,7 @@ class Task extends TaskFragment {
             return;
         }
 
-        getDisplayContent().getPinnedTaskController().setActions(actions);
+        getDisplayContent().getPinnedTaskController().setActions(actions, closeAction);
     }
 
     public DisplayInfo getDisplayInfo() {

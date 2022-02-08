@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
+import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.app.TaskInfo;
 import android.content.ComponentName;
@@ -69,7 +70,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     private static final int NONEXISTENT_TASK_ID = -1;
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "STATE_" }, value = {
+    @IntDef(prefix = {"STATE_"}, value = {
             STATE_NO_PIP,
             STATE_PIP,
             STATE_PIP_MENU,
@@ -108,6 +109,10 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     private int mPreviousGravity = TvPipBoundsState.DEFAULT_TV_GRAVITY;
     private int mPinnedTaskId = NONEXISTENT_TASK_ID;
     private Runnable mUnstashRunnable;
+
+    private RemoteAction mCloseAction;
+    // How long the shell will wait for the app to close the PiP if a custom action is set.
+    private int mPipForceCloseDelay;
 
     private int mResizeAnimationDuration;
 
@@ -369,9 +374,29 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     public void closePip() {
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: closePip(), state=%s", TAG, stateToName(mState));
+                    "%s: closePip(), state=%s, loseAction=%s", TAG, stateToName(mState),
+                    mCloseAction);
         }
 
+        if (mCloseAction != null) {
+            try {
+                mCloseAction.getActionIntent().send();
+            } catch (PendingIntent.CanceledException e) {
+                ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: Failed to send close action, %s", TAG, e);
+            }
+            mMainExecutor.executeDelayed(() -> closeCurrentPiP(mPinnedTaskId), mPipForceCloseDelay);
+        } else {
+            closeCurrentPiP(mPinnedTaskId);
+        }
+    }
+
+    private void closeCurrentPiP(int pinnedTaskId) {
+        if (mPinnedTaskId != pinnedTaskId) {
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: PiP has already been closed by custom close action", TAG);
+            return;
+        }
         removeTask(mPinnedTaskId);
         onPipDisappeared();
     }
@@ -468,6 +493,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     private void loadConfigurations() {
         final Resources res = mContext.getResources();
         mResizeAnimationDuration = res.getInteger(R.integer.config_pipResizeAnimationDuration);
+        mPipForceCloseDelay = res.getInteger(R.integer.config_pipForceCloseDelay);
     }
 
     private void registerTaskStackListenerCallback(TaskStackListenerImpl taskStackListener) {
@@ -592,13 +618,15 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 public void onMovementBoundsChanged(boolean fromImeAdjustment) {}
 
                 @Override
-                public void onActionsChanged(ParceledListSlice<RemoteAction> actions) {
+                public void onActionsChanged(ParceledListSlice<RemoteAction> actions,
+                        RemoteAction closeAction) {
                     if (DEBUG) {
                         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                                 "%s: onActionsChanged()", TAG);
                     }
 
-                    mTvPipMenuController.setAppActions(actions);
+                    mTvPipMenuController.setAppActions(actions, closeAction);
+                    mCloseAction = closeAction;
                 }
             });
         } catch (RemoteException e) {
@@ -617,7 +645,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                     WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
             if (DEBUG) {
                 ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                        "%s:   > taskInfo=%s", TAG, taskInfo);
+                        "%s: taskInfo=%s", TAG, taskInfo);
             }
             return taskInfo;
         } catch (RemoteException e) {

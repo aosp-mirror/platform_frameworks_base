@@ -246,8 +246,9 @@ public class PipController implements PipTransitionController.PipTransitionCallb
         }
 
         @Override
-        public void onActionsChanged(ParceledListSlice<RemoteAction> actions) {
-            mMenuController.setAppActions(actions);
+        public void onActionsChanged(ParceledListSlice<RemoteAction> actions,
+                RemoteAction closeAction) {
+            mMenuController.setAppActions(actions, closeAction);
         }
 
         @Override

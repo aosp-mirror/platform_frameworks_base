@@ -3527,11 +3527,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 final float expandedAspectRatio =
                         r.pictureInPictureArgs.getExpandedAspectRatioFloat();
                 final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
+                final RemoteAction closeAction = r.pictureInPictureArgs.getCloseAction();
                 mRootWindowContainer.moveActivityToPinnedRootTask(r,
                         null /* launchIntoPipHostActivity */, "enterPictureInPictureMode");
                 final Task task = r.getTask();
                 task.setPictureInPictureAspectRatio(aspectRatio, expandedAspectRatio);
-                task.setPictureInPictureActions(actions);
+                task.setPictureInPictureActions(actions, closeAction);
 
                 // Continue the pausing process after entering pip.
                 if (task.getPausingActivity() == r) {

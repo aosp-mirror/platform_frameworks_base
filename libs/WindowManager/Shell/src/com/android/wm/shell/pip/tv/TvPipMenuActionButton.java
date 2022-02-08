@@ -126,4 +126,15 @@ public class TvPipMenuActionButton extends RelativeLayout implements View.OnClic
     public boolean isEnabled() {
         return mButtonView.isEnabled();
     }
+
+    void setIsCustomCloseAction(boolean isCustomCloseAction) {
+        mIconImageView.setImageTintList(
+                getResources().getColorStateList(
+                        isCustomCloseAction ? R.color.tv_pip_menu_close_icon
+                                : R.color.tv_pip_menu_icon));
+        mButtonView.setBackgroundTintList(getResources()
+                .getColorStateList(isCustomCloseAction ? R.color.tv_pip_menu_close_icon_bg
+                        : R.color.tv_pip_menu_icon_bg));
+    }
+
 }

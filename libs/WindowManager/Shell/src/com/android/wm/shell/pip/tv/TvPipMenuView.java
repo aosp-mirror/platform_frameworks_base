@@ -50,6 +50,7 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A View that represents Pip Menu on TV. It's responsible for displaying 3 ever-present Pip Menu
@@ -78,6 +79,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     private Rect mCurrentBounds;
 
     private final TvPipMenuActionButton mExpandButton;
+    private final TvPipMenuActionButton mCloseButton;
 
     public TvPipMenuView(@NonNull Context context) {
         this(context, null);
@@ -100,8 +102,11 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         mActionButtonsContainer = findViewById(R.id.tv_pip_menu_action_buttons);
         mActionButtonsContainer.findViewById(R.id.tv_pip_menu_fullscreen_button)
                 .setOnClickListener(this);
-        mActionButtonsContainer.findViewById(R.id.tv_pip_menu_close_button)
-                .setOnClickListener(this);
+
+        mCloseButton = mActionButtonsContainer.findViewById(R.id.tv_pip_menu_close_button);
+        mCloseButton.setOnClickListener(this);
+        mCloseButton.setIsCustomCloseAction(true);
+
         mActionButtonsContainer.findViewById(R.id.tv_pip_menu_move_button)
                 .setOnClickListener(this);
         mExpandButton = findViewById(R.id.tv_pip_menu_expand_button);
@@ -220,11 +225,23 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
                 || mArrowLeft.getAlpha() != 0f;
     }
 
-    void setAdditionalActions(List<RemoteAction> actions, Handler mainHandler) {
+    void setAdditionalActions(List<RemoteAction> actions, RemoteAction closeAction,
+            Handler mainHandler) {
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: setAdditionalActions()", TAG);
         }
+
+        // Replace system close action with custom close action if available
+        if (closeAction != null) {
+            setActionForButton(closeAction, mCloseButton, mainHandler);
+        } else {
+            mCloseButton.setTextAndDescription(R.string.pip_close);
+            mCloseButton.setImageResource(R.drawable.pip_ic_close_white);
+        }
+        mCloseButton.setIsCustomCloseAction(closeAction != null);
+        // Make sure the close action is always enabled
+        mCloseButton.setEnabled(true);
 
         // Make sure we exactly as many additional buttons as we have actions to display.
         final int actionsNumber = actions.size();
@@ -256,12 +273,35 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         for (int index = 0; index < actionsNumber; index++) {
             final RemoteAction action = actions.get(index);
             final TvPipMenuActionButton button = mAdditionalButtons.get(index);
-            button.setVisibility(View.VISIBLE); // Ensure the button is visible.
-            button.setTextAndDescription(action.getContentDescription());
-            button.setEnabled(action.isEnabled());
-            button.setTag(action);
-            action.getIcon().loadDrawableAsync(mContext, button::setImageDrawable, mainHandler);
+
+            // Remove action if it matches the custom close action.
+            if (actionsMatch(action, closeAction)) {
+                button.setVisibility(GONE);
+                continue;
+            }
+            setActionForButton(action, button, mainHandler);
         }
+    }
+
+    /**
+     * Checks whether title, description and intent match.
+     * Comparing icons would be good, but using equals causes false negatives
+     */
+    private boolean actionsMatch(RemoteAction action1, RemoteAction action2) {
+        if (action1 == action2) return true;
+        if (action1 == null) return false;
+        return Objects.equals(action1.getTitle(), action2.getTitle())
+                && Objects.equals(action1.getContentDescription(), action2.getContentDescription())
+                && Objects.equals(action1.getActionIntent(), action2.getActionIntent());
+    }
+
+    private void setActionForButton(RemoteAction action, TvPipMenuActionButton button,
+            Handler mainHandler) {
+        button.setVisibility(View.VISIBLE); // Ensure the button is visible.
+        button.setTextAndDescription(action.getContentDescription());
+        button.setEnabled(action.isEnabled());
+        button.setTag(action);
+        action.getIcon().loadDrawableAsync(mContext, button::setImageDrawable, mainHandler);
     }
 
     @Nullable

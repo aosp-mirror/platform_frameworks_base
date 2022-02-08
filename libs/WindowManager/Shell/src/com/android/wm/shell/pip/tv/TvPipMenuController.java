@@ -45,6 +45,7 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Manages the visibility of the PiP Menu as user interacts with PiP.
@@ -67,6 +68,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
 
     private final List<RemoteAction> mMediaActions = new ArrayList<>();
     private final List<RemoteAction> mAppActions = new ArrayList<>();
+    private RemoteAction mCloseAction;
 
     private SyncRtSurfaceTransactionApplier mApplier;
     RectF mTmpSourceRectF = new RectF();
@@ -270,12 +272,12 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     }
 
     @Override
-    public void setAppActions(ParceledListSlice<RemoteAction> actions) {
+    public void setAppActions(ParceledListSlice<RemoteAction> actions, RemoteAction closeAction) {
         if (DEBUG) {
             ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: setAppActions()", TAG);
         }
-        updateAdditionalActionsList(mAppActions, actions.getList());
+        updateAdditionalActionsList(mAppActions, actions.getList(), closeAction);
     }
 
     private void onMediaActionsChanged(List<RemoteAction> actions) {
@@ -291,16 +293,18 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
                 enabledActions.add(remoteAction);
             }
         }
-        updateAdditionalActionsList(mMediaActions, enabledActions);
+        updateAdditionalActionsList(mMediaActions, enabledActions, mCloseAction);
     }
 
-    private void updateAdditionalActionsList(
-            List<RemoteAction> destination, @Nullable List<RemoteAction> source) {
+    private void updateAdditionalActionsList(List<RemoteAction> destination,
+            @Nullable List<RemoteAction> source, RemoteAction closeAction) {
         final int number = source != null ? source.size() : 0;
-        if (number == 0 && destination.isEmpty()) {
+        if (number == 0 && destination.isEmpty() && Objects.equals(closeAction, mCloseAction)) {
             // Nothing changed.
             return;
         }
+
+        mCloseAction = closeAction;
 
         destination.clear();
         if (number > 0) {
@@ -314,9 +318,9 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
             return;
         }
         if (!mAppActions.isEmpty()) {
-            mPipMenuView.setAdditionalActions(mAppActions, mMainHandler);
+            mPipMenuView.setAdditionalActions(mAppActions, mCloseAction, mMainHandler);
         } else {
-            mPipMenuView.setAdditionalActions(mMediaActions, mMainHandler);
+            mPipMenuView.setAdditionalActions(mMediaActions, mCloseAction, mMainHandler);
         }
     }
 

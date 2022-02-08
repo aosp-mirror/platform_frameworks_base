@@ -749,7 +749,8 @@ class ActivityClientController extends IActivityClientController.Stub {
                     rootTask.setPictureInPictureAspectRatio(
                             r.pictureInPictureArgs.getAspectRatioFloat(),
                             r.pictureInPictureArgs.getExpandedAspectRatioFloat());
-                    rootTask.setPictureInPictureActions(r.pictureInPictureArgs.getActions());
+                    rootTask.setPictureInPictureActions(r.pictureInPictureArgs.getActions(),
+                            r.pictureInPictureArgs.getCloseAction());
                 }
             }
         } finally {
