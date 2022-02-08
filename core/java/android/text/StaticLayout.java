@@ -410,7 +410,8 @@ public class StaticLayout extends Layout {
          *
          * @param lineBreakConfig the line break configuration for text wrapping.
          * @return this builder, useful for chaining.
-         * @see android.widget.TextView#setLineBreakConfig
+         * @see android.widget.TextView#setLineBreakStyle
+         * @see android.widget.TextView#setLineBreakWordStyle
          */
         @NonNull
         public Builder setLineBreakConfig(@NonNull LineBreakConfig lineBreakConfig) {

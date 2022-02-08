@@ -5471,9 +5471,9 @@
             <enum name="none" value="0" />
             <!-- Use the least restrictive rule for line-breaking. -->
             <enum name="loose" value="1" />
-            <!-- Indicate breaking text with the most comment set of line-breaking rules. -->
+            <!-- Indicates breaking text with the most comment set of line-breaking rules. -->
             <enum name="normal" value="2" />
-            <!-- ndicates breaking text with the most strictest line-breaking rules. -->
+            <!-- Indicates breaking text with the most strictest line-breaking rules. -->
             <enum name="strict" value="3" />
         </attr>
         <!-- Specify the phrase-based line break can be used when calculating the text wrapping.-->
