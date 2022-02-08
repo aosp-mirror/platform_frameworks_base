@@ -2398,6 +2398,10 @@ package android.service.voice {
     method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public void triggerHardwareRecognitionEventForTest(int, int, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[]);
   }
 
+  public static class AlwaysOnHotwordDetector.EventPayload {
+    ctor public AlwaysOnHotwordDetector.EventPayload(boolean, boolean, @Nullable android.media.AudioFormat, int, @Nullable byte[], @Nullable android.service.voice.HotwordDetectedResult, @Nullable android.os.ParcelFileDescriptor);
+  }
+
   public final class VisibleActivityInfo implements android.os.Parcelable {
     ctor public VisibleActivityInfo(int, @NonNull android.os.IBinder);
   }

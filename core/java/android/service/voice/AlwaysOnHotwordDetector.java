@@ -336,7 +336,39 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
      * Additional payload for {@link Callback#onDetected}.
      */
     public static class EventPayload {
-        private final boolean mTriggerAvailable;
+
+        /**
+         * Flags for describing the data format provided in the event payload.
+         *
+         * @hide
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(prefix = {"DATA_FORMAT_"}, value = {
+                DATA_FORMAT_RAW,
+                DATA_FORMAT_TRIGGER_AUDIO,
+        })
+        public @interface DataFormat {
+        }
+
+        /**
+         * Data format is not strictly defined by the framework, and the
+         * {@link android.hardware.soundtrigger.SoundTriggerModule} voice engine may populate this
+         * field in any format.
+         */
+        public static final int DATA_FORMAT_RAW = 0;
+
+        /**
+         * Data format is defined as trigger audio.
+         *
+         * <p>When this format is used, {@link #getCaptureAudioFormat()} can be used to understand
+         * further the audio format for reading the data.
+         *
+         * @see AlwaysOnHotwordDetector#RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO
+         */
+        public static final int DATA_FORMAT_TRIGGER_AUDIO = 1;
+
+        @DataFormat
+        private final int mDataFormat;
         // Indicates if {@code captureSession} can be used to continue capturing more audio
         // from the DSP hardware.
         private final boolean mCaptureAvailable;
@@ -349,16 +381,16 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         private final HotwordDetectedResult mHotwordDetectedResult;
         private final ParcelFileDescriptor mAudioStream;
 
-        EventPayload(boolean triggerAvailable, boolean captureAvailable,
+        EventPayload(boolean triggerInData, boolean captureAvailable,
                 AudioFormat audioFormat, int captureSession, byte[] data) {
-            this(triggerAvailable, captureAvailable, audioFormat, captureSession, data, null,
+            this(triggerInData, captureAvailable, audioFormat, captureSession, data, null,
                     null);
         }
 
-        EventPayload(boolean triggerAvailable, boolean captureAvailable,
+        EventPayload(boolean triggerInData, boolean captureAvailable,
                 AudioFormat audioFormat, int captureSession, byte[] data,
                 HotwordDetectedResult hotwordDetectedResult) {
-            this(triggerAvailable, captureAvailable, audioFormat, captureSession, data,
+            this(triggerInData, captureAvailable, audioFormat, captureSession, data,
                     hotwordDetectedResult, null);
         }
 
@@ -372,13 +404,20 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
             this(false, false, audioFormat, -1, null, hotwordDetectedResult, audioStream);
         }
 
-        private EventPayload(boolean triggerAvailable, boolean captureAvailable,
-                AudioFormat audioFormat, int captureSession, byte[] data,
-                HotwordDetectedResult hotwordDetectedResult, ParcelFileDescriptor audioStream) {
-            mTriggerAvailable = triggerAvailable;
+        /** @hide */
+        @TestApi
+        public EventPayload(boolean triggerInData, boolean captureAvailable,
+                @Nullable AudioFormat audioFormat, int captureSession, @Nullable byte[] data,
+                @Nullable HotwordDetectedResult hotwordDetectedResult,
+                @Nullable ParcelFileDescriptor audioStream) {
             mCaptureAvailable = captureAvailable;
             mCaptureSession = captureSession;
             mAudioFormat = audioFormat;
+            if (triggerInData) {
+                mDataFormat = DATA_FORMAT_TRIGGER_AUDIO;
+            } else {
+                mDataFormat = DATA_FORMAT_RAW;
+            }
             mData = data;
             mHotwordDetectedResult = hotwordDetectedResult;
             mAudioStream = audioStream;
@@ -400,14 +439,46 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
          * {@link #getCaptureAudioFormat()}.
          *
          * @see AlwaysOnHotwordDetector#RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO
+         * @deprecated Use {@link #getData()} instead.
          */
+        @Deprecated
         @Nullable
         public byte[] getTriggerAudio() {
-            if (mTriggerAvailable) {
+            if (mDataFormat == DATA_FORMAT_TRIGGER_AUDIO) {
                 return mData;
             } else {
                 return null;
             }
+        }
+
+        /**
+         * Conveys the format of the additional data that is triggered with the keyphrase event.
+         *
+         * @see AlwaysOnHotwordDetector#RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO
+         * @see DataFormat
+         */
+        @DataFormat
+        public int getDataFormat() {
+            return mDataFormat;
+        }
+
+        /**
+         * Gets additional raw data that is triggered with the keyphrase event.
+         *
+         * <p>A {@link android.hardware.soundtrigger.SoundTriggerModule} may populate this
+         * field with opaque data for use by system applications who know about voice
+         * engine internals. Data may be null if the field is not populated by the
+         * {@link android.hardware.soundtrigger.SoundTriggerModule}.
+         *
+         * <p>If {@link #getDataFormat()} is {@link #DATA_FORMAT_TRIGGER_AUDIO}, then the
+         * entirety of this buffer is expected to be of the format from
+         * {@link #getCaptureAudioFormat()}.
+         *
+         * @see AlwaysOnHotwordDetector#RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO
+         */
+        @Nullable
+        public byte[] getData() {
+            return mData;
         }
 
         /**
