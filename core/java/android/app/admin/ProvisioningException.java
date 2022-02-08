@@ -15,8 +15,10 @@
  */
 
 package android.app.admin;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.pm.PackageManager;
 import android.util.AndroidException;
@@ -106,12 +108,35 @@ public class ProvisioningException extends AndroidException {
 
     private final @ProvisioningError int mProvisioningError;
 
+    /**
+     * Constructs a {@link ProvisioningException}.
+     *
+     * @param cause the cause
+     * @param provisioningError the error code
+     */
     public ProvisioningException(@NonNull Exception cause,
             @ProvisioningError int provisioningError) {
-        super(cause);
+        this(cause, provisioningError, /* errorMessage= */ null);
+    }
+
+    /**
+     * Constructs a {@link ProvisioningException}.
+     *
+     * @param cause the cause
+     * @param provisioningError the error code
+     * @param errorMessage a {@code String} error message that give a more specific
+     *                     description of the exception; can be {@code null}
+     */
+    public ProvisioningException(@NonNull Exception cause,
+            @ProvisioningError int provisioningError,
+            @Nullable String errorMessage) {
+        super(errorMessage, cause);
         mProvisioningError = provisioningError;
     }
 
+    /**
+     * Returns the provisioning error specified at construction time.
+     */
     public @ProvisioningError int getProvisioningError() {
         return mProvisioningError;
     }

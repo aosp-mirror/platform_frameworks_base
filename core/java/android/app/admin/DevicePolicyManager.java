@@ -14588,11 +14588,20 @@ public class DevicePolicyManager {
             return mService.createAndProvisionManagedProfile(
                     provisioningParams, mContext.getPackageName());
         } catch (ServiceSpecificException e) {
-            throw new ProvisioningException(e, e.errorCode);
+            throw new ProvisioningException(e, e.errorCode, getErrorMessage(e));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * The localized error message to show to the end-user. If {@code null}, a generic error
+     * message will be shown.
+     */
+    private String getErrorMessage(ServiceSpecificException e) {
+        return null;
+    }
+
 
     /**
      * Provisions a managed device and sets the {@code deviceAdminComponentName} as the device
@@ -14619,7 +14628,7 @@ public class DevicePolicyManager {
             try {
                 mService.provisionFullyManagedDevice(provisioningParams, mContext.getPackageName());
             } catch (ServiceSpecificException e) {
-                throw new ProvisioningException(e, e.errorCode);
+                throw new ProvisioningException(e, e.errorCode, getErrorMessage(e));
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
