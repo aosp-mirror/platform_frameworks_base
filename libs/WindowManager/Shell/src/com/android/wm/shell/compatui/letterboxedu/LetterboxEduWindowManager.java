@@ -16,11 +16,14 @@
 
 package com.android.wm.shell.compatui.letterboxedu;
 
+import static android.provider.Settings.Secure.LAUNCHER_TASKBAR_EDUCATION_SHOWING;
+
 import android.annotation.Nullable;
 import android.app.TaskInfo;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Rect;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -93,9 +96,12 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
 
     @Override
     protected boolean eligibleToShowLayout() {
-        // If the layout isn't null then it was previously showing, and we shouldn't check if the
-        // user has seen the letterbox education before.
-        return mEligibleForLetterboxEducation && (mLayout != null
+        // - If taskbar education is showing, the letterbox education shouldn't be shown for the
+        //   given task until the taskbar education is dismissed and the compat info changes (then
+        //   the controller will create a new instance of this class since this one isn't eligible).
+        // - If the layout isn't null then it was previously showing, and we shouldn't check if the
+        //   user has seen the letterbox education before.
+        return mEligibleForLetterboxEducation && !isTaskbarEduShowing() && (mLayout != null
                 || !getHasSeenLetterboxEducation());
     }
 
@@ -172,5 +178,10 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
 
     private String getPrefKey() {
         return String.valueOf(mContext.getUserId());
+    }
+
+    private boolean isTaskbarEduShowing() {
+        return Settings.Secure.getInt(mContext.getContentResolver(),
+                LAUNCHER_TASKBAR_EDUCATION_SHOWING, /* def= */ 0) == 1;
     }
 }

@@ -10709,6 +10709,19 @@ public final class Settings {
                 "hdmi_cec_set_menu_language_denylist";
 
         /**
+         * Whether the Taskbar Education is about to be shown or is currently showing.
+         *
+         * <p>1 if true, 0 or unset otherwise.
+         *
+         * <p>This setting is used to inform other components that the Taskbar Education is
+         * currently showing, which can prevent them from showing something else to the user.
+         *
+         * @hide
+         */
+        public static final String LAUNCHER_TASKBAR_EDUCATION_SHOWING =
+                "launcher_taskbar_education_showing";
+
+        /**
          * These entries are considered common between the personal and the managed profile,
          * since the managed profile doesn't get to change them.
          */
