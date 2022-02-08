@@ -59,7 +59,7 @@ public final class LogcatManagerService extends SystemService {
     private ActivityManagerInternal mActivityManagerInternal;
     private static final int MAX_UID_IMPORTANCE_COUNT_LISTENER = 2;
     private static int sUidImportanceListenerCount = 0;
-    private static final int AID_SHELL_UID = 2000;
+    private static final int AID_APP_UID = 10000;
 
     // TODO This allowlist is just a temporary workaround for the tests:
     //      FrameworksServicesTests
@@ -339,8 +339,10 @@ public final class LogcatManagerService extends SystemService {
                     return;
                 }
 
-                // If the access request is coming from adb shell, approve the logd access
-                if (mUid == AID_SHELL_UID) {
+                // If the access request is coming from native apps, approve the logd access
+                // TODO: This is needed to make tooling to work. However,
+                // we intend to be stricter with respect to native processes in a follow-up CL
+                if (mUid < AID_APP_UID) {
                     try {
                         getLogdService().approve(mUid, mGid, mPid, mFd);
                     } catch (RemoteException e) {
