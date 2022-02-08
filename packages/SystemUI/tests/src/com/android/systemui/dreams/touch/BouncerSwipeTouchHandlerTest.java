@@ -32,6 +32,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
@@ -117,6 +118,7 @@ public class BouncerSwipeTouchHandlerTest extends SysuiTestCase {
     /**
      * Ensures expansion only happens when touch down happens in valid part of the screen.
      */
+    @FlakyTest
     @Test
     public void testSessionStart() {
         mTouchHandler.onSessionStart(mTouchSession);

@@ -107,7 +107,7 @@ public final class BroadcastHelper {
             int flags, String targetPkg, IIntentReceiver finishedReceiver,
             int[] userIds, boolean isInstantApp, @Nullable SparseArray<int[]> broadcastAllowList,
             @Nullable Bundle bOptions) {
-        for (int id : userIds) {
+        for (int userId : userIds) {
             final Intent intent = new Intent(action,
                     pkg != null ? Uri.fromParts(PACKAGE_SCHEME, pkg, null) : null);
             final String[] requiredPermissions =
@@ -119,27 +119,32 @@ public final class BroadcastHelper {
                 intent.setPackage(targetPkg);
             }
             // Modify the UID when posting to other users
-            int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
-            if (uid > 0 && UserHandle.getUserId(uid) != id) {
-                uid = UserHandle.getUid(id, UserHandle.getAppId(uid));
-                intent.putExtra(Intent.EXTRA_UID, uid);
+            final String[] uidExtraNames =
+                    { Intent.EXTRA_UID, Intent.EXTRA_PREVIOUS_UID, Intent.EXTRA_NEW_UID };
+            for (String name : uidExtraNames) {
+                int uid = intent.getIntExtra(name, -1);
+                if (uid >= 0 && UserHandle.getUserId(uid) != userId) {
+                    uid = UserHandle.getUid(userId, UserHandle.getAppId(uid));
+                    intent.putExtra(name, uid);
+                }
             }
             if (broadcastAllowList != null && PLATFORM_PACKAGE_NAME.equals(targetPkg)) {
-                intent.putExtra(Intent.EXTRA_VISIBILITY_ALLOW_LIST, broadcastAllowList.get(id));
+                intent.putExtra(Intent.EXTRA_VISIBILITY_ALLOW_LIST,
+                         broadcastAllowList.get(userId));
             }
-            intent.putExtra(Intent.EXTRA_USER_HANDLE, id);
+            intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT | flags);
             if (DEBUG_BROADCASTS) {
                 RuntimeException here = new RuntimeException("here");
                 here.fillInStackTrace();
-                Slog.d(TAG, "Sending to user " + id + ": "
+                Slog.d(TAG, "Sending to user " + userId + ": "
                         + intent.toShortString(false, true, false, false)
                         + " " + intent.getExtras(), here);
             }
             mAmInternal.broadcastIntent(
                     intent, finishedReceiver, requiredPermissions,
-                    finishedReceiver != null, id,
-                    broadcastAllowList == null ? null : broadcastAllowList.get(id),
+                    finishedReceiver != null, userId,
+                    broadcastAllowList == null ? null : broadcastAllowList.get(userId),
                     bOptions);
         }
     }

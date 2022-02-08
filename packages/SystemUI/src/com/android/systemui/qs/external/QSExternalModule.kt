@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.internal.telecom;
+package com.android.systemui.qs.external
 
-/**
- * Internal remote CallEndpointSession interface for streaming app to update the status of the
- * endpoint.
- *
- * @see android.telecom.CallEndpointSession
- *
- * {@hide}
- */
+import android.service.quicksettings.IQSService
+import dagger.Binds
+import dagger.Module
 
-oneway interface ICallEndpointSession {
-    void setCallEndpointSessionActivated();
-
-    void setCallEndpointSessionActivationFailed(int reason);
-
-    void setCallEndpointSessionDeactivated();
+@Module
+interface QSExternalModule {
+    @Binds
+    fun bindsIQSService(impl: TileServices): IQSService
 }

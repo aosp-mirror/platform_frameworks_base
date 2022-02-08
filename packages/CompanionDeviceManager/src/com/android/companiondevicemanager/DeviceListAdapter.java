@@ -26,14 +26,14 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.lifecycle.Observer;
+
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 
 /**
  * Adapter for the list of "found" devices.
  */
-class DeviceListAdapter extends BaseAdapter implements Observer {
+class DeviceListAdapter extends BaseAdapter implements Observer<List<DeviceFilterPair<?>>> {
     private final Context mContext;
 
     // List if pairs (display name, address)
@@ -56,12 +56,6 @@ class DeviceListAdapter extends BaseAdapter implements Observer {
     @Override
     public long getItemId(int position) {
         return position;
-    }
-
-    @Override
-    public void update(Observable o, Object arg) {
-        mDevices = CompanionDeviceDiscoveryService.getScanResults();
-        notifyDataSetChanged();
     }
 
     @Override
@@ -88,5 +82,11 @@ class DeviceListAdapter extends BaseAdapter implements Observer {
         //        : com.android.internal.R.drawable.ic_wifi_signal_3;
         // final Drawable icon = getTintedIcon(mResources, iconRes);
         // iconView.setImageDrawable(icon);
+    }
+
+    @Override
+    public void onChanged(List<DeviceFilterPair<?>> deviceFilterPairs) {
+        mDevices = deviceFilterPairs;
+        notifyDataSetChanged();
     }
 }

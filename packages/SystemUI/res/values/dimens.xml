@@ -1349,13 +1349,8 @@
     <dimen name="dream_overlay_notifications_drag_area_height">100dp</dimen>
 
     <!-- Dream overlay complications related dimensions -->
-    <dimen name="dream_overlay_complication_clock_time_padding_left">50dp</dimen>
     <dimen name="dream_overlay_complication_clock_time_text_size">72sp</dimen>
-    <dimen name="dream_overlay_complication_clock_date_padding_left">60dp</dimen>
-    <dimen name="dream_overlay_complication_clock_date_padding_bottom">50dp</dimen>
     <dimen name="dream_overlay_complication_clock_date_text_size">18sp</dimen>
-    <dimen name="dream_overlay_complication_weather_padding_left">20dp</dimen>
-    <dimen name="dream_overlay_complication_weather_padding_bottom">50dp</dimen>
     <dimen name="dream_overlay_complication_weather_text_size">18sp</dimen>
 
     <!-- The position of the end guide, which dream overlay complications can align their start with
@@ -1390,4 +1385,13 @@
     <item name="dream_overlay_bouncer_start_region_screen_percentage" format="float" type="dimen">
         .2
     </item>
+
+    <!-- The margins applied to the dream overlay container -->
+    <dimen name="dream_overlay_container_margin_start">0dp</dimen>
+    <dimen name="dream_overlay_container_margin_end">0dp</dimen>
+    <dimen name="dream_overlay_container_margin_top">0dp</dimen>
+    <dimen name="dream_overlay_container_margin_bottom">0dp</dimen>
+
+    <!-- The margin applied between complications -->
+    <dimen name="dream_overlay_complication_margin">0dp</dimen>
 </resources>

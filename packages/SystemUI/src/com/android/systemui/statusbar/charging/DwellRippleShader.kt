@@ -33,7 +33,7 @@ import android.util.MathUtils
  *
  * Modeled after frameworks/base/graphics/java/android/graphics/drawable/RippleShader.java.
  */
-class DwellRippleShader internal constructor() : RuntimeShader(SHADER, false) {
+class DwellRippleShader internal constructor() : RuntimeShader(SHADER) {
     companion object {
         private const val SHADER_UNIFORMS = """uniform vec2 in_origin;
                 uniform float in_time;

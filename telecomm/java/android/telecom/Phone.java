@@ -292,29 +292,6 @@ public final class Phone {
         }
     }
 
-    void internalOnCallPullFailed(String callId, @Call.Callback.PullFailedReason int reason) {
-        Call call = getCallById(callId);
-        if (call != null) {
-            call.internalOnCallPullFailed(reason);
-        }
-    }
-
-    void internalOnAnswerFailed(String callId, CallEndpoint callEndpoint,
-            @Call.Callback.AnswerFailedReason int reason) {
-        Call call = getCallById(callId);
-        if (call != null) {
-            call.internalOnAnswerFailed(callEndpoint, reason);
-        }
-    }
-
-    void internalOnCallPushFailed(String callId, CallEndpoint callEndpoint,
-            @Call.Callback.PushFailedReason int reason) {
-        Call call = getCallById(callId);
-        if (call != null) {
-            call.internalOnCallPushFailed(callEndpoint, reason);
-        }
-    }
-
     /**
      * Called to destroy the phone and cleanup any lingering calls.
      */

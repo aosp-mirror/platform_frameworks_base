@@ -531,12 +531,14 @@ final class NavigationBarController {
 
             if (drawLegacyNavigationBarBackground != mDrawLegacyNavigationBarBackground) {
                 mDrawLegacyNavigationBarBackground = drawLegacyNavigationBarBackground;
-                if (mDrawLegacyNavigationBarBackground) {
-                    mNavigationBarFrame.setBackgroundColor(Color.BLACK);
-                } else {
-                    mNavigationBarFrame.setBackground(null);
+                if (mNavigationBarFrame != null) {
+                    if (mDrawLegacyNavigationBarBackground) {
+                        mNavigationBarFrame.setBackgroundColor(Color.BLACK);
+                    } else {
+                        mNavigationBarFrame.setBackground(null);
+                    }
+                    scheduleRelayout();
                 }
-                scheduleRelayout();
                 onSystemBarAppearanceChanged(mAppearance);
             }
             return drawLegacyNavigationBarBackground;

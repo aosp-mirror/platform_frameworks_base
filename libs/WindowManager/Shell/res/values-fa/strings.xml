@@ -76,4 +76,10 @@
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"دوربین مشکل دارد؟\nبرای تنظیم مجدد اندازه ضربه بزنید"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"مشکل برطرف نشد؟\nبرای برگرداندن ضربه بزنید"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"دوربین مشکلی ندارد؟ برای بستن ضربه بزنید."</string>
+    <string name="letterbox_education_dialog_title" msgid="3924745395335329810">"بیشترین بهره را از <xliff:g id="APP_NAME">%s</xliff:g> ببرید"</string>
+    <string name="letterbox_education_screen_rotation_portrait_text" msgid="9005616635100891260">"صفحه‌نمایش را در جهت عمودی بچرخانید"</string>
+    <string name="letterbox_education_screen_rotation_landscape_text" msgid="7619609293250631225">"صفحه‌نمایش را در جهت افقی بچرخانید"</string>
+    <string name="letterbox_education_split_screen_text" msgid="3906978051324735033">"برای استفاده از صفحهٔ دونیمه، در برنامه‌ای دیگر بکشید"</string>
+    <string name="letterbox_education_reposition_text" msgid="8597800472592539168">"برای تغییر مکان، دوضربه بزنید"</string>
+    <string name="letterbox_education_got_it" msgid="4057634570866051177">"متوجه‌ام"</string>
 </resources>

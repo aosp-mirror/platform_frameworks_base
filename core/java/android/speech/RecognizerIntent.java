@@ -426,4 +426,16 @@ public class RecognizerIntent {
      *
      */
     public static final String EXTRA_PREFER_OFFLINE = "android.speech.extra.PREFER_OFFLINE";
+
+    /**
+     * Optional boolean, when true and supported by the recognizer implementation it will split
+     * the recognition results in segments, returned via
+     * {@link RecognitionListener#onSegmentResults(Bundle)} and terminate the session with
+     * {@link RecognitionListener#onEndOfSegmentedSession()}. There will be no call to
+     * {@link RecognitionListener#onResults(Bundle)}. Callers can use
+     * {@link #EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS} and
+     * {@link #EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS} to tune how long the segments
+     * will be. Defaults to false.
+     */
+    public static final String EXTRA_SEGMENT_SESSION = "android.speech.extra.SEGMENT_SESSION";
 }

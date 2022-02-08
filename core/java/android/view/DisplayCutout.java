@@ -260,7 +260,7 @@ public final class DisplayCutout {
         private final float mScale;
 
         public CutoutPathParserInfo(int displayWidth, int displayHeight, float density,
-                String cutoutSpec, @Rotation int rotation, float scale) {
+                @Nullable String cutoutSpec, @Rotation int rotation, float scale) {
             mDisplayWidth = displayWidth;
             mDisplayHeight = displayHeight;
             mDensity = density;
@@ -269,7 +269,7 @@ public final class DisplayCutout {
             mScale = scale;
         }
 
-        public CutoutPathParserInfo(CutoutPathParserInfo cutoutPathParserInfo) {
+        public CutoutPathParserInfo(@NonNull CutoutPathParserInfo cutoutPathParserInfo) {
             mDisplayWidth = cutoutPathParserInfo.mDisplayWidth;
             mDisplayHeight = cutoutPathParserInfo.mDisplayHeight;
             mDensity = cutoutPathParserInfo.mDensity;

@@ -19,6 +19,8 @@ package com.android.server.companion.virtual;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,6 +29,7 @@ import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertThrows;
@@ -117,6 +120,8 @@ public class VirtualDeviceManagerServiceTest {
         LocalServices.addService(DisplayManagerInternal.class, mDisplayManagerInternalMock);
 
         doNothing().when(mInputManagerInternalMock).setVirtualMousePointerDisplayId(anyInt());
+        doNothing().when(mInputManagerInternalMock).setPointerAcceleration(anyFloat(), anyInt());
+        doNothing().when(mInputManagerInternalMock).setPointerIconVisible(anyBoolean(), anyInt());
         LocalServices.removeServiceForTest(InputManagerInternal.class);
         LocalServices.addService(InputManagerInternal.class, mInputManagerInternalMock);
 
@@ -353,7 +358,7 @@ public class VirtualDeviceManagerServiceTest {
         mInputController.mInputDeviceDescriptors.put(BINDER,
                 new InputController.InputDeviceDescriptor(fd, () -> {}, /* type= */ 2,
                         /* displayId= */ 1, PHYS));
-        mInputController.mActivePointerDisplayId = 1;
+        doReturn(1).when(mInputManagerInternalMock).getVirtualMousePointerDisplayId();
         mDeviceImpl.sendButtonEvent(BINDER, new VirtualMouseButtonEvent.Builder()
                 .setButtonCode(buttonCode)
                 .setAction(action).build());
@@ -394,7 +399,7 @@ public class VirtualDeviceManagerServiceTest {
         mInputController.mInputDeviceDescriptors.put(BINDER,
                 new InputController.InputDeviceDescriptor(fd, () -> {}, /* type= */ 2,
                         /* displayId= */ 1, PHYS));
-        mInputController.mActivePointerDisplayId = 1;
+        doReturn(1).when(mInputManagerInternalMock).getVirtualMousePointerDisplayId();
         mDeviceImpl.sendRelativeEvent(BINDER, new VirtualMouseRelativeEvent.Builder()
                 .setRelativeX(x).setRelativeY(y).build());
         verify(mNativeWrapperMock).writeRelativeEvent(fd, x, y);
@@ -435,7 +440,7 @@ public class VirtualDeviceManagerServiceTest {
         mInputController.mInputDeviceDescriptors.put(BINDER,
                 new InputController.InputDeviceDescriptor(fd, () -> {}, /* type= */ 2,
                         /* displayId= */ 1, PHYS));
-        mInputController.mActivePointerDisplayId = 1;
+        doReturn(1).when(mInputManagerInternalMock).getVirtualMousePointerDisplayId();
         mDeviceImpl.sendScrollEvent(BINDER, new VirtualMouseScrollEvent.Builder()
                 .setXAxisMovement(x)
                 .setYAxisMovement(y).build());
@@ -507,5 +512,20 @@ public class VirtualDeviceManagerServiceTest {
                 .setPressure(pressure).setMajorAxisSize(majorAxisSize).build());
         verify(mNativeWrapperMock).writeTouchEvent(fd, pointerId, toolType, action, x, y, pressure,
                 majorAxisSize);
+    }
+
+    @Test
+    public void setShowPointerIcon_setsValueForAllDisplays() {
+        mDeviceImpl.mVirtualDisplayIds.add(1);
+        mDeviceImpl.mVirtualDisplayIds.add(2);
+        mDeviceImpl.mVirtualDisplayIds.add(3);
+        mDeviceImpl.createVirtualMouse(1, DEVICE_NAME, VENDOR_ID, PRODUCT_ID, BINDER);
+        mDeviceImpl.createVirtualMouse(2, DEVICE_NAME, VENDOR_ID, PRODUCT_ID, BINDER);
+        mDeviceImpl.createVirtualMouse(3, DEVICE_NAME, VENDOR_ID, PRODUCT_ID, BINDER);
+        mDeviceImpl.setShowPointerIcon(false);
+        verify(mInputManagerInternalMock, times(3)).setPointerIconVisible(eq(false), anyInt());
+        verify(mInputManagerInternalMock, never()).setPointerIconVisible(eq(true), anyInt());
+        mDeviceImpl.setShowPointerIcon(true);
+        verify(mInputManagerInternalMock, times(3)).setPointerIconVisible(eq(true), anyInt());
     }
 }

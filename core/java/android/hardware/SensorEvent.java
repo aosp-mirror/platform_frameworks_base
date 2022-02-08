@@ -779,6 +779,24 @@ public class SensorEvent {
      * </ul>
      * </p>
      *
+     * <h4>{@link android.hardware.Sensor#TYPE_HEADING Sensor.TYPE_HEADING}:</h4>
+     *
+     * A sensor of this type measures the direction in which the device is
+     * pointing relative to true north in degrees. The value must be between
+     * 0.0 (inclusive) and 360.0 (exclusive), with 0 indicating north, 90 east,
+     * 180 south, and 270 west.
+     *
+     * Accuracy is defined at 68% confidence. In the case where the underlying
+     * distribution is assumed Gaussian normal, this would be considered one
+     * standard deviation. For example, if heading returns 60 degrees, and
+     * accuracy returns 10 degrees, then there is a 68 percent probability of
+     * the true heading being between 50 degrees and 70 degrees.
+     *
+     * <ul>
+     *  <li> values[0]: Measured heading in degrees.</li>
+     *  <li> values[1]: Heading accuracy in degrees.</li>
+     * </ul>
+     *
      * @see GeomagneticField
      */
     public final float[] values;

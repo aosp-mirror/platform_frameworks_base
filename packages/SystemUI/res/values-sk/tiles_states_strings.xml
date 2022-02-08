@@ -171,9 +171,4 @@
     <item msgid="146088982397753810">"Vypnuté"</item>
     <item msgid="460891964396502657">"Zapnuté"</item>
   </string-array>
-  <string-array name="tile_states_fgsmanager">
-    <item msgid="3054341646818213094">"Nedostupné"</item>
-    <item msgid="5581384648880018330">"Vypnuté"</item>
-    <item msgid="8000850843692192257">"Zapnuté"</item>
-  </string-array>
 </resources>

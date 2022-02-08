@@ -7209,7 +7209,7 @@ public class Activity extends ContextThemeWrapper
             // Handle special cases
             switch (args[0]) {
                 case "--autofill":
-                    getAutofillClientController().dumpAutofillManager(prefix, writer);
+                    dumpAutofillManager(prefix, writer, args);
                     return;
                 case "--contentcapture":
                     dumpContentCaptureManager(prefix, writer);
@@ -7277,10 +7277,6 @@ public class Activity extends ContextThemeWrapper
 
         mHandler.getLooper().dump(new PrintWriterPrinter(writer), prefix);
 
-        getAutofillClientController().dumpAutofillManager(prefix, writer);
-        dumpContentCaptureManager(prefix, writer);
-        dumpUiTranslation(prefix, writer);
-
         ResourcesManager.getInstance().dump(prefix, writer);
 
         if (mDumpableContainer != null) {
@@ -7288,21 +7284,26 @@ public class Activity extends ContextThemeWrapper
         }
     }
 
-    void dumpContentCaptureManager(String prefix, PrintWriter writer) {
-        final ContentCaptureManager cm = getContentCaptureManager();
-        if (cm != null) {
-            cm.dump(prefix, writer);
-        } else {
-            writer.print(prefix); writer.println("No ContentCaptureManager");
-        }
+    private void dumpContentCaptureManager(String prefix, PrintWriter writer) {
+        getContentCaptureManager();
+        dumpLegacyDumpable(prefix, writer, ContentCaptureManager.DUMPABLE_NAME, /* args= */ null);
     }
 
-    void dumpUiTranslation(String prefix, PrintWriter writer) {
-        if (mUiTranslationController != null) {
-            mUiTranslationController.dump(prefix, writer);
-        } else {
-            writer.print(prefix); writer.println("No UiTranslationController");
+    private void dumpUiTranslation(String prefix, PrintWriter writer) {
+        dumpLegacyDumpable(prefix, writer, UiTranslationController.DUMPABLE_NAME, /* args= */ null);
+    }
+
+    private void dumpAutofillManager(String prefix, PrintWriter writer, String[] args) {
+        dumpLegacyDumpable(prefix, writer, AutofillClientController.DUMPABLE_NAME, args);
+    }
+
+    private void dumpLegacyDumpable(@NonNull String prefix, @NonNull PrintWriter writer,
+            @NonNull String dumpableName, @Nullable String[] args) {
+        if (mDumpableContainer == null) {
+            writer.print(prefix); writer.print("no "); writer.println(dumpableName);
+            return;
         }
+        mDumpableContainer.dumpOneDumpable(prefix, writer, dumpableName, args);
     }
 
     /**

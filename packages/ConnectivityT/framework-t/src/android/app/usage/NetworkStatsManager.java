@@ -27,7 +27,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.app.usage.NetworkStats.Bucket;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -192,9 +191,13 @@ public class NetworkStatsManager {
         }
     }
 
-    /** @hide */
+    /**
+     * Set poll force flag to indicate that calling any subsequent query method will force a stats
+     * poll.
+     * @hide
+     */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    @TestApi
+    @SystemApi(client = MODULE_LIBRARIES)
     public void setPollForce(boolean pollForce) {
         if (pollForce) {
             mFlags |= FLAG_POLL_FORCE;

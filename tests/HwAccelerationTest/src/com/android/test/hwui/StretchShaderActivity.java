@@ -69,7 +69,7 @@ public class StretchShaderActivity extends Activity {
         linearLayout.setOrientation(LinearLayout.VERTICAL);
 
         mBitmap = ((BitmapDrawable) getDrawable(R.drawable.sunset1)).getBitmap();
-        mRuntimeShader = new RuntimeShader(SKSL, false);
+        mRuntimeShader = new RuntimeShader(SKSL);
 
         BitmapShader bitmapShader = new BitmapShader(mBitmap, Shader.TileMode.CLAMP,
                 Shader.TileMode.CLAMP);

@@ -1345,7 +1345,7 @@ public final class ViewRootImpl implements ViewParent,
     private void setTag() {
         final String[] split = mWindowAttributes.getTitle().toString().split("\\.");
         if (split.length > 0) {
-            mTag = TAG + "[" + split[split.length - 1] + "]";
+            mTag =  "VRI[" + split[split.length - 1] + "]";
         }
     }
 

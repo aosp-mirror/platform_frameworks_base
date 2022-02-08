@@ -591,7 +591,9 @@ final class DeletePackageHelper {
         if (outInfo != null) {
             // Delete the updated package
             outInfo.mIsRemovedPackageSystemUpdate = true;
-            outInfo.mAppIdChanging = disabledPs.getAppId() != deletedPs.getAppId();
+            if (disabledPs.getAppId() != deletedPs.getAppId()) {
+                outInfo.mNewAppId = disabledPs.getAppId();
+            }
         }
 
         if (disabledPs.getVersionCode() < deletedPs.getVersionCode()

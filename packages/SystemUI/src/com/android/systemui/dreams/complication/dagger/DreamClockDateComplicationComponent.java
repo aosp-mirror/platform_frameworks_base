@@ -104,8 +104,7 @@ public interface DreamClockDateComplicationComponent {
                     ComplicationLayoutParams.POSITION_BOTTOM
                             | ComplicationLayoutParams.POSITION_START,
                     ComplicationLayoutParams.DIRECTION_END,
-                    INSERT_ORDER_WEIGHT,
-                    true);
+                    INSERT_ORDER_WEIGHT);
         }
     }
 }

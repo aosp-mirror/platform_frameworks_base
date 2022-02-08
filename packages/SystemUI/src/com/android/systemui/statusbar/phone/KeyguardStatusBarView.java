@@ -40,6 +40,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
@@ -67,8 +69,10 @@ public class KeyguardStatusBarView extends RelativeLayout {
     private ImageView mMultiUserAvatar;
     private BatteryMeterView mBatteryView;
     private StatusIconContainer mStatusIconContainer;
+    private ViewGroup mUserSwitcherContainer;
 
     private boolean mKeyguardUserSwitcherEnabled;
+    private boolean mKeyguardUserAvatarEnabled;
 
     private boolean mIsPrivacyDotEnabled;
     private int mSystemIconsSwitcherHiddenExpandedMargin;
@@ -111,8 +115,13 @@ public class KeyguardStatusBarView extends RelativeLayout {
         mCutoutSpace = findViewById(R.id.cutout_space_view);
         mStatusIconArea = findViewById(R.id.status_icon_area);
         mStatusIconContainer = findViewById(R.id.statusIcons);
+        mUserSwitcherContainer = findViewById(R.id.user_switcher_container);
         mIsPrivacyDotEnabled = mContext.getResources().getBoolean(R.bool.config_enablePrivacyDot);
         loadDimens();
+    }
+
+    public ViewGroup getUserSwitcherContainer() {
+        return mUserSwitcherContainer;
     }
 
     @Override
@@ -186,6 +195,17 @@ public class KeyguardStatusBarView extends RelativeLayout {
     }
 
     private void updateVisibilities() {
+        // Multi user avatar is disabled in favor of the user switcher chip
+        if (!mKeyguardUserAvatarEnabled) {
+            if (mMultiUserAvatar.getParent() == mStatusIconArea) {
+                mStatusIconArea.removeView(mMultiUserAvatar);
+            } else if (mMultiUserAvatar.getParent() != null) {
+                getOverlay().remove(mMultiUserAvatar);
+            }
+
+            return;
+        }
+
         if (mMultiUserAvatar.getParent() != mStatusIconArea
                 && !mKeyguardUserSwitcherEnabled) {
             if (mMultiUserAvatar.getParent() != null) {
@@ -346,6 +366,16 @@ public class KeyguardStatusBarView extends RelativeLayout {
         mKeyguardUserSwitcherEnabled = enabled;
     }
 
+    void setKeyguardUserAvatarEnabled(boolean enabled) {
+        mKeyguardUserAvatarEnabled = enabled;
+        updateVisibilities();
+    }
+
+    @VisibleForTesting
+    boolean isKeyguardUserAvatarEnabled() {
+        return mKeyguardUserAvatarEnabled;
+    }
+
     private void animateNextLayoutChange() {
         final int systemIconsCurrentX = mSystemIconsContainer.getLeft();
         final boolean userAvatarVisible = mMultiUserAvatar.getParent() == mStatusIconArea;
@@ -416,9 +446,14 @@ public class KeyguardStatusBarView extends RelativeLayout {
 
     /** Should only be called from {@link KeyguardStatusBarViewController}. */
     void onOverlayChanged() {
-        mCarrierLabel.setTextAppearance(
-                Utils.getThemeAttr(mContext, com.android.internal.R.attr.textAppearanceSmall));
+        int theme = Utils.getThemeAttr(mContext, com.android.internal.R.attr.textAppearanceSmall);
+        mCarrierLabel.setTextAppearance(theme);
         mBatteryView.updatePercentView();
+
+        TextView userSwitcherName = mUserSwitcherContainer.findViewById(R.id.current_user_name);
+        if (userSwitcherName != null) {
+            userSwitcherName.setTextAppearance(theme);
+        }
     }
 
     private void updateIconsAndTextColors(StatusBarIconController.TintedIconManager iconManager) {
@@ -429,6 +464,14 @@ public class KeyguardStatusBarView extends RelativeLayout {
                 R.color.light_mode_icon_color_single_tone);
         float intensity = textColor == Color.WHITE ? 0 : 1;
         mCarrierLabel.setTextColor(iconColor);
+
+        TextView userSwitcherName = mUserSwitcherContainer.findViewById(R.id.current_user_name);
+        if (userSwitcherName != null) {
+            userSwitcherName.setTextColor(Utils.getColorStateListDefaultColor(
+                    mContext,
+                    R.color.light_mode_icon_color_single_tone));
+        }
+
         if (iconManager != null) {
             iconManager.setTint(iconColor);
         }

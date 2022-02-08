@@ -47,6 +47,9 @@ import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserInfoTracker;
+import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherController;
+import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherFeatureController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -95,6 +98,9 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final StatusBarContentInsetsProvider mInsetsProvider;
     private final UserManager mUserManager;
+    private final StatusBarUserSwitcherFeatureController mFeatureController;
+    private final StatusBarUserSwitcherController mUserSwitcherController;
+    private final StatusBarUserInfoTracker mStatusBarUserInfoTracker;
 
     private final ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
@@ -246,7 +252,10 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
             BiometricUnlockController biometricUnlockController,
             SysuiStatusBarStateController statusBarStateController,
             StatusBarContentInsetsProvider statusBarContentInsetsProvider,
-            UserManager userManager
+            UserManager userManager,
+            StatusBarUserSwitcherFeatureController featureController,
+            StatusBarUserSwitcherController userSwitcherController,
+            StatusBarUserInfoTracker statusBarUserInfoTracker
     ) {
         super(view);
         mCarrierTextController = carrierTextController;
@@ -265,6 +274,9 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         mStatusBarStateController = statusBarStateController;
         mInsetsProvider = statusBarContentInsetsProvider;
         mUserManager = userManager;
+        mFeatureController = featureController;
+        mUserSwitcherController = userSwitcherController;
+        mStatusBarUserInfoTracker = statusBarUserInfoTracker;
 
         mFirstBypassAttempt = mKeyguardBypassController.getBypassEnabled();
         mKeyguardStateController.addCallback(
@@ -286,6 +298,10 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
                 r.getString(com.android.internal.R.string.status_bar_call_strength)));
         mNotificationsHeaderCollideDistance = r.getDimensionPixelSize(
                 R.dimen.header_notifications_collide_distance);
+
+        mView.setKeyguardUserAvatarEnabled(
+                !mFeatureController.isStatusBarUserSwitcherFeatureEnabled());
+        mFeatureController.addCallback(enabled -> mView.setKeyguardUserAvatarEnabled(!enabled));
     }
 
     @Override
@@ -293,6 +309,7 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
         super.onInit();
         mCarrierTextController.init();
         mBatteryMeterViewController.init();
+        mUserSwitcherController.init();
     }
 
     @Override
@@ -334,6 +351,9 @@ public class KeyguardStatusBarViewController extends ViewController<KeyguardStat
     /** Sets whether user switcher is enabled. */
     public void setKeyguardUserSwitcherEnabled(boolean enabled) {
         mView.setKeyguardUserSwitcherEnabled(enabled);
+        // We don't have a listener for when the user switcher setting changes, so this is
+        // where we re-check the state
+        mStatusBarUserInfoTracker.checkEnabled();
     }
 
     /** Sets whether this controller should listen to battery updates. */

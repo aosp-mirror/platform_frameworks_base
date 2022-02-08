@@ -43,7 +43,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -572,7 +571,7 @@ public final class Call {
         public static final int CAPABILITY_REMOTE_PARTY_SUPPORTS_RTT = 0x10000000;
 
         //******************************************************************************************
-        // Next CAPABILITY value: 0x40000000
+        // Next CAPABILITY value: 0x20000000
         //******************************************************************************************
 
         /**
@@ -734,8 +733,6 @@ public final class Call {
         private final String mContactDisplayName;
         private final @CallDirection int mCallDirection;
         private final @Connection.VerificationStatus int mCallerNumberVerificationStatus;
-        private final CallEndpoint mActiveCallEndpoint;
-        private final Set<CallEndpoint> mAvailableCallEndpoint;
 
         /**
          * Whether the supplied capabilities  supports the specified capability.
@@ -1119,52 +1116,32 @@ public final class Call {
             return mCallerNumberVerificationStatus;
         }
 
-        /**
-         * Return set of available {@link CallEndpoint} which can be used to push or answer this
-         * call via {@link #pushCall(CallEndpoint)} or {@link #answerCall(CallEndpoint, int)}.
-         * @return Set of available call endpoints.
-         */
-        public @NonNull Set<CallEndpoint> getAvailableCallEndpoints() {
-            return mAvailableCallEndpoint;
-        }
-
-        /**
-         * Return the {@link CallEndpoint} which is currently active for a call. If the call does
-         * not take place via any {@link CallEndpoint}, return {@code null}.
-         * @return Current active endpoint.
-         */
-        public @Nullable CallEndpoint getActiveCallEndpoint() {
-            return mActiveCallEndpoint;
-        }
-
         @Override
         public boolean equals(Object o) {
             if (o instanceof Details) {
                 Details d = (Details) o;
                 return
-                        Objects.equals(mState, d.mState)
-                                && Objects.equals(mHandle, d.mHandle)
-                                && Objects.equals(mHandlePresentation, d.mHandlePresentation)
-                                && Objects.equals(mCallerDisplayName, d.mCallerDisplayName)
-                                && Objects.equals(mCallerDisplayNamePresentation,
-                                d.mCallerDisplayNamePresentation)
-                                && Objects.equals(mAccountHandle, d.mAccountHandle)
-                                && Objects.equals(mCallCapabilities, d.mCallCapabilities)
-                                && Objects.equals(mCallProperties, d.mCallProperties)
-                                && Objects.equals(mDisconnectCause, d.mDisconnectCause)
-                                && Objects.equals(mConnectTimeMillis, d.mConnectTimeMillis)
-                                && Objects.equals(mGatewayInfo, d.mGatewayInfo)
-                                && Objects.equals(mVideoState, d.mVideoState)
-                                && Objects.equals(mStatusHints, d.mStatusHints)
-                                && areBundlesEqual(mExtras, d.mExtras)
-                                && areBundlesEqual(mIntentExtras, d.mIntentExtras)
-                                && Objects.equals(mCreationTimeMillis, d.mCreationTimeMillis)
-                                && Objects.equals(mContactDisplayName, d.mContactDisplayName)
-                                && Objects.equals(mCallDirection, d.mCallDirection)
-                                && Objects.equals(mCallerNumberVerificationStatus,
-                                d.mCallerNumberVerificationStatus)
-                                && Objects.equals(mActiveCallEndpoint, d.mActiveCallEndpoint)
-                                && Objects.equals(mAvailableCallEndpoint, d.mAvailableCallEndpoint);
+                        Objects.equals(mState, d.mState) &&
+                        Objects.equals(mHandle, d.mHandle) &&
+                        Objects.equals(mHandlePresentation, d.mHandlePresentation) &&
+                        Objects.equals(mCallerDisplayName, d.mCallerDisplayName) &&
+                        Objects.equals(mCallerDisplayNamePresentation,
+                                d.mCallerDisplayNamePresentation) &&
+                        Objects.equals(mAccountHandle, d.mAccountHandle) &&
+                        Objects.equals(mCallCapabilities, d.mCallCapabilities) &&
+                        Objects.equals(mCallProperties, d.mCallProperties) &&
+                        Objects.equals(mDisconnectCause, d.mDisconnectCause) &&
+                        Objects.equals(mConnectTimeMillis, d.mConnectTimeMillis) &&
+                        Objects.equals(mGatewayInfo, d.mGatewayInfo) &&
+                        Objects.equals(mVideoState, d.mVideoState) &&
+                        Objects.equals(mStatusHints, d.mStatusHints) &&
+                        areBundlesEqual(mExtras, d.mExtras) &&
+                        areBundlesEqual(mIntentExtras, d.mIntentExtras) &&
+                        Objects.equals(mCreationTimeMillis, d.mCreationTimeMillis) &&
+                        Objects.equals(mContactDisplayName, d.mContactDisplayName) &&
+                        Objects.equals(mCallDirection, d.mCallDirection) &&
+                        Objects.equals(mCallerNumberVerificationStatus,
+                                d.mCallerNumberVerificationStatus);
             }
             return false;
         }
@@ -1213,9 +1190,7 @@ public final class Call {
                 long creationTimeMillis,
                 String contactDisplayName,
                 int callDirection,
-                int callerNumberVerificationStatus,
-                CallEndpoint activeCallEndpoint,
-                Set<CallEndpoint> availableCallEndpoints) {
+                int callerNumberVerificationStatus) {
             mState = state;
             mTelecomCallId = telecomCallId;
             mHandle = handle;
@@ -1236,8 +1211,6 @@ public final class Call {
             mContactDisplayName = contactDisplayName;
             mCallDirection = callDirection;
             mCallerNumberVerificationStatus = callerNumberVerificationStatus;
-            mActiveCallEndpoint = activeCallEndpoint;
-            mAvailableCallEndpoint = availableCallEndpoints;
         }
 
         /** {@hide} */
@@ -1262,9 +1235,7 @@ public final class Call {
                     parcelableCall.getCreationTimeMillis(),
                     parcelableCall.getContactDisplayName(),
                     parcelableCall.getCallDirection(),
-                    parcelableCall.getCallerNumberVerificationStatus(),
-                    parcelableCall.getActiveCallEndpoint(),
-                    parcelableCall.getAvailableCallEndpoints());
+                    parcelableCall.getCallerNumberVerificationStatus());
         }
 
         @Override
@@ -1286,10 +1257,6 @@ public final class Call {
             sb.append(capabilitiesToString(mCallCapabilities));
             sb.append(", props: ");
             sb.append(propertiesToString(mCallProperties));
-            sb.append(", activeEndpoint: ");
-            sb.append(mActiveCallEndpoint);
-            sb.append(", availableEndpoints: ");
-            sb.append(mAvailableCallEndpoint);
             sb.append("]");
             return sb.toString();
         }
@@ -1387,121 +1354,6 @@ public final class Call {
          * {@link #handoverTo(PhoneAccountHandle, int, Bundle)}.
          */
         public static final int HANDOVER_FAILURE_UNKNOWN = 5;
-
-        /**
-         * @hide
-         */
-        @IntDef(prefix = { "PUSH_FAILED_" },
-                value = {PUSH_FAILED_UNKNOWN_REASON, PUSH_FAILED_ENDPOINT_UNAVAILABLE,
-                PUSH_FAILED_ENDPOINT_TIMEOUT, PUSH_FAILED_ENDPOINT_REJECTED})
-        @Retention(RetentionPolicy.SOURCE)
-        public @interface PushFailedReason {}
-
-        /**
-         * Answer failure reason returned via {@link #onAnswerFailed(CallEndpoint, int)} when a push
-         * fails due to unknown reason.
-         * <p>
-         * For more information on push call, see {@link #pushCall(CallEndpoint)}.
-         */
-        public static final int PUSH_FAILED_UNKNOWN_REASON = 0;
-
-        /**
-         * Push failure reason returned via {@link #onCallPushFailed(CallEndpoint, int)} when a push
-         * fails due to requested endpoint is unavailable.
-         * <p>
-         * For more information on push call, see {@link #pushCall(CallEndpoint)}.
-         */
-        public static final int PUSH_FAILED_ENDPOINT_UNAVAILABLE = 1;
-
-        /**
-         * Push failure reason returned via {@link #onCallPushFailed(CallEndpoint, int)} when a push
-         * fails due to requested endpoint takes too long to handle the request.
-         * <p>
-         * For more information on push call, see {@link #pushCall(CallEndpoint)}.
-         */
-        public static final int PUSH_FAILED_ENDPOINT_TIMEOUT = 2;
-
-        /**
-         * Push failure reason returned via {@link #onCallPushFailed(CallEndpoint, int)} when a push
-         * fails due to endpoint rejected the request.
-         * <p>
-         * For more information on push call, see {@link #pushCall(CallEndpoint)}.
-         */
-        public static final int PUSH_FAILED_ENDPOINT_REJECTED = 3;
-
-        /**
-         * @hide
-         */
-        @IntDef(prefix = { "ANSWER_FAILED_" },
-                value = {ANSWER_FAILED_UNKNOWN_REASON, ANSWER_FAILED_ENDPOINT_UNAVAILABLE,
-                        ANSWER_FAILED_ENDPOINT_TIMEOUT, ANSWER_FAILED_ENDPOINT_REJECTED})
-        @Retention(RetentionPolicy.SOURCE)
-        public @interface AnswerFailedReason {}
-
-        /**
-         * Answer failure reason returned via {@link #onAnswerFailed(CallEndpoint, int)} when it
-         * fails due to unknown reason.
-         * <p>
-         * For more information on answer call, see {@link #answerCall(CallEndpoint, int)}.
-         */
-        public static final int ANSWER_FAILED_UNKNOWN_REASON = 0;
-
-        /**
-         * Answer failure reason returned via {@link #onAnswerFailed(CallEndpoint, int)} when it
-         * fails due to requested endpoint is unavailable.
-         * <p>
-         * For more information on answer call, see {@link #answerCall(CallEndpoint, int)}.
-         */
-        public static final int ANSWER_FAILED_ENDPOINT_UNAVAILABLE = 1;
-
-        /**
-         * Answer failure reason returned via {@link #onAnswerFailed(CallEndpoint, int)} when it
-         * fails due to requested endpoint takes too long to handle the request.
-         * <p>
-         * For more information on answer call, see {@link #answerCall(CallEndpoint, int)}.
-         */
-        public static final int ANSWER_FAILED_ENDPOINT_TIMEOUT = 2;
-
-        /**
-         * Answer failure reason returned via {@link #onAnswerFailed(CallEndpoint, int)} when it
-         * fails due to endpoint rejected the request.
-         * <p>
-         * For more information on answer call, see {@link #answerCall(CallEndpoint, int)}.
-         */
-        public static final int ANSWER_FAILED_ENDPOINT_REJECTED = 3;
-
-        /**
-         * @hide
-         */
-        @IntDef(prefix = { "PULL_FAILED_" },
-                value = {PULL_FAILED_UNKNOWN_REASON, PULL_FAILED_ENDPOINT_TIMEOUT,
-                        PULL_FAILED_ENDPOINT_REJECTED})
-        @Retention(RetentionPolicy.SOURCE)
-        public @interface PullFailedReason {}
-
-        /**
-         * Pull failure reason returned via {@link #onCallPullFailed(int)} when it fails due to
-         * unknown reason.
-         * <p>
-         * For more information on pull call, see {@link #pullCall()}.
-         */
-        public static final int PULL_FAILED_UNKNOWN_REASON = 0;
-
-        /**
-         * Pull failure reason returned via {@link #onCallPullFailed(int)} when it fails due to
-         * requested endpoint takes too long to handle the request.
-         * <p>
-         * For more information on pull call, see {@link #pullCall()}.
-         */
-        public static final int PULL_FAILED_ENDPOINT_TIMEOUT = 1;
-
-        /**
-         * Pull failure reason returned via {@link #onCallPullFailed(int)} when it fails due to
-         * endpoint rejected the request.
-         * <p>
-         * For more information on pull call, see {@link #pullCall()}.
-         */
-        public static final int PULL_FAILED_ENDPOINT_REJECTED = 2;
 
         /**
          * Invoked when the state of this {@code Call} has changed. See {@link #getState()}.
@@ -1663,31 +1515,6 @@ public final class Call {
          * @param failureReason Error reason for failure.
          */
         public void onHandoverFailed(Call call, @HandoverFailureErrors int failureReason) {}
-
-        /**
-         * Invoked when call push request via {@link #pushCall(CallEndpoint)} has failed.
-         *
-         * @param endpoint The endpoint requested to push the call to.
-         * @param reason Failed reason.
-         */
-        public void onCallPushFailed(@NonNull CallEndpoint endpoint, @PushFailedReason int reason)
-        {}
-
-        /**
-         * Invoked when answer call request via {@link #answerCall(CallEndpoint, int)} has failed.
-         *
-         * @param endpoint The endpoint requested to answer the call.
-         * @param reason Failed reason
-         */
-        public void onAnswerFailed(@NonNull CallEndpoint endpoint, @AnswerFailedReason int reason)
-        {}
-
-        /**
-         * Invoked when pull call request via {@link #pullCall()} has failed.
-         *
-         * @param reason Failed reason
-         */
-        public void onCallPullFailed(@PullFailedReason int reason) {}
     }
 
     /**
@@ -2109,21 +1936,8 @@ public final class Call {
     }
 
     /**
-     * @deprecated Use {@link #pullCall()} instead
-     */
-    @Deprecated
-    public void pullExternalCall() {
-        // If this isn't an external call, ignore the request.
-        if (!mDetails.hasProperty(Details.PROPERTY_IS_EXTERNAL_CALL)) {
-            return;
-        }
-
-        mInCallAdapter.pullExternalCall(mTelecomCallId);
-    }
-
-    /**
      * Initiates a request to the {@link ConnectionService} to pull an external call to the local
-     * device, or to bring a tethered call back to the local device.
+     * device.
      * <p>
      * Calls to this method are ignored if the call does not have the
      * {@link Call.Details#PROPERTY_IS_EXTERNAL_CALL} property set.
@@ -2132,34 +1946,13 @@ public final class Call {
      * {@link TelecomManager#METADATA_INCLUDE_EXTERNAL_CALLS} metadata set to {@code true}
      * in its manifest.
      */
-    public void pullCall() {
-        pullExternalCall();
-    }
+    public void pullExternalCall() {
+        // If this isn't an external call, ignore the request.
+        if (!mDetails.hasProperty(Details.PROPERTY_IS_EXTERNAL_CALL)) {
+            return;
+        }
 
-    /**
-     * Initiates a request to the {@link ConnectionService} to push a call to a
-     * {@link CallEndpoint}.
-     * <p>
-     *
-     * @param endpoint The call endpoint to which the call will be pushed.
-     */
-    public void pushCall(@NonNull CallEndpoint endpoint) {
-        mInCallAdapter.pushCall(mTelecomCallId, endpoint);
-    }
-
-    /**
-     * Initiates a request to the {@link ConnectionService} to answer a call to a
-     * {@link CallEndpoint}.
-     * <p>
-     * Calls to this method are ignored if the call does not have the
-     * {@link Call.Details#CAPABILITY_CAN_PULL_CALL} capability set.
-     *
-     * @param endpoint The call endpoint on which to answer the call.
-     * @param videoState The video state in which to answer the call.
-     */
-    public void answerCall(@NonNull CallEndpoint endpoint,
-            @VideoProfile.VideoState int videoState) {
-        mInCallAdapter.answerCall(mTelecomCallId, endpoint, videoState);
+        mInCallAdapter.pullExternalCall(mTelecomCallId);
     }
 
     /**
@@ -2840,9 +2633,7 @@ public final class Call {
                         mDetails.getCreationTimeMillis(),
                         mDetails.getContactDisplayName(),
                         mDetails.getCallDirection(),
-                        mDetails.getCallerNumberVerificationStatus(),
-                        mDetails.getActiveCallEndpoint(),
-                        mDetails.getAvailableCallEndpoints()
+                        mDetails.getCallerNumberVerificationStatus()
                         );
                 fireDetailsChanged(mDetails);
             }
@@ -2884,37 +2675,11 @@ public final class Call {
     }
 
     /** {@hide} */
-    void internalOnHandoverComplete() {
+    final void internalOnHandoverComplete() {
         for (CallbackRecord<Callback> record : mCallbackRecords) {
             final Call call = this;
             final Callback callback = record.getCallback();
             record.getHandler().post(() -> callback.onHandoverComplete(call));
-        }
-    }
-
-    /** {@hide} */
-    void internalOnCallPullFailed(@Callback.PullFailedReason int reason) {
-        for (CallbackRecord<Callback> record : mCallbackRecords) {
-            final Callback callback = record.getCallback();
-            record.getHandler().post(() -> callback.onCallPullFailed(reason));
-        }
-    }
-
-    /** {@hide} */
-    void internalOnCallPushFailed(CallEndpoint callEndpoint,
-            @Callback.PushFailedReason int reason) {
-        for (CallbackRecord<Callback> record : mCallbackRecords) {
-            final Callback callback = record.getCallback();
-            record.getHandler().post(() -> callback.onCallPushFailed(callEndpoint, reason));
-        }
-    }
-
-    /** {@hide} */
-    void internalOnAnswerFailed(CallEndpoint callEndpoint,
-            @Callback.AnswerFailedReason int reason) {
-        for (CallbackRecord<Callback> record : mCallbackRecords) {
-            final Callback callback = record.getCallback();
-            record.getHandler().post(() -> callback.onAnswerFailed(callEndpoint, reason));
         }
     }
 

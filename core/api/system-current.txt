@@ -2538,13 +2538,6 @@ package android.app.usage {
     field public static final String SERVICE_INTERFACE = "android.app.usage.CacheQuotaService";
   }
 
-  public class NetworkStatsManager {
-    method @NonNull @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public android.net.NetworkStats getMobileUidStats();
-    method @NonNull @RequiresPermission(android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK) public android.net.NetworkStats getWifiUidStats();
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STATS_PROVIDER, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void registerNetworkStatsProvider(@NonNull String, @NonNull android.net.netstats.provider.NetworkStatsProvider);
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STATS_PROVIDER, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void unregisterNetworkStatsProvider(@NonNull android.net.netstats.provider.NetworkStatsProvider);
-  }
-
   public static final class UsageEvents.Event {
     method public int getInstanceId();
     method @Nullable public String getNotificationChannelId();
@@ -2768,6 +2761,7 @@ package android.companion.virtual {
     method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public android.hardware.input.VirtualTouchscreen createVirtualTouchscreen(@NonNull android.hardware.display.VirtualDisplay, @NonNull String, int, int);
     method public void launchPendingIntent(int, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull android.companion.virtual.VirtualDeviceManager.LaunchCallback);
     method public void removeActivityListener(@NonNull android.companion.virtual.VirtualDeviceManager.ActivityListener);
+    method @NonNull @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setShowPointerIcon(boolean);
   }
 
   public final class VirtualDeviceParams implements android.os.Parcelable {
@@ -7072,8 +7066,8 @@ package android.media.tv.tuner.filter {
     method @Nullable public String acquireSharedFilterToken();
     method public void close();
     method public int configure(@NonNull android.media.tv.tuner.filter.FilterConfiguration);
+    method public int delayCallbackForDurationMillis(long);
     method public int delayCallbackUntilBytesAccumulated(int);
-    method public int delayCallbackUntilMillisElapsed(long);
     method public int flush();
     method public void freeSharedFilterToken(@NonNull String);
     method @Deprecated public int getId();
@@ -8364,7 +8358,10 @@ package android.metrics {
 package android.net {
 
   public class EthernetManager {
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.MANAGE_ETHERNET_NETWORKS}) public void connectNetwork(@NonNull String, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.BiConsumer<android.net.Network,android.net.EthernetNetworkManagementException>);
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.MANAGE_ETHERNET_NETWORKS}) public void disconnectNetwork(@NonNull String, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.BiConsumer<android.net.Network,android.net.EthernetNetworkManagementException>);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public android.net.EthernetManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull java.util.concurrent.Executor, @NonNull android.net.EthernetManager.TetheredInterfaceCallback);
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.MANAGE_ETHERNET_NETWORKS}) public void updateConfiguration(@NonNull String, @NonNull android.net.EthernetNetworkUpdateRequest, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.BiConsumer<android.net.Network,android.net.EthernetNetworkManagementException>);
   }
 
   public static interface EthernetManager.TetheredInterfaceCallback {
@@ -8374,6 +8371,22 @@ package android.net {
 
   public static class EthernetManager.TetheredInterfaceRequest {
     method public void release();
+  }
+
+  public final class EthernetNetworkManagementException extends java.lang.RuntimeException implements android.os.Parcelable {
+    ctor public EthernetNetworkManagementException(@NonNull String);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkManagementException> CREATOR;
+  }
+
+  public final class EthernetNetworkUpdateRequest implements android.os.Parcelable {
+    ctor public EthernetNetworkUpdateRequest(@NonNull android.net.StaticIpConfiguration, @NonNull android.net.NetworkCapabilities);
+    method public int describeContents();
+    method @NonNull public android.net.StaticIpConfiguration getIpConfig();
+    method @NonNull public android.net.NetworkCapabilities getNetworkCapabilities();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkUpdateRequest> CREATOR;
   }
 
   public final class MatchAllNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
@@ -8437,48 +8450,6 @@ package android.net {
     field public static final String PERMISSION_MAINLINE_NETWORK_STACK = "android.permission.MAINLINE_NETWORK_STACK";
   }
 
-  public final class NetworkStats implements java.lang.Iterable<android.net.NetworkStats.Entry> android.os.Parcelable {
-    ctor public NetworkStats(long, int);
-    method @NonNull public android.net.NetworkStats add(@NonNull android.net.NetworkStats);
-    method @NonNull public android.net.NetworkStats addEntry(@NonNull android.net.NetworkStats.Entry);
-    method public int describeContents();
-    method @NonNull public java.util.Iterator<android.net.NetworkStats.Entry> iterator();
-    method @NonNull public android.net.NetworkStats subtract(@NonNull android.net.NetworkStats);
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkStats> CREATOR;
-    field public static final int DEFAULT_NETWORK_ALL = -1; // 0xffffffff
-    field public static final int DEFAULT_NETWORK_NO = 0; // 0x0
-    field public static final int DEFAULT_NETWORK_YES = 1; // 0x1
-    field public static final String IFACE_VT = "vt_data0";
-    field public static final int METERED_ALL = -1; // 0xffffffff
-    field public static final int METERED_NO = 0; // 0x0
-    field public static final int METERED_YES = 1; // 0x1
-    field public static final int ROAMING_ALL = -1; // 0xffffffff
-    field public static final int ROAMING_NO = 0; // 0x0
-    field public static final int ROAMING_YES = 1; // 0x1
-    field public static final int SET_ALL = -1; // 0xffffffff
-    field public static final int SET_DEFAULT = 0; // 0x0
-    field public static final int SET_FOREGROUND = 1; // 0x1
-    field public static final int TAG_NONE = 0; // 0x0
-    field public static final int UID_ALL = -1; // 0xffffffff
-    field public static final int UID_TETHERING = -5; // 0xfffffffb
-  }
-
-  public static class NetworkStats.Entry {
-    ctor public NetworkStats.Entry(@Nullable String, int, int, int, int, int, int, long, long, long, long, long);
-    method public int getDefaultNetwork();
-    method public int getMetered();
-    method public long getOperations();
-    method public int getRoaming();
-    method public long getRxBytes();
-    method public long getRxPackets();
-    method public int getSet();
-    method public int getTag();
-    method public long getTxBytes();
-    method public long getTxPackets();
-    method public int getUid();
-  }
-
   @Deprecated public class RssiCurve implements android.os.Parcelable {
     ctor @Deprecated public RssiCurve(int, int, byte[]);
     ctor @Deprecated public RssiCurve(int, int, byte[], int);
@@ -8508,19 +8479,6 @@ package android.net {
     field @Deprecated public final boolean meteredHint;
     field @Deprecated public final android.net.NetworkKey networkKey;
     field @Deprecated public final android.net.RssiCurve rssiCurve;
-  }
-
-  public class TrafficStats {
-    method public static void setThreadStatsTagApp();
-    method public static void setThreadStatsTagBackup();
-    method public static void setThreadStatsTagDownload();
-    method public static void setThreadStatsTagRestore();
-    field public static final int TAG_NETWORK_STACK_IMPERSONATION_RANGE_END = -113; // 0xffffff8f
-    field public static final int TAG_NETWORK_STACK_IMPERSONATION_RANGE_START = -128; // 0xffffff80
-    field public static final int TAG_NETWORK_STACK_RANGE_END = -257; // 0xfffffeff
-    field public static final int TAG_NETWORK_STACK_RANGE_START = -768; // 0xfffffd00
-    field public static final int TAG_SYSTEM_IMPERSONATION_RANGE_END = -241; // 0xffffff0f
-    field public static final int TAG_SYSTEM_IMPERSONATION_RANGE_START = -256; // 0xffffff00
   }
 
   public abstract class Uri implements java.lang.Comparable<android.net.Uri> android.os.Parcelable {
@@ -8699,23 +8657,6 @@ package android.net.metrics {
     method @Deprecated @NonNull public android.net.metrics.ValidationProbeEvent.Builder setDurationMs(long);
     method @Deprecated @NonNull public android.net.metrics.ValidationProbeEvent.Builder setProbeType(int, boolean);
     method @Deprecated @NonNull public android.net.metrics.ValidationProbeEvent.Builder setReturnCode(int);
-  }
-
-}
-
-package android.net.netstats.provider {
-
-  public abstract class NetworkStatsProvider {
-    ctor public NetworkStatsProvider();
-    method public void notifyAlertReached();
-    method public void notifyLimitReached();
-    method public void notifyStatsUpdated(int, @NonNull android.net.NetworkStats, @NonNull android.net.NetworkStats);
-    method public void notifyWarningReached();
-    method public abstract void onRequestStatsUpdate(int);
-    method public abstract void onSetAlert(long);
-    method public abstract void onSetLimit(@NonNull String, long);
-    method public void onSetWarningAndLimit(@NonNull String, long, long);
-    field public static final int QUOTA_UNLIMITED = -1; // 0xffffffff
   }
 
 }

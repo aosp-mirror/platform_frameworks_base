@@ -35,8 +35,6 @@ public interface Dumpable {
         return getClass().getName();
     }
 
-    //TODO(b/149254050): decide whether it should take a ParcelFileDescription as well.
-
     /**
      * Dumps the internal state into the given {@code writer}.
      *

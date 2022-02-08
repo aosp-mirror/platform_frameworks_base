@@ -28,16 +28,19 @@ import android.hardware.DataSpace;
 import android.hardware.DataSpace.NamedDataSpace;
 import android.hardware.HardwareBuffer;
 import android.hardware.HardwareBuffer.Usage;
+import android.hardware.SyncFence;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.SurfaceUtils;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.util.Size;
 import android.view.Surface;
 
 import dalvik.system.VMRuntime;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -1144,6 +1147,23 @@ public class ImageWriter implements AutoCloseable {
         }
 
         @Override
+        public SyncFence getFence() throws IOException {
+            throwISEIfImageIsInvalid();
+            // if mNativeFenceFd is -1, the fence is closed
+            if (mNativeFenceFd != -1) {
+                return SyncFence.create(ParcelFileDescriptor.fromFd(mNativeFenceFd));
+            } else {
+                return SyncFence.createEmpty();
+            }
+        }
+
+        @Override
+        public void setFence(@NonNull SyncFence fence) throws IOException {
+            throwISEIfImageIsInvalid();
+            nativeSetFenceFd(fence.getFdDup().detachFd());
+        }
+
+        @Override
         public Plane[] getPlanes() {
             throwISEIfImageIsInvalid();
 
@@ -1268,6 +1288,8 @@ public class ImageWriter implements AutoCloseable {
         private synchronized native int nativeGetFormat(long dataSpace);
 
         private synchronized native HardwareBuffer nativeGetHardwareBuffer();
+
+        private synchronized native void nativeSetFenceFd(int fenceFd);
     }
 
     // Native implemented ImageWriter methods.
