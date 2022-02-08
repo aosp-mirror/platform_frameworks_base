@@ -1185,10 +1185,11 @@ public class StatusBar extends CoreStartable implements
                 });
         initializer.initializeStatusBar(mStatusBarComponent);
 
-        mHeadsUpManager.setup(mVisualStabilityManager);
         mStatusBarTouchableRegionManager.setup(this, mNotificationShadeWindowView);
         mHeadsUpManager.addListener(mNotificationPanelViewController.getOnHeadsUpChangedListener());
-        mHeadsUpManager.addListener(mVisualStabilityManager);
+        if (!mNotifPipelineFlags.isNewPipelineEnabled()) {
+            mHeadsUpManager.addListener(mVisualStabilityManager);
+        }
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);
 
         createNavigationBar(result);
