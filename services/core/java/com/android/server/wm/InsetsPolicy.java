@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.view.InsetsController.ANIMATION_TYPE_HIDE;
 import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
 import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_HIDDEN;
@@ -449,6 +450,14 @@ class InsetsPolicy {
         if (focusedWin == mPolicy.getNotificationShade()) {
             // Notification shade has control anyways, no reason to force anything.
             return focusedWin;
+        }
+        if (mPolicy.isForceShowNavigationBarEnabled()
+                && focusedWin.getActivityType() == ACTIVITY_TYPE_STANDARD) {
+            // When "force show navigation bar" is enabled, it means we are in kid navigation bar
+            // and 3-button navigation bar mode. In this mode, the navigation bar is forcibly shown
+            // when activity type is ACTIVITY_TYPE_STANDARD which means Launcher or Recent could
+            // still control the navigation bar in this mode.
+            return null;
         }
         if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
             mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
