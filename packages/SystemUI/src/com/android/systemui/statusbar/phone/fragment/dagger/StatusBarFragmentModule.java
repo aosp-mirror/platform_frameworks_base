@@ -21,6 +21,7 @@ import android.view.View;
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
 import com.android.systemui.dagger.qualifiers.RootView;
+import com.android.systemui.statusbar.HeadsUpStatusBarView;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
@@ -31,6 +32,8 @@ import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherCo
 import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherControllerImpl;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
+
+import java.util.Optional;
 
 import javax.inject.Named;
 
@@ -44,6 +47,7 @@ public interface StatusBarFragmentModule {
 
     String LIGHTS_OUT_NOTIF_VIEW = "lights_out_notif_view";
     String OPERATOR_NAME_VIEW = "operator_name_view";
+    String OPERATOR_NAME_FRAME_VIEW = "operator_name_frame_view";
 
     /** */
     @Provides
@@ -75,6 +79,14 @@ public interface StatusBarFragmentModule {
     @Named(OPERATOR_NAME_VIEW)
     static View provideOperatorNameView(@RootView PhoneStatusBarView view) {
         return view.findViewById(R.id.operator_name);
+    }
+
+    /** */
+    @Provides
+    @StatusBarFragmentScope
+    @Named(OPERATOR_NAME_FRAME_VIEW)
+    static Optional<View> provideOperatorFrameNameView(@RootView PhoneStatusBarView view) {
+        return Optional.ofNullable(view.findViewById(R.id.operator_name_frame));
     }
 
     /** */
@@ -118,5 +130,12 @@ public interface StatusBarFragmentModule {
             StatusBarWindowController statusBarWindowController
     ) {
         return new PhoneStatusBarTransitions(view, statusBarWindowController.getBackgroundView());
+    }
+
+    /** */
+    @Provides
+    @StatusBarFragmentScope
+    static HeadsUpStatusBarView providesHeasdUpStatusBarView(@RootView PhoneStatusBarView view) {
+        return view.findViewById(R.id.heads_up_status_bar_view);
     }
 }
