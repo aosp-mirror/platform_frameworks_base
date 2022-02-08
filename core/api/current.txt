@@ -1570,6 +1570,7 @@ package android {
     field public static final int tileMode = 16843265; // 0x1010201
     field public static final int tileModeX = 16843895; // 0x1010477
     field public static final int tileModeY = 16843896; // 0x1010478
+    field public static final int tileService;
     field public static final int timePickerDialogTheme = 16843934; // 0x101049e
     field public static final int timePickerMode = 16843956; // 0x10104b4
     field public static final int timePickerStyle = 16843933; // 0x101049d
@@ -3233,6 +3234,7 @@ package android.accessibilityservice {
     method public int getNonInteractiveUiTimeoutMillis();
     method public android.content.pm.ResolveInfo getResolveInfo();
     method public String getSettingsActivityName();
+    method @Nullable public String getTileServiceClassName();
     method public boolean isAccessibilityTool();
     method public String loadDescription(android.content.pm.PackageManager);
     method public CharSequence loadSummary(android.content.pm.PackageManager);
