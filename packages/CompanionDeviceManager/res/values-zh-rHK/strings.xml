@@ -28,12 +28,12 @@
     <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"讓「<xliff:g id="APP_NAME">%1$s</xliff:g>」在「<xliff:g id="DEVICE_NAME">%2$s</xliff:g>」連線時可透過遠端方式存取此裝置上安裝的應用程式。"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
+    <string name="title_computer" msgid="4693714143506569253">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;strong&gt;&lt;/strong&gt;存取您手機中的這項資料"</string>
+    <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="profile_name_generic" msgid="6851028682723034988">"裝置"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"允許"</string>
     <string name="consent_no" msgid="2640796915611404382">"不允許"</string>
-    <!-- no translation found for permission_sync_confirmation_title (667074294393493186) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (8873391306499120778) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"將應用程式權限轉移至手錶"</string>
+    <string name="permission_sync_summary" msgid="8873391306499120778">"為簡化手錶的設定程序，在設定過程中安裝到手錶上的應用程式都將沿用手機上的權限。\n\n這些權限可能包括手錶麥克風和位置的存取權。"</string>
 </resources>
