@@ -70,7 +70,7 @@ public class RcsFeature extends ImsFeature {
         // Reference the outer class in order to have better test coverage metrics instead of
         // creating a inner class referencing the outer class directly.
         private final RcsFeature mReference;
-        private final Executor mExecutor;
+        private Executor mExecutor;
 
         RcsFeatureBinder(RcsFeature classRef, @CallbackExecutor Executor executor) {
             mReference = classRef;
@@ -259,7 +259,7 @@ public class RcsFeature extends ImsFeature {
         }
     }
 
-    private final Executor mExecutor;
+    private Executor mExecutor;
     private final RcsFeatureBinder mImsRcsBinder;
     private RcsCapabilityExchangeImplBase mCapabilityExchangeImpl;
     private CapabilityExchangeEventListener mCapExchangeEventListener;
@@ -270,13 +270,9 @@ public class RcsFeature extends ImsFeature {
      * Method stubs called from the framework will be called asynchronously. To specify the
      * {@link Executor} that the methods stubs will be called, use
      * {@link RcsFeature#RcsFeature(Executor)} instead.
-     *
-     * @deprecated Use {@link #RcsFeature(Executor)} to create the RcsFeature.
      */
-    @Deprecated
     public RcsFeature() {
         super();
-        mExecutor = Runnable::run;
         // Run on the Binder threads that call them.
         mImsRcsBinder = new RcsFeatureBinder(this, mExecutor);
     }
@@ -475,6 +471,19 @@ public class RcsFeature extends ImsFeature {
                 throw new IllegalStateException("Session is not available.");
             }
             return mCapabilityExchangeImpl;
+        }
+    }
+
+    /**
+     * Set default Executor from ImsService.
+     * @param executor The default executor for the framework to use when executing the methods
+     * overridden by the implementation of RcsFeature.
+     * @hide
+     */
+    public final void setDefaultExecutor(@NonNull Executor executor) {
+        if (mImsRcsBinder.mExecutor == null) {
+            mExecutor = executor;
+            mImsRcsBinder.mExecutor = executor;
         }
     }
 }
