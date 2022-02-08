@@ -156,6 +156,11 @@ public class NavigationModeController implements Dumpable {
         mListeners.remove(listener);
     }
 
+    public boolean getImeDrawsImeNavBar() {
+        return mCurrentUserContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_imeDrawsImeNavBar);
+    }
+
     private int getCurrentInteractionMode(Context context) {
         int mode = context.getResources().getInteger(
                 com.android.internal.R.integer.config_navBarInteractionMode);

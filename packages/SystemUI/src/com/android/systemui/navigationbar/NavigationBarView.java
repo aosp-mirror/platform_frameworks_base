@@ -125,6 +125,7 @@ public class NavigationBarView extends FrameLayout implements
     int mDisabledFlags = 0;
     int mNavigationIconHints = 0;
     private int mNavBarMode;
+    private boolean mImeDrawsImeNavBar;
 
     private final Region mTmpRegion = new Region();
     private final int[] mTmpPosition = new int[2];
@@ -324,6 +325,7 @@ public class NavigationBarView extends FrameLayout implements
         mIsVertical = false;
         mLongClickableAccessibilityButton = false;
         mNavBarMode = Dependency.get(NavigationModeController.class).addListener(this);
+        mImeDrawsImeNavBar = Dependency.get(NavigationModeController.class).getImeDrawsImeNavBar();
 
         mSysUiFlagContainer = Dependency.get(SysUiState.class);
         // Set up the context group of buttons
@@ -773,7 +775,7 @@ public class NavigationBarView extends FrameLayout implements
 
         updateRecentsIcon();
 
-        boolean isImeRenderingNavButtons = isGesturalMode(mNavBarMode)
+        boolean isImeRenderingNavButtons = mImeDrawsImeNavBar
                 && mImeCanRenderGesturalNavButtons
                 && (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0;
 
@@ -966,6 +968,7 @@ public class NavigationBarView extends FrameLayout implements
     @Override
     public void onNavigationModeChanged(int mode) {
         mNavBarMode = mode;
+        mImeDrawsImeNavBar = Dependency.get(NavigationModeController.class).getImeDrawsImeNavBar();
         mBarTransitions.onNavigationModeChanged(mNavBarMode);
         mEdgeBackGestureHandler.onNavigationModeChanged(mNavBarMode);
         updateRotationButton();
