@@ -15,12 +15,14 @@
  */
 package com.android.server.net;
 
+import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.net.INetd.FIREWALL_CHAIN_DOZABLE;
 import static android.net.INetd.FIREWALL_CHAIN_POWERSAVE;
 import static android.net.INetd.FIREWALL_CHAIN_RESTRICTED;
 import static android.net.INetd.FIREWALL_CHAIN_STANDBY;
 import static android.net.INetd.FIREWALL_RULE_ALLOW;
 import static android.net.INetd.FIREWALL_RULE_DENY;
+import static android.net.NetworkPolicyManager.ALLOWED_REASON_NONE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_DOZABLE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_POWERSAVE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_RESTRICTED;
@@ -29,6 +31,7 @@ import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.os.PowerExemptionManager.reasonCodeToString;
 import static android.os.Process.INVALID_UID;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.ProcessCapability;
 import android.net.NetworkPolicyManager;
@@ -81,13 +84,18 @@ public class NetworkPolicyLogger {
 
     private final Object mLock = new Object();
 
-    void networkBlocked(int uid, UidBlockedState uidBlockedState) {
+    void networkBlocked(int uid, @Nullable UidBlockedState uidBlockedState) {
         synchronized (mLock) {
             if (LOGD || uid == mDebugUid) {
                 Slog.d(TAG, "Blocked state of uid: " + uidBlockedState.toString());
             }
-            mNetworkBlockedBuffer.networkBlocked(uid, uidBlockedState.blockedReasons,
-                    uidBlockedState.allowedReasons, uidBlockedState.effectiveBlockedReasons);
+            if (uidBlockedState == null) {
+                mNetworkBlockedBuffer.networkBlocked(uid, BLOCKED_REASON_NONE, ALLOWED_REASON_NONE,
+                        BLOCKED_REASON_NONE);
+            } else {
+                mNetworkBlockedBuffer.networkBlocked(uid, uidBlockedState.blockedReasons,
+                        uidBlockedState.allowedReasons, uidBlockedState.effectiveBlockedReasons);
+            }
         }
     }
 
