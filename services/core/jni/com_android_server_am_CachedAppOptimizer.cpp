@@ -84,6 +84,9 @@ static inline void compactProcessProcfs(int pid, const std::string& compactionTy
 
 // Compacts a set of VMAs for pid using an madviseType accepted by process_madvise syscall
 // Returns the total bytes that where madvised.
+//
+// If any VMA fails compaction due to -EINVAL it will be skipped and continue.
+// However, if it fails for any other reason, it will bail out and forward the error
 static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseType) {
     static struct iovec vmasToKernel[MAX_VMAS_PER_COMPACTION];
 
@@ -148,8 +151,15 @@ static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseT
         auto bytesProcessed = process_madvise(pidfd, vmasToKernel, iVec, madviseType, 0);
 
         if (CC_UNLIKELY(bytesProcessed == -1)) {
-            compactionInProgress = false;
-            return -errno;
+            if (errno == EINVAL) {
+                // This error is somewhat common due to an unevictable VMA if this is
+                // the case silently skip the bad VMA and continue compacting the rest.
+                continue;
+            } else {
+                // Forward irrecoverable errors and bail out compaction
+                compactionInProgress = false;
+                return -errno;
+            }
         }
 
         totalBytesProcessed += bytesProcessed;
