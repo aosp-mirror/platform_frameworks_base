@@ -1452,18 +1452,27 @@ public class WallpaperManager {
                     mContext.getUserId());
             if (fd != null) {
                 FileOutputStream fos = null;
-                boolean ok = false;
+                final Bitmap tmp = BitmapFactory.decodeStream(resources.openRawResource(resid));
                 try {
-                    fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
-                    copyStreamToWallpaperFile(resources.openRawResource(resid), fos);
-                    // The 'close()' is the trigger for any server-side image manipulation,
-                    // so we must do that before waiting for completion.
-                    fos.close();
-                    completion.waitForCompletion();
+                    // If the stream can't be decoded, treat it as an invalid input.
+                    if (tmp != null) {
+                        fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
+                        tmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                        // The 'close()' is the trigger for any server-side image manipulation,
+                        // so we must do that before waiting for completion.
+                        fos.close();
+                        completion.waitForCompletion();
+                    } else {
+                        throw new IllegalArgumentException(
+                                "Resource 0x" + Integer.toHexString(resid) + " is invalid");
+                    }
                 } finally {
                     // Might be redundant but completion shouldn't wait unless the write
                     // succeeded; this is a fallback if it threw past the close+wait.
                     IoUtils.closeQuietly(fos);
+                    if (tmp != null) {
+                        tmp.recycle();
+                    }
                 }
             }
         } catch (RemoteException e) {
@@ -1705,13 +1714,22 @@ public class WallpaperManager {
                     result, which, completion, mContext.getUserId());
             if (fd != null) {
                 FileOutputStream fos = null;
+                final Bitmap tmp = BitmapFactory.decodeStream(bitmapData);
                 try {
-                    fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
-                    copyStreamToWallpaperFile(bitmapData, fos);
-                    fos.close();
-                    completion.waitForCompletion();
+                    // If the stream can't be decoded, treat it as an invalid input.
+                    if (tmp != null) {
+                        fos = new ParcelFileDescriptor.AutoCloseOutputStream(fd);
+                        tmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                        fos.close();
+                        completion.waitForCompletion();
+                    } else {
+                        throw new IllegalArgumentException("InputStream is invalid");
+                    }
                 } finally {
                     IoUtils.closeQuietly(fos);
+                    if (tmp != null) {
+                        tmp.recycle();
+                    }
                 }
             }
         } catch (RemoteException e) {

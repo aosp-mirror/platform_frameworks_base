@@ -50,7 +50,7 @@ class SensorUseStartedActivity @Inject constructor(
     private val keyguardStateController: KeyguardStateController,
     private val keyguardDismissUtil: KeyguardDismissUtil,
     @Background private val bgHandler: Handler
-) : Activity(), DialogInterface.OnClickListener {
+) : Activity(), DialogInterface.OnClickListener, DialogInterface.OnDismissListener {
 
     companion object {
         private val LOG_TAG = SensorUseStartedActivity::class.java.simpleName
@@ -120,7 +120,7 @@ class SensorUseStartedActivity @Inject constructor(
             }
         }
 
-        mDialog = SensorUseDialog(this, sensor, this)
+        mDialog = SensorUseDialog(this, sensor, this, this)
         mDialog!!.show()
     }
 
@@ -211,5 +211,9 @@ class SensorUseStartedActivity @Inject constructor(
             sensorPrivacyController
                     .suppressSensorPrivacyReminders(sensor, suppressed)
         }
+    }
+
+    override fun onDismiss(dialog: DialogInterface?) {
+        finish()
     }
 }
