@@ -1363,8 +1363,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * </p>
      *
      * @param displayId The logical display id
-     * @param region the new magnified region, may be empty if
-     *               magnification is not enabled (e.g. scale is 1)
+     * @param region The magnification region.
+     *               If the config mode is
+     *               {@link MagnificationConfig#MAGNIFICATION_MODE_FULLSCREEN},
+     *               it is the region of the screen currently active for magnification.
+     *               the returned region will be empty if the magnification is not active
+     *               (e.g. scale is 1. And the magnification is active if magnification
+     *               gestures are enabled or if a service is running that can control
+     *               magnification.
+     *               If the config mode is
+     *               {@link MagnificationConfig#MAGNIFICATION_MODE_WINDOW},
+     *               it is the region of screen projected on the magnification window.
+     *               The region will be empty if magnification is not activated.
      * @param config The magnification config. That has magnification mode, the new scale and the
      *              new screen-relative center position
      */
