@@ -75,6 +75,8 @@ abstract class HdmiCecLocalDevice {
     protected int mLastKeycode = HdmiCecKeycode.UNSUPPORTED_KEYCODE;
     protected int mLastKeyRepeatCount = 0;
 
+    HdmiCecStandbyModeHandler mStandbyHandler;
+
     // Stores recent changes to the active source in the CEC network.
     private final ArrayBlockingQueue<HdmiCecController.Dumpable> mActiveSourceHistory =
             new ArrayBlockingQueue<>(MAX_HDMI_ACTIVE_SOURCE_HISTORY);
@@ -262,6 +264,11 @@ abstract class HdmiCecLocalDevice {
         int dest = message.getDestination();
         if (dest != mDeviceInfo.getLogicalAddress() && dest != Constants.ADDR_BROADCAST) {
             return Constants.NOT_HANDLED;
+        }
+        if (mService.isPowerStandby()
+                && !mService.isWakeUpMessageReceived()
+                && mStandbyHandler.handleCommand(message)) {
+            return Constants.HANDLED;
         }
         // Cache incoming message if it is included in the list of cacheable opcodes.
         mCecMessageCache.cacheMessage(message);
