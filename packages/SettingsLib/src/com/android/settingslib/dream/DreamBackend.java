@@ -454,21 +454,26 @@ public class DreamBackend {
         uiContext.startActivity(intent);
     }
 
-    public void preview(DreamInfo dreamInfo) {
-        logd("preview(%s)", dreamInfo);
-        if (mDreamManager == null || dreamInfo == null || dreamInfo.componentName == null)
+    /**
+     * Preview a dream, given the component name.
+     */
+    public void preview(ComponentName componentName) {
+        logd("preview(%s)", componentName);
+        if (mDreamManager == null || componentName == null) {
             return;
+        }
         try {
-            mDreamManager.testDream(mContext.getUserId(), dreamInfo.componentName);
+            mDreamManager.testDream(mContext.getUserId(), componentName);
         } catch (RemoteException e) {
-            Log.w(TAG, "Failed to preview " + dreamInfo, e);
+            Log.w(TAG, "Failed to preview " + componentName, e);
         }
     }
 
     public void startDreaming() {
         logd("startDreaming()");
-        if (mDreamManager == null)
+        if (mDreamManager == null) {
             return;
+        }
         try {
             mDreamManager.dream();
         } catch (RemoteException e) {
