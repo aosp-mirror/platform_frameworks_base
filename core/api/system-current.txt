@@ -13257,6 +13257,7 @@ package android.telephony.ims {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.RcsClientConfiguration> CREATOR;
     field public static final String RCS_PROFILE_1_0 = "UP_1.0";
     field public static final String RCS_PROFILE_2_3 = "UP_2.3";
+    field public static final String RCS_PROFILE_2_4 = "UP_2.4";
   }
 
   public final class RcsContactPresenceTuple implements android.os.Parcelable {

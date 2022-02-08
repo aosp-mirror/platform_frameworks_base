@@ -34,7 +34,7 @@ public final class RcsClientConfiguration implements Parcelable {
 
     /**@hide*/
     @StringDef(prefix = "RCS_PROFILE_",
-            value = {RCS_PROFILE_1_0, RCS_PROFILE_2_3})
+            value = {RCS_PROFILE_1_0, RCS_PROFILE_2_3, RCS_PROFILE_2_4})
     public @interface StringRcsProfile {}
 
     /**
@@ -45,6 +45,10 @@ public final class RcsClientConfiguration implements Parcelable {
      * RCS profile UP 2.3
      */
     public static final String RCS_PROFILE_2_3 = "UP_2.3";
+    /**
+     * RCS profile UP 2.4
+     */
+    public static final String RCS_PROFILE_2_4 = "UP_2.4";
 
     private String mRcsVersion;
     private String mRcsProfile;
@@ -58,8 +62,8 @@ public final class RcsClientConfiguration implements Parcelable {
      * @param rcsVersion The parameter identifies the RCS version supported
      * by the client. Refer to GSMA RCC.07 "rcs_version" parameter.
      * @param rcsProfile Identifies a fixed set of RCS services that are
-     * supported by the client. See {@link #RCS_PROFILE_1_0 } or
-     * {@link #RCS_PROFILE_2_3 }
+     * supported by the client. See {@link #RCS_PROFILE_1_0 },
+     * {@link #RCS_PROFILE_2_3 } or {@link #RCS_PROFILE_2_4 }
      * @param clientVendor Identifies the vendor providing the RCS client.
      * @param clientVersion Identifies the RCS client version. Refer to GSMA
      * RCC.07 "client_version" parameter.
@@ -80,8 +84,8 @@ public final class RcsClientConfiguration implements Parcelable {
      * @param rcsVersion The parameter identifies the RCS version supported
      * by the client. Refer to GSMA RCC.07 "rcs_version" parameter.
      * @param rcsProfile Identifies a fixed set of RCS services that are
-     * supported by the client. See {@link #RCS_PROFILE_1_0 } or
-     * {@link #RCS_PROFILE_2_3 }
+     * supported by the client. See {@link #RCS_PROFILE_1_0 },
+     * {@link #RCS_PROFILE_2_3 } or {@link #RCS_PROFILE_2_4 }
      * @param clientVendor Identifies the vendor providing the RCS client.
      * @param clientVersion Identifies the RCS client version. Refer to GSMA
      * RCC.07 "client_version" parameter.
