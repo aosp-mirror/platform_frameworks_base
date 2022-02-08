@@ -64,7 +64,7 @@ import java.util.List;
  */
 @Deprecated
 public class BatteryStatsHelper {
-    static final boolean DEBUG = false;
+    private static final boolean DEBUG = false;
 
     private static final String TAG = BatteryStatsHelper.class.getSimpleName();
 
@@ -266,10 +266,6 @@ public class BatteryStatsHelper {
     public void storeState() {
         sStatsXfer = mStats;
         sBatteryBroadcastXfer = mBatteryBroadcast;
-    }
-
-    public static String makemAh(double power) {
-        return PowerCalculator.formatCharge(power);
     }
 
     /**

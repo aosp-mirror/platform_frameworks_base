@@ -30,7 +30,7 @@ import java.util.List;
 
 public class WakelockPowerCalculator extends PowerCalculator {
     private static final String TAG = "WakelockPowerCalculator";
-    private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final boolean DEBUG = PowerCalculator.DEBUG;
     private final UsageBasedPowerEstimator mPowerEstimator;
 
     private static class PowerAndDuration {

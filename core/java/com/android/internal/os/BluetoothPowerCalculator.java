@@ -32,7 +32,7 @@ import java.util.List;
 
 public class BluetoothPowerCalculator extends PowerCalculator {
     private static final String TAG = "BluetoothPowerCalc";
-    private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final boolean DEBUG = PowerCalculator.DEBUG;
 
     private static final BatteryConsumer.Key[] UNINITIALIZED_KEYS = new BatteryConsumer.Key[0];
 

@@ -39,7 +39,7 @@ import java.util.List;
  */
 public class ScreenPowerCalculator extends PowerCalculator {
     private static final String TAG = "ScreenPowerCalculator";
-    private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final boolean DEBUG = PowerCalculator.DEBUG;
 
     // Minimum amount of time the screen should be on to start smearing drain to apps
     public static final long MIN_ACTIVE_TIME_FOR_SMEARING = 10 * DateUtils.MINUTE_IN_MILLIS;
