@@ -71,8 +71,7 @@ class UserSwitcherActivity @Inject constructor(
     private lateinit var broadcastReceiver: BroadcastReceiver
     private var popupMenu: UserSwitcherPopupMenu? = null
     private lateinit var addButton: View
-    private var addUserItem: UserRecord? = null
-    private var addGuestItem: UserRecord? = null
+    private var addUserRecords = mutableListOf<UserRecord>()
 
     private val adapter = object : BaseUserAdapter(userSwitcherController) {
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -203,8 +202,7 @@ class UserSwitcherActivity @Inject constructor(
 
     private fun showPopupMenu() {
         val items = mutableListOf<UserRecord>()
-        addUserItem?.let { items.add(it) }
-        addGuestItem?.let { items.add(it) }
+        addUserRecords.forEach { items.add(it) }
 
         var popupMenuAdapter = ItemAdapter(
             this,
@@ -249,10 +247,10 @@ class UserSwitcherActivity @Inject constructor(
         val flow = requireViewById<Flow>(R.id.flow)
         for (i in 0 until adapter.getCount()) {
             val item = adapter.getItem(i)
-            if (item.isAddUser) {
-                addUserItem = item
-            } else if (item.isGuest && item.info == null) {
-                addGuestItem = item
+            if (item.isAddUser ||
+                item.isAddSupervisedUser ||
+                item.isGuest && item.info == null) {
+                addUserRecords.add(item)
             } else {
                 val userView = adapter.getView(i, null, parent)
                 userView.setId(View.generateViewId())
@@ -273,7 +271,7 @@ class UserSwitcherActivity @Inject constructor(
             }
         }
 
-        if (addUserItem != null || addGuestItem != null) {
+        if (!addUserRecords.isEmpty()) {
             addButton.visibility = View.VISIBLE
         } else {
             addButton.visibility = View.GONE
