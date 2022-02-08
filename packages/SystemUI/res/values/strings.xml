@@ -2390,4 +2390,10 @@
     <string name="clipboard_edit_source">From <xliff:g id="appName" example="Gmail">%1$s</xliff:g></string>
     <!-- Label for button to dismiss clipboard overlay [CHAR LIMIT=NONE] -->
     <string name="clipboard_dismiss_description">Dismiss copy UI</string>
+    <!-- Label for button to edit text that was copied to the clipboard [CHAR LIMIT=NONE] -->
+    <string name="clipboard_edit_text_description">Edit copied text</string>
+    <!-- Label for button to edit an image that was copied to the clipboard [CHAR LIMIT=NONE] -->
+    <string name="clipboard_edit_image_description">Edit copied image</string>
+    <!-- Label for button to send copied content to a nearby device [CHAR LIMIT=NONE] -->
+    <string name="clipboard_send_nearby_description">Send to nearby device</string>
 </resources>
