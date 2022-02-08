@@ -3463,27 +3463,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     @RequiresPermission(Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)
-    public void setSystemAudioCaptioningRequested(boolean isEnabled, int userId) {
+    public void setSystemAudioCaptioningEnabled(boolean isEnabled, int userId) {
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.SET_SYSTEM_AUDIO_CAPTION,
-                "setSystemAudioCaptioningRequested");
+                "setSystemAudioCaptioningEnabled");
 
-        mCaptioningManagerImpl.setSystemAudioCaptioningRequested(isEnabled, userId);
+        mCaptioningManagerImpl.setSystemAudioCaptioningEnabled(isEnabled, userId);
     }
 
     @Override
-    public boolean isSystemAudioCaptioningUiRequested(int userId) {
-        return mCaptioningManagerImpl.isSystemAudioCaptioningUiRequested(userId);
+    public boolean isSystemAudioCaptioningUiEnabled(int userId) {
+        return mCaptioningManagerImpl.isSystemAudioCaptioningUiEnabled(userId);
     }
 
     @Override
     @RequiresPermission(Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)
-    public void setSystemAudioCaptioningUiRequested(boolean isEnabled, int userId) {
+    public void setSystemAudioCaptioningUiEnabled(boolean isEnabled, int userId) {
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.SET_SYSTEM_AUDIO_CAPTION,
-                "setSystemAudioCaptioningUiRequested");
+                "setSystemAudioCaptioningUiEnabled");
 
-        mCaptioningManagerImpl.setSystemAudioCaptioningUiRequested(isEnabled, userId);
+        mCaptioningManagerImpl.setSystemAudioCaptioningUiEnabled(isEnabled, userId);
     }
 
     @Override
