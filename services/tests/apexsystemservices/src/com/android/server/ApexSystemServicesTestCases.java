@@ -31,6 +31,7 @@ import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
@@ -80,6 +81,7 @@ public class ApexSystemServicesTestCases extends BaseHostJUnit4Test {
                 .doesNotContain("FakeApexSystemService onStart");
     }
 
+    @Ignore
     @Test
     public void testApexSystemServiceStarts() throws Exception {
         // Pre-install the apex
@@ -94,6 +96,7 @@ public class ApexSystemServicesTestCases extends BaseHostJUnit4Test {
                 .contains("FakeApexSystemService onStart");
     }
 
+    @Ignore
     @Test
     public void testInitOrder() throws Exception {
         // Pre-install the apex
