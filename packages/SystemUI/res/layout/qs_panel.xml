@@ -25,7 +25,7 @@
         android:id="@+id/expanded_qs_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="4dp"
+        android:elevation="@dimen/qs_panel_elevation"
         android:importantForAccessibility="no"
         android:scrollbars="none"
         android:clipChildren="false"
@@ -55,7 +55,7 @@
         android:id="@+id/container_stub"
         android:inflatedId="@+id/qs_footer_actions"
         android:layout="@layout/new_footer_actions"
-        android:layout_height="@dimen/qs_footer_height"
+        android:layout_height="@dimen/new_footer_height"
         android:layout_width="match_parent"
         android:layout_gravity="bottom"
         />

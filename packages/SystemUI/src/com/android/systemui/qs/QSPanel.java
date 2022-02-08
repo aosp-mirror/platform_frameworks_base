@@ -110,6 +110,7 @@ public class QSPanel extends LinearLayout implements Tunable {
     private float mSquishinessFraction = 1f;
     private final ArrayMap<View, Integer> mChildrenLayoutTop = new ArrayMap<>();
     private final Rect mClippingRect = new Rect();
+    private boolean mUseNewFooter = false;
 
     public QSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -149,6 +150,10 @@ public class QSPanel extends LinearLayout implements Tunable {
             lp = new LayoutParams(LayoutParams.MATCH_PARENT, 0, 1);
             addView(mHorizontalLinearLayout, lp);
         }
+    }
+
+    void setUseNewFooter(boolean useNewFooter) {
+        mUseNewFooter = useNewFooter;
     }
 
     protected void setHorizontalContentContainerClipping() {
@@ -368,11 +373,12 @@ public class QSPanel extends LinearLayout implements Tunable {
 
     protected void updatePadding() {
         final Resources res = mContext.getResources();
-        int padding = res.getDimensionPixelSize(R.dimen.qs_panel_padding_top);
+        int paddingTop = res.getDimensionPixelSize(R.dimen.qs_panel_padding_top);
+        // Bottom padding only when there's a new footer with its height.
         setPaddingRelative(getPaddingStart(),
-                padding,
+                paddingTop,
                 getPaddingEnd(),
-                res.getDimensionPixelSize(R.dimen.qs_panel_padding_bottom));
+                mUseNewFooter ? res.getDimensionPixelSize(R.dimen.qs_panel_padding_bottom) : 0);
     }
 
     void addOnConfigurationChangedListener(OnConfigurationChangedListener listener) {

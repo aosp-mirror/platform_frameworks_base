@@ -20,34 +20,41 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/qs_footer_height"
+    android:layout_height="@dimen/new_footer_height"
+    android:elevation="@dimen/qs_panel_elevation"
+    android:paddingTop="8dp"
+    android:paddingBottom="4dp"
+    android:background="@drawable/qs_footer_actions_background"
     android:gravity="center_vertical"
     android:layout_gravity="bottom"
 >
 
-    <View
-        android:layout_height="1dp"
+    <LinearLayout
+        android:id="@+id/security_footers_container"
+        android:orientation="horizontal"
+        android:layout_height="@dimen/qs_footer_action_button_size"
         android:layout_width="0dp"
         android:layout_weight="1"
-        />
+    />
 
+    <!-- Negative margin equal to -->
     <LinearLayout
         android:layout_height="match_parent"
         android:layout_width="wrap_content"
+        android:layout_marginEnd="@dimen/new_qs_footer_action_inset_negative"
         >
 
         <com.android.systemui.statusbar.phone.MultiUserSwitch
             android:id="@+id/multi_user_switch"
             android:layout_width="@dimen/qs_footer_action_button_size"
             android:layout_height="@dimen/qs_footer_action_button_size"
-            android:layout_marginEnd="@dimen/qs_tile_margin_horizontal"
             android:background="@drawable/qs_footer_action_circle"
             android:focusable="true">
 
             <ImageView
                 android:id="@+id/multi_user_avatar"
-                android:layout_width="@dimen/multi_user_avatar_expanded_size"
-                android:layout_height="@dimen/multi_user_avatar_expanded_size"
+                android:layout_width="@dimen/qs_footer_icon_size"
+                android:layout_height="@dimen/qs_footer_icon_size"
                 android:layout_gravity="center"
                 android:scaleType="centerInside" />
         </com.android.systemui.statusbar.phone.MultiUserSwitch>
@@ -56,19 +63,17 @@
             android:id="@+id/settings_button_container"
             android:layout_width="@dimen/qs_footer_action_button_size"
             android:layout_height="@dimen/qs_footer_action_button_size"
-            android:layout_marginEnd="@dimen/qs_tile_margin_horizontal"
             android:background="@drawable/qs_footer_action_circle"
             android:clipChildren="false"
             android:clipToPadding="false">
 
             <com.android.systemui.statusbar.phone.SettingsButton
                 android:id="@+id/settings_button"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/qs_footer_action_button_size"
+                android:layout_width="@dimen/qs_footer_icon_size"
+                android:layout_height="@dimen/qs_footer_icon_size"
                 android:layout_gravity="center"
                 android:background="@android:color/transparent"
                 android:contentDescription="@string/accessibility_quick_settings_settings"
-                android:padding="@dimen/qs_footer_icon_padding"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_settings"
                 android:tint="?android:attr/textColorPrimary" />
