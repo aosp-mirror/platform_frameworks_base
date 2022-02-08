@@ -91,8 +91,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @GuardedBy("mLock")
     private boolean mSystemAudioMute = false;
 
-    private final HdmiCecStandbyModeHandler mStandbyHandler;
-
     // If true, do not do routing control/send active source for internal source.
     // Set to true when the device was woken up by <Text/Image View On>.
     private boolean mSkipRoutingControl;
