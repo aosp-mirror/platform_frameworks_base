@@ -113,6 +113,7 @@ filegroup {
         ":gatekeeper_aidl",
         ":gsiservice_aidl",
         ":idmap2_aidl",
+        ":guiconstants_aidl",
         ":idmap2_core_aidl",
         ":incidentcompanion_aidl",
         ":inputconstants_aidl",
@@ -423,7 +424,6 @@ filegroup {
         // TODO: remove these annotations as soon as we can use andoid.support.annotations.*
         ":framework-annotations",
         ":modules-utils-preconditions-srcs",
-        "core/java/android/net/DhcpResults.java",
         "core/java/android/util/IndentingPrintWriter.java",
         "core/java/android/util/LocalLog.java",
         "core/java/com/android/internal/util/HexDump.java",
