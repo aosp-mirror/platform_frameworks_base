@@ -26,6 +26,7 @@ import androidx.test.filters.SmallTest
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.statusbar.phone.userswitcher.StatusBarUserSwitcherController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
@@ -60,6 +61,8 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     private lateinit var progressProvider: ScopedUnfoldTransitionProgressProvider
     @Mock
     private lateinit var configurationController: ConfigurationController
+    @Mock
+    private lateinit var userSwitcherController: StatusBarUserSwitcherController
 
     private lateinit var view: PhoneStatusBarView
     private lateinit var controller: PhoneStatusBarViewController
@@ -187,6 +190,7 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
         return PhoneStatusBarViewController.Factory(
             Optional.of(sysuiUnfoldComponent),
             Optional.of(progressProvider),
+            userSwitcherController,
             configurationController
         ).create(view, touchEventHandler).also {
             it.init()

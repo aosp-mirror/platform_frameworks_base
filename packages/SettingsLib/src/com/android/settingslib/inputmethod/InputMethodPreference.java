@@ -27,6 +27,7 @@ import android.content.res.Configuration;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
@@ -155,7 +156,14 @@ public class InputMethodPreference extends PrimarySwitchPreference
         final int iconSize = getContext().getResources().getDimensionPixelSize(
                 R.dimen.secondary_app_icon_size);
         if (icon != null && iconSize > 0) {
-            icon.setLayoutParams(new LinearLayout.LayoutParams(iconSize, iconSize));
+            if (isTv()) {
+                ViewGroup.LayoutParams params = icon.getLayoutParams();
+                params.height = iconSize;
+                params.width = iconSize;
+                icon.setLayoutParams(params);
+            } else {
+                icon.setLayoutParams(new LinearLayout.LayoutParams(iconSize, iconSize));
+            }
         }
     }
 

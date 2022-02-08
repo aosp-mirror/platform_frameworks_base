@@ -43,7 +43,6 @@ import android.os.HandlerThread;
 import android.os.UserHandle;
 import android.service.quicksettings.IQSService;
 import android.service.quicksettings.IQSTileService;
-import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -96,11 +95,11 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         mThread.start();
         mHandler = Handler.createAsync(mThread.getLooper());
         mStateManager = new TileLifecycleManager(mHandler, mWrappedContext,
-                Mockito.mock(IQSService.class), new Tile(),
-                mTileServiceIntent,
-                mUser,
+                Mockito.mock(IQSService.class),
                 mMockPackageManagerAdapter,
-                mMockBroadcastDispatcher);
+                mMockBroadcastDispatcher,
+                mTileServiceIntent,
+                mUser);
     }
 
     @After

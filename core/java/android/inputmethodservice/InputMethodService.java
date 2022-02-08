@@ -839,10 +839,9 @@ public class InputMethodService extends AbstractInputMethodService {
             final boolean wasVisible = isInputViewShown();
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.hideSoftInput");
 
-            applyVisibilityInInsetsConsumerIfNecessary(false /* setVisible */);
             mShowInputFlags = 0;
             mShowInputRequested = false;
-            doHideWindow();
+            hideWindow();
             final boolean isVisible = isInputViewShown();
             final boolean visibilityChanged = isVisible != wasVisible;
             if (resultReceiver != null) {
@@ -891,7 +890,6 @@ public class InputMethodService extends AbstractInputMethodService {
             final boolean wasVisible = isInputViewShown();
             if (dispatchOnShowInputRequested(flags, false)) {
                 showWindow(true);
-                applyVisibilityInInsetsConsumerIfNecessary(true /* setVisible */);
             }
             setImeWindowStatus(mapToImeWindowStatus(), mBackDisposition);
 
@@ -1666,7 +1664,7 @@ public class InputMethodService extends AbstractInputMethodService {
                         onDisplayCompletions(completions);
                     }
                 } else {
-                    doHideWindow();
+                    hideWindow();
                 }
             } else if (mCandidatesVisibility == View.VISIBLE) {
                 // If the candidates are currently visible, make sure the
@@ -1674,7 +1672,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 showWindow(false);
             } else {
                 // Otherwise hide the window.
-                doHideWindow();
+                hideWindow();
             }
             // If user uses hard keyboard, IME button should always be shown.
             boolean showing = onEvaluateInputViewShown();
@@ -2119,7 +2117,7 @@ public class InputMethodService extends AbstractInputMethodService {
             if (shown) {
                 showWindow(false);
             } else {
-                doHideWindow();
+                hideWindow();
             }
         }
     }
@@ -2540,12 +2538,11 @@ public class InputMethodService extends AbstractInputMethodService {
         mWindowVisible = true;
 
         // request draw for the IME surface.
-        // When IME is not pre-rendered, this will actually show the IME.
-        if ((previousImeWindowStatus & IME_ACTIVE) == 0) {
-            if (DEBUG) Log.v(TAG, "showWindow: draw decorView!");
-            mWindow.show();
-        }
+        if (DEBUG) Log.v(TAG, "showWindow: draw decorView!");
+        mWindow.show();
         mDecorViewWasVisible = true;
+        applyVisibilityInInsetsConsumerIfNecessary(true);
+        cancelImeSurfaceRemoval();
         mInShowWindow = false;
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
@@ -2602,9 +2599,6 @@ public class InputMethodService extends AbstractInputMethodService {
         ImeTracing.getInstance().triggerServiceDump(
                 "InputMethodService#applyVisibilityInInsetsConsumerIfNecessary", mDumper,
                 null /* icProto */);
-        if (setVisible) {
-            cancelImeSurfaceRemoval();
-        }
         mPrivOps.applyImeVisibilityAsync(setVisible
                 ? mCurShowInputToken : mCurHideInputToken, setVisible);
     }
@@ -2622,15 +2616,12 @@ public class InputMethodService extends AbstractInputMethodService {
         mCandidatesViewStarted = false;
     }
 
-    private void doHideWindow() {
-        setImeWindowStatus(0, mBackDisposition);
-        hideWindow();
-    }
-
     public void hideWindow() {
         if (DEBUG) Log.v(TAG, "CALL: hideWindow");
         ImeTracing.getInstance().triggerServiceDump("InputMethodService#hideWindow", mDumper,
                 null /* icProto */);
+        setImeWindowStatus(0, mBackDisposition);
+        applyVisibilityInInsetsConsumerIfNecessary(false);
         mWindowVisible = false;
         finishViews(false /* finishingInput */);
         if (mDecorViewVisible) {
@@ -2916,7 +2907,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 // If we have the window visible for some other reason --
                 // most likely to show candidates -- then just get rid
                 // of it.  This really shouldn't happen, but just in case...
-                if (doIt) doHideWindow();
+                if (doIt) hideWindow();
             }
             return true;
         }

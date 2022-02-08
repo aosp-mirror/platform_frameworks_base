@@ -109,8 +109,7 @@ public interface DreamClockTimeComplicationComponent {
                     ComplicationLayoutParams.POSITION_BOTTOM
                             | ComplicationLayoutParams.POSITION_START,
                     ComplicationLayoutParams.DIRECTION_UP,
-                    INSERT_ORDER_WEIGHT,
-                    true);
+                    INSERT_ORDER_WEIGHT);
         }
     }
 }

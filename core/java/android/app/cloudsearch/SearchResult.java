@@ -76,7 +76,7 @@ public final class SearchResult implements Parcelable {
     public @interface SearchResultExtraInfoKey {}
     /** This App developer website's domain URL, String value expected. */
     public static final String EXTRAINFO_APP_DOMAIN_URL = "APP_DOMAIN_URL";
-    /** This App result's ICON URL, String value expected. */
+    /** This App icon, android.graphics.drawable.Icon expected. */
     public static final String EXTRAINFO_APP_ICON = "APP_ICON";
     /** This App developer's name, String value expected. */
     public static final String EXTRAINFO_APP_DEVELOPER_NAME = "APP_DEVELOPER_NAME";
@@ -114,7 +114,7 @@ public final class SearchResult implements Parcelable {
     public static final String EXTRAINFO_ACTION_BUTTON_IMAGE_PREREGISTERING = "ACTION_BUTTON_IMAGE";
     /** Web content's URL, String value expected. */
     public static final String EXTRAINFO_WEB_URL = "WEB_URL";
-    /** Web content's domain icon URL, String value expected. */
+    /** Web content's domain icon, android.graphics.drawable.Icon expected. */
     public static final String EXTRAINFO_WEB_ICON = "WEB_ICON";
 
     @NonNull

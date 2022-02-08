@@ -171,9 +171,4 @@
     <item msgid="146088982397753810">"Исклучен"</item>
     <item msgid="460891964396502657">"Вклучен"</item>
   </string-array>
-  <string-array name="tile_states_fgsmanager">
-    <item msgid="3054341646818213094">"Недостапно"</item>
-    <item msgid="5581384648880018330">"Исклучено"</item>
-    <item msgid="8000850843692192257">"Вклучено"</item>
-  </string-array>
 </resources>

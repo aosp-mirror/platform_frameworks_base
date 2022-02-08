@@ -310,10 +310,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             if (onKeyguard
                     && mAuthController.isUdfpsEnrolled(KeyguardUpdateMonitor.getCurrentUser())) {
                 mLpChanged.preferredMaxDisplayRefreshRate = mKeyguardPreferredRefreshRate;
-                mLpChanged.preferredMinDisplayRefreshRate = mKeyguardPreferredRefreshRate;
             } else {
                 mLpChanged.preferredMaxDisplayRefreshRate = 0;
-                mLpChanged.preferredMinDisplayRefreshRate = 0;
             }
             Trace.setCounter("display_set_preferred_refresh_rate",
                     (long) mKeyguardPreferredRefreshRate);

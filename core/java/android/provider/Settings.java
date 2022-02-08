@@ -16816,6 +16816,16 @@ public final class Settings {
                 "low_power_standby_active_during_maintenance";
 
         /**
+         * Timeout for the system server watchdog.
+         *
+         * @see {@link com.android.server.Watchdog}.
+         *
+         * @hide
+         */
+        public static final String WATCHDOG_TIMEOUT_MILLIS =
+                "system_server_watchdog_timeout_ms";
+
+        /**
          * Settings migrated from Wear OS settings provider.
          * @hide
          */

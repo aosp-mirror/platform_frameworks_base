@@ -83,7 +83,7 @@ public class ColorFiltersMutateActivity extends Activity {
             mBlendPaint = new Paint();
             mBlendPaint.setColorFilter(new PorterDuffColorFilter(0, PorterDuff.Mode.SRC_OVER));
 
-            mRuntimeShader = new RuntimeShader(sSkSL, false);
+            mRuntimeShader = new RuntimeShader(sSkSL);
             mRuntimeShader.setFloatUniform("param1", mShaderParam1);
             mRuntimeShader.setInputShader("bitmapShader", new BitmapShader(mBitmap1,
                                                                            Shader.TileMode.CLAMP,

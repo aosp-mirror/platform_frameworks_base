@@ -30,7 +30,6 @@ import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
 import android.hardware.input.VirtualTouchEvent;
 import android.os.IBinder;
-import android.os.IInputConstants;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -43,6 +42,7 @@ import com.android.server.LocalServices;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -76,13 +76,6 @@ class InputController {
     private final DisplayManagerInternal mDisplayManagerInternal;
     private final InputManagerInternal mInputManagerInternal;
 
-    /**
-     * Because the pointer is a singleton, it can only be targeted at one display at a time. Because
-     * multiple mice could be concurrently registered, mice that are associated with a different
-     * display than the current target display should not be allowed to affect the current target.
-     */
-    @VisibleForTesting int mActivePointerDisplayId;
-
     InputController(@NonNull Object lock) {
         this(lock, new NativeWrapper());
     }
@@ -91,18 +84,21 @@ class InputController {
     InputController(@NonNull Object lock, @NonNull NativeWrapper nativeWrapper) {
         mLock = lock;
         mNativeWrapper = nativeWrapper;
-        mActivePointerDisplayId = Display.INVALID_DISPLAY;
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
     }
 
     void close() {
         synchronized (mLock) {
-            for (InputDeviceDescriptor inputDeviceDescriptor : mInputDeviceDescriptors.values()) {
-                mNativeWrapper.closeUinput(inputDeviceDescriptor.getFileDescriptor());
+            final Iterator<Map.Entry<IBinder, InputDeviceDescriptor>> iterator =
+                    mInputDeviceDescriptors.entrySet().iterator();
+            if (iterator.hasNext()) {
+                final Map.Entry<IBinder, InputDeviceDescriptor> entry = iterator.next();
+                final IBinder token = entry.getKey();
+                final InputDeviceDescriptor inputDeviceDescriptor = entry.getValue();
+                iterator.remove();
+                closeInputDeviceDescriptorLocked(token, inputDeviceDescriptor);
             }
-            mInputDeviceDescriptors.clear();
-            resetMouseValuesLocked();
         }
     }
 
@@ -150,8 +146,6 @@ class InputController {
                     new InputDeviceDescriptor(fd, binderDeathRecipient,
                             InputDeviceDescriptor.TYPE_MOUSE, displayId, phys));
             mInputManagerInternal.setVirtualMousePointerDisplayId(displayId);
-            mInputManagerInternal.setPointerAcceleration(1);
-            mActivePointerDisplayId = displayId;
         }
         try {
             deviceToken.linkToDeath(binderDeathRecipient, /* flags= */ 0);
@@ -197,23 +191,44 @@ class InputController {
                 throw new IllegalArgumentException(
                         "Could not unregister input device for given token");
             }
-            token.unlinkToDeath(inputDeviceDescriptor.getDeathRecipient(), /* flags= */ 0);
-            mNativeWrapper.closeUinput(inputDeviceDescriptor.getFileDescriptor());
-            InputManager.getInstance().removeUniqueIdAssociation(inputDeviceDescriptor.getPhys());
-
-            // Reset values to the default if all virtual mice are unregistered, or set display
-            // id if there's another mouse (choose the most recent).
-            if (inputDeviceDescriptor.isMouse()) {
-                updateMouseValuesLocked();
-            }
+            closeInputDeviceDescriptorLocked(token, inputDeviceDescriptor);
         }
     }
 
     @GuardedBy("mLock")
-    private void updateMouseValuesLocked() {
+    private void closeInputDeviceDescriptorLocked(IBinder token,
+            InputDeviceDescriptor inputDeviceDescriptor) {
+        token.unlinkToDeath(inputDeviceDescriptor.getDeathRecipient(), /* flags= */ 0);
+        mNativeWrapper.closeUinput(inputDeviceDescriptor.getFileDescriptor());
+        InputManager.getInstance().removeUniqueIdAssociation(inputDeviceDescriptor.getPhys());
+
+        // Reset values to the default if all virtual mice are unregistered, or set display
+        // id if there's another mouse (choose the most recent). The inputDeviceDescriptor must be
+        // removed from the mInputDeviceDescriptors instance variable prior to this point.
+        if (inputDeviceDescriptor.isMouse()) {
+            if (mInputManagerInternal.getVirtualMousePointerDisplayId()
+                    == inputDeviceDescriptor.getDisplayId()) {
+                updateActivePointerDisplayIdLocked();
+            }
+        }
+    }
+
+    void setShowPointerIcon(boolean visible, int displayId) {
+        mInputManagerInternal.setPointerIconVisible(visible, displayId);
+    }
+
+    void setPointerAcceleration(float pointerAcceleration, int displayId) {
+        mInputManagerInternal.setPointerAcceleration(pointerAcceleration, displayId);
+    }
+
+    void setDisplayEligibilityForPointerCapture(boolean isEligible, int displayId) {
+        mInputManagerInternal.setDisplayEligibilityForPointerCapture(displayId, isEligible);
+    }
+
+    @GuardedBy("mLock")
+    private void updateActivePointerDisplayIdLocked() {
         InputDeviceDescriptor mostRecentlyCreatedMouse = null;
-        for (InputDeviceDescriptor otherInputDeviceDescriptor :
-                mInputDeviceDescriptors.values()) {
+        for (InputDeviceDescriptor otherInputDeviceDescriptor : mInputDeviceDescriptors.values()) {
             if (otherInputDeviceDescriptor.isMouse()) {
                 if (mostRecentlyCreatedMouse == null
                         || (otherInputDeviceDescriptor.getCreationOrderNumber()
@@ -225,18 +240,10 @@ class InputController {
         if (mostRecentlyCreatedMouse != null) {
             mInputManagerInternal.setVirtualMousePointerDisplayId(
                     mostRecentlyCreatedMouse.getDisplayId());
-            mActivePointerDisplayId = mostRecentlyCreatedMouse.getDisplayId();
         } else {
-            // All mice have been unregistered; reset all values.
-            resetMouseValuesLocked();
+            // All mice have been unregistered
+            mInputManagerInternal.setVirtualMousePointerDisplayId(Display.INVALID_DISPLAY);
         }
-    }
-
-    private void resetMouseValuesLocked() {
-        mInputManagerInternal.setVirtualMousePointerDisplayId(Display.INVALID_DISPLAY);
-        mInputManagerInternal.setPointerAcceleration(
-                IInputConstants.DEFAULT_POINTER_ACCELERATION);
-        mActivePointerDisplayId = Display.INVALID_DISPLAY;
     }
 
     private static String createPhys(@PhysType String type) {
@@ -269,7 +276,8 @@ class InputController {
                 throw new IllegalArgumentException(
                         "Could not send button event to input device for given token");
             }
-            if (inputDeviceDescriptor.getDisplayId() != mActivePointerDisplayId) {
+            if (inputDeviceDescriptor.getDisplayId()
+                    != mInputManagerInternal.getVirtualMousePointerDisplayId()) {
                 throw new IllegalStateException(
                         "Display id associated with this mouse is not currently targetable");
             }
@@ -300,7 +308,8 @@ class InputController {
                 throw new IllegalArgumentException(
                         "Could not send relative event to input device for given token");
             }
-            if (inputDeviceDescriptor.getDisplayId() != mActivePointerDisplayId) {
+            if (inputDeviceDescriptor.getDisplayId()
+                    != mInputManagerInternal.getVirtualMousePointerDisplayId()) {
                 throw new IllegalStateException(
                         "Display id associated with this mouse is not currently targetable");
             }
@@ -317,7 +326,8 @@ class InputController {
                 throw new IllegalArgumentException(
                         "Could not send scroll event to input device for given token");
             }
-            if (inputDeviceDescriptor.getDisplayId() != mActivePointerDisplayId) {
+            if (inputDeviceDescriptor.getDisplayId()
+                    != mInputManagerInternal.getVirtualMousePointerDisplayId()) {
                 throw new IllegalStateException(
                         "Display id associated with this mouse is not currently targetable");
             }
@@ -334,7 +344,8 @@ class InputController {
                 throw new IllegalArgumentException(
                         "Could not get cursor position for input device for given token");
             }
-            if (inputDeviceDescriptor.getDisplayId() != mActivePointerDisplayId) {
+            if (inputDeviceDescriptor.getDisplayId()
+                    != mInputManagerInternal.getVirtualMousePointerDisplayId()) {
                 throw new IllegalStateException(
                         "Display id associated with this mouse is not currently targetable");
             }
@@ -354,7 +365,6 @@ class InputController {
                 fout.println("          type: " + inputDeviceDescriptor.getType());
                 fout.println("          phys: " + inputDeviceDescriptor.getPhys());
             }
-            fout.println("      Active mouse display id: " + mActivePointerDisplayId);
         }
     }
 

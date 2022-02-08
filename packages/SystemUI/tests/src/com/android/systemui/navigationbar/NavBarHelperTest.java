@@ -31,6 +31,8 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
+import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
+import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.recents.OverviewProxyService;
@@ -55,9 +57,11 @@ public class NavBarHelperTest extends SysuiTestCase {
     @Mock
     AccessibilityManager mAccessibilityManager;
     @Mock
-    AccessibilityManagerWrapper mAccessibilityManagerWrapper;
-    @Mock
     AccessibilityButtonModeObserver mAccessibilityButtonModeObserver;
+    @Mock
+    AccessibilityButtonTargetsObserver mAccessibilityButtonTargetObserver;
+    @Mock
+    SystemActions mSystemActions;
     @Mock
     OverviewProxyService mOverviewProxyService;
     @Mock
@@ -85,8 +89,9 @@ public class NavBarHelperTest extends SysuiTestCase {
         when(mUserTracker.getUserId()).thenReturn(1);
 
         mNavBarHelper = new NavBarHelper(mContext, mAccessibilityManager,
-                mAccessibilityManagerWrapper, mAccessibilityButtonModeObserver,
-                mOverviewProxyService, mAssistManagerLazy, () -> Optional.of(mock(StatusBar.class)),
+                mAccessibilityButtonModeObserver, mAccessibilityButtonTargetObserver,
+                mSystemActions, mOverviewProxyService, mAssistManagerLazy,
+                () -> Optional.of(mock(StatusBar.class)),
                 mNavigationModeController, mUserTracker, mDumpManager);
 
     }

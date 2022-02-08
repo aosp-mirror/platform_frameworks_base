@@ -51,7 +51,6 @@ import androidx.annotation.WorkerThread;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.systemui.Dependency;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -103,6 +102,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     private final TileServiceKey mKey;
 
     private final AtomicBoolean mInitialDefaultIconFetched = new AtomicBoolean(false);
+    private final TileServices mTileServices;
 
     private CustomTile(
             QSHost host,
@@ -115,10 +115,12 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
             QSLogger qsLogger,
             String action,
             Context userContext,
-            CustomTileStatePersister customTileStatePersister
+            CustomTileStatePersister customTileStatePersister,
+            TileServices tileServices
     ) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
+        mTileServices = tileServices;
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
         mComponent = ComponentName.unflattenFromString(action);
         mTile = new Tile();
@@ -126,7 +128,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         mUser = mUserContext.getUserId();
         mKey = new TileServiceKey(mComponent, mUser);
 
-        mServiceManager = host.getTileServices().getTileWrapper(this);
+        mServiceManager = tileServices.getTileWrapper(this);
         mService = mServiceManager.getTileService();
         mCustomTileStatePersister = customTileStatePersister;
     }
@@ -349,7 +351,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
             } catch (RemoteException e) {
             }
         }
-        mHost.getTileServices().freeService(this, mServiceManager);
+        mTileServices.freeService(this, mServiceManager);
     }
 
     @Override
@@ -473,7 +475,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
     }
 
     public void startUnlockAndRun() {
-        Dependency.get(ActivityStarter.class).postQSRunnableDismissingKeyguard(() -> {
+        mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
             try {
                 mService.onUnlockComplete();
             } catch (RemoteException e) {
@@ -529,6 +531,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
         final ActivityStarter mActivityStarter;
         final QSLogger mQSLogger;
         final CustomTileStatePersister mCustomTileStatePersister;
+        private TileServices mTileServices;
 
         Context mUserContext;
         String mSpec = "";
@@ -543,7 +546,8 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
                 StatusBarStateController statusBarStateController,
                 ActivityStarter activityStarter,
                 QSLogger qsLogger,
-                CustomTileStatePersister customTileStatePersister
+                CustomTileStatePersister customTileStatePersister,
+                TileServices tileServices
         ) {
             mQSHostLazy = hostLazy;
             mBackgroundLooper = backgroundLooper;
@@ -554,6 +558,7 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
             mActivityStarter = activityStarter;
             mQSLogger = qsLogger;
             mCustomTileStatePersister = customTileStatePersister;
+            mTileServices = tileServices;
         }
 
         Builder setSpec(@NonNull String spec) {
@@ -583,7 +588,8 @@ public class CustomTile extends QSTileImpl<State> implements TileChangeListener 
                     mQSLogger,
                     action,
                     mUserContext,
-                    mCustomTileStatePersister
+                    mCustomTileStatePersister,
+                    mTileServices
             );
         }
     }

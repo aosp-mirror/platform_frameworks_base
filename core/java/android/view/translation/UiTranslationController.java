@@ -33,6 +33,7 @@ import android.os.HandlerThread;
 import android.os.Process;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Dumpable;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.LongSparseArray;
@@ -62,11 +63,15 @@ import java.util.function.BiConsumer;
  *
  * @hide
  */
-public class UiTranslationController {
+public class UiTranslationController implements Dumpable {
 
     public static final boolean DEBUG = Log.isLoggable(UiTranslationManager.LOG_TAG, Log.DEBUG);
 
+    /** @hide */
+    public static final String DUMPABLE_NAME = "UiTranslationController";
+
     private static final String TAG = "UiTranslationController";
+
     @NonNull
     private final Activity mActivity;
     @NonNull
@@ -104,6 +109,7 @@ public class UiTranslationController {
                         Process.THREAD_PRIORITY_FOREGROUND);
         mWorkerThread.start();
         mWorkerHandler = mWorkerThread.getThreadHandler();
+        activity.addDumpable(this);
     }
 
     /**
@@ -206,10 +212,14 @@ public class UiTranslationController {
         mLastRequestAutofillIds.addAll(views);
     }
 
-    /**
-     * Called to dump the translation information for Activity.
-     */
-    public void dump(String outerPrefix, PrintWriter pw) {
+    @Override
+    public String getDumpableName() {
+        return DUMPABLE_NAME;
+    }
+
+    @Override
+    public void dump(PrintWriter pw, String[] args) {
+        String outerPrefix = "";
         pw.print(outerPrefix); pw.println("UiTranslationController:");
         final String pfx = outerPrefix + "  ";
         pw.print(pfx); pw.print("activity: "); pw.print(mActivity);

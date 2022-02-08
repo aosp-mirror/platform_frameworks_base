@@ -407,6 +407,15 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int LENS_POSE_REFERENCE_UNDEFINED = 2;
 
+    /**
+     * <p>The value of {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation} is relative to the origin of the
+     * automotive sensor coodinate system, which is at the center of the rear axle.</p>
+     *
+     * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CameraCharacteristics#LENS_POSE_REFERENCE
+     */
+    public static final int LENS_POSE_REFERENCE_AUTOMOTIVE = 3;
+
     //
     // Enumeration values for CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
     //
@@ -1827,6 +1836,191 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE
      */
     public static final int LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE_CALIBRATED = 1;
+
+    //
+    // Enumeration values for CameraCharacteristics#AUTOMOTIVE_LENS_FACING
+    //
+
+    /**
+     * <p>The camera device faces the outside of the vehicle body frame but not exactly
+     * one of the exterior sides defined by this enum.  Applications should determine
+     * the exact facing direction from {@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation} and
+     * {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}.</p>
+     *
+     * @see CameraCharacteristics#LENS_POSE_ROTATION
+     * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CameraCharacteristics#AUTOMOTIVE_LENS_FACING
+     */
+    public static final int AUTOMOTIVE_LENS_FACING_EXTERIOR_OTHER = 0;
+
+    /**
+     * <p>The camera device faces the front of the vehicle body frame.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LENS_FACING
+     */
+    public static final int AUTOMOTIVE_LENS_FACING_EXTERIOR_FRONT = 1;
+
+    /**
+     * <p>The camera device faces the rear of the vehicle body frame.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LENS_FACING
+     */
+    public static final int AUTOMOTIVE_LENS_FACING_EXTERIOR_REAR = 2;
+
+    /**
+     * <p>The camera device faces the left side of the vehicle body frame.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LENS_FACING
+     */
+    public static final int AUTOMOTIVE_LENS_FACING_EXTERIOR_LEFT = 3;
+
+    /**
+     * <p>The camera device faces the right side of the vehicle body frame.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LENS_FACING
+     */
+    public static final int AUTOMOTIVE_LENS_FACING_EXTERIOR_RIGHT = 4;
+
+    /**
+     * <p>The camera device faces the inside of the vehicle body frame but not exactly
+     * one of seats described by this enum.  Applications should determine the exact
+     * facing direction from {@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation} and {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}.</p>
+     *
+     * @see CameraCharacteristics#LENS_POSE_ROTATION
+     * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CameraCharacteristics#AUTOMOTIVE_LENS_FACING
+     */
+    public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_OTHER = 5;
+
+    /**
+     * <p>The camera device faces the left side seat of the first row.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LENS_FACING
+     */
+    public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_1_LEFT = 6;
+
+    /**
+     * <p>The camera device faces the center seat of the first row.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LENS_FACING
+     */
+    public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_1_CENTER = 7;
+
+    /**
+     * <p>The camera device faces the right seat of the first row.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LENS_FACING
+     */
+    public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_1_RIGHT = 8;
+
+    /**
+     * <p>The camera device faces the left side seat of the second row.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LENS_FACING
+     */
+    public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_2_LEFT = 9;
+
+    /**
+     * <p>The camera device faces the center seat of the second row.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LENS_FACING
+     */
+    public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_2_CENTER = 10;
+
+    /**
+     * <p>The camera device faces the right side seat of the second row.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LENS_FACING
+     */
+    public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_2_RIGHT = 11;
+
+    /**
+     * <p>The camera device faces the left side seat of the third row.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LENS_FACING
+     */
+    public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_3_LEFT = 12;
+
+    /**
+     * <p>The camera device faces the center seat of the third row.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LENS_FACING
+     */
+    public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_3_CENTER = 13;
+
+    /**
+     * <p>The camera device faces the right seat of the third row.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LENS_FACING
+     */
+    public static final int AUTOMOTIVE_LENS_FACING_INTERIOR_SEAT_ROW_3_RIGHT = 14;
+
+    //
+    // Enumeration values for CameraCharacteristics#AUTOMOTIVE_LOCATION
+    //
+
+    /**
+     * <p>The camera device exists inside of the vehicle cabin.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LOCATION
+     */
+    public static final int AUTOMOTIVE_LOCATION_INTERIOR = 0;
+
+    /**
+     * <p>The camera exists outside of the vehicle body frame but not exactly on one of the
+     * exterior locations this enum defines.  The applications should determine the exact
+     * location from {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}.</p>
+     *
+     * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CameraCharacteristics#AUTOMOTIVE_LOCATION
+     */
+    public static final int AUTOMOTIVE_LOCATION_EXTERIOR_OTHER = 1;
+
+    /**
+     * <p>The camera device exists outside of the vehicle body frame and on its front side.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LOCATION
+     */
+    public static final int AUTOMOTIVE_LOCATION_EXTERIOR_FRONT = 2;
+
+    /**
+     * <p>The camera device exists outside of the vehicle body frame and on its rear side.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LOCATION
+     */
+    public static final int AUTOMOTIVE_LOCATION_EXTERIOR_REAR = 3;
+
+    /**
+     * <p>The camera device exists outside and on left side of the vehicle body frame.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LOCATION
+     */
+    public static final int AUTOMOTIVE_LOCATION_EXTERIOR_LEFT = 4;
+
+    /**
+     * <p>The camera device exists outside and on right side of the vehicle body frame.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LOCATION
+     */
+    public static final int AUTOMOTIVE_LOCATION_EXTERIOR_RIGHT = 5;
+
+    /**
+     * <p>The camera device exists on an extra vehicle, such as the trailer, but not exactly
+     * on one of front, rear, left, or right side.  Applications should determine the exact
+     * location from {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}.</p>
+     *
+     * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CameraCharacteristics#AUTOMOTIVE_LOCATION
+     */
+    public static final int AUTOMOTIVE_LOCATION_EXTRA_OTHER = 6;
+
+    /**
+     * <p>The camera device exists outside of the extra vehicle's body frame and on its front
+     * side.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LOCATION
+     */
+    public static final int AUTOMOTIVE_LOCATION_EXTRA_FRONT = 7;
+
+    /**
+     * <p>The camera device exists outside of the extra vehicle's body frame and on its rear
+     * side.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LOCATION
+     */
+    public static final int AUTOMOTIVE_LOCATION_EXTRA_REAR = 8;
+
+    /**
+     * <p>The camera device exists outside and on left side of the extra vehicle body.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LOCATION
+     */
+    public static final int AUTOMOTIVE_LOCATION_EXTRA_LEFT = 9;
+
+    /**
+     * <p>The camera device exists outside and on right side of the extra vehicle body.</p>
+     * @see CameraCharacteristics#AUTOMOTIVE_LOCATION
+     */
+    public static final int AUTOMOTIVE_LOCATION_EXTRA_RIGHT = 10;
 
     //
     // Enumeration values for CaptureRequest#COLOR_CORRECTION_MODE

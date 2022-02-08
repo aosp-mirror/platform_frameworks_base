@@ -74,6 +74,7 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.SysuiTestableContext;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
+import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -120,6 +121,8 @@ public class NavigationBarTest extends SysuiTestCase {
     private NavigationBar mExternalDisplayNavigationBar;
 
     private SysuiTestableContext mSysuiTestableContextExternal;
+    @Mock
+    private SystemActions mSystemActions;
     @Mock
     private OverviewProxyService mOverviewProxyService;
     @Mock
@@ -183,8 +186,9 @@ public class NavigationBarTest extends SysuiTestCase {
         mDependency.injectTestDependency(NavigationModeController.class, mNavigationModeController);
         TestableLooper.get(this).runWithLooper(() -> {
             mNavBarHelper = spy(new NavBarHelper(mContext, mock(AccessibilityManager.class),
-                    mock(AccessibilityManagerWrapper.class),
-                    mock(AccessibilityButtonModeObserver.class), mOverviewProxyService,
+                    mock(AccessibilityButtonModeObserver.class),
+                    mock(AccessibilityButtonTargetsObserver.class),
+                    mSystemActions, mOverviewProxyService,
                     () -> mock(AssistManager.class), () -> Optional.of(mStatusBar),
                     mock(NavigationModeController.class), mock(UserTracker.class),
                     mock(DumpManager.class)));
@@ -359,7 +363,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 NavBarHelper.NavbarTaskbarStateUpdater.class));
 
         // Should be safe even though the internal view is now null.
-        mNavigationBar.updateAcessibilityStateFlags();
+        mNavigationBar.updateAccessibilityStateFlags();
     }
 
     private NavigationBar createNavBar(Context context) {
@@ -385,12 +389,10 @@ public class NavigationBarTest extends SysuiTestCase {
                 mock(ShadeController.class),
                 mock(NotificationRemoteInputManager.class),
                 mock(NotificationShadeDepthController.class),
-                mock(SystemActions.class),
                 mHandler,
                 mock(NavigationBarOverlayController.class),
                 mUiEventLogger,
                 mNavBarHelper,
-                mock(UserTracker.class),
                 mLightBarController,
                 mLightBarcontrollerFactory,
                 mAutoHideController,

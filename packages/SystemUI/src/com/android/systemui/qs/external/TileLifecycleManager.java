@@ -31,20 +31,23 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.quicksettings.IQSService;
 import android.service.quicksettings.IQSTileService;
-import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.util.ArraySet;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Main;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import dagger.assisted.Assisted;
+import dagger.assisted.AssistedFactory;
+import dagger.assisted.AssistedInject;
 
 /**
  * Manages the lifecycle of a TileService.
@@ -102,16 +105,10 @@ public class TileLifecycleManager extends BroadcastReceiver implements
     // Return value from bindServiceAsUser, determines whether safe to call unbind.
     private boolean mIsBound;
 
-    public TileLifecycleManager(Handler handler, Context context, IQSService service, Tile tile,
-            Intent intent, UserHandle user, BroadcastDispatcher broadcastDispatcher) {
-        this(handler, context, service, tile, intent, user, new PackageManagerAdapter(context),
-                broadcastDispatcher);
-    }
-
-    @VisibleForTesting
-    TileLifecycleManager(Handler handler, Context context, IQSService service, Tile tile,
-            Intent intent, UserHandle user, PackageManagerAdapter packageManagerAdapter,
-            BroadcastDispatcher broadcastDispatcher) {
+    @AssistedInject
+    TileLifecycleManager(@Main Handler handler, Context context, IQSService service,
+            PackageManagerAdapter packageManagerAdapter, BroadcastDispatcher broadcastDispatcher,
+            @Assisted Intent intent, @Assisted UserHandle user) {
         mContext = context;
         mHandler = handler;
         mIntent = intent;
@@ -121,6 +118,13 @@ public class TileLifecycleManager extends BroadcastReceiver implements
         mPackageManagerAdapter = packageManagerAdapter;
         mBroadcastDispatcher = broadcastDispatcher;
         if (DEBUG) Log.d(TAG, "Creating " + mIntent + " " + mUser);
+    }
+
+    /** Injectable factory for TileLifecycleManager. */
+    @AssistedFactory
+    public interface Factory {
+        /** */
+        TileLifecycleManager create(Intent intent, UserHandle userHandle);
     }
 
     public ComponentName getComponent() {

@@ -16090,6 +16090,23 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         /**
+         * Returns package name by pid.
+         */
+        @Override
+        @Nullable
+        public String getPackageNameByPid(int pid) {
+            synchronized (mPidsSelfLocked) {
+                final ProcessRecord app = mPidsSelfLocked.get(pid);
+
+                if (app != null && app.info != null) {
+                    return app.info.packageName;
+                }
+
+                return null;
+            }
+        }
+
+        /**
          * Sets if the given pid has an overlay UI or not.
          *
          * @param pid The pid we are setting overlay UI for.

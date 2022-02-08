@@ -27,6 +27,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.TextUtils;
+import android.util.Dumpable;
 import android.util.Log;
 import android.util.Slog;
 import android.view.KeyEvent;
@@ -43,7 +44,7 @@ import java.util.Arrays;
  *
  * @hide
  */
-public final class AutofillClientController implements AutofillManager.AutofillClient {
+public final class AutofillClientController implements AutofillManager.AutofillClient, Dumpable {
 
     private static final String TAG = "AutofillClientController";
 
@@ -53,6 +54,8 @@ public final class AutofillClientController implements AutofillManager.AutofillC
     public static final String LAST_AUTOFILL_ID = "android:lastAutofillId";
     public static final String AUTOFILL_RESET_NEEDED = "@android:autofillResetNeeded";
     public static final String AUTO_FILL_AUTH_WHO_PREFIX = "@android:autoFillAuth:";
+
+    public static final String DUMPABLE_NAME = "AutofillManager";
 
     /** The last autofill id that was returned from {@link #getNextAutofillId()} */
     public int mLastAutofillId = View.LAST_APP_AUTOFILL_ID;
@@ -73,6 +76,7 @@ public final class AutofillClientController implements AutofillManager.AutofillC
      */
     public AutofillClientController(Activity activity) {
         mActivity = activity;
+        activity.addDumpable(this);
     }
 
     private AutofillManager getAutofillManager() {
@@ -280,10 +284,14 @@ public final class AutofillClientController implements AutofillManager.AutofillC
         }
     }
 
-    /**
-     * Prints autofill related information for the Activity.
-     */
-    public void dumpAutofillManager(String prefix, PrintWriter writer) {
+    @Override
+    public String getDumpableName() {
+        return DUMPABLE_NAME;
+    }
+
+    @Override
+    public void dump(PrintWriter writer, String[] args) {
+        final String prefix = "";
         final AutofillManager afm = getAutofillManager();
         if (afm != null) {
             afm.dump(prefix, writer);

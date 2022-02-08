@@ -37,7 +37,6 @@ import android.content.Context;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.hardware.display.DisplayManager;
-import android.hardware.input.InputManagerInternal;
 import android.hardware.input.VirtualKeyEvent;
 import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseRelativeEvent;
@@ -56,8 +55,8 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.window.DisplayWindowPolicyController;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -83,6 +82,9 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final VirtualDeviceParams mParams;
     private final Map<Integer, PowerManager.WakeLock> mPerDisplayWakelocks = new ArrayMap<>();
     private final IVirtualDeviceActivityListener mActivityListener;
+    // The default setting for showing the pointer on new displays.
+    @GuardedBy("mVirtualDeviceLock")
+    private boolean mDefaultShowPointerIcon = true;
 
     private ActivityListener createListenerAdapter(int displayId) {
         return new ActivityListener() {
@@ -382,6 +384,25 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
     }
 
+    @Override // Binder call
+    public void setShowPointerIcon(boolean showPointerIcon) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
+                "Permission required to unregister this input device");
+
+        final long binderToken = Binder.clearCallingIdentity();
+        try {
+            synchronized (mVirtualDeviceLock) {
+                mDefaultShowPointerIcon = showPointerIcon;
+                for (int displayId : mVirtualDisplayIds) {
+                    mInputController.setShowPointerIcon(mDefaultShowPointerIcon, displayId);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(binderToken);
+        }
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
         fout.println("  VirtualDevice: ");
@@ -392,6 +413,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             for (int id : mVirtualDisplayIds) {
                 fout.println("      " + id);
             }
+            fout.println("    mDefaultShowPointerIcon: " + mDefaultShowPointerIcon);
         }
         mInputController.dump(fout);
     }
@@ -403,15 +425,16 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                         "Virtual device already have a virtual display with ID " + displayId);
             }
             mVirtualDisplayIds.add(displayId);
+            mInputController.setShowPointerIcon(mDefaultShowPointerIcon, displayId);
+            mInputController.setPointerAcceleration(1f, displayId);
+            mInputController.setDisplayEligibilityForPointerCapture(/* isEligible= */ false,
+                    displayId);
 
             // Since we're being called in the middle of the display being created, we post a
             // task to grab the wakelock instead of doing it synchronously here, to avoid
             // reentrancy  problems.
             mContext.getMainThreadHandler().post(() -> addWakeLockForDisplay(displayId));
 
-            LocalServices.getService(
-                    InputManagerInternal.class).setDisplayEligibilityForPointerCapture(displayId,
-                    false);
             final GenericWindowPolicyController dwpc =
                     new GenericWindowPolicyController(FLAG_SECURE,
                             SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
@@ -471,9 +494,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 mPerDisplayWakelocks.remove(displayId);
             }
             mVirtualDisplayIds.remove(displayId);
-            LocalServices.getService(
-                    InputManagerInternal.class).setDisplayEligibilityForPointerCapture(
-                    displayId, true);
             mWindowPolicyControllers.remove(displayId);
         }
     }

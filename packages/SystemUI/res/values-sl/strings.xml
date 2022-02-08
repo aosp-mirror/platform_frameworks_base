@@ -46,6 +46,10 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Dovoli"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Odpravljanje napak s povezavo USB ni dovoljeno"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Uporabnik, trenutno prijavljen v napravo, ne more vklopiti odpravljanja napak s povezavo USB. Če želite uporabljati to funkcijo, preklopite na primarnega uporabnika."</string>
+    <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"Ali želite jezik sistema spremeniti na jezik <xliff:g id="LANGUAGE">%1$s</xliff:g>?"</string>
+    <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Spremembo jezika sistema je zahtevala druga naprava."</string>
+    <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Spremeni jezik"</string>
+    <string name="hdmi_cec_set_menu_language_decline" msgid="7650721096558646011">"Obdrži trenutni jezik"</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Ali dovolite brezžično odpravljanje napak v tem omrežju?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Ime omrežja (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nNaslov omrežja Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Vedno dovoli v tem omrežju"</string>
@@ -177,7 +181,6 @@
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Zapri"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"popolna tišina"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"samo alarmi"</string>
-    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Ne moti."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Bluetooth je vklopljen."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"Alarm je nastavljen čez: <xliff:g id="TIME">%s</xliff:g>."</string>
@@ -204,7 +207,6 @@
     <string name="dessert_case" msgid="9104973640704357717">"Vitrina za sladice"</string>
     <string name="start_dreams" msgid="9131802557946276718">"Ohranjeval. zaslona"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Ethernet"</string>
-    <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Ne moti"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Na voljo ni nobene seznanjene naprave"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Baterija na <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
@@ -273,10 +275,8 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"Do sončnega vzhoda"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"Vklop ob <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"Do <xliff:g id="TIME">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_dark_mode_secondary_label_on_at_bedtime (2274300599408864897) -->
-    <skip />
-    <!-- no translation found for quick_settings_dark_mode_secondary_label_until_bedtime_ends (1790772410777123685) -->
-    <skip />
+    <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime" msgid="2274300599408864897">"Vklop, ko je čas za spanje."</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_bedtime_ends" msgid="1790772410777123685">"Dokler se čas za spanje ne konča."</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"Tehnologija NFC je onemogočena"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"Tehnologija NFC je omogočena"</string>
@@ -320,6 +320,7 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Polnjenje • Napolnjeno čez <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Hitro polnjenje • Napolnjeno čez <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Počasno polnjenje • Napolnjeno čez <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Polnjenje na nosilcu • Polno čez <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Preklop med uporabniki"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Dodajanje uporabnika"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Nov uporabnik"</string>
@@ -354,7 +355,6 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Obvestila"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Pogovori"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Brisanje vseh tihih obvestil"</string>
-    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Prikazovanje obvestil je začasno zaustavljeno z načinom »ne moti«"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Začni zdaj"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Ni obvestil"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"To napravo upravlja tvoj starš"</string>
@@ -499,8 +499,6 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"&lt;b&gt;Stanje:&lt;/b&gt; Uvrščeno nižje"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"Prikaz na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"Prikaz v obliki oblačka na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu."</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"Prikaz na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu, preglasitev načina Ne moti."</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"Prikaz v obliki oblačka na vrhu razdelka z obvestili za pogovor in kot profilna slika na zaklenjenem zaslonu, preglasitev načina Ne moti."</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prednostno"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> ne podpira pogovornih funkcij."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Za ta obvestila ni mogoče spremeniti nastavitev."</string>
@@ -580,7 +578,6 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"Sporočila SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Glasba"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Koledar"</string>
-    <string name="volume_and_do_not_disturb" msgid="502044092739382832">"Ne moti"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"Bližnjica z gumboma za glasnost"</string>
     <string name="battery" msgid="769686279459897127">"Baterija"</string>
     <string name="headset" msgid="4485892374984466437">"Slušalke z mikrofonom"</string>
@@ -700,10 +697,6 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi-Fi je izklopljen"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth je izklopljen"</string>
-    <string name="dnd_is_off" msgid="3185706903793094463">"Način »ne moti« je izklopljen"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Samodejno pravilo (<xliff:g id="ID_1">%s</xliff:g>) je vklopilo način »ne moti«."</string>
-    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"Aplikacija (<xliff:g id="ID_1">%s</xliff:g>) je vklopila način »ne moti«."</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"Način »ne moti« je bil vklopljen zaradi samodejnega pravila ali aplikacije."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"Aplikacije, ki se izvajajo v ozadju"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"Dotaknite se za prikaz podrobnosti porabe baterije in prenosa podatkov"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"Želite izklopiti prenos podatkov v mobilnih omrežjih?"</string>
@@ -808,14 +801,10 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Predvajaj skladbo <xliff:g id="SONG_NAME">%1$s</xliff:g> iz aplikacije <xliff:g id="APP_LABEL">%2$s</xliff:g>."</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Razveljavi"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Za predvajanje v napravi <xliff:g id="DEVICENAME">%1$s</xliff:g> bolj približajte telefon."</string>
-    <!-- no translation found for media_move_closer_to_end_cast (6495907340926563656) -->
-    <skip />
-    <!-- no translation found for media_transfer_playing_different_device (7186806382609785610) -->
-    <skip />
-    <!-- no translation found for media_transfer_playing_this_device (1856890686844499172) -->
-    <skip />
-    <!-- no translation found for media_transfer_failed (2640354446629980227) -->
-    <skip />
+    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Približajte napravi <xliff:g id="DEVICENAME">%1$s</xliff:g> za predvajanje v tej napravi"</string>
+    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Predvajanje v napravi <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
+    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"Predvajanje v tem telefonu"</string>
+    <string name="media_transfer_failed" msgid="2640354446629980227">"Prišlo je do težave"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno, poglejte aplikacijo"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Ni mogoče najti"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrolnik ni na voljo"</string>
@@ -865,7 +854,6 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"Več kot <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"Ogled nedavnih sporočil, neodgovorjenih klicev in posodobitev stanj"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Pogovor"</string>
-    <string name="paused_by_dnd" msgid="7856941866433556428">"To je začasno zaustavil način »ne moti«."</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"Oseba <xliff:g id="NAME">%1$s</xliff:g> je poslala sporočilo: <xliff:g id="NOTIFICATION">%2$s</xliff:g>."</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"Oseba <xliff:g id="NAME">%1$s</xliff:g> je poslala sliko."</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"Oseba <xliff:g id="NAME">%1$s</xliff:g> je posodobila stanje: <xliff:g id="STATUS">%2$s</xliff:g>."</string>
@@ -900,8 +888,19 @@
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj ploščico"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Ne dodaj ploščice"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Izberite uporabnika"</string>
-    <string name="fgs_manager_dialog_title" msgid="656091833603337197">"Aplikacije z izvajanjem v ozadju"</string>
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
+      <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> aktivna aplikacija</item>
+      <item quantity="two"><xliff:g id="COUNT_1">%s</xliff:g> aktivni aplikaciji</item>
+      <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> aktivne aplikacije</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aktivnih aplikacij</item>
+    </plurals>
+    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktivne aplikacije"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Ustavi"</string>
+    <!-- no translation found for fgs_manager_app_item_stop_button_stopped_label (6950382004441263922) -->
+    <skip />
     <string name="clipboard_edit_text_copy" msgid="770856373439969178">"Kopiraj"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"Kopirano"</string>
+    <!-- no translation found for clipboard_edit_source (9156488177277788029) -->
+    <skip />
+    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"Opusti kopiranje uporabniškega vmesnika"</string>
 </resources>

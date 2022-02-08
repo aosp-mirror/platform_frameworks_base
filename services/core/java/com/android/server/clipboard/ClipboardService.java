@@ -722,7 +722,7 @@ public class ClipboardService extends SystemService {
                         clipboard.primaryClipListeners.getBroadcastItem(i)
                                 .dispatchPrimaryClipChanged();
                     }
-                } catch (RemoteException e) {
+                } catch (RemoteException | SecurityException e) {
                     // The RemoteCallbackList will take care of removing
                     // the dead object for us.
                 }

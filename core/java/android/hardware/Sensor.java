@@ -794,6 +794,21 @@ public final class Sensor {
             "android.sensor.gyroscope_limited_axes_uncalibrated";
 
     /**
+     * A constant string describing a heading sensor.
+     *
+     * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
+     */
+    public static final int TYPE_HEADING = 42;
+
+    /**
+     * A constant string describing a heading sensor.
+     *
+     * @see #TYPE_HEADING
+     *
+     */
+    public static final String STRING_TYPE_HEADING = "android.sensor.heading";
+
+    /**
      * A constant describing all sensor types.
      */
 
@@ -918,6 +933,7 @@ public final class Sensor {
             6, // SENSOR_TYPE_GYROSCOPE_LIMITED_AXES
             9, // SENSOR_TYPE_ACCELEROMETER_LIMITED_AXES_UNCALIBRATED
             9, // SENSOR_TYPE_GYROSCOPE_LIMITED_AXES_UNCALIBRATED
+            2, // SENSOR_TYPE_HEADING
     };
 
     /**
@@ -1384,6 +1400,9 @@ public final class Sensor {
                 return true;
             case TYPE_GYROSCOPE_LIMITED_AXES_UNCALIBRATED:
                 mStringType = STRING_TYPE_GYROSCOPE_LIMITED_AXES_UNCALIBRATED;
+                return true;
+            case TYPE_HEADING:
+                mStringType = STRING_TYPE_HEADING;
                 return true;
             default:
                 return false;

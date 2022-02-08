@@ -27,8 +27,8 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArraySet;
+import android.util.Dumpable;
 import android.util.EventLog;
-import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -44,6 +44,7 @@ import com.android.server.utils.TimingsTraceAndSlog;
 import dalvik.system.PathClassLoader;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -687,7 +688,12 @@ public final class SystemServiceManager implements Dumpable {
     }
 
     @Override
-    public void dump(IndentingPrintWriter pw, String[] args) {
+    public String getDumpableName() {
+        return SystemServiceManager.class.getSimpleName();
+    }
+
+    @Override
+    public void dump(PrintWriter pw, String[] args) {
         pw.printf("Current phase: %d\n", mCurrentPhase);
         synchronized (mTargetUsers) {
             if (mCurrentUser != null) {
@@ -711,14 +717,13 @@ public final class SystemServiceManager implements Dumpable {
             }
         }
         final int startedLen = mServices.size();
+        String prefix = "  ";
         if (startedLen > 0) {
             pw.printf("%d started services:\n", startedLen);
-            pw.increaseIndent();
             for (int i = 0; i < startedLen; i++) {
                 final SystemService service = mServices.get(i);
-                pw.println(service.getClass().getCanonicalName());
+                pw.print(prefix); pw.println(service.getClass().getCanonicalName());
             }
-            pw.decreaseIndent();
         } else {
             pw.println("No started services");
         }

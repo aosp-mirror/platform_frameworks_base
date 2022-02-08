@@ -171,9 +171,4 @@
     <item msgid="146088982397753810">"Aus"</item>
     <item msgid="460891964396502657">"An"</item>
   </string-array>
-  <string-array name="tile_states_fgsmanager">
-    <item msgid="3054341646818213094">"Nicht verfügbar"</item>
-    <item msgid="5581384648880018330">"Aus"</item>
-    <item msgid="8000850843692192257">"An"</item>
-  </string-array>
 </resources>

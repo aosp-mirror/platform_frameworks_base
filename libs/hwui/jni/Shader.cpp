@@ -261,11 +261,10 @@ static jlong RuntimeShader_getNativeFinalizer(JNIEnv*, jobject) {
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(&SkRuntimeShaderBuilder_delete));
 }
 
-static jlong RuntimeShader_create(JNIEnv* env, jobject, jlong shaderBuilder, jlong matrixPtr,
-                                  jboolean isOpaque) {
+static jlong RuntimeShader_create(JNIEnv* env, jobject, jlong shaderBuilder, jlong matrixPtr) {
     SkRuntimeShaderBuilder* builder = reinterpret_cast<SkRuntimeShaderBuilder*>(shaderBuilder);
     const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
-    sk_sp<SkShader> shader = builder->makeShader(matrix, isOpaque == JNI_TRUE);
+    sk_sp<SkShader> shader = builder->makeShader(matrix, false);
     ThrowIAE_IfNull(env, shader);
     return reinterpret_cast<jlong>(shader.release());
 }
@@ -419,7 +418,7 @@ static const JNINativeMethod gComposeShaderMethods[] = {
 
 static const JNINativeMethod gRuntimeShaderMethods[] = {
         {"nativeGetFinalizer", "()J", (void*)RuntimeShader_getNativeFinalizer},
-        {"nativeCreateShader", "(JJZ)J", (void*)RuntimeShader_create},
+        {"nativeCreateShader", "(JJ)J", (void*)RuntimeShader_create},
         {"nativeCreateBuilder", "(Ljava/lang/String;)J", (void*)RuntimeShader_createShaderBuilder},
         {"nativeUpdateUniforms", "(JLjava/lang/String;[FZ)V",
          (void*)RuntimeShader_updateFloatArrayUniforms},

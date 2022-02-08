@@ -3862,6 +3862,11 @@
   <java-symbol type="string" name="harmful_app_warning_title" />
   <java-symbol type="layout" name="harmful_app_warning_dialog" />
 
+  <java-symbol type="string" name="log_access_confirmation_allow" />
+  <java-symbol type="string" name="log_access_confirmation_deny" />
+  <java-symbol type="string" name="log_access_confirmation_title" />
+  <java-symbol type="string" name="log_access_confirmation_body" />
+
   <java-symbol type="string" name="config_defaultAssistantAccessComponent" />
 
   <java-symbol type="string" name="slices_permission_request" />

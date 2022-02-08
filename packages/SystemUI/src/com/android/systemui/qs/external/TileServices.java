@@ -38,8 +38,8 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import com.android.internal.statusbar.StatusBarIcon;
-import com.android.systemui.Dependency;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -49,6 +49,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Objects;
+
+import javax.inject.Inject;
 
 /**
  * Runs the day-to-day operations of which tiles should be bound and when.
@@ -65,14 +67,21 @@ public class TileServices extends IQSService.Stub {
     private final Handler mHandler;
     private final Handler mMainHandler;
     private final QSTileHost mHost;
+    private final KeyguardStateController mKeyguardStateController;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final UserTracker mUserTracker;
 
     private int mMaxBound = DEFAULT_MAX_BOUND;
 
-    public TileServices(QSTileHost host, Looper looper, BroadcastDispatcher broadcastDispatcher,
-            UserTracker userTracker) {
+    @Inject
+    public TileServices(
+            QSTileHost host,
+            @Main Looper looper,
+            BroadcastDispatcher broadcastDispatcher,
+            UserTracker userTracker,
+            KeyguardStateController keyguardStateController) {
         mHost = host;
+        mKeyguardStateController = keyguardStateController;
         mContext = mHost.getContext();
         mBroadcastDispatcher = broadcastDispatcher;
         mHandler = new Handler(looper);
@@ -96,8 +105,7 @@ public class TileServices extends IQSService.Stub {
 
     public TileServiceManager getTileWrapper(CustomTile tile) {
         ComponentName component = tile.getComponent();
-        TileServiceManager service = onCreateTileService(component, tile.getQsTile(),
-                mBroadcastDispatcher);
+        TileServiceManager service = onCreateTileService(component, mBroadcastDispatcher);
         synchronized (mServices) {
             mServices.put(tile, service);
             mTiles.put(component, tile);
@@ -108,9 +116,9 @@ public class TileServices extends IQSService.Stub {
         return service;
     }
 
-    protected TileServiceManager onCreateTileService(ComponentName component, Tile tile,
+    protected TileServiceManager onCreateTileService(ComponentName component,
             BroadcastDispatcher broadcastDispatcher) {
-        return new TileServiceManager(this, mHandler, component, tile,
+        return new TileServiceManager(this, mHandler, component,
                 broadcastDispatcher, mUserTracker);
     }
 
@@ -321,16 +329,12 @@ public class TileServices extends IQSService.Stub {
 
     @Override
     public boolean isLocked() {
-        KeyguardStateController keyguardStateController =
-                Dependency.get(KeyguardStateController.class);
-        return keyguardStateController.isShowing();
+        return mKeyguardStateController.isShowing();
     }
 
     @Override
     public boolean isSecure() {
-        KeyguardStateController keyguardStateController =
-                Dependency.get(KeyguardStateController.class);
-        return keyguardStateController.isMethodSecure() && keyguardStateController.isShowing();
+        return mKeyguardStateController.isMethodSecure() && mKeyguardStateController.isShowing();
     }
 
     @Nullable

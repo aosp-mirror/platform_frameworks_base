@@ -34,8 +34,6 @@ public class RuntimeShader extends Shader {
                 RuntimeShader.class.getClassLoader(), nativeGetFinalizer());
     }
 
-    private boolean mForceOpaque;
-
     /**
      * Current native shader builder instance.
      */
@@ -47,31 +45,15 @@ public class RuntimeShader extends Shader {
      * @param shader The text of AGSL shader program to run.
      */
     public RuntimeShader(@NonNull String shader) {
-        this(shader, false);
-    }
-
-    /**
-     * Creates a new RuntimeShader.
-     *
-     * @param shader The text of AGSL shader program to run.
-     * @param forceOpaque If true then all pixels produced by the AGSL shader program will have an
-     *                    alpha of 1.0f.
-     */
-    public RuntimeShader(@NonNull String shader, boolean forceOpaque) {
         // colorspace is required, but the RuntimeShader always produces colors in the destination
         // buffer's colorspace regardless of the value specified here.
         super(ColorSpace.get(ColorSpace.Named.SRGB));
         if (shader == null) {
             throw new NullPointerException("RuntimeShader requires a non-null AGSL string");
         }
-        mForceOpaque = forceOpaque;
         mNativeInstanceRuntimeShaderBuilder = nativeCreateBuilder(shader);
         NoImagePreloadHolder.sRegistry.registerNativeAllocation(
                 this, mNativeInstanceRuntimeShaderBuilder);
-    }
-
-    public boolean isForceOpaque() {
-        return mForceOpaque;
     }
 
     /**
@@ -322,7 +304,7 @@ public class RuntimeShader extends Shader {
     /** @hide */
     @Override
     protected long createNativeInstance(long nativeMatrix, boolean filterFromPaint) {
-        return nativeCreateShader(mNativeInstanceRuntimeShaderBuilder, nativeMatrix, mForceOpaque);
+        return nativeCreateShader(mNativeInstanceRuntimeShaderBuilder, nativeMatrix);
     }
 
     /** @hide */
@@ -332,8 +314,7 @@ public class RuntimeShader extends Shader {
 
     private static native long nativeGetFinalizer();
     private static native long nativeCreateBuilder(String agsl);
-    private static native long nativeCreateShader(
-            long shaderBuilder, long matrix, boolean isOpaque);
+    private static native long nativeCreateShader(long shaderBuilder, long matrix);
     private static native void nativeUpdateUniforms(
             long shaderBuilder, String uniformName, float[] uniforms, boolean isColor);
     private static native void nativeUpdateUniforms(

@@ -3089,6 +3089,38 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes a limited axes accelerometer.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_ACCELEROMETER_LIMITED_AXES =
+                "android.hardware.sensor.accelerometer_limited_axes";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes a limited axes gyroscope.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_GYROSCOPE_LIMITED_AXES =
+                "android.hardware.sensor.gyroscope_limited_axes";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes an uncalibrated limited axes accelerometer.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_ACCELEROMETER_LIMITED_AXES_UNCALIBRATED =
+                "android.hardware.sensor.accelerometer_limited_axes_uncalibrated";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes an uncalibrated limited axes gyroscope.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_GYROSCOPE_LIMITED_AXES_UNCALIBRATED =
+                "android.hardware.sensor.gyroscope_limited_axes_uncalibrated";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device includes a light sensor.
      */
     @SdkConstant(SdkConstantType.FEATURE)
