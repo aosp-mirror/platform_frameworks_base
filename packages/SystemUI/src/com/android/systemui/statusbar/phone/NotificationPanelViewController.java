@@ -1578,6 +1578,7 @@ public class NotificationPanelViewController extends PanelViewController
 
             constraintSet.applyTo(mNotificationContainerParent);
         }
+        mKeyguardUnfoldTransition.ifPresent(t -> t.setStatusViewCentered(mStatusViewCentered));
     }
 
     /**
