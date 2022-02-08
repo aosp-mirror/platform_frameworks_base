@@ -752,7 +752,8 @@ public class LauncherApps {
         }
         try {
             // due to b/209607104, startActivityOptions will be ignored
-            return mService.getActivityLaunchIntent(component, null /* opts */, user);
+            return mService.getActivityLaunchIntent(mContext.getPackageName(), component,
+                    null /* opts */, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
