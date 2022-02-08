@@ -31,10 +31,12 @@ import android.telephony.ims.ImsException;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.ImsService;
 import android.telephony.ims.RtpHeaderExtensionType;
+import android.telephony.ims.SrvccCall;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsMmTelFeature;
 import android.telephony.ims.aidl.IImsMmTelListener;
 import android.telephony.ims.aidl.IImsSmsListener;
+import android.telephony.ims.aidl.ISrvccStartedCallback;
 import android.telephony.ims.stub.ImsCallSessionImplBase;
 import android.telephony.ims.stub.ImsEcbmImplBase;
 import android.telephony.ims.stub.ImsMultiEndpointImplBase;
@@ -60,6 +62,7 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -287,6 +290,38 @@ public class MmTelFeature extends ImsFeature {
         public void onSmsReady() {
             executeMethodAsyncNoException(() -> MmTelFeature.this.onSmsReady(),
                     "onSmsReady");
+        }
+
+        @Override
+        public void notifySrvccStarted(final ISrvccStartedCallback cb) {
+            executeMethodAsyncNoException(
+                    () -> MmTelFeature.this.notifySrvccStarted(
+                            (profiles) -> {
+                                try {
+                                    cb.onSrvccCallNotified(profiles);
+                                } catch (Exception e) {
+                                    Log.e(LOG_TAG, "onSrvccCallNotified e=" + e);
+                                }
+                            }),
+                    "notifySrvccStarted");
+        }
+
+        @Override
+        public void notifySrvccCompleted() {
+            executeMethodAsyncNoException(
+                    () -> MmTelFeature.this.notifySrvccCompleted(), "notifySrvccCompleted");
+        }
+
+        @Override
+        public void notifySrvccFailed() {
+            executeMethodAsyncNoException(
+                    () -> MmTelFeature.this.notifySrvccFailed(), "notifySrvccFailed");
+        }
+
+        @Override
+        public void notifySrvccCanceled() {
+            executeMethodAsyncNoException(
+                    () -> MmTelFeature.this.notifySrvccCanceled(), "notifySrvccCanceled");
         }
 
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
@@ -967,6 +1002,76 @@ public class MmTelFeature extends ImsFeature {
         // Base Implementation - Should be overridden by IMS service
         throw new ServiceSpecificException(ImsException.CODE_ERROR_UNSUPPORTED_OPERATION,
                 "Not implemented on device.");
+    }
+
+    /**
+     * Notifies the MmTelFeature that the network has initiated an SRVCC for all IMS calls.
+     * Notifies the MmTelFeature that the network has initiated an SRVCC (Single radio voice
+     * call continuity) for all IMS calls. When the network initiates an SRVCC, calls from
+     * the LTE domain are handed over to the legacy circuit switched domain. The modem requires
+     * knowledge of ongoing calls in the IMS domain in order to complete the SRVCC operation.
+     * <p>
+     * @param consumer The callback used to notify the framework of the list of IMS calls and their
+     * state at the time of the SRVCC.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void notifySrvccStarted(@NonNull Consumer<List<SrvccCall>> consumer) {
+        // Base Implementation - Should be overridden by IMS service
+    }
+
+    /**
+     * Notifies the MmTelFeature that the SRVCC is completed and the calls have been moved
+     * over to the circuit-switched domain.
+     * {@link android.telephony.CarrierConfigManager.ImsVoice#KEY_SRVCC_TYPE_INT_ARRAY}
+     * specifies the calls can be moved. Other calls will be disconnected.
+     * <p>
+     * The MmTelFeature may now release all resources related to the IMS calls.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void notifySrvccCompleted() {
+        // Base Implementation - Should be overridden by IMS service
+    }
+
+    /**
+     * Notifies the MmTelFeature that the SRVCC has failed.
+     *
+     * The handover can fail by encountering a failure at the radio level
+     * or temporary MSC server internal errors in handover procedure.
+     * Refer to 3GPP TS 23.216 section 8 Handover Failure.
+     * <p>
+     * IMS service will recover and continue calls over IMS.
+     * Per TS 24.237 12.2.4.2, UE shall send SIP UPDATE request containing the reason-text
+     * set to "failure to transition to CS domain".
+     *
+     * @hide
+     */
+    @SystemApi
+    public void notifySrvccFailed() {
+        // Base Implementation - Should be overridden by IMS service
+    }
+
+    /**
+     * Notifies the MmTelFeature that the SRVCC has been canceled.
+     *
+     * Since the state of network can be changed, the network can decide to terminate
+     * the handover procedure before its completion and to return to its state before the handover
+     * procedure was triggered.
+     * Refer to 3GPP TS 23.216 section 8.1.3 Handover Cancellation.
+     *
+     * <p>
+     * IMS service will recover and continue calls over IMS.
+     * Per TS 24.237 12.2.4.2, UE shall send SIP UPDATE request containing the reason-text
+     * set to "handover canceled".
+     *
+     * @hide
+     */
+    @SystemApi
+    public void notifySrvccCanceled() {
+        // Base Implementation - Should be overridden by IMS service
     }
 
     private void setSmsListener(IImsSmsListener listener) {
