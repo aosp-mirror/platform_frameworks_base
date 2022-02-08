@@ -494,6 +494,7 @@
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"कनेक्ट केले, चार्ज होत नाही"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"चार्ज झाली"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"प्रशासकाने नियंत्रित केलेले"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"प्रतिबंधित केलेल्या सेटिंग द्वारे नियंत्रित"</string>
     <string name="disabled" msgid="8017887509554714950">"अक्षम"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"अनुमती आहे"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"अनुमती नाही"</string>
@@ -537,7 +538,6 @@
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"या ॲपला अलार्म सेट करण्याची किंवा वेळेनुसार संवेदनशील असलेल्या कृती शेड्युल करण्याची अनुमती द्या. हे ॲपला बॅकग्राउंडमध्ये रन होऊ देते, ज्यामुळे जास्त बॅटरी वापरली जाऊ शकते.\n\nही परवानगी बंद असल्यास, सध्याचे अलार्म आणि या ॲपद्वारे शेड्युल केलेले वेळेवर आधारित इव्हेंट काम करणार नाहीत."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"शेड्युल, अलार्म, रिमाइंडर, घड्याळ"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"सुरू करा"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"व्यत्यय आणू नका सुरू करा"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"कधीही नाही"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"केवळ प्राधान्य"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -635,4 +635,11 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"इथरनेट डिस्कनेक्ट केले."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"इथरनेट."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"कॉलिंग उपलब्ध नाही."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"वेळ"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"तारीख"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"हवामान"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"हवेची गुणवत्ता"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"कास्टसंबंधित माहिती"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"प्रोफाइल फोटो निवडा"</string>
+    <string name="default_user_icon_description" msgid="6554047177298972638">"डीफॉल्ट वापरकर्ता आयकन"</string>
 </resources>

@@ -494,6 +494,7 @@
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Повезано, не пуни се"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Напуњено"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Контролише администратор"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Контролишу ограничена подешавања"</string>
     <string name="disabled" msgid="8017887509554714950">"Онемогућено"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Дозвољено"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Није дозвољено"</string>
@@ -537,7 +538,6 @@
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Омогућите овој апликацији да подешава аларме и заказује временски осетљиве радње. То омогућава да апликација буде покренута у позадини, што може да троши више батерије.\n\nАко је ова дозвола искључена, постојећи аларми и догађаји засновани на времену заказани помоћу ове апликације неће радити."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"заказати, аларм, подсетник, сат"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Укључи"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Укључите режим Не узнемиравај"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Никад"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Само приоритетни прекиди"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -635,4 +635,12 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Веза са етернетом је прекинута."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Етернет."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Без позивања."</string>
+    <string name="dream_complication_title_time" msgid="701747800712893499">"Време"</string>
+    <string name="dream_complication_title_date" msgid="8661176085446135789">"Датум"</string>
+    <string name="dream_complication_title_weather" msgid="598609151677172783">"Време"</string>
+    <string name="dream_complication_title_aqi" msgid="4587552608957834110">"Квалитет ваздуха"</string>
+    <string name="dream_complication_title_cast_info" msgid="4038776652841885084">"Подаци о пребацивању"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"Одаберите слику профила"</string>
+    <!-- no translation found for default_user_icon_description (6554047177298972638) -->
+    <skip />
 </resources>
