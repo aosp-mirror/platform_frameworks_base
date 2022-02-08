@@ -1098,8 +1098,9 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
-        public PendingIntent getActivityLaunchIntent(ComponentName component, Bundle opts,
-                UserHandle user) {
+        public PendingIntent getActivityLaunchIntent(String callingPackage, ComponentName component,
+                Bundle opts, UserHandle user) {
+            ensureShortcutPermission(callingPackage);
             if (!canAccessProfile(user.getIdentifier(), "Cannot start activity")) {
                 throw new ActivityNotFoundException("Activity could not be found");
             }
