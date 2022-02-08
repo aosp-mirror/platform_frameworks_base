@@ -1699,9 +1699,10 @@
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
     <string name="fingerprint_acquired_insufficient">Couldn\'t process fingerprint. Please try again.</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint sensor needs cleaning -->
-    <string name="fingerprint_acquired_imager_dirty">Clean the sensor</string>
+    <string name="fingerprint_acquired_imager_dirty">Clean fingerprint sensor and try again</string>
+    <string name="fingerprint_acquired_imager_dirty_alt">Clean sensor and try again</string>
     <!-- Message shown during fingerprint acquisision when the user removes their finger from the sensor too quickly -->
-    <string name="fingerprint_acquired_too_fast">Hold a little longer</string>
+    <string name="fingerprint_acquired_too_fast">Press firmly on the sensor</string>
     <!-- Message shown during fingerprint acquisision when the user moves their finger too slowly -->
     <string name="fingerprint_acquired_too_slow">Finger moved too slow. Please try again.</string>
     <!-- Message shown during fingerprint acquisition when the fingerprint was already enrolled.[CHAR LIMIT=50] -->
@@ -1715,6 +1716,10 @@
     <!-- Array containing custom messages shown during fingerprint acquisision from vendor.  Vendor is expected to add and translate these strings -->
     <string-array name="fingerprint_acquired_vendor">
     </string-array>
+    <!-- Message shown when fingerprint fails to match -->
+    <string name="fingerprint_error_not_match">Fingerprint not recognized</string>
+    <!-- Message shown when UDFPS fails to match -->
+    <string name="fingerprint_udfps_error_not_match">Press firmly on the sensor</string>
 
     <!-- Accessibility message announced when a fingerprint has been authenticated [CHAR LIMIT=NONE] -->
     <string name="fingerprint_authenticated">Fingerprint authenticated</string>
