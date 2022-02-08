@@ -1963,7 +1963,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         try {
-            if (mStackSupervisor.realStartActivityLocked(r, app, top == r /*andResume*/,
+            if (mStackSupervisor.realStartActivityLocked(r, app,
+                    top == r && r.getTask().canBeResumed(r) /*andResume*/,
                     true /*checkConfig*/)) {
                 mTmpBoolean = true;
             }
