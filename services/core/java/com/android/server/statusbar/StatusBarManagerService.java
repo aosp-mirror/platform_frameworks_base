@@ -2031,11 +2031,14 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void updateMediaTapToTransferReceiverDisplay(
             @StatusBarManager.MediaTransferReceiverState int displayState,
-            MediaRoute2Info routeInfo) {
+            MediaRoute2Info routeInfo,
+            @Nullable Icon appIcon,
+            @Nullable CharSequence appName) {
         enforceMediaContentControl();
         if (mBar != null) {
             try {
-                mBar.updateMediaTapToTransferReceiverDisplay(displayState, routeInfo);
+                mBar.updateMediaTapToTransferReceiverDisplay(
+                        displayState, routeInfo, appIcon, appName);
             } catch (RemoteException e) {
                 Slog.e(TAG, "updateMediaTapToTransferReceiverDisplay", e);
             }

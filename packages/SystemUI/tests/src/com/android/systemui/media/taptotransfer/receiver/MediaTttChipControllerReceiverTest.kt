@@ -17,7 +17,9 @@
 package com.android.systemui.media.taptotransfer.receiver
 
 import android.app.StatusBarManager
+import android.graphics.drawable.Icon
 import android.media.MediaRoute2Info
+import android.os.Handler
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -51,7 +53,8 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        controllerReceiver = MediaTttChipControllerReceiver(commandQueue, context, windowManager)
+        controllerReceiver = MediaTttChipControllerReceiver(
+                commandQueue, context, windowManager, Handler.getMain())
 
         val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
         verify(commandQueue).addCallback(callbackCaptor.capture())
@@ -60,19 +63,24 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
 
     @Test
     fun commandQueueCallback_closeToSender_triggersChip() {
+        val appName = "FakeAppName"
         commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
             StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
-            routeInfo
+            routeInfo,
+            /* appIcon= */ null,
+            appName
         )
 
-        assertThat(getChipView().getAppIconView().contentDescription).isEqualTo(ROUTE_NAME)
+        assertThat(getChipView().getAppIconView().contentDescription).isEqualTo(appName)
     }
 
     @Test
     fun commandQueueCallback_farFromSender_noChipShown() {
         commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
             StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER,
-            routeInfo
+            routeInfo,
+            null,
+            null
         )
 
         verify(windowManager, never()).addView(any(), any())
@@ -82,12 +90,16 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     fun commandQueueCallback_closeThenFar_chipShownThenHidden() {
         commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
             StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
-            routeInfo
+            routeInfo,
+            null,
+            null
         )
 
         commandQueueCallback.updateMediaTapToTransferReceiverDisplay(
             StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER,
-            routeInfo
+            routeInfo,
+            null,
+            null
         )
 
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
@@ -96,14 +108,43 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     }
 
     @Test
-    fun displayChip_chipContainsIcon() {
-        val state = ChipStateReceiver(PACKAGE_NAME)
+    fun displayChip_nullAppIconDrawable_iconIsFromPackageName() {
+        val state = ChipStateReceiver(PACKAGE_NAME, appIconDrawable = null, "appName")
 
         controllerReceiver.displayChip(state)
 
         assertThat(getChipView().getAppIconView().drawable).isEqualTo(state.getAppIcon(context))
+
+    }
+
+    @Test
+    fun displayChip_hasAppIconDrawable_iconIsDrawable() {
+        val drawable = Icon.createWithResource(context, R.drawable.ic_cake).loadDrawable(context)
+        val state = ChipStateReceiver(PACKAGE_NAME, drawable, "appName")
+
+        controllerReceiver.displayChip(state)
+
+        assertThat(getChipView().getAppIconView().drawable).isEqualTo(drawable)
+    }
+
+    @Test
+    fun displayChip_nullAppName_iconContentDescriptionIsFromPackageName() {
+        val state = ChipStateReceiver(PACKAGE_NAME, appIconDrawable = null, appName = null)
+
+        controllerReceiver.displayChip(state)
+
         assertThat(getChipView().getAppIconView().contentDescription)
                 .isEqualTo(state.getAppName(context))
+    }
+
+    @Test
+    fun displayChip_hasAppName_iconContentDescriptionIsAppNameOverride() {
+        val appName = "FakeAppName"
+        val state = ChipStateReceiver(PACKAGE_NAME, appIconDrawable = null, appName)
+
+        controllerReceiver.displayChip(state)
+
+        assertThat(getChipView().getAppIconView().contentDescription).isEqualTo(appName)
     }
 
     private fun getChipView(): ViewGroup {
@@ -115,10 +156,9 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
     private fun ViewGroup.getAppIconView() = this.requireViewById<ImageView>(R.id.app_icon)
 }
 
-private const val ROUTE_NAME = "Test name"
 private const val PACKAGE_NAME = "com.android.systemui"
 
-private val routeInfo = MediaRoute2Info.Builder("id", ROUTE_NAME)
+private val routeInfo = MediaRoute2Info.Builder("id", "Test route name")
     .addFeature("feature")
     .setPackageName(PACKAGE_NAME)
     .build()

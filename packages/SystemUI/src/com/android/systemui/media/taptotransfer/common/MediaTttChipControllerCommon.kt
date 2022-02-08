@@ -36,7 +36,7 @@ import com.android.systemui.R
  * gets displayed to the user.
  */
 abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
-    private val context: Context,
+    internal val context: Context,
     private val windowManager: WindowManager,
     @LayoutRes private val chipLayoutRes: Int
 ) {
