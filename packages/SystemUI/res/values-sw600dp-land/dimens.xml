@@ -33,4 +33,13 @@
     <!-- Limit the TaskView to this percentage of the overall screen width (0.0 - 1.0) -->
     <item name="controls_task_view_width_percentage" translatable="false" format="float" type="dimen">0.45</item>
     <dimen name="controls_task_view_right_margin">8dp</dimen>
+
+    <!-- Distance that the full shade transition takes in order for qs to fully transition to the
+         shade -->
+    <dimen name="lockscreen_shade_qs_transition_distance">200dp</dimen>
+
+    <!-- Distance that the full shade transition takes in order for scrim to fully transition to
+         the shade (in alpha) -->
+    <dimen name="lockscreen_shade_scrim_transition_distance">200dp</dimen>
+
 </resources>
