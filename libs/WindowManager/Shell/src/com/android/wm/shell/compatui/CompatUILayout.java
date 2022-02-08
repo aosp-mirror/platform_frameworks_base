@@ -31,7 +31,7 @@ import com.android.wm.shell.R;
 /**
  * Container for compat UI controls.
  */
-public class CompatUILayout extends LinearLayout {
+class CompatUILayout extends LinearLayout {
 
     private CompatUIWindowManager mWindowManager;
 
