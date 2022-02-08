@@ -18195,6 +18195,7 @@ package android.hardware.camera2.params {
     method public void enableSurfaceSharing();
     method public int getDynamicRangeProfile();
     method public int getMaxSharedSurfaceCount();
+    method public int getMirrorMode();
     method public int getStreamUseCase();
     method @Nullable public android.view.Surface getSurface();
     method public int getSurfaceGroupId();
@@ -18203,11 +18204,16 @@ package android.hardware.camera2.params {
     method public void removeSensorPixelModeUsed(int);
     method public void removeSurface(@NonNull android.view.Surface);
     method public void setDynamicRangeProfile(int);
+    method public void setMirrorMode(int);
     method public void setPhysicalCameraId(@Nullable String);
     method public void setStreamUseCase(int);
     method public void setTimestampBase(int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.camera2.params.OutputConfiguration> CREATOR;
+    field public static final int MIRROR_MODE_AUTO = 0; // 0x0
+    field public static final int MIRROR_MODE_H = 2; // 0x2
+    field public static final int MIRROR_MODE_NONE = 1; // 0x1
+    field public static final int MIRROR_MODE_V = 3; // 0x3
     field public static final int SURFACE_GROUP_ID_NONE = -1; // 0xffffffff
     field public static final int TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED = 4; // 0x4
     field public static final int TIMESTAMP_BASE_DEFAULT = 0; // 0x0
