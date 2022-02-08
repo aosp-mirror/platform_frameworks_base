@@ -870,6 +870,24 @@ public class WindowContainerTests extends WindowTestsBase {
         final DisplayContent displayContent = createNewDisplay();
         // Do not reparent activity to default display when removing the display.
         doReturn(true).when(displayContent).shouldDestroyContentOnRemove();
+
+        // An animating window with mRemoveOnExit can be removed by handleCompleteDeferredRemoval
+        // once it no longer animates.
+        final WindowState exitingWindow = createWindow(null, TYPE_APPLICATION_OVERLAY,
+                displayContent, "exiting window");
+        exitingWindow.startAnimation(exitingWindow.getPendingTransaction(),
+                mock(AnimationAdapter.class), false /* hidden */,
+                SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION);
+        exitingWindow.mRemoveOnExit = true;
+        exitingWindow.handleCompleteDeferredRemoval();
+        // The animation has not finished so the window is not removed.
+        assertTrue(exitingWindow.isAnimating());
+        assertTrue(exitingWindow.isAttached());
+        exitingWindow.cancelAnimation();
+        // The window is removed because the animation is gone.
+        exitingWindow.handleCompleteDeferredRemoval();
+        assertFalse(exitingWindow.isAttached());
+
         final ActivityRecord r = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setDisplay(displayContent).build().getTopMostActivity();
         // Add a window and make the activity animating so the removal of activity is deferred.
