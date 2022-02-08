@@ -213,7 +213,10 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             if (mController.isTransferring()) {
                 return;
             }
-
+            if (isCurrentlyConnected(device)) {
+                Log.d(TAG, "This device is already connected! : " + device.getName());
+                return;
+            }
             mCurrentActivePosition = -1;
             mController.connectDevice(device);
             device.setState(MediaDeviceState.STATE_CONNECTING);
