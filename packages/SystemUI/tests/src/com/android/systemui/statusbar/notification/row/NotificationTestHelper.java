@@ -60,6 +60,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.icon.IconBuilder;
 import com.android.systemui.statusbar.notification.icon.IconManager;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
@@ -139,6 +140,7 @@ public class NotificationTestHelper {
                 mStatusBarStateController,
                 mock(KeyguardBypassController.class),
                 mock(NotificationGroupManagerLegacy.class),
+                mock(VisualStabilityProvider.class),
                 mock(ConfigurationControllerImpl.class)
         );
         mHeadsUpManager.mHandler.removeCallbacksAndMessages(null);
