@@ -22,6 +22,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.os.RemoteException;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
@@ -36,6 +37,7 @@ import com.android.wm.shell.common.annotations.ShellMainThread;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This module deals with display rotations coming from WM. When WM starts a rotation: after it has
@@ -245,8 +247,8 @@ public class DisplayController {
         }
     }
 
-    private void onKeepClearAreasChanged(int displayId, List<Rect> restricted,
-            List<Rect> unrestricted) {
+    private void onKeepClearAreasChanged(int displayId, Set<Rect> restricted,
+            Set<Rect> unrestricted) {
         synchronized (mDisplays) {
             if (mDisplays.get(displayId) == null || getDisplay(displayId) == null) {
                 Slog.w(TAG, "Skipping onKeepClearAreasChanged on unknown"
@@ -323,7 +325,8 @@ public class DisplayController {
         public void onKeepClearAreasChanged(int displayId, List<Rect> restricted,
                 List<Rect> unrestricted) {
             mMainExecutor.execute(() -> {
-                DisplayController.this.onKeepClearAreasChanged(displayId, restricted, unrestricted);
+                DisplayController.this.onKeepClearAreasChanged(displayId,
+                        new ArraySet<>(restricted), new ArraySet<>(unrestricted));
             });
         }
     }
@@ -364,7 +367,7 @@ public class DisplayController {
         /**
          * Called when keep-clear areas on a display have changed.
          */
-        default void onKeepClearAreasChanged(int displayId, List<Rect> restricted,
-                List<Rect> unrestricted) {}
+        default void onKeepClearAreasChanged(int displayId, Set<Rect> restricted,
+                Set<Rect> unrestricted) {}
     }
 }
