@@ -229,7 +229,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<AidlSession> 
                 context.y = y;
                 context.minor = minor;
                 context.major = major;
-                context.isAoD = getBiometricContext().isAoD();
+                context.isAod = getBiometricContext().isAod();
                 session.getSession().onPointerDownWithContext(context);
             } else {
                 session.getSession().onPointerDown(0 /* pointerId */, x, y, minor, major);
