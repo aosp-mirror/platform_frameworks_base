@@ -28,6 +28,11 @@ public abstract class AttentionManagerInternal {
     public abstract boolean isAttentionServiceSupported();
 
     /**
+     * Returns {@code true} if proximity update is supported by the service.
+     */
+    public abstract boolean isProximitySupported();
+
+    /**
      * Checks whether user attention is at the screen and calls in the provided callback.
      *
      * @param timeoutMillis a budget for the attention check; if it takes longer - {@link

@@ -192,6 +192,10 @@
          available on some devices. -->
     <bool name="config_enableHapticTextHandle">false</bool>
 
+    <!-- Enables or disables proximity service that approximates proximity with aiai attention
+         service. Off by default, since the service may not be available on some devices. -->
+    <bool name="config_enableProximityService">false</bool>
+
     <!-- Whether dialogs should close automatically when the user touches outside
          of them.  This should not normally be modified. -->
     <bool name="config_closeDialogWhenTouchOutside">true</bool>
