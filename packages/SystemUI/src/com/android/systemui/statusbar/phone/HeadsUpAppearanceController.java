@@ -69,7 +69,6 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     private final CommandQueue mCommandQueue;
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
 
-    private View mCenteredIconView;
     private View mClockView;
     private View mOperatorNameView;
 
@@ -109,8 +108,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
                 //  (which also removes the undesirable @VisibleForTesting).
                 statusBarView.findViewById(R.id.heads_up_status_bar_view),
                 statusBarView.findViewById(R.id.clock),
-                statusBarView.findViewById(R.id.operator_name_frame),
-                statusBarView.findViewById(R.id.centered_icon_area));
+                statusBarView.findViewById(R.id.operator_name_frame));
     }
 
     @VisibleForTesting
@@ -126,12 +124,10 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
             NotificationPanelViewController notificationPanelViewController,
             HeadsUpStatusBarView headsUpStatusBarView,
             View clockView,
-            View operatorNameView,
-            View centeredIconView) {
+            View operatorNameView) {
         super(headsUpStatusBarView);
         mNotificationIconAreaController = notificationIconAreaController;
         mHeadsUpManager = headsUpManager;
-        mCenteredIconView = centeredIconView;
 
         // We may be mid-HUN-expansion when this controller is re-created (for example, if the user
         // has started pulling down the notification shade from the HUN and then the font size
@@ -236,17 +232,11 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
                 mView.setVisibility(View.VISIBLE);
                 show(mView);
                 hide(mClockView, View.INVISIBLE);
-                if (mCenteredIconView.getVisibility() != View.GONE) {
-                    hide(mCenteredIconView, View.INVISIBLE);
-                }
                 if (mOperatorNameView != null) {
                     hide(mOperatorNameView, View.INVISIBLE);
                 }
             } else {
                 show(mClockView);
-                if (mCenteredIconView.getVisibility() != View.GONE) {
-                    show(mCenteredIconView);
-                }
                 if (mOperatorNameView != null) {
                     show(mOperatorNameView);
                 }
