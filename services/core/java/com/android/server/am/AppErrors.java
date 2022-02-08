@@ -1018,6 +1018,7 @@ class AppErrors {
                         Settings.Secure.SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
                         0,
                         mService.mUserController.getCurrentUserId()) != 0;
+                final String packageName = proc.info.packageName;
                 final boolean crashSilenced = mAppsNotReportingCrashes != null
                         && mAppsNotReportingCrashes.contains(proc.info.packageName);
                 final long now = SystemClock.uptimeMillis();
@@ -1026,6 +1027,7 @@ class AppErrors {
                 if ((mService.mAtmInternal.canShowErrorDialogs() || showBackground)
                         && !crashSilenced && !shouldThottle
                         && (showFirstCrash || showFirstCrashDevOption || data.repeating)) {
+                    Slog.i(TAG, "Showing crash dialog for package " + packageName + " u" + userId);
                     errState.getDialogController().showCrashDialogs(data);
                     if (!proc.isolated) {
                         mProcessCrashShowDialogTimes.put(proc.processName, proc.uid, now);
