@@ -70,7 +70,8 @@ public abstract class TvPipModule {
             TaskStackListenerImpl taskStackListener,
             DisplayController displayController,
             WindowManagerShellWrapper windowManagerShellWrapper,
-            @ShellMainThread ShellExecutor mainExecutor) {
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellMainThread Handler mainHandler) {
         return Optional.of(
                 TvPipController.create(
                         context,
@@ -84,7 +85,8 @@ public abstract class TvPipModule {
                         taskStackListener,
                         displayController,
                         windowManagerShellWrapper,
-                        mainExecutor));
+                        mainExecutor,
+                        mainHandler));
     }
 
     @WMSingleton
