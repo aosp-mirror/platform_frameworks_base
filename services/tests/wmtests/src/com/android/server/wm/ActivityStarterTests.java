@@ -1085,7 +1085,7 @@ public class ActivityStarterTests extends WindowTestsBase {
         starter.setActivityOptions(options.toBundle())
                 .setReason("testWindowingModeOptionsLaunchAdjacent")
                 .setOutActivity(outActivity).execute();
-        assertThat(outActivity[0].inSplitScreenWindowingMode()).isFalse();
+        assertThat(outActivity[0].inMultiWindowMode()).isFalse();
 
         // Move activity to split-screen-primary stack and make sure it has the focus.
         TestSplitOrganizer splitOrg = new TestSplitOrganizer(mAtm, top.getDisplayContent());
