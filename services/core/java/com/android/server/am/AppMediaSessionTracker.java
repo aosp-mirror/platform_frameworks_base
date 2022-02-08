@@ -19,8 +19,8 @@ package com.android.server.am;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.AppRestrictionController.DEVICE_CONFIG_SUBNAMESPACE_PREFIX;
-import static com.android.server.am.BaseAppStateDurationsTracker.EVENT_TYPE_MEDIA_SESSION;
 import static com.android.server.am.BaseAppStateTracker.ONE_DAY;
+import static com.android.server.am.BaseAppStateTracker.STATE_TYPE_MEDIA_SESSION;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -104,8 +104,8 @@ final class AppMediaSessionTracker
                     }
                     if (!pkg.isActive()) {
                         pkg.addEvent(true, now);
-                        notifyListenersOnEvent(pkg.mUid, pkg.mPackageName, true, now,
-                                EVENT_TYPE_MEDIA_SESSION);
+                        notifyListenersOnStateChange(pkg.mUid, pkg.mPackageName, true, now,
+                                STATE_TYPE_MEDIA_SESSION);
                     }
                     // Mark it as active, so we could filter out inactive ones below.
                     mTmpMediaControllers.put(packageName, uid, Boolean.TRUE);
@@ -127,8 +127,8 @@ final class AppMediaSessionTracker
                                 && mTmpMediaControllers.get(pkg.mPackageName, pkg.mUid) == null) {
                             // This package has removed its controller, issue a stop event.
                             pkg.addEvent(false, now);
-                            notifyListenersOnEvent(pkg.mUid, pkg.mPackageName, false, now,
-                                    EVENT_TYPE_MEDIA_SESSION);
+                            notifyListenersOnStateChange(pkg.mUid, pkg.mPackageName, false, now,
+                                    STATE_TYPE_MEDIA_SESSION);
                         }
                     }
                 }
@@ -146,8 +146,8 @@ final class AppMediaSessionTracker
                         final SimplePackageDurations pkg = val.valueAt(j);
                         if (pkg.isActive()) {
                             pkg.addEvent(false, now);
-                            notifyListenersOnEvent(pkg.mUid, pkg.mPackageName, false, now,
-                                    EVENT_TYPE_MEDIA_SESSION);
+                            notifyListenersOnStateChange(pkg.mUid, pkg.mPackageName, false, now,
+                                    STATE_TYPE_MEDIA_SESSION);
                         }
                     }
                 }

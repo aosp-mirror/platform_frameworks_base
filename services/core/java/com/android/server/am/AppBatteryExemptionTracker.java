@@ -20,7 +20,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.AppBatteryTracker.BATTERY_USAGE_NONE;
 import static com.android.server.am.AppRestrictionController.DEVICE_CONFIG_SUBNAMESPACE_PREFIX;
-import static com.android.server.am.BaseAppStateDurationsTracker.EVENT_NUM;
+import static com.android.server.am.BaseAppStateTracker.STATE_TYPE_NUM;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -36,9 +36,9 @@ import com.android.server.am.AppBatteryExemptionTracker.UidBatteryStates;
 import com.android.server.am.AppBatteryTracker.AppBatteryPolicy;
 import com.android.server.am.AppBatteryTracker.BatteryUsage;
 import com.android.server.am.AppBatteryTracker.ImmutableBatteryUsage;
-import com.android.server.am.BaseAppStateDurationsTracker.EventListener;
 import com.android.server.am.BaseAppStateTimeEvents.BaseTimeEvent;
 import com.android.server.am.BaseAppStateTracker.Injector;
+import com.android.server.am.BaseAppStateTracker.StateListener;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
@@ -57,13 +57,13 @@ import java.util.LinkedList;
  */
 final class AppBatteryExemptionTracker
         extends BaseAppStateDurationsTracker<AppBatteryExemptionPolicy, UidBatteryStates>
-        implements BaseAppStateEvents.Factory<UidBatteryStates>, EventListener {
+        implements BaseAppStateEvents.Factory<UidBatteryStates>, StateListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "AppBatteryExemptionTracker" : TAG_AM;
 
     private static final boolean DEBUG_BACKGROUND_BATTERY_EXEMPTION_TRACKER = false;
 
     // As it's a UID-based tracker, anywhere which requires a package name, use this default name.
-    private static final String DEFAULT_NAME = "";
+    static final String DEFAULT_NAME = "";
 
     AppBatteryExemptionTracker(Context context, AppRestrictionController controller) {
         this(context, controller, null, null);
@@ -80,9 +80,7 @@ final class AppBatteryExemptionTracker
     void onSystemReady() {
         super.onSystemReady();
         mAppRestrictionController.forEachTracker(tracker -> {
-            if (tracker instanceof BaseAppStateDurationsTracker) {
-                ((BaseAppStateDurationsTracker) tracker).registerEventListener(this);
-            }
+            tracker.registerStateListener(this);
         });
     }
 
@@ -97,19 +95,20 @@ final class AppBatteryExemptionTracker
     }
 
     @Override
-    public void onNewEvent(int uid, String packageName, boolean start, long now, int eventType) {
+    public void onStateChange(int uid, String packageName, boolean start, long now, int stateType) {
         if (!mInjector.getPolicy().isEnabled()) {
             return;
         }
         final ImmutableBatteryUsage batteryUsage = mAppRestrictionController
                 .getUidBatteryUsage(uid);
+        final int stateTypeIndex = stateTypeToIndex(stateType);
         synchronized (mLock) {
             UidBatteryStates pkg = mPkgEvents.get(uid, DEFAULT_NAME);
             if (pkg == null) {
                 pkg = createAppStateEvents(uid, DEFAULT_NAME);
                 mPkgEvents.put(uid, DEFAULT_NAME, pkg);
             }
-            pkg.addEvent(start, now, batteryUsage, eventType);
+            pkg.addEvent(start, now, batteryUsage, stateTypeIndex);
         }
     }
 
@@ -125,7 +124,8 @@ final class AppBatteryExemptionTracker
      * @return The to-be-exempted battery usage of the given UID in the given duration; it could
      *         be considered as "exempted" due to various use cases, i.e. media playback.
      */
-    ImmutableBatteryUsage getUidBatteryExemptedUsageSince(int uid, long since, long now) {
+    ImmutableBatteryUsage getUidBatteryExemptedUsageSince(int uid, long since, long now,
+            int types) {
         if (!mInjector.getPolicy().isEnabled()) {
             return BATTERY_USAGE_NONE;
         }
@@ -135,7 +135,7 @@ final class AppBatteryExemptionTracker
             if (pkg == null) {
                 return BATTERY_USAGE_NONE;
             }
-            result = pkg.getBatteryUsageSince(since, now);
+            result = pkg.getBatteryUsageSince(since, now, types);
         }
         if (!result.second.isEmpty()) {
             // We have an open event (just start, no stop), get the battery usage till now.
@@ -149,7 +149,7 @@ final class AppBatteryExemptionTracker
     static final class UidBatteryStates extends BaseAppStateDurations<UidStateEventWithBattery> {
         UidBatteryStates(int uid, @NonNull String tag,
                 @NonNull MaxTrackingDurationConfig maxTrackingDurationConfig) {
-            super(uid, DEFAULT_NAME, EVENT_NUM, tag, maxTrackingDurationConfig);
+            super(uid, DEFAULT_NAME, STATE_TYPE_NUM, tag, maxTrackingDurationConfig);
         }
 
         UidBatteryStates(@NonNull UidBatteryStates other) {
@@ -160,7 +160,7 @@ final class AppBatteryExemptionTracker
          * @param start {@code true} if it's a start event.
          * @param now   The timestamp when this event occurred.
          * @param batteryUsage The background current drain since the system boots.
-         * @param eventType One of EVENT_TYPE_* defined in the class BaseAppStateDurationsTracker.
+         * @param eventType One of STATE_TYPE_INDEX_* defined in the class BaseAppStateTracker.
          */
         void addEvent(boolean start, long now, ImmutableBatteryUsage batteryUsage, int eventType) {
             if (start) {
@@ -182,17 +182,6 @@ final class AppBatteryExemptionTracker
 
         UidStateEventWithBattery getLastEvent(int eventType) {
             return mEvents[eventType] != null ? mEvents[eventType].peekLast() : null;
-        }
-
-        /**
-         * @return The pair of bg battery usage of given duration; the first value in the pair
-         *         is the aggregated battery usage of all event pairs in this duration; while
-         *         the second value is the battery usage since the system boots, if there is
-         *         an open event(just start, no stop) at the end of the duration.
-         */
-        Pair<ImmutableBatteryUsage, ImmutableBatteryUsage> getBatteryUsageSince(long since,
-                long now, int eventType) {
-            return getBatteryUsageSince(since, now, mEvents[eventType]);
         }
 
         private Pair<ImmutableBatteryUsage, ImmutableBatteryUsage> getBatteryUsageSince(long since,
@@ -217,13 +206,18 @@ final class AppBatteryExemptionTracker
         }
 
         /**
-         * @return The aggregated battery usage amongst all the event types we're tracking.
+         * @return The pair of bg battery usage of given duration; the first value in the pair
+         *         is the aggregated battery usage of selected events in this duration; while
+         *         the second value is the battery usage since the system boots, if there is
+         *         an open event(just start, no stop) at the end of the duration.
          */
         Pair<ImmutableBatteryUsage, ImmutableBatteryUsage> getBatteryUsageSince(long since,
-                long now) {
+                long now, int types) {
             LinkedList<UidStateEventWithBattery> result = new LinkedList<>();
             for (int i = 0; i < mEvents.length; i++) {
-                result = add(result, mEvents[i]);
+                if ((types & stateIndexToType(i)) != 0) {
+                    result = add(result, mEvents[i]);
+                }
             }
             return getBatteryUsageSince(since, now, result);
         }
