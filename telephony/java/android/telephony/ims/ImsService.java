@@ -17,6 +17,7 @@
 package android.telephony.ims;
 
 import android.annotation.LongDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -44,11 +45,18 @@ import android.util.SparseArray;
 
 import com.android.ims.internal.IImsFeatureStatusCallback;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 /**
  * Main ImsService implementation, which binds via the Telephony ImsResolver. Services that extend
@@ -173,7 +181,21 @@ public class ImsService extends Service {
     private final SparseArray<SparseArray<ImsFeature>> mFeaturesBySlot = new SparseArray<>();
 
     private IImsServiceControllerListener mListener;
+    private Executor mExecutor;
 
+    /**
+     * Create a new ImsService.
+     * <p>
+     * Method stubs called from the framework will be called asynchronously. Vendor specifies the
+     * {@link Executor} that the methods stubs will be called. If mExecutor is set to null by
+     * vendor use Runnable::run.
+     */
+    public ImsService() {
+        mExecutor = ImsService.this.getExecutor();
+        if (mExecutor == null) {
+            mExecutor = Runnable::run;
+        }
+    }
 
     /**
      * Listener that notifies the framework of ImsService changes.
@@ -201,78 +223,132 @@ public class ImsService extends Service {
 
         @Override
         public IImsMmTelFeature createMmTelFeature(int slotId) {
-            return createMmTelFeatureInternal(slotId);
+            return executeMethodAsyncForResult(() -> createMmTelFeatureInternal(slotId),
+                "createMmTelFeature");
         }
 
         @Override
         public IImsRcsFeature createRcsFeature(int slotId) {
-            return createRcsFeatureInternal(slotId);
+            return executeMethodAsyncForResult(() -> createRcsFeatureInternal(slotId),
+                "createRcsFeature");
         }
 
         @Override
         public void addFeatureStatusCallback(int slotId, int featureType,
                 IImsFeatureStatusCallback c) {
-            ImsService.this.addImsFeatureStatusCallback(slotId, featureType, c);
+            executeMethodAsync(() -> ImsService.this.addImsFeatureStatusCallback(
+                    slotId, featureType, c), "addFeatureStatusCallback");
         }
 
         @Override
         public void removeFeatureStatusCallback(int slotId, int featureType,
                 IImsFeatureStatusCallback c) {
-            ImsService.this.removeImsFeatureStatusCallback(slotId, featureType, c);
+            executeMethodAsync(() -> ImsService.this.removeImsFeatureStatusCallback(
+                    slotId, featureType, c), "removeFeatureStatusCallback");
         }
 
         @Override
         public void removeImsFeature(int slotId, int featureType) {
-            ImsService.this.removeImsFeature(slotId, featureType);
+            executeMethodAsync(() -> ImsService.this.removeImsFeature(slotId, featureType),
+                    "removeImsFeature");
         }
 
         @Override
         public ImsFeatureConfiguration querySupportedImsFeatures() {
-            return ImsService.this.querySupportedImsFeatures();
+            return executeMethodAsyncForResult(() -> ImsService.this.querySupportedImsFeatures(),
+                    "ImsFeatureConfiguration");
         }
 
         @Override
         public long getImsServiceCapabilities() {
-            long caps = ImsService.this.getImsServiceCapabilities();
-            long sanitizedCaps = sanitizeCapabilities(caps);
-            if (caps != sanitizedCaps) {
-                Log.w(LOG_TAG, "removing invalid bits from field: 0x"
-                        + Long.toHexString(caps ^ sanitizedCaps));
-            }
-            return sanitizedCaps;
+            return executeMethodAsyncForResult(() -> {
+                long caps = ImsService.this.getImsServiceCapabilities();
+                long sanitizedCaps = sanitizeCapabilities(caps);
+                if (caps != sanitizedCaps) {
+                    Log.w(LOG_TAG, "removing invalid bits from field: 0x"
+                            + Long.toHexString(caps ^ sanitizedCaps));
+                }
+                return sanitizedCaps;
+            }, "getImsServiceCapabilities");
         }
 
         @Override
         public void notifyImsServiceReadyForFeatureCreation() {
-            ImsService.this.readyForFeatureCreation();
+            executeMethodAsync(() -> ImsService.this.readyForFeatureCreation(),
+                    "notifyImsServiceReadyForFeatureCreation");
         }
 
         @Override
         public IImsConfig getConfig(int slotId) {
-            ImsConfigImplBase c = ImsService.this.getConfig(slotId);
-            return c != null ? c.getIImsConfig() : null;
+            return executeMethodAsyncForResult(() -> {
+                ImsConfigImplBase c = ImsService.this.getConfig(slotId);
+                if (c != null) {
+                    c.setDefaultExecutor(mExecutor);
+                    return c.getIImsConfig();
+                } else {
+                    return null;
+                }
+            }, "getConfig");
         }
 
         @Override
         public IImsRegistration getRegistration(int slotId) {
-            ImsRegistrationImplBase r = ImsService.this.getRegistration(slotId);
-            return r != null ? r.getBinder() : null;
+            return executeMethodAsyncForResult(() -> {
+                ImsRegistrationImplBase r =  ImsService.this.getRegistration(slotId);
+                if (r != null) {
+                    r.setDefaultExecutor(mExecutor);
+                    return r.getBinder();
+                } else {
+                    return null;
+                }
+            }, "getRegistration");
         }
 
         @Override
         public ISipTransport getSipTransport(int slotId) {
-            SipTransportImplBase s = ImsService.this.getSipTransport(slotId);
-            return s != null ? s.getBinder() : null;
+            return executeMethodAsyncForResult(() -> {
+                SipTransportImplBase s =  ImsService.this.getSipTransport(slotId);
+                if (s != null) {
+                    s.setDefaultExecutor(mExecutor);
+                    return s.getBinder();
+                } else {
+                    return null;
+                }
+            }, "getSipTransport");
         }
 
         @Override
         public void enableIms(int slotId) {
-            ImsService.this.enableIms(slotId);
+            executeMethodAsync(() -> ImsService.this.enableIms(slotId), "enableIms");
         }
 
         @Override
         public void disableIms(int slotId) {
-            ImsService.this.disableIms(slotId);
+            executeMethodAsync(() -> ImsService.this.disableIms(slotId), "disableIms");
+        }
+
+        // Call the methods with a clean calling identity on the executor and wait indefinitely for
+        // the future to return.
+        private void executeMethodAsync(Runnable r, String errorLogName) {
+            try {
+                CompletableFuture.runAsync(
+                        () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor).join();
+            } catch (CancellationException | CompletionException e) {
+                Log.w(LOG_TAG, "ImsService Binder - " + errorLogName + " exception: "
+                        + e.getMessage());
+            }
+        }
+
+        private <T> T executeMethodAsyncForResult(Supplier<T> r, String errorLogName) {
+            CompletableFuture<T> future = CompletableFuture.supplyAsync(
+                    () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor);
+            try {
+                return future.get();
+            } catch (ExecutionException | InterruptedException e) {
+                Log.w(LOG_TAG, "ImsService Binder - " + errorLogName + " exception: "
+                        + e.getMessage());
+                return null;
+            }
         }
     };
 
@@ -300,6 +376,7 @@ public class ImsService extends Service {
         MmTelFeature f = createMmTelFeature(slotId);
         if (f != null) {
             setupFeature(f, slotId, ImsFeature.FEATURE_MMTEL);
+            f.setDefaultExecutor(mExecutor);
             return f.getBinder();
         } else {
             Log.e(LOG_TAG, "createMmTelFeatureInternal: null feature returned.");
@@ -310,6 +387,7 @@ public class ImsService extends Service {
     private IImsRcsFeature createRcsFeatureInternal(int slotId) {
         RcsFeature f = createRcsFeature(slotId);
         if (f != null) {
+            f.setDefaultExecutor(mExecutor);
             setupFeature(f, slotId, ImsFeature.FEATURE_RCS);
             return f.getBinder();
         } else {
@@ -561,5 +639,16 @@ public class ImsService extends Service {
         }
         result.append("}");
         return result.toString();
+    }
+
+    /**
+     * The ImsService will now be able to define an Executor that the ImsService can be used to
+     * execute the methods. By default all ImsService level method calls will use this Executor.
+     * The ImsService has set the default executor as Runnable::run,
+     * Should be override or default executor will be used.
+     *  @return an Executor used to execute methods called remotely by the framework.
+     */
+    public @NonNull Executor getExecutor() {
+        return Runnable::run;
     }
 }
