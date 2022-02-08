@@ -16,6 +16,7 @@
 
 package com.android.systemui.dreams.complication;
 
+import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewComponent.COMPLICATION_MARGIN;
 import static com.android.systemui.dreams.complication.dagger.ComplicationHostViewComponent.SCOPED_COMPLICATIONS_LAYOUT;
 
 import android.util.Log;
@@ -54,12 +55,14 @@ public class ComplicationLayoutEngine  {
         private final Parent mParent;
         @Complication.Category
         private final int mCategory;
+        private final int mMargin;
 
         /**
          * Default constructor. {@link Parent} allows for the {@link ViewEntry}'s surrounding
          * view hierarchy to be accessed without traversing the entire view tree.
          */
-        ViewEntry(View view, ComplicationLayoutParams layoutParams, int category, Parent parent) {
+        ViewEntry(View view, ComplicationLayoutParams layoutParams, int category, Parent parent,
+                int margin) {
             mView = view;
             // Views that are generated programmatically do not have a unique id assigned to them
             // at construction. A new id is assigned here to enable ConstraintLayout relative
@@ -69,6 +72,7 @@ public class ComplicationLayoutEngine  {
             mLayoutParams = layoutParams;
             mCategory = category;
             mParent = parent;
+            mMargin = margin;
         }
 
         /**
@@ -173,6 +177,23 @@ public class ComplicationLayoutEngine  {
                         }
                         break;
                 }
+
+                if (!isRoot) {
+                    switch(direction) {
+                        case ComplicationLayoutParams.DIRECTION_DOWN:
+                            params.setMargins(0, mMargin, 0, 0);
+                            break;
+                        case ComplicationLayoutParams.DIRECTION_UP:
+                            params.setMargins(0, 0, 0, mMargin);
+                            break;
+                        case ComplicationLayoutParams.DIRECTION_END:
+                            params.setMarginStart(mMargin);
+                            break;
+                        case ComplicationLayoutParams.DIRECTION_START:
+                            params.setMarginEnd(mMargin);
+                            break;
+                    }
+                }
             });
 
             mView.setLayoutParams(params);
@@ -224,6 +245,7 @@ public class ComplicationLayoutEngine  {
             private final ComplicationLayoutParams mLayoutParams;
             private final int mCategory;
             private Parent mParent;
+            private int mMargin;
 
             Builder(View view, ComplicationLayoutParams lp, @Complication.Category int category) {
                 mView = view;
@@ -257,10 +279,19 @@ public class ComplicationLayoutEngine  {
             }
 
             /**
+             * Sets the margin that will be applied in the direction the complication is laid out
+             * towards.
+             */
+            Builder setMargin(int margin) {
+                mMargin = margin;
+                return this;
+            }
+
+            /**
              * Builds and returns the resulting {@link ViewEntry}.
              */
             ViewEntry build() {
-                return new ViewEntry(mView, mLayoutParams, mCategory, mParent);
+                return new ViewEntry(mView, mLayoutParams, mCategory, mParent, mMargin);
             }
         }
 
@@ -408,13 +439,16 @@ public class ComplicationLayoutEngine  {
     }
 
     private final ConstraintLayout mLayout;
+    private final int mMargin;
     private final HashMap<ComplicationId, ViewEntry> mEntries = new HashMap<>();
     private final HashMap<Integer, PositionGroup> mPositions = new HashMap<>();
 
     /** */
     @Inject
-    public ComplicationLayoutEngine(@Named(SCOPED_COMPLICATIONS_LAYOUT) ConstraintLayout layout) {
+    public ComplicationLayoutEngine(@Named(SCOPED_COMPLICATIONS_LAYOUT) ConstraintLayout layout,
+            @Named(COMPLICATION_MARGIN) int margin) {
         mLayout = layout;
+        mMargin = margin;
     }
 
     /**
@@ -434,7 +468,8 @@ public class ComplicationLayoutEngine  {
             removeComplication(id);
         }
 
-        final ViewEntry.Builder entryBuilder = new ViewEntry.Builder(view, lp, category);
+        final ViewEntry.Builder entryBuilder = new ViewEntry.Builder(view, lp, category)
+                .setMargin(mMargin);
 
         // Add position group if doesn't already exist
         final int position = lp.getPosition();

@@ -171,9 +171,4 @@
     <item msgid="146088982397753810">"Naka-off"</item>
     <item msgid="460891964396502657">"Naka-on"</item>
   </string-array>
-  <string-array name="tile_states_fgsmanager">
-    <item msgid="3054341646818213094">"Hindi available"</item>
-    <item msgid="5581384648880018330">"Naka-off"</item>
-    <item msgid="8000850843692192257">"Naka-on"</item>
-  </string-array>
 </resources>

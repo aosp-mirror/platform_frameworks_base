@@ -18,12 +18,14 @@ package com.android.systemui.dreams.complication.dagger;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.android.internal.util.Preconditions;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.complication.ComplicationHostViewController;
 
 import java.lang.annotation.Documented;
@@ -48,7 +50,7 @@ import dagger.Subcomponent;
 @ComplicationHostViewComponent.ComplicationHostViewScope
 public interface ComplicationHostViewComponent {
     String SCOPED_COMPLICATIONS_LAYOUT = "scoped_complications_layout";
-
+    String COMPLICATION_MARGIN = "complication_margin";
     /** Scope annotation for singleton items within {@link ComplicationHostViewComponent}. */
     @Documented
     @Retention(RUNTIME)
@@ -84,6 +86,13 @@ public interface ComplicationHostViewComponent {
                             layoutInflater.inflate(R.layout.dream_overlay_complications_layer,
                                     null),
                     "R.layout.dream_overlay_complications_layer did not properly inflated");
+        }
+
+        @Provides
+        @Named(COMPLICATION_MARGIN)
+        @ComplicationHostViewScope
+        static int providesComplicationPadding(@Main Resources resources) {
+            return resources.getDimensionPixelSize(R.dimen.dream_overlay_complication_margin);
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package android.view;
+package com.android.systemui.qs.external
 
-import java.util.concurrent.Executor;
+import android.service.quicksettings.IQSService
+import dagger.Binds
+import dagger.Module
 
-/**
- * Interface to handle request to
- * {@link SurfaceControl.Transaction#addTransactionCommittedListener(Executor, TransactionCommittedListener)}
- */
-public interface TransactionCommittedListener {
-    /**
-     * Invoked when the transaction has been committed in SurfaceFlinger.
-     */
-    void onTransactionCommitted();
+@Module
+interface QSExternalModule {
+    @Binds
+    fun bindsIQSService(impl: TileServices): IQSService
 }

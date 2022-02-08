@@ -15,7 +15,6 @@
  */
 package com.android.internal.util.dump;
 
-import android.annotation.Nullable;
 import android.util.ArrayMap;
 import android.util.Dumpable;
 import android.util.DumpableContainer;
@@ -38,7 +37,6 @@ public final class DumpableContainerImpl implements DumpableContainer {
 
     private static final boolean DEBUG = false;
 
-    @Nullable
     private final ArrayMap<String, Dumpable> mDumpables = new ArrayMap<>();
 
     @Override
@@ -64,7 +62,7 @@ public final class DumpableContainerImpl implements DumpableContainer {
      * Dumps the number of dumpable, without a newline.
      */
     private int dumpNumberDumpables(IndentingPrintWriter writer) {
-        int size = mDumpables == null ? 0 : mDumpables.size();
+        int size = mDumpables.size();
         if (size == 0) {
             writer.print("No dumpables");
         } else {
@@ -102,7 +100,7 @@ public final class DumpableContainerImpl implements DumpableContainer {
             ipw.println();
             return;
         }
-        ipw.println(": ");
+        ipw.println(":");
 
         for (int i = 0; i < size; i++) {
             String dumpableName = mDumpables.keyAt(i);

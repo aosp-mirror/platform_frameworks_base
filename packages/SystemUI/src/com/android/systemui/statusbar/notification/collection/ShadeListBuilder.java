@@ -122,20 +122,23 @@ public class ShadeListBuilder implements Dumpable {
 
     private List<ListEntry> mReadOnlyNotifList = Collections.unmodifiableList(mNotifList);
     private List<ListEntry> mReadOnlyNewNotifList = Collections.unmodifiableList(mNewNotifList);
+    private final NotifPipelineChoreographer mChoreographer;
 
     @Inject
     public ShadeListBuilder(
-            SystemClock systemClock,
-            NotifPipelineFlags flags,
-            ShadeListBuilderLogger logger,
             DumpManager dumpManager,
-            NotificationInteractionTracker interactionTracker
+            NotifPipelineChoreographer pipelineChoreographer,
+            NotifPipelineFlags flags,
+            NotificationInteractionTracker interactionTracker,
+            ShadeListBuilderLogger logger,
+            SystemClock systemClock
     ) {
         Assert.isMainThread();
         mSystemClock = systemClock;
         mLogger = logger;
         mAlwaysLogList = flags.isDevLoggingEnabled();
         mInteractionTracker = interactionTracker;
+        mChoreographer = pipelineChoreographer;
         dumpManager.registerDumpable(TAG, this);
 
         setSectioners(Collections.emptyList());
@@ -148,6 +151,7 @@ public class ShadeListBuilder implements Dumpable {
     public void attach(NotifCollection collection) {
         Assert.isMainThread();
         collection.setBuildListener(mReadyForBuildListener);
+        mChoreographer.addOnEvalListener(this::buildList);
     }
 
     /**
@@ -290,7 +294,7 @@ public class ShadeListBuilder implements Dumpable {
 
                     mLogger.logOnBuildList();
                     mAllEntries = entries;
-                    buildList();
+                    mChoreographer.schedule();
                 }
             };
 
@@ -1281,7 +1285,7 @@ public class ShadeListBuilder implements Dumpable {
     private void rebuildListIfBefore(@PipelineState.StateName int state) {
         mPipelineState.requireIsBefore(state);
         if (mPipelineState.is(STATE_IDLE)) {
-            buildList();
+            mChoreographer.schedule();
         }
     }
 

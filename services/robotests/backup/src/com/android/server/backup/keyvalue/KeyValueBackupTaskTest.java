@@ -2727,7 +2727,7 @@ public class KeyValueBackupTaskTest  {
         // The second line will throw NPE because it will call lambda 1 with null, since argThat()
         // returns null. So we guard against that by checking for null.
         return packageInfo ->
-                packageInfo != null && packageInfo.packageName.equals(packageInfo.packageName);
+                packageInfo != null && packageInfo.packageName.equals(packageData.packageName);
     }
 
     /** Matches {@link ApplicationInfo} whose package name is {@code packageData.packageName}. */

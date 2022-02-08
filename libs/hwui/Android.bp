@@ -345,6 +345,7 @@ cc_defaults {
         "jni/PathEffect.cpp",
         "jni/PathMeasure.cpp",
         "jni/Picture.cpp",
+        "jni/Region.cpp",
         "jni/Shader.cpp",
         "jni/RenderEffect.cpp",
         "jni/Typeface.cpp",
@@ -394,7 +395,6 @@ cc_defaults {
                 "jni/GraphicsStatsService.cpp",
                 "jni/Movie.cpp",
                 "jni/MovieImpl.cpp",
-                "jni/Region.cpp", // requires libbinder_ndk
                 "jni/pdf/PdfDocument.cpp",
                 "jni/pdf/PdfEditor.cpp",
                 "jni/pdf/PdfRenderer.cpp",

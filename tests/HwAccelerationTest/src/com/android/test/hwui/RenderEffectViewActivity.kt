@@ -30,7 +30,7 @@ import android.view.View
 
 class RenderEffectViewActivity : Activity() {
 
-    private val mDropsShader = RuntimeShader(dropsAGSL, false)
+    private val mDropsShader = RuntimeShader(dropsAGSL)
     private var mDropsAnimator = ValueAnimator.ofFloat(0f, 1f)
     private var mStartTime = System.currentTimeMillis()
     private lateinit var mScratchesImage: Bitmap

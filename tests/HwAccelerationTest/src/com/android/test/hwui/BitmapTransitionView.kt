@@ -41,7 +41,7 @@ class BitmapTransitionView @JvmOverloads constructor(
             ImageDecoder.createSource(context.resources, R.drawable.very_large_photo))
     private val mShaderA = BitmapShader(mImageA, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
     private val mShaderB = BitmapShader(mImageB, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
-    private val mShader = RuntimeShader(AGSL, false)
+    private val mShader = RuntimeShader(AGSL)
     private var mCurrentProgress = -1f
     private var mForwardProgress = true
     private var mCurrentAnimator = ValueAnimator.ofFloat(-1f, 1f)

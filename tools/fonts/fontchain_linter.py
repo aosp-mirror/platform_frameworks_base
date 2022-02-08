@@ -635,23 +635,11 @@ def compute_expected_emoji():
         sequence = tuple(ch for ch in sequence if ch != EMOJI_VS)
         all_sequences.add(sequence)
         sequence_pieces.update(sequence)
-        if _emoji_sequences.get(sequence, None) == 'Emoji_Tag_Sequence':
-            # Add reverse of all emoji ZWJ sequences, which are added to the
-            # fonts as a workaround to get the sequences work in RTL text.
-            # TODO: test if these are actually needed by Minikin/HarfBuzz.
-            reversed_seq = reverse_emoji(sequence)
-            all_sequences.add(reversed_seq)
-            equivalent_emoji[reversed_seq] = sequence
 
     for sequence in adjusted_emoji_zwj_sequences.keys():
         sequence = tuple(ch for ch in sequence if ch != EMOJI_VS)
         all_sequences.add(sequence)
         sequence_pieces.update(sequence)
-        # Add reverse of all emoji ZWJ sequences, which are added to the fonts
-        # as a workaround to get the sequences work in RTL text.
-        reversed_seq = reverse_emoji(sequence)
-        all_sequences.add(reversed_seq)
-        equivalent_emoji[reversed_seq] = sequence
 
     for first, second in SAME_FLAG_MAPPINGS:
         equivalent_emoji[first] = second

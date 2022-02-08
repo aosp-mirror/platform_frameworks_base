@@ -54,6 +54,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * @hide
  */
 public class NetworkStatsFactory {
+    static {
+        System.loadLibrary("service-connectivity");
+    }
+
     private static final String TAG = "NetworkStatsFactory";
 
     private static final boolean USE_NATIVE_PARSING = true;

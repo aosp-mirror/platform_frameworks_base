@@ -17,7 +17,9 @@
 <resources>
 
     <style name="ChooserActivity"
-           parent="@android:style/Theme.DeviceDefault.Light.Dialog.NoActionBar">
+           parent="@style/Theme.AppCompat.Light.Dialog">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
         <item name="*android:windowFixedHeightMajor">100%</item>
         <item name="*android:windowFixedHeightMinor">100%</item>
         <item name="android:windowBackground">@android:color/transparent</item>

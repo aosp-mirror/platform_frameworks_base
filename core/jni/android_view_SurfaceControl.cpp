@@ -2168,7 +2168,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetLayerId },
     {"nativeSetDropInputMode", "(JJI)V",
              (void*)nativeSetDropInputMode },
-    {"nativeAddTransactionCommittedListener", "(JLandroid/view/TransactionCommittedListener;)V",
+    {"nativeAddTransactionCommittedListener", "(JLandroid/view/SurfaceControl$TransactionCommittedListener;)V",
             (void*) nativeAddTransactionCommittedListener },
     {"nativeSanitize", "(J)V",
             (void*) nativeSanitize }
@@ -2393,7 +2393,7 @@ int register_android_view_SurfaceControl(JNIEnv* env)
                              "([Landroid/view/SurfaceControl$JankData;)V");
 
     jclass transactionCommittedListenerClazz =
-            FindClassOrDie(env, "android/view/TransactionCommittedListener");
+            FindClassOrDie(env, "android/view/SurfaceControl$TransactionCommittedListener");
     gTransactionCommittedListenerClassInfo.clazz =
             MakeGlobalRefOrDie(env, transactionCommittedListenerClazz);
     gTransactionCommittedListenerClassInfo.onTransactionCommitted =

@@ -27,13 +27,16 @@ import android.hardware.DataSpace;
 import android.hardware.DataSpace.NamedDataSpace;
 import android.hardware.HardwareBuffer;
 import android.hardware.HardwareBuffer.Usage;
+import android.hardware.SyncFence;
 import android.hardware.camera2.MultiResolutionImageReader;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import android.view.Surface;
 
 import dalvik.system.VMRuntime;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -1219,9 +1222,15 @@ public class ImageReader implements AutoCloseable {
         }
 
         @Override
-        public int getFenceFd() {
+        public SyncFence getFence() throws IOException {
             throwISEIfImageIsInvalid();
-            return nativeGetFenceFd();
+            // duplicate ParcelFileDescriptor because native still retains the fence ownership.
+            int fence = nativeGetFenceFd();
+            if (fence != -1) {
+                return SyncFence.create(ParcelFileDescriptor.fromFd(nativeGetFenceFd()));
+            } else {
+                return SyncFence.createEmpty();
+            }
         }
 
         @Override

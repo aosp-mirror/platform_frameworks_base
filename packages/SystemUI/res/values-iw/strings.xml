@@ -46,6 +46,14 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"יש אישור"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"‏לא ניתן לבצע ניפוי באגים ב-USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"‏למשתמש המחובר לחשבון במכשיר הזה אין אפשרות להפעיל ניפוי באגים ב-USB. כדי להשתמש בתכונה הזו יש לעבור אל המשתמש הראשי."</string>
+    <!-- no translation found for hdmi_cec_set_menu_language_title (1259765420091503742) -->
+    <skip />
+    <!-- no translation found for hdmi_cec_set_menu_language_description (8176716678074126619) -->
+    <skip />
+    <!-- no translation found for hdmi_cec_set_menu_language_accept (2513689457281009578) -->
+    <skip />
+    <!-- no translation found for hdmi_cec_set_menu_language_decline (7650721096558646011) -->
+    <skip />
     <string name="wifi_debugging_title" msgid="7300007687492186076">"לאשר ניפוי באגים אלחוטי ברשת הזו?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"‏שם הרשת (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nכתובת Wi‑Fi‏ (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"לאשר תמיד ברשת הזו"</string>
@@ -177,7 +185,6 @@
     <string name="accessibility_desc_close" msgid="8293708213442107755">"סגירה"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"השתקה מוחלטת"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"רק התראות"</string>
-    <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"נא לא להפריע."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"‏Bluetooth מופעל."</string>
     <string name="accessibility_quick_settings_alarm" msgid="558094529584082090">"ההתראה נקבעה ל-<xliff:g id="TIME">%s</xliff:g>."</string>
@@ -204,7 +211,6 @@
     <string name="dessert_case" msgid="9104973640704357717">"מזנון קינוחים"</string>
     <string name="start_dreams" msgid="9131802557946276718">"שומר מסך"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"אתרנט"</string>
-    <string name="quick_settings_dnd_label" msgid="7728690179108024338">"נא לא להפריע"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"אין מכשירים מותאמים זמינים"</string>
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> סוללה"</string>
@@ -273,10 +279,8 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"עד הזריחה"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"יתחיל בשעה <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"עד <xliff:g id="TIME">%s</xliff:g>"</string>
-    <!-- no translation found for quick_settings_dark_mode_secondary_label_on_at_bedtime (2274300599408864897) -->
-    <skip />
-    <!-- no translation found for quick_settings_dark_mode_secondary_label_until_bedtime_ends (1790772410777123685) -->
-    <skip />
+    <string name="quick_settings_dark_mode_secondary_label_on_at_bedtime" msgid="2274300599408864897">"מופעל בזמן השינה"</string>
+    <string name="quick_settings_dark_mode_secondary_label_until_bedtime_ends" msgid="1790772410777123685">"עד לסיום זמן השינה"</string>
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"‏NFC מושבת"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"‏NFC מופעל"</string>
@@ -320,6 +324,7 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה מהירה • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • בטעינה איטית • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • אביזר העגינה בטעינה • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> עד לסיום"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"החלפת משתמש"</string>
     <string name="user_add_user" msgid="4336657383006913022">"הוספת משתמש"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"משתמש חדש"</string>
@@ -354,7 +359,6 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"התראות"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"שיחות"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ניקוי כל ההתראות השקטות"</string>
-    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"התראות הושהו על ידי מצב \'נא לא להפריע\'"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"כן, אפשר להתחיל"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"אין התראות"</string>
     <string name="quick_settings_disclosure_parental_controls" msgid="2114102871438223600">"המכשיר הזה מנוהל על ידי ההורה שלך"</string>
@@ -499,8 +503,6 @@
     <string name="notification_channel_summary_automatic_demoted" msgid="1831303964660807700">"‏&lt;b&gt;הסטטוס:&lt;/b&gt; דורג נמוך יותר"</string>
     <string name="notification_channel_summary_priority_baseline" msgid="46674690072551234">"מוצגת בחלק העליון של קטע ההתראות וכתמונת פרופיל במסך הנעילה"</string>
     <string name="notification_channel_summary_priority_bubble" msgid="1275413109619074576">"מוצגת בחלק העליון של קטע התראות השיחה וכתמונת פרופיל במסך הנעילה, מופיעה בבועה"</string>
-    <string name="notification_channel_summary_priority_dnd" msgid="6665395023264154361">"מוצגת בחלק העליון של קטע התראות השיחה וכתמונת פרופיל במסך הנעילה, מפריעה במצב \'נא לא להפריע\'"</string>
-    <string name="notification_channel_summary_priority_all" msgid="7151752959650048285">"מוצגת בחלק העליון של קטע התראות השיחה וכתמונת פרופיל במסך הנעילה, מופיעה בבועה צפה ומפריעה במצב \'נא לא להפריע\'"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"בעדיפות גבוהה"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> לא תומכת בתכונות השיחה"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"לא ניתן לשנות את ההתראות האלה."</string>
@@ -580,7 +582,6 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"מוזיקה"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"יומן"</string>
-    <string name="volume_and_do_not_disturb" msgid="502044092739382832">"נא לא להפריע"</string>
     <string name="volume_dnd_silent" msgid="4154597281458298093">"קיצור דרך ללחצני עוצמת קול"</string>
     <string name="battery" msgid="769686279459897127">"סוללה"</string>
     <string name="headset" msgid="4485892374984466437">"אוזניות"</string>
@@ -700,10 +701,6 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"‏Wi-Fi כבוי"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"‏Bluetooth כבוי"</string>
-    <string name="dnd_is_off" msgid="3185706903793094463">"מצב \'נא לא להפריע\' כבוי"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"מצב \'נא לא להפריע\' הופעל על ידי כלל אוטומטי (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"מצב \'נא לא להפריע\' הופעל על ידי אפליקציה (<xliff:g id="ID_1">%s</xliff:g>)."</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"מצב \'נא לא להפריע\' הופעל על ידי אפליקציה או על ידי כלל אוטומטי."</string>
     <string name="running_foreground_services_title" msgid="5137313173431186685">"אפליקציות שפועלות ברקע"</string>
     <string name="running_foreground_services_msg" msgid="3009459259222695385">"אפשר להקיש לקבלת פרטים על צריכה של נתונים וסוללה"</string>
     <string name="mobile_data_disable_title" msgid="5366476131671617790">"לכבות את חבילת הגלישה?"</string>
@@ -808,14 +805,10 @@
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"הפעלת <xliff:g id="SONG_NAME">%1$s</xliff:g> מ-<xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"ביטול"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"צריך להתקרב כדי להפעיל מוזיקה במכשיר <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <!-- no translation found for media_move_closer_to_end_cast (6495907340926563656) -->
-    <skip />
-    <!-- no translation found for media_transfer_playing_different_device (7186806382609785610) -->
-    <skip />
-    <!-- no translation found for media_transfer_playing_this_device (1856890686844499172) -->
-    <skip />
-    <!-- no translation found for media_transfer_failed (2640354446629980227) -->
-    <skip />
+    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"צריך להתקרב אל <xliff:g id="DEVICENAME">%1$s</xliff:g> כדי להפעיל כאן"</string>
+    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"פועלת ב-<xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
+    <string name="media_transfer_playing_this_device" msgid="1856890686844499172">"פועלת בטלפון הזה"</string>
+    <string name="media_transfer_failed" msgid="2640354446629980227">"משהו השתבש"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"לא פעיל, יש לבדוק את האפליקציה"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"לא נמצא"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"הפקד לא זמין"</string>
@@ -865,7 +858,6 @@
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
     <string name="people_tile_description" msgid="8154966188085545556">"ההודעות האחרונות, שיחות שלא נענו ועדכוני סטטוס"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"שיחה"</string>
-    <string name="paused_by_dnd" msgid="7856941866433556428">"ההתראה הושהתה על ידי \'נא לא להפריע\'"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"התקבלה הודעה מ<xliff:g id="NAME">%1$s</xliff:g>: ‏<xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
     <string name="new_notification_image_content_description" msgid="6017506886810813123">"<xliff:g id="NAME">%1$s</xliff:g> שלח/ה תמונה"</string>
     <string name="new_status_content_description" msgid="6046637888641308327">"הסטטוס של <xliff:g id="NAME">%1$s</xliff:g> עודכן: ‏<xliff:g id="STATUS">%2$s</xliff:g>"</string>
@@ -898,10 +890,21 @@
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"השבתה של מצב טיסה"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"האפליקציה <xliff:g id="APPNAME">%1$s</xliff:g> מבקשת להוסיף להגדרות המהירות את האריח הבא"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"הוספת אריח"</string>
-    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"אין להוסיף אריח"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"לא להוסיף אריח"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"בחירת משתמש"</string>
-    <string name="fgs_manager_dialog_title" msgid="656091833603337197">"אפליקציות שפועלות ברקע"</string>
+    <plurals name="fgs_manager_footer_label" formatted="false" msgid="9091110396713032871">
+      <item quantity="two"><xliff:g id="COUNT_1">%s</xliff:g> אפליקציות פעילות</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> אפליקציות פעילות</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> אפליקציות פעילות</item>
+      <item quantity="one">אפליקציה פעילה אחת (<xliff:g id="COUNT_0">%s</xliff:g>)</item>
+    </plurals>
+    <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"אפליקציות פעילות"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"עצירה"</string>
+    <!-- no translation found for fgs_manager_app_item_stop_button_stopped_label (6950382004441263922) -->
+    <skip />
     <string name="clipboard_edit_text_copy" msgid="770856373439969178">"העתקה"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"הועתק"</string>
+    <!-- no translation found for clipboard_edit_source (9156488177277788029) -->
+    <skip />
+    <string name="clipboard_dismiss_description" msgid="7544573092766945657">"ביטול של העתקת ממשק המשתמש"</string>
 </resources>

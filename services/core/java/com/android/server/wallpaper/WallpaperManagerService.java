@@ -2591,8 +2591,20 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
      */
     @Override
     public void setWallpaperDimAmount(float dimAmount) throws RemoteException {
+        setWallpaperDimAmountForUid(Binder.getCallingUid(), dimAmount);
+    }
+
+    /**
+     * Sets wallpaper dim amount for a given UID. This only applies to FLAG_SYSTEM wallpaper as the
+     * lock screen does not have a wallpaper component, so we use mWallpaperMap.
+     *
+     * @param uid Caller UID that wants to set the wallpaper dim amount
+     * @param dimAmount Dim amount where 0f reverts any dimming applied by the caller (fully bright)
+     *                  and 1f is fully black
+     * @throws RemoteException
+     */
+    public void setWallpaperDimAmountForUid(int uid, float dimAmount) {
         checkPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT);
-        int uid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {

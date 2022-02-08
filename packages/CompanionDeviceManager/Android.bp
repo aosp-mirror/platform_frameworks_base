@@ -36,5 +36,11 @@ android_app {
     defaults: ["platform_app_defaults"],
     srcs: ["src/**/*.java"],
 
+    static_libs: [
+        "androidx.lifecycle_lifecycle-livedata",
+        "androidx.lifecycle_lifecycle-extensions",
+        "androidx.appcompat_appcompat",
+    ],
+
     platform_apis: true,
 }

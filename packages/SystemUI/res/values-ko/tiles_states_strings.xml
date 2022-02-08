@@ -171,9 +171,4 @@
     <item msgid="146088982397753810">"꺼짐"</item>
     <item msgid="460891964396502657">"켜짐"</item>
   </string-array>
-  <string-array name="tile_states_fgsmanager">
-    <item msgid="3054341646818213094">"사용 불가"</item>
-    <item msgid="5581384648880018330">"사용 중지됨"</item>
-    <item msgid="8000850843692192257">"사용 설정됨"</item>
-  </string-array>
 </resources>
