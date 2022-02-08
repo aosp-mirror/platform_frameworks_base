@@ -1775,7 +1775,6 @@ public class NotificationManagerService extends SystemService {
                     mConditionProviders.onUserSwitched(userId);
                     mListeners.onUserSwitched(userId);
                     mZenModeHelper.onUserSwitched(userId);
-                    mPreferencesHelper.onUserSwitched(userId);
                 }
                 // assistant is the only thing that cares about managed profiles specifically
                 mAssistants.onUserSwitched(userId);
@@ -1805,7 +1804,6 @@ public class NotificationManagerService extends SystemService {
                     mConditionProviders.onUserUnlocked(userId);
                     mListeners.onUserUnlocked(userId);
                     mZenModeHelper.onUserUnlocked(userId);
-                    mPreferencesHelper.onUserUnlocked(userId);
                 }
             }
         }
