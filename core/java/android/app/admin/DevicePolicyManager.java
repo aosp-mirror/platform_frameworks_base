@@ -15635,4 +15635,40 @@ public class DevicePolicyManager {
             }
         }
     }
+
+    /**
+     * Returns the package name of the device manager role holder.
+     *
+     * <p>If the device manager role holder is not configured for this device, returns {@code null}.
+     */
+    @Nullable
+    public String getDeviceManagerRoleHolderPackageName() {
+        String deviceManagerConfig =
+                mContext.getString(com.android.internal.R.string.config_deviceManager);
+        return extractPackageNameFromDeviceManagerConfig(deviceManagerConfig);
+    }
+
+    /**
+     * Retrieves the package name for a given {@code deviceManagerConfig}.
+     *
+     * <p>Valid configs look like:
+     * <ul>
+     *     <li>{@code com.package.name}</li>
+     *     <li>{@code com.package.name:<SHA256 checksum>}</li>
+     * </ul>
+     *
+     * <p>If the supplied {@code deviceManagerConfig} is {@code null} or empty, returns
+     * {@code null}.
+     */
+    @Nullable
+    private String extractPackageNameFromDeviceManagerConfig(
+            @Nullable String deviceManagerConfig) {
+        if (TextUtils.isEmpty(deviceManagerConfig)) {
+            return null;
+        }
+        if (deviceManagerConfig.contains(":")) {
+            return deviceManagerConfig.split(":")[0];
+        }
+        return deviceManagerConfig;
+    }
 }
