@@ -3585,10 +3585,11 @@ public class DevicePolicyManager {
     @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.INTERACT_ACROSS_USERS})
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @UserHandleAware
     public void acknowledgeNewUserDisclaimer() {
         if (mService != null) {
             try {
-                mService.acknowledgeNewUserDisclaimer();
+                mService.acknowledgeNewUserDisclaimer(mContext.getUserId());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -3596,17 +3597,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Checks whether the new managed user disclaimer was viewed by the current user.
+     * Checks whether the new managed user disclaimer was viewed by the user.
      *
      * @hide
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.INTERACT_ACROSS_USERS})
     @TestApi
+    @UserHandleAware
     public boolean isNewUserDisclaimerAcknowledged() {
         if (mService != null) {
             try {
-                return mService.isNewUserDisclaimerAcknowledged();
+                return mService.isNewUserDisclaimerAcknowledged(mContext.getUserId());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
