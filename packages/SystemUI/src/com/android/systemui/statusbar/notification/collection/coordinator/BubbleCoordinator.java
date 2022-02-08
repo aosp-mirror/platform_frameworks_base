@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
-import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -58,7 +57,6 @@ import javax.inject.Inject;
 public class BubbleCoordinator implements Coordinator {
     private static final String TAG = "BubbleCoordinator";
 
-    private final NotifPipelineFlags mNotifPipelineFlags;
     private final Optional<BubblesManager> mBubblesManagerOptional;
     private final Optional<Bubbles> mBubblesOptional;
     private final NotifCollection mNotifCollection;
@@ -68,11 +66,9 @@ public class BubbleCoordinator implements Coordinator {
 
     @Inject
     public BubbleCoordinator(
-            NotifPipelineFlags notifPipelineFlags,
             Optional<BubblesManager> bubblesManagerOptional,
             Optional<Bubbles> bubblesOptional,
             NotifCollection notifCollection) {
-        mNotifPipelineFlags = notifPipelineFlags;
         mBubblesManagerOptional = bubblesManagerOptional;
         mBubblesOptional = bubblesOptional;
         mNotifCollection = notifCollection;
@@ -131,7 +127,7 @@ public class BubbleCoordinator implements Coordinator {
                 DismissedByUserStats dismissedByUserStats,
                 int reason
         ) {
-            if (!mNotifPipelineFlags.isNewPipelineEnabled()) {
+            if (!mNotifPipeline.isNewPipelineEnabled()) {
                 // The `entry` will be from whichever pipeline is active, so if the old pipeline is
                 // running, make sure that we use the new pipeline's entry (if it still exists).
                 NotificationEntry newPipelineEntry = mNotifPipeline.getEntry(entry.getKey());

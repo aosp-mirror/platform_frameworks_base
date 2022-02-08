@@ -1043,6 +1043,11 @@ public class NotificationEntryManager implements
         mNotifCollectionListeners.add(listener);
     }
 
+    @Override
+    public void removeCollectionListener(@NonNull NotifCollectionListener listener) {
+        mNotifCollectionListeners.remove(listener);
+    }
+
     /*
      * End annexation
      * -----

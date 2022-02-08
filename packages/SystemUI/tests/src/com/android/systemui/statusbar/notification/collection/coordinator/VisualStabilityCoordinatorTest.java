@@ -40,6 +40,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
+import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.NotifPanelEventSource;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -67,6 +68,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Mock private Pluggable.PluggableListener<NotifStabilityManager> mInvalidateListener;
     @Mock private HeadsUpManager mHeadsUpManager;
     @Mock private NotifPanelEventSource mNotifPanelEventSource;
+    @Mock private VisualStabilityProvider mVisualStabilityProvider;
 
     @Captor private ArgumentCaptor<WakefulnessLifecycle.Observer> mWakefulnessObserverCaptor;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mSBStateListenerCaptor;
@@ -92,6 +94,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
                 mHeadsUpManager,
                 mNotifPanelEventSource,
                 mStatusBarStateController,
+                mVisualStabilityProvider,
                 mWakefulnessLifecycle);
 
         mCoordinator.attach(mNotifPipeline);

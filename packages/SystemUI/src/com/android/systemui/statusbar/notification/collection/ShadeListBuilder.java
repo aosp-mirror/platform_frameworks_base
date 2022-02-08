@@ -150,6 +150,7 @@ public class ShadeListBuilder implements Dumpable {
      */
     public void attach(NotifCollection collection) {
         Assert.isMainThread();
+        collection.addCollectionListener(mInteractionTracker);
         collection.setBuildListener(mReadyForBuildListener);
         mChoreographer.addOnEvalListener(this::buildList);
     }

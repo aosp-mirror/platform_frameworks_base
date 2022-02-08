@@ -213,6 +213,12 @@ public class NotifCollection implements Dumpable {
         mNotifCollectionListeners.add(listener);
     }
 
+    /** @see NotifPipeline#removeCollectionListener(NotifCollectionListener) */
+    void removeCollectionListener(NotifCollectionListener listener) {
+        Assert.isMainThread();
+        mNotifCollectionListeners.remove(listener);
+    }
+
     /** @see NotifPipeline#addNotificationLifetimeExtender(NotifLifetimeExtender) */
     void addNotificationLifetimeExtender(NotifLifetimeExtender extender) {
         Assert.isMainThread();

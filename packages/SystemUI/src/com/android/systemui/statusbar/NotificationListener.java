@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar;
 
 import static com.android.systemui.statusbar.RemoteInputController.processForRemoteInput;
-import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
@@ -32,6 +31,7 @@ import android.util.Log;
 
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.dagger.StatusBarModule;
+import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.phone.NotificationListenerWithPlugins;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.time.SystemClock;
@@ -155,7 +155,7 @@ public class NotificationListener extends NotificationListenerWithPlugins {
 
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap) {
-        onNotificationRemoved(sbn, rankingMap, UNDEFINED_DISMISS_REASON);
+        onNotificationRemoved(sbn, rankingMap, NotifCollection.REASON_UNKNOWN);
     }
 
     @Override

@@ -27,11 +27,11 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
+import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.notification.collection.render.NotifPanelEventSource;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -49,11 +49,6 @@ import javax.inject.Inject;
  * Ensures that notifications are visually stable if the user is looking at the notifications.
  * Group and section changes are re-allowed when the notification entries are no longer being
  * viewed.
- *
- * Previously this was implemented in the view-layer {@link NotificationViewHierarchyManager} by
- * {@link com.android.systemui.statusbar.notification.collection.legacy.VisualStabilityManager}.
- * This is now integrated in the data-layer via
- * {@link com.android.systemui.statusbar.notification.collection.ShadeListBuilder}.
  */
 // TODO(b/204468557): Move to @CoordinatorScope
 @SysUISingleton
@@ -63,6 +58,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
     private final HeadsUpManager mHeadsUpManager;
     private final NotifPanelEventSource mNotifPanelEventSource;
     private final StatusBarStateController mStatusBarStateController;
+    private final VisualStabilityProvider mVisualStabilityProvider;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
 
     private boolean mScreenOn;
@@ -93,8 +89,10 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
             HeadsUpManager headsUpManager,
             NotifPanelEventSource notifPanelEventSource,
             StatusBarStateController statusBarStateController,
+            VisualStabilityProvider visualStabilityProvider,
             WakefulnessLifecycle wakefulnessLifecycle) {
         mHeadsUpManager = headsUpManager;
+        mVisualStabilityProvider = visualStabilityProvider;
         mWakefulnessLifecycle = wakefulnessLifecycle;
         mStatusBarStateController = statusBarStateController;
         mDelayableExecutor = delayableExecutor;
@@ -178,6 +176,7 @@ public class VisualStabilityCoordinator implements Coordinator, Dumpable,
                         || mIsSuppressingEntryReorder))) {
             mNotifStabilityManager.invalidateList();
         }
+        mVisualStabilityProvider.setReorderingAllowed(mReorderingAllowed);
     }
 
     private boolean isSuppressingSectionChange() {
