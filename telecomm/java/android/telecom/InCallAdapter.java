@@ -373,34 +373,6 @@ public final class InCallAdapter {
     }
 
     /**
-     * Instructs Telecom to push a call to the given endpoint.
-     *
-     * @param callId The callId to push.
-     * @param callEndpoint The endpoint to which the call will be pushed.
-     */
-    public void pushCall(String callId, CallEndpoint callEndpoint) {
-        try {
-            mAdapter.pushCall(callId, callEndpoint);
-        } catch (RemoteException ignored) {
-        }
-    }
-
-    /**
-     * Instructs Telecom to answer a call via the given endpoint.
-     *
-     * @param callId The callId to push.
-     * @param callEndpoint The endpoint on which the call will be answered.
-     * @param videoState The video state in which to answer the call.
-     */
-    public void answerCall(String callId, CallEndpoint callEndpoint,
-            @VideoProfile.VideoState int videoState) {
-        try {
-            mAdapter.answerCallViaEndpoint(callId, callEndpoint, videoState);
-        } catch (RemoteException ignored) {
-        }
-    }
-
-    /**
      * Intructs Telecom to send a call event.
      *
      * @param callId The callId to send the event for.
