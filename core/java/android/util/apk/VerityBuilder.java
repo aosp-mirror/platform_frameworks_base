@@ -143,25 +143,6 @@ public abstract class VerityBuilder {
             return generateFsVerityTreeInternal(apk, salt, levelOffset, tree);
         }
     }
-    /**
-     * Calculates the apk-verity root hash for integrity measurement.  This needs to be consistent
-     * to what kernel returns.
-     */
-    @NonNull
-    static byte[] generateApkVerityRootHash(@NonNull RandomAccessFile apk,
-            @NonNull ByteBuffer apkDigest, @NonNull SignatureInfo signatureInfo)
-            throws NoSuchAlgorithmException, DigestException, IOException {
-        assertSigningBlockAlignedAndHasFullPages(signatureInfo);
-
-        ByteBuffer footer = ByteBuffer.allocate(CHUNK_SIZE_BYTES).order(ByteOrder.LITTLE_ENDIAN);
-        generateApkVerityFooter(apk, signatureInfo, footer);
-        footer.flip();
-
-        MessageDigest md = MessageDigest.getInstance(JCA_DIGEST_ALGORITHM);
-        md.update(footer);
-        md.update(apkDigest);
-        return md.digest();
-    }
 
     /**
      * Generates the apk-verity header and hash tree to be used by kernel for the given apk. This
