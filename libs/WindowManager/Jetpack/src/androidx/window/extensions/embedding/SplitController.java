@@ -924,6 +924,7 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
      * Checks if an activity is embedded and its presentation is customized by a
      * {@link android.window.TaskFragmentOrganizer} to only occupy a portion of Task bounds.
      */
+    @Override
     public boolean isActivityEmbedded(@NonNull Activity activity) {
         return mPresenter.isActivityEmbedded(activity.getActivityToken());
     }
