@@ -774,6 +774,43 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         verify(mRotateTextViewController).hideIndication(INDICATION_TYPE_LOGOUT);
     }
 
+    @Test
+    public void onTrustGrantedMessageDoesNotShowUntilTrustGranted() {
+        createController();
+
+        // GIVEN a trust granted message but trust isn't granted
+        final String trustGrantedMsg = "testing trust granted message";
+        mController.getKeyguardCallback().showTrustGrantedMessage(trustGrantedMsg);
+
+        verifyHideIndication(INDICATION_TYPE_TRUST);
+
+        // WHEN trust is granted
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+        mController.setVisible(true);
+
+        // THEN verify the trust granted message shows
+        verifyIndicationMessage(
+                INDICATION_TYPE_TRUST,
+                trustGrantedMsg);
+    }
+
+    @Test
+    public void onTrustGrantedMessageDoesShowsOnTrustGranted() {
+        createController();
+
+        // GIVEN trust is granted
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+
+        // WHEN the showTrustGranted message is called
+        final String trustGrantedMsg = "testing trust granted message";
+        mController.getKeyguardCallback().showTrustGrantedMessage(trustGrantedMsg);
+
+        // THEN verify the trust granted message shows
+        verifyIndicationMessage(
+                INDICATION_TYPE_TRUST,
+                trustGrantedMsg);
+    }
+
     private void sendUpdateDisclosureBroadcast() {
         mBroadcastReceiver.onReceive(mContext, new Intent());
     }

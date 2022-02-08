@@ -143,6 +143,7 @@ public class KeyguardIndicationController {
 
     private String mRestingIndication;
     private String mAlignmentIndication;
+    private CharSequence mTrustGrantedIndication;
     private CharSequence mTransientIndication;
     private CharSequence mBiometricMessage;
     protected ColorStateList mInitialTextColorState;
@@ -609,7 +610,9 @@ public class KeyguardIndicationController {
      */
     @VisibleForTesting
     String getTrustGrantedIndication() {
-        return mContext.getString(R.string.keyguard_indication_trust_unlocked);
+        return TextUtils.isEmpty(mTrustGrantedIndication)
+                ? mContext.getString(R.string.keyguard_indication_trust_unlocked)
+                : mTrustGrantedIndication.toString();
     }
 
     /**
@@ -909,6 +912,7 @@ public class KeyguardIndicationController {
         pw.println("  mTextView.getText(): " + (
                 mTopIndicationView == null ? null : mTopIndicationView.getText()));
         pw.println("  computePowerIndication(): " + computePowerIndication());
+        pw.println("  trustGrantedIndication: " + getTrustGrantedIndication());
         mRotateTextViewController.dump(fd, pw, args);
     }
 
@@ -1052,6 +1056,22 @@ public class KeyguardIndicationController {
             return ((!updateMonitor.isUnlockingWithBiometricAllowed(true /* isStrongBiometric */)
                     && msgId != FaceManager.FACE_ERROR_LOCKOUT_PERMANENT)
                     || msgId == FaceManager.FACE_ERROR_CANCELED);
+        }
+
+
+        @Override
+        public void onTrustChanged(int userId) {
+            if (KeyguardUpdateMonitor.getCurrentUser() != userId) {
+                return;
+            }
+            updateTrust(userId, getTrustGrantedIndication(), getTrustManagedIndication());
+        }
+
+        @Override
+        public void showTrustGrantedMessage(CharSequence message) {
+            mTrustGrantedIndication = message;
+            updateTrust(KeyguardUpdateMonitor.getCurrentUser(), getTrustGrantedIndication(),
+                    getTrustManagedIndication());
         }
 
         @Override
