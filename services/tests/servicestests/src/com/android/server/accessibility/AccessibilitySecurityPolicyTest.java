@@ -47,6 +47,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.InstallSourceInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
@@ -748,7 +749,7 @@ public class AccessibilitySecurityPolicyTest {
             throws PackageManager.NameNotFoundException {
         final InstallSourceInfo installSourceInfo = new InstallSourceInfo(
                 packageName, new SigningInfo(), null,
-                packageName);
+                packageName, PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
         when(mMockPackageManager.getPackageInfo(packageName, 0)).thenReturn(
                 mMockSourcePackageInfo);
         mMockSourcePackageInfo.applicationInfo = mMockSourceApplicationInfo;

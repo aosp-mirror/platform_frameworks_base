@@ -11259,6 +11259,7 @@ package android.content.pm {
     method @Nullable public android.content.pm.SigningInfo getInitiatingPackageSigningInfo();
     method @Nullable public String getInstallingPackageName();
     method @Nullable public String getOriginatingPackageName();
+    method public int getPackageSource();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.InstallSourceInfo> CREATOR;
   }
@@ -11466,6 +11467,11 @@ package android.content.pm {
     field public static final String EXTRA_STATUS = "android.content.pm.extra.STATUS";
     field public static final String EXTRA_STATUS_MESSAGE = "android.content.pm.extra.STATUS_MESSAGE";
     field public static final String EXTRA_STORAGE_PATH = "android.content.pm.extra.STORAGE_PATH";
+    field public static final int PACKAGE_SOURCE_DOWNLOADED_FILE = 4; // 0x4
+    field public static final int PACKAGE_SOURCE_LOCAL_FILE = 3; // 0x3
+    field public static final int PACKAGE_SOURCE_OTHER = 1; // 0x1
+    field public static final int PACKAGE_SOURCE_STORE = 2; // 0x2
+    field public static final int PACKAGE_SOURCE_UNSPECIFIED = 0; // 0x0
     field public static final int STATUS_FAILURE = 1; // 0x1
     field public static final int STATUS_FAILURE_ABORTED = 3; // 0x3
     field public static final int STATUS_FAILURE_BLOCKED = 2; // 0x2
@@ -11522,6 +11528,7 @@ package android.content.pm {
     method public int getMode();
     method public int getOriginatingUid();
     method @Nullable public android.net.Uri getOriginatingUri();
+    method public int getPackageSource();
     method public int getParentSessionId();
     method public float getProgress();
     method @Nullable public android.net.Uri getReferrerUri();
@@ -11570,6 +11577,7 @@ package android.content.pm {
     method public void setMultiPackage();
     method public void setOriginatingUid(int);
     method public void setOriginatingUri(@Nullable android.net.Uri);
+    method public void setPackageSource(int);
     method public void setReferrerUri(@Nullable android.net.Uri);
     method public void setRequireUserAction(int);
     method public void setSize(long);
