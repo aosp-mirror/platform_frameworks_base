@@ -111,6 +111,7 @@ interface IUserManager {
     boolean isManagedProfile(int userId);
     boolean isCloneProfile(int userId);
     boolean isMediaSharedWithParent(int userId);
+    boolean isCredentialSharedWithParent(int userId);
     boolean isDemoUser(int userId);
     boolean isPreCreated(int userId);
     UserInfo createProfileForUserEvenWhenDisallowedWithThrow(in String name, in String userType, int flags,
