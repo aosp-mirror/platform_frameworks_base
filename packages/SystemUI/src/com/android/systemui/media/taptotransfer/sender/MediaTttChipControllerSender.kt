@@ -64,47 +64,24 @@ class MediaTttChipControllerSender @Inject constructor(
         routeInfo: MediaRoute2Info,
         undoCallback: IUndoMediaTransferCallback?
     ) {
-        // TODO(b/217418566): This app icon content description is incorrect --
-        //   routeInfo.name is the name of the device, not the name of the app.
-        val appIconContentDescription = routeInfo.name.toString()
         val appPackageName = routeInfo.packageName
         val otherDeviceName = routeInfo.name.toString()
         val chipState = when(displayState) {
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST ->
-                AlmostCloseToStartCast(
-                    appPackageName, appIconContentDescription, otherDeviceName
-                )
+                AlmostCloseToStartCast(appPackageName, otherDeviceName)
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_END_CAST ->
-                AlmostCloseToEndCast(
-                    appPackageName, appIconContentDescription, otherDeviceName
-                )
+                AlmostCloseToEndCast(appPackageName, otherDeviceName)
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_TRIGGERED ->
-                TransferToReceiverTriggered(
-                    appPackageName, appIconContentDescription, otherDeviceName
-                )
+                TransferToReceiverTriggered(appPackageName, otherDeviceName)
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED ->
-                TransferToThisDeviceTriggered(
-                    appPackageName, appIconContentDescription
-                )
+                TransferToThisDeviceTriggered(appPackageName)
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED ->
-                TransferToReceiverSucceeded(
-                    appPackageName,
-                    appIconContentDescription,
-                    otherDeviceName,
-                    undoCallback
-                )
+                TransferToReceiverSucceeded(appPackageName, otherDeviceName, undoCallback)
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_SUCCEEDED ->
-                TransferToThisDeviceSucceeded(
-                    appPackageName,
-                    appIconContentDescription,
-                    otherDeviceName,
-                    undoCallback
-                )
+                TransferToThisDeviceSucceeded(appPackageName, otherDeviceName, undoCallback)
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_FAILED,
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED ->
-                TransferFailed(
-                    appPackageName, appIconContentDescription
-                )
+                TransferFailed(appPackageName)
             StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_FAR_FROM_RECEIVER -> {
                 removeChip()
                 null

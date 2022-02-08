@@ -25,12 +25,10 @@ import android.util.Log
  * A superclass chip state that will be subclassed by the sender chip and receiver chip.
  *
  * @property appPackageName the package name of the app playing the media. Will be used to fetch the
- *   app icon.
- * @property appIconContentDescription a string to use as the content description for the icon.
+ *   app icon and app name.
  */
 open class MediaTttChipState(
     internal val appPackageName: String?,
-    internal val appIconContentDescription: String
 ) {
     fun getAppIcon(context: Context): Drawable? {
         appPackageName ?: return null
@@ -38,6 +36,19 @@ open class MediaTttChipState(
             context.packageManager.getApplicationIcon(appPackageName)
         } catch (e: PackageManager.NameNotFoundException) {
             Log.w(TAG, "Cannot find icon for package $appPackageName", e)
+            null
+        }
+    }
+
+    /** Returns the name of the app playing the media or null if we can't find it. */
+    fun getAppName(context: Context): String? {
+        appPackageName ?: return null
+        return try {
+            context.packageManager.getApplicationInfo(
+                appPackageName, PackageManager.ApplicationInfoFlags.of(0)
+            ).loadLabel(context.packageManager).toString()
+        } catch (e: PackageManager.NameNotFoundException) {
+            Log.w(TAG, "Cannot find name for package $appPackageName", e)
             null
         }
     }

@@ -101,8 +101,8 @@ abstract class MediaTttChipControllerCommon<T : MediaTttChipState>(
      * This is in the common superclass since both the sender and the receiver show an icon.
      */
     internal fun setIcon(chipState: T, currentChipView: ViewGroup) {
-        val appIconView = currentChipView.findViewById<CachingIconView>(R.id.app_icon)
-        appIconView.contentDescription = chipState.appIconContentDescription
+        val appIconView = currentChipView.requireViewById<CachingIconView>(R.id.app_icon)
+        appIconView.contentDescription = chipState.getAppName(context)
 
         val appIcon = chipState.getAppIcon(context)
         val visibility = if (appIcon != null) {

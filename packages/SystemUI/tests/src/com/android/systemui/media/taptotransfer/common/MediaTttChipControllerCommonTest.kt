@@ -92,16 +92,16 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     fun setIcon_viewHasIconAndContentDescription() {
         controllerCommon.displayChip(getState())
         val chipView = getChipView()
-        val contentDescription = "test description"
 
-        val state = MediaTttChipState(PACKAGE_NAME, contentDescription)
+        val state = MediaTttChipState(PACKAGE_NAME)
         controllerCommon.setIcon(state, chipView)
 
         assertThat(chipView.getAppIconView().drawable).isEqualTo(state.getAppIcon(context))
-        assertThat(chipView.getAppIconView().contentDescription).isEqualTo(contentDescription)
+        assertThat(chipView.getAppIconView().contentDescription)
+                .isEqualTo(state.getAppName(context))
     }
 
-    private fun getState() = MediaTttChipState(PACKAGE_NAME, APP_ICON_CONTENT_DESCRIPTION)
+    private fun getState() = MediaTttChipState(PACKAGE_NAME)
 
     private fun getChipView(): ViewGroup {
         val viewCaptor = ArgumentCaptor.forClass(View::class.java)
@@ -123,4 +123,3 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
 }
 
 private const val PACKAGE_NAME = "com.android.systemui"
-private const val APP_ICON_CONTENT_DESCRIPTION = "Content description"

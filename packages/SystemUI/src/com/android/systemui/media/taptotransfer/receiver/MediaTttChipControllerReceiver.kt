@@ -62,7 +62,7 @@ class MediaTttChipControllerReceiver @Inject constructor(
     ) {
         when(displayState) {
             StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER ->
-                displayChip(ChipStateReceiver(routeInfo.packageName, routeInfo.name.toString()))
+                displayChip(ChipStateReceiver(routeInfo.packageName))
             StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER -> removeChip()
             else ->
                 Log.e(RECEIVER_TAG, "Unhandled MediaTransferReceiverState $displayState")
@@ -74,4 +74,4 @@ class MediaTttChipControllerReceiver @Inject constructor(
     }
 }
 
-private const val RECEIVER_TAG = "MediaTapToTransferReceiver"
+private const val RECEIVER_TAG = "MediaTapToTransferRcvr"

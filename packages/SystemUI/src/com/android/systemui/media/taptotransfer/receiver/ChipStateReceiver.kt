@@ -24,5 +24,4 @@ import com.android.systemui.media.taptotransfer.common.MediaTttChipState
  */
 class ChipStateReceiver(
     appPackageName: String?,
-    appIconContentDescription: String
-) : MediaTttChipState(appPackageName, appIconContentDescription)
+) : MediaTttChipState(appPackageName)
