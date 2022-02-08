@@ -26,6 +26,7 @@ import android.media.metrics.PlaybackMetrics;
 import android.media.metrics.PlaybackStateEvent;
 import android.media.metrics.TrackChangeEvent;
 import android.os.Binder;
+import android.os.PersistableBundle;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
 import android.util.Base64;
@@ -180,6 +181,20 @@ public final class MediaMetricsManagerService extends SystemService {
             StatsLog.write(statsEvent);
         }
 
+        public void reportBundleMetrics(String sessionId, PersistableBundle metrics, int userId) {
+            int level = loggingLevel();
+            if (level == LOGGING_LEVEL_BLOCKED) {
+                return;
+            }
+
+            int atomid = metrics.getInt("KEY_STATSD_ATOM_NUMBER");
+            switch (atomid) {
+                default:
+                    return;
+                // to be extended as we define statsd atoms
+            }
+        }
+
         @Override
         public void reportPlaybackStateEvent(
                 String sessionId, PlaybackStateEvent event, int userId) {
@@ -228,6 +243,11 @@ public final class MediaMetricsManagerService extends SystemService {
 
         @Override
         public String getEditingSessionId(int userId) {
+            return getSessionIdInternal(userId);
+        }
+
+        @Override
+        public String getBundleSessionId(int userId) {
             return getSessionIdInternal(userId);
         }
 
