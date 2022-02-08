@@ -2991,6 +2991,7 @@
   <java-symbol type="integer" name="config_navBarInteractionMode" />
   <java-symbol type="bool" name="config_navBarCanMove" />
   <java-symbol type="bool" name="config_navBarTapThrough" />
+  <java-symbol type="bool" name="config_imeDrawsImeNavBar" />
   <java-symbol type="bool" name="config_navBarAlwaysShowOnSideEdgeGesture" />
   <java-symbol type="bool" name="config_navBarNeedsScrim" />
   <java-symbol type="bool" name="config_allowSeamlessRotationDespiteNavBarMoving" />
