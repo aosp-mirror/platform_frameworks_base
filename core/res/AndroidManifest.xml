@@ -6591,6 +6591,12 @@
                 android:process=":ui">
         </activity>
 
+        <activity android:name="com.android.internal.app.BlockedAppStreamingActivity"
+            android:theme="@style/Theme.Dialog.Confirmation"
+            android:excludeFromRecents="true"
+            android:process=":ui">
+        </activity>
+
         <activity android:name="com.android.internal.app.LaunchAfterAuthenticationActivity"
                   android:theme="@style/Theme.Translucent.NoTitleBar"
                   android:excludeFromRecents="true"
