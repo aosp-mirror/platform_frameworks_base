@@ -91,10 +91,10 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.phone.AutoHideController;
+import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.ShadeController;
-import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
@@ -387,14 +387,14 @@ public class NavigationBarTest extends SysuiTestCase {
         DeviceProvisionedController deviceProvisionedController =
                 mock(DeviceProvisionedController.class);
         when(deviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
-        NavigationBar.Factory factory = new NavigationBar.Factory(
+        return spy(new NavigationBar(context,
+                mWindowManager,
                 () -> mAssistManager,
                 mock(AccessibilityManager.class),
                 deviceProvisionedController,
                 new MetricsLogger(),
                 mOverviewProxyService,
                 mNavigationModeController,
-                mock(AccessibilityButtonModeObserver.class),
                 mStatusBarStateController,
                 mMockSysUiState,
                 mBroadcastDispatcher,
@@ -415,8 +415,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 mAutoHideControllerFactory,
                 Optional.of(mTelecomManager),
                 mInputMethodManager,
-                Optional.of(mock(BackAnimation.class)));
-        return spy(factory.create(context));
+                Optional.of(mock(BackAnimation.class))));
     }
 
     private void processAllMessages() {
