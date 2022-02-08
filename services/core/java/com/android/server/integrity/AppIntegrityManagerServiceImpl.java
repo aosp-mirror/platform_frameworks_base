@@ -45,7 +45,6 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
 import android.content.pm.SigningInfo;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.net.Uri;
@@ -70,6 +69,7 @@ import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.PackageUserStateInternal;
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -307,6 +307,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             }
 
             List<String> appCertificates = getCertificateFingerprint(packageInfo);
+            List<String> appCertificateLineage = getCertificateLineage(packageInfo);
             List<String> installerCertificates =
                     getInstallerCertificateFingerprint(installerPackageName);
 
@@ -314,6 +315,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
 
             builder.setPackageName(getPackageNameNormalized(packageName));
             builder.setAppCertificates(appCertificates);
+            builder.setAppCertificateLineage(appCertificateLineage);
             builder.setVersionCode(intent.getLongExtra(EXTRA_LONG_VERSION_CODE, -1));
             builder.setInstallerName(getPackageNameNormalized(installerPackageName));
             builder.setInstallerCertificates(installerCertificates);
@@ -460,6 +462,14 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         return certificateFingerprints;
     }
 
+    private List<String> getCertificateLineage(@NonNull PackageInfo packageInfo) {
+        ArrayList<String> certificateLineage = new ArrayList();
+        for (Signature signature : getSignatureLineage(packageInfo)) {
+            certificateLineage.add(getFingerprint(signature));
+        }
+        return certificateLineage;
+    }
+
     /** Get the allowed installers and their associated certificate hashes from <meta-data> tag. */
     private Map<String, String> getAllowedInstallers(@NonNull PackageInfo packageInfo) {
         Map<String, String> packageCertMap = new HashMap<>();
@@ -539,6 +549,38 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
 
         // We are only interested in evaluating the active signatures.
         return signingInfo.getApkContentsSigners();
+    }
+
+    private static Signature[] getSignatureLineage(@NonNull PackageInfo packageInfo) {
+        // Obtain the signing info of the package.
+        SigningInfo signingInfo = packageInfo.signingInfo;
+        if (signingInfo == null) {
+            throw new IllegalArgumentException(
+                    "Package signature not found in " + packageInfo);
+        }
+
+        // Obtain the active signatures of the package.
+        Signature[] signatureLineage = getSignatures(packageInfo);
+
+        // Obtain the past signatures of the package.
+        if (!signingInfo.hasMultipleSigners() && signingInfo.hasPastSigningCertificates()) {
+            Signature[] pastSignatures = signingInfo.getSigningCertificateHistory();
+
+            // Merge the signatures and return.
+            Signature[] allSignatures =
+                    new Signature[signatureLineage.length + pastSignatures.length];
+            int i;
+            for (i = 0; i < signatureLineage.length; i++) {
+                allSignatures[i] = signatureLineage[i];
+            }
+            for (int j = 0; j < pastSignatures.length; j++) {
+                allSignatures[i] = pastSignatures[j];
+                i++;
+            }
+            signatureLineage = allSignatures;
+        }
+
+        return signatureLineage;
     }
 
     private static String getFingerprint(Signature cert) {
