@@ -135,8 +135,11 @@ class SoftwareHotwordDetector extends AbstractHotwordDetector {
             mHandler.sendMessage(obtainMessage(
                     HotwordDetector.Callback::onDetected,
                     mCallback,
-                    new AlwaysOnHotwordDetector.EventPayload(
-                            audioFormat, hotwordDetectedResult, audioStream)));
+                    new AlwaysOnHotwordDetector.EventPayload.Builder()
+                            .setCaptureAudioFormat(audioFormat)
+                            .setAudioStream(audioStream)
+                            .setHotwordDetectedResult(hotwordDetectedResult)
+                            .build()));
         }
     }
 

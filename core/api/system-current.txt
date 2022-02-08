@@ -5172,6 +5172,15 @@ package android.hardware.soundtrigger {
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.Keyphrase> CREATOR;
   }
 
+  public static final class SoundTrigger.KeyphraseRecognitionExtra implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getCoarseConfidenceLevel();
+    method public int getKeyphraseId();
+    method public int getRecognitionModes();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra> CREATOR;
+  }
+
   public static final class SoundTrigger.KeyphraseSoundModel extends android.hardware.soundtrigger.SoundTrigger.SoundModel implements android.os.Parcelable {
     ctor public SoundTrigger.KeyphraseSoundModel(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[], @Nullable android.hardware.soundtrigger.SoundTrigger.Keyphrase[], int);
     ctor public SoundTrigger.KeyphraseSoundModel(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[], @Nullable android.hardware.soundtrigger.SoundTrigger.Keyphrase[]);
@@ -11758,6 +11767,7 @@ package android.service.voice {
     method @Nullable public byte[] getData();
     method public int getDataFormat();
     method @Nullable public android.service.voice.HotwordDetectedResult getHotwordDetectedResult();
+    method @NonNull public java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra> getKeyphraseRecognitionExtras();
     method @Deprecated @Nullable public byte[] getTriggerAudio();
     field public static final int DATA_FORMAT_RAW = 0; // 0x0
     field public static final int DATA_FORMAT_TRIGGER_AUDIO = 1; // 0x1

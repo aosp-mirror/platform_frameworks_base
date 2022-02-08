@@ -1276,6 +1276,10 @@ package android.hardware.soundtrigger {
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.KeyphraseMetadata> CREATOR;
   }
 
+  public static final class SoundTrigger.KeyphraseRecognitionExtra implements android.os.Parcelable {
+    ctor public SoundTrigger.KeyphraseRecognitionExtra(int, int, int);
+  }
+
   public static final class SoundTrigger.ModelParamRange implements android.os.Parcelable {
     ctor public SoundTrigger.ModelParamRange(int, int);
   }
@@ -2398,8 +2402,17 @@ package android.service.voice {
     method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public void triggerHardwareRecognitionEventForTest(int, int, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[]);
   }
 
-  public static class AlwaysOnHotwordDetector.EventPayload {
-    ctor public AlwaysOnHotwordDetector.EventPayload(boolean, boolean, @Nullable android.media.AudioFormat, int, @Nullable byte[], @Nullable android.service.voice.HotwordDetectedResult, @Nullable android.os.ParcelFileDescriptor);
+  public static final class AlwaysOnHotwordDetector.EventPayload.Builder {
+    ctor public AlwaysOnHotwordDetector.EventPayload.Builder();
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload build();
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setAudioStream(@NonNull android.os.ParcelFileDescriptor);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setCaptureAudioFormat(@NonNull android.media.AudioFormat);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setCaptureAvailable(boolean);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setCaptureSession(int);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setData(@NonNull byte[]);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setDataFormat(int);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setHotwordDetectedResult(@NonNull android.service.voice.HotwordDetectedResult);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setKeyphraseRecognitionExtras(@NonNull java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
   }
 
   public final class VisibleActivityInfo implements android.os.Parcelable {

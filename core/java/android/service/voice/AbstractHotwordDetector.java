@@ -146,7 +146,10 @@ abstract class AbstractHotwordDetector implements HotwordDetector {
             mHandler.sendMessage(obtainMessage(
                     HotwordDetector.Callback::onDetected,
                     mCallback,
-                    new AlwaysOnHotwordDetector.EventPayload(audioFormat, hotwordDetectedResult)));
+                    new AlwaysOnHotwordDetector.EventPayload.Builder()
+                            .setCaptureAudioFormat(audioFormat)
+                            .setHotwordDetectedResult(hotwordDetectedResult)
+                            .build()));
         }
     }
 }
