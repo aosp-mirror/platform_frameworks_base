@@ -574,15 +574,13 @@
     <dimen name="notification_shade_content_margin_horizontal">16dp</dimen>
 
     <!-- The top margin for the notification children container in its non-expanded form. -->
-    <dimen name="notification_children_container_margin_top">
-        @*android:dimen/notification_content_margin_top
-    </dimen>
+    <dimen name="notification_children_container_margin_top">48dp</dimen>
 
     <!-- The height of the gap between adjacent notification sections. -->
     <dimen name="notification_section_divider_height">@dimen/notification_side_paddings</dimen>
 
     <!-- Size of the face pile shown on one-line (children of a group) conversation notifications -->
-    <dimen name="conversation_single_line_face_pile_size">25dp</dimen>
+    <dimen name="conversation_single_line_face_pile_size">24dp</dimen>
 
     <!-- Size of the avatars within a face pile shown on one-line (children of a group) conversation notifications -->
     <dimen name="conversation_single_line_face_pile_avatar_size">17dp</dimen>
@@ -651,10 +649,13 @@
     <dimen name="panel_overshoot_amount">16dp</dimen>
 
     <!-- The padding between notification children when collapsed -->
-    <dimen name="notification_children_padding">4dp</dimen>
+    <dimen name="notification_children_padding">8dp</dimen>
 
     <!-- The padding on top of the first notification to the children container -->
     <dimen name="notification_children_container_top_padding">8dp</dimen>
+
+    <!-- The padding on the bottom of the last group hybrid notification when collapsed -->
+    <dimen name="notification_children_collapsed_bottom_padding">16dp</dimen>
 
     <!-- end margin for system icons if multi user switch is hidden -->
     <dimen name="system_icons_switcher_hidden_expanded_margin">16dp</dimen>
