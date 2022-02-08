@@ -75,7 +75,7 @@ public class KeyStoreOperation {
                     );
                 }
                 default:
-                    throw KeyStore2.getKeyStoreException(e.errorCode);
+                    throw KeyStore2.getKeyStoreException(e.errorCode, e.getMessage());
             }
         } catch (RemoteException e) {
             // Log exception and report invalid operation handle.
@@ -85,7 +85,8 @@ public class KeyStoreOperation {
                     "Remote exception while advancing a KeyStoreOperation.",
                     e
             );
-            throw new KeyStoreException(KeymasterDefs.KM_ERROR_INVALID_OPERATION_HANDLE, "");
+            throw new KeyStoreException(KeymasterDefs.KM_ERROR_INVALID_OPERATION_HANDLE, "",
+                    e.getMessage());
         }
     }
 

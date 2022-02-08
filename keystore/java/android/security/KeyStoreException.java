@@ -158,6 +158,16 @@ public class KeyStoreException extends Exception {
     }
 
     /**
+     * @hide
+     */
+    public KeyStoreException(int errorCode, @Nullable String message,
+            @Nullable String keystoreErrorMessage) {
+        super(message + " (internal Keystore code: " + errorCode + " message: "
+                + keystoreErrorMessage + ")");
+        mErrorCode = errorCode;
+    }
+
+    /**
      * Returns the internal error code. Only for use by the platform.
      *
      * @hide
