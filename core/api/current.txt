@@ -111,6 +111,7 @@ package android {
     field public static final String MANAGE_MEDIA = "android.permission.MANAGE_MEDIA";
     field public static final String MANAGE_ONGOING_CALLS = "android.permission.MANAGE_ONGOING_CALLS";
     field public static final String MANAGE_OWN_CALLS = "android.permission.MANAGE_OWN_CALLS";
+    field public static final String MANAGE_WIFI_AUTO_JOIN = "android.permission.MANAGE_WIFI_AUTO_JOIN";
     field public static final String MASTER_CLEAR = "android.permission.MASTER_CLEAR";
     field public static final String MEDIA_CONTENT_CONTROL = "android.permission.MEDIA_CONTENT_CONTROL";
     field public static final String MODIFY_AUDIO_SETTINGS = "android.permission.MODIFY_AUDIO_SETTINGS";
@@ -121,6 +122,7 @@ package android {
     field public static final String NFC = "android.permission.NFC";
     field public static final String NFC_PREFERRED_PAYMENT_INFO = "android.permission.NFC_PREFERRED_PAYMENT_INFO";
     field public static final String NFC_TRANSACTION_EVENT = "android.permission.NFC_TRANSACTION_EVENT";
+    field public static final String OVERRIDE_WIFI_CONFIG = "android.permission.OVERRIDE_WIFI_CONFIG";
     field public static final String PACKAGE_USAGE_STATS = "android.permission.PACKAGE_USAGE_STATS";
     field @Deprecated public static final String PERSISTENT_ACTIVITY = "android.permission.PERSISTENT_ACTIVITY";
     field public static final String POST_NOTIFICATIONS = "android.permission.POST_NOTIFICATIONS";

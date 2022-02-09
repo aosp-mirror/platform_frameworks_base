@@ -1839,7 +1839,7 @@
         android:label="@string/permlab_changeWifiState"
         android:protectionLevel="normal" />
 
-    <!-- @SystemApi @hide Allows applications to enable/disable wifi auto join. This permission
+    <!-- Allows applications to enable/disable wifi auto join. This permission
          is used to let OEMs grant their trusted app access to a subset of privileged wifi APIs
          to improve wifi performance.
          <p>Not for use by third-party applications. -->
@@ -1877,7 +1877,7 @@
     <permission android:name="android.permission.RECEIVE_WIFI_CREDENTIAL_CHANGE"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @SystemApi @hide Allows an application to modify any wifi configuration, even if created
+    <!-- Allows an application to modify any wifi configuration, even if created
      by another application. Once reconfigured the original creator cannot make any further
      modifications.
      <p>Not for use by third-party applications. -->
