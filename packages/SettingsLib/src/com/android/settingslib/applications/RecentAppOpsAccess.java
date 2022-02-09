@@ -51,6 +51,9 @@ public class RecentAppOpsAccess {
     private static final int[] MICROPHONE_OPS = new int[]{
             AppOpsManager.OP_RECORD_AUDIO,
     };
+    private static final int[] CAMERA_OPS = new int[]{
+            AppOpsManager.OP_CAMERA,
+    };
 
 
     private static final String TAG = RecentAppOpsAccess.class.getSimpleName();
@@ -96,6 +99,13 @@ public class RecentAppOpsAccess {
      */
     public static RecentAppOpsAccess createForMicrophone(Context context) {
         return new RecentAppOpsAccess(context, MICROPHONE_OPS);
+    }
+
+    /**
+     * Creates an instance of {@link RecentAppOpsAccess} for camera access.
+     */
+    public static RecentAppOpsAccess createForCamera(Context context) {
+        return new RecentAppOpsAccess(context, CAMERA_OPS);
     }
 
     /**
