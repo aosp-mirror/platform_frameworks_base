@@ -35,6 +35,8 @@ class LetterboxEduDialogLayout extends FrameLayout {
     // 204 is simply 255 * 0.8.
     private static final int BACKGROUND_DIM_ALPHA = 204;
 
+    private LetterboxEduWindowManager mWindowManager;
+
     public LetterboxEduDialogLayout(Context context) {
         this(context, null);
     }
@@ -50,6 +52,17 @@ class LetterboxEduDialogLayout extends FrameLayout {
     public LetterboxEduDialogLayout(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    void inject(LetterboxEduWindowManager windowManager) {
+        mWindowManager = windowManager;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        // Need to relayout after visibility changes since they affect size.
+        mWindowManager.relayout();
     }
 
     /**

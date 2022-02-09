@@ -16,15 +16,14 @@
 
 package com.android.wm.shell.compatui;
 
-import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
 import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
 import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
-import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
 import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -94,10 +93,12 @@ public class CompatUIControllerTest extends ShellTestCase {
         doReturn(mMockDisplayLayout).when(mMockDisplayController).getDisplayLayout(anyInt());
         doReturn(DISPLAY_ID).when(mMockLayout).getDisplayId();
         doReturn(TASK_ID).when(mMockLayout).getTaskId();
+        doReturn(true).when(mMockLayout).createLayout(anyBoolean());
+        doReturn(true).when(mMockLayout).updateCompatInfo(any(), any(), anyBoolean());
         mController = new CompatUIController(mContext, mMockDisplayController,
                 mMockDisplayInsetsController, mMockImeController, mMockSyncQueue, mMockExecutor) {
             @Override
-            CompatUIWindowManager createLayout(Context context, TaskInfo taskInfo,
+            CompatUIWindowManager createCompatUiWindowManager(Context context, TaskInfo taskInfo,
                     ShellTaskOrganizer.TaskListener taskListener) {
                 return mMockLayout;
             }
@@ -113,44 +114,77 @@ public class CompatUIControllerTest extends ShellTestCase {
 
     @Test
     public void testOnCompatInfoChanged() {
-        TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, true /* hasSizeCompat */,
+        TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true,
                 CAMERA_COMPAT_CONTROL_HIDDEN);
 
-        // Verify that the compat controls are added with non-null size compat info.
+        // Verify that the compat controls are added with non-null task listener.
         mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
 
-        verify(mController).createLayout(any(), eq(taskInfo), eq(mMockTaskListener));
+        verify(mController).createCompatUiWindowManager(any(), eq(taskInfo), eq(mMockTaskListener));
 
-        // Verify that the compat controls are updated with non-null new size compat info.
-        taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, true /* hasSizeCompat */,
+        // Verify that the compat controls are updated with new size compat info.
+        clearInvocations(mMockLayout);
+        clearInvocations(mController);
+        taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true,
                 CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED);
         mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
 
-        verify(mMockLayout).updateCompatInfo(taskInfo, mMockTaskListener, true /* canShow */);
+        verify(mMockLayout).updateCompatInfo(taskInfo, mMockTaskListener, /* canShow= */ true);
 
-        // Verify that compat controls are removed with null compat info.
-        mController.onCompatInfoChanged(createTaskInfo(DISPLAY_ID, TASK_ID,
-                false /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN),
-                null /* taskListener */);
-
-        verify(mMockLayout).release();
-
+        // Verify that compat controls are removed with null task listener.
         clearInvocations(mMockLayout);
         clearInvocations(mController);
-        // Verify that compat controls are removed with no size compat and dismissed camera state.
-        taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID,
-                true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED);
-
-        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
-
-        verify(mController).createLayout(any(), eq(taskInfo), eq(mMockTaskListener));
-
         mController.onCompatInfoChanged(createTaskInfo(DISPLAY_ID, TASK_ID,
-                false /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_DISMISSED),
-                null /* taskListener */);
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN),
+                /* taskListener= */ null);
 
         verify(mMockLayout).release();
     }
+
+    @Test
+    public void testOnCompatInfoChanged_createLayoutReturnsFalse() {
+        doReturn(false).when(mMockLayout).createLayout(anyBoolean());
+
+        TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true,
+                CAMERA_COMPAT_CONTROL_HIDDEN);
+        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
+
+        verify(mController).createCompatUiWindowManager(any(), eq(taskInfo), eq(mMockTaskListener));
+
+        // Verify that the layout is created again.
+        clearInvocations(mMockLayout);
+        clearInvocations(mController);
+        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
+
+        verify(mMockLayout, never()).updateCompatInfo(any(), any(), anyBoolean());
+        verify(mController).createCompatUiWindowManager(any(), eq(taskInfo), eq(mMockTaskListener));
+    }
+
+    @Test
+    public void testOnCompatInfoChanged_updateCompatInfoReturnsFalse() {
+        doReturn(false).when(mMockLayout).updateCompatInfo(any(), any(), anyBoolean());
+
+        TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true,
+                CAMERA_COMPAT_CONTROL_HIDDEN);
+        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
+
+        verify(mController).createCompatUiWindowManager(any(), eq(taskInfo), eq(mMockTaskListener));
+
+        clearInvocations(mMockLayout);
+        clearInvocations(mController);
+        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
+
+        verify(mMockLayout).updateCompatInfo(taskInfo, mMockTaskListener, /* canShow= */ true);
+
+        // Verify that the layout is created again.
+        clearInvocations(mMockLayout);
+        clearInvocations(mController);
+        mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
+
+        verify(mMockLayout, never()).updateCompatInfo(any(), any(), anyBoolean());
+        verify(mController).createCompatUiWindowManager(any(), eq(taskInfo), eq(mMockTaskListener));
+    }
+
 
     @Test
     public void testOnDisplayAdded() {
@@ -165,7 +199,7 @@ public class CompatUIControllerTest extends ShellTestCase {
     public void testOnDisplayRemoved() {
         mController.onDisplayAdded(DISPLAY_ID);
         mController.onCompatInfoChanged(createTaskInfo(DISPLAY_ID, TASK_ID,
-                true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN),
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN),
                 mMockTaskListener);
 
         mController.onDisplayRemoved(DISPLAY_ID + 1);
@@ -183,7 +217,7 @@ public class CompatUIControllerTest extends ShellTestCase {
     @Test
     public void testOnDisplayConfigurationChanged() {
         mController.onCompatInfoChanged(createTaskInfo(DISPLAY_ID, TASK_ID,
-                true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN), mMockTaskListener);
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN), mMockTaskListener);
 
         mController.onDisplayConfigurationChanged(DISPLAY_ID + 1, new Configuration());
 
@@ -198,7 +232,7 @@ public class CompatUIControllerTest extends ShellTestCase {
     public void testInsetsChanged() {
         mController.onDisplayAdded(DISPLAY_ID);
         mController.onCompatInfoChanged(createTaskInfo(DISPLAY_ID, TASK_ID,
-                true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN), mMockTaskListener);
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN), mMockTaskListener);
         InsetsState insetsState = new InsetsState();
         InsetsSource insetsSource = new InsetsSource(ITYPE_EXTRA_NAVIGATION_BAR);
         insetsSource.setFrame(0, 0, 1000, 1000);
@@ -219,22 +253,22 @@ public class CompatUIControllerTest extends ShellTestCase {
     @Test
     public void testChangeButtonVisibilityOnImeShowHide() {
         mController.onCompatInfoChanged(createTaskInfo(DISPLAY_ID, TASK_ID,
-                true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN), mMockTaskListener);
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN), mMockTaskListener);
 
         // Verify that the restart button is hidden after IME is showing.
-        mController.onImeVisibilityChanged(DISPLAY_ID, true /* isShowing */);
+        mController.onImeVisibilityChanged(DISPLAY_ID, /* isShowing= */ true);
 
         verify(mMockLayout).updateVisibility(false);
 
         // Verify button remains hidden while IME is showing.
-        TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, true /* hasSizeCompat */,
+        TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true,
                 CAMERA_COMPAT_CONTROL_HIDDEN);
         mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
 
-        verify(mMockLayout).updateCompatInfo(taskInfo, mMockTaskListener, false /* canShow */);
+        verify(mMockLayout).updateCompatInfo(taskInfo, mMockTaskListener, /* canShow= */ false);
 
         // Verify button is shown after IME is hidden.
-        mController.onImeVisibilityChanged(DISPLAY_ID, false /* isShowing */);
+        mController.onImeVisibilityChanged(DISPLAY_ID, /* isShowing= */ false);
 
         verify(mMockLayout).updateVisibility(true);
     }
@@ -242,7 +276,7 @@ public class CompatUIControllerTest extends ShellTestCase {
     @Test
     public void testChangeButtonVisibilityOnKeyguardOccludedChanged() {
         mController.onCompatInfoChanged(createTaskInfo(DISPLAY_ID, TASK_ID,
-                true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN), mMockTaskListener);
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN), mMockTaskListener);
 
         // Verify that the restart button is hidden after keyguard becomes occluded.
         mController.onKeyguardOccludedChanged(true);
@@ -250,11 +284,11 @@ public class CompatUIControllerTest extends ShellTestCase {
         verify(mMockLayout).updateVisibility(false);
 
         // Verify button remains hidden while keyguard is occluded.
-        TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, true /* hasSizeCompat */,
+        TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true,
                 CAMERA_COMPAT_CONTROL_HIDDEN);
         mController.onCompatInfoChanged(taskInfo, mMockTaskListener);
 
-        verify(mMockLayout).updateCompatInfo(taskInfo, mMockTaskListener, false /* canShow */);
+        verify(mMockLayout).updateCompatInfo(taskInfo, mMockTaskListener, /* canShow= */ false);
 
         // Verify button is shown after keyguard becomes not occluded.
         mController.onKeyguardOccludedChanged(false);
@@ -265,9 +299,9 @@ public class CompatUIControllerTest extends ShellTestCase {
     @Test
     public void testButtonRemainsHiddenOnKeyguardOccludedFalseWhenImeIsShowing() {
         mController.onCompatInfoChanged(createTaskInfo(DISPLAY_ID, TASK_ID,
-                true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN), mMockTaskListener);
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN), mMockTaskListener);
 
-        mController.onImeVisibilityChanged(DISPLAY_ID, true /* isShowing */);
+        mController.onImeVisibilityChanged(DISPLAY_ID, /* isShowing= */ true);
         mController.onKeyguardOccludedChanged(true);
 
         verify(mMockLayout, times(2)).updateVisibility(false);
@@ -280,7 +314,7 @@ public class CompatUIControllerTest extends ShellTestCase {
         verify(mMockLayout).updateVisibility(false);
 
         // Verify button is shown after IME is not showing.
-        mController.onImeVisibilityChanged(DISPLAY_ID, false /* isShowing */);
+        mController.onImeVisibilityChanged(DISPLAY_ID, /* isShowing= */ false);
 
         verify(mMockLayout).updateVisibility(true);
     }
@@ -288,9 +322,9 @@ public class CompatUIControllerTest extends ShellTestCase {
     @Test
     public void testButtonRemainsHiddenOnImeHideWhenKeyguardIsOccluded() {
         mController.onCompatInfoChanged(createTaskInfo(DISPLAY_ID, TASK_ID,
-                true /* hasSizeCompat */, CAMERA_COMPAT_CONTROL_HIDDEN), mMockTaskListener);
+                /* hasSizeCompat= */ true, CAMERA_COMPAT_CONTROL_HIDDEN), mMockTaskListener);
 
-        mController.onImeVisibilityChanged(DISPLAY_ID, true /* isShowing */);
+        mController.onImeVisibilityChanged(DISPLAY_ID, /* isShowing= */ true);
         mController.onKeyguardOccludedChanged(true);
 
         verify(mMockLayout, times(2)).updateVisibility(false);
@@ -298,7 +332,7 @@ public class CompatUIControllerTest extends ShellTestCase {
         clearInvocations(mMockLayout);
 
         // Verify button remains hidden after IME is hidden since keyguard is occluded.
-        mController.onImeVisibilityChanged(DISPLAY_ID, false /* isShowing */);
+        mController.onImeVisibilityChanged(DISPLAY_ID, /* isShowing= */ false);
 
         verify(mMockLayout).updateVisibility(false);
 
