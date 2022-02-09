@@ -24,15 +24,12 @@ import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.UidBatteryConsumer;
-import android.os.UserHandle;
 import android.text.format.DateUtils;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseLongArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-
-import java.util.List;
 
 /**
  * Estimates power consumed by the screen(s)
@@ -125,48 +122,6 @@ public class ScreenPowerCalculator extends PowerCalculator {
     }
 
     /**
-     * Screen power is the additional power the screen takes while the device is running.
-     */
-    @Override
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        final PowerAndDuration totalPowerAndDuration = new PowerAndDuration();
-        final long consumptionUC = batteryStats.getScreenOnMeasuredBatteryConsumptionUC();
-        final int powerModel = getPowerModel(consumptionUC);
-        calculateTotalDurationAndPower(totalPowerAndDuration, powerModel, batteryStats,
-                rawRealtimeUs, statsType, consumptionUC);
-        if (totalPowerAndDuration.powerMah == 0) {
-            return;
-        }
-
-        // First deal with the SCREEN BatterySipper (since we need this for smearing over apps).
-        final BatterySipper bs = new BatterySipper(BatterySipper.DrainType.SCREEN, null, 0);
-        bs.usagePowerMah = totalPowerAndDuration.powerMah;
-        bs.usageTimeMs = totalPowerAndDuration.durationMs;
-        bs.sumPower();
-        sippers.add(bs);
-
-        // Now deal with each app's BatterySipper. The results are stored in the screenPowerMah
-        // field, which is considered smeared, but the method depends on the data source.
-        switch (powerModel) {
-            case BatteryConsumer.POWER_MODEL_MEASURED_ENERGY:
-                final PowerAndDuration appPowerAndDuration = new PowerAndDuration();
-                for (int i = sippers.size() - 1; i >= 0; i--) {
-                    final BatterySipper app = sippers.get(i);
-                    if (app.drainType == BatterySipper.DrainType.APP) {
-                        calculateAppUsingMeasuredEnergy(appPowerAndDuration, app.uidObj,
-                                rawRealtimeUs);
-                        app.screenPowerMah = appPowerAndDuration.powerMah;
-                    }
-                }
-                break;
-            case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
-            default:
-                smearScreenBatterySipper(sippers, bs, rawRealtimeUs);
-        }
-    }
-
-    /**
      * Stores duration and power information in totalPowerAndDuration.
      */
     private void calculateTotalDurationAndPower(PowerAndDuration totalPowerAndDuration,
@@ -228,37 +183,8 @@ public class ScreenPowerCalculator extends PowerCalculator {
     }
 
     /**
-     * Smear the screen on power usage among {@code sippers}, based on ratio of foreground activity
-     * time, and store this in the {@link BatterySipper#screenPowerMah} field.
-     */
-    @VisibleForTesting
-    public void smearScreenBatterySipper(List<BatterySipper> sippers, BatterySipper screenSipper,
-            long rawRealtimeUs) {
-        long totalActivityTimeMs = 0;
-        final SparseLongArray activityTimeArray = new SparseLongArray();
-        for (int i = sippers.size() - 1; i >= 0; i--) {
-            final BatteryStats.Uid uid = sippers.get(i).uidObj;
-            if (uid != null) {
-                final long timeMs = getProcessForegroundTimeMs(uid, rawRealtimeUs);
-                activityTimeArray.put(uid.getUid(), timeMs);
-                totalActivityTimeMs += timeMs;
-            }
-        }
-
-        if (screenSipper != null && totalActivityTimeMs >= MIN_ACTIVE_TIME_FOR_SMEARING) {
-            final double totalScreenPowerMah = screenSipper.totalPowerMah;
-            for (int i = sippers.size() - 1; i >= 0; i--) {
-                final BatterySipper sipper = sippers.get(i);
-                sipper.screenPowerMah = totalScreenPowerMah
-                        * activityTimeArray.get(sipper.getUid(), 0)
-                        / totalActivityTimeMs;
-            }
-        }
-    }
-
-    /**
-     * Smear the screen on power usage among {@code sippers}, based on ratio of foreground activity
-     * time, and store this in the {@link BatterySipper#screenPowerMah} field.
+     * Smear the screen on power usage among {@code UidBatteryConsumers}, based on ratio of
+     * foreground activity time.
      */
     private void smearScreenBatteryDrain(
             SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders,

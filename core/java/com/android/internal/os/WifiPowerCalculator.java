@@ -19,14 +19,11 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.Process;
 import android.os.UidBatteryConsumer;
-import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArray;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * WiFi power calculator for when BatteryStats supports energy reporting
@@ -154,62 +151,6 @@ public class WifiPowerCalculator extends PowerCalculator {
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_WIFI,
                         totalAppPowerMah, powerModel);
-    }
-
-    /**
-     * We do per-app blaming of WiFi activity. If energy info is reported from the controller,
-     * then only the WiFi process gets blamed here since we normalize power calculations and
-     * assign all the power drain to apps. If energy info is not reported, we attribute the
-     * difference between total running time of WiFi for all apps and the actual running time
-     * of WiFi to the WiFi subsystem.
-     */
-    @Override
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-
-        final BatterySipper bs = new BatterySipper(BatterySipper.DrainType.WIFI, null, 0);
-
-        long totalAppDurationMs = 0;
-        double totalAppPowerMah = 0;
-        final PowerDurationAndTraffic powerDurationAndTraffic = new PowerDurationAndTraffic();
-        for (int i = sippers.size() - 1; i >= 0; i--) {
-            final BatterySipper app = sippers.get(i);
-            if (app.drainType == BatterySipper.DrainType.APP) {
-                final long consumptionUC =
-                        app.uidObj.getWifiMeasuredBatteryConsumptionUC();
-                final int powerModel = getPowerModel(consumptionUC);
-                calculateApp(powerDurationAndTraffic, app.uidObj, powerModel, rawRealtimeUs,
-                        statsType, batteryStats.hasWifiActivityReporting(), consumptionUC);
-
-                totalAppDurationMs += powerDurationAndTraffic.durationMs;
-                totalAppPowerMah += powerDurationAndTraffic.powerMah;
-
-                app.wifiPowerMah = powerDurationAndTraffic.powerMah;
-                app.wifiRunningTimeMs = powerDurationAndTraffic.durationMs;
-                app.wifiRxBytes = powerDurationAndTraffic.wifiRxBytes;
-                app.wifiRxPackets = powerDurationAndTraffic.wifiRxPackets;
-                app.wifiTxBytes = powerDurationAndTraffic.wifiTxBytes;
-                app.wifiTxPackets = powerDurationAndTraffic.wifiTxPackets;
-                if (app.getUid() == Process.WIFI_UID) {
-                    if (DEBUG) Log.d(TAG, "WiFi adding sipper " + app + ": cpu=" + app.cpuTimeMs);
-                    app.isAggregated = true;
-                    bs.add(app);
-                }
-            }
-        }
-
-        final long consumptionUC = batteryStats.getWifiMeasuredBatteryConsumptionUC();
-        final int powerModel = getPowerModel(consumptionUC);
-        calculateRemaining(powerDurationAndTraffic, powerModel, batteryStats, rawRealtimeUs,
-                statsType, batteryStats.hasWifiActivityReporting(), totalAppDurationMs,
-                totalAppPowerMah, consumptionUC);
-
-        bs.wifiRunningTimeMs += powerDurationAndTraffic.durationMs;
-        bs.wifiPowerMah += powerDurationAndTraffic.powerMah;
-
-        if (bs.sumPower() > 0) {
-            sippers.add(bs);
-        }
     }
 
     private void calculateApp(PowerDurationAndTraffic powerDurationAndTraffic,

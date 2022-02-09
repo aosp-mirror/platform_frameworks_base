@@ -9211,7 +9211,7 @@ public class BatteryStatsImpl extends BatteryStats {
          * Gets the minimum of the uid's foreground activity time and its PROCESS_STATE_TOP time
          * since last marked. Also sets the mark time for both these timers.
          *
-         * @see BatteryStatsHelper#getProcessForegroundTimeMs
+         * @see CpuPowerCalculator
          *
          * @param doCalc if true, then calculate the minimum; else don't bother and return 0. Either
          *               way, the mark is set.

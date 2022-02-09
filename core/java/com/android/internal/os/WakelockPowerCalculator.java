@@ -21,12 +21,9 @@ import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.Process;
 import android.os.UidBatteryConsumer;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
-
-import java.util.List;
 
 public class WakelockPowerCalculator extends PowerCalculator {
     private static final String TAG = "WakelockPowerCalculator";
@@ -103,42 +100,6 @@ public class WakelockPowerCalculator extends PowerCalculator {
                         totalAppDurationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_WAKELOCK,
                         appPowerMah);
-    }
-
-    @Override
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        final PowerAndDuration result = new PowerAndDuration();
-        BatterySipper osSipper = null;
-        double osPowerMah = 0;
-        long osDurationMs = 0;
-        long totalAppDurationMs = 0;
-        for (int i = sippers.size() - 1; i >= 0; i--) {
-            final BatterySipper app = sippers.get(i);
-            if (app.drainType == BatterySipper.DrainType.APP) {
-                calculateApp(result, app.uidObj, rawRealtimeUs, statsType);
-                app.wakeLockTimeMs = result.durationMs;
-                app.wakeLockPowerMah = result.powerMah;
-                totalAppDurationMs += result.durationMs;
-
-                if (app.getUid() == Process.ROOT_UID) {
-                    osSipper = app;
-                    osPowerMah = result.powerMah;
-                    osDurationMs = result.durationMs;
-                }
-            }
-        }
-
-        // The device has probably been awake for longer than the screen on
-        // time and application wake lock time would account for.  Assign
-        // this remainder to the OS, if possible.
-        if (osSipper != null) {
-            calculateRemaining(result, batteryStats, rawRealtimeUs, rawUptimeUs, statsType,
-                    osPowerMah, osDurationMs, totalAppDurationMs);
-            osSipper.wakeLockTimeMs = result.durationMs;
-            osSipper.wakeLockPowerMah = result.powerMah;
-            osSipper.sumPower();
-        }
     }
 
     private void calculateApp(PowerAndDuration result, BatteryStats.Uid u, long rawRealtimeUs,
