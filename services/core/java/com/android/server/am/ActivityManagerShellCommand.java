@@ -101,7 +101,6 @@ import android.view.Display;
 import android.window.SplashScreen;
 
 import com.android.internal.compat.CompatibilityChangeConfig;
-import com.android.internal.util.HexDump;
 import com.android.internal.util.MemInfoReader;
 import com.android.server.am.LowMemDetector.MemFactor;
 import com.android.server.compat.PlatformCompat;
@@ -1958,22 +1957,42 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private static byte[] argToBytes(String arg) {
-        if (arg.equals("!")) {
-            return null;
-        } else {
-            return HexDump.hexStringToByteArray(arg);
-        }
-    }
-
     int runUnlockUser(PrintWriter pw) throws RemoteException {
         int userId = Integer.parseInt(getNextArgRequired());
-        byte[] token = argToBytes(getNextArgRequired());
-        byte[] secret = argToBytes(getNextArgRequired());
-        boolean success = mInterface.unlockUser(userId, token, secret, null);
+
+        /*
+         * Originally this command required two more parameters: the hardware
+         * authentication token and secret needed to unlock the user.  However,
+         * unlockUser() no longer takes a token parameter at all, and there
+         * isn't really any way for callers of this shell command to get the
+         * secret if one is needed (i.e., when the user has an LSKF), given that
+         * the secret must be a cryptographic key derived from the user's
+         * synthetic password.  I.e. the secret is *not* the LSKF here, but
+         * rather an intermediate value several steps down the chain.
+         *
+         * As such, the only supported use for this command is unlocking a user
+         * who doesn't have an LSKF, with empty or unspecified token and secret.
+         *
+         * To preserve previous behavior, an exclamation mark ("!") is also
+         * accepted for these values; it means the same as an empty string.
+         */
+        String token = getNextArg();
+        if (!TextUtils.isEmpty(token) && !"!".equals(token)) {
+            getErrPrintWriter().println("Error: token parameter not supported");
+            return -1;
+        }
+        String secret = getNextArg();
+        if (!TextUtils.isEmpty(secret) && !"!".equals(secret)) {
+            getErrPrintWriter().println("Error: secret parameter not supported");
+            return -1;
+        }
+
+        boolean success = mInterface.unlockUser(userId, null, null, null);
         if (success) {
             pw.println("Success: user unlocked");
         } else {
+            // TODO(b/218389026): we can reach here even if the user's storage
+            // was successfully unlocked.
             getErrPrintWriter().println("Error: could not unlock user");
         }
         return 0;
@@ -3494,8 +3513,9 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Start USER_ID in background if it is currently stopped;");
             pw.println("      use switch-user if you want to start the user in foreground.");
             pw.println("      -w: wait for start-user to complete and the user to be unlocked.");
-            pw.println("  unlock-user <USER_ID> [TOKEN_HEX]");
-            pw.println("      Attempt to unlock the given user using the given authorization token.");
+            pw.println("  unlock-user <USER_ID>");
+            pw.println("      Unlock the given user.  This will only work if the user doesn't");
+            pw.println("      have an LSKF (PIN/pattern/password).");
             pw.println("  stop-user [-w] [-f] <USER_ID>");
             pw.println("      Stop execution of USER_ID, not allowing it to run any");
             pw.println("      code until a later explicit start or switch to it.");
