@@ -1723,6 +1723,12 @@ public final class ProcessList {
             return Zygote.MEMORY_TAG_LEVEL_TBI;
         }
 
+        String defaultLevel = SystemProperties.get("persist.arm64.memtag.app_default");
+        if ("sync".equals(defaultLevel)) {
+            return Zygote.MEMORY_TAG_LEVEL_SYNC;
+        } else if ("async".equals(defaultLevel)) {
+            return Zygote.MEMORY_TAG_LEVEL_ASYNC;
+        }
         return Zygote.MEMORY_TAG_LEVEL_NONE;
     }
 
