@@ -1172,7 +1172,10 @@ public final class PowerManagerService extends SystemService
     @Override
     public void onBootPhase(int phase) {
         synchronized (mLock) {
-            if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
+            if (phase == PHASE_SYSTEM_SERVICES_READY) {
+                systemReady();
+
+            } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
                 incrementBootCount();
 
             } else if (phase == PHASE_BOOT_COMPLETED) {
@@ -1198,7 +1201,7 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    public void systemReady() {
+    private void systemReady() {
         synchronized (mLock) {
             mSystemReady = true;
             mDreamManager = getLocalService(DreamManagerInternal.class);
