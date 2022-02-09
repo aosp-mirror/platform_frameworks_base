@@ -168,7 +168,10 @@ public class CarrierConfigManager {
     /**
      * This flag specifies whether VoLTE availability is based on provisioning. By default this is
      * false.
+     * Used for UCE to determine if EAB provisioning checks should be based on provisioning.
+     * @deprecated Use {@link Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE} instead.
      */
+    @Deprecated
     public static final String
             KEY_CARRIER_VOLTE_PROVISIONED_BOOL = "carrier_volte_provisioned_bool";
 
@@ -864,7 +867,12 @@ public class CarrierConfigManager {
     /**
      * Flag specifying whether provisioning is required for VoLTE, Video Telephony, and WiFi
      * Calling.
+
+     * Combines VoLTE, VT, VoWiFI calling provisioning into one parameter.
+     * @deprecated Use {@link Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE} instead for
+     * finer-grained control.
      */
+    @Deprecated
     public static final String KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL
             = "carrier_volte_provisioning_required_bool";
 
@@ -878,7 +886,11 @@ public class CarrierConfigManager {
      * and enable the UT over IMS capability for the subscription when the subscription is loaded.
      *
      * The default value for this key is {@code false}.
+     *
+     * @deprecated Use {@link Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE} instead for
+     * determining if UT requires provisioning.
      */
+    @Deprecated
     public static final String KEY_CARRIER_UT_PROVISIONING_REQUIRED_BOOL =
             "carrier_ut_provisioning_required_bool";
 
@@ -4638,34 +4650,93 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "rcs_request_retry_interval_millis_long";
 
         /**
-         * An array of strings, each entry contains a MMTEL capability and registration
-         * technology tuple that requires provisioning. If a tuple is not present, the
+         * A bundle which specifies the MMTEL capability and registration technology
+         * that requires provisioning. If a tuple is not present, the
          * framework will not require that the tuple requires provisioning before
          * enabling the capability.
-         * <p>
-         * Format for each tuple is two integers separated by a comma. The first
-         * integer is an integer defined in
-         * {@link MmTelFeature.MmTelCapabilities.MmTelCapability} and the second integer is
+         * <p> Possible keys in this bundle are
+         * <ul>
+         *     <li>{@link #KEY_CAPABILITY_TYPE_VOICE_INT_ARRAY}</li>
+         *     <li>{@link #KEY_CAPABILITY_TYPE_VIDEO_INT_ARRAY}</li>
+         *     <li>{@link #KEY_CAPABILITY_TYPE_UT_INT_ARRAY}</li>
+         *     <li>{@link #KEY_CAPABILITY_TYPE_SMS_INT_ARRAY}</li>
+         *     <li>{@link #KEY_CAPABILITY_CALL_COMPOSER_INT_ARRAY}</li>
+         * </ul>
+         * <p> The values are defined in
          * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationTech}
-         * @hide
          */
-        public static final String KEY_MMTEL_REQUIRES_PROVISIONING_STRING_ARRAY =
-                KEY_PREFIX + "mmtel_requires_provisioning_string_array";
+        public static final String KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE =
+                KEY_PREFIX + "mmtel_requires_provisioning_bundle";
 
         /**
-         * An array of strings, each entry contains a RCS capability and registration
-         * technology tuple that requires provisioning. If a tuple is not present, the
+         * This MmTelFeature supports Voice calling (IR.92)
+         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VOICE
+         */
+        public static final String KEY_CAPABILITY_TYPE_VOICE_INT_ARRAY =
+                KEY_PREFIX + "key_capability_type_voice_int_array";
+
+        /**
+         * This MmTelFeature supports Video (IR.94)
+         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VIDEO
+         */
+        public static final String KEY_CAPABILITY_TYPE_VIDEO_INT_ARRAY =
+                KEY_PREFIX + "key_capability_type_video_int_array";
+
+        /**
+         * This MmTelFeature supports XCAP over Ut for supplementary services. (IR.92)
+         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_UT
+         */
+        public static final String KEY_CAPABILITY_TYPE_UT_INT_ARRAY =
+                KEY_PREFIX + "key_capability_type_ut_int_array";
+
+        /**
+         * This MmTelFeature supports SMS (IR.92)
+         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_SMS
+         */
+        public static final String KEY_CAPABILITY_TYPE_SMS_INT_ARRAY =
+                KEY_PREFIX + "key_capability_type_sms_int_array";
+
+        /**
+         * This MmTelFeature supports Call Composer (section 2.4 of RCC.20)
+         * @see MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_CALL_COMPOSER
+         */
+        public static final String KEY_CAPABILITY_CALL_COMPOSER_INT_ARRAY =
+                KEY_PREFIX + "key_capability_type_call_composer_int_array";
+
+        /**
+         * A bundle which specifies the RCS capability and registration technology
+         * that requires provisioning. If a tuple is not present, the
          * framework will not require that the tuple requires provisioning before
          * enabling the capability.
-         * <p>
-         * Format for each tuple is two integers separated by a comma. The first
-         * integer is an integer defined in
-         * {@link RcsFeature.RcsImsCapabilities.RcsImsCapabilityFlag} and the second integer is
+         * <p> Possible keys in this bundle are
+         * <ul>
+         *     <li>{@link #KEY_CAPABILITY_TYPE_OPTIONS_UCE_INT_ARRAY}</li>
+         *     <li>{@link #KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY}</li>
+         * </ul>
+         * <p> The values are defined in
          * {@link android.telephony.ims.stub.ImsRegistrationImplBase.ImsRegistrationTech}
-         * @hide
          */
-        public static final String KEY_RCS_REQUIRES_PROVISIONING_STRING_ARRAY =
-                KEY_PREFIX + "rcs_requires_provisioning_string_array";
+        public static final String KEY_RCS_REQUIRES_PROVISIONING_BUNDLE =
+                KEY_PREFIX + "rcs_requires_provisioning_bundle";
+
+        /**
+         * This carrier supports User Capability Exchange using SIP OPTIONS as defined by the
+         * framework. If set, the RcsFeature should support capability exchange using SIP OPTIONS.
+         * If not set, this RcsFeature should not service capability requests.
+         * @see RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_OPTIONS_UCE
+         */
+        public static final String KEY_CAPABILITY_TYPE_OPTIONS_UCE_INT_ARRAY =
+                KEY_PREFIX + "key_capability_type_options_uce_int_array";
+
+        /**
+         * This carrier supports User Capability Exchange using a presence server as defined by the
+         * framework. If set, the RcsFeature should support capability exchange using a presence
+         * server. If not set, this RcsFeature should not publish capabilities or service capability
+         * requests using presence.
+         * @see RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_PRESENCE_UCE
+         */
+        public static final String KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY =
+                KEY_PREFIX + "key_capability_type_presence_uce_int_array";
 
         private Ims() {}
 
@@ -4702,8 +4773,20 @@ public class CarrierConfigManager {
                     "+g.3gpp.iari-ref=\"urn%3Aurn-7%3A3gpp-application.ims.iari.rcs.chatbot.sa\"",
                     "+g.gsma.rcs.botversion=\"#=1,#=2\"",
                     "+g.gsma.rcs.cpimext"});
-            defaults.putStringArray(KEY_MMTEL_REQUIRES_PROVISIONING_STRING_ARRAY, new String[] {});
-            defaults.putStringArray(KEY_RCS_REQUIRES_PROVISIONING_STRING_ARRAY, new String[] {});
+
+            /**
+             * @see #KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE
+             */
+            PersistableBundle mmtel_requires_provisioning_int_array = new PersistableBundle();
+            defaults.putPersistableBundle(
+                    KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE, mmtel_requires_provisioning_int_array);
+
+            /**
+             * @see #KEY_RCS_REQUIRES_PROVISIONING_BUNDLE
+             */
+            PersistableBundle rcs_requires_provisioning_int_array = new PersistableBundle();
+            defaults.putPersistableBundle(
+                    KEY_RCS_REQUIRES_PROVISIONING_BUNDLE, rcs_requires_provisioning_int_array);
 
             return defaults;
         }
