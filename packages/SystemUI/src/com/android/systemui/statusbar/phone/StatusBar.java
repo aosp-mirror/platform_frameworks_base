@@ -40,6 +40,7 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.TransitionMode;
+import static com.android.wm.shell.transition.Transitions.ENABLE_SHELL_TRANSITIONS;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -139,6 +140,7 @@ import com.android.systemui.R;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DelegateLaunchAnimatorController;
+import com.android.systemui.animation.RemoteTransitionAdapter;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -4087,7 +4089,12 @@ public class StatusBar extends CoreStartable implements
             @Nullable RemoteAnimationAdapter animationAdapter) {
         ActivityOptions options;
         if (animationAdapter != null) {
-            options = ActivityOptions.makeRemoteAnimation(animationAdapter);
+            if (ENABLE_SHELL_TRANSITIONS) {
+                options = ActivityOptions.makeRemoteTransition(
+                        RemoteTransitionAdapter.adaptRemoteAnimation(animationAdapter));
+            } else {
+                options = ActivityOptions.makeRemoteAnimation(animationAdapter);
+            }
         } else {
             options = ActivityOptions.makeBasic();
         }
