@@ -55,6 +55,8 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
      */
     private final SharedPreferences mSharedPreferences;
 
+    private final LetterboxEduAnimationController mAnimationController;
+
     // Remember the last reported state in case visibility changes due to keyguard or IME updates.
     private boolean mEligibleForLetterboxEducation;
 
@@ -69,6 +71,7 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
         mOnDismissCallback = onDismissCallback;
         mEligibleForLetterboxEducation = taskInfo.topActivityEligibleForLetterboxEducation;
+        mAnimationController = new LetterboxEduAnimationController(context);
         mSharedPreferences = mContext.getSharedPreferences(HAS_SEEN_LETTERBOX_EDUCATION_PREF_NAME,
                 Context.MODE_PRIVATE);
     }
@@ -101,7 +104,9 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
         setSeenLetterboxEducation();
         mLayout = inflateLayout();
         mLayout.inject(this);
-        mLayout.setDismissOnClickListener(this::onDismiss);
+
+        mAnimationController.startEnterAnimation(mLayout, /* endCallback= */
+                this::setDismissOnClickListener);
 
         return mLayout;
     }
@@ -111,9 +116,24 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
                 R.layout.letterbox_education_dialog_layout, null);
     }
 
+    private void setDismissOnClickListener() {
+        if (mLayout == null) {
+            return;
+        }
+        mLayout.setDismissOnClickListener(this::onDismiss);
+    }
+
     private void onDismiss() {
-        release();
-        mOnDismissCallback.run();
+        mAnimationController.startExitAnimation(mLayout, () -> {
+            release();
+            mOnDismissCallback.run();
+        });
+    }
+
+    @Override
+    public void release() {
+        mAnimationController.cancelAnimation();
+        super.release();
     }
 
     @Override

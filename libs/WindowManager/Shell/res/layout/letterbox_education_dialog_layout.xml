@@ -22,6 +22,8 @@
 
     <!-- The background of the top-level layout acts as the background dim. -->
 
+    <!-- Setting the alpha of the dialog container to 0, since it shouldn't be visible until the
+         enter animation starts. -->
     <LinearLayout
         android:id="@+id/letterbox_education_dialog_container"
         android:layout_width="wrap_content"
@@ -30,7 +32,8 @@
         android:gravity="center_horizontal"
         android:orientation="vertical"
         android:background="@drawable/letterbox_education_dialog_background"
-        android:padding="24dp">
+        android:padding="24dp"
+        android:alpha="0">
 
         <ImageView
             android:id="@+id/letterbox_education_icon"

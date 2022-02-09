@@ -17,7 +17,9 @@
 package com.android.wm.shell.compatui.letterboxedu;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.wm.shell.R;
@@ -33,9 +35,11 @@ class LetterboxEduDialogLayout extends FrameLayout {
 
     // The alpha of a background is a number between 0 (fully transparent) to 255 (fully opaque).
     // 204 is simply 255 * 0.8.
-    private static final int BACKGROUND_DIM_ALPHA = 204;
+    static final int BACKGROUND_DIM_ALPHA = 204;
 
     private LetterboxEduWindowManager mWindowManager;
+    private View mDialogContainer;
+    private Drawable mBackgroundDim;
 
     public LetterboxEduDialogLayout(Context context) {
         this(context, null);
@@ -58,6 +62,14 @@ class LetterboxEduDialogLayout extends FrameLayout {
         mWindowManager = windowManager;
     }
 
+    View getDialogContainer() {
+        return mDialogContainer;
+    }
+
+    Drawable getBackgroundDim() {
+        return mBackgroundDim;
+    }
+
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
@@ -77,12 +89,15 @@ class LetterboxEduDialogLayout extends FrameLayout {
         setOnClickListener(view -> callback.run());
         // We add a no-op on-click listener to the dialog container so that clicks on it won't
         // propagate to the listener of the layout (which represents the background dim).
-        findViewById(R.id.letterbox_education_dialog_container).setOnClickListener(view -> {});
+        mDialogContainer.setOnClickListener(view -> {});
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        getBackground().mutate().setAlpha(BACKGROUND_DIM_ALPHA);
+        mDialogContainer = findViewById(R.id.letterbox_education_dialog_container);
+        mBackgroundDim = getBackground().mutate();
+        // Set the alpha of the background dim to 0 for enter animation.
+        mBackgroundDim.setAlpha(0);
     }
 }
