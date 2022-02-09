@@ -496,6 +496,17 @@ public class SpeechRecognizer {
         Objects.requireNonNull(recognizerIntent, "intent must not be null");
         Objects.requireNonNull(supportListener, "listener must not be null");
 
+        if (DBG) {
+            Slog.i(TAG, "#checkRecognitionSupport called");
+            if (mService == null) {
+                Slog.i(TAG, "Connection is not established yet");
+            }
+        }
+
+        if (mService == null) {
+            // First time connection: first establish a connection, then dispatch.
+            connectToSystemService();
+        }
         putMessage(Message.obtain(mHandler, MSG_CHECK_RECOGNITION_SUPPORT,
                 Pair.create(recognizerIntent, supportListener)));
     }
@@ -510,7 +521,17 @@ public class SpeechRecognizer {
      */
     public void triggerModelDownload(@NonNull Intent recognizerIntent) {
         Objects.requireNonNull(recognizerIntent, "intent must not be null");
-        putMessage(Message.obtain(mHandler, MSG_TRIGGER_MODEL_DOWNLOAD));
+        if (DBG) {
+            Slog.i(TAG, "#triggerModelDownload called");
+            if (mService == null) {
+                Slog.i(TAG, "Connection is not established yet");
+            }
+        }
+        if (mService == null) {
+            // First time connection: first establish a connection, then dispatch.
+            connectToSystemService();
+        }
+        putMessage(Message.obtain(mHandler, MSG_TRIGGER_MODEL_DOWNLOAD, recognizerIntent));
     }
 
     /**
@@ -625,7 +646,6 @@ public class SpeechRecognizer {
         }
         try {
             mService.triggerModelDownload(recognizerIntent);
-            if (DBG) Log.d(TAG, "service download support command succeeded");
         } catch (final RemoteException e) {
             Log.e(TAG, "downloadModel() failed", e);
             mListener.onError(ERROR_CLIENT);
@@ -705,6 +725,9 @@ public class SpeechRecognizer {
     }
 
     private synchronized boolean maybeInitializeManagerService() {
+        if (DBG) {
+            Log.i(TAG, "#maybeInitializeManagerService found = " + mManagerService);
+        }
         if (mManagerService != null) {
             return true;
         }
@@ -712,8 +735,13 @@ public class SpeechRecognizer {
         mManagerService = IRecognitionServiceManager.Stub.asInterface(
                 ServiceManager.getService(Context.SPEECH_RECOGNITION_SERVICE));
 
-        if (mManagerService == null && mListener != null) {
-            mListener.onError(ERROR_CLIENT);
+        if (DBG) {
+            Log.i(TAG, "#maybeInitializeManagerService instantiated =" + mManagerService);
+        }
+        if (mManagerService == null) {
+            if (mListener != null) {
+                mListener.onError(ERROR_CLIENT);
+            }
             return false;
         }
         return true;
