@@ -1182,11 +1182,11 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
         mStatusBarStateController.setState(SHADE);
         when(mResources.getBoolean(R.bool.config_use_large_screen_shade_header)).thenReturn(true);
         mNotificationPanelViewController.updateResources();
-        verify(mLargeScreenShadeHeaderController).setActive(true);
+        verify(mLargeScreenShadeHeaderController).setLargeScreenActive(true);
 
         when(mResources.getBoolean(R.bool.config_use_large_screen_shade_header)).thenReturn(false);
         mNotificationPanelViewController.updateResources();
-        verify(mLargeScreenShadeHeaderController).setActive(false);
+        verify(mLargeScreenShadeHeaderController).setLargeScreenActive(false);
     }
 
     @Test

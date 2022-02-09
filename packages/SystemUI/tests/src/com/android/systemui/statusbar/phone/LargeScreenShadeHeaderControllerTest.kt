@@ -2,9 +2,7 @@ package com.android.systemui.statusbar.phone
 
 import android.app.StatusBarManager
 import android.content.Context
-import android.content.res.TypedArray
 import android.testing.AndroidTestingRunner
-import android.util.TypedValue.COMPLEX_UNIT_PX
 import android.view.View
 import android.widget.TextView
 import androidx.test.filters.SmallTest
@@ -20,18 +18,18 @@ import com.android.systemui.qs.HeaderPrivacyIconsController
 import com.android.systemui.qs.carrier.QSCarrierGroup
 import com.android.systemui.qs.carrier.QSCarrierGroupController
 import com.android.systemui.statusbar.policy.FakeConfigurationController
+import com.android.systemui.statusbar.policy.VariableDateViewController
+import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.verify
-import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.junit.MockitoJUnit
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -49,10 +47,12 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
     @Mock private lateinit var batteryMeterView: BatteryMeterView
     @Mock private lateinit var batteryMeterViewController: BatteryMeterViewController
     @Mock private lateinit var privacyIconsController: HeaderPrivacyIconsController
+    @Mock private lateinit var insetsProvider: StatusBarContentInsetsProvider
+    @Mock private lateinit var variableDateViewControllerFactory: VariableDateViewController.Factory
+    @Mock private lateinit var variableDateViewController: VariableDateViewController
     @Mock private lateinit var dumpManager: DumpManager
 
     @Mock private lateinit var mockedContext: Context
-    @Mock private lateinit var typedArray: TypedArray
 
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
     var viewVisibility = View.GONE
@@ -65,7 +65,6 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
     fun setup() {
         whenever<TextView>(view.findViewById(R.id.clock)).thenReturn(clock)
         whenever(clock.context).thenReturn(mockedContext)
-        whenever(mockedContext.obtainStyledAttributes(anyInt(), any())).thenReturn(typedArray)
         whenever<TextView>(view.findViewById(R.id.date)).thenReturn(date)
         whenever(date.context).thenReturn(mockedContext)
         whenever<QSCarrierGroup>(view.findViewById(R.id.carrier_group)).thenReturn(carrierGroup)
@@ -73,6 +72,7 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
                 .thenReturn(batteryMeterView)
         whenever<StatusIconContainer>(view.findViewById(R.id.statusIcons)).thenReturn(statusIcons)
         whenever(view.context).thenReturn(context)
+        whenever(view.resources).thenReturn(context.resources)
         whenever(statusIcons.context).thenReturn(context)
         whenever(qsCarrierGroupControllerBuilder.setQSCarrierGroup(any()))
                 .thenReturn(qsCarrierGroupControllerBuilder)
@@ -82,17 +82,23 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
             null
         }
         whenever(view.visibility).thenAnswer { _ -> viewVisibility }
+        whenever(variableDateViewControllerFactory.create(any()))
+            .thenReturn(variableDateViewController)
         whenever(featureFlags.isEnabled(Flags.COMBINED_QS_HEADERS)).thenReturn(false)
         mLargeScreenShadeHeaderController = LargeScreenShadeHeaderController(
                 view,
                 statusBarIconController,
                 privacyIconsController,
+                insetsProvider,
                 configurationController,
-                qsCarrierGroupControllerBuilder,
-                featureFlags,
+                variableDateViewControllerFactory,
                 batteryMeterViewController,
-                dumpManager
+                dumpManager,
+                featureFlags,
+                qsCarrierGroupControllerBuilder
         )
+        whenever(view.isAttachedToWindow).thenReturn(true)
+        mLargeScreenShadeHeaderController.init()
         carrierIconSlots = listOf(
                 context.getString(com.android.internal.R.string.status_bar_mobile))
     }
@@ -102,7 +108,7 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
         makeShadeVisible()
         assertThat(viewVisibility).isEqualTo(View.VISIBLE)
 
-        mLargeScreenShadeHeaderController.active = false
+        mLargeScreenShadeHeaderController.largeScreenActive = false
         assertThat(viewVisibility).isEqualTo(View.GONE)
     }
 
@@ -156,41 +162,16 @@ class LargeScreenShadeHeaderControllerTest : SysuiTestCase() {
     }
 
     private fun makeShadeVisible() {
-        mLargeScreenShadeHeaderController.active = true
-        mLargeScreenShadeHeaderController.shadeExpanded = true
+        mLargeScreenShadeHeaderController.largeScreenActive = true
+        mLargeScreenShadeHeaderController.qsVisible = true
     }
 
     @Test
-    fun updateConfig_changesFontSize() {
-        val updatedTextPixelSize = 32
-        setReturnTextSize(updatedTextPixelSize)
-
+    fun updateConfig_changesFontStyle() {
         configurationController.notifyDensityOrFontScaleChanged()
 
-        verify(clock).setTextSize(COMPLEX_UNIT_PX, updatedTextPixelSize.toFloat())
-        verify(date).setTextSize(COMPLEX_UNIT_PX, updatedTextPixelSize.toFloat())
-        verify(carrierGroup).updateTextAppearance(R.style.TextAppearance_QS_Status)
-    }
-
-    @Test
-    fun updateConfig_changesFontSizeMultipleTimes() {
-        val updatedTextPixelSize1 = 32
-        setReturnTextSize(updatedTextPixelSize1)
-        configurationController.notifyDensityOrFontScaleChanged()
-        verify(clock).setTextSize(COMPLEX_UNIT_PX, updatedTextPixelSize1.toFloat())
-        verify(date).setTextSize(COMPLEX_UNIT_PX, updatedTextPixelSize1.toFloat())
-        verify(carrierGroup).updateTextAppearance(R.style.TextAppearance_QS_Status)
-        clearInvocations(carrierGroup)
-
-        val updatedTextPixelSize2 = 42
-        setReturnTextSize(updatedTextPixelSize2)
-        configurationController.notifyDensityOrFontScaleChanged()
-        verify(clock).setTextSize(COMPLEX_UNIT_PX, updatedTextPixelSize2.toFloat())
-        verify(date).setTextSize(COMPLEX_UNIT_PX, updatedTextPixelSize2.toFloat())
-        verify(carrierGroup).updateTextAppearance(R.style.TextAppearance_QS_Status)
-    }
-
-    private fun setReturnTextSize(resultTextSize: Int) {
-        whenever(typedArray.getDimensionPixelSize(anyInt(), anyInt())).thenReturn(resultTextSize)
+        verify(clock).setTextAppearance(R.style.TextAppearance_QS_Status)
+        verify(date).setTextAppearance(R.style.TextAppearance_QS_Status)
+        verify(carrierGroup).updateTextAppearance(R.style.TextAppearance_QS_Status_Carriers)
     }
 }
