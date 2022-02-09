@@ -215,6 +215,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override // Binder call
     public void close() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CREATE_VIRTUAL_DEVICE,
+                "Permission required to close the virtual device");
+
         synchronized (mVirtualDeviceLock) {
             if (!mPerDisplayWakelocks.isEmpty()) {
                 mPerDisplayWakelocks.forEach((displayId, wakeLock) -> {
@@ -227,7 +231,13 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
         mListener.onClose(mAssociationInfo.getId());
         mAppToken.unlinkToDeath(this, 0);
-        mInputController.close();
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            mInputController.close();
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
