@@ -1262,6 +1262,50 @@ public final class MandatoryStreamCombination {
                 "Preview, in-application image processing, and YUV still image capture"),
     };
 
+    private static StreamCombinationTemplate sPreviewStabilizedStreamCombinations[] = {
+        // 1 stream combinations
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.RECORD)},
+                "Stabilized preview, GPU video processing, or no-preview stabilized recording"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD)},
+                "Stabilized preview, GPU video processing, or no-preview stabilized recording"),
+        //2 stream combinations
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM),
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
+                "Standard JPEG still imaging with stabilized preview"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.MAXIMUM),
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
+                "Standard YUV still imaging with stabilized preview"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.MAXIMUM),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW)},
+                "Standard YUV still imaging with stabilized in-app image processing stream"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.JPEG, SizeThreshold.MAXIMUM),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW)},
+                "Standard JPEG still imaging with stabilized in-app image processing stream"),
+
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.RECORD),
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
+                "High-resolution video recording with preview both streams stabilized"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.RECORD),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW)},
+                "High-resolution video recording with preview both streams stabilized"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD),
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.PREVIEW)},
+                "High-resolution video recording with preview both streams stabilized"),
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.YUV_420_888, SizeThreshold.RECORD),
+                new StreamTemplate(ImageFormat.PRIVATE, SizeThreshold.PREVIEW)},
+                "High-resolution video recording with preview both streams stabilized"),
+    };
+
     /**
      * Helper builder class to generate a list of available mandatory stream combinations.
      * @hide
@@ -1273,6 +1317,7 @@ public final class MandatoryStreamCombination {
         private StreamConfigurationMap mStreamConfigMap;
         private StreamConfigurationMap mStreamConfigMapMaximumResolution;
         private boolean mIsHiddenPhysicalCamera;
+        private boolean mIsPreviewStabilizationSupported;
 
         private final Size kPreviewSizeBound = new Size(1920, 1088);
 
@@ -1289,7 +1334,7 @@ public final class MandatoryStreamCombination {
          */
         public Builder(int cameraId, int hwLevel, @NonNull Size displaySize,
                 @NonNull List<Integer> capabilities, @NonNull StreamConfigurationMap sm,
-                StreamConfigurationMap smMaxResolution) {
+                StreamConfigurationMap smMaxResolution, boolean previewStabilization) {
             mCameraId = cameraId;
             mDisplaySize = displaySize;
             mCapabilities = capabilities;
@@ -1298,24 +1343,12 @@ public final class MandatoryStreamCombination {
             mHwLevel = hwLevel;
             mIsHiddenPhysicalCamera =
                     CameraManager.isHiddenPhysicalCamera(Integer.toString(mCameraId));
+            mIsPreviewStabilizationSupported = previewStabilization;
         }
 
-        /**
-         * Retrieve a list of all available mandatory 10-bit output capable stream combinations.
-         *
-         * @return a non-modifiable list of supported mandatory 10-bit capable stream combinations,
-         *         null in case device is not 10-bit output capable.
-         */
-        public @NonNull List<MandatoryStreamCombination>
-        getAvailableMandatory10BitStreamCombinations() {
-            // Since 10-bit streaming support is optional, we mandate these stream
-            // combinations regardless of camera device capabilities.
-
-            StreamCombinationTemplate []chosenStreamCombinations = s10BitOutputStreamCombinations;
-            if (!is10BitOutputSupported()) {
-                Log.v(TAG, "Device is not able to output 10-bit!");
-                return null;
-            }
+        private @Nullable List<MandatoryStreamCombination>
+        getAvailableMandatoryStreamCombinationsInternal(
+                StreamCombinationTemplate []chosenStreamCombinations, boolean s10Bit) {
 
             HashMap<Pair<SizeThreshold, Integer>, List<Size>> availableSizes =
                     enumerateAvailableSizes();
@@ -1334,7 +1367,7 @@ public final class MandatoryStreamCombination {
                     Pair<SizeThreshold, Integer> pair;
                     pair = new Pair<>(template.mSizeThreshold, new Integer(template.mFormat));
                     sizes = availableSizes.get(pair);
-                    if (template.mFormat == ImageFormat.YCBCR_P010) {
+                    if (s10Bit && template.mFormat == ImageFormat.YCBCR_P010) {
                         // Make sure that exactly the same 10 and 8-bit YUV streams sizes are
                         // supported
                         pair = new Pair<>(template.mSizeThreshold,
@@ -1354,7 +1387,8 @@ public final class MandatoryStreamCombination {
                         streamInfo = new MandatoryStreamInformation(sizes, template.mFormat,
                                 isMaximumSize, /*isInput*/ false,
                                 /*isUltraHighResolution*/ false,
-                                /*is10BitCapable*/ template.mFormat != ImageFormat.JPEG);
+                                /*is10BitCapable*/ s10Bit ? template.mFormat != ImageFormat.JPEG :
+                                        false);
                     } catch (IllegalArgumentException e) {
                         Log.e(TAG, "No available sizes found for format: " + template.mFormat +
                                 " size threshold: " + template.mSizeThreshold + " combination: " +
@@ -1378,6 +1412,52 @@ public final class MandatoryStreamCombination {
             }
 
             return Collections.unmodifiableList(availableStreamCombinations);
+        }
+
+        /**
+         * Retrieve a list of all available mandatory stream combinations for devices supporting
+         * preview stabilization.
+         *
+         * @return a non-modifiable list of supported mandatory stream combinations on which
+         *         preview stabilization is supported.,
+         *         null in case device is not 10-bit output capable.
+         */
+        public @Nullable List<MandatoryStreamCombination>
+        getAvailableMandatoryPreviewStabilizedStreamCombinations() {
+            // Since preview stabilization support is optional, we mandate these stream
+            // combinations regardless of camera device capabilities.
+
+            StreamCombinationTemplate []chosenStreamCombinations =
+                    sPreviewStabilizedStreamCombinations;
+
+            if (mIsPreviewStabilizationSupported) {
+                Log.v(TAG, "Device does not support preview stabilization");
+                 return null;
+             }
+
+            return getAvailableMandatoryStreamCombinationsInternal(chosenStreamCombinations,
+                    /*10bit*/false);
+        }
+
+
+        /**
+         * Retrieve a list of all available mandatory 10-bit output capable stream combinations.
+         *
+         * @return a non-modifiable list of supported mandatory 10-bit capable stream combinations,
+         *         null in case device is not 10-bit output capable.
+         */
+        public @Nullable List<MandatoryStreamCombination>
+        getAvailableMandatory10BitStreamCombinations() {
+            // Since 10-bit streaming support is optional, we mandate these stream
+            // combinations regardless of camera device capabilities.
+
+            StreamCombinationTemplate []chosenStreamCombinations = s10BitOutputStreamCombinations;
+            if (!is10BitOutputSupported()) {
+                Log.v(TAG, "Device is not able to output 10-bit!");
+                return null;
+            }
+            return getAvailableMandatoryStreamCombinationsInternal(chosenStreamCombinations,
+                    /*10bit*/true);
         }
 
         /**

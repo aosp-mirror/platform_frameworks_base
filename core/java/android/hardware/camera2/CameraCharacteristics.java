@@ -3455,6 +3455,30 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.hardware.camera2.params.MandatoryStreamCombination[]>("android.scaler.mandatoryTenBitOutputStreamCombinations", android.hardware.camera2.params.MandatoryStreamCombination[].class);
 
     /**
+     * <p>An array of mandatory stream combinations which are applicable when device lists
+     * {@code PREVIEW_STABILIZATION} in {@link CameraCharacteristics#CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES android.control.availableVideoStabilizationModes}.
+     * This is an app-readable conversion of the maximum resolution mandatory stream combination
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession tables}.</p>
+     * <p>The array of
+     * {@link android.hardware.camera2.params.MandatoryStreamCombination combinations} is
+     * generated according to the documented
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession guideline} for each
+     * device which supports {@code PREVIEW_STABILIZATION}
+     * Clients can use the array as a quick reference to find an appropriate camera stream
+     * combination.
+     * The mandatory stream combination array will be {@code null} in case the device does not
+     * list {@code PREVIEW_STABILIZATION} in {@link CameraCharacteristics#CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES android.control.availableVideoStabilizationModes}.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CameraCharacteristics#CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES
+     */
+    @PublicKey
+    @NonNull
+    @SyntheticKey
+    public static final Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_PREVIEW_STABILIZATION_OUTPUT_STREAM_COMBINATIONS =
+            new Key<android.hardware.camera2.params.MandatoryStreamCombination[]>("android.scaler.mandatoryPreviewStabilizationOutputStreamCombinations", android.hardware.camera2.params.MandatoryStreamCombination[].class);
+
+    /**
      * <p>Whether the camera device supports multi-resolution input or output streams</p>
      * <p>A logical multi-camera or an ultra high resolution camera may support multi-resolution
      * input or output streams. With multi-resolution output streams, the camera device is able
