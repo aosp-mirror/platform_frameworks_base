@@ -7557,7 +7557,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (packageState == null) {
                 return new ArraySet<>();
             }
-            return packageState.getUserStateOrDefault(userId).getEnabledComponentsNoCopy();
+            return packageState.getUserStateOrDefault(userId).getEnabledComponents();
         }
 
         @Override
@@ -7566,7 +7566,7 @@ public class PackageManagerService extends IPackageManager.Stub
             if (packageState == null) {
                 return new ArraySet<>();
             }
-            return packageState.getUserStateOrDefault(userId).getDisabledComponentsNoCopy();
+            return packageState.getUserStateOrDefault(userId).getDisabledComponents();
         }
 
         @Override
