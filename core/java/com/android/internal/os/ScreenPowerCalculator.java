@@ -219,7 +219,7 @@ public class ScreenPowerCalculator extends PowerCalculator {
                         brightnessTime) * (bin + 0.5f) / BatteryStats.NUM_SCREEN_BRIGHTNESS_BINS;
                 if (DEBUG && binPowerMah != 0) {
                     Slog.d(TAG, "Screen bin #" + bin + ": time=" + brightnessTime
-                            + " power=" + formatCharge(binPowerMah));
+                            + " power=" + BatteryStats.formatCharge(binPowerMah));
                 }
                 power += binPowerMah;
             }

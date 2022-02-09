@@ -396,9 +396,9 @@ public class BatteryStatsHelper {
         }
 
         if (DEBUG) {
-            Log.d(TAG, "Accuracy: total computed=" + PowerCalculator.formatCharge(mComputedPower)
-                    + ", min discharge=" + PowerCalculator.formatCharge(mMinDrainedPower)
-                    + ", max discharge=" + PowerCalculator.formatCharge(mMaxDrainedPower));
+            Log.d(TAG, "Accuracy: total computed=" + BatteryStats.formatCharge(mComputedPower)
+                    + ", min discharge=" + BatteryStats.formatCharge(mMinDrainedPower)
+                    + ", max discharge=" + BatteryStats.formatCharge(mMaxDrainedPower));
         }
 
         mTotalPower = mComputedPower;
@@ -466,7 +466,7 @@ public class BatteryStatsHelper {
             final double totalPower = sipper.sumPower();
             if (DEBUG && totalPower != 0) {
                 Log.d(TAG, String.format("UID %d: total power=%s", sipper.getUid(),
-                        PowerCalculator.formatCharge(totalPower)));
+                        BatteryStats.formatCharge(totalPower)));
             }
 
             // Add the sipper to the list if it is consuming power.

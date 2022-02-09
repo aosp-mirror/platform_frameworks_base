@@ -163,7 +163,7 @@ public class WakelockPowerCalculator extends PowerCalculator {
         result.powerMah = mPowerEstimator.calculatePower(result.durationMs);
         if (DEBUG && result.powerMah != 0) {
             Log.d(TAG, "UID " + u.getUid() + ": wake " + result.durationMs
-                    + " power=" + formatCharge(result.powerMah));
+                    + " power=" + BatteryStats.formatCharge(result.powerMah));
         }
     }
 
@@ -175,7 +175,8 @@ public class WakelockPowerCalculator extends PowerCalculator {
         if (wakeTimeMillis > 0) {
             final double power = mPowerEstimator.calculatePower(wakeTimeMillis);
             if (DEBUG) {
-                Log.d(TAG, "OS wakeLockTime " + wakeTimeMillis + " power " + formatCharge(power));
+                Log.d(TAG, "OS wakeLockTime " + wakeTimeMillis
+                        + " power " + BatteryStats.formatCharge(power));
             }
             result.durationMs = osDurationMs + wakeTimeMillis;
             result.powerMah = osPowerMah + power;

@@ -258,7 +258,7 @@ public class CpuPowerCalculator extends PowerCalculator {
 
         if (DEBUG && (durationMs != 0 || powerMah != 0)) {
             Log.d(TAG, "UID " + u.getUid() + ": CPU time=" + durationMs + " ms power="
-                    + formatCharge(powerMah));
+                    + BatteryStats.formatCharge(powerMah));
         }
 
         // Keep track of the package with highest drain.
@@ -325,7 +325,7 @@ public class CpuPowerCalculator extends PowerCalculator {
                     if (DEBUG) {
                         Log.d(TAG, "UID " + u.getUid() + ": CPU cluster #" + cluster
                                 + " clusterTimeMs=" + cpuClusterTimes[cluster]
-                                + " power=" + formatCharge(power));
+                                + " power=" + BatteryStats.formatCharge(power));
                     }
                 }
             } else {

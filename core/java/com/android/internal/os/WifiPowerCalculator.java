@@ -251,7 +251,7 @@ public class WifiPowerCalculator extends PowerCalculator {
 
                 if (DEBUG && powerDurationAndTraffic.powerMah != 0) {
                     Log.d(TAG, "UID " + u.getUid() + ": idle=" + idleTime + "ms rx=" + rxTime
-                            + "ms tx=" + txTime + "ms power=" + formatCharge(
+                            + "ms tx=" + txTime + "ms power=" + BatteryStats.formatCharge(
                             powerDurationAndTraffic.powerMah));
                 }
 
@@ -306,7 +306,7 @@ public class WifiPowerCalculator extends PowerCalculator {
             }
 
             if (DEBUG && powerDurationAndTraffic.powerMah != 0) {
-                Log.d(TAG, "UID " + u.getUid() + ": power=" + formatCharge(
+                Log.d(TAG, "UID " + u.getUid() + ": power=" + BatteryStats.formatCharge(
                         powerDurationAndTraffic.powerMah));
             }
         }
@@ -353,7 +353,8 @@ public class WifiPowerCalculator extends PowerCalculator {
         powerDurationAndTraffic.powerMah = Math.max(0, totalPowerMah - totalAppPowerMah);
 
         if (DEBUG) {
-            Log.d(TAG, "left over WiFi power: " + formatCharge(powerDurationAndTraffic.powerMah));
+            Log.d(TAG, "left over WiFi power: " + BatteryStats.formatCharge(
+                    powerDurationAndTraffic.powerMah));
         }
     }
 

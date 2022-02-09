@@ -106,7 +106,7 @@ public class BluetoothPowerCalculator extends PowerCalculator {
                 powerAndDuration.durationMs - powerAndDuration.totalDurationMs);
         if (DEBUG) {
             Log.d(TAG, "Bluetooth active: time=" + (systemComponentDurationMs)
-                    + " power=" + formatCharge(powerAndDuration.powerMah));
+                    + " power=" + BatteryStats.formatCharge(powerAndDuration.powerMah));
         }
 
         builder.getAggregateBatteryConsumerBuilder(
@@ -190,7 +190,7 @@ public class BluetoothPowerCalculator extends PowerCalculator {
                 powerAndDuration.durationMs - powerAndDuration.totalDurationMs);
         if (DEBUG && powerMah != 0) {
             Log.d(TAG, "Bluetooth active: time=" + (durationMs)
-                    + " power=" + formatCharge(powerMah));
+                    + " power=" + BatteryStats.formatCharge(powerMah));
         }
 
         bs.bluetoothPowerMah = powerMah;

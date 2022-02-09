@@ -225,7 +225,7 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
             Log.d(TAG, "UID " + u.getUid() + ": mobile packets "
                     + (app.mobileRxPackets + app.mobileTxPackets)
                     + " active time " + app.mobileActive
-                    + " power=" + formatCharge(app.mobileRadioPowerMah));
+                    + " power=" + BatteryStats.formatCharge(app.mobileRadioPowerMah));
         }
     }
 
@@ -262,7 +262,7 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
                 final double p = calcIdlePowerAtSignalStrengthMah(strengthTimeMs, i);
                 if (DEBUG && p != 0) {
                     Log.d(TAG, "Cell strength #" + i + ": time=" + strengthTimeMs + " power="
-                            + formatCharge(p));
+                            + BatteryStats.formatCharge(p));
                 }
                 powerMah += p;
             }
@@ -281,8 +281,8 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
         if (powerModel == BatteryConsumer.POWER_MODEL_POWER_PROFILE) {
             final double p = calcScanTimePowerMah(scanningTimeMs);
             if (DEBUG && p != 0) {
-                Log.d(TAG, "Cell radio scanning: time=" + scanningTimeMs + " power=" + formatCharge(
-                        p));
+                Log.d(TAG, "Cell radio scanning: time=" + scanningTimeMs
+                        + " power=" + BatteryStats.formatCharge(p));
             }
             powerMah += p;
 
