@@ -21,11 +21,9 @@ import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.UidBatteryConsumer;
-import android.os.UserHandle;
 import android.util.SparseArray;
 
 import java.io.PrintWriter;
-import java.util.List;
 
 /**
  * Calculates power use of a device subsystem for an app.
@@ -41,34 +39,6 @@ public abstract class PowerCalculator {
      */
     public abstract boolean isPowerComponentSupported(
             @BatteryConsumer.PowerComponent int powerComponent);
-
-
-    /**
-     * Attributes the total amount of power used by this subsystem to various consumers such
-     * as apps.
-     *
-     * @param sippers       A list of battery sippers that contains battery attribution data.
-     *                      The calculator may modify the list.
-     * @param batteryStats  The recorded battery stats.
-     * @param rawRealtimeUs The raw system realtime in microseconds.
-     * @param rawUptimeUs   The raw system uptime in microseconds.
-     * @param statsType     The type of stats. As of {@link android.os.Build.VERSION_CODES#Q}, this
-     *                      can only be {@link BatteryStats#STATS_SINCE_CHARGED}, since
-     *                      {@link BatteryStats#STATS_CURRENT} and
-     *                      {@link BatteryStats#STATS_SINCE_UNPLUGGED} are deprecated.
-     * @param asUsers       An array of users for which the attribution is requested.  It may
-     *                      contain {@link UserHandle#USER_ALL} to indicate that the attribution
-     *                      should be performed for all users.
-     */
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        for (int i = sippers.size() - 1; i >= 0; i--) {
-            final BatterySipper app = sippers.get(i);
-            if (app.drainType == BatterySipper.DrainType.APP) {
-                calculateApp(app, app.uidObj, rawRealtimeUs, rawUptimeUs, statsType);
-            }
-        }
-    }
 
     /**
      * Attributes the total amount of power used by this subsystem to various consumers such
@@ -90,21 +60,6 @@ public abstract class PowerCalculator {
             final UidBatteryConsumer.Builder app = uidBatteryConsumerBuilders.valueAt(i);
             calculateApp(app, app.getBatteryStatsUid(), rawRealtimeUs, rawUptimeUs, query);
         }
-    }
-
-    /**
-     * Calculate the amount of power an app used for this subsystem.
-     * @param app The BatterySipper that represents the power use of an app.
-     * @param u The recorded stats for the app.
-     * @param rawRealtimeUs The raw system realtime in microseconds.
-     * @param rawUptimeUs The raw system uptime in microseconds.
-     * @param statsType The type of stats. As of {@link android.os.Build.VERSION_CODES#Q}, this can
-     *                  only be {@link BatteryStats#STATS_SINCE_CHARGED}, since
-     *                  {@link BatteryStats#STATS_CURRENT} and
-     *                  {@link BatteryStats#STATS_SINCE_UNPLUGGED} are deprecated.
-     */
-    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
-                                      long rawUptimeUs, int statsType) {
     }
 
     /**

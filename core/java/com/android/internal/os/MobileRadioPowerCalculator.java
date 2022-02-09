@@ -20,12 +20,9 @@ import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.UidBatteryConsumer;
-import android.os.UserHandle;
 import android.telephony.CellSignalStrength;
 import android.util.Log;
 import android.util.SparseArray;
-
-import java.util.List;
 
 public class MobileRadioPowerCalculator extends PowerCalculator {
     private static final String TAG = "MobRadioPowerCalculator";
@@ -167,65 +164,6 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
                         consumptionInStateUc);
                 app.setConsumedPower(key, powerInStateMah, powerModel);
             }
-        }
-    }
-
-    @Override
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        PowerAndDuration total = new PowerAndDuration();
-        for (int i = sippers.size() - 1; i >= 0; i--) {
-            final BatterySipper app = sippers.get(i);
-            if (app.drainType == BatterySipper.DrainType.APP) {
-                final BatteryStats.Uid u = app.uidObj;
-                calculateApp(app, u, statsType, total);
-            }
-        }
-
-        BatterySipper radio = new BatterySipper(BatterySipper.DrainType.CELL, null, 0);
-        final long consumptionUC = batteryStats.getMobileRadioMeasuredBatteryConsumptionUC();
-        final int powerModel = getPowerModel(consumptionUC);
-        calculateRemaining(total, powerModel, batteryStats, rawRealtimeUs, consumptionUC);
-        if (total.remainingPowerMah != 0) {
-            if (total.signalDurationMs != 0) {
-                radio.noCoveragePercent =
-                        total.noCoverageDurationMs * 100.0 / total.signalDurationMs;
-            }
-            radio.mobileActive = total.durationMs;
-            radio.mobileActiveCount = batteryStats.getMobileRadioActiveUnknownCount(statsType);
-            radio.mobileRadioPowerMah = total.remainingPowerMah;
-            radio.sumPower();
-        }
-        if (radio.totalPowerMah > 0) {
-            sippers.add(radio);
-        }
-    }
-
-    private void calculateApp(BatterySipper app, BatteryStats.Uid u, int statsType,
-            PowerAndDuration total) {
-        app.mobileActive = calculateDuration(u, statsType);
-
-        final long consumptionUC =  u.getMobileRadioMeasuredBatteryConsumptionUC();
-        final int powerModel = getPowerModel(consumptionUC);
-        app.mobileRadioPowerMah = calculatePower(u, powerModel, app.mobileActive, consumptionUC);
-        total.totalAppDurationMs += app.mobileActive;
-
-        // Add cost of mobile traffic.
-        app.mobileRxPackets = u.getNetworkActivityPackets(BatteryStats.NETWORK_MOBILE_RX_DATA,
-                statsType);
-        app.mobileTxPackets = u.getNetworkActivityPackets(BatteryStats.NETWORK_MOBILE_TX_DATA,
-                statsType);
-        app.mobileActiveCount = u.getMobileRadioActiveCount(statsType);
-        app.mobileRxBytes = u.getNetworkActivityBytes(BatteryStats.NETWORK_MOBILE_RX_DATA,
-                statsType);
-        app.mobileTxBytes = u.getNetworkActivityBytes(BatteryStats.NETWORK_MOBILE_TX_DATA,
-                statsType);
-
-        if (DEBUG && app.mobileRadioPowerMah != 0) {
-            Log.d(TAG, "UID " + u.getUid() + ": mobile packets "
-                    + (app.mobileRxPackets + app.mobileTxPackets)
-                    + " active time " + app.mobileActive
-                    + " power=" + BatteryStats.formatCharge(app.mobileRadioPowerMah));
         }
     }
 

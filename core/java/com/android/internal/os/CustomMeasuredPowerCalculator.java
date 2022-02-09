@@ -102,16 +102,6 @@ public class CustomMeasuredPowerCalculator extends PowerCalculator {
         return newTotalPowerMah;
     }
 
-    @Override
-    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
-            long rawUptimeUs, int statsType) {
-        updateCustomMeasuredPowerMah(app, u.getCustomConsumerMeasuredBatteryConsumptionUC());
-    }
-
-    private void updateCustomMeasuredPowerMah(BatterySipper sipper, long[] measuredChargeUC) {
-        sipper.customMeasuredPowerMah = calculateMeasuredEnergiesMah(measuredChargeUC);
-    }
-
     private double[] calculateMeasuredEnergiesMah(long[] measuredChargeUC) {
         if (measuredChargeUC == null) {
             return null;

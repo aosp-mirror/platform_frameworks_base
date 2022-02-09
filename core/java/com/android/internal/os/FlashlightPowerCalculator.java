@@ -66,14 +66,4 @@ public class FlashlightPowerCalculator extends PowerCalculator {
         app.setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT, durationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_FLASHLIGHT, powerMah);
     }
-
-    @Override
-    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
-            long rawUptimeUs, int statsType) {
-        final long durationMs = mPowerEstimator.calculateDuration(u.getFlashlightTurnedOnTimer(),
-                rawRealtimeUs, statsType);
-        final double powerMah = mPowerEstimator.calculatePower(durationMs);
-        app.flashlightTimeMs = durationMs;
-        app.flashlightPowerMah = powerMah;
-    }
 }

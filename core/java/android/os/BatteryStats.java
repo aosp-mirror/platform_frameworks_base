@@ -8591,7 +8591,10 @@ public abstract class BatteryStats implements Parcelable {
         proto.end(sToken);
     }
 
-    private static boolean checkWifiOnly(Context context) {
+    /**
+     * Returns true if the device does not have data-capable telephony.
+     */
+    public static boolean checkWifiOnly(Context context) {
         final TelephonyManager tm = context.getSystemService(TelephonyManager.class);
         if (tm == null) {
             return false;

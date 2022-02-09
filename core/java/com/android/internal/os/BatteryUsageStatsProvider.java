@@ -73,7 +73,7 @@ public class BatteryUsageStatsProvider {
                 mPowerCalculators.add(new CpuPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new MemoryPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new WakelockPowerCalculator(mPowerProfile));
-                if (!BatteryStatsHelper.checkWifiOnly(mContext)) {
+                if (!BatteryStats.checkWifiOnly(mContext)) {
                     mPowerCalculators.add(new MobileRadioPowerCalculator(mPowerProfile));
                 }
                 mPowerCalculators.add(new WifiPowerCalculator(mPowerProfile));

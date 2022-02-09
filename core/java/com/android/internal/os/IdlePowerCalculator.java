@@ -20,11 +20,7 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.UserHandle;
 import android.util.Log;
-import android.util.SparseArray;
-
-import java.util.List;
 
 /**
  * Estimates the amount of power consumed when the device is idle.
@@ -61,20 +57,6 @@ public class IdlePowerCalculator extends PowerCalculator {
                     BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE)
                     .setConsumedPower(BatteryConsumer.POWER_COMPONENT_IDLE, mPowerMah)
                     .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_IDLE, mDurationMs);
-        }
-    }
-
-    @Override
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        calculatePowerAndDuration(batteryStats, rawRealtimeUs, rawUptimeUs, statsType);
-
-        if (mPowerMah != 0) {
-            BatterySipper bs = new BatterySipper(BatterySipper.DrainType.IDLE, null, 0);
-            bs.usagePowerMah = mPowerMah;
-            bs.usageTimeMs = mDurationMs;
-            bs.sumPower();
-            sippers.add(bs);
         }
     }
 

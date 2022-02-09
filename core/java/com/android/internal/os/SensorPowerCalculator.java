@@ -72,12 +72,6 @@ public class SensorPowerCalculator extends PowerCalculator {
         return powerMah;
     }
 
-    @Override
-    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
-            long rawUptimeUs, int statsType) {
-        app.sensorPowerMah = calculatePowerMah(u, rawRealtimeUs, statsType);
-    }
-
     private long calculateDuration(BatteryStats.Uid u, long rawRealtimeUs, int statsType) {
         long durationMs = 0;
         final SparseArray<? extends BatteryStats.Uid.Sensor> sensorStats = u.getSensorStats();
