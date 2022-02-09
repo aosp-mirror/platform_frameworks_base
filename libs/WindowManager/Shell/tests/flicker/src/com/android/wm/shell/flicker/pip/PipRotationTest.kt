@@ -182,7 +182,7 @@ class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) 
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance().getConfigRotationTests(
                 supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90),
-                repetitions = 5)
+                repetitions = 3)
         }
     }
 }
