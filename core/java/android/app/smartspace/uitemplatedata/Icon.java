@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.smartspace.SmartspaceUtils;
-import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -34,34 +33,37 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi
-public final class SmartspaceIcon implements Parcelable {
+public final class Icon implements Parcelable {
 
     @NonNull
-    private final Icon mIcon;
+    private final android.graphics.drawable.Icon mIcon;
 
     @Nullable
     private final CharSequence mContentDescription;
 
     private final boolean mShouldTint;
 
-    SmartspaceIcon(@NonNull Parcel in) {
-        mIcon = in.readTypedObject(Icon.CREATOR);
+    Icon(@NonNull Parcel in) {
+        mIcon = in.readTypedObject(android.graphics.drawable.Icon.CREATOR);
         mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mShouldTint = in.readBoolean();
     }
 
-    private SmartspaceIcon(@NonNull Icon icon, @Nullable CharSequence contentDescription,
+    private Icon(@NonNull android.graphics.drawable.Icon icon,
+            @Nullable CharSequence contentDescription,
             boolean shouldTint) {
         mIcon = icon;
         mContentDescription = contentDescription;
         mShouldTint = shouldTint;
     }
 
+    /** Returns the icon image. */
     @NonNull
-    public Icon getIcon() {
+    public android.graphics.drawable.Icon getIcon() {
         return mIcon;
     }
 
+    /** Returns the content description of the icon image. */
     @Nullable
     public CharSequence getContentDescription() {
         return mContentDescription;
@@ -73,23 +75,23 @@ public final class SmartspaceIcon implements Parcelable {
     }
 
     @NonNull
-    public static final Creator<SmartspaceIcon> CREATOR = new Creator<SmartspaceIcon>() {
+    public static final Creator<Icon> CREATOR = new Creator<Icon>() {
         @Override
-        public SmartspaceIcon createFromParcel(Parcel in) {
-            return new SmartspaceIcon(in);
+        public Icon createFromParcel(Parcel in) {
+            return new Icon(in);
         }
 
         @Override
-        public SmartspaceIcon[] newArray(int size) {
-            return new SmartspaceIcon[size];
+        public Icon[] newArray(int size) {
+            return new Icon[size];
         }
     };
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SmartspaceIcon)) return false;
-        SmartspaceIcon that = (SmartspaceIcon) o;
+        if (!(o instanceof Icon)) return false;
+        Icon that = (Icon) o;
         return mIcon.toString().equals(that.mIcon.toString()) && SmartspaceUtils.isEqual(
                 mContentDescription,
                 that.mContentDescription) && mShouldTint == that.mShouldTint;
@@ -122,23 +124,23 @@ public final class SmartspaceIcon implements Parcelable {
     }
 
     /**
-     * A builder for {@link SmartspaceIcon} object.
+     * A builder for {@link Icon} object.
      *
      * @hide
      */
     @SystemApi
     public static final class Builder {
 
-        private Icon mIcon;
+        private android.graphics.drawable.Icon mIcon;
         private CharSequence mContentDescription;
         private boolean mShouldTint;
 
         /**
-         * A builder for {@link SmartspaceIcon}, which sets shouldTint to true by default.
+         * A builder for {@link Icon}, which sets shouldTint to true by default.
          *
-         * @param icon the icon image of this {@link SmartspaceIcon} instance.
+         * @param icon the icon image of this {@link Icon} instance.
          */
-        public Builder(@NonNull Icon icon) {
+        public Builder(@NonNull android.graphics.drawable.Icon icon) {
             mIcon = Objects.requireNonNull(icon);
             mShouldTint = true;
         }
@@ -165,8 +167,8 @@ public final class SmartspaceIcon implements Parcelable {
          * Builds a new SmartspaceIcon instance.
          */
         @NonNull
-        public SmartspaceIcon build() {
-            return new SmartspaceIcon(mIcon, mContentDescription, mShouldTint);
+        public Icon build() {
+            return new Icon(mIcon, mContentDescription, mShouldTint);
         }
     }
 }

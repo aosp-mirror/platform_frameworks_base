@@ -32,43 +32,54 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi
-public final class SmartspaceText implements Parcelable {
+public final class Text implements Parcelable {
 
     @NonNull
     private final CharSequence mText;
 
     private final TextUtils.TruncateAt mTruncateAtType;
 
-    SmartspaceText(Parcel in) {
+    private final int mMaxLines;
+
+    Text(Parcel in) {
         mText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mTruncateAtType = TextUtils.TruncateAt.valueOf(in.readString());
+        mMaxLines = in.readInt();
     }
 
-    private SmartspaceText(@NonNull CharSequence text, TextUtils.TruncateAt truncateAtType) {
+    private Text(@NonNull CharSequence text, TextUtils.TruncateAt truncateAtType, int maxLines) {
         mText = text;
         mTruncateAtType = truncateAtType;
+        mMaxLines = maxLines;
     }
 
+    /** Returns the text content. */
     @NonNull
     public CharSequence getText() {
         return mText;
     }
 
+    /** Returns the {@link TextUtils.TruncateAt} type of the text content. */
     @NonNull
     public TextUtils.TruncateAt getTruncateAtType() {
         return mTruncateAtType;
     }
 
+    /** Returns the allowed max lines for presenting the text content. */
+    public int getMaxLines() {
+        return mMaxLines;
+    }
+
     @NonNull
-    public static final Creator<SmartspaceText> CREATOR = new Creator<SmartspaceText>() {
+    public static final Creator<Text> CREATOR = new Creator<Text>() {
         @Override
-        public SmartspaceText createFromParcel(Parcel in) {
-            return new SmartspaceText(in);
+        public Text createFromParcel(Parcel in) {
+            return new Text(in);
         }
 
         @Override
-        public SmartspaceText[] newArray(int size) {
-            return new SmartspaceText[size];
+        public Text[] newArray(int size) {
+            return new Text[size];
         }
     };
 
@@ -80,25 +91,26 @@ public final class SmartspaceText implements Parcelable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SmartspaceText)) return false;
-        SmartspaceText that = (SmartspaceText) o;
+        if (!(o instanceof Text)) return false;
+        Text that = (Text) o;
         return mTruncateAtType == that.mTruncateAtType && SmartspaceUtils.isEqual(mText,
-                that.mText);
+                that.mText) && mMaxLines == that.mMaxLines;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mText, mTruncateAtType);
+        return Objects.hash(mText, mTruncateAtType, mMaxLines);
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
         TextUtils.writeToParcel(mText, out, flags);
         out.writeString(mTruncateAtType.name());
+        out.writeInt(mMaxLines);
     }
 
     /**
-     * A builder for {@link SmartspaceText} object.
+     * A builder for {@link Text} object.
      *
      * @hide
      */
@@ -106,25 +118,31 @@ public final class SmartspaceText implements Parcelable {
     public static final class Builder {
         private final CharSequence mText;
         private TextUtils.TruncateAt mTruncateAtType;
+        private int mMaxLines;
 
         /**
-         * A builder for {@link SmartspaceText}, which sets TruncateAtType to AT_END by default.
+         * A builder for {@link Text}, which by default sets TruncateAtType to AT_END, and the max
+         * lines to 1.
          */
         public Builder(@NonNull CharSequence text) {
             mText = Objects.requireNonNull(text);
             mTruncateAtType = TextUtils.TruncateAt.END;
+            mMaxLines = 1;
         }
 
         /**
-         * A builder for {@link SmartspaceText}.
+         * A builder for {@link Text} with specifying {@link TextUtils.TruncateAt} type, and by
+         * default set the max lines to 1.
          */
         public Builder(@NonNull CharSequence text, @NonNull TextUtils.TruncateAt truncateAtType) {
             mText = Objects.requireNonNull(text);
             mTruncateAtType = Objects.requireNonNull(truncateAtType);
+            mMaxLines = 1;
         }
 
         /**
-         * Sets truncateAtType.
+         * Sets truncateAtType, where the text content should be truncated if not all the content
+         * can be presented.
          */
         @NonNull
         public Builder setTruncateAtType(@NonNull TextUtils.TruncateAt truncateAtType) {
@@ -133,11 +151,20 @@ public final class SmartspaceText implements Parcelable {
         }
 
         /**
+         * Sets the allowed max lines for the text content.
+         */
+        @NonNull
+        public Builder setMaxLines(int maxLines) {
+            mMaxLines = maxLines;
+            return this;
+        }
+
+        /**
          * Builds a new SmartspaceText instance.
          */
         @NonNull
-        public SmartspaceText build() {
-            return new SmartspaceText(mText, mTruncateAtType);
+        public Text build() {
+            return new Text(mText, mTruncateAtType, mMaxLines);
         }
     }
 }

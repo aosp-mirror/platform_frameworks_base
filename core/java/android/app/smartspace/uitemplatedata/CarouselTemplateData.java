@@ -30,10 +30,16 @@ import java.util.Objects;
 /**
  * Holds all the relevant data needed to render a Smartspace card with the carousel Ui Template.
  *
+ * This template will add a sub-card displaying a list of carousel items within the default-template
+ * card:
+ * <ul>
+ *     <li> carouselItem1, carouselItem2, carouselItem3... </li>
+ * </ul>
+ *
  * @hide
  */
 @SystemApi
-public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiTemplateData {
+public final class CarouselTemplateData extends BaseTemplateData {
 
     /** Lists of {@link CarouselItem}. */
     @NonNull
@@ -41,26 +47,26 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
 
     /** Tap action for the entire carousel secondary card, including the blank space */
     @Nullable
-    private final SmartspaceTapAction mCarouselAction;
+    private final TapAction mCarouselAction;
 
-    SmartspaceCarouselUiTemplateData(@NonNull Parcel in) {
+    CarouselTemplateData(@NonNull Parcel in) {
         super(in);
         mCarouselItems = in.createTypedArrayList(CarouselItem.CREATOR);
-        mCarouselAction = in.readTypedObject(SmartspaceTapAction.CREATOR);
+        mCarouselAction = in.readTypedObject(TapAction.CREATOR);
     }
 
-    private SmartspaceCarouselUiTemplateData(@SmartspaceTarget.UiTemplateType int templateType,
-            @Nullable SmartspaceText titleText,
-            @Nullable SmartspaceIcon titleIcon,
-            @Nullable SmartspaceText subtitleText,
-            @Nullable SmartspaceIcon subTitleIcon,
-            @Nullable SmartspaceTapAction primaryTapAction,
-            @Nullable SmartspaceText supplementalSubtitleText,
-            @Nullable SmartspaceIcon supplementalSubtitleIcon,
-            @Nullable SmartspaceTapAction supplementalSubtitleTapAction,
-            @Nullable SmartspaceText supplementalAlarmText,
+    private CarouselTemplateData(@SmartspaceTarget.UiTemplateType int templateType,
+            @Nullable Text titleText,
+            @Nullable Icon titleIcon,
+            @Nullable Text subtitleText,
+            @Nullable Icon subTitleIcon,
+            @Nullable TapAction primaryTapAction,
+            @Nullable Text supplementalSubtitleText,
+            @Nullable Icon supplementalSubtitleIcon,
+            @Nullable TapAction supplementalSubtitleTapAction,
+            @Nullable Text supplementalAlarmText,
             @NonNull List<CarouselItem> carouselItems,
-            @Nullable SmartspaceTapAction carouselAction) {
+            @Nullable TapAction carouselAction) {
         super(templateType, titleText, titleIcon, subtitleText, subTitleIcon, primaryTapAction,
                 supplementalSubtitleText, supplementalSubtitleIcon, supplementalSubtitleTapAction,
                 supplementalAlarmText);
@@ -68,13 +74,15 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
         mCarouselAction = carouselAction;
     }
 
+    /** Returns the list of {@link CarouselItem}. Can be empty if not being set. */
     @NonNull
     public List<CarouselItem> getCarouselItems() {
         return mCarouselItems;
     }
 
+    /** Returns the card's tap action. */
     @Nullable
-    public SmartspaceTapAction getCarouselAction() {
+    public TapAction getCarouselAction() {
         return mCarouselAction;
     }
 
@@ -82,16 +90,16 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
      * @see Parcelable.Creator
      */
     @NonNull
-    public static final Creator<SmartspaceCarouselUiTemplateData> CREATOR =
-            new Creator<SmartspaceCarouselUiTemplateData>() {
+    public static final Creator<CarouselTemplateData> CREATOR =
+            new Creator<CarouselTemplateData>() {
                 @Override
-                public SmartspaceCarouselUiTemplateData createFromParcel(Parcel in) {
-                    return new SmartspaceCarouselUiTemplateData(in);
+                public CarouselTemplateData createFromParcel(Parcel in) {
+                    return new CarouselTemplateData(in);
                 }
 
                 @Override
-                public SmartspaceCarouselUiTemplateData[] newArray(int size) {
-                    return new SmartspaceCarouselUiTemplateData[size];
+                public CarouselTemplateData[] newArray(int size) {
+                    return new CarouselTemplateData[size];
                 }
             };
 
@@ -111,9 +119,9 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SmartspaceCarouselUiTemplateData)) return false;
+        if (!(o instanceof CarouselTemplateData)) return false;
         if (!super.equals(o)) return false;
-        SmartspaceCarouselUiTemplateData that = (SmartspaceCarouselUiTemplateData) o;
+        CarouselTemplateData that = (CarouselTemplateData) o;
         return mCarouselItems.equals(that.mCarouselItems) && Objects.equals(mCarouselAction,
                 that.mCarouselAction);
     }
@@ -132,18 +140,18 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
     }
 
     /**
-     * A builder for {@link SmartspaceCarouselUiTemplateData} object.
+     * A builder for {@link CarouselTemplateData} object.
      *
      * @hide
      */
     @SystemApi
-    public static final class Builder extends SmartspaceDefaultUiTemplateData.Builder {
+    public static final class Builder extends BaseTemplateData.Builder {
 
         private final List<CarouselItem> mCarouselItems;
-        private SmartspaceTapAction mCarouselAction;
+        private TapAction mCarouselAction;
 
         /**
-         * A builder for {@link SmartspaceCarouselUiTemplateData}.
+         * A builder for {@link CarouselTemplateData}.
          */
         public Builder(@NonNull List<CarouselItem> carouselItems) {
             super(SmartspaceTarget.UI_TEMPLATE_CAROUSEL);
@@ -154,23 +162,23 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
          * Sets the card tap action.
          */
         @NonNull
-        public Builder setCarouselAction(@NonNull SmartspaceTapAction carouselAction) {
+        public Builder setCarouselAction(@NonNull TapAction carouselAction) {
             mCarouselAction = carouselAction;
             return this;
         }
 
         /**
-         * Builds a new SmartspaceCarouselUiTemplateData instance.
+         * Builds a new {@link CarouselTemplateData} instance.
          *
          * @throws IllegalStateException if the carousel data is invalid.
          */
         @NonNull
-        public SmartspaceCarouselUiTemplateData build() {
+        public CarouselTemplateData build() {
             if (mCarouselItems.isEmpty()) {
                 throw new IllegalStateException("Carousel data is empty");
             }
 
-            return new SmartspaceCarouselUiTemplateData(getTemplateType(), getTitleText(),
+            return new CarouselTemplateData(getTemplateType(), getTitleText(),
                     getTitleIcon(), getSubtitleText(), getSubtitleIcon(), getPrimaryTapAction(),
                     getSupplementalSubtitleText(), getSupplementalSubtitleIcon(),
                     getSupplementalSubtitleTapAction(), getSupplementalAlarmText(), mCarouselItems,
@@ -178,37 +186,45 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
         }
     }
 
-    /** Holds all the relevant data needed to render a carousel item. */
+    /**
+     * Holds all the relevant data needed to render a carousel item.
+     *
+     * <ul>
+     *     <li> upper text </li>
+     *     <li> image </li>
+     *     <li> lower text </li>
+     * </ul>
+     */
     public static final class CarouselItem implements Parcelable {
 
         /** Text which is above the image item. */
         @Nullable
-        private final SmartspaceText mUpperText;
+        private final Text mUpperText;
 
         /** Image item. Can be empty. */
         @Nullable
-        private final SmartspaceIcon mImage;
+        private final Icon mImage;
 
         /** Text which is under the image item. */
         @Nullable
-        private final SmartspaceText mLowerText;
+        private final Text mLowerText;
 
         /**
          * Tap action for this {@link CarouselItem} instance. {@code mCarouselAction} is used if not
          * being set.
          */
         @Nullable
-        private final SmartspaceTapAction mTapAction;
+        private final TapAction mTapAction;
 
         CarouselItem(@NonNull Parcel in) {
-            mUpperText = in.readTypedObject(SmartspaceText.CREATOR);
-            mImage = in.readTypedObject(SmartspaceIcon.CREATOR);
-            mLowerText = in.readTypedObject(SmartspaceText.CREATOR);
-            mTapAction = in.readTypedObject(SmartspaceTapAction.CREATOR);
+            mUpperText = in.readTypedObject(Text.CREATOR);
+            mImage = in.readTypedObject(Icon.CREATOR);
+            mLowerText = in.readTypedObject(Text.CREATOR);
+            mTapAction = in.readTypedObject(TapAction.CREATOR);
         }
 
-        private CarouselItem(@Nullable SmartspaceText upperText, @Nullable SmartspaceIcon image,
-                @Nullable SmartspaceText lowerText, @Nullable SmartspaceTapAction tapAction) {
+        private CarouselItem(@Nullable Text upperText, @Nullable Icon image,
+                @Nullable Text lowerText, @Nullable TapAction tapAction) {
             mUpperText = upperText;
             mImage = image;
             mLowerText = lowerText;
@@ -216,22 +232,22 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
         }
 
         @Nullable
-        public SmartspaceText getUpperText() {
+        public Text getUpperText() {
             return mUpperText;
         }
 
         @Nullable
-        public SmartspaceIcon getImage() {
+        public Icon getImage() {
             return mImage;
         }
 
         @Nullable
-        public SmartspaceText getLowerText() {
+        public Text getLowerText() {
             return mLowerText;
         }
 
         @Nullable
-        public SmartspaceTapAction getTapAction() {
+        public TapAction getTapAction() {
             return mTapAction;
         }
 
@@ -299,16 +315,16 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
         @SystemApi
         public static final class Builder {
 
-            private SmartspaceText mUpperText;
-            private SmartspaceIcon mImage;
-            private SmartspaceText mLowerText;
-            private SmartspaceTapAction mTapAction;
+            private Text mUpperText;
+            private Icon mImage;
+            private Text mLowerText;
+            private TapAction mTapAction;
 
             /**
              * Sets the upper text.
              */
             @NonNull
-            public Builder setUpperText(@Nullable SmartspaceText upperText) {
+            public Builder setUpperText(@Nullable Text upperText) {
                 mUpperText = upperText;
                 return this;
             }
@@ -317,7 +333,7 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
              * Sets the image.
              */
             @NonNull
-            public Builder setImage(@Nullable SmartspaceIcon image) {
+            public Builder setImage(@Nullable Icon image) {
                 mImage = image;
                 return this;
             }
@@ -327,7 +343,7 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
              * Sets the lower text.
              */
             @NonNull
-            public Builder setLowerText(@Nullable SmartspaceText lowerText) {
+            public Builder setLowerText(@Nullable Text lowerText) {
                 mLowerText = lowerText;
                 return this;
             }
@@ -336,7 +352,7 @@ public final class SmartspaceCarouselUiTemplateData extends SmartspaceDefaultUiT
              * Sets the tap action.
              */
             @NonNull
-            public Builder setTapAction(@Nullable SmartspaceTapAction tapAction) {
+            public Builder setTapAction(@Nullable TapAction tapAction) {
                 mTapAction = tapAction;
                 return this;
             }

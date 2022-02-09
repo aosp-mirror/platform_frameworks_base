@@ -20,7 +20,7 @@ import android.app.PendingIntent;
 import android.app.smartspace.SmartspaceAction;
 import android.app.smartspace.SmartspaceTarget;
 import android.app.smartspace.SmartspaceTargetEvent;
-import android.app.smartspace.uitemplatedata.SmartspaceTapAction;
+import android.app.smartspace.uitemplatedata.TapAction;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -139,7 +139,7 @@ public interface BcSmartspaceDataPlugin extends Plugin {
             }
         }
 
-        default void startFromAction(SmartspaceTapAction action, View v, boolean showOnLockscreen) {
+        default void startFromAction(TapAction action, View v, boolean showOnLockscreen) {
             try {
                 if (action.getIntent() != null) {
                     startIntent(v, action.getIntent(), showOnLockscreen);
