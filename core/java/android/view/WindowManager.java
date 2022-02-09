@@ -97,6 +97,7 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -4886,4 +4887,21 @@ public interface WindowManager extends ViewManager {
      */
     @SystemApi
     default void unregisterTaskFpsCallback(@NonNull TaskFpsCallback callback) {}
+
+    /**
+     * Take a snapshot using the same path that's used for Recents. This is used for Testing only.
+     *
+     * @param taskId to take the snapshot of
+     *
+     * @return a bitmap of the screenshot or {@code null} if it was unable to screenshot. The
+     * screenshot can fail if the taskId is invalid or if there's no SurfaceControl associated with
+     * that task.
+     *
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    default Bitmap snapshotTaskForRecents(@IntRange(from = 0) int taskId) {
+        return null;
+    }
 }

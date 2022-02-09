@@ -941,4 +941,14 @@ interface IWindowManager
      * @hide
      */
     void unregisterTaskFpsCallback(in IOnFpsCallbackListener listener);
+
+    /**
+     * Take a snapshot using the same path that's used for Recents. This is used for Testing only.
+     *
+     * @param taskId to take the snapshot of
+     *
+     * Returns a bitmap of the screenshot or {@code null} if it was unable to screenshot.
+     * @hide
+     */
+    Bitmap snapshotTaskForRecents(int taskId);
 }

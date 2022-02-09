@@ -8662,8 +8662,18 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * If set to true, this indicates to the system that it should never take a
-     * screenshot of the activity to be used as a representation while it is not in a started state.
+     * @hide
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.S,
+            publicAlternatives = "Use {@link #setRecentsScreenshotEnabled(boolean)} instead.")
+    public void setDisablePreviewScreenshots(boolean disable) {
+        setRecentsScreenshotEnabled(!disable);
+    }
+
+    /**
+     * If set to false, this indicates to the system that it should never take a
+     * screenshot of the activity to be used as a representation in recents screen. By default, this
+     * value is {@code true}.
      * <p>
      * Note that the system may use the window background of the theme instead to represent
      * the window when it is not running.
@@ -8676,12 +8686,10 @@ public class Activity extends ContextThemeWrapper
      * {@link android.service.voice.VoiceInteractionService} requests a screenshot via
      * {@link android.service.voice.VoiceInteractionSession#SHOW_WITH_SCREENSHOT}.
      *
-     * @param disable {@code true} to disable preview screenshots; {@code false} otherwise.
-     * @hide
+     * @param enabled {@code true} to enable recents screenshots; {@code false} otherwise.
      */
-    @UnsupportedAppUsage
-    public void setDisablePreviewScreenshots(boolean disable) {
-        ActivityClient.getInstance().setDisablePreviewScreenshots(mToken, disable);
+    public void setRecentsScreenshotEnabled(boolean enabled) {
+        ActivityClient.getInstance().setRecentsScreenshotEnabled(mToken, enabled);
     }
 
     /**
