@@ -24,6 +24,7 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.MANAGE_ACTIVITY_TASKS;
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
 import static android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND;
+import static android.app.ActivityManager.INSTR_FLAG_ALWAYS_CHECK_SIGNATURE;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_ISOLATED_STORAGE;
 import static android.app.ActivityManager.INSTR_FLAG_DISABLE_TEST_API_CHECKS;
@@ -14339,14 +14340,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return false;
             }
 
-            if (!Build.IS_DEBUGGABLE) {
-                int match = mContext.getPackageManager().checkSignatures(
-                        ii.targetPackage, ii.packageName);
-                if (match < 0 && match != PackageManager.SIGNATURE_FIRST_NOT_SIGNED) {
+            int match = mContext.getPackageManager().checkSignatures(
+                    ii.targetPackage, ii.packageName);
+            if (match < 0 && match != PackageManager.SIGNATURE_FIRST_NOT_SIGNED) {
+                if (Build.IS_DEBUGGABLE && (flags & INSTR_FLAG_ALWAYS_CHECK_SIGNATURE) == 0) {
+                    Slog.w(TAG, "Instrumentation test " + ii.packageName
+                            + " doesn't have a signature matching the target " + ii.targetPackage
+                            + ", which would not be allowed on the production Android builds");
+                } else {
                     String msg = "Permission Denial: starting instrumentation "
                             + className + " from pid="
                             + Binder.getCallingPid()
-                            + ", uid=" + Binder.getCallingPid()
+                            + ", uid=" + Binder.getCallingUid()
                             + " not allowed because package " + ii.packageName
                             + " does not have a signature matching the target "
                             + ii.targetPackage;
