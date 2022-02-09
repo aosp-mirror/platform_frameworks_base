@@ -65,6 +65,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.SettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.qs.tiles.dialog.QSZenModeDialogMetricsLogger;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.settings.SecureSettings;
@@ -86,6 +87,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
     private final SharedPreferences mSharedPreferences;
     private final SettingObserver mSettingZenDuration;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
+    private final QSZenModeDialogMetricsLogger mQSZenDialogMetricsLogger;
 
     private boolean mListening;
     private boolean mShowingDetail;
@@ -119,6 +121,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
                 refreshState();
             }
         };
+        mQSZenDialogMetricsLogger = new QSZenModeDialogMetricsLogger(mContext);
     }
 
     public static void setVisible(Context context, boolean visible) {
@@ -211,7 +214,8 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
     private Dialog makeZenModeDialog() {
         AlertDialog dialog = new EnableZenModeDialog(mContext, R.style.Theme_SystemUI_Dialog,
-                true /* cancelIsNeutral */).createDialog();
+                true /* cancelIsNeutral */,
+                mQSZenDialogMetricsLogger).createDialog();
         SystemUIDialog.applyFlags(dialog);
         SystemUIDialog.setShowForAllUsers(dialog, true);
         SystemUIDialog.registerDismissListener(dialog);
