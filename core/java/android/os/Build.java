@@ -407,7 +407,7 @@ public class Build {
          */
         @SystemApi
         @NonNull public static final Set<String> KNOWN_CODENAMES =
-                new ArraySet<>(new String[]{"Q", "R", "S", "Sv2", "Tiramisu"});
+                new ArraySet<>(getStringList("ro.build.version.known_codenames", ","));
 
         private static final String[] ALL_CODENAMES
                 = getStringList("ro.build.version.all_codenames", ",");
