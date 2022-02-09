@@ -1695,6 +1695,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
+    public String getVoiceInteractorPackageName(IBinder callingVoiceInteractor) {
+        return LocalServices.getService(VoiceInteractionManagerInternal.class)
+                .getVoiceInteractorPackageName(callingVoiceInteractor);
+    }
+
+    @Override
     public int startAssistantActivity(String callingPackage, @NonNull String callingFeatureId,
             int callingPid, int callingUid, Intent intent, String resolvedType, Bundle bOptions,
             int userId) {
