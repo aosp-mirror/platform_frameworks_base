@@ -45,6 +45,10 @@
     <item name="config_pictureInPictureExpandedVerticalWidth"
           format="dimension" type="dimen">110dp</item>
 
+    <!-- The behavior when an activity has not specified a preference to dock big overlays or not.
+         Docking puts the activity side-by-side next to the big overlay windows. -->
+    <bool name="config_dockBigOverlayWindows">true</bool>
+
     <!-- Whether the device uses the default focus highlight when focus state isn't specified. -->
     <bool name="config_useDefaultFocusHighlight">false</bool>
 
