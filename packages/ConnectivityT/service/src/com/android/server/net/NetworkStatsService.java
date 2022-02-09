@@ -1067,7 +1067,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     public NetworkStats getUidStatsForTransport(int transport) {
-        enforceAnyPermissionOf(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
+        PermissionUtils.enforceNetworkStackPermission(mContext);
         try {
             final String[] relevantIfaces =
                     transport == TRANSPORT_WIFI ? mWifiIfaces : mMobileIfaces;
