@@ -1143,17 +1143,17 @@ public class WifiNl80211ManagerTest {
     @Test
     public void testNotifyCountryCodeChanged() throws Exception {
         doNothing().when(mWificond).notifyCountryCodeChanged();
-        assertTrue(mWificondControl.notifyCountryCodeChanged());
+        mWificondControl.notifyCountryCodeChanged(TEST_COUNTRY_CODE);
         verify(mWificond).notifyCountryCodeChanged();
     }
 
     /**
      * Tests notifyCountryCodeChanged with RemoteException
      */
-    @Test
+    @Test(expected = RuntimeException.class)
     public void testNotifyCountryCodeChangedRemoteException() throws Exception {
         doThrow(new RemoteException()).when(mWificond).notifyCountryCodeChanged();
-        assertFalse(mWificondControl.notifyCountryCodeChanged());
+        mWificondControl.notifyCountryCodeChanged(TEST_COUNTRY_CODE);
         verify(mWificond).notifyCountryCodeChanged();
     }
 
