@@ -118,6 +118,9 @@ public class EuiccCardManager {
     /** Resets the default SM-DP+ address. */
     public static final int RESET_OPTION_RESET_DEFAULT_SMDP_ADDRESS = 1 << 2;
 
+    /** Result code when the requested profile is not found */
+    public static final int RESULT_PROFILE_NOT_FOUND = 1;
+
     /** Result code of execution with no error. */
     public static final int RESULT_OK = 0;
 
@@ -129,9 +132,6 @@ public class EuiccCardManager {
 
     /** Result code indicating the caller is not the active LPA. */
     public static final int RESULT_CALLER_NOT_ALLOWED = -3;
-
-    /** Result code when the requested profile is not found */
-    public static final int RESULT_PROFILE_NOT_FOUND = -4;
 
     /**
      * Callback to receive the result of an eUICC card API.
@@ -223,7 +223,9 @@ public class EuiccCardManager {
     }
 
     /**
-     * Requests the enabled profile for a given port on an eUicc.
+     * Requests the enabled profile for a given port on an eUicc. Callback with result code
+     * {@link RESULT_PROFILE_NOT_FOUND} and {@code NULL} EuiccProfile if there is no enabled
+     * profile on the target port.
      *
      * @param cardId    The Id of the eUICC.
      * @param portIndex The portIndex to use. The port may be active or inactive. As long as the
