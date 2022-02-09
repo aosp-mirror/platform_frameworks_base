@@ -140,11 +140,8 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
 
     /**
      * Whether the layout is eligible to be shown according to the internal state of the subclass.
-     * Returns true by default if subclass doesn't override this method.
      */
-    protected boolean eligibleToShowLayout() {
-        return true;
-    }
+    protected abstract boolean eligibleToShowLayout();
 
     @Override
     public void setConfiguration(Configuration configuration) {
@@ -214,8 +211,7 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
         boolean layoutDirectionUpdated =
                 mTaskConfig.getLayoutDirection() != prevTaskConfig.getLayoutDirection();
         if (boundsUpdated || layoutDirectionUpdated) {
-            // Reposition the UI surfaces.
-            updateSurfacePosition();
+            updateSurface();
         }
 
         if (layout != null && layoutDirectionUpdated) {
@@ -225,7 +221,6 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
 
         return true;
     }
-
 
     /**
      * Updates the visibility of the layout.
@@ -253,8 +248,7 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
         displayLayout.getStableBounds(curStableBounds);
         mDisplayLayout = displayLayout;
         if (!prevStableBounds.equals(curStableBounds)) {
-            // Stable bounds changed, update UI surface positions.
-            updateSurfacePosition();
+            updateSurface();
             mStableBounds.set(curStableBounds);
         }
     }
@@ -300,6 +294,14 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
             return;
         }
         mViewHost.relayout(getWindowLayoutParams());
+        updateSurfacePosition();
+    }
+
+    /**
+     * Updates the surface following a change in the task bounds, display layout stable bounds,
+     * or the layout direction.
+     */
+    protected void updateSurface() {
         updateSurfacePosition();
     }
 

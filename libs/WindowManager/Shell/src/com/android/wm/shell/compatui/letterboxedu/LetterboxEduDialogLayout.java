@@ -36,8 +36,6 @@ class LetterboxEduDialogLayout extends FrameLayout {
     // The alpha of a background is a number between 0 (fully transparent) to 255 (fully opaque).
     // 204 is simply 255 * 0.8.
     static final int BACKGROUND_DIM_ALPHA = 204;
-
-    private LetterboxEduWindowManager mWindowManager;
     private View mDialogContainer;
     private Drawable mBackgroundDim;
 
@@ -58,23 +56,12 @@ class LetterboxEduDialogLayout extends FrameLayout {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
-    void inject(LetterboxEduWindowManager windowManager) {
-        mWindowManager = windowManager;
-    }
-
     View getDialogContainer() {
         return mDialogContainer;
     }
 
     Drawable getBackgroundDim() {
         return mBackgroundDim;
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        // Need to relayout after visibility changes since they affect size.
-        mWindowManager.relayout();
     }
 
     /**
