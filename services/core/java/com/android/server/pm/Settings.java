@@ -51,13 +51,6 @@ import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.overlay.OverlayPaths;
-import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
-import com.android.server.pm.pkg.component.ParsedComponent;
-import com.android.server.pm.pkg.component.ParsedIntentInfo;
-import com.android.server.pm.pkg.component.ParsedMainComponent;
-import com.android.server.pm.pkg.component.ParsedPermission;
-import com.android.server.pm.pkg.component.ParsedProcess;
-import com.android.server.pm.pkg.PackageUserStateUtils;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -118,10 +111,18 @@ import com.android.server.pm.permission.LegacyPermissionState.PermissionState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
+import com.android.server.pm.pkg.PackageUserStateUtils;
 import com.android.server.pm.pkg.SuspendParams;
+import com.android.server.pm.pkg.component.ParsedComponent;
+import com.android.server.pm.pkg.component.ParsedIntentInfo;
+import com.android.server.pm.pkg.component.ParsedMainComponent;
+import com.android.server.pm.pkg.component.ParsedPermission;
+import com.android.server.pm.pkg.component.ParsedProcess;
+import com.android.server.pm.pkg.parsing.PackageInfoWithoutStateUtils;
 import com.android.server.pm.verify.domain.DomainVerificationLegacySettings;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationPersistence;
+import com.android.server.utils.Slogf;
 import com.android.server.utils.Snappable;
 import com.android.server.utils.SnapshotCache;
 import com.android.server.utils.TimingsTraceAndSlog;
@@ -982,7 +983,8 @@ public final class Settings implements Watchable, Snappable {
                     Slog.i(PackageManagerService.TAG, "Stopping package " + pkgName, e);
                 }
                 List<UserInfo> users = getAllUsers(userManager);
-                final int installUserId = installUser != null ? installUser.getIdentifier() : 0;
+                int installUserId = installUser != null ? installUser.getIdentifier()
+                        : UserHandle.USER_SYSTEM;
                 if (users != null && allowInstall) {
                     for (UserInfo user : users) {
                         // By default we consider this app to be installed
@@ -993,8 +995,14 @@ public final class Settings implements Watchable, Snappable {
                         // user we are installing for.
                         final boolean installed = installUser == null
                                 || (installUserId == UserHandle.USER_ALL
-                                    && !isAdbInstallDisallowed(userManager, user.id))
+                                    && !isAdbInstallDisallowed(userManager, user.id)
+                                    && !user.preCreated)
                                 || installUserId == user.id;
+                        if (DEBUG_MU) {
+                            Slogf.d(TAG, "createNewSetting(pkg=%s, installUserId=%s, user=%s, "
+                                    + "installed=%b)",
+                                    pkgName, installUserId, user.toFullString(), installed);
+                        }
                         pkgSetting.setUserState(user.id, 0, COMPONENT_ENABLED_STATE_DEFAULT,
                                 installed,
                                 true /*stopped*/,
@@ -2039,11 +2047,14 @@ public final class Settings implements Watchable, Snappable {
 
             serializer.startTag(null, TAG_PACKAGE_RESTRICTIONS);
 
-            if (DEBUG_MU) Log.i(TAG, "Writing " + userPackagesStateFile);
+            if (DEBUG_MU) {
+                Slogf.i(TAG, "Writing %s (%d packages)", userPackagesStateFile,
+                        mPackages.values().size());
+            }
             for (final PackageSetting pkg : mPackages.values()) {
                 final PackageUserStateInternal ustate = pkg.readUserState(userId);
                 if (DEBUG_MU) {
-                    Log.i(TAG, "  pkg=" + pkg.getPackageName()
+                    Log.v(TAG, "  pkg=" + pkg.getPackageName()
                             + ", installed=" + ustate.isInstalled()
                             + ", state=" + ustate.getEnabledState());
                 }
@@ -5617,7 +5628,8 @@ public final class Settings implements Watchable, Snappable {
                                 userId);
                         packageSetting.setInstallPermissionsFixed(true);
                     } else if (packageSetting.getSharedUser() == null && !isUpgradeToR) {
-                        Slog.w(TAG, "Missing permission state for package: " + packageName);
+                        Slogf.w(TAG, "Missing permission state for package %s on user %d",
+                                packageName, userId);
                         packageSetting.getLegacyPermissionState().setMissing(true, userId);
                     }
                 }
