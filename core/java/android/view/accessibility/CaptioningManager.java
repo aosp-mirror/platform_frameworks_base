@@ -152,7 +152,7 @@ public class CaptioningManager {
     /**
      * @return the system audio caption enabled state.
      */
-    public final boolean isSystemAudioCaptioningRequested() {
+    public final boolean isSystemAudioCaptioningEnabled() {
         return Secure.getIntForUser(mContentResolver, Secure.ODI_CAPTIONS_ENABLED,
                 SYSTEM_AUDIO_CAPTIONING_DEFAULT_ENABLED ? 1 : 0, mContext.getUserId()) == 1;
     }
@@ -169,9 +169,9 @@ public class CaptioningManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)
-    public final void setSystemAudioCaptioningRequested(boolean isEnabled) {
+    public final void setSystemAudioCaptioningEnabled(boolean isEnabled) {
         if (mAccessibilityManager != null) {
-            mAccessibilityManager.setSystemAudioCaptioningRequested(isEnabled,
+            mAccessibilityManager.setSystemAudioCaptioningEnabled(isEnabled,
                     mContext.getUserId());
         }
     }
@@ -179,9 +179,9 @@ public class CaptioningManager {
     /**
      * @return the system audio caption UI enabled state.
      */
-    public final boolean isSystemAudioCaptioningUiRequested() {
+    public final boolean isSystemAudioCaptioningUiEnabled() {
         return mAccessibilityManager != null
-                && mAccessibilityManager.isSystemAudioCaptioningUiRequested(mContext.getUserId());
+                && mAccessibilityManager.isSystemAudioCaptioningUiEnabled(mContext.getUserId());
     }
 
     /**
@@ -196,9 +196,9 @@ public class CaptioningManager {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)
-    public final void setSystemAudioCaptioningUiRequested(boolean isEnabled) {
+    public final void setSystemAudioCaptioningUiEnabled(boolean isEnabled) {
         if (mAccessibilityManager != null) {
-            mAccessibilityManager.setSystemAudioCaptioningUiRequested(isEnabled,
+            mAccessibilityManager.setSystemAudioCaptioningUiEnabled(isEnabled,
                     mContext.getUserId());
         }
     }
@@ -300,7 +300,7 @@ public class CaptioningManager {
     }
 
     private void notifySystemAudioCaptionChanged() {
-        final boolean enabled = isSystemAudioCaptioningRequested();
+        final boolean enabled = isSystemAudioCaptioningEnabled();
         synchronized (mListeners) {
             for (CaptioningChangeListener listener : mListeners) {
                 listener.onSystemAudioCaptioningChanged(enabled);
@@ -309,7 +309,7 @@ public class CaptioningManager {
     }
 
     private void notifySystemAudioCaptionUiChanged() {
-        final boolean enabled = isSystemAudioCaptioningUiRequested();
+        final boolean enabled = isSystemAudioCaptioningUiEnabled();
         synchronized (mListeners) {
             for (CaptioningChangeListener listener : mListeners) {
                 listener.onSystemAudioCaptioningUiChanged(enabled);
@@ -686,7 +686,7 @@ public class CaptioningManager {
          * @param isEnabled The system audio captioning enabled state.
          * @param userId The user Id.
          */
-        void setSystemAudioCaptioningRequested(boolean isEnabled, int userId);
+        void setSystemAudioCaptioningEnabled(boolean isEnabled, int userId);
 
         /**
          * Gets the system audio caption UI enabled state.
@@ -694,7 +694,7 @@ public class CaptioningManager {
          * @param userId The user Id.
          * @return the system audio caption UI enabled state.
          */
-        boolean isSystemAudioCaptioningUiRequested(int userId);
+        boolean isSystemAudioCaptioningUiEnabled(int userId);
 
         /**
          * Sets the system audio caption UI enabled state.
@@ -702,6 +702,6 @@ public class CaptioningManager {
          * @param isEnabled The system audio captioning UI enabled state.
          * @param userId The user Id.
          */
-        void setSystemAudioCaptioningUiRequested(boolean isEnabled, int userId);
+        void setSystemAudioCaptioningUiEnabled(boolean isEnabled, int userId);
     }
 }

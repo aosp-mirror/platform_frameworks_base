@@ -15531,8 +15531,8 @@ package android.view.accessibility {
   }
 
   public class CaptioningManager {
-    method @RequiresPermission(android.Manifest.permission.SET_SYSTEM_AUDIO_CAPTION) public final void setSystemAudioCaptioningRequested(boolean);
-    method @RequiresPermission(android.Manifest.permission.SET_SYSTEM_AUDIO_CAPTION) public final void setSystemAudioCaptioningUiRequested(boolean);
+    method @RequiresPermission(android.Manifest.permission.SET_SYSTEM_AUDIO_CAPTION) public final void setSystemAudioCaptioningEnabled(boolean);
+    method @RequiresPermission(android.Manifest.permission.SET_SYSTEM_AUDIO_CAPTION) public final void setSystemAudioCaptioningUiEnabled(boolean);
   }
 
 }

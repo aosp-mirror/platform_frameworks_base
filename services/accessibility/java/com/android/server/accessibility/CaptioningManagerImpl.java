@@ -40,7 +40,7 @@ public class CaptioningManagerImpl implements CaptioningManager.SystemAudioCapti
      * @param userId The user Id.
      */
     @Override
-    public void setSystemAudioCaptioningRequested(boolean isEnabled, int userId) {
+    public void setSystemAudioCaptioningEnabled(boolean isEnabled, int userId) {
         final long identity = Binder.clearCallingIdentity();
         try {
             Settings.Secure.putIntForUser(mContext.getContentResolver(),
@@ -57,7 +57,7 @@ public class CaptioningManagerImpl implements CaptioningManager.SystemAudioCapti
      * @return the system audio caption UI enabled state.
      */
     @Override
-    public boolean isSystemAudioCaptioningUiRequested(int userId) {
+    public boolean isSystemAudioCaptioningUiEnabled(int userId) {
         final long identity = Binder.clearCallingIdentity();
         try {
             return Settings.Secure.getIntForUser(mContext.getContentResolver(),
@@ -75,7 +75,7 @@ public class CaptioningManagerImpl implements CaptioningManager.SystemAudioCapti
      * @param userId The user Id.
      */
     @Override
-    public void setSystemAudioCaptioningUiRequested(boolean isEnabled, int userId) {
+    public void setSystemAudioCaptioningUiEnabled(boolean isEnabled, int userId) {
         final long identity = Binder.clearCallingIdentity();
         try {
             Settings.Secure.putIntForUser(mContext.getContentResolver(),
