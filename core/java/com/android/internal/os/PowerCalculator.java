@@ -26,7 +26,6 @@ import android.util.SparseArray;
 
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Calculates power use of a device subsystem for an app.
@@ -145,38 +144,7 @@ public abstract class PowerCalculator {
      * Prints formatted amount of power in milli-amp-hours.
      */
     public static void printPowerMah(PrintWriter pw, double powerMah) {
-        pw.print(formatCharge(powerMah));
-    }
-
-    /**
-     * Converts charge in mAh to string.
-     */
-    public static String formatCharge(double power) {
-        if (power == 0) return "0";
-
-        final String format;
-        if (power < .00001) {
-            format = "%.8f";
-        } else if (power < .0001) {
-            format = "%.7f";
-        } else if (power < .001) {
-            format = "%.6f";
-        } else if (power < .01) {
-            format = "%.5f";
-        } else if (power < .1) {
-            format = "%.4f";
-        } else if (power < 1) {
-            format = "%.3f";
-        } else if (power < 10) {
-            format = "%.2f";
-        } else if (power < 100) {
-            format = "%.1f";
-        } else {
-            format = "%.0f";
-        }
-
-        // Use English locale because this is never used in UI (only in checkin and dump).
-        return String.format(Locale.ENGLISH, format, power);
+        pw.print(BatteryStats.formatCharge(powerMah));
     }
 
     static double uCtoMah(long chargeUC) {

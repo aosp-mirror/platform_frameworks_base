@@ -97,9 +97,9 @@ public class IdlePowerCalculator extends PowerCalculator {
         mPowerMah = suspendPowerMah + idlePowerMah;
         if (DEBUG && mPowerMah != 0) {
             Log.d(TAG, "Suspend: time=" + (batteryRealtimeUs / 1000)
-                    + " power=" + formatCharge(suspendPowerMah));
+                    + " power=" + BatteryStats.formatCharge(suspendPowerMah));
             Log.d(TAG, "Idle: time=" + (batteryUptimeUs / 1000)
-                    + " power=" + formatCharge(idlePowerMah));
+                    + " power=" + BatteryStats.formatCharge(idlePowerMah));
         }
         mDurationMs = batteryRealtimeUs / 1000;
     }
