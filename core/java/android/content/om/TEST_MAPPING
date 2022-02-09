@@ -21,7 +21,9 @@
           "include-filter": "android.appsecurity.cts.OverlayHostTest"
         }
       ]
-    },
+    }
+  ],
+  "presubmit-large": [
     {
       "name": "CtsContentTestCases",
       "options": [
