@@ -7849,6 +7849,8 @@ package android.app.admin {
     field public static final int TAG_ADB_SHELL_CMD = 210002; // 0x33452
     field public static final int TAG_ADB_SHELL_INTERACTIVE = 210001; // 0x33451
     field public static final int TAG_APP_PROCESS_START = 210005; // 0x33455
+    field public static final int TAG_BLUETOOTH_CONNECTION = 210039; // 0x33477
+    field public static final int TAG_BLUETOOTH_DISCONNECTION = 210040; // 0x33478
     field public static final int TAG_CAMERA_POLICY_SET = 210034; // 0x33472
     field public static final int TAG_CERT_AUTHORITY_INSTALLED = 210029; // 0x3346d
     field public static final int TAG_CERT_AUTHORITY_REMOVED = 210030; // 0x3346e
@@ -7881,6 +7883,8 @@ package android.app.admin {
     field public static final int TAG_SYNC_SEND_FILE = 210004; // 0x33454
     field public static final int TAG_USER_RESTRICTION_ADDED = 210027; // 0x3346b
     field public static final int TAG_USER_RESTRICTION_REMOVED = 210028; // 0x3346c
+    field public static final int TAG_WIFI_CONNECTION = 210037; // 0x33475
+    field public static final int TAG_WIFI_DISCONNECTION = 210038; // 0x33476
     field public static final int TAG_WIPE_FAILURE = 210023; // 0x33467
   }
 
