@@ -30,6 +30,7 @@ import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManager
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManagerFactory
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
@@ -74,6 +75,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Mock private lateinit var lmm: LocalMediaManager
     @Mock private lateinit var mr2: MediaRouter2Manager
     @Mock private lateinit var muteAwaitFactory: MediaMuteAwaitConnectionManagerFactory
+    @Mock private lateinit var muteAwaitManager: MediaMuteAwaitConnectionManager
     private lateinit var fakeFgExecutor: FakeExecutor
     private lateinit var fakeBgExecutor: FakeExecutor
     @Mock private lateinit var dumpster: DumpManager
@@ -106,6 +108,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         whenever(device.name).thenReturn(DEVICE_NAME)
         whenever(device.iconWithoutBackground).thenReturn(icon)
         whenever(lmmFactory.create(PACKAGE)).thenReturn(lmm)
+        whenever(muteAwaitFactory.create(lmm)).thenReturn(muteAwaitManager)
         whenever(lmm.getCurrentConnectedDevice()).thenReturn(device)
         whenever(mr2.getRoutingSessionForMediaController(any())).thenReturn(route)
 
@@ -156,6 +159,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         manager.onMediaDataRemoved(KEY)
         fakeBgExecutor.runAllReady()
         verify(lmm).unregisterCallback(any())
+        verify(muteAwaitManager).stopListening()
     }
 
     @Test
@@ -179,6 +183,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         fakeFgExecutor.runAllReady()
         // THEN the listener for the old key should removed.
         verify(lmm).unregisterCallback(any())
+        verify(muteAwaitManager).stopListening()
         // AND a new device event emitted
         val data = captureDeviceData(KEY, KEY_OLD)
         assertThat(data.enabled).isTrue()
@@ -250,6 +255,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         manager.onMediaDataLoaded(KEY, null, mediaData)
         fakeBgExecutor.runAllReady()
         val deviceCallback = captureCallback()
+        verify(muteAwaitManager).startListening()
         // WHEN the device list changes
         deviceCallback.onDeviceListUpdate(mutableListOf(device))
         assertThat(fakeBgExecutor.runAllReady()).isEqualTo(1)

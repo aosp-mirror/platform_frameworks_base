@@ -37,8 +37,8 @@ import java.util.concurrent.Executor
  * TODO(b/206614671): Add logging.
  */
 class MediaMuteAwaitConnectionManager constructor(
-    @Main mainExecutor: Executor,
-    localMediaManager: LocalMediaManager,
+    @Main private val mainExecutor: Executor,
+    private val localMediaManager: LocalMediaManager,
     private val context: Context,
     private val deviceIconUtil: DeviceIconUtil
 ) {
@@ -68,8 +68,8 @@ class MediaMuteAwaitConnectionManager constructor(
         }
     }
 
-    init {
-        // TODO(b/206614671): Unregister this callback (likely on [MediaDeviceManager.Entry.Stop]).
+    /** Start listening for mute await events. */
+    fun startListening() {
         audioManager.registerMuteAwaitConnectionCallback(
                 mainExecutor, muteAwaitConnectionChangeListener
         )
@@ -80,6 +80,11 @@ class MediaMuteAwaitConnectionManager constructor(
                 currentDevice.name, currentDevice.getIcon()
             )
         }
+    }
+
+    /** Stop listening for mute await events. */
+    fun stopListening() {
+        audioManager.unregisterMuteAwaitConnectionCallback(muteAwaitConnectionChangeListener)
     }
 
     private fun AudioDeviceAttributes.getIcon(): Drawable {

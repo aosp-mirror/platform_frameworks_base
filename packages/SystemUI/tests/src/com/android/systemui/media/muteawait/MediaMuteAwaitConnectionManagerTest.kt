@@ -16,7 +16,6 @@
 
 package com.android.systemui.media.muteawait
 
-import android.annotation.DrawableRes
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.media.AudioAttributes.USAGE_MEDIA
@@ -54,7 +53,6 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
     private lateinit var deviceIconUtil: DeviceIconUtil
     @Mock
     private lateinit var localMediaManager: LocalMediaManager
-    private lateinit var muteAwaitListener: AudioManager.MuteAwaitConnectionCallback
     private lateinit var icon: Drawable
 
     @Before
@@ -63,29 +61,56 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
         context.addMockSystemService(Context.AUDIO_SERVICE, audioManager)
         icon = context.getDrawable(R.drawable.ic_cake)!!
         whenever(deviceIconUtil.getIconFromAudioDeviceType(any(), any())).thenReturn(icon)
+
+        muteAwaitConnectionManager = MediaMuteAwaitConnectionManager(
+            FakeExecutor(FakeSystemClock()),
+            localMediaManager,
+            context,
+            deviceIconUtil
+        )
     }
 
     @Test
-    fun constructor_audioManagerHasNoMuteAwaitDevice_localMediaMangerNotNotified() {
+    fun constructor_audioManagerCallbackNotRegistered() {
+        verify(audioManager, never()).registerMuteAwaitConnectionCallback(any(), any())
+    }
+
+    @Test
+    fun startListening_audioManagerCallbackRegistered() {
+        muteAwaitConnectionManager.startListening()
+
+        verify(audioManager).registerMuteAwaitConnectionCallback(any(), any())
+    }
+
+    @Test
+    fun stopListening_audioManagerCallbackUnregistered() {
+        muteAwaitConnectionManager.stopListening()
+
+        verify(audioManager).unregisterMuteAwaitConnectionCallback(any())
+    }
+
+    @Test
+    fun startListening_audioManagerHasNoMuteAwaitDevice_localMediaMangerNotNotified() {
         whenever(audioManager.mutingExpectedDevice).thenReturn(null)
 
-        instantiateManager()
+        muteAwaitConnectionManager.startListening()
 
         verify(localMediaManager, never()).dispatchAboutToConnectDeviceChanged(any(), any())
     }
 
     @Test
-    fun constructor_audioManagerHasMuteAwaitDevice_localMediaMangerNotified() {
+    fun startListening_audioManagerHasMuteAwaitDevice_localMediaMangerNotified() {
         whenever(audioManager.mutingExpectedDevice).thenReturn(DEVICE)
 
-        instantiateManager()
+        muteAwaitConnectionManager.startListening()
 
         verify(localMediaManager).dispatchAboutToConnectDeviceChanged(eq(DEVICE_NAME), eq(icon))
     }
 
     @Test
     fun onMutedUntilConnection_notUsageMedia_localMediaManagerNotNotified() {
-        instantiateManager()
+        muteAwaitConnectionManager.startListening()
+        val muteAwaitListener = getMuteAwaitListener()
 
         muteAwaitListener.onMutedUntilConnection(DEVICE, intArrayOf(USAGE_UNKNOWN))
 
@@ -94,7 +119,9 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
 
     @Test
     fun onMutedUntilConnection_isUsageMedia_localMediaManagerNotified() {
-        instantiateManager()
+        muteAwaitConnectionManager.startListening()
+        val muteAwaitListener = getMuteAwaitListener()
+
 
         muteAwaitListener.onMutedUntilConnection(DEVICE, intArrayOf(USAGE_MEDIA))
 
@@ -103,7 +130,9 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
 
     @Test
     fun onUnmutedEvent_noDeviceMutedBefore_localMediaManagerNotNotified() {
-        instantiateManager()
+        muteAwaitConnectionManager.startListening()
+        val muteAwaitListener = getMuteAwaitListener()
+
         muteAwaitListener.onUnmutedEvent(EVENT_CONNECTION, DEVICE, intArrayOf(USAGE_MEDIA))
 
         verify(localMediaManager, never()).dispatchAboutToConnectDeviceChanged(any(), any())
@@ -111,7 +140,8 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
 
     @Test
     fun onUnmutedEvent_notSameDevice_localMediaManagerNotNotified() {
-        instantiateManager()
+        muteAwaitConnectionManager.startListening()
+        val muteAwaitListener = getMuteAwaitListener()
         muteAwaitListener.onMutedUntilConnection(DEVICE, intArrayOf(USAGE_MEDIA))
         reset(localMediaManager)
 
@@ -130,7 +160,8 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
 
     @Test
     fun onUnmutedEvent_notUsageMedia_localMediaManagerNotNotified() {
-        instantiateManager()
+        muteAwaitConnectionManager.startListening()
+        val muteAwaitListener = getMuteAwaitListener()
         muteAwaitListener.onMutedUntilConnection(DEVICE, intArrayOf(USAGE_MEDIA))
         reset(localMediaManager)
 
@@ -141,7 +172,8 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
 
     @Test
     fun onUnmutedEvent_sameDeviceAndUsageMedia_localMediaManagerNotified() {
-        instantiateManager()
+        muteAwaitConnectionManager.startListening()
+        val muteAwaitListener = getMuteAwaitListener()
         muteAwaitListener.onMutedUntilConnection(DEVICE, intArrayOf(USAGE_MEDIA))
         reset(localMediaManager)
 
@@ -150,20 +182,12 @@ class MediaMuteAwaitConnectionManagerTest : SysuiTestCase() {
         verify(localMediaManager).dispatchAboutToConnectDeviceChanged(eq(null), eq(null))
     }
 
-    // Some classes test the constructor, so don't instantiate the manager in @SetUp.
-    private fun instantiateManager() {
-        muteAwaitConnectionManager = MediaMuteAwaitConnectionManager(
-                FakeExecutor(FakeSystemClock()),
-                localMediaManager,
-                context,
-                deviceIconUtil
-        )
-
+    private fun getMuteAwaitListener(): AudioManager.MuteAwaitConnectionCallback {
         val listenerCaptor = ArgumentCaptor.forClass(
                 AudioManager.MuteAwaitConnectionCallback::class.java
         )
         verify(audioManager).registerMuteAwaitConnectionCallback(any(), listenerCaptor.capture())
-        muteAwaitListener = listenerCaptor.value!!
+        return listenerCaptor.value!!
     }
 }
 

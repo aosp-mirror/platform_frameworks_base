@@ -28,6 +28,7 @@ import com.android.systemui.Dumpable
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManager
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionManagerFactory
 import java.io.FileDescriptor
 import java.io.PrintWriter
@@ -84,14 +85,14 @@ class MediaDeviceManager @Inject constructor(
                 controllerFactory.create(it)
             }
             val localMediaManager = localMediaManagerFactory.create(data.packageName)
-            // We don't need to set this muteAwaitConnectionManager anywhere; it will just notify
-            // [localMediaManager] on the appropriate events.
-            muteAwaitConnectionManagerFactory.create(localMediaManager)
+            val muteAwaitConnectionManager =
+                    muteAwaitConnectionManagerFactory.create(localMediaManager)
             entry = Entry(
                 key,
                 oldKey,
                 controller,
-                localMediaManager
+                localMediaManager,
+                muteAwaitConnectionManager
             )
             entries[key] = entry
             entry.start()
@@ -137,7 +138,8 @@ class MediaDeviceManager @Inject constructor(
         val key: String,
         val oldKey: String?,
         val controller: MediaController?,
-        val localMediaManager: LocalMediaManager
+        val localMediaManager: LocalMediaManager,
+        val muteAwaitConnectionManager: MediaMuteAwaitConnectionManager?
     ) : LocalMediaManager.DeviceCallback, MediaController.Callback() {
 
         val token
@@ -161,6 +163,7 @@ class MediaDeviceManager @Inject constructor(
         fun start() = bgExecutor.execute {
             localMediaManager.registerCallback(this)
             localMediaManager.startScan()
+            muteAwaitConnectionManager?.startListening()
             playbackType = controller?.playbackInfo?.playbackType ?: PLAYBACK_TYPE_UNKNOWN
             controller?.registerCallback(this)
             updateCurrent()
@@ -173,6 +176,7 @@ class MediaDeviceManager @Inject constructor(
             controller?.unregisterCallback(this)
             localMediaManager.stopScan()
             localMediaManager.unregisterCallback(this)
+            muteAwaitConnectionManager?.stopListening()
         }
 
         fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
