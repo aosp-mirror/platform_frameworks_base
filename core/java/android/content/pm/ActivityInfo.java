@@ -18,6 +18,8 @@ package android.content.pm;
 
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.compat.CompatChanges;
@@ -35,10 +37,16 @@ import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.Printer;
+
+import com.android.internal.util.Parcelling;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Collections;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * Information you can retrieve about a particular application
@@ -47,6 +55,9 @@ import java.lang.annotation.RetentionPolicy;
  * &lt;receiver&gt; tags.
  */
 public class ActivityInfo extends ComponentInfo implements Parcelable {
+
+    private static final Parcelling.BuiltIn.ForStringSet sForStringSet =
+            Parcelling.Cache.getOrCreate(Parcelling.BuiltIn.ForStringSet.class);
 
      // NOTE: When adding new data members be sure to update the copy-constructor, Parcel
      // constructor, and writeToParcel.
@@ -525,6 +536,13 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public static final int FLAG_PREFER_MINIMAL_POST_PROCESSING = 0x2000000;
 
     /**
+     * Bit in {@link #flags}: If set, indicates that the activity can be embedded by untrusted
+     * hosts. In this case the interactions with and visibility of the embedded activity may be
+     * limited. Set from the {@link android.R.attr#allowUntrustedActivityEmbedding} attribute.
+     */
+    public static final int FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING = 0x10000000;
+
+    /**
      * @hide Bit in {@link #flags}: If set, this component will only be seen
      * by the system user.  Only works with broadcast receivers.  Set from the
      * android.R.attr#systemUserOnly attribute.
@@ -561,7 +579,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * {@link #FLAG_STATE_NOT_NEEDED}, {@link #FLAG_EXCLUDE_FROM_RECENTS},
      * {@link #FLAG_ALLOW_TASK_REPARENTING}, {@link #FLAG_NO_HISTORY},
      * {@link #FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS},
-     * {@link #FLAG_HARDWARE_ACCELERATED}, {@link #FLAG_SINGLE_USER}.
+     * {@link #FLAG_HARDWARE_ACCELERATED}, {@link #FLAG_SINGLE_USER},
+     * {@link #FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING}.
      */
     public int flags;
 
@@ -1080,6 +1099,13 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     private static final long CHECK_MIN_WIDTH_HEIGHT_FOR_MULTI_WINDOW = 197654537L;
 
     /**
+     * Optional set of a certificates identifying apps that are allowed to embed this activity. From
+     * the "knownActivityEmbeddingCerts" attribute.
+     */
+    @Nullable
+    private Set<String> mKnownActivityEmbeddingCerts;
+
+    /**
      * Convert Java change bits to native.
      *
      * @hide
@@ -1227,6 +1253,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         launchMode = orig.launchMode;
         documentLaunchMode = orig.documentLaunchMode;
         permission = orig.permission;
+        mKnownActivityEmbeddingCerts = orig.mKnownActivityEmbeddingCerts;
         taskAffinity = orig.taskAffinity;
         targetActivity = orig.targetActivity;
         flags = orig.flags;
@@ -1442,6 +1469,31 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         return mMinAspectRatio;
     }
 
+    /**
+     * Gets the trusted host certificate digests of apps that are allowed to embed this activity.
+     * The digests are computed using the SHA-256 digest algorithm.
+     * @see android.R.attr#knownActivityEmbeddingCerts
+     */
+    @NonNull
+    public Set<String> getKnownActivityEmbeddingCerts() {
+        return mKnownActivityEmbeddingCerts == null ? Collections.emptySet()
+                : mKnownActivityEmbeddingCerts;
+    }
+
+    /**
+     * Sets the trusted host certificates of apps that are allowed to embed this activity.
+     * @see #getKnownActivityEmbeddingCerts()
+     * @hide
+     */
+    public void setKnownActivityEmbeddingCerts(@NonNull Set<String> knownActivityEmbeddingCerts) {
+        // Convert the provided digest to upper case for consistent Set membership
+        // checks when verifying the signing certificate digests of requesting apps.
+        mKnownActivityEmbeddingCerts = new ArraySet<>();
+        for (String knownCert : knownActivityEmbeddingCerts) {
+            mKnownActivityEmbeddingCerts.add(knownCert.toUpperCase(Locale.US));
+        }
+    }
+
     private boolean isChangeEnabled(long changeId) {
         return CompatChanges.isChangeEnabled(changeId, applicationInfo.packageName,
                 UserHandle.getUserHandleForUid(applicationInfo.uid));
@@ -1573,6 +1625,9 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         if (supportsSizeChanges) {
             pw.println(prefix + "supportsSizeChanges=true");
         }
+        if (mKnownActivityEmbeddingCerts != null) {
+            pw.println(prefix + "knownActivityEmbeddingCerts=" + mKnownActivityEmbeddingCerts);
+        }
         super.dumpBack(pw, prefix, dumpFlags);
     }
 
@@ -1618,6 +1673,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         dest.writeFloat(mMaxAspectRatio);
         dest.writeFloat(mMinAspectRatio);
         dest.writeBoolean(supportsSizeChanges);
+        sForStringSet.parcel(mKnownActivityEmbeddingCerts, dest, flags);
     }
 
     /**
@@ -1739,6 +1795,10 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         mMaxAspectRatio = source.readFloat();
         mMinAspectRatio = source.readFloat();
         supportsSizeChanges = source.readBoolean();
+        mKnownActivityEmbeddingCerts = sForStringSet.unparcel(source);
+        if (mKnownActivityEmbeddingCerts.isEmpty()) {
+            mKnownActivityEmbeddingCerts = null;
+        }
     }
 
     /**

@@ -341,6 +341,7 @@ package android {
     field public static final int allowSingleTap = 16843353; // 0x1010259
     field public static final int allowTaskReparenting = 16843268; // 0x1010204
     field public static final int allowUndo = 16843999; // 0x10104df
+    field public static final int allowUntrustedActivityEmbedding;
     field public static final int alpha = 16843551; // 0x101031f
     field public static final int alphabeticModifiers = 16844110; // 0x101054e
     field public static final int alphabeticShortcut = 16843235; // 0x10101e3
@@ -905,6 +906,7 @@ package android {
     field public static final int keyboardNavigationCluster = 16844096; // 0x1010540
     field public static final int keycode = 16842949; // 0x10100c5
     field public static final int killAfterRestore = 16843420; // 0x101029c
+    field public static final int knownActivityEmbeddingCerts;
     field public static final int knownCerts = 16844330; // 0x101062a
     field public static final int lStar = 16844359; // 0x1010647
     field public static final int label = 16842753; // 0x1010001
@@ -10966,6 +10968,7 @@ package android.content.pm {
     ctor public ActivityInfo(android.content.pm.ActivityInfo);
     method public int describeContents();
     method public void dump(android.util.Printer, String);
+    method @NonNull public java.util.Set<java.lang.String> getKnownActivityEmbeddingCerts();
     method public final int getThemeResource();
     field public static final int COLOR_MODE_DEFAULT = 0; // 0x0
     field public static final int COLOR_MODE_HDR = 2; // 0x2
@@ -10993,6 +10996,7 @@ package android.content.pm {
     field public static final int DOCUMENT_LAUNCH_NEVER = 3; // 0x3
     field public static final int DOCUMENT_LAUNCH_NONE = 0; // 0x0
     field public static final int FLAG_ALLOW_TASK_REPARENTING = 64; // 0x40
+    field public static final int FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING = 268435456; // 0x10000000
     field public static final int FLAG_ALWAYS_RETAIN_TASK_STATE = 8; // 0x8
     field public static final int FLAG_AUTO_REMOVE_FROM_RECENTS = 8192; // 0x2000
     field public static final int FLAG_CLEAR_TASK_ON_LAUNCH = 4; // 0x4
@@ -11082,6 +11086,7 @@ package android.content.pm {
     method public void dump(android.util.Printer, String);
     method public static CharSequence getCategoryTitle(android.content.Context, int);
     method public int getGwpAsanMode();
+    method @NonNull public java.util.Set<java.lang.String> getKnownActivityEmbeddingCerts();
     method public int getMemtagMode();
     method public int getNativeHeapZeroInitialized();
     method public int getRequestRawExternalStorageAccess();

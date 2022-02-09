@@ -563,6 +563,9 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         return (mBooleans & flag) != 0;
     }
 
+    @Nullable
+    private Set<String> mKnownActivityEmbeddingCerts;
+
     // Derived fields
     @NonNull
     private UUID mStorageUuid;
@@ -1150,6 +1153,9 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         appInfo.setVersionCode(mLongVersionCode);
         appInfo.setAppClassNamesByProcess(buildAppClassNamesByProcess());
         appInfo.setLocaleConfigRes(mLocaleConfigRes);
+        if (mKnownActivityEmbeddingCerts != null) {
+            appInfo.setKnownActivityEmbeddingCerts(mKnownActivityEmbeddingCerts);
+        }
 
         return appInfo;
     }
@@ -1329,6 +1335,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         dest.writeInt(this.nativeHeapZeroInitialized);
         sForBoolean.parcel(this.requestRawExternalStorageAccess, dest, flags);
         dest.writeInt(this.mLocaleConfigRes);
+        sForStringSet.parcel(mKnownActivityEmbeddingCerts, dest, flags);
     }
 
     public ParsingPackageImpl(Parcel in) {
@@ -1477,6 +1484,7 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         this.nativeHeapZeroInitialized = in.readInt();
         this.requestRawExternalStorageAccess = sForBoolean.unparcel(in);
         this.mLocaleConfigRes = in.readInt();
+        this.mKnownActivityEmbeddingCerts = sForStringSet.unparcel(in);
         assignDerivedFields();
     }
 
@@ -2376,6 +2384,13 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
         return getBoolean(Booleans.RESET_ENABLED_SETTINGS_ON_APP_DATA_CLEARED);
     }
 
+    @NonNull
+    @Override
+    public Set<String> getKnownActivityEmbeddingCerts() {
+        return mKnownActivityEmbeddingCerts == null ? Collections.emptySet()
+                : mKnownActivityEmbeddingCerts;
+    }
+
     @Override
     public boolean shouldInheritKeyStoreKeys() {
         return getBoolean(Booleans.INHERIT_KEYSTORE_KEYS);
@@ -2971,6 +2986,13 @@ public class ParsingPackageImpl implements ParsingPackage, ParsingPackageHidden,
     @Override
     public ParsingPackageImpl setLocaleConfigRes(int value) {
         mLocaleConfigRes = value;
+        return this;
+    }
+
+    @Override
+    public ParsingPackage setKnownActivityEmbeddingCerts(
+            @Nullable Set<String> knownEmbeddingCerts) {
+        mKnownActivityEmbeddingCerts = knownEmbeddingCerts;
         return this;
     }
 }
