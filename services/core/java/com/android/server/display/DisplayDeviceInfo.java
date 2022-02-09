@@ -418,7 +418,7 @@ final class DisplayDeviceInfo {
                 || !Objects.equals(deviceProductInfo, other.deviceProductInfo)
                 || ownerUid != other.ownerUid
                 || !Objects.equals(ownerPackageName, other.ownerPackageName)
-                || !Objects.equals(frameRateOverrides, other.frameRateOverrides)
+                || !Arrays.equals(frameRateOverrides, other.frameRateOverrides)
                 || !BrightnessSynchronizer.floatEquals(brightnessMinimum, other.brightnessMinimum)
                 || !BrightnessSynchronizer.floatEquals(brightnessMaximum, other.brightnessMaximum)
                 || !BrightnessSynchronizer.floatEquals(brightnessDefault,
