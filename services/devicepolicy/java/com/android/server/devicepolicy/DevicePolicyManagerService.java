@@ -9616,18 +9616,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     "Cannot set the profile owner on a user which is already set-up");
 
             if (!mIsWatch) {
-                // Only the default supervision profile owner can be set as profile owner after SUW
+                final String supervisionRolePackage = mContext.getResources().getString(
+                        com.android.internal.R.string.config_systemSupervision);
+                // Only the default supervision profile owner or supervision role holder
+                // can be set as profile owner after SUW
                 final String supervisor = mContext.getResources().getString(
                         com.android.internal.R.string
                                 .config_defaultSupervisionProfileOwnerComponent);
-                if (supervisor == null) {
+                if (supervisor == null && supervisionRolePackage == null) {
                     throw new IllegalStateException("Unable to set profile owner post-setup, no"
                             + "default supervisor profile owner defined");
                 }
 
                 final ComponentName supervisorComponent = ComponentName.unflattenFromString(
                         supervisor);
-                if (!owner.equals(supervisorComponent)) {
+                if (!owner.equals(supervisorComponent)
+                        && !owner.getPackageName().equals(supervisionRolePackage)) {
                     throw new IllegalStateException("Unable to set non-default profile owner"
                             + " post-setup " + owner);
                 }
