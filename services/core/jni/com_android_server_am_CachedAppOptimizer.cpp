@@ -113,6 +113,7 @@ static int64_t compactMemory(const std::vector<Vma>& vmas, int pid, int madviseT
                 // There could be a significant delay between when a compaction
                 // is requested and when it is handled during this time our
                 // OOM adjust could have improved.
+                LOG(DEBUG) << "Cancelled running compaction for " << pid;
                 break;
             }
 
