@@ -271,8 +271,8 @@ interface IDevicePolicyManager {
     int logoutUserInternal(); // AIDL doesn't allow overloading name (logoutUser())
     int getLogoutUserId();
     List<UserHandle> getSecondaryUsers(in ComponentName who);
-    void acknowledgeNewUserDisclaimer();
-    boolean isNewUserDisclaimerAcknowledged();
+    void acknowledgeNewUserDisclaimer(int userId);
+    boolean isNewUserDisclaimerAcknowledged(int userId);
 
     void enableSystemApp(in ComponentName admin, in String callerPackage, in String packageName);
     int enableSystemAppWithIntent(in ComponentName admin, in String callerPackage, in Intent intent);

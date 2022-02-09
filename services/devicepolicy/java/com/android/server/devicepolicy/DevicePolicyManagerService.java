@@ -10982,13 +10982,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void acknowledgeNewUserDisclaimer() {
+    public void acknowledgeNewUserDisclaimer(@UserIdInt int userId) {
         CallerIdentity callerIdentity = getCallerIdentity();
         Preconditions.checkCallAuthorization(canManageUsers(callerIdentity)
                 || hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS));
 
-        setShowNewUserDisclaimer(callerIdentity.getUserId(),
-                DevicePolicyData.NEW_USER_DISCLAIMER_ACKNOWLEDGED);
+        setShowNewUserDisclaimer(userId, DevicePolicyData.NEW_USER_DISCLAIMER_ACKNOWLEDGED);
     }
 
     private void setShowNewUserDisclaimer(@UserIdInt int userId, String value) {
@@ -11021,11 +11020,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean isNewUserDisclaimerAcknowledged() {
+    public boolean isNewUserDisclaimerAcknowledged(@UserIdInt int userId) {
         CallerIdentity callerIdentity = getCallerIdentity();
         Preconditions.checkCallAuthorization(canManageUsers(callerIdentity)
                 || hasCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS));
-        int userId = callerIdentity.getUserId();
         synchronized (getLockObject()) {
             DevicePolicyData policyData = getUserData(userId);
             return policyData.isNewUserDisclaimerAcknowledged();
