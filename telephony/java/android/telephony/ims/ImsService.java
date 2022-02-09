@@ -42,6 +42,7 @@ import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.SipTransportImplBase;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 
 import com.android.ims.internal.IImsFeatureStatusCallback;
 import com.android.internal.annotations.VisibleForTesting;
@@ -180,6 +181,12 @@ public class ImsService extends Service {
     // call ImsFeature#onFeatureRemoved.
     private final SparseArray<SparseArray<ImsFeature>> mFeaturesBySlot = new SparseArray<>();
 
+    // A map of slot id -> boolean array, where each entry in the boolean array corresponds to an
+    // ImsFeature that was created for a slot id and not a sub id for backwards compatibility
+    // purposes.
+    private final SparseArray<SparseBooleanArray> mCreateImsFeatureWithSlotIdFlagMap =
+            new SparseArray<>();
+
     private IImsServiceControllerListener mListener;
     private Executor mExecutor;
 
@@ -222,15 +229,36 @@ public class ImsService extends Service {
         }
 
         @Override
-        public IImsMmTelFeature createMmTelFeature(int slotId) {
-            return executeMethodAsyncForResult(() -> createMmTelFeatureInternal(slotId),
-                "createMmTelFeature");
+        public IImsMmTelFeature createMmTelFeature(int slotId, int subId) {
+            MmTelFeature f  = (MmTelFeature) getImsFeature(slotId, ImsFeature.FEATURE_MMTEL);
+            if (f == null) {
+                return executeMethodAsyncForResult(() -> createMmTelFeatureInternal(slotId, subId),
+                        "createMmTelFeature");
+            } else {
+                return f.getBinder();
+            }
         }
 
         @Override
-        public IImsRcsFeature createRcsFeature(int slotId) {
-            return executeMethodAsyncForResult(() -> createRcsFeatureInternal(slotId),
-                "createRcsFeature");
+        public IImsMmTelFeature createEmergencyOnlyMmTelFeature(int slotId) {
+            MmTelFeature f  = (MmTelFeature) getImsFeature(slotId, ImsFeature.FEATURE_MMTEL);
+            if (f == null) {
+                return executeMethodAsyncForResult(() -> createEmergencyOnlyMmTelFeatureInternal(
+                        slotId), "createEmergencyOnlyMmTelFeature");
+            } else {
+                return f.getBinder();
+            }
+        }
+
+        @Override
+        public IImsRcsFeature createRcsFeature(int slotId, int subId) {
+            RcsFeature f  = (RcsFeature) getImsFeature(slotId, ImsFeature.FEATURE_RCS);
+            if (f == null) {
+                return executeMethodAsyncForResult(() ->
+                        createRcsFeatureInternal(slotId, subId), "createRcsFeature");
+            } else {
+                return f.getBinder();
+            }
         }
 
         @Override
@@ -248,9 +276,14 @@ public class ImsService extends Service {
         }
 
         @Override
-        public void removeImsFeature(int slotId, int featureType) {
+        public void removeImsFeature(int slotId, int featureType, boolean changeSubId) {
+            if (changeSubId && isImsFeatureCreatedForSlot(slotId, featureType)) {
+                Log.w(LOG_TAG, "Do not remove Ims feature for compatibility");
+                return;
+            }
             executeMethodAsync(() -> ImsService.this.removeImsFeature(slotId, featureType),
                     "removeImsFeature");
+            setImsFeatureCreatedForSlot(slotId, featureType, false);
         }
 
         @Override
@@ -279,9 +312,10 @@ public class ImsService extends Service {
         }
 
         @Override
-        public IImsConfig getConfig(int slotId) {
+        public IImsConfig getConfig(int slotId, int subId) {
             return executeMethodAsyncForResult(() -> {
-                ImsConfigImplBase c = ImsService.this.getConfig(slotId);
+                ImsConfigImplBase c =
+                        ImsService.this.getConfigForSubscription(slotId, subId);
                 if (c != null) {
                     c.setDefaultExecutor(mExecutor);
                     return c.getIImsConfig();
@@ -292,9 +326,10 @@ public class ImsService extends Service {
         }
 
         @Override
-        public IImsRegistration getRegistration(int slotId) {
+        public IImsRegistration getRegistration(int slotId, int subId) {
             return executeMethodAsyncForResult(() -> {
-                ImsRegistrationImplBase r =  ImsService.this.getRegistration(slotId);
+                ImsRegistrationImplBase r =
+                        ImsService.this.getRegistrationForSubscription(slotId, subId);
                 if (r != null) {
                     r.setDefaultExecutor(mExecutor);
                     return r.getBinder();
@@ -318,13 +353,15 @@ public class ImsService extends Service {
         }
 
         @Override
-        public void enableIms(int slotId) {
-            executeMethodAsync(() -> ImsService.this.enableIms(slotId), "enableIms");
+        public void enableIms(int slotId, int subId) {
+            executeMethodAsync(() ->
+                    ImsService.this.enableImsForSubscription(slotId, subId), "enableIms");
         }
 
         @Override
-        public void disableIms(int slotId) {
-            executeMethodAsync(() -> ImsService.this.disableIms(slotId), "disableIms");
+        public void disableIms(int slotId, int subId) {
+            executeMethodAsync(() ->
+                    ImsService.this.disableImsForSubscription(slotId, subId), "disableIms");
         }
 
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
@@ -364,16 +401,8 @@ public class ImsService extends Service {
         return null;
     }
 
-    /**
-     * @hide
-     */
-    @VisibleForTesting
-    public SparseArray<ImsFeature> getFeatures(int slotId) {
-        return mFeaturesBySlot.get(slotId);
-    }
-
-    private IImsMmTelFeature createMmTelFeatureInternal(int slotId) {
-        MmTelFeature f = createMmTelFeature(slotId);
+    private IImsMmTelFeature createMmTelFeatureInternal(int slotId, int subscriptionId) {
+        MmTelFeature f = createMmTelFeatureForSubscription(slotId, subscriptionId);
         if (f != null) {
             setupFeature(f, slotId, ImsFeature.FEATURE_MMTEL);
             f.setDefaultExecutor(mExecutor);
@@ -384,8 +413,20 @@ public class ImsService extends Service {
         }
     }
 
-    private IImsRcsFeature createRcsFeatureInternal(int slotId) {
-        RcsFeature f = createRcsFeature(slotId);
+    private IImsMmTelFeature createEmergencyOnlyMmTelFeatureInternal(int slotId) {
+        MmTelFeature f = createEmergencyOnlyMmTelFeature(slotId);
+        if (f != null) {
+            setupFeature(f, slotId, ImsFeature.FEATURE_MMTEL);
+            f.setDefaultExecutor(mExecutor);
+            return f.getBinder();
+        } else {
+            Log.e(LOG_TAG, "createEmergencyOnlyMmTelFeatureInternal: null feature returned.");
+            return null;
+        }
+    }
+
+    private IImsRcsFeature createRcsFeatureInternal(int slotId, int subI) {
+        RcsFeature f = createRcsFeatureForSubscription(slotId, subI);
         if (f != null) {
             f.setDefaultExecutor(mExecutor);
             setupFeature(f, slotId, ImsFeature.FEATURE_RCS);
@@ -466,6 +507,49 @@ public class ImsService extends Service {
             f.onFeatureRemoved();
             features.remove(featureType);
         }
+
+    }
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public ImsFeature getImsFeature(int slotId, int featureType) {
+        synchronized (mFeaturesBySlot) {
+            // Get SparseArray for Features, by querying slot Id
+            SparseArray<ImsFeature> features = mFeaturesBySlot.get(slotId);
+            if (features == null) {
+                return null;
+            }
+            return features.get(featureType);
+        }
+    }
+
+    private void setImsFeatureCreatedForSlot(int slotId,
+            @ImsFeature.FeatureType int featureType, boolean createdForSlot) {
+        synchronized (mCreateImsFeatureWithSlotIdFlagMap) {
+            getImsFeatureCreatedForSlot(slotId).put(featureType, createdForSlot);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public boolean isImsFeatureCreatedForSlot(int slotId,
+            @ImsFeature.FeatureType int featureType) {
+        synchronized (mCreateImsFeatureWithSlotIdFlagMap) {
+            return getImsFeatureCreatedForSlot(slotId).get(featureType);
+        }
+    }
+
+    private SparseBooleanArray getImsFeatureCreatedForSlot(int slotId) {
+        SparseBooleanArray createFlag = mCreateImsFeatureWithSlotIdFlagMap.get(slotId);
+        if (createFlag == null) {
+            createFlag = new SparseBooleanArray();
+            mCreateImsFeatureWithSlotIdFlagMap.put(slotId, createFlag);
+        }
+        return createFlag;
     }
 
     /**
@@ -524,27 +608,95 @@ public class ImsService extends Service {
     }
 
     /**
+     * The framework has enabled IMS for the subscription specified, the ImsService should register
+     * for IMS and perform all appropriate initialization to bring up all ImsFeatures.
+     *
+     * @param slotId The slot ID that IMS will be enabled for.
+     * @param subscriptionId The subscription ID that IMS will be enabled for.
+     */
+    public void enableImsForSubscription(int slotId, int subscriptionId) {
+        enableIms(slotId);
+    }
+
+    /**
+     * The framework has disabled IMS for the subscription specified. The ImsService must deregister
+     * for IMS and set capability status to false for all ImsFeatures.
+     * @param slotId The slot ID that IMS will be disabled for.
+     * @param subscriptionId The subscription ID that IMS will be disabled for.
+     */
+    public void disableImsForSubscription(int slotId, int subscriptionId) {
+        disableIms(slotId);
+    }
+
+    /**
      * The framework has enabled IMS for the slot specified, the ImsService should register for IMS
      * and perform all appropriate initialization to bring up all ImsFeatures.
+     * @deprecated Use {@link #enableImsForSubscription} instead.
      */
+    @Deprecated
     public void enableIms(int slotId) {
     }
 
     /**
      * The framework has disabled IMS for the slot specified. The ImsService must deregister for IMS
      * and set capability status to false for all ImsFeatures.
+     * @deprecated Use {@link #disableImsForSubscription} instead.
      */
+    @Deprecated
     public void disableIms(int slotId) {
     }
 
     /**
      * When called, the framework is requesting that a new {@link MmTelFeature} is created for the
+     * specified subscription.
+     *
+     * @param subscriptionId The subscription ID that the MMTEL Feature is being created for.
+     * @return The newly created {@link MmTelFeature} associated with the subscription or null if
+     * the feature is not supported.
+     */
+    public @Nullable MmTelFeature createMmTelFeatureForSubscription(int slotId,
+            int subscriptionId) {
+        setImsFeatureCreatedForSlot(slotId, ImsFeature.FEATURE_MMTEL, true);
+        return createMmTelFeature(slotId);
+    }
+
+    /**
+     * When called, the framework is requesting that a new {@link RcsFeature} is created for the
+     * specified subscription.
+     *
+     * @param subscriptionId The subscription ID that the RCS Feature is being created for.
+     * @return The newly created {@link RcsFeature} associated with the subscription or null if the
+     * feature is not supported.
+     */
+    public @Nullable RcsFeature createRcsFeatureForSubscription(int slotId, int subscriptionId) {
+        setImsFeatureCreatedForSlot(slotId, ImsFeature.FEATURE_RCS, true);
+        return createRcsFeature(slotId);
+    }
+
+    /**
+     * When called, the framework is requesting that a new emergency-only {@link MmTelFeature} is
+     * created for the specified slot. For emergency calls, there is no known Subscription Id.
+     *
+     * @param slotId The slot ID that the MMTEL Feature is being created for.
+     * @return An MmTelFeature instance to be used for the slot ID when there is not
+     * subscription inserted. Only requested when there is no subscription active on
+     * the specified slot.
+     */
+    public @Nullable MmTelFeature createEmergencyOnlyMmTelFeature(int slotId) {
+        setImsFeatureCreatedForSlot(slotId, ImsFeature.FEATURE_MMTEL, true);
+        return createMmTelFeature(slotId);
+    }
+
+    /**
+     * When called, the framework is requesting that a new {@link MmTelFeature} is created for the
      * specified slot.
+     * @deprecated Use {@link #createMmTelFeatureForSubscription} instead
      *
      * @param slotId The slot ID that the MMTEL Feature is being created for.
      * @return The newly created {@link MmTelFeature} associated with the slot or null if the
      * feature is not supported.
      */
+    @Deprecated
     public MmTelFeature createMmTelFeature(int slotId) {
         return null;
     }
@@ -552,32 +704,62 @@ public class ImsService extends Service {
     /**
      * When called, the framework is requesting that a new {@link RcsFeature} is created for the
      * specified slot.
+     * @deprecated Use {@link #createRcsFeatureForSubscription} instead
      *
      * @param slotId The slot ID that the RCS Feature is being created for.
      * @return The newly created {@link RcsFeature} associated with the slot or null if the feature
      * is not supported.
      */
+    @Deprecated
     public RcsFeature createRcsFeature(int slotId) {
         return null;
     }
 
     /**
+     * Return the {@link ImsConfigImplBase} implementation associated with the provided
+     * subscription. This will be used by the platform to get/set specific IMS related
+     * configurations.
+     *
+     * @param subscriptionId The subscription ID that the IMS configuration is associated with.
+     * @return ImsConfig implementation that is associated with the specified subscription.
+     */
+    public @NonNull ImsConfigImplBase getConfigForSubscription(int slotId, int subscriptionId) {
+        return getConfig(slotId);
+    }
+
+    /**
+     * Return the {@link ImsRegistrationImplBase} implementation associated with the provided
+     * subscription.
+     *
+     * @param subscriptionId The subscription ID that is associated with the IMS Registration.
+     * @return the ImsRegistration implementation associated with the subscription.
+     */
+    public @NonNull ImsRegistrationImplBase getRegistrationForSubscription(int slotId,
+            int subscriptionId) {
+        return getRegistration(slotId);
+    }
+
+    /**
      * Return the {@link ImsConfigImplBase} implementation associated with the provided slot. This
      * will be used by the platform to get/set specific IMS related configurations.
+     * @deprecated use {@link #getConfigForSubscription} instead.
      *
      * @param slotId The slot that the IMS configuration is associated with.
      * @return ImsConfig implementation that is associated with the specified slot.
      */
+    @Deprecated
     public ImsConfigImplBase getConfig(int slotId) {
         return new ImsConfigImplBase();
     }
 
     /**
      * Return the {@link ImsRegistrationImplBase} implementation associated with the provided slot.
+     * @deprecated use  {@link #getRegistrationForSubscription} instead.
      *
      * @param slotId The slot that is associated with the IMS Registration.
      * @return the ImsRegistration implementation associated with the slot.
      */
+    @Deprecated
     public ImsRegistrationImplBase getRegistration(int slotId) {
         return new ImsRegistrationImplBase();
     }
