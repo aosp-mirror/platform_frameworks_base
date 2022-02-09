@@ -27,8 +27,10 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.accessibility.IAccessibilityEmbeddedConnection;
 import android.view.InsetsState;
+import android.view.WindowManagerGlobal;
 
 import java.util.Objects;
 
@@ -43,11 +45,13 @@ import java.util.Objects;
  * {@link SurfaceView#setChildSurfacePackage}.
  */
 public class SurfaceControlViewHost {
+    private final static String TAG = "SurfaceControlViewHost";
     private final ViewRootImpl mViewRoot;
     private WindowlessWindowManager mWm;
 
     private SurfaceControl mSurfaceControl;
     private IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
+    private boolean mReleased = false;
 
     private final class ISurfaceControlViewHostImpl extends ISurfaceControlViewHost.Stub {
         @Override
@@ -268,6 +272,8 @@ public class SurfaceControlViewHost {
             @NonNull WindowlessWindowManager wwm, boolean useSfChoreographer) {
         mWm = wwm;
         mViewRoot = new ViewRootImpl(c, d, mWm, useSfChoreographer);
+        WindowManagerGlobal.getInstance().addWindowlessRoot(mViewRoot);
+
         mAccessibilityEmbeddedConnection = mViewRoot.getAccessibilityEmbeddedConnection();
     }
 
@@ -292,7 +298,10 @@ public class SurfaceControlViewHost {
                 .build();
         mWm = new WindowlessWindowManager(context.getResources().getConfiguration(),
                 mSurfaceControl, hostToken);
+
         mViewRoot = new ViewRootImpl(context, display, mWm);
+        WindowManagerGlobal.getInstance().addWindowlessRoot(mViewRoot);
+
         mAccessibilityEmbeddedConnection = mViewRoot.getAccessibilityEmbeddedConnection();
     }
 
@@ -301,11 +310,14 @@ public class SurfaceControlViewHost {
      */
     @Override
     protected void finalize() throws Throwable {
-        // We aren't on the UI thread here so we need to pass false to
-        // doDie
+        if (mReleased) {
+            return;
+        }
+        Log.e(TAG, "SurfaceControlViewHost finalized without being released: " + this);
+        // We aren't on the UI thread here so we need to pass false to doDie
         mViewRoot.die(false /* immediate */);
+        WindowManagerGlobal.getInstance().removeWindowlessRoot(mViewRoot);
     }
-
 
     /**
      * Return a SurfacePackage for the root SurfaceControl of the embedded hierarchy.
@@ -413,5 +425,7 @@ public class SurfaceControlViewHost {
     public void release() {
         // ViewRoot will release mSurfaceControl for us.
         mViewRoot.die(true /* immediate */);
+        WindowManagerGlobal.getInstance().removeWindowlessRoot(mViewRoot);
+        mReleased = true;
     }
 }
