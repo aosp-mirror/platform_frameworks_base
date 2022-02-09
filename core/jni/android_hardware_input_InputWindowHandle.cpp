@@ -18,16 +18,17 @@
 
 #include "android_hardware_input_InputWindowHandle.h"
 
+#include <android/graphics/matrix.h>
 #include <android/graphics/region.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/Log.h>
 #include <binder/IPCThreadState.h>
 #include <gui/SurfaceControl.h>
+#include <gui/WindowInfo.h>
 #include <nativehelper/JNIHelp.h>
 #include <ui/Region.h>
 #include <utils/threads.h>
 
-#include <android/graphics/matrix.h>
-#include <gui/WindowInfo.h>
 #include "SkRegion.h"
 #include "android_hardware_input_InputApplicationHandle.h"
 #include "android_util_Binder.h"
@@ -262,6 +263,12 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
     jobject inputWindowHandle =
             env->NewObject(gInputWindowHandleClassInfo.clazz, gInputWindowHandleClassInfo.ctor,
                            applicationHandle.get(), windowInfo.displayId);
+    if (env->ExceptionCheck()) {
+        LOGE_EX(env);
+        env->ExceptionClear();
+    }
+    LOG_ALWAYS_FATAL_IF(inputWindowHandle == nullptr,
+                        "Failed to create new InputWindowHandle object.");
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.token,
                         javaObjectForIBinder(env, windowInfo.token));
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.name,

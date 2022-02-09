@@ -106,7 +106,7 @@ class DragState {
     ClipDescription mDataDescription;
     int mTouchSource;
     boolean mDragResult;
-    boolean mRelinquishDragSurface;
+    boolean mRelinquishDragSurfaceToDropTarget;
     float mOriginalAlpha;
     float mOriginalX, mOriginalY;
     float mCurrentX, mCurrentY;
@@ -214,13 +214,19 @@ class DragState {
             for (WindowState ws : mNotifiedWindows) {
                 float x = 0;
                 float y = 0;
+                SurfaceControl dragSurface = null;
                 if (!mDragResult && (ws.mSession.mPid == mPid)) {
                     // Report unconsumed drop location back to the app that started the drag.
                     x = mCurrentX;
                     y = mCurrentY;
+                    if (relinquishDragSurfaceToDragSource()) {
+                        // If requested (and allowed), report the drag surface back to the app
+                        // starting the drag to handle the return animation
+                        dragSurface = mSurfaceControl;
+                    }
                 }
                 DragEvent event = DragEvent.obtain(DragEvent.ACTION_DRAG_ENDED,
-                        x, y, mThumbOffsetX, mThumbOffsetY, null, null, null, null, null,
+                        x, y, mThumbOffsetX, mThumbOffsetY, null, null, null, dragSurface, null,
                         mDragResult);
                 try {
                     ws.mClient.dispatchDragEvent(event);
@@ -249,7 +255,7 @@ class DragState {
             mInputSurface = null;
         }
         if (mSurfaceControl != null) {
-            if (!mRelinquishDragSurface) {
+            if (!mRelinquishDragSurfaceToDropTarget && !relinquishDragSurfaceToDragSource()) {
                 mTransaction.reparent(mSurfaceControl, null).apply();
             } else {
                 mDragDropController.sendTimeoutMessage(MSG_REMOVE_DRAG_SURFACE_TIMEOUT,
@@ -570,7 +576,7 @@ class DragState {
             return;
         }
         if (!mDragResult) {
-            if (!isAccessibilityDragDrop()) {
+            if (!isAccessibilityDragDrop() && !relinquishDragSurfaceToDragSource()) {
                 mAnimator = createReturnAnimationLocked();
                 return;  // Will call closeLocked() when the animation is done.
             }
@@ -730,5 +736,9 @@ class DragState {
 
     boolean isAccessibilityDragDrop() {
         return (mFlags & View.DRAG_FLAG_ACCESSIBILITY_ACTION) != 0;
+    }
+
+    private boolean relinquishDragSurfaceToDragSource() {
+        return (mFlags & View.DRAG_FLAG_REQUEST_SURFACE_FOR_RETURN_ANIMATION) != 0;
     }
 }

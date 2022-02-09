@@ -18,8 +18,9 @@ package com.android.systemui.statusbar.notification.interruption;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
@@ -63,7 +64,7 @@ public class HeadsUpViewBinderTest extends SysuiTestCase {
     }
 
     @Test
-    public void testLoggingWorks() {
+    public void testLoggingForStandardFlow() {
         AtomicReference<NotifBindPipeline.BindCallback> callback = new AtomicReference<>();
         when(mBindStage.requestRebind(any(), any())).then(i -> {
             callback.set(i.getArgument(1));
@@ -71,19 +72,82 @@ public class HeadsUpViewBinderTest extends SysuiTestCase {
         });
 
         mViewBinder.bindHeadsUpView(mEntry, null);
-        verify(mLogger, times(1)).startBindingHun(eq("key"));
-        verify(mLogger, times(0)).entryBoundSuccessfully(eq("key"));
-        verify(mLogger, times(0)).currentOngoingBindingAborted(eq("key"));
+        verify(mLogger).startBindingHun(eq("key"));
+        verifyNoMoreInteractions(mLogger);
+        clearInvocations(mLogger);
 
         callback.get().onBindFinished(mEntry);
+        verify(mLogger).entryBoundSuccessfully(eq("key"));
+        verifyNoMoreInteractions(mLogger);
+        clearInvocations(mLogger);
 
-        verify(mLogger, times(1)).entryBoundSuccessfully(eq("key"));
         mViewBinder.bindHeadsUpView(mEntry, null);
+        verify(mLogger).startBindingHun(eq("key"));
+        verifyNoMoreInteractions(mLogger);
+        clearInvocations(mLogger);
 
         callback.get().onBindFinished(mEntry);
+        verify(mLogger).entryBoundSuccessfully(eq("key"));
+        verifyNoMoreInteractions(mLogger);
+        clearInvocations(mLogger);
 
-        verify(mLogger, times(2)).startBindingHun(eq("key"));
-        verify(mLogger, times(2)).entryBoundSuccessfully(eq("key"));
-        verify(mLogger, times(1)).currentOngoingBindingAborted(eq("key"));
+        mViewBinder.unbindHeadsUpView(mEntry);
+        verify(mLogger).entryContentViewMarkedFreeable(eq("key"));
+        verifyNoMoreInteractions(mLogger);
+        clearInvocations(mLogger);
+
+        callback.get().onBindFinished(mEntry);
+        verify(mLogger).entryUnbound(eq("key"));
+        verifyNoMoreInteractions(mLogger);
+        clearInvocations(mLogger);
+    }
+
+    @Test
+    public void testLoggingForAbortFlow() {
+        AtomicReference<NotifBindPipeline.BindCallback> callback = new AtomicReference<>();
+        when(mBindStage.requestRebind(any(), any())).then(i -> {
+            callback.set(i.getArgument(1));
+            return new CancellationSignal();
+        });
+
+        mViewBinder.bindHeadsUpView(mEntry, null);
+        verify(mLogger).startBindingHun(eq("key"));
+        verifyNoMoreInteractions(mLogger);
+        clearInvocations(mLogger);
+
+        mViewBinder.abortBindCallback(mEntry);
+        verify(mLogger).currentOngoingBindingAborted(eq("key"));
+        verifyNoMoreInteractions(mLogger);
+        clearInvocations(mLogger);
+
+        // second abort logs nothing
+        mViewBinder.abortBindCallback(mEntry);
+        verifyNoMoreInteractions(mLogger);
+        clearInvocations(mLogger);
+    }
+
+    @Test
+    public void testLoggingForEarlyUnbindFlow() {
+        AtomicReference<NotifBindPipeline.BindCallback> callback = new AtomicReference<>();
+        when(mBindStage.requestRebind(any(), any())).then(i -> {
+            callback.set(i.getArgument(1));
+            return new CancellationSignal();
+        });
+
+        mViewBinder.bindHeadsUpView(mEntry, null);
+        verify(mLogger).startBindingHun(eq("key"));
+        verifyNoMoreInteractions(mLogger);
+        clearInvocations(mLogger);
+
+        mViewBinder.unbindHeadsUpView(mEntry);
+        verify(mLogger).currentOngoingBindingAborted(eq("key"));
+        verify(mLogger).entryContentViewMarkedFreeable(eq("key"));
+        verifyNoMoreInteractions(mLogger);
+        clearInvocations(mLogger);
+
+        callback.get().onBindFinished(mEntry);
+        verify(mLogger).entryUnbound(eq("key"));
+        verifyNoMoreInteractions(mLogger);
+        clearInvocations(mLogger);
     }
 }

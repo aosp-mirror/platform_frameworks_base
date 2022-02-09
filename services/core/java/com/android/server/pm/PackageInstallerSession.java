@@ -182,6 +182,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -232,6 +233,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String ATTR_IS_READY = "isReady";
     private static final String ATTR_IS_FAILED = "isFailed";
     private static final String ATTR_IS_APPLIED = "isApplied";
+    private static final String ATTR_PACKAGE_SOURCE = "packageSource";
     private static final String ATTR_SESSION_ERROR_CODE = "errorCode";
     private static final String ATTR_SESSION_ERROR_MESSAGE = "errorMessage";
     private static final String ATTR_MODE = "mode";
@@ -549,18 +551,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         /**
          * Installs apks of staged session while skipping the verification process for a committed
          * and ready session.
+         *
+         * @return a CompletableFuture that will be completed when installation completes.
          */
         @Override
-        public void installSession(IntentSender statusReceiver) {
+        public CompletableFuture<Void> installSession() {
             assertCallerIsOwnerOrRootOrSystem();
             assertNotChild("StagedSession#installSession");
             Preconditions.checkArgument(isCommitted() && isSessionReady());
-
-            // Since staged sessions are installed during boot, the original reference to status
-            // receiver from the owner has already been lost. We can safely replace it with a
-            // status receiver from the system without effecting the flow.
-            updateRemoteStatusReceiver(statusReceiver);
-            install();
+            return install();
         }
 
         private void updateRemoteStatusReceiver(IntentSender remoteStatusReceiver) {
@@ -1127,6 +1126,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.updatedMillis = updatedMillis;
             info.requireUserAction = params.requireUserAction;
             info.installerUid = mInstallerUid;
+            info.packageSource = params.packageSource;
         }
         return info;
     }
@@ -1694,15 +1694,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
         if (isMultiPackage()) {
             synchronized (mLock) {
-                final IntentSender childIntentSender =
-                        new ChildStatusIntentReceiver(mChildSessions.clone(), statusReceiver)
-                                .getIntentSender();
                 boolean sealFailed = false;
                 for (int i = mChildSessions.size() - 1; i >= 0; --i) {
                     // seal all children, regardless if any of them fail; we'll throw/return
                     // as appropriate once all children have been processed
-                    if (!mChildSessions.valueAt(i)
-                            .markAsSealed(childIntentSender, forTransfer)) {
+                    if (!mChildSessions.valueAt(i).markAsSealed(null, forTransfer)) {
                         sealFailed = true;
                     }
                 }
@@ -1890,8 +1886,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
      * This method may be called multiple times to update the status receiver validate caller
      * permissions.
      */
-    private boolean markAsSealed(@NonNull IntentSender statusReceiver, boolean forTransfer) {
-        Objects.requireNonNull(statusReceiver);
+    private boolean markAsSealed(@Nullable IntentSender statusReceiver, boolean forTransfer) {
+        Preconditions.checkState(statusReceiver != null || hasParentSessionId(),
+                "statusReceiver can't be null for the root session");
         assertCallerIsOwnerOrRoot();
 
         synchronized (mLock) {
@@ -2186,12 +2183,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
 
             mInstallerUid = newOwnerAppInfo.uid;
-            mInstallSource = InstallSource.create(packageName, null, packageName, null);
+            mInstallSource = InstallSource.create(packageName, null, packageName, null,
+                    params.packageSource);
         }
     }
 
     @WorkerThread
-    private static boolean checkUserActionRequirement(PackageInstallerSession session) {
+    private static boolean checkUserActionRequirement(
+            PackageInstallerSession session, IntentSender target) {
         if (session.isMultiPackage()) {
             return false;
         }
@@ -2200,7 +2199,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // TODO(b/159331446): Move this to makeSessionActiveForInstall and update javadoc
         userActionRequirement = session.computeUserActionRequirement();
         if (userActionRequirement == USER_ACTION_REQUIRED) {
-            session.sendPendingUserActionIntent();
+            session.sendPendingUserActionIntent(target);
             return true;
         }
 
@@ -2212,7 +2211,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
             if (validatedTargetSdk != INVALID_TARGET_SDK_VERSION
                     && validatedTargetSdk < Build.VERSION_CODES.Q) {
-                session.sendPendingUserActionIntent();
+                session.sendPendingUserActionIntent(target);
                 return true;
             }
 
@@ -2221,7 +2220,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         session.getInstallerPackageName(), session.getPackageName())) {
                     // Fall back to the non-silent update if a repeated installation is invoked
                     // within the throttle time.
-                    session.sendPendingUserActionIntent();
+                    session.sendPendingUserActionIntent(target);
                     return true;
                 }
                 session.mSilentUpdatePolicy.track(session.getInstallerPackageName(),
@@ -2241,7 +2240,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private boolean sendPendingUserActionIntentIfNeeded() {
         assertNotChild("PackageInstallerSession#sendPendingUserActionIntentIfNeeded");
 
-        return sessionContains(PackageInstallerSession::checkUserActionRequirement);
+        final IntentSender statusReceiver = getRemoteStatusReceiver();
+        return sessionContains(s -> checkUserActionRequirement(s, statusReceiver));
     }
 
     @WorkerThread
@@ -2439,53 +2439,69 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         });
     }
 
-    private void install() {
-        try {
-            installNonStaged();
-        } catch (PackageManagerException e) {
-            final String completeMsg = ExceptionUtils.getCompleteMessage(e);
-            onSessionInstallationFailure(e.error, completeMsg);
-        }
+    /**
+     * Stages installs and do cleanup accordingly depending on whether the installation is
+     * successful or not.
+     *
+     * @return a future that will be completed when the whole process is completed.
+     */
+    private CompletableFuture<Void> install() {
+        return installNonStaged().whenComplete((r, t) -> {
+            if (t == null) {
+                setSessionApplied();
+                dispatchSessionFinished(INSTALL_SUCCEEDED, "Session installed", null);
+                maybeFinishChildSessions(INSTALL_SUCCEEDED, "Session installed");
+            } else {
+                PackageManagerException e = (PackageManagerException) t.getCause();
+                setSessionFailed(SessionInfo.SESSION_ACTIVATION_FAILED,
+                        PackageManager.installStatusToString(e.error, e.getMessage()));
+                dispatchSessionFinished(e.error, e.getMessage(), null);
+                maybeFinishChildSessions(e.error, e.getMessage());
+            }
+        });
     }
 
-    private void installNonStaged()
-            throws PackageManagerException {
-        final InstallParams installingSession = makeInstallParams();
-        if (installingSession == null) {
-            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR,
-                    "Session should contain at least one apk session for installation");
-        }
-        if (isMultiPackage()) {
-            final List<PackageInstallerSession> childSessions = getChildSessions();
-            List<InstallParams> installingChildSessions = new ArrayList<>(childSessions.size());
-            boolean success = true;
-            PackageManagerException failure = null;
-            for (int i = 0; i < childSessions.size(); ++i) {
-                final PackageInstallerSession session = childSessions.get(i);
-                try {
-                    final InstallParams installingChildSession =
-                            session.makeInstallParams();
+    /**
+     * Stages sessions (including child sessions if any) for install.
+     *
+     * @return a future that will be completed when the whole session is completed (could be
+     *         success or failure).
+     */
+    private CompletableFuture<Void> installNonStaged() {
+        try {
+            List<CompletableFuture<Void>> futures = new ArrayList<>();
+            CompletableFuture<Void> future = new CompletableFuture<>();
+            futures.add(future);
+            final InstallParams installingSession = makeInstallParams(future);
+            if (isMultiPackage()) {
+                final List<PackageInstallerSession> childSessions = getChildSessions();
+                List<InstallParams> installingChildSessions = new ArrayList<>(childSessions.size());
+                for (int i = 0; i < childSessions.size(); ++i) {
+                    final PackageInstallerSession session = childSessions.get(i);
+                    future = new CompletableFuture<>();
+                    futures.add(future);
+                    final InstallParams installingChildSession = session.makeInstallParams(future);
                     if (installingChildSession != null) {
                         installingChildSessions.add(installingChildSession);
                     }
-                } catch (PackageManagerException e) {
-                    failure = e;
-                    success = false;
                 }
+                if (!installingChildSessions.isEmpty()) {
+                    installingSession.installStage(installingChildSessions);
+                }
+            } else if (installingSession != null) {
+                installingSession.installStage();
             }
-            if (!success) {
-                sendOnPackageInstalled(mContext, getRemoteStatusReceiver(), sessionId,
-                        isInstallerDeviceOwnerOrAffiliatedProfileOwner(), userId, null,
-                        failure.error, failure.getLocalizedMessage(), null);
-                return;
-            }
-            installingSession.installStage(installingChildSessions);
-        } else {
-            installingSession.installStage();
+
+            CompletableFuture<Void>[] arr = new CompletableFuture[futures.size()];
+            return CompletableFuture.allOf(futures.toArray(arr));
+        } catch (PackageManagerException e) {
+            CompletableFuture<Void> future = new CompletableFuture<>();
+            future.completeExceptionally(e);
+            return future;
         }
     }
 
-    private void sendPendingUserActionIntent() {
+    private void sendPendingUserActionIntent(IntentSender target) {
         // User needs to confirm installation;
         // give installer an intent they can use to involve
         // user.
@@ -2493,7 +2509,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         intent.setPackage(mPm.getPackageInstallerPackageName());
         intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
 
-        sendOnUserActionRequired(mContext, getRemoteStatusReceiver(), sessionId, intent);
+        sendOnUserActionRequired(mContext, target, sessionId, intent);
 
         // Commit was keeping session marked as active until now; release
         // that extra refcount so session appears idle.
@@ -2525,9 +2541,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /**
      * Stages this session for install and returns a
      * {@link InstallParams} representing this new staged state.
+     *
+     * @param future a future that will be completed when this session is completed.
      */
     @Nullable
-    private InstallParams makeInstallParams()
+    private InstallParams makeInstallParams(CompletableFuture<Void> future)
             throws PackageManagerException {
         synchronized (mLock) {
             if (mDestroyed) {
@@ -2540,11 +2558,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        // Do not try to install staged apex session. Parent session will have at least one apk
-        // session.
-        if (!isMultiPackage() && isApexSession() && params.isStaged) {
-            dispatchSessionFinished(INSTALL_SUCCEEDED,
-                    "Apex package should have been installed by apexd", null);
+        if (isMultiPackage()) {
+            // Always treat parent session as success for it has nothing to install
+            future.complete(null);
+        } else if (isApexSession() && params.isStaged) {
+            // Staged apex sessions have been handled by apexd
+            future.complete(null);
             return null;
         }
 
@@ -2557,12 +2576,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             @Override
             public void onPackageInstalled(String basePackageName, int returnCode, String msg,
                     Bundle extras) {
-                if (!isStaged()) {
-                    // We've reached point of no return; call into PMS to install the stage.
-                    // Regardless of success or failure we always destroy session.
-                    destroyInternal();
+                if (returnCode == INSTALL_SUCCEEDED) {
+                    future.complete(null);
+                } else {
+                    future.completeExceptionally(new PackageManagerException(returnCode, msg));
                 }
-                dispatchSessionFinished(returnCode, msg, extras);
             }
         };
 
@@ -4482,6 +4500,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             writeBooleanAttribute(out, ATTR_IS_READY, mSessionReady);
             writeBooleanAttribute(out, ATTR_IS_FAILED, mSessionFailed);
             writeBooleanAttribute(out, ATTR_IS_APPLIED, mSessionApplied);
+            out.attributeInt(null, ATTR_PACKAGE_SOURCE, params.packageSource);
             out.attributeInt(null, ATTR_SESSION_ERROR_CODE, mSessionErrorCode);
             writeStringAttribute(out, ATTR_SESSION_ERROR_MESSAGE, mSessionErrorMessage);
             // TODO(patb,109941548): avoid writing to xml and instead infer / validate this after
@@ -4656,6 +4675,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         params.abiOverride = readStringAttribute(in, ATTR_ABI_OVERRIDE);
         params.volumeUuid = readStringAttribute(in, ATTR_VOLUME_UUID);
         params.installReason = in.getAttributeInt(null, ATTR_INSTALL_REASON);
+        params.packageSource = in.getAttributeInt(null, ATTR_PACKAGE_SOURCE);
 
         if (in.getAttributeBoolean(null, ATTR_IS_DATALOADER, false)) {
             params.dataLoaderParams = new DataLoaderParams(
@@ -4784,7 +4804,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         InstallSource installSource = InstallSource.create(installInitiatingPackageName,
-                installOriginatingPackageName, installerPackageName, installerAttributionTag);
+                installOriginatingPackageName, installerPackageName, installerAttributionTag,
+                params.packageSource);
         return new PackageInstallerSession(callback, context, pm, sessionProvider,
                 silentUpdatePolicy, installerThread, stagingManager, sessionId, userId,
                 installerUid, installSource, params, createdMillis, committedMillis, stageDir,

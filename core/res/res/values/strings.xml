@@ -1699,9 +1699,10 @@
     <!-- Message shown during fingerprint acquisision when the fingerprint cannot be recognized -->
     <string name="fingerprint_acquired_insufficient">Couldn\'t process fingerprint. Please try again.</string>
     <!-- Message shown during fingerprint acquisision when the fingerprint sensor needs cleaning -->
-    <string name="fingerprint_acquired_imager_dirty">Clean the sensor</string>
+    <string name="fingerprint_acquired_imager_dirty">Clean fingerprint sensor and try again</string>
+    <string name="fingerprint_acquired_imager_dirty_alt">Clean sensor and try again</string>
     <!-- Message shown during fingerprint acquisision when the user removes their finger from the sensor too quickly -->
-    <string name="fingerprint_acquired_too_fast">Hold a little longer</string>
+    <string name="fingerprint_acquired_too_fast">Press firmly on the sensor</string>
     <!-- Message shown during fingerprint acquisision when the user moves their finger too slowly -->
     <string name="fingerprint_acquired_too_slow">Finger moved too slow. Please try again.</string>
     <!-- Message shown during fingerprint acquisition when the fingerprint was already enrolled.[CHAR LIMIT=50] -->
@@ -1715,6 +1716,10 @@
     <!-- Array containing custom messages shown during fingerprint acquisision from vendor.  Vendor is expected to add and translate these strings -->
     <string-array name="fingerprint_acquired_vendor">
     </string-array>
+    <!-- Message shown when fingerprint fails to match -->
+    <string name="fingerprint_error_not_match">Fingerprint not recognized</string>
+    <!-- Message shown when UDFPS fails to match -->
+    <string name="fingerprint_udfps_error_not_match">Press firmly on the sensor</string>
 
     <!-- Accessibility message announced when a fingerprint has been authenticated [CHAR LIMIT=NONE] -->
     <string name="fingerprint_authenticated">Fingerprint authenticated</string>
@@ -5704,6 +5709,20 @@
     <string name="harmful_app_warning_open_anyway">OPEN ANYWAY</string>
     <!-- Title for the harmful app warning dialog. [CHAR LIMIT=40] -->
     <string name="harmful_app_warning_title">Harmful app detected</string>
+
+    <!-- Title for the log access confirmation dialog. [CHAR LIMIT=40] -->
+    <string name="log_access_confirmation_title">System log access request</string>
+    <!-- Label for the allow button on the log access confirmation dialog. [CHAR LIMIT=20] -->
+    <string name="log_access_confirmation_allow">Only this time</string>
+    <!-- Label for the deny button on the log access confirmation dialog. [CHAR LIMIT=20] -->
+    <string name="log_access_confirmation_deny">Don\u2019t allow</string>
+
+    <!-- Content for the log access confirmation dialog. [CHAR LIMIT=NONE]-->
+    <string name="log_access_confirmation_body"><xliff:g id="log_access_app_name" example="Example App">%s</xliff:g> requests system logs for functional debugging.
+        These logs might contain information that apps and services on your device have written.</string>
+
+    <!-- Privacy notice do not show [CHAR LIMIT=20] -->
+    <string name="log_access_do_not_show_again">Don\u2019t show again</string>
 
     <!-- Text describing a permission request for one app to show another app's
          slices [CHAR LIMIT=NONE] -->

@@ -79,6 +79,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     static final String TAG = "ScrimController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    // debug mode colors scrims with below debug colors, irrespectively of which state they're in
+    public static final boolean DEBUG_MODE = false;
+
+    public static final int DEBUG_NOTIFICATIONS_TINT = Color.RED;
+    public static final int DEBUG_FRONT_TINT = Color.GREEN;
+    public static final int DEBUG_BEHIND_TINT = Color.BLUE;
+
     /**
      * General scrim animation duration.
      */
@@ -994,6 +1001,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         alpha = Math.max(0, Math.min(1.0f, alpha));
         if (scrim instanceof ScrimView) {
             ScrimView scrimView = (ScrimView) scrim;
+            if (DEBUG_MODE) {
+                tint = getDebugScrimTint(scrimView);
+            }
 
             Trace.traceCounter(Trace.TRACE_TAG_APP, getScrimName(scrimView) + "_alpha",
                     (int) (alpha * 255));
@@ -1006,6 +1016,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             scrim.setAlpha(alpha);
         }
         dispatchScrimsVisible();
+    }
+
+    private int getDebugScrimTint(ScrimView scrim) {
+        if (scrim == mScrimBehind) return DEBUG_BEHIND_TINT;
+        if (scrim == mScrimInFront) return DEBUG_FRONT_TINT;
+        if (scrim == mNotificationsScrim) return DEBUG_NOTIFICATIONS_TINT;
+        throw new RuntimeException("scrim can't be matched with known scrims");
     }
 
     private void startScrimAnimation(final View scrim, float current) {

@@ -2076,6 +2076,7 @@
   <java-symbol type="integer" name="config_screenBrightnessDim" />
   <java-symbol type="integer" name="config_screenBrightnessDoze" />
   <java-symbol type="integer" name="config_autoBrightnessShortTermModelTimeout" />
+  <java-symbol type="integer" name="config_progressTimeoutFallbackHome" />
   <java-symbol type="integer" name="config_shutdownBatteryTemperature" />
   <java-symbol type="integer" name="config_undockedHdmiRotation" />
   <java-symbol type="integer" name="config_virtualKeyQuietTimeMillis" />
@@ -2590,6 +2591,8 @@
   <java-symbol type="string" name="fingerprint_error_timeout" />
   <java-symbol type="array" name="fingerprint_error_vendor" />
   <java-symbol type="string" name="fingerprint_error_vendor_unknown" />
+  <java-symbol type="string" name="fingerprint_error_not_match" />
+  <java-symbol type="string" name="fingerprint_udfps_error_not_match" />
   <java-symbol type="string" name="fingerprint_acquired_partial" />
   <java-symbol type="string" name="fingerprint_acquired_insufficient" />
   <java-symbol type="string" name="fingerprint_acquired_imager_dirty" />
@@ -3861,6 +3864,11 @@
   <java-symbol type="string" name="harmful_app_warning_open_anyway" />
   <java-symbol type="string" name="harmful_app_warning_title" />
   <java-symbol type="layout" name="harmful_app_warning_dialog" />
+
+  <java-symbol type="string" name="log_access_confirmation_allow" />
+  <java-symbol type="string" name="log_access_confirmation_deny" />
+  <java-symbol type="string" name="log_access_confirmation_title" />
+  <java-symbol type="string" name="log_access_confirmation_body" />
 
   <java-symbol type="string" name="config_defaultAssistantAccessComponent" />
 

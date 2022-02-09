@@ -172,8 +172,8 @@ public class LocalMediaManager implements BluetoothCallback {
             }
         }
 
-        if (device == mCurrentConnectedDevice) {
-            Log.d(TAG, "connectDevice() this device all ready connected! : " + device.getName());
+        if (device.equals(mCurrentConnectedDevice)) {
+            Log.d(TAG, "connectDevice() this device is already connected! : " + device.getName());
             return false;
         }
 

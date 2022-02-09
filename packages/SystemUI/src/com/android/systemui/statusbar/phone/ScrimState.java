@@ -153,7 +153,7 @@ public enum ScrimState {
         // to make sure correct color is returned before "prepare" is called
         @Override
         public int getBehindTint() {
-            return DEBUG_MODE ? DEBUG_BEHIND_TINT : Color.BLACK;
+            return Color.BLACK;
         }
     },
 
@@ -264,12 +264,6 @@ public enum ScrimState {
         }
     };
 
-    private static final boolean DEBUG_MODE = false;
-
-    private static final int DEBUG_NOTIFICATIONS_TINT = Color.RED;
-    private static final int DEBUG_FRONT_TINT = Color.GREEN;
-    private static final int DEBUG_BEHIND_TINT = Color.BLUE;
-
     boolean mBlankScreen = false;
     long mAnimationDuration = ScrimController.ANIMATION_DURATION;
     int mFrontTint = Color.TRANSPARENT;
@@ -329,15 +323,15 @@ public enum ScrimState {
     }
 
     public int getFrontTint() {
-        return DEBUG_MODE ? DEBUG_FRONT_TINT : mFrontTint;
+        return mFrontTint;
     }
 
     public int getBehindTint() {
-        return DEBUG_MODE ? DEBUG_BEHIND_TINT : mBehindTint;
+        return mBehindTint;
     }
 
     public int getNotifTint() {
-        return DEBUG_MODE ? DEBUG_NOTIFICATIONS_TINT : mNotifTint;
+        return mNotifTint;
     }
 
     public long getAnimationDuration() {
@@ -349,6 +343,10 @@ public enum ScrimState {
     }
 
     public void updateScrimColor(ScrimView scrim, float alpha, int tint) {
+        if (ScrimController.DEBUG_MODE) {
+            tint = scrim == mScrimInFront ? ScrimController.DEBUG_FRONT_TINT
+                    : ScrimController.DEBUG_BEHIND_TINT;
+        }
         Trace.traceCounter(Trace.TRACE_TAG_APP,
                 scrim == mScrimInFront ? "front_scrim_alpha" : "back_scrim_alpha",
                 (int) (alpha * 255));

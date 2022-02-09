@@ -5033,7 +5033,7 @@ public class ComputerEngine implements Computer {
         }
 
         return new InstallSourceInfo(initiatingPackageName, initiatingPackageSigningInfo,
-                originatingPackageName, installerPackageName);
+                originatingPackageName, installerPackageName, installSource.packageSource);
     }
 
     @PackageManager.EnabledState

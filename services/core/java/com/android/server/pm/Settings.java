@@ -40,6 +40,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
 import android.content.pm.IntentFilterVerificationInfo;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackagePartitions;
@@ -2828,6 +2829,8 @@ public final class Settings implements Watchable, Snappable {
             serializer.attribute(null, "installerAttributionTag",
                     installSource.installerAttributionTag);
         }
+        serializer.attributeInt(null, "packageSource",
+                installSource.packageSource);
         if (installSource.isOrphaned) {
             serializer.attributeBoolean(null, "isOrphaned", true);
         }
@@ -3599,6 +3602,7 @@ public final class Settings implements Watchable, Snappable {
         String systemStr = null;
         String installerPackageName = null;
         String installerAttributionTag = null;
+        int packageSource = PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED;
         boolean isOrphaned = false;
         String installOriginatingPackageName = null;
         String installInitiatingPackageName = null;
@@ -3640,6 +3644,8 @@ public final class Settings implements Watchable, Snappable {
             versionCode = parser.getAttributeLong(null, "version", 0);
             installerPackageName = parser.getAttributeValue(null, "installer");
             installerAttributionTag = parser.getAttributeValue(null, "installerAttributionTag");
+            packageSource = parser.getAttributeInt(null, "packageSource",
+                    PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
             isOrphaned = parser.getAttributeBoolean(null, "isOrphaned", false);
             installInitiatingPackageName = parser.getAttributeValue(null, "installInitiator");
             installOriginatingPackageName = parser.getAttributeValue(null, "installOriginator");
@@ -3778,7 +3784,7 @@ public final class Settings implements Watchable, Snappable {
         if (packageSetting != null) {
             InstallSource installSource = InstallSource.create(
                     installInitiatingPackageName, installOriginatingPackageName,
-                    installerPackageName, installerAttributionTag, isOrphaned,
+                    installerPackageName, installerAttributionTag, packageSource, isOrphaned,
                     installInitiatorUninstalled);
             packageSetting.setInstallSource(installSource)
                     .setVolumeUuid(volumeUuid)
@@ -4449,6 +4455,8 @@ public final class Settings implements Watchable, Snappable {
                     ? ps.getInstallSource().installerPackageName : "?");
             pw.print(ps.getInstallSource().installerAttributionTag != null
                     ? "(" + ps.getInstallSource().installerAttributionTag + ")" : "");
+            pw.print(",");
+            pw.print(ps.getInstallSource().packageSource);
             pw.println();
             if (pkg != null) {
                 pw.print(checkinTag); pw.print("-"); pw.print("splt,");
@@ -4727,6 +4735,8 @@ public final class Settings implements Watchable, Snappable {
             pw.print(prefix); pw.print("  installerAttributionTag=");
             pw.println(ps.getInstallSource().installerAttributionTag);
         }
+        pw.print(prefix); pw.print("  packageSource=");
+        pw.println(ps.getInstallSource().packageSource);
         if (ps.isLoading()) {
             pw.print(prefix); pw.println("  loadingProgress=" +
                     (int) (ps.getLoadingProgress() * 100) + "%");

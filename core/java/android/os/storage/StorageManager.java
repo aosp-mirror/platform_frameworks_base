@@ -1624,9 +1624,9 @@ public class StorageManager {
     }
 
     /** {@hide} */
-    public void unlockUserKey(int userId, int serialNumber, byte[] token, byte[] secret) {
+    public void unlockUserKey(int userId, int serialNumber, byte[] secret) {
         try {
-            mStorageManager.unlockUserKey(userId, serialNumber, token, secret);
+            mStorageManager.unlockUserKey(userId, serialNumber, secret);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

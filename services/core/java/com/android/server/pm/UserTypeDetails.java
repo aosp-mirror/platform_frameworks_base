@@ -156,6 +156,13 @@ public final class UserTypeDetails {
      */
     private final boolean mIsMediaSharedWithParent;
 
+    /**
+     * Denotes if the user shares encryption credentials with its parent user.
+     *
+     * <p> Default value is false
+     */
+    private final boolean mIsCredentialSharedWithParent;
+
     private UserTypeDetails(@NonNull String name, boolean enabled, int maxAllowed,
             @UserInfoFlag int baseType, @UserInfoFlag int defaultUserInfoPropertyFlags, int label,
             int maxAllowedPerParent,
@@ -166,7 +173,8 @@ public final class UserTypeDetails {
             @Nullable Bundle defaultSystemSettings,
             @Nullable Bundle defaultSecureSettings,
             @Nullable List<DefaultCrossProfileIntentFilter> defaultCrossProfileIntentFilters,
-            boolean isMediaSharedWithParent) {
+            boolean isMediaSharedWithParent,
+            boolean isCredentialSharedWithParent) {
         this.mName = name;
         this.mEnabled = enabled;
         this.mMaxAllowed = maxAllowed;
@@ -186,6 +194,7 @@ public final class UserTypeDetails {
         this.mBadgeColors = badgeColors;
         this.mDarkThemeBadgeColors = darkThemeBadgeColors;
         this.mIsMediaSharedWithParent = isMediaSharedWithParent;
+        this.mIsCredentialSharedWithParent = isCredentialSharedWithParent;
     }
 
     /**
@@ -310,6 +319,14 @@ public final class UserTypeDetails {
         return mIsMediaSharedWithParent;
     }
 
+    /**
+     * Returns true if the user has shared encryption credential with parent user or
+     * false otherwise.
+     */
+    public boolean isCredentialSharedWithParent() {
+        return mIsCredentialSharedWithParent;
+    }
+
     /** Returns a {@link Bundle} representing the default user restrictions. */
     @NonNull Bundle getDefaultRestrictions() {
         return BundleUtils.clone(mDefaultRestrictions);
@@ -402,6 +419,7 @@ public final class UserTypeDetails {
         private @DrawableRes int mBadgePlain = Resources.ID_NULL;
         private @DrawableRes int mBadgeNoBackground = Resources.ID_NULL;
         private boolean mIsMediaSharedWithParent = false;
+        private boolean mIsCredentialSharedWithParent = false;
 
         public Builder setName(String name) {
             mName = name;
@@ -501,6 +519,15 @@ public final class UserTypeDetails {
             return this;
         }
 
+        /**
+         * Sets shared media property for the user.
+         * @param isCredentialSharedWithParent  the value to be set, true or false
+         */
+        public Builder setIsCredentialSharedWithParent(boolean isCredentialSharedWithParent) {
+            mIsCredentialSharedWithParent = isCredentialSharedWithParent;
+            return this;
+        }
+
         @UserInfoFlag int getBaseType() {
             return mBaseType;
         }
@@ -543,7 +570,8 @@ public final class UserTypeDetails {
                     mDefaultSystemSettings,
                     mDefaultSecureSettings,
                     mDefaultCrossProfileIntentFilters,
-                    mIsMediaSharedWithParent);
+                    mIsMediaSharedWithParent,
+                    mIsCredentialSharedWithParent);
         }
 
         private boolean hasBadge() {

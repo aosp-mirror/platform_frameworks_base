@@ -28,6 +28,7 @@ import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.PackageManagerServiceUtils.makeDirRecursive;
 
 import android.content.pm.DataLoaderType;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.SigningDetails;
 import android.content.pm.parsing.ApkLiteParseUtils;
@@ -80,7 +81,8 @@ class FileInstallArgs extends InstallArgs {
                 null, null, instructionSets, null, null, null, MODE_DEFAULT, null, 0,
                 SigningDetails.UNKNOWN,
                 PackageManager.INSTALL_REASON_UNKNOWN, PackageManager.INSTALL_SCENARIO_DEFAULT,
-                false, DataLoaderType.NONE, pm);
+                false, DataLoaderType.NONE,
+                PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED, pm);
         mCodeFile = (codePath != null) ? new File(codePath) : null;
     }
 

@@ -173,13 +173,13 @@ interface IStorageManager {
     void setDebugFlags(int flags, int mask) = 60;
     void createUserKey(int userId, int serialNumber, boolean ephemeral) = 61;
     void destroyUserKey(int userId) = 62;
-    void unlockUserKey(int userId, int serialNumber, in byte[] token, in byte[] secret) = 63;
+    void unlockUserKey(int userId, int serialNumber, in byte[] secret) = 63;
     void lockUserKey(int userId) = 64;
     boolean isUserKeyUnlocked(int userId) = 65;
     void prepareUserStorage(in String volumeUuid, int userId, int serialNumber, int flags) = 66;
     void destroyUserStorage(in String volumeUuid, int userId, int flags) = 67;
     boolean isConvertibleToFBE() = 68;
-    void addUserKeyAuth(int userId, int serialNumber, in byte[] token, in byte[] secret) = 70;
+    void addUserKeyAuth(int userId, int serialNumber, in byte[] secret) = 70;
     void fixateNewestUserKeyAuth(int userId) = 71;
     void fstrim(int flags, IVoldTaskListener listener) = 72;
     AppFuseMount mountProxyFileDescriptorBridge() = 73;
@@ -195,7 +195,7 @@ interface IStorageManager {
     void startCheckpoint(int numTries) = 85;
     boolean needsCheckpoint() = 86;
     void abortChanges(in String message, boolean retry) = 87;
-    void clearUserKeyAuth(int userId, int serialNumber, in byte[] token, in byte[] secret) = 88;
+    void clearUserKeyAuth(int userId, int serialNumber, in byte[] secret) = 88;
     void fixupAppDir(in String path) = 89;
     void disableAppDataIsolation(in String pkgName, int pid, int userId) = 90;
     PendingIntent getManageSpaceActivityIntent(in String packageName, int requestCode) = 91;

@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar.notification.collection
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderEntryListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderGroupListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderListListener
@@ -75,6 +76,7 @@ import javax.inject.Inject
  */
 @SysUISingleton
 class NotifPipeline @Inject constructor(
+    notifPipelineFlags: NotifPipelineFlags,
     private val mNotifCollection: NotifCollection,
     private val mShadeListBuilder: ShadeListBuilder,
     private val mRenderStageManager: RenderStageManager
@@ -94,12 +96,18 @@ class NotifPipeline @Inject constructor(
         mNotifCollection.addCollectionListener(listener)
     }
 
+    override fun removeCollectionListener(listener: NotifCollectionListener) {
+        mNotifCollection.removeCollectionListener(listener)
+    }
+
     /**
      * Returns the NotificationEntry associated with [key].
      */
     override fun getEntry(key: String): NotificationEntry? {
         return mNotifCollection.getEntry(key)
     }
+
+    val isNewPipelineEnabled: Boolean = notifPipelineFlags.isNewPipelineEnabled()
 
     /**
      * Registers a lifetime extender. Lifetime extenders can cause notifications that have been

@@ -76,6 +76,7 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         super(service, HdmiDeviceInfo.DEVICE_PLAYBACK);
 
         mDelayedStandbyHandler = new Handler(service.getServiceLooper());
+        mStandbyHandler = new HdmiCecStandbyModeHandler(service, this);
     }
 
     @Override

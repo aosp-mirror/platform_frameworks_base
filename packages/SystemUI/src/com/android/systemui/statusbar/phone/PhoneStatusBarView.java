@@ -50,8 +50,6 @@ public class PhoneStatusBarView extends FrameLayout {
     private DarkReceiver mClock;
     private int mRotationOrientation = -1;
     @Nullable
-    private View mCenterIconSpace;
-    @Nullable
     private View mCutoutSpace;
     @Nullable
     private DisplayCutout mDisplayCutout;
@@ -79,7 +77,6 @@ public class PhoneStatusBarView extends FrameLayout {
         mBattery = findViewById(R.id.battery);
         mClock = findViewById(R.id.clock);
         mCutoutSpace = findViewById(R.id.cutout_space_view);
-        mCenterIconSpace = findViewById(R.id.centered_icon_area);
 
         updateResources();
     }
@@ -228,12 +225,10 @@ public class PhoneStatusBarView extends FrameLayout {
 
         boolean hasCornerCutout = mContentInsetsProvider.currentRotationHasCornerCutout();
         if (mDisplayCutout == null || mDisplayCutout.isEmpty() || hasCornerCutout) {
-            mCenterIconSpace.setVisibility(View.VISIBLE);
             mCutoutSpace.setVisibility(View.GONE);
             return;
         }
 
-        mCenterIconSpace.setVisibility(View.GONE);
         mCutoutSpace.setVisibility(View.VISIBLE);
         LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) mCutoutSpace.getLayoutParams();
 

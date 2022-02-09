@@ -38,6 +38,7 @@ import android.Manifest;
 import android.app.ActivityManagerInternal;
 import android.content.Context;
 import android.content.pm.InstallSourceInfo;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
@@ -69,7 +70,8 @@ public class LocaleManagerServiceTest {
     private static final InstallSourceInfo DEFAULT_INSTALL_SOURCE_INFO = new InstallSourceInfo(
             /* initiatingPackageName = */ null, /* initiatingPackageSigningInfo = */ null,
             /* originatingPackageName = */ null,
-            /* installingPackageName = */ DEFAULT_INSTALLER_PACKAGE_NAME);
+            /* installingPackageName = */ DEFAULT_INSTALLER_PACKAGE_NAME,
+            /* packageSource = */ PackageInstaller.PACKAGE_SOURCE_UNSPECIFIED);
 
     private LocaleManagerService mLocaleManagerService;
     private LocaleManagerBackupHelper mMockBackupHelper;

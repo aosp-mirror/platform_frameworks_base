@@ -53,6 +53,7 @@ abstract class InstallArgs {
     final int mInstallScenario;
     final boolean mForceQueryableOverride;
     final int mDataLoaderType;
+    final int mPackageSource;
 
     // The list of instruction sets supported by this app. This is currently
     // only used during the rmdex() phase to clean up resources. We can get rid of this
@@ -70,7 +71,7 @@ abstract class InstallArgs {
             int autoRevokePermissionsMode,
             String traceMethod, int traceCookie, SigningDetails signingDetails,
             int installReason, int installScenario, boolean forceQueryableOverride,
-            int dataLoaderType, PackageManagerService pm) {
+            int dataLoaderType, int packageSource, PackageManagerService pm) {
         mOriginInfo = originInfo;
         mMoveInfo = moveInfo;
         mInstallFlags = installFlags;
@@ -90,6 +91,7 @@ abstract class InstallArgs {
         mInstallScenario = installScenario;
         mForceQueryableOverride = forceQueryableOverride;
         mDataLoaderType = dataLoaderType;
+        mPackageSource = packageSource;
         mPm = pm;
         mRemovePackageHelper = new RemovePackageHelper(mPm);
     }
@@ -103,7 +105,7 @@ abstract class InstallArgs {
                 params.mAutoRevokePermissionsMode,
                 params.mTraceMethod, params.mTraceCookie, params.mSigningDetails,
                 params.mInstallReason, params.mInstallScenario, params.mForceQueryableOverride,
-                params.mDataLoaderType, params.mPm);
+                params.mDataLoaderType, params.mPackageSource, params.mPm);
     }
 
     abstract int copyApk();

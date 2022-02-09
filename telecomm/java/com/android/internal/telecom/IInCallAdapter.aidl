@@ -18,7 +18,6 @@ package com.android.internal.telecom;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.telecom.CallEndpoint;
 import android.telecom.PhoneAccountHandle;
 
 /**
@@ -96,8 +95,4 @@ oneway interface IInCallAdapter {
 
     void handoverTo(String callId, in PhoneAccountHandle destAcct, int videoState,
             in Bundle extras);
-
-    void pushCall(String callId, in CallEndpoint endpoint);
-
-    void answerCallViaEndpoint(String callId, in CallEndpoint endpoint, int videoState);
 }
