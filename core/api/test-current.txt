@@ -569,9 +569,13 @@ package android.app.admin {
 
 package android.app.assist {
 
-  public class ActivityId {
+  public final class ActivityId implements android.os.Parcelable {
+    ctor public ActivityId(int, @Nullable android.os.IBinder);
+    method public int describeContents();
     method public int getTaskId();
     method @Nullable public android.os.IBinder getToken();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.assist.ActivityId> CREATOR;
   }
 
 }

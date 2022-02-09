@@ -1395,7 +1395,10 @@ package android.app.ambientcontext {
 
 package android.app.assist {
 
-  public class ActivityId {
+  public final class ActivityId implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.assist.ActivityId> CREATOR;
   }
 
   public static class AssistStructure.ViewNode {
