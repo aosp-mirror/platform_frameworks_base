@@ -18,7 +18,9 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.TestApi;
+import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -43,6 +45,9 @@ public final class PictureInPictureParams implements Parcelable {
         private Rational mAspectRatio;
 
         @Nullable
+        private Rational mExpandedAspectRatio;
+
+        @Nullable
         private List<RemoteAction> mUserActions;
 
         @Nullable
@@ -63,6 +68,24 @@ public final class PictureInPictureParams implements Parcelable {
          */
         public Builder setAspectRatio(Rational aspectRatio) {
             mAspectRatio = aspectRatio;
+            return this;
+        }
+
+        /**
+         * Sets the aspect ratio for the expanded picture-in-picture mode. The aspect ratio is
+         * defined as the desired width / height. <br/>
+         * The aspect ratio cannot be changed from horizontal to vertical or vertical to horizontal
+         * while the PIP is shown. Any such changes will be ignored. <br/>
+         *
+         * Setting the expanded ratio shows the activity's support for expanded mode.
+         *
+         * @param expandedAspectRatio must not be between 2.39:1 and 1:2.39 (inclusive). If {@code
+         *                            null}, expanded picture-in-picture mode is not supported.
+         * @return this builder instance.
+         */
+        @RequiresFeature(PackageManager.FEATURE_EXPANDED_PICTURE_IN_PICTURE)
+        public @NonNull Builder setExpandedAspectRatio(@Nullable Rational expandedAspectRatio) {
+            mExpandedAspectRatio = expandedAspectRatio;
             return this;
         }
 
@@ -152,7 +175,8 @@ public final class PictureInPictureParams implements Parcelable {
          * @see Activity#setPictureInPictureParams(PictureInPictureParams)
          */
         public PictureInPictureParams build() {
-            PictureInPictureParams params = new PictureInPictureParams(mAspectRatio, mUserActions,
+            PictureInPictureParams params = new PictureInPictureParams(mAspectRatio,
+                    mExpandedAspectRatio, mUserActions,
                     mSourceRectHint, mAutoEnterEnabled, mSeamlessResizeEnabled);
             return params;
         }
@@ -163,6 +187,12 @@ public final class PictureInPictureParams implements Parcelable {
      */
     @Nullable
     private Rational mAspectRatio;
+
+    /**
+     * The expected aspect ratio of the vertically expanded picture-in-picture window.
+     */
+    @Nullable
+    private Rational mExpandedAspectRatio;
 
     /**
      * The set of actions that are associated with this activity when in picture-in-picture.
@@ -197,9 +227,8 @@ public final class PictureInPictureParams implements Parcelable {
 
     /** {@hide} */
     PictureInPictureParams(Parcel in) {
-        if (in.readInt() != 0) {
-            mAspectRatio = new Rational(in.readInt(), in.readInt());
-        }
+        mAspectRatio = readRationalFromParcel(in);
+        mExpandedAspectRatio = readRationalFromParcel(in);
         if (in.readInt() != 0) {
             mUserActions = new ArrayList<>();
             in.readTypedList(mUserActions, RemoteAction.CREATOR);
@@ -216,9 +245,11 @@ public final class PictureInPictureParams implements Parcelable {
     }
 
     /** {@hide} */
-    PictureInPictureParams(Rational aspectRatio, List<RemoteAction> actions,
-            Rect sourceRectHint, Boolean autoEnterEnabled, Boolean seamlessResizeEnabled) {
+    PictureInPictureParams(Rational aspectRatio, Rational expandedAspectRatio,
+            List<RemoteAction> actions, Rect sourceRectHint, Boolean autoEnterEnabled,
+            Boolean seamlessResizeEnabled) {
         mAspectRatio = aspectRatio;
+        mExpandedAspectRatio = expandedAspectRatio;
         mUserActions = actions;
         mSourceRectHint = sourceRectHint;
         mAutoEnterEnabled = autoEnterEnabled;
@@ -230,7 +261,7 @@ public final class PictureInPictureParams implements Parcelable {
      * @hide
      */
     public PictureInPictureParams(PictureInPictureParams other) {
-        this(other.mAspectRatio, other.mUserActions,
+        this(other.mAspectRatio, other.mExpandedAspectRatio, other.mUserActions,
                 other.hasSourceBoundsHint() ? new Rect(other.getSourceRectHint()) : null,
                 other.mAutoEnterEnabled, other.mSeamlessResizeEnabled);
     }
@@ -243,6 +274,10 @@ public final class PictureInPictureParams implements Parcelable {
         if (otherArgs.hasSetAspectRatio()) {
             mAspectRatio = otherArgs.mAspectRatio;
         }
+
+        // Copy either way because null can be used to explicitly unset the value
+        mExpandedAspectRatio = otherArgs.mExpandedAspectRatio;
+
         if (otherArgs.hasSetActions()) {
             mUserActions = otherArgs.mUserActions;
         }
@@ -280,6 +315,26 @@ public final class PictureInPictureParams implements Parcelable {
      */
     public boolean hasSetAspectRatio() {
         return mAspectRatio != null;
+    }
+
+    /**
+     * @return the expanded aspect ratio. If none is set, return 0.
+     * @hide
+     */
+    @TestApi
+    public float getExpandedAspectRatio() {
+        if (mExpandedAspectRatio != null) {
+            return mExpandedAspectRatio.floatValue();
+        }
+        return 0f;
+    }
+
+    /**
+     * @return whether the expanded aspect ratio is set
+     * @hide
+     */
+    public boolean hasSetExpandedAspectRatio() {
+        return mExpandedAspectRatio != null;
     }
 
     /**
@@ -349,7 +404,8 @@ public final class PictureInPictureParams implements Parcelable {
      */
     public boolean empty() {
         return !hasSourceBoundsHint() && !hasSetActions() && !hasSetAspectRatio()
-                && mAutoEnterEnabled != null && mSeamlessResizeEnabled != null;
+                && !hasSetExpandedAspectRatio() && mAutoEnterEnabled != null
+                && mSeamlessResizeEnabled != null;
     }
 
     @Override
@@ -360,13 +416,14 @@ public final class PictureInPictureParams implements Parcelable {
         return Objects.equals(mAutoEnterEnabled, that.mAutoEnterEnabled)
                 && Objects.equals(mSeamlessResizeEnabled, that.mSeamlessResizeEnabled)
                 && Objects.equals(mAspectRatio, that.mAspectRatio)
+                && Objects.equals(mExpandedAspectRatio, that.mExpandedAspectRatio)
                 && Objects.equals(mUserActions, that.mUserActions)
                 && Objects.equals(mSourceRectHint, that.mSourceRectHint);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mAspectRatio, mUserActions, mSourceRectHint,
+        return Objects.hash(mAspectRatio, mExpandedAspectRatio, mUserActions, mSourceRectHint,
                 mAutoEnterEnabled, mSeamlessResizeEnabled);
     }
 
@@ -377,13 +434,8 @@ public final class PictureInPictureParams implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        if (mAspectRatio != null) {
-            out.writeInt(1);
-            out.writeInt(mAspectRatio.getNumerator());
-            out.writeInt(mAspectRatio.getDenominator());
-        } else {
-            out.writeInt(0);
-        }
+        writeRationalToParcel(mAspectRatio, out);
+        writeRationalToParcel(mExpandedAspectRatio, out);
         if (mUserActions != null) {
             out.writeInt(1);
             out.writeTypedList(mUserActions, 0);
@@ -410,10 +462,28 @@ public final class PictureInPictureParams implements Parcelable {
         }
     }
 
+    private void writeRationalToParcel(Rational rational, Parcel out) {
+        if (rational != null) {
+            out.writeInt(1);
+            out.writeInt(rational.getNumerator());
+            out.writeInt(rational.getDenominator());
+        } else {
+            out.writeInt(0);
+        }
+    }
+
+    private Rational readRationalFromParcel(Parcel in) {
+        if (in.readInt() != 0) {
+            return new Rational(in.readInt(), in.readInt());
+        }
+        return null;
+    }
+
     @Override
     public String toString() {
         return "PictureInPictureParams("
                 + " aspectRatio=" + getAspectRatioRational()
+                + " expandedAspectRatio=" + mExpandedAspectRatio
                 + " sourceRectHint=" + getSourceRectHint()
                 + " hasSetActions=" + hasSetActions()
                 + " isAutoPipEnabled=" + isAutoEnterEnabled()

@@ -3797,6 +3797,16 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports expanded picture-in-picture multi-window mode.
+     *
+     * @see android.app.PictureInPictureParams.Builder#setExpandedAspectRatio
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_EXPANDED_PICTURE_IN_PICTURE
+            = "android.software.expanded_picture_in_picture";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device supports running activities on secondary displays.
      */
     @SdkConstant(SdkConstantType.FEATURE)
