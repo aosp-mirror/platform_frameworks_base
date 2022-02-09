@@ -901,7 +901,7 @@ static void Image_setNativeContext(JNIEnv* env, jobject thiz,
 
     env->SetIntField(thiz, gSurfaceImageClassInfo.mNativeFenceFd, reinterpret_cast<jint>(fenceFd));
 
-    env->SetLongField(thiz, gSurfaceImageClassInfo.mDataSpace, dataSpace);
+    env->SetIntField(thiz, gSurfaceImageClassInfo.mDataSpace, dataSpace);
 }
 
 static void Image_unlockIfLocked(JNIEnv* env, jobject thiz) {
