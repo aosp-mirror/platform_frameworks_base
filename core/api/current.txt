@@ -23351,7 +23351,6 @@ package android.media {
     method @NonNull public java.util.List<java.lang.String> getAllowedPackages();
     method @NonNull public java.util.List<java.lang.String> getDeduplicationPackageOrder();
     method @NonNull public java.util.List<java.lang.String> getPreferredFeatures();
-    method @NonNull public java.util.List<java.lang.String> getRequiredFeatures();
     method public boolean shouldPerformActiveScan();
     method public boolean shouldRemoveDuplicates();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -23365,7 +23364,6 @@ package android.media {
     method @NonNull public android.media.RouteDiscoveryPreference.Builder setAllowedPackages(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.media.RouteDiscoveryPreference.Builder setDeduplicationPackageOrder(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.media.RouteDiscoveryPreference.Builder setPreferredFeatures(@NonNull java.util.List<java.lang.String>);
-    method @NonNull public android.media.RouteDiscoveryPreference.Builder setRequiredFeatures(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.media.RouteDiscoveryPreference.Builder setShouldPerformActiveScan(boolean);
   }
 
