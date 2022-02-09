@@ -755,7 +755,7 @@
     <string name="policydesc_disableKeyguardFeatures" msgid="6641673177041195957">"Evita el uso de algunas funciones de bloqueo de pantalla."</string>
   <string-array name="phoneTypes">
     <item msgid="8996339953292723951">"Casa"</item>
-    <item msgid="7740243458912727194">"Móvil"</item>
+    <item msgid="7740243458912727194">"Celular"</item>
     <item msgid="8526146065496663766">"Trabajo"</item>
     <item msgid="8150904584178569699">"Fax laboral"</item>
     <item msgid="4537253139152229577">"Fax residencial"</item>
@@ -798,7 +798,7 @@
   </string-array>
     <string name="phoneTypeCustom" msgid="5120365721260686814">"Personalizado"</string>
     <string name="phoneTypeHome" msgid="3880132427643623588">"Casa"</string>
-    <string name="phoneTypeMobile" msgid="1178852541462086735">"Móvil"</string>
+    <string name="phoneTypeMobile" msgid="1178852541462086735">"Celular"</string>
     <string name="phoneTypeWork" msgid="6604967163358864607">"Trabajo"</string>
     <string name="phoneTypeFaxWork" msgid="6757519896109439123">"Fax laboral"</string>
     <string name="phoneTypeFaxHome" msgid="6678559953115904345">"Fax personal"</string>
