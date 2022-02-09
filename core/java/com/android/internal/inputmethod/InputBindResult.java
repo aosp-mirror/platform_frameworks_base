@@ -25,6 +25,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.SparseArray;
 import android.view.InputChannel;
 
 import com.android.internal.view.IInputMethodSession;
@@ -53,7 +54,8 @@ public final class InputBindResult implements Parcelable {
             ResultCode.ERROR_NOT_IME_TARGET_WINDOW,
             ResultCode.ERROR_NO_EDITOR,
             ResultCode.ERROR_DISPLAY_ID_MISMATCH,
-            ResultCode.ERROR_INVALID_DISPLAY_ID
+            ResultCode.ERROR_INVALID_DISPLAY_ID,
+            ResultCode.SUCCESS_WITH_ACCESSIBILITY_SESSION
     })
     public @interface ResultCode {
         /**
@@ -168,6 +170,7 @@ public final class InputBindResult implements Parcelable {
          * display.
          */
         int ERROR_INVALID_DISPLAY_ID = 15;
+        int SUCCESS_WITH_ACCESSIBILITY_SESSION = 16;
     }
 
     @ResultCode
@@ -177,6 +180,11 @@ public final class InputBindResult implements Parcelable {
      * The input method service.
      */
     public final IInputMethodSession method;
+
+    /**
+     * The accessibility services.
+     */
+    public SparseArray<IInputMethodSession> accessibilitySessions;
 
     /**
      * The input channel used to send input events to this IME.
@@ -204,6 +212,8 @@ public final class InputBindResult implements Parcelable {
      *
      * @param result A result code defined in {@link ResultCode}.
      * @param method {@link IInputMethodSession} to interact with the IME.
+     * @param accessibilitySessions {@link IInputMethodSession} to interact with accessibility
+     *                              services.
      * @param channel {@link InputChannel} to forward input events to the IME.
      * @param id The {@link String} representations of the IME, which is the same as
      *           {@link android.view.inputmethod.InputMethodInfo#getId()} and
@@ -213,10 +223,12 @@ public final class InputBindResult implements Parcelable {
      *                                             {@code suppressesSpellChecker="true"}.
      */
     public InputBindResult(@ResultCode int result,
-            IInputMethodSession method, InputChannel channel, String id, int sequence,
+            IInputMethodSession method, SparseArray<IInputMethodSession> accessibilitySessions,
+            InputChannel channel, String id, int sequence,
             boolean isInputMethodSuppressingSpellChecker) {
         this.result = result;
         this.method = method;
+        this.accessibilitySessions = accessibilitySessions;
         this.channel = channel;
         this.id = id;
         this.sequence = sequence;
@@ -226,6 +238,19 @@ public final class InputBindResult implements Parcelable {
     private InputBindResult(Parcel source) {
         result = source.readInt();
         method = IInputMethodSession.Stub.asInterface(source.readStrongBinder());
+        int n = source.readInt();
+        if (n < 0) {
+            accessibilitySessions = null;
+        } else {
+            accessibilitySessions = new SparseArray<>(n);
+            while (n > 0) {
+                int key = source.readInt();
+                IInputMethodSession value =
+                        IInputMethodSession.Stub.asInterface(source.readStrongBinder());
+                accessibilitySessions.append(key, value);
+                n--;
+            }
+        }
         if (source.readInt() != 0) {
             channel = InputChannel.CREATOR.createFromParcel(source);
         } else {
@@ -254,6 +279,18 @@ public final class InputBindResult implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(result);
         dest.writeStrongInterface(method);
+        if (accessibilitySessions == null) {
+            dest.writeInt(-1);
+        } else {
+            int n = accessibilitySessions.size();
+            dest.writeInt(n);
+            int i = 0;
+            while (i < n) {
+                dest.writeInt(accessibilitySessions.keyAt(i));
+                dest.writeStrongInterface(accessibilitySessions.valueAt(i));
+                i++;
+            }
+        }
         if (channel != null) {
             dest.writeInt(1);
             channel.writeToParcel(dest, flags);
@@ -329,7 +366,7 @@ public final class InputBindResult implements Parcelable {
     }
 
     private static InputBindResult error(@ResultCode int result) {
-        return new InputBindResult(result, null, null, null, -1, false);
+        return new InputBindResult(result, null, null, null, null, -1, false);
     }
 
     /**

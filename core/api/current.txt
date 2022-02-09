@@ -3061,6 +3061,7 @@ package android.accessibilityservice {
     method @NonNull public final android.accessibilityservice.AccessibilityButtonController getAccessibilityButtonController();
     method @NonNull public final android.accessibilityservice.AccessibilityButtonController getAccessibilityButtonController(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.USE_FINGERPRINT) public final android.accessibilityservice.FingerprintGestureController getFingerprintGestureController();
+    method @Nullable public final android.accessibilityservice.InputMethod getInputMethod();
     method @NonNull public final android.accessibilityservice.AccessibilityService.MagnificationController getMagnificationController();
     method public android.view.accessibility.AccessibilityNodeInfo getRootInActiveWindow();
     method public final android.accessibilityservice.AccessibilityServiceInfo getServiceInfo();
@@ -3073,6 +3074,7 @@ package android.accessibilityservice {
     method public boolean isNodeInCache(@NonNull android.view.accessibility.AccessibilityNodeInfo);
     method public abstract void onAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     method public final android.os.IBinder onBind(android.content.Intent);
+    method @NonNull public android.accessibilityservice.InputMethod onCreateInputMethod();
     method @Deprecated protected boolean onGesture(int);
     method public boolean onGesture(@NonNull android.accessibilityservice.AccessibilityGestureEvent);
     method public abstract void onInterrupt();
@@ -3260,6 +3262,7 @@ package android.accessibilityservice {
     field public static final int FEEDBACK_VISUAL = 8; // 0x8
     field public static final int FLAG_ENABLE_ACCESSIBILITY_VOLUME = 128; // 0x80
     field public static final int FLAG_INCLUDE_NOT_IMPORTANT_VIEWS = 2; // 0x2
+    field public static final int FLAG_INPUT_METHOD_EDITOR = 32768; // 0x8000
     field public static final int FLAG_REPORT_VIEW_IDS = 16; // 0x10
     field public static final int FLAG_REQUEST_2_FINGER_PASSTHROUGH = 8192; // 0x2000
     field public static final int FLAG_REQUEST_ACCESSIBILITY_BUTTON = 256; // 0x100
@@ -3318,6 +3321,28 @@ package android.accessibilityservice {
     method public android.graphics.Path getPath();
     method public long getStartTime();
     method public boolean willContinue();
+  }
+
+  public class InputMethod {
+    ctor protected InputMethod(@NonNull android.accessibilityservice.AccessibilityService);
+    method @Nullable public final android.accessibilityservice.InputMethod.AccessibilityInputConnection getCurrentInputConnection();
+    method @Nullable public final android.view.inputmethod.EditorInfo getCurrentInputEditorInfo();
+    method public final boolean getCurrentInputStarted();
+    method public void onFinishInput();
+    method public void onStartInput(@NonNull android.view.inputmethod.EditorInfo, boolean);
+    method public void onUpdateSelection(int, int, int, int, int, int);
+  }
+
+  public final class InputMethod.AccessibilityInputConnection {
+    method public void clearMetaKeyStates(int);
+    method public void commitText(@NonNull CharSequence, int, @Nullable android.view.inputmethod.TextAttribute);
+    method public void deleteSurroundingText(int, int);
+    method public int getCursorCapsMode(int);
+    method @Nullable public android.view.inputmethod.SurroundingText getSurroundingText(@IntRange(from=0) int, @IntRange(from=0) int, int);
+    method public void performContextMenuAction(int);
+    method public void performEditorAction(int);
+    method public void sendKeyEvent(@NonNull android.view.KeyEvent);
+    method public void setSelection(int, int);
   }
 
   public final class MagnificationConfig implements android.os.Parcelable {
