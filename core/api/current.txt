@@ -19114,6 +19114,7 @@ package android.media {
     method public boolean isSink();
     method public boolean isSource();
     field public static final int TYPE_AUX_LINE = 19; // 0x13
+    field public static final int TYPE_BLE_BROADCAST = 30; // 0x1e
     field public static final int TYPE_BLE_HEADSET = 26; // 0x1a
     field public static final int TYPE_BLE_SPEAKER = 27; // 0x1b
     field public static final int TYPE_BLUETOOTH_A2DP = 8; // 0x8
