@@ -15,7 +15,6 @@
 
 package com.android.server.inputmethod;
 
-import static android.inputmethodservice.InputMethodService.FINISH_INPUT_NO_FALLBACK_CONNECTION;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
@@ -148,7 +147,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.infra.AndroidFuture;
 import com.android.internal.inputmethod.DirectBootAwareness;
@@ -279,6 +277,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     final WindowManagerInternal mWindowManagerInternal;
     final PackageManagerInternal mPackageManagerInternal;
     final InputManagerInternal mInputManagerInternal;
+    final ImePlatformCompatUtils mImePlatformCompatUtils;
     final boolean mHasFeature;
     private final ArrayMap<String, List<InputMethodSubtype>> mAdditionalSubtypeMap =
             new ArrayMap<>();
@@ -690,8 +689,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      * True if the device is currently interactive with user.  The value is true initially.
      */
     boolean mIsInteractive = true;
-
-    private final IPlatformCompat mPlatformCompat;
 
     int mBackDisposition = InputMethodService.BACK_DISPOSITION_DEFAULT;
 
@@ -1627,6 +1624,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
+        mImePlatformCompatUtils = new ImePlatformCompatUtils();
         mImeDisplayValidator = mWindowManagerInternal::getDisplayImePolicy;
         mAppOpsManager = mContext.getSystemService(AppOpsManager.class);
         mUserManager = mContext.getSystemService(UserManager.class);
@@ -1634,8 +1632,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mAccessibilityManager = AccessibilityManager.getInstance(context);
         mHasFeature = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_INPUT_METHODS);
-        mPlatformCompat = IPlatformCompat.Stub.asInterface(
-                ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
+
         mSlotIme = mContext.getString(com.android.internal.R.string.status_bar_ime);
 
         Bundle extras = new Bundle();
@@ -4728,14 +4725,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
             // Inform the current client of the change in active status
             if (mCurClient != null && mCurClient.client != null) {
-                boolean reportToImeController = false;
-                try {
-                    reportToImeController = mPlatformCompat.isChangeEnabledByUid(
-                            FINISH_INPUT_NO_FALLBACK_CONNECTION, getCurMethodUidLocked());
-                } catch (RemoteException e) {
-                }
                 scheduleSetActiveToClient(mCurClient, mIsInteractive, mInFullscreenMode,
-                        reportToImeController);
+                        mImePlatformCompatUtils.shouldFinishInputWithReportToIme(
+                                getCurMethodUidLocked()));
             }
         }
     }
