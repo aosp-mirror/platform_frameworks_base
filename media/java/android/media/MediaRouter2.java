@@ -52,13 +52,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
- * This API is not generally intended for third party application developers.
- * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
-  <a href="{@docRoot}reference/androidx/mediarouter/media/package-summary.html">Media Router
+ * This API is not generally intended for third party application developers. Use the
+ * <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ * <a href="{@docRoot}reference/androidx/mediarouter/media/package-summary.html">Media Router
  * Library</a> for consistent behavior across all devices.
  *
- * Media Router 2 allows applications to control the routing of media channels
- * and streams from the current device to remote speakers and devices.
+ * <p>MediaRouter2 allows applications to control the routing of media channels and streams from
+ * the current device to remote speakers and devices.
  */
 // TODO(b/157873330): Add method names at the beginning of log messages. (e.g. selectRoute)
 //       Not only MediaRouter2, but also to service / manager / provider.
