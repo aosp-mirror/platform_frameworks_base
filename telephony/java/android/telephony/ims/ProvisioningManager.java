@@ -1449,8 +1449,7 @@ public class ProvisioningManager {
      *     <li>{@link TelephonyManager#hasCarrierPrivileges}).</li>
      * </ul>
      *
-     * @see CarrierConfigManager#KEY_CARRIER_UT_PROVISIONING_REQUIRED_BOOL
-     * @see CarrierConfigManager#KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL
+     * @see CarrierConfigManager.Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE
      * @param isProvisioned true if the device is provisioned for UT over IMS, false otherwise.
      */
     @WorkerThread
@@ -1483,8 +1482,7 @@ public class ProvisioningManager {
      *         {@link TelephonyManager#hasCarrierPrivileges()}).</li>
      * </ul>
      *
-     * @see CarrierConfigManager#KEY_CARRIER_UT_PROVISIONING_REQUIRED_BOOL
-     * @see CarrierConfigManager#KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL
+     * @see CarrierConfigManager.Ims#KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE
      * @return true if the device is provisioned for the capability or does not require
      * provisioning, false if the capability does require provisioning and has not been
      * provisioned yet.
@@ -1545,6 +1543,7 @@ public class ProvisioningManager {
      *         {@link TelephonyManager#hasCarrierPrivileges()}).</li>
      * </ul>
      *
+     * @see CarrierConfigManager.Ims#KEY_RCS_REQUIRES_PROVISIONING_BUNDLE
      * @return true if the device is provisioned for the capability or does not require
      * provisioning, false if the capability does require provisioning and has not been
      * provisioned yet.
@@ -1614,6 +1613,7 @@ public class ProvisioningManager {
      *         {@link TelephonyManager#hasCarrierPrivileges()}).</li>
      * </ul>
      *
+     * @see CarrierConfigManager.Ims#KEY_RCS_REQUIRES_PROVISIONING_BUNDLE
      * @param isProvisioned true if the device is provisioned for the RCS capability specified,
      *                      false otherwise.
      */
