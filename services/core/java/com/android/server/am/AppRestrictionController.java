@@ -69,6 +69,7 @@ import static android.os.PowerExemptionManager.REASON_ROLE_EMERGENCY;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_ALLOW_LISTED;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_MODULE;
 import static android.os.PowerExemptionManager.REASON_SYSTEM_UID;
+import static android.os.PowerExemptionManager.reasonCodeToString;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.internal.notification.SystemNotificationChannels.ABUSIVE_BACKGROUND_APPS;
@@ -157,6 +158,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.function.Consumer;
 
@@ -329,6 +331,8 @@ public final class AppRestrictionController {
                         }
                     }
                 }
+                pw.print(" effectiveExemption=");
+                pw.print(reasonCodeToString(getBackgroundRestrictionExemptionReason(mUid)));
             }
 
             String getPackageName() {
@@ -555,6 +559,12 @@ public final class AppRestrictionController {
         static final String KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_TO_BG_RESTRICTED =
                 DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "prompt_fgs_with_noti_to_bg_restricted";
 
+        /**
+         * The list of packages to be exempted from all these background restrictions.
+         */
+        static final String KEY_BG_RESTRICTION_EXEMPTED_PACKAGES =
+                DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "restriction_exempted_packages";
+
         static final boolean DEFAULT_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION = false;
         static final long DEFAULT_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
@@ -568,6 +578,13 @@ public final class AppRestrictionController {
         volatile boolean mRestrictedBucketEnabled;
 
         volatile long mBgNotificationMinIntervalMs;
+
+        /**
+         * @see #KEY_BG_RESTRICTION_EXEMPTED_PACKAGES.
+         *
+         *<p> Mutations on them would result in copy-on-write.</p>
+         */
+        volatile Set<String> mBgRestrictionExemptedPackages = Collections.emptySet();
 
         /**
          * @see #KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_TO_BG_RESTRICTED.
@@ -595,6 +612,9 @@ public final class AppRestrictionController {
                         break;
                     case KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_TO_BG_RESTRICTED:
                         updateBgPromptFgsWithNotiToBgRestricted();
+                        break;
+                    case KEY_BG_RESTRICTION_EXEMPTED_PACKAGES:
+                        updateBgRestrictionExemptedPackages();
                         break;
                 }
                 AppRestrictionController.this.onPropertiesChanged(name);
@@ -628,6 +648,7 @@ public final class AppRestrictionController {
             updateBgAutoRestrictedBucketChanged();
             updateBgAbusiveNotificationMinimalInterval();
             updateBgPromptFgsWithNotiToBgRestricted();
+            updateBgRestrictionExemptedPackages();
         }
 
         private void updateBgAutoRestrictedBucketChanged() {
@@ -655,6 +676,23 @@ public final class AppRestrictionController {
                     mDefaultBgPromptFgsWithNotiToBgRestricted);
         }
 
+        private void updateBgRestrictionExemptedPackages() {
+            final String settings = DeviceConfig.getString(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    KEY_BG_RESTRICTION_EXEMPTED_PACKAGES,
+                    null);
+            if (settings == null) {
+                mBgRestrictionExemptedPackages = Collections.emptySet();
+                return;
+            }
+            final String[] settingsList = settings.split(",");
+            final ArraySet<String> packages = new ArraySet<>();
+            for (String pkg : settingsList) {
+                packages.add(pkg);
+            }
+            mBgRestrictionExemptedPackages = Collections.unmodifiableSet(packages);
+        }
+
         void dump(PrintWriter pw, String prefix) {
             pw.print(prefix);
             pw.println("BACKGROUND RESTRICTION POLICY SETTINGS:");
@@ -672,6 +710,10 @@ public final class AppRestrictionController {
             pw.print(KEY_BG_PROMPT_FGS_WITH_NOTIFICATION_TO_BG_RESTRICTED);
             pw.print('=');
             pw.println(mBgPromptFgsWithNotiToBgRestricted);
+            pw.print(prefix);
+            pw.print(KEY_BG_RESTRICTION_EXEMPTED_PACKAGES);
+            pw.print('=');
+            pw.println(mBgRestrictionExemptedPackages.toString());
         }
     }
 
@@ -1727,6 +1769,8 @@ public final class AppRestrictionController {
                     return REASON_CARRIER_PRIVILEGED_APP;
                 } else if (isExemptedFromSysConfig(pkg)) {
                     return REASON_SYSTEM_ALLOW_LISTED;
+                } else if (mConstantsObserver.mBgRestrictionExemptedPackages.contains(pkg)) {
+                    return REASON_ALLOWLISTED_PACKAGE;
                 }
             }
         }
