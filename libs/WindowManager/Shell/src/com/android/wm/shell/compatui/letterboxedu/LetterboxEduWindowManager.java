@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.WindowManager;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayLayout;
@@ -38,7 +39,6 @@ import com.android.wm.shell.compatui.CompatUIWindowManagerAbstract;
 /**
  * Window manager for the Letterbox Education.
  */
-// TODO(b/215316431): Add tests
 public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
 
     /**
@@ -51,7 +51,8 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
      * The name of the {@link SharedPreferences} that holds which user has seen the Letterbox
      * Education for specific packages and which user has seen the full dialog for any package.
      */
-    private static final String HAS_SEEN_LETTERBOX_EDUCATION_PREF_NAME =
+    @VisibleForTesting
+    static final String HAS_SEEN_LETTERBOX_EDUCATION_PREF_NAME =
             "has_seen_letterbox_education";
 
     /**
@@ -65,19 +66,37 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
     private boolean mEligibleForLetterboxEducation;
 
     @Nullable
-    private LetterboxEduDialogLayout mLayout;
+    @VisibleForTesting
+    LetterboxEduDialogLayout mLayout;
 
     private final Runnable mOnDismissCallback;
+
+    /**
+     * The vertical margin between the dialog container and the task stable bounds (excluding
+     * insets).
+     */
+    private final int mDialogVerticalMargin;
 
     public LetterboxEduWindowManager(Context context, TaskInfo taskInfo,
             SyncTransactionQueue syncQueue, ShellTaskOrganizer.TaskListener taskListener,
             DisplayLayout displayLayout, Runnable onDismissCallback) {
+        this(context, taskInfo, syncQueue, taskListener, displayLayout, onDismissCallback,
+                new LetterboxEduAnimationController(context));
+    }
+
+    @VisibleForTesting
+    LetterboxEduWindowManager(Context context, TaskInfo taskInfo,
+            SyncTransactionQueue syncQueue, ShellTaskOrganizer.TaskListener taskListener,
+            DisplayLayout displayLayout, Runnable onDismissCallback,
+            LetterboxEduAnimationController animationController) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
         mOnDismissCallback = onDismissCallback;
+        mAnimationController = animationController;
         mEligibleForLetterboxEducation = taskInfo.topActivityEligibleForLetterboxEducation;
-        mAnimationController = new LetterboxEduAnimationController(context);
         mSharedPreferences = mContext.getSharedPreferences(HAS_SEEN_LETTERBOX_EDUCATION_PREF_NAME,
                 Context.MODE_PRIVATE);
+        mDialogVerticalMargin = (int) mContext.getResources().getDimension(
+                R.dimen.letterbox_education_dialog_margin);
     }
 
     @Override
@@ -124,13 +143,12 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
         }
         final View dialogContainer = mLayout.getDialogContainer();
         MarginLayoutParams marginParams = (MarginLayoutParams) dialogContainer.getLayoutParams();
-        int verticalMargin = (int) mContext.getResources().getDimension(
-                R.dimen.letterbox_education_dialog_margin);
 
         final Rect taskBounds = getTaskBounds();
         final Rect taskStableBounds = getTaskStableBounds();
-        marginParams.topMargin = taskStableBounds.top - taskBounds.top + verticalMargin;
-        marginParams.bottomMargin = taskBounds.bottom - taskStableBounds.bottom + verticalMargin;
+        marginParams.topMargin = taskStableBounds.top - taskBounds.top + mDialogVerticalMargin;
+        marginParams.bottomMargin =
+                taskBounds.bottom - taskStableBounds.bottom + mDialogVerticalMargin;
         dialogContainer.setLayoutParams(marginParams);
     }
 
@@ -147,6 +165,10 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
     }
 
     private void onDismiss() {
+        if (mLayout == null) {
+            return;
+        }
+        mLayout.setDismissOnClickListener(null);
         mAnimationController.startExitAnimation(mLayout, () -> {
             release();
             mOnDismissCallback.run();
@@ -204,7 +226,8 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
         return String.valueOf(mContext.getUserId());
     }
 
-    private boolean isTaskbarEduShowing() {
+    @VisibleForTesting
+    boolean isTaskbarEduShowing() {
         return Settings.Secure.getInt(mContext.getContentResolver(),
                 LAUNCHER_TASKBAR_EDUCATION_SHOWING, /* def= */ 0) == 1;
     }
