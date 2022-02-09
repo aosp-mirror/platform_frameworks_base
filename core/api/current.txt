@@ -26436,6 +26436,7 @@ package android.net {
     method @NonNull public android.net.Ikev2VpnProfile.Builder setMaxMtu(int);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setMetered(boolean);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setProxy(@Nullable android.net.ProxyInfo);
+    method @NonNull public android.net.Ikev2VpnProfile.Builder setRequiresInternetValidation(boolean);
   }
 
   public class LocalServerSocket implements java.io.Closeable {
@@ -26510,6 +26511,7 @@ package android.net {
 
   public abstract class PlatformVpnProfile {
     method public final boolean getExcludeLocalRoutes();
+    method public final boolean getRequiresInternetValidation();
     method public final int getType();
     method @NonNull public final String getTypeString();
     field public static final int TYPE_IKEV2_IPSEC_PSK = 7; // 0x7

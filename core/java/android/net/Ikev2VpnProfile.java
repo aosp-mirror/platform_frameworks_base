@@ -159,8 +159,9 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
             boolean isMetered,
             int maxMtu,
             boolean restrictToTestNetworks,
-            boolean excludeLocalRoutes) {
-        super(type, excludeLocalRoutes);
+            boolean excludeLocalRoutes,
+            boolean requiresInternetValidation) {
+        super(type, excludeLocalRoutes, requiresInternetValidation);
 
         checkNotNull(serverAddr, MISSING_PARAM_MSG_TMPL, "Server address");
         checkNotNull(userIdentity, MISSING_PARAM_MSG_TMPL, "User Identity");
@@ -181,7 +182,7 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         mAllowedAlgorithms = Collections.unmodifiableList(new ArrayList<>(allowedAlgorithms));
         if (excludeLocalRoutes && !isBypassable) {
             throw new IllegalArgumentException(
-                    "Vpn should be byassable if excludeLocalRoutes is set");
+                    "Vpn must be bypassable if excludeLocalRoutes is set");
         }
 
         mIsBypassable = isBypassable;
@@ -238,7 +239,7 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
      * that provides Authentication, and one that provides Encryption. Authenticated Encryption with
      * Associated Data (AEAD) algorithms are counted as providing Authentication and Encryption.
      *
-     * @param allowedAlgorithms The list to be validated
+     * @param algorithmNames The list to be validated
      */
     private static void validateAllowedAlgorithms(@NonNull List<String> algorithmNames) {
         // First, make sure no insecure algorithms were proposed.
@@ -400,7 +401,9 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
                 mIsBypassable,
                 mIsMetered,
                 mMaxMtu,
-                mIsRestrictedToTestNetworks);
+                mIsRestrictedToTestNetworks,
+                mExcludeLocalRoutes,
+                mRequiresInternetValidation);
     }
 
     @Override
@@ -425,7 +428,8 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
                 && mIsMetered == other.mIsMetered
                 && mMaxMtu == other.mMaxMtu
                 && mIsRestrictedToTestNetworks == other.mIsRestrictedToTestNetworks
-                && mExcludeLocalRoutes == other.mExcludeLocalRoutes;
+                && mExcludeLocalRoutes == other.mExcludeLocalRoutes
+                && mRequiresInternetValidation == other.mRequiresInternetValidation;
     }
 
     /**
@@ -439,7 +443,7 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
     @NonNull
     public VpnProfile toVpnProfile() throws IOException, GeneralSecurityException {
         final VpnProfile profile = new VpnProfile("" /* Key; value unused by IKEv2VpnProfile(s) */,
-                mIsRestrictedToTestNetworks, mExcludeLocalRoutes);
+                mIsRestrictedToTestNetworks, mExcludeLocalRoutes, mRequiresInternetValidation);
         profile.type = mType;
         profile.server = mServerAddr;
         profile.ipsecIdentifier = mUserIdentity;
@@ -544,6 +548,7 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
             Log.w(TAG, "ExcludeLocalRoutes should only be set in the bypassable VPN");
         }
         builder.setExcludeLocalRoutes(profile.excludeLocalRoutes && profile.isBypassable);
+        builder.setRequiresInternetValidation(profile.requiresInternetValidation);
 
         return builder.build();
     }
@@ -776,6 +781,7 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
 
         @Nullable private ProxyInfo mProxyInfo;
         @NonNull private List<String> mAllowedAlgorithms = DEFAULT_ALGORITHMS;
+        private boolean mRequiresInternetValidation = false;
         private boolean mIsBypassable = false;
         private boolean mIsMetered = true;
         private int mMaxMtu = PlatformVpnProfile.MAX_MTU_DEFAULT;
@@ -988,6 +994,30 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         }
 
         /**
+         * Request that this VPN undergoes Internet validation.
+         *
+         * If this is true, the platform will perform basic validation checks for Internet
+         * connectivity over this VPN. If and when they succeed, the VPN network capabilities will
+         * reflect this by gaining the {@link NetworkCapabilities#NET_CAPABILITY_VALIDATED}
+         * capability.
+         *
+         * If this is false, the platform assumes the VPN either is always capable of reaching the
+         * Internet or intends not to. In this case, the VPN network capabilities will
+         * always gain the {@link NetworkCapabilities#NET_CAPABILITY_VALIDATED} capability
+         * immediately after it connects, whether it can reach public Internet destinations or not.
+         *
+         * @param requiresInternetValidation {@code true} if the framework should attempt to
+         *                                   validate this VPN for Internet connectivity. Defaults
+         *                                   to {@code false}.
+         */
+        @NonNull
+        @RequiresFeature(PackageManager.FEATURE_IPSEC_TUNNELS)
+        public Builder setRequiresInternetValidation(boolean requiresInternetValidation) {
+            mRequiresInternetValidation = requiresInternetValidation;
+            return this;
+        }
+
+        /**
          * Marks the VPN network as metered.
          *
          * <p>A VPN network is classified as metered when the user is sensitive to heavy data usage
@@ -1103,7 +1133,8 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
                     mIsMetered,
                     mMaxMtu,
                     mIsRestrictedToTestNetworks,
-                    mExcludeLocalRoutes);
+                    mExcludeLocalRoutes,
+                    mRequiresInternetValidation);
         }
     }
 }
