@@ -39,6 +39,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.AppTransition.MAX_APP_TRANSITION_DURATION;
+import static com.android.server.wm.AppTransition.isActivityTransitOld;
 import static com.android.server.wm.AppTransition.isTaskTransitOld;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
@@ -81,7 +82,6 @@ import android.util.Pools;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
-import android.view.InsetsState;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
@@ -98,6 +98,7 @@ import android.window.WindowContainerToken;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.graphics.ColorUtils;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wm.SurfaceAnimator.Animatable;
@@ -2814,6 +2815,25 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                     animationRunnerBuilder.hideInsetSourceViewOverflows(
                             mWmService.mTaskTransitionSpec.animationBoundInsets);
                 }
+            }
+
+            final ActivityRecord activityRecord = asActivityRecord();
+            if (activityRecord != null && isActivityTransitOld(transit)
+                    && adapter.getShowBackground()) {
+                final @ColorInt int backgroundColorForTransition;
+                if (adapter.getBackgroundColor() != 0) {
+                    // If available use the background color provided through getBackgroundColor
+                    // which if set originates from a call to overridePendingAppTransition.
+                    backgroundColorForTransition = adapter.getBackgroundColor();
+                } else {
+                    // Otherwise default to the window's background color if provided through
+                    // the theme as the background color for the animation - the top most window
+                    // with a valid background color and showBackground set takes precedence.
+                    final Task arTask = activityRecord.getTask();
+                    backgroundColorForTransition = ColorUtils.setAlphaComponent(
+                            arTask.getTaskDescription().getBackgroundColor(), 255);
+                }
+                animationRunnerBuilder.setTaskBackgroundColor(backgroundColorForTransition);
             }
 
             animationRunnerBuilder.build()
