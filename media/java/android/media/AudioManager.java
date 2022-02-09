@@ -5417,6 +5417,10 @@ public class AudioManager {
      */
     public static final int DEVICE_OUT_BLE_SPEAKER = AudioSystem.DEVICE_OUT_BLE_SPEAKER;
     /** @hide
+     * The audio output device code for a BLE audio brodcast group.
+     */
+    public static final int DEVICE_OUT_BLE_BROADCAST = AudioSystem.DEVICE_OUT_BLE_BROADCAST;
+    /** @hide
      * This is not used as a returned value from {@link #getDevicesForStream}, but could be
      *  used in the future in a set method to select whatever default device is chosen by the
      *  platform-specific implementation.
