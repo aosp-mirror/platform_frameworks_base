@@ -272,13 +272,13 @@
 
     <!-- fallback fonts -->
     <family lang="und-Arab" variant="elegant">
-        <font weight="400" style="normal">
+        <font weight="400" style="normal" postScriptName="NotoNaskhArabic">
             NotoNaskhArabic-Regular.ttf
         </font>
         <font weight="700" style="normal">NotoNaskhArabic-Bold.ttf</font>
     </family>
     <family lang="und-Arab" variant="compact">
-        <font weight="400" style="normal">
+        <font weight="400" style="normal" postScriptName="NotoNaskhArabicUI">
             NotoNaskhArabicUI-Regular.ttf
         </font>
         <font weight="700" style="normal">NotoNaskhArabicUI-Bold.ttf</font>

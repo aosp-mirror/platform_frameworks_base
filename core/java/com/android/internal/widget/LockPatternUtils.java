@@ -34,6 +34,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.Build;
 import android.os.Handler;
@@ -65,6 +66,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -194,6 +196,8 @@ public class LockPatternUtils {
     private final SparseLongArray mLockoutDeadlines = new SparseLongArray();
     private Boolean mHasSecureLockScreen;
 
+    private HashMap<UserHandle, UserManager> mUserManagerCache = new HashMap<>();
+
     /**
      * Use {@link TrustManager#isTrustUsuallyManaged(int)}.
      *
@@ -263,6 +267,22 @@ public class LockPatternUtils {
             mUserManager = UserManager.get(mContext);
         }
         return mUserManager;
+    }
+
+    private UserManager getUserManager(int userId) {
+        UserHandle userHandle = UserHandle.of(userId);
+        if (mUserManagerCache.containsKey(userHandle)) {
+            return mUserManagerCache.get(userHandle);
+        }
+
+        try {
+            Context userContext = mContext.createPackageContextAsUser("system", 0, userHandle);
+            UserManager userManager = userContext.getSystemService(UserManager.class);
+            mUserManagerCache.put(userHandle, userManager);
+            return userManager;
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new RuntimeException("Failed to create context for user " + userHandle, e);
+        }
     }
 
     private TrustManager getTrustManager() {
@@ -812,16 +832,17 @@ public class LockPatternUtils {
 
     /**
      * Enables/disables the Separate Profile Challenge for this {@code userHandle}. This is a no-op
-     * for user handles that do not belong to a managed profile.
+     * for user handles that do not belong to a profile that shares credential with parent.
+     * (managed profile and clone profile share lock credential with parent).
      *
      * @param userHandle Managed profile user id
      * @param enabled True if separate challenge is enabled
-     * @param profilePassword Managed profile previous password. Null when {@code enabled} is
+     * @param profilePassword Managed/Clone profile previous password. Null when {@code enabled} is
      *            true
      */
     public void setSeparateProfileChallengeEnabled(int userHandle, boolean enabled,
             LockscreenCredential profilePassword) {
-        if (!isManagedProfile(userHandle)) {
+        if (!isCredentialSharedWithParent(userHandle)) {
             return;
         }
         try {
@@ -837,7 +858,7 @@ public class LockPatternUtils {
      * Returns true if {@code userHandle} is a managed profile with separate challenge.
      */
     public boolean isSeparateProfileChallengeEnabled(int userHandle) {
-        return isManagedProfile(userHandle) && hasSeparateChallenge(userHandle);
+        return isCredentialSharedWithParent(userHandle) && hasSeparateChallenge(userHandle);
     }
 
     /**
@@ -860,6 +881,10 @@ public class LockPatternUtils {
     private boolean isManagedProfile(int userHandle) {
         final UserInfo info = getUserManager().getUserInfo(userHandle);
         return info != null && info.isManagedProfile();
+    }
+
+    private boolean isCredentialSharedWithParent(int userHandle) {
+        return getUserManager(userHandle).isCredentialSharedWithParent();
     }
 
     /**

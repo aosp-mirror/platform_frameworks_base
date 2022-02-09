@@ -31,7 +31,6 @@ import static android.content.ContentResolver.DEPRECATE_DATA_COLUMNS;
 import static android.content.ContentResolver.DEPRECATE_DATA_PREFIX;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.window.ConfigurationHelper.diffPublicWithSizeBuckets;
 import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
 import static android.window.ConfigurationHelper.isDifferentDisplay;
 import static android.window.ConfigurationHelper.shouldUpdateResources;
@@ -5880,15 +5879,15 @@ public final class ActivityThread extends ClientTransactionHandler
 
         final boolean movedToDifferentDisplay = isDifferentDisplay(activity.getDisplayId(),
                 displayId);
-        final ActivityClientRecord r = mActivities.get(activityToken);
-        final int diff = diffPublicWithSizeBuckets(activity.mCurrentConfig,
-                newConfig, r != null ? r.mSizeConfigurations : null);
+        final Configuration currentConfig = activity.mCurrentConfig;
+        final int diff = (currentConfig == null) ? 0xffffffff
+                : currentConfig.diffPublicOnly(newConfig);
         final boolean hasPublicConfigChange = diff != 0;
         // TODO(b/173090263): Use diff instead after the improvement of AssetManager and
         // ResourcesImpl constructions.
         final boolean shouldUpdateResources = hasPublicConfigChange
-                || shouldUpdateResources(activityToken, activity.mCurrentConfig, newConfig,
-                amOverrideConfig, movedToDifferentDisplay, hasPublicConfigChange);
+                || shouldUpdateResources(activityToken, currentConfig, newConfig, amOverrideConfig,
+                movedToDifferentDisplay, hasPublicConfigChange);
         final boolean shouldReportChange = hasPublicConfigChange
                 // If this activity doesn't handle any of the config changes, then don't bother
                 // calling onConfigurationChanged. Otherwise, report to the activity for the

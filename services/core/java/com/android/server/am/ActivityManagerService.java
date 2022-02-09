@@ -8504,6 +8504,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             sb.append("Process: ").append(processName).append("\n");
             sb.append("PID: ").append(process.getPid()).append("\n");
             sb.append("UID: ").append(process.uid).append("\n");
+            if (process.mOptRecord != null) {
+                sb.append("Frozen: ").append(process.mOptRecord.isFrozen()).append("\n");
+            }
             int flags = process.info.flags;
             final IPackageManager pm = AppGlobals.getPackageManager();
             sb.append("Flags: 0x").append(Integer.toHexString(flags)).append("\n");
@@ -15644,9 +15647,23 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mUserController.startUser(userId, /* foreground */ true, unlockListener);
     }
 
+    /**
+     * Unlocks the given user.
+     *
+     * @param userId The ID of the user to unlock.
+     * @param token No longer used.  (This parameter cannot be removed because
+     *              this method is marked with UnsupportedAppUsage, so its
+     *              signature might not be safe to change.)
+     * @param secret The secret needed to unlock the user's credential-encrypted
+     *               storage, or null if no secret is needed.
+     * @param listener An optional progress listener.
+     *
+     * @return true if the user was successfully unlocked, otherwise false.
+     */
     @Override
-    public boolean unlockUser(int userId, byte[] token, byte[] secret, IProgressListener listener) {
-        return mUserController.unlockUser(userId, token, secret, listener);
+    public boolean unlockUser(int userId, @Nullable byte[] token, @Nullable byte[] secret,
+            @Nullable IProgressListener listener) {
+        return mUserController.unlockUser(userId, secret, listener);
     }
 
     @Override
@@ -16087,6 +16104,23 @@ public class ActivityManagerService extends IActivityManager.Stub
         public boolean isSystemReady() {
             // no need to synchronize(this) just to read & return the value
             return mSystemReady;
+        }
+
+        /**
+         * Returns package name by pid.
+         */
+        @Override
+        @Nullable
+        public String getPackageNameByPid(int pid) {
+            synchronized (mPidsSelfLocked) {
+                final ProcessRecord app = mPidsSelfLocked.get(pid);
+
+                if (app != null && app.info != null) {
+                    return app.info.packageName;
+                }
+
+                return null;
+            }
         }
 
         /**

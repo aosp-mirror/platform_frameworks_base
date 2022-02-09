@@ -1880,7 +1880,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         if (mAsyncRotationController == null) {
             mAsyncRotationController = new AsyncRotationController(this);
-            mAsyncRotationController.hide();
+            mAsyncRotationController.start();
             return true;
         }
         return false;
@@ -1890,7 +1890,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void finishAsyncRotationIfPossible() {
         final AsyncRotationController controller = mAsyncRotationController;
         if (controller != null && !mDisplayRotation.hasSeamlessRotatingWindow()) {
-            controller.show();
+            controller.completeAll();
             mAsyncRotationController = null;
         }
     }
@@ -1898,19 +1898,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /** Shows the given window which may be hidden for screen rotation. */
     void finishAsyncRotation(WindowToken windowToken) {
         final AsyncRotationController controller = mAsyncRotationController;
-        if (controller != null && controller.show(windowToken)) {
+        if (controller != null && controller.completeRotation(windowToken)) {
             mAsyncRotationController = null;
         }
     }
 
     /** Returns {@code true} if the screen rotation animation needs to wait for the window. */
     boolean shouldSyncRotationChange(WindowState w) {
-        if (w.mForceSeamlesslyRotate) {
-            // The window should look no different before and after rotation.
-            return false;
-        }
         final AsyncRotationController controller = mAsyncRotationController;
-        return controller == null || !controller.isHandledToken(w.mToken);
+        return controller == null || !controller.isAsync(w);
     }
 
     void notifyInsetsChanged(Consumer<WindowState> dispatchInsetsChanged) {

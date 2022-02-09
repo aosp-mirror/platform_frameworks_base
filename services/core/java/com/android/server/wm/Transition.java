@@ -1328,7 +1328,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     }
 
     boolean getLegacyIsReady() {
-        return mState == STATE_STARTED && mSyncId >= 0 && mSyncEngine.isReady(mSyncId);
+        return (mState == STATE_STARTED || mState == STATE_COLLECTING) && mSyncId >= 0;
     }
 
     static Transition fromBinder(IBinder binder) {

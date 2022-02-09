@@ -427,26 +427,6 @@ public abstract class RecognitionService extends Service {
         }
 
         /**
-         * The service should call this method for each ready segment of a long recognition session.
-         *
-         * @param results the recognition results. To retrieve the results in {@code
-         *        ArrayList<String>} format use {@link Bundle#getStringArrayList(String)} with
-         *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter
-         */
-        @SuppressLint({"CallbackMethodName", "RethrowRemoteException"})
-        public void segmentResults(@NonNull Bundle results) throws RemoteException {
-            mListener.onSegmentResults(results);
-        }
-
-        /**
-         * The service should call this method to end a segmented session.
-         */
-        @SuppressLint({"CallbackMethodName", "RethrowRemoteException"})
-        public void endOfSegmentedSession() throws RemoteException {
-            mListener.onEndOfSegmentedSession();
-        }
-
-        /**
          * Return the Linux uid assigned to the process that sent you the current transaction that
          * is being processed. This is obtained from {@link Binder#getCallingUid()}.
          */

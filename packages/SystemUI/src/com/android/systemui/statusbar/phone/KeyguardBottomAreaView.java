@@ -107,7 +107,6 @@ import com.android.systemui.statusbar.policy.PreviewInflater;
 import com.android.systemui.tuner.LockscreenFragment.LockButtonFactory;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.wallet.controller.QuickAccessWalletController;
-import com.android.systemui.wallet.ui.WalletActivity;
 
 import java.util.List;
 
@@ -1149,21 +1148,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
 
         ActivityLaunchAnimator.Controller animationController = createLaunchAnimationController(v);
-        if (mHasCard) {
-            Intent intent = new Intent(mContext, WalletActivity.class)
-                    .setAction(Intent.ACTION_VIEW)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            mActivityStarter.startActivity(intent, true /* dismissShade */, animationController,
-                    true /* showOverLockscreenWhenLocked */);
-        } else {
-            if (mQuickAccessWalletController.getWalletClient().createWalletIntent() == null) {
-                Log.w(TAG, "Could not get intent of the wallet app.");
-                return;
-            }
-            mActivityStarter.postStartActivityDismissingKeyguard(
-                    mQuickAccessWalletController.getWalletClient().createWalletIntent(),
-                    /* delay= */ 0, animationController);
-        }
+        mQuickAccessWalletController.startQuickAccessUiIntent(
+                mActivityStarter, animationController, mHasCard);
     }
 
     protected ActivityLaunchAnimator.Controller createLaunchAnimationController(View view) {

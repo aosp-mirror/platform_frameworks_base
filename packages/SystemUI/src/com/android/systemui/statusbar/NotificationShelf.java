@@ -86,7 +86,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private float mCornerAnimationDistance;
     private NotificationShelfController mController;
     private int mActualWidth = -1;
-    private boolean mUseSplitShade;
 
     /** Fraction of lockscreen to shade animation (on lockscreen swipe down). */
     private float mFractionToShade;
@@ -137,9 +136,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mShowNotificationShelf = res.getBoolean(R.bool.config_showNotificationShelf);
         mCornerAnimationDistance = res.getDimensionPixelSize(
                 R.dimen.notification_corner_animation_distance);
-
-        // TODO(b/213480466)  enable short shelf on split shade
-        mUseSplitShade = Utils.shouldUseSplitNotificationShade(mContext.getResources());
 
         mShelfIcons.setInNotificationIconShelf(true);
         if (!mShowNotificationShelf) {
@@ -233,7 +229,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
      */
     @VisibleForTesting
     public void updateStateWidth(ShelfState shelfState, float fraction, int shortestWidth) {
-        shelfState.actualWidth = !mUseSplitShade && mAmbientState.isOnKeyguard()
+        shelfState.actualWidth = mAmbientState.isOnKeyguard()
                 ? (int) MathUtils.lerp(shortestWidth, getWidth(), fraction)
                 : getWidth();
     }

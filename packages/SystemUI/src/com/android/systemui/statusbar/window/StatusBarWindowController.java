@@ -274,6 +274,11 @@ public class StatusBarWindowController {
     private void applyHeight(State state) {
         mLpChanged.height =
                 state.mIsLaunchAnimationRunning ? ViewGroup.LayoutParams.MATCH_PARENT : mBarHeight;
+        for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
+            mLpChanged.paramsForRotation[rot].height =
+                    state.mIsLaunchAnimationRunning ? ViewGroup.LayoutParams.MATCH_PARENT :
+                    SystemBarUtils.getStatusBarHeightForRotation(mContext, rot);
+        }
     }
 
     private void apply(State state) {

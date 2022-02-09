@@ -768,8 +768,6 @@ public class SpeechRecognizer {
         private static final int MSG_PARTIAL_RESULTS = 7;
         private static final int MSG_RMS_CHANGED = 8;
         private static final int MSG_ON_EVENT = 9;
-        private static final int MSG_SEGMENT_RESULTS = 10;
-        private static final int MSG_SEGMENT_END_SESSION = 11;
 
         private final Handler mInternalHandler = new Handler(Looper.getMainLooper()) {
             @Override
@@ -805,12 +803,6 @@ public class SpeechRecognizer {
                     case MSG_ON_EVENT:
                         mInternalListener.onEvent(msg.arg1, (Bundle) msg.obj);
                         break;
-                    case MSG_SEGMENT_RESULTS:
-                        mInternalListener.onSegmentResults((Bundle) msg.obj);
-                        break;
-                    case MSG_SEGMENT_END_SESSION:
-                        mInternalListener.onEndOfSegmentedSession();
-                        break;
                 }
             }
         };
@@ -845,14 +837,6 @@ public class SpeechRecognizer {
 
         public void onRmsChanged(final float rmsdB) {
             Message.obtain(mInternalHandler, MSG_RMS_CHANGED, rmsdB).sendToTarget();
-        }
-
-        public void onSegmentResults(final Bundle bundle) {
-            Message.obtain(mInternalHandler, MSG_SEGMENT_RESULTS, bundle).sendToTarget();
-        }
-
-        public void onEndOfSegmentedSession() {
-            Message.obtain(mInternalHandler, MSG_SEGMENT_END_SESSION).sendToTarget();
         }
 
         public void onEvent(final int eventType, final Bundle params) {

@@ -10889,6 +10889,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             int user, String action, boolean leaveAllSystemAppsEnabled) {
         final Intent intent = new Intent(DevicePolicyManager.ACTION_PROVISIONING_COMPLETED)
                 .putExtra(Intent.EXTRA_USER_HANDLE, user)
+                .putExtra(Intent.EXTRA_USER, UserHandle.of(user))
                 .putExtra(
                         DevicePolicyManager.EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED,
                         leaveAllSystemAppsEnabled)

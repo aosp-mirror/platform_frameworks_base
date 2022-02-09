@@ -203,8 +203,10 @@ public final class ImeFocusController {
         if (!getImmDelegate().isCurrentRootView(view.getViewRootImpl())) {
             return;
         }
-        if (mServedView == view) {
+        if (mNextServedView == view) {
             mNextServedView = null;
+        }
+        if (mServedView == view) {
             mViewRootImpl.dispatchCheckFocus();
         }
     }

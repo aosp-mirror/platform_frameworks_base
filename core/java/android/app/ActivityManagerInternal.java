@@ -215,6 +215,14 @@ public abstract class ActivityManagerInternal {
     public abstract boolean isSystemReady();
 
     /**
+     * Returns package name given pid.
+     *
+     * @param pid The pid we are searching package name for.
+     */
+    @Nullable
+    public abstract String getPackageNameByPid(int pid);
+
+    /**
      * Sets if the given pid has an overlay UI or not.
      *
      * @param pid The pid we are setting overlay UI for.

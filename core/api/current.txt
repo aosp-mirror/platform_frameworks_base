@@ -1642,6 +1642,7 @@ package android {
     field public static final int useEmbeddedDex = 16844190; // 0x101059e
     field public static final int useIntrinsicSizeAsMinimum = 16843536; // 0x1010310
     field public static final int useLevel = 16843167; // 0x101019f
+    field public static final int useTargetActivityForQuickAccess;
     field public static final int userVisible = 16843409; // 0x1010291
     field public static final int usesCleartextTraffic = 16844012; // 0x10104ec
     field public static final int usesPermissionFlags = 16844356; // 0x1010644
@@ -11258,6 +11259,7 @@ package android.content.pm {
     method @Nullable public android.content.pm.SigningInfo getInitiatingPackageSigningInfo();
     method @Nullable public String getInstallingPackageName();
     method @Nullable public String getOriginatingPackageName();
+    method public int getPackageSource();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.InstallSourceInfo> CREATOR;
   }
@@ -11465,6 +11467,11 @@ package android.content.pm {
     field public static final String EXTRA_STATUS = "android.content.pm.extra.STATUS";
     field public static final String EXTRA_STATUS_MESSAGE = "android.content.pm.extra.STATUS_MESSAGE";
     field public static final String EXTRA_STORAGE_PATH = "android.content.pm.extra.STORAGE_PATH";
+    field public static final int PACKAGE_SOURCE_DOWNLOADED_FILE = 4; // 0x4
+    field public static final int PACKAGE_SOURCE_LOCAL_FILE = 3; // 0x3
+    field public static final int PACKAGE_SOURCE_OTHER = 1; // 0x1
+    field public static final int PACKAGE_SOURCE_STORE = 2; // 0x2
+    field public static final int PACKAGE_SOURCE_UNSPECIFIED = 0; // 0x0
     field public static final int STATUS_FAILURE = 1; // 0x1
     field public static final int STATUS_FAILURE_ABORTED = 3; // 0x3
     field public static final int STATUS_FAILURE_BLOCKED = 2; // 0x2
@@ -11521,6 +11528,7 @@ package android.content.pm {
     method public int getMode();
     method public int getOriginatingUid();
     method @Nullable public android.net.Uri getOriginatingUri();
+    method public int getPackageSource();
     method public int getParentSessionId();
     method public float getProgress();
     method @Nullable public android.net.Uri getReferrerUri();
@@ -11569,6 +11577,7 @@ package android.content.pm {
     method public void setMultiPackage();
     method public void setOriginatingUid(int);
     method public void setOriginatingUri(@Nullable android.net.Uri);
+    method public void setPackageSource(int);
     method public void setReferrerUri(@Nullable android.net.Uri);
     method public void setRequireUserAction(int);
     method public void setSize(long);
@@ -38995,6 +39004,7 @@ package android.service.quickaccesswallet {
 
   public abstract class QuickAccessWalletService extends android.app.Service {
     ctor public QuickAccessWalletService();
+    method @Nullable public android.app.PendingIntent getTargetActivityPendingIntent();
     method @Nullable public android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onWalletCardSelected(@NonNull android.service.quickaccesswallet.SelectWalletCardRequest);
     method public abstract void onWalletCardsRequested(@NonNull android.service.quickaccesswallet.GetWalletCardsRequest, @NonNull android.service.quickaccesswallet.GetWalletCardsCallback);
@@ -39349,7 +39359,6 @@ package android.speech {
   public interface RecognitionListener {
     method public void onBeginningOfSpeech();
     method public void onBufferReceived(byte[]);
-    method public default void onEndOfSegmentedSession();
     method public void onEndOfSpeech();
     method public void onError(int);
     method public void onEvent(int, android.os.Bundle);
@@ -39357,7 +39366,6 @@ package android.speech {
     method public void onReadyForSpeech(android.os.Bundle);
     method public void onResults(android.os.Bundle);
     method public void onRmsChanged(float);
-    method public default void onSegmentResults(@NonNull android.os.Bundle);
   }
 
   public abstract class RecognitionService extends android.app.Service {
@@ -39375,7 +39383,6 @@ package android.speech {
   public class RecognitionService.Callback {
     method public void beginningOfSpeech() throws android.os.RemoteException;
     method public void bufferReceived(byte[]) throws android.os.RemoteException;
-    method public void endOfSegmentedSession() throws android.os.RemoteException;
     method public void endOfSpeech() throws android.os.RemoteException;
     method public void error(int) throws android.os.RemoteException;
     method @NonNull public android.content.AttributionSource getCallingAttributionSource();
@@ -39384,7 +39391,6 @@ package android.speech {
     method public void readyForSpeech(android.os.Bundle) throws android.os.RemoteException;
     method public void results(android.os.Bundle) throws android.os.RemoteException;
     method public void rmsChanged(float) throws android.os.RemoteException;
-    method public void segmentResults(@NonNull android.os.Bundle) throws android.os.RemoteException;
   }
 
   public static class RecognitionService.SupportCallback {
@@ -39440,7 +39446,6 @@ package android.speech {
     field public static final String EXTRA_RESULTS_PENDINGINTENT = "android.speech.extra.RESULTS_PENDINGINTENT";
     field public static final String EXTRA_RESULTS_PENDINGINTENT_BUNDLE = "android.speech.extra.RESULTS_PENDINGINTENT_BUNDLE";
     field public static final String EXTRA_SECURE = "android.speech.extras.EXTRA_SECURE";
-    field public static final String EXTRA_SEGMENT_SESSION = "android.speech.extra.SEGMENT_SESSION";
     field public static final String EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS = "android.speech.extras.SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS";
     field public static final String EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS = "android.speech.extras.SPEECH_INPUT_MINIMUM_LENGTH_MILLIS";
     field public static final String EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS = "android.speech.extras.SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS";
@@ -39697,7 +39702,6 @@ package android.telecom {
   public final class Call {
     method public void addConferenceParticipants(@NonNull java.util.List<android.net.Uri>);
     method public void answer(int);
-    method public void answerCall(@NonNull android.telecom.CallEndpoint, int);
     method public void conference(android.telecom.Call);
     method public void deflect(android.net.Uri);
     method public void disconnect();
@@ -39718,9 +39722,7 @@ package android.telecom {
     method public void phoneAccountSelected(android.telecom.PhoneAccountHandle, boolean);
     method public void playDtmfTone(char);
     method public void postDialContinue(boolean);
-    method public void pullCall();
-    method @Deprecated public void pullExternalCall();
-    method public void pushCall(@NonNull android.telecom.CallEndpoint);
+    method public void pullExternalCall();
     method public void putExtras(android.os.Bundle);
     method public void registerCallback(android.telecom.Call.Callback);
     method public void registerCallback(android.telecom.Call.Callback, android.os.Handler);
@@ -39763,10 +39765,7 @@ package android.telecom {
 
   public abstract static class Call.Callback {
     ctor public Call.Callback();
-    method public void onAnswerFailed(@NonNull android.telecom.CallEndpoint, int);
     method public void onCallDestroyed(android.telecom.Call);
-    method public void onCallPullFailed(int);
-    method public void onCallPushFailed(@NonNull android.telecom.CallEndpoint, int);
     method public void onCannedTextResponsesLoaded(android.telecom.Call, java.util.List<java.lang.String>);
     method public void onChildrenChanged(android.telecom.Call, java.util.List<android.telecom.Call>);
     method public void onConferenceableCallsChanged(android.telecom.Call, java.util.List<android.telecom.Call>);
@@ -39782,22 +39781,11 @@ package android.telecom {
     method public void onRttStatusChanged(android.telecom.Call, boolean, android.telecom.Call.RttCall);
     method public void onStateChanged(android.telecom.Call, int);
     method public void onVideoCallChanged(android.telecom.Call, android.telecom.InCallService.VideoCall);
-    field public static final int ANSWER_FAILED_ENDPOINT_REJECTED = 3; // 0x3
-    field public static final int ANSWER_FAILED_ENDPOINT_TIMEOUT = 2; // 0x2
-    field public static final int ANSWER_FAILED_ENDPOINT_UNAVAILABLE = 1; // 0x1
-    field public static final int ANSWER_FAILED_UNKNOWN_REASON = 0; // 0x0
     field public static final int HANDOVER_FAILURE_DEST_APP_REJECTED = 1; // 0x1
     field public static final int HANDOVER_FAILURE_NOT_SUPPORTED = 2; // 0x2
     field public static final int HANDOVER_FAILURE_ONGOING_EMERGENCY_CALL = 4; // 0x4
     field public static final int HANDOVER_FAILURE_UNKNOWN = 5; // 0x5
     field public static final int HANDOVER_FAILURE_USER_REJECTED = 3; // 0x3
-    field public static final int PULL_FAILED_ENDPOINT_REJECTED = 2; // 0x2
-    field public static final int PULL_FAILED_ENDPOINT_TIMEOUT = 1; // 0x1
-    field public static final int PULL_FAILED_UNKNOWN_REASON = 0; // 0x0
-    field public static final int PUSH_FAILED_ENDPOINT_REJECTED = 3; // 0x3
-    field public static final int PUSH_FAILED_ENDPOINT_TIMEOUT = 2; // 0x2
-    field public static final int PUSH_FAILED_ENDPOINT_UNAVAILABLE = 1; // 0x1
-    field public static final int PUSH_FAILED_UNKNOWN_REASON = 0; // 0x0
   }
 
   public static class Call.Details {
@@ -39805,8 +39793,6 @@ package android.telecom {
     method public boolean can(int);
     method public static String capabilitiesToString(int);
     method public android.telecom.PhoneAccountHandle getAccountHandle();
-    method @Nullable public android.telecom.CallEndpoint getActiveCallEndpoint();
-    method @NonNull public java.util.Set<android.telecom.CallEndpoint> getAvailableCallEndpoints();
     method public int getCallCapabilities();
     method public int getCallDirection();
     method public int getCallProperties();
@@ -39898,34 +39884,6 @@ package android.telecom {
     field public static final int ROUTE_SPEAKER = 8; // 0x8
     field public static final int ROUTE_WIRED_HEADSET = 4; // 0x4
     field public static final int ROUTE_WIRED_OR_EARPIECE = 5; // 0x5
-  }
-
-  public final class CallEndpoint implements android.os.Parcelable {
-    ctor public CallEndpoint(@NonNull android.os.ParcelUuid, @NonNull CharSequence, int, @NonNull android.content.ComponentName);
-    method public int describeContents();
-    method @NonNull public CharSequence getDescription();
-    method @NonNull public android.os.ParcelUuid getIdentifier();
-    method public int getType();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telecom.CallEndpoint> CREATOR;
-    field public static final int ENDPOINT_TYPE_TETHERED = 2; // 0x2
-    field public static final int ENDPOINT_TYPE_UNTETHERED = 1; // 0x1
-  }
-
-  public interface CallEndpointCallback {
-    method public void onCallEndpointSessionActivationTimeout();
-    method public void onCallEndpointSessionDeactivated();
-  }
-
-  public class CallEndpointSession {
-    method public void setCallEndpointSessionActivated();
-    method public void setCallEndpointSessionActivationFailed(int);
-    method public void setCallEndpointSessionDeactivated();
-    field public static final int ACTIVATION_FAILURE_REJECTED = 1; // 0x1
-    field public static final int ACTIVATION_FAILURE_UNAVAILABLE = 0; // 0x0
-    field public static final int ANSWER_REQUEST = 1; // 0x1
-    field public static final int PLACE_REQUEST = 3; // 0x3
-    field public static final int PUSH_REQUEST = 2; // 0x2
   }
 
   public abstract class CallRedirectionService extends android.app.Service {
@@ -40197,6 +40155,7 @@ package android.telecom {
     field public static final int PROPERTY_IS_RTT = 256; // 0x100
     field public static final int PROPERTY_NETWORK_IDENTIFIED_EMERGENCY_CALL = 1024; // 0x400
     field public static final int PROPERTY_SELF_MANAGED = 128; // 0x80
+    field public static final int PROPERTY_TETHERED_CALL = 16384; // 0x4000
     field public static final int PROPERTY_WIFI = 8; // 0x8
     field public static final int STATE_ACTIVE = 4; // 0x4
     field public static final int STATE_DIALING = 3; // 0x3
@@ -40330,8 +40289,6 @@ package android.telecom {
     field public static final int OTHER = 9; // 0x9
     field public static final String REASON_EMERGENCY_CALL_PLACED = "REASON_EMERGENCY_CALL_PLACED";
     field public static final String REASON_EMULATING_SINGLE_CALL = "EMULATING_SINGLE_CALL";
-    field public static final String REASON_ENDPOINT_REJECTED = "REASON_ENDPOINT_REJECTED";
-    field public static final String REASON_ENDPOINT_SESSION_DEACTIVATED = "REASON_ENDPOINT_SESSION_DEACTIVATED";
     field public static final String REASON_IMS_ACCESS_BLOCKED = "REASON_IMS_ACCESS_BLOCKED";
     field public static final String REASON_WIFI_ON_BUT_WFC_OFF = "REASON_WIFI_ON_BUT_WFC_OFF";
     field public static final int REJECTED = 6; // 0x6
@@ -40360,7 +40317,6 @@ package android.telecom {
     method public void onBringToForeground(boolean);
     method public void onCallAdded(android.telecom.Call);
     method public void onCallAudioStateChanged(android.telecom.CallAudioState);
-    method @NonNull public android.telecom.CallEndpointCallback onCallEndpointActivationRequested(@NonNull android.telecom.CallEndpoint, @NonNull android.telecom.CallEndpointSession) throws java.lang.UnsupportedOperationException;
     method public void onCallRemoved(android.telecom.Call);
     method public void onCanAddCallChanged(boolean);
     method public void onConnectionEvent(android.telecom.Call, String, android.os.Bundle);
@@ -40625,7 +40581,6 @@ package android.telecom {
     method @Deprecated @RequiresPermission(android.Manifest.permission.ANSWER_PHONE_CALLS) public boolean endCall();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.net.Uri getAdnUriForPhoneAccount(android.telecom.PhoneAccountHandle);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public java.util.List<android.telecom.PhoneAccountHandle> getCallCapablePhoneAccounts();
-    method @NonNull public java.util.Set<android.telecom.CallEndpoint> getCallEndpoints();
     method public String getDefaultDialerPackage();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public android.telecom.PhoneAccountHandle getDefaultOutgoingPhoneAccount(String);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PHONE_STATE, android.Manifest.permission.READ_SMS, android.Manifest.permission.READ_PHONE_NUMBERS}, conditional=true) public String getLine1Number(android.telecom.PhoneAccountHandle);
@@ -40646,12 +40601,10 @@ package android.telecom {
     method @RequiresPermission(anyOf={"android.permission.READ_PRIVILEGED_PHONE_STATE", android.Manifest.permission.READ_PHONE_STATE}) public boolean isTtySupported();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isVoiceMailNumber(android.telecom.PhoneAccountHandle, String);
     method @RequiresPermission(anyOf={android.Manifest.permission.CALL_PHONE, android.Manifest.permission.MANAGE_OWN_CALLS}) public void placeCall(android.net.Uri, android.os.Bundle);
-    method public void registerCallEndpoints(@NonNull java.util.Set<android.telecom.CallEndpoint>);
     method public void registerPhoneAccount(android.telecom.PhoneAccount);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void showInCallScreen(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void silenceRinger();
     method @RequiresPermission(android.Manifest.permission.CALL_PHONE) public void startConference(@NonNull java.util.List<android.net.Uri>, @NonNull android.os.Bundle);
-    method public void unregisterCallEndpoints(@NonNull java.util.Set<android.telecom.CallEndpoint>);
     method public void unregisterPhoneAccount(android.telecom.PhoneAccountHandle);
     field public static final String ACTION_CHANGE_DEFAULT_DIALER = "android.telecom.action.CHANGE_DEFAULT_DIALER";
     field public static final String ACTION_CHANGE_PHONE_ACCOUNTS = "android.telecom.action.CHANGE_PHONE_ACCOUNTS";
@@ -40695,7 +40648,6 @@ package android.telecom {
     field public static final String EXTRA_PHONE_ACCOUNT_HANDLE = "android.telecom.extra.PHONE_ACCOUNT_HANDLE";
     field public static final String EXTRA_PICTURE_URI = "android.telecom.extra.PICTURE_URI";
     field public static final String EXTRA_PRIORITY = "android.telecom.extra.PRIORITY";
-    field public static final String EXTRA_START_CALL_ON_ENDPOINT = "android.telecom.extra.START_CALL_ON_ENDPOINT";
     field public static final String EXTRA_START_CALL_WITH_RTT = "android.telecom.extra.START_CALL_WITH_RTT";
     field public static final String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.telecom.extra.START_CALL_WITH_SPEAKERPHONE";
     field public static final String EXTRA_START_CALL_WITH_VIDEO_STATE = "android.telecom.extra.START_CALL_WITH_VIDEO_STATE";
@@ -40707,7 +40659,6 @@ package android.telecom {
     field public static final String METADATA_IN_CALL_SERVICE_CAR_MODE_UI = "android.telecom.IN_CALL_SERVICE_CAR_MODE_UI";
     field public static final String METADATA_IN_CALL_SERVICE_RINGING = "android.telecom.IN_CALL_SERVICE_RINGING";
     field public static final String METADATA_IN_CALL_SERVICE_UI = "android.telecom.IN_CALL_SERVICE_UI";
-    field public static final String METADATA_STREAMING_TETHERED_CALLS = "android.telecom.STREAMING_TETHERED_CALLS";
     field public static final int PRESENTATION_ALLOWED = 1; // 0x1
     field public static final int PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int PRESENTATION_RESTRICTED = 2; // 0x2

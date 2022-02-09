@@ -121,7 +121,8 @@ public final class UserTypeFactory {
                 .setMaxAllowedPerParent(1)
                 .setLabel(0)
                 .setDefaultRestrictions(null)
-                .setIsMediaSharedWithParent(true);
+                .setIsMediaSharedWithParent(true)
+                .setIsCredentialSharedWithParent(true);
     }
 
     /**
@@ -152,7 +153,8 @@ public final class UserTypeFactory {
                         com.android.internal.R.color.profile_badge_3_dark)
                 .setDefaultRestrictions(getDefaultManagedProfileRestrictions())
                 .setDefaultSecureSettings(getDefaultManagedProfileSecureSettings())
-                .setDefaultCrossProfileIntentFilters(getDefaultManagedCrossProfileIntentFilter());
+                .setDefaultCrossProfileIntentFilters(getDefaultManagedCrossProfileIntentFilter())
+                .setIsCredentialSharedWithParent(true);
     }
 
     /**

@@ -16,7 +16,6 @@
 
 package android.telecom;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.Uri;
@@ -30,11 +29,8 @@ import android.telecom.Call.Details.CallDirection;
 import com.android.internal.telecom.IVideoProvider;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Information about a call that is used between InCallService and Telecom.
@@ -73,8 +69,6 @@ public final class ParcelableCall implements Parcelable {
         private int mCallerNumberVerificationStatus;
         private String mContactDisplayName;
         private String mActiveChildCallId;
-        private CallEndpoint mActiveCallEndpoint;
-        private Set<CallEndpoint> mAvailableCallEndpoints = new HashSet<>();
 
         public ParcelableCallBuilder setId(String id) {
             mId = id;
@@ -230,27 +224,6 @@ public final class ParcelableCall implements Parcelable {
             return this;
         }
 
-        /**
-         * Set active call endpoint
-         * @param callEndpoint
-         * @return
-         */
-        public ParcelableCallBuilder setActiveCallEndpoint(CallEndpoint callEndpoint) {
-            mActiveCallEndpoint = callEndpoint;
-            return this;
-        }
-
-        /**
-         * Set available call endpoints
-         * @param availableCallEndpoints
-         * @return
-         */
-        public ParcelableCallBuilder setAvailableCallEndpoints(
-                Set<CallEndpoint> availableCallEndpoints) {
-            mAvailableCallEndpoints = availableCallEndpoints;
-            return this;
-        }
-
         public ParcelableCall createParcelableCall() {
             return new ParcelableCall(
                     mId,
@@ -282,9 +255,7 @@ public final class ParcelableCall implements Parcelable {
                     mCallDirection,
                     mCallerNumberVerificationStatus,
                     mContactDisplayName,
-                    mActiveChildCallId,
-                    mActiveCallEndpoint,
-                    mAvailableCallEndpoints);
+                    mActiveChildCallId);
         }
 
         public static ParcelableCallBuilder fromParcelableCall(ParcelableCall parcelableCall) {
@@ -321,8 +292,6 @@ public final class ParcelableCall implements Parcelable {
                     parcelableCall.mCallerNumberVerificationStatus;
             newBuilder.mContactDisplayName = parcelableCall.mContactDisplayName;
             newBuilder.mActiveChildCallId = parcelableCall.mActiveChildCallId;
-            newBuilder.mActiveCallEndpoint = parcelableCall.mActiveCallEndpoint;
-            newBuilder.mAvailableCallEndpoints = parcelableCall.mAvailableCallEndpoints;
             return newBuilder;
         }
     }
@@ -358,8 +327,6 @@ public final class ParcelableCall implements Parcelable {
     private final int mCallerNumberVerificationStatus;
     private final String mContactDisplayName;
     private final String mActiveChildCallId; // Only valid for CDMA conferences
-    private final CallEndpoint mActiveCallEndpoint;
-    private final Set<CallEndpoint> mAvailableCallEndpoints;
 
     public ParcelableCall(
             String id,
@@ -391,9 +358,7 @@ public final class ParcelableCall implements Parcelable {
             int callDirection,
             int callerNumberVerificationStatus,
             String contactDisplayName,
-            String activeChildCallId,
-            CallEndpoint activeCallEndpoint,
-            Set<CallEndpoint> availableCallEndpoints
+            String activeChildCallId
     ) {
         mId = id;
         mState = state;
@@ -425,8 +390,6 @@ public final class ParcelableCall implements Parcelable {
         mCallerNumberVerificationStatus = callerNumberVerificationStatus;
         mContactDisplayName = contactDisplayName;
         mActiveChildCallId = activeChildCallId;
-        mActiveCallEndpoint = activeCallEndpoint;
-        mAvailableCallEndpoints = availableCallEndpoints;
     }
 
     /** The unique ID of the call. */
@@ -651,21 +614,6 @@ public final class ParcelableCall implements Parcelable {
         return mActiveChildCallId;
     }
 
-    /**
-     * @return The {@link CallEndpoint} which is currently active for this call, or null if the call
-     * does not take place via an {@link CallEndpoint}.
-     */
-    public @Nullable CallEndpoint getActiveCallEndpoint() {
-        return mActiveCallEndpoint;
-    }
-
-    /**
-     * @return A set of available {@link CallEndpoint}
-     */
-    public @NonNull Set<CallEndpoint> getAvailableCallEndpoints() {
-        return mAvailableCallEndpoints;
-    }
-
     /** Responsible for creating ParcelableCall objects for deserialized Parcels. */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static final @android.annotation.NonNull Parcelable.Creator<ParcelableCall> CREATOR =
@@ -707,9 +655,6 @@ public final class ParcelableCall implements Parcelable {
             int callerNumberVerificationStatus = source.readInt();
             String contactDisplayName = source.readString();
             String activeChildCallId = source.readString();
-            CallEndpoint activeCallEndpoint = source.readParcelable(classLoader);
-            List<CallEndpoint> availablableCallEndpoints = new ArrayList<>();
-            source.readList(availablableCallEndpoints, classLoader);
             return new ParcelableCallBuilder()
                     .setId(id)
                     .setState(state)
@@ -741,8 +686,6 @@ public final class ParcelableCall implements Parcelable {
                     .setCallerNumberVerificationStatus(callerNumberVerificationStatus)
                     .setContactDisplayName(contactDisplayName)
                     .setActiveChildCallId(activeChildCallId)
-                    .setActiveCallEndpoint(activeCallEndpoint)
-                    .setAvailableCallEndpoints(new HashSet<>(availablableCallEndpoints))
                     .createParcelableCall();
         }
 
@@ -792,8 +735,6 @@ public final class ParcelableCall implements Parcelable {
         destination.writeInt(mCallerNumberVerificationStatus);
         destination.writeString(mContactDisplayName);
         destination.writeString(mActiveChildCallId);
-        destination.writeParcelable(mActiveCallEndpoint, 0);
-        destination.writeList(Arrays.asList(mAvailableCallEndpoints.toArray()));
     }
 
     @Override
