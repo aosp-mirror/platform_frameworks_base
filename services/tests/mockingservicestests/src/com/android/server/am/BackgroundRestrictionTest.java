@@ -117,6 +117,7 @@ import com.android.server.am.AppBindServiceEventsTracker.AppBindServiceEventsPol
 import com.android.server.am.AppBroadcastEventsTracker.AppBroadcastEventsPolicy;
 import com.android.server.am.AppFGSTracker.AppFGSPolicy;
 import com.android.server.am.AppMediaSessionTracker.AppMediaSessionPolicy;
+import com.android.server.am.AppRestrictionController.ConstantsObserver;
 import com.android.server.am.AppRestrictionController.NotificationHelper;
 import com.android.server.am.AppRestrictionController.UidBatteryUsageProvider;
 import com.android.server.am.BaseAppStateTimeEvents.BaseTimeEvent;
@@ -350,6 +351,22 @@ public final class BackgroundRestrictionTest {
 
     @Test
     public void testTogglingBackgroundRestrict() throws Exception {
+        DeviceConfigSession<Boolean> bgAutoRestrictedBucketOnBgRestriction = null;
+        try {
+            bgAutoRestrictedBucketOnBgRestriction = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    ConstantsObserver.KEY_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION,
+                    DeviceConfig::getBoolean,
+                    ConstantsObserver.DEFAULT_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION);
+            bgAutoRestrictedBucketOnBgRestriction.set(true);
+
+            testTogglingBackgroundRestrictInternal();
+        } finally {
+            closeIfNotNull(bgAutoRestrictedBucketOnBgRestriction);
+        }
+    }
+
+    private void testTogglingBackgroundRestrictInternal() throws Exception {
         final int testPkgIndex = 2;
         final String testPkgName = TEST_PACKAGE_BASE + testPkgIndex;
         final int testUser = TEST_USER0;
