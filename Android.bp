@@ -272,6 +272,8 @@ java_defaults {
         include_dirs: [
             "frameworks/av/aidl",
             "frameworks/native/libs/permission/aidl",
+            // TODO: remove when moved to the below package
+            "frameworks/base/packages/ConnectivityT/framework-t/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
         ],
     },
@@ -510,6 +512,9 @@ stubs_defaults {
         include_dirs: [
             "frameworks/av/aidl",
             "frameworks/native/libs/permission/aidl",
+            // TODO: remove when moved to the below package
+            "frameworks/base/packages/ConnectivityT/framework-t/aidl-export",
+            "packages/modules/Connectivity/framework/aidl-export",
         ],
     },
     // These are libs from framework-internal-utils that are required (i.e. being referenced)
