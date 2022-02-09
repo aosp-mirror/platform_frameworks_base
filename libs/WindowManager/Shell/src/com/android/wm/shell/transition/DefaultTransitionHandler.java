@@ -419,8 +419,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     // hasRoundedCorners is currently only enabled for tasks
                     final Context displayContext =
                             mDisplayController.getDisplayContext(change.getTaskInfo().displayId);
-                    cornerRadius =
-                            ScreenDecorationsUtils.getWindowCornerRadius(displayContext);
+                    cornerRadius = displayContext == null ? 0
+                            : ScreenDecorationsUtils.getWindowCornerRadius(displayContext);
                 } else {
                     cornerRadius = 0;
                 }

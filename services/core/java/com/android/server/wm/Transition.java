@@ -158,8 +158,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
     /** The final animation targets derived from participants after promotion. */
     private ArrayList<WindowContainer> mTargets;
 
-    /** The main display running this transition. */
-    private DisplayContent mTargetDisplay;
+    /** The displays that this transition is running on. */
+    private final ArrayList<DisplayContent> mTargetDisplays = new ArrayList<>();
 
     /**
      * Set of participating windowtokens (activity/wallpaper) which are visible at the end of
@@ -207,6 +207,10 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
 
     boolean isTransientLaunch(@NonNull ActivityRecord activity) {
         return mTransientLaunches != null && mTransientLaunches.contains(activity);
+    }
+
+    boolean isOnDisplay(@NonNull DisplayContent dc) {
+        return mTargetDisplays.contains(dc);
     }
 
     void setSeamlessRotation(@NonNull WindowContainer wc) {
@@ -280,6 +284,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             mChanges.put(wc, info);
         }
         mParticipants.add(wc);
+        if (wc.getDisplayContent() != null && !mTargetDisplays.contains(wc.getDisplayContent())) {
+            mTargetDisplays.add(wc.getDisplayContent());
+        }
         if (info.mShowWallpaper) {
             // Collect the wallpaper token (for isWallpaper(wc)) so it is part of the sync set.
             final WindowState wallpaper =
@@ -516,15 +523,23 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             dc.getInputMonitor().setActiveRecents(null /* activity */, null /* layer */);
         }
 
-        final AsyncRotationController asyncRotationController =
-                mTargetDisplay.getAsyncRotationController();
-        if (asyncRotationController != null) {
-            asyncRotationController.onTransitionFinished();
-        }
-        // Transient-launch activities cannot be IME target (WindowState#canBeImeTarget),
-        // so re-compute in case the IME target is changed after transition.
-        if (mTransientLaunches != null) {
-            mTargetDisplay.computeImeTarget(true /* updateImeTarget */);
+        for (int i = 0; i < mTargetDisplays.size(); ++i) {
+            final DisplayContent dc = mTargetDisplays.get(i);
+            final AsyncRotationController asyncRotationController = dc.getAsyncRotationController();
+            if (asyncRotationController != null) {
+                asyncRotationController.onTransitionFinished();
+            }
+            if (mTransientLaunches != null) {
+                // Transient-launch activities cannot be IME target (WindowState#canBeImeTarget),
+                // so re-compute in case the IME target is changed after transition.
+                for (int t = 0; t < mTransientLaunches.size(); ++t) {
+                    if (mTransientLaunches.valueAt(t).getDisplayContent() == dc) {
+                        dc.computeImeTarget(true /* updateImeTarget */);
+                        break;
+                    }
+                }
+            }
+            dc.handleCompleteDeferredRemoval();
         }
     }
 
@@ -555,19 +570,13 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             Slog.e(TAG, "Unexpected Sync ID " + syncId + ". Expected " + mSyncId);
             return;
         }
-        boolean hasWallpaper = false;
-        DisplayContent dc = null;
-        for (int i = mParticipants.size() - 1; i >= 0; --i) {
-            final WindowContainer<?> wc = mParticipants.valueAt(i);
-            if (dc == null && wc.mDisplayContent != null) {
-                dc = wc.mDisplayContent;
-            }
-            if (!hasWallpaper && isWallpaper(wc)) {
-                hasWallpaper = true;
-            }
+        if (mTargetDisplays.isEmpty()) {
+            mTargetDisplays.add(mController.mAtm.mRootWindowContainer.getDefaultDisplay());
         }
-        if (dc == null) dc = mController.mAtm.mRootWindowContainer.getDefaultDisplay();
-        mTargetDisplay = dc;
+        // While there can be multiple DC's involved. For now, we just use the first one as
+        // the "primary" one for most things. Eventually, this will need to change, but, for the
+        // time being, we don't have full cross-display transitions so it isn't a problem.
+        final DisplayContent dc = mTargetDisplays.get(0);
 
         if (mState == STATE_ABORT) {
             mController.abort(this);
@@ -577,8 +586,11 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             return;
         }
         // Ensure that wallpaper visibility is updated with the latest wallpaper target.
-        if (hasWallpaper) {
-            dc.mWallpaperController.adjustWallpaperWindows();
+        for (int i = mParticipants.size() - 1; i >= 0; --i) {
+            final WindowContainer<?> wc = mParticipants.valueAt(i);
+            if (isWallpaper(wc) && wc.getDisplayContent() != null) {
+                wc.getDisplayContent().mWallpaperController.adjustWallpaperWindows();
+            }
         }
 
         mState = STATE_PLAYING;
