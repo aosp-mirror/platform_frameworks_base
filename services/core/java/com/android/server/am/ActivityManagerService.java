@@ -15951,13 +15951,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public boolean startAndBindSupplementalProcessService(Intent service,
-                ServiceConnection conn, int userAppUid) throws TransactionTooLargeException {
+        public boolean bindSupplementalProcessService(Intent service, ServiceConnection conn,
+                int userAppUid, String processName, int flags) throws RemoteException {
             if (service == null) {
                 throw new IllegalArgumentException("intent is null");
             }
             if (conn == null) {
                 throw new IllegalArgumentException("connection is null");
+            }
+            if (processName == null) {
+                throw new IllegalArgumentException("processName is null");
             }
             if (service.getComponent() == null) {
                 throw new IllegalArgumentException("service must specify explicit component");
@@ -15967,15 +15970,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             Handler handler = mContext.getMainThreadHandler();
-            int flags = Context.BIND_AUTO_CREATE;
 
             final IServiceConnection sd = mContext.getServiceDispatcher(conn, handler, flags);
             service.prepareToLeaveProcess(mContext);
             return ActivityManagerService.this.bindServiceInstance(
-                        mContext.getIApplicationThread(), mContext.getActivityToken(), service,
-                        service.resolveTypeIfNeeded(mContext.getContentResolver()), sd, flags,
-                        Integer.toString(userAppUid), /*isSupplementalProcessService*/ true,
-                        mContext.getOpPackageName(), UserHandle.getUserId(userAppUid)) != 0;
+                    mContext.getIApplicationThread(), mContext.getActivityToken(), service,
+                    service.resolveTypeIfNeeded(mContext.getContentResolver()), sd, flags,
+                    processName, /*isSupplementalProcessService*/ true, mContext.getOpPackageName(),
+                    UserHandle.getUserId(userAppUid)) != 0;
         }
 
         @Override

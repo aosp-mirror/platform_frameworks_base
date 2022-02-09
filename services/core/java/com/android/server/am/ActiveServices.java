@@ -3411,9 +3411,11 @@ public final class ActiveServices {
                     final Intent.FilterComparison filter
                             = new Intent.FilterComparison(service.cloneFilter());
                     final ServiceRestarter res = new ServiceRestarter();
+                    String supplementalProcessName = isSupplementalProcessService ? instanceName
+                                                                                  : null;
                     r = new ServiceRecord(mAm, className, name, definingPackageName,
                             definingUid, filter, sInfo, callingFromFg, res,
-                            isSupplementalProcessService);
+                            supplementalProcessName);
                     res.setService(r);
                     smap.mServicesByInstanceName.put(name, r);
                     smap.mServicesByIntent.put(filter, r);
