@@ -623,7 +623,7 @@ static jint ImageReader_imageSetup(JNIEnv* env, jobject thiz, jobject image,
     Image_setBufferItem(env, image, buffer);
     env->SetLongField(image, gSurfaceImageClassInfo.mTimestamp,
             static_cast<jlong>(buffer->mTimestamp));
-    env->SetLongField(image, gSurfaceImageClassInfo.mDataSpace,
+    env->SetIntField(image, gSurfaceImageClassInfo.mDataSpace,
             static_cast<jint>(buffer->mDataSpace));
     auto transform = buffer->mTransform;
     if (buffer->mTransformToDisplayInverse) {
