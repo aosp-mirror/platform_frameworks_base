@@ -5719,20 +5719,6 @@
     <!-- Title for the harmful app warning dialog. [CHAR LIMIT=40] -->
     <string name="harmful_app_warning_title">Harmful app detected</string>
 
-    <!-- Title for the log access confirmation dialog. [CHAR LIMIT=40] -->
-    <string name="log_access_confirmation_title">System log access request</string>
-    <!-- Label for the allow button on the log access confirmation dialog. [CHAR LIMIT=20] -->
-    <string name="log_access_confirmation_allow">Only this time</string>
-    <!-- Label for the deny button on the log access confirmation dialog. [CHAR LIMIT=20] -->
-    <string name="log_access_confirmation_deny">Don\u2019t allow</string>
-
-    <!-- Content for the log access confirmation dialog. [CHAR LIMIT=NONE]-->
-    <string name="log_access_confirmation_body"><xliff:g id="log_access_app_name" example="Example App">%s</xliff:g> requests system logs for functional debugging.
-        These logs might contain information that apps and services on your device have written.</string>
-
-    <!-- Privacy notice do not show [CHAR LIMIT=20] -->
-    <string name="log_access_do_not_show_again">Don\u2019t show again</string>
-
     <!-- Text describing a permission request for one app to show another app's
          slices [CHAR LIMIT=NONE] -->
     <string name="slices_permission_request"><xliff:g id="app" example="Example App">%1$s</xliff:g> wants to show <xliff:g id="app_2" example="Other Example App">%2$s</xliff:g> slices</string>
