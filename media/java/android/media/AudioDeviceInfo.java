@@ -177,6 +177,11 @@ public final class AudioDeviceInfo {
      */
     public static final int TYPE_HDMI_EARC         = 29;
 
+    /**
+     * A device type describing a Bluetooth Low Energy (BLE) broadcast group.
+     */
+    public static final int TYPE_BLE_BROADCAST   = 30;
+
     /** @hide */
     @IntDef(flag = false, prefix = "TYPE", value = {
             TYPE_BUILTIN_EARPIECE,
@@ -207,7 +212,8 @@ public final class AudioDeviceInfo {
             TYPE_REMOTE_SUBMIX,
             TYPE_BLE_HEADSET,
             TYPE_BLE_SPEAKER,
-            TYPE_ECHO_REFERENCE}
+            TYPE_ECHO_REFERENCE,
+            TYPE_BLE_BROADCAST}
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioDeviceType {}
@@ -264,7 +270,8 @@ public final class AudioDeviceInfo {
             TYPE_HEARING_AID,
             TYPE_BUILTIN_SPEAKER_SAFE,
             TYPE_BLE_HEADSET,
-            TYPE_BLE_SPEAKER}
+            TYPE_BLE_SPEAKER,
+            TYPE_BLE_BROADCAST}
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioDeviceTypeOut {}
@@ -296,6 +303,7 @@ public final class AudioDeviceInfo {
             case TYPE_BUILTIN_SPEAKER_SAFE:
             case TYPE_BLE_HEADSET:
             case TYPE_BLE_SPEAKER:
+            case TYPE_BLE_BROADCAST:
                 return true;
             default:
                 return false;
@@ -627,6 +635,7 @@ public final class AudioDeviceInfo {
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_REMOTE_SUBMIX, TYPE_REMOTE_SUBMIX);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_BLE_HEADSET, TYPE_BLE_HEADSET);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_BLE_SPEAKER, TYPE_BLE_SPEAKER);
+        INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_OUT_BLE_BROADCAST, TYPE_BLE_BROADCAST);
 
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BUILTIN_MIC, TYPE_BUILTIN_MIC);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BLUETOOTH_SCO_HEADSET, TYPE_BLUETOOTH_SCO);
@@ -684,6 +693,7 @@ public final class AudioDeviceInfo {
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_REMOTE_SUBMIX, AudioSystem.DEVICE_OUT_REMOTE_SUBMIX);
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_BLE_HEADSET, AudioSystem.DEVICE_OUT_BLE_HEADSET);
         EXT_TO_INT_DEVICE_MAPPING.put(TYPE_BLE_SPEAKER, AudioSystem.DEVICE_OUT_BLE_SPEAKER);
+        EXT_TO_INT_DEVICE_MAPPING.put(TYPE_BLE_BROADCAST, AudioSystem.DEVICE_OUT_BLE_BROADCAST);
 
         // privileges mapping to input device
         EXT_TO_INT_INPUT_DEVICE_MAPPING = new SparseIntArray();
