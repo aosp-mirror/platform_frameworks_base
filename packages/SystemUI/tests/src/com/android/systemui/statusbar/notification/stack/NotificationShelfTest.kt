@@ -36,14 +36,14 @@ class NotificationShelfTest : SysuiTestCase() {
         setFractionToShade(0f)
         setOnLockscreen(true)
 
-        shelf.updateStateWidth(shelfState, /* fraction */ 0f, /* shortestWidth */ 10)
-        assertTrue(shelfState.actualWidth == 10)
+        shelf.updateActualWidth(/* fractionToShade */ 0f, /* shortestWidth */ 10f);
+        assertTrue(shelf.actualWidth == 10)
 
-        shelf.updateStateWidth(shelfState, /* fraction */ 0.5f, /* shortestWidth */ 10)
-        assertTrue(shelfState.actualWidth == 20)
+        shelf.updateActualWidth(/* fractionToShade */ 0.5f, /* shortestWidth */ 10f)
+        assertTrue(shelf.actualWidth == 20)
 
-        shelf.updateStateWidth(shelfState, /* fraction */ 1f, /* shortestWidth */ 10)
-        assertTrue(shelfState.actualWidth == 30)
+        shelf.updateActualWidth(/* fractionToShade */ 1f, /* shortestWidth */ 10f)
+        assertTrue(shelf.actualWidth == 30)
     }
 
     @Test
@@ -51,8 +51,8 @@ class NotificationShelfTest : SysuiTestCase() {
         setFractionToShade(0f)
         setOnLockscreen(false)
 
-        shelf.updateStateWidth(shelfState, /* fraction */ 0f, /* shortestWidth */ 10)
-        assertTrue(shelfState.actualWidth == 30)
+        shelf.updateActualWidth(/* fraction */ 0f, /* shortestWidth */ 10f)
+        assertTrue(shelf.actualWidth == 30)
     }
 
     @Test
