@@ -39771,11 +39771,11 @@ package android.telephony {
     field public static final String KEY_CARRIER_SUPPORTS_TETHERING_BOOL = "carrier_supports_tethering_bool";
     field public static final String KEY_CARRIER_USE_IMS_FIRST_FOR_EMERGENCY_BOOL = "carrier_use_ims_first_for_emergency_bool";
     field public static final String KEY_CARRIER_USSD_METHOD_INT = "carrier_ussd_method_int";
-    field public static final String KEY_CARRIER_UT_PROVISIONING_REQUIRED_BOOL = "carrier_ut_provisioning_required_bool";
+    field @Deprecated public static final String KEY_CARRIER_UT_PROVISIONING_REQUIRED_BOOL = "carrier_ut_provisioning_required_bool";
     field public static final String KEY_CARRIER_VOLTE_AVAILABLE_BOOL = "carrier_volte_available_bool";
     field public static final String KEY_CARRIER_VOLTE_OVERRIDE_WFC_PROVISIONING_BOOL = "carrier_volte_override_wfc_provisioning_bool";
-    field public static final String KEY_CARRIER_VOLTE_PROVISIONED_BOOL = "carrier_volte_provisioned_bool";
-    field public static final String KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL = "carrier_volte_provisioning_required_bool";
+    field @Deprecated public static final String KEY_CARRIER_VOLTE_PROVISIONED_BOOL = "carrier_volte_provisioned_bool";
+    field @Deprecated public static final String KEY_CARRIER_VOLTE_PROVISIONING_REQUIRED_BOOL = "carrier_volte_provisioning_required_bool";
     field public static final String KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL = "carrier_volte_tty_supported_bool";
     field public static final String KEY_CARRIER_VT_AVAILABLE_BOOL = "carrier_vt_available_bool";
     field @Deprecated public static final String KEY_CARRIER_VVM_PACKAGE_NAME_STRING = "carrier_vvm_package_name_string";
@@ -40004,14 +40004,23 @@ package android.telephony {
   }
 
   public static final class CarrierConfigManager.Ims {
+    field public static final String KEY_CAPABILITY_CALL_COMPOSER_INT_ARRAY = "ims.key_capability_type_call_composer_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_OPTIONS_UCE_INT_ARRAY = "ims.key_capability_type_options_uce_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY = "ims.key_capability_type_presence_uce_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_SMS_INT_ARRAY = "ims.key_capability_type_sms_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_UT_INT_ARRAY = "ims.key_capability_type_ut_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_VIDEO_INT_ARRAY = "ims.key_capability_type_video_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_VOICE_INT_ARRAY = "ims.key_capability_type_voice_int_array";
     field public static final String KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL = "ims.enable_presence_capability_exchange_bool";
     field public static final String KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL = "ims.enable_presence_group_subscribe_bool";
     field public static final String KEY_ENABLE_PRESENCE_PUBLISH_BOOL = "ims.enable_presence_publish_bool";
     field public static final String KEY_IMS_SINGLE_REGISTRATION_REQUIRED_BOOL = "ims.ims_single_registration_required_bool";
+    field public static final String KEY_MMTEL_REQUIRES_PROVISIONING_BUNDLE = "ims.mmtel_requires_provisioning_bundle";
     field public static final String KEY_NON_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC_INT = "ims.non_rcs_capabilities_cache_expiration_sec_int";
     field public static final String KEY_PREFIX = "ims.";
     field public static final String KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL = "ims.rcs_bulk_capability_exchange_bool";
     field public static final String KEY_RCS_FEATURE_TAG_ALLOWED_STRING_ARRAY = "ims.rcs_feature_tag_allowed_string_array";
+    field public static final String KEY_RCS_REQUIRES_PROVISIONING_BUNDLE = "ims.rcs_requires_provisioning_bundle";
     field public static final String KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT = "ims.wifi_off_deferring_time_millis_int";
   }
 
