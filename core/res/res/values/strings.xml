@@ -4242,7 +4242,7 @@
          match and total number of matches found in the current page. [CHAR LIMIT=NONE] -->
     <string name="matches_found">{ count, plural,
         =1 {# match}
-        other {# of {total}}}
+        other {# of {total}}
     }
     </string>
 
