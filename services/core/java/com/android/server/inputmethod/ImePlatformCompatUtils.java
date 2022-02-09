@@ -17,6 +17,7 @@
 package com.android.server.inputmethod;
 
 import static android.inputmethodservice.InputMethodService.FINISH_INPUT_NO_FALLBACK_CONNECTION;
+import static android.view.inputmethod.InputMethodManager.CLEAR_SHOW_FORCED_FLAG_WHEN_LEAVING;
 
 import android.content.Context;
 import android.os.RemoteException;
@@ -40,6 +41,16 @@ final class ImePlatformCompatUtils {
      */
     public boolean shouldFinishInputWithReportToIme(int imeUid) {
         return isChangeEnabledByUid(FINISH_INPUT_NO_FALLBACK_CONNECTION, imeUid);
+    }
+
+    /**
+     *  Whether to clear {@link android.view.inputmethod.InputMethodManager#SHOW_FORCED} flag
+     *  when the next IME focused application changed.
+     *
+     * @param clientUid The uid of the app
+     */
+    public boolean shouldClearShowForcedFlag(int clientUid) {
+        return isChangeEnabledByUid(CLEAR_SHOW_FORCED_FLAG_WHEN_LEAVING, clientUid);
     }
 
     private boolean isChangeEnabledByUid(long changeFlag, int uid) {
