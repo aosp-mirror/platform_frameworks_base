@@ -222,8 +222,12 @@ final class DeletePackageHelper {
                         deleteFlags | PackageManager.DELETE_CHATTY, info, true);
             }
             if (res && pkg != null) {
+                final boolean packageInstalledForSomeUsers;
+                synchronized (mPm.mLock) {
+                    packageInstalledForSomeUsers = mPm.mPackages.get(pkg.getPackageName()) != null;
+                }
                 mPm.mInstantAppRegistry.onPackageUninstalled(pkg, uninstalledPs,
-                        info.mRemovedUsers);
+                        info.mRemovedUsers, packageInstalledForSomeUsers);
             }
             synchronized (mPm.mLock) {
                 if (res) {
