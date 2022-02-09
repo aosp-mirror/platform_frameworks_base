@@ -2509,12 +2509,12 @@ public class UserManager {
     }
 
     /**
-     * Checks if the calling context user is running in a profile.
+     * Checks if the calling context user is running in a profile. A profile is a user that
+     * typically has its own separate data but shares its UI with some parent user. For example, a
+     * {@link #isManagedProfile() managed profile} is a type of profile.
      *
      * @return whether the caller is in a profile.
-     * @hide
      */
-    @SystemApi
     @UserHandleAware(
             requiresAnyOfPermissionsIfNotCallerProfileGroup = {
                     android.Manifest.permission.MANAGE_USERS,
