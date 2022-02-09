@@ -12896,14 +12896,21 @@ package android.telephony.ims {
 
   public class ImsService extends android.app.Service {
     ctor public ImsService();
-    method public android.telephony.ims.feature.MmTelFeature createMmTelFeature(int);
-    method public android.telephony.ims.feature.RcsFeature createRcsFeature(int);
-    method public void disableIms(int);
-    method public void enableIms(int);
-    method public android.telephony.ims.stub.ImsConfigImplBase getConfig(int);
+    method @Nullable public android.telephony.ims.feature.MmTelFeature createEmergencyOnlyMmTelFeature(int);
+    method @Deprecated public android.telephony.ims.feature.MmTelFeature createMmTelFeature(int);
+    method @Nullable public android.telephony.ims.feature.MmTelFeature createMmTelFeatureForSubscription(int, int);
+    method @Deprecated public android.telephony.ims.feature.RcsFeature createRcsFeature(int);
+    method @Nullable public android.telephony.ims.feature.RcsFeature createRcsFeatureForSubscription(int, int);
+    method @Deprecated public void disableIms(int);
+    method public void disableImsForSubscription(int, int);
+    method @Deprecated public void enableIms(int);
+    method public void enableImsForSubscription(int, int);
+    method @Deprecated public android.telephony.ims.stub.ImsConfigImplBase getConfig(int);
+    method @NonNull public android.telephony.ims.stub.ImsConfigImplBase getConfigForSubscription(int, int);
     method @NonNull public java.util.concurrent.Executor getExecutor();
     method public long getImsServiceCapabilities();
-    method public android.telephony.ims.stub.ImsRegistrationImplBase getRegistration(int);
+    method @Deprecated public android.telephony.ims.stub.ImsRegistrationImplBase getRegistration(int);
+    method @NonNull public android.telephony.ims.stub.ImsRegistrationImplBase getRegistrationForSubscription(int, int);
     method @Nullable public android.telephony.ims.stub.SipTransportImplBase getSipTransport(int);
     method public final void onUpdateSupportedImsFeatures(android.telephony.ims.stub.ImsFeatureConfiguration) throws android.os.RemoteException;
     method public android.telephony.ims.stub.ImsFeatureConfiguration querySupportedImsFeatures();
