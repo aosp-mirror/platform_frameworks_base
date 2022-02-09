@@ -1359,36 +1359,19 @@ package android.app.ambientcontext {
     method @NonNull public android.app.ambientcontext.AmbientContextEventRequest.Builder setOptions(@NonNull android.os.PersistableBundle);
   }
 
-  public final class AmbientContextEventResponse implements android.os.Parcelable {
-    method public int describeContents();
-    method @Nullable public android.app.PendingIntent getActionPendingIntent();
-    method @NonNull public java.util.List<android.app.ambientcontext.AmbientContextEvent> getEvents();
-    method @NonNull public String getPackageName();
-    method public int getStatusCode();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.ambientcontext.AmbientContextEventResponse> CREATOR;
+  public final class AmbientContextManager {
+    method @NonNull public static java.util.List<android.app.ambientcontext.AmbientContextEvent> getEventsFromIntent(@NonNull android.content.Intent);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT) public void queryAmbientContextServiceStatus(@NonNull java.util.Set<java.lang.Integer>, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT) public void registerObserver(@NonNull android.app.ambientcontext.AmbientContextEventRequest, @NonNull android.app.PendingIntent, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT) public void startConsentActivity(@NonNull java.util.Set<java.lang.Integer>);
+    method @RequiresPermission(android.Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT) public void unregisterObserver();
+    field public static final String EXTRA_AMBIENT_CONTEXT_EVENTS = "android.app.ambientcontext.extra.AMBIENT_CONTEXT_EVENTS";
     field public static final int STATUS_ACCESS_DENIED = 5; // 0x5
     field public static final int STATUS_MICROPHONE_DISABLED = 4; // 0x4
     field public static final int STATUS_NOT_SUPPORTED = 2; // 0x2
     field public static final int STATUS_SERVICE_UNAVAILABLE = 3; // 0x3
     field public static final int STATUS_SUCCESS = 1; // 0x1
     field public static final int STATUS_UNKNOWN = 0; // 0x0
-  }
-
-  public static final class AmbientContextEventResponse.Builder {
-    ctor public AmbientContextEventResponse.Builder();
-    method @NonNull public android.app.ambientcontext.AmbientContextEventResponse.Builder addEvent(@NonNull android.app.ambientcontext.AmbientContextEvent);
-    method @NonNull public android.app.ambientcontext.AmbientContextEventResponse build();
-    method @NonNull public android.app.ambientcontext.AmbientContextEventResponse.Builder setActionPendingIntent(@NonNull android.app.PendingIntent);
-    method @NonNull public android.app.ambientcontext.AmbientContextEventResponse.Builder setPackageName(@NonNull String);
-    method @NonNull public android.app.ambientcontext.AmbientContextEventResponse.Builder setStatusCode(int);
-  }
-
-  public final class AmbientContextManager {
-    method @Nullable public static android.app.ambientcontext.AmbientContextEventResponse getResponseFromIntent(@NonNull android.content.Intent);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT) public void registerObserver(@NonNull android.app.ambientcontext.AmbientContextEventRequest, @NonNull android.app.PendingIntent);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT) public void unregisterObserver();
-    field public static final String EXTRA_AMBIENT_CONTEXT_EVENT_RESPONSE = "android.app.ambientcontext.extra.AMBIENT_CONTEXT_EVENT_RESPONSE";
   }
 
 }
@@ -10704,12 +10687,43 @@ package android.security.keystore.recovery {
 
 package android.service.ambientcontext {
 
+  public final class AmbientContextDetectionResult implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.app.ambientcontext.AmbientContextEvent> getEvents();
+    method @NonNull public String getPackageName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.ambientcontext.AmbientContextDetectionResult> CREATOR;
+  }
+
+  public static final class AmbientContextDetectionResult.Builder {
+    ctor public AmbientContextDetectionResult.Builder();
+    method @NonNull public android.service.ambientcontext.AmbientContextDetectionResult.Builder addEvent(@NonNull android.app.ambientcontext.AmbientContextEvent);
+    method @NonNull public android.service.ambientcontext.AmbientContextDetectionResult build();
+    method @NonNull public android.service.ambientcontext.AmbientContextDetectionResult.Builder setPackageName(@NonNull String);
+  }
+
   public abstract class AmbientContextDetectionService extends android.app.Service {
     ctor public AmbientContextDetectionService();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method public abstract void onStartDetection(@NonNull android.app.ambientcontext.AmbientContextEventRequest, @NonNull String, @NonNull java.util.function.Consumer<android.app.ambientcontext.AmbientContextEventResponse>);
+    method @BinderThread public abstract void onQueryServiceStatus(@NonNull int[], @NonNull String, @NonNull java.util.function.Consumer<android.service.ambientcontext.AmbientContextDetectionServiceStatus>);
+    method @BinderThread public abstract void onStartDetection(@NonNull android.app.ambientcontext.AmbientContextEventRequest, @NonNull String, @NonNull java.util.function.Consumer<android.service.ambientcontext.AmbientContextDetectionResult>, @NonNull java.util.function.Consumer<android.service.ambientcontext.AmbientContextDetectionServiceStatus>);
     method public abstract void onStopDetection(@NonNull String);
     field public static final String SERVICE_INTERFACE = "android.service.ambientcontext.AmbientContextDetectionService";
+  }
+
+  public final class AmbientContextDetectionServiceStatus implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public String getPackageName();
+    method public int getStatusCode();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.ambientcontext.AmbientContextDetectionServiceStatus> CREATOR;
+  }
+
+  public static final class AmbientContextDetectionServiceStatus.Builder {
+    ctor public AmbientContextDetectionServiceStatus.Builder();
+    method @NonNull public android.service.ambientcontext.AmbientContextDetectionServiceStatus build();
+    method @NonNull public android.service.ambientcontext.AmbientContextDetectionServiceStatus.Builder setPackageName(@NonNull String);
+    method @NonNull public android.service.ambientcontext.AmbientContextDetectionServiceStatus.Builder setStatusCode(int);
   }
 
 }
