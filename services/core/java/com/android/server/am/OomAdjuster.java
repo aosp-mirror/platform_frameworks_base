@@ -2491,6 +2491,7 @@ public class OomAdjuster {
                 mCachedAppOptimizer.onOomAdjustChanged(state.getSetAdj(), state.getCurAdj(), app);
             } else if (mService.mWakefulness.get() != PowerManagerInternal.WAKEFULNESS_AWAKE
                     && state.getSetAdj() < ProcessList.FOREGROUND_APP_ADJ
+                    && !state.isRunningRemoteAnimation()
                     // Because these can fire independent of oom_adj/procstate changes, we need
                     // to throttle the actual dispatch of these requests in addition to the
                     // processing of the requests. As a result, there is throttling both here
