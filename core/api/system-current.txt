@@ -2778,8 +2778,8 @@ package android.companion.virtual {
     method @NonNull public java.util.Set<android.os.UserHandle> getUsersWithMatchingAccounts();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.companion.virtual.VirtualDeviceParams> CREATOR;
-    field public static final int LOCK_STATE_ALWAYS_LOCKED = 0; // 0x0
     field public static final int LOCK_STATE_ALWAYS_UNLOCKED = 1; // 0x1
+    field public static final int LOCK_STATE_DEFAULT = 0; // 0x0
   }
 
   public static final class VirtualDeviceParams.Builder {
