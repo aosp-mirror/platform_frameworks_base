@@ -107,7 +107,7 @@ public class Flags {
     public static final ResourceBooleanFlag QS_USER_DETAIL_SHORTCUT =
             new ResourceBooleanFlag(503, R.bool.flag_lockscreen_qs_user_detail_shortcut);
 
-    public static final BooleanFlag NEW_FOOTER = new BooleanFlag(504, false);
+    public static final BooleanFlag NEW_FOOTER = new BooleanFlag(504, true);
 
     public static final BooleanFlag NEW_HEADER = new BooleanFlag(505, false);
     public static final ResourceBooleanFlag FULL_SCREEN_USER_SWITCHER =
