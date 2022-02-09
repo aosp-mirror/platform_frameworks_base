@@ -27,6 +27,8 @@ import android.app.job.JobParameters;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.location.GnssSignalQuality;
 import android.os.BatteryStatsManager.WifiState;
 import android.os.BatteryStatsManager.WifiSupplState;
@@ -43,6 +45,7 @@ import android.util.MutableBoolean;
 import android.util.Pair;
 import android.util.Printer;
 import android.util.SparseArray;
+import android.util.SparseDoubleArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -65,6 +68,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -4126,7 +4130,28 @@ public abstract class BatteryStats implements Parcelable {
      * Temporary for settings.
      */
     public final void dumpCheckinLocked(Context context, PrintWriter pw, int which, int reqUid) {
-        dumpCheckinLocked(context, pw, which, reqUid, BatteryStatsHelper.checkWifiOnly(context));
+        dumpCheckinLocked(context, pw, which, reqUid, checkWifiOnly(context));
+    }
+
+    private static final String[] CHECKIN_POWER_COMPONENT_LABELS =
+            new String[BatteryConsumer.POWER_COMPONENT_COUNT];
+    static {
+        // Assign individually to avoid future mismatch of indices
+        CHECKIN_POWER_COMPONENT_LABELS[BatteryConsumer.POWER_COMPONENT_SCREEN] = "scrn";
+        CHECKIN_POWER_COMPONENT_LABELS[BatteryConsumer.POWER_COMPONENT_CPU] = "cpu";
+        CHECKIN_POWER_COMPONENT_LABELS[BatteryConsumer.POWER_COMPONENT_BLUETOOTH] = "blue";
+        CHECKIN_POWER_COMPONENT_LABELS[BatteryConsumer.POWER_COMPONENT_CAMERA] = "camera";
+        CHECKIN_POWER_COMPONENT_LABELS[BatteryConsumer.POWER_COMPONENT_AUDIO] = "audio";
+        CHECKIN_POWER_COMPONENT_LABELS[BatteryConsumer.POWER_COMPONENT_VIDEO] = "video";
+        CHECKIN_POWER_COMPONENT_LABELS[BatteryConsumer.POWER_COMPONENT_FLASHLIGHT] = "flashlight";
+        CHECKIN_POWER_COMPONENT_LABELS[BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO] = "cell";
+        CHECKIN_POWER_COMPONENT_LABELS[BatteryConsumer.POWER_COMPONENT_SENSORS] = "sensors";
+        CHECKIN_POWER_COMPONENT_LABELS[BatteryConsumer.POWER_COMPONENT_GNSS] = "gnss";
+        CHECKIN_POWER_COMPONENT_LABELS[BatteryConsumer.POWER_COMPONENT_WIFI] = "wifi";
+        CHECKIN_POWER_COMPONENT_LABELS[BatteryConsumer.POWER_COMPONENT_MEMORY] = "memory";
+        CHECKIN_POWER_COMPONENT_LABELS[BatteryConsumer.POWER_COMPONENT_PHONE] = "phone";
+        CHECKIN_POWER_COMPONENT_LABELS[BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY] = "ambi";
+        CHECKIN_POWER_COMPONENT_LABELS[BatteryConsumer.POWER_COMPONENT_IDLE] = "idle";
     }
 
     /**
@@ -4397,74 +4422,37 @@ public abstract class BatteryStats implements Parcelable {
             }
         }
 
-        final BatteryStatsHelper helper = new BatteryStatsHelper(context, false, wifiOnly);
-        helper.create(this);
-        helper.refreshStats(which, UserHandle.USER_ALL);
-        final List<BatterySipper> sippers = helper.getUsageList();
-        if (sippers != null && sippers.size() > 0) {
-            dumpLine(pw, 0 /* uid */, category, POWER_USE_SUMMARY_DATA,
-                    PowerCalculator.formatCharge(helper.getPowerProfile().getBatteryCapacity()),
-                    PowerCalculator.formatCharge(helper.getComputedPower()),
-                    PowerCalculator.formatCharge(helper.getMinDrainedPower()),
-                    PowerCalculator.formatCharge(helper.getMaxDrainedPower()));
-            int uid = 0;
-            for (int i=0; i<sippers.size(); i++) {
-                final BatterySipper bs = sippers.get(i);
-                String label;
-                switch (bs.drainType) {
-                    case AMBIENT_DISPLAY:
-                        label = "ambi";
-                        break;
-                    case IDLE:
-                        label="idle";
-                        break;
-                    case CELL:
-                        label="cell";
-                        break;
-                    case PHONE:
-                        label="phone";
-                        break;
-                    case WIFI:
-                        label="wifi";
-                        break;
-                    case BLUETOOTH:
-                        label="blue";
-                        break;
-                    case SCREEN:
-                        label="scrn";
-                        break;
-                    case FLASHLIGHT:
-                        label="flashlight";
-                        break;
-                    case APP:
-                        uid = bs.uidObj.getUid();
-                        label = "uid";
-                        break;
-                    case USER:
-                        uid = UserHandle.getUid(bs.userId, 0);
-                        label = "user";
-                        break;
-                    case UNACCOUNTED:
-                        label = "unacc";
-                        break;
-                    case OVERCOUNTED:
-                        label = "over";
-                        break;
-                    case CAMERA:
-                        label = "camera";
-                        break;
-                    case MEMORY:
-                        label = "memory";
-                        break;
-                    default:
-                        label = "???";
-                }
-                dumpLine(pw, uid, category, POWER_USE_ITEM_DATA, label,
-                        PowerCalculator.formatCharge(bs.totalPowerMah),
-                        bs.shouldHide ? 1 : 0,
-                        PowerCalculator.formatCharge(bs.screenPowerMah),
-                        PowerCalculator.formatCharge(bs.proportionalSmearMah));
+        final BatteryUsageStats stats = getBatteryUsageStats(context);
+        dumpLine(pw, 0 /* uid */, category, POWER_USE_SUMMARY_DATA,
+                PowerCalculator.formatCharge(stats.getBatteryCapacity()),
+                PowerCalculator.formatCharge(stats.getConsumedPower()),
+                PowerCalculator.formatCharge(stats.getDischargedPowerRange().getLower()),
+                PowerCalculator.formatCharge(stats.getDischargedPowerRange().getUpper()));
+        final BatteryConsumer deviceConsumer = stats.getAggregateBatteryConsumer(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
+        for (@BatteryConsumer.PowerComponent int powerComponent = 0;
+                powerComponent < BatteryConsumer.POWER_COMPONENT_COUNT; powerComponent++) {
+            String label = CHECKIN_POWER_COMPONENT_LABELS[powerComponent];
+            if (label == null) {
+                label = "???";
             }
+            dumpLine(pw, 0 /* uid */, category, POWER_USE_ITEM_DATA, label,
+                    PowerCalculator.formatCharge(deviceConsumer.getConsumedPower(powerComponent)),
+                    shouldHidePowerComponent(powerComponent) ? 1 : 0, "0", "0");
+        }
+
+        final ProportionalAttributionCalculator proportionalAttributionCalculator =
+                new ProportionalAttributionCalculator(context, stats);
+        final List<UidBatteryConsumer> uidBatteryConsumers = stats.getUidBatteryConsumers();
+        for (int i = 0; i < uidBatteryConsumers.size(); i++) {
+            UidBatteryConsumer consumer = uidBatteryConsumers.get(i);
+            dumpLine(pw, consumer.getUid(), category, POWER_USE_ITEM_DATA, "uid",
+                    PowerCalculator.formatCharge(consumer.getConsumedPower()),
+                    proportionalAttributionCalculator.isSystemBatteryConsumer(consumer) ? 1 : 0,
+                    PowerCalculator.formatCharge(
+                            consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN)),
+                    PowerCalculator.formatCharge(
+                            proportionalAttributionCalculator.getProportionalPowerMah(consumer)));
         }
 
         final long[] cpuFreqs = getCpuFreqs();
@@ -4909,7 +4897,7 @@ public abstract class BatteryStats implements Parcelable {
      */
     public final void dumpLocked(Context context, PrintWriter pw, String prefix, int which,
             int reqUid) {
-        dumpLocked(context, pw, prefix, which, reqUid, BatteryStatsHelper.checkWifiOnly(context));
+        dumpLocked(context, pw, prefix, which, reqUid, checkWifiOnly(context));
     }
 
     @SuppressWarnings("unused")
@@ -7625,21 +7613,20 @@ public abstract class BatteryStats implements Parcelable {
         proto.write(BatteryStatsProto.END_PLATFORM_VERSION, getEndPlatformVersion());
 
         if ((flags & DUMP_DAILY_ONLY) == 0) {
-            final BatteryStatsHelper helper = new BatteryStatsHelper(context, false,
-                    (flags & DUMP_DEVICE_WIFI_ONLY) != 0);
-            helper.create(this);
-            helper.refreshStats(STATS_SINCE_CHARGED, UserHandle.USER_ALL);
-
-            dumpProtoAppsLocked(proto, helper, apps);
-            dumpProtoSystemLocked(proto, helper);
+            final BatteryUsageStats stats = getBatteryUsageStats(context);
+            ProportionalAttributionCalculator proportionalAttributionCalculator =
+                    new ProportionalAttributionCalculator(context, stats);
+            dumpProtoAppsLocked(proto, stats, apps, proportionalAttributionCalculator);
+            dumpProtoSystemLocked(proto, stats);
         }
 
         proto.end(bToken);
         proto.flush();
     }
 
-    private void dumpProtoAppsLocked(ProtoOutputStream proto, BatteryStatsHelper helper,
-            List<ApplicationInfo> apps) {
+    private void dumpProtoAppsLocked(ProtoOutputStream proto, BatteryUsageStats stats,
+            List<ApplicationInfo> apps,
+            ProportionalAttributionCalculator proportionalAttributionCalculator) {
         final int which = STATS_SINCE_CHARGED;
         final long rawUptimeUs = SystemClock.uptimeMillis() * 1000;
         final long rawRealtimeMs = SystemClock.elapsedRealtime();
@@ -7660,17 +7647,11 @@ public abstract class BatteryStats implements Parcelable {
             }
         }
 
-        SparseArray<BatterySipper> uidToSipper = new SparseArray<>();
-        final List<BatterySipper> sippers = helper.getUsageList();
-        if (sippers != null) {
-            for (int i = 0; i < sippers.size(); ++i) {
-                final BatterySipper bs = sippers.get(i);
-                if (bs.drainType != BatterySipper.DrainType.APP) {
-                    // Others are handled by dumpProtoSystemLocked()
-                    continue;
-                }
-                uidToSipper.put(bs.uidObj.getUid(), bs);
-            }
+        SparseArray<UidBatteryConsumer> uidToConsumer = new SparseArray<>();
+        final List<UidBatteryConsumer> consumers = stats.getUidBatteryConsumers();
+        for (int i = consumers.size() - 1; i >= 0; --i) {
+            final UidBatteryConsumer bs = consumers.get(i);
+            uidToConsumer.put(bs.getUid(), bs);
         }
 
         SparseArray<? extends Uid> uidStats = getUidStats();
@@ -7936,14 +7917,16 @@ public abstract class BatteryStats implements Parcelable {
             proto.end(nToken);
 
             // Power use item (POWER_USE_ITEM_DATA)
-            BatterySipper bs = uidToSipper.get(uid);
-            if (bs != null) {
+            UidBatteryConsumer consumer = uidToConsumer.get(uid);
+            if (consumer != null) {
                 final long bsToken = proto.start(UidProto.POWER_USE_ITEM);
-                proto.write(UidProto.PowerUseItem.COMPUTED_POWER_MAH, bs.totalPowerMah);
-                proto.write(UidProto.PowerUseItem.SHOULD_HIDE, bs.shouldHide);
-                proto.write(UidProto.PowerUseItem.SCREEN_POWER_MAH, bs.screenPowerMah);
+                proto.write(UidProto.PowerUseItem.COMPUTED_POWER_MAH, consumer.getConsumedPower());
+                proto.write(UidProto.PowerUseItem.SHOULD_HIDE,
+                        proportionalAttributionCalculator.isSystemBatteryConsumer(consumer));
+                proto.write(UidProto.PowerUseItem.SCREEN_POWER_MAH,
+                        consumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN));
                 proto.write(UidProto.PowerUseItem.PROPORTIONAL_SMEAR_MAH,
-                        bs.proportionalSmearMah);
+                        proportionalAttributionCalculator.getProportionalPowerMah(consumer));
                 proto.end(bsToken);
             }
 
@@ -8189,7 +8172,7 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
-    private void dumpProtoSystemLocked(ProtoOutputStream proto, BatteryStatsHelper helper) {
+    private void dumpProtoSystemLocked(ProtoOutputStream proto, BatteryUsageStats stats) {
         final long sToken = proto.start(BatteryStatsProto.SYSTEM);
         final long rawUptimeUs = SystemClock.uptimeMillis() * 1000;
         final long rawRealtimeMs = SystemClock.elapsedRealtime();
@@ -8433,77 +8416,65 @@ public abstract class BatteryStats implements Parcelable {
                 multicastWakeLockCountTotal);
         proto.end(wmctToken);
 
-        // Power use item (POWER_USE_ITEM_DATA)
-        final List<BatterySipper> sippers = helper.getUsageList();
-        if (sippers != null) {
-            for (int i = 0; i < sippers.size(); ++i) {
-                final BatterySipper bs = sippers.get(i);
-                int n = SystemProto.PowerUseItem.UNKNOWN_SIPPER;
-                int uid = 0;
-                switch (bs.drainType) {
-                    case AMBIENT_DISPLAY:
-                        n = SystemProto.PowerUseItem.AMBIENT_DISPLAY;
-                        break;
-                    case IDLE:
-                        n = SystemProto.PowerUseItem.IDLE;
-                        break;
-                    case CELL:
-                        n = SystemProto.PowerUseItem.CELL;
-                        break;
-                    case PHONE:
-                        n = SystemProto.PowerUseItem.PHONE;
-                        break;
-                    case WIFI:
-                        n = SystemProto.PowerUseItem.WIFI;
-                        break;
-                    case BLUETOOTH:
-                        n = SystemProto.PowerUseItem.BLUETOOTH;
-                        break;
-                    case SCREEN:
-                        n = SystemProto.PowerUseItem.SCREEN;
-                        break;
-                    case FLASHLIGHT:
-                        n = SystemProto.PowerUseItem.FLASHLIGHT;
-                        break;
-                    case APP:
-                        // dumpProtoAppsLocked will handle this.
-                        continue;
-                    case USER:
-                        n = SystemProto.PowerUseItem.USER;
-                        uid = UserHandle.getUid(bs.userId, 0);
-                        break;
-                    case UNACCOUNTED:
-                        n = SystemProto.PowerUseItem.UNACCOUNTED;
-                        break;
-                    case OVERCOUNTED:
-                        n = SystemProto.PowerUseItem.OVERCOUNTED;
-                        break;
-                    case CAMERA:
-                        n = SystemProto.PowerUseItem.CAMERA;
-                        break;
-                    case MEMORY:
-                        n = SystemProto.PowerUseItem.MEMORY;
-                        break;
-                }
-                final long puiToken = proto.start(SystemProto.POWER_USE_ITEM);
-                proto.write(SystemProto.PowerUseItem.NAME, n);
-                proto.write(SystemProto.PowerUseItem.UID, uid);
-                proto.write(SystemProto.PowerUseItem.COMPUTED_POWER_MAH, bs.totalPowerMah);
-                proto.write(SystemProto.PowerUseItem.SHOULD_HIDE, bs.shouldHide);
-                proto.write(SystemProto.PowerUseItem.SCREEN_POWER_MAH, bs.screenPowerMah);
-                proto.write(SystemProto.PowerUseItem.PROPORTIONAL_SMEAR_MAH,
-                        bs.proportionalSmearMah);
-                proto.end(puiToken);
+        final BatteryConsumer deviceConsumer = stats.getAggregateBatteryConsumer(
+                BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_DEVICE);
+
+        for (int powerComponent = 0; powerComponent < BatteryConsumer.POWER_COMPONENT_COUNT;
+                powerComponent++) {
+            int n = SystemProto.PowerUseItem.UNKNOWN_SIPPER;
+            switch (powerComponent) {
+                case BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY:
+                    n = SystemProto.PowerUseItem.AMBIENT_DISPLAY;
+                    break;
+                case BatteryConsumer.POWER_COMPONENT_IDLE:
+                    n = SystemProto.PowerUseItem.IDLE;
+                    break;
+                case BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO:
+                    n = SystemProto.PowerUseItem.CELL;
+                    break;
+                case BatteryConsumer.POWER_COMPONENT_PHONE:
+                    n = SystemProto.PowerUseItem.PHONE;
+                    break;
+                case BatteryConsumer.POWER_COMPONENT_WIFI:
+                    n = SystemProto.PowerUseItem.WIFI;
+                    break;
+                case BatteryConsumer.POWER_COMPONENT_BLUETOOTH:
+                    n = SystemProto.PowerUseItem.BLUETOOTH;
+                    break;
+                case BatteryConsumer.POWER_COMPONENT_SCREEN:
+                    n = SystemProto.PowerUseItem.SCREEN;
+                    break;
+                case BatteryConsumer.POWER_COMPONENT_FLASHLIGHT:
+                    n = SystemProto.PowerUseItem.FLASHLIGHT;
+                    break;
+                case BatteryConsumer.POWER_COMPONENT_CAMERA:
+                    n = SystemProto.PowerUseItem.CAMERA;
+                    break;
+                case BatteryConsumer.POWER_COMPONENT_MEMORY:
+                    n = SystemProto.PowerUseItem.MEMORY;
+                    break;
             }
+            final long puiToken = proto.start(SystemProto.POWER_USE_ITEM);
+            proto.write(SystemProto.PowerUseItem.NAME, n);
+            proto.write(SystemProto.PowerUseItem.UID, 0);
+            proto.write(SystemProto.PowerUseItem.COMPUTED_POWER_MAH,
+                    deviceConsumer.getConsumedPower(powerComponent));
+            proto.write(SystemProto.PowerUseItem.SHOULD_HIDE,
+                    shouldHidePowerComponent(powerComponent));
+            proto.write(SystemProto.PowerUseItem.SCREEN_POWER_MAH, 0);
+            proto.write(SystemProto.PowerUseItem.PROPORTIONAL_SMEAR_MAH, 0);
+            proto.end(puiToken);
         }
 
         // Power use summary (POWER_USE_SUMMARY_DATA)
         final long pusToken = proto.start(SystemProto.POWER_USE_SUMMARY);
         proto.write(SystemProto.PowerUseSummary.BATTERY_CAPACITY_MAH,
-                helper.getPowerProfile().getBatteryCapacity());
-        proto.write(SystemProto.PowerUseSummary.COMPUTED_POWER_MAH, helper.getComputedPower());
-        proto.write(SystemProto.PowerUseSummary.MIN_DRAINED_POWER_MAH, helper.getMinDrainedPower());
-        proto.write(SystemProto.PowerUseSummary.MAX_DRAINED_POWER_MAH, helper.getMaxDrainedPower());
+                stats.getBatteryCapacity());
+        proto.write(SystemProto.PowerUseSummary.COMPUTED_POWER_MAH, stats.getConsumedPower());
+        proto.write(SystemProto.PowerUseSummary.MIN_DRAINED_POWER_MAH,
+                stats.getDischargedPowerRange().getLower());
+        proto.write(SystemProto.PowerUseSummary.MAX_DRAINED_POWER_MAH,
+                stats.getDischargedPowerRange().getUpper());
         proto.end(pusToken);
 
         // RPM stats (RESOURCE_POWER_MANAGER_DATA)
@@ -8578,5 +8549,107 @@ public abstract class BatteryStats implements Parcelable {
         }
 
         proto.end(sToken);
+    }
+
+    private static boolean checkWifiOnly(Context context) {
+        final TelephonyManager tm = context.getSystemService(TelephonyManager.class);
+        if (tm == null) {
+            return false;
+        }
+        return !tm.isDataCapable();
+    }
+
+    private BatteryUsageStats getBatteryUsageStats(Context context) {
+        final BatteryUsageStatsProvider provider = new BatteryUsageStatsProvider(context, this);
+        final BatteryUsageStatsQuery query =
+                new BatteryUsageStatsQuery.Builder().setMaxStatsAgeMs(0).build();
+        return provider.getBatteryUsageStats(query);
+    }
+
+    private boolean shouldHidePowerComponent(int powerComponent) {
+        return powerComponent == BatteryConsumer.POWER_COMPONENT_IDLE
+                || powerComponent == BatteryConsumer.POWER_COMPONENT_MOBILE_RADIO
+                || powerComponent == BatteryConsumer.POWER_COMPONENT_SCREEN
+                || powerComponent == BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY;
+    }
+
+    private static class ProportionalAttributionCalculator {
+        private static final double SYSTEM_BATTERY_CONSUMER = -1;
+        private final PackageManager mPackageManager;
+        private final HashSet<String> mSystemAndServicePackages;
+        private final SparseDoubleArray mProportionalPowerMah;
+
+        ProportionalAttributionCalculator(Context context, BatteryUsageStats stats) {
+            mPackageManager = context.getPackageManager();
+            final Resources resources = context.getResources();
+            final String[] systemPackageArray = resources.getStringArray(
+                    com.android.internal.R.array.config_batteryPackageTypeSystem);
+            final String[] servicePackageArray = resources.getStringArray(
+                    com.android.internal.R.array.config_batteryPackageTypeService);
+            mSystemAndServicePackages =
+                    new HashSet<>(systemPackageArray.length + servicePackageArray.length);
+            for (String packageName : systemPackageArray) {
+                mSystemAndServicePackages.add(packageName);
+            }
+            for (String packageName : servicePackageArray) {
+                mSystemAndServicePackages.add(packageName);
+            }
+
+            final List<UidBatteryConsumer> uidBatteryConsumers = stats.getUidBatteryConsumers();
+            mProportionalPowerMah =  new SparseDoubleArray(uidBatteryConsumers.size());
+            double systemPowerMah = 0;
+            for (int i = uidBatteryConsumers.size() - 1; i >= 0; i--) {
+                UidBatteryConsumer consumer = uidBatteryConsumers.get(i);
+                final int uid = consumer.getUid();
+                if (isSystemUid(uid)) {
+                    mProportionalPowerMah.put(uid, SYSTEM_BATTERY_CONSUMER);
+                    systemPowerMah += consumer.getConsumedPower();
+                }
+            }
+
+            final double totalRemainingPower = stats.getConsumedPower() - systemPowerMah;
+            if (Math.abs(totalRemainingPower) > 1e-3) {
+                for (int i = uidBatteryConsumers.size() - 1; i >= 0; i--) {
+                    UidBatteryConsumer consumer = uidBatteryConsumers.get(i);
+                    final int uid = consumer.getUid();
+                    if (mProportionalPowerMah.get(uid) != SYSTEM_BATTERY_CONSUMER) {
+                        final double power = consumer.getConsumedPower();
+                        mProportionalPowerMah.put(uid,
+                                power + systemPowerMah * power / totalRemainingPower);
+                    }
+                }
+            }
+        }
+
+        boolean isSystemBatteryConsumer(UidBatteryConsumer consumer) {
+            return mProportionalPowerMah.get(consumer.getUid()) < 0;
+        }
+
+        double getProportionalPowerMah(UidBatteryConsumer consumer) {
+            final double powerMah = mProportionalPowerMah.get(consumer.getUid());
+            return powerMah >= 0 ? powerMah : 0;
+        }
+
+        /**
+         * Check whether the UID is one of the system UIDs or a service UID
+         */
+        private boolean isSystemUid(int uid) {
+            if (uid >= Process.ROOT_UID && uid < Process.FIRST_APPLICATION_UID) {
+                return true;
+            }
+
+            final String[] packages = mPackageManager.getPackagesForUid(uid);
+            if (packages == null) {
+                return false;
+            }
+
+            for (String packageName : packages) {
+                if (mSystemAndServicePackages.contains(packageName)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }
