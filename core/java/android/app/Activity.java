@@ -2668,6 +2668,7 @@ public class Activity extends ContextThemeWrapper
 
         if (mDefaultBackCallback != null) {
             getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(mDefaultBackCallback);
+            mDefaultBackCallback = null;
         }
     }
 
