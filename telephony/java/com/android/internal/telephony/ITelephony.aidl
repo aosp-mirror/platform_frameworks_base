@@ -55,6 +55,7 @@ import android.telephony.VisualVoicemailSmsFilterSettings;
 import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.RcsClientConfiguration;
 import android.telephony.ims.RcsContactUceCapability;
+import android.telephony.ims.aidl.IFeatureProvisioningCallback;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.aidl.IImsConfigCallback;
@@ -2027,6 +2028,18 @@ interface ITelephony {
     void unregisterImsProvisioningChangedCallback(int subId, IImsConfigCallback callback);
 
     /**
+     * Register an IMS provisioning change callback with Telephony.
+     */
+    void registerFeatureProvisioningChangedCallback(int subId,
+            IFeatureProvisioningCallback callback);
+
+    /**
+     * unregister an existing IMS provisioning change callback.
+     */
+    void unregisterFeatureProvisioningChangedCallback(int subId,
+            IFeatureProvisioningCallback callback);
+
+    /**
      * Set the provisioning status for the IMS MmTel capability using the specified subscription.
      */
     void setImsProvisioningStatusForCapability(int subId, int capability, int tech,
@@ -2040,19 +2053,12 @@ interface ITelephony {
     /**
      * Get the provisioning status for the IMS Rcs capability specified.
      */
-    boolean getRcsProvisioningStatusForCapability(int subId, int capability);
+    boolean getRcsProvisioningStatusForCapability(int subId, int capability, int tech);
 
     /**
      * Set the provisioning status for the IMS Rcs capability using the specified subscription.
      */
-    void setRcsProvisioningStatusForCapability(int subId, int capability,
-            boolean isProvisioned);
-
-    /** Is the capability and tech flagged as provisioned in the cache */
-    boolean isMmTelCapabilityProvisionedInCache(int subId, int capability, int tech);
-
-    /** Set the provisioning for the capability and tech in the cache */
-    void cacheMmTelCapabilityProvisioning(int subId, int capability, int tech,
+    void setRcsProvisioningStatusForCapability(int subId, int capability, int tech,
             boolean isProvisioned);
 
     /**
@@ -2555,4 +2561,18 @@ interface ITelephony {
      * @return the service name of the modem service which bind to.
      */
     String getModemService();
+
+    /**
+     * Is Provisioning required for capability
+     * @return true if provisioning is required for the MMTEL capability and IMS
+     * registration technology specified, false if it is not required.
+     */
+    boolean isProvisioningRequiredForCapability(int subId, int capability, int tech);
+
+    /**
+     * Is RCS Provisioning required for capability
+     * @return true if provisioning is required for the RCS capability and IMS
+     * registration technology specified, false if it is not required.
+     */
+    boolean isRcsProvisioningRequiredForCapability(int subId, int capability, int tech);
 }

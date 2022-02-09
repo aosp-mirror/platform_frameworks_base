@@ -394,6 +394,13 @@ public class MmTelFeature extends ImsFeature {
         public @interface MmTelCapability {}
 
         /**
+         * Undefined capability type for initialization
+         * This is used to check the upper range of MmTel capability
+         * {@hide}
+         */
+        public static final int CAPABILITY_TYPE_NONE = 0;
+
+        /**
          * This MmTelFeature supports Voice calling (IR.92)
          */
         public static final int CAPABILITY_TYPE_VOICE = 1 << 0;
@@ -417,6 +424,12 @@ public class MmTelFeature extends ImsFeature {
          * This MmTelFeature supports Call Composer (section 2.4 of RC.20)
          */
         public static final int CAPABILITY_TYPE_CALL_COMPOSER = 1 << 4;
+
+        /**
+         * This is used to check the upper range of MmTel capability
+         * {@hide}
+         */
+        public static final int CAPABILITY_TYPE_MAX = CAPABILITY_TYPE_CALL_COMPOSER + 1;
 
         /**
          * @hide
