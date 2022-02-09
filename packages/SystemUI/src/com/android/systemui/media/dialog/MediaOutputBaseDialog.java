@@ -19,8 +19,14 @@ package com.android.systemui.media.dialog;
 import static android.view.WindowInsets.Type.navigationBars;
 import static android.view.WindowInsets.Type.statusBars;
 
+import android.app.WallpaperColors;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.graphics.ColorFilter;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -73,6 +79,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private Button mDoneButton;
     private Button mStopButton;
     private int mListMaxHeight;
+    private WallpaperColors mWallpaperColors;
 
     MediaOutputBaseAdapter mAdapter;
 
@@ -161,6 +168,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         final int iconRes = getHeaderIconRes();
         final IconCompat iconCompat = getHeaderIcon();
         final Drawable appSourceDrawable = getAppSourceIcon();
+        boolean colorSetUpdated = false;
         if (appSourceDrawable != null) {
             mAppResourceIcon.setImageDrawable(appSourceDrawable);
         } else {
@@ -170,8 +178,24 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             mHeaderIcon.setVisibility(View.VISIBLE);
             mHeaderIcon.setImageResource(iconRes);
         } else if (iconCompat != null) {
+            Icon icon = iconCompat.toIcon(mContext);
+            Configuration config = mContext.getResources().getConfiguration();
+            int currentNightMode = config.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+            boolean isDarkThemeOn = currentNightMode == Configuration.UI_MODE_NIGHT_YES;
+            WallpaperColors wallpaperColors = WallpaperColors.fromBitmap(icon.getBitmap());
+            colorSetUpdated = !wallpaperColors.equals(mWallpaperColors);
+            if (colorSetUpdated) {
+                mAdapter.updateColorScheme(wallpaperColors, isDarkThemeOn);
+                ColorFilter buttonColorFilter = new PorterDuffColorFilter(
+                        mAdapter.getController().getColorButtonBackground(),
+                        PorterDuff.Mode.SRC_IN);
+                ColorFilter onlineButtonColorFilter = new PorterDuffColorFilter(
+                        mAdapter.getController().getColorInactiveItem(), PorterDuff.Mode.SRC_IN);
+                mDoneButton.getBackground().setColorFilter(buttonColorFilter);
+                mStopButton.getBackground().setColorFilter(onlineButtonColorFilter);
+            }
             mHeaderIcon.setVisibility(View.VISIBLE);
-            mHeaderIcon.setImageIcon(iconCompat.toIcon(mContext));
+            mHeaderIcon.setImageIcon(icon);
         } else {
             mHeaderIcon.setVisibility(View.GONE);
         }
@@ -194,7 +218,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         }
         if (!mAdapter.isDragging() && !mAdapter.isAnimating()) {
             int currentActivePosition = mAdapter.getCurrentActivePosition();
-            if (!deviceSetChanged && currentActivePosition >= 0
+            if (!colorSetUpdated && !deviceSetChanged && currentActivePosition >= 0
                     && currentActivePosition < mAdapter.getItemCount()) {
                 mAdapter.notifyItemChanged(currentActivePosition);
             } else {

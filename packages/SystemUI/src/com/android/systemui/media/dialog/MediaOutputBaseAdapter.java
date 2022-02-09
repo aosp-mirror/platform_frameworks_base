@@ -18,6 +18,7 @@ package com.android.systemui.media.dialog;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.WallpaperColors;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -56,7 +57,7 @@ public abstract class MediaOutputBaseAdapter extends
     static final int CUSTOMIZED_ITEM_GROUP = 2;
     static final int CUSTOMIZED_ITEM_DYNAMIC_GROUP = 3;
 
-    final MediaOutputController mController;
+    protected final MediaOutputController mController;
 
     private int mMargin;
     private boolean mIsAnimating;
@@ -84,6 +85,10 @@ public abstract class MediaOutputBaseAdapter extends
         return null;
     }
 
+    void updateColorScheme(WallpaperColors wallpaperColors, boolean isDarkTheme) {
+        mController.setCurrentColorScheme(wallpaperColors, isDarkTheme);
+    }
+
     CharSequence getItemTitle(MediaDevice device) {
         return device.getName();
     }
@@ -103,6 +108,10 @@ public abstract class MediaOutputBaseAdapter extends
 
     int getCurrentActivePosition() {
         return mCurrentActivePosition;
+    }
+
+    public MediaOutputController getController() {
+        return mController;
     }
 
     /**

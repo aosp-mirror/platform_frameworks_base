@@ -24,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.media.session.MediaSessionManager;
 import android.os.Bundle;
@@ -99,7 +100,10 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
 
     @Test
     public void refresh_withIconCompat_iconIsVisible() {
-        mIconCompat = mock(IconCompat.class);
+        mIconCompat = IconCompat.createWithBitmap(
+                Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888));
+        when(mMediaOutputBaseAdapter.getController()).thenReturn(mMediaOutputController);
+
         mMediaOutputBaseDialogImpl.refresh();
         final ImageView view = mMediaOutputBaseDialogImpl.mDialogView.requireViewById(
                 R.id.header_icon);

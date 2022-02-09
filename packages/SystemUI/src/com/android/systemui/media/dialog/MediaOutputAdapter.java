@@ -16,6 +16,7 @@
 
 package com.android.systemui.media.dialog;
 
+import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
@@ -23,8 +24,10 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 
 import androidx.annotation.NonNull;
+import androidx.core.widget.CompoundButtonCompat;
 
 import com.android.settingslib.Utils;
 import com.android.settingslib.media.LocalMediaManager.MediaDeviceState;
@@ -100,8 +103,10 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             }
             mCheckBox.setVisibility(View.GONE);
             mStatusIcon.setVisibility(View.GONE);
-            mTitleText.setTextColor(Utils.getColorStateListDefaultColor(mContext,
-                    R.color.media_dialog_inactive_item_main_content));
+            mTitleText.setTextColor(mController.getColorInactiveItem());
+            mSeekBar.getProgressDrawable().setColorFilter(
+                    new PorterDuffColorFilter(mController.getColorSeekbarProgress(),
+                            PorterDuff.Mode.SRC_IN));
             if (mCurrentActivePosition == position) {
                 mCurrentActivePosition = -1;
             }
@@ -117,6 +122,10 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             if (mController.isTransferring()) {
                 if (device.getState() == MediaDeviceState.STATE_CONNECTING
                         && !mController.hasAdjustVolumeUserRestriction()) {
+                    mProgressBar.getIndeterminateDrawable().setColorFilter(
+                            new PorterDuffColorFilter(
+                                    mController.getColorInactiveItem(),
+                                    PorterDuff.Mode.SRC_IN));
                     setSingleLineLayout(getItemTitle(device), true /* bFocused */,
                             false /* showSeekBar*/,
                             true /* showProgressBar */, false /* showStatus */);
@@ -130,6 +139,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     mTitleIcon.setAlpha(DEVICE_CONNECTED_ALPHA);
                     mStatusIcon.setImageDrawable(
                             mContext.getDrawable(R.drawable.media_output_status_failed));
+                    mStatusIcon.setColorFilter(mController.getColorInactiveItem());
                     setTwoLineLayout(device, false /* bFocused */,
                             false /* showSeekBar */, false /* showProgressBar */,
                             true /* showSubtitle */, true /* showStatus */);
@@ -137,8 +147,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     mContainerLayout.setOnClickListener(v -> onItemClick(v, device));
                 } else if (mController.getSelectedMediaDevice().size() > 1
                         && isDeviceIncluded(mController.getSelectedMediaDevice(), device)) {
-                    mTitleText.setTextColor(Utils.getColorStateListDefaultColor(mContext,
-                            R.color.media_dialog_active_item_main_content));
+                    mTitleText.setTextColor(mController.getColorActiveItem());
                     setSingleLineLayout(getItemTitle(device), true /* bFocused */,
                             true /* showSeekBar */,
                             false /* showProgressBar */, false /* showStatus */);
@@ -147,12 +156,13 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     mCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                         onCheckBoxClicked(false, device);
                     });
+                    setCheckBoxColor(mCheckBox, mController.getColorActiveItem());
                     initSessionSeekbar();
                 } else if (!mController.hasAdjustVolumeUserRestriction() && currentlyConnected) {
                     mStatusIcon.setImageDrawable(
                             mContext.getDrawable(R.drawable.media_output_status_check));
-                    mTitleText.setTextColor(Utils.getColorStateListDefaultColor(mContext,
-                            R.color.media_dialog_active_item_main_content));
+                    mStatusIcon.setColorFilter(mController.getColorActiveItem());
+                    mTitleText.setTextColor(mController.getColorActiveItem());
                     setSingleLineLayout(getItemTitle(device), true /* bFocused */,
                             true /* showSeekBar */,
                             false /* showProgressBar */, true /* showStatus */);
@@ -164,6 +174,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     mCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
                         onCheckBoxClicked(true, device);
                     });
+                    setCheckBoxColor(mCheckBox, mController.getColorInactiveItem());
                     setSingleLineLayout(getItemTitle(device), false /* bFocused */,
                             false /* showSeekBar */,
                             false /* showProgressBar */, false /* showStatus */);
@@ -175,11 +186,17 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             }
         }
 
+        public void setCheckBoxColor(CheckBox checkBox, int color) {
+            int[][] states = {{android.R.attr.state_checked}, {}};
+            int[] colors = {color, color};
+            CompoundButtonCompat.setButtonTintList(checkBox, new
+                    ColorStateList(states, colors));
+        }
+
         @Override
         void onBind(int customizedItem, boolean topMargin, boolean bottomMargin) {
             if (customizedItem == CUSTOMIZED_ITEM_PAIR_NEW) {
-                mTitleText.setTextColor(Utils.getColorStateListDefaultColor(mContext,
-                        R.color.media_dialog_inactive_item_main_content));
+                mTitleText.setTextColor(mController.getColorInactiveItem());
                 mCheckBox.setVisibility(View.GONE);
                 setSingleLineLayout(mContext.getText(R.string.media_output_dialog_pairing_new),
                         false /* bFocused */);
