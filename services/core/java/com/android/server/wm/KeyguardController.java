@@ -235,7 +235,7 @@ class KeyguardController {
      */
     void keyguardGoingAway(int displayId, int flags) {
         final KeyguardDisplayState state = getDisplayState(displayId);
-        if (!state.mKeyguardShowing) {
+        if (!state.mKeyguardShowing || state.mKeyguardGoingAway) {
             return;
         }
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "keyguardGoingAway");
