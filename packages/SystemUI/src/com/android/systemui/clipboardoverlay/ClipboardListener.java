@@ -48,7 +48,7 @@ public class ClipboardListener extends CoreStartable
     @Override
     public void start() {
         if (DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_SYSTEMUI, CLIPBOARD_OVERLAY_ENABLED, true)) {
+                DeviceConfig.NAMESPACE_SYSTEMUI, CLIPBOARD_OVERLAY_ENABLED, false)) {
             mClipboardManager = requireNonNull(mContext.getSystemService(ClipboardManager.class));
             mClipboardManager.addPrimaryClipChangedListener(this);
         }
