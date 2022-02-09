@@ -66,6 +66,7 @@ public class SmartSpaceComplication implements Complication {
     }
 
     private static class SmartSpaceComplicationViewHolder implements ViewHolder {
+        private static final int SMARTSPACE_COMPLICATION_WEIGHT = 10;
         private final LockscreenSmartspaceController mSmartSpaceController;
         private final Context mContext;
 
@@ -92,7 +93,7 @@ public class SmartSpaceComplication implements Complication {
             return new ComplicationLayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT,
                     ComplicationLayoutParams.POSITION_TOP | ComplicationLayoutParams.POSITION_START,
                     ComplicationLayoutParams.DIRECTION_DOWN,
-                    0, true);
+                    SMARTSPACE_COMPLICATION_WEIGHT, true);
         }
     }
 
