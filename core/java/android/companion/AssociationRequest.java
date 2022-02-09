@@ -260,9 +260,9 @@ public final class AssociationRequest implements Parcelable {
     }
 
     /**
-     * Indicates that the application would prefer the CompanionDeviceManager to collect an explicit
-     * confirmation from the user before creating an association, even if such confirmation is not
-     * required.
+     * Indicates whether the application requires the {@link CompanionDeviceManager} service to
+     * collect an explicit confirmation from the user before creating an association, even if
+     * such confirmation is not required from the service's perspective.
      *
      * @see Builder#setForceConfirmation(boolean)
      */
@@ -391,9 +391,9 @@ public final class AssociationRequest implements Parcelable {
         }
 
         /**
-         * Indicates whether the application would prefer the CompanionDeviceManager to collect an
-         * explicit confirmation from the user before creating an association, even if such
-         * confirmation is not required.
+         * Indicates whether the application requires the {@link CompanionDeviceManager} service to
+         * collect an explicit confirmation from the user before creating an association, even if
+         * such confirmation is not required from the service's perspective.
          */
         @RequiresPermission(REQUEST_COMPANION_SELF_MANAGED)
         @NonNull
