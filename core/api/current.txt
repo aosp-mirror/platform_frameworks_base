@@ -46803,6 +46803,7 @@ package android.util {
 
   public interface DumpableContainer {
     method public boolean addDumpable(@NonNull android.util.Dumpable);
+    method public boolean removeDumpable(@NonNull android.util.Dumpable);
   }
 
   public class EventLog {
