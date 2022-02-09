@@ -41354,6 +41354,7 @@ package android.telephony {
     field public static final String KEY_SIP_TIMER_T2_MILLIS_INT = "ims.sip_timer_t2_millis_int";
     field public static final String KEY_SIP_TIMER_T4_MILLIS_INT = "ims.sip_timer_t4_millis_int";
     field public static final String KEY_SUPPORTED_RATS_INT_ARRAY = "ims.supported_rats_int_array";
+    field public static final String KEY_USE_SIP_URI_FOR_PRESENCE_SUBSCRIBE_BOOL = "ims.use_sip_uri_for_presence_subscribe_bool";
     field public static final String KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT = "ims.wifi_off_deferring_time_millis_int";
     field public static final int NETWORK_TYPE_HOME = 0; // 0x0
     field public static final int NETWORK_TYPE_ROAMING = 1; // 0x1
