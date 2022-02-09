@@ -367,4 +367,9 @@ public class BadgedImageView extends ConstraintLayout {
     void hideBadge() {
         mAppIcon.setVisibility(GONE);
     }
+
+    @Override
+    public String toString() {
+        return "BadgedImageView{" + mBubble + "}";
+    }
 }

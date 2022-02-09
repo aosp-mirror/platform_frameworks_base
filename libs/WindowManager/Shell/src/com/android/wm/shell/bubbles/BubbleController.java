@@ -24,6 +24,7 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
+import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_CONTROLLER;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.wm.shell.bubbles.BubblePositioner.TASKBAR_POSITION_BOTTOM;
@@ -616,7 +617,7 @@ public class BubbleController {
         return mTaskViewTransitions;
     }
 
-    /** Contains information to help position things on the screen.  */
+    /** Contains information to help position things on the screen. */
     BubblePositioner getPositioner() {
         return mBubblePositioner;
     }
@@ -659,8 +660,8 @@ public class BubbleController {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                    | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
                 PixelFormat.TRANSLUCENT);
 
         mWmLayoutParams.setTrustedOverlay();
@@ -750,7 +751,7 @@ public class BubbleController {
         // First clear any existing keys that might be stored.
         mSavedBubbleKeysPerUser.remove(userId);
         // Add in all active bubbles for the current user.
-        for (Bubble bubble: mBubbleData.getBubbles()) {
+        for (Bubble bubble : mBubbleData.getBubbles()) {
             mSavedBubbleKeysPerUser.add(userId, bubble.getKey());
         }
     }
@@ -982,9 +983,9 @@ public class BubbleController {
     /**
      * Adds or updates a bubble associated with the provided notification entry.
      *
-     * @param notif the notification associated with this bubble.
+     * @param notif          the notification associated with this bubble.
      * @param suppressFlyout this bubble suppress flyout or not.
-     * @param showInShade this bubble show in shade or not.
+     * @param showInShade    this bubble show in shade or not.
      */
     @VisibleForTesting
     public void updateBubble(BubbleEntry notif, boolean suppressFlyout, boolean showInShade) {
@@ -992,11 +993,17 @@ public class BubbleController {
         mSysuiProxy.setNotificationInterruption(notif.getKey());
         if (!notif.getRanking().isTextChanged()
                 && (notif.getBubbleMetadata() != null
-                    && !notif.getBubbleMetadata().getAutoExpandBubble())
+                && !notif.getBubbleMetadata().getAutoExpandBubble())
                 && mBubbleData.hasOverflowBubbleWithKey(notif.getKey())) {
             // Update the bubble but don't promote it out of overflow
             Bubble b = mBubbleData.getOverflowBubbleWithKey(notif.getKey());
             b.setEntry(notif);
+        } else if (mBubbleData.isSuppressedWithLocusId(notif.getLocusId())) {
+            // Update the bubble but don't promote it out of overflow
+            Bubble b = mBubbleData.getSuppressedBubbleWithKey(notif.getKey());
+            if (b != null) {
+                b.setEntry(notif);
+            }
         } else {
             Bubble bubble = mBubbleData.getOrCreateBubble(notif, null /* persistedBubble */);
             inflateAndAdd(bubble, suppressFlyout, showInShade);
@@ -1170,6 +1177,18 @@ public class BubbleController {
 
         @Override
         public void applyUpdate(BubbleData.Update update) {
+            if (DEBUG_BUBBLE_CONTROLLER) {
+                Log.d(TAG, "applyUpdate:" + " bubbleAdded=" + (update.addedBubble != null)
+                        + " bubbleRemoved="
+                        + (update.removedBubbles != null && update.removedBubbles.size() > 0)
+                        + " bubbleUpdated=" + (update.updatedBubble != null)
+                        + " orderChanged=" + update.orderChanged
+                        + " expandedChanged=" + update.expandedChanged
+                        + " selectionChanged=" + update.selectionChanged
+                        + " suppressed=" + (update.suppressedBubble != null)
+                        + " unsuppressed=" + (update.unsuppressedBubble != null));
+            }
+
             ensureStackViewCreated();
 
             // Lazy load overflow bubbles from disk
@@ -1249,6 +1268,14 @@ public class BubbleController {
                 mStackView.updateBubble(update.updatedBubble);
             }
 
+            if (update.suppressedBubble != null && mStackView != null) {
+                mStackView.setBubbleSuppressed(update.suppressedBubble, true);
+            }
+
+            if (update.unsuppressedBubble != null && mStackView != null) {
+                mStackView.setBubbleSuppressed(update.unsuppressedBubble, false);
+            }
+
             // At this point, the correct bubbles are inflated in the stack.
             // Make sure the order in bubble data is reflected in bubble row.
             if (update.orderChanged && mStackView != null) {
@@ -1261,14 +1288,6 @@ public class BubbleController {
                 if (update.selectedBubble != null) {
                     mSysuiProxy.updateNotificationSuppression(update.selectedBubble.getKey());
                 }
-            }
-
-            if (update.suppressedBubble != null && mStackView != null) {
-                mStackView.setBubbleVisibility(update.suppressedBubble, false);
-            }
-
-            if (update.unsuppressedBubble != null && mStackView != null) {
-                mStackView.setBubbleVisibility(update.unsuppressedBubble, true);
             }
 
             // Expanding? Apply this last.
@@ -1398,7 +1417,7 @@ public class BubbleController {
      * that should filter out any invalid bubbles, but should protect SysUI side just in case.
      *
      * @param context the context to use.
-     * @param entry the entry to bubble.
+     * @param entry   the entry to bubble.
      */
     static boolean canLaunchInTaskView(Context context, BubbleEntry entry) {
         PendingIntent intent = entry.getBubbleMetadata() != null
@@ -1531,7 +1550,7 @@ public class BubbleController {
                     String groupKey) {
                 return mSuppressedBubbleKeys.contains(key)
                         || (mSuppressedGroupToNotifKeys.containsKey(groupKey)
-                                && key.equals(mSuppressedGroupToNotifKeys.get(groupKey)));
+                        && key.equals(mSuppressedGroupToNotifKeys.get(groupKey)));
             }
 
             @Nullable
