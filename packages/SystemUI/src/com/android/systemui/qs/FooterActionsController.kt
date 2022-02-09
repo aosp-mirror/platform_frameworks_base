@@ -191,6 +191,10 @@ internal class FooterActionsController @Inject constructor(
             reformatForNewFooter(securityFooter)
             val fgsFooter = fgsManagerFooterController.view
             securityFootersContainer?.addView(fgsFooter)
+            (fgsFooter.layoutParams as LinearLayout.LayoutParams).apply {
+                width = 0
+                weight = 1f
+            }
 
             val visibilityListener =
                 VisibilityChangedDispatcher.OnVisibilityChangedListener { visibility ->
