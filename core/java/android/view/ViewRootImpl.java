@@ -10841,6 +10841,7 @@ public final class ViewRootImpl implements ViewParent,
     private void unregisterCompatOnBackInvokedCallback() {
         if (mCompatOnBackInvokedCallback != null) {
             mOnBackInvokedDispatcher.unregisterOnBackInvokedCallback(mCompatOnBackInvokedCallback);
+            mCompatOnBackInvokedCallback = null;
         }
     }
 

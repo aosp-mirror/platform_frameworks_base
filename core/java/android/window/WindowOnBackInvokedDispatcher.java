@@ -55,10 +55,6 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     private static final boolean IS_BACK_PREDICTABILITY_ENABLED = SystemProperties
             .getInt(BACK_PREDICTABILITY_PROP, 0) > 0;
 
-    /** The currently most prioritized callback. */
-    @Nullable
-    private OnBackInvokedCallbackWrapper mTopCallback;
-
     /** Convenience hashmap to quickly decide if a callback has been added. */
     private final HashMap<OnBackInvokedCallback, Integer> mAllCallbacks = new HashMap<>();
     /** Holds all callbacks by priorities. */
@@ -72,8 +68,8 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     public void attachToWindow(@NonNull IWindowSession windowSession, @NonNull IWindow window) {
         mWindowSession = windowSession;
         mWindow = window;
-        if (mTopCallback != null) {
-            setTopOnBackInvokedCallback(mTopCallback);
+        if (!mAllCallbacks.isEmpty()) {
+            setTopOnBackInvokedCallback(getTopCallback());
         }
     }
 
@@ -81,6 +77,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
     public void detachFromWindow() {
         mWindow = null;
         mWindowSession = null;
+        clear();
     }
 
     // TODO: Take an Executor for the callback to run on.
@@ -110,11 +107,13 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             mOnBackInvokedCallbacks.get(prevPriority).remove(callback);
         }
 
+        OnBackInvokedCallback previousTopCallback = getTopCallback();
         callbacks.add(callback);
         mAllCallbacks.put(callback, priority);
-        if (mTopCallback == null || (mTopCallback.getCallback() != callback
-                && mAllCallbacks.get(mTopCallback.getCallback()) <= priority)) {
-            setTopOnBackInvokedCallback(new OnBackInvokedCallbackWrapper(callback, priority));
+        if (previousTopCallback == null
+                || (previousTopCallback != callback
+                        && mAllCallbacks.get(previousTopCallback) <= priority)) {
+            setTopOnBackInvokedCallback(callback);
         }
     }
 
@@ -126,11 +125,17 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             }
             return;
         }
+        OnBackInvokedCallback previousTopCallback = getTopCallback();
         Integer priority = mAllCallbacks.get(callback);
-        mOnBackInvokedCallbacks.get(priority).remove(callback);
+        ArrayList<OnBackInvokedCallback> callbacks = mOnBackInvokedCallbacks.get(priority);
+        callbacks.remove(callback);
+        if (callbacks.isEmpty()) {
+            mOnBackInvokedCallbacks.remove(priority);
+        }
         mAllCallbacks.remove(callback);
-        if (mTopCallback != null && mTopCallback.getCallback() == callback) {
-            findAndSetTopOnBackInvokedCallback();
+        // Re-populate the top callback to WM if the removed callback was previously the top one.
+        if (previousTopCallback == callback) {
+            setTopOnBackInvokedCallback(getTopCallback());
         }
     }
 
@@ -141,41 +146,26 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
     /** Clears all registered callbacks on the instance. */
     public void clear() {
+        if (!mAllCallbacks.isEmpty()) {
+            // Clear binder references in WM.
+            setTopOnBackInvokedCallback(null);
+        }
         mAllCallbacks.clear();
-        mTopCallback = null;
         mOnBackInvokedCallbacks.clear();
     }
 
-    /**
-     * Iterates through all callbacks to find the most prioritized one and pushes it to
-     * window manager.
-     */
-    private void findAndSetTopOnBackInvokedCallback() {
-        if (mAllCallbacks.isEmpty()) {
-            setTopOnBackInvokedCallback(null);
-            return;
-        }
-
-        for (Integer priority : mOnBackInvokedCallbacks.descendingKeySet()) {
-            ArrayList<OnBackInvokedCallback> callbacks = mOnBackInvokedCallbacks.get(priority);
-            if (!callbacks.isEmpty()) {
-                OnBackInvokedCallbackWrapper callback = new OnBackInvokedCallbackWrapper(
-                        callbacks.get(callbacks.size() - 1), priority);
-                setTopOnBackInvokedCallback(callback);
-                return;
-            }
-        }
-        setTopOnBackInvokedCallback(null);
-    }
-
-    // Pushes the top priority callback to window manager.
-    private void setTopOnBackInvokedCallback(@Nullable OnBackInvokedCallbackWrapper callback) {
-        mTopCallback = callback;
+    private void setTopOnBackInvokedCallback(@Nullable OnBackInvokedCallback callback) {
         if (mWindowSession == null || mWindow == null) {
             return;
         }
         try {
-            mWindowSession.setOnBackInvokedCallback(mWindow, mTopCallback);
+            if (callback == null) {
+                mWindowSession.setOnBackInvokedCallback(mWindow, null);
+            } else {
+                int priority = mAllCallbacks.get(callback);
+                mWindowSession.setOnBackInvokedCallback(
+                        mWindow, new OnBackInvokedCallbackWrapper(callback, priority));
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to set OnBackInvokedCallback to WM. Error: " + e);
         }
@@ -220,7 +210,16 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
 
     @Override
     public OnBackInvokedCallback getTopCallback() {
-        return mTopCallback == null ? null : mTopCallback.getCallback();
+        if (mAllCallbacks.isEmpty()) {
+            return null;
+        }
+        for (Integer priority : mOnBackInvokedCallbacks.descendingKeySet()) {
+            ArrayList<OnBackInvokedCallback> callbacks = mOnBackInvokedCallbacks.get(priority);
+            if (!callbacks.isEmpty()) {
+                return callbacks.get(callbacks.size() - 1);
+            }
+        }
+        return null;
     }
 
     /**
