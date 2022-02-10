@@ -52,12 +52,12 @@ import java.util.Objects;
 @RunWith(AndroidJUnit4.class)
 public class TimeDetectorStrategyImplTest {
 
-    private static final Instant TIME_LOWER_BOUND = createUtcTime(2009, 1, 1, 12, 0, 0);
+    private static final Instant TIME_LOWER_BOUND = createUnixEpochTime(2009, 1, 1, 12, 0, 0);
 
     private static final TimestampedValue<Instant> ARBITRARY_CLOCK_INITIALIZATION_INFO =
             new TimestampedValue<>(
                     123456789L /* realtimeClockMillis */,
-                    createUtcTime(2010, 5, 23, 12, 0, 0));
+                    createUnixEpochTime(2010, 5, 23, 12, 0, 0));
 
     // This is the traditional ordering for time detection on Android.
     private static final @Origin int [] PROVIDERS_PRIORITY = { ORIGIN_TELEPHONY, ORIGIN_NETWORK };
@@ -66,7 +66,7 @@ public class TimeDetectorStrategyImplTest {
      * An arbitrary time, very different from the {@link #ARBITRARY_CLOCK_INITIALIZATION_INFO}
      * time. Can be used as the basis for time suggestions.
      */
-    private static final Instant ARBITRARY_TEST_TIME = createUtcTime(2018, 1, 1, 12, 0, 0);
+    private static final Instant ARBITRARY_TEST_TIME = createUnixEpochTime(2018, 1, 1, 12, 0, 0);
 
     private static final int ARBITRARY_SLOT_INDEX = 123456;
 
@@ -91,7 +91,7 @@ public class TimeDetectorStrategyImplTest {
                 .simulateTelephonyTimeSuggestion(timeSuggestion);
 
         long expectedSystemClockMillis =
-                mScript.calculateTimeInMillisForNow(timeSuggestion.getUtcTime());
+                mScript.calculateTimeInMillisForNow(timeSuggestion.getUnixEpochTime());
         mScript.verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis)
                 .assertLatestTelephonySuggestion(slotIndex, timeSuggestion);
     }
@@ -128,7 +128,7 @@ public class TimeDetectorStrategyImplTest {
             mScript.simulateTimePassing(clockIncrementMillis);
 
             long expectedSystemClockMillis1 =
-                    mScript.calculateTimeInMillisForNow(timeSuggestion1.getUtcTime());
+                    mScript.calculateTimeInMillisForNow(timeSuggestion1.getUnixEpochTime());
 
             mScript.simulateTelephonyTimeSuggestion(timeSuggestion1)
                     .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis1)
@@ -155,7 +155,7 @@ public class TimeDetectorStrategyImplTest {
             mScript.simulateTimePassing(clockIncrementMillis);
 
             long expectedSystemClockMillis3 =
-                    mScript.calculateTimeInMillisForNow(timeSuggestion3.getUtcTime());
+                    mScript.calculateTimeInMillisForNow(timeSuggestion3.getUnixEpochTime());
 
             mScript.simulateTelephonyTimeSuggestion(timeSuggestion3)
                     .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis3)
@@ -182,8 +182,8 @@ public class TimeDetectorStrategyImplTest {
                     mScript.generateTelephonyTimeSuggestion(slotIndex2, slotIndex2Time);
             mScript.simulateTimePassing();
 
-            long expectedSystemClockMillis =
-                    mScript.calculateTimeInMillisForNow(slotIndex2TimeSuggestion.getUtcTime());
+            long expectedSystemClockMillis = mScript.calculateTimeInMillisForNow(
+                    slotIndex2TimeSuggestion.getUnixEpochTime());
 
             mScript.simulateTelephonyTimeSuggestion(slotIndex2TimeSuggestion)
                     .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis)
@@ -199,8 +199,8 @@ public class TimeDetectorStrategyImplTest {
                     mScript.generateTelephonyTimeSuggestion(slotIndex1, slotIndex1Time);
             mScript.simulateTimePassing();
 
-            long expectedSystemClockMillis =
-                    mScript.calculateTimeInMillisForNow(slotIndex1TimeSuggestion.getUtcTime());
+            long expectedSystemClockMillis = mScript.calculateTimeInMillisForNow(
+                    slotIndex1TimeSuggestion.getUnixEpochTime());
 
             mScript.simulateTelephonyTimeSuggestion(slotIndex1TimeSuggestion)
                     .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis)
@@ -232,8 +232,8 @@ public class TimeDetectorStrategyImplTest {
                     mScript.generateTelephonyTimeSuggestion(slotIndex2, slotIndex2Time);
             mScript.simulateTimePassing();
 
-            long expectedSystemClockMillis =
-                    mScript.calculateTimeInMillisForNow(slotIndex2TimeSuggestion.getUtcTime());
+            long expectedSystemClockMillis = mScript.calculateTimeInMillisForNow(
+                    slotIndex2TimeSuggestion.getUnixEpochTime());
 
             mScript.simulateTelephonyTimeSuggestion(slotIndex2TimeSuggestion)
                     .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis)
@@ -267,26 +267,27 @@ public class TimeDetectorStrategyImplTest {
 
         TelephonyTimeSuggestion timeSuggestion1 =
                 mScript.generateTelephonyTimeSuggestion(slotIndex, testTime);
-        TimestampedValue<Long> utcTime1 = timeSuggestion1.getUtcTime();
+        TimestampedValue<Long> unixEpochTime1 = timeSuggestion1.getUnixEpochTime();
 
         // Initialize the strategy / device with a time set from a telephony suggestion.
         mScript.simulateTimePassing();
-        long expectedSystemClockMillis1 = mScript.calculateTimeInMillisForNow(utcTime1);
+        long expectedSystemClockMillis1 = mScript.calculateTimeInMillisForNow(unixEpochTime1);
         mScript.simulateTelephonyTimeSuggestion(timeSuggestion1)
                 .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis1)
                 .assertLatestTelephonySuggestion(slotIndex, timeSuggestion1);
 
-        // The UTC time increment should be larger than the system clock update threshold so we
-        // know it shouldn't be ignored for other reasons.
-        long validUtcTimeMillis = utcTime1.getValue() + (2 * systemClockUpdateThreshold);
+        // The Unix epoch time increment should be larger than the system clock update threshold so
+        // we know it shouldn't be ignored for other reasons.
+        long validUnixEpochTimeMillis = unixEpochTime1.getValue()
+                + (2 * systemClockUpdateThreshold);
 
         // Now supply a new signal that has an obviously bogus reference time : older than the last
         // one.
-        long referenceTimeBeforeLastSignalMillis = utcTime1.getReferenceTimeMillis() - 1;
-        TimestampedValue<Long> utcTime2 = new TimestampedValue<>(
-                referenceTimeBeforeLastSignalMillis, validUtcTimeMillis);
+        long referenceTimeBeforeLastSignalMillis = unixEpochTime1.getReferenceTimeMillis() - 1;
+        TimestampedValue<Long> unixEpochTime2 = new TimestampedValue<>(
+                referenceTimeBeforeLastSignalMillis, validUnixEpochTimeMillis);
         TelephonyTimeSuggestion timeSuggestion2 =
-                createTelephonyTimeSuggestion(slotIndex, utcTime2);
+                createTelephonyTimeSuggestion(slotIndex, unixEpochTime2);
         mScript.simulateTelephonyTimeSuggestion(timeSuggestion2)
                 .verifySystemClockWasNotSetAndResetCallTracking()
                 .assertLatestTelephonySuggestion(slotIndex, timeSuggestion1);
@@ -294,22 +295,22 @@ public class TimeDetectorStrategyImplTest {
         // Now supply a new signal that has an obviously bogus reference time : substantially in the
         // future.
         long referenceTimeInFutureMillis =
-                utcTime1.getReferenceTimeMillis() + Integer.MAX_VALUE + 1;
-        TimestampedValue<Long> utcTime3 = new TimestampedValue<>(
-                referenceTimeInFutureMillis, validUtcTimeMillis);
+                unixEpochTime1.getReferenceTimeMillis() + Integer.MAX_VALUE + 1;
+        TimestampedValue<Long> unixEpochTime3 = new TimestampedValue<>(
+                referenceTimeInFutureMillis, validUnixEpochTimeMillis);
         TelephonyTimeSuggestion timeSuggestion3 =
-                createTelephonyTimeSuggestion(slotIndex, utcTime3);
+                createTelephonyTimeSuggestion(slotIndex, unixEpochTime3);
         mScript.simulateTelephonyTimeSuggestion(timeSuggestion3)
                 .verifySystemClockWasNotSetAndResetCallTracking()
                 .assertLatestTelephonySuggestion(slotIndex, timeSuggestion1);
 
-        // Just to prove validUtcTimeMillis is valid.
-        long validReferenceTimeMillis = utcTime1.getReferenceTimeMillis() + 100;
-        TimestampedValue<Long> utcTime4 = new TimestampedValue<>(
-                validReferenceTimeMillis, validUtcTimeMillis);
-        long expectedSystemClockMillis4 = mScript.calculateTimeInMillisForNow(utcTime4);
+        // Just to prove validUnixEpochTimeMillis is valid.
+        long validReferenceTimeMillis = unixEpochTime1.getReferenceTimeMillis() + 100;
+        TimestampedValue<Long> unixEpochTime4 = new TimestampedValue<>(
+                validReferenceTimeMillis, validUnixEpochTimeMillis);
+        long expectedSystemClockMillis4 = mScript.calculateTimeInMillisForNow(unixEpochTime4);
         TelephonyTimeSuggestion timeSuggestion4 =
-                createTelephonyTimeSuggestion(slotIndex, utcTime4);
+                createTelephonyTimeSuggestion(slotIndex, unixEpochTime4);
         mScript.simulateTelephonyTimeSuggestion(timeSuggestion4)
                 .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis4)
                 .assertLatestTelephonySuggestion(slotIndex, timeSuggestion4);
@@ -344,7 +345,7 @@ public class TimeDetectorStrategyImplTest {
         Instant testTime = ARBITRARY_TEST_TIME;
         TelephonyTimeSuggestion timeSuggestion1 =
                 mScript.generateTelephonyTimeSuggestion(slotIndex, testTime);
-        TimestampedValue<Long> utcTime1 = timeSuggestion1.getUtcTime();
+        TimestampedValue<Long> unixEpochTime1 = timeSuggestion1.getUnixEpochTime();
 
         // Simulate time passing.
         mScript.simulateTimePassing(clockIncrementMillis);
@@ -358,7 +359,7 @@ public class TimeDetectorStrategyImplTest {
         // Simulate more time passing.
         mScript.simulateTimePassing(clockIncrementMillis);
 
-        long expectedSystemClockMillis1 = mScript.calculateTimeInMillisForNow(utcTime1);
+        long expectedSystemClockMillis1 = mScript.calculateTimeInMillisForNow(unixEpochTime1);
 
         // Turn on auto time detection.
         mScript.simulateAutoTimeDetectionToggle()
@@ -379,7 +380,7 @@ public class TimeDetectorStrategyImplTest {
         mScript.simulateTimePassing(clockIncrementMillis);
 
         long expectedSystemClockMillis2 =
-                mScript.calculateTimeInMillisForNow(timeSuggestion2.getUtcTime());
+                mScript.calculateTimeInMillisForNow(timeSuggestion2.getUnixEpochTime());
 
         // The new time, though valid, should not be set in the system clock because auto time is
         // disabled.
@@ -406,7 +407,7 @@ public class TimeDetectorStrategyImplTest {
         mScript.simulateTimePassing();
 
         long expectedSystemClockMillis =
-                mScript.calculateTimeInMillisForNow(telephonySuggestion.getUtcTime());
+                mScript.calculateTimeInMillisForNow(telephonySuggestion.getUnixEpochTime());
         mScript.simulateTelephonyTimeSuggestion(telephonySuggestion)
                 .verifySystemClockWasSetAndResetCallTracking(
                         expectedSystemClockMillis  /* expectedNetworkBroadcast */)
@@ -416,7 +417,7 @@ public class TimeDetectorStrategyImplTest {
         assertEquals(telephonySuggestion, mScript.peekBestTelephonySuggestion());
 
         // Simulate time passing, long enough that telephonySuggestion is now too old.
-        mScript.simulateTimePassing(TimeDetectorStrategyImpl.MAX_UTC_TIME_AGE_MILLIS);
+        mScript.simulateTimePassing(TimeDetectorStrategyImpl.MAX_SUGGESTION_TIME_AGE_MILLIS);
 
         // Look inside and check what the strategy considers the current best telephony suggestion.
         // It should still be the, it's just no longer used.
@@ -435,7 +436,7 @@ public class TimeDetectorStrategyImplTest {
         mScript.simulateTimePassing();
 
         long expectedSystemClockMillis =
-                mScript.calculateTimeInMillisForNow(timeSuggestion.getUtcTime());
+                mScript.calculateTimeInMillisForNow(timeSuggestion.getUnixEpochTime());
         mScript.simulateManualTimeSuggestion(timeSuggestion, true /* expectedResult */)
                 .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis);
     }
@@ -457,7 +458,7 @@ public class TimeDetectorStrategyImplTest {
         mScript.simulateTimePassing();
 
         long expectedAutoClockMillis =
-                mScript.calculateTimeInMillisForNow(telephonyTimeSuggestion.getUtcTime());
+                mScript.calculateTimeInMillisForNow(telephonyTimeSuggestion.getUnixEpochTime());
         mScript.simulateTelephonyTimeSuggestion(telephonyTimeSuggestion)
                 .verifySystemClockWasSetAndResetCallTracking(expectedAutoClockMillis)
                 .assertLatestTelephonySuggestion(slotIndex, telephonyTimeSuggestion);
@@ -480,7 +481,7 @@ public class TimeDetectorStrategyImplTest {
         mScript.simulateTimePassing();
 
         long expectedManualClockMillis =
-                mScript.calculateTimeInMillisForNow(manualTimeSuggestion.getUtcTime());
+                mScript.calculateTimeInMillisForNow(manualTimeSuggestion.getUnixEpochTime());
         mScript.simulateManualTimeSuggestion(manualTimeSuggestion, true /* expectedResult */)
                 .verifySystemClockWasSetAndResetCallTracking(expectedManualClockMillis)
                 .assertLatestTelephonySuggestion(slotIndex, telephonyTimeSuggestion);
@@ -492,7 +493,7 @@ public class TimeDetectorStrategyImplTest {
         mScript.simulateAutoTimeDetectionToggle();
 
         expectedAutoClockMillis =
-                mScript.calculateTimeInMillisForNow(telephonyTimeSuggestion.getUtcTime());
+                mScript.calculateTimeInMillisForNow(telephonyTimeSuggestion.getUnixEpochTime());
         mScript.verifySystemClockWasSetAndResetCallTracking(expectedAutoClockMillis)
                 .assertLatestTelephonySuggestion(slotIndex, telephonyTimeSuggestion);
 
@@ -540,7 +541,7 @@ public class TimeDetectorStrategyImplTest {
         mScript.simulateTimePassing();
 
         long expectedSystemClockMillis =
-                mScript.calculateTimeInMillisForNow(timeSuggestion.getUtcTime());
+                mScript.calculateTimeInMillisForNow(timeSuggestion.getUnixEpochTime());
         mScript.simulateNetworkTimeSuggestion(timeSuggestion)
                 .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis);
     }
@@ -586,7 +587,7 @@ public class TimeDetectorStrategyImplTest {
         mScript.simulateTimePassing();
 
         long expectedSystemClockMillis =
-                mScript.calculateTimeInMillisForNow(timeSuggestion.getUtcTime());
+                mScript.calculateTimeInMillisForNow(timeSuggestion.getUnixEpochTime());
         mScript.simulateGnssTimeSuggestion(timeSuggestion)
                 .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis);
     }
@@ -617,7 +618,7 @@ public class TimeDetectorStrategyImplTest {
         mScript.simulateTimePassing();
 
         long expectedSystemClockMillis =
-                mScript.calculateTimeInMillisForNow(timeSuggestion.getUtcTime());
+                mScript.calculateTimeInMillisForNow(timeSuggestion.getUnixEpochTime());
         mScript.simulateExternalTimeSuggestion(timeSuggestion)
                 .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis);
     }
@@ -671,7 +672,8 @@ public class TimeDetectorStrategyImplTest {
         mScript.simulateTimePassing(smallTimeIncrementMillis)
                 .simulateNetworkTimeSuggestion(networkTimeSuggestion1)
                 .verifySystemClockWasSetAndResetCallTracking(
-                        mScript.calculateTimeInMillisForNow(networkTimeSuggestion1.getUtcTime()));
+                        mScript.calculateTimeInMillisForNow(
+                                networkTimeSuggestion1.getUnixEpochTime()));
 
         // Check internal state.
         mScript.assertLatestTelephonySuggestion(ARBITRARY_SLOT_INDEX, null)
@@ -690,7 +692,8 @@ public class TimeDetectorStrategyImplTest {
         mScript.simulateTimePassing(smallTimeIncrementMillis)
                 .simulateTelephonyTimeSuggestion(telephonyTimeSuggestion)
                 .verifySystemClockWasSetAndResetCallTracking(
-                        mScript.calculateTimeInMillisForNow(telephonyTimeSuggestion.getUtcTime()));
+                        mScript.calculateTimeInMillisForNow(
+                                telephonyTimeSuggestion.getUnixEpochTime()));
 
         // Check internal state.
         mScript.assertLatestTelephonySuggestion(ARBITRARY_SLOT_INDEX, telephonyTimeSuggestion)
@@ -700,7 +703,7 @@ public class TimeDetectorStrategyImplTest {
 
         // Simulate some significant time passing: half the time allowed before a time signal
         // becomes "too old to use".
-        mScript.simulateTimePassing(TimeDetectorStrategyImpl.MAX_UTC_TIME_AGE_MILLIS / 2)
+        mScript.simulateTimePassing(TimeDetectorStrategyImpl.MAX_SUGGESTION_TIME_AGE_MILLIS / 2)
                 .verifySystemClockWasNotSetAndResetCallTracking();
 
         // Now another network suggestion is made. Telephony suggestions are prioritized over
@@ -720,7 +723,7 @@ public class TimeDetectorStrategyImplTest {
         // Simulate some significant time passing: half the time allowed before a time signal
         // becomes "too old to use". This should mean that telephonyTimeSuggestion is now too old to
         // be used but networkTimeSuggestion2 is not.
-        mScript.simulateTimePassing(TimeDetectorStrategyImpl.MAX_UTC_TIME_AGE_MILLIS / 2);
+        mScript.simulateTimePassing(TimeDetectorStrategyImpl.MAX_SUGGESTION_TIME_AGE_MILLIS / 2);
 
         // NOTE: The TimeDetectorStrategyImpl doesn't set an alarm for the point when the last
         // suggestion it used becomes too old: it requires a new suggestion or an auto-time toggle
@@ -743,7 +746,7 @@ public class TimeDetectorStrategyImplTest {
 
         // Verify the latest network time now wins.
         mScript.verifySystemClockWasSetAndResetCallTracking(
-                mScript.calculateTimeInMillisForNow(networkTimeSuggestion2.getUtcTime()));
+                mScript.calculateTimeInMillisForNow(networkTimeSuggestion2.getUnixEpochTime()));
 
         // Check internal state.
         mScript.assertLatestTelephonySuggestion(ARBITRARY_SLOT_INDEX, telephonyTimeSuggestion)
@@ -774,7 +777,8 @@ public class TimeDetectorStrategyImplTest {
         mScript.simulateTimePassing(smallTimeIncrementMillis)
                 .simulateGnssTimeSuggestion(gnssTimeSuggestion1)
                 .verifySystemClockWasSetAndResetCallTracking(
-                        mScript.calculateTimeInMillisForNow(gnssTimeSuggestion1.getUtcTime()));
+                        mScript.calculateTimeInMillisForNow(
+                                gnssTimeSuggestion1.getUnixEpochTime()));
 
         // Check internal state.
         mScript.assertLatestNetworkSuggestion(null)
@@ -793,7 +797,8 @@ public class TimeDetectorStrategyImplTest {
         mScript.simulateTimePassing(smallTimeIncrementMillis)
                 .simulateNetworkTimeSuggestion(networkTimeSuggestion)
                 .verifySystemClockWasSetAndResetCallTracking(
-                        mScript.calculateTimeInMillisForNow(networkTimeSuggestion.getUtcTime()));
+                        mScript.calculateTimeInMillisForNow(
+                                networkTimeSuggestion.getUnixEpochTime()));
 
         // Check internal state.
         mScript.assertLatestNetworkSuggestion(networkTimeSuggestion)
@@ -803,7 +808,7 @@ public class TimeDetectorStrategyImplTest {
 
         // Simulate some significant time passing: half the time allowed before a time signal
         // becomes "too old to use".
-        mScript.simulateTimePassing(TimeDetectorStrategyImpl.MAX_UTC_TIME_AGE_MILLIS / 2)
+        mScript.simulateTimePassing(TimeDetectorStrategyImpl.MAX_SUGGESTION_TIME_AGE_MILLIS / 2)
                 .verifySystemClockWasNotSetAndResetCallTracking();
 
         // Now another gnss suggestion is made. Network suggestions are prioritized over
@@ -823,7 +828,7 @@ public class TimeDetectorStrategyImplTest {
         // Simulate some significant time passing: half the time allowed before a time signal
         // becomes "too old to use". This should mean that telephonyTimeSuggestion is now too old to
         // be used but networkTimeSuggestion2 is not.
-        mScript.simulateTimePassing(TimeDetectorStrategyImpl.MAX_UTC_TIME_AGE_MILLIS / 2);
+        mScript.simulateTimePassing(TimeDetectorStrategyImpl.MAX_SUGGESTION_TIME_AGE_MILLIS / 2);
 
         // NOTE: The TimeDetectorStrategyImpl doesn't set an alarm for the point when the last
         // suggestion it used becomes too old: it requires a new suggestion or an auto-time toggle
@@ -846,7 +851,7 @@ public class TimeDetectorStrategyImplTest {
 
         // Verify the latest gnss time now wins.
         mScript.verifySystemClockWasSetAndResetCallTracking(
-                mScript.calculateTimeInMillisForNow(gnssTimeSuggestion2.getUtcTime()));
+                mScript.calculateTimeInMillisForNow(gnssTimeSuggestion2.getUnixEpochTime()));
 
         // Check internal state.
         mScript.assertLatestNetworkSuggestion(networkTimeSuggestion)
@@ -877,7 +882,8 @@ public class TimeDetectorStrategyImplTest {
         mScript.simulateTimePassing(smallTimeIncrementMillis)
                 .simulateExternalTimeSuggestion(externalTimeSuggestion1)
                 .verifySystemClockWasSetAndResetCallTracking(
-                        mScript.calculateTimeInMillisForNow(externalTimeSuggestion1.getUtcTime()));
+                        mScript.calculateTimeInMillisForNow(
+                                externalTimeSuggestion1.getUnixEpochTime()));
 
         // Check internal state.
         mScript.assertLatestNetworkSuggestion(null)
@@ -896,7 +902,8 @@ public class TimeDetectorStrategyImplTest {
         mScript.simulateTimePassing(smallTimeIncrementMillis)
                 .simulateNetworkTimeSuggestion(networkTimeSuggestion)
                 .verifySystemClockWasSetAndResetCallTracking(
-                        mScript.calculateTimeInMillisForNow(networkTimeSuggestion.getUtcTime()));
+                        mScript.calculateTimeInMillisForNow(
+                                networkTimeSuggestion.getUnixEpochTime()));
 
         // Check internal state.
         mScript.assertLatestNetworkSuggestion(networkTimeSuggestion)
@@ -906,7 +913,7 @@ public class TimeDetectorStrategyImplTest {
 
         // Simulate some significant time passing: half the time allowed before a time signal
         // becomes "too old to use".
-        mScript.simulateTimePassing(TimeDetectorStrategyImpl.MAX_UTC_TIME_AGE_MILLIS / 2)
+        mScript.simulateTimePassing(TimeDetectorStrategyImpl.MAX_SUGGESTION_TIME_AGE_MILLIS / 2)
                 .verifySystemClockWasNotSetAndResetCallTracking();
 
         // Now another external suggestion is made. Network suggestions are prioritized over
@@ -926,7 +933,7 @@ public class TimeDetectorStrategyImplTest {
         // Simulate some significant time passing: half the time allowed before a time signal
         // becomes "too old to use". This should mean that networkTimeSuggestion is now too old to
         // be used but externalTimeSuggestion2 is not.
-        mScript.simulateTimePassing(TimeDetectorStrategyImpl.MAX_UTC_TIME_AGE_MILLIS / 2);
+        mScript.simulateTimePassing(TimeDetectorStrategyImpl.MAX_SUGGESTION_TIME_AGE_MILLIS / 2);
 
         // NOTE: The TimeDetectorStrategyImpl doesn't set an alarm for the point when the last
         // suggestion it used becomes too old: it requires a new suggestion or an auto-time toggle
@@ -949,7 +956,7 @@ public class TimeDetectorStrategyImplTest {
 
         // Verify the latest external time now wins.
         mScript.verifySystemClockWasSetAndResetCallTracking(
-                mScript.calculateTimeInMillisForNow(externalTimeSuggestion2.getUtcTime()));
+                mScript.calculateTimeInMillisForNow(externalTimeSuggestion2.getUnixEpochTime()));
 
         // Check internal state.
         mScript.assertLatestNetworkSuggestion(networkTimeSuggestion)
@@ -1438,11 +1445,11 @@ public class TimeDetectorStrategyImplTest {
          * reference time.
          */
         ManualTimeSuggestion generateManualTimeSuggestion(Instant suggestedTime) {
-            TimestampedValue<Long> utcTime =
+            TimestampedValue<Long> unixEpochTime =
                     new TimestampedValue<>(
                             mFakeEnvironment.peekElapsedRealtimeMillis(),
                             suggestedTime.toEpochMilli());
-            return new ManualTimeSuggestion(utcTime);
+            return new ManualTimeSuggestion(unixEpochTime);
         }
 
         /**
@@ -1472,11 +1479,11 @@ public class TimeDetectorStrategyImplTest {
          * reference time.
          */
         NetworkTimeSuggestion generateNetworkTimeSuggestion(Instant suggestedTime) {
-            TimestampedValue<Long> utcTime =
+            TimestampedValue<Long> unixEpochTime =
                     new TimestampedValue<>(
                             mFakeEnvironment.peekElapsedRealtimeMillis(),
                             suggestedTime.toEpochMilli());
-            return new NetworkTimeSuggestion(utcTime);
+            return new NetworkTimeSuggestion(unixEpochTime);
         }
 
         /**
@@ -1484,11 +1491,11 @@ public class TimeDetectorStrategyImplTest {
          * reference time.
          */
         GnssTimeSuggestion generateGnssTimeSuggestion(Instant suggestedTime) {
-            TimestampedValue<Long> utcTime =
+            TimestampedValue<Long> unixEpochTime =
                     new TimestampedValue<>(
                             mFakeEnvironment.peekElapsedRealtimeMillis(),
                             suggestedTime.toEpochMilli());
-            return new GnssTimeSuggestion(utcTime);
+            return new GnssTimeSuggestion(unixEpochTime);
         }
 
         /**
@@ -1504,19 +1511,19 @@ public class TimeDetectorStrategyImplTest {
          * Calculates what the supplied time would be when adjusted for the movement of the fake
          * elapsed realtime clock.
          */
-        long calculateTimeInMillisForNow(TimestampedValue<Long> utcTime) {
-            return TimeDetectorStrategy.getTimeAt(utcTime, peekElapsedRealtimeMillis());
+        long calculateTimeInMillisForNow(TimestampedValue<Long> unixEpochTime) {
+            return TimeDetectorStrategy.getTimeAt(unixEpochTime, peekElapsedRealtimeMillis());
         }
     }
 
     private static TelephonyTimeSuggestion createTelephonyTimeSuggestion(int slotIndex,
-            TimestampedValue<Long> utcTime) {
+            TimestampedValue<Long> unixEpochTime) {
         return new TelephonyTimeSuggestion.Builder(slotIndex)
-                .setUtcTime(utcTime)
+                .setUnixEpochTime(unixEpochTime)
                 .build();
     }
 
-    private static Instant createUtcTime(int year, int monthInYear, int day, int hourOfDay,
+    private static Instant createUnixEpochTime(int year, int monthInYear, int day, int hourOfDay,
             int minute, int second) {
         return LocalDateTime.of(year, monthInYear, day, hourOfDay, minute, second)
                 .toInstant(ZoneOffset.UTC);

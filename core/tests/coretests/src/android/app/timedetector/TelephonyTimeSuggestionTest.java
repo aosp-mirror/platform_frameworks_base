@@ -45,13 +45,13 @@ public class TelephonyTimeSuggestionTest {
             assertEquals(two, one);
         }
 
-        builder1.setUtcTime(new TimestampedValue<>(1111L, 2222L));
+        builder1.setUnixEpochTime(new TimestampedValue<>(1111L, 2222L));
         {
             TelephonyTimeSuggestion one = builder1.build();
             assertEquals(one, one);
         }
 
-        builder2.setUtcTime(new TimestampedValue<>(1111L, 2222L));
+        builder2.setUnixEpochTime(new TimestampedValue<>(1111L, 2222L));
         {
             TelephonyTimeSuggestion one = builder1.build();
             TelephonyTimeSuggestion two = builder2.build();
@@ -61,7 +61,7 @@ public class TelephonyTimeSuggestionTest {
 
         TelephonyTimeSuggestion.Builder builder3 =
                 new TelephonyTimeSuggestion.Builder(SLOT_INDEX + 1);
-        builder3.setUtcTime(new TimestampedValue<>(1111L, 2222L));
+        builder3.setUnixEpochTime(new TimestampedValue<>(1111L, 2222L));
         {
             TelephonyTimeSuggestion one = builder1.build();
             TelephonyTimeSuggestion three = builder3.build();
@@ -84,7 +84,7 @@ public class TelephonyTimeSuggestionTest {
         TelephonyTimeSuggestion.Builder builder = new TelephonyTimeSuggestion.Builder(SLOT_INDEX);
         assertRoundTripParcelable(builder.build());
 
-        builder.setUtcTime(new TimestampedValue<>(1111L, 2222L));
+        builder.setUnixEpochTime(new TimestampedValue<>(1111L, 2222L));
         assertRoundTripParcelable(builder.build());
 
         // DebugInfo should also be stored (but is not checked by equals()
