@@ -855,8 +855,7 @@ public class UserSwitcherController implements Dumpable {
     public @UserIdInt int createGuest() {
         UserInfo guest;
         try {
-            guest = mUserManager.createGuest(mContext,
-                    mContext.getString(com.android.settingslib.R.string.guest_nickname));
+            guest = mUserManager.createGuest(mContext);
         } catch (UserManager.UserOperationException e) {
             Log.e(TAG, "Couldn't create guest user", e);
             return UserHandle.USER_NULL;
