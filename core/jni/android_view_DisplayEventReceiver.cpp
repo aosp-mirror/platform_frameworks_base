@@ -118,11 +118,11 @@ void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, PhysicalDispla
 
         ScopedLocalRef<jobjectArray>
                 frameTimelineObjs(env,
-                                  env->NewObjectArray(vsyncEventData.frameTimelines.size(),
+                                  env->NewObjectArray(VsyncEventData::kFrameTimelinesLength,
                                                       gDisplayEventReceiverClassInfo
                                                               .frameTimelineClassInfo.clazz,
                                                       /*initial element*/ NULL));
-        for (int i = 0; i < vsyncEventData.frameTimelines.size(); i++) {
+        for (int i = 0; i < VsyncEventData::kFrameTimelinesLength; i++) {
             VsyncEventData::FrameTimeline frameTimeline = vsyncEventData.frameTimelines[i];
             ScopedLocalRef<jobject>
                     frameTimelineObj(env,
@@ -130,8 +130,8 @@ void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, PhysicalDispla
                                                             .frameTimelineClassInfo.clazz,
                                                     gDisplayEventReceiverClassInfo
                                                             .frameTimelineClassInfo.init,
-                                                    frameTimeline.id,
-                                                    frameTimeline.expectedPresentTime,
+                                                    frameTimeline.vsyncId,
+                                                    frameTimeline.expectedPresentationTime,
                                                     frameTimeline.deadlineTimestamp));
             env->SetObjectArrayElement(frameTimelineObjs.get(), i, frameTimelineObj.get());
         }
