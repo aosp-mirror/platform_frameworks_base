@@ -31,6 +31,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
+import android.content.res.TypedArray;
+import android.content.res.XmlResourceParser;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -39,9 +44,11 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
+import android.util.Xml;
 import android.view.ActionMode;
 import android.view.Display;
 import android.view.KeyEvent;
@@ -57,9 +64,14 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.android.internal.R;
 import com.android.internal.util.DumpUtils;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.function.Consumer;
@@ -159,8 +171,9 @@ import java.util.function.Consumer;
  * </pre>
  */
 public class DreamService extends Service implements Window.Callback {
-    private final String mTag =
-            DreamService.class.getSimpleName() + "[" + getClass().getSimpleName() + "]";
+    private static final String TAG = DreamService.class.getSimpleName();
+    private final String mTag = TAG + "[" + getClass().getSimpleName() + "]";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     /**
      * The name of the dream manager service.
@@ -189,6 +202,11 @@ public class DreamService extends Service implements Window.Callback {
      * tag.
      */
     public static final String DREAM_META_DATA = "android.service.dream";
+
+    /**
+     * Name of the root tag under which a Dream defines its metadata in an XML file.
+     */
+    private static final String DREAM_META_DATA_ROOT_TAG = "dream";
 
     /**
      * Extra containing a boolean for whether to show complications on the overlay.
@@ -239,13 +257,16 @@ public class DreamService extends Service implements Window.Callback {
             mRequests = new ArrayDeque<>();
         }
 
-        public void bind(Context context, @Nullable ComponentName overlayService) {
+        public void bind(Context context, @Nullable ComponentName overlayService,
+                ComponentName dreamService) {
             if (overlayService == null) {
                 return;
             }
 
             final Intent overlayIntent = new Intent();
             overlayIntent.setComponent(overlayService);
+            overlayIntent.putExtra(EXTRA_SHOW_COMPLICATIONS,
+                    fetchShouldShowComplications(context, dreamService));
 
             context.bindService(overlayIntent,
                     this, Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE);
@@ -967,7 +988,8 @@ public class DreamService extends Service implements Window.Callback {
 
         // Connect to the overlay service if present.
         if (!mWindowless) {
-            mOverlayConnection.bind(this, intent.getParcelableExtra(EXTRA_DREAM_OVERLAY_COMPONENT));
+            mOverlayConnection.bind(this, intent.getParcelableExtra(EXTRA_DREAM_OVERLAY_COMPONENT),
+                    new ComponentName(this, getClass()));
         }
 
         return mDreamServiceWrapper;
@@ -1079,6 +1101,86 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     // end public api
+
+    /**
+     * Parses and returns metadata of the dream service indicated by the service info. Returns null
+     * if metadata cannot be found.
+     *
+     * Note that {@link ServiceInfo} must be fetched with {@link PackageManager#GET_META_DATA} flag.
+     *
+     * @hide
+     */
+    @Nullable
+    public static DreamMetadata getDreamMetadata(Context context, ServiceInfo serviceInfo) {
+        final PackageManager pm = context.getPackageManager();
+
+        final TypedArray rawMetadata = readMetadata(pm, serviceInfo);
+        if (rawMetadata == null) return null;
+
+        final DreamMetadata metadata = new DreamMetadata(
+                convertToComponentName(rawMetadata.getString(
+                        com.android.internal.R.styleable.Dream_settingsActivity), serviceInfo),
+                rawMetadata.getDrawable(
+                        com.android.internal.R.styleable.Dream_previewImage),
+                rawMetadata.getBoolean(R.styleable.Dream_showClockAndComplications,
+                        DEFAULT_SHOW_COMPLICATIONS));
+        rawMetadata.recycle();
+        return metadata;
+    }
+
+    /**
+     * Returns the raw XML metadata fetched from the {@link ServiceInfo}.
+     *
+     * Returns <code>null</code> if the {@link ServiceInfo} doesn't contain valid dream metadata.
+     */
+    @Nullable
+    private static TypedArray readMetadata(PackageManager pm, ServiceInfo serviceInfo) {
+        if (serviceInfo == null || serviceInfo.metaData == null) {
+            return null;
+        }
+
+        try (XmlResourceParser parser =
+                     serviceInfo.loadXmlMetaData(pm, DreamService.DREAM_META_DATA)) {
+            if (parser == null) {
+                if (DEBUG) Log.w(TAG, "No " + DreamService.DREAM_META_DATA + " metadata");
+                return null;
+            }
+
+            final AttributeSet attrs = Xml.asAttributeSet(parser);
+            while (true) {
+                final int type = parser.next();
+                if (type == XmlPullParser.END_DOCUMENT || type == XmlPullParser.START_TAG) {
+                    break;
+                }
+            }
+
+            if (!parser.getName().equals(DREAM_META_DATA_ROOT_TAG)) {
+                if (DEBUG) {
+                    Log.w(TAG, "Metadata does not start with " + DREAM_META_DATA_ROOT_TAG + " tag");
+                }
+                return null;
+            }
+
+            return pm.getResourcesForApplication(serviceInfo.applicationInfo).obtainAttributes(
+                    attrs, com.android.internal.R.styleable.Dream);
+        } catch (PackageManager.NameNotFoundException | IOException | XmlPullParserException e) {
+            if (DEBUG) Log.e(TAG, "Error parsing: " + serviceInfo.packageName, e);
+            return null;
+        }
+    }
+
+    private static ComponentName convertToComponentName(String flattenedString,
+            ServiceInfo serviceInfo) {
+        if (flattenedString == null) {
+            return null;
+        }
+
+        if (!flattenedString.contains("/")) {
+            return new ComponentName(serviceInfo.packageName, flattenedString);
+        }
+
+        return ComponentName.unflattenFromString(flattenedString);
+    }
 
     /**
      * Called by DreamController.stopDream() when the Dream is about to be unbound and destroyed.
@@ -1242,6 +1344,30 @@ public class DreamService extends Service implements Window.Callback {
         return (oldFlags&~mask) | (flags&mask);
     }
 
+    /**
+     * Fetches metadata of the dream indicated by the {@link ComponentName}, and returns whether
+     * the dream should show complications on the overlay. If not defined, returns
+     * {@link DreamService#DEFAULT_SHOW_COMPLICATIONS}.
+     */
+    private static boolean fetchShouldShowComplications(Context context,
+            ComponentName componentName) {
+        final PackageManager pm = context.getPackageManager();
+
+        try {
+            final ServiceInfo si = pm.getServiceInfo(componentName,
+                    PackageManager.ComponentInfoFlags.of(PackageManager.GET_META_DATA));
+            final DreamMetadata metadata = getDreamMetadata(context, si);
+
+            if (metadata != null) {
+                return metadata.showComplications;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            if (DEBUG) Log.w(TAG, "cannot find component " + componentName.flattenToShortString());
+        }
+
+        return DEFAULT_SHOW_COMPLICATIONS;
+    }
+
     @Override
     protected void dump(final FileDescriptor fd, PrintWriter pw, final String[] args) {
         DumpUtils.dumpAsync(mHandler, (pw1, prefix) -> dumpOnHandler(fd, pw1, args), pw, "", 1000);
@@ -1300,6 +1426,29 @@ public class DreamService extends Service implements Window.Callback {
         void onActivityCreated(DreamActivity a) {
             mActivity = a;
             onWindowCreated(a.getWindow());
+        }
+    }
+
+    /**
+     * Represents metadata defined in {@link android.R.styleable#Dream &lt;dream&gt;}.
+     *
+     * @hide
+     */
+    public static final class DreamMetadata {
+        @Nullable
+        public final ComponentName settingsActivity;
+
+        @Nullable
+        public final Drawable previewImage;
+
+        @NonNull
+        public final boolean showComplications;
+
+        DreamMetadata(ComponentName settingsActivity, Drawable previewImage,
+                boolean showComplications) {
+            this.settingsActivity = settingsActivity;
+            this.previewImage = previewImage;
+            this.showComplications = showComplications;
         }
     }
 }
