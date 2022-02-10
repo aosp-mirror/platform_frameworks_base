@@ -191,6 +191,19 @@ public class SystemWindows {
         return null;
     }
 
+    /**
+     * Gets a token associated with the view that can be used to grant the view focus.
+     */
+    public IBinder getFocusGrantToken(View view) {
+        SurfaceControlViewHost root = mViewRoots.get(view);
+        if (root == null) {
+            Slog.e(TAG, "Couldn't get focus grant token since view does not exist in "
+                    + "SystemWindow:" + view);
+            return null;
+        }
+        return root.getFocusGrantToken();
+    }
+
     private class PerDisplay {
         final int mDisplayId;
         private final SparseArray<SysUiWindowManager> mWwms = new SparseArray<>();

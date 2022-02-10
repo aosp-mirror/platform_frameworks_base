@@ -28,7 +28,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Debug;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Size;
@@ -126,7 +125,6 @@ public class PhonePipMenuController implements PipMenuController {
     private int mMenuState;
 
     private PipMenuView mPipMenuView;
-    private IBinder mPipMenuInputToken;
 
     private ActionListener mMediaActionListener = new ActionListener() {
         @Override
@@ -206,7 +204,6 @@ public class PhonePipMenuController implements PipMenuController {
         mApplier = null;
         mSystemWindows.removeView(mPipMenuView);
         mPipMenuView = null;
-        mPipMenuInputToken = null;
     }
 
     /**
@@ -392,7 +389,6 @@ public class PhonePipMenuController implements PipMenuController {
 
         if (mApplier == null) {
             mApplier = new SyncRtSurfaceTransactionApplier(mPipMenuView);
-            mPipMenuInputToken = mPipMenuView.getViewRootImpl().getInputToken();
         }
 
         return mApplier != null;
@@ -539,7 +535,8 @@ public class PhonePipMenuController implements PipMenuController {
 
             try {
                 WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(null /* window */,
-                        mPipMenuInputToken, menuState != MENU_STATE_NONE /* grantFocus */);
+                        mSystemWindows.getFocusGrantToken(mPipMenuView),
+                        menuState != MENU_STATE_NONE /* grantFocus */);
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to update focus as menu appears/disappears", e);
             }
