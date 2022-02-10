@@ -62,6 +62,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -113,6 +114,19 @@ public class MidiService extends IMidiManager.Stub {
     private int mNextDeviceId = 1;
 
     private final PackageManager mPackageManager;
+
+    private static final String MIDI_LEGACY_STRING = "MIDI 1.0";
+    private static final String MIDI_UNIVERSAL_STRING = "MIDI 2.0";
+
+    // Used to lock mUsbMidiLegacyDeviceOpenCount and mUsbMidiUniversalDeviceInUse.
+    private final Object mUsbMidiLock = new Object();
+
+    // Number of times a USB MIDI 1.0 device has opened, based on the device name.
+    private final HashMap<String, Integer> mUsbMidiLegacyDeviceOpenCount =
+            new HashMap<String, Integer>();
+
+    // Whether a USB MIDI device has opened, based on the device name.
+    private final HashSet<String> mUsbMidiUniversalDeviceInUse = new HashSet<String>();
 
     // UID of BluetoothMidiService
     private int mBluetoothServiceUid;
@@ -246,6 +260,12 @@ public class MidiService extends IMidiManager.Stub {
             }
 
             for (DeviceConnection connection : mDeviceConnections.values()) {
+                if (connection.getDevice().getDeviceInfo().getType()
+                        == MidiDeviceInfo.TYPE_USB) {
+                    synchronized (mUsbMidiLock) {
+                        removeUsbMidiDeviceLocked(connection.getDevice().getDeviceInfo());
+                    }
+                }
                 connection.getDevice().removeDeviceConnection(connection);
             }
         }
@@ -698,6 +718,7 @@ public class MidiService extends IMidiManager.Stub {
         synchronized (mDevicesByInfo) {
             for (Device device : mDevicesByInfo.values()) {
                 if (device.isUidAllowed(uid)) {
+                    deviceInfos.add(device.getDeviceInfo());
                     // UMP devices have protocols that are not PROTOCOL_UNKNOWN
                     if (transport == MidiManager.TRANSPORT_UNIVERSAL_MIDI_PACKETS) {
                         if (device.getDeviceInfo().getDefaultProtocol()
@@ -731,6 +752,15 @@ public class MidiService extends IMidiManager.Stub {
             }
             if (!device.isUidAllowed(Binder.getCallingUid())) {
                 throw new SecurityException("Attempt to open private device with wrong UID");
+            }
+        }
+
+        if (deviceInfo.getType() == MidiDeviceInfo.TYPE_USB) {
+            synchronized (mUsbMidiLock) {
+                if (isUsbMidiDeviceInUseLocked(deviceInfo)) {
+                    throw new IllegalArgumentException("device already in use: " + deviceInfo);
+                }
+                addUsbMidiDeviceLocked(deviceInfo);
             }
         }
 
@@ -1144,5 +1174,83 @@ public class MidiService extends IMidiManager.Stub {
             }
         }
         pw.decreaseIndent();
+    }
+
+    // hold mUsbMidiLock before calling this
+    private boolean isUsbMidiDeviceInUseLocked(MidiDeviceInfo info) {
+        String name = info.getProperties().getString(MidiDeviceInfo.PROPERTY_NAME);
+        if (name.length() < MIDI_LEGACY_STRING.length()) {
+            return false;
+        }
+        String deviceName = extractUsbDeviceName(name);
+        String tagName = extractUsbDeviceTag(name);
+
+        // Only one MIDI 2.0 device can be used at once.
+        // Multiple MIDI 1.0 devices can be used at once.
+        if (mUsbMidiUniversalDeviceInUse.contains(deviceName)
+                || ((tagName).equals(MIDI_UNIVERSAL_STRING)
+                && (mUsbMidiLegacyDeviceOpenCount.containsKey(deviceName)))) {
+            return true;
+        }
+        return false;
+    }
+
+    // hold mUsbMidiLock before calling this
+    void addUsbMidiDeviceLocked(MidiDeviceInfo info) {
+        String name = info.getProperties().getString(MidiDeviceInfo.PROPERTY_NAME);
+        if (name.length() < MIDI_LEGACY_STRING.length()) {
+            return;
+        }
+        String deviceName = extractUsbDeviceName(name);
+        String tagName = extractUsbDeviceTag(name);
+
+        if ((tagName).equals(MIDI_UNIVERSAL_STRING)) {
+            mUsbMidiUniversalDeviceInUse.add(deviceName);
+        } else if ((tagName).equals(MIDI_LEGACY_STRING)) {
+            int count = mUsbMidiLegacyDeviceOpenCount.getOrDefault(deviceName, 0) + 1;
+            mUsbMidiLegacyDeviceOpenCount.put(deviceName, count);
+        }
+    }
+
+    // hold mUsbMidiLock before calling this
+    void removeUsbMidiDeviceLocked(MidiDeviceInfo info) {
+        String name = info.getProperties().getString(MidiDeviceInfo.PROPERTY_NAME);
+        if (name.length() < MIDI_LEGACY_STRING.length()) {
+            return;
+        }
+        String deviceName = extractUsbDeviceName(name);
+        String tagName = extractUsbDeviceTag(name);
+
+        if ((tagName).equals(MIDI_UNIVERSAL_STRING)) {
+            mUsbMidiUniversalDeviceInUse.remove(deviceName);
+        } else if ((tagName).equals(MIDI_LEGACY_STRING)) {
+            if (mUsbMidiLegacyDeviceOpenCount.containsKey(deviceName)) {
+                int count = mUsbMidiLegacyDeviceOpenCount.get(deviceName);
+                if (count > 1) {
+                    mUsbMidiLegacyDeviceOpenCount.put(deviceName, count - 1);
+                } else {
+                    mUsbMidiLegacyDeviceOpenCount.remove(deviceName);
+                }
+            }
+        }
+    }
+
+    // The USB property name is in the form "manufacturer product#Id MIDI 1.0".
+    // This is defined in UsbDirectMidiDevice.java.
+    // This function extracts out the "manufacturer product#Id " part.
+    // Two devices would have the same device name if they had the following property name:
+    // "manufacturer product#Id MIDI 1.0"
+    // "manufacturer product#Id MIDI 2.0"
+    // Note that MIDI_LEGACY_STRING and MIDI_UNIVERSAL_STRING are the same length.
+    String extractUsbDeviceName(String propertyName) {
+        return propertyName.substring(0, propertyName.length() - MIDI_LEGACY_STRING.length());
+    }
+
+    // The USB property name is in the form "manufacturer product#Id MIDI 1.0".
+    // This is defined in UsbDirectMidiDevice.java.
+    // This function extracts the "MIDI 1.0" part.
+    // Note that MIDI_LEGACY_STRING and MIDI_UNIVERSAL_STRING are the same length.
+    String extractUsbDeviceTag(String propertyName) {
+        return propertyName.substring(propertyName.length() - MIDI_LEGACY_STRING.length());
     }
 }
