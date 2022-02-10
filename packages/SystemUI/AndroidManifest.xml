@@ -886,12 +886,6 @@
             android:singleUser="true"
             android:permission="android.permission.BIND_DREAM_SERVICE" />
 
-        <!-- Service for external clients to notify us of nearby media devices -->
-        <!-- TODO(b/216313420): Export and guard with a permission. -->
-        <service
-            android:name=".media.nearby.NearbyMediaDevicesService"
-            />
-
         <receiver
             android:name=".tuner.TunerService$ClearReceiver"
             android:exported="false">

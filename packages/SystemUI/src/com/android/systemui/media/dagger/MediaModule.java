@@ -16,7 +16,6 @@
 
 package com.android.systemui.media.dagger;
 
-import android.app.Service;
 import android.content.Context;
 import android.os.Handler;
 import android.view.WindowManager;
@@ -30,7 +29,7 @@ import com.android.systemui.media.MediaHost;
 import com.android.systemui.media.MediaHostStatesManager;
 import com.android.systemui.media.dream.dagger.MediaComplicationComponent;
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionCli;
-import com.android.systemui.media.nearby.NearbyMediaDevicesService;
+import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.MediaTttFlags;
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver;
@@ -43,11 +42,9 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Named;
 
-import dagger.Binds;
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
-import dagger.multibindings.ClassKey;
-import dagger.multibindings.IntoMap;
 
 /** Dagger module for the media package. */
 @Module(subcomponents = {
@@ -159,9 +156,15 @@ public interface MediaModule {
         return Optional.of(new MediaMuteAwaitConnectionCli(commandRegistry, context));
     }
 
-    /** Inject into NearbyMediaDevicesService. */
-    @Binds
-    @IntoMap
-    @ClassKey(NearbyMediaDevicesService.class)
-    Service bindMediaNearbyDevicesService(NearbyMediaDevicesService service);
+    /** */
+    @Provides
+    @SysUISingleton
+    static Optional<NearbyMediaDevicesManager> providesNearbyMediaDevicesManager(
+            MediaFlags mediaFlags,
+            Lazy<NearbyMediaDevicesManager> nearbyMediaDevicesManagerLazy) {
+        if (!mediaFlags.areNearbyMediaDevicesEnabled()) {
+            return Optional.empty();
+        }
+        return Optional.of(nearbyMediaDevicesManagerLazy.get());
+    }
 }

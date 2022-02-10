@@ -14,25 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.shared.media;
+package android.media;
 
-import com.android.systemui.shared.media.INearbyMediaDevicesUpdateCallback;
-import com.android.systemui.shared.media.NearbyDevice;
+import android.media.INearbyMediaDevicesUpdateCallback;
+import android.media.NearbyDevice;
 
 /**
- * An interface that provides information about nearby devices that are able to play media.
+ * A binder-compatible version of {@link android.media.NearbyMediaDevicesProvider}. See that class
+ * for more information.
  *
- * External clients will implement this interface and System UI will invoke it if it's passed to
- * SystemUI via {@link INearbyMediaDevicesService.registerProvider}.
+ * @hide
  */
 interface INearbyMediaDevicesProvider {
   /**
-   * Returns a list of nearby devices that are able to play media.
-   */
-  List<NearbyDevice> getCurrentNearbyDevices() = 1;
-
-  /**
-   * Registers a callback that will be notified each time the status of a nearby device changes.
+   * Registers a callback that should be notified each time nearby media device(s) change.
    */
   oneway void registerNearbyDevicesCallback(in INearbyMediaDevicesUpdateCallback callback) = 2;
 

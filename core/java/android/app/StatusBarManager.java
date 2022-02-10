@@ -28,7 +28,11 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.drawable.Icon;
+import android.media.INearbyMediaDevicesProvider;
+import android.media.INearbyMediaDevicesUpdateCallback;
 import android.media.MediaRoute2Info;
+import android.media.NearbyDevice;
+import android.media.NearbyMediaDevicesProvider;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -46,6 +50,9 @@ import com.android.internal.statusbar.NotificationVisibility;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -502,6 +509,16 @@ public class StatusBarManager {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface MediaTransferReceiverState {}
+
+    /**
+     * A map from a provider registered in
+     * {@link #registerNearbyMediaDevicesProvider(NearbyMediaDevicesProvider)} to the wrapper
+     * around the provider that was created internally. We need the wrapper to make the provider
+     * binder-compatible, and we need to store a reference to the wrapper so that when the provider
+     * is un-registered, we un-register the saved wrapper instance.
+     */
+    private final Map<NearbyMediaDevicesProvider, NearbyMediaDevicesProviderWrapper>
+            nearbyMediaDevicesProviderMap = new HashMap<>();
 
     @UnsupportedAppUsage
     private Context mContext;
@@ -1033,6 +1050,67 @@ public class StatusBarManager {
         }
     }
 
+    /**
+     * Registers a provider that notifies callbacks about the status of nearby devices that are able
+     * to play media.
+     * <p>
+     * If multiple providers are registered, all the providers will be used for nearby device
+     * information.
+     * <p>
+     * @param provider the nearby device information provider to register
+     * <p>
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL)
+    public void registerNearbyMediaDevicesProvider(
+            @NonNull NearbyMediaDevicesProvider provider
+    ) {
+        Objects.requireNonNull(provider);
+        if (nearbyMediaDevicesProviderMap.containsKey(provider)) {
+            return;
+        }
+        try {
+            final IStatusBarService svc = getService();
+            NearbyMediaDevicesProviderWrapper providerWrapper =
+                    new NearbyMediaDevicesProviderWrapper(provider);
+            nearbyMediaDevicesProviderMap.put(provider, providerWrapper);
+            svc.registerNearbyMediaDevicesProvider(providerWrapper);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+   /**
+     * Unregisters a provider that gives information about nearby devices that are able to play
+     * media.
+     * <p>
+     * See {@link registerNearbyMediaDevicesProvider}.
+     * <p>
+     * @param provider the nearby device information provider to unregister
+     * <p>
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MEDIA_CONTENT_CONTROL)
+    public void unregisterNearbyMediaDevicesProvider(
+            @NonNull NearbyMediaDevicesProvider provider
+    ) {
+        Objects.requireNonNull(provider);
+        if (!nearbyMediaDevicesProviderMap.containsKey(provider)) {
+            return;
+        }
+        try {
+            final IStatusBarService svc = getService();
+            NearbyMediaDevicesProviderWrapper providerWrapper =
+                    nearbyMediaDevicesProviderMap.get(provider);
+            nearbyMediaDevicesProviderMap.remove(provider);
+            svc.unregisterNearbyMediaDevicesProvider(providerWrapper);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** @hide */
     public static String windowStateToString(int state) {
         if (state == WINDOW_STATE_HIDING) return "WINDOW_STATE_HIDING";
@@ -1338,6 +1416,50 @@ public class StatusBarManager {
             } finally {
                 restoreCallingIdentity(callingIdentity);
             }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    static final class NearbyMediaDevicesProviderWrapper extends INearbyMediaDevicesProvider.Stub {
+        @NonNull
+        private final NearbyMediaDevicesProvider mProvider;
+        // Because we're wrapping a {@link NearbyMediaDevicesProvider} in a binder-compatible
+        // interface, we also need to wrap the callbacks that the provider receives. We use
+        // this map to keep track of the original callback and the wrapper callback so that
+        // unregistering the callback works correctly.
+        @NonNull
+        private final Map<INearbyMediaDevicesUpdateCallback, Consumer<List<NearbyDevice>>>
+                mRegisteredCallbacks = new HashMap<>();
+
+        NearbyMediaDevicesProviderWrapper(@NonNull NearbyMediaDevicesProvider provider) {
+            mProvider = provider;
+        }
+
+        @Override
+        public void registerNearbyDevicesCallback(
+                @NonNull INearbyMediaDevicesUpdateCallback callback) {
+            Consumer<List<NearbyDevice>> callbackAsConsumer = nearbyDevices -> {
+                try {
+                    callback.onDevicesUpdated(nearbyDevices);
+                } catch (RemoteException ex) {
+                    throw ex.rethrowFromSystemServer();
+                }
+            };
+
+            mRegisteredCallbacks.put(callback, callbackAsConsumer);
+            mProvider.registerNearbyDevicesCallback(callbackAsConsumer);
+        }
+
+        @Override
+        public void unregisterNearbyDevicesCallback(
+                @NonNull INearbyMediaDevicesUpdateCallback callback) {
+            if (!mRegisteredCallbacks.containsKey(callback)) {
+                return;
+            }
+            mProvider.unregisterNearbyDevicesCallback(mRegisteredCallbacks.get(callback));
+            mRegisteredCallbacks.remove(callback);
         }
     }
 }

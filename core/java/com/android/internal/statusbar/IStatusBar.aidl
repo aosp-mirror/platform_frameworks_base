@@ -24,6 +24,7 @@ import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.fingerprint.IUdfpsHbmListener;
+import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -311,4 +312,10 @@ oneway interface IStatusBar
         in MediaRoute2Info routeInfo,
         in Icon appIcon,
         in CharSequence appName);
+
+    /** Registers a nearby media devices provider. */
+    void registerNearbyMediaDevicesProvider(in INearbyMediaDevicesProvider provider);
+
+    /** Unregisters a nearby media devices provider. */
+    void unregisterNearbyMediaDevicesProvider(in INearbyMediaDevicesProvider provider);
 }

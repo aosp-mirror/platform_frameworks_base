@@ -26,6 +26,7 @@ import com.android.systemui.dagger.qualifiers.PerUser;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionCli;
+import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver;
 import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender;
@@ -152,6 +153,7 @@ public interface SysUIComponent {
         getMediaTttChipControllerReceiver();
         getMediaTttCommandLineHelper();
         getMediaMuteAwaitConnectionCli();
+        getNearbyMediaDevicesManager();
         getUnfoldLatencyTracker().init();
         getFoldStateLoggingProvider().ifPresent(FoldStateLoggingProvider::init);
         getFoldStateLogger().ifPresent(FoldStateLogger::init);
@@ -230,6 +232,9 @@ public interface SysUIComponent {
 
     /** */
     Optional<MediaMuteAwaitConnectionCli> getMediaMuteAwaitConnectionCli();
+
+    /** */
+    Optional<NearbyMediaDevicesManager> getNearbyMediaDevicesManager();
 
     /**
      * Returns {@link CoreStartable}s that should be started with the application.
