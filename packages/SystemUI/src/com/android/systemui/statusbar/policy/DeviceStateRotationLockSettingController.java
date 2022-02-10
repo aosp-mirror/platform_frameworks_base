@@ -21,6 +21,7 @@ import static android.provider.Settings.Secure.DEVICE_STATE_ROTATION_LOCK_LOCKED
 
 import android.annotation.Nullable;
 import android.hardware.devicestate.DeviceStateManager;
+import android.os.Trace;
 import android.util.Log;
 
 import com.android.settingslib.devicestate.DeviceStateRotationLockSettingsManager;
@@ -117,11 +118,16 @@ public final class DeviceStateRotationLockSettingController
 
     private void updateDeviceState(int state) {
         Log.v(TAG, "updateDeviceState [state=" + state + "]");
-        if (mDeviceState == state) {
-            return;
-        }
+        Trace.beginSection("updateDeviceState [state=" + state + "]");
+        try {
+            if (mDeviceState == state) {
+                return;
+            }
 
-        readPersistedSetting(state);
+            readPersistedSetting(state);
+        } finally {
+            Trace.endSection();
+        }
     }
 
     private void readPersistedSetting(int state) {
