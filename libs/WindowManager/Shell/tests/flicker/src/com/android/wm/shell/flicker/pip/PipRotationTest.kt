@@ -27,10 +27,13 @@ import com.android.server.wm.flicker.annotation.Group4
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.entireScreenCovered
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.helpers.isShellTransitionsEnabled
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.wm.shell.flicker.helpers.FixedAppHelper
+import org.junit.Assume
+import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -61,10 +64,15 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group4
-class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
+open class PipRotationTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
     private val fixedApp = FixedAppHelper(instrumentation)
     private val screenBoundsStart = WindowUtils.getDisplayBounds(testSpec.startRotation)
     private val screenBoundsEnd = WindowUtils.getDisplayBounds(testSpec.endRotation)
+
+    @Before
+    open fun before() {
+        Assume.assumeFalse(isShellTransitionsEnabled)
+    }
 
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition(eachRun = false) {

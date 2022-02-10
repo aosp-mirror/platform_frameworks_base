@@ -130,7 +130,7 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter)
     override fun appLayerBecomesVisible() = super.appLayerBecomesVisible_warmStart()
 
     /** {@inheritDoc} */
-    @Presubmit
+    @FlakyTest(bugId = 218624176)
     @Test
     override fun appWindowBecomesVisible() = super.appWindowBecomesVisible_warmStart()
 
@@ -147,6 +147,22 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter)
     fun appWindowReplacesLauncherAsTopWindow_shellTransit() {
         assumeTrue(isShellTransitionsEnabled)
         super.appWindowReplacesLauncherAsTopWindow()
+    }
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
+        assumeFalse(isShellTransitionsEnabled)
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    }
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 218470989)
+    @Test
+    fun visibleWindowsShownMoreThanOneConsecutiveEntry_shellTransit() {
+        assumeTrue(isShellTransitionsEnabled)
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
     }
 
     companion object {
