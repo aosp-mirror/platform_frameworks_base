@@ -264,6 +264,8 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeAddTransactionCommittedListener(long nativeObject,
             TransactionCommittedListener listener);
     private static native void nativeSanitize(long transactionObject);
+    private static native void nativeSetDestinationFrame(long transactionObj, long nativeObject,
+            int l, int t, int r, int b);
 
     /**
      * Transforms that can be applied to buffers as they are displayed to a window.
@@ -3831,6 +3833,26 @@ public final class SurfaceControl implements Parcelable {
          */
         public void sanitize() {
             nativeSanitize(mNativeObject);
+        }
+
+        /**
+         * @hide
+         */
+        public Transaction setDesintationFrame(SurfaceControl sc, @NonNull Rect destinationFrame) {
+            checkPreconditions(sc);
+            nativeSetDestinationFrame(mNativeObject, sc.mNativeObject,
+                    destinationFrame.left, destinationFrame.top, destinationFrame.right,
+                    destinationFrame.bottom);
+            return this;
+        }
+
+        /**
+         * @hide
+         */
+        public Transaction setDesintationFrame(SurfaceControl sc, int width, int height) {
+            checkPreconditions(sc);
+            nativeSetDestinationFrame(mNativeObject, sc.mNativeObject, 0, 0, width, height);
+            return this;
         }
 
         /**
