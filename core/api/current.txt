@@ -25259,6 +25259,14 @@ package android.net {
     method public int getUid();
   }
 
+  public final class EthernetNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
+    ctor public EthernetNetworkSpecifier(@NonNull String);
+    method public int describeContents();
+    method @Nullable public String getInterfaceName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkSpecifier> CREATOR;
+  }
+
   public final class Ikev2VpnProfile extends android.net.PlatformVpnProfile {
     method @NonNull public java.util.List<java.lang.String> getAllowedAlgorithms();
     method public int getMaxMtu();
