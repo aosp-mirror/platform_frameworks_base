@@ -754,7 +754,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // WHEN asked to update the indication area
         mController.setVisible(true);
-        int runTasks = mExecutor.runAllReady();
+        mExecutor.runAllReady();
 
         // THEN the owner info should be hidden
         verifyHideIndication(INDICATION_TYPE_OWNER_INFO);
