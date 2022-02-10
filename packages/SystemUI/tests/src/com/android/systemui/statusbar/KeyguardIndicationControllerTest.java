@@ -244,6 +244,9 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         verify(mKeyguardStateController).addCallback(
                 mKeyguardStateControllerCallbackCaptor.capture());
         mKeyguardStateControllerCallback = mKeyguardStateControllerCallbackCaptor.getValue();
+
+        mExecutor.runAllReady();
+        reset(mRotateTextViewController);
     }
 
     @Test
@@ -328,6 +331,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void disclosure_unmanaged() {
         createController();
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(false);
         when(mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile()).thenReturn(false);
         sendUpdateDisclosureBroadcast();
@@ -339,6 +343,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void disclosure_deviceOwner_noOrganizationName() {
         createController();
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
         when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(null);
         sendUpdateDisclosureBroadcast();
@@ -350,6 +355,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void disclosure_orgOwnedDeviceWithManagedProfile_noOrganizationName() {
         createController();
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile()).thenReturn(true);
         when(mUserManager.getProfiles(anyInt())).thenReturn(Collections.singletonList(
                 new UserInfo(10, /* name */ null, /* flags */ FLAG_MANAGED_PROFILE)));
@@ -363,6 +369,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void disclosure_deviceOwner_withOrganizationName() {
         createController();
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
         when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(ORGANIZATION_NAME);
         sendUpdateDisclosureBroadcast();
@@ -374,6 +381,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void disclosure_orgOwnedDeviceWithManagedProfile_withOrganizationName() {
         createController();
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile()).thenReturn(true);
         when(mUserManager.getProfiles(anyInt())).thenReturn(Collections.singletonList(
                 new UserInfo(10, /* name */ null, FLAG_MANAGED_PROFILE)));
@@ -386,6 +394,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     @Test
     public void disclosure_updateOnTheFly() {
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(false);
         createController();
 
@@ -416,6 +425,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void disclosure_deviceOwner_financedDeviceWithOrganizationName() {
         createController();
 
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
         when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(ORGANIZATION_NAME);
         when(mDevicePolicyManager.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
@@ -738,12 +748,13 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void testEmptyOwnerInfoHidesIndicationArea() {
         createController();
 
-        // GIVEN the owner info is set to an empty string
+        // GIVEN the owner info is set to an empty string & keyguard is showing
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mLockPatternUtils.getDeviceOwnerInfo()).thenReturn("");
 
         // WHEN asked to update the indication area
         mController.setVisible(true);
-        mExecutor.runAllReady();
+        int runTasks = mExecutor.runAllReady();
 
         // THEN the owner info should be hidden
         verifyHideIndication(INDICATION_TYPE_OWNER_INFO);
