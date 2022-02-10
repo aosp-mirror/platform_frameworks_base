@@ -482,6 +482,25 @@ package android.util {
     method public static int logToRadioBuffer(int, @Nullable String, @Nullable String);
   }
 
+  public final class Slog {
+    method public static int d(@Nullable String, @NonNull String);
+    method public static int d(@Nullable String, @NonNull String, @Nullable Throwable);
+    method public static int e(@Nullable String, @NonNull String);
+    method public static int e(@Nullable String, @NonNull String, @Nullable Throwable);
+    method public static int i(@Nullable String, @NonNull String);
+    method public static int i(@Nullable String, @NonNull String, @Nullable Throwable);
+    method public static int v(@Nullable String, @NonNull String);
+    method public static int v(@Nullable String, @NonNull String, @Nullable Throwable);
+    method public static int w(@Nullable String, @NonNull String);
+    method public static int w(@Nullable String, @NonNull String, @Nullable Throwable);
+    method public static int w(@Nullable String, @Nullable Throwable);
+    method public static int wtf(@Nullable String, @NonNull String);
+    method public static int wtf(@Nullable String, @Nullable Throwable);
+    method public static int wtf(@Nullable String, @NonNull String, @Nullable Throwable);
+    method public static void wtfQuiet(@Nullable String, @NonNull String);
+    method public static int wtfStack(@Nullable String, @NonNull String);
+  }
+
   public class SystemConfigFileCommitEventLogger {
     ctor public SystemConfigFileCommitEventLogger(@NonNull String);
     method public void setStartTime(long);
