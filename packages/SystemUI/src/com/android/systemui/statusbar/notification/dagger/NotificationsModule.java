@@ -204,7 +204,7 @@ public interface NotificationsModule {
     static VisualStabilityManager provideVisualStabilityManager(
             NotificationEntryManager notificationEntryManager,
             VisualStabilityProvider visualStabilityProvider,
-            Handler handler,
+            @Main Handler handler,
             StatusBarStateController statusBarStateController,
             WakefulnessLifecycle wakefulnessLifecycle,
             DumpManager dumpManager) {

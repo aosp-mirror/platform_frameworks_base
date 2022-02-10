@@ -18,9 +18,11 @@ package com.android.systemui.dagger;
 
 import com.android.keyguard.clock.ClockOptionsProvider;
 import com.android.systemui.BootCompleteCacheImpl;
+import com.android.systemui.CoreStartable;
 import com.android.systemui.Dependency;
 import com.android.systemui.InitController;
 import com.android.systemui.SystemUIAppComponentFactory;
+import com.android.systemui.dagger.qualifiers.PerUser;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
@@ -51,7 +53,10 @@ import com.android.wm.shell.startingsurface.StartingSurface;
 import com.android.wm.shell.tasksurfacehelper.TaskSurfaceHelper;
 import com.android.wm.shell.transition.ShellTransitions;
 
+import java.util.Map;
 import java.util.Optional;
+
+import javax.inject.Provider;
 
 import dagger.BindsInstance;
 import dagger.Subcomponent;
@@ -65,6 +70,7 @@ import dagger.Subcomponent;
         DependencyProvider.class,
         SystemUIBinder.class,
         SystemUIModule.class,
+        SystemUICoreStartableModule.class,
         SystemUIDefaultModule.class})
 public interface SysUIComponent {
 
@@ -219,6 +225,16 @@ public interface SysUIComponent {
 
     /** */
     Optional<MediaTttCommandLineHelper> getMediaTttCommandLineHelper();
+
+    /**
+     * Returns {@link CoreStartable}s that should be started with the application.
+     */
+    Map<Class<?>, Provider<CoreStartable>> getStartables();
+
+    /**
+     * Returns {@link CoreStartable}s that should be started for every user.
+     */
+    @PerUser Map<Class<?>, Provider<CoreStartable>> getPerUserStartables();
 
     /**
      * Member injection into the supplied argument.
