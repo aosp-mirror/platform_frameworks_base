@@ -138,8 +138,6 @@ public class RestrictedPreferenceHelper {
             return true;
         }
         if (mDisabledByAppOps) {
-            Preconditions.checkState(Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU,
-                    "Build SDK version needs >= T");
             RestrictedLockUtilsInternal.sendShowRestrictedSettingDialogIntent(mContext, packageName,
                     uid);
             return true;
