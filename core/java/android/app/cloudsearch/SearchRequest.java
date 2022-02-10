@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -91,6 +92,14 @@ public final class SearchRequest implements Parcelable {
     @NonNull
     private Bundle mSearchConstraints;
 
+    /** Auto set by system servier, and the caller cannot set it.
+     *
+     * The caller's package name.
+     *
+     */
+    @NonNull
+    private String mSource;
+
     private SearchRequest(Parcel in) {
         this.mQuery = in.readString();
         this.mResultOffset = in.readInt();
@@ -98,15 +107,17 @@ public final class SearchRequest implements Parcelable {
         this.mMaxLatencyMillis = in.readFloat();
         this.mSearchConstraints = in.readBundle();
         this.mId = in.readString();
+        this.mSource = in.readString();
     }
 
     private SearchRequest(String query, int resultOffset, int resultNumber, float maxLatencyMillis,
-            Bundle searchConstraints) {
+            Bundle searchConstraints, String source) {
         mQuery = query;
         mResultOffset = resultOffset;
         mResultNumber = resultNumber;
         mMaxLatencyMillis = maxLatencyMillis;
         mSearchConstraints = searchConstraints;
+        mSource = source;
     }
 
     /** Returns the original query. */
@@ -136,27 +147,28 @@ public final class SearchRequest implements Parcelable {
         return mSearchConstraints;
     }
 
+    /** Gets the caller's package name. */
+    @NonNull
+    public String getSource() {
+        return mSource;
+    }
+
     /** Returns the search request id, which is used to identify the request. */
     @NonNull
     public String getRequestId() {
         if (mId == null || mId.length() == 0) {
-            boolean isPresubmit =
-                    mSearchConstraints.containsKey(CONSTRAINT_IS_PRESUBMIT_SUGGESTION)
-                    && mSearchConstraints.getBoolean(CONSTRAINT_IS_PRESUBMIT_SUGGESTION);
-
-            String searchProvider = "EMPTY";
-            if (mSearchConstraints.containsKey(CONSTRAINT_SEARCH_PROVIDER_FILTER)) {
-                searchProvider = mSearchConstraints.getString(CONSTRAINT_SEARCH_PROVIDER_FILTER);
-            }
-
-            String rawContent = String.format("%s\t%d\t%d\t%f\t%b\t%s",
-                    mQuery, mResultOffset, mResultNumber, mMaxLatencyMillis,
-                    isPresubmit, searchProvider);
-
-            mId = String.valueOf(rawContent.hashCode());
+            mId = String.valueOf(toString().hashCode());
         }
 
         return mId;
+    }
+
+    /** Sets the caller, and this will be set by the system server.
+     *
+     * @hide
+     */
+    public void setSource(@NonNull String source) {
+        this.mSource = source;
     }
 
     private SearchRequest(Builder b) {
@@ -165,6 +177,7 @@ public final class SearchRequest implements Parcelable {
         mResultNumber = b.mResultNumber;
         mMaxLatencyMillis = b.mMaxLatencyMillis;
         mSearchConstraints = requireNonNull(b.mSearchConstraints);
+        mSource = requireNonNull(b.mSource);
     }
 
     /**
@@ -192,6 +205,7 @@ public final class SearchRequest implements Parcelable {
         dest.writeFloat(this.mMaxLatencyMillis);
         dest.writeBundle(this.mSearchConstraints);
         dest.writeString(getRequestId());
+        dest.writeString(this.mSource);
     }
 
     @Override
@@ -214,13 +228,30 @@ public final class SearchRequest implements Parcelable {
                 && mResultOffset == that.mResultOffset
                 && mResultNumber == that.mResultNumber
                 && mMaxLatencyMillis == that.mMaxLatencyMillis
-                && Objects.equals(mSearchConstraints, that.mSearchConstraints);
+                && Objects.equals(mSearchConstraints, that.mSearchConstraints)
+                && Objects.equals(mSource, that.mSource);
+    }
+
+    @Override
+    public String toString() {
+        boolean isPresubmit =
+                mSearchConstraints.containsKey(CONSTRAINT_IS_PRESUBMIT_SUGGESTION)
+                        && mSearchConstraints.getBoolean(CONSTRAINT_IS_PRESUBMIT_SUGGESTION);
+
+        String searchProvider = "EMPTY";
+        if (mSearchConstraints.containsKey(CONSTRAINT_SEARCH_PROVIDER_FILTER)) {
+            searchProvider = mSearchConstraints.getString(CONSTRAINT_SEARCH_PROVIDER_FILTER);
+        }
+
+        return String.format("SearchRequest: {query:%s,offset:%d;number:%d;max_latency:%f;"
+                        + "is_presubmit:%b;search_provider:%s;source:%s}", mQuery, mResultOffset,
+                mResultNumber, mMaxLatencyMillis, isPresubmit, searchProvider, mSource);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mQuery, mResultOffset, mResultNumber, mMaxLatencyMillis,
-                mSearchConstraints);
+                mSearchConstraints, mSource);
     }
 
     /**
@@ -235,6 +266,7 @@ public final class SearchRequest implements Parcelable {
         private int mResultNumber;
         private float mMaxLatencyMillis;
         private Bundle mSearchConstraints;
+        private String mSource;
 
         /**
          *
@@ -250,6 +282,7 @@ public final class SearchRequest implements Parcelable {
             mResultNumber = 10;
             mMaxLatencyMillis = 200;
             mSearchConstraints = Bundle.EMPTY;
+            mSource = "DEFAULT_CALLER";
         }
 
         /** Sets the input query. */
@@ -288,6 +321,17 @@ public final class SearchRequest implements Parcelable {
             return this;
         }
 
+        /** Sets the caller, and this will be set by the system server.
+         *
+         * @hide
+         */
+        @NonNull
+        @TestApi
+        public Builder setSource(@NonNull String source) {
+            this.mSource = source;
+            return this;
+        }
+
         /** Builds a SearchRequest based-on the given params. */
         @NonNull
         public SearchRequest build() {
@@ -297,7 +341,7 @@ public final class SearchRequest implements Parcelable {
             }
 
             return new SearchRequest(mQuery, mResultOffset, mResultNumber, mMaxLatencyMillis,
-                               mSearchConstraints);
+                               mSearchConstraints, mSource);
         }
     }
 }

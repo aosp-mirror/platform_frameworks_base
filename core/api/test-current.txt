@@ -601,6 +601,14 @@ package android.app.blob {
 
 }
 
+package android.app.cloudsearch {
+
+  public static final class SearchRequest.Builder {
+    method @NonNull public android.app.cloudsearch.SearchRequest.Builder setSource(@NonNull String);
+  }
+
+}
+
 package android.app.contentsuggestions {
 
   public final class ContentSuggestionsManager {
