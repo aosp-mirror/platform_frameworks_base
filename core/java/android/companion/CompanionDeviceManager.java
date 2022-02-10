@@ -780,9 +780,9 @@ public final class CompanionDeviceManager {
     }
 
     /**
-     * Notify the system that the given self-managed association has just 'appeared'.
+     * Notify the system that the given self-managed association has just appeared.
      * This causes the system to bind to the companion app to keep it running until the association
-     * is reported as 'disappeared'
+     * is reported as disappeared
      *
      * <p>This API is only available for the companion apps that manage the connectivity by
      * themselves.</p>
@@ -803,7 +803,7 @@ public final class CompanionDeviceManager {
     }
 
     /**
-     * Notify the system that the given self-managed association has just 'disappeared'.
+     * Notify the system that the given self-managed association has just disappeared.
      * This causes the system to unbind to the companion app.
      *
      * <p>This API is only available for the companion apps that manage the connectivity by
