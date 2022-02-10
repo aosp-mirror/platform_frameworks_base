@@ -18,7 +18,6 @@ package com.android.systemui.media.taptotransfer.common
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.graphics.drawable.Icon
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
@@ -29,7 +28,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.any
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
@@ -39,7 +37,6 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@Ignore("b/216286227")
 class MediaTttChipControllerCommonTest : SysuiTestCase() {
     private lateinit var controllerCommon: MediaTttChipControllerCommon<MediaTttChipState>
 
@@ -50,7 +47,7 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        appIconDrawable = Icon.createWithResource(context, R.drawable.ic_cake).loadDrawable(context)
+        appIconDrawable = context.getDrawable(R.drawable.ic_cake)!!
         controllerCommon = TestControllerCommon(context, windowManager)
     }
 
@@ -93,10 +90,10 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
         controllerCommon.displayChip(getState())
         val chipView = getChipView()
 
-        val state = MediaTttChipState(PACKAGE_NAME)
+        val state = TestChipState(PACKAGE_NAME)
         controllerCommon.setIcon(state, chipView)
 
-        assertThat(chipView.getAppIconView().drawable).isEqualTo(state.getAppIcon(context))
+        assertThat(chipView.getAppIconView().drawable).isEqualTo(appIconDrawable)
         assertThat(chipView.getAppIconView().contentDescription)
                 .isEqualTo(state.getAppName(context))
     }
@@ -119,6 +116,10 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     ) {
         override fun updateChipView(chipState: MediaTttChipState, currentChipView: ViewGroup) {
         }
+    }
+
+    inner class TestChipState(appPackageName: String?) : MediaTttChipState(appPackageName) {
+        override fun getAppIcon(context: Context) = appIconDrawable
     }
 }
 
