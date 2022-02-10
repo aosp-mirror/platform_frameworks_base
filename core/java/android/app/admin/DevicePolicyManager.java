@@ -3703,8 +3703,9 @@ public class DevicePolicyManager {
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.INTERACT_ACROSS_USERS})
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @UserHandleAware
+    @TestApi
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void acknowledgeNewUserDisclaimer() {
         if (mService != null) {
             try {
@@ -10330,6 +10331,7 @@ public class DevicePolicyManager {
             throw re.rethrowFromSystemServer();
         }
     }
+
     /**
      * Gets the user a {@link #logoutUser(ComponentName)} call would switch to,
      * or {@code null} if the current user is not in a session (i.e., if it was not
