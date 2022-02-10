@@ -1333,7 +1333,7 @@ public class Environment {
         final Context context = AppGlobals.getInitialApplication();
         final int uid = context.getApplicationInfo().uid;
         // Isolated processes and Instant apps are never allowed to be in scoped storage
-        if (Process.isIsolated(uid)) {
+        if (Process.isIsolated(uid) || Process.isSupplemental(uid)) {
             return false;
         }
 
