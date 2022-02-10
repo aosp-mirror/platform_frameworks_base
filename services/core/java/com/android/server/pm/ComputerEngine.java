@@ -2369,6 +2369,10 @@ public class ComputerEngine implements Computer {
     }
 
     public final boolean isCallerSameApp(String packageName, int uid) {
+        if (Process.isSupplemental(uid)) {
+            return (packageName != null
+                    && packageName.equals(mService.getSupplementalProcessPackageName()));
+        }
         AndroidPackage pkg = mPackages.get(packageName);
         return pkg != null
                 && UserHandle.getAppId(uid) == pkg.getUid();
