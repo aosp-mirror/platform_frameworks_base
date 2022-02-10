@@ -43,6 +43,8 @@ import com.android.internal.policy.TransitionAnimation;
 class LetterboxEduAnimationController {
     private static final String TAG = "LetterboxEduAnimation";
 
+    private static final int ENTER_ANIM_START_DELAY_MILLIS = 500;
+
     private final TransitionAnimation mTransitionAnimation;
     private final String mPackageName;
     @AnyRes
@@ -86,6 +88,9 @@ class LetterboxEduAnimationController {
                 /* endAlpha= */ LetterboxEduDialogLayout.BACKGROUND_DIM_ALPHA,
                 mDialogAnimation.getDuration());
         mBackgroundDimAnimator.addListener(getDimAnimatorListener());
+
+        mDialogAnimation.setStartOffset(ENTER_ANIM_START_DELAY_MILLIS);
+        mBackgroundDimAnimator.setStartDelay(ENTER_ANIM_START_DELAY_MILLIS);
 
         dialogContainer.startAnimation(mDialogAnimation);
         mBackgroundDimAnimator.start();
