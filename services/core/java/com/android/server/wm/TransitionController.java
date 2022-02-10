@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_IS_RECENTS;
@@ -514,8 +513,13 @@ class TransitionController {
 
         // TODO(b/188669821): Remove once legacy recents behavior is moved to shell.
         // Also interpret HOME transient launch as recents
-        if (activity.getActivityType() == ACTIVITY_TYPE_HOME) {
+        if (activity.isActivityTypeHomeOrRecents()) {
             mCollectingTransition.addFlag(TRANSIT_FLAG_IS_RECENTS);
+            // When starting recents animation, we assume the recents activity is behind the app
+            // task and should not affect system bar appearance,
+            // until WMS#setRecentsAppBehindSystemBars be called from launcher when passing
+            // the gesture threshold.
+            activity.getTask().setCanAffectSystemUiFlags(false);
         }
     }
 

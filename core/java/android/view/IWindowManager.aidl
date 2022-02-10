@@ -955,4 +955,10 @@ interface IWindowManager
      * @hide
      */
     Bitmap snapshotTaskForRecents(int taskId);
+
+    /**
+     * Informs the system whether the recents app is currently behind the system bars. If so,
+     * means the recents app can control the SystemUI flags, and vice-versa.
+     */
+    void setRecentsAppBehindSystemBars(boolean behindSystemBars);
 }
