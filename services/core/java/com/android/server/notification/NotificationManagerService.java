@@ -5805,6 +5805,7 @@ public class NotificationManagerService extends SystemService {
                             || channel.isImportanceLockedByCriticalDeviceFunction());
             final StatusBarNotification adjustedSbn = notificationRecord.getSbn();
             userId = adjustedSbn.getUser().getIdentifier();
+            int uid =  adjustedSbn.getUid();
             ArrayMap<String, String> summaries = mAutobundledSummaries.get(userId);
             if (summaries == null) {
                 summaries = new ArrayMap<>();
@@ -5851,7 +5852,7 @@ public class NotificationManagerService extends SystemService {
                         notificationRecord.getIsAppImportanceLocked());
                 summaries.put(pkg, summarySbn.getKey());
             }
-            if (summaryRecord != null && checkDisqualifyingFeatures(userId, MY_UID,
+            if (summaryRecord != null && checkDisqualifyingFeatures(userId, uid,
                     summaryRecord.getSbn().getId(), summaryRecord.getSbn().getTag(), summaryRecord,
                     true)) {
                 return summaryRecord;
@@ -6822,7 +6823,6 @@ public class NotificationManagerService extends SystemService {
             return false;
         }
 
-
         // blocked apps
         boolean isBlocked = !areNotificationsEnabledForPackageInt(pkg, uid);
         synchronized (mNotificationLock) {
@@ -7215,10 +7215,12 @@ public class NotificationManagerService extends SystemService {
                 if (mAssistants.isEnabled()) {
                     mAssistants.onNotificationEnqueuedLocked(r);
                     mHandler.postDelayed(
-                            new PostNotificationRunnable(r.getKey(), enqueueElapsedTimeMs),
+                            new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
+                                    r.getUid(), enqueueElapsedTimeMs),
                             DELAY_FOR_ASSISTANT_TIME);
                 } else {
-                    mHandler.post(new PostNotificationRunnable(r.getKey(), enqueueElapsedTimeMs));
+                    mHandler.post(new PostNotificationRunnable(r.getKey(),
+                            r.getSbn().getPackageName(), r.getUid(), enqueueElapsedTimeMs));
                 }
             }
         }
@@ -7242,16 +7244,19 @@ public class NotificationManagerService extends SystemService {
     protected class PostNotificationRunnable implements Runnable {
         private final String key;
         private final long postElapsedTimeMs;
+        private final String pkg;
+        private final int uid;
 
-        PostNotificationRunnable(String key, @ElapsedRealtimeLong long postElapsedTimeMs) {
+        PostNotificationRunnable(String key, String pkg, int uid,
+                @ElapsedRealtimeLong long postElapsedTimeMs) {
             this.key = key;
+            this.pkg = pkg;
+            this.uid = uid;
             this.postElapsedTimeMs = postElapsedTimeMs;
         }
 
         @Override
         public void run() {
-            String pkg = StatusBarNotification.getPkgFromKey(key);
-            int uid = StatusBarNotification.getUidFromKey(key);
             boolean appBanned = !areNotificationsEnabledForPackageInt(pkg, uid);
             synchronized (mNotificationLock) {
                 try {

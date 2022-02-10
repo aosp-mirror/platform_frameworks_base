@@ -657,7 +657,8 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
         when(mPermissionHelper.hasPermission(anyInt())).thenReturn(false);
 
         NotificationManagerService.PostNotificationRunnable runnable =
-                mService.new PostNotificationRunnable(r.getKey(), SystemClock.elapsedRealtime());
+                mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
+                        r.getUid(), SystemClock.elapsedRealtime());
         runnable.run();
         waitForIdle();
 
@@ -790,7 +791,8 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
 
         mService.addEnqueuedNotification(r);
         NotificationManagerService.PostNotificationRunnable runnable =
-                mService.new PostNotificationRunnable(r.getKey(), SystemClock.elapsedRealtime());
+                mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
+                        r.getUid(), SystemClock.elapsedRealtime());
         runnable.run();
         waitForIdle();
 
@@ -806,7 +808,8 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
         r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         mService.addEnqueuedNotification(r);
-        runnable = mService.new PostNotificationRunnable(r.getKey(), SystemClock.elapsedRealtime());
+        runnable = mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
+                r.getUid(), SystemClock.elapsedRealtime());
         runnable.run();
         waitForIdle();
 
@@ -822,7 +825,8 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
         r = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
         mService.addEnqueuedNotification(r);
-        runnable = mService.new PostNotificationRunnable(r.getKey(), SystemClock.elapsedRealtime());
+        runnable = mService.new PostNotificationRunnable(r.getKey(), r.getSbn().getPackageName(),
+                r.getUid(), SystemClock.elapsedRealtime());
         runnable.run();
         waitForIdle();
 
