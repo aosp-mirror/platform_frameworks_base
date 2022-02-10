@@ -108,6 +108,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
@@ -124,6 +125,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.PermissionChecker;
 import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -389,6 +391,7 @@ public class AlarmManagerServiceTest {
                 .mockStatic(LocalServices.class)
                 .spyStatic(Looper.class)
                 .mockStatic(MetricsHelper.class)
+                .mockStatic(PermissionChecker.class)
                 .mockStatic(PermissionManagerService.class)
                 .mockStatic(ServiceManager.class)
                 .mockStatic(Settings.Global.class)
@@ -444,6 +447,10 @@ public class AlarmManagerServiceTest {
         // Needed to ensure logging doesn't cause tests to fail.
         doReturn(true)
                 .when(() -> DateFormat.is24HourFormat(eq(mMockContext), anyInt()));
+
+        doReturn(PermissionChecker.PERMISSION_HARD_DENIED).when(
+                () -> PermissionChecker.checkPermissionForPreflight(any(),
+                        eq(Manifest.permission.USE_EXACT_ALARM), anyInt(), anyInt(), anyString()));
 
         when(mMockContext.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(mAppOpsManager);
 
@@ -2158,6 +2165,7 @@ public class AlarmManagerServiceTest {
 
     @Test
     public void canScheduleExactAlarmsBinderCall() throws RemoteException {
+        // Policy permission is denied in setUp().
         mockChangeEnabled(AlarmManager.REQUIRE_EXACT_ALARM_PERMISSION, true);
 
         // No permission, no exemption.
@@ -2167,6 +2175,14 @@ public class AlarmManagerServiceTest {
         // No permission, no exemption.
         mockExactAlarmPermissionGrant(true, false, MODE_ERRORED);
         assertFalse(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
+
+        // Policy permission only, no exemption.
+        mockExactAlarmPermissionGrant(true, false, MODE_ERRORED);
+        doReturn(PermissionChecker.PERMISSION_GRANTED).when(
+                () -> PermissionChecker.checkPermissionForPreflight(eq(mMockContext),
+                        eq(Manifest.permission.USE_EXACT_ALARM), anyInt(), eq(TEST_CALLING_UID),
+                        eq(TEST_CALLING_PACKAGE)));
+        assertTrue(mBinder.canScheduleExactAlarms(TEST_CALLING_PACKAGE));
 
         // Permission, no exemption.
         mockExactAlarmPermissionGrant(true, false, MODE_DEFAULT);
@@ -2699,7 +2715,8 @@ public class AlarmManagerServiceTest {
         mService.handleChangesToExactAlarmDenyList(new ArraySet<>(packages), false);
 
         // No permission revoked.
-        verify(mService, never()).removeExactAlarmsOnPermissionRevokedLocked(anyInt(), anyString());
+        verify(mService, never()).removeExactAlarmsOnPermissionRevokedLocked(anyInt(), anyString(),
+                anyBoolean());
 
         // Permission got granted only for (appId1, userId2).
         final ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
@@ -2754,14 +2771,14 @@ public class AlarmManagerServiceTest {
 
         // Permission got revoked only for (appId1, userId2)
         verify(mService, never()).removeExactAlarmsOnPermissionRevokedLocked(
-                eq(UserHandle.getUid(userId1, appId1)), eq(packages[0]));
+                eq(UserHandle.getUid(userId1, appId1)), eq(packages[0]), eq(true));
         verify(mService, never()).removeExactAlarmsOnPermissionRevokedLocked(
-                eq(UserHandle.getUid(userId1, appId2)), eq(packages[1]));
+                eq(UserHandle.getUid(userId1, appId2)), eq(packages[1]), eq(true));
         verify(mService, never()).removeExactAlarmsOnPermissionRevokedLocked(
-                eq(UserHandle.getUid(userId2, appId2)), eq(packages[1]));
+                eq(UserHandle.getUid(userId2, appId2)), eq(packages[1]), eq(true));
 
         verify(mService).removeExactAlarmsOnPermissionRevokedLocked(
-                eq(UserHandle.getUid(userId2, appId1)), eq(packages[0]));
+                eq(UserHandle.getUid(userId2, appId1)), eq(packages[0]), eq(true));
     }
 
     @Test
@@ -2774,7 +2791,7 @@ public class AlarmManagerServiceTest {
         mIAppOpsCallback.opChanged(OP_SCHEDULE_EXACT_ALARM, TEST_CALLING_UID, TEST_CALLING_PACKAGE);
         assertAndHandleMessageSync(REMOVE_EXACT_ALARMS);
         verify(mService).removeExactAlarmsOnPermissionRevokedLocked(TEST_CALLING_UID,
-                TEST_CALLING_PACKAGE);
+                TEST_CALLING_PACKAGE, true);
     }
 
     @Test
@@ -2859,7 +2876,8 @@ public class AlarmManagerServiceTest {
                 null);
         assertEquals(6, mService.mAlarmStore.size());
 
-        mService.removeExactAlarmsOnPermissionRevokedLocked(TEST_CALLING_UID, TEST_CALLING_PACKAGE);
+        mService.removeExactAlarmsOnPermissionRevokedLocked(TEST_CALLING_UID, TEST_CALLING_PACKAGE,
+                true);
 
         final ArrayList<Alarm> remaining = mService.mAlarmStore.asList();
         assertEquals(3, remaining.size());
@@ -3080,7 +3098,7 @@ public class AlarmManagerServiceTest {
                 SCHEDULE_EXACT_ALARM)).thenReturn(exactAlarmRequesters);
 
         final Intent packageAdded = new Intent(Intent.ACTION_PACKAGE_ADDED)
-                .setPackage(TEST_CALLING_PACKAGE)
+                .setData(Uri.fromParts("package", TEST_CALLING_PACKAGE, null))
                 .putExtra(Intent.EXTRA_REPLACING, true);
         mPackageChangesReceiver.onReceive(mMockContext, packageAdded);
 
