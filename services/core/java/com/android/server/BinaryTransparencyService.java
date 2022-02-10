@@ -261,7 +261,6 @@ public class BinaryTransparencyService extends SystemService {
                                 pw.println("");
                             }
                         } catch (PackageManager.NameNotFoundException e) {
-                            pw.println(packageName);
                             pw.println(packageName
                                     + ";ERROR:Unable to find PackageInfo for this module.");
                             if (verbose) {
