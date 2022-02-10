@@ -749,24 +749,29 @@ public class LauncherApps {
     }
 
     /**
-     * Returns a PendingIntent that would start the same activity started from
-     * {@link #startMainActivity(ComponentName, UserHandle, Rect, Bundle)}.
+     * Returns a mutable PendingIntent that would start the same activity started from
+     * {@link #startMainActivity(ComponentName, UserHandle, Rect, Bundle)}.  The caller needs to
+     * take care in ensuring that the mutable intent returned is not passed to untrusted parties.
      *
      * @param component The ComponentName of the activity to launch
      * @param startActivityOptions This parameter is no longer supported
      * @param user The UserHandle of the profile
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS)
     @Nullable
     public PendingIntent getMainActivityLaunchIntent(@NonNull ComponentName component,
             @Nullable Bundle startActivityOptions, @NonNull UserHandle user) {
+        if (mContext.checkSelfPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "Only allowed for recents.");
+        }
         logErrorForInvalidProfileAccess(user);
         if (DEBUG) {
             Log.i(TAG, "GetMainActivityLaunchIntent " + component + " " + user);
         }
         try {
-            // due to b/209607104, startActivityOptions will be ignored
-            return mService.getActivityLaunchIntent(component, null /* opts */, user);
+            return mService.getActivityLaunchIntent(mContext.getPackageName(), component, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

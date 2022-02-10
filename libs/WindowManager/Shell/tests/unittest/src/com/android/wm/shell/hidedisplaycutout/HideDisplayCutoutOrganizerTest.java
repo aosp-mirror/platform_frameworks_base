@@ -45,8 +45,8 @@ import android.window.DisplayAreaOrganizer;
 import android.window.IWindowContainerToken;
 import android.window.WindowContainerToken;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
