@@ -5267,6 +5267,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    /**
+     * Returns {@code true} if the process represented by the pid passed as argument is
+     * instrumented.
+     */
+    boolean isInstrumenting(int pid) {
+        final WindowProcessController process;
+        synchronized (mGlobalLock) {
+            process = mProcessMap.getProcess(pid);
+        }
+        return process != null ? process.isInstrumenting() : false;
+    }
+
     final class H extends Handler {
         static final int REPORT_TIME_TRACKER_MSG = 1;
         static final int UPDATE_PROCESS_ANIMATING_STATE = 2;
