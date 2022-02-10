@@ -265,8 +265,8 @@ public final class VirtualDeviceManager {
          *
          * @param display the display that the events inputted through this device should target
          * @param inputDeviceName the name to call this input device
-         * @param vendorId the vendor id
-         * @param productId the product id
+         * @param vendorId the vendor id, as defined by uinput's uinput_setup struct (PCI vendor id)
+         * @param productId the product id, as defined by uinput's uinput_setup struct
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
@@ -291,8 +291,8 @@ public final class VirtualDeviceManager {
          *
          * @param display the display that the events inputted through this device should target
          * @param inputDeviceName the name to call this input device
-         * @param vendorId the vendor id
-         * @param productId the product id
+         * @param vendorId the vendor id, as defined by uinput's uinput_setup struct (PCI vendor id)
+         * @param productId the product id, as defined by uinput's uinput_setup struct
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
@@ -317,8 +317,8 @@ public final class VirtualDeviceManager {
          *
          * @param display the display that the events inputted through this device should target
          * @param inputDeviceName the name to call this input device
-         * @param vendorId the vendor id
-         * @param productId the product id
+         * @param vendorId the vendor id, as defined by uinput's uinput_setup struct (PCI vendor id)
+         * @param productId the product id, as defined by uinput's uinput_setup struct
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         @NonNull
