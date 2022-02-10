@@ -15,10 +15,7 @@
  */
 package com.android.keyguard;
 
-import android.app.admin.DevicePolicyManager;
-import android.graphics.Bitmap;
 import android.hardware.biometrics.BiometricSourceType;
-import android.media.AudioManager;
 import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 import android.view.WindowManagerPolicyConstants;
@@ -70,13 +67,6 @@ public class KeyguardUpdateMonitorCallback {
     public void onRefreshCarrierInfo() { }
 
     /**
-     * Called when the ringer mode changes.
-     * @param state the current ringer state, as defined in
-     * {@link AudioManager#RINGER_MODE_CHANGED_ACTION}
-     */
-    public void onRingerModeChanged(int state) { }
-
-    /**
      * Called when the phone state changes. String will be one of:
      * {@link TelephonyManager#EXTRA_STATE_IDLE}
      * {@link TelephonyManager@EXTRA_STATE_RINGING}
@@ -124,12 +114,6 @@ public class KeyguardUpdateMonitorCallback {
     public void onDeviceProvisioned() { }
 
     /**
-     * Called when the device policy changes.
-     * See {@link DevicePolicyManager#ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED}
-     */
-    public void onDevicePolicyManagerStateChanged() { }
-
-    /**
      * Called when the user change begins.
      */
     public void onUserSwitching(int userId) { }
@@ -168,14 +152,7 @@ public class KeyguardUpdateMonitorCallback {
     public void onEmergencyCallAction() { }
 
     /**
-     * Called when the transport background changes.
-     * @param bitmap
-     */
-    public void onSetBackground(Bitmap bitmap) {
-    }
-
-    /**
-     * Called when the device has started waking up.
+     * Called when the device has started waking up and after biometric states are updated.
      *
      * @deprecated use {@link com.android.systemui.keyguard.WakefulnessLifecycle}.
      */
@@ -183,7 +160,8 @@ public class KeyguardUpdateMonitorCallback {
     public void onStartedWakingUp() { }
 
     /**
-     * Called when the device has started going to sleep.
+     * Called when the device has started going to sleep and after biometric recognized
+     * states are reset.
      * @param why see {@link #onFinishedGoingToSleep(int)}
      *
      * @deprecated use {@link com.android.systemui.keyguard.WakefulnessLifecycle}.
@@ -303,7 +281,6 @@ public class KeyguardUpdateMonitorCallback {
      * @see KeyguardIndicationController#showTransientIndication(CharSequence)
      */
     public void onTrustAgentErrorMessage(CharSequence message) { }
-
 
     /**
      * Called when a value of logout enabled is change.
