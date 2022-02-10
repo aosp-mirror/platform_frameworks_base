@@ -95,7 +95,7 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                     .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
-                            repetitions = 5)
+                            repetitions = 3)
         }
 
         const val FIND_OBJECT_TIMEOUT = 2000L

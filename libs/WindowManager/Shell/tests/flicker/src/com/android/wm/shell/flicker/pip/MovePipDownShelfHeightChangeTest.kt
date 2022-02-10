@@ -96,7 +96,7 @@ class MovePipDownShelfHeightChangeTest(
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance().getConfigNonRotationTests(
-                    supportedRotations = listOf(Surface.ROTATION_0), repetitions = 5)
+                    supportedRotations = listOf(Surface.ROTATION_0), repetitions = 3)
         }
     }
 }

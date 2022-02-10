@@ -142,7 +142,7 @@ class CloseAppBackButtonTest(testSpec: FlickerTestParameter) : CloseAppTransitio
         @JvmStatic
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(repetitions = 5)
+                .getConfigNonRotationTests(repetitions = 3)
         }
     }
 }
