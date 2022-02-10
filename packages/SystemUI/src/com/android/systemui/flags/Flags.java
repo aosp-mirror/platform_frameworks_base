@@ -143,6 +143,11 @@ public class Flags {
     public static final BooleanFlag MEDIA_SESSION_ACTIONS = new BooleanFlag(901, true);
     public static final BooleanFlag MEDIA_SESSION_LAYOUT = new BooleanFlag(902, false);
 
+    // 1000 - dock
+    public static final BooleanFlag SIMULATE_DOCK_THROUGH_CHARGING =
+            new BooleanFlag(1000, true);
+
+
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================
     // |                                                           |
