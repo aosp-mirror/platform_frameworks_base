@@ -27,10 +27,7 @@ import dagger.Component;
  * Root component for Dagger injection.
  */
 @Singleton
-@Component(modules = {
-        GlobalModule.class,
-        SysUISubcomponentModule.class,
-        WMModule.class})
+@Component(modules = {GlobalModule.class})
 public interface GlobalRootComponent {
 
     /**
@@ -45,12 +42,12 @@ public interface GlobalRootComponent {
     }
 
     /**
-     * Builder for a WMComponent.
+     * Builder for a {@link WMComponent}, which makes it a subcomponent of this class.
      */
     WMComponent.Builder getWMComponentBuilder();
 
     /**
-     * Builder for a SysUIComponent.
+     * Builder for a {@link SysUIComponent}, which makes it a subcomponent of this class.
      */
     SysUIComponent.Builder getSysUIComponent();
 }
