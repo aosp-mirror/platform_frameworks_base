@@ -39963,13 +39963,13 @@ package android.telephony {
   }
 
   public static final class CarrierConfigManager.Ims {
-    field public static final String KEY_CAPABILITY_CALL_COMPOSER_INT_ARRAY = "ims.key_capability_type_call_composer_int_array";
-    field public static final String KEY_CAPABILITY_TYPE_OPTIONS_UCE_INT_ARRAY = "ims.key_capability_type_options_uce_int_array";
-    field public static final String KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY = "ims.key_capability_type_presence_uce_int_array";
-    field public static final String KEY_CAPABILITY_TYPE_SMS_INT_ARRAY = "ims.key_capability_type_sms_int_array";
-    field public static final String KEY_CAPABILITY_TYPE_UT_INT_ARRAY = "ims.key_capability_type_ut_int_array";
-    field public static final String KEY_CAPABILITY_TYPE_VIDEO_INT_ARRAY = "ims.key_capability_type_video_int_array";
-    field public static final String KEY_CAPABILITY_TYPE_VOICE_INT_ARRAY = "ims.key_capability_type_voice_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_CALL_COMPOSER_INT_ARRAY = "ims.capability_type_call_composer_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_OPTIONS_UCE_INT_ARRAY = "ims.capability_type_options_uce_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY = "ims.capability_type_presence_uce_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_SMS_INT_ARRAY = "ims.capability_type_sms_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_UT_INT_ARRAY = "ims.capability_type_ut_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_VIDEO_INT_ARRAY = "ims.capability_type_video_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_VOICE_INT_ARRAY = "ims.capability_type_voice_int_array";
     field public static final String KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL = "ims.enable_presence_capability_exchange_bool";
     field public static final String KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL = "ims.enable_presence_group_subscribe_bool";
     field public static final String KEY_ENABLE_PRESENCE_PUBLISH_BOOL = "ims.enable_presence_publish_bool";
