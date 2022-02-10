@@ -82,14 +82,21 @@ public final class VirtualDeviceManager {
     }
 
     /**
-     * Creates a virtual device.
+     * Creates a virtual device where applications can launch and receive input events injected by
+     * the creator.
+     *
+     * <p>The {@link android.Manifest.permission#CREATE_VIRTUAL_DEVICE} permission is required to
+     * create virtual devices, which is only available to system apps holding specific roles.
      *
      * @param associationId The association ID as returned by {@link AssociationInfo#getId()} from
      *   Companion Device Manager. Virtual devices must have a corresponding association with CDM in
      *   order to be created.
+     * @param params The parameters for creating virtual devices. See {@link VirtualDeviceParams}
+     *   for the available options.
+     * @return The created virtual device.
      */
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
-    @Nullable
+    @NonNull
     public VirtualDevice createVirtualDevice(
             int associationId,
             @NonNull VirtualDeviceParams params) {

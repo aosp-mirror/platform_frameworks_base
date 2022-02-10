@@ -356,7 +356,6 @@ public final class DisplayManager {
      * @see #VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final int VIRTUAL_DISPLAY_FLAG_TRUSTED = 1 << 10;
 
