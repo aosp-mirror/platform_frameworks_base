@@ -28,6 +28,8 @@ import static android.app.UiModeManager.PROJECTION_TYPE_ALL;
 import static android.app.UiModeManager.PROJECTION_TYPE_AUTOMOTIVE;
 import static android.app.UiModeManager.PROJECTION_TYPE_NONE;
 
+import static com.android.server.UiModeManagerService.SUPPORTED_NIGHT_MODE_CUSTOM_TYPES;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.TestCase.assertFalse;
@@ -292,6 +294,24 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
 
         assertThrows(SecurityException.class,
                 () -> mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_BEDTIME));
+    }
+
+    @Test
+    public void setNightModeCustomType_customTypeUnknown_shouldThrow() throws RemoteException {
+        assertThrows(IllegalArgumentException.class,
+                () -> mService.setNightModeCustomType(MODE_NIGHT_CUSTOM_TYPE_UNKNOWN));
+    }
+
+    @Test
+    public void setNightModeCustomType_customTypeUnsupported_shouldThrow() throws RemoteException {
+        assertThrows(IllegalArgumentException.class,
+                () -> {
+                    int maxSupportedCustomType = 0;
+                    for (Integer supportedType : SUPPORTED_NIGHT_MODE_CUSTOM_TYPES) {
+                        maxSupportedCustomType = Math.max(maxSupportedCustomType, supportedType);
+                    }
+                    mService.setNightModeCustomType(maxSupportedCustomType + 1);
+                });
     }
 
     @Test
@@ -775,7 +795,6 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         mScreenOffCallback.onReceive(mContext, new Intent(Intent.ACTION_SCREEN_OFF));
         assertFalse(isNightModeActivated());
     }
-
 
 
     @Test
