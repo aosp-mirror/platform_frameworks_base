@@ -25254,7 +25254,7 @@ package android.net {
     field public static final String CRYPT_AES_CTR = "rfc3686(ctr(aes))";
   }
 
-  public final class IpSecManager {
+  public class IpSecManager {
     method @NonNull public android.net.IpSecManager.SecurityParameterIndex allocateSecurityParameterIndex(@NonNull java.net.InetAddress) throws android.net.IpSecManager.ResourceUnavailableException;
     method @NonNull public android.net.IpSecManager.SecurityParameterIndex allocateSecurityParameterIndex(@NonNull java.net.InetAddress, int) throws android.net.IpSecManager.ResourceUnavailableException, android.net.IpSecManager.SpiUnavailableException;
     method public void applyTransportModeTransform(@NonNull java.net.Socket, int, @NonNull android.net.IpSecTransform) throws java.io.IOException;
