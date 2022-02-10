@@ -22,7 +22,6 @@ import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 import androidx.lifecycle.ViewModelStore;
 
-import com.android.settingslib.dream.DreamBackend;
 import com.android.systemui.dreams.DreamOverlayContainerViewController;
 import com.android.systemui.dreams.complication.Complication;
 import com.android.systemui.dreams.complication.dagger.ComplicationModule;
@@ -69,7 +68,4 @@ public interface DreamOverlayComponent {
 
     /** Builds a {@link DreamOverlayTouchMonitor} */
     DreamOverlayTouchMonitor getDreamOverlayTouchMonitor();
-
-    /** Builds a ${@link DreamBackend} */
-    DreamBackend getDreamBackend();
 }
