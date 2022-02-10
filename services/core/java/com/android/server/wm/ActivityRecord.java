@@ -2504,10 +2504,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void removeStartingWindow() {
+        boolean prevEligibleForLetterboxEducation = isEligibleForLetterboxEducation();
+
         if (transferSplashScreenIfNeeded()) {
             return;
         }
         removeStartingWindowAnimation(true /* prepareAnimation */);
+
+        // TODO(b/215316431): Add tests
+        final Task task = getTask();
+        if (prevEligibleForLetterboxEducation != isEligibleForLetterboxEducation()
+                && task != null) {
+            // Trigger TaskInfoChanged to update the letterbox education.
+            task.dispatchTaskInfoChangedIfNeeded(true /* force */);
+        }
     }
 
     void removeStartingWindowAnimation(boolean prepareAnimation) {
@@ -7701,6 +7711,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *     <li>The activity is eligible for fixed orientation letterbox.
      *     <li>The activity is in fullscreen.
      *     <li>The activity is portrait-only.
+     *     <li>The activity doesn't have a starting window (education should only be displayed
+     *     once the starting window is removed in {@link #removeStartingWindow}).
      * </ul>
      */
     // TODO(b/215316431): Add tests
@@ -7708,7 +7720,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mWmService.mLetterboxConfiguration.getIsEducationEnabled()
                 && mIsEligibleForFixedOrientationLetterbox
                 && getWindowingMode() == WINDOWING_MODE_FULLSCREEN
-                && getRequestedConfigurationOrientation() == ORIENTATION_PORTRAIT;
+                && getRequestedConfigurationOrientation() == ORIENTATION_PORTRAIT
+                && mStartingWindow == null;
     }
 
     /**
