@@ -91,4 +91,10 @@ public abstract class NetworkPolicyManagerInternal {
      */
     public abstract void setMeteredRestrictedPackagesAsync(
             Set<String> packageNames, int userId);
+
+    /** Informs that Low Power Standby has become active */
+    public abstract void setLowPowerStandbyActive(boolean active);
+
+    /** Informs that the Low Power Standby allowlist has changed */
+    public abstract void setLowPowerStandbyAllowlist(int[] uids);
 }
