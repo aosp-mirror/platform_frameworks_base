@@ -699,7 +699,9 @@ public class NetworkStatsManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
     @NonNull public android.net.NetworkStats getMobileUidStats() {
         try {
             return mService.getUidStatsForTransport(TRANSPORT_CELLULAR);
@@ -723,7 +725,9 @@ public class NetworkStatsManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
+    @RequiresPermission(anyOf = {
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
+            android.Manifest.permission.NETWORK_STACK})
     @NonNull public android.net.NetworkStats getWifiUidStats() {
         try {
             return mService.getUidStatsForTransport(TRANSPORT_WIFI);
