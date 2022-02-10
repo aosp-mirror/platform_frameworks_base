@@ -46,9 +46,10 @@ import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.android.internal.notification.SystemNotificationChannels.ABUSIVE_BACKGROUND_APPS;
-import static com.android.server.am.AppBatteryTracker.BATT_DIMEN_BG;
-import static com.android.server.am.AppBatteryTracker.BATT_DIMEN_FG;
-import static com.android.server.am.AppBatteryTracker.BATT_DIMEN_FGS;
+import static com.android.server.am.AppBatteryTracker.BatteryUsage.BATTERY_USAGE_INDEX_BACKGROUND;
+import static com.android.server.am.AppBatteryTracker.BatteryUsage.BATTERY_USAGE_INDEX_FOREGROUND;
+import static com.android.server.am.AppBatteryTracker.BatteryUsage.BATTERY_USAGE_INDEX_FOREGROUND_SERVICE;
+import static com.android.server.am.AppBatteryTracker.BatteryUsage.BATT_DIMENS;
 import static com.android.server.am.AppRestrictionController.STOCK_PM_FLAGS;
 
 import static org.junit.Assert.assertEquals;
@@ -113,6 +114,7 @@ import com.android.server.am.AppBatteryExemptionTracker.AppBatteryExemptionPolic
 import com.android.server.am.AppBatteryExemptionTracker.UidBatteryStates;
 import com.android.server.am.AppBatteryExemptionTracker.UidStateEventWithBattery;
 import com.android.server.am.AppBatteryTracker.AppBatteryPolicy;
+import com.android.server.am.AppBatteryTracker.ImmutableBatteryUsage;
 import com.android.server.am.AppBindServiceEventsTracker.AppBindServiceEventsPolicy;
 import com.android.server.am.AppBroadcastEventsTracker.AppBroadcastEventsPolicy;
 import com.android.server.am.AppFGSTracker.AppFGSPolicy;
@@ -566,7 +568,7 @@ public final class BackgroundRestrictionTest {
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_RESTRICTED_BUCKET,
                     DeviceConfig::getFloat,
-                    AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_THRESHOLD);
+                    AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_RESTRICTED_BUCKET_THRESHOLD);
             bgCurrentDrainRestrictedBucketThreshold.set(restrictBucketThreshold);
 
             bgCurrentDrainBgRestrictedThreshold = new DeviceConfigSession<>(
@@ -1294,7 +1296,7 @@ public final class BackgroundRestrictionTest {
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_RESTRICTED_BUCKET,
                     DeviceConfig::getFloat,
-                    AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_THRESHOLD);
+                    AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_RESTRICTED_BUCKET_THRESHOLD);
             bgCurrentDrainRestrictedBucketThreshold.set(restrictBucketThreshold);
 
             bgCurrentDrainBgRestrictedThreshold = new DeviceConfigSession<>(
@@ -1932,9 +1934,12 @@ public final class BackgroundRestrictionTest {
     private UidBatteryConsumer mockUidBatteryConsumer(int uid, double bg, double fgs, double fg) {
         UidBatteryConsumer uidConsumer = mock(UidBatteryConsumer.class);
         doReturn(uid).when(uidConsumer).getUid();
-        doReturn(bg).when(uidConsumer).getConsumedPower(eq(BATT_DIMEN_BG));
-        doReturn(fgs).when(uidConsumer).getConsumedPower(eq(BATT_DIMEN_FGS));
-        doReturn(fg).when(uidConsumer).getConsumedPower(eq(BATT_DIMEN_FG));
+        doReturn(bg).when(uidConsumer).getConsumedPower(
+                eq(BATT_DIMENS[BATTERY_USAGE_INDEX_BACKGROUND]));
+        doReturn(fgs).when(uidConsumer).getConsumedPower(
+                eq(BATT_DIMENS[BATTERY_USAGE_INDEX_FOREGROUND_SERVICE]));
+        doReturn(fg).when(uidConsumer).getConsumedPower(
+                eq(BATT_DIMENS[BATTERY_USAGE_INDEX_FOREGROUND]));
         return uidConsumer;
     }
 
@@ -2234,8 +2239,8 @@ public final class BackgroundRestrictionTest {
             boolean[] isStart, long[] timestamps, double[] batteryUsage) {
         final LinkedList<UidStateEventWithBattery> result = new LinkedList<>();
         for (int i = 0; i < isStart.length; i++) {
-            result.add(new UidStateEventWithBattery(
-                    isStart[i], timestamps[i], batteryUsage[i], null));
+            result.add(new UidStateEventWithBattery(isStart[i], timestamps[i],
+                        new ImmutableBatteryUsage(0.0d, 0.0d, batteryUsage[i], 0.0d), null));
         }
         return result;
     }
