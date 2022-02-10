@@ -3027,6 +3027,7 @@ package android.content.integrity {
   }
 
   public static final class IntegrityFormula.Application {
+    method @NonNull public static android.content.integrity.IntegrityFormula certificateLineageContains(@NonNull String);
     method @NonNull public static android.content.integrity.IntegrityFormula certificatesContain(@NonNull String);
     method @NonNull public static android.content.integrity.IntegrityFormula isPreInstalled();
     method @NonNull public static android.content.integrity.IntegrityFormula packageNameEquals(@NonNull String);
