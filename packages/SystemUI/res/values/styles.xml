@@ -96,17 +96,12 @@
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
 
-    <style name="TextAppearance.QS.DetailHeader">
-        <item name="android:textSize">@dimen/qs_detail_header_text_size</item>
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
-    </style>
-
     <style name="TextAppearance.QS.DetailItemPrimary">
-        <item name="android:textSize">@dimen/qs_detail_item_primary_text_size</item>
+        <item name="android:textSize">@dimen/qs_tile_text_size</item>
     </style>
 
     <style name="TextAppearance.QS.DetailItemSecondary">
-        <item name="android:textSize">@dimen/qs_detail_item_secondary_text_size</item>
+        <item name="android:textSize">@dimen/qs_tile_text_size</item>
         <item name="android:textColor">?android:attr/colorAccent</item>
     </style>
 
@@ -118,23 +113,6 @@
     <style name="TextAppearance.QS.Warning">
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">?android:attr/colorError</item>
-    </style>
-
-    <style name="TextAppearance.QS.DetailButton">
-        <item name="android:textSize">@dimen/qs_detail_button_text_size</item>
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
-        <item name="android:gravity">center</item>
-    </style>
-
-    <style name="TextAppearance.QS.DetailButton.White">
-        <item name="android:textColor">@color/zen_introduction</item>
-    </style>
-
-    <style name="TextAppearance.QS.DetailEmpty">
-        <item name="android:textSize">@dimen/qs_detail_empty_text_size</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.QS.SegmentedButton">
@@ -167,7 +145,7 @@
     </style>
 
     <style name="TextAppearance.QS.UserSwitcher">
-        <item name="android:textSize">@dimen/qs_detail_item_secondary_text_size</item>
+        <item name="android:textSize">@dimen/qs_tile_text_size</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
@@ -433,9 +411,6 @@
         <item name="numColumns">3</item>
     </style>
 
-    <style name="AutoSizingList">
-        <item name="enableAutoSizing">true</item>
-    </style>
     <style name="Theme.SystemUI.MediaProjectionAlertDialog">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>

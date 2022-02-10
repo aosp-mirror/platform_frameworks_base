@@ -411,10 +411,6 @@ public class InternetTile extends QSTileImpl<SignalState> {
         }
         boolean wifiConnected = cb.mEnabled && (cb.mWifiSignalIconId > 0) && (cb.mSsid != null);
         boolean wifiNotConnected = (cb.mWifiSignalIconId > 0) && (cb.mSsid == null);
-        boolean enabledChanging = state.value != cb.mEnabled;
-        if (enabledChanging) {
-            fireToggleStateChanged(cb.mEnabled);
-        }
         if (state.slash == null) {
             state.slash = new SlashState();
             state.slash.rotation = 6;

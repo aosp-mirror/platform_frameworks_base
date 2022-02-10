@@ -33,7 +33,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.FrameLayout.LayoutParams;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -85,7 +84,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private QSSquishinessController mQSSquishinessController;
     protected QuickStatusBarHeader mHeader;
     protected NonInterceptingScrollView mQSPanelScrollView;
-    private QSDetail mQSDetail;
     private boolean mListening;
     private QSContainerImpl mContainer;
     private int mLayoutDirection;
@@ -96,8 +94,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private boolean mQsDisabled;
 
     private final RemoteInputQuickSettingsDisabler mRemoteInputQuickSettingsDisabler;
-    private final CommandQueue mCommandQueue;
-    private final QSDetailDisplayer mQsDetailDisplayer;
     private final MediaHost mQsMediaHost;
     private final MediaHost mQqsMediaHost;
     private final QSFragmentComponent.Factory mQsComponentFactory;
@@ -126,7 +122,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
      * otherwise.
      */
     private boolean mInSplitShade;
-    private boolean mPulseExpanding;
 
     /**
      * Are we currently transitioning from lockscreen to the full shade?
@@ -150,15 +145,13 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
             QSTileHost qsTileHost,
             StatusBarStateController statusBarStateController, CommandQueue commandQueue,
-            QSDetailDisplayer qsDetailDisplayer, @Named(QS_PANEL) MediaHost qsMediaHost,
+            @Named(QS_PANEL) MediaHost qsMediaHost,
             @Named(QUICK_QS_PANEL) MediaHost qqsMediaHost,
             KeyguardBypassController keyguardBypassController,
             QSFragmentComponent.Factory qsComponentFactory,
             QSFragmentDisableFlagsLogger qsFragmentDisableFlagsLogger,
             FalsingManager falsingManager, DumpManager dumpManager) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
-        mCommandQueue = commandQueue;
-        mQsDetailDisplayer = qsDetailDisplayer;
         mQsMediaHost = qsMediaHost;
         mQqsMediaHost = qqsMediaHost;
         mQsComponentFactory = qsComponentFactory;
@@ -209,19 +202,15 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                         mScrollListener.onQsPanelScrollChanged(scrollY);
                     }
         });
-        mQSDetail = view.findViewById(R.id.qs_detail);
         mHeader = view.findViewById(R.id.header);
         mQSPanelController.setHeaderContainer(view.findViewById(R.id.header_text_container));
         mFooter = qsFragmentComponent.getQSFooter();
-
-        mQsDetailDisplayer.setQsPanelController(mQSPanelController);
 
         mQSContainerImplController = qsFragmentComponent.getQSContainerImplController();
         mQSContainerImplController.init();
         mContainer = mQSContainerImplController.getView();
         mDumpManager.registerDumpable(mContainer.getClass().getName(), mContainer);
 
-        mQSDetail.setQsPanel(mQSPanelController, mHeader, mFooter, mFalsingManager);
         mQSAnimator = qsFragmentComponent.getQSAnimator();
         mQSSquishinessController = qsFragmentComponent.getQSSquishinessController();
 
@@ -237,7 +226,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 mQSPanelController.getTileLayout().restoreInstanceState(savedInstanceState);
             }
         }
-        setHost(mHost);
         mStatusBarStateController.addCallback(this);
         onStateChanged(mStatusBarStateController.getState());
         view.addOnLayoutChangeListener(
@@ -271,7 +259,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             setListening(false);
         }
         mQSCustomizerController.setQs(null);
-        mQsDetailDisplayer.setQsPanelController(null);
         mScrollListener = null;
         mDumpManager.unregisterDumpable(mContainer.getClass().getName());
     }
@@ -352,16 +339,11 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     @Override
     public void setContainerController(QSContainerController controller) {
         mQSCustomizerController.setContainerController(controller);
-        mQSDetail.setContainerController(controller);
     }
 
     @Override
     public boolean isCustomizing() {
         return mQSCustomizerController.isCustomizing();
-    }
-
-    public void setHost(QSTileHost qsh) {
-        mQSDetail.setHost(qsh);
     }
 
     @Override
@@ -392,7 +374,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         final boolean expandVisually = expanded || mStackScrollerOverscrolling
                 || mHeaderAnimating;
         mQSPanelController.setExpanded(expanded);
-        mQSDetail.setExpanded(expanded);
         boolean keyguardShowing = isKeyguardState();
         mHeader.setVisibility((expanded || !keyguardShowing || mHeaderAnimating
                 || mShowCollapsedOnKeyguard)
@@ -444,7 +425,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
     @Override
     public boolean isShowingDetail() {
-        return mQSCustomizerController.isCustomizing() || mQSDetail.isShowingDetail();
+        return mQSCustomizerController.isCustomizing();
     }
 
     @Override
@@ -573,7 +554,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         if (fullyCollapsed) {
             mQSPanelScrollView.setScrollY(0);
         }
-        mQSDetail.setFullyExpanded(fullyExpanded);
 
         if (!fullyExpanded) {
             // Set bounds on the QS panel so it doesn't run over the header when animating.
@@ -732,14 +712,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         if (mQSCustomizerController.isCustomizing()) {
             return getView().getHeight();
         }
-        if (mQSDetail.isClosingDetail()) {
-            LayoutParams layoutParams = (LayoutParams) mQSPanelScrollView.getLayoutParams();
-            int panelHeight = layoutParams.topMargin + layoutParams.bottomMargin +
-                    + mQSPanelScrollView.getMeasuredHeight();
-            return panelHeight + getView().getPaddingBottom();
-        } else {
-            return getView().getMeasuredHeight();
-        }
+        return getView().getMeasuredHeight();
     }
 
     @Override

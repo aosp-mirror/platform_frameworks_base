@@ -35,14 +35,12 @@ import java.util.function.Supplier;
 
 @ProvidesInterface(version = QSTile.VERSION)
 @DependsOn(target = QSIconView.class)
-@DependsOn(target = DetailAdapter.class)
 @DependsOn(target = Callback.class)
 @DependsOn(target = Icon.class)
 @DependsOn(target = State.class)
 public interface QSTile {
-    int VERSION = 2;
+    int VERSION = 3;
 
-    DetailAdapter getDetailAdapter();
     String getTileSpec();
 
     boolean isAvailable();
@@ -117,12 +115,9 @@ public interface QSTile {
     }
 
     @ProvidesInterface(version = Callback.VERSION)
-    public interface Callback {
-        public static final int VERSION = 1;
+    interface Callback {
+        static final int VERSION = 2;
         void onStateChanged(State state);
-        void onShowDetail(boolean show);
-        void onToggleStateChanged(boolean state);
-        void onScanStateChanged(boolean state);
     }
 
     @ProvidesInterface(version = Icon.VERSION)

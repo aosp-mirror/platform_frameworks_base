@@ -53,7 +53,6 @@ import com.android.systemui.qs.tiles.ReduceBrightColorsTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.qs.tiles.ScreenRecordTile;
 import com.android.systemui.qs.tiles.UiModeNightTile;
-import com.android.systemui.qs.tiles.UserTile;
 import com.android.systemui.qs.tiles.WifiTile;
 import com.android.systemui.qs.tiles.WorkModeTile;
 import com.android.systemui.util.leak.GarbageMonitor;
@@ -82,7 +81,6 @@ public class QSFactoryImpl implements QSFactory {
     private final Provider<LocationTile> mLocationTileProvider;
     private final Provider<CastTile> mCastTileProvider;
     private final Provider<HotspotTile> mHotspotTileProvider;
-    private final Provider<UserTile> mUserTileProvider;
     private final Provider<BatterySaverTile> mBatterySaverTileProvider;
     private final Provider<DataSaverTile> mDataSaverTileProvider;
     private final Provider<NightDisplayTile> mNightDisplayTileProvider;
@@ -119,7 +117,6 @@ public class QSFactoryImpl implements QSFactory {
             Provider<LocationTile> locationTileProvider,
             Provider<CastTile> castTileProvider,
             Provider<HotspotTile> hotspotTileProvider,
-            Provider<UserTile> userTileProvider,
             Provider<BatterySaverTile> batterySaverTileProvider,
             Provider<DataSaverTile> dataSaverTileProvider,
             Provider<NightDisplayTile> nightDisplayTileProvider,
@@ -152,7 +149,6 @@ public class QSFactoryImpl implements QSFactory {
         mLocationTileProvider = locationTileProvider;
         mCastTileProvider = castTileProvider;
         mHotspotTileProvider = hotspotTileProvider;
-        mUserTileProvider = userTileProvider;
         mBatterySaverTileProvider = batterySaverTileProvider;
         mDataSaverTileProvider = dataSaverTileProvider;
         mNightDisplayTileProvider = nightDisplayTileProvider;
@@ -212,8 +208,6 @@ public class QSFactoryImpl implements QSFactory {
                 return mCastTileProvider.get();
             case "hotspot":
                 return mHotspotTileProvider.get();
-            case "user":
-                return mUserTileProvider.get();
             case "battery":
                 return mBatterySaverTileProvider.get();
             case "saver":

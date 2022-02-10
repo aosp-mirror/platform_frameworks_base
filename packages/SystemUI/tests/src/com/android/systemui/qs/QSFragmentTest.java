@@ -146,7 +146,6 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 mock(QSLogger.class), mock(UiEventLogger.class), mock(UserTracker.class),
                 mock(SecureSettings.class), mock(CustomTileStatePersister.class),
                 mTileServiceRequestControllerBuilder, mock(TileLifecycleManager.Factory.class));
-        qs.setHost(host);
 
         qs.setListening(true);
         processAllMessages();
@@ -186,7 +185,6 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 mock(QSTileHost.class),
                 mock(StatusBarStateController.class),
                 commandQueue,
-                new QSDetailDisplayer(),
                 mQSMediaHost,
                 mQQSMediaHost,
                 mBypassController,
