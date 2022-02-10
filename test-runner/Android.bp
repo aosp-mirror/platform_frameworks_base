@@ -79,32 +79,6 @@ java_library {
     ],
 }
 
-// Build the repackaged.android.test.runner library
-// ================================================
-java_library_static {
-    name: "repackaged.android.test.runner",
-
-    srcs: [":android-test-runner-sources"],
-    exclude_srcs: [
-        "src/android/test/ActivityUnitTestCase.java",
-        "src/android/test/ApplicationTestCase.java",
-        "src/android/test/IsolatedContext.java",
-        "src/android/test/ProviderTestCase.java",
-        "src/android/test/ProviderTestCase2.java",
-        "src/android/test/RenamingDelegatingContext.java",
-        "src/android/test/ServiceTestCase.java",
-    ],
-
-    sdk_version: "current",
-    libs: [
-        "android.test.base_static",
-    ],
-
-    jarjar_rules: "jarjar-rules.txt",
-    // Pin java_version until jarjar is certified to support later versions. http://b/72703434
-    java_version: "1.8",
-}
-
 // Make the current.txt available for use by the cts/tests/signature tests.
 // ========================================================================
 filegroup {
