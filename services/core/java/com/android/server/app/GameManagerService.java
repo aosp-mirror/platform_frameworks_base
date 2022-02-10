@@ -17,8 +17,8 @@
 package com.android.server.app;
 
 import static android.content.Intent.ACTION_PACKAGE_ADDED;
-import static android.content.Intent.ACTION_PACKAGE_CHANGED;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
+import static android.content.Intent.EXTRA_REPLACING;
 
 import static com.android.internal.R.styleable.GameModeConfig_allowGameAngleDriver;
 import static com.android.internal.R.styleable.GameModeConfig_allowGameDownscaling;
@@ -1467,7 +1467,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
     private void registerPackageReceiver() {
         final IntentFilter packageFilter = new IntentFilter();
         packageFilter.addAction(ACTION_PACKAGE_ADDED);
-        packageFilter.addAction(ACTION_PACKAGE_CHANGED);
         packageFilter.addAction(ACTION_PACKAGE_REMOVED);
         packageFilter.addDataScheme("package");
         final BroadcastReceiver packageReceiver = new BroadcastReceiver() {
@@ -1492,16 +1491,29 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     }
                     switch (intent.getAction()) {
                         case ACTION_PACKAGE_ADDED:
-                        case ACTION_PACKAGE_CHANGED:
                             updateConfigsForUser(userId, packageName);
                             break;
                         case ACTION_PACKAGE_REMOVED:
                             disableCompatScale(packageName);
-                            synchronized (mOverrideConfigLock) {
-                                mOverrideConfigs.remove(packageName);
-                            }
-                            synchronized (mDeviceConfigLock) {
-                                mConfigs.remove(packageName);
+                            // If EXTRA_REPLACING is true, it means there will be an
+                            // ACTION_PACKAGE_ADDED triggered after this because this
+                            // is an updated package that gets installed. Hence, disable
+                            // resolution downscaling effort but avoid removing the server
+                            // or commandline overriding configurations because those will
+                            // not change but the package game mode configurations may change
+                            // which may opt in and/or opt out some game mode configurations.
+                            if (!intent.getBooleanExtra(EXTRA_REPLACING, false)) {
+                                synchronized (mOverrideConfigLock) {
+                                    mOverrideConfigs.remove(packageName);
+                                }
+                                synchronized (mDeviceConfigLock) {
+                                    mConfigs.remove(packageName);
+                                }
+                                synchronized (mLock) {
+                                    if (mSettings.containsKey(userId)) {
+                                        mSettings.get(userId).removeGame(packageName);
+                                    }
+                                }
                             }
                             break;
                         default:
