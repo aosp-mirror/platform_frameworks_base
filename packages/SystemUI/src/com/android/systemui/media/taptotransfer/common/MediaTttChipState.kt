@@ -30,7 +30,7 @@ import android.util.Log
 open class MediaTttChipState(
     internal val appPackageName: String?,
 ) {
-    fun getAppIcon(context: Context): Drawable? {
+    open fun getAppIcon(context: Context): Drawable? {
         appPackageName ?: return null
         return try {
             context.packageManager.getApplicationIcon(appPackageName)
@@ -41,7 +41,7 @@ open class MediaTttChipState(
     }
 
     /** Returns the name of the app playing the media or null if we can't find it. */
-    fun getAppName(context: Context): String? {
+    open fun getAppName(context: Context): String? {
         appPackageName ?: return null
         return try {
             context.packageManager.getApplicationInfo(

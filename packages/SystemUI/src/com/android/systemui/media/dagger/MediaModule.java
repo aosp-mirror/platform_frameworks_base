@@ -18,6 +18,7 @@ package com.android.systemui.media.dagger;
 
 import android.app.Service;
 import android.content.Context;
+import android.os.Handler;
 import android.view.WindowManager;
 
 import com.android.systemui.dagger.SysUISingleton;
@@ -119,12 +120,14 @@ public interface MediaModule {
             MediaTttFlags mediaTttFlags,
             CommandQueue commandQueue,
             Context context,
-            WindowManager windowManager) {
+            WindowManager windowManager,
+            @Main Handler mainHandler) {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
         }
         return Optional.of(
-                new MediaTttChipControllerReceiver(commandQueue, context, windowManager));
+                new MediaTttChipControllerReceiver(
+                        commandQueue, context, windowManager, mainHandler));
     }
 
     /** */

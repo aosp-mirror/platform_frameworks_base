@@ -147,12 +147,16 @@ class MediaTttCommandLineHelper @Inject constructor(
                 CLOSE_TO_SENDER_STATE ->
                     statusBarManager.updateMediaTapToTransferReceiverDisplay(
                         StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
-                        routeInfo
+                        routeInfo,
+                        null,
+                        null
                     )
                 FAR_FROM_SENDER_STATE ->
                     statusBarManager.updateMediaTapToTransferReceiverDisplay(
                         StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER,
-                        routeInfo
+                        routeInfo,
+                        null,
+                        null
                     )
                 else ->
                     pw.println("Invalid command name $commandName")
