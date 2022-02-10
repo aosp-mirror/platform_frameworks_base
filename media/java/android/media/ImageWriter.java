@@ -108,7 +108,6 @@ public class ImageWriter implements AutoCloseable {
     private long mUsage = HardwareBuffer.USAGE_CPU_WRITE_OFTEN;
     private @HardwareBuffer.Format int mHardwareBufferFormat;
     private @NamedDataSpace int mDataSpace;
-    private boolean mUseLegacyImageFormat;
 
     // Field below is used by native code, do not access or modify.
     private int mWriterFormat;
@@ -257,7 +256,6 @@ public class ImageWriter implements AutoCloseable {
                 + ", maxImages: " + maxImages);
         }
 
-        mUseLegacyImageFormat = useLegacyImageFormat;
         // Note that the underlying BufferQueue is working in synchronous mode
         // to avoid dropping any buffers.
         mNativeContext = nativeInit(new WeakReference<>(this), surface, maxImages, width, height,
@@ -334,12 +332,21 @@ public class ImageWriter implements AutoCloseable {
             int hardwareBufferFormat, int dataSpace, int width, int height, long usage) {
         mMaxImages = maxImages;
         mUsage = usage;
-        mHardwareBufferFormat = hardwareBufferFormat;
-        mDataSpace = dataSpace;
-        int publicFormat = PublicFormatUtils.getPublicFormat(hardwareBufferFormat, dataSpace);
+        int imageFormat;
+        // if useSurfaceImageFormatInfo is true, imageFormat will be set to UNKNOWN
+        // and retrieve corresponding hardwareBufferFormat and dataSpace here.
+        if (useSurfaceImageFormatInfo) {
+            imageFormat = ImageFormat.UNKNOWN;
+            mHardwareBufferFormat = PublicFormatUtils.getHalFormat(imageFormat);
+            mDataSpace = PublicFormatUtils.getHalDataspace(imageFormat);
+        } else {
+            imageFormat = PublicFormatUtils.getPublicFormat(hardwareBufferFormat, dataSpace);
+            mHardwareBufferFormat = hardwareBufferFormat;
+            mDataSpace = dataSpace;
+        }
 
         initializeImageWriter(surface, maxImages, useSurfaceImageFormatInfo, false,
-                publicFormat, hardwareBufferFormat, dataSpace, width, height, usage);
+                imageFormat, hardwareBufferFormat, dataSpace, width, height, usage);
     }
 
     /**
@@ -884,16 +891,10 @@ public class ImageWriter implements AutoCloseable {
         private @HardwareBuffer.Format int mHardwareBufferFormat = HardwareBuffer.RGBA_8888;
         private @NamedDataSpace int mDataSpace = DataSpace.DATASPACE_UNKNOWN;
         private boolean mUseSurfaceImageFormatInfo = true;
-        // set this as true temporarily now as a workaround to get correct format
-        // when using surface format by default without overriding the image format
-        // in the builder pattern
-        private boolean mUseLegacyImageFormat = true;
+        private boolean mUseLegacyImageFormat = false;
 
         /**
          * Constructs a new builder for {@link ImageWriter}.
-         *
-         * <p>Uses {@code surface} input parameter to retrieve image format, hal format
-         * and hal dataspace value for default. </p>
          *
          * @param surface The destination Surface this writer produces Image data into.
          *
@@ -901,10 +902,6 @@ public class ImageWriter implements AutoCloseable {
          */
         public Builder(@NonNull Surface surface) {
             mSurface = surface;
-            // retrieve format from surface
-            mImageFormat = SurfaceUtils.getSurfaceFormat(surface);
-            mDataSpace = SurfaceUtils.getSurfaceDataspace(surface);
-            mHardwareBufferFormat = PublicFormatUtils.getHalFormat(mImageFormat);
         }
 
         /**
@@ -1058,11 +1055,6 @@ public class ImageWriter implements AutoCloseable {
             mWidth = writer.mWidth;
             mHeight = writer.mHeight;
             mDataSpace = writer.mDataSpace;
-
-            if (!mOwner.mUseLegacyImageFormat) {
-                mFormat = PublicFormatUtils.getPublicFormat(
-                    mOwner.mHardwareBufferFormat, mDataSpace);
-            }
         }
 
         @Override
@@ -1083,7 +1075,7 @@ public class ImageWriter implements AutoCloseable {
         public int getFormat() {
             throwISEIfImageIsInvalid();
 
-            if (mOwner.mUseLegacyImageFormat && mFormat == -1) {
+            if (mFormat == -1) {
                 mFormat = nativeGetFormat(mDataSpace);
             }
             return mFormat;
