@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTE
 
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.StringRes;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
@@ -57,6 +58,8 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.Display;
+import android.widget.Toast;
 import android.window.DisplayWindowPolicyController;
 
 import com.android.internal.annotations.GuardedBy;
@@ -581,6 +584,26 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             }
         }
         return false;
+    }
+
+    /**
+     * Shows a toast on virtual displays owned by this device which have a given uid running.
+     */
+    void showToastWhereUidIsRunning(int uid, @StringRes int resId, @Toast.Duration int duration) {
+        synchronized (mVirtualDeviceLock) {
+            DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+            final int size = mWindowPolicyControllers.size();
+            for (int i = 0; i < size; i++) {
+                if (mWindowPolicyControllers.valueAt(i).containsUid(uid)) {
+                    int displayId = mWindowPolicyControllers.keyAt(i);
+                    Display display = displayManager.getDisplay(displayId);
+                    if (display != null && display.isValid()) {
+                        Toast.makeText(mContext.createDisplayContext(display), resId,
+                                duration).show();
+                    }
+                }
+            }
+        }
     }
 
     interface OnDeviceCloseListener {
