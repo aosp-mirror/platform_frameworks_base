@@ -160,14 +160,15 @@ public class WindowlessWindowManager implements IWindowSession {
         if (((attrs.inputFeatures &
                 WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL) == 0)) {
             try {
-                if(mRealWm instanceof IWindowSession.Stub) {
+                if (mRealWm instanceof IWindowSession.Stub) {
                     mRealWm.grantInputChannel(displayId,
-                        new SurfaceControl(sc, "WindowlessWindowManager.addToDisplay"),
-                        window, mHostInputToken, attrs.flags, attrs.privateFlags, attrs.type,
-                        mFocusGrantToken, outInputChannel);
+                            new SurfaceControl(sc, "WindowlessWindowManager.addToDisplay"),
+                            window, mHostInputToken, attrs.flags, attrs.privateFlags, attrs.type,
+                            mFocusGrantToken, attrs.getTitle().toString(), outInputChannel);
                 } else {
                     mRealWm.grantInputChannel(displayId, sc, window, mHostInputToken, attrs.flags,
-                        attrs.privateFlags, attrs.type, mFocusGrantToken, outInputChannel);
+                            attrs.privateFlags, attrs.type, mFocusGrantToken,
+                            attrs.getTitle().toString(), outInputChannel);
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to grant input to surface: ", e);
@@ -485,7 +486,7 @@ public class WindowlessWindowManager implements IWindowSession {
     @Override
     public void grantInputChannel(int displayId, SurfaceControl surface, IWindow window,
             IBinder hostInputToken, int flags, int privateFlags, int type, IBinder focusGrantToken,
-            InputChannel outInputChannel) {
+            String inputHandleName, InputChannel outInputChannel) {
     }
 
     @Override
