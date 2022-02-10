@@ -1037,6 +1037,7 @@ public final class UsageEvents implements Parcelable {
         // Data can be too large for a transact. Write the data as a Blob, which will be written to
         // ashmem if too large.
         dest.writeBlob(data.marshall());
+        data.recycle();
     }
 
     public static final @android.annotation.NonNull Creator<UsageEvents> CREATOR = new Creator<UsageEvents>() {
