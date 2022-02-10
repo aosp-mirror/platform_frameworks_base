@@ -192,9 +192,9 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
 
         @Override
-        public void onBackProgressed(int touchX, int touchY, float progress)
+        public void onBackProgressed(BackEvent backEvent)
                 throws RemoteException {
-            Handler.getMain().post(() -> mCallback.onBackProgressed(touchX, touchY, progress));
+            Handler.getMain().post(() -> mCallback.onBackProgressed(backEvent));
         }
 
         @Override
