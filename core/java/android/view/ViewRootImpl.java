@@ -583,6 +583,12 @@ public final class ViewRootImpl implements ViewParent,
     boolean mForceNextWindowRelayout;
     CountDownLatch mWindowDrawCountDown;
 
+    // Whether we have used applyTransactionOnDraw to schedule an RT
+    // frame callback consuming a passed in transaction. In this case
+    // we also need to schedule a commit callback so we can observe
+    // if the draw was skipped, and the BBQ pending transactions.
+    boolean mHasPendingTransactions;
+
     boolean mIsDrawing;
     int mLastSystemUiVisibility;
     int mClientWindowLayoutFlags;
@@ -4184,6 +4190,9 @@ public final class ViewRootImpl implements ViewParent,
                         mRtLastAttemptedDrawFrameNum);
                 tmpTransaction.merge(pendingTransactions);
             }
+            if (!useBlastSync && !reportNextDraw) {
+                tmpTransaction.apply();
+            }
 
             // Post at front of queue so the buffer can be processed immediately and allow RT
             // to continue processing new buffers. If RT tries to process buffers before the sync
@@ -4214,7 +4223,7 @@ public final class ViewRootImpl implements ViewParent,
         final boolean hasBlurUpdates = mBlurRegionAggregator.hasUpdates();
         final boolean needsCallbackForBlur = hasBlurUpdates || mBlurRegionAggregator.hasRegions();
 
-        if (!useBlastSync && !needsCallbackForBlur && !reportNextDraw) {
+        if (!useBlastSync && !needsCallbackForBlur && !reportNextDraw && !mHasPendingTransactions) {
             return null;
         }
 
@@ -4226,11 +4235,14 @@ public final class ViewRootImpl implements ViewParent,
                     + " nextDrawUseBlastSync=" + useBlastSync
                     + " reportNextDraw=" + reportNextDraw
                     + " hasBlurUpdates=" + hasBlurUpdates
-                    + " hasBlastSyncConsumer=" + (blastSyncConsumer != null));
+                    + " hasBlastSyncConsumer=" + (blastSyncConsumer != null)
+                    + " mHasPendingTransactions=" + mHasPendingTransactions);
         }
 
         final BackgroundBlurDrawable.BlurRegion[] blurRegionsForFrame =
                 needsCallbackForBlur ?  mBlurRegionAggregator.getBlurRegionsCopyForRT() : null;
+        final boolean hasPendingTransactions = mHasPendingTransactions;
+        mHasPendingTransactions = false;
 
         // The callback will run on the render thread.
         return new FrameDrawingCallback() {
@@ -4257,7 +4269,7 @@ public final class ViewRootImpl implements ViewParent,
                     return null;
                 }
 
-                if (!useBlastSync && !reportNextDraw) {
+                if (!useBlastSync && !reportNextDraw && !hasPendingTransactions) {
                     return null;
                 }
 
@@ -10700,7 +10712,10 @@ public final class ViewRootImpl implements ViewParent,
         if (mRemoved || !isHardwareEnabled()) {
             t.apply();
         } else {
-            registerRtFrameCallback(frame -> mergeWithNextTransaction(t, frame));
+            mHasPendingTransactions = true;
+            registerRtFrameCallback(frame -> {
+                mergeWithNextTransaction(t, frame);
+            });
         }
         return true;
     }
