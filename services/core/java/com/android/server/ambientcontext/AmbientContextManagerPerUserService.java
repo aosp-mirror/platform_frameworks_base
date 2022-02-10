@@ -29,6 +29,7 @@ import android.app.PendingIntent;
 import android.app.ambientcontext.AmbientContextEvent;
 import android.app.ambientcontext.AmbientContextEventRequest;
 import android.app.ambientcontext.AmbientContextManager;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -39,7 +40,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.service.ambientcontext.AmbientContextDetectionResult;
 import android.service.ambientcontext.AmbientContextDetectionServiceStatus;
 import android.text.TextUtils;
@@ -289,7 +289,7 @@ final class AmbientContextManagerPerUserService extends
             return;
         }
 
-        if ((recentTasks != null) || recentTasks.getList().isEmpty()) {
+        if ((recentTasks == null) || recentTasks.getList().isEmpty()) {
             Slog.e(TAG, "Recent task list is empty!");
             return;
         }
@@ -297,40 +297,48 @@ final class AmbientContextManagerPerUserService extends
         task = recentTasks.getList().get(0);
         if (!callingPackage.equals(task.topActivityInfo.packageName)) {
             Slog.e(TAG, "Recent task package name: " + task.topActivityInfo.packageName
-                    + " doesn't match with camera client package name: " + callingPackage);
+                    + " doesn't match with client package name: " + callingPackage);
             return;
         }
 
         // Start activity as the same task from the callingPackage
-        Intent intent = new Intent();
         ComponentName consentComponent = getConsentComponent();
-        if (consentComponent != null) {
-            Slog.e(TAG, "Starting consent activity for " + callingPackage);
-            Context context = getContext();
-            String packageNameExtraKey = Settings.Secure.getStringForUser(
-                    context.getContentResolver(),
-                    Settings.Secure.AMBIENT_CONTEXT_PACKAGE_NAME_EXTRA_KEY,
-                    userId);
-            String eventArrayExtraKey = Settings.Secure.getStringForUser(
-                    context.getContentResolver(),
-                    Settings.Secure.AMBIENT_CONTEXT_EVENT_ARRAY_EXTRA_KEY,
-                    userId);
+        if (consentComponent == null) {
+            Slog.e(TAG, "Consent component not found!");
+            return;
+        }
 
-            // Create consent activity intent with the calling package name and requested events.
+        Slog.d(TAG, "Starting consent activity for " + callingPackage);
+        Intent intent = new Intent();
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            Context context = getContext();
+            String packageNameExtraKey = context.getResources().getString(
+                    com.android.internal.R.string.config_ambientContextPackageNameExtraKey);
+            String eventArrayExtraKey = context.getResources().getString(
+                    com.android.internal.R.string.config_ambientContextEventArrayExtraKey);
+
+            // Create consent activity intent with the calling package name and requested events
             intent.setComponent(consentComponent);
             if (packageNameExtraKey != null) {
                 intent.putExtra(packageNameExtraKey, callingPackage);
+            } else {
+                Slog.d(TAG, "Missing packageNameExtraKey for consent activity");
             }
             if (eventArrayExtraKey != null) {
                 intent.putExtra(eventArrayExtraKey, eventTypes);
+            } else {
+                Slog.d(TAG, "Missing eventArrayExtraKey for consent activity");
             }
 
             // Set parent to the calling app's task
             ActivityOptions options = ActivityOptions.makeBasic();
             options.setLaunchTaskId(task.taskId);
-            context.startActivity(intent, options.toBundle());
-        } else {
-            Slog.e(TAG, "Consent component not found!");
+            context.startActivityAsUser(intent, options.toBundle(), context.getUser());
+        } catch (ActivityNotFoundException e) {
+            Slog.e(TAG, "unable to start consent activity");
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
     }
 
@@ -339,13 +347,12 @@ final class AmbientContextManagerPerUserService extends
      */
     private ComponentName getConsentComponent() {
         Context context = getContext();
-        String consentComponent = Settings.Secure.getStringForUser(
-                context.getContentResolver(),
-                Settings.Secure.AMBIENT_CONTEXT_CONSENT_COMPONENT,
-                getUserId());
+        String consentComponent = context.getResources().getString(
+                    com.android.internal.R.string.config_defaultAmbientContextConsentComponent);
         if (TextUtils.isEmpty(consentComponent)) {
             return null;
         }
+        Slog.i(TAG, "Consent component name: " + consentComponent);
         return ComponentName.unflattenFromString(consentComponent);
     }
 
