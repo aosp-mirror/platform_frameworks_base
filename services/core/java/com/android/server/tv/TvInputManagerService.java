@@ -2543,6 +2543,7 @@ public final class TvInputManagerService extends SystemService {
 
         @Override
         public int getClientPriority(int useCase, String sessionId) {
+            ensureTunerResourceAccessPermission();
             final int callingPid = Binder.getCallingPid();
             final long identity = Binder.clearCallingIdentity();
             try {
