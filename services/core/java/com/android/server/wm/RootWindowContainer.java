@@ -637,36 +637,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return null;
     }
 
-    /**
-     * Set new display override config. If called for the default display, global configuration
-     * will also be updated.
-     */
-    void setDisplayOverrideConfigurationIfNeeded(Configuration newConfiguration,
-            @NonNull DisplayContent displayContent) {
-
-        final Configuration currentConfig = displayContent.getRequestedOverrideConfiguration();
-        final boolean configChanged = currentConfig.diff(newConfiguration) != 0;
-        if (!configChanged) {
-            return;
-        }
-
-        displayContent.onRequestedOverrideConfigurationChanged(newConfiguration);
-
-        if (displayContent.getDisplayId() == DEFAULT_DISPLAY) {
-            // Override configuration of the default display duplicates global config. In this case
-            // we also want to update the global config.
-            setGlobalConfigurationIfNeeded(newConfiguration);
-        }
-    }
-
-    private void setGlobalConfigurationIfNeeded(Configuration newConfiguration) {
-        final boolean configChanged = getConfiguration().diff(newConfiguration) != 0;
-        if (!configChanged) {
-            return;
-        }
-        onConfigurationChanged(newConfiguration);
-    }
-
     @Override
     void dispatchConfigurationToChild(DisplayContent child, Configuration config) {
         if (child.isDefaultDisplay) {

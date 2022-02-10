@@ -2893,16 +2893,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void setNewDisplayOverrideConfiguration(Configuration overrideConfig,
-            @NonNull DisplayContent dc) {
-        if (dc.mWaitingForConfig) {
-            dc.mWaitingForConfig = false;
-            mLastFinishedFreezeSource = "new-config";
-        }
-
-        mRoot.setDisplayOverrideConfigurationIfNeeded(overrideConfig, dc);
-    }
-
     // TODO(multi-display): remove when no default display use case.
     void prepareAppTransitionNone() {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "prepareAppTransition()")) {

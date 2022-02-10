@@ -5761,7 +5761,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mCurrentOverrideConfigurationChanges = currOverrideConfig.diff(overrideConfiguration);
         super.onRequestedOverrideConfigurationChanged(overrideConfiguration);
         mCurrentOverrideConfigurationChanges = 0;
-        mWmService.setNewDisplayOverrideConfiguration(currOverrideConfig, this);
+        if (mWaitingForConfig) {
+            mWaitingForConfig = false;
+            mWmService.mLastFinishedFreezeSource = "new-config";
+        }
         mAtmService.addWindowLayoutReasons(
                 ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED);
     }
