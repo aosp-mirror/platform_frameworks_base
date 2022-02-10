@@ -28,5 +28,6 @@
     <!-- Will display the bouncer on one side of the display, and the current user icon and
          user switcher on the other side -->
     <bool name="config_enableBouncerUserSwitcher">false</bool>
-
+    <!-- Time to be considered a consecutive fingerprint failure in ms -->
+    <integer name="fp_consecutive_failure_time_ms">3500</integer>
 </resources>
