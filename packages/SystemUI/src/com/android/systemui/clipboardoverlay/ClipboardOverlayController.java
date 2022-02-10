@@ -252,7 +252,8 @@ public class ClipboardOverlayController {
             resetActionChips();
             for (RemoteAction action : actions) {
                 Intent targetIntent = action.getActionIntent().getIntent();
-                if (!TextUtils.equals(source, targetIntent.getComponent().getPackageName())) {
+                ComponentName component = targetIntent.getComponent();
+                if (component != null && !TextUtils.equals(source, component.getPackageName())) {
                     OverlayActionChip chip = constructActionChip(action);
                     mActionContainer.addView(chip);
                     mActionChips.add(chip);
