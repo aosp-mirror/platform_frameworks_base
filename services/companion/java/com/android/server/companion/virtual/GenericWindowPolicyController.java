@@ -47,9 +47,17 @@ import java.util.function.Consumer;
 /**
  * A controller to control the policies of the windows that can be displayed on the virtual display.
  */
-class GenericWindowPolicyController extends DisplayWindowPolicyController {
+public class GenericWindowPolicyController extends DisplayWindowPolicyController {
 
-    private static final String TAG = "VirtualDeviceManager";
+    private static final String TAG = "GenericWindowPolicyController";
+
+    /** Interface to listen running applications change on virtual display. */
+    public interface RunningAppsChangedListener {
+        /**
+         * Notifies the running applications change.
+         */
+        void onRunningAppsChanged(ArraySet<Integer> runningUids);
+    }
 
     private static final ComponentName BLOCKED_APP_STREAMING_COMPONENT =
             new ComponentName("android", BlockedAppStreamingActivity.class.getName());
@@ -74,6 +82,9 @@ class GenericWindowPolicyController extends DisplayWindowPolicyController {
     @Nullable private final ActivityListener mActivityListener;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
 
+    @Nullable
+    private RunningAppsChangedListener mRunningAppsChangedListener;
+
     /**
      * Creates a window policy controller that is generic to the different use cases of virtual
      * device.
@@ -84,7 +95,7 @@ class GenericWindowPolicyController extends DisplayWindowPolicyController {
      * @param activityListener Activity listener to listen for activity changes. The display ID
      *   is not populated in this callback and is always {@link Display#INVALID_DISPLAY}.
      */
-    GenericWindowPolicyController(int windowFlags, int systemWindowFlags,
+    public GenericWindowPolicyController(int windowFlags, int systemWindowFlags,
             @NonNull ArraySet<UserHandle> allowedUsers,
             @Nullable Set<ComponentName> allowedActivities,
             @Nullable Set<ComponentName> blockedActivities,
@@ -96,6 +107,11 @@ class GenericWindowPolicyController extends DisplayWindowPolicyController {
         mActivityBlockedCallback = activityBlockedCallback;
         setInterestedWindowFlags(windowFlags, systemWindowFlags);
         mActivityListener = activityListener;
+    }
+
+    /** Sets listener for running applications change. */
+    public void setRunningAppsChangedListener(@Nullable RunningAppsChangedListener listener) {
+        mRunningAppsChangedListener = listener;
     }
 
     @Override
@@ -138,6 +154,9 @@ class GenericWindowPolicyController extends DisplayWindowPolicyController {
         if (mActivityListener != null && mRunningUids.isEmpty()) {
             // Post callback on the main thread so it doesn't block activity launching
             mHandler.post(() -> mActivityListener.onDisplayEmpty(Display.INVALID_DISPLAY));
+        }
+        if (mRunningAppsChangedListener != null) {
+            mRunningAppsChangedListener.onRunningAppsChanged(runningUids);
         }
     }
 
