@@ -53,7 +53,8 @@ object Utils {
 
     @JvmStatic
     fun dpToPixels(context: Context, dp: Float): Float {
-        return dp * (context.resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
+        val density = context.resources.displayMetrics.densityDpi.toFloat()
+        return dp * (density / DisplayMetrics.DENSITY_DEFAULT)
     }
 
     @JvmStatic
@@ -86,8 +87,12 @@ object Utils {
     fun getCredentialType(utils: LockPatternUtils, userId: Int): Int =
         when (utils.getKeyguardStoredPasswordQuality(userId)) {
             PASSWORD_QUALITY_SOMETHING -> CREDENTIAL_PATTERN
-            PASSWORD_QUALITY_NUMERIC, PASSWORD_QUALITY_NUMERIC_COMPLEX -> CREDENTIAL_PIN
-            PASSWORD_QUALITY_ALPHABETIC, PASSWORD_QUALITY_ALPHANUMERIC, PASSWORD_QUALITY_COMPLEX, PASSWORD_QUALITY_MANAGED -> CREDENTIAL_PASSWORD
+            PASSWORD_QUALITY_NUMERIC,
+            PASSWORD_QUALITY_NUMERIC_COMPLEX -> CREDENTIAL_PIN
+            PASSWORD_QUALITY_ALPHABETIC,
+            PASSWORD_QUALITY_ALPHANUMERIC,
+            PASSWORD_QUALITY_COMPLEX,
+            PASSWORD_QUALITY_MANAGED -> CREDENTIAL_PASSWORD
             else -> CREDENTIAL_PASSWORD
         }
 

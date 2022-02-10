@@ -113,7 +113,7 @@ public interface AuthDialog {
     /**
      * Biometric authenticated. May be pending user confirmation, or completed.
      */
-    void onAuthenticationSucceeded();
+    void onAuthenticationSucceeded(@Modality int modality);
 
     /**
      * Authentication failed (reject, timeout). Dialog stays showing.
@@ -135,6 +135,9 @@ public interface AuthDialog {
      * @param error message
      */
     void onError(@Modality int modality, String error);
+
+    /** UDFPS pointer down event. */
+    void onPointerDown();
 
     /**
      * Save the current state.

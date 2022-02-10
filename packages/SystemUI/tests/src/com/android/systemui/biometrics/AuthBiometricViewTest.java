@@ -20,6 +20,8 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
+import static com.android.systemui.biometrics.AuthBiometricView.Callback.ACTION_AUTHENTICATED;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -68,10 +70,10 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         initDialog(false /* allowDeviceCredential */, mCallback);
 
         // The onAuthenticated runnable is posted when authentication succeeds.
-        mBiometricView.onAuthenticationSucceeded();
+        mBiometricView.onAuthenticationSucceeded(TYPE_FINGERPRINT);
         waitForIdleSync();
         assertEquals(AuthBiometricView.STATE_AUTHENTICATED, mBiometricView.mState);
-        verify(mCallback).onAction(AuthBiometricView.Callback.ACTION_AUTHENTICATED);
+        verify(mCallback).onAction(ACTION_AUTHENTICATED);
     }
 
     @Test
@@ -79,19 +81,28 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         initDialog(false /* allowDeviceCredential */, mCallback);
 
         mBiometricView.setRequireConfirmation(true);
-        mBiometricView.onAuthenticationSucceeded();
+        mBiometricView.onAuthenticationSucceeded(TYPE_FINGERPRINT);
         waitForIdleSync();
-        assertEquals(AuthBiometricView.STATE_PENDING_CONFIRMATION, mBiometricView.mState);
-        verify(mCallback, never()).onAction(anyInt());
 
-        assertEquals(View.GONE, mBiometricView.mNegativeButton.getVisibility());
-        assertEquals(View.VISIBLE, mBiometricView.mCancelButton.getVisibility());
-        assertTrue(mBiometricView.mCancelButton.isEnabled());
+        // TODO: this should be tested in the subclasses
+        if (mBiometricView.supportsRequireConfirmation()) {
+            assertEquals(AuthBiometricView.STATE_PENDING_CONFIRMATION, mBiometricView.mState);
 
-        assertTrue(mBiometricView.mConfirmButton.isEnabled());
-        assertEquals(mContext.getText(R.string.biometric_dialog_tap_confirm),
-                mBiometricView.mIndicatorView.getText());
-        assertEquals(View.VISIBLE, mBiometricView.mIndicatorView.getVisibility());
+            verify(mCallback, never()).onAction(anyInt());
+
+            assertEquals(View.GONE, mBiometricView.mNegativeButton.getVisibility());
+            assertEquals(View.VISIBLE, mBiometricView.mCancelButton.getVisibility());
+            assertTrue(mBiometricView.mCancelButton.isEnabled());
+
+            assertTrue(mBiometricView.mConfirmButton.isEnabled());
+            assertEquals(mContext.getText(R.string.biometric_dialog_tap_confirm),
+                    mBiometricView.mIndicatorView.getText());
+            assertEquals(View.VISIBLE, mBiometricView.mIndicatorView.getVisibility());
+        } else {
+            assertEquals(AuthBiometricView.STATE_AUTHENTICATED, mBiometricView.mState);
+            verify(mCallback).onAction(eq(ACTION_AUTHENTICATED));
+        }
+
     }
 
     @Test
@@ -101,7 +112,7 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         mBiometricView.mConfirmButton.performClick();
         waitForIdleSync();
 
-        verify(mCallback).onAction(AuthBiometricView.Callback.ACTION_AUTHENTICATED);
+        verify(mCallback).onAction(ACTION_AUTHENTICATED);
         assertEquals(AuthBiometricView.STATE_AUTHENTICATED, mBiometricView.mState);
     }
 
@@ -121,7 +132,7 @@ public class AuthBiometricViewTest extends SysuiTestCase {
         initDialog(false /* allowDeviceCredential */, mCallback);
 
         mBiometricView.setRequireConfirmation(true);
-        mBiometricView.onAuthenticationSucceeded();
+        mBiometricView.onAuthenticationSucceeded(TYPE_FINGERPRINT);
 
         assertEquals(View.GONE, mBiometricView.mNegativeButton.getVisibility());
 
@@ -170,7 +181,7 @@ public class AuthBiometricViewTest extends SysuiTestCase {
 
         View view = new View(mContext);
         mBiometricView.setBackgroundView(view);
-        mBiometricView.onAuthenticationSucceeded();
+        mBiometricView.onAuthenticationSucceeded(TYPE_FINGERPRINT);
         view.performClick();
         verify(mCallback, never()).onAction(eq(AuthBiometricView.Callback.ACTION_USER_CANCELED));
     }

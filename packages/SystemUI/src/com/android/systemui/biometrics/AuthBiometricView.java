@@ -25,6 +25,7 @@ import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringRes;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricPrompt;
@@ -51,6 +52,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Contains the Biometric views (title, subtitle, icon, buttons, etc.) and its controllers.
@@ -132,6 +134,7 @@ public class AuthBiometricView extends LinearLayout {
     protected ImageView mIconView;
     protected TextView mIndicatorView;
 
+    @VisibleForTesting @NonNull AuthIconController mIconController;
     @VisibleForTesting int mAnimationDurationShort = AuthDialog.ANIMATE_SMALL_TO_MEDIUM_DURATION_MS;
     @VisibleForTesting int mAnimationDurationLong = AuthDialog.ANIMATE_MEDIUM_TO_LARGE_DURATION_MS;
     @VisibleForTesting int mAnimationDurationHideDialog = BiometricPrompt.HIDE_DIALOG_DELAY;
@@ -224,6 +227,40 @@ public class AuthBiometricView extends LinearLayout {
         return false;
     }
 
+    /** The string to show when the user must tap to confirm via the button or icon. */
+    @StringRes
+    protected int getConfirmationPrompt() {
+        return R.string.biometric_dialog_tap_confirm;
+    }
+
+    /** True if require confirmation will be honored when set via the API. */
+    protected boolean supportsRequireConfirmation() {
+        return false;
+    }
+
+    /** True if confirmation will be required even if it was not supported/requested. */
+    protected boolean forceRequireConfirmation(@Modality int modality) {
+        return false;
+    }
+
+    /** Ignore all events from this (secondary) modality except successful authentication. */
+    protected boolean ignoreUnsuccessfulEventsFrom(@Modality int modality) {
+        return false;
+    }
+
+    /**
+     * Create the controller for managing the icons transitions during the prompt.
+     *
+     * Subclass should override.
+     */
+    @NonNull
+    protected AuthIconController createIconController() {
+        return new AuthIconController(mContext, mIconView) {
+            @Override
+            public void updateIcon(int lastState, int newState) {}
+        };
+    }
+
     void setPanelController(AuthPanelController panelController) {
         mPanelController = panelController;
     }
@@ -249,11 +286,11 @@ public class AuthBiometricView extends LinearLayout {
     }
 
     void setRequireConfirmation(boolean requireConfirmation) {
-        mRequireConfirmation = requireConfirmation;
+        mRequireConfirmation = requireConfirmation && supportsRequireConfirmation();
     }
 
     @VisibleForTesting
-    void updateSize(@AuthDialog.DialogSize int newSize) {
+    final void updateSize(@AuthDialog.DialogSize int newSize) {
         Log.v(TAG, "Current size: " + mSize + " New size: " + newSize);
         if (newSize == AuthDialog.SIZE_SMALL) {
             mTitleView.setVisibility(View.GONE);
@@ -413,6 +450,8 @@ public class AuthBiometricView extends LinearLayout {
     public void updateState(@BiometricState int newState) {
         Log.v(TAG, "newState: " + newState);
 
+        mIconController.updateState(mState, newState);
+
         switch (newState) {
             case STATE_AUTHENTICATING_ANIMATING_IN:
             case STATE_AUTHENTICATING:
@@ -442,10 +481,11 @@ public class AuthBiometricView extends LinearLayout {
                 mNegativeButton.setVisibility(View.GONE);
                 mCancelButton.setVisibility(View.VISIBLE);
                 mUseCredentialButton.setVisibility(View.GONE);
-                mConfirmButton.setEnabled(true);
-                mConfirmButton.setVisibility(View.VISIBLE);
+                // forced confirmations (multi-sensor) use the icon view as the confirm button
+                mConfirmButton.setEnabled(mRequireConfirmation);
+                mConfirmButton.setVisibility(mRequireConfirmation ? View.VISIBLE : View.GONE);
                 mIndicatorView.setTextColor(mTextColorHint);
-                mIndicatorView.setText(R.string.biometric_dialog_tap_confirm);
+                mIndicatorView.setText(getConfirmationPrompt());
                 mIndicatorView.setVisibility(View.VISIBLE);
                 break;
 
@@ -468,9 +508,9 @@ public class AuthBiometricView extends LinearLayout {
         updateState(STATE_AUTHENTICATING);
     }
 
-    public void onAuthenticationSucceeded() {
+    public void onAuthenticationSucceeded(@Modality int modality) {
         removePendingAnimations();
-        if (mRequireConfirmation) {
+        if (mRequireConfirmation || forceRequireConfirmation(modality)) {
             updateState(STATE_PENDING_CONFIRMATION);
         } else {
             updateState(STATE_AUTHENTICATED);
@@ -485,6 +525,10 @@ public class AuthBiometricView extends LinearLayout {
      */
     public void onAuthenticationFailed(
             @Modality int modality, @Nullable String failureReason) {
+        if (ignoreUnsuccessfulEventsFrom(modality)) {
+            return;
+        }
+
         showTemporaryMessage(failureReason, mResetErrorRunnable);
         updateState(STATE_ERROR);
     }
@@ -496,11 +540,27 @@ public class AuthBiometricView extends LinearLayout {
      * @param error message
      */
     public void onError(@Modality int modality, String error) {
+        if (ignoreUnsuccessfulEventsFrom(modality)) {
+            return;
+        }
+
         showTemporaryMessage(error, mResetErrorRunnable);
         updateState(STATE_ERROR);
 
         mHandler.postDelayed(() -> mCallback.onAction(Callback.ACTION_ERROR),
                 mAnimationDurationHideDialog);
+    }
+
+    /**
+     * Fingerprint pointer down event. This does nothing by default and will not be called if the
+     * device does not have an appropriate sensor (UDFPS), but it may be used as an alternative
+     * to the "retry" button when fingerprint is used with other modalities.
+     *
+     * @param failedModalities the set of modalities that have failed
+     * @return true if a retry was initiated as a result of this event
+     */
+    public boolean onPointerDown(Set<Integer> failedModalities) {
+        return false;
     }
 
     /**
@@ -510,6 +570,9 @@ public class AuthBiometricView extends LinearLayout {
      * @param help message
      */
     public void onHelp(@Modality int modality, String help) {
+        if (ignoreUnsuccessfulEventsFrom(modality)) {
+            return;
+        }
         if (mSize != AuthDialog.SIZE_MEDIUM) {
             Log.w(TAG, "Help received in size: " + mSize);
             return;
@@ -617,6 +680,15 @@ public class AuthBiometricView extends LinearLayout {
             mTryAgainButton.setVisibility(View.GONE);
             Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
         });
+
+        mIconController = createIconController();
+        if (mIconController.getActsAsConfirmButton()) {
+            mIconView.setOnClickListener((view) -> {
+                if (mState == STATE_PENDING_CONFIRMATION) {
+                    updateState(STATE_AUTHENTICATED);
+                }
+            });
+        }
     }
 
     /**
@@ -685,6 +757,8 @@ public class AuthBiometricView extends LinearLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+
+        mIconController.setDeactivated(true);
 
         // Empty the handler, otherwise things like ACTION_AUTHENTICATED may be duplicated once
         // the new dialog is restored.

@@ -16,6 +16,7 @@
 
 package com.android.systemui.biometrics;
 
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE;
 
@@ -352,8 +353,8 @@ public class AuthControllerTest extends SysuiTestCase {
     @Test
     public void testOnAuthenticationSucceededInvoked_whenSystemRequested() {
         showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
-        mAuthController.onBiometricAuthenticated();
-        verify(mDialog1).onAuthenticationSucceeded();
+        mAuthController.onBiometricAuthenticated(TYPE_FINGERPRINT);
+        verify(mDialog1).onAuthenticationSucceeded(eq(TYPE_FINGERPRINT));
     }
 
     @Test

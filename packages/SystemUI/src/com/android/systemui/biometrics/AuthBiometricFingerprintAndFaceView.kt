@@ -17,8 +17,12 @@
 package com.android.systemui.biometrics
 
 import android.content.Context
+import android.hardware.biometrics.BiometricAuthenticator.Modality
+import android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE
 import android.util.AttributeSet
+import com.android.systemui.R
 
+/** Face/Fingerprint combined view for BiometricPrompt. */
 class AuthBiometricFingerprintAndFaceView(
     context: Context,
     attrs: AttributeSet?
@@ -26,4 +30,14 @@ class AuthBiometricFingerprintAndFaceView(
 
     constructor (context: Context) : this(context, null)
 
+    override fun getConfirmationPrompt() = R.string.biometric_dialog_tap_confirm_with_face
+
+    override fun forceRequireConfirmation(@Modality modality: Int) = modality == TYPE_FACE
+
+    override fun ignoreUnsuccessfulEventsFrom(@Modality modality: Int) = modality == TYPE_FACE
+
+    override fun onPointerDown(failedModalities: Set<Int>) = failedModalities.contains(TYPE_FACE)
+
+    override fun createIconController(): AuthIconController =
+        AuthBiometricFingerprintAndFaceIconController(mContext, mIconView)
 }

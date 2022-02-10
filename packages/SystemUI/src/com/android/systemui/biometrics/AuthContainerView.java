@@ -60,7 +60,9 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Top level container/controller for the BiometricPrompt UI.
@@ -106,6 +108,7 @@ public class AuthContainerView extends LinearLayout
     private final View mPanelView;
     private final float mTranslationY;
     @ContainerState private int mContainerState = STATE_UNKNOWN;
+    private final Set<Integer> mFailedModalities = new HashSet<Integer>();
 
     // Non-null only if the dialog is in the act of dismissing and has not sent the reason yet.
     @Nullable @AuthDialogCallback.DismissedReason private Integer mPendingCallbackReason;
@@ -217,6 +220,7 @@ public class AuthContainerView extends LinearLayout
                     animateAway(AuthDialogCallback.DISMISSED_BUTTON_NEGATIVE);
                     break;
                 case AuthBiometricView.Callback.ACTION_BUTTON_TRY_AGAIN:
+                    mFailedModalities.clear();
                     mConfig.mCallback.onTryAgainPressed();
                     break;
                 case AuthBiometricView.Callback.ACTION_ERROR:
@@ -546,12 +550,13 @@ public class AuthContainerView extends LinearLayout
     }
 
     @Override
-    public void onAuthenticationSucceeded() {
-        mBiometricView.onAuthenticationSucceeded();
+    public void onAuthenticationSucceeded(@Modality int modality) {
+        mBiometricView.onAuthenticationSucceeded(modality);
     }
 
     @Override
     public void onAuthenticationFailed(@Modality int modality, String failureReason) {
+        mFailedModalities.add(modality);
         mBiometricView.onAuthenticationFailed(modality, failureReason);
     }
 
@@ -563,6 +568,14 @@ public class AuthContainerView extends LinearLayout
     @Override
     public void onError(@Modality int modality, String error) {
         mBiometricView.onError(modality, error);
+    }
+
+    @Override
+    public void onPointerDown() {
+        if (mBiometricView.onPointerDown(mFailedModalities)) {
+            Log.d(TAG, "retrying failed modalities (pointer down)");
+            mBiometricCallback.onAction(AuthBiometricView.Callback.ACTION_BUTTON_TRY_AGAIN);
+        }
     }
 
     @Override
