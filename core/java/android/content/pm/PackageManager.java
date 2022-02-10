@@ -4342,6 +4342,21 @@ public abstract class PackageManager {
             = "android.content.pm.extra.REQUEST_PERMISSIONS_RESULTS";
 
     /**
+     * Indicates that the package requesting permissions has legacy access for some permissions,
+     * or had it, but it was recently revoked. These request dialogs may show different text,
+     * indicating that the app is requesting continued access to a permission. Will be cleared
+     * from any permission request intent, if set by a non-system server app.
+     * <p>
+     * <strong>Type:</strong> String[]
+     * </p>
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_REQUEST_PERMISSIONS_LEGACY_ACCESS_PERMISSION_NAMES
+            = "android.content.pm.extra.REQUEST_PERMISSIONS_LEGACY_ACCESS_PERMISSION_NAMES";
+
+    /**
      * String extra for {@link PackageInstallObserver} in the 'extras' Bundle in case of
      * {@link #INSTALL_FAILED_DUPLICATE_PERMISSION}.  This extra names the package which provides
      * the existing definition for the permission.

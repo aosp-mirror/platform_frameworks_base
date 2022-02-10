@@ -16,6 +16,12 @@
 
 package android.permission;
 
+import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.os.Build.VERSION_CODES.S;
 
 import android.Manifest;
@@ -105,6 +111,16 @@ public final class PermissionManager {
      * The app should receive a {@code SecurityException}, or an error through a relevant callback.
      */
     public static final int PERMISSION_HARD_DENIED = 2;
+
+    /**
+     * The set of flags that indicate that a permission state has been explicitly set
+     *
+     * @hide
+     */
+    public static final int EXPLICIT_SET_FLAGS = FLAG_PERMISSION_USER_SET
+            | FLAG_PERMISSION_USER_FIXED | FLAG_PERMISSION_POLICY_FIXED
+            | FLAG_PERMISSION_SYSTEM_FIXED | FLAG_PERMISSION_GRANTED_BY_DEFAULT
+            | FLAG_PERMISSION_GRANTED_BY_ROLE;
 
     /**
      * Activity action: Launch UI to review permission decisions.
@@ -1447,6 +1463,7 @@ public final class PermissionManager {
      * @hide
      */
     @TestApi
+    @RequiresPermission(Manifest.permission.REVOKE_POST_NOTIFICATIONS_WITHOUT_KILL)
     public void revokePostNotificationPermissionWithoutKillForTest(@NonNull String packageName,
             int userId) {
         try {
