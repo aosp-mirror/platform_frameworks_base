@@ -10855,4 +10855,8 @@ public final class ViewRootImpl implements ViewParent,
         mLastGivenInsets.reset();
         requestLayout();
     }
+
+    IWindowSession getWindowSession() {
+        return mWindowSession;
+    }
 }
