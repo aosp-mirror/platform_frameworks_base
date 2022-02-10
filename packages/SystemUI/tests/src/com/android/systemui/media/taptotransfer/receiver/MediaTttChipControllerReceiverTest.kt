@@ -17,7 +17,6 @@
 package com.android.systemui.media.taptotransfer.receiver
 
 import android.app.StatusBarManager
-import android.graphics.drawable.Icon
 import android.media.MediaRoute2Info
 import android.view.View
 import android.view.ViewGroup
@@ -98,13 +97,13 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
 
     @Test
     fun displayChip_chipContainsIcon() {
-        val drawable = Icon.createWithResource(context, R.drawable.ic_cake).loadDrawable(context)
-        val contentDescription = "Test description"
+        val state = ChipStateReceiver(PACKAGE_NAME)
 
-        controllerReceiver.displayChip(ChipStateReceiver(drawable, contentDescription))
+        controllerReceiver.displayChip(state)
 
-        assertThat(getChipView().getAppIconView().drawable).isEqualTo(drawable)
-        assertThat(getChipView().getAppIconView().contentDescription).isEqualTo(contentDescription)
+        assertThat(getChipView().getAppIconView().drawable).isEqualTo(state.getAppIcon(context))
+        assertThat(getChipView().getAppIconView().contentDescription)
+                .isEqualTo(state.getAppName(context))
     }
 
     private fun getChipView(): ViewGroup {
@@ -117,6 +116,9 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
 }
 
 private const val ROUTE_NAME = "Test name"
+private const val PACKAGE_NAME = "com.android.systemui"
+
 private val routeInfo = MediaRoute2Info.Builder("id", ROUTE_NAME)
     .addFeature("feature")
+    .setPackageName(PACKAGE_NAME)
     .build()

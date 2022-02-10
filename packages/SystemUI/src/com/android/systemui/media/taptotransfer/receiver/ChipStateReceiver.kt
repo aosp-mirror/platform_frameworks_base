@@ -16,7 +16,6 @@
 
 package com.android.systemui.media.taptotransfer.receiver
 
-import android.graphics.drawable.Drawable
 import com.android.systemui.media.taptotransfer.common.MediaTttChipState
 
 /**
@@ -24,6 +23,5 @@ import com.android.systemui.media.taptotransfer.common.MediaTttChipState
  * the receiver device.
  */
 class ChipStateReceiver(
-    appIconDrawable: Drawable,
-    appIconContentDescription: String
-) : MediaTttChipState(appIconDrawable, appIconContentDescription)
+    appPackageName: String?,
+) : MediaTttChipState(appPackageName)
