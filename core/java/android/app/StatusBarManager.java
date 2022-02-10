@@ -755,7 +755,7 @@ public class StatusBarManager {
     public void setNavBarModeOverride(@NavBarModeOverride int navBarModeOverride) {
         if (navBarModeOverride != NAV_BAR_MODE_OVERRIDE_NONE
                 && navBarModeOverride != NAV_BAR_MODE_OVERRIDE_KIDS) {
-            throw new IllegalArgumentException(
+            throw new UnsupportedOperationException(
                     "Supplied navBarModeOverride not supported: " + navBarModeOverride);
         }
 
