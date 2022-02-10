@@ -264,6 +264,44 @@ public final class OutputConfiguration implements Parcelable {
     public @interface StreamUseCase {};
 
     /**
+     * Automatic mirroring based on camera facing
+     *
+     * <p>This is the default mirroring mode for the camera device. With this mode,
+     * the camera output is mirrored horizontally for front-facing cameras. There is
+     * no mirroring for rear-facing and external cameras.</p>
+     */
+    public static final int MIRROR_MODE_AUTO = 0;
+
+    /**
+     * No mirror transform is applied
+     *
+     * <p>No mirroring is applied to the camera output regardless of the camera facing.</p>
+     */
+    public static final int MIRROR_MODE_NONE = 1;
+
+    /**
+     * Camera output is mirrored horizontally
+     *
+     * <p>The camera output is mirrored horizontally, the same behavior as in AUTO mode for
+     * front facing camera.</p>
+     */
+    public static final int MIRROR_MODE_H = 2;
+
+    /**
+     * Camera output is mirrored vertically
+     */
+    public static final int MIRROR_MODE_V = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"MIRROR_MODE_"}, value =
+        {MIRROR_MODE_AUTO,
+          MIRROR_MODE_NONE,
+          MIRROR_MODE_H,
+          MIRROR_MODE_V})
+    public @interface MirrorMode {};
+
+    /**
      * Create a new {@link OutputConfiguration} instance with a {@link Surface}.
      *
      * @param surface
@@ -461,6 +499,7 @@ public final class OutputConfiguration implements Parcelable {
         mDynamicRangeProfile = DynamicRangeProfiles.STANDARD;
         mStreamUseCase = CameraMetadata.SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT;
         mTimestampBase = TIMESTAMP_BASE_DEFAULT;
+        mMirrorMode = MIRROR_MODE_AUTO;
     }
 
     /**
@@ -945,6 +984,42 @@ public final class OutputConfiguration implements Parcelable {
     }
 
     /**
+     * Set the mirroring mode for this output target
+     *
+     * <p>If this function is not called, the mirroring mode for this output is
+     * {@link #MIRROR_MODE_AUTO}, with which the camera API will mirror the output images
+     * horizontally for front facing camera.</p>
+     *
+     * <p>For efficiency, the mirror effect is applied as a transform flag, so it is only effective
+     * in some outputs. It works automatically for SurfaceView and TextureView outputs. For manual
+     * use of SurfaceTexture, it is reflected in the value of
+     * {@link android.graphics.SurfaceTexture#getTransformMatrix}. For other end points, such as
+     * ImageReader, MediaRecorder, or MediaCodec, the mirror mode has no effect. If mirroring is
+     * needed for such outputs, the application needs to mirror the image buffers itself before
+     * passing them onward.</p>
+     */
+    public void setMirrorMode(@MirrorMode int mirrorMode) {
+        // Verify that the value is in range
+        if (mirrorMode < MIRROR_MODE_AUTO ||
+                mirrorMode > MIRROR_MODE_V) {
+            throw new IllegalArgumentException("Not a valid mirror mode " + mirrorMode);
+        }
+        mMirrorMode = mirrorMode;
+    }
+
+    /**
+     * Get the current mirroring mode
+     *
+     * <p>If no {@link #setMirrorMode} is called first, this function returns
+     * {@link #MIRROR_MODE_AUTO}.</p>
+     *
+     * @return The currently set mirroring mode
+     */
+    public @MirrorMode int getMirrorMode() {
+        return mMirrorMode;
+    }
+
+    /**
      * Create a new {@link OutputConfiguration} instance with another {@link OutputConfiguration}
      * instance.
      *
@@ -973,6 +1048,7 @@ public final class OutputConfiguration implements Parcelable {
         this.mDynamicRangeProfile = other.mDynamicRangeProfile;
         this.mStreamUseCase = other.mStreamUseCase;
         this.mTimestampBase = other.mTimestampBase;
+        this.mMirrorMode = other.mMirrorMode;
     }
 
     /**
@@ -998,6 +1074,8 @@ public final class OutputConfiguration implements Parcelable {
         DynamicRangeProfiles.checkProfileValue(dynamicRangeProfile);
 
         int timestampBase = source.readInt();
+        int mirrorMode = source.readInt();
+
         mSurfaceGroupId = surfaceSetId;
         mRotation = rotation;
         mSurfaces = surfaces;
@@ -1023,6 +1101,7 @@ public final class OutputConfiguration implements Parcelable {
         mDynamicRangeProfile = dynamicRangeProfile;
         mStreamUseCase = streamUseCase;
         mTimestampBase = timestampBase;
+        mMirrorMode = mirrorMode;
     }
 
     /**
@@ -1141,6 +1220,7 @@ public final class OutputConfiguration implements Parcelable {
         dest.writeInt(mDynamicRangeProfile);
         dest.writeInt(mStreamUseCase);
         dest.writeInt(mTimestampBase);
+        dest.writeInt(mMirrorMode);
     }
 
     /**
@@ -1173,7 +1253,8 @@ public final class OutputConfiguration implements Parcelable {
                     !Objects.equals(mPhysicalCameraId, other.mPhysicalCameraId) ||
                     mIsMultiResolution != other.mIsMultiResolution ||
                     mStreamUseCase != other.mStreamUseCase ||
-                    mTimestampBase != other.mTimestampBase)
+                    mTimestampBase != other.mTimestampBase ||
+                    mMirrorMode != other.mMirrorMode)
                 return false;
             if (mSensorPixelModesUsed.size() != other.mSensorPixelModesUsed.size()) {
                 return false;
@@ -1211,7 +1292,7 @@ public final class OutputConfiguration implements Parcelable {
                     mSurfaceGroupId, mSurfaceType, mIsShared ? 1 : 0,
                     mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
                     mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode(),
-                    mDynamicRangeProfile, mStreamUseCase, mTimestampBase);
+                    mDynamicRangeProfile, mStreamUseCase, mTimestampBase, mMirrorMode);
         }
 
         return HashCodeHelpers.hashCode(
@@ -1220,7 +1301,8 @@ public final class OutputConfiguration implements Parcelable {
                 mConfiguredDataspace, mSurfaceGroupId, mIsShared ? 1 : 0,
                 mPhysicalCameraId == null ? 0 : mPhysicalCameraId.hashCode(),
                 mIsMultiResolution ? 1 : 0, mSensorPixelModesUsed.hashCode(),
-                mDynamicRangeProfile, mStreamUseCase, mTimestampBase);
+                mDynamicRangeProfile, mStreamUseCase, mTimestampBase,
+                mMirrorMode);
     }
 
     private static final String TAG = "OutputConfiguration";
@@ -1258,4 +1340,6 @@ public final class OutputConfiguration implements Parcelable {
     private int mStreamUseCase;
     // Timestamp base
     private int mTimestampBase;
+    // Mirroring mode
+    private int mMirrorMode;
 }
