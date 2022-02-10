@@ -1856,16 +1856,15 @@ public class AudioSystem
 
     /**
      * @hide
-     * Communicate UID of active assistant to audio policy service.
+     * Communicate UIDs of the active assistant to audio policy service.
      */
-    public static native int setAssistantUid(int uid);
+    public static native int setActiveAssistantServicesUids(int[] uids);
 
     /**
-     * Communicate UID of the current {@link android.service.voice.HotwordDetectionService} to audio
-     * policy service.
      * @hide
+     * Communicate UIDs of assistant to audio policy service.
      */
-    public static native int setHotwordDetectionServiceUid(int uid);
+    public static native int setAssistantServicesUids(int[] uids);
 
     /**
      * @hide
