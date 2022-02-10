@@ -3068,6 +3068,7 @@ package android.accessibilityservice {
     method @Nullable public final android.accessibilityservice.InputMethod getInputMethod();
     method @NonNull public final android.accessibilityservice.AccessibilityService.MagnificationController getMagnificationController();
     method public android.view.accessibility.AccessibilityNodeInfo getRootInActiveWindow();
+    method @Nullable public android.view.accessibility.AccessibilityNodeInfo getRootInActiveWindow(int);
     method public final android.accessibilityservice.AccessibilityServiceInfo getServiceInfo();
     method @NonNull public final android.accessibilityservice.AccessibilityService.SoftKeyboardController getSoftKeyboardController();
     method @NonNull public final java.util.List<android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction> getSystemActions();
@@ -51620,6 +51621,7 @@ package android.view.accessibility {
     method @Deprecated public void getBoundsInParent(android.graphics.Rect);
     method public void getBoundsInScreen(android.graphics.Rect);
     method public android.view.accessibility.AccessibilityNodeInfo getChild(int);
+    method @Nullable public android.view.accessibility.AccessibilityNodeInfo getChild(int, int);
     method public int getChildCount();
     method public CharSequence getClassName();
     method public android.view.accessibility.AccessibilityNodeInfo.CollectionInfo getCollectionInfo();
@@ -51639,6 +51641,7 @@ package android.view.accessibility {
     method public CharSequence getPackageName();
     method @Nullable public CharSequence getPaneTitle();
     method public android.view.accessibility.AccessibilityNodeInfo getParent();
+    method @Nullable public android.view.accessibility.AccessibilityNodeInfo getParent(int);
     method public android.view.accessibility.AccessibilityNodeInfo.RangeInfo getRangeInfo();
     method @Nullable public CharSequence getStateDescription();
     method public CharSequence getText();
@@ -51789,8 +51792,15 @@ package android.view.accessibility {
     field public static final int EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_MAX_LENGTH = 20000; // 0x4e20
     field public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX = "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX";
     field public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY = "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_KEY";
+    field public static final int FLAG_PREFETCH_ANCESTORS = 1; // 0x1
+    field public static final int FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST = 16; // 0x10
+    field public static final int FLAG_PREFETCH_DESCENDANTS_DEPTH_FIRST = 8; // 0x8
+    field public static final int FLAG_PREFETCH_DESCENDANTS_HYBRID = 4; // 0x4
+    field public static final int FLAG_PREFETCH_SIBLINGS = 2; // 0x2
+    field public static final int FLAG_PREFETCH_UNINTERRUPTIBLE = 32; // 0x20
     field public static final int FOCUS_ACCESSIBILITY = 2; // 0x2
     field public static final int FOCUS_INPUT = 1; // 0x1
+    field public static final int MAX_NUMBER_OF_PREFETCHED_NODES = 50; // 0x32
     field public static final int MOVEMENT_GRANULARITY_CHARACTER = 1; // 0x1
     field public static final int MOVEMENT_GRANULARITY_LINE = 4; // 0x4
     field public static final int MOVEMENT_GRANULARITY_PAGE = 16; // 0x10
@@ -51955,6 +51965,7 @@ package android.view.accessibility {
     method public int getScrollX();
     method public int getScrollY();
     method @Nullable public android.view.accessibility.AccessibilityNodeInfo getSource();
+    method @Nullable public android.view.accessibility.AccessibilityNodeInfo getSource(int);
     method @NonNull public java.util.List<java.lang.CharSequence> getText();
     method public int getToIndex();
     method public int getWindowId();
@@ -52012,6 +52023,7 @@ package android.view.accessibility {
     method public android.view.accessibility.AccessibilityWindowInfo getParent();
     method public void getRegionInScreen(@NonNull android.graphics.Region);
     method public android.view.accessibility.AccessibilityNodeInfo getRoot();
+    method @Nullable public android.view.accessibility.AccessibilityNodeInfo getRoot(int);
     method @Nullable public CharSequence getTitle();
     method public int getType();
     method public boolean isAccessibilityFocused();
