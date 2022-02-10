@@ -24,6 +24,7 @@ import android.os.IBinder
 import android.os.RemoteException
 import android.util.ArrayMap
 import android.util.Log
+import android.util.RotationUtils
 import android.view.IRemoteAnimationFinishedCallback
 import android.view.IRemoteAnimationRunner
 import android.view.RemoteAnimationAdapter
@@ -345,39 +346,33 @@ class RemoteTransitionAdapter {
          * Sets up this rotator.
          *
          * @param rotateDelta is the forward rotation change (the rotation the display is making).
-         * @param displayW (and H) Is the size of the rotating display.
+         * @param parentW (and H) Is the size of the rotating parent.
          */
         fun setup(
             t: SurfaceControl.Transaction,
             parent: SurfaceControl,
             rotateDelta: Int,
-            displayW: Float,
-            displayH: Float
+            parentW: Float,
+            parentH: Float
         ) {
-            var rotateDelta = rotateDelta
             if (rotateDelta == 0) return
-            // We want to counter-rotate, so subtract from 4
-            rotateDelta = 4 - (rotateDelta + 4) % 4
-            surface = SurfaceControl.Builder()
+            val surface = SurfaceControl.Builder()
                     .setName("Transition Unrotate")
                     .setContainerLayer()
                     .setParent(parent)
                     .build()
-            // column-major
-            when (rotateDelta) {
-                1 -> {
-                    t.setMatrix(surface, 0f, 1f, -1f, 0f)
-                    t.setPosition(surface!!, displayW, 0f)
-                }
-                2 -> {
-                    t.setMatrix(surface, -1f, 0f, 0f, -1f)
-                    t.setPosition(surface!!, displayW, displayH)
-                }
-                3 -> {
-                    t.setMatrix(surface, 0f, -1f, 1f, 0f)
-                    t.setPosition(surface!!, 0f, displayH)
-                }
-            }
+            // Rotate forward to match the new rotation (rotateDelta is the forward rotation the
+            // parent already took). Child surfaces will be in the old rotation relative to the new
+            // parent rotation, so we need to forward-rotate the child surfaces to match.
+            RotationUtils.rotateSurface(t, surface, rotateDelta)
+            val tmpPt = Point(0, 0)
+            // parentW/H are the size in the END rotation, the rotation utilities expect the
+            // starting size. So swap them if necessary
+            val flipped = rotateDelta % 2 != 0
+            val pw = if (flipped) parentH else parentW
+            val ph = if (flipped) parentW else parentH
+            RotationUtils.rotatePoint(tmpPt, rotateDelta, pw.toInt(), ph.toInt())
+            t.setPosition(surface, tmpPt.x.toFloat(), tmpPt.y.toFloat())
             t.show(surface)
         }
 

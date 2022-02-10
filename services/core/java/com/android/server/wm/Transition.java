@@ -209,6 +209,12 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         return mTransientLaunches != null && mTransientLaunches.contains(activity);
     }
 
+    void setSeamlessRotation(@NonNull WindowContainer wc) {
+        final ChangeInfo info = mChanges.get(wc);
+        if (info == null) return;
+        info.mFlags = info.mFlags | ChangeInfo.FLAG_SEAMLESS_ROTATION;
+    }
+
     @VisibleForTesting
     int getSyncId() {
         return mSyncId;
@@ -1122,6 +1128,15 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             // hardware-screen-level surfaces.
             return asDC.getWindowingLayer();
         }
+        if (!wc.mTransitionController.useShellTransitionsRotation()) {
+            final WindowToken asToken = wc.asWindowToken();
+            if (asToken != null) {
+                // WindowTokens can have a fixed-rotation applied to them. In the current
+                // implementation this fact is hidden from the player, so we must create a leash.
+                final SurfaceControl leash = asToken.getOrCreateFixedRotationLeash();
+                if (leash != null) return leash;
+            }
+        }
         return wc.getSurfaceControl();
     }
 
@@ -1224,6 +1239,8 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 final ActivityRecord topMostActivity = task.getTopMostActivity();
                 change.setAllowEnterPip(topMostActivity != null
                         && topMostActivity.checkEnterPictureInPictureAppOpsState());
+            } else if ((info.mFlags & ChangeInfo.FLAG_SEAMLESS_ROTATION) != 0) {
+                change.setRotationAnimation(ROTATION_ANIMATION_SEAMLESS);
             }
             final ActivityRecord activityRecord = target.asActivityRecord();
             if (activityRecord != null) {
@@ -1337,6 +1354,21 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
 
     @VisibleForTesting
     static class ChangeInfo {
+        private static final int FLAG_NONE = 0;
+
+        /**
+         * When set, the associated WindowContainer has been explicitly requested to be a
+         * seamless rotation. This is currently only used by DisplayContent during fixed-rotation.
+         */
+        private static final int FLAG_SEAMLESS_ROTATION = 1;
+
+        @IntDef(prefix = { "FLAG_" }, value = {
+                FLAG_NONE,
+                FLAG_SEAMLESS_ROTATION
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        @interface Flag {}
+
         // Usually "post" change state.
         WindowContainer mParent;
 
@@ -1349,6 +1381,9 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         boolean mShowWallpaper;
         int mRotation = ROTATION_UNDEFINED;
         @ActivityInfo.Config int mKnownConfigChanges;
+
+        /** These are just extra info. They aren't used for change-detection. */
+        @Flag int mFlags = FLAG_NONE;
 
         ChangeInfo(@NonNull WindowContainer origState) {
             mVisible = origState.isVisibleRequested();

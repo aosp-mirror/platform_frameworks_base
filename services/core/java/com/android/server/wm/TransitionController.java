@@ -34,6 +34,7 @@ import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -57,6 +58,10 @@ import java.util.function.LongConsumer;
  */
 class TransitionController {
     private static final String TAG = "TransitionController";
+
+    /** Whether to use shell-transitions rotation instead of fixed-rotation. */
+    private static final boolean SHELL_TRANSITIONS_ROTATION =
+            SystemProperties.getBoolean("persist.debug.shell_transit_rotate", false);
 
     /** The same as legacy APP_TRANSITION_TIMEOUT_MS. */
     private static final int DEFAULT_TIMEOUT_MS = 5000;
@@ -203,6 +208,11 @@ class TransitionController {
         return mTransitionPlayer != null;
     }
 
+    /** @return {@code true} if using shell-transitions rotation instead of fixed-rotation. */
+    boolean useShellTransitionsRotation() {
+        return isShellTransitionsEnabled() && SHELL_TRANSITIONS_ROTATION;
+    }
+
     /**
      * @return {@code true} if transition is actively collecting changes. This is {@code false}
      * once a transition is playing
@@ -258,6 +268,21 @@ class TransitionController {
             if (mPlayingTransitions.get(i).isTransientLaunch(ar)) return true;
         }
         return false;
+    }
+
+    /**
+     * Temporary work-around to deal with integration of legacy fixed-rotation. Returns whether
+     * the activity was visible before the collecting transition.
+     * TODO: at-least replace the polling mechanism.
+     */
+    boolean wasVisibleAtStart(@NonNull ActivityRecord ar) {
+        if (mCollectingTransition == null) return ar.isVisible();
+        final Transition.ChangeInfo ci = mCollectingTransition.mChanges.get(ar);
+        if (ci == null) {
+            // not part of transition, so use current state.
+            return ar.isVisible();
+        }
+        return ci.mVisible;
     }
 
     @WindowManager.TransitionType
@@ -482,6 +507,11 @@ class TransitionController {
         if (activity.getActivityType() == ACTIVITY_TYPE_HOME) {
             mCollectingTransition.addFlag(TRANSIT_FLAG_IS_RECENTS);
         }
+    }
+
+    void setSeamlessRotation(@NonNull WindowContainer wc) {
+        if (mCollectingTransition == null) return;
+        mCollectingTransition.setSeamlessRotation(wc);
     }
 
     void legacyDetachNavigationBarFromApp(@NonNull IBinder token) {
