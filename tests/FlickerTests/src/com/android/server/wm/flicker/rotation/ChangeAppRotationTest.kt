@@ -96,24 +96,6 @@ class ChangeAppRotationTest(
             }
         }
 
-    @FlakyTest
-    @Test
-    fun runPresubmitAssertion() {
-        flickerRule.checkPresubmitAssertions()
-    }
-
-    @FlakyTest
-    @Test
-    fun runPostsubmitAssertion() {
-        flickerRule.checkPostsubmitAssertions()
-    }
-
-    @FlakyTest
-    @Test
-    fun runFlakyAssertion() {
-        flickerRule.checkFlakyAssertions()
-    }
-
     /**
      * Windows maybe recreated when rotated. Checks that the focus does not change or if it does,
      * focus returns to [testApp]
