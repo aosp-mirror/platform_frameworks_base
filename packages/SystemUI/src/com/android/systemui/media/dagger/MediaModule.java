@@ -16,12 +16,7 @@
 
 package com.android.systemui.media.dagger;
 
-import android.content.Context;
-import android.os.Handler;
-import android.view.WindowManager;
-
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaFlags;
 import com.android.systemui.media.MediaHierarchyManager;
@@ -34,11 +29,8 @@ import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.MediaTttFlags;
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver;
 import com.android.systemui.media.taptotransfer.sender.MediaTttChipControllerSender;
-import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.commandline.CommandRegistry;
 
 import java.util.Optional;
-import java.util.concurrent.Executor;
 
 import javax.inject.Named;
 
@@ -101,13 +93,11 @@ public interface MediaModule {
     @SysUISingleton
     static Optional<MediaTttChipControllerSender> providesMediaTttChipControllerSender(
             MediaTttFlags mediaTttFlags,
-            CommandQueue commandQueue,
-            Context context,
-            WindowManager windowManager) {
+            Lazy<MediaTttChipControllerSender> controllerSenderLazy) {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
         }
-        return Optional.of(new MediaTttChipControllerSender(commandQueue, context, windowManager));
+        return Optional.of(controllerSenderLazy.get());
     }
 
     /** */
@@ -115,16 +105,11 @@ public interface MediaModule {
     @SysUISingleton
     static Optional<MediaTttChipControllerReceiver> providesMediaTttChipControllerReceiver(
             MediaTttFlags mediaTttFlags,
-            CommandQueue commandQueue,
-            Context context,
-            WindowManager windowManager,
-            @Main Handler mainHandler) {
+            Lazy<MediaTttChipControllerReceiver> controllerReceiverLazy) {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
         }
-        return Optional.of(
-                new MediaTttChipControllerReceiver(
-                        commandQueue, context, windowManager, mainHandler));
+        return Optional.of(controllerReceiverLazy.get());
     }
 
     /** */
@@ -132,14 +117,11 @@ public interface MediaModule {
     @SysUISingleton
     static Optional<MediaTttCommandLineHelper> providesMediaTttCommandLineHelper(
             MediaTttFlags mediaTttFlags,
-            CommandRegistry commandRegistry,
-            Context context,
-            @Main Executor mainExecutor) {
+            Lazy<MediaTttCommandLineHelper> helperLazy) {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
         }
-        return Optional.of(
-                new MediaTttCommandLineHelper(commandRegistry, context, mainExecutor));
+        return Optional.of(helperLazy.get());
     }
 
     /** */
@@ -147,13 +129,12 @@ public interface MediaModule {
     @SysUISingleton
     static Optional<MediaMuteAwaitConnectionCli> providesMediaMuteAwaitConnectionCli(
             MediaFlags mediaFlags,
-            CommandRegistry commandRegistry,
-            Context context
+            Lazy<MediaMuteAwaitConnectionCli> muteAwaitConnectionCliLazy
     ) {
         if (!mediaFlags.areMuteAwaitConnectionsEnabled()) {
             return Optional.empty();
         }
-        return Optional.of(new MediaMuteAwaitConnectionCli(commandRegistry, context));
+        return Optional.of(muteAwaitConnectionCliLazy.get());
     }
 
     /** */

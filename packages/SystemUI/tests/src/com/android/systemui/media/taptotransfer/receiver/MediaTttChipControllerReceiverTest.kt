@@ -30,8 +30,10 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.CommandQueue
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -70,7 +72,12 @@ class MediaTttChipControllerReceiverTest : SysuiTestCase() {
         context.setMockPackageManager(packageManager)
 
         controllerReceiver = MediaTttChipControllerReceiver(
-                commandQueue, context, windowManager, Handler.getMain())
+            commandQueue,
+            context,
+            windowManager,
+            FakeExecutor(FakeSystemClock()),
+            Handler.getMain()
+        )
 
         val callbackCaptor = ArgumentCaptor.forClass(CommandQueue.Callbacks::class.java)
         verify(commandQueue).addCallback(callbackCaptor.capture())

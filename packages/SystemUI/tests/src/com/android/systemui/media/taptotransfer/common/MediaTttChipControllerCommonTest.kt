@@ -25,7 +25,11 @@ import android.widget.ImageView
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -40,6 +44,9 @@ import org.mockito.MockitoAnnotations
 class MediaTttChipControllerCommonTest : SysuiTestCase() {
     private lateinit var controllerCommon: MediaTttChipControllerCommon<MediaTttChipState>
 
+    private lateinit var fakeClock: FakeSystemClock
+    private lateinit var fakeExecutor: FakeExecutor
+
     private lateinit var appIconDrawable: Drawable
     @Mock
     private lateinit var windowManager: WindowManager
@@ -48,7 +55,10 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         appIconDrawable = context.getDrawable(R.drawable.ic_cake)!!
-        controllerCommon = TestControllerCommon(context, windowManager)
+        fakeClock = FakeSystemClock()
+        fakeExecutor = FakeExecutor(fakeClock)
+
+        controllerCommon = TestControllerCommon(context, windowManager, fakeExecutor)
     }
 
     @Test
@@ -65,6 +75,58 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
 
         controllerCommon.displayChip(getState())
         verify(windowManager, never()).addView(any(), any())
+    }
+
+    @Test
+    fun displayChip_chipDoesNotDisappearsBeforeTimeout() {
+        controllerCommon.displayChip(getState())
+        reset(windowManager)
+
+        fakeClock.advanceTime(TIMEOUT_MILLIS - 1)
+
+        verify(windowManager, never()).removeView(any())
+    }
+
+    @Test
+    fun displayChip_chipDisappearsAfterTimeout() {
+        controllerCommon.displayChip(getState())
+        reset(windowManager)
+
+        fakeClock.advanceTime(TIMEOUT_MILLIS + 1)
+
+        verify(windowManager).removeView(any())
+    }
+
+    @Test
+    fun displayChip_calledAgainBeforeTimeout_timeoutReset() {
+        // First, display the chip
+        controllerCommon.displayChip(getState())
+
+        // After some time, re-display the chip
+        val waitTime = 1000L
+        fakeClock.advanceTime(waitTime)
+        controllerCommon.displayChip(getState())
+
+        // Wait until the timeout for the first display would've happened
+        fakeClock.advanceTime(TIMEOUT_MILLIS - waitTime + 1)
+
+        // Verify we didn't hide the chip
+        verify(windowManager, never()).removeView(any())
+    }
+
+    @Test
+    fun displayChip_calledAgainBeforeTimeout_eventuallyTimesOut() {
+        // First, display the chip
+        controllerCommon.displayChip(getState())
+
+        // After some time, re-display the chip
+        fakeClock.advanceTime(1000L)
+        controllerCommon.displayChip(getState())
+
+        // Ensure we still hide the chip eventually
+        fakeClock.advanceTime(TIMEOUT_MILLIS + 1)
+
+        verify(windowManager).removeView(any())
     }
 
     @Test
@@ -110,9 +172,10 @@ class MediaTttChipControllerCommonTest : SysuiTestCase() {
 
     inner class TestControllerCommon(
         context: Context,
-        windowManager: WindowManager
-    ) : MediaTttChipControllerCommon<MediaTttChipState>(
-        context, windowManager, R.layout.media_ttt_chip
+        windowManager: WindowManager,
+        @Main mainExecutor: DelayableExecutor,
+        ) : MediaTttChipControllerCommon<MediaTttChipState>(
+        context, windowManager, mainExecutor, R.layout.media_ttt_chip
     ) {
         override fun updateChipView(chipState: MediaTttChipState, currentChipView: ViewGroup) {
         }
