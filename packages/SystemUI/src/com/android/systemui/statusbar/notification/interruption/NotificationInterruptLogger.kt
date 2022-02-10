@@ -211,6 +211,14 @@ class NotificationInterruptLogger @Inject constructor(
             "Pulsing: $str1"
         })
     }
+
+    fun keyguardHideNotification(key: String) {
+        hunBuffer.log(TAG, DEBUG, {
+            str1 = key
+        }, {
+            "Keyguard Hide Notification: $str1"
+        })
+    }
 }
 
 private const val TAG = "InterruptionStateProvider"
