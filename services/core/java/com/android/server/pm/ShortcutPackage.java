@@ -442,6 +442,16 @@ class ShortcutPackage extends ShortcutPackageItem {
                     sortShortcutsToActivities();
             final ArrayList<ShortcutInfo> activityShortcuts = all.get(newShortcut.getActivity());
 
+            if (activityShortcuts != null && activityShortcuts.size() > maxShortcuts) {
+                Slog.e(TAG, "Error pushing shortcut. There are already "
+                        + activityShortcuts.size() + " shortcuts, exceeding the " + maxShortcuts
+                        + " shortcuts limit when pushing the new shortcut " + newShortcut
+                        + ". Id of shortcuts currently available in system memory are "
+                        + activityShortcuts.stream().map(ShortcutInfo::getId)
+                        .collect(Collectors.joining(",", "[", "]")));
+                // TODO: This should not have happened. If it does, identify the root cause where
+                //  possible, otherwise bail-out early to prevent memory issue.
+            }
             if (activityShortcuts != null && activityShortcuts.size() == maxShortcuts) {
                 // Max has reached. Delete the shortcut with lowest rank.
 
