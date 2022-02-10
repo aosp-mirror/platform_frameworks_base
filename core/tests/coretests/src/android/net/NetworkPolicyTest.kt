@@ -16,7 +16,9 @@
 
 package android.net
 
+import android.net.NetworkStats.METERED_YES
 import android.net.NetworkTemplate.MATCH_BLUETOOTH
+import android.net.NetworkTemplate.MATCH_CARRIER
 import android.net.NetworkTemplate.MATCH_ETHERNET
 import android.net.NetworkTemplate.MATCH_MOBILE
 import android.net.NetworkTemplate.MATCH_WIFI
@@ -39,11 +41,19 @@ class NetworkPolicyTest {
     @Test
     fun testTemplateBackupRestore() {
         assertPolicyBackupRestore(createTestPolicyForTemplate(
-                NetworkTemplate.buildTemplateWifi(TEST_WIFI_NETWORK_KEY1)))
+                NetworkTemplate.Builder(MATCH_WIFI)
+                    .setWifiNetworkKeys(setOf(TEST_WIFI_NETWORK_KEY1))
+                    .build()))
         assertPolicyBackupRestore(createTestPolicyForTemplate(
-                NetworkTemplate.buildTemplateMobileAll(TEST_IMSI1)))
+                NetworkTemplate.Builder(MATCH_MOBILE)
+                    .setSubscriberIds(setOf(TEST_IMSI1))
+                    .setMeteredness(METERED_YES)
+                    .build()))
         assertPolicyBackupRestore(createTestPolicyForTemplate(
-                NetworkTemplate.buildTemplateCarrierMetered(TEST_IMSI1)))
+                NetworkTemplate.Builder(MATCH_CARRIER)
+                    .setSubscriberIds(setOf(TEST_IMSI1))
+                    .setMeteredness(METERED_YES)
+                    .build()))
     }
 
     private fun createTestPolicyForTemplate(template: NetworkTemplate): NetworkPolicy {
