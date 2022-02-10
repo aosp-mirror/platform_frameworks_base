@@ -54,12 +54,12 @@ public class KeyStoreSecurityLevel {
         try {
             return request.execute();
         } catch (ServiceSpecificException e) {
-            throw KeyStore2.getKeyStoreException(e.errorCode);
+            throw KeyStore2.getKeyStoreException(e.errorCode, e.getMessage());
         } catch (RemoteException e) {
             // Log exception and report invalid operation handle.
             // This should prompt the caller drop the reference to this operation and retry.
             Log.e(TAG, "Could not connect to Keystore.", e);
-            throw new KeyStoreException(ResponseCode.SYSTEM_ERROR, "");
+            throw new KeyStoreException(ResponseCode.SYSTEM_ERROR, "", e.getMessage());
         }
     }
 
@@ -117,7 +117,7 @@ public class KeyStoreSecurityLevel {
                         break;
                     }
                     default:
-                        throw KeyStore2.getKeyStoreException(e.errorCode);
+                        throw KeyStore2.getKeyStoreException(e.errorCode, e.getMessage());
                 }
             } catch (RemoteException e) {
                 Log.w(TAG, "Cannot connect to keystore", e);

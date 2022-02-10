@@ -16,6 +16,7 @@
 
 package com.android.server.hdmi;
 
+import android.hardware.hdmi.HdmiDeviceInfo;
 import android.util.SparseArray;
 
 /**
@@ -56,7 +57,8 @@ public final class HdmiCecStandbyModeHandler {
     private final class AutoOnHandler implements CecMessageHandler {
         @Override
         public boolean handle(HdmiCecMessage message) {
-            if (!mTv.getAutoWakeup()) {
+            HdmiCecLocalDeviceTv tv = (HdmiCecLocalDeviceTv) mDevice;
+            if (!tv.getAutoWakeup()) {
                 mAborterRefused.handle(message);
                 return true;
             }
@@ -78,7 +80,7 @@ public final class HdmiCecStandbyModeHandler {
     }
 
     private final HdmiControlService mService;
-    private final HdmiCecLocalDeviceTv mTv;
+    private final HdmiCecLocalDevice mDevice;
 
     private final SparseArray<CecMessageHandler> mCecMessageHandlers = new SparseArray<>();
     private final CecMessageHandler mDefaultHandler = new Aborter(
@@ -92,13 +94,7 @@ public final class HdmiCecStandbyModeHandler {
     private final UserControlProcessedHandler
             mUserControlProcessedHandler = new UserControlProcessedHandler();
 
-    public HdmiCecStandbyModeHandler(HdmiControlService service, HdmiCecLocalDeviceTv tv) {
-        mService = service;
-        mTv = tv;
-
-        addHandler(Constants.MESSAGE_IMAGE_VIEW_ON, mAutoOnHandler);
-        addHandler(Constants.MESSAGE_TEXT_VIEW_ON, mAutoOnHandler);
-
+    private void addCommonHandlers() {
         addHandler(Constants.MESSAGE_ACTIVE_SOURCE, mBystander);
         addHandler(Constants.MESSAGE_REQUEST_ACTIVE_SOURCE, mBystander);
         addHandler(Constants.MESSAGE_ROUTING_CHANGE, mBystander);
@@ -111,19 +107,6 @@ public final class HdmiCecStandbyModeHandler {
         addHandler(Constants.MESSAGE_INACTIVE_SOURCE, mBystander);
         addHandler(Constants.MESSAGE_SYSTEM_AUDIO_MODE_STATUS, mBystander);
         addHandler(Constants.MESSAGE_REPORT_AUDIO_STATUS, mBystander);
-
-        // If TV supports the following messages during power-on, ignore them and do nothing,
-        // else reply with <Feature Abort>["Unrecognized Opcode"]
-        // <Deck Status>, <Tuner Device Status>, <Tuner Cleared Status>, <Timer Status>
-        addHandler(Constants.MESSAGE_RECORD_STATUS, mBystander);
-
-        // If TV supports the following messages during power-on, reply with <Feature Abort>["Not
-        // in correct mode to respond"], else reply with <Feature Abort>["Unrecognized Opcode"]
-        // <Give Tuner Device Status>, <Select Digital Service>, <Tuner Step Decrement>,
-        // <Tuner Stem Increment>, <Menu Status>.
-        addHandler(Constants.MESSAGE_RECORD_TV_SCREEN, mAborterIncorrectMode);
-        addHandler(Constants.MESSAGE_INITIATE_ARC, mAborterIncorrectMode);
-        addHandler(Constants.MESSAGE_TERMINATE_ARC, mAborterIncorrectMode);
 
         addHandler(Constants.MESSAGE_GIVE_PHYSICAL_ADDRESS, mBypasser);
         addHandler(Constants.MESSAGE_GET_MENU_LANGUAGE, mBypasser);
@@ -143,6 +126,34 @@ public final class HdmiCecStandbyModeHandler {
 
         addHandler(Constants.MESSAGE_VENDOR_COMMAND_WITH_ID, mAborterIncorrectMode);
         addHandler(Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE, mAborterIncorrectMode);
+    }
+
+    private void addTvHandlers() {
+        addHandler(Constants.MESSAGE_IMAGE_VIEW_ON, mAutoOnHandler);
+        addHandler(Constants.MESSAGE_TEXT_VIEW_ON, mAutoOnHandler);
+
+        // If TV supports the following messages during power-on, ignore them and do nothing,
+        // else reply with <Feature Abort>["Unrecognized Opcode"]
+        // <Deck Status>, <Tuner Device Status>, <Tuner Cleared Status>, <Timer Status>
+        addHandler(Constants.MESSAGE_RECORD_STATUS, mBystander);
+
+        // If TV supports the following messages during power-on, reply with <Feature Abort>["Not
+        // in correct mode to respond"], else reply with <Feature Abort>["Unrecognized Opcode"]
+        // <Give Tuner Device Status>, <Select Digital Service>, <Tuner Step Decrement>,
+        // <Tuner Stem Increment>, <Menu Status>.
+        addHandler(Constants.MESSAGE_RECORD_TV_SCREEN, mAborterIncorrectMode);
+        addHandler(Constants.MESSAGE_INITIATE_ARC, mAborterIncorrectMode);
+        addHandler(Constants.MESSAGE_TERMINATE_ARC, mAborterIncorrectMode);
+    }
+
+    public HdmiCecStandbyModeHandler(HdmiControlService service, HdmiCecLocalDevice device) {
+        mService = service;
+        mDevice = device;
+
+        addCommonHandlers();
+        if (mDevice.getType() == HdmiDeviceInfo.DEVICE_TV) {
+            addTvHandlers();
+        }
     }
 
     private void addHandler(int opcode, CecMessageHandler handler) {

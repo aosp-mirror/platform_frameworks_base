@@ -8765,7 +8765,8 @@ public class TelephonyManager {
      * @param allowedNetworkTypes The bitmask of allowed network types.
      * @return true on success; false on any failure.
      * @hide
-     * @deprecated Use {@link #setAllowedNetworkTypesForReason} instead.
+     * @deprecated Use {@link #setAllowedNetworkTypesForReason} instead with reason
+     * {@link #ALLOWED_NETWORK_TYPES_REASON_CARRIER}.
      */
     @Deprecated
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
@@ -8799,10 +8800,7 @@ public class TelephonyManager {
 
     /**
      * To indicate allowed network type change is requested by user.
-     *
-     * @hide
      */
-    @SystemApi
     public static final int ALLOWED_NETWORK_TYPES_REASON_USER = 0;
 
     /**
@@ -8821,10 +8819,7 @@ public class TelephonyManager {
      * Carrier configuration won't affect the settings configured through
      * other reasons and will result in allowing network types that are in both
      * configurations (i.e intersection of both sets).
-     *
-     * @hide
      */
-    @SystemApi
     public static final int ALLOWED_NETWORK_TYPES_REASON_CARRIER = 2;
 
     /**
@@ -8838,35 +8833,23 @@ public class TelephonyManager {
     /**
      * Set the allowed network types of the device and provide the reason triggering the allowed
      * network change.
+     * <p>Requires permission: android.Manifest.MODIFY_PHONE_STATE or
+     * that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
      * This can be called for following reasons
      * <ol>
      * <li>Allowed network types control by USER {@link #ALLOWED_NETWORK_TYPES_REASON_USER}
-     * <li>Allowed network types control by power manager
-     * {@link #ALLOWED_NETWORK_TYPES_REASON_POWER}
      * <li>Allowed network types control by carrier {@link #ALLOWED_NETWORK_TYPES_REASON_CARRIER}
-     * <li>Allowed network types control by the user-controlled "Allow 2G" toggle
-     * {@link #ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G}
      * </ol>
      * This API will result in allowing an intersection of allowed network types for all reasons,
      * including the configuration done through other reasons.
      *
-     * The functionality of this API with the parameter
-     * {@link #ALLOWED_NETWORK_TYPES_REASON_CARRIER} is the same as the API
-     * {@link TelephonyManager#setAllowedNetworkTypes}. Use this API instead of
-     * {@link TelephonyManager#setAllowedNetworkTypes}.
-     * <p>
-     * If {@link android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported}
-     * ({@link TelephonyManager#CAPABILITY_USES_ALLOWED_NETWORK_TYPES_BITMASK}) returns true, then
-     * setAllowedNetworkTypesBitmap is used on the radio interface. Otherwise,
-     * setPreferredNetworkTypesBitmap is used instead.
-     *
      * @param reason the reason the allowed network type change is taking place
-     * @param allowedNetworkTypes The bitmask of allowed network types.
+     * @param allowedNetworkTypes The bitmask of allowed network type
      * @throws IllegalStateException if the Telephony process is not currently available.
      * @throws IllegalArgumentException if invalid AllowedNetworkTypesReason is passed.
-     * @hide
+     * @throws SecurityException if the caller does not have the required privileges
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     @RequiresFeature(
             enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
@@ -8896,18 +8879,19 @@ public class TelephonyManager {
      *
      * {@link #getAllowedNetworkTypesForReason} returns allowed network type for a
      * specific reason.
+     * <p>Requires permission: android.Manifest.READ_PRIVILEGED_PHONE_STATE or
+     * that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param reason the reason the allowed network type change is taking place
      * @return the allowed network type bitmask
      * @throws IllegalStateException    if the Telephony process is not currently available.
      * @throws IllegalArgumentException if invalid AllowedNetworkTypesReason is passed.
-     * @hide
+     * @throws SecurityException if the caller does not have the required permission/privileges
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @RequiresFeature(
             enforcement = "android.telephony.TelephonyManager#isRadioInterfaceCapabilitySupported",
             value = TelephonyManager.CAPABILITY_USES_ALLOWED_NETWORK_TYPES_BITMASK)
-    @SystemApi
     public @NetworkTypeBitMask long getAllowedNetworkTypesForReason(
             @AllowedNetworkTypesReason int reason) {
         if (!isValidAllowedNetworkTypesReason(reason)) {
@@ -13026,127 +13010,88 @@ public class TelephonyManager {
     // 2G
     /**
      * network type bitmask unknown.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_UNKNOWN = 0L;
     /**
      * network type bitmask indicating the support of radio tech GSM.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_GSM = (1 << (NETWORK_TYPE_GSM -1));
     /**
      * network type bitmask indicating the support of radio tech GPRS.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_GPRS = (1 << (NETWORK_TYPE_GPRS -1));
     /**
      * network type bitmask indicating the support of radio tech EDGE.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_EDGE = (1 << (NETWORK_TYPE_EDGE -1));
     /**
      * network type bitmask indicating the support of radio tech CDMA(IS95A/IS95B).
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_CDMA = (1 << (NETWORK_TYPE_CDMA -1));
     /**
      * network type bitmask indicating the support of radio tech 1xRTT.
-     * @hide
      */
-    @SystemApi
+    @SuppressLint("AllUpper")
     public static final long NETWORK_TYPE_BITMASK_1xRTT = (1 << (NETWORK_TYPE_1xRTT - 1));
     // 3G
     /**
      * network type bitmask indicating the support of radio tech EVDO 0.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_EVDO_0 = (1 << (NETWORK_TYPE_EVDO_0 -1));
     /**
      * network type bitmask indicating the support of radio tech EVDO A.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_EVDO_A = (1 << (NETWORK_TYPE_EVDO_A - 1));
     /**
      * network type bitmask indicating the support of radio tech EVDO B.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_EVDO_B = (1 << (NETWORK_TYPE_EVDO_B -1));
     /**
      * network type bitmask indicating the support of radio tech EHRPD.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_EHRPD = (1 << (NETWORK_TYPE_EHRPD -1));
     /**
      * network type bitmask indicating the support of radio tech HSUPA.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_HSUPA = (1 << (NETWORK_TYPE_HSUPA -1));
     /**
      * network type bitmask indicating the support of radio tech HSDPA.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_HSDPA = (1 << (NETWORK_TYPE_HSDPA -1));
     /**
      * network type bitmask indicating the support of radio tech HSPA.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_HSPA = (1 << (NETWORK_TYPE_HSPA -1));
     /**
      * network type bitmask indicating the support of radio tech HSPAP.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_HSPAP = (1 << (NETWORK_TYPE_HSPAP -1));
     /**
      * network type bitmask indicating the support of radio tech UMTS.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_UMTS = (1 << (NETWORK_TYPE_UMTS -1));
     /**
      * network type bitmask indicating the support of radio tech TD_SCDMA.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_TD_SCDMA = (1 << (NETWORK_TYPE_TD_SCDMA -1));
     // 4G
     /**
      * network type bitmask indicating the support of radio tech LTE.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_LTE = (1 << (NETWORK_TYPE_LTE -1));
     /**
      * network type bitmask indicating the support of radio tech LTE CA (carrier aggregation).
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_LTE_CA = (1 << (NETWORK_TYPE_LTE_CA -1));
 
     /**
      * network type bitmask indicating the support of radio tech NR(New Radio) 5G.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_NR = (1 << (NETWORK_TYPE_NR -1));
 
     /**
      * network type bitmask indicating the support of radio tech IWLAN.
-     * @hide
      */
-    @SystemApi
     public static final long NETWORK_TYPE_BITMASK_IWLAN = (1 << (NETWORK_TYPE_IWLAN -1));
 
     /** @hide */
@@ -13201,12 +13146,11 @@ public class TelephonyManager {
     /**
      * @return Modem supported radio access family bitmask
      *
-     * <p>Requires permission: {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE} or
+     * <p>Requires permission: android.Manifest.READ_PRIVILEGED_PHONE_STATE or
      * that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
-     * @hide
+     *
+     * @throws SecurityException if the caller does not have the required permission
      */
-    @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @NetworkTypeBitMask long getSupportedRadioAccessFamily() {
         try {
