@@ -145,6 +145,7 @@ package android {
     field public static final String MANAGE_CONTENT_CAPTURE = "android.permission.MANAGE_CONTENT_CAPTURE";
     field public static final String MANAGE_CONTENT_SUGGESTIONS = "android.permission.MANAGE_CONTENT_SUGGESTIONS";
     field public static final String MANAGE_DEBUGGING = "android.permission.MANAGE_DEBUGGING";
+    field public static final String MANAGE_ETHERNET_NETWORKS = "android.permission.MANAGE_ETHERNET_NETWORKS";
     field public static final String MANAGE_FACTORY_RESET_PROTECTION = "android.permission.MANAGE_FACTORY_RESET_PROTECTION";
     field public static final String MANAGE_HOTWORD_DETECTION = "android.permission.MANAGE_HOTWORD_DETECTION";
     field public static final String MANAGE_IPSEC_TUNNELS = "android.permission.MANAGE_IPSEC_TUNNELS";
@@ -7022,7 +7023,10 @@ package android.metrics {
 package android.net {
 
   public class EthernetManager {
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.MANAGE_ETHERNET_NETWORKS}) public void connectNetwork(@NonNull String, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.BiConsumer<android.net.Network,android.net.EthernetNetworkManagementException>);
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.MANAGE_ETHERNET_NETWORKS}) public void disconnectNetwork(@NonNull String, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.BiConsumer<android.net.Network,android.net.EthernetNetworkManagementException>);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public android.net.EthernetManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull java.util.concurrent.Executor, @NonNull android.net.EthernetManager.TetheredInterfaceCallback);
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_STACK, android.Manifest.permission.MANAGE_ETHERNET_NETWORKS}) public void updateConfiguration(@NonNull String, @NonNull android.net.EthernetNetworkUpdateRequest, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.BiConsumer<android.net.Network,android.net.EthernetNetworkManagementException>);
   }
 
   public static interface EthernetManager.TetheredInterfaceCallback {
@@ -7032,6 +7036,22 @@ package android.net {
 
   public static class EthernetManager.TetheredInterfaceRequest {
     method public void release();
+  }
+
+  public final class EthernetNetworkManagementException extends java.lang.RuntimeException implements android.os.Parcelable {
+    ctor public EthernetNetworkManagementException(@NonNull String);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkManagementException> CREATOR;
+  }
+
+  public final class EthernetNetworkUpdateRequest implements android.os.Parcelable {
+    ctor public EthernetNetworkUpdateRequest(@NonNull android.net.StaticIpConfiguration, @NonNull android.net.NetworkCapabilities);
+    method public int describeContents();
+    method @NonNull public android.net.StaticIpConfiguration getIpConfig();
+    method @NonNull public android.net.NetworkCapabilities getNetworkCapabilities();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkUpdateRequest> CREATOR;
   }
 
   public final class IpSecManager {
@@ -11670,7 +11690,6 @@ package android.telephony {
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers(int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getAllowedNetworkTypes();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getAllowedNetworkTypesBitmask();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getAllowedNetworkTypesForReason(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.content.ComponentName getAndUpdateDefaultRespondViaMessageApplication();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getCallForwarding(int, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.TelephonyManager.CallForwardingInfoCallback);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getCallWaitingStatus(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>);
@@ -11713,7 +11732,6 @@ package android.telephony {
     method public int getSimCardState();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getSimCardState(int);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.Locale getSimLocale();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getSupportedRadioAccessFamily();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.List<android.telephony.RadioAccessSpecifier> getSystemSelectionChannels();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public java.util.List<android.telephony.TelephonyHistogram> getTelephonyHistograms();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.UiccSlotInfo[] getUiccSlotsInfo();
@@ -11764,7 +11782,6 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int sendThermalMitigationRequest(@NonNull android.telephony.ThermalMitigationRequest);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setAllowedNetworkTypes(long);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setAllowedNetworkTypesForReason(int, long);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCallForwarding(@NonNull android.telephony.CallForwardingInfo, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCallWaitingEnabled(boolean, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCarrierDataEnabled(boolean);
@@ -11814,10 +11831,8 @@ package android.telephony {
     field public static final String ACTION_SIM_APPLICATION_STATE_CHANGED = "android.telephony.action.SIM_APPLICATION_STATE_CHANGED";
     field public static final String ACTION_SIM_CARD_STATE_CHANGED = "android.telephony.action.SIM_CARD_STATE_CHANGED";
     field public static final String ACTION_SIM_SLOT_STATUS_CHANGED = "android.telephony.action.SIM_SLOT_STATUS_CHANGED";
-    field public static final int ALLOWED_NETWORK_TYPES_REASON_CARRIER = 2; // 0x2
     field public static final int ALLOWED_NETWORK_TYPES_REASON_ENABLE_2G = 3; // 0x3
     field public static final int ALLOWED_NETWORK_TYPES_REASON_POWER = 1; // 0x1
-    field public static final int ALLOWED_NETWORK_TYPES_REASON_USER = 0; // 0x0
     field public static final int CALL_WAITING_STATUS_DISABLED = 2; // 0x2
     field public static final int CALL_WAITING_STATUS_ENABLED = 1; // 0x1
     field public static final int CALL_WAITING_STATUS_NOT_SUPPORTED = 4; // 0x4
@@ -11856,26 +11871,6 @@ package android.telephony {
     field public static final int KEY_TYPE_WLAN = 2; // 0x2
     field public static final int MOBILE_DATA_POLICY_DATA_ON_NON_DEFAULT_DURING_VOICE_CALL = 1; // 0x1
     field public static final int MOBILE_DATA_POLICY_MMS_ALWAYS_ALLOWED = 2; // 0x2
-    field public static final long NETWORK_TYPE_BITMASK_1xRTT = 64L; // 0x40L
-    field public static final long NETWORK_TYPE_BITMASK_CDMA = 8L; // 0x8L
-    field public static final long NETWORK_TYPE_BITMASK_EDGE = 2L; // 0x2L
-    field public static final long NETWORK_TYPE_BITMASK_EHRPD = 8192L; // 0x2000L
-    field public static final long NETWORK_TYPE_BITMASK_EVDO_0 = 16L; // 0x10L
-    field public static final long NETWORK_TYPE_BITMASK_EVDO_A = 32L; // 0x20L
-    field public static final long NETWORK_TYPE_BITMASK_EVDO_B = 2048L; // 0x800L
-    field public static final long NETWORK_TYPE_BITMASK_GPRS = 1L; // 0x1L
-    field public static final long NETWORK_TYPE_BITMASK_GSM = 32768L; // 0x8000L
-    field public static final long NETWORK_TYPE_BITMASK_HSDPA = 128L; // 0x80L
-    field public static final long NETWORK_TYPE_BITMASK_HSPA = 512L; // 0x200L
-    field public static final long NETWORK_TYPE_BITMASK_HSPAP = 16384L; // 0x4000L
-    field public static final long NETWORK_TYPE_BITMASK_HSUPA = 256L; // 0x100L
-    field public static final long NETWORK_TYPE_BITMASK_IWLAN = 131072L; // 0x20000L
-    field public static final long NETWORK_TYPE_BITMASK_LTE = 4096L; // 0x1000L
-    field public static final long NETWORK_TYPE_BITMASK_LTE_CA = 262144L; // 0x40000L
-    field public static final long NETWORK_TYPE_BITMASK_NR = 524288L; // 0x80000L
-    field public static final long NETWORK_TYPE_BITMASK_TD_SCDMA = 65536L; // 0x10000L
-    field public static final long NETWORK_TYPE_BITMASK_UMTS = 4L; // 0x4L
-    field public static final long NETWORK_TYPE_BITMASK_UNKNOWN = 0L; // 0x0L
     field public static final int NR_DUAL_CONNECTIVITY_DISABLE = 2; // 0x2
     field public static final int NR_DUAL_CONNECTIVITY_DISABLE_IMMEDIATE = 3; // 0x3
     field public static final int NR_DUAL_CONNECTIVITY_ENABLE = 1; // 0x1
@@ -12901,13 +12896,21 @@ package android.telephony.ims {
 
   public class ImsService extends android.app.Service {
     ctor public ImsService();
-    method public android.telephony.ims.feature.MmTelFeature createMmTelFeature(int);
-    method public android.telephony.ims.feature.RcsFeature createRcsFeature(int);
-    method public void disableIms(int);
-    method public void enableIms(int);
-    method public android.telephony.ims.stub.ImsConfigImplBase getConfig(int);
+    method @Nullable public android.telephony.ims.feature.MmTelFeature createEmergencyOnlyMmTelFeature(int);
+    method @Deprecated public android.telephony.ims.feature.MmTelFeature createMmTelFeature(int);
+    method @Nullable public android.telephony.ims.feature.MmTelFeature createMmTelFeatureForSubscription(int, int);
+    method @Deprecated public android.telephony.ims.feature.RcsFeature createRcsFeature(int);
+    method @Nullable public android.telephony.ims.feature.RcsFeature createRcsFeatureForSubscription(int, int);
+    method @Deprecated public void disableIms(int);
+    method public void disableImsForSubscription(int, int);
+    method @Deprecated public void enableIms(int);
+    method public void enableImsForSubscription(int, int);
+    method @Deprecated public android.telephony.ims.stub.ImsConfigImplBase getConfig(int);
+    method @NonNull public android.telephony.ims.stub.ImsConfigImplBase getConfigForSubscription(int, int);
+    method @NonNull public java.util.concurrent.Executor getExecutor();
     method public long getImsServiceCapabilities();
-    method public android.telephony.ims.stub.ImsRegistrationImplBase getRegistration(int);
+    method @Deprecated public android.telephony.ims.stub.ImsRegistrationImplBase getRegistration(int);
+    method @NonNull public android.telephony.ims.stub.ImsRegistrationImplBase getRegistrationForSubscription(int, int);
     method @Nullable public android.telephony.ims.stub.SipTransportImplBase getSipTransport(int);
     method public final void onUpdateSupportedImsFeatures(android.telephony.ims.stub.ImsFeatureConfiguration) throws android.os.RemoteException;
     method public android.telephony.ims.stub.ImsFeatureConfiguration querySupportedImsFeatures();
@@ -13131,18 +13134,16 @@ package android.telephony.ims {
   public class ProvisioningManager {
     method @NonNull public static android.telephony.ims.ProvisioningManager createForSubscriptionId(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public int getProvisioningIntValue(int);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public boolean getProvisioningStatusForCapability(int, int);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public String getProvisioningStringValue(int);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public boolean getRcsProvisioningStatusForCapability(int);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public boolean getRcsProvisioningStatusForCapability(int);
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION}) public boolean isRcsVolteSingleRegistrationCapable() throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyRcsAutoConfigurationReceived(@NonNull byte[], boolean);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void registerProvisioningChangedCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ProvisioningManager.Callback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION}) public void registerRcsProvisioningCallback(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.ProvisioningManager.RcsProvisioningCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public int setProvisioningIntValue(int, int);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void setProvisioningStatusForCapability(int, int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public int setProvisioningStringValue(int, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION) public void setRcsClientConfiguration(@NonNull android.telephony.ims.RcsClientConfiguration) throws android.telephony.ims.ImsException;
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void setRcsProvisioningStatusForCapability(int, boolean);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void setRcsProvisioningStatusForCapability(int, boolean);
     method @RequiresPermission(android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION) public void triggerRcsReconfiguration();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterProvisioningChangedCallback(@NonNull android.telephony.ims.ProvisioningManager.Callback);
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.PERFORM_IMS_SINGLE_REGISTRATION}) public void unregisterRcsProvisioningCallback(@NonNull android.telephony.ims.ProvisioningManager.RcsProvisioningCallback);
@@ -13189,6 +13190,7 @@ package android.telephony.ims {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.RcsClientConfiguration> CREATOR;
     field public static final String RCS_PROFILE_1_0 = "UP_1.0";
     field public static final String RCS_PROFILE_2_3 = "UP_2.3";
+    field public static final String RCS_PROFILE_2_4 = "UP_2.4";
   }
 
   public final class RcsContactPresenceTuple implements android.os.Parcelable {
@@ -13525,6 +13527,7 @@ package android.telephony.ims.feature {
 
   public class MmTelFeature extends android.telephony.ims.feature.ImsFeature {
     ctor public MmTelFeature();
+    ctor public MmTelFeature(@NonNull java.util.concurrent.Executor);
     method public void changeEnabledCapabilities(@NonNull android.telephony.ims.feature.CapabilityChangeRequest, @NonNull android.telephony.ims.feature.ImsFeature.CapabilityCallbackProxy);
     method public void changeOfferedRtpHeaderExtensionTypes(@NonNull java.util.Set<android.telephony.ims.RtpHeaderExtensionType>);
     method @Nullable public android.telephony.ims.ImsCallProfile createCallProfile(int, int);
@@ -13558,7 +13561,7 @@ package android.telephony.ims.feature {
   }
 
   public class RcsFeature extends android.telephony.ims.feature.ImsFeature {
-    ctor @Deprecated public RcsFeature();
+    ctor public RcsFeature();
     ctor public RcsFeature(@NonNull java.util.concurrent.Executor);
     method public void changeEnabledCapabilities(@NonNull android.telephony.ims.feature.CapabilityChangeRequest, @NonNull android.telephony.ims.feature.ImsFeature.CapabilityCallbackProxy);
     method @NonNull public android.telephony.ims.stub.RcsCapabilityExchangeImplBase createCapabilityExchangeImpl(@NonNull android.telephony.ims.stub.CapabilityExchangeEventListener);
@@ -13575,9 +13578,6 @@ package android.telephony.ims.feature {
     method public void addCapabilities(int);
     method public boolean isCapable(int);
     method public void removeCapabilities(int);
-    field public static final int CAPABILITY_TYPE_NONE = 0; // 0x0
-    field public static final int CAPABILITY_TYPE_OPTIONS_UCE = 1; // 0x1
-    field public static final int CAPABILITY_TYPE_PRESENCE_UCE = 2; // 0x2
   }
 
 }
@@ -13663,6 +13663,7 @@ package android.telephony.ims.stub {
   }
 
   public class ImsConfigImplBase {
+    ctor public ImsConfigImplBase(@NonNull java.util.concurrent.Executor);
     ctor public ImsConfigImplBase();
     method public int getConfigInt(int);
     method public String getConfigString(int);
@@ -13715,6 +13716,7 @@ package android.telephony.ims.stub {
 
   public class ImsRegistrationImplBase {
     ctor public ImsRegistrationImplBase();
+    ctor public ImsRegistrationImplBase(@NonNull java.util.concurrent.Executor);
     method public final void onDeregistered(android.telephony.ims.ImsReasonInfo);
     method public final void onRegistered(int);
     method public final void onRegistered(@NonNull android.telephony.ims.ImsRegistrationAttributes);
@@ -13725,11 +13727,6 @@ package android.telephony.ims.stub {
     method public void triggerFullNetworkRegistration(@IntRange(from=100, to=699) int, @Nullable String);
     method public void triggerSipDelegateDeregistration();
     method public void updateSipDelegateRegistration();
-    field public static final int REGISTRATION_TECH_CROSS_SIM = 2; // 0x2
-    field public static final int REGISTRATION_TECH_IWLAN = 1; // 0x1
-    field public static final int REGISTRATION_TECH_LTE = 0; // 0x0
-    field public static final int REGISTRATION_TECH_NONE = -1; // 0xffffffff
-    field public static final int REGISTRATION_TECH_NR = 3; // 0x3
   }
 
   public class ImsSmsImplBase {
@@ -13827,6 +13824,7 @@ package android.telephony.ims.stub {
   }
 
   public class SipTransportImplBase {
+    ctor public SipTransportImplBase();
     ctor public SipTransportImplBase(@NonNull java.util.concurrent.Executor);
     method public void createSipDelegate(int, @NonNull android.telephony.ims.DelegateRequest, @NonNull android.telephony.ims.DelegateStateCallback, @NonNull android.telephony.ims.DelegateMessageCallback);
     method public void destroySipDelegate(@NonNull android.telephony.ims.stub.SipDelegate, int);

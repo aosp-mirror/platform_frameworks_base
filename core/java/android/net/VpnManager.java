@@ -211,25 +211,18 @@ public class VpnManager {
     public static final int ERROR_CODE_NETWORK_TIMEOUT = 1;
 
     /**
-     * An error code to indicate that the connection is refused.
-     *
-     * @hide
-     */
-    public static final int ERROR_CODE_NETWORK_CONNECT = 2;
-
-    /**
      * An error code to indicate the connection was reset. (e.g. SocketException)
      *
      * @hide
      */
-    public static final int ERROR_CODE_NETWORK_CONNECTION_RESET = 3;
+    public static final int ERROR_CODE_NETWORK_RESET = 2;
 
     /**
      * An error code to indicate that there is an IOException.
      *
      * @hide
      */
-    public static final int ERROR_CODE_NETWORK_IO = 4;
+    public static final int ERROR_CODE_NETWORK_IO = 3;
 
     /** @hide */
     @IntDef(value = {TYPE_VPN_NONE, TYPE_VPN_SERVICE, TYPE_VPN_PLATFORM, TYPE_VPN_LEGACY,
@@ -317,15 +310,30 @@ public class VpnManager {
     /**
      * Request the startup of a previously provisioned VPN.
      *
+     * @return A unique key corresponding to this session.
      * @throws SecurityException exception if user or device settings prevent this VPN from being
-     *     setup, or if user consent has not been granted
+     *         setup, or if user consent has not been granted
      */
-    public void startProvisionedVpnProfile() {
+    @NonNull
+    public String startProvisionedVpnProfileSession() {
         try {
-            mService.startVpnProfile(mContext.getOpPackageName());
+            return mService.startVpnProfile(mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Request the startup of a previously provisioned VPN.
+     *
+     * @throws SecurityException exception if user or device settings prevent this VPN from being
+     *         setup, or if user consent has not been granted
+     * @deprecated This method is replaced by startProvisionedVpnProfileSession which returns a
+     *             session key for the caller to diagnose the errors.
+     */
+    @Deprecated
+    public void startProvisionedVpnProfile() {
+        startProvisionedVpnProfileSession();
     }
 
     /** Tear down the VPN provided by the calling app (if any) */

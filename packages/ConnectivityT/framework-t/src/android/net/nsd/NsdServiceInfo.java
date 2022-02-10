@@ -17,7 +17,9 @@
 package android.net.nsd;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.net.Network;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -48,6 +50,9 @@ public final class NsdServiceInfo implements Parcelable {
     private InetAddress mHost;
 
     private int mPort;
+
+    @Nullable
+    private Network mNetwork;
 
     public NsdServiceInfo() {
     }
@@ -307,18 +312,37 @@ public final class NsdServiceInfo implements Parcelable {
         return txtRecord;
     }
 
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
+    /**
+     * Get the network where the service can be found.
+     *
+     * This is never null if this {@link NsdServiceInfo} was obtained from
+     * {@link NsdManager#discoverServices} or {@link NsdManager#resolveService}.
+     */
+    @Nullable
+    public Network getNetwork() {
+        return mNetwork;
+    }
 
+    /**
+     * Set the network where the service can be found.
+     * @param network The network, or null to search for, or to announce, the service on all
+     *                connected networks.
+     */
+    public void setNetwork(@Nullable Network network) {
+        mNetwork = network;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
         sb.append("name: ").append(mServiceName)
                 .append(", type: ").append(mServiceType)
                 .append(", host: ").append(mHost)
-                .append(", port: ").append(mPort);
+                .append(", port: ").append(mPort)
+                .append(", network: ").append(mNetwork);
 
         byte[] txtRecord = getTxtRecord();
-        if (txtRecord != null) {
-            sb.append(", txtRecord: ").append(new String(txtRecord, StandardCharsets.UTF_8));
-        }
+        sb.append(", txtRecord: ").append(new String(txtRecord, StandardCharsets.UTF_8));
         return sb.toString();
     }
 
@@ -352,6 +376,8 @@ public final class NsdServiceInfo implements Parcelable {
             }
             dest.writeString(key);
         }
+
+        dest.writeParcelable(mNetwork, 0);
     }
 
     /** Implement the Parcelable interface */
@@ -381,6 +407,7 @@ public final class NsdServiceInfo implements Parcelable {
                     }
                     info.mTxtRecord.put(in.readString(), valueArray);
                 }
+                info.mNetwork = in.readParcelable(null, Network.class);
                 return info;
             }
 

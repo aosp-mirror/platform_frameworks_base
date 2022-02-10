@@ -19,6 +19,8 @@ package android.mtp;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.storage.StorageVolume;
 
+import java.util.function.Supplier;
+
 /**
  * This class represents a storage unit on an MTP device.
  * Used only for MTP support in USB responder mode.
@@ -33,14 +35,16 @@ public class MtpStorage {
     private final boolean mRemovable;
     private final long mMaxFileSize;
     private final String mVolumeName;
+    private final Supplier<Boolean> mIsHostWindows;
 
-    public MtpStorage(StorageVolume volume, int storageId) {
+    public MtpStorage(StorageVolume volume, int storageId, Supplier<Boolean> isHostWindows) {
         mStorageId = storageId;
         mPath = volume.getPath();
         mDescription = volume.getDescription(null);
         mRemovable = volume.isRemovable();
         mMaxFileSize = volume.getMaxFileSize();
         mVolumeName = volume.getMediaStoreVolumeName();
+        mIsHostWindows = isHostWindows;
     }
 
     /**
@@ -92,5 +96,14 @@ public class MtpStorage {
 
     public String getVolumeName() {
         return mVolumeName;
+    }
+
+    /**
+     * Returns true if the mtp host of this storage is Windows.
+     *
+     * @return is host Windows
+     */
+    public boolean isHostWindows() {
+        return mIsHostWindows.get();
     }
 }
