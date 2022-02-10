@@ -11065,7 +11065,8 @@ package android.service.euicc {
     method public int encodeSmdxSubjectAndReasonCode(@Nullable String, @Nullable String);
     method @CallSuper public android.os.IBinder onBind(android.content.Intent);
     method public abstract int onDeleteSubscription(int, String);
-    method public android.service.euicc.DownloadSubscriptionResult onDownloadSubscription(int, @NonNull android.telephony.euicc.DownloadableSubscription, boolean, boolean, @Nullable android.os.Bundle);
+    method @Deprecated public android.service.euicc.DownloadSubscriptionResult onDownloadSubscription(int, @NonNull android.telephony.euicc.DownloadableSubscription, boolean, boolean, @Nullable android.os.Bundle);
+    method @NonNull public android.service.euicc.DownloadSubscriptionResult onDownloadSubscription(int, int, @NonNull android.telephony.euicc.DownloadableSubscription, boolean, boolean, @NonNull android.os.Bundle);
     method @Deprecated public int onDownloadSubscription(int, @NonNull android.telephony.euicc.DownloadableSubscription, boolean, boolean);
     method @Deprecated public abstract int onEraseSubscriptions(int);
     method public int onEraseSubscriptions(int, @android.telephony.euicc.EuiccCardManager.ResetOption int);
