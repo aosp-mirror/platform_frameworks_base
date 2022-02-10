@@ -338,7 +338,9 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
         out.writeInt(TEMPLATE_BACKUP_VERSION_LATEST);
 
         out.writeInt(template.getMatchRule());
-        BackupUtils.writeString(out, template.getSubscriberIds().iterator().next());
+        final Set<String> subscriberIds = template.getSubscriberIds();
+        BackupUtils.writeString(out, subscriberIds.isEmpty()
+                ? null : subscriberIds.iterator().next());
         BackupUtils.writeString(out, template.getWifiNetworkKeys().isEmpty()
                 ? null : template.getWifiNetworkKeys().iterator().next());
         out.writeInt(template.getMeteredness());
