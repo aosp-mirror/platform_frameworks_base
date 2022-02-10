@@ -68,9 +68,11 @@ abstract class BaseBubbleScreen(protected val testSpec: FlickerTestParameter) {
             }
 
             teardown {
-                notifyManager.setBubblesAllowed(testApp.component.packageName,
+                test {
+                    notifyManager.setBubblesAllowed(testApp.component.packageName,
                         uid, NotificationManager.BUBBLE_PREFERENCE_NONE)
-                testApp.exit()
+                    testApp.exit()
+                }
             }
 
             extraSpec(this)
