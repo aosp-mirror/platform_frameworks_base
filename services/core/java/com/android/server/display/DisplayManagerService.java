@@ -78,6 +78,7 @@ import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
 import android.hardware.display.WifiDisplayStatus;
+import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.hardware.input.InputManagerInternal;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionManager;
@@ -1860,10 +1861,10 @@ public final class DisplayManagerService extends SystemService {
         return mDisplayModeDirector.getModeSwitchingType();
     }
 
-    private boolean getDisplayDecorationSupportInternal(int displayId) {
+    private DisplayDecorationSupport getDisplayDecorationSupportInternal(int displayId) {
         final IBinder displayToken = getDisplayToken(displayId);
         if (null == displayToken) {
-            return false;
+            return null;
         }
         return SurfaceControl.getDisplayDecorationSupport(displayToken);
     }
@@ -3550,7 +3551,7 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override // Binder call
-        public boolean getDisplayDecorationSupport(int displayId) {
+        public DisplayDecorationSupport getDisplayDecorationSupport(int displayId) {
             final long token = Binder.clearCallingIdentity();
             try {
                 return getDisplayDecorationSupportInternal(displayId);

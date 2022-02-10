@@ -32,6 +32,7 @@ import android.content.res.Resources;
 import android.graphics.ColorSpace;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager.DisplayListener;
+import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.media.projection.IMediaProjection;
 import android.media.projection.MediaProjection;
 import android.os.Handler;
@@ -812,13 +813,13 @@ public final class DisplayManagerGlobal {
     }
 
     /**
-     * Report whether the display supports DISPLAY_DECORATION.
+     * Report whether/how the display supports DISPLAY_DECORATION.
      *
      * @param displayId The display whose support is being queried.
      *
      * @hide
      */
-    public boolean getDisplayDecorationSupport(int displayId) {
+    public DisplayDecorationSupport getDisplayDecorationSupport(int displayId) {
         try {
             return mDm.getDisplayDecorationSupport(displayId);
         } catch (RemoteException ex) {

@@ -42,6 +42,7 @@ import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DeviceProductInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
+import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1853,6 +1854,19 @@ public final class Display {
      */
     public static boolean isRefreshRateValid(float refreshRate) {
         return refreshRate > 0.0f;
+    }
+
+    /**
+     * Returns whether/how the specified display supports DISPLAY_DECORATION.
+     *
+     * Composition.DISPLAY_DECORATION is a special layer type which is used to
+     * render the screen decorations (i.e. antialiased rounded corners and
+     * cutouts) while taking advantage of specific hardware.
+     *
+     * @hide
+     */
+    public DisplayDecorationSupport getDisplayDecorationSupport() {
+        return mGlobal.getDisplayDecorationSupport(mDisplayId);
     }
 
     /**
