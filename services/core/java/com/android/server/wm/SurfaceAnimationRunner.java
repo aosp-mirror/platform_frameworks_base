@@ -26,13 +26,22 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
+import android.graphics.Canvas;
+import android.graphics.Insets;
+import android.graphics.Paint;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.hardware.power.Boost;
 import android.os.Handler;
 import android.os.PowerManagerInternal;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.view.Choreographer;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -40,6 +49,8 @@ import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.server.AnimationThread;
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -70,6 +81,10 @@ class SurfaceAnimationRunner {
     @GuardedBy("mLock")
     @VisibleForTesting
     final ArrayMap<SurfaceControl, RunningAnimation> mPendingAnimations = new ArrayMap<>();
+
+    @GuardedBy("mLock")
+    @VisibleForTesting
+    final ArrayMap<SurfaceControl, RunningAnimation> mPreProcessingAnimations = new ArrayMap<>();
 
     @GuardedBy("mLock")
     @VisibleForTesting
@@ -136,21 +151,62 @@ class SurfaceAnimationRunner {
         synchronized (mLock) {
             final RunningAnimation runningAnim = new RunningAnimation(a, animationLeash,
                     finishCallback);
-            mPendingAnimations.put(animationLeash, runningAnim);
-            if (!mAnimationStartDeferred) {
-                mChoreographer.postFrameCallback(this::startAnimations);
+            boolean requiresEdgeExtension = requiresEdgeExtension(a);
+
+            if (requiresEdgeExtension) {
+                mPreProcessingAnimations.put(animationLeash, runningAnim);
+
+                // We must wait for t to be committed since otherwise the leash doesn't have the
+                // windows we want to screenshot and extend as children.
+                t.addTransactionCommittedListener(Runnable::run, () -> {
+                    final WindowAnimationSpec animationSpec = a.asWindowAnimationSpec();
+                    final Runnable cleanUpEdgeExtension = edgeExtendWindow(animationLeash,
+                            animationSpec.getRootTaskBounds(), animationSpec.getAnimation(),
+                            mFrameTransaction);
+
+                    runningAnim.mFinishCallback = () -> {
+                        cleanUpEdgeExtension.run();
+                        finishCallback.run();
+                    };
+
+                    synchronized (mLock) {
+                        // only run if animation is not yet canceled by this point
+                        if (mPreProcessingAnimations.get(animationLeash) == runningAnim) {
+                            mPreProcessingAnimations.remove(animationLeash);
+                            mPendingAnimations.put(animationLeash, runningAnim);
+                            if (!mAnimationStartDeferred) {
+                                mChoreographer.postFrameCallback(this::startAnimations);
+                            }
+                        }
+                    }
+                });
             }
 
-            // Some animations (e.g. move animations) require the initial transform to be applied
-            // immediately.
-            applyTransformation(runningAnim, t, 0 /* currentPlayTime */);
+            if (!requiresEdgeExtension) {
+                mPendingAnimations.put(animationLeash, runningAnim);
+                if (!mAnimationStartDeferred) {
+                    mChoreographer.postFrameCallback(this::startAnimations);
+                }
+
+                // Some animations (e.g. move animations) require the initial transform to be
+                // applied immediately.
+                applyTransformation(runningAnim, t, 0 /* currentPlayTime */);
+            }
         }
+    }
+
+    private boolean requiresEdgeExtension(AnimationSpec a) {
+        return a.asWindowAnimationSpec() != null && a.asWindowAnimationSpec().hasExtension();
     }
 
     void onAnimationCancelled(SurfaceControl leash) {
         synchronized (mLock) {
             if (mPendingAnimations.containsKey(leash)) {
                 mPendingAnimations.remove(leash);
+                return;
+            }
+            if (mPreProcessingAnimations.containsKey(leash)) {
+                mPreProcessingAnimations.remove(leash);
                 return;
             }
             final RunningAnimation anim = mRunningAnimations.get(leash);
@@ -264,10 +320,133 @@ class SurfaceAnimationRunner {
         mApplyScheduled = false;
     }
 
+    private Runnable edgeExtendWindow(SurfaceControl leash, Rect bounds, Animation a,
+            Transaction transaction) {
+        final Transformation transformationAtStart = new Transformation();
+        a.getTransformationAt(0, transformationAtStart);
+        final Transformation transformationAtEnd = new Transformation();
+        a.getTransformationAt(1, transformationAtEnd);
+
+        // We want to create an extension surface that is the maximal size and the animation will
+        // take care of cropping any part that overflows.
+        final Insets maxExtensionInsets = Insets.min(
+                transformationAtStart.getInsets(), transformationAtEnd.getInsets());
+
+        final int targetSurfaceHeight = bounds.height();
+        final int targetSurfaceWidth = bounds.width();
+
+        final List<SurfaceControl> extensionSurfaces = new ArrayList<>();
+
+        if (maxExtensionInsets.left < 0) {
+            final Rect edgeBounds = new Rect(0, 0, 1, targetSurfaceHeight);
+            final Rect extensionRect = new Rect(0, 0,
+                    -maxExtensionInsets.left, targetSurfaceHeight);
+            final int xPos = maxExtensionInsets.left;
+            final int yPos = 0;
+            final SurfaceControl extensionSurface = createExtensionSurface(leash, edgeBounds,
+                    extensionRect, xPos, yPos, "Left Edge Extension", transaction);
+            extensionSurfaces.add(extensionSurface);
+        }
+
+        if (maxExtensionInsets.top < 0) {
+            final Rect edgeBounds = new Rect(0, 0, targetSurfaceWidth, 1);
+            final Rect extensionRect = new Rect(0, 0,
+                    targetSurfaceWidth, -maxExtensionInsets.top);
+            final int xPos = 0;
+            final int yPos = maxExtensionInsets.top;
+            final SurfaceControl extensionSurface = createExtensionSurface(leash, edgeBounds,
+                    extensionRect, xPos, yPos, "Top Edge Extension", transaction);
+            extensionSurfaces.add(extensionSurface);
+        }
+
+        if (maxExtensionInsets.right < 0) {
+            final Rect edgeBounds = new Rect(targetSurfaceWidth - 1, 0,
+                    targetSurfaceWidth, targetSurfaceHeight);
+            final Rect extensionRect = new Rect(0, 0,
+                    -maxExtensionInsets.right, targetSurfaceHeight);
+            final int xPos = targetSurfaceWidth;
+            final int yPos = 0;
+            final SurfaceControl extensionSurface = createExtensionSurface(leash, edgeBounds,
+                    extensionRect, xPos, yPos, "Right Edge Extension", transaction);
+            extensionSurfaces.add(extensionSurface);
+        }
+
+        if (maxExtensionInsets.bottom < 0) {
+            final Rect edgeBounds = new Rect(0, targetSurfaceHeight - 1,
+                    targetSurfaceWidth, targetSurfaceHeight);
+            final Rect extensionRect = new Rect(0, 0,
+                    targetSurfaceWidth, -maxExtensionInsets.bottom);
+            final int xPos = maxExtensionInsets.left;
+            final int yPos = targetSurfaceHeight;
+            final SurfaceControl extensionSurface = createExtensionSurface(leash, edgeBounds,
+                    extensionRect, xPos, yPos, "Bottom Edge Extension", transaction);
+            extensionSurfaces.add(extensionSurface);
+        }
+
+        Runnable cleanUp = () -> {
+            for (final SurfaceControl extensionSurface : extensionSurfaces) {
+                if (extensionSurface != null) {
+                    transaction.remove(extensionSurface);
+                }
+            }
+        };
+
+        return cleanUp;
+    }
+
+    private SurfaceControl createExtensionSurface(SurfaceControl surfaceToExtend, Rect edgeBounds,
+            Rect extensionRect, int xPos, int yPos, String layerName,
+            Transaction startTransaction) {
+        final SurfaceControl edgeExtensionLayer = new SurfaceControl.Builder()
+                .setName(layerName)
+                .setParent(surfaceToExtend)
+                .setHidden(true)
+                .setCallsite("DefaultTransitionHandler#startAnimation")
+                .setOpaque(true)
+                .setBufferSize(extensionRect.width(), extensionRect.height())
+                .build();
+
+        SurfaceControl.LayerCaptureArgs captureArgs =
+                new SurfaceControl.LayerCaptureArgs.Builder(surfaceToExtend)
+                        .setSourceCrop(edgeBounds)
+                        .setFrameScale(1)
+                        .setPixelFormat(PixelFormat.RGBA_8888)
+                        .setChildrenOnly(true)
+                        .setAllowProtected(true)
+                        .build();
+        final SurfaceControl.ScreenshotHardwareBuffer edgeBuffer =
+                SurfaceControl.captureLayers(captureArgs);
+
+        if (edgeBuffer == null) {
+            Log.e("SurfaceAnimationRunner", "Failed to create edge extension - "
+                    + "edge buffer is null");
+            return null;
+        }
+
+        android.graphics.BitmapShader shader =
+                new android.graphics.BitmapShader(edgeBuffer.asBitmap(),
+                        android.graphics.Shader.TileMode.CLAMP,
+                        android.graphics.Shader.TileMode.CLAMP);
+        final Paint paint = new Paint();
+        paint.setShader(shader);
+
+        final Surface surface = new Surface(edgeExtensionLayer);
+        Canvas c = surface.lockHardwareCanvas();
+        c.drawRect(extensionRect, paint);
+        surface.unlockCanvasAndPost(c);
+        surface.release();
+
+        startTransaction.setLayer(edgeExtensionLayer, Integer.MIN_VALUE);
+        startTransaction.setPosition(edgeExtensionLayer, xPos, yPos);
+        startTransaction.setVisibility(edgeExtensionLayer, true);
+
+        return edgeExtensionLayer;
+    }
+
     private static final class RunningAnimation {
         final AnimationSpec mAnimSpec;
         final SurfaceControl mLeash;
-        final Runnable mFinishCallback;
+        Runnable mFinishCallback;
         ValueAnimator mAnim;
 
         @GuardedBy("mCancelLock")

@@ -21,6 +21,7 @@ import static com.android.server.wm.AnimationSpecProto.WINDOW;
 import static com.android.server.wm.WindowAnimationSpecProto.ANIMATION;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_NONE;
 
+import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.SystemClock;
@@ -75,6 +76,11 @@ public class WindowAnimationSpec implements AnimationSpec {
     }
 
     @Override
+    public WindowAnimationSpec asWindowAnimationSpec() {
+        return this;
+    }
+
+    @Override
     public boolean getShowWallpaper() {
         return mAnimation.getShowWallpaper();
     }
@@ -89,9 +95,25 @@ public class WindowAnimationSpec implements AnimationSpec {
         return mAnimation.getBackgroundColor();
     }
 
+    /**
+     * @return If a window animation has outsets applied to it.
+     * @see Animation#hasExtension()
+     */
+    public boolean hasExtension() {
+        return mAnimation.hasExtension();
+    }
+
     @Override
     public long getDuration() {
         return mAnimation.computeDurationHint();
+    }
+
+    public Rect getRootTaskBounds() {
+        return mRootTaskBounds;
+    }
+
+    public Animation getAnimation() {
+        return mAnimation;
     }
 
     @Override
@@ -106,7 +128,9 @@ public class WindowAnimationSpec implements AnimationSpec {
         boolean cropSet = false;
         if (mRootTaskClipMode == ROOT_TASK_CLIP_NONE) {
             if (tmp.transformation.hasClipRect()) {
-                t.setWindowCrop(leash, tmp.transformation.getClipRect());
+                final Rect clipRect = tmp.transformation.getClipRect();
+                accountForExtension(tmp.transformation, clipRect);
+                t.setWindowCrop(leash, clipRect);
                 cropSet = true;
             }
         } else {
@@ -114,6 +138,7 @@ public class WindowAnimationSpec implements AnimationSpec {
             if (tmp.transformation.hasClipRect()) {
                 mTmpRect.intersect(tmp.transformation.getClipRect());
             }
+            accountForExtension(tmp.transformation, mTmpRect);
             t.setWindowCrop(leash, mTmpRect);
             cropSet = true;
         }
@@ -122,6 +147,14 @@ public class WindowAnimationSpec implements AnimationSpec {
         // since it doesn't have anything it's relative to.
         if (cropSet && mAnimation.hasRoundedCorners() && mWindowCornerRadius > 0) {
             t.setCornerRadius(leash, mWindowCornerRadius);
+        }
+    }
+
+    private void accountForExtension(Transformation transformation, Rect clipRect) {
+        Insets extensionInsets = Insets.min(transformation.getInsets(), Insets.NONE);
+        if (!extensionInsets.equals(Insets.NONE)) {
+            // Extend the surface to allow for the edge extension to be visible
+            clipRect.inset(extensionInsets);
         }
     }
 
