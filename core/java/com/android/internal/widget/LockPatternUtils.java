@@ -26,6 +26,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PropertyInvalidatedCache;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.PasswordMetrics;
 import android.app.trust.IStrongAuthTracker;
@@ -941,17 +942,53 @@ public class LockPatternUtils {
     }
 
     /**
+     * Retrieve the credential type of a user.
+     */
+    private final PropertyInvalidatedCache.QueryHandler<Integer, Integer> mCredentialTypeQuery =
+            new PropertyInvalidatedCache.QueryHandler<>() {
+                @Override
+                public Integer apply(Integer userHandle) {
+                    try {
+                        return getLockSettings().getCredentialType(userHandle);
+                    } catch (RemoteException re) {
+                        Log.e(TAG, "failed to get credential type", re);
+                        return CREDENTIAL_TYPE_NONE;
+                    }
+                }
+                @Override
+                public boolean shouldBypassCache(Integer userHandle) {
+                    return userHandle == USER_FRP;
+                }
+            };
+
+    /**
+     * The API that is cached.
+     */
+    private final static String CREDENTIAL_TYPE_API = "getCredentialType";
+
+    /**
+     * Cache the credential type of a user.
+     */
+    private final PropertyInvalidatedCache<Integer, Integer> mCredentialTypeCache =
+            new PropertyInvalidatedCache<>(4, PropertyInvalidatedCache.MODULE_SYSTEM,
+                    CREDENTIAL_TYPE_API, CREDENTIAL_TYPE_API, mCredentialTypeQuery);
+
+    /**
+     * Invalidate the credential cache
+     * @hide
+     */
+    public final static void invalidateCredentialTypeCache() {
+        PropertyInvalidatedCache.invalidateCache(PropertyInvalidatedCache.MODULE_SYSTEM,
+                CREDENTIAL_TYPE_API);
+    }
+
+    /**
      * Returns the credential type of the user, can be one of {@link #CREDENTIAL_TYPE_NONE},
      * {@link #CREDENTIAL_TYPE_PATTERN}, {@link #CREDENTIAL_TYPE_PIN} and
      * {@link #CREDENTIAL_TYPE_PASSWORD}
      */
     public @CredentialType int getCredentialTypeForUser(int userHandle) {
-        try {
-            return getLockSettings().getCredentialType(userHandle);
-        } catch (RemoteException re) {
-            Log.e(TAG, "failed to get credential type", re);
-            return CREDENTIAL_TYPE_NONE;
-        }
+        return mCredentialTypeCache.query(userHandle);
     }
 
     /**

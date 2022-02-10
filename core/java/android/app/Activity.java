@@ -17,6 +17,8 @@
 package android.app;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
+import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.inMultiWindowMode;
 import static android.os.Process.myUid;
@@ -44,6 +46,7 @@ import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -5435,26 +5438,115 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Launch an activity for which you would like a result when it finished.
+     * When this activity exits, your
+     * onActivityResult() method will be called with the given requestCode.
+     * Using a negative requestCode is the same as calling
+     * {@link #startActivity} (the activity is not launched as a sub-activity).
+     *
+     * <p>Note that this method should only be used with Intent protocols
+     * that are defined to return a result.  In other protocols (such as
+     * {@link Intent#ACTION_MAIN} or {@link Intent#ACTION_VIEW}), you may
+     * not get the result when you expect.  For example, if the activity you
+     * are launching uses {@link Intent#FLAG_ACTIVITY_NEW_TASK}, it will not
+     * run in your task and thus you will immediately receive a cancel result.
+     *
+     * <p>As a special case, if you call startActivityForResult() with a requestCode
+     * >= 0 during the initial onCreate(Bundle savedInstanceState)/onResume() of your
+     * activity, then your window will not be displayed until a result is
+     * returned back from the started activity.  This is to avoid visible
+     * flickering when redirecting to another activity.
+     *
+     * <p>This method throws {@link android.content.ActivityNotFoundException}
+     * if there was no Activity found to run the given Intent.
+     *
+     * @param intent      The intent to start.
+     * @param requestCode If >= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     * @param user        The user to start the intent as.
      * @hide Implement to provide correct calling token.
      */
-    @UnsupportedAppUsage
-    public void startActivityForResultAsUser(Intent intent, int requestCode, UserHandle user) {
+    @SystemApi
+    @RequiresPermission(anyOf = {INTERACT_ACROSS_USERS, INTERACT_ACROSS_USERS_FULL})
+    public void startActivityForResultAsUser(@NonNull Intent intent, int requestCode,
+            @NonNull UserHandle user) {
         startActivityForResultAsUser(intent, requestCode, null, user);
     }
 
     /**
+     * Launch an activity for which you would like a result when it finished.
+     * When this activity exits, your
+     * onActivityResult() method will be called with the given requestCode.
+     * Using a negative requestCode is the same as calling
+     * {@link #startActivity} (the activity is not launched as a sub-activity).
+     *
+     * <p>Note that this method should only be used with Intent protocols
+     * that are defined to return a result.  In other protocols (such as
+     * {@link Intent#ACTION_MAIN} or {@link Intent#ACTION_VIEW}), you may
+     * not get the result when you expect.  For example, if the activity you
+     * are launching uses {@link Intent#FLAG_ACTIVITY_NEW_TASK}, it will not
+     * run in your task and thus you will immediately receive a cancel result.
+     *
+     * <p>As a special case, if you call startActivityForResult() with a requestCode
+     * >= 0 during the initial onCreate(Bundle savedInstanceState)/onResume() of your
+     * activity, then your window will not be displayed until a result is
+     * returned back from the started activity.  This is to avoid visible
+     * flickering when redirecting to another activity.
+     *
+     * <p>This method throws {@link android.content.ActivityNotFoundException}
+     * if there was no Activity found to run the given Intent.
+     *
+     * @param intent      The intent to start.
+     * @param requestCode If >= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     * @param options     Additional options for how the Activity should be started. See {@link
+     *                    android.content.Context#startActivity(Intent, Bundle)} for more details.
+     * @param user        The user to start the intent as.
      * @hide Implement to provide correct calling token.
      */
-    public void startActivityForResultAsUser(Intent intent, int requestCode,
-            @Nullable Bundle options, UserHandle user) {
+    @SystemApi
+    @RequiresPermission(anyOf = {INTERACT_ACROSS_USERS, INTERACT_ACROSS_USERS_FULL})
+    public void startActivityForResultAsUser(@NonNull Intent intent, int requestCode,
+            @Nullable Bundle options, @NonNull UserHandle user) {
         startActivityForResultAsUser(intent, mEmbeddedID, requestCode, options, user);
     }
 
     /**
+     * Launch an activity for which you would like a result when it finished.
+     * When this activity exits, your
+     * onActivityResult() method will be called with the given requestCode.
+     * Using a negative requestCode is the same as calling
+     * {@link #startActivity} (the activity is not launched as a sub-activity).
+     *
+     * <p>Note that this method should only be used with Intent protocols
+     * that are defined to return a result.  In other protocols (such as
+     * {@link Intent#ACTION_MAIN} or {@link Intent#ACTION_VIEW}), you may
+     * not get the result when you expect.  For example, if the activity you
+     * are launching uses {@link Intent#FLAG_ACTIVITY_NEW_TASK}, it will not
+     * run in your task and thus you will immediately receive a cancel result.
+     *
+     * <p>As a special case, if you call startActivityForResult() with a requestCode
+     * >= 0 during the initial onCreate(Bundle savedInstanceState)/onResume() of your
+     * activity, then your window will not be displayed until a result is
+     * returned back from the started activity.  This is to avoid visible
+     * flickering when redirecting to another activity.
+     *
+     * <p>This method throws {@link android.content.ActivityNotFoundException}
+     * if there was no Activity found to run the given Intent.
+     *
+     * @param intent      The intent to start.
+     * @param requestCode If >= 0, this code will be returned in
+     *                    onActivityResult() when the activity exits.
+     * @param options     Additional options for how the Activity should be started. See {@link
+     *                    android.content.Context#startActivity(Intent, Bundle)} for more details.
+     * @param user        The user to start the intent as.
      * @hide Implement to provide correct calling token.
      */
-    public void startActivityForResultAsUser(Intent intent, String resultWho, int requestCode,
-            @Nullable Bundle options, UserHandle user) {
+    @SystemApi
+    @RequiresPermission(anyOf = {INTERACT_ACROSS_USERS, INTERACT_ACROSS_USERS_FULL})
+    public void startActivityForResultAsUser(@NonNull Intent intent, @NonNull String resultWho,
+            int requestCode,
+            @Nullable Bundle options, @NonNull UserHandle user) {
         if (mParent != null) {
             throw new RuntimeException("Can't be called from a child");
         }
@@ -5464,7 +5556,7 @@ public class Activity extends ContextThemeWrapper
                 options, user);
         if (ar != null) {
             mMainThread.sendActivityResult(
-                mToken, mEmbeddedID, requestCode, ar.getResultCode(), ar.getResultData());
+                    mToken, mEmbeddedID, requestCode, ar.getResultCode(), ar.getResultData());
         }
         if (requestCode >= 0) {
             // If this start is requesting a result, we can avoid making
@@ -5489,9 +5581,23 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * @hide Implement to provide correct calling token.
+     * Version of {@link #startActivity(Intent, Bundle)} that allows you to specify the
+     * user the activity will be started for.  This is not available to applications
+     * that are not pre-installed on the system image.
+     * @param intent The description of the activity to start.
+     *
+     * @param user The UserHandle of the user to start this activity for.
+     * @param options Additional options for how the Activity should be started.
+     *          May be null if there are no options.  See {@link android.app.ActivityOptions}
+     *          for how to build the Bundle supplied here; there are no supported definitions
+     *          for building it manually.
+     * @throws ActivityNotFoundException &nbsp;
+     * @hide
      */
-    public void startActivityAsUser(Intent intent, Bundle options, UserHandle user) {
+    @SystemApi
+    @RequiresPermission(anyOf = {INTERACT_ACROSS_USERS, INTERACT_ACROSS_USERS_FULL})
+    public void startActivityAsUser(@NonNull Intent intent,
+            @Nullable Bundle options, @NonNull UserHandle user) {
         if (mParent != null) {
             throw new RuntimeException("Can't be called from a child");
         }
@@ -8556,8 +8662,18 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * If set to true, this indicates to the system that it should never take a
-     * screenshot of the activity to be used as a representation while it is not in a started state.
+     * @hide
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.S,
+            publicAlternatives = "Use {@link #setRecentsScreenshotEnabled(boolean)} instead.")
+    public void setDisablePreviewScreenshots(boolean disable) {
+        setRecentsScreenshotEnabled(!disable);
+    }
+
+    /**
+     * If set to false, this indicates to the system that it should never take a
+     * screenshot of the activity to be used as a representation in recents screen. By default, this
+     * value is {@code true}.
      * <p>
      * Note that the system may use the window background of the theme instead to represent
      * the window when it is not running.
@@ -8570,12 +8686,10 @@ public class Activity extends ContextThemeWrapper
      * {@link android.service.voice.VoiceInteractionService} requests a screenshot via
      * {@link android.service.voice.VoiceInteractionSession#SHOW_WITH_SCREENSHOT}.
      *
-     * @param disable {@code true} to disable preview screenshots; {@code false} otherwise.
-     * @hide
+     * @param enabled {@code true} to enable recents screenshots; {@code false} otherwise.
      */
-    @UnsupportedAppUsage
-    public void setDisablePreviewScreenshots(boolean disable) {
-        ActivityClient.getInstance().setDisablePreviewScreenshots(mToken, disable);
+    public void setRecentsScreenshotEnabled(boolean enabled) {
+        ActivityClient.getInstance().setRecentsScreenshotEnabled(mToken, enabled);
     }
 
     /**

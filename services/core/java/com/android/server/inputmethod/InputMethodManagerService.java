@@ -94,6 +94,7 @@ import android.media.AudioManagerInternal;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.DeadObjectException;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
@@ -120,6 +121,7 @@ import android.util.Pair;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.IWindowManager;
 import android.view.InputChannel;
@@ -171,6 +173,7 @@ import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.IInputSessionCallback;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
+import com.android.server.AccessibilityManagerInternal;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -228,7 +231,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private static final int MSG_START_HANDWRITING = 1100;
 
     private static final int MSG_UNBIND_CLIENT = 3000;
+    private static final int MSG_UNBIND_ACCESSIBILITY_SERVICE = 3001;
     private static final int MSG_BIND_CLIENT = 3010;
+    private static final int MSG_BIND_ACCESSIBILITY_SERVICE = 3011;
     private static final int MSG_SET_ACTIVE = 3020;
     private static final int MSG_SET_INTERACTIVE = 3030;
     private static final int MSG_REPORT_FULLSCREEN_MODE = 3045;
@@ -351,6 +356,33 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    /**
+     * Record session state for an accessibility service.
+     */
+    private static class AccessibilitySessionState {
+        final ClientState mClient;
+        // Id of the accessibility service.
+        final int mId;
+
+        public IInputMethodSession mSession;
+
+        @Override
+        public String toString() {
+            return "AccessibilitySessionState{uid " + mClient.uid + " pid " + mClient.pid
+                    + " id " + Integer.toHexString(mId)
+                    + " session " + Integer.toHexString(
+                    System.identityHashCode(mSession))
+                    + "}";
+        }
+
+        AccessibilitySessionState(ClientState client, int id,
+                IInputMethodSession session) {
+            mClient = client;
+            mId = id;
+            mSession = session;
+        }
+    }
+
     private static final class ClientDeathRecipient implements IBinder.DeathRecipient {
         private final InputMethodManagerService mImms;
         private final IInputMethodClient mClient;
@@ -376,7 +408,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         final ClientDeathRecipient clientDeathRecipient;
 
         boolean sessionRequested;
+        boolean mSessionRequestedForAccessibility;
         SessionState curSession;
+        SparseArray<AccessibilitySessionState> mAccessibilitySessions = new SparseArray<>();
 
         @Override
         public String toString() {
@@ -637,10 +671,16 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     boolean mBoundToMethod;
 
     /**
+     * Have we called bindInput() for accessibility services?
+     */
+    boolean mBoundToAccessibility;
+
+     /**
      * Currently enabled session.
      */
     @GuardedBy("ImfLock.class")
     SessionState mEnabledSession;
+    SparseArray<AccessibilitySessionState> mEnabledAccessibilitySessions = new SparseArray<>();
 
     /**
      * True if the device is currently interactive with user.  The value is true initially.
@@ -2188,6 +2228,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (cs != null) {
                 client.asBinder().unlinkToDeath(cs.clientDeathRecipient, 0);
                 clearClientSessionLocked(cs);
+                clearClientSessionForAccessibilityLocked(cs);
                 if (mCurClient == cs) {
                     hideCurrentInputLocked(
                             mCurFocusedWindow, 0, null, SoftInputShowHideReason.HIDE_REMOVE_CLIENT);
@@ -2195,9 +2236,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         mBoundToMethod = false;
                         IInputMethodInvoker curMethod = getCurMethodLocked();
                         if (curMethod != null) {
+                            // When we unbind input, we are unbinding the client, so we always
+                            // unbind ime and a11y together.
                             curMethod.unbindInput();
+                            AccessibilityManagerInternal.get().unbindInput();
                         }
                     }
+                    mBoundToAccessibility = false;
                     mCurClient = null;
                 }
                 if (mCurFocusedWindowClient == cs) {
@@ -2213,6 +2258,24 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         args.arg1 = arg1;
         args.arg2 = arg2;
         return mHandler.obtainMessage(what, 0, 0, args);
+    }
+
+    @NonNull
+    private Message obtainMessageOOO(int what, Object arg1, Object arg2, Object arg3) {
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = arg1;
+        args.arg2 = arg2;
+        args.arg3 = arg3;
+        return mHandler.obtainMessage(what, 0, 0, args);
+    }
+
+    @NonNull
+    private Message obtainMessageIIOO(int what, int arg1, int arg2,
+            Object arg3, Object arg4) {
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = arg3;
+        args.arg2 = arg4;
+        return mHandler.obtainMessage(what, arg1, arg2, args);
     }
 
     @NonNull
@@ -2252,13 +2315,18 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     curMethod.unbindInput();
                 }
             }
+            mBoundToAccessibility = false;
 
+            // Since we set active false to current client and set mCurClient to null, let's unbind
+            // all accessibility too. That means, when input method get disconnected (including
+            // switching ime), we also unbind accessibility
             scheduleSetActiveToClient(mCurClient, false /* active */, false /* fullscreen */,
                     false /* reportToImeController */);
             executeOrSendMessage(mCurClient.client, mHandler.obtainMessage(
                     MSG_UNBIND_CLIENT, getSequenceNumberLocked(), unbindClientReason,
                     mCurClient.client));
             mCurClient.sessionRequested = false;
+            mCurClient.mSessionRequestedForAccessibility = false;
             mCurClient = null;
 
             mMenuController.hideInputMethodMenuLocked();
@@ -2340,9 +2408,61 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         final InputMethodInfo curInputMethodInfo = mMethodMap.get(curId);
         final boolean suppressesSpellChecker =
                 curInputMethodInfo != null && curInputMethodInfo.suppressesSpellChecker();
+        final SparseArray<IInputMethodSession> accessibilityInputMethodSessions =
+                createAccessibilityInputMethodSessions(mCurClient.mAccessibilitySessions);
         return new InputBindResult(InputBindResult.ResultCode.SUCCESS_WITH_IME_SESSION,
-                session.session, (session.channel != null ? session.channel.dup() : null),
+                session.session, accessibilityInputMethodSessions,
+                (session.channel != null ? session.channel.dup() : null),
                 curId, getSequenceNumberLocked(), suppressesSpellChecker);
+    }
+
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    InputBindResult attachNewAccessibilityLocked(@StartInputReason int startInputReason,
+            boolean initial, int id) {
+        if (!mBoundToAccessibility) {
+            AccessibilityManagerInternal.get().bindInput(mCurClient.binding);
+            mBoundToAccessibility = true;
+        }
+
+        // TODO(b/187453053): grantImplicitAccess to accessibility services access? if so, need to
+        //  record accessibility services uid.
+
+        final AccessibilitySessionState accessibilitySession =
+                mCurClient.mAccessibilitySessions.get(id);
+        // We don't start input when session for a11y is created. We start input when
+        // input method start input, a11y manager service is always on.
+        if (startInputReason != StartInputReason.SESSION_CREATED_BY_ACCESSIBILITY) {
+            final Binder startInputToken = new Binder();
+            setEnabledSessionForAccessibilityLocked(mCurClient.mAccessibilitySessions);
+            AccessibilityManagerInternal.get().startInput(startInputToken, mCurInputContext,
+                    mCurAttribute, !initial /* restarting */);
+        }
+
+        if (accessibilitySession != null) {
+            final SessionState session = mCurClient.curSession;
+            IInputMethodSession imeSession = session == null ? null : session.session;
+            final SparseArray<IInputMethodSession> accessibilityInputMethodSessions =
+                    createAccessibilityInputMethodSessions(mCurClient.mAccessibilitySessions);
+            return new InputBindResult(
+                    InputBindResult.ResultCode.SUCCESS_WITH_ACCESSIBILITY_SESSION,
+                    imeSession, accessibilityInputMethodSessions, null,
+                    getCurIdLocked(), getSequenceNumberLocked(), false);
+        }
+        return null;
+    }
+
+    private SparseArray<IInputMethodSession> createAccessibilityInputMethodSessions(
+            SparseArray<AccessibilitySessionState> accessibilitySessions) {
+        final SparseArray<IInputMethodSession> accessibilityInputMethodSessions =
+                new SparseArray<>();
+        if (accessibilitySessions != null) {
+            for (int i = 0; i < accessibilitySessions.size(); i++) {
+                accessibilityInputMethodSessions.append(accessibilitySessions.keyAt(i),
+                        accessibilitySessions.valueAt(i).mSession);
+            }
+        }
+        return accessibilityInputMethodSessions;
     }
 
     /**
@@ -2370,7 +2490,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             // party code.
             return new InputBindResult(
                     InputBindResult.ResultCode.ERROR_SYSTEM_NOT_READY,
-                    null, null, selectedMethodId, getSequenceNumberLocked(), false);
+                    null, null, null, selectedMethodId, getSequenceNumberLocked(), false);
         }
 
         if (!InputMethodUtils.checkIfPackageBelongsToUid(mAppOpsManager, cs.uid,
@@ -2422,6 +2542,17 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (cs.curSession != null) {
                 // Fast case: if we are already connected to the input method,
                 // then just return it.
+                // This doesn't mean a11y sessions are there. When a11y service is
+                // enabled while this client is switched out, this client doesn't have the session.
+                // A11yManagerService will only request missing sessions (will not request existing
+                // sessions again). Note when an a11y service is disabled, it will clear its
+                // session from all clients, so we don't need to worry about disabled a11y services.
+                cs.mSessionRequestedForAccessibility = false;
+                requestClientSessionForAccessibilityLocked(cs);
+                // we can always attach to accessibility because AccessibilityManagerService is
+                // always on.
+                attachNewAccessibilityLocked(startInputReason,
+                        (startInputFlags & StartInputFlags.INITIAL_CONNECTION) != 0, -1);
                 return attachNewInputLocked(startInputReason,
                         (startInputFlags & StartInputFlags.INITIAL_CONNECTION) != 0);
             }
@@ -2464,9 +2595,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 // Return to client, and we will get back with it when
                 // we have had a session made for it.
                 requestClientSessionLocked(cs);
+                requestClientSessionForAccessibilityLocked(cs);
                 return new InputBindResult(
                         InputBindResult.ResultCode.SUCCESS_WAITING_IME_SESSION,
-                        null, null, getCurIdLocked(), getSequenceNumberLocked(), false);
+                        null, null, null, getCurIdLocked(), getSequenceNumberLocked(), false);
             } else {
                 long bindingDuration = SystemClock.uptimeMillis() - getLastBindTimeLocked();
                 if (bindingDuration < TIME_TO_RECONNECT) {
@@ -2479,7 +2611,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     // to see if we can get back in touch with the service.
                     return new InputBindResult(
                             InputBindResult.ResultCode.SUCCESS_WAITING_IME_BINDING,
-                            null, null, getCurIdLocked(), getSequenceNumberLocked(), false);
+                            null, null, null, getCurIdLocked(), getSequenceNumberLocked(), false);
                 } else {
                     EventLog.writeEvent(EventLogTags.IMF_FORCE_RECONNECT_IME,
                             getSelectedMethodIdLocked(), bindingDuration, 0);
@@ -2565,6 +2697,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                                 method, session, channel);
                         InputBindResult res = attachNewInputLocked(
                                 StartInputReason.SESSION_CREATED_BY_IME, true);
+                        attachNewAccessibilityLocked(StartInputReason.SESSION_CREATED_BY_IME,
+                                true, -1);
                         if (res.method != null) {
                             executeOrSendMessage(mCurClient.client, obtainMessageOO(
                                     MSG_BIND_CLIENT, mCurClient.client, res));
@@ -2602,7 +2736,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     void reRequestCurrentClientSessionLocked() {
         if (mCurClient != null) {
             clearClientSessionLocked(mCurClient);
+            clearClientSessionForAccessibilityLocked(mCurClient);
             requestClientSessionLocked(mCurClient);
+            requestClientSessionForAccessibilityLocked(mCurClient);
         }
     }
 
@@ -2646,10 +2782,41 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("ImfLock.class")
+    void requestClientSessionForAccessibilityLocked(ClientState cs) {
+        if (!cs.mSessionRequestedForAccessibility) {
+            if (DEBUG) Slog.v(TAG, "Creating new accessibility sessions for client " + cs);
+            cs.mSessionRequestedForAccessibility = true;
+            ArraySet<Integer> ignoreSet = new ArraySet<>();
+            for (int i = 0; i < cs.mAccessibilitySessions.size(); i++) {
+                ignoreSet.add(cs.mAccessibilitySessions.keyAt(i));
+            }
+            AccessibilityManagerInternal.get().createImeSession(ignoreSet);
+        }
+    }
+
+    @GuardedBy("ImfLock.class")
     void clearClientSessionLocked(ClientState cs) {
         finishSessionLocked(cs.curSession);
         cs.curSession = null;
         cs.sessionRequested = false;
+    }
+
+    @GuardedBy("ImfLock.class")
+    void clearClientSessionForAccessibilityLocked(ClientState cs) {
+        for (int i = 0; i < cs.mAccessibilitySessions.size(); i++) {
+            finishSessionForAccessibilityLocked(cs.mAccessibilitySessions.valueAt(i));
+        }
+        cs.mAccessibilitySessions.clear();
+        cs.mSessionRequestedForAccessibility = false;
+    }
+
+    @GuardedBy("ImfLock.class")
+    void clearClientSessionForAccessibilityLocked(ClientState cs, int id) {
+        AccessibilitySessionState session = cs.mAccessibilitySessions.get(id);
+        if (session != null) {
+            finishSessionForAccessibilityLocked(session);
+            cs.mAccessibilitySessions.remove(id);
+        }
     }
 
     @GuardedBy("ImfLock.class")
@@ -2672,15 +2839,34 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @GuardedBy("ImfLock.class")
+    private void finishSessionForAccessibilityLocked(AccessibilitySessionState sessionState) {
+        if (sessionState != null) {
+            if (sessionState.mSession != null) {
+                try {
+                    sessionState.mSession.finishSession();
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Session failed to close due to remote exception", e);
+                }
+                sessionState.mSession = null;
+            }
+        }
+    }
+
+    @GuardedBy("ImfLock.class")
     void clearClientSessionsLocked() {
         if (getCurMethodLocked() != null) {
             final int numClients = mClients.size();
             for (int i = 0; i < numClients; ++i) {
                 clearClientSessionLocked(mClients.valueAt(i));
+                clearClientSessionForAccessibilityLocked(mClients.valueAt(i));
             }
 
             finishSessionLocked(mEnabledSession);
+            for (int i = 0; i < mEnabledAccessibilitySessions.size(); i++) {
+                finishSessionForAccessibilityLocked(mEnabledAccessibilitySessions.valueAt(i));
+            }
             mEnabledSession = null;
+            mEnabledAccessibilitySessions.clear();
             scheduleNotifyImeUidToAudioService(Process.INVALID_UID);
         }
         hideStatusBarIconLocked();
@@ -3455,7 +3641,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
             return new InputBindResult(
                     InputBindResult.ResultCode.SUCCESS_REPORT_WINDOW_FOCUS_ONLY,
-                    null, null, null, -1, false);
+                    null, null, null, null, -1, false);
         }
 
         mCurFocusedWindow = windowToken;
@@ -4250,6 +4436,41 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @GuardedBy("ImfLock.class")
+    void setEnabledSessionForAccessibilityLocked(
+            SparseArray<AccessibilitySessionState> accessibilitySessions) {
+        // mEnabledAccessibilitySessions could the same object as accessibilitySessions.
+        SparseArray<IInputMethodSession> disabledSessions = new SparseArray<>();
+        for (int i = 0; i < mEnabledAccessibilitySessions.size(); i++) {
+            if (!accessibilitySessions.contains(mEnabledAccessibilitySessions.keyAt(i))) {
+                AccessibilitySessionState sessionState  = mEnabledAccessibilitySessions.valueAt(i);
+                if (sessionState != null) {
+                    disabledSessions.append(mEnabledAccessibilitySessions.keyAt(i),
+                            sessionState.mSession);
+                }
+            }
+        }
+        if (disabledSessions.size() > 0) {
+            AccessibilityManagerInternal.get().setImeSessionEnabled(disabledSessions,
+                    false);
+        }
+        SparseArray<IInputMethodSession> enabledSessions = new SparseArray<>();
+        for (int i = 0; i < accessibilitySessions.size(); i++) {
+            if (!mEnabledAccessibilitySessions.contains(accessibilitySessions.keyAt(i))) {
+                AccessibilitySessionState sessionState = accessibilitySessions.valueAt(i);
+                if (sessionState != null) {
+                    enabledSessions.append(accessibilitySessions.keyAt(i), sessionState.mSession);
+                }
+            }
+        }
+        if (enabledSessions.size() > 0) {
+            AccessibilityManagerInternal.get().setImeSessionEnabled(enabledSessions,
+                    true);
+        }
+        mEnabledAccessibilitySessions = accessibilitySessions;
+    }
+
+    @SuppressWarnings("unchecked")
     @UiThread
     @Override
     public boolean handleMessage(Message msg) {
@@ -4319,13 +4540,34 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
             // ---------------------------------------------------------
 
-            case MSG_UNBIND_CLIENT:
+            case MSG_UNBIND_CLIENT: {
                 try {
-                    ((IInputMethodClient)msg.obj).onUnbindMethod(msg.arg1, msg.arg2);
+                    // This unbinds all accessibility services too.
+                    ((IInputMethodClient) msg.obj).onUnbindMethod(msg.arg1, msg.arg2);
                 } catch (RemoteException e) {
                     // There is nothing interesting about the last client dying.
+                    if (!(e instanceof DeadObjectException)) {
+                        Slog.w(TAG, "RemoteException when unbinding input method service or"
+                                + "accessibility services");
+                    }
                 }
                 return true;
+            }
+            case MSG_UNBIND_ACCESSIBILITY_SERVICE: {
+                args = (SomeArgs) msg.obj;
+                IInputMethodClient client = (IInputMethodClient) args.arg1;
+                int id = (int) args.arg2;
+                try {
+                    client.onUnbindAccessibilityService(msg.arg1, id);
+                } catch (RemoteException e) {
+                    // There is nothing interesting about the last client dying.
+                    if (!(e instanceof DeadObjectException)) {
+                        Slog.w(TAG, "RemoteException when unbinding accessibility services");
+                    }
+                }
+                args.recycle();
+                return true;
+            }
             case MSG_BIND_CLIENT: {
                 args = (SomeArgs)msg.obj;
                 IInputMethodClient client = (IInputMethodClient)args.arg1;
@@ -4336,6 +4578,25 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     Slog.w(TAG, "Client died receiving input method " + args.arg2);
                 } finally {
                     // Dispose the channel if the input method is not local to this process
+                    // because the remote proxy will get its own copy when unparceled.
+                    if (res.channel != null && Binder.isProxy(client)) {
+                        res.channel.dispose();
+                    }
+                }
+                args.recycle();
+                return true;
+            }
+            case MSG_BIND_ACCESSIBILITY_SERVICE: {
+                args = (SomeArgs) msg.obj;
+                IInputMethodClient client = (IInputMethodClient) args.arg1;
+                InputBindResult res = (InputBindResult) args.arg2;
+                int id = (int) args.arg3;
+                try {
+                    client.onBindAccessibilityService(res, id);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Client died receiving input method " + args.arg2);
+                } finally {
+                    // Dispose the channel if the accessibility service is not local to this process
                     // because the remote proxy will get its own copy when unparceled.
                     if (res.channel != null && Binder.isProxy(client)) {
                         res.channel.dispose();
@@ -5025,6 +5286,59 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             mHandler.obtainMessage(MSG_UPDATE_IME_WINDOW_STATUS, disableImeIcon ? 1 : 0, 0)
                     .sendToTarget();
         }
+
+        @Override
+        public void onSessionForAccessibilityCreated(int accessibilityConnectionId,
+                IInputMethodSession session) {
+            synchronized (ImfLock.class) {
+                if (mCurClient != null) {
+                    clearClientSessionForAccessibilityLocked(mCurClient, accessibilityConnectionId);
+                    mCurClient.mAccessibilitySessions.put(accessibilityConnectionId,
+                            new AccessibilitySessionState(mCurClient, accessibilityConnectionId,
+                                    session));
+                    InputBindResult res = attachNewAccessibilityLocked(
+                            StartInputReason.SESSION_CREATED_BY_ACCESSIBILITY, true,
+                            accessibilityConnectionId);
+                    executeOrSendMessage(mCurClient.client, obtainMessageOOO(
+                            MSG_BIND_ACCESSIBILITY_SERVICE, mCurClient.client, res,
+                            accessibilityConnectionId));
+                }
+            }
+        }
+
+        @Override
+        public void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId) {
+            synchronized (ImfLock.class) {
+                if (mCurClient != null) {
+                    if (DEBUG) {
+                        Slog.v(TAG, "unbindAccessibilityFromCurrentClientLocked: client="
+                                + mCurClient.client.asBinder());
+                    }
+                    // A11yManagerService unbinds the disabled accessibility service. We don't need
+                    // to do it here.
+                    @UnbindReason int unbindClientReason =
+                            UnbindReason.ACCESSIBILITY_SERVICE_DISABLED;
+                    executeOrSendMessage(mCurClient.client, obtainMessageIIOO(
+                            MSG_UNBIND_ACCESSIBILITY_SERVICE, getSequenceNumberLocked(),
+                            unbindClientReason, mCurClient.client, accessibilityConnectionId));
+                }
+                // We only have sessions when we bound to an input method. Remove this session
+                // from all clients.
+                if (getCurMethodLocked() != null) {
+                    final int numClients = mClients.size();
+                    for (int i = 0; i < numClients; ++i) {
+                        clearClientSessionForAccessibilityLocked(mClients.valueAt(i),
+                                accessibilityConnectionId);
+                    }
+                    AccessibilitySessionState session = mEnabledAccessibilitySessions.get(
+                            accessibilityConnectionId);
+                    if (session != null) {
+                        finishSessionForAccessibilityLocked(session);
+                        mEnabledAccessibilitySessions.remove(accessibilityConnectionId);
+                    }
+                }
+            }
+        }
     }
 
     @BinderThread
@@ -5184,6 +5498,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 p.println("    client=" + ci.client);
                 p.println("    inputContext=" + ci.inputContext);
                 p.println("    sessionRequested=" + ci.sessionRequested);
+                p.println("    sessionRequestedForAccessibility="
+                        + ci.mSessionRequestedForAccessibility);
                 p.println("    curSession=" + ci.curSession);
             }
             p.println("  mCurMethodId=" + getSelectedMethodIdLocked());

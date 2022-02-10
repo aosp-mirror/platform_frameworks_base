@@ -25,6 +25,7 @@ import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILIT
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_SERVICE_CLIENT;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_SERVICE_CONNECTION;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAGER_INTERNAL;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.accessibility.AccessibilityInteractionClient.CALL_STACK;
 import static android.view.accessibility.AccessibilityInteractionClient.IGNORE_CALL_STACK;
@@ -66,6 +67,7 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -80,15 +82,21 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputBinding;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.internal.view.IInputContext;
+import com.android.internal.view.IInputMethodSession;
+import com.android.internal.view.IInputSessionWithIdCallback;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityWindowManager.RemoteAccessibilityConnection;
 import com.android.server.accessibility.magnification.MagnificationProcessor;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -179,6 +187,8 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     boolean mReceivedAccessibilityButtonCallbackSinceBind;
 
     boolean mLastAccessibilityButtonCallbackState;
+
+    boolean mRequestImeApis;
 
     int mFetchFlags;
 
@@ -271,6 +281,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
         void onDoubleTapAndHold(int displayId);
 
+        void requestImeLocked(AccessibilityServiceConnection connection);
+
+        void unbindImeLocked(AccessibilityServiceConnection connection);
     }
 
     public AbstractAccessibilityServiceConnection(Context context, ComponentName componentName,
@@ -374,6 +387,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 & AccessibilityServiceInfo.FLAG_REQUEST_FINGERPRINT_GESTURES) != 0;
         mRequestAccessibilityButton = (info.flags
                 & AccessibilityServiceInfo.FLAG_REQUEST_ACCESSIBILITY_BUTTON) != 0;
+        // TODO(b/218193835): request ime when ime flag is set and clean up when ime flag is unset
+        mRequestImeApis = (info.flags
+                & AccessibilityServiceInfo.FLAG_INPUT_METHOD_EDITOR) != 0;
     }
 
     protected boolean supportsFlagForNotImportantViews(AccessibilityServiceInfo info) {
@@ -1610,6 +1626,27 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         mInvocationHandler.notifyAccessibilityButtonAvailabilityChangedLocked(available);
     }
 
+    public void createImeSessionLocked() {
+        mInvocationHandler.createImeSessionLocked();
+    }
+
+    public void setImeSessionEnabledLocked(IInputMethodSession session, boolean enabled) {
+        mInvocationHandler.setImeSessionEnabledLocked(session, enabled);
+    }
+
+    public void bindInputLocked(InputBinding binding) {
+        mInvocationHandler.bindInputLocked(binding);
+    }
+
+    public  void unbindInputLocked() {
+        mInvocationHandler.unbindInputLocked();
+    }
+
+    public void startInputLocked(IBinder startInputToken, IInputContext inputContext,
+            EditorInfo editorInfo, boolean restarting) {
+        mInvocationHandler.startInputLocked(startInputToken, inputContext, editorInfo, restarting);
+    }
+
     /**
      * Called by the invocation handler to notify the service that the
      * state of magnification has changed.
@@ -1728,6 +1765,84 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG, "Error during requesting accessibility info cache"
                         + " to be cleared.", re);
+            }
+        }
+    }
+
+    private void createImeSessionInternal() {
+        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
+        if (listener != null) {
+            try {
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("createImeSession", "");
+                }
+                AccessibilityCallback callback = new AccessibilityCallback();
+                listener.createImeSession(callback);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG,
+                        "Error requesting IME session from " + mService, re);
+            }
+        }
+    }
+
+    private void setImeSessionEnabledInternal(IInputMethodSession session, boolean enabled) {
+        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
+        if (listener != null && session != null) {
+            try {
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("createImeSession", "");
+                }
+                listener.setImeSessionEnabled(session, enabled);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG,
+                        "Error requesting IME session from " + mService, re);
+            }
+        }
+    }
+
+    private void bindInputInternal(InputBinding binding) {
+        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
+        if (listener != null) {
+            try {
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("bindInput", binding.toString());
+                }
+                listener.bindInput(binding);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG,
+                        "Error binding input to " + mService, re);
+            }
+        }
+    }
+
+    private void unbindInputInternal() {
+        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
+        if (listener != null) {
+            try {
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("unbindInput", "");
+                }
+                listener.unbindInput();
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG,
+                        "Error unbinding input to " + mService, re);
+            }
+        }
+    }
+
+    private void startInputInternal(IBinder startInputToken, IInputContext inputContext,
+            EditorInfo editorInfo, boolean restarting) {
+        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
+        if (listener != null) {
+            try {
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("startInput", startInputToken + " "
+                            + inputContext + " " + editorInfo + restarting);
+                }
+                listener.startInput(startInputToken, inputContext, editorInfo, restarting);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG,
+                        "Error starting input to " + mService, re);
             }
         }
     }
@@ -1925,6 +2040,11 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         private static final int MSG_ON_ACCESSIBILITY_BUTTON_CLICKED = 7;
         private static final int MSG_ON_ACCESSIBILITY_BUTTON_AVAILABILITY_CHANGED = 8;
         private static final int MSG_ON_SYSTEM_ACTIONS_CHANGED = 9;
+        private static final int MSG_CREATE_IME_SESSION = 10;
+        private static final int MSG_SET_IME_SESSION_ENABLED = 11;
+        private static final int MSG_BIND_INPUT = 12;
+        private static final int MSG_UNBIND_INPUT = 13;
+        private static final int MSG_START_INPUT = 14;
 
         /** List of magnification callback states, mapping from displayId -> Boolean */
         @GuardedBy("mlock")
@@ -1974,6 +2094,29 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                     notifySystemActionsChangedInternal();
                     break;
                 }
+                case MSG_CREATE_IME_SESSION:
+                    createImeSessionInternal();
+                    break;
+                case MSG_SET_IME_SESSION_ENABLED:
+                    final boolean enabled = (message.arg1 != 0);
+                    final IInputMethodSession session = (IInputMethodSession) message.obj;
+                    setImeSessionEnabledInternal(session, enabled);
+                    break;
+                case MSG_BIND_INPUT:
+                    final InputBinding binding = (InputBinding) message.obj;
+                    bindInputInternal(binding);
+                    break;
+                case MSG_UNBIND_INPUT:
+                    unbindInputInternal();
+                    break;
+                case MSG_START_INPUT:
+                    final boolean restarting = (message.arg1 != 0);
+                    final SomeArgs args = (SomeArgs) message.obj;
+                    final IBinder startInputToken = (IBinder) args.arg1;
+                    final IInputContext inputContext = (IInputContext) args.arg2;
+                    final EditorInfo editorInfo = (EditorInfo) args.arg3;
+                    startInputInternal(startInputToken, inputContext, editorInfo, restarting);
+                    break;
                 default: {
                     throw new IllegalArgumentException("Unknown message: " + type);
                 }
@@ -2034,6 +2177,37 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         public void notifyAccessibilityButtonAvailabilityChangedLocked(boolean available) {
             final Message msg = obtainMessage(MSG_ON_ACCESSIBILITY_BUTTON_AVAILABILITY_CHANGED,
                     (available ? 1 : 0), 0);
+            msg.sendToTarget();
+        }
+
+        public void createImeSessionLocked() {
+            final Message msg = obtainMessage(MSG_CREATE_IME_SESSION);
+            msg.sendToTarget();
+        }
+
+        public void setImeSessionEnabledLocked(IInputMethodSession session, boolean enabled) {
+            final Message msg = obtainMessage(MSG_SET_IME_SESSION_ENABLED, (enabled ? 1 : 0),
+                    0, session);
+            msg.sendToTarget();
+        }
+
+        public void bindInputLocked(InputBinding binding) {
+            final Message msg = obtainMessage(MSG_BIND_INPUT, binding);
+            msg.sendToTarget();
+        }
+
+        public void unbindInputLocked() {
+            final Message msg = obtainMessage(MSG_UNBIND_INPUT);
+            msg.sendToTarget();
+        }
+
+        public void startInputLocked(IBinder startInputToken, IInputContext inputContext,
+                EditorInfo editorInfo, boolean restarting) {
+            final SomeArgs args = SomeArgs.obtain();
+            args.arg1 = startInputToken;
+            args.arg2 = inputContext;
+            args.arg3 = editorInfo;
+            final Message msg = obtainMessage(MSG_START_INPUT, restarting ? 1 : 0, 0, args);
             msg.sendToTarget();
         }
     }
@@ -2183,6 +2357,20 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                     mContext.getContentResolver(), Settings.Global.ANIMATOR_DURATION_SCALE, scale);
         } finally {
             Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    private static final class AccessibilityCallback extends IInputSessionWithIdCallback.Stub {
+        @Override
+        public void sessionCreated(IInputMethodSession session, int id) {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMMS.sessionCreated");
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                InputMethodManagerInternal.get().onSessionForAccessibilityCreated(id, session);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
 }

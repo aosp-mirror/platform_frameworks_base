@@ -546,7 +546,7 @@ public final class AppRestrictionController {
         static final String KEY_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL =
                 DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "abusive_notification_minimal_interval";
 
-        static final boolean DEFAULT_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION = true;
+        static final boolean DEFAULT_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION = false;
         static final long DEFAULT_BG_ABUSIVE_NOTIFICATION_MINIMAL_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
         volatile boolean mBgAutoRestrictedBucket;
@@ -1136,8 +1136,7 @@ public final class AppRestrictionController {
         final AppStandbyInternal appStandbyInternal = mInjector.getAppStandbyInternal();
         if (level >= RESTRICTION_LEVEL_RESTRICTED_BUCKET
                 && curLevel < RESTRICTION_LEVEL_RESTRICTED_BUCKET) {
-            if (!mConstantsObserver.mRestrictedBucketEnabled
-                    || !mConstantsObserver.mBgAutoRestrictedBucket) {
+            if (!mConstantsObserver.mRestrictedBucketEnabled) {
                 return;
             }
             // Moving the app standby bucket to restricted in the meanwhile.
@@ -1146,7 +1145,9 @@ public final class AppRestrictionController {
                 Slog.i(TAG, pkgName + "/" + UserHandle.formatUid(uid)
                         + " is bg-restricted, moving to restricted standby bucket");
             }
-            if (curBucket != STANDBY_BUCKET_RESTRICTED) {
+            if (curBucket != STANDBY_BUCKET_RESTRICTED
+                    && (mConstantsObserver.mBgAutoRestrictedBucket
+                    || level == RESTRICTION_LEVEL_RESTRICTED_BUCKET)) {
                 // restrict the app if it hasn't done so.
                 boolean doIt = true;
                 synchronized (mLock) {

@@ -2573,11 +2573,18 @@ public class NotificationManager {
      * method will return false regardless of input.
      * </p>
      * <p>
-     * The provided URI must meet the requirements for a URI associated with a
-     * {@link Person}: it may be the {@code String} representation of a
-     * {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}, or a
-     * <code>mailto:</code> or <code>tel:</code> schema URI matching an entry in the
-     * Contacts database. See also {@link Person.Builder#setUri} and
+     * The provided URI should be a <code>tel:</code> or <code>mailto:</code> schema URI indicating
+     * the source of the call. For an accurate answer regarding whether the caller matches the
+     * user's permitted contacts, the path part of the URI must match an entry the Contacts database
+     * in the appropriate column.
+     * </p>
+     * <p>
+     * Passing in a {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI} is also
+     * permissible, but should only be used for priority contact interruptions and may not provide
+     * accurate results in the case of repeat callers.
+     * </p>
+     * <p>
+     * See also {@link Person.Builder#setUri} and
      * {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}
      * for more information.
      * </p>

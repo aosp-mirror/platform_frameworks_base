@@ -329,6 +329,9 @@
          etc. -->
     <dimen name="qs_footer_height">48dp</dimen>
 
+    <!-- 40dp (circles) + 8dp (circle padding) + 8dp (top) + 4dp (bottom) -->
+    <dimen name="new_footer_height">60dp</dimen>
+
     <!-- The size of each of the icon buttons in the QS footer -->
     <dimen name="qs_footer_action_button_size">48dp</dimen>
 
@@ -336,6 +339,9 @@
 
     <!-- (48dp - 44dp) / 2 -->
     <dimen name="qs_footer_action_inset">2dp</dimen>
+    <!-- (48dp - 40dp) / 2 -->
+    <dimen name="new_qs_footer_action_inset">4dp</dimen>
+    <dimen name="new_qs_footer_action_inset_negative">-4dp</dimen>
 
     <!-- Margins on each side of QS Footer -->
     <dimen name="qs_footer_margin">2dp</dimen>
@@ -491,7 +497,8 @@
     <dimen name="qs_tile_text_size">14sp</dimen>
     <dimen name="qs_panel_padding">16dp</dimen>
     <dimen name="qs_dual_tile_padding_horizontal">6dp</dimen>
-    <dimen name="qs_panel_padding_bottom">@dimen/qs_footer_height</dimen>
+    <dimen name="qs_panel_elevation">4dp</dimen>
+    <dimen name="qs_panel_padding_bottom">@dimen/new_footer_height</dimen>
     <dimen name="qs_panel_padding_top">48dp</dimen>
     <dimen name="qs_detail_header_padding">0dp</dimen>
     <dimen name="qs_detail_image_width">56dp</dimen>
@@ -574,15 +581,13 @@
     <dimen name="notification_shade_content_margin_horizontal">16dp</dimen>
 
     <!-- The top margin for the notification children container in its non-expanded form. -->
-    <dimen name="notification_children_container_margin_top">
-        @*android:dimen/notification_content_margin_top
-    </dimen>
+    <dimen name="notification_children_container_margin_top">48dp</dimen>
 
     <!-- The height of the gap between adjacent notification sections. -->
     <dimen name="notification_section_divider_height">@dimen/notification_side_paddings</dimen>
 
     <!-- Size of the face pile shown on one-line (children of a group) conversation notifications -->
-    <dimen name="conversation_single_line_face_pile_size">25dp</dimen>
+    <dimen name="conversation_single_line_face_pile_size">24dp</dimen>
 
     <!-- Size of the avatars within a face pile shown on one-line (children of a group) conversation notifications -->
     <dimen name="conversation_single_line_face_pile_avatar_size">17dp</dimen>
@@ -651,10 +656,13 @@
     <dimen name="panel_overshoot_amount">16dp</dimen>
 
     <!-- The padding between notification children when collapsed -->
-    <dimen name="notification_children_padding">4dp</dimen>
+    <dimen name="notification_children_padding">8dp</dimen>
 
     <!-- The padding on top of the first notification to the children container -->
     <dimen name="notification_children_container_top_padding">8dp</dimen>
+
+    <!-- The padding on the bottom of the last group hybrid notification when collapsed -->
+    <dimen name="notification_children_collapsed_bottom_padding">16dp</dimen>
 
     <!-- end margin for system icons if multi user switch is hidden -->
     <dimen name="system_icons_switcher_hidden_expanded_margin">16dp</dimen>

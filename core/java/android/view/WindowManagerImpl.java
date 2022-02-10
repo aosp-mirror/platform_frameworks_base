@@ -32,6 +32,7 @@ import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
@@ -438,5 +439,15 @@ public final class WindowManagerImpl implements WindowManager {
                     callback.getListener());
         } catch (RemoteException e) {
         }
+    }
+
+    @Override
+    public Bitmap snapshotTaskForRecents(int taskId) {
+        try {
+            return WindowManagerGlobal.getWindowManagerService().snapshotTaskForRecents(taskId);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+        return null;
     }
 }

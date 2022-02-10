@@ -4501,6 +4501,13 @@ public final class Settings {
         public static final String SCREEN_OFF_TIMEOUT = "screen_off_timeout";
 
         /**
+         * The amount of time in milliseconds before the device goes to sleep or begins to dream
+         * after a period of inactivity while it is docked.
+         * @hide
+         */
+        public static final String SCREEN_OFF_TIMEOUT_DOCKED = "screen_off_timeout_docked";
+
+        /**
          * The screen backlight brightness between 0 and 255.
          */
         @Readable
@@ -10312,6 +10319,34 @@ public final class Settings {
          */
         public static final String NEARBY_FAST_PAIR_SETTINGS_DEVICES_COMPONENT =
                 "nearby_fast_pair_settings_devices_component";
+
+        /**
+         * Current provider of the component for requesting ambient context consent.
+         * Default value in @string/config_defaultAmbientContextConsentComponent.
+         * No VALIDATOR as this setting will not be backed up.
+         * @hide
+         */
+        public static final String AMBIENT_CONTEXT_CONSENT_COMPONENT =
+                "ambient_context_consent_component";
+
+        /**
+         * Current provider of the intent extra key for the caller's package name while
+         * requesting ambient context consent.
+         * No VALIDATOR as this setting will not be backed up.
+         * @hide
+         */
+        public static final String AMBIENT_CONTEXT_PACKAGE_NAME_EXTRA_KEY =
+                "ambient_context_package_name_key";
+
+        /**
+         * Current provider of the intent extra key for the event code int array while
+         * requesting ambient context consent.
+         * Default value in @string/config_ambientContextEventArrayExtraKey.
+         * No VALIDATOR as this setting will not be backed up.
+         * @hide
+         */
+        public static final String AMBIENT_CONTEXT_EVENT_ARRAY_EXTRA_KEY =
+                "ambient_context_event_array_key";
 
         /**
          * Controls whether aware is enabled.

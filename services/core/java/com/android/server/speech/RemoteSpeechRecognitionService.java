@@ -365,6 +365,20 @@ final class RemoteSpeechRecognitionService extends ServiceConnector.Impl<IRecogn
         }
 
         @Override
+        public void onSegmentResults(Bundle results) throws RemoteException {
+            mRemoteListener.onSegmentResults(results);
+        }
+
+        @Override
+        public void onEndOfSegmentedSession() throws RemoteException {
+            if (DEBUG) {
+                Slog.i(TAG, "#onEndOfSegmentedSession invoked for a recognition session");
+            }
+            mOnSessionComplete.run();
+            mRemoteListener.onEndOfSegmentedSession();
+        }
+
+        @Override
         public void onEvent(int eventType, Bundle params) throws RemoteException {
             mRemoteListener.onEvent(eventType, params);
         }

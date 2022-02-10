@@ -116,6 +116,7 @@ import static com.android.server.wm.ActivityTaskManagerService.POWER_MODE_REASON
 import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
 import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
+import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_RECENT_TASKS;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
@@ -224,7 +225,6 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.MergedConfiguration;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 import android.util.TypedValue;
@@ -582,20 +582,6 @@ public class WindowManagerService extends IWindowManager.Stub
      * underlying surface.
      */
     final ArrayList<WindowState> mResizingWindows = new ArrayList<>();
-
-    /**
-     * Windows whose animations have ended and now must be removed.
-     */
-    final ArrayList<WindowState> mPendingRemove = new ArrayList<>();
-
-    /**
-     * Used when processing mPendingRemove to avoid working on the original array.
-     */
-    WindowState[] mPendingRemoveTmp = new WindowState[20];
-
-    // TODO: use WindowProcessController once go/wm-unified is done.
-    /** Mapping of process pids to configurations */
-    final SparseArray<Configuration> mProcessConfigurations = new SparseArray<>();
 
     /**
      * Mapping of displayId to {@link DisplayImePolicy}.
@@ -2039,7 +2025,6 @@ public class WindowManagerService extends IWindowManager.Stub
             dc.mWinRemovedSinceNullFocus.add(win);
         }
         mEmbeddedWindowController.onWindowRemoved(win);
-        mPendingRemove.remove(win);
         mResizingWindows.remove(win);
         updateNonSystemOverlayWindowsVisibilityIfNeeded(win, false /* surfaceShown */);
         mWindowsChanged = true;
@@ -3698,7 +3683,8 @@ public class WindowManagerService extends IWindowManager.Stub
      * Sets the touch mode state.
      *
      * To be able to change touch mode state, the caller must either own the focused window, or must
-     * have the MODIFY_TOUCH_MODE_STATE permission.
+     * have the MODIFY_TOUCH_MODE_STATE permission. Instrumented processes are allowed to switch
+     * touch mode at any time.
      *
      * @param mode the touch mode to set
      */
@@ -3710,8 +3696,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
-            final boolean hasPermission = checkCallingPermission(MODIFY_TOUCH_MODE_STATE,
-                    "setInTouchMode()");
+
+            final boolean hasPermission = mAtmService.isInstrumenting(pid)
+                    || checkCallingPermission(MODIFY_TOUCH_MODE_STATE, "setInTouchMode()");
             final long token = Binder.clearCallingIdentity();
             try {
                 if (mInputManager.setInTouchMode(mode, pid, uid, hasPermission)) {
@@ -6411,23 +6398,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         }
-        if (mPendingRemove.size() > 0) {
-            pw.println();
-            pw.println("  Remove pending for:");
-            for (int i=mPendingRemove.size()-1; i>=0; i--) {
-                WindowState w = mPendingRemove.get(i);
-                if (windows == null || windows.contains(w)) {
-                    pw.print("  Remove #"); pw.print(i); pw.print(' ');
-                            pw.print(w);
-                    if (dumpAll) {
-                        pw.println(":");
-                        w.dump(pw, "    ", true);
-                    } else {
-                        pw.println();
-                    }
-                }
-            }
-        }
         if (mForceRemoves != null && mForceRemoves.size() > 0) {
             pw.println();
             pw.println("  Windows force removing:");
@@ -8940,5 +8910,28 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         mTaskFpsCallbackController.unregisterCallback(listener);
+    }
+
+    @Override
+    public Bitmap snapshotTaskForRecents(int taskId) {
+        if (!checkCallingPermission(READ_FRAME_BUFFER, "snapshotTaskForRecents()")) {
+            throw new SecurityException("Requires READ_FRAME_BUFFER permission");
+        }
+
+        TaskSnapshot taskSnapshot;
+        synchronized (mGlobalLock) {
+            Task task = mRoot.anyTaskForId(taskId, MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
+            if (task == null) {
+                throw new IllegalArgumentException(
+                        "Failed to find matching task for taskId=" + taskId);
+            }
+            taskSnapshot = mTaskSnapshotController.captureTaskSnapshot(task, false);
+        }
+
+        if (taskSnapshot == null || taskSnapshot.getHardwareBuffer() == null) {
+            return null;
+        }
+        return Bitmap.wrapHardwareBuffer(taskSnapshot.getHardwareBuffer(),
+                taskSnapshot.getColorSpace());
     }
 }

@@ -504,6 +504,7 @@ public class NetworkPolicyManagerServiceTest {
                 ArgumentCaptor.forClass(NetworkStatsManager.UsageCallback.class);
         verify(mStatsManager, times(2))
                 .registerUsageCallback(any(), anyLong(), any(), usageObserver.capture());
+        // It doesn't matter which of the observers is returned here.
         usageObserver.getValue().onThresholdReached(
                 new NetworkTemplate.Builder(MATCH_MOBILE).build());
 

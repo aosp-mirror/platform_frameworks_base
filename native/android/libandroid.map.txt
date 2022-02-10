@@ -205,6 +205,7 @@ LIBANDROID {
     ASensorManager_destroyEventQueue;
     ASensorManager_getDefaultSensor;
     ASensorManager_getDefaultSensorEx; # introduced=21
+    ASensorManager_getDynamicSensorList; # introduced=33
     ASensorManager_getInstance;
     ASensorManager_getInstanceForPackage; # introduced=26
     ASensorManager_getSensorList;

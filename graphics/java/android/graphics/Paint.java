@@ -1612,7 +1612,7 @@ public class Paint {
      * Return the paint's Align value for drawing text. This controls how the
      * text is positioned relative to its origin. LEFT align means that all of
      * the text will be drawn to the right of its origin (i.e. the origin
-     * specifieds the LEFT edge of the text) and so on.
+     * specifies the LEFT edge of the text) and so on.
      *
      * @return the paint's Align value for drawing text.
      */
@@ -1624,7 +1624,7 @@ public class Paint {
      * Set the paint's text alignment. This controls how the
      * text is positioned relative to its origin. LEFT align means that all of
      * the text will be drawn to the right of its origin (i.e. the origin
-     * specifieds the LEFT edge of the text) and so on.
+     * specifies the LEFT edge of the text) and so on.
      *
      * @param align set the paint's Align value for drawing text.
      */

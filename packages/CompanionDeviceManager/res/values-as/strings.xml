@@ -28,12 +28,12 @@
     <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"সংযোগ কৰিলে &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;ক এই ডিভাইচটোত ইনষ্টল কৰি থোৱা এপ্লিকেশ্বনসমূহ এক্সেছ কৰিবলৈ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;ক ৰিম’ট এক্সেছ দিবলৈ দিয়ক।"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
+    <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;ক আপোনাৰ ফ’নৰ পৰা এই তথ্যখিনি এক্সেছ কৰাৰ অনুমতি দিয়ক"</string>
+    <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="profile_name_generic" msgid="6851028682723034988">"ডিভাইচ"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"অনুমতি দিয়ক"</string>
     <string name="consent_no" msgid="2640796915611404382">"অনুমতি নিদিব"</string>
-    <!-- no translation found for permission_sync_confirmation_title (667074294393493186) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (8873391306499120778) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"আপোনাৰ ঘড়ীলৈ এপৰ অনুমতিসমূহ স্থানান্তৰ কৰক"</string>
+    <string name="permission_sync_summary" msgid="8873391306499120778">"আপোনাৰ ঘড়ীটো ছেটআপ কৰাটো অধিক সহজ কৰি তুলিবলৈ, এয়া কৰাৰ সময়ত আপোনাৰ ঘড়ীটোত ইনষ্টল কৰি থোৱা এপ্‌সমূহে আপোনাৰ ফ’নৰ দৰে একেই অনুমতিসমূহ ব্যৱহাৰ কৰিব।\n\n এই অনুমতিসমূহত আপোনাৰ ঘড়ীৰ মাইক্ৰ’ফ’ন আৰু অৱস্থানৰ এক্সেছ অন্তৰ্ভুক্ত হ’ব পাৰে।"</string>
 </resources>

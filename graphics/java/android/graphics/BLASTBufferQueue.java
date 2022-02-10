@@ -39,6 +39,8 @@ public final class BLASTBufferQueue {
     private static native long nativeGetLastAcquiredFrameNum(long ptr);
     private static native void nativeApplyPendingTransactions(long ptr, long frameNumber);
     private static native boolean nativeIsSameSurfaceControl(long ptr, long surfaceControlPtr);
+    private static native SurfaceControl.Transaction nativeGatherPendingTransactions(long ptr,
+            long frameNumber);
 
     /** Create a new connection with the surface flinger. */
     public BLASTBufferQueue(String name, SurfaceControl sc, int width, int height,
@@ -158,5 +160,18 @@ public final class BLASTBufferQueue {
      */
     public boolean isSameSurfaceControl(SurfaceControl sc) {
         return nativeIsSameSurfaceControl(mNativeObject, sc.mNativeObject);
+    }
+
+    /**
+     * Get any transactions that were passed to {@link #mergeWithNextTransaction} with the
+     * specified frameNumber. This is intended to ensure transactions don't get stuck as pending
+     * if the specified frameNumber is never drawn.
+     *
+     * @param frameNumber The frameNumber used to determine which transactions to apply.
+     * @return a Transaction that contains the merge of all the transactions that were sent to
+     *         mergeWithNextTransaction
+     */
+    public SurfaceControl.Transaction gatherPendingTransactions(long frameNumber) {
+        return nativeGatherPendingTransactions(mNativeObject, frameNumber);
     }
 }

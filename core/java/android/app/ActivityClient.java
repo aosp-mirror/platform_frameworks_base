@@ -438,9 +438,9 @@ public class ActivityClient {
         }
     }
 
-    void setDisablePreviewScreenshots(IBinder token, boolean disable) {
+    void setRecentsScreenshotEnabled(IBinder token, boolean enabled) {
         try {
-            getActivityClientController().setDisablePreviewScreenshots(token, disable);
+            getActivityClientController().setRecentsScreenshotEnabled(token, enabled);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

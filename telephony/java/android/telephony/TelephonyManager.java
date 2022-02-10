@@ -7639,7 +7639,7 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
-     * TODO: remove this one. use {@link #rebootRadio()} for reset type 1 and
+     * TODO: remove this one. use {@link #rebootModem()} for reset type 1 and
      * {@link #resetRadioConfig()} for reset type 3
      *
      * @param resetType reset type: 1: reload NV reset, 2: erase NV reset, 3: factory NV reset
@@ -7706,6 +7706,8 @@ public class TelephonyManager {
      *
      * @return {@code true} on success; {@code false} on any failure.
      *
+     * @deprecated  Using {@link #rebootModem()} instead.
+     *
      * @hide
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
@@ -7723,6 +7725,30 @@ public class TelephonyManager {
             Rlog.e(TAG, "rebootRadio NPE", ex);
         }
         return false;
+    }
+
+    /**
+     * Generate a radio modem reset. Used for device configuration by some carriers.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @throws RuntimeException
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_RADIO_ACCESS)
+    public void rebootModem() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                throw new IllegalStateException("telephony service is null.");
+            }
+            telephony.rebootModem(getSlotIndex());
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "rebootRadio RemoteException", ex);
+            throw ex.rethrowAsRuntimeException();
+        }
     }
 
     /**

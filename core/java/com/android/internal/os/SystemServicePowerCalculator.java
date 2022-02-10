@@ -22,11 +22,8 @@ import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.Process;
 import android.os.UidBatteryConsumer;
-import android.os.UserHandle;
 import android.util.Log;
 import android.util.SparseArray;
-
-import java.util.List;
 
 /**
  * Estimates the amount of power consumed by the System Server handling requests from
@@ -119,55 +116,6 @@ public class SystemServicePowerCalculator extends PowerCalculator {
                 BatteryUsageStats.AGGREGATE_BATTERY_CONSUMER_SCOPE_ALL_APPS)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SYSTEM_SERVICES,
                         systemServicePowerMah);
-    }
-
-    @Override
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType,
-            SparseArray<UserHandle> asUsers) {
-        final BatteryStats.Uid systemUid = batteryStats.getUidStats().get(Process.SYSTEM_UID);
-        if (systemUid == null) {
-            return;
-        }
-
-        final long consumptionUC = systemUid.getCpuMeasuredBatteryConsumptionUC();
-        double systemServicePowerMah;
-        if (getPowerModel(consumptionUC) == BatteryConsumer.POWER_MODEL_MEASURED_ENERGY) {
-            systemServicePowerMah = calculatePowerUsingMeasuredConsumption(batteryStats,
-                    systemUid, consumptionUC);
-        } else {
-            systemServicePowerMah = calculatePowerUsingPowerProfile(batteryStats);
-        }
-
-        BatterySipper systemServerSipper = null;
-        for (int i = sippers.size() - 1; i >= 0; i--) {
-            final BatterySipper app = sippers.get(i);
-            if (app.drainType == BatterySipper.DrainType.APP) {
-                if (app.getUid() == Process.SYSTEM_UID) {
-                    systemServerSipper = app;
-                    break;
-                }
-            }
-        }
-
-        if (systemServerSipper != null) {
-            systemServicePowerMah = Math.min(systemServicePowerMah, systemServerSipper.sumPower());
-
-            // The system server power needs to be adjusted because part of it got
-            // distributed to applications
-            systemServerSipper.powerReattributedToOtherSippersMah = -systemServicePowerMah;
-        }
-
-        for (int i = sippers.size() - 1; i >= 0; i--) {
-            final BatterySipper app = sippers.get(i);
-            if (app.drainType == BatterySipper.DrainType.APP) {
-                if (app != systemServerSipper) {
-                    final BatteryStats.Uid uid = app.uidObj;
-                    app.systemServiceCpuPowerMah =
-                            systemServicePowerMah * uid.getProportionalSystemServiceUsage();
-                }
-            }
-        }
     }
 
     private double calculatePowerUsingMeasuredConsumption(BatteryStats batteryStats,

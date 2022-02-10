@@ -390,6 +390,15 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public static final int FLAG_SEND_MOTION_EVENTS = 0x0004000;
 
+    /**
+     * This flag makes the AccessibilityService an input method editor with a subset of input
+     * method editor capabilities: get the {@link android.view.inputmethod.InputConnection} and get
+     * text selection change notifications.
+     *
+     * @see AccessibilityService#getInputMethod()
+     */
+    public static final int FLAG_INPUT_METHOD_EDITOR = 0x0008000;
+
     /** {@hide} */
     public static final int FLAG_FORCE_DIRECT_BOOT_AWARE = 0x00010000;
 
@@ -497,6 +506,7 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see #FLAG_ENABLE_ACCESSIBILITY_VOLUME
      * @see #FLAG_REQUEST_ACCESSIBILITY_BUTTON
      * @see #FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK
+     * @see #FLAG_INPUT_METHOD_EDITOR
      */
     public int flags;
 
@@ -535,6 +545,13 @@ public class AccessibilityServiceInfo implements Parcelable {
      * settings to launch the setting activity of this accessibility service.
      */
     private String mSettingsActivityName;
+
+    /**
+     * The class name of {@link android.service.quicksettings.TileService} is associated with this
+     * accessibility service for one to one mapping. It is used by system settings to remind users
+     * this accessibility service has a {@link android.service.quicksettings.TileService}.
+     */
+    private String mTileServiceClassName;
 
     /**
      * Bit mask with capabilities of this service.
@@ -718,6 +735,8 @@ public class AccessibilityServiceInfo implements Parcelable {
             }
             mIsAccessibilityTool = asAttributes.getBoolean(
                     R.styleable.AccessibilityService_isAccessibilityTool, false);
+            mTileServiceClassName = asAttributes.getString(
+                    com.android.internal.R.styleable.AccessibilityService_tileService);
             asAttributes.recycle();
         } catch (NameNotFoundException e) {
             throw new XmlPullParserException( "Unable to create context for: "
@@ -818,6 +837,17 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public String getSettingsActivityName() {
         return mSettingsActivityName;
+    }
+
+    /**
+     * Gets the class name of {@link android.service.quicksettings.TileService} is associated with
+     * this accessibility service.
+     *
+     * @return The class names of {@link android.service.quicksettings.TileService}.
+     */
+    @Nullable
+    public String getTileServiceClassName() {
+        return mTileServiceClassName;
     }
 
     /**
@@ -1083,6 +1113,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         parcel.writeInt(mHtmlDescriptionRes);
         parcel.writeString(mNonLocalizedDescription);
         parcel.writeBoolean(mIsAccessibilityTool);
+        parcel.writeString(mTileServiceClassName);
     }
 
     private void initFromParcel(Parcel parcel) {
@@ -1105,6 +1136,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         mHtmlDescriptionRes = parcel.readInt();
         mNonLocalizedDescription = parcel.readString();
         mIsAccessibilityTool = parcel.readBoolean();
+        mTileServiceClassName = parcel.readString();
     }
 
     @Override
@@ -1156,6 +1188,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         stringBuilder.append("resolveInfo: ").append(mResolveInfo);
         stringBuilder.append(", ");
         stringBuilder.append("settingsActivityName: ").append(mSettingsActivityName);
+        stringBuilder.append(", ");
+        stringBuilder.append("tileServiceClassName: ").append(mTileServiceClassName);
         stringBuilder.append(", ");
         stringBuilder.append("summary: ").append(mNonLocalizedSummary);
         stringBuilder.append(", ");
@@ -1332,6 +1366,8 @@ public class AccessibilityServiceInfo implements Parcelable {
                 return "FLAG_REQUEST_FINGERPRINT_GESTURES";
             case FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK:
                 return "FLAG_REQUEST_SHORTCUT_WARNING_DIALOG_SPOKEN_FEEDBACK";
+            case FLAG_INPUT_METHOD_EDITOR:
+                return "FLAG_INPUT_METHOD_EDITOR";
             default:
                 return null;
         }

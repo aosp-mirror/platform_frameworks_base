@@ -302,13 +302,13 @@ public abstract class Image implements AutoCloseable {
         return;
     }
 
-    private @NamedDataSpace long mDataSpace = DataSpace.DATASPACE_UNKNOWN;
+    private @NamedDataSpace int mDataSpace = DataSpace.DATASPACE_UNKNOWN;
 
     /**
      * Get the dataspace associated with this frame.
      */
     @SuppressLint("MethodNameUnits")
-    public @NamedDataSpace long getDataSpace() {
+    public @NamedDataSpace int getDataSpace() {
         throwISEIfImageIsInvalid();
         return mDataSpace;
     }
@@ -322,7 +322,7 @@ public abstract class Image implements AutoCloseable {
      *
      * @param dataSpace The Dataspace to be set for this image
      */
-    public void setDataSpace(@NamedDataSpace long dataSpace) {
+    public void setDataSpace(@NamedDataSpace int dataSpace) {
         throwISEIfImageIsInvalid();
         mDataSpace = dataSpace;
     }

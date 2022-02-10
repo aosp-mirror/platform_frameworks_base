@@ -70,7 +70,6 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‏‏‎‏‎‎‎‎‎‏‎‏‏‏‏‎‎‎‎‏‏‎‏‎‎‏‏‏‎‏‎‏‎‏‏‏‎‎‎‏‏‏‏‎‏‏‎‎‏‎‏‏‎‎‏‏‎Three way calling‎‏‎‎‏‎"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‎‏‎‏‎‎‎‎‏‎‏‏‏‏‏‎‏‎‏‎‏‎‎‎‏‎‎‏‏‎‏‏‎‎‎‎‏‏‎‎Rejection of undesired annoying calls‎‏‎‎‏‎"</string>
     <string name="CndMmi" msgid="185136449405618437">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‎‏‎‎‏‎‎‎‏‏‎‏‏‏‏‎‎‏‎‎‏‏‏‏‎‏‎‏‎‏‏‎‏‏‏‎‎‏‏‎‎‏‎‎‎‏‎‎‏‎‎‎‎‎‏‎‏‎Calling number delivery‎‏‎‎‏‎"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‎‎‎‎‏‎‏‏‎‏‎‎‎‏‏‏‎‏‎‏‏‎‎‏‎‏‎‎‏‎‎‎‎‎‎‏‎‏‏‏‎‎‏‏‏‎‏‏‏‎‏‎‎‏‎‎‎‎Do not disturb‎‏‎‎‏‎"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‎‏‎‎‏‏‏‎‎‎‏‏‏‏‏‏‏‎‏‏‎‏‎‏‎‏‎‏‎‏‏‎‎‏‎‏‏‏‏‏‏‎‎‏‏‎‏‏‏‎‏‎‏‎‏‎‎‎Caller ID defaults to restricted. Next call: Restricted‎‏‎‎‏‎"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‏‏‏‎‎‏‏‎‎‎‏‎‎‎‎‎‏‎‎‏‎‎‏‏‎‏‏‏‏‎‎‎‎‎‎‏‎‎‎‎‎‏‎‏‏‏‎‎‏‏‏‏‏‎‎‏‎Caller ID defaults to restricted. Next call: Not restricted‎‏‎‎‏‎"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‎‎‎‏‏‎‎‎‏‏‎‏‎‎‏‏‎‎‎‎‎‎‏‎‎‎‎‎‎‏‎‏‏‏‎‎‏‏‏‏‏‎‏‎‏‎‏‏‎‏‎‎‏‏‎‎‏‎Caller ID defaults to not restricted. Next call: Restricted‎‏‎‎‏‎"</string>
@@ -180,10 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‎‏‎‎‏‎‎‏‎‏‏‏‏‎‏‏‏‎‎‎‎‎‏‎‏‎‏‎‏‎‎‏‎‎‏‎‎‎‏‏‎‎‎‎‏‏‎‎‎‏‏‏‎‎‏‎‎Watch storage is full. Delete some files to free space.‎‏‎‎‏‎"</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‎‏‏‏‏‎‏‎‎‎‏‎‎‏‏‎‎‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‏‎‏‏‎‎‏‏‎‏‎‎‎‎‏‎‎‏‏‏‎‏‏‎‎Android TV device storage is full. Delete some files to free space.‎‏‎‎‏‎"</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‎‎‏‏‏‏‏‎‎‎‏‏‏‎‏‏‎‎‏‏‏‎‏‎‏‏‏‎‏‏‎‎‎‏‏‎‏‎‎‏‏‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‎Phone storage is full. Delete some files to free space.‎‏‎‎‏‎"</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‏‎‎‏‏‎‎‏‎‏‎‎‏‎‎‎‏‏‏‏‎‏‏‎‎‏‏‎‎‏‎‎‏‏‎‏‏‏‏‎‏‏‎‎‏‎‏‎Certificate authorities installed‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‏‎‎‏‏‎‎‏‎‏‎‎‏‎‎‎‏‏‏‏‎‏‏‎‎‏‏‎‎‏‎‎‏‏‎‏‏‏‏‎‏‏‎‎‏‎‏‎Certificate authority installed‎‏‎‎‏‎</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‎‎‏‏‎‎‎‏‎‏‏‎‏‎‎‎‏‎‎‏‎‎‏‎‏‎‏‎‏‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‏‏‎‏‎‎‎‏‏‏‎‏‏‎Certificate authority installed‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‎‎‏‏‎‎‎‏‎‏‏‎‏‎‎‎‏‎‎‏‎‎‏‎‏‎‏‎‏‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‏‏‎‏‎‎‎‏‏‏‎‏‏‎Certificate authorities installed‎‏‎‎‏‎}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‎‏‏‎‏‏‎‎‏‎‏‏‎‎‎‎‎‎‎‏‎‏‏‏‎‏‎‏‏‎‎‏‏‎‎‏‏‎‏‏‏‎‎‏‏‏‎‏‎‏‎‎‎‏‎‏‎‎By an unknown third party‎‏‎‎‏‎"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‏‎‏‎‏‏‎‎‏‏‏‏‎‏‏‏‎‏‎‎‎‎‏‎‎‏‎‏‎‎‎‏‏‏‏‎‏‏‎‏‎‎‎‏‎‎‎‏‎‎‎‎‎‎‏‏‏‎By your work profile admin‎‏‎‎‏‎"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‏‎‎‎‎‎‏‎‎‎‎‏‎‎‎‏‏‎‎‎‎‏‏‏‏‏‎‏‎‏‏‏‎‎‎‎‏‏‏‎‎‏‎‎‎‎‎‎‏‎‎‎‏‏‎‏‎‎By ‎‏‎‎‏‏‎<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
@@ -203,6 +199,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‏‏‏‎‏‎‏‏‎‏‏‏‏‏‎‎‏‏‏‎‏‏‏‎‏‏‏‎‎‏‎‎‏‏‏‏‏‎‎‎‏‎‏‎‎‏‎‎‏‏‎‏‎‎‎Sensor Notification Service‎‏‎‎‏‎"</string>
     <string name="twilight_service" msgid="8964898045693187224">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‏‎‎‏‏‎‏‏‎‏‏‏‎‏‎‎‎‏‏‎‎‏‎‎‎‏‎‏‎‎‏‎‎‎‏‎‏‏‎‏‎‏‎‎‏‎‎‏‏‎‎‎‎Twilight Service‎‏‎‎‏‎"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‏‎‏‏‏‎‎‏‎‏‎‏‏‎‏‏‏‏‏‎‎‏‏‎‏‏‎‏‎‏‎‏‎‎‎‏‏‎‎‏‎‎‏‏‎‏‎‎‏‏‏‎‏‏‏‏‏‎GNSS Time Update Service‎‏‎‎‏‎"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‏‎‏‎‎‏‎‏‎‎‎‏‎‎‎‎‏‎‎‏‎‏‏‏‏‎‎‎‏‎‏‎‎‎‏‏‏‎‏‎‎‏‎‎‎‎‎‎‎‎‏‎‎‏‏‏‎‎‎Device Policy Manager Service‎‏‎‎‏‎"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‏‏‏‎‏‎‏‎‏‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‎‎‎‎‏‏‎‏‏‎‎‎‏‏‏‎‏‏‎‎‎‎‎‏‏‎‎‎‎‎‏‏‏‎Music Recognition Manager Service‎‏‎‎‏‎"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‎‎‏‎‏‏‏‏‎‎‎‎‎‏‎‎‎‏‎‏‎‏‏‎‏‎‏‎‏‎‏‏‎‏‏‎‏‎‎‏‎‎‏‎‎‏‎‎‎‏‎‎‎‎‎‏‎Your device will be erased‎‏‎‎‏‎"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‏‏‎‏‏‏‏‏‏‎‏‏‏‏‎‎‏‎‎‎‎‏‏‏‎‏‏‏‎‏‎‏‏‎‏‏‏‏‏‏‏‏‎‎‏‎‏‎‎‎‎‏‎‏‎‏‎The admin app can\'t be used. Your device will now be erased.‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎If you have questions, contact your organization\'s admin.‎‏‎‎‏‎"</string>
@@ -256,10 +253,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‏‏‏‏‎‎‎‎‎‎‎‎‎‎‏‎‏‏‏‏‏‏‎‏‏‏‏‎‏‎‎‎‏‎‎‏‏‎‎‎‏‎‎‎‏‎‎‎‏‏‎‎‏‎‏‏‎‎Use this under most circumstances. It allows you to track progress of the report, enter more details about the problem, and take screenshots. It might omit some less-used sections that take a long time to report.‎‏‎‎‏‎"</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‎‏‏‎‎‎‏‎‎‎‎‏‎‏‎‏‎‏‎‎‎‎‏‎‏‎‏‎‎‎‎‏‏‎‏‏‏‎‎‎‎‏‎‏‎‏‏‏‏‏‏‎‏‎‎Full report‎‏‎‎‏‎"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‏‎‏‏‎‏‎‎‏‎‎‎‏‎‎‏‎‎‏‎‎‎‏‏‏‎‏‎‏‏‎‏‏‎‎‎‏‎‎‎‎‎‎‏‎‎‏‎‏‎‎‏‎‏‏‎‏‎Use this option for minimal system interference when your device is unresponsive or too slow, or when you need all report sections. Does not allow you to enter more details or take additional screenshots.‎‏‎‎‏‎"</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‎‎‏‏‎‏‎‏‎‏‎‏‎‎‏‏‏‏‎‎‏‎‏‎‎‎‎‏‎‏‏‏‏‎‏‏‎‏‎‏‏‎‏‏‏‏‏‎‎‏‎‎‎‏‏‎‎Taking screenshot for bug report in ‎‏‎‎‏‏‎<xliff:g id="NUMBER_1">%d</xliff:g>‎‏‎‎‏‏‏‎ seconds.‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‎‎‏‏‎‏‎‏‎‏‎‏‎‎‏‏‏‏‎‎‏‎‏‎‎‎‎‏‎‏‏‏‏‎‏‏‎‏‎‏‏‎‏‏‏‏‏‎‎‏‎‎‎‏‏‎‎Taking screenshot for bug report in ‎‏‎‎‏‏‎<xliff:g id="NUMBER_0">%d</xliff:g>‎‏‎‎‏‏‏‎ second.‎‏‎‎‏‎</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‏‎‎‎‏‎‎‏‏‏‎‎‎‎‏‎‏‎‏‎‏‏‎‏‏‎‏‏‏‎‏‎‎‏‏‎‏‏‎‏‏‎‎‎‏‎‎‎‏‎‎‏‏‎‎‏‏‎Taking screenshot for bug report in # second.‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‏‎‎‎‏‎‎‏‏‏‎‎‎‎‏‎‏‎‏‎‏‏‎‏‏‎‏‏‏‎‏‎‎‏‏‎‏‏‎‏‏‎‎‎‏‎‎‎‏‎‎‏‏‎‎‏‏‎Taking screenshot for bug report in # seconds.‎‏‎‎‏‎}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‎‏‏‎‏‎‏‎‎‎‏‎‎‏‏‏‏‎‎‏‎‏‏‏‏‎‏‏‎‎‎‎‏‎‏‏‎‏‏‏‏‎‏‎‎‏‏‏‎‎‏‎‏‎‎‎‏‎Screenshot taken with bug report‎‏‎‎‏‎"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‏‎‏‏‏‏‏‎‎‎‎‏‏‏‎‎‎‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‏‏‎‏‎‏‏‎‏‏‎‏‎‏‎‏‏‎‎Failed to take screenshot with bug report‎‏‎‎‏‎"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‏‎‏‏‏‎‏‏‏‎‏‏‎‏‎‏‏‏‏‎‏‎‏‏‎‎‏‎‎‏‏‏‏‎‎‎‏‏‎‎‏‎‏‎‏‏‏‎‎‏‏‎‏‏‏‎‎‎Silent mode‎‏‎‎‏‎"</string>
@@ -310,8 +304,18 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‏‏‏‎‏‏‎‏‎‎‎‎‏‏‏‏‎‎‏‎‎‎‎‏‎‏‏‏‏‎‏‎‎‎‎‎‎‏‏‏‎‏‎‎‎‏‎‎‏‏‏‏‎‎‎‏‏‎access your calendar‎‏‎‎‏‎"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‎‎‎‎‏‎‏‏‎‎‎‎‎‏‏‏‎‏‎‎‎‎‎‏‎‎‎‎‏‏‎‎‏‎‎‏‎‎‎‎‎‏‏‎‏‏‎‏‎‎‎‎‏‎‏‎‎SMS‎‏‎‎‏‎"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‏‏‏‏‎‎‎‎‏‏‏‏‎‏‏‎‎‏‏‎‏‏‎‎‎‎‎‎‎‎‎‏‎‎‏‏‎‎‏‎‎‎‎‎‏‎‏‏‎‎‏‏‏‏‎‎send and view SMS messages‎‏‎‎‏‎"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‏‏‏‎‎‏‏‎‏‎‏‎‎‎‏‏‎‎‏‏‎‏‎‎‎‏‏‏‎‏‏‏‏‏‏‎‏‏‎‏‏‏‏‎‎‎‎‎‏‎‎‏‏‏‎‏‎Files and media‎‏‎‎‏‎"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‎‎‏‎‎‏‎‏‎‎‎‏‎‎‏‏‎‎‎‎‎‎‎‎‎‎‎‏‏‎‎‎‏‏‎‎‏‏‎‏‏‏‏‎‎‎‏‏‎‎‏‎‏‎‎‎‎access photos, media, and files on your device‎‏‎‎‏‎"</string>
+    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
+    <skip />
+    <!-- no translation found for permgrouplab_readMediaAural (5885210465560755316) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaAural (1170143315714662822) -->
+    <skip />
+    <!-- no translation found for permgrouplab_readMediaVisual (9137695801926624061) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_readMediaVisual (173787212014117477) -->
+    <skip />
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‎‎‏‏‎‏‏‎‎‏‏‎‏‏‎‏‎‎‎‏‏‎‏‏‏‏‎‏‏‏‎‏‎‏‏‎‏‏‏‎‏‎‏‎‎‎‎‏‏‏‎‏‎‏‏‎‎‎Microphone‎‏‎‎‏‎"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‎‏‎‎‎‏‎‏‎‎‏‏‏‏‏‎‎‎‏‏‏‏‎‏‏‎‏‏‎‏‎‎‎‎‏‏‏‎‏‏‎‏‎‎‏‏‏‏‏‎‎‏‎‏‎‏‎‎record audio‎‏‎‎‏‎"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‎‎‎‏‎‎‎‏‎‏‏‏‎‎‎‎‎‏‏‎‏‎‎‏‎‎‎‎‏‏‎‎‏‎‎‎‏‏‎‏‎‏‎‎‏‏‏‎‎‏‎‎‏‎‏‏‎‎Physical activity‎‏‎‎‏‎"</string>
@@ -683,6 +687,18 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‏‏‎‏‎‏‏‎‏‎‎‏‏‏‎‎‎‏‎‏‎‎‎‏‎‏‎‏‏‏‎‏‏‏‏‎‎‎‏‏‏‎‏‎‎‎‎‎‏‏‏‏‎‏‎‏‎‎Allows an app to read the sync stats for an account, including the history of sync events and how much data is synced.‎‏‎‎‏‎"</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‎‎‏‎‏‏‏‏‏‎‏‏‎‏‏‎‎‏‎‎‏‎‎‏‎‎‎‏‏‎‎‎‎‎‎‎‏‏‏‏‎‎‏‎‎‏‏‏‏‎‎‎‏‏‎‎‎‎read the contents of your shared storage‎‏‎‎‏‎"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‎‏‏‎‎‎‎‏‏‎‏‏‎‏‎‎‏‎‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‏‎‎‎‏‏‏‎‏‏‎‏‏‏‏‏‏‏‏‏‏‏‎‎Allows the app to read the contents of your shared storage.‎‏‎‎‏‎"</string>
+    <!-- no translation found for permlab_readMediaAudio (8723513075731763810) -->
+    <skip />
+    <!-- no translation found for permdesc_readMediaAudio (5299772574434619399) -->
+    <skip />
+    <!-- no translation found for permlab_readMediaVideo (7768003311260655007) -->
+    <skip />
+    <!-- no translation found for permdesc_readMediaVideo (3846400073770403528) -->
+    <skip />
+    <!-- no translation found for permlab_readMediaImage (1507059005825769856) -->
+    <skip />
+    <!-- no translation found for permdesc_readMediaImage (8328052622292457588) -->
+    <skip />
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‏‏‏‏‏‎‎‏‏‏‎‏‏‎‎‏‎‎‏‎‏‎‎‎‏‏‎‎‎‎‎‎‏‏‏‏‏‎‏‎‎‎‎‏‏‏‏‎‏‎‏‏‏‎‎‎modify or delete the contents of your shared storage‎‏‎‎‏‎"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‎‎‎‏‏‏‏‎‏‏‎‏‏‎‎‏‎‏‏‏‏‏‏‎‎‎‏‏‏‎‏‎‎‎‏‎‎‏‎‎‎‎‏‎‎‎‏‏‎‏‏‎‏‏‏‏‎‎Allows the app to write the contents of your shared storage.‎‏‎‎‏‎"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‎‏‎‎‎‎‎‎‎‏‎‏‎‎‎‏‏‏‏‎‎‎‎‎‎‏‎‏‎‎‏‏‏‏‏‏‏‎‎‎‎‎‏‎‎‎‎‎‏‏‎‎‎‎‏‎‏‎make/receive SIP calls‎‏‎‎‏‎"</string>
@@ -729,8 +745,6 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‏‏‏‎‏‎‏‎‎‎‏‎‎‏‎‎‎‎‎‎‏‏‎‎‏‏‎‏‏‏‏‎‏‏‎‏‎‎‏‏‎‎‏‎‏‏‏‎‎‏‏‏‎‎‏‎‎‏‎Allows the holder to bind to the top-level interface of a carrier messaging service. Should never be needed for normal apps.‎‏‎‎‏‎"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‎‎‏‏‏‏‏‎‏‏‎‏‏‏‏‎‏‏‎‎‎‎‏‎‎‏‏‏‏‎‎‎‎‎‎‎‎‏‎‎‎‎‎‏‎‏‎‎‎‎‏‎‎‎‏‎‎bind to carrier services‎‏‎‎‏‎"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‎‎‏‏‏‎‏‏‎‏‏‏‎‏‏‎‏‎‎‎‎‏‏‎‎‎‏‎‏‎‏‎‏‏‏‏‎‏‎‏‏‎‎‏‎‏‏‎‏‎‎‎Allows the holder to bind to carrier services. Should never be needed for normal apps.‎‏‎‎‏‎"</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‎‏‎‏‎‏‎‎‏‏‎‎‏‎‏‏‏‎‏‎‏‏‏‎‎‏‏‎‏‎‎‏‎‏‏‎‏‏‎‏‎‏‏‏‏‏‎‎‏‏‎‏‏‎‎‎‏‎access Do Not Disturb‎‏‎‎‏‎"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‏‏‏‏‏‏‎‎‏‏‎‎‏‏‎‎‎‎‎‎‏‎‎‎‏‎‏‏‎‎‏‎‎‏‏‏‎‎‎‏‏‏‎‏‏‏‏‏‎‎‏‎‏‎‏‎Allows the app to read and write Do Not Disturb configuration.‎‏‎‎‏‎"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‎‏‏‏‎‎‎‎‏‎‏‎‎‏‎‎‏‎‏‎‎‏‎‎‏‎‎‎‎‏‏‏‎‎‏‏‎‎‎‎‎‏‎‏‎‏‎‎‏‎‎‎‏‎‏‎‏‎start view permission usage‎‏‎‎‏‎"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‎‎‏‎‎‎‏‏‏‏‎‎‏‏‏‏‎‎‏‏‎‎‏‎‎‎‏‎‎‏‏‎‎‎‏‎‏‎‎‎‏‏‎‏‎‎‏‎‏‏‏‎‏‎‏‎‎Allows the holder to start the permission usage for an app. Should never be needed for normal apps.‎‏‎‎‏‎"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‏‏‎‏‏‎‎‏‎‎‎‏‏‎‏‎‎‎‏‎‏‏‏‎‎‎‎‏‏‎‎‏‏‏‎‏‎‎‏‎‏‎‎‏‏‏‏‏‏‎‏‎‎‎start view permission decisions‎‏‎‎‏‎"</string>
@@ -1072,10 +1086,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‏‏‏‎‏‏‎‏‎‏‏‎‎‏‎‎‎‎‎‏‎‎‎‏‏‎‏‎‏‏‏‎‎‎‎‏‎‎‏‏‏‏‎‎‏‎‎‏‏‎‎‏‏‎‎‏‎‎‎‏‎‎‏‏‎<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ wants to enable Explore by Touch. When Explore by Touch is turned on, you can hear or see descriptions of what\'s under your finger or perform gestures to interact with the phone.‎‏‎‎‏‎"</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‎‏‏‏‏‏‎‏‎‎‏‎‏‎‎‏‏‎‎‎‎‎‏‎‏‎‏‏‎‎‎‏‎‎‎‎‏‎‏‎‎‎‏‎‎‏‏‏‎‎‎‎‎‎‎‎‏‎1 month ago‎‏‎‎‏‎"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‎‎‏‎‏‎‏‎‏‏‎‎‎‎‏‏‏‎‎‏‏‏‏‎‎‏‎‏‏‏‎‏‏‏‎‏‏‏‏‏‏‎‏‏‎‎‏‏‏‎‎‎‎‎Before 1 month ago‎‏‎‎‏‎"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‏‏‎‎‎‏‎‏‎‎‏‎‎‏‎‎‏‏‏‎‏‏‏‎‏‏‎‎‏‎‎‏‏‏‏‏‎‎‏‏‎‏‎‏‏‏‎‎‏‏‏‏‎‎‎‎‎‎Last ‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%d</xliff:g>‎‏‎‎‏‏‏‎ days‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‏‏‎‎‎‏‎‏‎‎‏‎‎‏‎‎‏‏‏‎‏‏‏‎‏‏‎‎‏‎‎‏‏‏‏‏‎‎‏‏‎‏‎‏‏‏‎‎‏‏‏‏‎‎‎‎‎‎Last ‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%d</xliff:g>‎‏‎‎‏‏‏‎ day‎‏‎‎‏‎</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‎‎‏‏‎‏‏‏‏‏‏‏‏‏‎‏‎‏‏‏‏‎‏‎‏‏‏‏‎‎‏‏‏‏‏‎‎‎‏‎‏‏‏‎‏‏‎‎‎‏‎‏‏‎‎‏‎Last # day‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‎‎‏‏‎‏‏‏‏‏‏‏‏‏‎‏‎‏‏‏‏‎‏‎‏‏‏‏‎‎‏‏‏‏‏‎‎‎‏‎‏‏‏‎‏‏‎‎‎‏‎‏‏‎‎‏‎Last # days‎‏‎‎‏‎}}"</string>
     <string name="last_month" msgid="1528906781083518683">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‎‎‏‏‎‏‏‏‏‏‎‎‎‏‎‎‏‎‎‏‏‏‎‏‏‏‏‎‏‏‎‏‎‎‏‎‏‎‏‏‎‏‎‎‎‏‏‎‏‏‎‏‏‎‏‏‎Last month‎‏‎‎‏‎"</string>
     <string name="older" msgid="1645159827884647400">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‎‏‏‎‏‎‏‎‎‏‏‎‎‏‎‎‎‎‎‏‎‎‏‎‏‏‎‏‎‎‎‏‏‏‏‎‎‏‏‏‎‏‎‏‎‎‎‏‏‏‏‏‎‏‎‎‎‎Older‎‏‎‎‏‎"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‎‏‎‎‏‎‏‏‏‎‏‎‎‎‏‎‏‏‎‏‎‎‏‎‎‏‏‎‎‎‎‎‎‏‎‎‏‏‎‎‎‎‏‎‎‏‎‎‏‏‏‏‏‏‏‏‏‎on ‎‏‎‎‏‏‎<xliff:g id="DATE">%s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
@@ -1094,70 +1105,22 @@
     <string name="year" msgid="5182610307741238982">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‏‎‏‎‏‎‎‏‎‎‏‏‏‎‏‏‏‎‎‎‎‏‎‎‎‏‏‎‎‎‏‏‏‎‎‎‏‏‎‏‏‎‎‎‏‏‎‎year‎‏‎‎‏‎"</string>
     <string name="years" msgid="5797714729103773425">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‎‎‏‏‏‎‏‎‏‏‎‎‏‏‏‏‎‏‏‎‏‎‏‎‎‎‎‎‏‏‎‎‏‎‏‎‎‎‏‏‏‏‏‎‎‏‏‏‎‏‏‏‏‎‎‎‏‎years‎‏‎‎‏‎"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‏‎‎‏‎‎‎‏‏‎‏‏‏‎‎‎‏‏‏‎‏‏‏‏‏‏‏‏‏‏‏‎‎‎‎‏‎‏‏‎‎‏‏‏‏‏‏‎‏‏‎‎‏‏‎‏‎‎now‎‏‎‎‏‎"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‎‎‏‎‏‏‎‏‎‏‏‏‎‎‏‎‏‏‎‎‎‎‏‏‎‏‎‏‏‎‎‏‎‏‏‎‏‎‏‎‏‏‎‎‏‎‏‏‏‎‏‏‎‏‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%d</xliff:g>‎‏‎‎‏‏‏‎m‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‎‎‏‎‏‏‎‏‎‏‏‏‎‎‏‎‏‏‎‎‎‎‏‏‎‏‎‏‏‎‎‏‎‏‏‎‏‎‏‎‏‏‎‎‏‎‏‏‏‎‏‏‎‏‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%d</xliff:g>‎‏‎‎‏‏‏‎m‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‎‏‏‎‎‏‎‎‏‏‏‎‏‏‏‎‏‎‎‏‎‏‏‎‎‏‎‎‏‏‏‏‏‎‏‏‏‏‎‎‎‏‎‎‏‎‎‎‏‏‎‎‎‎‏‏‎‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%d</xliff:g>‎‏‎‎‏‏‏‎h‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‎‏‏‎‎‏‎‎‏‏‏‎‏‏‏‎‏‎‎‏‎‏‏‎‎‏‎‎‏‏‏‏‏‎‏‏‏‏‎‎‎‏‎‎‏‎‎‎‏‏‎‎‎‎‏‏‎‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%d</xliff:g>‎‏‎‎‏‏‏‎h‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‏‎‎‏‎‎‏‏‏‏‎‎‎‎‎‏‎‏‎‏‎‎‏‏‎‏‏‎‎‏‏‏‏‎‏‏‏‏‎‏‎‏‏‎‏‏‏‏‎‏‏‏‎‎‎‎‎‎‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%d</xliff:g>‎‏‎‎‏‏‏‎d‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‏‎‎‏‎‎‏‏‏‏‎‎‎‎‎‏‎‏‎‏‎‎‏‏‎‏‏‎‎‏‏‏‏‎‏‏‏‏‎‏‎‏‏‎‏‏‏‏‎‏‏‏‎‎‎‎‎‎‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%d</xliff:g>‎‏‎‎‏‏‏‎d‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‎‏‎‏‏‎‎‎‏‎‏‏‏‏‎‏‎‏‏‎‏‎‏‏‏‏‎‏‎‎‎‏‎‏‏‏‎‏‎‏‏‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%d</xliff:g>‎‏‎‎‏‏‏‎y‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‎‏‎‏‏‎‎‎‏‎‏‏‏‏‎‏‎‏‏‎‏‎‏‏‏‏‎‏‎‎‎‏‎‏‏‏‎‏‎‏‏‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%d</xliff:g>‎‏‎‎‏‏‏‎y‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‏‏‎‎‏‎‎‎‏‏‏‏‎‎‏‏‎‏‏‎‎‎‏‏‎‎‏‏‎‏‎‏‎‎‎‎‏‎‎‎‎‏‏‏‏‏‏‎‎‏‎‏‎‎‎‎‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%d</xliff:g>‎‏‎‎‏‏‏‎m‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‏‏‎‎‏‎‎‎‏‏‏‏‎‎‏‏‎‏‏‎‎‎‏‏‎‎‏‏‎‏‎‏‎‎‎‎‏‎‎‎‎‏‏‏‏‏‏‎‎‏‎‏‎‎‎‎‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%d</xliff:g>‎‏‎‎‏‏‏‎m‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‎‏‏‎‎‎‎‎‎‎‎‏‏‏‏‏‎‎‎‏‏‏‏‏‏‏‎‏‎‎‎‎‏‎‎‏‎‏‏‏‎‏‎‏‏‏‏‏‏‎‏‎‏‎‏‎‎‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%d</xliff:g>‎‏‎‎‏‏‏‎h‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‎‏‏‎‎‎‎‎‎‎‎‏‏‏‏‏‎‎‎‏‏‏‏‏‏‏‎‏‎‎‎‎‏‎‎‏‎‏‏‏‎‏‎‏‏‏‏‏‏‎‏‎‏‎‏‎‎‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%d</xliff:g>‎‏‎‎‏‏‏‎h‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‎‏‎‎‏‏‏‎‏‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‎‎‎‏‎‏‏‎‎‎‎‎‎‎‏‏‎‏‏‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%d</xliff:g>‎‏‎‎‏‏‏‎d‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‎‏‎‎‏‏‏‎‏‎‎‏‎‏‏‏‎‎‎‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‎‎‎‏‎‏‏‎‎‎‎‎‎‎‏‏‎‏‏‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%d</xliff:g>‎‏‎‎‏‏‏‎d‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‏‎‎‎‏‎‎‎‎‏‏‎‎‏‎‏‎‏‏‏‎‎‏‎‏‏‎‎‎‎‏‎‏‏‏‎‏‎‏‏‎‎‎‎‎‎‏‎‏‎‎‎‎‏‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%d</xliff:g>‎‏‎‎‏‏‏‎y‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‏‎‎‎‏‎‎‎‎‏‏‎‎‏‎‏‎‏‏‏‎‎‏‎‏‏‎‎‎‎‏‎‏‏‏‎‏‎‏‏‎‎‎‎‎‎‏‎‏‎‎‎‎‏‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%d</xliff:g>‎‏‎‎‏‏‏‎y‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‏‎‎‏‎‏‏‎‎‏‏‎‎‏‏‎‎‏‏‏‏‎‏‎‎‏‏‏‎‎‎‏‏‎‎‏‏‏‎‏‎‎‎‎‎‎‏‏‎‎‏‏‏‏‎‎‎‎‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%d</xliff:g>‎‏‎‎‏‏‏‎ minutes ago‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‏‎‎‏‎‏‏‎‎‏‏‎‎‏‏‎‎‏‏‏‏‎‏‎‎‏‏‏‎‎‎‏‏‎‎‏‏‏‎‏‎‎‎‎‎‎‏‏‎‎‏‏‏‏‎‎‎‎‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%d</xliff:g>‎‏‎‎‏‏‏‎ minute ago‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‎‏‏‏‎‏‎‏‎‏‏‎‏‎‏‏‏‏‎‎‏‏‎‏‏‎‎‏‏‏‎‎‎‏‎‎‎‏‎‎‎‏‏‏‏‎‎‎‏‏‏‏‎‎‎‎‏‏‎‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%d</xliff:g>‎‏‎‎‏‏‏‎ hours ago‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‎‏‏‏‎‏‎‏‎‏‏‎‏‎‏‏‏‏‎‎‏‏‎‏‏‎‎‏‏‏‎‎‎‏‎‎‎‏‎‎‎‏‏‏‏‎‎‎‏‏‏‏‎‎‎‎‏‏‎‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%d</xliff:g>‎‏‎‎‏‏‏‎ hour ago‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‎‎‎‏‏‎‎‏‎‏‏‏‏‏‏‎‎‏‏‏‏‏‏‎‏‏‏‏‎‎‎‏‏‎‏‎‏‎‎‎‎‎‎‏‏‎‏‏‎‏‏‏‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%d</xliff:g>‎‏‎‎‏‏‏‎ days ago‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‎‎‎‏‏‎‎‏‎‏‏‏‏‏‏‎‎‏‏‏‏‏‏‎‏‏‏‏‎‎‎‏‏‎‏‎‏‎‎‎‎‎‎‏‏‎‏‏‎‏‏‏‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%d</xliff:g>‎‏‎‎‏‏‏‎ day ago‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‎‎‏‎‎‎‎‎‎‏‏‏‎‏‎‎‎‏‏‎‏‎‏‏‎‏‏‎‎‏‎‏‎‎‏‎‎‎‎‎‎‎‎‏‏‏‎‎‏‏‎‏‏‏‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%d</xliff:g>‎‏‎‎‏‏‏‎ years ago‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‎‎‏‎‎‎‎‎‎‏‏‏‎‏‎‎‎‏‏‎‏‎‏‏‎‏‏‎‎‏‎‏‎‎‏‎‎‎‎‎‎‎‎‏‏‏‎‎‏‏‎‏‏‏‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%d</xliff:g>‎‏‎‎‏‏‏‎ year ago‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‏‏‏‏‎‏‏‏‏‎‎‏‏‏‎‎‏‏‎‎‎‏‎‏‏‏‏‎‎‎‏‏‎‎‎‏‎‎‎‏‎‏‏‏‎‏‎‎‎‏‏‏‎‏‎‏‏‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%d</xliff:g>‎‏‎‎‏‏‏‎ minutes‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‏‏‏‏‎‏‏‏‏‎‎‏‏‏‎‎‏‏‎‎‎‏‎‏‏‏‏‎‎‎‏‏‎‎‎‏‎‎‎‏‎‏‏‏‎‏‎‎‎‏‏‏‎‏‎‏‏‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%d</xliff:g>‎‏‎‎‏‏‏‎ minute‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‎‏‎‎‏‏‎‎‏‎‏‎‎‏‎‏‎‎‎‏‎‎‏‏‎‏‎‏‎‎‏‏‎‎‎‏‎‎‏‏‎‎‏‎‎‎‏‏‎‏‏‏‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%d</xliff:g>‎‏‎‎‏‏‏‎ hours‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‎‎‏‎‎‏‏‎‎‏‎‏‎‎‏‎‏‎‎‎‏‎‎‏‏‎‏‎‏‎‎‏‏‎‎‎‏‎‎‏‏‎‎‏‎‎‎‏‏‎‏‏‏‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%d</xliff:g>‎‏‎‎‏‏‏‎ hour‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‏‎‏‎‎‎‏‎‎‎‎‎‎‏‏‎‎‏‏‎‏‏‎‏‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‎‎‎‏‎‏‏‎‏‎‎‎‎‎‏‏‏‎‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%d</xliff:g>‎‏‎‎‏‏‏‎ days‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‏‎‏‎‎‎‏‎‎‎‎‎‎‏‏‎‎‏‏‎‏‏‎‏‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‎‎‎‏‎‏‏‎‏‎‎‎‎‎‏‏‏‎‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%d</xliff:g>‎‏‎‎‏‏‏‎ day‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‏‎‏‎‎‏‏‏‎‎‎‎‎‎‏‎‏‏‎‏‏‏‎‏‏‏‏‏‏‎‏‏‏‎‏‎‎‎‎‏‏‏‎‏‎‎‏‎‎‏‏‏‏‎‎‏‏‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%d</xliff:g>‎‏‎‎‏‏‏‎ years‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‏‎‏‎‎‏‏‏‎‎‎‎‎‎‏‎‏‏‎‏‏‏‎‏‏‏‏‏‏‎‏‏‏‎‏‎‎‎‎‏‏‏‎‏‎‎‏‎‎‏‏‏‏‎‎‏‏‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%d</xliff:g>‎‏‎‎‏‏‏‎ year‎‏‎‎‏‎</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‏‏‎‏‏‏‎‎‎‎‎‏‎‎‎‏‎‎‏‎‏‎‏‏‎‎‏‏‏‏‎‏‏‎‎‏‏‎‏‏‏‎‎‎‏‎‏‎‎‎‎‏‎‎‎‏‎‎‎‏‎‎‏‏‎<xliff:g id="COUNT">%d</xliff:g>‎‏‎‎‏‏‏‎m‎‏‎‎‏‎"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‎‏‎‎‎‎‎‏‎‎‎‎‎‎‏‏‏‏‎‏‏‎‎‏‏‎‎‏‏‏‏‎‏‎‏‏‎‏‎‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‎‏‏‎‎‏‎‎‏‏‎<xliff:g id="COUNT">%d</xliff:g>‎‏‎‎‏‏‏‎h‎‏‎‎‏‎"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‎‏‎‏‎‏‎‏‎‎‎‏‎‏‏‎‎‎‏‎‎‏‎‎‎‎‏‏‎‏‎‎‏‎‎‎‎‏‎‎‎‏‏‎‎‏‎‏‎‏‎‏‎‎‎‎‏‎‎‏‎‎‏‏‎<xliff:g id="COUNT">%d</xliff:g>‎‏‎‎‏‏‏‎d‎‏‎‎‏‎"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‎‏‎‏‏‎‏‏‏‎‏‏‏‎‎‏‏‏‎‏‏‏‎‎‎‎‎‎‎‏‎‎‏‎‎‏‏‎‎‏‏‎‎‏‏‎‏‏‎‏‎‎‏‎‎‏‎‎‎‏‎‎‏‏‎<xliff:g id="COUNT">%d</xliff:g>‎‏‎‎‏‏‏‎y‎‏‎‎‏‎"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‏‎‎‎‎‎‎‏‎‎‏‎‏‎‎‎‏‏‏‎‏‎‏‏‏‎‎‏‎‏‎‎‏‏‏‎‎‎‏‎‎‏‎‏‎‏‏‏‎‏‎‏‎‎‏‏‏‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT">%d</xliff:g>‎‏‎‎‏‏‏‎m‎‏‎‎‏‎"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‏‎‏‎‏‏‎‎‎‏‎‎‎‎‏‎‎‎‏‏‏‎‏‎‏‏‎‏‏‎‎‏‎‏‎‎‏‏‎‎‎‏‏‎‎‏‏‎‏‎‏‏‎‏‎‏‎‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT">%d</xliff:g>‎‏‎‎‏‏‏‎h‎‏‎‎‏‎"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‏‎‎‎‏‎‏‎‏‎‏‎‏‏‏‏‎‏‏‎‏‎‏‎‏‎‎‏‎‏‎‏‎‏‏‏‏‏‎‎‏‎‏‏‎‏‏‏‎‎‏‎‏‎‏‏‏‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT">%d</xliff:g>‎‏‎‎‏‏‏‎d‎‏‎‎‏‎"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‎‏‏‎‏‏‎‎‏‎‎‎‎‎‏‏‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‎‎‎‎‏‎‏‏‎‏‎‏‏‎‏‎‎‏‎‏‎‎‎in ‎‏‎‎‏‏‎<xliff:g id="COUNT">%d</xliff:g>‎‏‎‎‏‏‏‎y‎‏‎‎‏‎"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‎‏‎‎‎‎‏‏‎‎‏‎‏‏‏‎‏‏‏‎‏‏‏‎‏‏‏‎‎‏‏‎‎‎‎‏‏‎‏‏‎‏‎‎‎‎‏‏‎‏‎‏‎‎‏‎# minute ago‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‎‏‎‎‎‎‏‏‎‎‏‎‏‏‏‎‏‏‏‎‏‏‏‎‏‏‏‎‎‏‏‎‎‎‎‏‏‎‏‏‎‏‎‎‎‎‏‏‎‏‎‏‎‎‏‎# minutes ago‎‏‎‎‏‎}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‎‎‏‏‏‏‎‏‎‎‎‎‏‎‏‏‎‎‏‏‏‎‏‏‎‎‏‎‏‎‎‏‎‏‎‏‏‎‎‎‏‏‏‎‎‎‏‎‏‎‏‏‏‎‏‎# hour ago‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‎‎‏‏‏‏‎‏‎‎‎‎‏‎‏‏‎‎‏‏‏‎‏‏‎‎‏‎‏‎‎‏‎‏‎‏‏‎‎‎‏‏‏‎‎‎‏‎‏‎‏‏‏‎‏‎# hours ago‎‏‎‎‏‎}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‎‏‎‏‎‎‎‎‏‏‎‏‎‏‎‏‎‏‎‎‏‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‏‏‎‎‏‎‏‏‎‎‏‎‏‎‏‏‏‏‏‎‎# day ago‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‎‏‎‏‎‎‎‎‏‏‎‏‎‏‎‏‎‏‎‎‏‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‏‏‎‎‏‎‏‏‎‎‏‎‏‎‏‏‏‏‏‎‎# days ago‎‏‎‎‏‎}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‏‎‎‏‎‏‎‏‏‎‏‏‏‎‏‏‎‎‏‎‎‎‏‏‎‏‏‎‎‎‎‏‎‎‏‏‎‏‎‏‏‎‎‎‏‎‏‎‎‏‏‏‏‎‎‏‎‎# year ago‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‏‎‎‏‎‏‎‏‏‎‏‏‏‎‏‏‎‎‏‎‎‎‏‏‎‏‏‎‎‎‎‏‎‎‏‏‎‏‎‏‏‎‎‎‏‎‏‎‎‏‏‏‏‎‎‏‎‎# years ago‎‏‎‎‏‎}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‎‎‏‎‏‏‎‏‎‏‏‏‏‏‎‎‎‎‎‎‏‏‎‏‎‏‏‏‎‏‏‎‏‏‎‎‏‏‎‏‎‎‏‏‎# minute‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‎‎‏‎‏‏‎‏‎‏‏‏‏‏‎‎‎‎‎‎‏‏‎‏‎‏‏‏‎‏‏‎‏‏‎‎‏‏‎‏‎‎‏‏‎# minutes‎‏‎‎‏‎}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‏‎‎‏‎‎‏‎‎‎‏‎‏‎‏‎‎‏‎‎‎‏‏‎‎‎‎‎‏‏‏‏‎‏‎‎‎‎‎‏‎‏‎‎‏‎‏‏‎‏‎‏‎‏‎‏‎# hour‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‏‎‎‏‎‎‏‎‎‎‏‎‏‎‏‎‎‏‎‎‎‏‏‎‎‎‎‎‏‏‏‏‎‏‎‎‎‎‎‏‎‏‎‎‏‎‏‏‎‏‎‏‎‏‎‏‎# hours‎‏‎‎‏‎}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‏‎‏‏‏‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‎‎‏‏‎‏‎‎‎‏‎‎‏‏‎‏‎‎‏‏‏‎‏‏‏‏‏‎‏‎‎# day‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‏‎‏‏‏‎‏‎‎‏‎‎‎‎‎‏‏‏‏‏‎‎‏‏‎‏‎‎‎‏‎‎‏‏‎‏‎‎‏‏‏‎‏‏‏‏‏‎‏‎‎# days‎‏‎‎‏‎}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‎‏‏‏‎‎‏‏‎‎‏‎‏‎‎‎‎‎‎‏‎‏‏‏‏‏‏‏‎‎‏‏‎‎‎‏‎‏‎‏‎‏‏‏‏‎‎‏‎‏‎‏‎‏‏‎‎‎# year‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‎‏‏‏‎‎‏‏‎‎‏‎‏‎‎‎‎‎‎‏‎‏‏‏‏‏‏‏‎‎‏‏‎‎‎‏‎‏‎‏‎‏‏‏‏‎‎‏‎‏‎‏‎‏‏‎‎‎# years‎‏‎‎‏‎}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‏‏‏‎‎‏‏‏‎‏‎‎‎‏‎‏‏‎‎‎‏‏‎‎‏‏‏‎‏‎‎‏‎‏‏‎‎‎‎‎‏‏‏‏‎‎‏‎‏‏‏‏‏‎‎‎‎‎Video problem‎‏‎‎‏‎"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‎‎‏‏‏‏‏‎‏‏‏‏‏‎‏‎‏‏‎‎‎‏‏‎‎‏‎‎‎‏‏‎‏‏‏‎‏‏‎‎‏‎‎‏‏‏‎‎‏‏‎‎‎‎‎‎‎‎This video isn\'t valid for streaming to this device.‎‏‎‎‏‎"</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‏‎‎‏‎‎‏‎‎‎‏‏‎‏‏‏‏‏‎‏‎‏‏‏‎‎‎‎‏‏‎‎‏‏‏‏‎‎‏‎‏‏‎‏‎‎‎‎‏‏‎‎‎‏‎‎Can\'t play this video.‎‏‎‎‏‎"</string>
@@ -1409,6 +1372,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‎‎‏‎‏‏‎‏‎‎‏‎‎‎‏‎‏‏‏‏‎‎‎‏‎‏‎‎‎‎‎‏‏‎‎‏‏‎‎‎‏‏‏‏‎‎‏‏‏‎‎‏‎‏‎‎‎Perform a factory reset to disable Test Harness Mode.‎‏‎‎‏‎"</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‏‏‏‏‏‎‎‏‎‎‎‎‏‏‎‏‎‏‏‏‏‎‎‎‎‏‏‏‎‎‎‏‎‏‏‏‎‎‎‎‎‏‎‏‏‎‏‎‏‎‎‎‎‎‎‎Serial console enabled‎‏‎‎‏‎"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‏‏‎‎‎‏‎‎‎‏‎‏‏‎‎‎‎‎‎‎‎‎‏‏‎‎‏‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‎‏‎‎‎‏‎‏‏‏‎Performance is impacted. To disable, check bootloader.‎‏‎‎‏‎"</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‎‏‏‎‏‎‏‎‎‎‎‏‎‎‏‏‎‎‎‏‎‏‏‏‏‏‏‎‎‏‎‏‎‏‎‏‎‎‎‏‏‏‎‏‎‏‏‏‏‏‏‏‏‏‎‎‎‎‎Experimental MTE enabled‎‏‎‎‏‎"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‏‏‏‎‎‎‎‎‏‏‎‎‎‏‏‏‏‎‎‏‎‏‎‏‎‏‏‏‎‎‏‎‏‏‎‏‏‎‎‏‏‏‎‎‏‎‎‏‏‎‏‏‏‏‏‎‎Performance and stability might be impacted. Reboot to disable. If enabled using arm64.memtag.bootctl, set it to none beforehand.‎‏‎‎‏‎"</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‎‎‏‏‏‏‏‏‎‎‏‏‏‎‎‏‏‏‎‎‏‏‎‏‏‏‏‏‏‏‎‎‎‏‎‎‏‏‎‎‏‏‎‎‏‏‎‎‎‏‏‏‏‏‏‏‎‎Liquid or debris in USB port‎‏‎‎‏‎"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‏‏‏‏‏‎‎‏‎‏‎‎‏‎‏‏‏‏‎‎‎‏‏‏‏‏‎‏‎‎‏‎‎‏‎‎‎‎‎‎‏‏‏‏‎‏‎‏‏‏‏‎‏‏‏‏‏‎USB port is automatically disabled. Tap to learn more.‎‏‎‎‏‎"</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‏‏‎‎‏‎‏‎‏‏‎‏‎‏‏‏‎‎‎‎‎‎‎‎‏‏‏‎‏‎‎‎‏‎‎‏‏‎‎‎‏‏‏‎‎‏‎‎‎‎‏‏‎‏‎‏‎OK to use USB port‎‏‎‎‏‎"</string>
@@ -1545,10 +1510,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‏‎‏‏‏‏‏‏‏‎‎‎‏‏‎‏‏‏‎‏‎‎‎‎‏‏‎‏‏‏‎‏‎‎‎‎‏‏‎‏‎‎‎‏‏‏‏‎‎‏‎‎‎‎‏‎‏‎Skip‎‏‎‎‏‎"</string>
     <string name="no_matches" msgid="6472699895759164599">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‏‏‏‎‏‎‎‏‏‏‎‏‎‎‏‏‎‎‏‎‎‎‎‏‎‏‏‏‎‏‎‎‎‎‏‏‎‏‏‏‎‏‏‎‏‎‏‎‎‏‎‏‏‎‏‏‏‎No matches‎‏‎‎‏‎"</string>
     <string name="find_on_page" msgid="5400537367077438198">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‎‏‏‏‏‎‎‏‎‏‎‎‏‎‎‎‎‎‎‎‏‏‏‏‏‎‏‎‎‎‎‎‎‏‏‎‏‏‏‏‏‏‏‎‎‎‎‏‎‏‏‏‏‎‏‏‎‎Find on page‎‏‎‎‏‎"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‎‏‎‎‏‎‏‎‎‎‏‏‏‎‏‏‏‎‏‏‎‏‏‏‏‎‎‎‎‎‏‎‎‎‏‎‏‎‎‏‎‎‏‎‎‎‏‏‎‎‎‎‎‎‏‎‎‎‏‎‎‏‏‎<xliff:g id="INDEX">%d</xliff:g>‎‏‎‎‏‏‏‎ of ‎‏‎‎‏‏‎<xliff:g id="TOTAL">%d</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‎‏‎‎‏‎‏‎‎‎‏‏‏‎‏‏‏‎‏‏‎‏‏‏‏‎‎‎‎‎‏‎‎‎‏‎‏‎‎‏‎‎‏‎‎‎‏‏‎‎‎‎‎‎‏‎‎1 match‎‏‎‎‏‎</item>
-    </plurals>
+    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‏‏‏‎‏‎‎‎‎‎‏‎‎‏‏‏‎‎‎‏‎‎‎‏‎‏‏‏‎‏‏‏‎‏‏‎‎‎‏‎‏‎‎‎‎‎‏‎‏‏‏‏‏‎‎‏‏‎# match‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‏‏‏‎‏‎‎‎‎‎‏‎‎‏‏‏‎‎‎‏‎‎‎‏‎‏‏‏‎‏‏‏‎‏‏‎‎‎‏‎‏‎‎‎‎‎‏‎‏‏‏‏‏‎‎‏‏‎# of ‎‏‎‎‏‏‎{total}‎‏‎‎‏‏‏‎‎‏‎‎‏‎}} }"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‎‎‏‏‎‎‏‎‎‏‎‏‎‏‎‎‏‎‎‎‏‏‎‏‎‎‎‎‎‎‏‎‎‎‎‏‎‎‎‏‎‎‎‎‏‎‎‎‏‎‎‏‎‏‏‎‎Done‎‏‎‎‏‎"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‎‏‎‎‎‏‏‎‏‎‎‏‏‎‎‏‎‎‎‎‏‎‏‏‏‏‎‎‎‏‎‎‏‏‏‏‎‏‎‎‏‏‏‎‎‏‏‏‎‏‎‎‏‎‎‎Erasing shared storage…‎‏‎‎‏‎"</string>
     <string name="share" msgid="4157615043345227321">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‏‏‎‏‏‎‎‏‎‏‏‎‏‎‎‎‎‏‏‎‏‏‎‏‎‏‎‎‏‏‎‏‏‎‏‏‎‏‎‎‏‏‎‎‏‏‏‏‎‎‎‏‏‏‎‎‏‎Share‎‏‎‎‏‎"</string>
@@ -1678,10 +1640,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‎‏‎‏‎‎‎‏‎‏‎‏‎‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‏‏‏‎‏‎‎‏‎‎‏‎‎‏‏‎‏‎‏‏‎‏‏‎‏‏‎‏‏‎Wrong Pattern‎‏‎‎‏‎"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‎‎‎‏‏‎‎‎‎‎‎‏‎‎‏‏‏‏‏‎‏‎‏‎‎‏‏‏‏‎‏‎‏‎‏‏‎‎‏‎‎‎‎‎‎‏‎‎‎‎‎‎‎‎‏‎‎Wrong Password‎‏‎‎‏‎"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‏‎‎‎‏‎‏‎‏‎‏‎‎‎‏‏‎‎‏‏‎‏‏‎‎‏‏‎‏‎‏‎‎‎‎‎‎‏‎‏‏‎‎‏‏‏‎‏‎‏‎‎‏‎‎‏‎‎Wrong PIN‎‏‎‎‏‎"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‏‎‏‎‎‏‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‎‎‎‏‏‎‏‏‏‎‎‎‎‎‏‎‏‏‏‏‏‎‎‎‎‎Try again in ‎‏‎‎‏‏‎<xliff:g id="NUMBER">%d</xliff:g>‎‏‎‎‏‏‏‎ seconds.‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‏‎‏‎‎‏‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‎‎‎‏‏‎‏‏‏‎‎‎‎‎‏‎‏‏‏‏‏‎‎‎‎‎Try again in 1 second.‎‏‎‎‏‎</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‎‎‎‎‏‏‎‏‎‎‎‎‏‎‏‏‎‏‏‏‏‎‏‏‏‏‎‎‏‏‎‏‎‏‎‏‏‎‏‏‎‏‎‏‏‏‎‏‏‏‏‏‏‎‏‎‎‎Draw your pattern‎‏‎‎‏‎"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‏‏‏‏‎‏‎‏‏‎‏‏‏‎‏‎‏‎‏‎‏‎‎‏‏‎‏‎‎‏‎‎‏‎‎‎‏‏‎‎‎‏‏‎‏‎‏‏‎‎‏‏‏‎‏‏‏‎Enter SIM PIN‎‏‎‎‏‎"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‎‎‎‎‏‎‏‎‏‏‎‎‎‎‏‏‎‎‎‏‏‏‏‏‏‏‎‏‏‏‎‏‏‏‏‏‎‏‏‎‏‎‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‎Enter PIN‎‏‎‎‏‎"</string>
@@ -1878,10 +1836,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‎‎‏‎‏‏‏‎‏‎‎‎‎‏‎‏‎‎‎‎‏‎‎‎‏‎‏‏‎‏‎‎‎‏‎‏‎‎‏‏‏‎‏‏‎‏‎‏‏‏‏‏‎‏‎‎‎‏‎Create a PIN for modifying restrictions‎‏‎‎‏‎"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‎‎‎‎‏‏‎‎‎‏‏‎‏‏‎‎‎‏‏‏‏‎‎‎‏‎‏‏‏‏‎‏‎‎‎‏‎‏‎‏‎‎‏‏‎‎‎‎‎‏‎‏‏‎‎‎PINs don\'t match. Try again.‎‏‎‎‏‎"</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‎‏‏‏‏‎‎‎‎‎‎‏‎‎‏‏‎‏‏‎‎‏‏‏‏‎‏‏‏‎‏‎‏‏‎‎‎‏‏‏‎‎‏‏‎‎‎‏‎‏‎‎‏‎‎‏‎PIN is too short. Must be at least 4 digits.‎‏‎‎‏‎"</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‏‎‏‏‏‎‎‎‏‏‎‎‏‎‏‏‏‏‏‏‎‎‎‎‏‎‏‏‏‎‏‏‎‎‎‎‎‎‎‏‎‎‏‏‏‎‎‏‏‏‎‎‏‏‎‎‏‎Try again in ‎‏‎‎‏‏‎<xliff:g id="COUNT">%d</xliff:g>‎‏‎‎‏‏‏‎ seconds‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‏‎‏‏‏‎‎‎‏‏‎‎‏‎‏‏‏‏‏‏‎‎‎‎‏‎‏‏‏‎‏‏‎‎‎‎‎‎‎‏‎‎‏‏‏‎‎‏‏‏‎‎‏‏‎‎‏‎Try again in 1 second‎‏‎‎‏‎</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‏‏‏‎‏‏‎‎‎‏‏‏‎‏‎‎‏‎‎‎‎‏‏‏‎‏‏‏‏‏‎‎‎‎‎‎‎‎‏‏‎‎‎‏‏‏‏‎‎‎‏‏‏‎‏‏‏‎Try again later‎‏‎‎‏‎"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‎‎‎‎‎‎‏‎‎‎‎‏‏‏‎‏‏‎‏‏‏‏‎‎‎‏‎‏‏‎‎‏‏‏‏‏‏‎‎‎‎‏‎‎‏‏‏‏‎‏‎‎‏‏‏‏‏‎Viewing full screen‎‏‎‎‏‎"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‏‏‎‏‏‏‎‎‏‏‏‎‏‏‎‏‏‏‎‎‎‎‏‏‏‎‎‏‏‎‏‏‎‏‎‏‎‎‎‏‎‎‎‏‏‏‎‎‏‏‎‎‎‎‎‎To exit, swipe down from the top.‎‏‎‎‏‎"</string>
@@ -1909,46 +1863,20 @@
     <string name="data_saver_description" msgid="4995164271550590517">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‏‎‏‎‎‏‎‎‏‏‎‎‎‏‏‎‏‏‏‎‎‎‎‏‎‎‎‎‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‏‏‎‎‎‏‏‎‏‎‏‎To help reduce data usage, Data Saver prevents some apps from sending or receiving data in the background. An app you’re currently using can access data, but may do so less frequently. This may mean, for example, that images don’t display until you tap them.‎‏‎‎‏‎"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‏‎‎‎‎‏‏‎‏‏‎‏‎‏‎‎‏‏‎‏‏‏‏‎‏‏‎‎‎‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‏‎‎‏‏‎‏‎‎‏‎Turn on Data Saver?‎‏‎‎‏‎"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‏‎‎‎‎‏‏‎‏‏‏‎‏‎‏‎‎‎‎‏‏‏‎‏‏‎‏‏‎‎‏‎‏‏‏‎‎‎‏‎‏‎‎‏‎‎‎‏‎‎‎‎‎‏‏‏‎‎Turn on‎‏‎‎‏‎"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‎‎‎‏‎‎‏‏‎‏‎‏‎‎‎‏‎‎‎‎‎‏‎‏‎‎‏‏‎‎‎‎‏‎‏‎‎‎‎‏‏‎‎‎‎‏‎For %1$d minutes (until ‎‏‎‎‏‏‎<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>‎‏‎‎‏‏‏‎)‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‎‎‎‏‎‎‏‏‎‏‎‏‎‎‎‏‎‎‎‎‎‏‎‏‎‎‏‏‎‎‎‎‏‎‏‎‎‎‎‏‏‎‎‎‎‏‎For one minute (until ‎‏‎‎‏‏‎<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>‎‏‎‎‏‏‏‎)‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‎‏‎‏‏‎‏‏‎‏‎‎‏‎‎‏‎‏‏‎‎‏‏‎‏‎‏‎‎‎‏‏‏‎‎‎‎‏‎‎‎‏‎‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎For %1$d min (until ‎‏‎‎‏‏‎<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>‎‏‎‎‏‏‏‎)‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‎‏‎‏‏‎‏‏‎‏‎‎‏‎‎‏‎‏‏‎‎‏‏‎‏‎‏‎‎‎‏‏‏‎‎‎‎‏‎‎‎‏‎‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎For 1 min (until ‎‏‎‎‏‏‎<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>‎‏‎‎‏‏‏‎)‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‏‎‎‏‏‎‏‎‏‏‏‏‏‏‎‎‎‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‎‏‏‎‎‎‏‏‎‎‎‎‎‎‎‎‎‏‎‎‎‏‏‎‎For %1$d hours (until ‎‏‎‎‏‏‎<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>‎‏‎‎‏‏‏‎)‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‏‎‎‏‏‎‏‎‏‏‏‏‏‏‎‎‎‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‎‏‏‎‎‎‏‏‎‎‎‎‎‎‎‎‎‏‎‎‎‏‏‎‎For 1 hour (until ‎‏‎‎‏‏‎<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>‎‏‎‎‏‏‏‎)‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‎‎‎‏‎‏‎‏‏‏‎‎‎‏‏‎‎‏‏‎‏‏‏‏‏‏‏‎‎‏‎‏‏‏‎‎‎‎‎‎‎‎‏‏‎‎‎‎‏‎‎‎‎‏‎‏‎‎For %1$d hr (until ‎‏‎‎‏‏‎<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>‎‏‎‎‏‏‏‎)‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‎‎‎‏‎‏‎‏‏‏‎‎‎‏‏‎‎‏‏‎‏‏‏‏‏‏‏‎‎‏‎‏‏‏‎‎‎‎‎‎‎‎‏‏‎‎‎‎‏‎‎‎‎‏‎‏‎‎For 1 hr (until ‎‏‎‎‏‏‎<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>‎‏‎‎‏‏‏‎)‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‎‎‎‏‎‎‎‏‏‏‎‏‏‎‏‎‎‎‏‏‏‎‏‎‏‎‎‎‎‎‏‏‎‏‎‎‏‏‎‏‏‏‎‎‏‏‎‎For %d minutes‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‎‎‎‏‎‎‎‏‏‏‎‏‏‎‏‎‎‎‏‏‏‎‏‎‏‎‎‎‎‎‏‏‎‏‎‎‏‏‎‏‏‏‎‎‏‏‎‎For one minute‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‎‎‎‎‎‏‏‏‎‏‏‏‎‎‎‏‎‎‎‎‏‎‏‎‎‎‏‎‏‎‎‎‎‏‎‏‎‎‏‎‏‎‏‏‏‎‏‎‏‏‎‎‎‏‎‏‏‎For %d min‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‎‎‎‎‎‏‏‏‎‏‏‏‎‎‎‏‎‎‎‎‏‎‏‎‎‎‏‎‏‎‎‎‎‏‎‏‎‎‏‎‏‎‏‏‏‎‏‎‏‏‎‎‎‏‎‏‏‎For 1 min‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‏‎‏‎‎‏‎‏‎‏‎‎‏‏‎‏‎‎‎‏‏‎‏‎‎‎‎‏‏‏‎‏‎‎‎‎‏‎‏‎‎‏‎‎‏‏‎‏‏‎‏‏‎‎‏‏‎‎For %d hours‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‏‎‏‎‎‏‎‏‎‏‎‎‏‏‎‏‎‎‎‏‏‎‏‎‎‎‎‏‏‏‎‏‎‎‎‎‏‎‏‎‎‏‎‎‏‏‎‏‏‎‏‏‎‎‏‏‎‎For 1 hour‎‏‎‎‏‎</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‎‏‎‏‏‏‎‏‎‎‎‎‏‏‏‎‎‏‎‎‏‎‏‎‏‎‏‎‎‏‏‏‏‏‏‏‎‎‏‏‎‏‎‏‎‏‎‎‎‏‏‎‎‎‎For %d hr‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‎‏‎‏‏‏‎‏‎‎‎‎‏‏‏‎‎‏‎‎‏‎‏‎‏‎‏‎‎‏‏‏‏‏‏‏‎‎‏‏‎‏‎‏‎‏‎‎‎‏‏‎‎‎‎For 1 hr‎‏‎‎‏‎</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‏‏‏‎‎‎‎‏‏‏‎‎‎‎‏‎‎‎‏‎‎‏‎‎‎‏‏‎‎‏‏‏‎‎‏‎‏‏‎‏‏‎‏‏‏‎‏‏‏‏‏‏‎‏‎For one minute (until ‎‏‎‎‏‏‎{formattedTime}‎‏‎‎‏‏‏‎)‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‏‏‏‎‎‎‎‏‏‏‎‎‎‎‏‎‎‎‏‎‎‏‎‎‎‏‏‎‎‏‏‏‎‎‏‎‏‏‎‏‏‎‏‏‏‎‏‏‏‏‏‏‎‏‎For # minutes (until ‎‏‎‎‏‏‎{formattedTime}‎‏‎‎‏‏‏‎)‎‏‎‎‏‎}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‎‎‏‏‏‏‎‏‏‎‎‎‎‏‎‎‏‏‏‏‎‎‎‎‎‏‏‏‎‏‎‏‎‏‎‎‏‏‎‎‏‎‎‏‎‎‏‎‎‏‏‏‎‎‏‏‎‎For 1 min (until ‎‏‎‎‏‏‎{formattedTime}‎‏‎‎‏‏‏‎)‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‎‎‏‏‏‏‎‏‏‎‎‎‎‏‎‎‏‏‏‏‎‎‎‎‎‏‏‏‎‏‎‏‎‏‎‎‏‏‎‎‏‎‎‏‎‎‏‎‎‏‏‏‎‎‏‏‎‎For # min (until ‎‏‎‎‏‏‎{formattedTime}‎‏‎‎‏‏‏‎)‎‏‎‎‏‎}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‏‏‎‏‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‏‏‏‎‎‎‎‏‏‏‎‎‎‎‎‎‎‏‏‏‏‎‎‎‏‎‏‎‏‏‎‎‎‏‏‎‏‏‎For 1 hour (until ‎‏‎‎‏‏‎{formattedTime}‎‏‎‎‏‏‏‎)‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‏‏‎‏‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‏‏‏‎‎‎‎‏‏‏‎‎‎‎‎‎‎‏‏‏‏‎‎‎‏‎‏‎‏‏‎‎‎‏‏‎‏‏‎For # hours (until ‎‏‎‎‏‏‎{formattedTime}‎‏‎‎‏‏‏‎)‎‏‎‎‏‎}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‏‏‎‎‎‏‎‏‏‏‏‏‏‏‎‏‏‎‏‏‎‏‏‎‏‎‎‎‎‏‎‎‏‎‏‏‏‏‏‎‏‎‏‎‏‎‎‏‏‎‏‏‎‏‎‎‏‎For 1 hr (until ‎‏‎‎‏‏‎{formattedTime}‎‏‎‎‏‏‏‎)‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‏‏‎‎‎‏‎‏‏‏‏‏‏‏‎‏‏‎‏‏‎‏‏‎‏‎‎‎‎‏‎‎‏‎‏‏‏‏‏‎‏‎‏‎‏‎‎‏‏‎‏‏‎‏‎‎‏‎For # hr (until ‎‏‎‎‏‏‎{formattedTime}‎‏‎‎‏‏‏‎)‎‏‎‎‏‎}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‎‎‏‏‏‏‎‎‏‎‏‏‎‎‎‎‎‏‏‎‏‏‏‎‎‏‎‏‎‏‎‏‏‎‎‏‎‏‏‎‎‎‏‏‎‎‏‏‏‏‏‎‏‏‏‏‎‎For one minute‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‎‎‏‏‏‏‎‎‏‎‏‏‎‎‎‎‎‏‏‎‏‏‏‎‎‏‎‏‎‏‎‏‏‎‎‏‎‏‏‎‎‎‏‏‎‎‏‏‏‏‏‎‏‏‏‏‎‎For # minutes‎‏‎‎‏‎}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‏‏‎‎‏‏‎‏‏‎‎‎‏‎‏‏‏‎‎‏‎‏‏‎‎‎‎‏‎‏‎‏‏‏‎‎‏‏‏‎‏‎‏‎‎‏‏‏‏‏‎‏‏‎‏‎‎For 1 min‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‏‏‎‎‏‏‎‏‏‎‎‎‏‎‏‏‏‎‎‏‎‏‏‎‎‎‎‏‎‏‎‏‏‏‎‎‏‏‏‎‏‎‏‎‎‏‏‏‏‏‎‏‏‎‏‎‎For # min‎‏‎‎‏‎}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‎‏‏‎‏‎‎‏‏‏‎‏‏‎‎‎‏‎‎‎‏‎‎‎‏‏‎‎‎‎‏‏‏‏‏‏‎‎‏‎‏‏‏‎‏‎‎‏‏‎‎‏‎‏‎‎‏‎For 1 hour‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‎‏‏‎‏‎‎‏‏‏‎‏‏‎‎‎‏‎‎‎‏‎‎‎‏‏‎‎‎‎‏‏‏‏‏‏‎‎‏‎‏‏‏‎‏‎‎‏‏‎‎‏‎‏‎‎‏‎For # hours‎‏‎‎‏‎}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‎‏‏‏‎‎‎‏‏‏‎‎‏‏‏‏‏‎‏‎‎‏‎‎‎‎‎‏‎‏‎‏‏‏‏‏‎‏‏‎‎‏‎‎‎‏‎‎‎‎‎‏‏‏‎‎‏‎For 1 hr‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‎‏‏‏‎‎‎‏‏‏‎‎‏‏‏‏‏‎‏‎‎‏‎‎‎‎‎‏‎‏‎‏‏‏‏‏‎‏‏‎‎‏‎‎‎‏‎‎‎‎‎‏‏‏‎‎‏‎For # hr‎‏‎‎‏‎}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‏‎‏‏‏‏‎‎‎‏‎‎‏‏‎‏‏‏‏‏‏‏‎‏‎‏‎‎‎‎‎‏‎‏‎‏‎‎‎‏‎‎‏‏‏‏‎‏‎‎‏‏‎‏‏‏‎‎Until ‎‏‎‎‏‏‎<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‏‎‎‏‏‏‎‏‎‏‎‎‏‏‏‏‏‎‏‎‏‏‏‏‎‎‎‎‏‎‏‎‎‎‎‎‏‎‏‎‏‎‏‎‏‎‏‏‎‏‏‎‏‎‏‏‏‎Until ‎‏‎‎‏‏‎<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‏‏‏‎‎‏‎‏‏‏‎‏‎‏‎‎‎‏‏‏‎‎‎‎‏‎‏‎‎‏‎‏‏‏‎‎‏‎‏‎‏‏‏‏‏‎‎‏‏‎‏‎‎‏‎‏‏‎Until ‎‏‎‎‏‏‎<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ (next alarm)‎‏‎‎‏‎"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‎‎‏‎‎‎‏‏‏‎‎‎‏‎‏‏‎‏‎‏‏‏‏‎‏‎‏‏‎‎‎‎‏‎‏‏‎‏‏‎‏‎‎‏‏‎‎‏‏‎‏‎‎‎‎‎‎‎Until you turn off‎‏‎‎‏‎"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‏‏‎‎‎‎‎‎‏‏‎‏‎‏‎‎‎‎‎‎‎‏‎‏‎‏‎‏‏‎‏‎‎‎‎‏‎‏‎‏‏‏‎‎‎‏‏‎‏‎‏‏‎‎‎‏‏‎Until you turn off Do Not Disturb‎‏‎‎‏‎"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‏‏‎‎‏‎‎‎‏‎‏‎‎‏‎‏‏‎‎‏‏‎‎‏‏‎‎‏‎‎‎‎‏‎‏‎‎‎‎‏‎‎‎‏‏‎‏‏‏‎‎‏‏‏‏‎‏‎‎‏‎‎‏‏‎<xliff:g id="FIRST">%1$s</xliff:g>‎‏‎‎‏‏‏‎ / ‎‏‎‎‏‏‎<xliff:g id="REST">%2$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‏‎‎‏‎‏‎‎‎‏‏‏‏‎‏‎‎‎‎‏‏‎‏‎‏‎‎‎‏‏‎‏‎‏‎‎‎‎‎‏‎‎‎‏‏‎‎‎‎‏‏‏‏‎‏‎‎‎Collapse‎‏‎‎‏‎"</string>
-    <string name="zen_mode_feature_name" msgid="3785547207263754500">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‎‏‎‎‎‏‎‎‎‏‏‏‏‎‏‏‏‎‎‏‎‎‎‎‎‏‏‎‏‏‎‎‏‎‏‏‎‏‏‎‏‏‎‎‏‏‎‎‏‎‎‎‎‎‏‎‎‎Do not disturb‎‏‎‎‏‎"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‏‏‎‏‎‏‏‏‏‎‏‎‎‏‎‏‏‎‎‎‎‏‏‎‏‏‏‏‏‏‏‎‎‎‎‎‎‎‏‎‏‏‏‎‏‏‎‎‎‎‎‏‏‏‎‎‎‎Downtime‎‏‎‎‏‎"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‏‏‎‏‎‏‎‎‏‏‏‏‎‏‏‎‏‎‏‏‏‏‏‏‎‏‏‎‎‏‎‎‏‎‎‎‏‏‏‎‏‏‎‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎Weeknight‎‏‎‎‏‎"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‏‎‏‎‎‏‏‎‏‎‏‎‏‎‏‏‎‏‏‎‏‎‏‎‏‎‎‏‏‎‏‎‏‏‏‎‏‏‎‏‏‎‏‏‏‏‏‏‎‎‎‏‎‏‎‎Weekend‎‏‎‎‏‎"</string>
@@ -1987,10 +1915,6 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‏‎‎‎‎‎‎‏‎‏‏‎‏‎‏‏‏‎‏‎‏‏‎‏‎‏‎‏‏‏‏‏‎‎‏‎‎‏‏‎‎‎‏‏‎‎‎‎‏‏‏‏‎‎‏‎Incoming call‎‏‎‎‏‎"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‏‏‏‎‏‏‎‏‏‎‏‏‏‏‏‎‎‏‏‏‏‏‏‎‏‏‏‏‎‏‎‏‏‏‎‏‏‎‏‏‎‏‏‏‏‎‏‏‎‏‏‎‎‏‎‏‏‎Ongoing call‎‏‎‎‏‎"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‎‏‎‎‏‎‏‎‎‎‎‎‏‎‎‎‎‎‎‏‎‎‏‏‎‎‎‎‏‏‎‏‎‎‏‏‏‎‏‏‎‎‎‎‎Screening an incoming call‎‏‎‎‏‎"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‏‏‎‎‎‎‏‏‏‏‎‎‎‎‏‏‎‎‎‎‏‏‏‏‏‏‎‎‏‏‎‎‎‏‏‎‏‎‏‏‎‏‎‏‏‏‎‏‎‎‏‎‏‎‏‏‎‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%1$d</xliff:g>‎‏‎‎‏‏‏‎ selected‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‏‏‎‎‎‎‏‏‏‏‎‎‎‎‏‏‎‎‎‎‏‏‏‏‏‏‎‎‏‏‎‎‎‏‏‎‏‎‏‏‎‏‎‏‏‏‎‏‎‎‏‎‏‎‏‏‎‎‏‎‎‏‏‎<xliff:g id="COUNT_0">%1$d</xliff:g>‎‏‎‎‏‏‏‎ selected‎‏‎‎‏‎</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‏‎‏‎‏‎‎‎‏‏‎‏‎‏‏‏‎‏‏‎‎‏‏‏‏‎‎‎‏‏‎‏‎‎‎‎‏‏‎‎‏‎‏‎‎‏‏‏‎‏‎‏‏‎‎‏‎‎Uncategorized‎‏‎‎‏‎"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‎‏‎‎‏‏‏‏‎‎‏‎‏‎‏‏‎‎‏‏‏‏‏‏‎‏‏‎‏‎‎‎‏‏‏‏‎‎‏‎‎‎‎‎‏‏‎‏‎‏‎‏‏‏‏‏‏‎You set the importance of these notifications.‎‏‎‎‏‎"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‎‏‏‎‎‏‎‎‎‏‎‎‏‏‎‏‎‎‎‏‎‏‏‏‏‏‏‎‎‏‏‏‎‏‎‏‏‏‎‏‏‎‎‏‎‏‏‎‏‏‏‏‎‎‏‏‏‎This is important because of the people involved.‎‏‎‎‏‎"</string>
@@ -2056,10 +1980,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‎‎‏‎‎‎‏‏‏‎‎‏‎‏‎‏‏‏‎‎‎‏‎‏‏‏‏‎‏‎‎‎‎‎‏‏‏‎‎‎‎‎‏‎‏‎‎‎‎‏‎‏‎‏‎‏‎Save for Autofill‎‏‎‎‏‎"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‎‏‎‎‏‏‎‏‏‎‎‎‎‏‏‏‎‎‎‏‎‎‏‏‏‏‎‏‏‏‏‎‏‎‎‎‏‏‏‏‏‏‎‎‎‎‏‎‎‎‎‏‎‎‏‎‎‎Contents can’t be autofilled‎‏‎‎‏‎"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‎‏‏‏‎‏‏‏‎‏‏‎‎‏‏‎‎‏‏‏‎‎‏‏‎‎‏‎‎‏‎‎‏‎‎‎‎‎‎‎‏‎‎‎‏‏‏‎‏‏‎‏‎‎‏‎‏‎No autofill suggestions‎‏‎‎‏‎"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‎‏‎‏‎‎‎‎‎‎‏‏‏‏‎‎‏‎‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‎‎‏‏‏‏‎‎‎‏‎‏‏‏‎‏‏‎‏‎‏‎‎‎‏‎‎‏‏‎<xliff:g id="COUNT">%1$s</xliff:g>‎‏‎‎‏‏‏‎ autofill suggestions‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‎‏‎‏‎‎‎‎‎‎‏‏‏‏‎‎‏‎‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‎‎‏‏‏‏‎‎‎‏‎‏‏‏‎‏‏‎‏‎‏‎‎One autofill suggestion‎‏‎‎‏‎</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‏‎‎‏‎‏‎‏‏‎‎‎‎‏‎‏‎‎‏‏‏‏‏‎‎‏‏‎‏‏‎‏‏‏‎‏‎‎‏‎‎‎‎‏‏‎‎‎‏‏‏‎‎‏‏‎‏‎One autofill suggestion‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‏‎‎‏‎‏‎‏‏‎‎‎‎‏‎‏‎‎‏‏‏‏‏‎‎‏‏‎‏‏‎‏‏‏‎‏‎‎‏‎‎‎‎‏‏‎‎‎‏‏‏‎‎‏‏‎‏‎# autofill suggestions‎‏‎‎‏‎}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‏‎‎‏‎‎‎‏‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‏‎‏‏‏‎‏‎‎‏‎‎‏‏‏‏‏‏‏‎Save to ‎‏‎‎‏‏‎"<b>"‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="LABEL">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎"</b>"‎‏‎‎‏‏‏‎?‎‏‎‎‏‎"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‏‏‎‏‎‏‎‏‎‏‏‏‎‎‎‎‏‎‏‏‏‏‎‎‏‏‎‏‏‏‏‎‏‎‏‎‏‎‏‏‏‏‏‎‏‎‏‏‎‎‎‏‏‎‏‎‏‎Save ‎‏‎‎‏‏‎<xliff:g id="TYPE">%1$s</xliff:g>‎‏‎‎‏‏‏‎ to ‎‏‎‎‏‏‎"<b>"‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="LABEL">%2$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎"</b>"‎‏‎‎‏‏‏‎?‎‏‎‎‏‎"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‎‏‎‎‎‎‎‎‎‏‏‏‎‎‎‎‎‏‏‏‎‎‏‏‎‎‏‏‏‎‏‏‏‏‏‎‎‎‏‏‏‎‏‎‏‎‏‏‏‎‎‏‏‏‎‎‏‎Save ‎‏‎‎‏‏‎<xliff:g id="TYPE_0">%1$s</xliff:g>‎‏‎‎‏‏‏‎ and ‎‏‎‎‏‏‎<xliff:g id="TYPE_1">%2$s</xliff:g>‎‏‎‎‏‏‏‎ to ‎‏‎‎‏‏‎"<b>"‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="LABEL">%3$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎"</b>"‎‏‎‎‏‏‏‎?‎‏‎‎‏‎"</string>
@@ -2106,15 +2027,17 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‏‏‏‎‏‎‏‎‎‎‏‏‎‏‎‎‎‎‎‎‎‏‏‏‎‎‏‏‏‎‎‎‎‎‏‏‏‏‎‏‏‎‎‎‏‏‎‎‏‎‎‎‏‏‏‎‎‎UNINSTALL‎‏‎‎‏‎"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‏‎‏‏‎‎‎‎‏‏‎‎‏‎‏‎‏‏‎‎‏‎‏‎‏‎‎‎‏‎‏‏‏‎‏‎‏‎‏‎‏‎‎‏‏‏‎‎‏‎‎‏‎‏‏‏‏‏‎OPEN ANYWAY‎‏‎‎‏‎"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‎‎‎‎‎‏‏‎‏‎‏‏‏‏‏‎‏‏‎‏‏‏‎‎‏‎‎‎‎‎‎‏‎‎‎‎‎‏‎‏‎‏‎‎‎‏‎‏‏‎‎‎‎‎‎‎‎‎Harmful app detected‎‏‎‎‏‎"</string>
+    <string name="log_access_confirmation_title" msgid="3143035474800851565">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‏‏‎‎‏‏‏‏‎‎‏‎‎‏‏‏‎‎‎‎‏‏‏‎‎‏‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‏‎‏‏‏‎‏‎‎‏‏‎‏‏‎‏‎System log access request‎‏‎‎‏‎"</string>
+    <string name="log_access_confirmation_allow" msgid="143157286283302512">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‏‏‎‎‎‏‏‎‎‏‎‏‏‎‎‎‏‏‎‏‏‏‏‏‎‏‏‎‎‏‏‎‏‎‏‏‎‎‏‏‏‎‎‎‎‎Only this time‎‏‎‎‏‎"</string>
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‏‎‏‎‎‏‎‏‏‎‏‎‏‎‎‎‏‎‎‏‏‏‏‎‎‏‏‏‎‏‎‎‎‎‎‏‎‏‎‏‎‎‎‏‏‏‏‏‎‎‎‏‎‏‎Don’t allow‎‏‎‎‏‎"</string>
+    <string name="log_access_confirmation_body" msgid="7599059550906238538">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‏‎‏‏‏‎‏‎‏‎‏‎‎‏‎‎‎‎‏‏‎‎‏‏‎‎‏‏‎‎‏‏‎‏‏‎‎‏‏‏‎‎‏‎‎‎‏‏‎‎‏‎‎‏‎‏‎‎‎‏‎‎‏‏‎<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>‎‏‎‎‏‏‏‎ requests system logs for functional debugging. These logs might contain information that apps and services on your device have written.‎‏‎‎‏‎"</string>
+    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‎‏‎‏‏‎‎‎‏‎‎‏‏‏‎‎‏‎‏‏‏‏‏‎‏‏‎‎‏‏‏‎‏‎‏‏‎‎‏‎‎‏‎‏‎‎‏‏‎‎‏‏‎‎‎‎‎‎Don’t show again‎‏‎‎‏‎"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‏‎‎‎‎‎‏‏‏‏‏‎‎‏‎‏‎‎‎‏‎‎‎‎‏‏‎‏‎‎‏‎‏‏‏‎‏‎‎‏‏‏‏‎‏‎‎‏‎‎‎‏‏‏‏‏‎‎‎‏‎‎‏‏‎<xliff:g id="APP_0">%1$s</xliff:g>‎‏‎‎‏‏‏‎ wants to show ‎‏‎‎‏‏‎<xliff:g id="APP_2">%2$s</xliff:g>‎‏‎‎‏‏‏‎ slices‎‏‎‎‏‎"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‎‏‎‎‎‏‏‏‎‏‎‎‏‏‎‎‎‎‎‏‏‎‏‎‎‏‎‎‏‏‏‏‎‎‎‏‏‎‎‏‎‏‎‎‏‎‏‏‏‏‎‏‏‏‎Edit‎‏‎‎‏‎"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‎‏‎‎‎‏‎‎‎‎‎‎‏‏‏‏‏‏‎‎‎‎‎‏‎‎‎‎‎‎‏‎‎‎‏‏‎‏‏‏‏‎‎‎‏‎‎‎‎‎‏‏‎‎‏‏‏‎Calls and notifications will vibrate‎‏‎‎‏‎"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‎‎‎‎‎‏‎‎‎‏‎‏‎‏‎‏‏‏‎‎‏‎‏‎‏‏‎‎‎‎‎‎‏‎‎‏‎‎‏‏‏‎‏‎‏‏‏‎‏‎‎‏‏‎‏‏‏‎Calls and notifications will be muted‎‏‎‎‏‎"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‎‎‎‏‎‏‎‏‎‏‏‎‏‎‎‎‏‏‎‎‏‎‏‏‏‏‏‏‏‎‏‏‎‏‎‏‎‏‏‎‏‎‎‏‏‎‎‎‏‎‎‎‎‏‏‏‎‎System changes‎‏‎‎‏‎"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‎‏‎‏‏‎‎‏‎‏‏‏‎‏‏‎‏‏‏‏‎‎‏‏‏‏‏‎‏‎‎‏‎‏‏‏‏‏‏‎‎‎‎‏‏‏‎‏‎‏‏‏‎‎‏‎‏‎Do Not Disturb‎‏‎‎‏‎"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‏‏‏‎‎‎‏‎‏‏‎‎‎‎‎‏‎‎‏‏‎‎‏‏‎‎‎‎‏‎‏‎‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‎‏‏‎‏‏‎‎‎New: Do Not Disturb is hiding notifications‎‏‎‎‏‎"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‏‎‎‎‏‏‏‎‏‏‏‎‎‎‎‏‏‎‎‎‏‏‏‏‏‎‎‏‏‏‎‎‎‎‏‎‎‎‎‎‏‎‎‏‏‏‎‎‏‏‎‏‎‎‎‏‎‎Tap to learn more and change.‎‏‎‎‏‎"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‏‏‎‎‎‏‎‏‏‎‏‏‏‏‏‎‎‎‎‏‎‏‎‏‏‏‏‎‏‏‏‎‎‎‎‎‏‏‎‏‎‏‎‏‏‎‎‎‏‎‎‏‏‏‎‏‎Do Not Disturb has changed‎‏‎‎‏‎"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‎‏‎‎‎‏‏‏‏‎‎‏‏‎‏‏‏‎‏‎‏‏‏‎‏‏‎‎‎‎‎‏‏‏‎‎‏‏‏‏‎‎‏‏‏‏‏‏‏‎‏‏‎‎‏‎‏‎Tap to check what\'s blocked.‎‏‎‎‏‎"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‎‏‎‎‎‎‏‎‏‎‏‏‎‏‏‎‎‏‎‏‏‎‎‏‎‎‎‏‎‎‏‏‎‎‏‏‏‎‎‏‎‎‏‎‏‏‎‏‏‏‏‏‎‎‎‏‎System‎‏‎‎‏‎"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‎‎‏‎‎‎‎‎‎‏‎‏‏‏‏‏‎‏‏‎‎‏‏‎‎‎‏‎‏‏‏‎‎‎‏‏‎‏‎‏‏‏‏‏‎‎‏‎‎‏‏‎Settings‎‏‎‎‏‎"</string>
@@ -2131,7 +2054,6 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‎‏‎‎‎‏‏‏‎‎‎‎‎‎‏‎‏‏‎‏‏‎‏‎‎‎‎‎‎‏‏‎‏‎‏‏‏‏‏‎‏‏‎‏‏‎‎‏‏‏‎‏‏‎‏‎‎OK‎‏‎‎‏‎"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‎‏‎‏‎‏‎‎‏‏‏‏‏‎‏‎‎‏‎‏‏‎‎‏‎‏‏‎‏‏‎‏‎‎‏‏‏‏‏‏‏‎‏‏‏‏‏‎‏‏‏‏‏‏‏‏‎‎Turn off‎‏‎‎‏‎"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‎‏‎‏‎‎‏‏‎‎‏‎‎‎‏‎‏‎‎‎‏‎‏‏‏‏‎‏‏‎‏‏‎‎‎‏‏‎‎‎‎‏‎‎‏‎‏‏‏‎‏‏‎‎‏‎‏‏‎Learn more‎‏‎‎‏‎"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‏‏‏‏‎‏‎‏‏‏‎‎‎‏‎‏‏‏‏‏‎‎‏‎‎‎‏‏‎‎‎‏‎‎‎‏‏‎‏‏‎‏‏‎‎‏‏‎‎‎‏‎‎‏‏‎‏‎‎Enhanced notifications replaced Android Adaptive Notifications in Android 12. This feature shows suggested actions and replies, and organizes your notifications.‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎Enhanced notifications can access notification content, including personal information like contact names and messages. This feature can also dismiss or respond to notifications, such as answering phone calls, and control Do Not Disturb.‎‏‎‎‏‎"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‏‎‏‏‏‎‎‏‏‏‎‏‏‎‎‎‏‏‏‎‎‎‎‎‏‎‏‏‎‎‏‏‏‏‎‎‎‎‎‏‏‎‎‏‎‎‏‎‏‎‏‏‎‎‎‎‎‎Routine Mode info notification‎‏‎‎‏‎"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‏‎‎‎‏‎‏‎‏‏‏‏‎‎‏‎‏‏‏‎‏‎‎‏‏‎‎‎‏‏‏‏‎‏‏‎‎‎‏‏‎‎‏‎‎‎‎‎Battery may run out before usual charge‎‏‎‎‏‎"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‏‎‏‏‏‏‎‎‏‏‏‏‏‏‎‎‎‏‎‎‎‏‎‏‎‎‎‎‏‏‏‏‎‎‎‎‎‏‏‏‏‎‎‏‏‏‏‎‎‏‏‏‏‏‏‎‏‎Battery Saver activated to extend battery life‎‏‎‎‏‎"</string>
@@ -2160,10 +2082,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‎‏‏‎‎‏‎‏‎‏‎‏‏‏‏‏‏‏‏‏‏‏‎‎‏‏‏‏‏‎‎‎‎‏‏‏‏‏‏‏‎‎‏‎‎‎‎‏‏‎‎‎‎‎‏‏‎‎‎‎‏‎‎‏‏‎<xliff:g id="EXTENSION">%1$s</xliff:g>‎‏‎‎‏‏‏‎ presentation‎‏‎‎‏‎"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‎‏‎‏‎‏‏‎‏‎‏‎‏‎‎‏‎‏‏‏‏‏‏‏‎‎‏‏‎‎‏‎‎‏‎‎‏‎‏‏‏‏‏‎‏‎‏‎‎‏‏‏‎‏‎‏‎‎Bluetooth will stay on during airplane mode‎‏‎‎‏‎"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‎‎‎‎‏‎‎‏‏‎‎‏‏‏‎‏‎‏‏‎‎‏‎‎‏‎‏‎‏‎‎‎‎‏‎‎‏‏‏‏‏‎‏‏‎‎‏‎‏‎‎‏‎‎‏‏‎‎Loading‎‏‎‎‏‎"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="other">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‎‎‎‎‏‏‎‏‎‏‎‎‏‎‎‎‏‏‎‏‎‎‎‏‎‎‏‏‎‎‎‏‏‎‎‏‏‎‏‏‏‏‏‎‎‎‏‎‏‏‏‏‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="FILE_NAME_2">%s</xliff:g>‎‏‎‎‏‏‏‎ + ‎‏‎‎‏‏‎<xliff:g id="COUNT_3">%d</xliff:g>‎‏‎‎‏‏‏‎ files‎‏‎‎‏‎</item>
-      <item quantity="one">‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‎‎‎‎‏‏‎‏‎‏‎‎‏‎‎‎‏‏‎‏‎‎‎‏‎‎‏‏‎‎‎‏‏‎‎‏‏‎‏‏‏‏‏‎‎‎‏‎‏‏‏‏‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="FILE_NAME_0">%s</xliff:g>‎‏‎‎‏‏‏‎ + ‎‏‎‎‏‏‎<xliff:g id="COUNT_1">%d</xliff:g>‎‏‎‎‏‏‏‎ file‎‏‎‎‏‎</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‎‏‎‏‎‏‏‏‏‏‏‎‎‏‏‎‏‏‏‎‏‏‎‏‎‎‎‎‏‎‎‎‎‎‏‏‏‏‎‎‏‎‎‎‎‏‎‏‏‏‏‏‏‏‎‎‏‎‎‏‎‎‏‏‎{file_name}‎‏‎‎‏‏‏‎ + # file‎‏‎‎‏‎}other{‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‎‏‎‏‎‏‏‏‏‏‏‎‎‏‏‎‏‏‏‎‏‏‎‏‎‎‎‎‏‎‎‎‎‎‏‏‏‏‎‎‏‎‎‎‎‏‎‏‏‏‏‏‏‏‎‎‏‎‎‏‎‎‏‏‎{file_name}‎‏‎‎‏‏‏‎ + # files‎‏‎‎‏‎}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‎‏‏‏‏‏‎‏‎‏‎‏‏‎‏‏‏‎‎‏‏‏‏‏‎‎‏‏‏‏‏‏‏‎‏‎‎‎‏‎‏‎‏‎‏‏‎‎‎‎‎‎‎‎‏‎‎‎No recommended people to share with‎‏‎‎‏‎"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‎‏‏‎‏‎‏‎‎‏‏‎‎‏‎‎‎‏‏‏‎‏‏‎‏‏‏‎‎‎‎‏‏‎‎‏‎‏‎‏‎‏‏‏‏‏‎‏‎‎‏‎‏‏‎‎‎‎Apps list‎‏‎‎‏‎"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‎‎‏‎‎‎‎‏‎‏‏‎‏‏‏‎‏‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‏‎‏‎‎‎‎‎‎‎‎‏‏‏‎‎‎‏‏‏‎‎‎‏‏‏‎This app has not been granted record permission but could capture audio through this USB device.‎‏‎‎‏‎"</string>
@@ -2175,10 +2094,16 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‏‏‎‎‎‎‏‏‎‏‏‏‎‎‏‏‏‏‏‏‎‏‏‏‏‎‎‎‎‏‏‎‏‎‏‎‏‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‎Power Dialog‎‏‎‎‏‎"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‎‎‎‎‏‏‎‏‏‏‏‎‎‎‎‏‎‎‏‏‎‎‎‎‎‏‎‏‏‏‎‎‏‏‏‏‎‏‎‏‏‎‏‎‎‎‏‏‎‏‎‏‏‏‏‏‎‎Lock Screen‎‏‎‎‏‎"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‏‏‎‏‎‎‎‏‎‎‎‏‏‏‏‏‎‎‎‏‎‎‏‏‏‏‏‏‎‏‏‎‏‏‏‏‏‏‏‎‎‏‏‎‏‎‏‎‏‎‏‏‎‎‎Screenshot‎‏‎‎‏‎"</string>
+    <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‏‎‎‏‏‎‏‏‏‎‎‏‎‎‏‏‏‏‏‎‏‎‎‎‏‏‎‏‎‏‏‎‎‎‎‏‏‎‎‏‏‎‏‏‏‎‏‏‎‏‏‏‏‎‎‎Headset Hook‎‏‎‎‏‎"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‏‏‏‎‎‏‏‎‏‏‏‏‎‏‏‎‏‎‎‎‎‎‎‏‎‏‏‏‎‏‎‏‏‎‏‏‏‎‎‏‏‏‏‏‎‎‎‎‎‎‏‎‎‎‏‎‏‎On-screen Accessibility Shortcut‎‏‎‎‏‎"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‎‏‎‏‎‏‏‏‎‎‏‎‏‎‏‏‏‎‎‎‏‎‎‎‎‎‏‎‏‏‎‎‏‎‏‏‎‏‎‎‏‎‏‏‎‎‏‎‏‎‎‎‏‏‏‏‎‎On-screen Accessibility Shortcut Chooser‎‏‎‎‏‎"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‎‎‎‎‎‎‎‎‎‎‎‏‎‎‎‎‏‎‏‎‏‏‎‎‎‏‎‏‎‏‎‎‏‎‏‎‎‏‎‎‏‏‎‏‏‏‎‏‏‎‏‎‎‎‎‏‏‎Accessibility Shortcut‎‏‎‎‏‎"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‏‏‏‎‎‎‏‏‎‎‏‏‏‏‏‎‏‎‏‏‏‏‎‏‏‏‏‏‎‏‏‎‎‏‏‎‎‏‎‏‏‎‎‏‏‏‎‎‎‎‎Dismiss Notification Shade‎‏‎‎‏‎"</string>
+    <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‎‎‏‎‎‎‏‏‏‏‏‏‎‎‏‎‏‎‎‎‏‏‏‎‎‎‏‏‏‎‎‏‏‎‎‎‎‏‎‏‎‎‎‎‏‎‏‏‏‎‎‎‏‎‏‏‎‎Dpad Up‎‏‎‎‏‎"</string>
+    <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‏‏‏‎‎‎‏‎‎‎‎‏‎‎‏‏‎‏‎‎‏‎‏‏‏‏‏‎‎‏‏‎‎‎‎‏‎‎‏‏‎‏‏‏‎‏‎‏‏‎‏‏‏‎‏‎‏‎Dpad Down‎‏‎‎‏‎"</string>
+    <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‏‎‎‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‏‎‏‏‏‎‏‏‎‎‏‎‎‎‏‏‎‎‏‎‏‎‎‏‎‎‎‎‎‏‎‏‎‏‏‎‎‎‎‎Dpad Left‎‏‎‎‏‎"</string>
+    <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‏‏‎‏‎‎‏‏‏‎‎‎‏‏‏‏‏‎‎‏‏‎‏‎‎‏‎‏‎‏‎‏‏‎‏‏‎‎‏‎‏‏‎‎‎‏‏‎‎‎‏‎Dpad Right‎‏‎‎‏‎"</string>
+    <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‎‏‏‎‎‏‏‏‏‎‎‎‎‎‎‎‎‏‏‏‎‏‏‏‎‏‎‎‎‎‎‏‎‏‏‏‏‏‏‎‏‎‎‎‎‏‏‏‏‏‏‏‎‏‎Dpad Center‎‏‎‎‏‎"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‏‎‎‎‏‎‎‎‎‏‎‏‏‏‎‏‏‎‏‎‏‏‏‎‎‎‎‎‏‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‎‎‏‎‏‏‏‎‏‎‎‏‎‏‎‎Caption bar of ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎.‎‏‎‎‏‎"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‎‎‏‎‎‎‏‎‎‏‎‎‏‎‏‏‎‎‏‎‏‎‎‎‎‎‎‎‏‎‎‎‎‎‎‏‏‏‎‏‎‎‎‎‎‏‎‏‏‏‏‎‏‎‏‎‎‎‎‏‎‎‏‏‎<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ has been put into the RESTRICTED bucket‎‏‎‎‏‎"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‏‎‎‏‎‎‏‎‏‎‎‎‎‎‎‎‏‏‎‎‎‏‎‏‎‎‎‎‏‏‎‎‏‏‎‎‎‏‎‎‎‏‎‏‎‏‏‏‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="SENDER_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎:‎‏‎‎‏‎"</string>
@@ -2199,8 +2124,8 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‎‎‏‏‎‏‏‏‏‎‏‏‎‏‏‎‎‏‏‏‎‏‎‏‏‎‎‎‏‏‎‎‏‏‏‏‎‏‏‏‎‎‏‎‎‎‏‎‎‏‏‏‏‎‏‎‎‎Tap to turn on‎‏‎‎‏‎"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‏‏‏‎‎‎‏‎‏‏‏‏‎‎‎‏‎‏‎‎‎‎‏‎‎‎‏‎‏‎‏‏‎‎‏‏‏‏‏‎‎‏‏‎‏‎‎‎‎‏‎‏‏‎‏‏‎‎No work apps‎‏‎‎‏‎"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‏‏‎‎‏‏‏‎‎‎‎‎‏‏‏‎‏‎‎‎‏‎‏‎‎‎‏‏‎‏‎‎‏‏‏‎‏‎‎‏‏‏‎‏‏‎‏‏‎‎‏‎‎‎‎‎‎‏‎No personal apps‎‏‎‎‏‎"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‎‏‏‎‎‎‏‎‎‎‏‏‏‎‎‏‏‏‎‎‎‏‎‏‏‎‏‎‏‎‏‎‎‏‏‎‏‎‏‏‏‏‎‎‎‏‏‏‏‏‏‏‎‎‎‎‏‎Open in ‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>‎‏‎‎‏‏‏‎ in personal profile?‎‏‎‎‏‎"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‎‎‎‎‏‏‏‎‎‏‏‎‎‎‎‎‎‎‏‏‎‏‎‎‏‎‎‎‎‎‏‎‎‎‏‎‎‎‎‏‎‏‏‏‎‏‎‏‏‏‏‎‏‎‏‎‎‎Open in ‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>‎‏‎‎‏‏‏‎ in work profile?‎‏‎‎‏‎"</string>
+    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‎‏‏‏‎‎‎‏‎‏‎‎‎‏‎‎‎‏‏‏‎‏‏‏‎‎‏‎‎‏‏‏‎‏‏‏‎‏‏‎‏‏‏‎‎‎‎‎‎‏‎‏‎‏‏‏‏‎‎Open ‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>‎‏‎‎‏‏‏‎ in your personal profile?‎‏‎‎‏‎"</string>
+    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‏‎‏‎‎‎‏‏‎‎‎‎‎‎‏‏‎‏‎‏‎‎‏‎‏‏‏‎‎‎‎‎‏‏‎‎‎‎‏‏‎‎‏‏‏‏‎‏‏‎‎‏‎‏‏‏‏‎Open ‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>‎‏‎‎‏‏‏‎ in your work profile?‎‏‎‎‏‎"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‎‏‏‎‎‎‏‎‏‎‎‏‎‏‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‎‏‏‎‎‏‏‎‏‎‏‏‎‎‎‏‎‏‎‎‎‏‏‏‏‏‎‎‎Use personal browser‎‏‎‎‏‎"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‏‏‎‎‎‏‎‏‏‎‎‏‎‏‎‏‎‏‏‎‏‏‏‎‎‎‏‏‎‏‏‎‏‏‏‎‏‎‎‏‎‎‏‏‎‎‎‏‏‎‏‏‎‎‎‏‎‎Use work browser‎‏‎‎‏‎"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‏‏‎‏‏‏‎‏‎‏‎‏‏‏‎‏‏‎‏‎‎‏‏‏‏‎‎‎‎‎‎‏‏‏‎‎‎‏‏‏‎‎‎‎‏‏‎‎‏‏‏‏‏‏‎‏‏‎SIM network unlock PIN‎‏‎‎‏‎"</string>
@@ -2330,4 +2255,9 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‏‎‎‎‏‎‎‏‏‎‎‎‏‎‏‏‏‎‎‏‏‏‎‎‏‏‎‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‎‎‎‎‎‎‏‎‎‎‏‎‎‏‏‎<xliff:g id="SERVICE_NAME">%s</xliff:g>‎‏‎‎‏‏‏‎ can view and control your screen. Tap to review.‎‏‎‎‏‎"</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‎‎‏‎‏‏‏‏‏‏‏‏‏‏‎‎‎‎‏‎‎‎‎‎‎‏‏‏‎‏‏‎‎‎‎‎‏‏‎‎‎‎‎‏‎‏‏‏‎‎‎‏‎‎‎‎‎‎‎‏‎‎‏‏‎<xliff:g id="MESSAGE">%1$s</xliff:g>‎‏‎‎‏‏‏‎ Translated.‎‏‎‎‏‎"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‎‏‏‎‏‏‏‏‏‎‎‏‏‎‎‏‎‎‎‎‏‎‏‏‏‎‏‏‎‏‏‏‎‏‏‏‏‏‏‎‏‏‎‏‎‏‎‎‎‎‎‏‎‎‎‏‎Message translated from ‎‏‎‎‏‏‎<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>‎‏‎‎‏‏‏‎ to ‎‏‎‎‏‏‎<xliff:g id="TO_LANGUAGE">%2$s</xliff:g>‎‏‎‎‏‏‏‎.‎‏‎‎‏‎"</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‎‎‏‎‎‎‏‎‏‏‏‎‏‎‎‎‎‏‎‎‏‏‏‏‏‏‎‎‎‏‎‏‎‏‏‎‎‎‎‏‏‏‎‎‏‎‏‏‏‏‎‎‏‎‎‎‏‏‎Background Activity‎‏‎‎‏‎"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‎‎‏‏‎‎‏‎‎‎‎‎‏‏‎‎‏‏‏‏‏‎‏‏‏‎‏‏‏‎‏‏‏‎‏‏‏‏‎‎‏‏‎‎‎‎‏‏‎‏‎‏‏‏‏‎‎‏‎Background Activity‎‏‎‎‏‎"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‏‎‏‎‏‎‏‎‎‎‎‎‏‎‎‎‎‎‏‏‎‏‏‏‏‎‎‎‎‏‎‎‏‎‎‏‎‎‏‎‎‏‎‏‎‏‎‏‎‎‎‏‎‏‎‎‏‎‎‏‎‎‏‏‎<xliff:g id="APP">%1$s</xliff:g>‎‏‎‎‏‏‏‎ is running in the background and draining battery. Tap to review.‎‏‎‎‏‎"</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‏‏‎‏‎‏‎‎‎‏‏‎‏‎‏‏‎‎‎‎‎‎‎‎‎‎‎‏‎‎‎‏‏‏‎‏‎‎‎‎‏‏‏‎‏‏‏‎‎‎‎‎‏‎‎‎‏‎‎‏‏‎<xliff:g id="APP">%1$s</xliff:g>‎‏‎‎‏‏‏‎ is running in the background for a long time. Tap to review.‎‏‎‎‏‎"</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‎‎‎‎‎‏‎‏‎‏‏‏‎‏‏‎‏‏‏‎‏‎‎‏‎‎‎‏‏‎‏‎‏‎‏‏‎‏‎‎‏‎‏‎‏‏‎‏‏‎‏‏‎‎‏‎‎‎Check active apps‎‏‎‎‏‎"</string>
 </resources>

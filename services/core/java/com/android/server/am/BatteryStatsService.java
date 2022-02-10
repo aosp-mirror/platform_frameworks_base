@@ -79,7 +79,6 @@ import android.util.StatsEvent;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.BatteryUsageStatsProvider;
 import com.android.internal.os.BatteryUsageStatsStore;
@@ -2488,7 +2487,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (BatteryStatsHelper.checkWifiOnly(mContext)) {
+            if (BatteryStats.checkWifiOnly(mContext)) {
                 flags |= BatteryStats.DUMP_DEVICE_WIFI_ONLY;
             }
             awaitCompletion();

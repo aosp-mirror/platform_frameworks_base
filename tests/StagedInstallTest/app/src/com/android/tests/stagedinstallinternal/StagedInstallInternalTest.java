@@ -17,7 +17,6 @@
 package com.android.tests.stagedinstallinternal;
 
 import static com.android.cts.install.lib.InstallUtils.getPackageInstaller;
-import static com.android.cts.install.lib.InstallUtils.waitForSessionReady;
 import static com.android.cts.shim.lib.ShimPackage.SHIM_APEX_PACKAGE_NAME;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -458,7 +457,6 @@ public class StagedInstallInternalTest {
         assertThat(result).hasLength(0);
         // Stage an apex
         int sessionId = Install.single(APEX_V2).setStaged().commit();
-        waitForSessionReady(sessionId);
         result = getPackageManagerNative().getStagedApexModuleNames();
         assertThat(result).hasLength(1);
         assertThat(result).isEqualTo(new String[]{SHIM_APEX_PACKAGE_NAME});
@@ -475,7 +473,6 @@ public class StagedInstallInternalTest {
         assertThat(result).isNull();
         // Stage an apex
         int sessionId = Install.single(TEST_APEX_CLASSPATH).setStaged().commit();
-        waitForSessionReady(sessionId);
         // Query proper module name
         result = getPackageManagerNative().getStagedApexInfo(TEST_APEX_PACKAGE_NAME);
         assertThat(result.moduleName).isEqualTo(TEST_APEX_PACKAGE_NAME);
@@ -499,7 +496,6 @@ public class StagedInstallInternalTest {
 
         // Stage an apex and verify observer was called
         int sessionId = Install.single(APEX_V2).setStaged().commit();
-        waitForSessionReady(sessionId);
         ArgumentCaptor<ApexStagedEvent> captor = ArgumentCaptor.forClass(ApexStagedEvent.class);
         verify(observer, timeout(5000)).onApexStaged(captor.capture());
         assertThat(captor.getValue().stagedApexModuleNames).isEqualTo(

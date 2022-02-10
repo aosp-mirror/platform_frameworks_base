@@ -229,8 +229,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         mController = new KeyguardIndicationController(mContext, mWakeLockBuilder,
                 mKeyguardStateController, mStatusBarStateController, mKeyguardUpdateMonitor,
                 mDockManager, mBroadcastDispatcher, mDevicePolicyManager, mIBatteryStats,
-                mUserManager, mExecutor, mFalsingManager, mLockPatternUtils, mScreenLifecycle,
-                mIActivityManager, mKeyguardBypassController);
+                mUserManager, mExecutor, mExecutor,  mFalsingManager, mLockPatternUtils,
+                mScreenLifecycle, mIActivityManager, mKeyguardBypassController);
         mController.init();
         mController.setIndicationArea(mIndicationArea);
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
@@ -331,6 +331,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(false);
         when(mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile()).thenReturn(false);
         sendUpdateDisclosureBroadcast();
+        mExecutor.runAllReady();
 
         verifyHideIndication(INDICATION_TYPE_DISCLOSURE);
     }
@@ -341,6 +342,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
         when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(null);
         sendUpdateDisclosureBroadcast();
+        mExecutor.runAllReady();
 
         verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mDisclosureGeneric);
     }
@@ -353,6 +355,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 new UserInfo(10, /* name */ null, /* flags */ FLAG_MANAGED_PROFILE)));
         when(mDevicePolicyManager.getOrganizationNameForUser(eq(10))).thenReturn(null);
         sendUpdateDisclosureBroadcast();
+        mExecutor.runAllReady();
 
         verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mDisclosureGeneric);
     }
@@ -363,6 +366,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
         when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(ORGANIZATION_NAME);
         sendUpdateDisclosureBroadcast();
+        mExecutor.runAllReady();
 
         verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mDisclosureWithOrganization);
     }
@@ -375,6 +379,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 new UserInfo(10, /* name */ null, FLAG_MANAGED_PROFILE)));
         when(mDevicePolicyManager.getOrganizationNameForUser(eq(10))).thenReturn(ORGANIZATION_NAME);
         sendUpdateDisclosureBroadcast();
+        mExecutor.runAllReady();
 
         verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mDisclosureWithOrganization);
     }
@@ -387,6 +392,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
         when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(null);
         sendUpdateDisclosureBroadcast();
+        mExecutor.runAllReady();
 
         verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mDisclosureGeneric);
         reset(mRotateTextViewController);
@@ -394,12 +400,14 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
         when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(ORGANIZATION_NAME);
         sendUpdateDisclosureBroadcast();
+        mExecutor.runAllReady();
 
         verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mDisclosureWithOrganization);
         reset(mRotateTextViewController);
 
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(false);
         sendUpdateDisclosureBroadcast();
+        mExecutor.runAllReady();
 
         verifyHideIndication(INDICATION_TYPE_DISCLOSURE);
     }
@@ -413,6 +421,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         when(mDevicePolicyManager.getDeviceOwnerType(DEVICE_OWNER_COMPONENT))
                 .thenReturn(DEVICE_OWNER_TYPE_FINANCED);
         sendUpdateDisclosureBroadcast();
+        mExecutor.runAllReady();
 
         verifyIndicationMessage(INDICATION_TYPE_DISCLOSURE, mFinancedDisclosureWithOrganization);
     }
@@ -734,6 +743,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // WHEN asked to update the indication area
         mController.setVisible(true);
+        mExecutor.runAllReady();
 
         // THEN the owner info should be hidden
         verifyHideIndication(INDICATION_TYPE_OWNER_INFO);
@@ -763,6 +773,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         // WHEN keyguard showing changed called
         mKeyguardStateControllerCallback.onKeyguardShowingChanged();
+        mExecutor.runAllReady();
 
         // THEN persistent messages are updated (in this case, most messages are hidden since
         // no info is provided) - verify that this happens
@@ -772,6 +783,43 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         verify(mRotateTextViewController).hideIndication(INDICATION_TYPE_TRUST);
         verify(mRotateTextViewController).hideIndication(INDICATION_TYPE_ALIGNMENT);
         verify(mRotateTextViewController).hideIndication(INDICATION_TYPE_LOGOUT);
+    }
+
+    @Test
+    public void onTrustGrantedMessageDoesNotShowUntilTrustGranted() {
+        createController();
+
+        // GIVEN a trust granted message but trust isn't granted
+        final String trustGrantedMsg = "testing trust granted message";
+        mController.getKeyguardCallback().showTrustGrantedMessage(trustGrantedMsg);
+
+        verifyHideIndication(INDICATION_TYPE_TRUST);
+
+        // WHEN trust is granted
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+        mController.setVisible(true);
+
+        // THEN verify the trust granted message shows
+        verifyIndicationMessage(
+                INDICATION_TYPE_TRUST,
+                trustGrantedMsg);
+    }
+
+    @Test
+    public void onTrustGrantedMessageDoesShowsOnTrustGranted() {
+        createController();
+
+        // GIVEN trust is granted
+        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(true);
+
+        // WHEN the showTrustGranted message is called
+        final String trustGrantedMsg = "testing trust granted message";
+        mController.getKeyguardCallback().showTrustGrantedMessage(trustGrantedMsg);
+
+        // THEN verify the trust granted message shows
+        verifyIndicationMessage(
+                INDICATION_TYPE_TRUST,
+                trustGrantedMsg);
     }
 
     private void sendUpdateDisclosureBroadcast() {

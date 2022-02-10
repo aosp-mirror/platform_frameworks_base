@@ -28,12 +28,12 @@
     <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"Gee &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; afstandtoegang tot programme wat op &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; geïnstalleer is wanneer hierdie toestel aan die internet gekoppel is."</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
+    <string name="title_computer" msgid="4693714143506569253">"Gee &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; toegang tot hierdie inligting op jou foon"</string>
+    <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="profile_name_generic" msgid="6851028682723034988">"toestel"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"Laat toe"</string>
     <string name="consent_no" msgid="2640796915611404382">"Moenie toelaat nie"</string>
-    <!-- no translation found for permission_sync_confirmation_title (667074294393493186) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (8873391306499120778) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Dra programtoestemmings na jou horlosie toe oor"</string>
+    <string name="permission_sync_summary" msgid="8873391306499120778">"Om dit makliker te maak om jou horlosie op te stel, sal programme wat gedurende opstelling op jou horlosie geïnstalleer word, dieselfde toestemmings as jou foon gebruik.\n\n Hierdie toestemmings kan toegang tot jou horlosie se mikrofoon en ligging insluit."</string>
 </resources>

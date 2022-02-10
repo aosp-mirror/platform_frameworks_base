@@ -28,12 +28,12 @@
     <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"कनेक्ट होने पर, &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; को &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; के रिमोट ऐक्सेस की अनुमति दें, ताकि इस डिवाइस पर इंस्टॉल किए गए ऐप्लिकेशन ऐक्सेस किए जा सकें."</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
+    <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; को अपने फ़ोन से यह जानकारी ऐक्सेस करने की अनुमति दें"</string>
+    <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="profile_name_generic" msgid="6851028682723034988">"डिवाइस"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"अनुमति दें"</string>
     <string name="consent_no" msgid="2640796915611404382">"अनुमति न दें"</string>
-    <!-- no translation found for permission_sync_confirmation_title (667074294393493186) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (8873391306499120778) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"ऐप्लिकेशन से जुड़ी अनुमतियों को अपनी वॉच में ट्रांसफ़र करें"</string>
+    <string name="permission_sync_summary" msgid="8873391306499120778">"वॉच को सेट अप करने की प्रोसेस को आसान बनाने के लिए, उस पर इंस्टॉल किए गए ऐप्लिकेशन को भी वही अनुमतियां मिलेंगी जो आपने उन ऐप्लिकेशन को फ़ोन पर दी होंगी.\n\n इन अनुमतियों में, आपकी वॉच के माइक्रोफ़ोन और जगह की जानकारी का ऐक्सेस शामिल हो सकता है."</string>
 </resources>

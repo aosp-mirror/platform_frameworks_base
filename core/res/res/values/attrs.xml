@@ -3910,10 +3910,17 @@
             <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_REQUEST_MULTI_FINGER_GESTURES}. -->
             <flag name="flagRequestMultiFingerGestures" value="0x00001000" />
             <flag name="flagSendMotionEvents" value="0x0004000" />
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#FLAG_INPUT_METHOD_EDITOR}. -->
+            <flag name="flagInputMethodEditor" value="0x0008000" />
         </attr>
         <!-- Component name of an activity that allows the user to modify
              the settings for this service. This setting cannot be changed at runtime. -->
         <attr name="settingsActivity" />
+        <!-- Component name of {@link android.service.quicksettings.TileService} is associated
+             with this accessibility service for one to one mapping. It is used by system settings
+             to remind users this accessibility service has a
+             {@link android.service.quicksettings.TileService}. -->
+        <attr name="tileService" format="string" />
         <!-- Attribute whether the accessibility service wants to be able to retrieve the
              active window content. This setting cannot be changed at runtime.
              <p>
@@ -4000,6 +4007,11 @@
         <!-- Component name of an activity that allows the user to modify the settings for this
              target of accessibility shortcut. -->
         <attr name="settingsActivity" />
+        <!-- Component name of {@link android.service.quicksettings.TileService} is associated
+             with this accessibility shortcut target for one to one mapping. It is used by system
+             settings to remind users this accessibility service has a
+             {@link android.service.quicksettings.TileService}. -->
+        <attr name="tileService" format="string" />
     </declare-styleable>
 
     <!-- Use <code>print-service</code> as the root tag of the XML resource that

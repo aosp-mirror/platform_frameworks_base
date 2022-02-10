@@ -28,12 +28,12 @@
     <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"Izinkan &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; memberikan akses jarak jauh ke &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; guna mengakses aplikasi yang diinstal di perangkat ini saat terhubung."</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
+    <string name="title_computer" msgid="4693714143506569253">"Izinkan &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; mengakses informasi ini dari ponsel Anda"</string>
+    <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="profile_name_generic" msgid="6851028682723034988">"perangkat"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"Izinkan"</string>
     <string name="consent_no" msgid="2640796915611404382">"Jangan izinkan"</string>
-    <!-- no translation found for permission_sync_confirmation_title (667074294393493186) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (8873391306499120778) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Transfer izin aplikasi ke smartwatch"</string>
+    <string name="permission_sync_summary" msgid="8873391306499120778">"Untuk mempermudah penyiapan smartwatch, aplikasi yang diinstal di smartwatch selama penyiapan akan menggunakan izin yang sama dengan ponsel.\n\n Izin ini dapat meliputi akses ke mikrofon dan lokasi smartwatch."</string>
 </resources>

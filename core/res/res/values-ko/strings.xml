@@ -70,7 +70,6 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"3자 통화"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"원하지 않는 통화 수신 거부"</string>
     <string name="CndMmi" msgid="185136449405618437">"통화 번호 전달"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"방해 금지 모드"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"발신자 번호가 기본적으로 제한됨으로 설정됩니다. 다음 통화: 제한됨"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"발신자 번호가 기본적으로 제한됨으로 설정됩니다. 다음 통화: 제한되지 않음"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"발신자 번호가 기본적으로 제한되지 않음으로 설정됩니다. 다음 통화: 제한됨"</string>
@@ -180,10 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"시계 저장공간이 가득 찼습니다. 일부 파일을 삭제하여 저장 여유 공간을 늘리세요."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Android TV 기기 저장용량이 가득 찼습니다. 파일을 삭제하여 여유 공간을 확보하세요."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"휴대전화 저장공간이 꽉 찼습니다. 일부 파일을 삭제하여 저장공간을 늘리세요."</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="other">인증기관 설치됨</item>
-      <item quantity="one">인증기관 설치됨</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{인증 기관 설치됨}other{인증 기관 설치됨}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"알 수 없는 제3자의 모니터링"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"직장 프로필 관리자가 수행함"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>에서 모니터링"</string>
@@ -203,6 +199,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"센서 알림 서비스"</string>
     <string name="twilight_service" msgid="8964898045693187224">"새벽 서비스"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS 시간 업데이트 서비스"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"기기 정책 관리자 서비스"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"음악 인식 관리자 서비스"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"기기가 삭제됩니다."</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"관리자 앱을 사용할 수 없습니다. 곧 기기가 삭제됩니다.\n\n궁금한 점이 있으면 조직의 관리자에게 문의하세요."</string>
@@ -256,10 +253,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"대부분의 경우 이 옵션을 사용합니다. 신고 진행 상황을 추적하고 문제에 대한 세부정보를 입력하고 스크린샷을 찍을 수 있습니다. 신고하기에 시간이 너무 오래 걸리고 사용 빈도가 낮은 일부 섹션을 생략할 수 있습니다."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"전체 보고서"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"기기가 응답하지 않거나 너무 느리거나 모든 보고서 섹션이 필요한 경우 이 옵션을 사용하여 시스템 방해를 최소화합니다. 세부정보를 추가하거나 스크린샷을 추가로 찍을 수 없습니다."</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="other">버그 신고 스크린샷을 <xliff:g id="NUMBER_1">%d</xliff:g>초 후에 찍습니다.</item>
-      <item quantity="one">버그 신고 스크린샷을 <xliff:g id="NUMBER_0">%d</xliff:g>초 후에 찍습니다.</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{버그 신고 스크린샷을 #초 후에 찍습니다.}other{버그 신고 스크린샷을 #초 후에 찍습니다.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"버그 신고용 스크린샷 촬영 완료"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"버그 신고용 스크린샷 촬영 실패"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"무음 모드"</string>
@@ -310,8 +304,14 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"캘린더에 액세스"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS 메시지 전송 및 보기"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"파일 및 미디어"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"기기 사진, 미디어, 파일 액세스"</string>
+    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
+    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"음악 및 기타 오디오"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"기기에 있는 오디오 파일에 액세스"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"사진 및 동영상"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"기기에 있는 이미지 및 동영상 파일에 액세스"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"마이크"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"오디오 녹음"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"신체 활동"</string>
@@ -683,6 +683,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"앱이 동기화된 일정의 기록이나 동기화된 데이터의 양 등을 포함하여 계정의 동기화 통계를 읽을 수 있도록 허용합니다."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"공유 저장공간의 콘텐츠 읽기"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"앱이 공유 저장공간의 콘텐츠를 읽도록 허용합니다."</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"공유 저장소에서 오디오 파일 읽기"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"앱이 공유 저장소에서 오디오 파일을 읽도록 허용합니다."</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"공유 저장소에서 동영상 파일 읽기"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"앱이 공유 저장소에서 동영상 파일을 읽도록 허용합니다."</string>
+    <string name="permlab_readMediaImage" msgid="1507059005825769856">"공유 저장소에서 이미지 파일 읽기"</string>
+    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"앱이 공유 저장소에서 이미지 파일을 읽도록 허용합니다."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"공유 저장공간의 콘텐츠 수정 또는 삭제"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"앱이 공유 저장공간의 콘텐츠에 쓰도록 허용합니다."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP 통화 발신/수신"</string>
@@ -729,8 +735,6 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"보유자가 이동통신사 메시지 서비스의 최상위 인터페이스에 고정할 수 있습니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"이동통신사 서비스 사용"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"권한을 가진 애플리케이션에서 이동통신사 서비스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"방해 금지 모드에 접근"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"앱에서 방해 금지 모드 설정을 읽고 작성하도록 허용합니다."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"권한 사용 보기 시작"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"앱의 권한 사용을 시작하려면 보유자를 허용하세요. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"권한 결정 보기 시작"</string>
@@ -1072,10 +1076,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g>을(를) 사용하려면 \'터치하여 탐색\' 기능을 사용하도록 설정해야 합니다. \'터치하여 탐색\'을 사용하도록 설정하면, 화면을 터치하여 손가락 아래에 표시된 항목에 대한 설명을 듣고 보거나 휴대전화로 상호작용하기 위한 동작을 수행할 수 있습니다."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"한 달 전"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"한 달 전"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="other">지난 <xliff:g id="COUNT_1">%d</xliff:g>일</item>
-      <item quantity="one">지난 <xliff:g id="COUNT_0">%d</xliff:g>일</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{지난 #일}other{지난 #일}}"</string>
     <string name="last_month" msgid="1528906781083518683">"지난달"</string>
     <string name="older" msgid="1645159827884647400">"이전"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"<xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1094,70 +1095,22 @@
     <string name="year" msgid="5182610307741238982">"년"</string>
     <string name="years" msgid="5797714729103773425">"년"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"지금"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>분</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>분</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>시간</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>시간</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>일</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>일</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>년</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>년</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>분 후</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>분 후</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>시간 후</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>시간 후</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>일 후</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>일 후</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>년 후</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>년 후</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>분 전</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>분 전</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>시간 전</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>시간 전</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>일 전</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>일 전</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>년 전</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>년 전</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>분 후</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>분 후</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>시간 후</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>시간 후</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>일 후</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>일 후</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>년 후</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>년 후</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g>분"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g>시간"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g>일"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g>년"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"<xliff:g id="COUNT">%d</xliff:g>분 후"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g>시간 후"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g>일 후"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g>년 후"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{#분 전}other{#분 전}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{#시간 전}other{#시간 전}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{#일 전}other{#일 전}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{#년 전}other{#년 전}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{#분}other{#분}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{#시간}other{#시간}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{#일}other{#일}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{#년}other{#년}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"영상 문제"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"이 기기로 스트리밍하기에 적합하지 않은 동영상입니다."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"동영상을 재생할 수 없습니다."</string>
@@ -1187,10 +1140,8 @@
     <string name="deleteText" msgid="4200807474529938112">"삭제"</string>
     <string name="inputMethod" msgid="1784759500516314751">"입력 방법"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"텍스트 작업"</string>
-    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
-    <skip />
-    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
-    <skip />
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"뒤로"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"입력 방법 전환"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"저장 공간이 부족함"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"일부 시스템 기능이 작동하지 않을 수 있습니다."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"시스템의 저장 공간이 부족합니다. 250MB의 여유 공간이 확보한 후 다시 시작하세요."</string>
@@ -1411,6 +1362,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"테스트 하네스 모드를 사용 중지하려면 초기화하세요."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"시리얼 콘솔 사용 설정됨"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"성능에 영향을 미쳤습니다. 사용 중지하려면 부트로더를 확인하세요."</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"실험용 MTE 사용 설정됨"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"성능과 안정성이 영향을 받을 수 있습니다. 사용 중지하려면 재부팅하세요. arm64.memtag.bootctl을 사용하여 활성화된 경우 미리 \'none\'으로 설정합니다."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"USB 포트에서 액체 또는 이물질 감지됨"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB 포트가 자동으로 사용 중지되었습니다. 자세한 내용을 보려면 탭하세요."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB 포트를 사용해도 좋음"</string>
@@ -1547,10 +1500,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"건너뛰기"</string>
     <string name="no_matches" msgid="6472699895759164599">"검색결과 없음"</string>
     <string name="find_on_page" msgid="5400537367077438198">"페이지에서 찾기"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="other">검색결과 <xliff:g id="INDEX">%d</xliff:g>/<xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">검색결과 1개</item>
-    </plurals>
+    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{일치하는 항목 #개}other{#/{total}}} }"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"완료"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"공유 저장공간 지우는 중…"</string>
     <string name="share" msgid="4157615043345227321">"공유"</string>
@@ -1680,10 +1630,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"잘못된 패턴"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"잘못된 비밀번호"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"잘못된 PIN"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g>초 후에 다시 시도하세요.</item>
-      <item quantity="one">1초 후에 다시 시도하세요.</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"패턴 그리기"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"SIM PIN 입력"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"PIN 입력"</string>
@@ -1880,10 +1826,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"제한사항 수정을 위한 PIN 생성"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN이 일치하지 않습니다. 다시 시도하세요."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN이 너무 짧습니다. 최소 4자 이상이어야 합니다."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g>초 후에 다시 시도하세요.</item>
-      <item quantity="one">1초 후에 다시 시도하세요.</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"나중에 다시 시도"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"전체 화면 모드"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"종료하려면 위에서 아래로 스와이프합니다."</string>
@@ -1911,46 +1853,20 @@
     <string name="data_saver_description" msgid="4995164271550590517">"데이터 사용량을 줄이기 위해 데이터 절약 모드는 일부 앱이 백그라운드에서 데이터를 전송하거나 수신하지 못하도록 합니다. 현재 사용 중인 앱에서 데이터에 액세스할 수 있지만 빈도가 줄어듭니다. 예를 들면, 이미지를 탭하기 전에는 이미지가 표시되지 않습니다."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"데이터 절약 모드를 사용 설정하시겠습니까?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"사용 설정"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="other">%1$d분 동안(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>까지)</item>
-      <item quantity="one">1분 동안(<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>까지)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="other">%1$d분 동안(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>까지)</item>
-      <item quantity="one">1분 동안(<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>까지)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="other">%1$d시간(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">1시간(<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>까지)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="other">%1$d시간 동안(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>까지)</item>
-      <item quantity="one">1시간 동안(<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>까지)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="other">%d분 동안</item>
-      <item quantity="one">1분 동안</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="other">%d분 동안</item>
-      <item quantity="one">1분 동안</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="other">%d시간</item>
-      <item quantity="one">1시간</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="other">%d시간 동안</item>
-      <item quantity="one">1시간 동안</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{1분 동안({formattedTime}까지)}other{#분 동안({formattedTime}까지)}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{1분 동안({formattedTime}까지)}other{#분 동안({formattedTime}까지)}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{1시간 동안({formattedTime}까지)}other{#시간 동안({formattedTime}까지)}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{1시간 동안({formattedTime}까지)}other{#시간 동안({formattedTime}까지)}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{1분 동안}other{#분 동안}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{1분 동안}other{#분 동안}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{1시간 동안}other{#시간 동안}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{1시간 동안}other{#시간 동안}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>까지"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>까지"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>(다음 알람)까지"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"사용 중지할 때까지"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"방해 금지 모드를 사용 중지할 때까지"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"접기"</string>
-    <string name="zen_mode_feature_name" msgid="3785547207263754500">"방해 금지 모드"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"다운타임"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"평일 밤"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"주말"</string>
@@ -1989,10 +1905,6 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"수신 전화"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"진행 중인 통화"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"수신 전화 검사 중"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g>개 선택됨</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g>개 선택됨</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"지정된 카테고리 없음"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"이러한 알림의 중요도를 설정했습니다."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"관련된 사용자가 있으므로 중요합니다."</string>
@@ -2058,10 +1970,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"자동완성에 저장"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"콘텐츠를 자동완성할 수 없습니다."</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"자동완성 추천 없음"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="other">자동완성 추천 <xliff:g id="COUNT">%1$s</xliff:g>개</item>
-      <item quantity="one">자동완성 추천 1개</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{자동 완성 추천 1개}other{자동 완성 추천 #개}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"에 저장하시겠습니까?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"<xliff:g id="TYPE">%1$s</xliff:g>을(를) "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"에 저장하시겠습니까?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"<xliff:g id="TYPE_0">%1$s</xliff:g> 및 <xliff:g id="TYPE_1">%2$s</xliff:g>을(를) "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"에 저장하시겠습니까?"</string>
@@ -2108,15 +2017,22 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"제거"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"열기"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"유해한 앱 감지됨"</string>
+    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
+    <skip />
+    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
+    <skip />
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g>에서 <xliff:g id="APP_2">%2$s</xliff:g>의 슬라이스를 표시하려고 합니다"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"수정"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"전화 및 알림이 오면 진동이 사용됩니다."</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"전화 및 알림 소리가 음소거됩니다."</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"시스템 변경사항"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"방해 금지 모드"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"새로운 기능: 방해 금지 모드로 알림 숨기기"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"자세히 알아보고 변경하려면 탭하세요."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"방해 금지 모드 변경"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"차단된 항목을 확인하려면 탭하세요."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"시스템"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"설정"</string>
@@ -2133,7 +2049,6 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"확인"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"사용 중지"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"자세히 알아보기"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12에서는 Android 적응형 알림이 개선된 알림으로 대체됩니다. 이 기능은 추천 작업과 답장을 표시하고 알림을 정리해 줍니다.\n\n개선된 알림은 연락처 이름과 메시지 등 개인 정보가 포함된 알림 내용에 액세스할 수 있습니다. 또한 전화를 받고 방해 금지 모드를 제어하는 등 알림을 닫거나 처리하는 것도 가능합니다."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"루틴 모드 정보 알림"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"평소에 충전하는 시간 전에 배터리가 소진될 수 있습니다."</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"배터리 수명을 연장하기 위해 절전 모드가 활성화되었습니다."</string>
@@ -2162,10 +2077,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> 프레젠테이션"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"비행기 모드에서 블루투스가 켜진 상태로 유지됩니다."</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"로드 중"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> 및 파일 <xliff:g id="COUNT_3">%d</xliff:g>개</item>
-      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> 및 파일 <xliff:g id="COUNT_1">%d</xliff:g>개</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + 파일 #개}other{{file_name} + 파일 #개}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"공유할 추천 사용자가 없음"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"앱 목록"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"이 앱에는 녹음 권한이 부여되지 않았지만, 이 USB 기기를 통해 오디오를 녹음할 수 있습니다."</string>
@@ -2177,10 +2089,22 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"전원 대화상자"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"잠금 화면"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"스크린샷"</string>
+    <!-- no translation found for accessibility_system_action_headset_hook_label (8524691721287425468) -->
+    <skip />
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"화면상의 접근성 바로가기"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"화면상의 접근성 바로가기 선택 도구"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"접근성 단축키"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"알림 창 닫기"</string>
+    <!-- no translation found for accessibility_system_action_dpad_up_label (1029042950229333782) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_down_label (3441918448624921461) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_left_label (6557647179116479152) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_right_label (9180196950365804081) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_center_label (8149791419358224893) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>의 자막 표시줄입니다."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> 항목이 RESTRICTED 버킷으로 이동함"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2201,8 +2125,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"탭하여 사용 설정"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"직장 앱 없음"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"개인 앱 없음"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"개인 프로필의 <xliff:g id="APP">%s</xliff:g>에서 여시겠습니까?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"직장 프로필의 <xliff:g id="APP">%s</xliff:g>에서 여시겠습니까?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"개인 브라우저 사용"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"직장 브라우저 사용"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM 네트워크 잠금 해제 PIN"</string>
@@ -2332,4 +2258,9 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> 서비스가 내 화면을 보고 제어할 수 있습니다. 검토하려면 탭하세요."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"다음 메시지가 번역되었습니다. <xliff:g id="MESSAGE">%1$s</xliff:g>"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"메시지가 <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>에서 <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>로 번역되었습니다."</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"백그라운드 활동"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"백그라운드 활동"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> 앱이 백그라운드에서 실행 중이며 배터리를 소모하고 있습니다. 확인하려면 탭하세요."</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> 앱이 백그라운드에서 오랫동안 실행 중입니다. 확인하려면 탭하세요."</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"활성 상태의 앱 확인"</string>
 </resources>

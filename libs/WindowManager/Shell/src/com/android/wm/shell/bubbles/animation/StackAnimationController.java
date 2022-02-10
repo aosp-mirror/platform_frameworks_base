@@ -750,6 +750,12 @@ public class StackAnimationController extends
             // Otherwise, animate the bubble in if it's the newest bubble. If we're adding a bubble
             // to the back of the stack, it'll be largely invisible so don't bother animating it in.
             animateInBubble(child, index);
+        } else {
+            // We are not animating the bubble in. Make sure it has the right alpha and scale values
+            // in case this view was previously removed and is being re-added.
+            child.setAlpha(1f);
+            child.setScaleX(1f);
+            child.setScaleY(1f);
         }
     }
 
@@ -785,23 +791,24 @@ public class StackAnimationController extends
             }
         };
 
+        boolean swapped = false;
         for (int newIndex = 0; newIndex < bubbleViews.size(); newIndex++) {
             View view = bubbleViews.get(newIndex);
             final int oldIndex = mLayout.indexOfChild(view);
-            animateSwap(view, oldIndex, newIndex, updateAllIcons, after);
+            swapped |= animateSwap(view, oldIndex, newIndex, updateAllIcons, after);
+        }
+        if (!swapped) {
+            // All bubbles were at the right position. Make sure badges and z order is correct.
+            updateAllIcons.run();
         }
     }
 
-    private void animateSwap(View view, int oldIndex, int newIndex,
+    private boolean animateSwap(View view, int oldIndex, int newIndex,
             Runnable updateAllIcons, Runnable finishReorder) {
         if (newIndex == oldIndex) {
-            // Add new bubble to index 0; move existing bubbles down
-            updateBadgesAndZOrder(view, newIndex);
-            if (newIndex == 0) {
-                animateInBubble(view, newIndex);
-            } else {
-                moveToFinalIndex(view, newIndex, finishReorder);
-            }
+            // View order did not change. Make sure position is correct.
+            moveToFinalIndex(view, newIndex, finishReorder);
+            return false;
         } else {
             // Reorder existing bubbles
             if (newIndex == 0) {
@@ -809,6 +816,7 @@ public class StackAnimationController extends
             } else {
                 moveToFinalIndex(view, newIndex, finishReorder);
             }
+            return true;
         }
     }
 

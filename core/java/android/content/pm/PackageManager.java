@@ -75,6 +75,7 @@ import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.permission.PermissionManager;
 import android.telephony.TelephonyManager;
+import android.telephony.UiccCardInfo;
 import android.telephony.gba.GbaService;
 import android.telephony.ims.ImsService;
 import android.telephony.ims.ProvisioningManager;
@@ -3185,6 +3186,13 @@ public abstract class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_SENSOR_HINGE_ANGLE = "android.hardware.sensor.hinge_angle";
 
+     /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device includes a heading sensor.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SENSOR_HEADING = "android.hardware.sensor.heading";
+
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports exposing head tracker sensors from peripheral
@@ -3263,6 +3271,20 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TELEPHONY_EUICC = "android.hardware.telephony.euicc";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * supports multiple enabled profiles on eUICCs.
+     *
+     * <p>Devices declaring this feature must have an implementation of the
+     *  {@link UiccCardInfo#getPorts},
+     *  {@link UiccCardInfo#isMultipleEnabledProfilesSupported} and
+     *  {@link android.telephony.euicc.EuiccManager#switchToSubscription (with portIndex)}.
+     *
+     * This feature should only be defined if {@link #FEATURE_TELEPHONY_EUICC} have been defined.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TELEPHONY_EUICC_MEP = "android.hardware.telephony.euicc.mep";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device

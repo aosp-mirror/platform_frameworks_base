@@ -20,18 +20,14 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.UserHandle;
 import android.util.Log;
-import android.util.SparseArray;
-
-import java.util.List;
 
 /**
  * Estimates the amount of power consumed when the device is idle.
  */
 public class IdlePowerCalculator extends PowerCalculator {
     private static final String TAG = "IdlePowerCalculator";
-    private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final boolean DEBUG = PowerCalculator.DEBUG;
     private final double mAveragePowerCpuSuspendMahPerUs;
     private final double mAveragePowerCpuIdleMahPerUs;
     public long mDurationMs;
@@ -64,20 +60,6 @@ public class IdlePowerCalculator extends PowerCalculator {
         }
     }
 
-    @Override
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        calculatePowerAndDuration(batteryStats, rawRealtimeUs, rawUptimeUs, statsType);
-
-        if (mPowerMah != 0) {
-            BatterySipper bs = new BatterySipper(BatterySipper.DrainType.IDLE, null, 0);
-            bs.usagePowerMah = mPowerMah;
-            bs.usageTimeMs = mDurationMs;
-            bs.sumPower();
-            sippers.add(bs);
-        }
-    }
-
     /**
      * Calculates the baseline power usage for the device when it is in suspend and idle.
      * The device is drawing POWER_CPU_SUSPEND power at its lowest power state.
@@ -97,9 +79,9 @@ public class IdlePowerCalculator extends PowerCalculator {
         mPowerMah = suspendPowerMah + idlePowerMah;
         if (DEBUG && mPowerMah != 0) {
             Log.d(TAG, "Suspend: time=" + (batteryRealtimeUs / 1000)
-                    + " power=" + formatCharge(suspendPowerMah));
+                    + " power=" + BatteryStats.formatCharge(suspendPowerMah));
             Log.d(TAG, "Idle: time=" + (batteryUptimeUs / 1000)
-                    + " power=" + formatCharge(idlePowerMah));
+                    + " power=" + BatteryStats.formatCharge(idlePowerMah));
         }
         mDurationMs = batteryRealtimeUs / 1000;
     }

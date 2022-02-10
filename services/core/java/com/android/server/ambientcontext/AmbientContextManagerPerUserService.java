@@ -20,22 +20,30 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
+import android.app.ActivityOptions;
+import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.app.ambientcontext.AmbientContextEvent;
 import android.app.ambientcontext.AmbientContextEventRequest;
-import android.app.ambientcontext.AmbientContextEventResponse;
 import android.app.ambientcontext.AmbientContextManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
-import android.service.ambientcontext.AmbientContextDetectionService;
+import android.provider.Settings;
+import android.service.ambientcontext.AmbientContextDetectionResult;
+import android.service.ambientcontext.AmbientContextDetectionServiceStatus;
+import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
@@ -44,7 +52,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.infra.AbstractPerUserSystemService;
 
 import java.io.PrintWriter;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Set;
 
 /**
@@ -60,14 +69,12 @@ final class AmbientContextManagerPerUserService extends
     RemoteAmbientContextDetectionService mRemoteService;
 
     private ComponentName mComponentName;
-    private Context mContext;
     private Set<PendingIntent> mExistingPendingIntents;
 
     AmbientContextManagerPerUserService(
             @NonNull AmbientContextManagerService master, Object lock, @UserIdInt int userId) {
         super(master, lock, userId);
-        mContext = master.getContext();
-        mExistingPendingIntents = new HashSet<>();
+        mExistingPendingIntents = new ArraySet<>();
     }
 
     void destroyLocked() {
@@ -154,12 +161,13 @@ final class AmbientContextManagerPerUserService extends
      * package. A new registration from the same package will overwrite the previous registration.
      */
     public void onRegisterObserver(AmbientContextEventRequest request,
-            PendingIntent pendingIntent) {
+            PendingIntent pendingIntent, RemoteCallback clientStatusCallback) {
         synchronized (mLock) {
             if (!setUpServiceIfNeeded()) {
-                Slog.w(TAG, "Service is not available at this moment.");
-                sendStatusUpdateIntent(
-                        pendingIntent, AmbientContextEventResponse.STATUS_SERVICE_UNAVAILABLE);
+                Slog.w(TAG, "Detection service is not available at this moment.");
+                sendStatusCallback(
+                        clientStatusCallback,
+                        AmbientContextManager.STATUS_SERVICE_UNAVAILABLE);
                 return;
             }
 
@@ -173,29 +181,58 @@ final class AmbientContextManagerPerUserService extends
             }
 
             // Register new package and add request to mExistingRequests
-            startDetection(request, callingPackage, createRemoteCallback());
+            startDetection(request, callingPackage, createDetectionResultRemoteCallback(),
+                    getServerStatusCallback(clientStatusCallback));
             mExistingPendingIntents.add(pendingIntent);
         }
     }
 
+    /**
+     * Returns a RemoteCallback that handles the status from the detection service, and
+     * sends results to the client callback.
+     */
+    private RemoteCallback getServerStatusCallback(RemoteCallback clientStatusCallback) {
+        return new RemoteCallback(result -> {
+            AmbientContextDetectionServiceStatus serviceStatus =
+                    (AmbientContextDetectionServiceStatus) result.get(
+                            AmbientContextDetectionServiceStatus.STATUS_RESPONSE_BUNDLE_KEY);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                String packageName = serviceStatus.getPackageName();
+                Bundle bundle = new Bundle();
+                bundle.putInt(
+                        AmbientContextManager.STATUS_RESPONSE_BUNDLE_KEY,
+                        serviceStatus.getStatusCode());
+                clientStatusCallback.sendResult(bundle);
+                int statusCode = serviceStatus.getStatusCode();
+                Slog.i(TAG, "Got detection status of " + statusCode
+                        + " for " + packageName);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        });
+    }
+
     @VisibleForTesting
     void startDetection(AmbientContextEventRequest request, String callingPackage,
-            RemoteCallback callback) {
+            RemoteCallback detectionResultCallback, RemoteCallback statusCallback) {
         Slog.d(TAG, "Requested detection of " + request.getEventTypes());
         synchronized (mLock) {
             ensureRemoteServiceInitiated();
-            mRemoteService.startDetection(request, callingPackage, callback);
+            mRemoteService.startDetection(request, callingPackage, detectionResultCallback,
+                    statusCallback);
         }
     }
 
     /**
      * Sends an intent with a status code and empty events.
      */
-    void sendStatusUpdateIntent(PendingIntent pendingIntent, int statusCode) {
-        AmbientContextEventResponse response = new AmbientContextEventResponse.Builder()
-                .setStatusCode(statusCode)
-                .build();
-        sendResponseIntent(pendingIntent, response);
+    void sendStatusCallback(RemoteCallback statusCallback, int statusCode) {
+        Bundle bundle = new Bundle();
+        bundle.putInt(
+                AmbientContextManager.STATUS_RESPONSE_BUNDLE_KEY,
+                statusCode);
+        statusCallback.sendResult(bundle);
     }
 
     /**
@@ -215,6 +252,113 @@ final class AmbientContextManagerPerUserService extends
             mExistingPendingIntents.remove(pendingIntent);
             stopDetection(pendingIntent.getCreatorPackage());
         }
+    }
+
+    public void onQueryServiceStatus(int[] eventTypes, String callingPackage,
+            RemoteCallback statusCallback) {
+        Slog.d(TAG, "Query event status of " + Arrays.toString(eventTypes)
+                + " for " + callingPackage);
+        synchronized (mLock) {
+            if (!setUpServiceIfNeeded()) {
+                Slog.w(TAG, "Detection service is not available at this moment.");
+                sendStatusToCallback(statusCallback,
+                        AmbientContextManager.STATUS_SERVICE_UNAVAILABLE);
+                return;
+            }
+            ensureRemoteServiceInitiated();
+            mRemoteService.queryServiceStatus(
+                    eventTypes,
+                    callingPackage,
+                    getServerStatusCallback(statusCallback));
+        }
+    }
+
+    public void onStartConsentActivity(int[] eventTypes, String callingPackage) {
+        Slog.d(TAG, "Opening consent activity of " + Arrays.toString(eventTypes)
+                + " for " + callingPackage);
+
+        // Look up the recent task from the callingPackage
+        ActivityManager.RecentTaskInfo task;
+        ParceledListSlice<ActivityManager.RecentTaskInfo> recentTasks;
+        int userId = getUserId();
+        try {
+            recentTasks = ActivityTaskManager.getService().getRecentTasks(/*maxNum*/1,
+                    /*flags*/ 0, userId);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to query recent tasks!");
+            return;
+        }
+
+        if ((recentTasks != null) || recentTasks.getList().isEmpty()) {
+            Slog.e(TAG, "Recent task list is empty!");
+            return;
+        }
+
+        task = recentTasks.getList().get(0);
+        if (!callingPackage.equals(task.topActivityInfo.packageName)) {
+            Slog.e(TAG, "Recent task package name: " + task.topActivityInfo.packageName
+                    + " doesn't match with camera client package name: " + callingPackage);
+            return;
+        }
+
+        // Start activity as the same task from the callingPackage
+        Intent intent = new Intent();
+        ComponentName consentComponent = getConsentComponent();
+        if (consentComponent != null) {
+            Slog.e(TAG, "Starting consent activity for " + callingPackage);
+            Context context = getContext();
+            String packageNameExtraKey = Settings.Secure.getStringForUser(
+                    context.getContentResolver(),
+                    Settings.Secure.AMBIENT_CONTEXT_PACKAGE_NAME_EXTRA_KEY,
+                    userId);
+            String eventArrayExtraKey = Settings.Secure.getStringForUser(
+                    context.getContentResolver(),
+                    Settings.Secure.AMBIENT_CONTEXT_EVENT_ARRAY_EXTRA_KEY,
+                    userId);
+
+            // Create consent activity intent with the calling package name and requested events.
+            intent.setComponent(consentComponent);
+            if (packageNameExtraKey != null) {
+                intent.putExtra(packageNameExtraKey, callingPackage);
+            }
+            if (eventArrayExtraKey != null) {
+                intent.putExtra(eventArrayExtraKey, eventTypes);
+            }
+
+            // Set parent to the calling app's task
+            ActivityOptions options = ActivityOptions.makeBasic();
+            options.setLaunchTaskId(task.taskId);
+            context.startActivity(intent, options.toBundle());
+        } else {
+            Slog.e(TAG, "Consent component not found!");
+        }
+    }
+
+    /**
+     * Returns the consent activity component from config lookup.
+     */
+    private ComponentName getConsentComponent() {
+        Context context = getContext();
+        String consentComponent = Settings.Secure.getStringForUser(
+                context.getContentResolver(),
+                Settings.Secure.AMBIENT_CONTEXT_CONSENT_COMPONENT,
+                getUserId());
+        if (TextUtils.isEmpty(consentComponent)) {
+            return null;
+        }
+        return ComponentName.unflattenFromString(consentComponent);
+    }
+
+    /**
+     * Sends the result response with the specified status to the callback.
+     */
+    void sendStatusToCallback(RemoteCallback callback,
+                    @AmbientContextManager.StatusCode int status) {
+        Bundle bundle = new Bundle();
+        bundle.putInt(
+                AmbientContextManager.STATUS_RESPONSE_BUNDLE_KEY,
+                status);
+        callback.sendResult(bundle);
     }
 
     @VisibleForTesting
@@ -240,12 +384,13 @@ final class AmbientContextManagerPerUserService extends
      * Sends out the Intent to the client after the event is detected.
      *
      * @param pendingIntent Client's PendingIntent for callback
-     * @param response Response with status code and detection result
+     * @param result result from the detection service
      */
-    private void sendResponseIntent(PendingIntent pendingIntent,
-            AmbientContextEventResponse response) {
+    private void sendDetectionResultIntent(PendingIntent pendingIntent,
+            AmbientContextDetectionResult result) {
         Intent intent = new Intent();
-        intent.putExtra(AmbientContextManager.EXTRA_AMBIENT_CONTEXT_EVENT_RESPONSE, response);
+        intent.putExtra(AmbientContextManager.EXTRA_AMBIENT_CONTEXT_EVENTS,
+                new ArrayList(result.getEvents()));
         // Explicitly disallow the receiver from starting activities, to prevent apps from utilizing
         // the PendingIntent as a backdoor to do this.
         BroadcastOptions options = BroadcastOptions.makeBasic();
@@ -254,37 +399,28 @@ final class AmbientContextManagerPerUserService extends
             pendingIntent.send(getContext(), 0, intent, null, null, null,
                     options.toBundle());
             Slog.i(TAG, "Sending PendingIntent to " + pendingIntent.getCreatorPackage() + ": "
-                    + response);
+                    + result);
         } catch (PendingIntent.CanceledException e) {
             Slog.w(TAG, "Couldn't deliver pendingIntent:" + pendingIntent);
         }
     }
 
     @NonNull
-    private RemoteCallback createRemoteCallback() {
+    private RemoteCallback createDetectionResultRemoteCallback() {
         return new RemoteCallback(result -> {
-            AmbientContextEventResponse response = (AmbientContextEventResponse) result.get(
-                            AmbientContextDetectionService.RESPONSE_BUNDLE_KEY);
+            AmbientContextDetectionResult detectionResult =
+                    (AmbientContextDetectionResult) result.get(
+                            AmbientContextDetectionResult.RESULT_RESPONSE_BUNDLE_KEY);
             final long token = Binder.clearCallingIdentity();
             try {
-                Set<PendingIntent> pendingIntentForFailedRequests = new HashSet<>();
                 for (PendingIntent pendingIntent : mExistingPendingIntents) {
-                    // Send PendingIntent if a requesting package matches the response packages.
-                    if (response.getPackageName().equals(pendingIntent.getCreatorPackage())) {
-                        sendResponseIntent(pendingIntent, response);
-
-                        int statusCode = response.getStatusCode();
-                        if (statusCode != AmbientContextEventResponse.STATUS_SUCCESS) {
-                            pendingIntentForFailedRequests.add(pendingIntent);
-                        }
-                        Slog.i(TAG, "Got response of " + response.getEvents() + " for "
-                                + pendingIntent.getCreatorPackage() + ". Status: " + statusCode);
+                    // Send PendingIntent to requesting packages
+                    String creatorPackage = pendingIntent.getCreatorPackage();
+                    if (detectionResult.getPackageName().equals(creatorPackage)) {
+                        sendDetectionResultIntent(pendingIntent, detectionResult);
+                        Slog.i(TAG, "Got detection result of " + detectionResult.getEvents()
+                                + " for " + creatorPackage);
                     }
-                }
-
-                // Removes the failed requests from the existing requests.
-                for (PendingIntent pendingIntent : pendingIntentForFailedRequests) {
-                    mExistingPendingIntents.remove(pendingIntent);
                 }
             } finally {
                 Binder.restoreCallingIdentity(token);

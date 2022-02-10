@@ -30,6 +30,11 @@
 
 namespace android {
 
+static struct {
+    jclass clazz;
+    jmethodID ctor;
+} gTransactionClassInfo;
+
 static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring jName) {
     ScopedUtfChars name(env, jName);
     sp<BLASTBufferQueue> queue = new BLASTBufferQueue(name.c_str());
@@ -86,6 +91,14 @@ static bool nativeIsSameSurfaceControl(JNIEnv* env, jclass clazz, jlong ptr, jlo
     return queue->isSameSurfaceControl(reinterpret_cast<SurfaceControl*>(surfaceControl));
 }
 
+static jobject nativeGatherPendingTransactions(JNIEnv* env, jclass clazz, jlong ptr,
+                                               jlong frameNum) {
+    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
+    SurfaceComposerClient::Transaction* transaction = queue->gatherPendingTransactions(frameNum);
+    return env->NewObject(gTransactionClassInfo.clazz, gTransactionClassInfo.ctor,
+                          reinterpret_cast<jlong>(transaction));
+}
+
 static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
         // clang-format off
@@ -98,6 +111,7 @@ static const JNINativeMethod gMethods[] = {
         {"nativeGetLastAcquiredFrameNum", "(J)J", (void*)nativeGetLastAcquiredFrameNum},
         {"nativeApplyPendingTransactions", "(JJ)V", (void*)nativeApplyPendingTransactions},
         {"nativeIsSameSurfaceControl", "(JJ)Z", (void*)nativeIsSameSurfaceControl},
+        {"nativeGatherPendingTransactions", "(JJ)Landroid/view/SurfaceControl$Transaction;", (void*)nativeGatherPendingTransactions}
         // clang-format on
 };
 
@@ -105,6 +119,11 @@ int register_android_graphics_BLASTBufferQueue(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/graphics/BLASTBufferQueue",
             gMethods, NELEM(gMethods));
     LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
+
+    jclass transactionClazz = FindClassOrDie(env, "android/view/SurfaceControl$Transaction");
+    gTransactionClassInfo.clazz = MakeGlobalRefOrDie(env, transactionClazz);
+    gTransactionClassInfo.ctor =
+            GetMethodIDOrDie(env, gTransactionClassInfo.clazz, "<init>", "(J)V");
     return 0;
 }
 

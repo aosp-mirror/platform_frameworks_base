@@ -254,7 +254,7 @@ public final class MediaRouter2Manager {
     @NonNull
     public List<MediaRoute2Info> getAvailableRoutes(@NonNull RoutingSessionInfo sessionInfo) {
         return getFilteredRoutes(sessionInfo, /*includeSelectedRoutes=*/true,
-                null);
+                /*additionalFilter=*/null);
     }
 
     /**
@@ -315,20 +315,20 @@ public final class MediaRouter2Manager {
                 routes.add(route);
                 continue;
             }
-            if (!route.hasAllFeatures(discoveryPreference.getRequiredFeatures())
-                    || !route.hasAnyFeatures(discoveryPreference.getPreferredFeatures())) {
+            if (!route.hasAnyFeatures(discoveryPreference.getPreferredFeatures())) {
                 continue;
             }
             if (!discoveryPreference.getAllowedPackages().isEmpty()
-                    && !discoveryPreference.getAllowedPackages()
-                    .contains(route.getPackageName())) {
+                    && (route.getPackageName() == null
+                    || !discoveryPreference.getAllowedPackages()
+                    .contains(route.getPackageName()))) {
                 continue;
             }
             if (additionalFilter != null && !additionalFilter.test(route)) {
                 continue;
             }
             if (discoveryPreference.shouldRemoveDuplicates()) {
-                if (Collections.disjoint(deduplicationIdSet, route.getDeduplicationIds())) {
+                if (!Collections.disjoint(deduplicationIdSet, route.getDeduplicationIds())) {
                     continue;
                 }
                 deduplicationIdSet.addAll(route.getDeduplicationIds());

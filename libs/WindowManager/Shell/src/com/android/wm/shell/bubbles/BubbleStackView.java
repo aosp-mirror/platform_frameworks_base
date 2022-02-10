@@ -168,26 +168,27 @@ public class BubbleStackView extends FrameLayout
 
     private static final SurfaceSynchronizer DEFAULT_SURFACE_SYNCHRONIZER =
             new SurfaceSynchronizer() {
-        @Override
-        public void syncSurfaceAndRun(Runnable callback) {
-            Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
-                // Just wait 2 frames. There is no guarantee, but this is usually enough time that
-                // the requested change is reflected on the screen.
-                // TODO: Once SurfaceFlinger provide APIs to sync the state of {@code View} and
-                // surfaces, rewrite this logic with them.
-                private int mFrameWait = 2;
-
                 @Override
-                public void doFrame(long frameTimeNanos) {
-                    if (--mFrameWait > 0) {
-                        Choreographer.getInstance().postFrameCallback(this);
-                    } else {
-                        callback.run();
-                    }
+                public void syncSurfaceAndRun(Runnable callback) {
+                    Choreographer.FrameCallback frameCallback = new Choreographer.FrameCallback() {
+                        // Just wait 2 frames. There is no guarantee, but this is usually enough
+                        // time that the requested change is reflected on the screen.
+                        // TODO: Once SurfaceFlinger provide APIs to sync the state of
+                        //  {@code View} and surfaces, rewrite this logic with them.
+                        private int mFrameWait = 2;
+
+                        @Override
+                        public void doFrame(long frameTimeNanos) {
+                            if (--mFrameWait > 0) {
+                                Choreographer.getInstance().postFrameCallback(this);
+                            } else {
+                                callback.run();
+                            }
+                        }
+                    };
+                    Choreographer.getInstance().postFrameCallback(frameCallback);
                 }
-            });
-        }
-    };
+            };
     private final BubbleController mBubbleController;
     private final BubbleData mBubbleData;
     private StackViewState mStackViewState = new StackViewState();
@@ -781,7 +782,7 @@ public class BubbleStackView extends FrameLayout
         mPositioner = mBubbleController.getPositioner();
 
         final TypedArray ta = mContext.obtainStyledAttributes(
-                new int[] {android.R.attr.dialogCornerRadius});
+                new int[]{android.R.attr.dialogCornerRadius});
         mCornerRadius = ta.getDimensionPixelSize(0, 0);
         ta.recycle();
 
@@ -942,7 +943,7 @@ public class BubbleStackView extends FrameLayout
         });
 
         // If the stack itself is clicked, it means none of its touchable views (bubbles, flyouts,
-         // TaskView, etc.) were touched. Collapse the stack if it's expanded.
+        // TaskView, etc.) were touched. Collapse the stack if it's expanded.
         setOnClickListener(view -> {
             if (mShowingManage) {
                 showManageMenu(false /* show */);
@@ -1656,7 +1657,12 @@ public class BubbleStackView extends FrameLayout
                 return;
             }
         }
-        Log.d(TAG, "was asked to remove Bubble, but didn't find the view! " + bubble);
+        // If a bubble is suppressed, it is not attached to the container. Clean it up.
+        if (bubble.isSuppressed()) {
+            bubble.cleanupViews();
+        } else {
+            Log.d(TAG, "was asked to remove Bubble, but didn't find the view! " + bubble);
+        }
     }
 
     private void updateOverflowVisibility() {
@@ -1842,11 +1848,30 @@ public class BubbleStackView extends FrameLayout
         }
     }
 
-    void setBubbleVisibility(Bubble b, boolean visible) {
-        if (b.getIconView() != null) {
-            b.getIconView().setVisibility(visible ? VISIBLE : GONE);
+    void setBubbleSuppressed(Bubble bubble, boolean suppressed) {
+        if (DEBUG_BUBBLE_STACK_VIEW) {
+            Log.d(TAG, "setBubbleSuppressed: suppressed=" + suppressed + " bubble=" + bubble);
         }
-        // TODO(b/181166384): Animate in / out & handle adjusting how the bubbles overlap
+        if (suppressed) {
+            int index = getBubbleIndex(bubble);
+            mBubbleContainer.removeViewAt(index);
+            updateExpandedView();
+        } else {
+            if (bubble.getIconView() == null) {
+                return;
+            }
+            if (bubble.getIconView().getParent() != null) {
+                Log.e(TAG, "Bubble is already added to parent. Can't unsuppress: " + bubble);
+                return;
+            }
+            int index = mBubbleData.getBubbles().indexOf(bubble);
+            // Add the view back to the correct position
+            mBubbleContainer.addView(bubble.getIconView(), index,
+                    new LayoutParams(mPositioner.getBubbleSize(),
+                            mPositioner.getBubbleSize()));
+            updateBubbleShadows(false /* showForAllBubbles */);
+            requestUpdate();
+        }
     }
 
     /**
@@ -2191,7 +2216,7 @@ public class BubbleStackView extends FrameLayout
             PhysicsAnimator.getInstance(mAnimatingOutSurfaceContainer)
                     .spring(DynamicAnimation.TRANSLATION_Y,
                             mAnimatingOutSurfaceContainer.getTranslationY() - mBubbleSize,
-                    mTranslateSpringConfig)
+                            mTranslateSpringConfig)
                     .start();
         }
 
@@ -3040,14 +3065,14 @@ public class BubbleStackView extends FrameLayout
      * Logs the bubble UI event.
      *
      * @param provider the bubble view provider that is being interacted on. Null value indicates
-     *               that the user interaction is not specific to one bubble.
-     * @param action the user interaction enum.
+     *                 that the user interaction is not specific to one bubble.
+     * @param action   the user interaction enum.
      */
     private void logBubbleEvent(@Nullable BubbleViewProvider provider, int action) {
         final String packageName =
                 (provider != null && provider instanceof Bubble)
-                    ? ((Bubble) provider).getPackageName()
-                    : "null";
+                        ? ((Bubble) provider).getPackageName()
+                        : "null";
         mBubbleData.logBubbleEvent(provider,
                 action,
                 packageName,

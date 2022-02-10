@@ -320,7 +320,7 @@ extern "C" {
 // -------------------------------Private method declarations--------------
 
 static void Image_setNativeContext(JNIEnv* env, jobject thiz,
-        sp<GraphicBuffer> buffer, int fenceFd, long dataSpace);
+        sp<GraphicBuffer> buffer, int fenceFd, int dataSpace);
 static void Image_getNativeContext(JNIEnv* env, jobject thiz,
         GraphicBuffer** buffer, int* fenceFd);
 static void Image_unlockIfLocked(JNIEnv* env, jobject thiz);
@@ -334,7 +334,7 @@ static void ImageWriter_classInit(JNIEnv* env, jclass clazz) {
             "can't find android/media/ImageWriter$WriterSurfaceImage");
 
     gSurfaceImageClassInfo.mDataSpace = env->GetFieldID(
-            imageClazz, "mDataSpace", "J");
+            imageClazz, "mDataSpace", "I");
     LOG_ALWAYS_FATAL_IF(gSurfaceImageClassInfo.mDataSpace == NULL,
             "can't find android/media/ImageWriter$WriterSurfaceImage.mDataSpace");
 
@@ -375,7 +375,7 @@ static void ImageWriter_classInit(JNIEnv* env, jclass clazz) {
 
 static jlong ImageWriter_init(JNIEnv* env, jobject thiz, jobject weakThiz, jobject jsurface,
         jint maxImages, jint userWidth, jint userHeight, jboolean useSurfaceImageFormatInfo,
-        jint hardwareBufferFormat, jlong dataSpace, jlong ndkUsage) {
+        jint hardwareBufferFormat, jint dataSpace, jlong ndkUsage) {
     status_t res;
 
     ALOGV("%s: maxImages:%d", __FUNCTION__, maxImages);
@@ -626,7 +626,7 @@ static void ImageWriter_cancelImage(JNIEnv* env, jobject thiz, jlong nativeCtx, 
 }
 
 static void ImageWriter_queueImage(JNIEnv* env, jobject thiz, jlong nativeCtx, jobject image,
-        jlong timestampNs, jlong dataSpace, jint left, jint top, jint right,
+        jlong timestampNs, jint dataSpace, jint left, jint top, jint right,
         jint bottom, jint transform, jint scalingMode) {
     ALOGV("%s", __FUNCTION__);
     JNIImageWriterContext* const ctx = reinterpret_cast<JNIImageWriterContext *>(nativeCtx);
@@ -660,7 +660,7 @@ static void ImageWriter_queueImage(JNIEnv* env, jobject thiz, jlong nativeCtx, j
     }
 
     // Set dataSpace
-    ALOGV("dataSpace to be queued: %" PRId64, dataSpace);
+    ALOGV("dataSpace to be queued: %d", dataSpace);
     res = native_window_set_buffers_data_space(
         anw.get(), static_cast<android_dataspace>(dataSpace));
     if (res != OK) {
@@ -719,7 +719,7 @@ static void ImageWriter_queueImage(JNIEnv* env, jobject thiz, jlong nativeCtx, j
 }
 
 static status_t attachAndQeueuGraphicBuffer(JNIEnv* env, JNIImageWriterContext *ctx,
-        sp<Surface> surface, sp<GraphicBuffer> gb, jlong timestampNs, jlong dataSpace,
+        sp<Surface> surface, sp<GraphicBuffer> gb, jlong timestampNs, jint dataSpace,
         jint left, jint top, jint right, jint bottom, jint transform, jint scalingMode) {
     status_t res = OK;
     // Step 1. Attach Image
@@ -748,7 +748,7 @@ static status_t attachAndQeueuGraphicBuffer(JNIEnv* env, JNIImageWriterContext *
         return res;
     }
 
-    ALOGV("dataSpace to be queued: %" PRId64, dataSpace);
+    ALOGV("dataSpace to be queued: %" PRId32, dataSpace);
     res = native_window_set_buffers_data_space(
         anw.get(), static_cast<android_dataspace>(dataSpace));
     if (res != OK) {
@@ -809,7 +809,7 @@ static status_t attachAndQeueuGraphicBuffer(JNIEnv* env, JNIImageWriterContext *
 }
 
 static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nativeCtx,
-        jlong nativeBuffer, jint imageFormat, jlong timestampNs, jlong dataSpace,
+        jlong nativeBuffer, jint imageFormat, jlong timestampNs, jint dataSpace,
         jint left, jint top, jint right, jint bottom, jint transform, jint scalingMode) {
     ALOGV("%s", __FUNCTION__);
     JNIImageWriterContext* const ctx = reinterpret_cast<JNIImageWriterContext *>(nativeCtx);
@@ -840,7 +840,7 @@ static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nat
 }
 
 static jint ImageWriter_attachAndQueueGraphicBuffer(JNIEnv* env, jobject thiz, jlong nativeCtx,
-        jobject buffer, jint format, jlong timestampNs, jlong dataSpace, jint left, jint top,
+        jobject buffer, jint format, jlong timestampNs, jint dataSpace, jint left, jint top,
         jint right, jint bottom, jint transform, jint scalingMode) {
     ALOGV("%s", __FUNCTION__);
     JNIImageWriterContext* const ctx = reinterpret_cast<JNIImageWriterContext *>(nativeCtx);
@@ -886,7 +886,7 @@ static void Image_getNativeContext(JNIEnv* env, jobject thiz,
 }
 
 static void Image_setNativeContext(JNIEnv* env, jobject thiz,
-        sp<GraphicBuffer> buffer, int fenceFd, long dataSpace) {
+        sp<GraphicBuffer> buffer, int fenceFd, int dataSpace) {
     ALOGV("%s:", __FUNCTION__);
     GraphicBuffer* p = NULL;
     Image_getNativeContext(env, thiz, &p, /*fenceFd*/NULL);
@@ -901,7 +901,7 @@ static void Image_setNativeContext(JNIEnv* env, jobject thiz,
 
     env->SetIntField(thiz, gSurfaceImageClassInfo.mNativeFenceFd, reinterpret_cast<jint>(fenceFd));
 
-    env->SetLongField(thiz, gSurfaceImageClassInfo.mDataSpace, dataSpace);
+    env->SetIntField(thiz, gSurfaceImageClassInfo.mDataSpace, dataSpace);
 }
 
 static void Image_unlockIfLocked(JNIEnv* env, jobject thiz) {
@@ -958,7 +958,7 @@ static jint Image_getHeight(JNIEnv* env, jobject thiz) {
     return buffer->getHeight();
 }
 
-static jint Image_getFormat(JNIEnv* env, jobject thiz, jlong dataSpace) {
+static jint Image_getFormat(JNIEnv* env, jobject thiz, jint dataSpace) {
     ALOGV("%s", __FUNCTION__);
     GraphicBuffer* buffer;
     Image_getNativeContext(env, thiz, &buffer, NULL);
@@ -1042,7 +1042,7 @@ static bool Image_getLockedImageInfo(JNIEnv* env, LockedImage* buffer, int idx,
 }
 
 static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
-        int numPlanes, int writerFormat, long dataSpace) {
+        int numPlanes, int writerFormat, int dataSpace) {
     ALOGV("%s: create SurfacePlane array with size %d", __FUNCTION__, numPlanes);
     int rowStride, pixelStride;
     uint8_t *pData;
@@ -1103,27 +1103,27 @@ static jobjectArray Image_createSurfacePlanes(JNIEnv* env, jobject thiz,
 
 static JNINativeMethod gImageWriterMethods[] = {
     {"nativeClassInit",         "()V",                        (void*)ImageWriter_classInit },
-    {"nativeInit",              "(Ljava/lang/Object;Landroid/view/Surface;IIIZIJJ)J",
+    {"nativeInit",              "(Ljava/lang/Object;Landroid/view/Surface;IIIZIIJ)J",
                                                               (void*)ImageWriter_init },
     {"nativeClose",              "(J)V",                      (void*)ImageWriter_close },
     {"nativeAttachAndQueueImage",
-        "(JJIJJIIIIII)I",
+        "(JJIJIIIIIII)I",
         (void*)ImageWriter_attachAndQueueImage },
     {"nativeAttachAndQueueGraphicBuffer",
-        "(JLandroid/graphics/GraphicBuffer;IJJIIIIII)I",
+        "(JLandroid/graphics/GraphicBuffer;IJIIIIIII)I",
         (void*)ImageWriter_attachAndQueueGraphicBuffer },
     {"nativeDequeueInputImage", "(JLandroid/media/Image;)V",  (void*)ImageWriter_dequeueImage },
-    {"nativeQueueInputImage",   "(JLandroid/media/Image;JJIIIIII)V",
+    {"nativeQueueInputImage",   "(JLandroid/media/Image;JIIIIIII)V",
                                                                (void*)ImageWriter_queueImage },
     {"cancelImage",             "(JLandroid/media/Image;)V",   (void*)ImageWriter_cancelImage },
 };
 
 static JNINativeMethod gImageMethods[] = {
-    {"nativeCreatePlanes",      "(IIJ)[Landroid/media/ImageWriter$WriterSurfaceImage$SurfacePlane;",
+    {"nativeCreatePlanes",      "(III)[Landroid/media/ImageWriter$WriterSurfaceImage$SurfacePlane;",
                                                                (void*)Image_createSurfacePlanes },
     {"nativeGetWidth",          "()I",                         (void*)Image_getWidth },
     {"nativeGetHeight",         "()I",                         (void*)Image_getHeight },
-    {"nativeGetFormat",         "(J)I",                        (void*)Image_getFormat },
+    {"nativeGetFormat",         "(I)I",                        (void*)Image_getFormat },
     {"nativeSetFenceFd",        "(I)V",                        (void*)Image_setFenceFd },
     {"nativeGetHardwareBuffer", "()Landroid/hardware/HardwareBuffer;",
                                                                (void*)Image_getHardwareBuffer },

@@ -28,12 +28,12 @@
     <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ផ្ដល់ការចូលប្រើពីចម្ងាយដល់ &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; ដើម្បីចូលប្រើកម្មវិធី ដែលបានដំឡើងនៅលើឧបករណ៍នេះ នៅពេលភ្ជាប់អ៊ីនធឺណិត។"</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
+    <string name="title_computer" msgid="4693714143506569253">"អនុញ្ញាតឱ្យ &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ចូលមើលព័ត៌មាននេះពីទូរសព្ទរបស់អ្នក"</string>
+    <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="profile_name_generic" msgid="6851028682723034988">"ឧបករណ៍"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"អនុញ្ញាត"</string>
     <string name="consent_no" msgid="2640796915611404382">"កុំអនុញ្ញាត"</string>
-    <!-- no translation found for permission_sync_confirmation_title (667074294393493186) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (8873391306499120778) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"ផ្ទេរការអនុញ្ញាតកម្មវិធីទៅនាឡិការបស់អ្នក"</string>
+    <string name="permission_sync_summary" msgid="8873391306499120778">"ដើម្បីជួយឱ្យការរៀបចំនាឡិការបស់អ្នកកាន់តែងាយស្រួល កម្មវិធីដែលបានដំឡើងនៅលើនាឡិការបស់អ្នកអំឡុងពេលរៀបចំនឹងប្រើការអនុញ្ញាតដូចគ្នានឹងទូរសព្ទរបស់អ្នកដែរ។\n\n ការអនុញ្ញាតទាំងនេះអាចរួមបញ្ចូលសិទ្ធិចូលប្រើទីតាំង និងមីក្រូហ្វូនរបស់នាឡិកាអ្នក។"</string>
 </resources>

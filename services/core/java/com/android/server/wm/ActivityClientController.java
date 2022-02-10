@@ -1135,13 +1135,13 @@ class ActivityClientController extends IActivityClientController.Stub {
     }
 
     @Override
-    public void setDisablePreviewScreenshots(IBinder token, boolean disable) {
+    public void setRecentsScreenshotEnabled(IBinder token, boolean enabled) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
                 final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
                 if (r != null) {
-                    r.setDisablePreviewScreenshots(disable);
+                    r.setRecentsScreenshotEnabled(enabled);
                 }
             }
         } finally {

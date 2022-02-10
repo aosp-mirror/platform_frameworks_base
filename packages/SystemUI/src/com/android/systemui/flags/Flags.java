@@ -109,6 +109,10 @@ public class Flags {
 
     public static final BooleanFlag NEW_FOOTER = new BooleanFlag(504, false);
 
+    public static final BooleanFlag NEW_HEADER = new BooleanFlag(505, false);
+    public static final ResourceBooleanFlag FULL_SCREEN_USER_SWITCHER =
+            new ResourceBooleanFlag(506, R.bool.config_enableFullscreenUserSwitcher);
+
     /***************************************/
     // 600- status bar
     public static final BooleanFlag COMBINED_STATUS_BAR_SIGNAL_ICONS =
@@ -135,7 +139,7 @@ public class Flags {
 
     /***************************************/
     // 900 - media
-    public static final BooleanFlag MEDIA_TAP_TO_TRANSFER = new BooleanFlag(900, false);
+    public static final BooleanFlag MEDIA_TAP_TO_TRANSFER = new BooleanFlag(900, true);
     public static final BooleanFlag MEDIA_SESSION_ACTIONS = new BooleanFlag(901, true);
     public static final BooleanFlag MEDIA_SESSION_LAYOUT = new BooleanFlag(902, false);
 

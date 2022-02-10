@@ -25,7 +25,7 @@ import android.app.ContextImpl.ServiceInitializationState;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.ambientcontext.AmbientContextManager;
-import android.app.ambientcontext.IAmbientContextEventObserver;
+import android.app.ambientcontext.IAmbientContextManager;
 import android.app.appsearch.AppSearchManagerFrameworkInitializer;
 import android.app.blob.BlobStoreManagerFrameworkInitializer;
 import android.app.cloudsearch.CloudSearchManager;
@@ -1542,8 +1542,8 @@ public final class SystemServiceRegistry {
                             throws ServiceNotFoundException {
                         IBinder iBinder = ServiceManager.getServiceOrThrow(
                                 Context.AMBIENT_CONTEXT_SERVICE);
-                        IAmbientContextEventObserver manager =
-                                IAmbientContextEventObserver.Stub.asInterface(iBinder);
+                        IAmbientContextManager manager =
+                                IAmbientContextManager.Stub.asInterface(iBinder);
                         return new AmbientContextManager(ctx.getOuterContext(), manager);
                     }});
 

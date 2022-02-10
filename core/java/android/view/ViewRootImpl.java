@@ -4169,19 +4169,22 @@ public final class ViewRootImpl implements ViewParent,
                         + " didProduceBuffer=" + didProduceBuffer);
             }
 
+            Transaction tmpTransaction = new Transaction();
+            tmpTransaction.merge(mRtBLASTSyncTransaction);
+
             // If frame wasn't drawn, clear out the next transaction so it doesn't affect the next
             // draw attempt. The next transaction and transaction complete callback were only set
             // for the current draw attempt.
             if (!didProduceBuffer) {
                 mBlastBufferQueue.setSyncTransaction(null);
-                // Apply the transactions that were sent to mergeWithNextTransaction since the
+                // Get the transactions that were sent to mergeWithNextTransaction since the
                 // frame didn't draw on this vsync. It's possible the frame will draw later, but
                 // it's better to not be sync than to block on a frame that may never come.
-                mBlastBufferQueue.applyPendingTransactions(mRtLastAttemptedDrawFrameNum);
+                Transaction pendingTransactions = mBlastBufferQueue.gatherPendingTransactions(
+                        mRtLastAttemptedDrawFrameNum);
+                tmpTransaction.merge(pendingTransactions);
             }
 
-            Transaction tmpTransaction = new Transaction();
-            tmpTransaction.merge(mRtBLASTSyncTransaction);
             // Post at front of queue so the buffer can be processed immediately and allow RT
             // to continue processing new buffers. If RT tries to process buffers before the sync
             // buffer is applied, the new buffers will not get acquired and could result in a

@@ -22,10 +22,6 @@ import android.os.BatteryConsumer;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.UserHandle;
-import android.util.SparseArray;
-
-import java.util.List;
 
 /**
  * Estimates power consumed by the ambient display
@@ -65,29 +61,6 @@ public class AmbientDisplayPowerCalculator extends PowerCalculator {
                 .setUsageDurationMillis(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY, durationMs)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_AMBIENT_DISPLAY,
                         powerMah, powerModel);
-    }
-
-    /**
-     * Ambient display power is the additional power the screen takes while in ambient display/
-     * screen doze/ always-on display (interchangeable terms) mode. Ambient display power should
-     * be hidden {@link BatteryStatsHelper#shouldHideSipper(BatterySipper)}, but should not be
-     * included in smearing {@link BatteryStatsHelper#removeHiddenBatterySippers(List)}.
-     */
-    @Override
-    public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        final long measuredEnergyUC = batteryStats.getScreenDozeMeasuredBatteryConsumptionUC();
-        final long durationMs = calculateDuration(batteryStats, rawRealtimeUs, statsType);
-        final int powerModel = getPowerModel(measuredEnergyUC);
-        final double powerMah = calculateTotalPower(powerModel, batteryStats, rawRealtimeUs,
-                measuredEnergyUC);
-        if (powerMah > 0) {
-            BatterySipper bs = new BatterySipper(BatterySipper.DrainType.AMBIENT_DISPLAY, null, 0);
-            bs.usagePowerMah = powerMah;
-            bs.usageTimeMs = durationMs;
-            bs.sumPower();
-            sippers.add(bs);
-        }
     }
 
     private long calculateDuration(BatteryStats batteryStats, long rawRealtimeUs, int statsType) {

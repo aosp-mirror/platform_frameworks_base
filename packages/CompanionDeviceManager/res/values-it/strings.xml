@@ -28,12 +28,12 @@
     <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"Consenti all\'app &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; di fornire l\'accesso remoto a &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; per accedere alle applicazioni installate su questo dispositivo quando è connesso."</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
+    <string name="title_computer" msgid="4693714143506569253">"Consenti a &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; di accedere a questa informazione dal tuo telefono"</string>
+    <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="profile_name_generic" msgid="6851028682723034988">"dispositivo"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"Consenti"</string>
     <string name="consent_no" msgid="2640796915611404382">"Non consentire"</string>
-    <!-- no translation found for permission_sync_confirmation_title (667074294393493186) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (8873391306499120778) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"Trasferisci le autorizzazioni app all\'orologio"</string>
+    <string name="permission_sync_summary" msgid="8873391306499120778">"Per facilitare la configurazione dell\'orologio, le app installate su quest\'ultimo durante la configurazione useranno le stesse autorizzazioni delle app sul telefono.\n\n Queste autorizzazioni potrebbero includere l\'accesso al microfono e alla posizione dell\'orologio."</string>
 </resources>

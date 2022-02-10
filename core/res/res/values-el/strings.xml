@@ -70,7 +70,6 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Τριμερής κλήση"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Απόρριψη ανεπιθύμητων, ενοχλητικών κλήσεων"</string>
     <string name="CndMmi" msgid="185136449405618437">"Παράδοση καλούμενου αριθμού"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"Μην ενοχλείτε"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Η αναγνώριση κλήσης βρίσκεται από προεπιλογή στην \"περιορισμένη\". Επόμενη κλήση: Περιορισμένη."</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Η αναγνώριση κλήσης βρίσκεται από προεπιλογή στην \"περιορισμένη\". Επόμενη κλήση: Μη περιορισμένη"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Η αναγνώριση κλήσης βρίσκεται από προεπιλογή στην \"μη περιορισμένη\". Επόμενη κλήση: Περιορισμένη."</string>
@@ -180,10 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"Ο αποθηκευτικός χώρος παρακολούθησης είναι πλήρης! Διαγράψτε μερικά αρχεία για να απελευθερώσετε χώρο."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Ο αποθηκευτικός χώρος της συσκευής Android TV είναι πλήρης. Διαγράψτε μερικά αρχεία για να απελευθερώσετε χώρο."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"Ο αποθηκευτικός χώρος του τηλεφώνου είναι πλήρης. Διαγράψτε μερικά αρχεία για να δημιουργήσετε ελεύθερο χώρο."</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="other">Οι αρχές έκδοσης πιστοποιητικών εγκαταστάθηκαν</item>
-      <item quantity="one">Η αρχή έκδοσης πιστοποιητικών εγκαταστάθηκε</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Η αρχή έκδοσης πιστοποιητικών εγκαταστάθηκε}other{Οι αρχές έκδοσης πιστοποιητικών εγκαταστάθηκαν}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Από ένα άγνωστο τρίτο μέρος"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Από τον διαχειριστή του προφίλ εργασίας σας"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Από <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -203,6 +199,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"Υπηρεσία ειδοποίησης αισθητήρα"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Υπηρεσία Twilight"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Υπηρεσία ενημέρωσης ώρας GNSS"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"Υπηρεσία Εργαλείου διαχείρισης πολιτικής"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Υπηρεσία διαχείρισης αναγνώρισης μουσικής"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Η συσκευή σας θα διαγραφεί"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Δεν είναι δυνατή η χρήση της εφαρμογής διαχειριστή. Η συσκευή σας θα διαγραφεί.\n\nΕάν έχετε ερωτήσεις, επικοινωνήστε με τον διαχειριστή του οργανισμού σας."</string>
@@ -256,10 +253,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Χρησιμοποιήστε αυτήν την επιλογή στις περισσότερες περιπτώσεις. Σας επιτρέπει να παρακολουθείτε την πρόοδο της αναφοράς, να εισάγετε περισσότερες λεπτομέρειες σχετικά με το πρόβλημα που αντιμετωπίζετε και να τραβήξετε στιγμιότυπα οθόνης. Ενδέχεται να παραλείψει ορισμένες ενότητες που δεν χρησιμοποιούνται συχνά και για τις οποίες απαιτείται μεγάλο χρονικό διάστημα για τη δημιουργία αναφορών."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Πλήρης αναφορά"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Χρησιμοποιήστε αυτήν την επιλογή για την ελάχιστη δυνατή παρέμβαση συστήματος, όταν η συσκευή σας δεν ανταποκρίνεται ή παρουσιάζει μεγάλη καθυστέρηση στη λειτουργία ή όταν χρειάζεστε όλες τις ενότητες αναφοράς. Δεν σας επιτρέπει να προσθέσετε περισσότερες λεπτομέρειες ή να τραβήξετε επιπλέον στιγμιότυπα οθόνης."</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="other">Λήψη στιγμιότυπου οθόνης για αναφορά σφαλμάτων σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλεπτα.</item>
-      <item quantity="one">Λήψη στιγμιότυπου οθόνης για αναφορά σφαλμάτων σε <xliff:g id="NUMBER_0">%d</xliff:g> δευτερόλεπτο.</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Λήψη στιγμιότυπου οθόνης για αναφορά σφάλματος σε # δευτερόλεπτο.}other{Λήψη στιγμιότυπου οθόνης για αναφορά σφάλματος σε # δευτερόλεπτα.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Έγινε λήψη στιγμιότυπου οθόνης με αναφορά σφάλματος"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Αποτυχία λήψης στιγμιότυπου οθόνης με αναφορά σφάλματος"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Λειτουργία σίγασης"</string>
@@ -310,8 +304,14 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"έχει πρόσβαση στο ημερολόγιό σας"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"στέλνει και να διαβάζει μηνύματα SMS"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"Αρχεία και μέσα"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"έχει πρόσβαση στις φωτογραφίες/πολυμέσα/αρχεία στη συσκευή σας"</string>
+    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
+    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Μουσική και άλλο ηχητικό περιεχόμενο"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"πρόσβαση σε αρχεία ήχου στη συσκευή σας"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Φωτογραφίες και βίντεο"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"πρόσβαση σε αρχεία εικόνας και βίντεο στη συσκευή σας"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Μικρόφωνο"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ηχογραφεί"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Σωματική δραστ/τητα"</string>
@@ -683,6 +683,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Επιτρέπει σε μια εφαρμογή την ανάγνωση των στατιστικών στοιχείων συγχρονισμού για έναν λογαριασμό, συμπεριλαμβανομένων του ιστορικού των συμβάντων συγχρονισμού και του όγκου των δεδομένων που συγχρονίζονται."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"ανάγνωση του περιεχομένου του κοινόχρηστου αποθηκευτικού χώρου σας"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Επιτρέπει στην εφαρμογή την ανάγνωση του περιεχομένου του κοινόχρηστου αποθηκευτικού χώρου σας."</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"ανάγνωση αρχείων ήχου από κοινόχρηστο αποθηκευτικό χώρο"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Επιτρέπει στην εφαρμογή την ανάγνωση αρχείων ήχου από τον κοινόχρηστο αποθηκευτικό σας χώρο."</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"ανάγνωση αρχείων βίντεο από τον κοινόχρηστο αποθηκευτικό χώρο"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Επιτρέπει στην εφαρμογή την ανάγνωση αρχείων βίντεο από τον κοινόχρηστο αποθηκευτικό σας χώρο."</string>
+    <string name="permlab_readMediaImage" msgid="1507059005825769856">"ανάγνωση αρχείων εικόνας από τον κοινόχρηστο αποθηκευτικό χώρο"</string>
+    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Επιτρέπει στην εφαρμογή την ανάγνωση αρχείων εικόνας από τον κοινόχρηστο αποθηκευτικό σας χώρο."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"τροποποιεί ή διαγράφει το περιεχόμενο του κοινόχρηστου αποθηκευτικού χώρου σας"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Επιτρέπει στην εφαρμογή την εγγραφή του περιεχομένου του κοινόχρηστου αποθηκευτικού χώρου σας."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"πραγματοποιεί/λαμβάνει κλήσεις SIP"</string>
@@ -729,8 +735,6 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας υπηρεσίας ανταλλαγής μηνυμάτων εταιρείας κινητής τηλεφωνίας. Δεν απαιτείται για συνήθεις εφαρμογές."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"δεσμεύεται σε υπηρεσίες του παρόχου κινητής τηλεφωνίας"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Δίνει στον κάτοχο τη δυνατότητα δέσμευσης σε υπηρεσίες εταιρείας κινητής τηλεφωνίας. Δεν απαιτείται ποτέ για κανονικές εφαρμογές."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"έχει πρόσβαση στη λειτουργία \"Μην ενοχλείτε\""</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Επιτρέπει στην εφαρμογή την εγγραφή και τη σύνταξη διαμόρφωσης για τη λειτουργία \"Μην ενοχλείτε\"."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"έναρξη χρήσης άδειας προβολής"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Επιτρέπει στον κάτοχο να ξεκινήσει τη χρήση της άδειας για μια εφαρμογή. Δεν απαιτείται ποτέ για κανονικές εφαρμογές."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"έναρξη προβολής αποφάσεων για άδειες"</string>
@@ -1072,10 +1076,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"Η υπηρεσία <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> απαιτεί ενεργοποίηση της Εξερεύνησης μέσω αφής. Όταν είναι ενεργοποιημένη η Εξερεύνηση μέσω αφής, μπορείτε να δείτε ή να ακούσετε περιγραφές για τις επιλογές που βρίσκονται κάτω από το δάχτυλό σας ή να κάνετε κινήσεις αλληλεπίδρασης με το τηλέφωνό σας."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"πριν από 1 μήνα"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Παλαιότερα από 1 μήνα"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="other">Τελευταίες <xliff:g id="COUNT_1">%d</xliff:g> ημέρες</item>
-      <item quantity="one">Τελευταία <xliff:g id="COUNT_0">%d</xliff:g> ημέρα</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Τελευταία # ημέρα}other{Τελευταίες # ημέρες}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Τελευταίος μήνας"</string>
     <string name="older" msgid="1645159827884647400">"Παλαιότερα"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"στις <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1094,70 +1095,22 @@
     <string name="year" msgid="5182610307741238982">"έτος"</string>
     <string name="years" msgid="5797714729103773425">"έτη"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"τώρα"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> λ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> λ</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ω</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ω</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ημ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ημ</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ε</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ε</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="other">σε <xliff:g id="COUNT_1">%d</xliff:g> λ</item>
-      <item quantity="one">σε <xliff:g id="COUNT_0">%d</xliff:g> λ</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="other">σε <xliff:g id="COUNT_1">%d</xliff:g> ω</item>
-      <item quantity="one">σε <xliff:g id="COUNT_0">%d</xliff:g> ω</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="other">σε <xliff:g id="COUNT_1">%d</xliff:g> ημ</item>
-      <item quantity="one">σε <xliff:g id="COUNT_0">%d</xliff:g> ημ</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="other">σε <xliff:g id="COUNT_1">%d</xliff:g> ε</item>
-      <item quantity="one">σε <xliff:g id="COUNT_0">%d</xliff:g> ε</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="other">πριν από <xliff:g id="COUNT_1">%d</xliff:g> λεπτά</item>
-      <item quantity="one">πριν από <xliff:g id="COUNT_0">%d</xliff:g> λεπτό</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="other">πριν από <xliff:g id="COUNT_1">%d</xliff:g> ώρες</item>
-      <item quantity="one">πριν από <xliff:g id="COUNT_0">%d</xliff:g> ώρα</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="other">πριν από <xliff:g id="COUNT_1">%d</xliff:g> ημέρες</item>
-      <item quantity="one">πριν από <xliff:g id="COUNT_0">%d</xliff:g> ημέρα</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="other">πριν από <xliff:g id="COUNT_1">%d</xliff:g> έτη</item>
-      <item quantity="one">πριν από <xliff:g id="COUNT_0">%d</xliff:g> έτος</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="other">σε <xliff:g id="COUNT_1">%d</xliff:g> λεπτά</item>
-      <item quantity="one">σε <xliff:g id="COUNT_0">%d</xliff:g> λεπτό</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="other">σε <xliff:g id="COUNT_1">%d</xliff:g> ώρες</item>
-      <item quantity="one">σε <xliff:g id="COUNT_0">%d</xliff:g> ώρα</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="other">σε <xliff:g id="COUNT_1">%d</xliff:g> ημέρες</item>
-      <item quantity="one">σε <xliff:g id="COUNT_0">%d</xliff:g> ημέρα</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="other">σε <xliff:g id="COUNT_1">%d</xliff:g> έτη</item>
-      <item quantity="one">σε <xliff:g id="COUNT_0">%d</xliff:g> έτος</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g>λ."</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g>ώ."</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g>η."</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g>έτ."</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"σε <xliff:g id="COUNT">%d</xliff:g>λ."</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"σε <xliff:g id="COUNT">%d</xliff:g>ώ."</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"σε <xliff:g id="COUNT">%d</xliff:g>η."</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"σε <xliff:g id="COUNT">%d</xliff:g>έτ."</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# λεπτό πριν}other{Πριν από # λεπτά}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Πριν από # ώρα}other{Πριν από # ώρες}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Πριν από # ημέρα}other{Πριν από # ημέρες}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{Πριν από # έτος}other{Πριν από # έτη}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# λεπτό}other{# λεπτά}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# ώρα}other{# ώρες}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# ημέρα}other{# ημέρες}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# έτος}other{# έτη}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Πρόβλημα με το βίντεο"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"Αυτό το βίντεο δεν είναι έγκυρο για ροή σε αυτή τη συσκευή."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"Δεν μπορείτε να αναπαράγετε αυτό το βίντεο."</string>
@@ -1187,10 +1140,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Διαγραφή"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Μέθοδος εισόδου"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Ενέργειες κειμένου"</string>
-    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
-    <skip />
-    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
-    <skip />
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Πίσω"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Εναλλαγή μεθόδου εισαγωγής"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Ο αποθηκευτικός χώρος εξαντλείται"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Ορισμένες λειτουργίες συστήματος ενδέχεται να μην λειτουργούν"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Δεν υπάρχει αρκετός αποθηκευτικός χώρος για το σύστημα. Βεβαιωθείτε ότι διαθέτετε 250 MB ελεύθερου χώρου και κάντε επανεκκίνηση."</string>
@@ -1411,6 +1362,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Εκτελέστε επαναφορά εργοστασιακών ρυθμίσεων για να απενεργοποιήσετε τη λειτουργία περιβάλλοντος δοκιμών."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Η σειριακή κονσόλα ενεργοποιήθηκε"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Η απόδοση επηρεάζεται. Για απενεργοποίηση, επιλέξτε το πρόγραμμα φόρτωσης εκκίνησης."</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"Ενεργοποιήθηκε το πειραματικό MTE"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"Μπορεί να επηρεαστεί η απόδοση και η σταθερότητα. Κάντε επανεκκίνηση για απενεργοποίηση. Εάν ενεργοποιηθεί με τη χρήση του arm64.memtag.bootctl, ορίστε την εκ των προτέρων σε none."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Υγρασία ή ακαθαρσίες στη θύρα USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"Η θύρα USB απενεργοποιείται αυτόματα. Πατήστε για να μάθετε περισσότερα."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"Αποδεκτή η χρήση της θύρας USB"</string>
@@ -1547,10 +1500,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Παράβλεψη"</string>
     <string name="no_matches" msgid="6472699895759164599">"Δεν υπάρχουν αποτελέσματα"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Εύρεση στη σελίδα"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> από <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">1 αντιστοιχία</item>
-    </plurals>
+    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{# αντιστοίχιση}other{# από {total}}} }"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Τέλος"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Διαγραφή κοινόχρηστου αποθηκευτικού χώρου…"</string>
     <string name="share" msgid="4157615043345227321">"Κοινή χρ."</string>
@@ -1680,10 +1630,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Λάθος μοτίβο"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"Λανθασμένος κωδικός πρόσβασης"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Λανθασμένος κωδικός PIN"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="other">Δοκιμάστε ξανά σε <xliff:g id="NUMBER">%d</xliff:g> δευτερόλεπτα.</item>
-      <item quantity="one">Δοκιμάστε ξανά σε 1 δευτερόλεπτο</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Σχεδιάστε το μοτίβο σας"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Εισαγωγή PIN SIM"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Πληκτρολογήστε το PIN"</string>
@@ -1880,10 +1826,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Δημιουργία PIN για τροποποίηση περιορισμών"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"Τα PIN δεν συμφωνούν. Προσπαθήστε ξανά."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"Το PIN είναι υπερβολικά μικρό. Πρέπει να έχει μέγεθος τουλάχιστον 4 χαρακτήρων."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="other">Δοκιμάστε ξανά σε <xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα</item>
-      <item quantity="one">Δοκιμάστε ξανά σε 1 δευτερόλεπτο</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Δοκιμάστε ξανά αργότερα"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Προβολή σε πλήρη οθόνη"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Για έξοδο, σύρετε προς τα κάτω από το επάνω μέρος."</string>
@@ -1911,46 +1853,20 @@
     <string name="data_saver_description" msgid="4995164271550590517">"Προκειμένου να μειωθεί η χρήση δεδομένων, η Εξοικονόμηση δεδομένων αποτρέπει την αποστολή ή λήψη δεδομένων από ορισμένες εφαρμογές στο παρασκήνιο. Μια εφαρμογή που χρησιμοποιείτε αυτήν τη στιγμή μπορεί να χρησιμοποιήσει δεδομένα αλλά με μικρότερη συχνότητα. Για παράδειγμα, οι εικόνες μπορεί να μην εμφανίζονται μέχρι να τις πατήσετε."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Ενεργ.Εξοικονόμησης δεδομένων;"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Ενεργοποίηση"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="other">Για %1$d λεπτά (έως τις <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Για ένα λεπτό (έως τις <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="other">Για %1$d λεπτά (μέχρι <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Για 1 λεπτό (μέχρι <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="other">Για %1$d ώρες (μέχρι τις <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Για 1 ώρα (μέχρι τις <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="other">Για %1$d ώρες (μέχρι <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Για 1 ώρα (μέχρι <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="other">Για %d λεπτά</item>
-      <item quantity="one">Για ένα λεπτό</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="other">Για %d λεπτά</item>
-      <item quantity="one">Για 1 λεπτό</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="other">Για %d ώρες</item>
-      <item quantity="one">Για 1 ώρα</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="other">Για %d ώρες</item>
-      <item quantity="one">Για 1 ώρα</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Για ένα λεπτό (μέχρι τις {formattedTime})}other{Για # λεπτά (μέχρι τις {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Για 1 λ. (μέχρι τις {formattedTime})}other{Για # λ. (μέχρι τις {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Για 1 ώρα (μέχρι τις {formattedTime})}other{Για # ώρες (μέχρι τις {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Για 1 ώ. (μέχρι τις {formattedTime})}other{Για # ώ. (μέχρι τις {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Για ένα λεπτό}other{Για # λεπτά}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Για 1 λ.}other{Για # λ.}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Για 1 ώρα}other{Για # ώρες}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Για 1 ώ.}other{Για # ώ.}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Έως <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Έως τις <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Μέχρι τις <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (επόμενο ξυπνητήρι)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Μέχρι την απενεργοποίηση"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Μέχρι να απενεργοποιήσετε \"Μην ενοχλείτε\""</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Σύμπτυξη"</string>
-    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Μην ενοχλείτε"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Διακοπή λειτουργίας"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Νύχτα καθημερινής"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Σαββατοκύριακο"</string>
@@ -1989,10 +1905,6 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Εισερχόμενη κλήση"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Κλήση σε εξέλιξη"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Διαλογή εισερχόμενης κλήσης"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="other">Επιλέχτηκαν <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="one">Επιλέχτηκε <xliff:g id="COUNT_0">%1$d</xliff:g></item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Μη κατηγοριοποιημένο"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Μπορείτε να ρυθμίσετε τη βαρύτητα αυτών των ειδοποιήσεων."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Αυτό είναι σημαντικό λόγω των ατόμων που συμμετέχουν."</string>
@@ -2058,10 +1970,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Αποθήκευση για Αυτόματη Συμπλήρωση"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Δεν είναι δυνατή η αυτόματη συμπλήρωση των περιεχομένων"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Δεν υπάρχουν προτάσεις αυτόματης συμπλήρωσης"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> προτάσεις αυτόματης συμπλήρωσης</item>
-      <item quantity="one">Μία πρόταση αυτόματης συμπλήρωσης</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{Μία πρόταση αυτόματης συμπλήρωσης}other{# προτάσεις αυτόματης συμπλήρωσης}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"Αποθήκευση σε "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>";"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Αποθήκευση <xliff:g id="TYPE">%1$s</xliff:g> σε "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>";"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Αποθήκευση <xliff:g id="TYPE_0">%1$s</xliff:g> και <xliff:g id="TYPE_1">%2$s</xliff:g> σε "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>";"</string>
@@ -2108,15 +2017,22 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ΑΠΕΓΚΑΤΑΣΤΑΣΗ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ΑΝΟΙΓΜΑ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Εντοπίστηκε επιβλαβής εφαρμογή"</string>
+    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
+    <skip />
+    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
+    <skip />
     <string name="slices_permission_request" msgid="3677129866636153406">"Η εφαρμογή <xliff:g id="APP_0">%1$s</xliff:g> θέλει να εμφανίζει τμήματα της εφαρμογής <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Επεξεργασία"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Θα υπάρχει δόνηση για κλήσεις και ειδοποιήσεις"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Οι κλήσεις και οι ειδοποιήσεις θα τεθούν σε παύση"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Αλλαγές στο σύστημα"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Μην ενοχλείτε"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Νέο: Η λειτουργία \"Μην ενοχλείτε\" αποκρύπτει ειδοποιήσεις"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Πατήστε για να μάθετε περισσότερα και να κάνετε αλλαγές."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Η λειτουργία \"Μην ενοχλείτε\" άλλαξε"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Πατήστε για να ελέγξετε το περιεχόμενο που έχει αποκλειστεί."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Σύστημα"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Ρυθμίσεις"</string>
@@ -2133,7 +2049,6 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ΟΚ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Απενεργοποίηση"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Μάθετε περισσότερα"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Στο Android 12, οι Βελτιωμένες ειδοποιήσεις αντικατέστησαν τις Προσαρμοστικές ειδοποιήσεις Android. Αυτή η λειτουργία εμφανίζει προτεινόμενες ενέργειες και απαντήσεις και οργανώνει τις ειδοποιήσεις σας.\n\nΟι Βελτιωμένες ειδοποιήσεις μπορούν να αποκτήσουν πρόσβαση σε περιεχόμενο ειδοποιήσεων, συμπεριλαμβανομένων προσωπικών στοιχείων, όπως ονομάτων επαφών και μηνυμάτων Αυτή η λειτουργία παρέχει επίσης τη δυνατότητα παράβλεψης ειδοποιήσεων ή απάντησης σε αυτές, όπως η απάντηση σε τηλεφωνικές κλήσεις και ο έλεγχος της λειτουργίας Μην ενοχλείτε."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ειδοποίηση πληροφοριών λειτουργίας Ρουτίνας"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Η μπαταρία μπορεί να εξαντληθεί πριν από τη συνηθισμένη φόρτιση"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Η Εξοικονόμηση μπαταρίας ενεργοποιήθηκε για την επέκταση της διάρκειας ζωής της μπαταρίας"</string>
@@ -2162,10 +2077,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"Παρουσίαση <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Το Bluetooth θα παραμείνει ενεργό κατά τη λειτουργία πτήσης."</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Φόρτωση"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> αρχεία</item>
-      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> αρχείο</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # αρχείο}other{{file_name} + # αρχεία}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Δεν υπάρχουν προτεινόμενα άτομα για κοινοποίηση"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Λίστα εφαρμογών"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Δεν έχει εκχωρηθεί άδεια εγγραφής σε αυτήν την εφαρμογή, αλλά μέσω αυτής της συσκευής USB θα μπορεί να εγγράφει ήχο."</string>
@@ -2177,10 +2089,22 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Παράθυρο διαλόγου λειτουργίας συσκευής"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Οθόνη κλειδώματος"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Στιγμιότυπο οθόνης"</string>
+    <!-- no translation found for accessibility_system_action_headset_hook_label (8524691721287425468) -->
+    <skip />
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Συντόμευση οθόνης για την προσβασιμότητα"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Επιλογέας συντόμευσης οθόνης για την προσβασιμότητα"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Συντόμευση προσβασιμότητας"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Παράβλεψη πλαισίου σκίασης ειδοποιήσεων"</string>
+    <!-- no translation found for accessibility_system_action_dpad_up_label (1029042950229333782) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_down_label (3441918448624921461) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_left_label (6557647179116479152) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_right_label (9180196950365804081) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_center_label (8149791419358224893) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Γραμμή υποτίτλων για την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Το πακέτο <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> τοποθετήθηκε στον κάδο ΠΕΡΙΟΡΙΣΜΕΝΗΣ ΠΡΟΣΒΑΣΗΣ."</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2201,8 +2125,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Πατήστε για ενεργοποίηση"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Δεν υπάρχουν εφαρμογές εργασιών"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Δεν υπάρχουν προσωπικές εφαρμογές"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Άνοιγμα εφαρμογής <xliff:g id="APP">%s</xliff:g> στο προσωπικό προφίλ;"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Άνοιγμα εφαρμογής <xliff:g id="APP">%s</xliff:g> στο προφίλ εργασίας;"</string>
+    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Χρήση προσωπικού προγράμματος περιήγησης"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Χρήση προγράμματος περιήγησης εργασίας"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN ξεκλειδώματος δικτύου κάρτας SIM"</string>
@@ -2332,4 +2258,9 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"Η υπηρεσία <xliff:g id="SERVICE_NAME">%s</xliff:g> μπορεί να βλέπει και να ελέγχει την οθόνη σας. Πατήστε για έλεγχο."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Μεταφράστηκε το μήνυμα <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Μήνυμα που έχει μεταφραστεί από τα <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> στα <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Δραστηριότητα στο παρασκήνιο"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Δραστηριότητα στο παρασκήνιο"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Η εφαρμογή <xliff:g id="APP">%1$s</xliff:g> εκτελείται στο παρασκήνιο και καταναλώνει μπαταρία. Πατήστε για έλεγχο."</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Η εφαρμογή <xliff:g id="APP">%1$s</xliff:g> εκτελείται στο παρασκήνιο για πολύ ώρα. Πατήστε για έλεγχο."</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Έλεγχος ενεργών εφαρμογών"</string>
 </resources>

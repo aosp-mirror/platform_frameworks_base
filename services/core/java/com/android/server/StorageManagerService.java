@@ -4071,7 +4071,7 @@ class StorageManagerService extends IStorageManager.Stub
                             || (includeSharedProfile && vol.isVisibleForWrite(userIdSharingMedia));
                 } else {
                     match = vol.isVisibleForUser(userId)
-                            || (includeInvisible && vol.getPath() != null)
+                            || (!vol.isVisible() && includeInvisible && vol.getPath() != null)
                             || (includeSharedProfile && vol.isVisibleForRead(userIdSharingMedia));
                 }
                 if (!match) continue;

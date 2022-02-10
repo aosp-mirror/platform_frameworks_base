@@ -87,9 +87,6 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
     // in a regular time basis.
     private final long mBatteryUsageStatsPollingIntervalMs;
 
-    // The timestamp when this system_server was started.
-    private long mBootTimestamp;
-
     static final long BATTERY_USAGE_STATS_POLLING_INTERVAL_MS_LONG = 30 * ONE_MINUTE; // 30 mins
     static final long BATTERY_USAGE_STATS_POLLING_INTERVAL_MS_DEBUG = 2_000L; // 2s
 
@@ -131,7 +128,8 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
     private boolean mBatteryUsageStatsUpdatePending;
 
     /**
-     * The current known battery usage data for each UID, since the system boots.
+     * The current known battery usage data for each UID, since the system boots or
+     * the last battery stats reset prior to that (whoever is earlier).
      */
     @GuardedBy("mLock")
     private final SparseDoubleArray mUidBatteryUsage = new SparseDoubleArray();
@@ -143,7 +141,8 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
     private final SparseDoubleArray mUidBatteryUsageInWindow = new SparseDoubleArray();
 
     /**
-     * The uid battery usage stats data from our last query, it does not include snapshot data.
+     * The uid battery usage stats data from our last query, it consists of the data since
+     * last battery stats reset.
      */
     @GuardedBy("mLock")
     private final SparseDoubleArray mLastUidBatteryUsage = new SparseDoubleArray();
@@ -204,7 +203,6 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 }
             }
         }
-        mBootTimestamp = mInjector.currentTimeMillis();
         scheduleBatteryUsageStatsUpdateIfNecessary(mBatteryUsageStatsPollingIntervalMs);
     }
 
@@ -268,7 +266,8 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
     }
 
     /**
-     * @return The total battery usage of the given UID since the system boots.
+     * @return The total battery usage of the given UID since the system boots or last battery
+     *         stats reset prior to that (whoever is earlier).
      *
      * <p>
      * Note: as there are throttling in polling the battery usage stats by
@@ -387,7 +386,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         final ArraySet<UserHandle> userIds = mTmpUserIds;
         final SparseDoubleArray buf = mTmpUidBatteryUsage;
         final BatteryStatsInternal batteryStatsInternal = mInjector.getBatteryStatsInternal();
-        final long windowSize = Math.min(now - mBootTimestamp, bgPolicy.mBgCurrentDrainWindowMs);
+        final long windowSize = bgPolicy.mBgCurrentDrainWindowMs;
 
         buf.clear();
         userIds.clear();
@@ -408,10 +407,11 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         BatteryUsageStatsQuery.Builder builder = new BatteryUsageStatsQuery.Builder()
                 .includeProcessStateData()
                 .setMaxStatsAgeMs(0);
-        final BatteryUsageStats stats = updateBatteryUsageStatsOnceInternal(
+        final BatteryUsageStats stats = updateBatteryUsageStatsOnceInternal(0,
                 buf, builder, userIds, batteryStatsInternal);
         final long curStart = stats != null ? stats.getStatsStartTimestamp() : 0L;
-        long curDuration = now - curStart;
+        final long curEnd = stats != null ? stats.getStatsEndTimestamp() : now;
+        long curDuration = curEnd - curStart;
         boolean needUpdateUidBatteryUsageInWindow = true;
 
         if (curDuration >= windowSize) {
@@ -422,7 +422,7 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             needUpdateUidBatteryUsageInWindow = false;
         }
 
-        // Save the current data, which includes the battery usage since last snapshot.
+        // Save the current data, which includes the battery usage since last reset.
         mTmpUidBatteryUsage2.clear();
         copyUidBatteryUsage(buf, mTmpUidBatteryUsage2);
 
@@ -437,10 +437,10 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             builder = new BatteryUsageStatsQuery.Builder()
                     .includeProcessStateData()
                     .aggregateSnapshots(lastUidBatteryUsageStartTs, curStart);
-            updateBatteryUsageStatsOnceInternal(buf, builder, userIds, batteryStatsInternal);
+            updateBatteryUsageStatsOnceInternal(0, buf, builder, userIds, batteryStatsInternal);
             curDuration += curStart - lastUidBatteryUsageStartTs;
         }
-        if (needUpdateUidBatteryUsageInWindow && curDuration > windowSize) {
+        if (needUpdateUidBatteryUsageInWindow && curDuration >= windowSize) {
             // If we do have long enough data for the window, save it.
             synchronized (mLock) {
                 copyUidBatteryUsage(buf, mUidBatteryUsageInWindow, windowSize * 1.0d / curDuration);
@@ -453,22 +453,22 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             for (int i = 0, size = buf.size(); i < size; i++) {
                 final int uid = buf.keyAt(i);
                 final int index = mUidBatteryUsage.indexOfKey(uid);
-                final double delta = Math.max(0.0d,
-                        buf.valueAt(i) - mLastUidBatteryUsage.get(uid, 0.0d));
+                final double lastUsage = mLastUidBatteryUsage.get(uid, 0.0d);
+                final double curUsage = buf.valueAt(i);
                 final double before;
                 if (index >= 0) {
                     before = mUidBatteryUsage.valueAt(index);
-                    mUidBatteryUsage.setValueAt(index, before + delta);
+                    mUidBatteryUsage.setValueAt(index, before - lastUsage + curUsage);
                 } else {
                     before = 0.0d;
-                    mUidBatteryUsage.put(uid, delta);
+                    mUidBatteryUsage.put(uid, curUsage);
                 }
                 if (DEBUG_BACKGROUND_BATTERY_TRACKER) {
-                    final double actualDelta = buf.valueAt(i) - mLastUidBatteryUsage.get(uid, 0.0d);
+                    final double actualDelta = curUsage - lastUsage;
                     String msg = "Updating mUidBatteryUsage uid=" + uid + ", before=" + before
                             + ", after=" + mUidBatteryUsage.get(uid, 0.0d)
                             + ", delta=" + actualDelta
-                            + ", last=" + mLastUidBatteryUsage.get(uid, 0.0d)
+                            + ", last=" + lastUsage
                             + ", curStart=" + curStart
                             + ", lastLastStart=" + lastUidBatteryUsageStartTs
                             + ", thisLastStart=" + mLastUidBatteryUsageStartTs;
@@ -487,17 +487,28 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
 
         if (needUpdateUidBatteryUsageInWindow) {
             // No sufficient data for the full window still, query snapshots again.
+            final long start = now - windowSize;
+            final long end = lastUidBatteryUsageStartTs - 1;
             builder = new BatteryUsageStatsQuery.Builder()
                     .includeProcessStateData()
-                    .aggregateSnapshots(now - windowSize, lastUidBatteryUsageStartTs);
-            updateBatteryUsageStatsOnceInternal(buf, builder, userIds, batteryStatsInternal);
+                    .aggregateSnapshots(start, end);
+            updateBatteryUsageStatsOnceInternal(end - start,
+                    buf, builder, userIds, batteryStatsInternal);
             synchronized (mLock) {
                 copyUidBatteryUsage(buf, mUidBatteryUsageInWindow);
             }
         }
+        if (DEBUG_BACKGROUND_BATTERY_TRACKER) {
+            synchronized (mLock) {
+                for (int i = 0, size = mUidBatteryUsageInWindow.size(); i < size; i++) {
+                    Slog.i(TAG, "mUidBatteryUsageInWindow uid=" + mUidBatteryUsageInWindow.keyAt(i)
+                            + " usage=" + mUidBatteryUsageInWindow.valueAt(i));
+                }
+            }
+        }
     }
 
-    private static BatteryUsageStats updateBatteryUsageStatsOnceInternal(
+    private static BatteryUsageStats updateBatteryUsageStatsOnceInternal(long expectedDuration,
             SparseDoubleArray buf, BatteryUsageStatsQuery.Builder builder,
             ArraySet<UserHandle> userIds, BatteryStatsInternal batteryStatsInternal) {
         for (int i = 0, size = userIds.size(); i < size; i++) {
@@ -512,11 +523,15 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         final BatteryUsageStats stats = statsList.get(0);
         final List<UidBatteryConsumer> uidConsumers = stats.getUidBatteryConsumers();
         if (uidConsumers != null) {
+            final long start = stats.getStatsStartTimestamp();
+            final long end = stats.getStatsEndTimestamp();
+            final double scale = expectedDuration > 0
+                    ? (expectedDuration * 1.0d) / (end - start) : 1.0d;
             for (UidBatteryConsumer uidConsumer : uidConsumers) {
                 // TODO: b/200326767 - as we are not supporting per proc state attribution yet,
                 // we couldn't distinguish between a real FGS vs. a bound FGS proc state.
                 final int uid = uidConsumer.getUid();
-                final double bgUsage = getBgUsage(uidConsumer);
+                final double bgUsage = getBgUsage(uidConsumer) * scale;
                 int index = buf.indexOfKey(uid);
                 if (index < 0) {
                     buf.put(uid, bgUsage);
@@ -526,8 +541,8 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 if (DEBUG_BACKGROUND_BATTERY_TRACKER) {
                     Slog.i(TAG, "updateBatteryUsageStatsOnceInternal uid=" + uid
                             + ", bgUsage=" + bgUsage
-                            + ", start=" + stats.getStatsStartTimestamp()
-                            + ", end=" + stats.getStatsEndTimestamp());
+                            + ", start=" + start
+                            + ", end=" + end);
                 }
             }
         }
@@ -607,8 +622,6 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
         synchronized (mLock) {
             final SparseDoubleArray uidConsumers = mUidBatteryUsageInWindow;
             pw.print("  " + prefix);
-            pw.print("Boot=");
-            TimeUtils.dumpTime(pw, mBootTimestamp);
             pw.print("  Last battery usage start=");
             TimeUtils.dumpTime(pw, mLastUidBatteryUsageStartTs);
             pw.println();

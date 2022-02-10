@@ -40,6 +40,8 @@ import android.graphics.ParcelableColorSpace;
 import android.graphics.Region;
 import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayManager;
+import android.inputmethodservice.IInputMethodSessionWrapper;
+import android.inputmethodservice.RemoteInputConnection;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -65,14 +67,23 @@ import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityWindowInfo;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputBinding;
+import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputMethodSession;
 
+import com.android.internal.inputmethod.CancellationGroup;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.internal.view.IInputContext;
+import com.android.internal.view.IInputMethodSession;
+import com.android.internal.view.IInputSessionWithIdCallback;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -627,6 +638,21 @@ public abstract class AccessibilityService extends Service {
         void onAccessibilityButtonAvailabilityChanged(boolean available);
         /** This is called when the system action list is changed. */
         void onSystemActionsChanged();
+        /** This is called when an app requests ime sessions or when the service is enabled. */
+        void createImeSession(IInputSessionWithIdCallback callback);
+        /**
+         * This is called when InputMethodManagerService requests to set the session enabled or
+         * disabled
+         */
+        void setImeSessionEnabled(InputMethodSession session, boolean enabled);
+        /** This is called when an app binds input or when the service is enabled. */
+        void bindInput(InputBinding binding);
+        /** This is called when an app unbinds input or when the service is disabled. */
+        void unbindInput();
+        /** This is called when an app starts input or when the service is enabled. */
+        void startInput(@Nullable InputConnection inputConnection,
+                @NonNull EditorInfo editorInfo, boolean restarting,
+                @NonNull IBinder startInputToken);
     }
 
     /**
@@ -763,6 +789,8 @@ public abstract class AccessibilityService extends Service {
             new SparseArray<>(0);
 
     private SoftKeyboardController mSoftKeyboardController;
+    private InputMethod mInputMethod;
+    private boolean mInputMethodInitialized = false;
     private final SparseArray<AccessibilityButtonController> mAccessibilityButtonControllers =
             new SparseArray<>(0);
 
@@ -796,6 +824,17 @@ public abstract class AccessibilityService extends Service {
         synchronized (mLock) {
             for (int i = 0; i < mMagnificationControllers.size(); i++) {
                 mMagnificationControllers.valueAt(i).onServiceConnectedLocked();
+            }
+            AccessibilityServiceInfo info = getServiceInfo();
+            if (info != null) {
+                boolean requestIme = (info.flags
+                        & AccessibilityServiceInfo.FLAG_INPUT_METHOD_EDITOR) != 0;
+                if (requestIme && !mInputMethodInitialized) {
+                    mInputMethod = onCreateInputMethod();
+                    mInputMethodInitialized = true;
+                }
+            } else {
+                Log.e(LOG_TAG, "AccessibilityServiceInfo is null in dispatchServiceConnected");
             }
         }
         if (mSoftKeyboardController != null) {
@@ -1849,6 +1888,32 @@ public abstract class AccessibilityService extends Service {
         }
     }
 
+    /**
+     * The default implementation returns our default {@link InputMethod}. Subclasses can override
+     * it to provide their own customized version. Accessibility services need to set the
+     * {@link AccessibilityServiceInfo#FLAG_INPUT_METHOD_EDITOR} flag to use input method APIs.
+     *
+     * @return the InputMethod.
+     */
+    @NonNull
+    public InputMethod onCreateInputMethod() {
+        return new InputMethod(this);
+    }
+
+    /**
+     * Returns the InputMethod instance after the system calls {@link #onCreateInputMethod()},
+     * which may be used to input text or get editable text selection change notifications. It will
+     * return null if the accessibility service doesn't set the
+     * {@link AccessibilityServiceInfo#FLAG_INPUT_METHOD_EDITOR} flag or the system doesn't call
+     * {@link #onCreateInputMethod()}.
+     *
+     * @return the InputMethod instance
+     */
+    @Nullable
+    public final InputMethod getInputMethod() {
+        return mInputMethod;
+    }
+
     private void onSoftKeyboardShowModeChanged(int showMode) {
         if (mSoftKeyboardController != null) {
             mSoftKeyboardController.dispatchSoftKeyboardShowModeChanged(showMode);
@@ -2657,6 +2722,47 @@ public abstract class AccessibilityService extends Service {
             public void onSystemActionsChanged() {
                 AccessibilityService.this.onSystemActionsChanged();
             }
+
+            @Override
+            public void createImeSession(IInputSessionWithIdCallback callback) {
+                if (mInputMethod != null) {
+                    mInputMethod.createImeSession(callback);
+                }
+            }
+
+            @Override
+            public void setImeSessionEnabled(InputMethodSession session, boolean enabled) {
+                if (mInputMethod != null) {
+                    mInputMethod.setImeSessionEnabled(session, enabled);
+                }
+            }
+
+            @Override
+            public void bindInput(InputBinding binding) {
+                if (mInputMethod != null) {
+                    mInputMethod.bindInput(binding);
+                }
+            }
+
+            @Override
+            public void unbindInput() {
+                if (mInputMethod != null) {
+                    mInputMethod.unbindInput();
+                }
+            }
+
+            @Override
+            public void startInput(@Nullable InputConnection inputConnection,
+                    @NonNull EditorInfo editorInfo, boolean restarting,
+                    @NonNull IBinder startInputToken) {
+                if (mInputMethod != null) {
+                    if (restarting) {
+                        mInputMethod.restartInput(inputConnection, editorInfo);
+                    } else {
+                        mInputMethod.startInput(inputConnection, editorInfo);
+                    }
+                }
+            }
         });
     }
 
@@ -2682,6 +2788,11 @@ public abstract class AccessibilityService extends Service {
         private static final int DO_ACCESSIBILITY_BUTTON_CLICKED = 12;
         private static final int DO_ACCESSIBILITY_BUTTON_AVAILABILITY_CHANGED = 13;
         private static final int DO_ON_SYSTEM_ACTIONS_CHANGED = 14;
+        private static final int DO_CREATE_IME_SESSION = 15;
+        private static final int DO_SET_IME_SESSION_ENABLED = 16;
+        private static final int DO_BIND_INPUT = 17;
+        private static final int DO_UNBIND_INPUT = 18;
+        private static final int DO_START_INPUT = 19;
 
         private final HandlerCaller mCaller;
 
@@ -2689,6 +2800,22 @@ public abstract class AccessibilityService extends Service {
         private final Context mContext;
 
         private int mConnectionId = AccessibilityInteractionClient.NO_ID;
+
+        /**
+         * This is not {@null} only between {@link #bindInput(InputBinding)} and
+         * {@link #unbindInput()} so that {@link RemoteInputConnection} can query if
+         * {@link #unbindInput()} has already been called or not, mainly to avoid unnecessary
+         * blocking operations.
+         *
+         * <p>This field must be set and cleared only from the binder thread(s), where the system
+         * guarantees that {@link #bindInput(InputBinding)},
+         * {@link #startInput(IBinder, IInputContext, EditorInfo, boolean)}, and
+         * {@link #unbindInput()} are called with the same order as the original calls
+         * in {@link com.android.server.inputmethod.InputMethodManagerService}.
+         * See {@link IBinder#FLAG_ONEWAY} for detailed semantics.</p>
+         */
+        @Nullable
+        CancellationGroup mCancellationGroup = null;
 
         public IAccessibilityServiceClientWrapper(Context context, Looper looper,
                 Callbacks callback) {
@@ -2781,6 +2908,70 @@ public abstract class AccessibilityService extends Service {
         /** This is called when the system action list is changed. */
         public void onSystemActionsChanged() {
             mCaller.sendMessage(mCaller.obtainMessage(DO_ON_SYSTEM_ACTIONS_CHANGED));
+        }
+
+        /** This is called when an app requests ime sessions or when the service is enabled. */
+        public void createImeSession(IInputSessionWithIdCallback callback) {
+            final Message message = mCaller.obtainMessageO(DO_CREATE_IME_SESSION, callback);
+            mCaller.sendMessage(message);
+        }
+
+        /**
+         * This is called when InputMethodManagerService requests to set the session enabled or
+         * disabled
+         */
+        public void setImeSessionEnabled(IInputMethodSession session, boolean enabled) {
+            try {
+                InputMethodSession ls = ((IInputMethodSessionWrapper)
+                        session).getInternalInputMethodSession();
+                if (ls == null) {
+                    Log.w(LOG_TAG, "Session is already finished: " + session);
+                    return;
+                }
+                mCaller.sendMessage(mCaller.obtainMessageIO(
+                        DO_SET_IME_SESSION_ENABLED, enabled ? 1 : 0, ls));
+            } catch (ClassCastException e) {
+                Log.w(LOG_TAG, "Incoming session not of correct type: " + session, e);
+            }
+        }
+
+        /** This is called when an app binds input or when the service is enabled. */
+        public void bindInput(InputBinding binding) {
+            if (mCancellationGroup != null) {
+                Log.e(LOG_TAG, "bindInput must be paired with unbindInput.");
+            }
+            mCancellationGroup = new CancellationGroup();
+            InputConnection ic = new RemoteInputConnection(new WeakReference<>(() -> mContext),
+                    IInputContext.Stub.asInterface(binding.getConnectionToken()),
+                    mCancellationGroup);
+            InputBinding nu = new InputBinding(ic, binding);
+            final Message message = mCaller.obtainMessageO(DO_BIND_INPUT, nu);
+            mCaller.sendMessage(message);
+        }
+
+        /** This is called when an app unbinds input or when the service is disabled. */
+        public void unbindInput() {
+            if (mCancellationGroup != null) {
+                // Signal the flag then forget it.
+                mCancellationGroup.cancelAll();
+                mCancellationGroup = null;
+            } else {
+                Log.e(LOG_TAG, "unbindInput must be paired with bindInput.");
+            }
+            mCaller.sendMessage(mCaller.obtainMessage(DO_UNBIND_INPUT));
+        }
+
+        /** This is called when an app starts input or when the service is enabled. */
+        public void startInput(IBinder startInputToken, IInputContext inputContext,
+                EditorInfo editorInfo, boolean restarting) {
+            if (mCancellationGroup == null) {
+                Log.e(LOG_TAG, "startInput must be called after bindInput.");
+                mCancellationGroup = new CancellationGroup();
+            }
+            final Message message = mCaller.obtainMessageOOOOII(DO_START_INPUT, startInputToken,
+                    inputContext, editorInfo, mCancellationGroup, restarting ? 1 : 0,
+                    0 /* unused */);
+            mCaller.sendMessage(message);
         }
 
         @Override
@@ -2945,6 +3136,50 @@ public abstract class AccessibilityService extends Service {
                 case DO_ON_SYSTEM_ACTIONS_CHANGED: {
                     if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
                         mCallback.onSystemActionsChanged();
+                    }
+                    return;
+                }
+                case DO_CREATE_IME_SESSION: {
+                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                        IInputSessionWithIdCallback callback =
+                                (IInputSessionWithIdCallback) message.obj;
+                        mCallback.createImeSession(callback);
+                    }
+                    return;
+                }
+                case DO_SET_IME_SESSION_ENABLED: {
+                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                        mCallback.setImeSessionEnabled((InputMethodSession) message.obj,
+                                message.arg1 != 0);
+                    }
+                    return;
+                }
+                case DO_BIND_INPUT: {
+                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                        mCallback.bindInput((InputBinding) message.obj);
+                    }
+                    return;
+                }
+                case DO_UNBIND_INPUT: {
+                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                        mCallback.unbindInput();
+                    }
+                    return;
+                }
+                case DO_START_INPUT: {
+                    if (mConnectionId != AccessibilityInteractionClient.NO_ID) {
+                        final SomeArgs args = (SomeArgs) message.obj;
+                        final IBinder startInputToken = (IBinder) args.arg1;
+                        final IInputContext inputContext = (IInputContext) args.arg2;
+                        final EditorInfo info = (EditorInfo) args.arg3;
+                        final CancellationGroup cancellationGroup = (CancellationGroup) args.arg4;
+                        final boolean restarting = args.argi5 == 1;
+                        final InputConnection ic = inputContext != null
+                                ? new RemoteInputConnection(new WeakReference<>(() -> mContext),
+                                inputContext, cancellationGroup) : null;
+                        info.makeCompatible(mContext.getApplicationInfo().targetSdkVersion);
+                        mCallback.startInput(ic, info, restarting, startInputToken);
+                        args.recycle();
                     }
                     return;
                 }

@@ -597,20 +597,21 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
 
         dumpSortedBatteryConsumers(pw, prefix, getUidBatteryConsumers());
         dumpSortedBatteryConsumers(pw, prefix, getUserBatteryConsumers());
+        pw.println();
     }
 
     private void printPowerComponent(PrintWriter pw, String prefix, String label,
             double devicePowerMah, double appsPowerMah, int powerModel, long durationMs) {
         StringBuilder sb = new StringBuilder();
         sb.append(prefix).append("      ").append(label).append(": ")
-                .append(PowerCalculator.formatCharge(devicePowerMah));
+                .append(BatteryStats.formatCharge(devicePowerMah));
         if (powerModel != BatteryConsumer.POWER_MODEL_UNDEFINED
                 && powerModel != BatteryConsumer.POWER_MODEL_POWER_PROFILE) {
             sb.append(" [");
             sb.append(BatteryConsumer.powerModelToString(powerModel));
             sb.append("]");
         }
-        sb.append(" apps: ").append(PowerCalculator.formatCharge(appsPowerMah));
+        sb.append(" apps: ").append(BatteryStats.formatCharge(appsPowerMah));
         if (durationMs != 0) {
             sb.append(" duration: ");
             BatteryStats.formatTimeMs(sb, durationMs);

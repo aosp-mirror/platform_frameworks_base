@@ -136,7 +136,7 @@ public final class UidBatteryConsumer extends BatteryConsumer {
         }
 
         sb.append(" ").append(processStateToString(processState)).append(": ")
-                .append(PowerCalculator.formatCharge(power));
+                .append(BatteryStats.formatCharge(power));
     }
 
     static UidBatteryConsumer create(BatteryConsumerData data) {

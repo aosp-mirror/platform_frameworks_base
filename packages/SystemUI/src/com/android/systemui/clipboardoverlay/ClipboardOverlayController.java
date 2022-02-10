@@ -19,7 +19,6 @@ package com.android.systemui.clipboardoverlay;
 import static android.content.Intent.ACTION_CLOSE_SYSTEM_DIALOGS;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowManager.LayoutParams.TYPE_SCREENSHOT;
 
 import static java.util.Objects.requireNonNull;
@@ -40,6 +39,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.graphics.drawable.Icon;
 import android.hardware.display.DisplayManager;
 import android.hardware.input.InputManager;
@@ -47,11 +47,11 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Size;
 import android.view.Display;
 import android.view.DisplayCutout;
-import android.view.Gravity;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
 import android.view.InputMonitor;
@@ -93,9 +93,11 @@ public class ClipboardOverlayController {
     public static final String COPY_OVERLAY_ACTION = "com.android.systemui.COPY";
 
     private static final int CLIPBOARD_DEFAULT_TIMEOUT_MILLIS = 6000;
+    private static final int SWIPE_PADDING_DP = 12; // extra padding around views to allow swipe
 
     private final Context mContext;
     private final DisplayManager mDisplayManager;
+    private final DisplayMetrics mDisplayMetrics;
     private final WindowManager mWindowManager;
     private final WindowManager.LayoutParams mWindowLayoutParams;
     private final PhoneWindow mWindow;
@@ -107,6 +109,7 @@ public class ClipboardOverlayController {
     private final DraggableConstraintLayout mView;
     private final ImageView mImagePreview;
     private final TextView mTextPreview;
+    private final View mPreviewBorder;
     private final OverlayActionChip mEditChip;
     private final OverlayActionChip mRemoteCopyChip;
     private final View mActionContainerBackground;
@@ -136,17 +139,23 @@ public class ClipboardOverlayController {
 
         mWindowManager = mContext.getSystemService(WindowManager.class);
 
+        mDisplayMetrics = new DisplayMetrics();
+        mContext.getDisplay().getRealMetrics(mDisplayMetrics);
+
         mTimeoutHandler = timeoutHandler;
         mTimeoutHandler.setDefaultTimeoutMillis(CLIPBOARD_DEFAULT_TIMEOUT_MILLIS);
 
         // Setup the window that we are going to use
         mWindowLayoutParams = FloatingWindowUtil.getFloatingWindowParams();
-        mWindowLayoutParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-        mWindowLayoutParams.height = WRAP_CONTENT;
-        mWindowLayoutParams.gravity = Gravity.BOTTOM;
         mWindowLayoutParams.setTitle("ClipboardOverlay");
         mWindow = FloatingWindowUtil.getFloatingWindow(mContext);
         mWindow.setWindowManager(mWindowManager, null, null);
+
+        if (!mAccessibilityManager.isTouchExplorationEnabled()) {
+            setWindowFocusable(true);
+        } else {
+            setWindowFocusable(false);
+        }
 
         mContainer = (FrameLayout)
                 LayoutInflater.from(mContext).inflate(R.layout.clipboard_overlay, null);
@@ -156,6 +165,7 @@ public class ClipboardOverlayController {
         mActionContainer = requireNonNull(mView.findViewById(R.id.actions));
         mImagePreview = requireNonNull(mView.findViewById(R.id.image_preview));
         mTextPreview = requireNonNull(mView.findViewById(R.id.text_preview));
+        mPreviewBorder = requireNonNull(mView.findViewById(R.id.preview_border));
         mEditChip = requireNonNull(mView.findViewById(R.id.edit_chip));
         mRemoteCopyChip = requireNonNull(mView.findViewById(R.id.remote_copy_chip));
         mDismissButton = requireNonNull(mView.findViewById(R.id.dismiss_button));
@@ -265,6 +275,7 @@ public class ClipboardOverlayController {
         OverlayActionChip chip = (OverlayActionChip) LayoutInflater.from(mContext).inflate(
                 R.layout.overlay_action_chip, mActionContainer, false);
         chip.setText(action.getTitle());
+        chip.setContentDescription(action.getTitle());
         chip.setIcon(action.getIcon(), false);
         chip.setPendingIntent(action.getActionIntent(), this::animateOut);
         chip.setAlpha(1);
@@ -281,11 +292,24 @@ public class ClipboardOverlayController {
                 if (event instanceof MotionEvent) {
                     MotionEvent motionEvent = (MotionEvent) event;
                     if (motionEvent.getActionMasked() == MotionEvent.ACTION_DOWN) {
-                        int[] pt = new int[2];
-                        mView.getLocationOnScreen(pt);
-                        Rect rect = new Rect(pt[0], pt[1], pt[0] + mView.getWidth(),
-                                pt[1] + mView.getHeight());
-                        if (!rect.contains(
+                        Region touchRegion = new Region();
+
+                        final Rect tmpRect = new Rect();
+                        mPreviewBorder.getBoundsOnScreen(tmpRect);
+                        tmpRect.inset(
+                                (int) FloatingWindowUtil.dpToPx(mDisplayMetrics, -SWIPE_PADDING_DP),
+                                (int) FloatingWindowUtil.dpToPx(mDisplayMetrics,
+                                        -SWIPE_PADDING_DP));
+                        touchRegion.op(tmpRect, Region.Op.UNION);
+                        mActionContainerBackground.getBoundsOnScreen(tmpRect);
+                        tmpRect.inset(
+                                (int) FloatingWindowUtil.dpToPx(mDisplayMetrics, -SWIPE_PADDING_DP),
+                                (int) FloatingWindowUtil.dpToPx(mDisplayMetrics,
+                                        -SWIPE_PADDING_DP));
+                        touchRegion.op(tmpRect, Region.Op.UNION);
+                        mDismissButton.getBoundsOnScreen(tmpRect);
+                        touchRegion.op(tmpRect, Region.Op.UNION);
+                        if (!touchRegion.contains(
                                 (int) motionEvent.getRawX(), (int) motionEvent.getRawY())) {
                             animateOut();
                         }
@@ -332,6 +356,8 @@ public class ClipboardOverlayController {
         showTextPreview(text);
         mEditChip.setVisibility(View.VISIBLE);
         mEditChip.setAlpha(1f);
+        mEditChip.setContentDescription(
+                mContext.getString(R.string.clipboard_edit_text_description));
         View.OnClickListener listener = v -> editText();
         mEditChip.setOnClickListener(listener);
         mTextPreview.setOnClickListener(listener);
@@ -353,6 +379,8 @@ public class ClipboardOverlayController {
         }
         View.OnClickListener listener = v -> editImage(uri);
         mEditChip.setOnClickListener(listener);
+        mEditChip.setContentDescription(
+                mContext.getString(R.string.clipboard_edit_image_description));
         mImagePreview.setOnClickListener(listener);
     }
 
@@ -524,5 +552,26 @@ public class ClipboardOverlayController {
 
     private Display getDefaultDisplay() {
         return mDisplayManager.getDisplay(DEFAULT_DISPLAY);
+    }
+
+    /**
+     * Updates the window focusability.  If the window is already showing, then it updates the
+     * window immediately, otherwise the layout params will be applied when the window is next
+     * shown.
+     */
+    private void setWindowFocusable(boolean focusable) {
+        int flags = mWindowLayoutParams.flags;
+        if (focusable) {
+            mWindowLayoutParams.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        } else {
+            mWindowLayoutParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+        }
+        if (mWindowLayoutParams.flags == flags) {
+            return;
+        }
+        final View decorView = mWindow.peekDecorView();
+        if (decorView != null && decorView.isAttachedToWindow()) {
+            mWindowManager.updateViewLayout(decorView, mWindowLayoutParams);
+        }
     }
 }

@@ -372,6 +372,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 "android.permission.WRITE_DEVICE_CONFIG",
                 "android.permission.READ_DEVICE_CONFIG",
                 "android.permission.READ_CONTACTS");
+        Settings.Secure.putIntForUser(
+                getContext().getContentResolver(),
+                Settings.Secure.NOTIFICATION_PERMISSION_ENABLED, 0, USER_SYSTEM);
 
         MockitoAnnotations.initMocks(this);
 
@@ -1335,7 +1338,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mBinderService.applyEnqueuedAdjustmentFromAssistant(null, adjustment);
 
         NotificationManagerService.PostNotificationRunnable runnable =
-                mService.new PostNotificationRunnable(r.getKey());
+                mService.new PostNotificationRunnable(r.getKey(), SystemClock.elapsedRealtime());
         runnable.run();
         waitForIdle();
 
@@ -1356,7 +1359,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPreferencesHelper.getImportance(anyString(), anyInt())).thenReturn(IMPORTANCE_NONE);
 
         NotificationManagerService.PostNotificationRunnable runnable =
-                mService.new PostNotificationRunnable(r.getKey());
+                mService.new PostNotificationRunnable(r.getKey(), SystemClock.elapsedRealtime());
         runnable.run();
         waitForIdle();
 
@@ -3918,7 +3921,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, null, false);
         mService.addEnqueuedNotification(r);
         NotificationManagerService.PostNotificationRunnable runnable =
-                mService.new PostNotificationRunnable(r.getKey());
+                mService.new PostNotificationRunnable(r.getKey(), SystemClock.elapsedRealtime());
         runnable.run();
         waitForIdle();
 
@@ -3935,7 +3938,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         r = generateNotificationRecord(mTestNotificationChannel, 0, null, false);
         mService.addEnqueuedNotification(r);
         NotificationManagerService.PostNotificationRunnable runnable =
-                mService.new PostNotificationRunnable(r.getKey());
+                mService.new PostNotificationRunnable(r.getKey(), SystemClock.elapsedRealtime());
         runnable.run();
         waitForIdle();
 
@@ -3951,7 +3954,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addEnqueuedNotification(r);
 
         NotificationManagerService.PostNotificationRunnable runnable =
-                mService.new PostNotificationRunnable(r.getKey());
+                mService.new PostNotificationRunnable(r.getKey(), SystemClock.elapsedRealtime());
         runnable.run();
         waitForIdle();
 
@@ -3964,12 +3967,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         r.setCriticality(CriticalNotificationExtractor.CRITICAL_LOW);
         mService.addEnqueuedNotification(r);
         NotificationManagerService.PostNotificationRunnable runnable =
-                mService.new PostNotificationRunnable(r.getKey());
+                mService.new PostNotificationRunnable(r.getKey(), SystemClock.elapsedRealtime());
         runnable.run();
 
         r = generateNotificationRecord(mTestNotificationChannel, 1, null, false);
         r.setCriticality(CriticalNotificationExtractor.CRITICAL);
-        runnable = mService.new PostNotificationRunnable(r.getKey());
+        runnable = mService.new PostNotificationRunnable(r.getKey(), SystemClock.elapsedRealtime());
         mService.addEnqueuedNotification(r);
 
         runnable.run();
@@ -4412,7 +4415,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addEnqueuedNotification(original);
 
         NotificationManagerService.PostNotificationRunnable runnable =
-                mService.new PostNotificationRunnable(original.getKey());
+                mService.new PostNotificationRunnable(original.getKey(),
+                        SystemClock.elapsedRealtime());
         runnable.run();
         waitForIdle();
 
@@ -4433,7 +4437,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.addEnqueuedNotification(update);
 
         NotificationManagerService.PostNotificationRunnable runnable =
-                mService.new PostNotificationRunnable(update.getKey());
+                mService.new PostNotificationRunnable(update.getKey(),
+                        SystemClock.elapsedRealtime());
         runnable.run();
         waitForIdle();
 
@@ -4651,6 +4656,59 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mNotificationRecordLogger.event(1));
         assertEquals(1, mNotificationRecordLogger.get(0).getInstanceId());
         assertEquals(2, mNotificationRecordLogger.get(1).getInstanceId());
+    }
+
+    @Test
+    public void testAdjustmentToImportanceNone_cancelsNotification() throws Exception {
+        NotificationManagerService.WorkerHandler handler = mock(
+                NotificationManagerService.WorkerHandler.class);
+        mService.setHandler(handler);
+        when(mAssistants.isSameUser(eq(null), anyInt())).thenReturn(true);
+        when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
+
+        // Set up notifications: r1 is adjusted, r2 is not
+        final NotificationRecord r1 = generateNotificationRecord(
+                mTestNotificationChannel, 1, null, true);
+        r1.getSbn().setInstanceId(mNotificationInstanceIdSequence.newInstanceId());
+        mService.addNotification(r1);
+        final NotificationRecord r2 = generateNotificationRecord(
+                mTestNotificationChannel, 2, null, true);
+        r2.getSbn().setInstanceId(mNotificationInstanceIdSequence.newInstanceId());
+        mService.addNotification(r2);
+
+        // Test an adjustment that sets importance to none (meaning it's cancelling)
+        Bundle signals1 = new Bundle();
+        signals1.putInt(Adjustment.KEY_IMPORTANCE, IMPORTANCE_NONE);
+        Adjustment adjustment1 = new Adjustment(
+                r1.getSbn().getPackageName(), r1.getKey(), signals1, "",
+                r1.getUser().getIdentifier());
+
+        mBinderService.applyAdjustmentFromAssistant(null, adjustment1);
+
+        // Actually apply the adjustments & recalculate importance when run
+        doAnswer(invocationOnMock -> {
+            ((NotificationRecord) invocationOnMock.getArguments()[0])
+                    .applyAdjustments();
+            ((NotificationRecord) invocationOnMock.getArguments()[0])
+                    .calculateImportance();
+            return null;
+        }).when(mRankingHelper).extractSignals(any(NotificationRecord.class));
+
+        // run the CancelNotificationRunnable when it happens
+        ArgumentCaptor<NotificationManagerService.CancelNotificationRunnable> captor =
+                ArgumentCaptor.forClass(
+                        NotificationManagerService.CancelNotificationRunnable.class);
+
+        verify(handler, times(1)).scheduleCancelNotification(
+                captor.capture());
+
+        // Run the runnable given to the cancel notification, and see if it logs properly
+        NotificationManagerService.CancelNotificationRunnable runnable = captor.getValue();
+        runnable.run();
+        assertEquals(1, mNotificationRecordLogger.numCalls());
+        assertEquals(
+                NotificationRecordLogger.NotificationCancelledEvent.NOTIFICATION_CANCEL_ASSISTANT,
+                mNotificationRecordLogger.event(0));
     }
 
     @Test
@@ -6475,7 +6533,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertNull(update.getSbn().getNotification().getSmallIcon());
 
         NotificationManagerService.PostNotificationRunnable runnable =
-                mService.new PostNotificationRunnable(update.getKey());
+                mService.new PostNotificationRunnable(update.getKey(),
+                        SystemClock.elapsedRealtime());
         runnable.run();
         waitForIdle();
 

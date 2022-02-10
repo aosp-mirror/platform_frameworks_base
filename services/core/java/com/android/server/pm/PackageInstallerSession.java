@@ -62,8 +62,6 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.IIntentReceiver;
-import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
@@ -104,7 +102,6 @@ import android.os.Bundle;
 import android.os.FileBridge;
 import android.os.FileUtils;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -560,19 +557,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertNotChild("StagedSession#installSession");
             Preconditions.checkArgument(isCommitted() && isSessionReady());
             return install();
-        }
-
-        private void updateRemoteStatusReceiver(IntentSender remoteStatusReceiver) {
-            synchronized (mLock) {
-                setRemoteStatusReceiver(remoteStatusReceiver);
-                if (isMultiPackage()) {
-                    final IntentSender childIntentSender = new ChildStatusIntentReceiver(
-                            mChildSessions.clone(), remoteStatusReceiver).getIntentSender();
-                    for (int i = mChildSessions.size() - 1; i >= 0; --i) {
-                        mChildSessions.valueAt(i).setRemoteStatusReceiver(childIntentSender);
-                    }
-                }
-            }
         }
 
         @Override
@@ -1778,71 +1762,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    private class ChildStatusIntentReceiver {
-        private final SparseArray<PackageInstallerSession> mChildSessionsRemaining;
-        private final IntentSender mStatusReceiver;
-        private final IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
-            @Override
-            public void send(int code, Intent intent, String resolvedType, IBinder whitelistToken,
-                    IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {
-                statusUpdate(intent);
-            }
-        };
-
-        private ChildStatusIntentReceiver(SparseArray<PackageInstallerSession> remainingSessions,
-                IntentSender statusReceiver) {
-            this.mChildSessionsRemaining = remainingSessions;
-            this.mStatusReceiver = statusReceiver;
-        }
-
-        public IntentSender getIntentSender() {
-            return new IntentSender((IIntentSender) mLocalSender);
-        }
-
-        public void statusUpdate(Intent intent) {
-            mHandler.post(() -> {
-                if (mChildSessionsRemaining.size() == 0) {
-                    // no children to deal with, ignore.
-                    return;
-                }
-                final boolean destroyed;
-                synchronized (mLock) {
-                    destroyed = mDestroyed;
-                }
-                if (destroyed) {
-                    // the parent has already been terminated, ignore.
-                    return;
-                }
-                final int sessionId = intent.getIntExtra(
-                        PackageInstaller.EXTRA_SESSION_ID, 0);
-                final int status = intent.getIntExtra(PackageInstaller.EXTRA_STATUS,
-                        PackageInstaller.STATUS_FAILURE);
-                final int sessionIndex = mChildSessionsRemaining.indexOfKey(sessionId);
-                final String message = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE);
-                if (PackageInstaller.STATUS_SUCCESS == status) {
-                    mChildSessionsRemaining.removeAt(sessionIndex);
-                    if (mChildSessionsRemaining.size() == 0) {
-                        destroyInternal();
-                        dispatchSessionFinished(INSTALL_SUCCEEDED,
-                                "Session installed", null);
-                    }
-                } else if (PackageInstaller.STATUS_PENDING_USER_ACTION == status) {
-                    try {
-                        mStatusReceiver.sendIntent(mContext, 0, intent, null, null);
-                    } catch (IntentSender.SendIntentException ignore) {
-                    }
-                } else { // failure, let's forward and clean up this session.
-                    intent.putExtra(PackageInstaller.EXTRA_SESSION_ID,
-                            PackageInstallerSession.this.sessionId);
-                    mChildSessionsRemaining.clear(); // we're done. Don't send any more.
-                    destroyInternal();
-                    dispatchSessionFinished(INSTALL_FAILED_INTERNAL_ERROR,
-                            "Child session " + sessionId + " failed: " + message, null);
-                }
-            });
-        }
-    }
-
     /**
      * Returns whether or not a package can be installed while Secure FRP is enabled.
      * <p>
@@ -2063,12 +1982,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // Dispatch message to remove session from PackageInstallerService.
         dispatchSessionFinished(error, msg, null);
         maybeFinishChildSessions(error, msg);
-    }
-
-    private void onSessionInstallationFailure(int error, String detailedMessage) {
-        Slog.e(TAG, "Install of session " + sessionId + " failed: " + detailedMessage);
-        destroyInternal();
-        dispatchSessionFinished(error, detailedMessage, null);
     }
 
     private void onSystemDataLoaderUnrecoverable() {

@@ -130,6 +130,7 @@ import com.android.systemui.statusbar.notification.collection.legacy.VisualStabi
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptLogger;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLoggerFake;
@@ -309,6 +310,7 @@ public class StatusBarTest extends SysuiTestCase {
                         mPowerManager,
                         mDreamManager, mAmbientDisplayConfiguration, mNotificationFilter,
                         mStatusBarStateController, mBatteryController, mHeadsUpManager,
+                        mock(NotificationInterruptLogger.class),
                         new Handler(TestableLooper.get(this).getLooper()));
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
@@ -994,9 +996,10 @@ public class StatusBarTest extends SysuiTestCase {
                 StatusBarStateController controller,
                 BatteryController batteryController,
                 HeadsUpManager headsUpManager,
+                NotificationInterruptLogger logger,
                 Handler mainHandler) {
             super(contentResolver, powerManager, dreamManager, ambientDisplayConfiguration, filter,
-                    batteryController, controller, headsUpManager, mainHandler);
+                    batteryController, controller, headsUpManager, logger, mainHandler);
             mUseHeadsUp = true;
         }
     }

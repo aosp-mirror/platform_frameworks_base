@@ -70,7 +70,6 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"మూడు మార్గాల కాలింగ్"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"అవాంఛిత అంతరాయ కాల్స్‌ల తిరస్కరణ"</string>
     <string name="CndMmi" msgid="185136449405618437">"కాలింగ్ నంబర్ బట్వాడా"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"అంతరాయం కలిగించవద్దు"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"కాలర్ ID ఆటోమేటిక్‌లపై పరిమితి ఉంటుంది. తర్వాత కాల్: పరిమితి ఉంటుంది"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"కాలర్ ID ఆటోమేటిక్‌లపై పరిమితి ఉంటుంది. తర్వాత కాల్: పరిమితి లేదు"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"కాలర్ ID ఆటోమేటిక్‌లపై పరిమితి లేదు. తర్వాత కాల్: పరిమితి ఉంటుంది"</string>
@@ -180,10 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"వాచ్ నిల్వ నిండింది. స్థలాన్ని ఖాళీ చేయడానికి కొన్ని ఫైళ్లను తొలగించండి."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Android TV పరికరం నిల్వ నిండింది. కొంత ప్రదేశాన్ని ఖాళీ చేయడానికి కొన్ని ఫైల్‌‌‌లను తొలగించండి."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"ఫోన్ నిల్వ నిండింది. స్థలాన్ని ఖాళీ చేయడానికి కొన్ని ఫైళ్లను తొలగించండి."</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="other">ప్రమాణపత్ర అధికారాలు ఇన్‌స్టాల్ చేయబడ్డాయి</item>
-      <item quantity="one">ప్రమాణపత్ర అధికారం ఇన్‌స్టాల్ చేయబడింది</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{సర్టిఫికెట్ అధికార యంత్రాంగం ఇన్‌స్టాల్ చేయబడింది}other{సర్టిఫికెట్ అధికార యంత్రాంగాలు ఇన్‌స్టాల్ చేయబడ్డాయి}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"తెలియని మూడవ పక్షం ద్వారా"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"మీ కార్యాలయ ప్రొఫైల్ నిర్వాహకుల ద్వారా"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> ద్వారా"</string>
@@ -203,6 +199,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"సెన్సార్ నోటిఫికేషన్ సర్వీస్"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ట్విలైట్ సర్వీస్"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS సమయ అప్‌డేట్ సర్వీస్"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"పరికర పాలసీ మేనేజర్ సర్వీస్"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"మ్యూజిక్ గుర్తింపు మేనేజర్ సర్వీస్"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"మీ పరికరంలోని డేటా తొలగించబడుతుంది"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"నిర్వాహక యాప్‌ ఉపయోగించడం సాధ్యపడదు. మీ పరికరంలోని డేటా ఇప్పుడు తొలగించబడుతుంది.\n\nమీకు ప్రశ్నలు ఉంటే, మీ సంస్థ యొక్క నిర్వాహకులను సంప్రదించండి."</string>
@@ -256,10 +253,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"చాలా సందర్భాల్లో దీన్ని ఉపయోగించండి. ఇది రిపోర్ట్‌ ప్రోగ్రెస్‌ను ట్రాక్ చేయడానికి, సమస్య గురించి మరిన్ని వివరాలను నమోదు చేయడానికి మరియు స్క్రీన్‌షాట్‌లు తీయడానికి మిమ్మల్ని అనుమతిస్తుంది. ఇది నివేదించడానికి ఎక్కువ సమయం పట్టే తక్కువ వినియోగ విభాగాలను విడిచిపెట్టవచ్చు."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"పూర్తి రిపోర్ట్‌"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"మీ పరికరం ప్రతిస్పందనరహితంగా ఉన్నప్పుడు లేదా చాలా నెమ్మదిగా ఉన్నప్పుడు లేదా మీకు అన్ని రిపోర్ట్‌ విభాగాలు అవసరమైనప్పుడు సిస్టమ్‌కి అంతరాయ స్థాయి కనిష్టంగా ఉండేలా చేయడానికి ఈ ఎంపిక ఉపయోగించండి. ఇది మరిన్ని వివరాలను నమోదు చేయడానికి లేదా అదనపు స్క్రీన్‌షాట్‌లు తీయడానికి మిమ్మల్ని అనుమతించదు."</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="other">బగ్ రిపోర్ట్‌ కోసం <xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో స్క్రీన్‌షాట్ తీయబోతోంది.</item>
-      <item quantity="one">బగ్ రిపోర్ట్‌ కోసం <xliff:g id="NUMBER_0">%d</xliff:g> సెకనులో స్క్రీన్‌షాట్ తీయబోతోంది.</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{# సెకనులో బగ్ రిపోర్ట్ కోసం స్క్రీన్ షాట్ తీయడం.}other{# సెకన్లలో బగ్ రిపోర్ట్ కోసం స్క్రీన్ షాట్ తీయడం.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"బగ్ రిపోర్ట్‌తో ఉన్న స్క్రీన్‌షాట్ తీయబడింది"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"బగ్ రిపోర్ట్‌తో ఉన్న స్క్రీన్‌షాట్‌ను తీయడం విఫలమైంది"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"నిశ్శబ్ద మోడ్"</string>
@@ -310,8 +304,14 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"మీ క్యాలెండర్‌ను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS మెసేజ్‌లను పంపడం, వీక్షించడం"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"ఫైల్స్, మీడియా"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"మీ పరికరంలోని ఫోటోలు, మీడియా మరియు ఫైళ్లను యాక్సెస్ చేయడానికి"</string>
+    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
+    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"మ్యూజిక్ &amp; ఇతర ఆడియో"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"మీ పరికరంలోని ఆడియో ఫైల్‌లను యాక్సెస్ చేయండి"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"ఫోటోలు &amp; వీడియోలు"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"మీ పరికరంలోని ఇమేజ్‌లు, వీడియో ఫైల్‌లను యాక్సెస్ చేయండి"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"మైక్రోఫోన్"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ఆడియోను రికార్డ్ చేయడానికి"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ఫిజికల్ యాక్టివిటీ"</string>
@@ -683,6 +683,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"ఖాతా యొక్క సింక్‌ గణాంకాలను అలాగే సింక్‌ ఈవెంట్‌ల చరిత్రను మరియు ఎంత డేటా సమకాలీకరించబడింది అనేవాటిని చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను చదువుతుంది"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"షేర్ చేయబడిన స్టోరేజ్ నుండి ఆడియో ఫైల్‌లను చదవండి"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"మీ షేర్ చేయబడిన స్టోరేజ్ నుండి ఆడియో ఫైల్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"షేర్ చేయబడిన స్టోరేజ్ నుండి వీడియో ఫైల్‌లను చదవండి"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"మీ షేర్ చేయబడిన స్టోరేజ్ నుండి వీడియో ఫైల్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_readMediaImage" msgid="1507059005825769856">"షేర్ చేయబడిన స్టోరేజ్ నుండి ఇమేజ్ ఫైల్‌లను చదవండి"</string>
+    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"మీ షేర్ చేయబడిన స్టోరేజ్ నుండి ఇమేజ్ ఫైల్‌లను చదవడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను ఎడిట్ చేయండి లేదా తొలగించండి"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"మీ షేర్ చేసిన నిల్వ యొక్క కంటెంట్‌లను రాయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP కాల్స్‌ను చేయడానికి/స్వీకరించడానికి"</string>
@@ -729,8 +735,6 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"క్యారియర్ మెసేజింగ్ సర్వీస్‌ యొక్క అగ్ర-స్థాయి ఇంటర్‌ఫేస్‌కు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ అవసరం ఉండదు."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"క్యారియర్ సేవలకు అనుబంధించడం"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"క్యారియర్ సేవలకు అనుబంధించడానికి హోల్డర్‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ అవసరం ఉండదు."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"అంతరాయం కలిగించవద్దును యాక్సెస్ చేయడం"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"అంతరాయం కలిగించవద్దు ఎంపిక కాన్ఫిగరేషన్ చదవడానికి మరియు రాయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"వీక్షణ అనుమతి వినియోగాన్ని ప్రారంభించండి"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"యాప్‌నకు అనుమతి వినియోగాన్ని ప్రారంభించడానికి హోల్డర్‌‌ను అనుమతిస్తుంది. సాధారణ యాప్‌లకు ఎప్పటికీ ఇటువంటి అనుమతి అవసరం ఉండదు."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"వీక్షణ అనుమతి నిర్ణయాలను ప్రారంభించండి"</string>
@@ -951,7 +955,7 @@
     <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"అన్‌లాక్ చేయడానికి, మీ Google ఖాతాతో సైన్ ఇన్ చేయండి."</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"వినియోగదారు పేరు (ఈమెయిల్‌)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"పాస్‌వర్డ్"</string>
-    <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"సైన్ ఇన్ చేయి"</string>
+    <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"సైన్ ఇన్ చేయండి"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="4369219936865697679">"వినియోగదారు పేరు లేదా పాస్‌వర్డ్ చెల్లదు."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1683405808525090649">"మీ వినియోగదారు పేరు లేదా పాస్‌వర్డ్‌ను మర్చిపోయారా?\n"<b>"google.com/accounts/recovery"</b>"ని సందర్శించండి."</string>
     <string name="lockscreen_glogin_checking_password" msgid="2607271802803381645">"తనిఖీ చేస్తోంది..."</string>
@@ -1072,10 +1076,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> తాకడం ద్వారా విశ్లేషణను ప్రారంభించాలనుకుంటోంది. తాకడం ద్వారా విశ్లేషణ ఆన్ చేయబడినప్పుడు, మీరు మీ వేలి కింద ఉన్నవాటి యొక్క వివరణలను వినవచ్చు లేదా చూడవచ్చు లేదా ఫోన్‌తో పరస్పర చర్య చేయడానికి సంజ్ఞలు చేయవచ్చు."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 నెల క్రితం"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"1 నెలకు ముందు"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="other">గత <xliff:g id="COUNT_1">%d</xliff:g> రోజులు</item>
-      <item quantity="one">గత <xliff:g id="COUNT_0">%d</xliff:g> రోజు</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{గత # రోజు}other{గత # రోజులు}}"</string>
     <string name="last_month" msgid="1528906781083518683">"గత నెల"</string>
     <string name="older" msgid="1645159827884647400">"పాతది"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"<xliff:g id="DATE">%s</xliff:g>న"</string>
@@ -1094,70 +1095,22 @@
     <string name="year" msgid="5182610307741238982">"సంవత్సరం"</string>
     <string name="years" msgid="5797714729103773425">"సంవత్సరాలు"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"ఇప్పుడు"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ని</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ని</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>గం</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>గం</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>రో</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>రో</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>సం</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>సం</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ని.లో</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ని.లో</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>గంటల్లో</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>గంటలో</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>రోజుల్లో</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>రోజులో</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>సం.లో</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>సం.లో</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> నిమిషాల క్రితం</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> నిమిషం క్రితం</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> గంటల క్రితం</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> గంట క్రితం</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> రోజుల క్రితం</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> రోజు క్రితం</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> సంవత్సరాల క్రితం</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> సంవత్సరం క్రితం</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> నిమిషాల్లో</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> నిమిషంలో</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> గంటల్లో</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> గంటలో</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> రోజుల్లో</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> రోజులో</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> సంవత్సరాల్లో</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> సంవత్సరంలో</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g>నిమిషం"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g>గంట"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g>రోజు"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g>సం"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"<xliff:g id="COUNT">%d</xliff:g>నిమిషంలో"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g>గంటలో"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g>రోజులో"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g>సంవత్సరంలో"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# నిమిషం క్రితం}other{# నిమిషాల క్రితం}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# గంట క్రితం}other{# గంటల క్రితం}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# రోజు క్రితం}other{# రోజుల క్రితం}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{# సంవత్సరం క్రితం}other{# సంవత్సరాల క్రితం}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# నిమిషం}other{# నిమిషాలు}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# గంట}other{# గంటలు}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# రోజు}other{# రోజులు}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# సంవత్సరం}other{# సంవత్సరాలు}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"వీడియో సమస్య"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"ఈ పరికరంలో ప్రసారం చేయడానికి ఈ వీడియో చెల్లదు."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"ఈ వీడియోను ప్లే చేయడం సాధ్యపడదు."</string>
@@ -1187,10 +1140,8 @@
     <string name="deleteText" msgid="4200807474529938112">"తొలగించు"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ఇన్‌పుట్ పద్ధతి"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"వచనానికి సంబంధించిన చర్యలు"</string>
-    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
-    <skip />
-    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
-    <skip />
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"వెనుకకు"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ఇన్‌పుట్ విధానాన్ని మార్చండి"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"నిల్వ ఖాళీ అయిపోతోంది"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"కొన్ని సిస్టమ్ కార్యాచరణలు పని చేయకపోవచ్చు"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"సిస్టమ్ కోసం తగినంత నిల్వ లేదు. మీకు 250MB ఖాళీ స్థలం ఉందని నిర్ధారించుకుని, పునఃప్రారంభించండి."</string>
@@ -1411,6 +1362,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"పరీక్ష నియంత్రణ మోడ్‌ను నిలిపివేయడానికి ఫ్యాక్టరీ రీసెట్‍‌ను అమలు చేయండి."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"సీరియల్ కన్సోల్ ప్రారంభించబడింది"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"పని తీరు ప్రభావితమైంది. నిలిపివేయడానికి, బూట్‌లోడర్‌ను తనిఖీ చేయండి."</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"ప్రయోగాత్మక MTE ఎనేబుల్ చేయబడింది"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"పనితీరు, స్థిరత్వం ప్రభావితం కావచ్చు. డిజేబుల్ చేయడానికి రీబూట్ చేయండి. arm64.memtag.bootctlని ఉపయోగించి ఎనేబుల్ చేసినట్లయితే, దాన్ని ముందుగా ఏదీ లేనిదిగా సెట్ చేయండి."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"USB పోర్ట్‌లో ద్రవ లేదా వ్యర్థ పదార్థాలు ఉన్నాయి"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB పోర్ట్ ఆటోమేటిక్‌గా నిలిపివేయబడింది. మరింత తెలుసుకోవడానికి నొక్కండి."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB పోర్ట్‌ను ఉపయోగించడం సురక్షితం"</string>
@@ -1547,10 +1500,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"దాటవేయి"</string>
     <string name="no_matches" msgid="6472699895759164599">"సరిపోలికలు లేవు"</string>
     <string name="find_on_page" msgid="5400537367077438198">"పేజీలో కనుగొనండి"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="other"><xliff:g id="TOTAL">%d</xliff:g>లో <xliff:g id="INDEX">%d</xliff:g></item>
-      <item quantity="one">1 సరిపోలిక</item>
-    </plurals>
+    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{# {total}లో #}other{ మ్యాచ్ }} }"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"పూర్తయింది"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"షేర్ చేసిన నిల్వను తొలగిస్తోంది…"</string>
     <string name="share" msgid="4157615043345227321">"షేర్"</string>
@@ -1680,10 +1630,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"ఆకృతి తప్పు"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"పాస్‌వర్డ్ తప్పు"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"పిన్‌ తప్పు"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి.</item>
-      <item quantity="one">1 సెకనులో మళ్లీ ప్రయత్నించండి.</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"మీ నమూనాను గీయండి"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"సిమ్ పిన్‌ను నమోదు చేయండి"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"పిన్‌ను నమోదు చేయండి"</string>
@@ -1701,7 +1647,7 @@
     <string name="kg_login_instructions" msgid="3619844310339066827">"అన్‌లాక్ చేయడానికి, మీ Google ఖాతాతో సైన్ ఇన్ చేయండి."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"వినియోగదారు పేరు (ఈమెయిల్‌)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"పాస్‌వర్డ్"</string>
-    <string name="kg_login_submit_button" msgid="893611277617096870">"సైన్ ఇన్ చేయి"</string>
+    <string name="kg_login_submit_button" msgid="893611277617096870">"సైన్ ఇన్ చేయండి"</string>
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"చెల్లని వినియోగదారు పేరు లేదా పాస్‌వర్డ్."</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"మీ వినియోగదారు పేరు లేదా పాస్‌వర్డ్‌ను మర్చిపోయారా?\n"<b>"google.com/accounts/recovery"</b>"ని సందర్శించండి."</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"ఖాతాను తనిఖీ చేస్తోంది…"</string>
@@ -1880,10 +1826,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"నియంత్రణలను ఎడిట్ చేయడానికి పిన్‌ను రూపొందించండి"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"పిన్‌లు సరిపోలలేదు. మళ్లీ ప్రయత్నించండి."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"పిన్‌ చాలా చిన్నదిగా ఉంది. తప్పనిసరిగా కనీసం 4 అంకెలు ఉండాలి."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి</item>
-      <item quantity="one">1 సెకనులో మళ్లీ ప్రయత్నించండి</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"తర్వాత మళ్లీ ప్రయత్నించండి"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"ఫుల్-స్క్రీన్‌లో వీక్షిస్తున్నారు"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"నిష్క్రమించడానికి, పై నుండి క్రిందికి స్వైప్ చేయండి."</string>
@@ -1911,46 +1853,20 @@
     <string name="data_saver_description" msgid="4995164271550590517">"డేటా వినియోగాన్ని తగ్గించడంలో డేటా సేవర్ సహాయకరంగా ఉంటుంది. బ్యాక్‌గ్రౌండ్‌లో కొన్ని యాప్‌లు డేటాను పంపకుండా లేదా స్వీకరించకుండా నిరోధిస్తుంది. మీరు ప్రస్తుతం ఉపయోగిస్తోన్న యాప్‌, డేటాను యాక్సెస్ చేయగలదు. కానీ త‌క్కువ సార్లు మాత్ర‌మే అలా చేయవచ్చు. ఉదాహరణకు, మీరు నొక్కే వరకు ఇమేజ్‌లు ప్రదర్శించబడవు."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"డేటా సేవర్‌ను ఆన్ చేయాలా?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ఆన్ చేయి"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="other">%1$d నిమిషాల పాటు (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> వరకు)</item>
-      <item quantity="one">ఒక నిమిషం పాటు (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> వరకు)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="other">%1$d నిమి పాటు (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> వరకు)</item>
-      <item quantity="one">1 నిమి పాటు (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> వరకు)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="other">%1$d గంటల పాటు (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> వరకు)</item>
-      <item quantity="one">1 గంట పాటు (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> వరకు)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="other">%1$d గం పాటు (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> వరకు)</item>
-      <item quantity="one">1 గం పాటు (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> వరకు)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="other">%d నిమిషాల పాటు</item>
-      <item quantity="one">ఒక నిమిషం పాటు</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="other">%d నిమి పాటు</item>
-      <item quantity="one">1 నిమి పాటు</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="other">%d గంటల పాటు</item>
-      <item quantity="one">1 గంట పాటు</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="other">%d గం పాటు</item>
-      <item quantity="one">1 గం పాటు</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{ఒక నిమిషానికి ({formattedTime} వరకు)}other{# నిమిషాలకు ({formattedTime} వరకు)}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{1 నిమిషానికి ({formattedTime} వరకు)}other{# నిమిషాలకు ({formattedTime} వరకు)}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{1 గంట పాటు ({formattedTime} వరకు)}other{# గంటల పాటు ({formattedTime} వరకు)}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{1 గంట పాటు ({formattedTime} వరకు)}other{# గంటల పాటు ({formattedTime} వరకు)}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{ఒక నిమిషానికి}other{# నిమిషాలకు}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{1 నిమిషానికి}other{# నిమిషాలకు}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{1 గంట పాటు}other{# గంటల పాటు}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{1 గంట పాటు}other{# గంటల పాటు}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> వరకు"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> వరకు"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (తర్వాత అలారం) వరకు"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"మీరు ఆఫ్‌ చేసే వరకు"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"మీరు అంతరాయం కలిగించవద్దు ఎంపిక ఆఫ్ చేసే వరకు"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"కుదించండి"</string>
-    <string name="zen_mode_feature_name" msgid="3785547207263754500">"అంతరాయం కలిగించవద్దు"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ముఖ్యమైన పనిలో ఉన్నప్పుడు"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"వారపు రోజుల్లో రాత్రి"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"వారాంతం"</string>
@@ -1989,10 +1905,6 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"ఇన్‌కమింగ్ కాల్"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"కాల్ కొనసాగుతోంది"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"ఇన్‌కమింగ్ కాల్‌ను స్క్రీన్ చేయండి"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ఎంచుకోబడ్డాయి</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ఎంచుకోబడింది</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"వర్గీకరించబడలేదు"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"మీరు ఈ నోటిఫికేషన్‌ల ప్రాముఖ్యతను సెట్ చేశారు."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ఇందులో పేర్కొనబడిన వ్యక్తులను బట్టి ఇది చాలా ముఖ్యమైనది."</string>
@@ -2058,10 +1970,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"స్వీయ పూరింపు కోసం సేవ్ చేయండి"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"కంటెంట్‌లను స్వీయ పూరింపు చేయడం సాధ్యపడదు"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"స్వీయ పూరింపు సూచనలు లేవు"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> స్వీయ పూరింపు సూచనలు</item>
-      <item quantity="one">ఒక స్వీయ పూరింపు సూచన</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{ఒక ఆటోఫిల్ సూచన}other{# ఆటోఫిల్ సూచనలు}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"లో సేవ్ చేయాలా?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"<xliff:g id="TYPE">%1$s</xliff:g>ని "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"లో సేవ్ చేయాలా?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"<xliff:g id="TYPE_0">%1$s</xliff:g> మరియు <xliff:g id="TYPE_1">%2$s</xliff:g>ని "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"లో సేవ్ చేయాలా?"</string>
@@ -2108,15 +2017,22 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"అన్ఇన్‌స్టాల్ చేయండి"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ఏదేమైనా తెరువు"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"హానికరమైన యాప్ గుర్తించబడింది"</string>
+    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
+    <skip />
+    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
+    <skip />
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> <xliff:g id="APP_2">%2$s</xliff:g> స్లైస్‌లను చూపించాలనుకుంటోంది"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"ఎడిట్ చేయండి"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"కాల్స్‌ మరియు నోటిఫికేషన్‌లు వైబ్రేట్ అవుతాయి"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"కాల్స్‌ మరియు నోటిఫికేషన్‌లు మ్యూట్ చేయబడతాయి"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"సిస్టమ్ మార్పులు"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"అంతరాయం కలిగించవద్దు"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"కొత్తది: అంతరాయం కలిగించవద్దు నోటిఫికేషన్‌లను దాస్తోంది"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"మరింత తెలుసుకోవడానికి మరియు మార్చడానికి నొక్కండి."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"అంతరాయం కలిగించవద్దు మార్చబడింది"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"బ్లాక్ చేయబడిన దాన్ని తనిఖీ చేయడానికి నొక్కండి."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"సిస్టమ్"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"సెట్టింగ్‌లు"</string>
@@ -2133,7 +2049,6 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"సరే"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ఆఫ్ చేయండి"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"మరింత తెలుసుకోండి"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12లో Android అనుకూల నోటిఫికేషన్‌లను, మెరుగైన నోటిఫికేషన్‌లు రీప్లేస్‌ చేశాయి. ఈ ఫీచర్, సూచించిన చర్యలను, రిప్లయిలను చూపించి, మీ నోటిఫికేషన్‌లను ఆర్గనైజ్ చేస్తుంది.\n\nకాంటాక్ట్ పేర్లు, మెసేజ్‌లు లాంటి వ్యక్తిగత సమాచారంతో పాటు నోటిఫికేషన్ కంటెంట్‌ను మెరుగైన నోటిఫికేషన్‌లు యాక్సెస్ చేస్తాయి. ఫోన్ కాల్స్‌కు సమాధానమివ్వడం, \'అంతరాయం కలిగించవద్దు\' ఆప్షన్‌ను కంట్రోల్ చేయడం వంటి నోటిఫికేషన్‌లను విస్మరించడం లేదా వాటికి ప్రతిస్పందించడం కూడా ఈ ఫీచర్ చేయగలదు."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"రొటీన్ మోడ్ సమాచార నోటిఫికేషన్"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"మామూలుగా ఛార్జ్ చేసేలోపు బ్యాటరీ ఖాళీ కావచ్చు"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి బ్యాటరీ సేవర్ యాక్టివేట్ చేయబడింది"</string>
@@ -2162,10 +2077,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> ప్రదర్శన"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"విమానం మోడ్‌లో బ్లూటూత్ ఆన్‌లో ఉంటుంది"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"లోడవుతోంది"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ఫైళ్లు</item>
-      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ఫైల్</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # ఫైల్}other{{file_name} + # ఫైల్స్}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ఎవరికి షేర్ చేయాలనే దానికి సంబంధించి సిఫార్సులేవీ లేవు"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"యాప్‌ల లిస్ట్‌"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"ఈ యాప్‌కు రికార్డ్ చేసే అనుమతి మంజూరు కాలేదు, అయినా ఈ USB పరికరం ద్వారా ఆడియోను క్యాప్చర్ చేయగలదు."</string>
@@ -2177,10 +2089,16 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"పవర్ డైలాగ్‌ను తెరువు"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"స్క్రీన్‌ను లాక్ చేయి"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"స్క్రీన్‌షాట్"</string>
+    <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"హెడ్‌సెట్ హుక్"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"స్క్రీన్‌పై ఉండే యాక్సెసిబిలిటీ షార్ట్‌కట్"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"స్క్రీన్‌పై ఉండే యాక్సెసిబిలిటీ షార్ట్‌కట్‌ల ఎంపిక సాధనం"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"యాక్సెసిబిలిటీ షార్ట్‌కట్"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"నోటిఫికేషన్ తెరను తీసివేయండి"</string>
+    <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad పైకి"</string>
+    <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad కింద"</string>
+    <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad ఎడమవైపున"</string>
+    <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad కుడివైపున"</string>
+    <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"DPad మధ్యన"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> క్యాప్షన్ బార్."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> పరిమితం చేయబడిన బకెట్‌లో ఉంచబడింది"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2201,8 +2119,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"ఆన్ చేయడానికి ట్యాప్ చేయి"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"వర్క్ యాప్‌లు లేవు"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"వ్యక్తిగత యాప్‌లు లేవు"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"వ్యక్తిగత ప్రొఫైల్‌లో <xliff:g id="APP">%s</xliff:g>లో తెరవాలా?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"వర్క్ ప్రొఫైల్‌లో <xliff:g id="APP">%s</xliff:g>లో తెరవాలా?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"వ్యక్తిగత బ్రౌజర్‌ను ఉపయోగించు"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"వర్క్ బ్రౌజర్‌ను ఉపయోగించు"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM నెట్‌వర్క్ అన్‌లాక్ పిన్‌"</string>
@@ -2332,4 +2252,9 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> మీ స్క్రీన్‌ను చూడవచ్చు, కంట్రోల్ చేయవచ్చు. రివ్యూ చేయడానికి ట్యాప్ చేయండి."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> అనువదించబడింది."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"మెసేజ్ <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> నుండి <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>‌కు అనువదించబడింది."</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"బ్యాక్‌గ్రౌండ్ యాక్టివిటీ"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"బ్యాక్‌గ్రౌండ్ యాక్టివిటీ"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> బ్యాక్‌గ్రౌండ్‌లో రన్ అవుతోంది, బ్యాటరీని ఎక్కువగా వాడుతోంది. రివ్యూ చేయడానికి ట్యాప్ చేయండి."</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> చాలా సమయం నుండి బ్యాక్‌గ్రౌండ్‌లో రన్ అవుతోంది. రివ్యూ చేయడానికి ట్యాప్ చేయండి."</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"యాక్టివ్‌గా ఉన్న యాప్‌లను చెక్ చేయండి"</string>
 </resources>
