@@ -3692,21 +3692,32 @@ public final class SurfaceControl implements Parcelable {
         /**
          * Sets the buffer transform that should be applied to the current buffer.
          *
+         * This can be used in combination with
+         * {@link AttachedSurfaceControl#addOnBufferTransformHintChangedListener(AttachedSurfaceControl.OnBufferTransformHintChangedListener)}
+         * to pre-rotate the buffer for the current display orientation. This can
+         * improve the performance of displaying the associated buffer.
+         *
          * @param sc The SurfaceControl to update
          * @param transform The transform to apply to the buffer.
          * @return this
          */
         public @NonNull Transaction setBufferTransform(@NonNull SurfaceControl sc,
-                /* TODO: Mark the intdef */ int transform) {
+                @SurfaceControl.BufferTransform int transform) {
             checkPreconditions(sc);
             nativeSetBufferTransform(mNativeObject, sc.mNativeObject, transform);
             return this;
         }
 
         /**
-         * Updates the region for the content on this surface updated in this transaction.
+         * Updates the region for the content on this surface updated in this transaction. The
+         * damage region is the area of the buffer that has changed since the previously
+         * sent buffer. This can be used to reduce the amount of recomposition that needs
+         * to happen when only a small region of the buffer is being updated, such as for
+         * a small blinking cursor or a loading indicator.
          *
-         * If unspecified, the complete surface is assumed to be damaged.
+         * @param sc The SurfaceControl on which to set the damage region
+         * @param region The region to set. If null, the entire buffer is assumed dirty. This is
+         *               equivalent to not setting a damage region at all.
          */
         public @NonNull Transaction setDamageRegion(@NonNull SurfaceControl sc,
                 @Nullable Region region) {
