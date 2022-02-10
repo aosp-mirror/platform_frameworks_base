@@ -35,6 +35,7 @@ public class ResizingSpace extends View {
         TypedArray a = context.obtainStyledAttributes(attrs, android.R.styleable.ViewGroup_Layout);
         mWidth = a.getResourceId(android.R.styleable.ViewGroup_Layout_layout_width, 0);
         mHeight = a.getResourceId(android.R.styleable.ViewGroup_Layout_layout_height, 0);
+        a.recycle();
     }
 
     @Override
