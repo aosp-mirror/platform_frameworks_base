@@ -188,6 +188,7 @@ import android.app.Instrumentation;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.PendingIntentStats;
 import android.app.ProcessMemoryState;
 import android.app.ProfilerInfo;
 import android.app.SyncNotedAppOp;
@@ -15950,6 +15951,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     @VisibleForTesting
     public final class LocalService extends ActivityManagerInternal
             implements ActivityManagerLocal {
+
+        @Override
+        public List<PendingIntentStats> getPendingIntentStats() {
+            return mPendingIntentController.dumpPendingIntentStatsForStatsd();
+        }
 
         @Override
         public Pair<String, String> getAppProfileStatsForDebugging(long time, int lines) {
