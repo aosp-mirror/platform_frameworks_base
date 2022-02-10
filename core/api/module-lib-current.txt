@@ -226,7 +226,7 @@ package android.net {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkSpecifier> CREATOR;
   }
 
-  public final class IpSecManager {
+  public class IpSecManager {
     field public static final int DIRECTION_FWD = 2; // 0x2
   }
 
