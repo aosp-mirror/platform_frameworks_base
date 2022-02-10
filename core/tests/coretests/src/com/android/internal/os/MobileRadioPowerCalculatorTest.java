@@ -16,6 +16,9 @@
 
 package com.android.internal.os;
 
+import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
+import static android.net.NetworkStats.METERED_NO;
+import static android.net.NetworkStats.ROAMING_NO;
 import static android.os.BatteryStats.POWER_DATA_UNAVAILABLE;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -89,7 +92,8 @@ public class MobileRadioPowerCalculatorTest {
 
         // Note application network activity
         NetworkStats networkStats = new NetworkStats(10000, 1)
-                .insertEntry("cellular", APP_UID, 0, 0, 1000, 100, 2000, 20, 100);
+                .addEntry(new NetworkStats.Entry("cellular", APP_UID, 0, 0,
+                        METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO, 1000, 100, 2000, 20, 100));
         mStatsRule.setNetworkStats(networkStats);
 
         ModemActivityInfo mai = new ModemActivityInfo(10000, 2000, 3000,
@@ -150,7 +154,8 @@ public class MobileRadioPowerCalculatorTest {
 
         // Note application network activity
         NetworkStats networkStats = new NetworkStats(10000, 1)
-                .insertEntry("cellular", APP_UID, 0, 0, 1000, 100, 2000, 20, 100);
+                .addEntry(new NetworkStats.Entry("cellular", APP_UID, 0, 0,
+                        METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO, 1000, 100, 2000, 20, 100));
         mStatsRule.setNetworkStats(networkStats);
 
         ModemActivityInfo mai = new ModemActivityInfo(10000, 2000, 3000,
