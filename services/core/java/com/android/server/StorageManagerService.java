@@ -872,13 +872,13 @@ class StorageManagerService extends IStorageManager.Stub
                     break;
                 }
                 case H_COMPLETE_UNLOCK_USER: {
-                    completeUnlockUser((int) msg.obj);
+                    completeUnlockUser(msg.arg1);
                     break;
                 }
                 case H_VOLUME_STATE_CHANGED: {
                     final SomeArgs args = (SomeArgs) msg.obj;
-                    onVolumeStateChangedAsync((VolumeInfo) args.arg1, (int) args.arg2,
-                            (int) args.arg3);
+                    onVolumeStateChangedAsync((VolumeInfo) args.arg1, args.argi1, args.argi2);
+                    args.recycle();
                 }
             }
         }
@@ -1205,7 +1205,8 @@ class StorageManagerService extends IStorageManager.Stub
             Slog.w(TAG, "UNLOCK_USER lost from vold reset, will retry, user:" + userId);
             mVold.onUserStarted(userId);
             mStoraged.onUserStarted(userId);
-            mHandler.obtainMessage(H_COMPLETE_UNLOCK_USER, userId).sendToTarget();
+            mHandler.obtainMessage(H_COMPLETE_UNLOCK_USER, userId, /* arg2 (unusued) */ 0)
+                    .sendToTarget();
         }
     }
 
@@ -1263,7 +1264,8 @@ class StorageManagerService extends IStorageManager.Stub
             Slog.wtf(TAG, e);
         }
 
-        mHandler.obtainMessage(H_COMPLETE_UNLOCK_USER, userId).sendToTarget();
+        mHandler.obtainMessage(H_COMPLETE_UNLOCK_USER, userId, /* arg2 (unusued) */ 0)
+                .sendToTarget();
         if (mRemountCurrentUserVolumesOnUnlock && userId == mCurrentUserId) {
             maybeRemountVolumes(userId);
             mRemountCurrentUserVolumesOnUnlock = false;
@@ -1493,18 +1495,17 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         @Override
-        public void onVolumeStateChanged(String volId, int state) {
+        public void onVolumeStateChanged(String volId, final int newState) {
             synchronized (mLock) {
                 final VolumeInfo vol = mVolumes.get(volId);
                 if (vol != null) {
                     final int oldState = vol.state;
-                    final int newState = state;
                     vol.state = newState;
                     final VolumeInfo vInfo = new VolumeInfo(vol);
                     final SomeArgs args = SomeArgs.obtain();
                     args.arg1 = vInfo;
-                    args.arg2 = oldState;
-                    args.arg3 = newState;
+                    args.argi1 = oldState;
+                    args.argi2 = newState;
                     mHandler.obtainMessage(H_VOLUME_STATE_CHANGED, args).sendToTarget();
                     onVolumeStateChangedLocked(vInfo, oldState, newState);
                 }
