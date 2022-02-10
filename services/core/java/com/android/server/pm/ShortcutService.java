@@ -735,6 +735,9 @@ public class ShortcutService extends IShortcutService.Stub {
         if (DEBUG || DEBUG_REBOOT) {
             Slog.d(TAG, "unloadUserLocked: user=" + userId);
         }
+        // Cancel any ongoing background tasks.
+        getUserShortcutsLocked(userId).cancelAllInFlightTasks();
+
         // Save all dirty information.
         saveDirtyInfo(false);
 
@@ -3736,6 +3739,7 @@ public class ShortcutService extends IShortcutService.Stub {
             synchronized (mLock) {
                 if (mHandler.hasCallbacks(mSaveDirtyInfoRunner)) {
                     mHandler.removeCallbacks(mSaveDirtyInfoRunner);
+                    forEachLoadedUserLocked(ShortcutUser::cancelAllInFlightTasks);
                     saveDirtyInfo(false);
                 }
                 mShutdown.set(true);

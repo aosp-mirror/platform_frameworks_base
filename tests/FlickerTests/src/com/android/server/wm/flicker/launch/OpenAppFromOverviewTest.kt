@@ -62,7 +62,8 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @Group1
-class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransition(testSpec) {
+class OpenAppFromOverviewTest(testSpec: FlickerTestParameter)
+    : OpenAppFromLauncherTransition(testSpec) {
     /**
      * Defines the transition used to run the test
      */
@@ -116,17 +117,22 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter) : OpenAppTransitio
     /** {@inheritDoc} */
     @Presubmit
     @Test
-    override fun launcherWindowBecomesInvisible() = super.launcherWindowBecomesInvisible()
-
-    /** {@inheritDoc} */
-    @Presubmit
-    @Test
     override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
 
     /** {@inheritDoc} */
     @Presubmit
     @Test
     override fun navBarWindowIsVisible() = super.navBarWindowIsVisible()
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun appLayerBecomesVisible() = super.appLayerBecomesVisible_warmStart()
+
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun appWindowBecomesVisible() = super.appWindowBecomesVisible_warmStart()
 
     /** {@inheritDoc} */
     @Presubmit

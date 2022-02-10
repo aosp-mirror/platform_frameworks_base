@@ -70,7 +70,6 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"(၃)ယောက်ဆိုင်ပြောဆိုခြင်း"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"စိတ်အနှောက်အယှက်ဖြစ်သော မလိုလားသည့်ခေါ်ဆိုမှုများအား ငြင်းဖယ်ခြင်း"</string>
     <string name="CndMmi" msgid="185136449405618437">"ခေါ်ဆိုသောနံပါတ် ပေးပို့မှု"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"မနှောင့်ယှက်ရ"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ပုံသေအားဖြင့် ခေါ်ဆိုသူအိုင်ဒီ(Caller ID)အား ကန့်သတ်ထားသည်။ နောက်ထပ်အဝင်ခေါ်ဆိုမှု-ကန့်သတ်ထားသည်။"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ပုံသေအားဖြင့် ခေါ်ဆိုသူအိုင်ဒီ(Caller ID)အား ကန့်သတ်ထားသည်။ နောက်ထပ်အဝင်ခေါ်ဆိုမှု-ကန့်သတ်မထားပါ။"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ပုံသေအားဖြင့် ခေါ်ဆိုသူအိုင်ဒီ(Caller ID)အား ကန့်သတ်မထားပါ။ နောက်ထပ်အဝင်ခေါ်ဆိုမှု-ကန့်သတ်ထားသည်။"</string>
@@ -180,10 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"သိုလှောင်ခန်း နေရာ ပြည့်နေပြီ။ နေရာ လွတ်လာရန် ဖိုင် အချို့ကို ဖျက်ပါ။"</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Android TV စက်ပစ္စည်း သိုလှောင်ခန်း ပြည့်သွားပါပြီ။ နေရာလွတ်ပြုလုပ်ရန် အချို့ဖိုင်များကို ဖျက်ပါ။"</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"ဖုန်းတွင် သိမ်းဆည်းသော နေရာ ကုန်သွားပါပြီ။ တချို့ ဖိုင်များ ဖျက်စီးခြင်းဖြင့် နေရာလွတ် ပြုလုပ်ပါ"</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="other">အသိအမှတ်ပြုခွင့်များကို ထည့်သွင်းပြီးပါပြီ</item>
-      <item quantity="one">အသိအမှတ်ပြုခွင့်ကို ထည့်သွင်းပြီးပါပြီ</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{အသိအမှတ်ပြုခွင့် ထည့်သွင်းပြီးပြီ}other{အသိအမှတ်ပြုခွင့်များ ထည့်သွင်းပြီးပြီ}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"အမျိုးအမည်မသိ တတိယ ပါတီဖြင့်"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"သင်၏အလုပ်ပရိုဖိုင် စီမံခန့်ခွဲသူမှ"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> ဖြင့်"</string>
@@ -203,6 +199,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"အာရုံခံကိရိယာ အကြောင်းကြားချက် ဝန်ဆောင်မှု"</string>
     <string name="twilight_service" msgid="8964898045693187224">"နေဝင်ဆည်းဆာ ဝန်ဆောင်မှု"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS အချိန်အပ်ဒိတ် ဝန်ဆောင်မှု"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"ကိရိယာဆိုင်ရာ မူဝါဒ မန်နေဂျာဝန်ဆောင်မှု"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"တေးဂီတကို သိရှိမှတ်မိခြင်း စီမံခန့်ခွဲမှုစနစ် ဝန်ဆောင်မှု"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"သင့်ကိရိယာအား ပယ်ဖျက်လိမ့်မည်"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"စက်စီမံအက်ပ်ကို သုံး၍မရပါ။ သင်၏ စက်ပစ္စည်းအတွင်းရှိ အရာများကို ဖျက်လိုက်ပါမည်\n\nမေးစရာများရှိပါက သင့်အဖွဲ့အစည်း၏ စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ။"</string>
@@ -256,10 +253,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"အခြေအနေတော်တော်များများတွင် ၎င်းကိုအသုံးပြုပါ။ ၎င်းသည် အစီရင်ခံစာကို မှတ်သားခြင်း၊ ပြဿနာအကြောင်း နောက်ထပ်အသေးစိတ်များကို ထည့်သွင်းခြင်းနှင့် မျက်နှာပြင်ပုံဖမ်းယူခြင်းတို့ကို ပြုလုပ်ခွင့်ပေးပါသည်။ ပေးပို့ရန် အလွန်ကြာပြီး အသုံးပြုခြင်းနည်းပါးသည့်အပိုင်းကို ၎င်းက ချန်ခဲ့နိုင်ပါသည်။"</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"အစီရင်ခံချက်အပြည့်"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"သင့်စက်ပစ္စည်းတုံ့ပြန်မှု မရှိချိန် သို့မဟုတ် အလွန်နှေးကွေးချိန် သို့မဟုတ် အစီရင်ခံမှုကဏ္ဍများအားလုံး လိုအပ်သည့်အချိန်တွင် စနစ်ကြားဝင်စွက်ဖက်မှုအနည်းဆုံးဖြစ်သည့် ဤရွေးချယ်မှုကို အသုံးပြုပါ။ မျက်နှာပြင်ပုံဖမ်းမှု နောက်ထပ်ရယူခြင်းနှင့် နောက်ထပ်အသေးစိတ်များ ထည့်သွင်းခြင်းတို့ကို ခွင့်မပြုပါ။"</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> စက္ကန့်အတွင်း ချွတ်ယွင်းချက် အစီရင်ခံရန်အတွက် မျက်နှာပြင်ဓာတ်ပုံ ရိုက်ပါမည်။</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> စက္ကန့်အတွင်း ချွတ်ယွင်းချက် အစီရင်ခံရန်အတွက် မျက်နှာပြင်ဓာတ်ပုံ ရိုက်ပါမည်။</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{ချွတ်ယွင်းမှုအစီရင်ခံစာအတွက် # စက္ကန့်အတွင်း ဖန်သားပြင်ဓာတ်ပုံရိုက်မည်။}other{ချွတ်ယွင်းမှုအစီရင်ခံစာအတွက် # စက္ကန့်အတွင်း ဖန်သားပြင်ဓာတ်ပုံရိုက်မည်။}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"ချွတ်ယွင်းချက်အစီရင်ခံချက်နှင့်အတူ ဖန်သားပြင်ဓာတ်ပုံရိုက်ထားသည်"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"ချွတ်ယွင်းချက်အစီရင်ခံချက်နှင့်အတူ ဖန်သားပြင်ဓာတ်ပုံရိုက်၍မရခဲ့ပါ"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"အသံတိတ်စနစ်"</string>
@@ -310,8 +304,14 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"သင့်ပြက္ခဒိန်အား ဝင်ရောက်သုံးရန်"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS စာတိုစနစ်"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS စာများကို ပို့ကာ ကြည့်မည်"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"Files နှင့် မီဒီယာ"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"သင့်ဖုန်းရှိ ဓာတ်ပုံများ၊ မီဒီယာနှင့် ဖိုင်များအား ဝင်သုံးပါ"</string>
+    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
+    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"သီချင်းနှင့် အခြားအသံဖိုင်"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"သင့်စက်ပေါ်ရှိ အသံဖိုင်များကို သုံးနိုင်သည်"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"ဓာတ်ပုံနှင့် ဗီဒီယိုများ"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"သင့်စက်ပေါ်ရှိ ပုံနှင့် ဗီဒီယိုဖိုင်များကို သုံးနိုင်သည်"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"မိုက်ခရိုဖုန်း"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"အသံဖမ်းခြင်း"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ကိုယ်ခန္ဓာလှုပ်ရှားမှု"</string>
@@ -683,6 +683,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"အပလီကေးရှင်းအား အကောင့်တစ်ခု၏ ထပ်တူညီအောင် လုပ်ဆောင်မှု အခြေအနေ (ပြီးခဲ့သော အဖြစ်အပျက်၊ ဒေတာ ပမာဏ ပါဝင်မှု များအပါအဝင်)ကို ဖတ်ရှုခွင့် ပြုပါ။"</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"မျှဝေသိုလှောင်ခန်းမှ အရာများ ဖတ်ခြင်း"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"မျှဝေသိုလှောင်ခန်းမှ အရာများ ဖတ်ရန် ခွင့်ပြုသည်။"</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"မျှဝေထားသော သိုလှောင်ခန်းမှ အသံဖိုင်များဖတ်ရန်"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"သင်၏မျှဝေထားသော သိုလှောင်ခန်းမှ အသံဖိုင်များဖတ်ရန် အက်ပ်ကိုခွင့်ပြုသည်။"</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"မျှဝေထားသော သိုလှောင်ခန်းမှ ဗီဒီယိုဖိုင်များဖတ်ရန်"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"သင်၏မျှဝေထားသော သိုလှောင်ခန်းမှ ဗီဒီယိုဖိုင်များဖတ်ရန် အက်ပ်ကိုခွင့်ပြုသည်။"</string>
+    <string name="permlab_readMediaImage" msgid="1507059005825769856">"မျှဝေထားသော သိုလှောင်ခန်းမှ ပုံပါဝင်သောဖိုင်များဖတ်ရန်"</string>
+    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"သင်၏မျှဝေထားသော သိုလှောင်ခန်းမှ ပုံပါဝင်သောဖိုင်များဖတ်ရန် အက်ပ်ကိုခွင့်ပြုသည်။"</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"မျှဝေသိုလှောင်ခန်းမှ အရာများ ပြုပြင်/ဖျက်ခြင်း"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"မျှဝေသိုလှောင်ခန်းမှ အရာများ ရေးခွင့်ပြုသည်။"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP ခေါ်ဆိုမှုများ ခေါ်ရန်/လက်ခံရန်"</string>
@@ -729,8 +735,6 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"စာပို့စာယူဆက်သွယ်ရေးဝန်ဆောင်မှုတစ်ခု၏ ထိပ်ဆုံးရှိအင်တာဖေ့စ်ဖြင့် ပူးပေါင်းရန် ပိုင်ရှင်အားခွင့်ပြုပါ။ ပုံမှန် အက်ပ်များအတွက် ဘယ်တော့မှ မလိုအပ်ပါ။"</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"မိုဘိုင်းဖုန်းဝန်ဆောင်မှုပေးသူများနှင့် ပူးပေါင်းခွင့်ပြုရန်"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"မိုဘိုင်းဖုန်းဝန်ဆောင်မှုစနစ်တစ်ခုအား ပူးပေါင်းခွင့်ပြုရန် ကိုင်ဆောင်ထားသူအား ခွင့်ပြုပါ။ သာမန် အက်ပ်များ အတွက် ဘယ်တော့မှ မလိုအပ်ပါ။"</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"မနှောင့်ယှက်ရန်ကို အသုံးပြုမည်"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"မနှောင့်ယှက်ရန် ချိန်ညှိမှုကို အပ်ဖ်များ ဖတ်ခြင်း ပြင်ခြင်းပြုလုပ်နိုင်ရန် ခွင့်ပြုမည်။"</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"အစမြင်ကွင်း ခွင့်ပြုချက် အသုံးပြုမှု"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"အက်ပ်တစ်ခုအတွက် ခွင့်ပြုချက်စတင်အသုံးပြုမှုကို ကိုင်ဆောင်သူအား ခွင့်ပြုသည်။ ပုံမှန်အက်ပ်များအတွက် ဘယ်သောအခါမျှ မလိုအပ်ပါ။"</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"ခွင့်ပြုသည့် ဆုံးဖြတ်ချက်များကို စတင်ကြည့်ခြင်း"</string>
@@ -1072,10 +1076,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> က ထိတွေ့ပြီး ရှာဖွေခြင်းကို လုပ်ချင်ပါသည်။ ထိတွေ့ရှာဖွေခြင်း ဖွင့်ထားလျှင် သင့်လက်ဖျားအောက်မှ အရာကို ကြားနိုင် သို့ ရှင်းလင်းချက်ကို မြင်နိုင်တဲ့ အပြင် လက် အနေအထားဖြင့် ဖုန်းကို ဆက်သွယ်ပြုလုပ်စေခိုင်းနိုင်ပါသည်"</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"လွန်ခဲ့သော၁လက"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"လွန်ခဲ့သော၁လမတိုင်မီက"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="other"> နောက်ဆုံး <xliff:g id="COUNT_1">%d</xliff:g> နေ့</item>
-      <item quantity="one"> နောက်ဆုံး <xliff:g id="COUNT_0">%d</xliff:g> နေ့ </item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{ပြီးခဲ့သော # ရက်}other{ပြီးခဲ့သော # ရက်}}"</string>
     <string name="last_month" msgid="1528906781083518683">"ပြီးခဲ့သောလ"</string>
     <string name="older" msgid="1645159827884647400">"ယခင်က"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"<xliff:g id="DATE">%s</xliff:g> တွင်"</string>
@@ -1094,70 +1095,22 @@
     <string name="year" msgid="5182610307741238982">"နှစ်"</string>
     <string name="years" msgid="5797714729103773425">"နှစ်ပေါင်း"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"ယခု"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>မိနစ်</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>မိနစ်</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>နာရီ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>နာရီ</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ရက်</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ရက်</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>နှစ်</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>နှစ်</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>မိနစ်အတွင်း</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>မိနစ်အတွင်း</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>နာရီအတွင်း</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>နာရီအတွင်း</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ရက်အတွင်း</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ရက်အတွင်း</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>နှစ်အတွင်း</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>နှစ်အတွင်း</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="other">ပြီးခဲ့သည့် <xliff:g id="COUNT_1">%d</xliff:g> မိနစ်က</item>
-      <item quantity="one">ပြီးခဲ့သည့် <xliff:g id="COUNT_0">%d</xliff:g> မိနစ်က</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="other">ပြီးခဲ့သည့် <xliff:g id="COUNT_1">%d</xliff:g> နာရီ</item>
-      <item quantity="one">ပြီးခဲ့သည့် <xliff:g id="COUNT_0">%d</xliff:g> နာရီ</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="other">ပြီးခဲ့သည့် <xliff:g id="COUNT_1">%d</xliff:g> ရက်က</item>
-      <item quantity="one">ပြီးခဲ့သည့် <xliff:g id="COUNT_0">%d</xliff:g> ရက်က</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="other">ပြီးခဲ့သည့် <xliff:g id="COUNT_1">%d</xliff:g> နှစ်က</item>
-      <item quantity="one">ပြီးခဲ့သည့် <xliff:g id="COUNT_0">%d</xliff:g> နှစ်က</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> မိနစ်အတွင်း</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> မိနစ်အတွင်း</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> နာရီအတွင်း</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> နာရီအတွင်း</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ရက်အတွင်း</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ရက်အတွင်း</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> နှစ်အတွင်း</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> နှစ်အတွင်း</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> မိနစ်"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> နာရီ"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g> ရက်"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g> နှစ်"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"<xliff:g id="COUNT">%d</xliff:g> မိနစ်အတွင်း"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> နာရီအတွင်း"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> ရက်အတွင်း"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> နှစ်အတွင်း"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{ပြီးခဲ့သော # မိနစ်}other{ပြီးခဲ့သော # မိနစ်}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{ပြီးခဲ့သော # နာရီ}other{ပြီးခဲ့သော # နာရီ}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{ပြီးခဲ့သော # ရက်}other{ပြီးခဲ့သော # ရက်}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{ပြီးခဲ့သော # နှစ်}other{ပြီးခဲ့သော # နှစ်}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# မိနစ်}other{# မိနစ်}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# နာရီ}other{# နာရီ}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# ရက်}other{# ရက်}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# နှစ်}other{# နှစ်}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"ဗီဒီယို ပြဿနာ"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"ဒီဗိဒီယိုမှာ ဒီကိရိယာ ပေါ်မှာ ဖွင့်ကြည့်၍ မရနိုင်ပါ။"</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"ဒီဗီဒီယိုကို ပြသလို့ မရပါ"</string>
@@ -1187,10 +1140,8 @@
     <string name="deleteText" msgid="4200807474529938112">"ဖျက်ရန်"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ထည့်သွင်းရန်နည်းလမ်း"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"စာတို လုပ်ဆောင်ချက်"</string>
-    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
-    <skip />
-    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
-    <skip />
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"နောက်သို့"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"လက်ကွက်ပြောင်းရန်"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"သိမ်းဆည်သော နေရာ နည်းနေပါသည်"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"တချို့ စနစ်လုပ်ငန်းများ အလုပ် မလုပ်ခြင်း ဖြစ်နိုင်ပါသည်"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"စနစ်အတွက် သိုလှောင်ခန်း မလုံလောက်ပါ။ သင့်ဆီမှာ နေရာလွတ် ၂၅၀ MB ရှိတာ စစ်ကြည့်ပြီး စတင်ပါ။"</string>
@@ -1411,6 +1362,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"\'စမ်းသပ်ခြင်းစနစ် မုဒ်\' ကိုပိတ်ရန် စက်ရုံထုတ်အတိုင်း ပြင်ဆင်သတ်မှတ်ပါ။"</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"အမှတ်စဉ် ကွန်ဆိုးလ်ကို ဖွင့်ထားသည်"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"စွမ်းဆောင်ရည်အပေါ် သက်ရောက်မှုရှိနိုင်ပါသည်။ ပိတ်ရန် bootloader ကို စစ်ဆေးပါ။"</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"အစမ်းသုံး MTE ကို ဖွင့်ထားသည်"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"စွမ်းဆောင်ရည်နှင့် တည်ငြိမ်မှုအပေါ် သက်ရောက်နိုင်သည်။ ပိတ်ရန် ပြန်လည်စတင်ပါ။ arm64.memtag.bootctl ကို သုံး၍ ဖွင့်ထားပါက ၎င်းအတွက် သတ်မှတ်ချက်ကို ကြို၍ဖြုတ်ထားပါ။"</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"USB ပို့တ်တွင် အရည် သို့မဟုတ် အမှိုက်စ ရှိနေသည်"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB ပို့တ်ကို အလိုအလျောက် ပိတ်ထားသည်။ ပိုမိုလေ့လာရန် တို့ပါ။"</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"USB ပို့တ်ကို အသုံးပြုနိုင်သည်"</string>
@@ -1547,10 +1500,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"ကျော်ရန်"</string>
     <string name="no_matches" msgid="6472699895759164599">"ထပ်တူမတွေ့ရှိပါ"</string>
     <string name="find_on_page" msgid="5400537367077438198">"စာမျက်နှာတွင်ရှာဖွေရန်"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="other"><xliff:g id="TOTAL">%d</xliff:g>ထဲမှ <xliff:g id="INDEX">%d</xliff:g></item>
-      <item quantity="one">ကိုက်ညီမှု 1 ခု</item>
-    </plurals>
+    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{# ပွဲ}other{{total} ပွဲအနက် #}} }"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"ပြီးပါပြီ"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"မျှဝေထားသည့် သိုလှောင်ခန်းကို ဖျက်နေသည်…"</string>
     <string name="share" msgid="4157615043345227321">"မျှဝေရန်"</string>
@@ -1680,10 +1630,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"ပုံဆွဲအမှား"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"စကားဝှက်အမှား"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"ပင် နံပါတ်အမှား"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> စက္ကန့် အကြာတွင် ထပ်လုပ်ကြည့်ပါ</item>
-      <item quantity="one">၁ စက္ကန့် အကြာတွင် ထပ်လုပ်ကြည့်ပါ</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"သင့်ရဲ့ သော့ဖွင့်သော ပုံစံကို ဆွဲပါ"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"ဆင်းမ်ကတ် ပင် နံပါတ် ရိုက်ထည့်ပါ"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"ပင်နံပါတ် ရိုက်ထည့်ပါ"</string>
@@ -1880,10 +1826,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"ကန့်သတ်ချက်များ ပြင်ဆင်ခွင့်ပေးသော ပင်နံပါတ် သတ်မှတ်ပါ"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"ပင် နံပါတ် မတူပါ။ ထပ်ကြိုးစားပါ"</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"ပင် နံပါတ် တိုလွန်းသည်။. အနည်းဆုံး ဂဏန်း ၄ လုံး ဖြစ်ရမည်။"</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> စက္ကန့်အတွင်း ထပ်မံကြိုးစားပါ</item>
-      <item quantity="one">1 စက္ကန့်အတွင်း ထပ်မံကြိုးစားပါ</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"နောက်မှ ပြန်ကြိုးစားပါ"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"မျက်နှာပြင်အပြည့် ကြည့်နေသည်"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"ထွက်ရန် အပေါ်မှ အောက်သို့ ဆွဲချပါ။"</string>
@@ -1911,46 +1853,20 @@
     <string name="data_saver_description" msgid="4995164271550590517">"ဒေတာအသုံးလျှော့ချနိုင်ရန်အတွက် အက်ပ်များကို နောက်ခံတွင် ဒေတာပို့ခြင်းနှင့် လက်ခံခြင်းမပြုရန် \'ဒေတာချွေတာမှု\' စနစ်က တားဆီးထားပါသည်။ ယခုအက်ပ်ဖြင့် ဒေတာအသုံးပြုနိုင်သော်လည်း အကြိမ်လျှော့၍သုံးရပါမည်။ ဥပမာ၊ သင်က မတို့မချင်း ပုံများပေါ်လာမည် မဟုတ်ပါ။"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ဒေတာချွေတာမှုစနစ် ဖွင့်မလား။"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ဖွင့်ပါ"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="other">%1$d မိနစ်တွင် (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>အထိ)</item>
-      <item quantity="one">တစ်မိနစ်တွင် (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> အထိ)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="other">(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ထိ) %1$d မိနစ်အတွက်</item>
-      <item quantity="one">(<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> ထိ) ၁မိနစ်အတွက်</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="other">%1$d နာရီကြာ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ထိ)</item>
-      <item quantity="one">၁ နာရီကြာ (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> ထိ)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="other">(<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> ထိ) %1$d နာရီအတွက်</item>
-      <item quantity="one">(<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> ထိ) ၁ နာရီအတွက်</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="other">%d မိနစ်တွင်</item>
-      <item quantity="one">တစ်မိနစ်တွင်</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="other">%d မိနစ်အတွက်</item>
-      <item quantity="one">၁ မိနစ်အတွက်</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="other">%d နာရီကြာ</item>
-      <item quantity="one">၁ နာရီကြာ</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="other">%d နာရီ အတွက်</item>
-      <item quantity="one">၁ နာရီအတွက်</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{တစ်မိနစ်ကြာ ({formattedTime} အထိ)}other{# မိနစ်ကြာ ({formattedTime} အထိ)}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{1 မိနစ်ကြာ ({formattedTime} အထိ)}other{# မိနစ်ကြာ ({formattedTime} အထိ)}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{1 နာရီကြာ ({formattedTime} အထိ)}other{# နာရီကြာ ({formattedTime} အထိ)}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{1 နာရီကြာ ({formattedTime} အထိ)}other{# နာရီကြာ ({formattedTime} အထိ)}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{တစ်မိနစ်ကြာ}other{# မိနစ်ကြာ}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{1 မိနစ်ကြာ}other{# မိနစ်ကြာ}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{1 နာရီကြာ}other{# နာရီကြာ}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{1 နာရီကြာ}other{# နာရီကြာ}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> အထိ"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>အထိ"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> အထိ (လာမည့် နှိုးစက်)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"သင်ပိတ်လိုက်သည် အထိ"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"မနှောင့်ယှက်ရန် ကိုသင်ပိတ်သည်အထိ"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"ခေါက်ရန်"</string>
-    <string name="zen_mode_feature_name" msgid="3785547207263754500">"မနှောင့်ယှက်ရ"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"ကျချိန်"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"ကြားရက်ည"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"စနေ၊ တနင်္ဂနွေ"</string>
@@ -1989,10 +1905,6 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"အဝင်ခေါ်ဆိုမှု"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"လက်ရှိခေါ်ဆိုမှု"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"အဝင်ခေါ်ဆိုမှုကို စစ်ဆေးနေသည်"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ရွေးချယ်ပြီးပါပြီ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ရွေးချယ်ပြီးပါပြီ</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"အမျိုးအစားမခွဲရသေးပါ"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ဤသတိပေးချက်များ၏ အရေးပါမှုကိုသတ်မှတ်ပြီးပါပြီ။"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ပါဝင်သည့်လူများကြောင့် အရေးပါပါသည်။"</string>
@@ -2058,10 +1970,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"အော်တိုဖြည့်ရန်အတွက် သိမ်းပါ"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"အကြောင်းအရာများကို အော်တိုဖြည့်၍မရပါ"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"အော်တိုဖြည့်အကြံပြုချက် တစ်ခုမျှ မရှိပါ"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="other">အော်တိုဖြည့်အကြံပြုချက် <xliff:g id="COUNT">%1$s</xliff:g> ခု</item>
-      <item quantity="one">အော်တိုဖြည့်အကြံပြုချက် တစ်ခု</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{အော်တိုဖြည့်အကြံပြုချက် တစ်ခု}other{အော်တိုဖြည့်အကြံပြုချက် # ခု}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"တွင် သိမ်းလိုပါသလား။"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"<xliff:g id="TYPE">%1$s</xliff:g> ကို "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"တွင် သိမ်းဆည်းလိုပါသလား။"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"<xliff:g id="TYPE_0">%1$s</xliff:g> နှင့် <xliff:g id="TYPE_1">%2$s</xliff:g> ကို "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"တွင် သိမ်းလိုပါသလား။"</string>
@@ -2108,15 +2017,22 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ဖြုတ်ရန်"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"ဘာဖြစ်ဖြစ် ဖွင့်ရန်"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"အန္တရာယ်ရှိသော အက်ပ်ကို တွေ့ရှိထားသည်"</string>
+    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
+    <skip />
+    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
+    <skip />
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> သည် <xliff:g id="APP_2">%2$s</xliff:g> ၏အချပ်များကို ပြသလိုသည်"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"တည်းဖြတ်ရန်"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"ခေါ်ဆိုမှုများနှင့် အကြောင်းကြားချက်များ တုန်ခါပါမည်"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"ခေါ်ဆိုမှုများနှင့် အကြောင်းကြားချက်များကို အသံပိတ်ထားပါမည်"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"စနစ် အပြောင်းအလဲများ"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"မနှောင့်ယှက်ရ"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"အသစ်− \'မနှောင့်ယှက်ရ\' က အကြောင်းကြားချက်များကို ဖျောက်ထားသည်"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"ပိုမိုလေ့လာရန်နှင့် ပြောင်းလဲရန် တို့ပါ။"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'မနှောင့်ယှက်ရ\' ပြောင်းလဲသွားပါပြီ"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"ပိတ်ထားသည့်အရာများကို ကြည့်ရန် တို့ပါ။"</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"စနစ်"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ဆက်တင်များ"</string>
@@ -2133,7 +2049,6 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ပိတ်ရန်"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ပိုမိုလေ့လာရန်"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 တွင် ‘Android အလိုက်သင့် အကြောင်းကြားချက်များ’ ကို အဆင့်မြင့် အကြောင်းကြားချက်များဖြင့် အစားထိုးထားသည်။ ဤဝန်ဆောင်မှုက အကြံပြုထားသော လုပ်ဆောင်ချက်နှင့် ပြန်စာများကို ပြပေးပြီး သင်၏အကြောင်းကြားချက်များကို စီစဉ်ပေးသည်။\n\nအဆင့်မြင့် အကြောင်းကြားချက်များက အဆက်အသွယ်အမည်နှင့် မက်ဆေ့ဂျ်များကဲ့သို့ ကိုယ်ရေးကိုယ်တာအချက်လက်များ အပါအဝင် အကြောင်းကြားချက် အကြောင်းအရာကို သုံးနိုင်သည်။ ဤဝန်ဆောင်မှုက ဖုန်းခေါ်ဆိုမှုများ ဖြေခြင်းနှင့် ‘မနှောင့်ယှက်ရ’ ကို ထိန်းချုပ်ခြင်းကဲ့သို့ အကြောင်းကြားချက်များကို ပယ်နိုင်သည် (သို့) တုံ့ပြန်နိုင်သည်။"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ပုံမှန်မုဒ်အတွက် အချက်အလက်ပြသည့် အကြောင်းကြားချက်"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ပုံမှန်အားသွင်းမှုမပြုလုပ်မီ ဘက်ထရီကုန်သွားနိုင်သည်"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ဘက်ထရီသက်တမ်းကို တိုးမြှင့်ရန် \'ဘက်ထရီအားထိန်း\' စတင်ပြီးပါပြီ"</string>
@@ -2162,10 +2077,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> တင်ပြမှု"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"လေယာဉ်ပျံမုဒ်ကို ဖွင့်ထားစဉ် ဘလူးတုသ် ပွင့်နေပါမည်"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"တင်နေသည်"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ဖိုင်</item>
-      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ဖိုင်</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # ဖိုင်}other{{file_name} + # ဖိုင်}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"မျှဝေရန် အကြံပြုထားသူများ မရှိပါ"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"အက်ပ်စာရင်း"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"ဤအက်ပ်ကို အသံဖမ်းခွင့် ပေးမထားသော်လည်း ၎င်းသည် ဤ USB စက်ပစ္စည်းမှတစ်ဆင့် အသံများကို ဖမ်းယူနိုင်ပါသည်။"</string>
@@ -2177,10 +2089,22 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"ပါဝါ ဒိုင်ယာလော့"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"လော့ခ်မျက်နှာပြင်"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"ဖန်သားပြင်ဓာတ်ပုံ"</string>
+    <!-- no translation found for accessibility_system_action_headset_hook_label (8524691721287425468) -->
+    <skip />
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"ဖန်သားပြင်အတွက် အများသုံးစွဲနိုင်မှုဖြတ်လမ်းလင့်ခ်"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"ဖန်သားပြင်အတွက် အများသုံးစွဲနိုင်မှုဖြတ်လမ်းလင့်ခ် ရွေးချယ်စနစ်"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ်"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"အကြောင်းကြားစာအကွက်ကို ပယ်ရန်"</string>
+    <!-- no translation found for accessibility_system_action_dpad_up_label (1029042950229333782) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_down_label (3441918448624921461) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_left_label (6557647179116479152) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_right_label (9180196950365804081) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_center_label (8149791419358224893) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>၏ ခေါင်းစီး ဘား။"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ကို တားမြစ်ထားသော သိမ်းဆည်းမှုအတွင်းသို့ ထည့်ပြီးပါပြီ"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>-"</string>
@@ -2201,8 +2125,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"ဖွင့်ရန်တို့ပါ"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"အလုပ်သုံးအက်ပ်များ မရှိပါ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ကိုယ်ပိုင်အက်ပ်များ မရှိပါ"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"ကိုယ်ပိုင်ပရိုဖိုင်ရှိ <xliff:g id="APP">%s</xliff:g> တွင် ဖွင့်မလား။"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"အလုပ်ပရိုဖိုင်ရှိ <xliff:g id="APP">%s</xliff:g> တွင် ဖွင့်မလား။"</string>
+    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ကိုယ်ပိုင်ဘရောင်ဇာ သုံးရန်"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"အလုပ်သုံးဘရောင်ဇာ သုံးရန်"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"ဆင်းမ်ကွန်ရက် လော့ခ်ဖွင့်ရန် ပင်နံပါတ်"</string>
@@ -2332,4 +2258,9 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> က သင့်ဖန်သားပြင်ကို ကြည့်ရှုပြီး ထိန်းချုပ်နိုင်သည်။ ပြန်ကြည့်ရန် တို့ပါ။"</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> ကို ဘာသာပြန်ထားသည်။"</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"မက်ဆေ့ဂျ်ကို <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> မှ <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> သို့ ဘာသာပြန်ထားသည်။"</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"နောက်ခံလုပ်ဆောင်ချက်"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"နောက်ခံလုပ်ဆောင်ချက်"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> သည် နောက်ခံတွင်ပွင့်နေပြီး ဘက်ထရီအားကုန်စေသည်။ ပြန်ကြည့်ရန် တို့ပါ။"</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> သည် နောက်ခံတွင် အချိန်အတော်ကြာပွင့်နေသည်။ ပြန်ကြည့်ရန် တို့ပါ။"</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"ပွင့်နေသည့်အက်ပ်များ စစ်ဆေးရန်"</string>
 </resources>

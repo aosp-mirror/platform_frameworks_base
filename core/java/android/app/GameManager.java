@@ -109,6 +109,7 @@ public final class GameManager {
      *
      * @hide
      */
+    @TestApi
     @UserHandleAware
     @RequiresPermission(Manifest.permission.MANAGE_GAME_MODE)
     public @GameMode int getGameMode(@NonNull String packageName) {

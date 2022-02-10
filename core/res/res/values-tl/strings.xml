@@ -70,7 +70,6 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Three way na pagtawag"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Pagtanggi sa mga hindi ninanais na nakakaistorbong tawag"</string>
     <string name="CndMmi" msgid="185136449405618437">"Pagpapadala ng numero sa pagtawag"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"Huwag istorbohin"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Pinaghihigpitan ang mga default ng Caller ID. Susunod na tawag: Pinaghihigpitan"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Nade-default sa pinaghihigpitan ang Caller ID. Susunod na tawag: hindi pinaghihigpitan"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Naka-default sa hindi pinaghihigpitan ang Caller ID. Susunod na tawag: Pinaghihigpitan"</string>
@@ -180,10 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"Puno na ang storage ng relo. Magtanggal ng ilang file upang magbakante ng espasyo."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Puno na ang storage ng Android TV device. Mag-delete ng ilang file para magbakante ng space."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"Puno na ang storage ng telepono. Magtanggal ng ilang file upang magbakante ng espasyo."</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="one">May mga naka-install na certificate authority</item>
-      <item quantity="other">May mga naka-install na certificate authority</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{May naka-install na awtoridad sa certificate}one{May mga naka-install na certificate authority}other{May mga naka-install na certificate authority}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Ng isang di-kilalang third party"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Ng admin ng iyong profile sa trabaho"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Ng <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -203,6 +199,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"Serbisyo ng Notification ng Sensor"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Serbisyo ng Twilight"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Serbisyo sa Pag-update ng Oras ng GNSS"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"Serbisyo ng Manager ng Patakaran sa Device"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Serbisyo ng Music Recognition Manager"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Buburahin ang iyong device"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Hindi magamit ang admin app. Mabubura na ang iyong device.\n\nKung mayroon kang mga tanong, makipag-ugnayan sa admin ng iyong organisasyon."</string>
@@ -256,10 +253,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Gamitin ito sa karamihan ng sitwasyon. Nagbibigay-daan ito sa iyo na masubaybayan ang pag-usad ng ulat, makapaglagay ng higit pang mga detalye tungkol sa problema, at makakuha ng mga screenshot. Maaari itong mag-alis ng ilan sa mga hindi masyadong ginagamit na seksyon na nangangailangan ng mahabang panahon upang iulat."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Buong ulat"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Gamitin ang opsyong ito para sa kaunting pagkaantala sa system kapag hindi tumutugon o masyadong mabagal ang iyong device, o kapag kailangan mo ang lahat ng seksyon ng ulat. Hindi ka pinapayagan na maglagay ng iba pang mga detalye o kumuha ng mga karagdagang screenshot."</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="one">Kukuha ng screenshot para sa ulat ng bug sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> segundo.</item>
-      <item quantity="other">Kukuha ng screenshot para sa ulat ng bug sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> na segundo.</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Kukuha ng screenshot para sa ulat ng bug sa loob ng # segundo.}one{Kukuha ng screenshot para sa ulat ng bug sa loob ng # segundo.}other{Kukuha ng screenshot para sa ulat ng bug sa loob ng # na segundo.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Nakakuha ng screenshot kasama ng ulat ng bug"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Hindi nakakuha ng screenshot kasama ng ulat ng bug"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Silent mode"</string>
@@ -310,8 +304,14 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"i-access ang iyong kalendaryo"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"magpadala at tumingin ng mga mensaheng SMS"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"Mga file at media"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"i-access ang mga larawan, media at file sa iyong device"</string>
+    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
+    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Musika at iba pang audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"mag-access ng mga audio file sa iyong device"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Mga larawan at video"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"mag-access ng mga larawan at video file sa iyong device"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikropono"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"mag-record ng audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Pisikal na aktibidad"</string>
@@ -683,6 +683,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Pinapayagan ang app na basahin ang mga istatistika ng pag-sync para sa isang account, kabilang ang kasaysayan ng mga event sa pag-sync at kung ilang data ang naka-sync."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"i-read ang content ng nakabahagi mong storage"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Pinapayagan ang app na i-read ang content ng nakabahagi mong storage."</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"magbasa ng mga audio file mula sa nakabahaging storage"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Nagbibigay-daan sa app na magbasa ng mga audio file mula sa iyong nakabahaging storage."</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"magbasa ng mga video file mula sa nakabahaging storage"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Nagbibigay-daan sa app na magbasa ng mga video file mula sa iyong nakabahaging storage."</string>
+    <string name="permlab_readMediaImage" msgid="1507059005825769856">"magbasa ng mga image file mula sa nakabahaging storage"</string>
+    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Nagbibigay-daan sa app na magbasa ng mga image file mula sa iyong nakabahaging storage."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"baguhin o i-delete ang content ng nakabahagi mong storage"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Pinapayagan ang app na mag-write sa content ng nakabahagi mong storage."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"magsagawa/tumanggap ng mga tawag sa SIP"</string>
@@ -729,8 +735,6 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Binibigyang-daan ang may-ari na sumailalim sa interface sa nangungunang antas ng isang serbisyo ng pagmemensahe ng carrier. Hindi kailanman dapat kailanganin para sa mga normal na app."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"mag-bind sa mga serbisyo ng carrier"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Pinapayagan ang may-ari na mag-bind sa mga serbisyo ng carrier. Hindi dapat kailanganin sa mga normal na app."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"i-access ang Huwag Istorbohin"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Nagbibigay-daan sa app na basahin at isulat ang configuration ng Huwag Istorbohin."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"simulan ang paggamit sa pahintulot sa pagtingin"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Binibigyang-daan ang may hawak na simulan ang paggamit ng pahintulot para sa isang app. Hindi dapat kailanganin kailanman para sa mga normal na app."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"simulan ang mga desisyon sa pahintulot na tumingin"</string>
@@ -1072,10 +1076,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"Nais i-enable ng <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ang Explore by Touch. Kapag naka-on ang Explore by Touch, maaari mong marinig o makita ang mga paglalarawan ng nasa ilalim ng iyong daliri o maaari kang magsagawa ng mga galaw upang makipag-ugnayan sa telepono."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 buwan ang nakalipas"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Bago ang nakalipas na 1 buwan"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="one">Huling <xliff:g id="COUNT_1">%d</xliff:g> araw</item>
-      <item quantity="other">Huling <xliff:g id="COUNT_1">%d</xliff:g> na araw</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Huling # araw}one{Huling # araw}other{Huling # na araw}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Nakaraang buwan"</string>
     <string name="older" msgid="1645159827884647400">"Mas luma"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"sa <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1094,70 +1095,22 @@
     <string name="year" msgid="5182610307741238982">"taon"</string>
     <string name="years" msgid="5797714729103773425">"mga taon"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"ngayon"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>m</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>h</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>h</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>d</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>d</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g>y</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>y</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="one">sa loob ng <xliff:g id="COUNT_1">%d</xliff:g>m</item>
-      <item quantity="other">sa loob ng <xliff:g id="COUNT_1">%d</xliff:g>m</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="one">sa loob ng <xliff:g id="COUNT_1">%d</xliff:g>h</item>
-      <item quantity="other">sa loob ng <xliff:g id="COUNT_1">%d</xliff:g>h</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="one">sa loob ng <xliff:g id="COUNT_1">%d</xliff:g>d</item>
-      <item quantity="other">sa loob ng <xliff:g id="COUNT_1">%d</xliff:g>d</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="one">sa loob ng <xliff:g id="COUNT_1">%d</xliff:g>y</item>
-      <item quantity="other">sa loob ng <xliff:g id="COUNT_1">%d</xliff:g>y</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> minuto na ang nakakalipas</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> na minuto na ang nakakalipas</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> oras na ang nakakalipas</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> na oras na ang nakakalipas</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> araw na ang nakakalipas</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> na araw na ang nakakalipas</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> taon na ang nakakalipas</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> na taon na ang nakakalipas</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="one">pagkalipas ng <xliff:g id="COUNT_1">%d</xliff:g> minuto</item>
-      <item quantity="other">pagkalipas ng <xliff:g id="COUNT_1">%d</xliff:g> na minuto</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="one">pagkalipas ng <xliff:g id="COUNT_1">%d</xliff:g> oras</item>
-      <item quantity="other">pagkalipas ng <xliff:g id="COUNT_1">%d</xliff:g> na oras</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="one">pagkalipas ng <xliff:g id="COUNT_1">%d</xliff:g> araw</item>
-      <item quantity="other">pagkalipas ng <xliff:g id="COUNT_1">%d</xliff:g> na araw</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="one">pagkalipas ng <xliff:g id="COUNT_1">%d</xliff:g> taon</item>
-      <item quantity="other">pagkalipas ng <xliff:g id="COUNT_1">%d</xliff:g> na taon</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g>m"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g>h"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g>d"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g>y"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"sa <xliff:g id="COUNT">%d</xliff:g>m"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"sa <xliff:g id="COUNT">%d</xliff:g>h"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"sa <xliff:g id="COUNT">%d</xliff:g>d"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"sa <xliff:g id="COUNT">%d</xliff:g>y"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# minuto ang nakalipas}one{# minuto ang nakalipas}other{# na minuto ang nakalipas}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# oras ang nakalipas}one{# oras ang nakalipas}other{# na oras ang nakalipas}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# araw ang nakalipas}one{# araw ang nakalipas}other{# na araw ang nakalipas}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{# taon ang nakalipas}one{# taon ang nakalipas}other{# na taon ang nakalipas}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minuto}one{# minuto}other{# na minuto}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# oras}one{# oras}other{# na oras}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# araw}one{# araw}other{# na araw}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# taon}one{# taon}other{# na taon}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Problema sa video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"Hindi wasto ang video na ito para sa streaming sa device na ito."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"Hindi ma-play ang video na ito."</string>
@@ -1187,10 +1140,8 @@
     <string name="deleteText" msgid="4200807474529938112">"I-delete"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Pamamaraan ng pag-input"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Pagkilos ng teksto"</string>
-    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
-    <skip />
-    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
-    <skip />
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Bumalik"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Magpalit ng pamamaraan ng pag-input"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Nauubusan na ang puwang ng storage"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Maaaring hindi gumana nang tama ang ilang paggana ng system"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Walang sapat na storage para sa system. Tiyaking mayroon kang 250MB na libreng espasyo at i-restart."</string>
@@ -1411,6 +1362,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Mag-factory reset para i-disable ang Test Harness Mode."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Naka-enable ang serial console"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Naaapektuhan ang performance. Para i-disable, lagyan ng check ang bootloader."</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"Na-enable ang Pang-eksperimentong MTE"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"Posibleng maapektuhan ang performance at stability. Mag-reboot para i-disable ito. Kung na-enable gamit ang arm64.memtag.bootctl, itakda ito sa wala bago iyon."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Liquid o debris sa USB port"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"Awtomatikong na-disable ang USB port. Mag-tap para matuto pa."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"Ayos na gamitin ang USB port"</string>
@@ -1547,10 +1500,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Laktawan"</string>
     <string name="no_matches" msgid="6472699895759164599">"Walang mga tugma"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Maghanap sa pahina"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="one"><xliff:g id="INDEX">%d</xliff:g> ng <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> ng <xliff:g id="TOTAL">%d</xliff:g></item>
-    </plurals>
+    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{# tugma}one{# sa {total}}other{# sa {total}}} }"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Tapos na"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Binubura ang nakabahaging storage…"</string>
     <string name="share" msgid="4157615043345227321">"Ibahagi"</string>
@@ -1680,10 +1630,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Maling Pattern"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"Maling Password"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Maling PIN"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="one">Subukang muli sa loob ng <xliff:g id="NUMBER">%d</xliff:g> segundo.</item>
-      <item quantity="other">Subukang muli sa loob ng <xliff:g id="NUMBER">%d</xliff:g> na segundo.</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Iguhit ang iyong pattern"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Ilagay ang PIN ng SIM"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Ilagay ang PIN"</string>
@@ -1880,10 +1826,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Gumawa ng PIN para sa pagbago sa mga paghihigpit"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"Hindi nagtutugma ang mga PIN. Subukang muli."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"Masyadong maikli ang PIN. Hindi dapat mas maikli sa 4 na digit."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="one">Subukang muli sa loob ng <xliff:g id="COUNT">%d</xliff:g> segundo</item>
-      <item quantity="other">Subukang muli sa loob ng <xliff:g id="COUNT">%d</xliff:g> na segundo</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Subukang muli sa ibang pagkakataon"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Panonood sa full screen"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Upang lumabas, mag-swipe mula sa itaas pababa."</string>
@@ -1911,46 +1853,20 @@
     <string name="data_saver_description" msgid="4995164271550590517">"Upang makatulong na mabawasan ang paggamit ng data, pinipigilan ng Data Saver ang ilang app na magpadala o makatanggap ng data sa background. Maaaring mag-access ng data ang isang app na ginagamit mo sa kasalukuyan, ngunit mas bihira na nito magagawa iyon. Halimbawa, maaaring hindi lumabas ang mga larawan hangga\'t hindi mo nata-tap ang mga ito."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"I-on ang Data Saver?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"I-on"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="one">Sa loob ng %1$d minuto (hanggang <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">Sa loob ng %1$d na minuto (hanggang <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="one">Sa loob ng %1$d min (hanggang <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">Sa loob ng %1$d na min (hanggang <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="one">Sa loob ng %1$d oras (hanggang <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">Sa loob ng %1$d na oras (hanggang <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="one">Sa loob ng %1$d oras (hanggang <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">Sa loob ng %1$d na oras (hanggang <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="one">Sa loob ng %d minuto</item>
-      <item quantity="other">Sa loob ng %d na minuto</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="one">Sa loob ng %d min</item>
-      <item quantity="other">Sa loob ng %d na min</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="one">Sa loob ng %d oras</item>
-      <item quantity="other">Sa loob ng %d na oras</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="one">Sa loob ng %d oras</item>
-      <item quantity="other">Sa loob ng %d na oras</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Sa loob ng isang minuto (hanggang {formattedTime})}one{Sa loob ng # minuto (hanggang {formattedTime})}other{Sa loob ng # na minuto (hanggang {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Sa loob ng 1 min (hanggang {formattedTime})}one{Sa loob ng # min (hanggang {formattedTime})}other{Sa loob ng # na min (hanggang {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Sa loob ng 1 oras (hanggang {formattedTime})}one{Sa loob ng # oras (hanggang {formattedTime})}other{Sa loob ng # na oras (hanggang {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Sa loob ng 1 hr (hanggang{formattedTime})}one{Sa loob ng # hr (hanggang {formattedTime})}other{Sa loob ng # na hr (hanggang {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Sa loob ng isang minuto}one{Sa loob ng # minuto}other{Sa loob ng # na minuto}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Sa loob ng 1 min}one{Sa loob ng # min}other{Sa loob ng # na min}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Sa loob ng 1 oras}one{Sa loob ng # oras}other{Sa loob ng # na oras}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Sa loob ng 1 hr}one{Sa loob ng # hr}other{Sa loob ng # na hr}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Hanggang <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Hanggang <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Hanggang <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (susunod na alarm)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Hanggang sa i-off mo"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Hanggang sa i-off mo ang Huwag Istorbohin"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"I-collapse"</string>
-    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Huwag istorbohin"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Walang serbisyo"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Weeknight"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
@@ -1989,10 +1905,6 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Papasok na tawag"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Kasalukuyang tawag"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Nagsi-screen ng papasok na tawag"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ang napili</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ang napili</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Di-nakategorya"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Ikaw ang magtatakda sa kahalagahan ng mga notification na ito."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Mahalaga ito dahil sa mga taong kasangkot."</string>
@@ -2058,10 +1970,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"I-save para sa Autofill"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Hindi maaaring ma-autofill ang mga content"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Walang suhestyon sa autofill"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="one"><xliff:g id="COUNT">%1$s</xliff:g> suhestyon sa autofill</item>
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> na suhestyon sa autofill</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{Isang suhestyon sa autofill}one{# suhestyon sa autofill}other{# na suhestyon sa autofill}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"I-save sa "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"I-save ang <xliff:g id="TYPE">%1$s</xliff:g> sa "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"I-save ang <xliff:g id="TYPE_0">%1$s</xliff:g> at <xliff:g id="TYPE_1">%2$s</xliff:g> sa "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
@@ -2108,15 +2017,22 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"I-UNINSTALL"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"BUKSAN PA RIN"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"May na-detect na mapaminsalang app"</string>
+    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
+    <skip />
+    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
+    <skip />
     <string name="slices_permission_request" msgid="3677129866636153406">"Gustong ipakita ng <xliff:g id="APP_0">%1$s</xliff:g> ang mga slice ng <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"I-edit"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Magva-vibrate ang mga tawag at notification"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Mamu-mute ang mga tawag at notification"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Mga pagbabago sa system"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Huwag Istorbohin"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Bago: Itinatago ng Huwag Istorbohin ang mga notification"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"I-tap para matuto pa at baguhin."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Binago ang Huwag Istorbohin"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"I-tap para tingnan kung ano ang naka-block."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"System"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Mga Setting"</string>
@@ -2133,7 +2049,6 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"I-off"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Matuto pa"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Pinalitan ng Mga pinahusay na notification ang Mga Adaptive na Notification ng Android sa Android 12. Nagpapakita ng mga iminumungkahing pagkilos at sagot ang feature na ito, at isinasaayos nito ang iyong mga notification.\n\nMaa-access ng Mga pinahusay na notification ang content ng notification, kabilang ang personal na impormasyon gaya ng mga pangalan ng contact at mensahe. Magagawa rin ng feature na ito na i-dismiss o tugunan ang mga notification, gaya ng pagsagot sa mga tawag sa telepono, at kontrolin ang Huwag Istorbohin."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification ng impormasyon ng Routine Mode"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Maaaring maubos ang baterya bago ang karaniwang pag-charge"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Na-activate ang Pantipid ng Baterya para patagalin ang buhay ng baterya"</string>
@@ -2162,10 +2077,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> na presentation"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Mananatiling naka-on ang bluetooth habang nasa airplane mode"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Naglo-load"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> file</item>
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> na file</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # file}one{{file_name} + # file}other{{file_name} + # na file}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Walang inirerekomendang taong mapagbabahagian"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Listahan ng mga app"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Hindi nabigyan ng pahintulot ang app na ito para mag-record pero nakakapag-capture ito ng audio sa pamamagitan ng USB device na ito."</string>
@@ -2177,10 +2089,22 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Dialog ng Power"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Lock Screen"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Screenshot"</string>
+    <!-- no translation found for accessibility_system_action_headset_hook_label (8524691721287425468) -->
+    <skip />
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Shortcut ng Accessibility sa Screen"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Tagapili ng Shortcut ng Accessibility sa Screen"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Shortcut ng Accessibility"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"I-dismiss ang Notification Shade"</string>
+    <!-- no translation found for accessibility_system_action_dpad_up_label (1029042950229333782) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_down_label (3441918448624921461) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_left_label (6557647179116479152) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_right_label (9180196950365804081) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_center_label (8149791419358224893) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Caption bar ng <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Inilagay ang <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> sa PINAGHIHIGPITANG bucket"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2201,8 +2125,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"I-tap para i-on"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Walang app para sa trabaho"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Walang personal na app"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Buksan sa <xliff:g id="APP">%s</xliff:g> sa personal na profile?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Buksan sa <xliff:g id="APP">%s</xliff:g> sa profile sa trabaho?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Gamitin ang personal na browser"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Gamitin ang browser sa trabaho"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN para sa pag-unlock ng network ng SIM"</string>
@@ -2332,4 +2258,9 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"Makikita at makokontrol ng <xliff:g id="SERVICE_NAME">%s</xliff:g> ang iyong screen. I-tap para suriin."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Naisalin ang <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Naisalin ang mensahe sa <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> mula sa <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>."</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Aktibidad sa Background"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Aktibidad sa Background"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Gumagana ang <xliff:g id="APP">%1$s</xliff:g> sa background at gumagamit ito ng baterya I-tap para suriin."</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Napakatagal nang gumagana ang <xliff:g id="APP">%1$s</xliff:g> sa background. I-tap para suriin."</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Tingnan ang mga aktibong app"</string>
 </resources>

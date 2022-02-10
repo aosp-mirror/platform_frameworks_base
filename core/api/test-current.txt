@@ -278,6 +278,7 @@ package android.app {
   }
 
   public final class GameManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE) public int getGameMode(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.MANAGE_GAME_MODE) public boolean isAngleEnabled(@NonNull String);
     method public void setGameServiceProvider(@Nullable String);
   }
@@ -569,9 +570,13 @@ package android.app.admin {
 
 package android.app.assist {
 
-  public class ActivityId {
+  public final class ActivityId implements android.os.Parcelable {
+    ctor public ActivityId(int, @Nullable android.os.IBinder);
+    method public int describeContents();
     method public int getTaskId();
     method @Nullable public android.os.IBinder getToken();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.assist.ActivityId> CREATOR;
   }
 
 }
@@ -2862,6 +2867,7 @@ package android.view {
     method public default void setShouldShowSystemDecors(int, boolean);
     method public default void setShouldShowWithInsecureKeyguard(int, boolean);
     method public default boolean shouldShowSystemDecors(int);
+    method @Nullable public default android.graphics.Bitmap snapshotTaskForRecents(@IntRange(from=0) int);
     field public static final int DISPLAY_IME_POLICY_FALLBACK_DISPLAY = 1; // 0x1
     field public static final int DISPLAY_IME_POLICY_HIDE = 2; // 0x2
     field public static final int DISPLAY_IME_POLICY_LOCAL = 0; // 0x0

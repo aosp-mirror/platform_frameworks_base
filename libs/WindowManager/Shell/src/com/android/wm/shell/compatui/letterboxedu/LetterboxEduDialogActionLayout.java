@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.compatui.letterboxedu;
 
-import android.annotation.StringRes;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -32,8 +31,6 @@ import com.android.wm.shell.R;
  */
 // TODO(b/215316431): Add tests
 class LetterboxEduDialogActionLayout extends FrameLayout {
-    private final ImageView mIcon;
-    private final TextView mText;
 
     LetterboxEduDialogActionLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -46,26 +43,15 @@ class LetterboxEduDialogActionLayout extends FrameLayout {
                         /* defStyleRes= */ 0);
         int iconId = styledAttributes.getResourceId(
                 R.styleable.LetterboxEduDialogActionLayout_icon, 0);
-        String optionalText = styledAttributes.getString(
+        String text = styledAttributes.getString(
                 R.styleable.LetterboxEduDialogActionLayout_text);
         styledAttributes.recycle();
 
         View rootView = inflate(getContext(), R.layout.letterbox_education_dialog_action_layout,
                 this);
-
-        mIcon = rootView.findViewById(R.id.letterbox_education_dialog_action_icon);
-        mIcon.setImageResource(iconId);
-        mText = rootView.findViewById(R.id.letterbox_education_dialog_action_text);
-        if (optionalText != null) {
-            mText.setText(optionalText);
-        }
-    }
-
-    void setText(@StringRes int id) {
-        mText.setText(getResources().getString(id));
-    }
-
-    void setIconRotation(float rotation) {
-        mIcon.setRotation(rotation);
+        ((ImageView) rootView.findViewById(
+                R.id.letterbox_education_dialog_action_icon)).setImageResource(iconId);
+        ((TextView) rootView.findViewById(R.id.letterbox_education_dialog_action_text)).setText(
+                text);
     }
 }

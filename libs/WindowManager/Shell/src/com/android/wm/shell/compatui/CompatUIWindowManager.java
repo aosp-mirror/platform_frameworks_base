@@ -25,7 +25,6 @@ import android.annotation.Nullable;
 import android.app.TaskInfo;
 import android.app.TaskInfo.CameraCompatControlState;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,6 +35,8 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.compatui.CompatUIController.CompatUICallback;
+import com.android.wm.shell.compatui.letterboxedu.LetterboxEduWindowManager;
 
 /**
  * Window manager for the Size Compat restart button and Camera Compat control.
@@ -43,18 +44,19 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
 
     /**
-     * The Compat UI should be the topmost child of the Task in case there can be more than one
-     * child.
+     * The Compat UI should be below the Letterbox Education.
      */
-    private static final int Z_ORDER = Integer.MAX_VALUE;
+    private static final int Z_ORDER = LetterboxEduWindowManager.Z_ORDER - 1;
 
-    private final CompatUIController.CompatUICallback mCallback;
+    private final CompatUICallback mCallback;
 
     // Remember the last reported states in case visibility changes due to keyguard or IME updates.
     @VisibleForTesting
     boolean mHasSizeCompat;
+
+    @VisibleForTesting
     @CameraCompatControlState
-    private int mCameraCompatControlState = CAMERA_COMPAT_CONTROL_HIDDEN;
+    int mCameraCompatControlState = CAMERA_COMPAT_CONTROL_HIDDEN;
 
     @VisibleForTesting
     boolean mShouldShowSizeCompatHint;
@@ -65,12 +67,14 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
     @VisibleForTesting
     CompatUILayout mLayout;
 
-    CompatUIWindowManager(Context context, Configuration taskConfig,
-            SyncTransactionQueue syncQueue, CompatUIController.CompatUICallback callback,
-            int taskId, ShellTaskOrganizer.TaskListener taskListener, DisplayLayout displayLayout,
+    CompatUIWindowManager(Context context, TaskInfo taskInfo,
+            SyncTransactionQueue syncQueue, CompatUICallback callback,
+            ShellTaskOrganizer.TaskListener taskListener, DisplayLayout displayLayout,
             boolean hasShownSizeCompatHint, boolean hasShownCameraCompatHint) {
-        super(context, taskConfig, syncQueue, taskId, taskListener, displayLayout);
+        super(context, taskInfo, syncQueue, taskListener, displayLayout);
         mCallback = callback;
+        mHasSizeCompat = taskInfo.topActivityInSizeCompat;
+        mCameraCompatControlState = taskInfo.cameraCompatControlState;
         mShouldShowSizeCompatHint = !hasShownSizeCompatHint;
         mShouldShowCameraCompatHint = !hasShownCameraCompatHint;
     }
@@ -79,7 +83,6 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
     protected int getZOrder() {
         return Z_ORDER;
     }
-
 
     @Override
     protected @Nullable View getLayout() {
@@ -94,16 +97,6 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
     @Override
     protected boolean eligibleToShowLayout() {
         return mHasSizeCompat || shouldShowCameraControl();
-    }
-
-    /**
-     * Updates the internal state with respect to {@code taskInfo} and calls {@link
-     * #createLayout(boolean)}.
-     */
-    void createLayout(boolean canShow, TaskInfo taskInfo) {
-        mHasSizeCompat = taskInfo.topActivityInSizeCompat;
-        mCameraCompatControlState = taskInfo.cameraCompatControlState;
-        createLayout(canShow);
     }
 
     @Override
@@ -127,19 +120,23 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
     }
 
     @Override
-    public void updateCompatInfo(TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener,
+    public boolean updateCompatInfo(TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener,
             boolean canShow) {
         final boolean prevHasSizeCompat = mHasSizeCompat;
         final int prevCameraCompatControlState = mCameraCompatControlState;
         mHasSizeCompat = taskInfo.topActivityInSizeCompat;
         mCameraCompatControlState = taskInfo.cameraCompatControlState;
 
-        super.updateCompatInfo(taskInfo, taskListener, canShow);
+        if (!super.updateCompatInfo(taskInfo, taskListener, canShow)) {
+            return false;
+        }
 
         if (prevHasSizeCompat != mHasSizeCompat
                 || prevCameraCompatControlState != mCameraCompatControlState) {
             updateVisibilityOfViews();
         }
+
+        return true;
     }
 
     /** Called when the restart button is clicked. */

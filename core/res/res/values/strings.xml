@@ -4242,7 +4242,7 @@
          match and total number of matches found in the current page. [CHAR LIMIT=NONE] -->
     <string name="matches_found">{ count, plural,
         =1 {# match}
-        other {# of {total}}}
+        other {# of {total}}
     }
     </string>
 
@@ -5468,6 +5468,15 @@
     <string name="app_blocked_message">
         <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> is not available right now.
     </string>
+
+    <!-- Title of the dialog shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_title"><xliff:g id="activity" example="Permission dialog">%1$s</xliff:g> unavailable</string>
+    <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message" product="tv">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your Android TV device instead.</string>
+    <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message" product="tablet">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your tablet instead.</string>
+    <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <string name="app_streaming_blocked_message" product="default">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your phone instead.</string>
 
     <!-- Message displayed in dialog when app is too old to run on this verison of android. [CHAR LIMIT=NONE] -->
     <string name="deprecated_target_sdk_message">This app was built for an older version of Android and may not work properly. Try checking for updates, or contact the developer.</string>

@@ -81,7 +81,6 @@ import com.android.systemui.qs.QSUserSwitcherEvent;
 import com.android.systemui.qs.tiles.UserDetailView;
 import com.android.systemui.qs.user.UserSwitchDialogController.DialogShower;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.user.CreateUserActivity;
@@ -159,7 +158,7 @@ public class UserSwitcherController implements Dumpable {
     private final AtomicBoolean mGuestIsResetting;
     private final AtomicBoolean mGuestCreationScheduled;
     private FalsingManager mFalsingManager;
-    private NotificationShadeWindowView mRootView;
+    private View mView;
 
     @Inject
     public UserSwitcherController(Context context,
@@ -458,6 +457,19 @@ public class UserSwitcherController implements Dumpable {
         }
     }
 
+    /**
+     * @return UserRecord for the current user
+     */
+    public @Nullable UserRecord getCurrentUserRecord() {
+        for (int i = 0; i < mUsers.size(); ++i) {
+            UserRecord userRecord = mUsers.get(i);
+            if (userRecord.isCurrent) {
+                return userRecord;
+            }
+        }
+        return null;
+    }
+
     @VisibleForTesting
     void onUserListItemClicked(UserRecord record, DialogShower dialogShower) {
         int id;
@@ -504,7 +516,7 @@ public class UserSwitcherController implements Dumpable {
     protected void switchToUserId(int id) {
         try {
             mInteractionJankMonitor.begin(InteractionJankMonitor.Configuration.Builder
-                    .withView(InteractionJankMonitor.CUJ_USER_SWITCH, mRootView)
+                    .withView(InteractionJankMonitor.CUJ_USER_SWITCH, mView)
                     .setTimeout(MULTI_USER_JOURNEY_TIMEOUT));
             mLatencyTracker.onActionStart(LatencyTracker.ACTION_USER_SWITCH);
             pauseRefreshUsers();
@@ -823,8 +835,11 @@ public class UserSwitcherController implements Dumpable {
         return guest.id;
     }
 
-    public void init(NotificationShadeWindowView notificationShadeWindowView) {
-        mRootView = notificationShadeWindowView;
+    /**
+     * Require a view for jank detection
+     */
+    public void init(View view) {
+        mView = view;
     }
 
     @VisibleForTesting

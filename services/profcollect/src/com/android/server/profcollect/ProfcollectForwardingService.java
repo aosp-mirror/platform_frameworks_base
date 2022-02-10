@@ -60,6 +60,12 @@ public final class ProfcollectForwardingService extends SystemService {
     private static ProfcollectForwardingService sSelfService;
     private final Handler mHandler = new ProfcollectdHandler(IoThread.getHandler().getLooper());
 
+    private IProviderStatusCallback mProviderStatusCallback = new IProviderStatusCallback.Stub() {
+        public void onProviderReady() {
+            mHandler.sendEmptyMessage(ProfcollectdHandler.MESSAGE_REGISTER_SCHEDULERS);
+        }
+    };
+
     public ProfcollectForwardingService(Context context) {
         super(context);
 
@@ -93,10 +99,20 @@ public final class ProfcollectForwardingService extends SystemService {
             }
             BackgroundThread.get().getThreadHandler().post(() -> {
                 if (serviceHasSupportedTraceProvider()) {
-                    registerObservers();
-                    ProfcollectBGJobService.schedule(getContext());
+                    registerProviderStatusCallback();
                 }
             });
+        }
+    }
+
+    private void registerProviderStatusCallback() {
+        if (mIProfcollect == null) {
+            return;
+        }
+        try {
+            mIProfcollect.registerProviderStatusCallback(mProviderStatusCallback);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, e.getMessage());
         }
     }
 
@@ -141,12 +157,17 @@ public final class ProfcollectForwardingService extends SystemService {
         }
 
         public static final int MESSAGE_BINDER_CONNECT = 0;
+        public static final int MESSAGE_REGISTER_SCHEDULERS = 1;
 
         @Override
         public void handleMessage(android.os.Message message) {
             switch (message.what) {
                 case MESSAGE_BINDER_CONNECT:
                     connectNativeService();
+                    break;
+                case MESSAGE_REGISTER_SCHEDULERS:
+                    registerObservers();
+                    ProfcollectBGJobService.schedule(getContext());
                     break;
                 default:
                     throw new AssertionError("Unknown message: " + message);

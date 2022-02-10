@@ -1773,8 +1773,7 @@ public final class AccessibilityManager {
      * @param userId The user Id.
      * @hide
      */
-    @RequiresPermission(Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)
-    public void setSystemAudioCaptioningRequested(boolean isEnabled, int userId) {
+    public void setSystemAudioCaptioningEnabled(boolean isEnabled, int userId) {
         final IAccessibilityManager service;
         synchronized (mLock) {
             service = getServiceLocked();
@@ -1783,7 +1782,7 @@ public final class AccessibilityManager {
             }
         }
         try {
-            service.setSystemAudioCaptioningRequested(isEnabled, userId);
+            service.setSystemAudioCaptioningEnabled(isEnabled, userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -1796,7 +1795,7 @@ public final class AccessibilityManager {
      * @return the system audio caption UI enabled state.
      * @hide
      */
-    public boolean isSystemAudioCaptioningUiRequested(int userId) {
+    public boolean isSystemAudioCaptioningUiEnabled(int userId) {
         final IAccessibilityManager service;
         synchronized (mLock) {
             service = getServiceLocked();
@@ -1805,7 +1804,7 @@ public final class AccessibilityManager {
             }
         }
         try {
-            return service.isSystemAudioCaptioningUiRequested(userId);
+            return service.isSystemAudioCaptioningUiEnabled(userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -1818,8 +1817,7 @@ public final class AccessibilityManager {
      * @param userId The user Id.
      * @hide
      */
-    @RequiresPermission(Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)
-    public void setSystemAudioCaptioningUiRequested(boolean isEnabled, int userId) {
+    public void setSystemAudioCaptioningUiEnabled(boolean isEnabled, int userId) {
         final IAccessibilityManager service;
         synchronized (mLock) {
             service = getServiceLocked();
@@ -1828,7 +1826,7 @@ public final class AccessibilityManager {
             }
         }
         try {
-            service.setSystemAudioCaptioningUiRequested(isEnabled, userId);
+            service.setSystemAudioCaptioningUiEnabled(isEnabled, userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

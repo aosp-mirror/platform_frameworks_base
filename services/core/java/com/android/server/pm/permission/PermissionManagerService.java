@@ -606,6 +606,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             int granted = PermissionManagerService.this.checkUidPermission(uid,
                     POST_NOTIFICATIONS);
             AndroidPackage pkg = mPackageManagerInt.getPackage(uid);
+            if (pkg == null) {
+                Slog.e(LOG_TAG, "No package for uid " + uid);
+                return granted;
+            }
             if (granted != PackageManager.PERMISSION_GRANTED
                     && pkg.getTargetSdkVersion() >= Build.VERSION_CODES.M) {
                 int flags = PermissionManagerService.this.getPermissionFlags(pkg.getPackageName(),

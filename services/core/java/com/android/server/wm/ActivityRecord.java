@@ -766,7 +766,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // Last visibility state we reported to the app token.
     boolean reportedVisible;
 
-    boolean mDisablePreviewScreenshots;
+    boolean mEnablePreviewScreenshots = true;
 
     // Information about an application starting window if displayed.
     // Note: these are de-referenced before the starting window animates away.
@@ -5116,22 +5116,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * See {@link Activity#setDisablePreviewScreenshots}.
+     * See {@link Activity#setRecentsScreenshotEnabled}.
      */
-    void setDisablePreviewScreenshots(boolean disable) {
-        mDisablePreviewScreenshots = disable;
+    void setRecentsScreenshotEnabled(boolean enabled) {
+        mEnablePreviewScreenshots = enabled;
     }
 
     /**
      * Retrieves whether we'd like to generate a snapshot that's based solely on the theme. This is
-     * the case when preview screenshots are disabled {@link #setDisablePreviewScreenshots} or when
+     * the case when preview screenshots are disabled {@link #setRecentsScreenshotEnabled} or when
      * we can't take a snapshot for other reasons, for example, if we have a secure window.
      *
      * @return True if we need to generate an app theme snapshot, false if we'd like to take a real
      *         screenshot.
      */
     boolean shouldUseAppThemeSnapshot() {
-        return mDisablePreviewScreenshots || forAllWindows(WindowState::isSecureLocked,
+        return !mEnablePreviewScreenshots || forAllWindows(WindowState::isSecureLocked,
                 true /* topToBottom */);
     }
 
@@ -5215,6 +5215,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_STOPPED);
                 break;
             case DESTROYED:
+                if (app != null && (mVisible || mVisibleRequested)) {
+                    // The app may be died while visible (no PAUSED state).
+                    mAtmService.updateBatteryStats(this, false);
+                }
                 mAtmService.updateActivityUsageStats(this, Event.ACTIVITY_DESTROYED);
                 // Fall through.
             case DESTROYING:
@@ -9402,6 +9406,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean isSyncFinished() {
         if (!super.isSyncFinished()) return false;
         if (!isVisibleRequested()) return true;
+        // Wait for attach. That is the earliest time where we know if there will be an associated
+        // display rotation. If we don't wait, the starting-window can finishDrawing first and
+        // cause the display rotation to end-up in a following transition.
+        if (!isAttached()) return false;
         // If visibleRequested, wait for at-least one visible child.
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             if (mChildren.get(i).isVisibleRequested()) {

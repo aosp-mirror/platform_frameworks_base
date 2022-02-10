@@ -48,15 +48,16 @@ public final class VirtualDeviceParams implements Parcelable {
 
     /** @hide */
     @IntDef(prefix = "LOCK_STATE_",
-            value = {LOCK_STATE_ALWAYS_LOCKED, LOCK_STATE_ALWAYS_UNLOCKED})
+            value = {LOCK_STATE_DEFAULT, LOCK_STATE_ALWAYS_UNLOCKED})
     @Retention(RetentionPolicy.SOURCE)
     @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})
     public @interface LockState {}
 
     /**
-     * Indicates that the lock state of the virtual device should be always locked.
+     * Indicates that the lock state of the virtual device will be the same as the default physical
+     * display.
      */
-    public static final int LOCK_STATE_ALWAYS_LOCKED = 0;
+    public static final int LOCK_STATE_DEFAULT = 0;
 
     /**
      * Indicates that the lock state of the virtual device should be always unlocked.
@@ -199,7 +200,7 @@ public final class VirtualDeviceParams implements Parcelable {
      */
     public static final class Builder {
 
-        private @LockState int mLockState = LOCK_STATE_ALWAYS_LOCKED;
+        private @LockState int mLockState = LOCK_STATE_DEFAULT;
         private Set<UserHandle> mUsersWithMatchingAccounts;
         @Nullable private Set<ComponentName> mBlockedActivities;
         @Nullable private Set<ComponentName> mAllowedActivities;
@@ -207,9 +208,9 @@ public final class VirtualDeviceParams implements Parcelable {
         /**
          * Sets the lock state of the device. The permission {@code ADD_ALWAYS_UNLOCKED_DISPLAY}
          * is required if this is set to {@link #LOCK_STATE_ALWAYS_UNLOCKED}.
-         * The default is {@link #LOCK_STATE_ALWAYS_LOCKED}.
+         * The default is {@link #LOCK_STATE_DEFAULT}.
          *
-         * @param lockState The lock state, either {@link #LOCK_STATE_ALWAYS_LOCKED} or
+         * @param lockState The lock state, either {@link #LOCK_STATE_DEFAULT} or
          *   {@link #LOCK_STATE_ALWAYS_UNLOCKED}.
          */
         @RequiresPermission(value = ADD_ALWAYS_UNLOCKED_DISPLAY, conditional = true)

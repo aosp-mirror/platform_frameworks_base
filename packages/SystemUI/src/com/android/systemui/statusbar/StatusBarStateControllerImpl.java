@@ -336,6 +336,9 @@ public class StatusBarStateControllerImpl implements
     }
 
     private void setDozeAmountInternal(float dozeAmount) {
+        if (Float.compare(dozeAmount, mDozeAmount) == 0) {
+            return;
+        }
         mDozeAmount = dozeAmount;
         float interpolatedAmount = mDozeInterpolator.getInterpolation(dozeAmount);
         synchronized (mListeners) {

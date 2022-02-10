@@ -28,12 +28,12 @@
     <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"కనెక్ట్ అయినప్పుడు ఈ పరికరంలో ఇన్‌స్టాల్ చేయబడిన యాప్‌లను యాక్సెస్ చేయడానికి &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; రిమోట్ యాక్సెస్‌ను అందించడానికి &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;ను అనుమతించండి."</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
+    <string name="title_computer" msgid="4693714143506569253">"మీ ఫోన్ నుండి ఈ సమాచారాన్ని యాక్సెస్ చేయడానికి &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; యాప్‌ను అనుమతించండి"</string>
+    <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="profile_name_generic" msgid="6851028682723034988">"పరికరం"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"అనుమతించు"</string>
     <string name="consent_no" msgid="2640796915611404382">"అనుమతించవద్దు"</string>
-    <!-- no translation found for permission_sync_confirmation_title (667074294393493186) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (8873391306499120778) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"మీ వాచ్‌కు యాప్ అనుమతులను బదిలీ చేయండి"</string>
+    <string name="permission_sync_summary" msgid="8873391306499120778">"మీ వాచ్‌ను సెటప్ చేయడాన్ని సులభతరం చేయడానికి, సెటప్ సమయంలో మీ వాచ్‌లో ఇన్‌స్టాల్ చేయబడిన యాప్‌లు మీ ఫోన్‌లో యాప్‌లకు ఉన్న అవే అనుమతులను ఉపయోగిస్తాయి.\n\n ఈ అనుమతులతో మీ వాచ్ మైక్రోఫోన్, అలాగే లొకేషన్ కూడా ఉండవచ్చు."</string>
 </resources>

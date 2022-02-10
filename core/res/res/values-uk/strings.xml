@@ -72,7 +72,6 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Конференція"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Відхил. небажаних надокучливих дзвінків"</string>
     <string name="CndMmi" msgid="185136449405618437">"Отрим. номера абонента"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"Не турбувати"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Ідентиф. абонента за умовч. обмеж. Наст. дзвінок: обмеж."</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Ідентиф. абонента за умовч. обмеж. Наст. дзвінок: не обмеж."</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Ідентиф. абонента за умовч. не обмеж. Наст. дзвінок: обмеж."</string>
@@ -182,12 +181,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"Пам’ять годинника заповнено. Видаліть файли, щоб звільнити місце."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Пам\'ять пристрою Android TV заповнено. Видаліть непотрібні файли, щоб звільнити місце."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"Пам’ять телефону заповнено. Видаліть якісь файли, щоб звільнити місце."</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="one">Центри сертифікації встановлено</item>
-      <item quantity="few">Центри сертифікації встановлено</item>
-      <item quantity="many">Центри сертифікації встановлено</item>
-      <item quantity="other">Центри сертифікації встановлено</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Центр сертифікації встановлено}one{Центр сертифікації встановлено}few{Центри сертифікації встановлено}many{Центри сертифікації встановлено}other{Центри сертифікації встановлено}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Невідомою третьою стороною"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Адміністратор робочого профілю"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Доменом <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -207,6 +201,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"Сервіс \"Сповіщення датчика\""</string>
     <string name="twilight_service" msgid="8964898045693187224">"Сервіс \"Сутінки\""</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Сервіс оновлення часу GNSS"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"Сервіс Device Policy Manager"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Сервіс Music Recognition Manager"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"З вашого пристрою буде стерто всі дані"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Не можна запускати додаток для адміністраторів. Буде відновлено заводські налаштування пристрою.\n\nЯкщо у вас є запитання, зв’яжіться з адміністратором своєї організації."</string>
@@ -260,12 +255,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Підходить для більшості випадків. Можна відстежувати, як створюється звіт, вводити більше деталей про проблему та робити знімки екрана. Можуть опускатися деякі розділи, які рідко використовуються, але довго створюються."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Повний звіт"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Підходить для мінімального втручання в систему, коли пристрій не відповідає, працює повільно або вам потрібні всі розділи звіту. Не можна вводити більше деталей або робити додаткові знімки екрана."</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="one">Знімок екрана для звіту про помилки буде зроблено через <xliff:g id="NUMBER_1">%d</xliff:g> секунду.</item>
-      <item quantity="few">Знімок екрана для звіту про помилки буде зроблено через <xliff:g id="NUMBER_1">%d</xliff:g> секунди.</item>
-      <item quantity="many">Знімок екрана для звіту про помилки буде зроблено через <xliff:g id="NUMBER_1">%d</xliff:g> секунд.</item>
-      <item quantity="other">Знімок екрана для звіту про помилки буде зроблено через <xliff:g id="NUMBER_1">%d</xliff:g> секунди.</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Знімок екрана для звіту про помилку буде зроблено через # секунду.}one{Знімок екрана для звіту про помилку буде зроблено через # секунду.}few{Знімок екрана для звіту про помилку буде зроблено через # секунди.}many{Знімок екрана для звіту про помилку буде зроблено через # секунд.}other{Знімок екрана для звіту про помилку буде зроблено через # секунди.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Знімок екрана зі звітом про помилку зроблено"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Не вдалося зробити знімок екрана зі звітом про помилку"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Беззвуч. режим"</string>
@@ -316,8 +306,14 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"отримувати доступ до календаря"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"надсилати та переглядати SMS-повідомлення"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"Файли й мультимедіа"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"отримувати доступ до фотографій, мультимедійного вмісту та файлів на вашому пристрої"</string>
+    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
+    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Музика й інше аудіо"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"отримувати доступ до аудіофайлів на вашому пристрої"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Фото й відео"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"отримувати доступ до відеофайлів на вашому пристрої"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Мікрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"записувати аудіо"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Фізична активність"</string>
@@ -689,6 +685,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Дозволяє програмі читати статистику синхронізації облікового запису, зокрема історію синхронізацій і обсяг синхронізованих даних."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"переглядати вміст у спільній пам’яті"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Додаток може переглядати вміст у спільній пам’яті."</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"зчитувати аудіофайли зі спільного сховища"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Дозволяє додатку зчитувати аудіофайли з вашого спільного сховища."</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"зчитувати відеофайли зі спільного сховища"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Дозволяє додатку зчитувати відеофайли з вашого спільного сховища."</string>
+    <string name="permlab_readMediaImage" msgid="1507059005825769856">"зчитувати файли зображень зі спільного сховища"</string>
+    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Дозволяє додатку зчитувати файли зображень із вашого спільного сховища."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"змінювати чи видаляти вміст у спільній пам’яті"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Додаток може писати вміст у спільній пам’яті."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"здійснювати й отримувати дзвінки через протокол SIP"</string>
@@ -735,8 +737,6 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Додаток зможе підключатися до інтерфейсу верхнього рівня служби надсилання повідомлень через оператора. Звичайні додатки ніколи не використовують цей дозвіл."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"підключатися до служб оператора"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Власник може підключатися до служб оператора. Звичайні додатки ніколи не використовують цей дозвіл."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"доступ до режиму \"Не турбувати\""</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Додаток зможе переглядати та змінювати конфігурацію режиму \"Не турбувати\"."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"перегляньте дані про використання дозволів"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Власник зможе використовувати дозволи для цього додатка. Цей дозвіл не потрібен для звичайних додатків."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"почати перегляд рішень щодо дозволів"</string>
@@ -1078,12 +1078,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> хоче ввімкнути функцію дослідження дотиком. Увімкнувши функцію дослідження дотиком, можна чути або бачити опис елемента, розташованого під вашим пальцем, або виконувати жести для взаємодії з телефоном."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 міс. тому"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Раніше 1 місяця тому"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="one">Останній <xliff:g id="COUNT_1">%d</xliff:g> день</item>
-      <item quantity="few">Останні <xliff:g id="COUNT_1">%d</xliff:g> дні</item>
-      <item quantity="many">Останні <xliff:g id="COUNT_1">%d</xliff:g> днів</item>
-      <item quantity="other">Останні <xliff:g id="COUNT_1">%d</xliff:g> днів</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{За останній # день}one{За останні # день}few{За останні # дні}many{За останні # днів}other{За останні # дня}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Останній міс."</string>
     <string name="older" msgid="1645159827884647400">"Давніше"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"<xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1102,102 +1097,22 @@
     <string name="year" msgid="5182610307741238982">"рік"</string>
     <string name="years" msgid="5797714729103773425">"р."</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"зараз"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> хв</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> хв</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> хв</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> хв</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> год</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> год</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> год</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> год</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> д</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> д</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> д</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> д</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> рік</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> р</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> р</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> р</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="one">через <xliff:g id="COUNT_1">%d</xliff:g> хв</item>
-      <item quantity="few">через <xliff:g id="COUNT_1">%d</xliff:g> хв</item>
-      <item quantity="many">через <xliff:g id="COUNT_1">%d</xliff:g> хв</item>
-      <item quantity="other">через <xliff:g id="COUNT_1">%d</xliff:g> хв</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="one">через <xliff:g id="COUNT_1">%d</xliff:g> год</item>
-      <item quantity="few">через <xliff:g id="COUNT_1">%d</xliff:g> год</item>
-      <item quantity="many">через <xliff:g id="COUNT_1">%d</xliff:g> год</item>
-      <item quantity="other">через <xliff:g id="COUNT_1">%d</xliff:g> год</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="one">через <xliff:g id="COUNT_1">%d</xliff:g> д</item>
-      <item quantity="few">через <xliff:g id="COUNT_1">%d</xliff:g> д</item>
-      <item quantity="many">через <xliff:g id="COUNT_1">%d</xliff:g> д</item>
-      <item quantity="other">через <xliff:g id="COUNT_1">%d</xliff:g> д</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="one">через <xliff:g id="COUNT_1">%d</xliff:g> р</item>
-      <item quantity="few">через <xliff:g id="COUNT_1">%d</xliff:g> р</item>
-      <item quantity="many">через <xliff:g id="COUNT_1">%d</xliff:g> р</item>
-      <item quantity="other">через <xliff:g id="COUNT_1">%d</xliff:g> р</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> хвилину тому</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> хвилини тому</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> хвилин тому</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> хвилини тому</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> годину тому</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> години тому</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> годин тому</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> години тому</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> день тому</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> дні тому</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> днів тому</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> дня тому</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="one"><xliff:g id="COUNT_1">%d</xliff:g> рік тому</item>
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> роки тому</item>
-      <item quantity="many"><xliff:g id="COUNT_1">%d</xliff:g> років тому</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> року тому</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="one">через <xliff:g id="COUNT_1">%d</xliff:g> хвилину</item>
-      <item quantity="few">через <xliff:g id="COUNT_1">%d</xliff:g> хвилини</item>
-      <item quantity="many">через <xliff:g id="COUNT_1">%d</xliff:g> хвилин</item>
-      <item quantity="other">через <xliff:g id="COUNT_1">%d</xliff:g> хвилини</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="one">через <xliff:g id="COUNT_1">%d</xliff:g> годину</item>
-      <item quantity="few">через <xliff:g id="COUNT_1">%d</xliff:g> години</item>
-      <item quantity="many">через <xliff:g id="COUNT_1">%d</xliff:g> годин</item>
-      <item quantity="other">через <xliff:g id="COUNT_1">%d</xliff:g> години</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="one">через <xliff:g id="COUNT_1">%d</xliff:g> день</item>
-      <item quantity="few">через <xliff:g id="COUNT_1">%d</xliff:g> дні</item>
-      <item quantity="many">через <xliff:g id="COUNT_1">%d</xliff:g> днів</item>
-      <item quantity="other">через <xliff:g id="COUNT_1">%d</xliff:g> дня</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="one">через <xliff:g id="COUNT_1">%d</xliff:g> рік</item>
-      <item quantity="few">через <xliff:g id="COUNT_1">%d</xliff:g> роки</item>
-      <item quantity="many">через <xliff:g id="COUNT_1">%d</xliff:g> років</item>
-      <item quantity="other">через <xliff:g id="COUNT_1">%d</xliff:g> року</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> хв"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> год"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g> дн."</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g> р."</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"через <xliff:g id="COUNT">%d</xliff:g> хв"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"через <xliff:g id="COUNT">%d</xliff:g> год"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"через <xliff:g id="COUNT">%d</xliff:g> дн."</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"через <xliff:g id="COUNT">%d</xliff:g> р."</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# хвилину тому}one{# хвилину тому}few{# хвилини тому}many{# хвилин тому}other{# хвилини тому}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# годину тому}one{# годину тому}few{# години тому}many{# годин тому}other{# години тому}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# день тому}one{# день тому}few{# дні тому}many{# днів тому}other{# дня тому}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{# рік тому}one{# рік тому}few{# роки тому}many{# років тому}other{# року тому}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# хвилина}one{# хвилина}few{# хвилини}many{# хвилин}other{# хвилини}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# година}one{# година}few{# години}many{# годин}other{# години}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# день}one{# день}few{# дні}many{# днів}other{# дня}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# рік}one{# рік}few{# роки}many{# років}other{# року}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Проблема з відео"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"Відео не придатне для потокового передавання в цей пристрій."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"Неможливо відтворити це відео."</string>
@@ -1227,10 +1142,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Видалити"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Метод введення"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Дії з текстом"</string>
-    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
-    <skip />
-    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
-    <skip />
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Назад"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Змінити метод введення"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Закінчується пам’ять"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Деякі системні функції можуть не працювати"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Недостатньо місця для системи. Переконайтесь, що на пристрої є 250 МБ вільного місця, і повторіть спробу."</string>
@@ -1451,6 +1364,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Щоб вимкнути режим автоматизованого тестування, відновіть заводські налаштування."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Послідовну консоль увімкнено"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Продуктивність зазнала впливу. Щоб вимкнути, перевірте завантажувач операційної системи."</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"Експериментальний запуск з MTE ввімкнено"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"Це може вплинути на продуктивність і стабільність. Щоб вимкнути цю функцію, перезапустіть пристрій. Якщо перевизначення статусу ввімкнено за допомогою властивості arm64.memtag.bootctl, попередньо задайте для неї значення \"none\"."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Рідина або сміття в USB-порту"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB-порт автоматично вимкнено. Торкніться, щоб дізнатися більше."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"Можна використовувати USB-порт"</string>
@@ -1587,12 +1502,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Пропустити"</string>
     <string name="no_matches" msgid="6472699895759164599">"Немає збігів"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Знайти на сторінці"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="one"><xliff:g id="INDEX">%d</xliff:g> із <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="few"><xliff:g id="INDEX">%d</xliff:g> із <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="many"><xliff:g id="INDEX">%d</xliff:g> із <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> із <xliff:g id="TOTAL">%d</xliff:g></item>
-    </plurals>
+    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{# збіг}one{# з {total}}few{# з {total}}many{# з {total}}other{# з {total}}} }"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Готово"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Стирання спільної пам’яті…"</string>
     <string name="share" msgid="4157615043345227321">"Надіслати"</string>
@@ -1722,12 +1632,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Неправильний ключ"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"Неправильний пароль"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Неправильний PIN-код"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="one">Повторіть спробу через <xliff:g id="NUMBER">%d</xliff:g> секунду.</item>
-      <item quantity="few">Повторіть спробу через <xliff:g id="NUMBER">%d</xliff:g> секунди.</item>
-      <item quantity="many">Повторіть спробу через <xliff:g id="NUMBER">%d</xliff:g> секунд.</item>
-      <item quantity="other">Повторіть спробу через <xliff:g id="NUMBER">%d</xliff:g> секунди.</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Намалюйте ключ"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Введіть PIN-код SIM-карти"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Введіть PIN-код"</string>
@@ -1924,12 +1828,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Створіть PIN-код для змінення обмежень"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN-коди не збігаються. Повторіть спробу."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN-код закороткий. Має бути принаймні 4 цифри."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="one">Повтор через <xliff:g id="COUNT">%d</xliff:g> секунду</item>
-      <item quantity="few">Повтор через <xliff:g id="COUNT">%d</xliff:g> секунди</item>
-      <item quantity="many">Повтор через <xliff:g id="COUNT">%d</xliff:g> секунд</item>
-      <item quantity="other">Повтор через <xliff:g id="COUNT">%d</xliff:g> секунди</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Спробуйте пізніше"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Перегляд на весь екран"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Щоб вийти, проведіть пальцем зверху вниз."</string>
@@ -1957,62 +1855,20 @@
     <string name="data_saver_description" msgid="4995164271550590517">"Щоб зменшити використання трафіку, функція \"Заощадження трафіку\" не дозволяє деяким додаткам надсилати чи отримувати дані у фоновому режимі. Поточний додаток зможе отримувати доступ до таких даних, але рідше. Наприклад, зображення не відображатиметься, доки ви не торкнетеся його."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Увімкнути заощадження трафіку?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Увімкнути"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="one">%1$d хвилину (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="few">%1$d хвилини (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">%1$d хвилин (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">%1$d хвилини (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="one">Протягом %1$d хв (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="few">Протягом %1$d хв (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">Протягом %1$d хв (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">Протягом %1$d хв (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="one">%1$d година (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="few">%1$d години (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">%1$d годин (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">%1$d години (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="one">Протягом %1$d год (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="few">Протягом %1$d год (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="many">Протягом %1$d год (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">Протягом %1$d год (до <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="one">%d хвилину</item>
-      <item quantity="few">%d хвилини</item>
-      <item quantity="many">%d хвилин</item>
-      <item quantity="other">%d хвилини</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="one">Протягом %d хв</item>
-      <item quantity="few">Протягом %d хв</item>
-      <item quantity="many">Протягом %d хв</item>
-      <item quantity="other">Протягом %d хв</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="one">%d годину</item>
-      <item quantity="few">%d години</item>
-      <item quantity="many">%d годин</item>
-      <item quantity="other">%d години</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="one">Протягом %d год</item>
-      <item quantity="few">Протягом %d год</item>
-      <item quantity="many">Протягом %d год</item>
-      <item quantity="other">Протягом %d год</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Протягом хвилини (до {formattedTime})}one{Протягом # хвилини (до {formattedTime})}few{Протягом # хвилин (до {formattedTime})}many{Протягом # хвилин (до {formattedTime})}other{Протягом # хвилини (до {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Протягом 1 хв (до {formattedTime})}one{Протягом # хв (до {formattedTime})}few{Протягом # хв (до {formattedTime})}many{Протягом # хв (до {formattedTime})}other{Протягом # хв (до {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Протягом 1 години (до {formattedTime})}one{Протягом # години (до {formattedTime})}few{Протягом # годин (до {formattedTime})}many{Протягом # годин (до {formattedTime})}other{Протягом # години (до {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Протягом 1 год (до {formattedTime})}one{Протягом # год (до {formattedTime})}few{Протягом # год (до {formattedTime})}many{Протягом # год (до {formattedTime})}other{Протягом # год (до {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Протягом хвилини}one{Протягом # хвилини}few{Протягом # хвилин}many{Протягом # хвилин}other{Протягом # хвилини}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Протягом 1 хв}one{Протягом # хв}few{Протягом # хв}many{Протягом # хв}other{Протягом # хв}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Протягом 1 години}one{Протягом # години}few{Протягом # годин}many{Протягом # годин}other{Протягом # години}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Протягом 1 год}one{Протягом # год}few{Протягом # год}many{Протягом # год}other{Протягом # год}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"До: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (наступний будильник)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Доки ви не вимкнете"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Доки ввімкнено режим \"Не турбувати\""</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Згорнути"</string>
-    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Не турбувати"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Простій"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Увечері в будні"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"На вихідних"</string>
@@ -2051,12 +1907,6 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Вхідний виклик"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Активний виклик"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Вхідний виклик (Фільтр)"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="one">Вибрано <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="few">Вибрано <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="many">Вибрано <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="other">Вибрано <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Без категорії"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Ви вказуєте пріоритет цих сповіщень."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Важливе з огляду на учасників."</string>
@@ -2122,12 +1972,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Зберегти в службі Автозаповнення"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Вміст не можна заповнити автоматично"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Немає пропозицій автозаповнення"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="one"><xliff:g id="COUNT">%1$s</xliff:g> пропозиція автозаповнення</item>
-      <item quantity="few"><xliff:g id="COUNT">%1$s</xliff:g> пропозиції автозаповнення</item>
-      <item quantity="many"><xliff:g id="COUNT">%1$s</xliff:g> пропозицій автозаповнення</item>
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> пропозиції автозаповнення</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{Одна пропозиція автозаповнення}one{# пропозиція автозаповнення}few{# пропозиції автозаповнення}many{# пропозицій автозаповнення}other{# пропозиції автозаповнення}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"Зберегти в сервісі "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Зберегти дані (<xliff:g id="TYPE">%1$s</xliff:g>) у сервісі "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Зберегти дані (<xliff:g id="TYPE_0">%1$s</xliff:g> і <xliff:g id="TYPE_1">%2$s</xliff:g>) у сервісі "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
@@ -2174,15 +2019,22 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"ВИДАЛИТИ"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"УСЕ ОДНО ВІДКРИТИ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Виявлено шкідливий додаток"</string>
+    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
+    <skip />
+    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
+    <skip />
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> хоче показати фрагменти додатка <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Редагувати"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Вібросигнал для викликів і сповіщень увімкнено"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Звуковий сигнал для викликів і сповіщень вимкнено"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Системні зміни"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Не турбувати"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Нове: у режимі \"Не турбувати\" сповіщення ховаються"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Торкніться, щоб дізнатися більше та змінити."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Налаштування режиму \"Не турбувати\" змінено"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Торкніться, щоб перевірити, що заблоковано."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Система"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Налаштування"</string>
@@ -2199,7 +2051,6 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Вимкнути"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Докладніше"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"В Android 12 адаптивні сповіщення замінено на покращені. Ця функція допомагає впорядковувати сповіщення й показує в них пропоновані дії та відповіді.\n\nПокращені сповіщення надають доступ до вмісту сповіщень, зокрема до такої особистої інформації, як повідомлення й імена контактів. Ця функція може автоматично закривати сповіщення чи реагувати на них, наприклад відповідати на телефонні дзвінки або керувати режимом \"Не турбувати\"."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Сповіщення про послідовнсть дій"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Акумулятор може розрядитися раніше ніж зазвичай"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Режим енергозбереження активовано для збільшення часу роботи акумулятора"</string>
@@ -2228,12 +2079,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"Презентація у форматі <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"У режимі польоту Bluetooth залишатиметься ввімкненим"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Завантаження"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> і ще <xliff:g id="COUNT_3">%d</xliff:g> файл</item>
-      <item quantity="few"><xliff:g id="FILE_NAME_2">%s</xliff:g> і ще <xliff:g id="COUNT_3">%d</xliff:g> файли</item>
-      <item quantity="many"><xliff:g id="FILE_NAME_2">%s</xliff:g> і ще <xliff:g id="COUNT_3">%d</xliff:g> файлів</item>
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> і ще <xliff:g id="COUNT_3">%d</xliff:g> файлу</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} і ще # файл}one{{file_name} і ще # файл}few{{file_name} і ще # файли}many{{file_name} і ще # файлів}other{{file_name} і ще # файлу}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Немає рекомендацій щодо людей, з якими можна поділитися"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Список додатків"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Цей додаток не має дозволу на запис, але він може фіксувати звук через цей USB-пристрій."</string>
@@ -2245,10 +2091,22 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Відкрити вікно"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Заблокувати екран"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Знімок екрана"</string>
+    <!-- no translation found for accessibility_system_action_headset_hook_label (8524691721287425468) -->
+    <skip />
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Екранний засіб спеціальних можливостей"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Вибір екранного засобу спеціальних можливостей"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Засіб спеціальних можливостей"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Закрити панель сповіщень"</string>
+    <!-- no translation found for accessibility_system_action_dpad_up_label (1029042950229333782) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_down_label (3441918448624921461) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_left_label (6557647179116479152) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_right_label (9180196950365804081) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_center_label (8149791419358224893) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Смуга із субтитрами для додатка <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Пакет \"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>\" додано в сегмент з обмеженнями"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2269,8 +2127,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Торкніться, щоб увімкнути"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Немає робочих додатків"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Немає особистих додатків"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Відкрити в додатку <xliff:g id="APP">%s</xliff:g> в особистому профілі?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Відкрити в додатку <xliff:g id="APP">%s</xliff:g> у робочому профілі?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Використати особистий веб-переглядач"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Використати робочий веб-переглядач"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-код розблокування мережі SIM-карти"</string>
@@ -2400,4 +2260,9 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> може переглядати екран вашого пристрою та керувати ним. Натисніть, щоб переглянути."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> (перекладене повідомлення)."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Повідомлення перекладено (мова оригіналу: <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g>, мова перекладу: <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>)."</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Робота у фоновому режимі"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Робота у фоновому режимі"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"Додаток <xliff:g id="APP">%1$s</xliff:g> працює у фоновому режимі та розряджає акумулятор. Натисніть, щоб переглянути."</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"Додаток <xliff:g id="APP">%1$s</xliff:g> довго працює у фоновому режимі. Натисніть, щоб переглянути."</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Перевірте активні додатки"</string>
 </resources>

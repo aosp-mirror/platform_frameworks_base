@@ -494,6 +494,7 @@
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"සම්බන්ධයි, ආරෝපණය නොවේ"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"අරෝපිතයි"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"පරිපාලක විසින් පාලනය කරන ලදී"</string>
+    <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"සීමා කළ සැකසීම මගින් පාලනය වේ"</string>
     <string name="disabled" msgid="8017887509554714950">"අබල කර ඇත"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"ඉඩ දුන්"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"ඉඩ නොදෙන"</string>
@@ -526,8 +527,7 @@
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"ලියාපදිංචි වී නැත"</string>
     <string name="status_unavailable" msgid="5279036186589861608">"ලබාගත නොහැක"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"MAC සසම්භාවී වේ"</string>
-    <!-- no translation found for wifi_tether_connected_summary (5282919920463340158) -->
-    <skip />
+    <string name="wifi_tether_connected_summary" msgid="5282919920463340158">"{count,plural, =0{උපාංග 0ක් සම්බන්ධිතයි}=1{උපාංග 1ක් සම්බන්ධිතයි}one{උපාංග #ක් සම්බන්ධිතයි}other{උපාංග #ක් සම්බන්ධිතයි}}"</string>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"වේලාව වැඩියෙන්."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"වේලාව අඩුවෙන්."</string>
     <string name="cancel" msgid="5665114069455378395">"අවලංගු කරන්න"</string>
@@ -538,7 +538,6 @@
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"එලාම සැකසීමට සහ කාල සංවේදී ක්‍රියා කාලසටහන්ගත කිරීමට මෙම යෙදුමට ඉඩ දෙන්න. මෙය පසුබිමේ ධාවනය වීමට යෙදුමට ඉඩ දෙයි, එය වැඩි බැටරිය වැඩියෙන් භාවිත කළ හැකිය.\n\nමෙම අවසරය ක්‍රියාවිරහිත නම්, මෙම යෙදුම මඟින් සැලසුම් කර ඇති තිබෙන එලාම සහ වේලාව පදනම් කර ගත් සිදුවීම් ක්‍රියා නොකරනු ඇත."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"කාල සටහන, එලාමය, සිහිකැඳවීම, ඔරලෝසුව"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ක්‍රියාත්මක කරන්න"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"බාධා නොකරන්න ක්‍රියාත්මක කරන්න"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"කිසි විටක නැත"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"ප්‍රමුඛතා පමණි"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -636,4 +635,17 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"ඊතර්නෙට් විසන්ධි කරන ලදී."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ඊතර්නෙට්."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"ඇමතුම් නැත."</string>
+    <!-- no translation found for dream_complication_title_time (701747800712893499) -->
+    <skip />
+    <!-- no translation found for dream_complication_title_date (8661176085446135789) -->
+    <skip />
+    <!-- no translation found for dream_complication_title_weather (598609151677172783) -->
+    <skip />
+    <!-- no translation found for dream_complication_title_aqi (4587552608957834110) -->
+    <skip />
+    <!-- no translation found for dream_complication_title_cast_info (4038776652841885084) -->
+    <skip />
+    <string name="avatar_picker_title" msgid="8492884172713170652">"පැතිකඩ පින්තූරයක් තේරීම"</string>
+    <!-- no translation found for default_user_icon_description (6554047177298972638) -->
+    <skip />
 </resources>

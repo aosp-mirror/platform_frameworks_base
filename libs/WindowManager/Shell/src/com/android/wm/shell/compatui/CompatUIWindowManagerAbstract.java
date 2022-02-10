@@ -49,7 +49,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
  *
  * <p>Holds view hierarchy of a root surface and helps to inflate and manage layout.
  */
-abstract class CompatUIWindowManagerAbstract extends WindowlessWindowManager {
+public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowManager {
 
     protected final SyncTransactionQueue mSyncQueue;
     protected final int mDisplayId;
@@ -75,15 +75,15 @@ abstract class CompatUIWindowManagerAbstract extends WindowlessWindowManager {
     @Nullable
     protected SurfaceControl mLeash;
 
-    protected CompatUIWindowManagerAbstract(Context context, Configuration taskConfig,
-            SyncTransactionQueue syncQueue, int taskId,
-            ShellTaskOrganizer.TaskListener taskListener, DisplayLayout displayLayout) {
-        super(taskConfig, null /* rootSurface */, null /* hostInputToken */);
+    protected CompatUIWindowManagerAbstract(Context context, TaskInfo taskInfo,
+            SyncTransactionQueue syncQueue, ShellTaskOrganizer.TaskListener taskListener,
+            DisplayLayout displayLayout) {
+        super(taskInfo.configuration, null /* rootSurface */, null /* hostInputToken */);
         mContext = context;
         mSyncQueue = syncQueue;
-        mTaskConfig = taskConfig;
+        mTaskConfig = taskInfo.configuration;
         mDisplayId = mContext.getDisplayId();
-        mTaskId = taskId;
+        mTaskId = taskInfo.taskId;
         mTaskListener = taskListener;
         mDisplayLayout = displayLayout;
         mStableBounds = new Rect();
@@ -105,12 +105,18 @@ abstract class CompatUIWindowManagerAbstract extends WindowlessWindowManager {
      * Inflates and inits the layout of this window manager on to the root surface if both {@code
      * canShow} and {@link #eligibleToShowLayout} are true.
      *
+     * <p>Doesn't do anything if layout is not eligible to be shown.
+     *
      * @param canShow whether the layout is allowed to be shown by the parent controller.
+     * @return whether the layout is eligible to be shown.
      */
-    void createLayout(boolean canShow) {
-        if (!canShow || !eligibleToShowLayout() || getLayout() != null) {
-            // Wait until layout should be visible.
-            return;
+    protected boolean createLayout(boolean canShow) {
+        if (!eligibleToShowLayout()) {
+            return false;
+        }
+        if (!canShow || getLayout() != null) {
+            // Wait until layout should be visible, or layout was already created.
+            return true;
         }
 
         if (mViewHost != null) {
@@ -123,6 +129,8 @@ abstract class CompatUIWindowManagerAbstract extends WindowlessWindowManager {
         mViewHost.setView(createLayout(), getWindowLayoutParams());
 
         updateSurfacePosition();
+
+        return true;
     }
 
     /** Inflates and inits the layout of this window manager. */
@@ -174,9 +182,12 @@ abstract class CompatUIWindowManagerAbstract extends WindowlessWindowManager {
     /**
      * Called when compat info changed.
      *
+     * <p>The window manager is released if the layout is no longer eligible to be shown.
+     *
      * @param canShow whether the layout is allowed to be shown by the parent controller.
+     * @return whether the layout is eligible to be shown.
      */
-    void updateCompatInfo(TaskInfo taskInfo,
+    protected boolean updateCompatInfo(TaskInfo taskInfo,
             ShellTaskOrganizer.TaskListener taskListener, boolean canShow) {
         final Configuration prevTaskConfig = mTaskConfig;
         final ShellTaskOrganizer.TaskListener prevTaskListener = mTaskListener;
@@ -186,12 +197,16 @@ abstract class CompatUIWindowManagerAbstract extends WindowlessWindowManager {
         // Update configuration.
         setConfiguration(mTaskConfig);
 
+        if (!eligibleToShowLayout()) {
+            release();
+            return false;
+        }
+
         View layout = getLayout();
         if (layout == null || prevTaskListener != taskListener) {
             // TaskListener changed, recreate the layout for new surface parent.
             release();
-            createLayout(canShow);
-            return;
+            return createLayout(canShow);
         }
 
         boolean boundsUpdated = !mTaskConfig.windowConfiguration.getBounds().equals(
@@ -207,6 +222,8 @@ abstract class CompatUIWindowManagerAbstract extends WindowlessWindowManager {
             // Update layout for RTL.
             layout.setLayoutDirection(mTaskConfig.getLayoutDirection());
         }
+
+        return true;
     }
 
 
@@ -248,16 +265,16 @@ abstract class CompatUIWindowManagerAbstract extends WindowlessWindowManager {
         mTaskListener.attachChildSurfaceToTask(mTaskId, b);
     }
 
-    int getDisplayId() {
+    public int getDisplayId() {
         return mDisplayId;
     }
 
-    int getTaskId() {
+    public int getTaskId() {
         return mTaskId;
     }
 
     /** Releases the surface control and tears down the view hierarchy. */
-    void release() {
+    public void release() {
         // Hiding before releasing to avoid flickering when transitioning to the Home screen.
         View layout = getLayout();
         if (layout != null) {
@@ -278,7 +295,7 @@ abstract class CompatUIWindowManagerAbstract extends WindowlessWindowManager {
     }
 
     /** Re-layouts the view host and updates the surface position. */
-    void relayout() {
+    public void relayout() {
         if (mViewHost == null) {
             return;
         }
@@ -334,7 +351,7 @@ abstract class CompatUIWindowManagerAbstract extends WindowlessWindowManager {
     }
 
     /** Gets the layout params. */
-    private WindowManager.LayoutParams getWindowLayoutParams() {
+    protected WindowManager.LayoutParams getWindowLayoutParams() {
         View layout = getLayout();
         if (layout == null) {
             return new WindowManager.LayoutParams();
@@ -345,7 +362,7 @@ abstract class CompatUIWindowManagerAbstract extends WindowlessWindowManager {
     }
 
     /** Gets the layout params given the width and height of the layout. */
-    private WindowManager.LayoutParams getWindowLayoutParams(int width, int height) {
+    protected WindowManager.LayoutParams getWindowLayoutParams(int width, int height) {
         final WindowManager.LayoutParams winParams = new WindowManager.LayoutParams(
                 // Cannot be wrap_content as this determines the actual window size
                 width, height,

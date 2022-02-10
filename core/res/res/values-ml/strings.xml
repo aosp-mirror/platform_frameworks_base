@@ -70,7 +70,6 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"മൂന്നുവിധത്തിൽ കോൾ ചെയ്യൽ"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"ആവശ്യമില്ലാത്ത ശല്യപ്പെടുത്തൽ കോളുകൾ നിരസിക്കൽ"</string>
     <string name="CndMmi" msgid="185136449405618437">"കോൾ ചെയ്യാനുള്ള നമ്പർ ഡെലിവറി"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"ശല്യം ചെയ്യരുത്"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"നിയന്ത്രിക്കേണ്ട സ്ഥിര കോളർ ഐഡികൾ. അടുത്ത കോൾ: നിയന്ത്രിച്ചിട്ടുണ്ട്"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"നിയന്ത്രിക്കേണ്ട സ്ഥിര കോളർ ഐഡികൾ. അടുത്ത കോൾ: നിയന്ത്രിച്ചിട്ടില്ല"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"നിയന്ത്രിക്കേണ്ടതല്ലാത്ത സ്ഥിര കോളർ ഐഡികൾ. അടുത്ത കോൾ: നിയന്ത്രിച്ചിട്ടുണ്ട്"</string>
@@ -180,10 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"വാച്ചിലെ സ്റ്റോറേജ്  നിറഞ്ഞു. ഇടം ശൂന്യമാക്കാൻ കുറച്ച് ഫയലുകൾ ഇല്ലാതാക്കുക."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Android TV ഉപകരണ സ്‌റ്റോറേജ് നിറഞ്ഞിരിക്കുന്നു. ഇടമുണ്ടാക്കാൻ കുറച്ച് ഫയലുകൾ ഇല്ലാതാക്കുക."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"ഫോൺ സ്റ്റോറേജ്  കഴിഞ്ഞു. ഇടം ശൂന്യമാക്കാൻ ചില ഫയലുകൾ ഇല്ലാതാക്കുക."</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="other">സർട്ടിഫിക്കറ്റ് അതോറിറ്റികൾ ഇൻസ്റ്റാൾ ചെയ്തു</item>
-      <item quantity="one">സർട്ടിഫിക്കറ്റ് അതോറിറ്റി ഇൻസ്റ്റാൾ ചെയ്തു</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{സർട്ടിഫിക്കറ്റ് അതോറിറ്റി ഇൻസ്റ്റാൾ ചെയ്തു}other{സർട്ടിഫിക്കറ്റ് അതോറിറ്റികൾ ഇൻസ്റ്റാൾ ചെയ്തു}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"അജ്ഞാത മൂന്നാം കക്ഷി നിരീക്ഷിക്കാം"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ അഡ്‌മിൻ മുഖേന"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> നിരീക്ഷിക്കാം"</string>
@@ -203,6 +199,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"സെൻസർ അറിയിപ്പ് സേവനം"</string>
     <string name="twilight_service" msgid="8964898045693187224">"സന്ധ്യാസമയത്തെ സേവനം"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS സമയ അപ്ഡേറ്റ് സേവനം"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"ഉപകരണ നയ മാനേജർ സേവനം"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"സംഗീതം തിരിച്ചറിയൽ മാനേജര്‍ സേവനം"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"നിങ്ങളുടെ ഉപകരണം മായ്‌ക്കും"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"അഡ്‌മിൻ ആപ്പ് ഉപയോഗിക്കാനാകില്ല. നിങ്ങളുടെ ഉപകരണം ഇപ്പോൾ മായ്ക്കപ്പെടും.\n\nനിങ്ങൾക്ക് ചോദ്യങ്ങൾ ഉണ്ടെങ്കിൽ, നിങ്ങളുടെ സ്ഥാപനത്തിന്റെ അഡ്‌മിനെ ബന്ധപ്പെടുക."</string>
@@ -256,10 +253,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"മിക്ക സാഹചര്യങ്ങളിലും ഇത് ഉപയോഗിക്കുക. റിപ്പോർട്ടിന്റെ പുരോഗതി കാണാനും പ്രശ്നത്തെ കുറിച്ചുള്ള കൂടുതൽ വിശദാംശങ്ങൾ നൽകാനും സ്ക്രീൻഷോട്ടുകൾ എടുക്കാനും ഇത് അനുവദിക്കുന്നു. റിപ്പോർട്ടുചെയ്യാൻ നീണ്ട സമയം എടുക്കുന്നതും നിങ്ങൾ കുറച്ച് ഉപയോഗിക്കുന്നതുമായ ചില വിഭാഗങ്ങളെ ഇത് വിട്ടുകളഞ്ഞേക്കാം."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"പൂർണ്ണ റിപ്പോർട്ട്"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"നിങ്ങളുടെ ഉപകരണം പ്രതികരിക്കുന്നില്ലെങ്കിലോ അതിന് വേഗത വളരെ കുറവാണെങ്കിലോ നിങ്ങൾക്ക് എല്ലാ റിപ്പോർട്ട് വിഭാഗങ്ങളും ആവശ്യമുള്ളപ്പോഴോ, സിസ്റ്റത്തിന്റെ തടസ്സം പരിമിതപ്പെടുത്തുന്നതിന്, ഈ ഓപ്ഷൻ ഉപയോഗിക്കുക. കൂടുതൽ വിശദാംശങ്ങൾ നൽകാനോ അനുബന്ധ സ്ക്രീൻഷോട്ടുകൾ എടുക്കാനോ നിങ്ങളെ അനുവദിക്കില്ല."</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="other">ബഗ് റിപ്പോർട്ടിനായി <xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിൽ സ്ക്രീൻഷോട്ട് എടുക്കുന്നു.</item>
-      <item quantity="one">ബഗ് റിപ്പോർട്ടിനായി <xliff:g id="NUMBER_0">%d</xliff:g> സെക്കൻഡിൽ സ്ക്രീൻഷോട്ട് എടുക്കുന്നു.</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{ബഗ് റിപ്പോർട്ടിന് # സെക്കൻഡിൽ സ്ക്രീൻഷോട്ട് എടുക്കുന്നു.}other{ബഗ് റിപ്പോർട്ടിന് # സെക്കൻഡിൽ സ്ക്രീൻഷോട്ട് എടുക്കുന്നു.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"ബഗ് റിപ്പോർട്ടിന്റെ സ്ക്രീൻഷോട്ട് എടുത്തു"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"ബഗ് റിപ്പോർട്ടിന്റെ സ്ക്രീൻഷോട്ട് എടുക്കാനായില്ല"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"നിശബ്‌ദ മോഡ്"</string>
@@ -310,8 +304,14 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"നിങ്ങളുടെ കലണ്ടർ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS സന്ദേശങ്ങൾ അയയ്‌ക്കുകയും കാണുകയും ചെയ്യുക"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"ഫയലുകളും മീഡിയയും"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"നിങ്ങളുടെ ഉപകരണത്തിലെ ഫോട്ടോകളും മീഡിയയും ഫയലുകളും ആക്സസ് ചെയ്യുക"</string>
+    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
+    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"സംഗീതവും മറ്റ് ഓഡിയോയും"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"നിങ്ങളുടെ ഉപകരണത്തിലെ ഓഡിയോ ഫയലുകൾ ആക്‌സസ് ചെയ്യുക"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"ഫോട്ടോകളും വീഡിയോകളും"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"നിങ്ങളുടെ ഉപകരണത്തിലെ വീഡിയോ ഫയലുകൾ ആക്‌സസ് ചെയ്യുക"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"മൈക്രോഫോണ്‍"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ഓഡിയോ റെക്കോർഡ് ചെയ്യുക"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"ശാരീരിക ആക്റ്റിവിറ്റി"</string>
@@ -683,6 +683,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"സമന്വയ ഇവന്റുകളുടെ ചരിത്രവും ഡാറ്റ എത്രത്തോളം സമന്വയിപ്പിച്ചുവെന്നതും ഉൾപ്പെടെ, ഒരു അക്കൗണ്ടിനായി സമന്വയ സ്ഥിതിവിവരക്കണക്കുകൾ റീഡുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"നിങ്ങൾ പങ്കിടുന്ന സ്‌റ്റോറേജിലെ ഉള്ളടക്കങ്ങൾ വായിക്കുക"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"നിങ്ങൾ പങ്കിടുന്ന സ്‌റ്റോറേജിലെ ഉള്ളടക്കങ്ങൾ വായിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"പങ്കിട്ട സ്റ്റോറേജിൽ നിന്നുള്ള ഓഡിയോ ഫയലുകൾ വായിക്കുക"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"നിങ്ങളുടെ പങ്കിട്ട സ്‌റ്റോറേജിൽ നിന്നുള്ള ഓഡിയോ ഫയലുകൾ വായിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"പങ്കിട്ട സ്റ്റോറേജിൽ നിന്നുള്ള വീഡിയോ ഫയലുകൾ വായിക്കുക"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"നിങ്ങളുടെ പങ്കിട്ട സ്‌റ്റോറേജിൽ നിന്നുള്ള വീഡിയോ ഫയലുകൾ വായിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_readMediaImage" msgid="1507059005825769856">"പങ്കിട്ട സ്റ്റോറേജിൽ നിന്നുള്ള ചിത്ര ഫയലുകൾ വായിക്കുക"</string>
+    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"നിങ്ങളുടെ പങ്കിട്ട സ്‌റ്റോറേജിൽ നിന്നുള്ള ചിത്ര ഫയലുകൾ വായിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"നിങ്ങൾ പങ്കിടുന്ന സ്‌റ്റോറേജിലെ ഉള്ളടക്കങ്ങൾ പരിഷ്‌ക്കരിക്കുക അല്ലെങ്കിൽ ഇല്ലാതാക്കുക"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"നിങ്ങൾ പങ്കിടുന്ന സ്‌റ്റോറേജിലെ ഉള്ളടക്കങ്ങൾ എഴുതാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP കോളുകൾ വിളിക്കുക/സ്വീകരിക്കുക"</string>
@@ -729,8 +735,6 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"ഒരു കാരിയർ സന്ദേശമയയ്‌ക്കൽ സേവനത്തിന്റെ ഉയർന്ന നിലയിലുള്ള ഇന്റർഫേസിലേക്ക് ബന്ധിപ്പിക്കാൻ ദാതാവിനെ അനുവദിക്കുന്നു. സാധാരണ അപ്ലിക്കേഷനുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"കാരിയർ സേവനങ്ങളിലേക്ക് ബന്ധിപ്പിക്കുക"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"കാരിയർ സേവനങ്ങളെ ബന്ധിപ്പിക്കാൻ ഉടമയെ അനുവദിക്കുന്നു. സാധാരണ ആപ്പ്‌സിന് ഒരിക്കലും ആവശ്യമില്ല."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"\'ശല്യപ്പെടുത്തരുത്\' ആക്സസ് ചെയ്യുക"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"\'ശല്യപ്പെടുത്തരുത്\' കോൺഫിഗറേഷൻ വായിക്കുന്നതിനും എഴുതുന്നതിനും ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"അനുമതി ഉപയോഗം കാണാൻ ആരംഭിക്കുക"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"ഒരു ആപ്പിനുള്ള അനുമതി ഉപയോഗം ആരംഭിക്കാൻ ഹോൾഡറിനെ അനുവദിക്കുന്നു. സാധാരണ ആപ്പുകൾക്ക് ഒരിക്കലും ആവശ്യമില്ല."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"അനുമതിയുമായി ബന്ധപ്പെട്ട തീരുമാനങ്ങൾ കാണാൻ ആരംഭിക്കുക"</string>
@@ -1072,10 +1076,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"ടച്ച് വഴി പര്യവേക്ഷണം ചെയ്യൽ പ്രവർത്തനക്ഷമമാക്കാൻ <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> താൽപ്പര്യപ്പെടുന്നു. ടച്ച് വഴി പര്യവേക്ഷണം ചെയ്യൽ ഓൺ ചെയ്യുമ്പോൾ, നിങ്ങളുടെ വിരലിനടിയിലുള്ളവയുടെ വിവരണം കേൾക്കാനോ കാണാനോ അല്ലെങ്കിൽ ഫോണുമായി സംവദിക്കുന്ന ജെസ്റ്ററുകൾ നിർവഹിക്കാനോ കഴിയും."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 മാസം മുമ്പുള്ളത്"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"ഒരു മാസം മുമ്പ്"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="other">അവസാന <xliff:g id="COUNT_1">%d</xliff:g> ദിവസം</item>
-      <item quantity="one">അവസാന <xliff:g id="COUNT_0">%d</xliff:g> ദിവസം</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{അവസാന # ദിവസം}other{അവസാന # ദിവസം}}"</string>
     <string name="last_month" msgid="1528906781083518683">"കഴിഞ്ഞ മാസം"</string>
     <string name="older" msgid="1645159827884647400">"പഴയത്"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"<xliff:g id="DATE">%s</xliff:g>-ന്"</string>
@@ -1094,70 +1095,22 @@
     <string name="year" msgid="5182610307741238982">"വര്‍ഷം"</string>
     <string name="years" msgid="5797714729103773425">"വർഷം"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"ഇപ്പോൾ"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>മി</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>മി</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>മ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>മ</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ദി</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ദി</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>വർ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>വ</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>മിനിറ്റിൽ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>മിനിറ്റിൽ</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>മണിക്കൂറിൽ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>മണിക്കൂറിൽ</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ദിനത്തിൽ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ദിനത്തിൽ</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>വർഷത്തിൽ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>വർഷത്തിൽ</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> മിനിറ്റ് മുമ്പ്</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> മിനിറ്റ് മുമ്പ്</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> മണിക്കൂർ മുമ്പ്</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> മണിക്കൂർ മുമ്പ്</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ദിവസം മുമ്പ്</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ദിവസം മുമ്പ്</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> വർഷം മുമ്പ്</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> വർഷം മുമ്പ്</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> മിനിറ്റിൽ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> മിനിറ്റിൽ</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> മണിക്കൂറിൽ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> മണിക്കൂറിൽ</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ദിവസത്തിൽ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ദിവസത്തിൽ</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> വർഷത്തിൽ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> വർഷത്തിൽ</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g>മി"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g>മ"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g>ദിവസം"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g>വർഷം"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"<xliff:g id="COUNT">%d</xliff:g>മിനിറ്റിൽ"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g>മണിക്കൂറിൽ"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g>ദിവസത്തിൽ"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g>വർഷത്തിനുള്ളിൽ"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# മിനിറ്റ് മുമ്പ്}other{# മിനിറ്റ് മുമ്പ്}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# മണിക്കൂർ മുമ്പ്}other{# മണിക്കൂർ മുമ്പ്}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# ദിവസം മുമ്പ്}other{# ദിവസം മുമ്പ്}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{# വർഷം മുമ്പ്}other{# വർഷം മുമ്പ്}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# മിനിറ്റ്}other{# മിനിറ്റ്}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# മണിക്കൂർ}other{# മണിക്കൂർ}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# ദിവസം}other{# ദിവസം}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# വർഷം}other{# വർഷം}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"വീഡിയോ പ്രശ്‌നം"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"ഈ വീഡിയോ ഈ ഉപകരണത്തിൽ സ്ട്രീം ചെയ്യുന്നതിന് സാധുവായതല്ല."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"ഈ വീഡിയോ പ്ലേ ചെയ്യാനായില്ല."</string>
@@ -1187,10 +1140,8 @@
     <string name="deleteText" msgid="4200807474529938112">"ഇല്ലാതാക്കുക"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ടൈപ്പുചെയ്യൽ രീതി"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"ടെക്‌സ്‌റ്റ് പ്രവർത്തനങ്ങൾ"</string>
-    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
-    <skip />
-    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
-    <skip />
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"മടങ്ങുക"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"ഇൻപുട്ട് രീതി മാറുക"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"സംഭരണയിടം കഴിഞ്ഞു"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"ചില സിസ്റ്റം പ്രവർത്തനങ്ങൾ പ്രവർത്തിക്കണമെന്നില്ല."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"സിസ്‌റ്റത്തിനായി മതിയായ സംഭരണമില്ല. 250MB സൗജന്യ സംഭരണമുണ്ടെന്ന് ഉറപ്പുവരുത്തി പുനരാരംഭിക്കുക."</string>
@@ -1411,6 +1362,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"പരിശോധനാ സംവിധാന മോഡ് പ്രവർത്തനരഹിതമാക്കാൻ ഫാക്‌ടറി പുനഃക്രമീകരണം നിർവഹിക്കുക."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"സീരിയൽ കൺസോൾ പ്രവർത്തനക്ഷമമാക്കി"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"പ്രകടനത്തെ ബാധിച്ചു. പ്രവർത്തനരഹിതമാക്കാൻ, ബൂട്ട് ലോഡർ പരിശോധിക്കുക."</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"പരീക്ഷണാത്മക MTE പ്രവർത്തനക്ഷമമാക്കി"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"പ്രകടനത്തെയും സ്ഥിരതയേയും ബാധിച്ചേക്കാം. പ്രവർത്തനരഹിതമാക്കാൻ റീബൂട്ട് ചെയ്യുക. പ്രവർത്തനക്ഷമമാക്കിയത് arm64.memtag.bootctl ഉപയോഗിച്ചാണെങ്കിൽ, അത് മുൻകൂട്ടി തന്നെ ഒന്നുമില്ല എന്നാക്കി സജ്ജീകരിക്കുക."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"USB പോർട്ടിൽ ദ്രാവകമോ പൊടിയോ കണ്ടെത്തി"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"USB പോർട്ടർ സ്വയമേവ പ്രവർത്തനരഹിതമായി. കൂടുതലറിയാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"ഇനി USB പോർട്ട് ഉപയോഗിക്കാം"</string>
@@ -1547,10 +1500,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"ഒഴിവാക്കുക"</string>
     <string name="no_matches" msgid="6472699895759164599">"പൊരുത്തപ്പെടലുകൾ ഒന്നുമില്ല"</string>
     <string name="find_on_page" msgid="5400537367077438198">"പേജിൽ കണ്ടെത്തുക"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> / <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">ഒരു പൊരുത്തം</item>
-    </plurals>
+    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{# പൊരുത്തം}other{{total}-ൽ #-ാമത്തെ പൊരുത്തം}} }"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"പൂർത്തിയായി"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"പങ്കിടുന്ന സ്‌റ്റോറേജ് മായ്‌ക്കുന്നു…"</string>
     <string name="share" msgid="4157615043345227321">"പങ്കിടുക"</string>
@@ -1680,10 +1630,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"പാറ്റേൺ തെറ്റാണ്"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"പാസ്‌വേഡ് തെറ്റാണ്"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"പിൻ തെറ്റാണ്"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="other"><xliff:g id="NUMBER">%d</xliff:g> സെക്കൻഡുകൾക്കുള്ളിൽ വീണ്ടും ശ്രമിക്കുക.</item>
-      <item quantity="one">ഒരു സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക.</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"നിങ്ങളുടെ പാറ്റേൺ വരയ്‌ക്കുക"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"സിം പിൻ നൽകുക"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"പിൻ നൽകുക"</string>
@@ -1880,10 +1826,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"നിയന്ത്രണങ്ങൾ പരിഷ്‌ക്കരിക്കാൻ ഒരു പിൻ സൃഷ്‌ടിക്കുക"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"പിൻ നമ്പറുകൾ പൊരുത്തപ്പെടുന്നില്ല. വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"പിൻ തീരെ ചെറുതാണ്. 4 അക്കമെങ്കിലും ഉണ്ടായിരിക്കണം."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="other"><xliff:g id="COUNT">%d</xliff:g> സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക</item>
-      <item quantity="one">ഒരു സെക്കൻഡിനുള്ളിൽ വീണ്ടും ശ്രമിക്കുക</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"പിന്നീട് വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"പൂർണ്ണ സ്‌ക്രീനിൽ കാണുന്നു"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"അവസാനിപ്പിക്കാൻ, മുകളിൽ നിന്ന് താഴോട്ട് സ്വൈപ്പ് ചെയ്യുക."</string>
@@ -1911,46 +1853,20 @@
     <string name="data_saver_description" msgid="4995164271550590517">"ഡാറ്റാ ഉപയോഗം കുറയ്ക്കാൻ സഹായിക്കുന്നതിനായി പശ്ചാത്തലത്തിൽ ഡാറ്റ അയയ്ക്കുകയോ സ്വീകരിക്കുകയോ ചെയ്യുന്നതിൽ നിന്ന് ചില ആപ്പുകളെ ഡാറ്റാ സേവർ തടയുന്നു. നിങ്ങൾ നിലവിൽ ഉപയോഗിക്കുന്ന ഒരു ആപ്പിന് ഡാറ്റ ആക്‌സസ് ചെയ്യാനാകും, എന്നാൽ വല്ലപ്പോഴും മാത്രമെ സംഭവിക്കുന്നുള്ളു. ഇതിനർത്ഥം, ഉദാഹരണമായി നിങ്ങൾ ടാപ്പ് ചെയ്യുന്നത് വരെ ചിത്രങ്ങൾ പ്രദ‍‍‍ർശിപ്പിക്കുകയില്ല എന്നാണ്."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ഡാറ്റ സേവർ ഓണാക്കണോ?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ഓണാക്കുക"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="other">%1$d മിനിറ്റ് സമയത്തേക്ക് (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> വരെ)</item>
-      <item quantity="one">ഒരു മിനിറ്റ് സമയത്തേക്ക് (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> വരെ)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="other">%1$d മിനിറ്റത്തേക്ക് (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> വരെ)</item>
-      <item quantity="one">ഒരു മിനിറ്റത്തേക്ക് (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> വരെ)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="other">%1$d മണിക്കൂർ (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> വരെ)</item>
-      <item quantity="one">ഒരു മണിക്കൂർ (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> വരെ)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="other">%1$d മണിക്കൂറത്തേക്ക് (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> വരെ)</item>
-      <item quantity="one">ഒരു മണിക്കൂറത്തേക്ക് (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> വരെ)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="other">%d മിനിറ്റ് സമയത്തേക്ക്</item>
-      <item quantity="one">ഒരു മിനിറ്റ് സമയത്തേക്ക്</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="other">%d മിനിറ്റത്തേക്ക്</item>
-      <item quantity="one">ഒരു മിനിറ്റത്തേക്ക്</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="other">%d മണിക്കൂർ</item>
-      <item quantity="one">ഒരു മണിക്കൂർ</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="other">%d മണിക്കൂറത്തേക്ക്</item>
-      <item quantity="one">ഒരു മണിക്കൂറത്തേക്ക്</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{ഒരു മിനിറ്റ് സമയത്തേക്ക് ({formattedTime} വരെ)}other{# മിനിറ്റ് സമയത്തേക്ക് ({formattedTime} വരെ)}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{ഒരു മിനിറ്റ് നേരത്തേക്ക് ({formattedTime})}other{# മിനിറ്റ് നേരത്തേക്ക് ({formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{ഒരു മണിക്കൂർ നേരത്തേക്ക് ({formattedTime} വരെ)}other{# മണിക്കൂർ നേരത്തേക്ക് ({formattedTime} വരെ)}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{ഒരു മണിക്കൂർ നേരത്തേക്ക് ({formattedTime})}other{# മണിക്കൂർ നേരത്തേക്ക് ({formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{ഒരു മിനിറ്റ് നേരത്തേക്ക്}other{# മിനിറ്റ് നേരത്തേക്ക്}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{ഒരു മിനിറ്റ് നേരത്തേക്ക്}other{# മിനിറ്റ് നേരത്തേക്ക്}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{ഒരു മണിക്കൂർ നേരത്തേക്ക്}other{# മണിക്കൂർ നേരത്തേക്ക്}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{ഒരു മണിക്കൂർ നേരത്തേക്ക്}other{# മണിക്കൂർ നേരത്തേക്ക്}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> വരെ"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> വരെ"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> വരെ (അടുത്ത അലാറം)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"നിങ്ങൾ ഓഫാക്കുന്നത് വരെ"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"\'ശല്ല്യപ്പെടുത്തരുത്\' ഓഫാക്കുന്നതുവരെ"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"ചുരുക്കുക"</string>
-    <string name="zen_mode_feature_name" msgid="3785547207263754500">"ശല്യപ്പെടുത്തരുത്"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"പ്രവർത്തനരഹിതമായ സമയം"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"പ്രവൃത്തിദിനരാവ്"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"വാരാന്ത്യം"</string>
@@ -1989,10 +1905,6 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"ഇൻകമിംഗ് കോൾ"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"സജീവമായ കോൾ"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"ഇൻകമിംഗ് കോൾ സ്‌ക്രീൻ ചെയ്യുന്നു"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> എണ്ണം തിരഞ്ഞെടുത്തു</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> എണ്ണം തിരഞ്ഞെടുത്തു</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"വർഗ്ഗീകരിച്ചിട്ടില്ലാത്ത"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ഈ അറിയിപ്പുകളുടെ പ്രാധാന്യം നിങ്ങൾ സജ്ജീകരിച്ചു."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ഉൾപ്പെട്ടിട്ടുള്ള ആളുകളെ കണക്കിലെടുക്കുമ്പോള്‍ ഇത് പ്രധാനപ്പെട്ടതാണ്‌."</string>
@@ -2058,10 +1970,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"സ്വയമേവ പൂരിപ്പിക്കാനായി സംരക്ഷിക്കുക"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"ഉള്ളടക്കങ്ങൾ സ്വയമേവ പൂരിപ്പിക്കാൻ കഴിയില്ല"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"സ്വയമേവ പൂരിപ്പിക്കൽ നിർദ്ദേശങ്ങളൊന്നുമില്ല"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> സ്വയമേവ പൂരിപ്പിക്കൽ നിർദ്ദേശങ്ങൾ</item>
-      <item quantity="one">ഒരു സ്വയമേവ പൂരിപ്പിക്കൽ നിർദ്ദേശം</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{ഒരു സ്വയമേവ പൂരിപ്പിക്കൽ നിർദ്ദേശം}other{# സ്വയമേവ പൂരിപ്പിക്കൽ നിർദ്ദേശങ്ങൾ}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" എന്നതിൽ സംരക്ഷിക്കണോ?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"<xliff:g id="TYPE">%1$s</xliff:g>, "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" എന്നതിൽ സംരക്ഷിക്കണോ?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> എന്നിവ "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" എന്നതിൽ സംരക്ഷിക്കണോ?"</string>
@@ -2108,15 +2017,22 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"അൺഇൻസ്‌റ്റാള്‍ ചെയ്യുക"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"എന്തായാലും തുറക്കുക"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"ദോഷകരമായ ആപ്പ് കണ്ടെത്തി"</string>
+    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
+    <skip />
+    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
+    <skip />
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_2">%2$s</xliff:g> സ്ലൈസുകൾ കാണിക്കാൻ <xliff:g id="APP_0">%1$s</xliff:g> താൽപ്പര്യപ്പെടുന്നു"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"എഡിറ്റ് ചെയ്യുക"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"കോളുകളും അറിയിപ്പുകളും വൈബ്രേറ്റ് ചെയ്യും"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"കോളുകളും അറിയിപ്പുകളും മ്യൂട്ട് ചെയ്യപ്പെടും"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"സിസ്‌റ്റത്തിലെ മാറ്റങ്ങൾ"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"ശല്യപ്പെടുത്തരുത്"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"പുതിയത്: അറിയിപ്പുകളെ \'ശല്യപ്പെടുത്തരുത്\' അദൃശ്യമാക്കുന്നു"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"കൂടുതലറിയാനും മാറ്റാനും ടാപ്പ് ചെയ്യുക."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"\'ശല്യപ്പെടുത്തരുത്\' മാറ്റി"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"എന്തിനെയാണ് ബ്ലോക്ക് ചെയ്‌തതെന്ന് പരിശോധിക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"സിസ്റ്റം"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"ക്രമീകരണം"</string>
@@ -2133,7 +2049,6 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ശരി"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ഓഫാക്കുക"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"കൂടുതലറിയുക"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12-ൽ Android അഡാപ്റ്റീവ് അറിയിപ്പുകൾക്ക് പകരം മെച്ചപ്പെടുത്തിയ അറിയിപ്പുകൾ ഉൾപ്പെടുത്തിയിരിക്കുന്നു. നിർദ്ദേശിക്കുന്ന പ്രവർത്തനങ്ങളും മറുപടികളും കാണിക്കുന്നതിനൊപ്പം ഈ ഫീച്ചർ നിങ്ങളുടെ അറിയിപ്പുകൾ ഓർഗനൈസ് ചെയ്യുന്നു.\n\nമെച്ചപ്പെടുത്തിയ അറിയിപ്പുകൾക്ക്, കോൺടാക്റ്റ് പേരുകളും സന്ദേശങ്ങളും പോലുള്ള വ്യക്തിപരമായ വിവരങ്ങൾ ഉൾപ്പെടെയുള്ള അറിയിപ്പ് ഉള്ളടക്കം ആക്‌സസ് ചെയ്യാനാകും. ഫോൺ കോളുകൾക്ക് മറുപടി നൽകുക, \'ശല്യപ്പെടുത്തരുത്\' നിയന്ത്രിക്കുക എന്നിവ പോലെ, അറിയിപ്പുകൾ ഡിസ്‌മിസ് ചെയ്യാനും അവയ്‌ക്ക് മറുപടി നൽകാനും ഈ ഫീച്ചറിന് കഴിയും."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ദിനചര്യ മോഡ് വിവരത്തെ കുറിച്ചുള്ള അറിയിപ്പ്"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"സാധാരണയുള്ളതിലും നേരത്തെ ബാറ്ററിയുടെ ചാർജ് തീർന്നേക്കാം"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ബാറ്ററി ലൈഫ് വര്‍ദ്ധിപ്പിക്കാൻ, ബാറ്ററി ലാഭിക്കൽ സജീവമാക്കി"</string>
@@ -2162,10 +2077,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"<xliff:g id="EXTENSION">%1$s</xliff:g> അവതരണം"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"ഫ്ലൈറ്റ് മോഡ് ഓണാക്കിയിരിക്കുമ്പോഴും Bluetooth ലഭ്യമാകും"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"ലോഡ് ചെയ്യുന്നു"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ഫയലുകൾ</item>
-      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ഫയൽ</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # ഫയൽ}other{{file_name} + # ഫയലുകൾ}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"പങ്കിടാൻ, നിർദ്ദേശിക്കപ്പെട്ട ആളുകളൊന്നുമില്ല"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"ആപ്പുകളുടെ ലിസ്‌റ്റ്"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"ഈ ആപ്പിന് റെക്കോർഡ് അനുമതി നൽകിയിട്ടില്ല, എന്നാൽ ഈ USB ഉപകരണത്തിലൂടെ ഓഡിയോ ക്യാപ്‌ചർ ചെയ്യാനാവും."</string>
@@ -2177,10 +2089,16 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"പവർ ഡയലോഗ്"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"ലോക്ക് സ്‌ക്രീൻ"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"സ്ക്രീൻഷോട്ട്"</string>
+    <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"ഹെഡ്സെറ്റ് ഹുക്ക്"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"സ്ക്രീനിലെ ഉപയോഗസഹായി കുറുക്കുവഴി"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"സ്ക്രീനിലെ ഉപയോഗസഹായി കുറുക്കുവഴി ചൂസർ"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"ഉപയോഗസഹായി കുറുക്കുവഴി"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"അറിയിപ്പ് ഷെയ്‌ഡ് ഡിസ്‌മിസ് ചെയ്യുക"</string>
+    <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Dpad അപ്പ്"</string>
+    <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Dpad ഡൗൺ"</string>
+    <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Dpad ലെഫ്റ്റ്"</string>
+    <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Dpad റൈറ്റ്"</string>
+    <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Dpad സെന്റർ"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിന്റെ അടിക്കുറിപ്പ് ബാർ."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> നിയന്ത്രിത ബക്കറ്റിലേക്ക് നീക്കി"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2201,8 +2119,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"ഓണാക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ഔദ്യോഗിക ആപ്പുകൾ ഇല്ല"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"വ്യക്തിപര ആപ്പുകൾ ഇല്ല"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"വ്യക്തിപരമായ പ്രൊഫൈലിൽ <xliff:g id="APP">%s</xliff:g> എന്നതിൽ തുറക്കണോ?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"ഔദ്യോഗിക പ്രൊഫൈലിൽ <xliff:g id="APP">%s</xliff:g> എന്നതിൽ തുറക്കണോ?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"വ്യക്തിപരമായ ബ്രൗസർ ഉപയോഗിക്കുക"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ഔദ്യോഗിക ബ്രൗസർ ഉപയോഗിക്കുക"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"സിം നെറ്റ്‌വർക്ക് അൺലോക്ക് ചെയ്യാനുള്ള പിൻ"</string>
@@ -2332,4 +2252,9 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> എന്നതിന് നിങ്ങളുടെ സ്ക്രീൻ കാണാനും നിയന്ത്രിക്കാനും കഴിയും. അവലോകനം ചെയ്യുന്നതിന് ടാപ്പ് ചെയ്യുക."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> വിവർത്തനം ചെയ്‌തു."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> എന്നതിൽ നിന്ന് <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> എന്നതിലേക്ക് സന്ദേശം വിവർത്തനം ചെയ്തു."</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"പശ്ചാത്തല ആക്റ്റിവിറ്റി"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"പശ്ചാത്തല ആക്റ്റിവിറ്റി"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> ആപ്പ് പശ്ചാത്തലത്തിൽ റൺ ചെയ്യുന്നു, ഇത് ബാറ്ററി ഉപയോഗിച്ചുതീർക്കുന്നു. അവലോകനം ചെയ്യാൻ ടാപ്പ് ചെയ്യുക."</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"പശ്ചാത്തലത്തിൽ <xliff:g id="APP">%1$s</xliff:g> ആപ്പ് ഒരുപാട് നേരമായി റൺ ചെയ്യുന്നു. അവലോകനം ചെയ്യാൻ ടാപ്പ് ചെയ്യുക."</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"സജീവമായ ആപ്പുകൾ പരിശോധിക്കുക"</string>
 </resources>

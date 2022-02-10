@@ -80,6 +80,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.ActivityStarter;
@@ -88,11 +89,14 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.SecurityController;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 
 @QSScope
-class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListener {
+class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListener,
+        VisibilityChangedDispatcher {
     protected static final String TAG = "QSSecurityFooter";
     protected static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final boolean DEBUG_FORCE_VISIBLE = false;
@@ -107,10 +111,15 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
     private final ActivityStarter mActivityStarter;
     private final Handler mMainHandler;
     private final UserTracker mUserTracker;
+    private final DialogLaunchAnimator mDialogLaunchAnimator;
+
+    private final AtomicBoolean mShouldUseSettingsButton = new AtomicBoolean(false);
 
     private AlertDialog mDialog;
-    private QSTileHost mHost;
     protected H mHandler;
+
+    // Does it move between footer and header? Remove this once all the flagging is removed
+    private boolean mIsMovable = true;
 
     private boolean mIsVisible;
     @Nullable
@@ -119,10 +128,14 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
     @Nullable
     private Drawable mPrimaryFooterIconDrawable;
 
+    @Nullable
+    private VisibilityChangedDispatcher.OnVisibilityChangedListener mVisibilityChangedListener;
+
     @Inject
     QSSecurityFooter(@Named(QS_SECURITY_FOOTER_VIEW) View rootView,
             UserTracker userTracker, @Main Handler mainHandler, ActivityStarter activityStarter,
-            SecurityController securityController, @Background Looper bgLooper) {
+            SecurityController securityController, DialogLaunchAnimator dialogLaunchAnimator,
+            @Background Looper bgLooper) {
         mRootView = rootView;
         mRootView.setOnClickListener(this);
         mFooterText = mRootView.findViewById(R.id.footer_text);
@@ -135,10 +148,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         mSecurityController = securityController;
         mHandler = new H(bgLooper);
         mUserTracker = userTracker;
-    }
-
-    public void setHostEnvironment(QSTileHost host) {
-        mHost = host;
+        mDialogLaunchAnimator = dialogLaunchAnimator;
     }
 
     public void setListening(boolean listening) {
@@ -150,23 +160,31 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
         }
     }
 
+    @Override
+    public void setOnVisibilityChangedListener(
+            @Nullable OnVisibilityChangedListener onVisibilityChangedListener) {
+        mVisibilityChangedListener = onVisibilityChangedListener;
+    }
+
     public void onConfigurationChanged() {
         FontSizeUtils.updateFontSize(mFooterText, R.dimen.qs_tile_text_size);
 
-        Resources r = mContext.getResources();
+        if (mIsMovable) {
+            Resources r = mContext.getResources();
 
-        mFooterText.setMaxLines(r.getInteger(R.integer.qs_security_footer_maxLines));
-        int padding = r.getDimensionPixelSize(R.dimen.qs_footer_padding);
-        mRootView.setPaddingRelative(padding, padding, padding, padding);
+            mFooterText.setMaxLines(r.getInteger(R.integer.qs_security_footer_maxLines));
+            int padding = r.getDimensionPixelSize(R.dimen.qs_footer_padding);
+            mRootView.setPaddingRelative(padding, padding, padding, padding);
 
-        int bottomMargin = r.getDimensionPixelSize(R.dimen.qs_footers_margin_bottom);
-        ViewGroup.MarginLayoutParams lp =
-                (ViewGroup.MarginLayoutParams) mRootView.getLayoutParams();
-        lp.bottomMargin = bottomMargin;
-        lp.width = r.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT
-                ? MATCH_PARENT : WRAP_CONTENT;
-        mRootView.setLayoutParams(lp);
+            int bottomMargin = r.getDimensionPixelSize(R.dimen.qs_footers_margin_bottom);
+            ViewGroup.MarginLayoutParams lp =
+                    (ViewGroup.MarginLayoutParams) mRootView.getLayoutParams();
+            lp.bottomMargin = bottomMargin;
+            lp.width = r.getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT
+                    ? MATCH_PARENT : WRAP_CONTENT;
+            mRootView.setLayoutParams(lp);
 
+        }
         mRootView.setBackground(mContext.getDrawable(R.drawable.qs_security_footer_background));
     }
 
@@ -455,23 +473,27 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
     public void onClick(DialogInterface dialog, int which) {
         if (which == DialogInterface.BUTTON_NEGATIVE) {
             final Intent intent = new Intent(Settings.ACTION_ENTERPRISE_PRIVACY_SETTINGS);
-            mDialog.dismiss();
+            dialog.dismiss();
             // This dismisses the shade on opening the activity
             mActivityStarter.postStartActivityDismissingKeyguard(intent, 0);
         }
     }
 
     private void createDialog() {
-        mDialog = new SystemUIDialog(mContext, 0); // Use mContext theme
-        mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        mDialog.setButton(DialogInterface.BUTTON_POSITIVE, getPositiveButton(), this);
-        mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getNegativeButton(), this);
+        mShouldUseSettingsButton.set(false);
+        final View view = createDialogView();
+        mMainHandler.post(() -> {
+            mDialog = new SystemUIDialog(mContext, 0); // Use mContext theme
+            mDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            mDialog.setButton(DialogInterface.BUTTON_POSITIVE, getPositiveButton(), this);
+            mDialog.setButton(DialogInterface.BUTTON_NEGATIVE,
+                    mShouldUseSettingsButton.get() ? getSettingsButton() : getNegativeButton(),
+                    this);
 
-        mDialog.setView(createDialogView());
+            mDialog.setView(view);
 
-        mDialog.show();
-        mDialog.getWindow().setLayout(MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
+            mDialogLaunchAnimator.showFromView(mDialog, mRootView);
+        });
     }
 
     @VisibleForTesting
@@ -510,7 +532,7 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
             TextView deviceManagementWarning =
                     (TextView) dialogView.findViewById(R.id.device_management_warning);
             deviceManagementWarning.setText(managementMessage);
-            mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getSettingsButton(), this);
+            mShouldUseSettingsButton.set(true);
         }
 
         // ca certificate section
@@ -782,6 +804,9 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
                 mFooterText.setText(mFooterTextContent);
             }
             mRootView.setVisibility(mIsVisible || DEBUG_FORCE_VISIBLE ? View.VISIBLE : View.GONE);
+            if (mVisibilityChangedListener != null) {
+                mVisibilityChangedListener.onVisibilityChanged(mRootView.getVisibility());
+            }
         }
     };
 
@@ -814,7 +839,6 @@ class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListen
             } catch (Throwable t) {
                 final String error = "Error in " + name;
                 Log.w(TAG, error, t);
-                mHost.warn(error, t);
             }
         }
     }

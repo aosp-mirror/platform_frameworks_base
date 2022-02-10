@@ -117,6 +117,7 @@ import com.android.server.am.AppBindServiceEventsTracker.AppBindServiceEventsPol
 import com.android.server.am.AppBroadcastEventsTracker.AppBroadcastEventsPolicy;
 import com.android.server.am.AppFGSTracker.AppFGSPolicy;
 import com.android.server.am.AppMediaSessionTracker.AppMediaSessionPolicy;
+import com.android.server.am.AppRestrictionController.ConstantsObserver;
 import com.android.server.am.AppRestrictionController.NotificationHelper;
 import com.android.server.am.AppRestrictionController.UidBatteryUsageProvider;
 import com.android.server.am.BaseAppStateTimeEvents.BaseTimeEvent;
@@ -350,6 +351,22 @@ public final class BackgroundRestrictionTest {
 
     @Test
     public void testTogglingBackgroundRestrict() throws Exception {
+        DeviceConfigSession<Boolean> bgAutoRestrictedBucketOnBgRestriction = null;
+        try {
+            bgAutoRestrictedBucketOnBgRestriction = new DeviceConfigSession<>(
+                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                    ConstantsObserver.KEY_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION,
+                    DeviceConfig::getBoolean,
+                    ConstantsObserver.DEFAULT_BG_AUTO_RESTRICTED_BUCKET_ON_BG_RESTRICTION);
+            bgAutoRestrictedBucketOnBgRestriction.set(true);
+
+            testTogglingBackgroundRestrictInternal();
+        } finally {
+            closeIfNotNull(bgAutoRestrictedBucketOnBgRestriction);
+        }
+    }
+
+    private void testTogglingBackgroundRestrictInternal() throws Exception {
         final int testPkgIndex = 2;
         final String testPkgName = TEST_PACKAGE_BASE + testPkgIndex;
         final int testUser = TEST_USER0;
@@ -561,6 +578,7 @@ public final class BackgroundRestrictionTest {
 
             mCurrentTimeMillis = 10_000L;
             doReturn(mCurrentTimeMillis - windowMs).when(stats).getStatsStartTimestamp();
+            doReturn(mCurrentTimeMillis).when(stats).getStatsEndTimestamp();
             doReturn(statsList).when(mBatteryStatsInternal).getBatteryUsageStats(anyObject());
 
             runTestBgCurrentDrainMonitorOnce(listener, stats, uids,
@@ -568,6 +586,8 @@ public final class BackgroundRestrictionTest {
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros,
                     () -> {
                         doReturn(mCurrentTimeMillis).when(stats).getStatsStartTimestamp();
+                        doReturn(mCurrentTimeMillis + windowMs)
+                                .when(stats).getStatsEndTimestamp();
                         mCurrentTimeMillis += windowMs + 1;
                         try {
                             listener.verify(timeout, testUid, testPkgName,
@@ -583,6 +603,8 @@ public final class BackgroundRestrictionTest {
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros,
                     () -> {
                         doReturn(mCurrentTimeMillis).when(stats).getStatsStartTimestamp();
+                        doReturn(mCurrentTimeMillis + windowMs)
+                                .when(stats).getStatsEndTimestamp();
                         mCurrentTimeMillis += windowMs + 1;
                         // It should have gone to the restricted bucket.
                         listener.verify(timeout, testUid, testPkgName,
@@ -599,6 +621,8 @@ public final class BackgroundRestrictionTest {
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros,
                     () -> {
                         doReturn(mCurrentTimeMillis).when(stats).getStatsStartTimestamp();
+                        doReturn(mCurrentTimeMillis + windowMs)
+                                .when(stats).getStatsEndTimestamp();
                         mCurrentTimeMillis += windowMs + 1;
                         // We won't change restriction level until user interactions.
                         try {
@@ -621,6 +645,8 @@ public final class BackgroundRestrictionTest {
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros,
                     () -> {
                         doReturn(mCurrentTimeMillis).when(stats).getStatsStartTimestamp();
+                        doReturn(mCurrentTimeMillis + windowMs)
+                                .when(stats).getStatsEndTimestamp();
                         mCurrentTimeMillis += windowMs + 1;
                         mIdleStateListener.onUserInteractionStarted(testPkgName, testUser);
                         waitForIdleHandler(mBgRestrictionController.getBackgroundHandler());
@@ -643,6 +669,8 @@ public final class BackgroundRestrictionTest {
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros,
                     () -> {
                         doReturn(mCurrentTimeMillis).when(stats).getStatsStartTimestamp();
+                        doReturn(mCurrentTimeMillis + windowMs)
+                                .when(stats).getStatsEndTimestamp();
                         mCurrentTimeMillis += windowMs + 1;
                         // It should have gone to the restricted bucket.
                         listener.verify(timeout, testUid, testPkgName,
@@ -660,6 +688,8 @@ public final class BackgroundRestrictionTest {
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros,
                     () -> {
                         doReturn(mCurrentTimeMillis).when(stats).getStatsStartTimestamp();
+                        doReturn(mCurrentTimeMillis + windowMs)
+                                .when(stats).getStatsEndTimestamp();
                         mCurrentTimeMillis += windowMs + 1;
                         // We won't change restriction level until user interactions.
                         try {
@@ -685,6 +715,8 @@ public final class BackgroundRestrictionTest {
                     new double[]{0, restrictBucketThresholdMah - 1}, zeros,
                     () -> {
                         doReturn(mCurrentTimeMillis).when(stats).getStatsStartTimestamp();
+                        doReturn(mCurrentTimeMillis + windowMs)
+                                .when(stats).getStatsEndTimestamp();
                         mCurrentTimeMillis += windowMs + 1;
                         // We won't change restriction level automatically because it needs
                         // user consent.
@@ -1317,6 +1349,7 @@ public final class BackgroundRestrictionTest {
 
             mCurrentTimeMillis = 10_000L;
             doReturn(mCurrentTimeMillis - windowMs).when(stats).getStatsStartTimestamp();
+            doReturn(mCurrentTimeMillis).when(stats).getStatsEndTimestamp();
             doReturn(statsList).when(mBatteryStatsInternal).getBatteryUsageStats(anyObject());
 
             // Run with a media playback service which starts/stops immediately, we should
@@ -1631,6 +1664,7 @@ public final class BackgroundRestrictionTest {
         listener.mLatchHolder[0] = new CountDownLatch(1);
         if (initialBg != null) {
             doReturn(mCurrentTimeMillis).when(stats).getStatsStartTimestamp();
+            doReturn(mCurrentTimeMillis + windowMs).when(stats).getStatsEndTimestamp();
             mCurrentTimeMillis += windowMs + 1;
             setUidBatteryConsumptions(stats, uids, initialBg, initialFgs, initialFg);
             mAppBatteryExemptionTracker.reset();
@@ -1645,6 +1679,8 @@ public final class BackgroundRestrictionTest {
                     runTestBgCurrentDrainMonitorOnce(listener, stats, uids, bg, fgs, fg, false,
                             () -> {
                                 doReturn(mCurrentTimeMillis).when(stats).getStatsStartTimestamp();
+                                doReturn(mCurrentTimeMillis + windowMs)
+                                        .when(stats).getStatsEndTimestamp();
                                 mCurrentTimeMillis += windowMs + 1;
                                 if (expectingTimeout) {
                                     try {

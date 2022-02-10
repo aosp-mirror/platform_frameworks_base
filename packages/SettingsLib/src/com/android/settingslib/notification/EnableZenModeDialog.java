@@ -16,6 +16,7 @@
 
 package com.android.settingslib.notification;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -42,8 +43,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.policy.PhoneWindow;
 import com.android.settingslib.R;
 
@@ -71,6 +70,9 @@ public class EnableZenModeDialog {
 
     private static final int SECONDS_MS = 1000;
     private static final int MINUTES_MS = 60 * SECONDS_MS;
+
+    @Nullable
+    private final ZenModeDialogMetricsLogger mMetricsLogger;
 
     @VisibleForTesting
     protected Uri mForeverId;
@@ -102,13 +104,16 @@ public class EnableZenModeDialog {
     }
 
     public EnableZenModeDialog(Context context, int themeResId) {
-        this(context, themeResId, false /* cancelIsNeutral */);
+        this(context, themeResId, false /* cancelIsNeutral */,
+                new ZenModeDialogMetricsLogger(context));
     }
 
-    public EnableZenModeDialog(Context context, int themeResId, boolean cancelIsNeutral) {
+    public EnableZenModeDialog(Context context, int themeResId, boolean cancelIsNeutral,
+            ZenModeDialogMetricsLogger metricsLogger) {
         mContext = context;
         mThemeResId = themeResId;
         mCancelIsNeutral = cancelIsNeutral;
+        mMetricsLogger = metricsLogger;
     }
 
     public AlertDialog createDialog() {
@@ -129,17 +134,11 @@ public class EnableZenModeDialog {
                                 ConditionTag tag = getConditionTagAt(checkedId);
 
                                 if (isForever(tag.condition)) {
-                                    MetricsLogger.action(mContext,
-                                            MetricsProto.MetricsEvent.
-                                                    NOTIFICATION_ZEN_MODE_TOGGLE_ON_FOREVER);
+                                    mMetricsLogger.logOnEnableZenModeForever();
                                 } else if (isAlarm(tag.condition)) {
-                                    MetricsLogger.action(mContext,
-                                            MetricsProto.MetricsEvent.
-                                                    NOTIFICATION_ZEN_MODE_TOGGLE_ON_ALARM);
+                                    mMetricsLogger.logOnEnableZenModeUntilAlarm();
                                 } else if (isCountdown(tag.condition)) {
-                                    MetricsLogger.action(mContext,
-                                            MetricsProto.MetricsEvent.
-                                                    NOTIFICATION_ZEN_MODE_TOGGLE_ON_COUNTDOWN);
+                                    mMetricsLogger.logOnEnableZenModeUntilCountdown();
                                 } else {
                                     Slog.d(TAG, "Invalid manual condition: " + tag.condition);
                                 }
@@ -222,8 +221,7 @@ public class EnableZenModeDialog {
                 if (isChecked) {
                     tag.rb.setChecked(true);
                     if (DEBUG) Log.d(TAG, "onCheckedChanged " + conditionId);
-                    MetricsLogger.action(mContext,
-                            MetricsProto.MetricsEvent.QS_DND_CONDITION_SELECT);
+                    mMetricsLogger.logOnConditionSelected();
                     updateAlarmWarningText(tag.condition);
                 }
             }
@@ -435,7 +433,7 @@ public class EnableZenModeDialog {
     }
 
     private void onClickTimeButton(View row, ConditionTag tag, boolean up, int rowId) {
-        MetricsLogger.action(mContext, MetricsProto.MetricsEvent.QS_DND_TIME, up);
+        mMetricsLogger.logOnClickTimeButton(up);
         Condition newCondition = null;
         final int N = MINUTE_BUCKETS.length;
         if (mBucketIndex == -1) {

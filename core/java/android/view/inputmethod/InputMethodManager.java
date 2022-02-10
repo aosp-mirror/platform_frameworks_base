@@ -115,6 +115,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * Central system API to the overall input method framework (IMF) architecture,
@@ -426,6 +427,8 @@ public final class InputMethodManager {
     int mCursorSelEnd;
     int mCursorCandStart;
     int mCursorCandEnd;
+    int mInitialSelStart;
+    int mInitialSelEnd;
 
     /**
      * The instance that has previously been sent to the input method.
@@ -468,6 +471,13 @@ public final class InputMethodManager {
     @Nullable
     @GuardedBy("mH")
     private InputMethodSessionWrapper mCurrentInputMethodSession = null;
+    /**
+     * Encapsulates IPCs to the currently connected AccessibilityServices.
+     */
+    @Nullable
+    @GuardedBy("mH")
+    private final SparseArray<InputMethodSessionWrapper> mAccessibilityInputMethodSession =
+            new SparseArray<>();
 
     InputChannel mCurChannel;
     ImeInputEventSender mCurSender;
@@ -499,6 +509,8 @@ public final class InputMethodManager {
     static final int MSG_TIMEOUT_INPUT_EVENT = 6;
     static final int MSG_FLUSH_INPUT_EVENT = 7;
     static final int MSG_REPORT_FULLSCREEN_MODE = 10;
+    static final int MSG_BIND_ACCESSIBILITY_SERVICE = 11;
+    static final int MSG_UNBIND_ACCESSIBILITY_SERVICE = 12;
 
     private static boolean isAutofillUIShowing(View servedView) {
         AutofillManager afm = servedView.getContext().getSystemService(AutofillManager.class);
@@ -626,6 +638,7 @@ public final class InputMethodManager {
                 if (mCurrentInputMethodSession != null) {
                     mCurrentInputMethodSession.finishInput();
                 }
+                forAccessibilitySessions(InputMethodSessionWrapper::finishInput);
             }
         }
 
@@ -881,6 +894,7 @@ public final class InputMethodManager {
                         if (mBindSequence != sequence) {
                             return;
                         }
+                        clearAllAccessibilityBindingLocked();
                         clearBindingLocked();
                         // If we were actively using the last input method, then
                         // we would like to re-connect to the next input method.
@@ -893,6 +907,73 @@ public final class InputMethodManager {
                     if (startInput) {
                         startInputInner(
                                 StartInputReason.UNBOUND_FROM_IMMS, null, 0, 0, 0);
+                    }
+                    return;
+                }
+                case MSG_BIND_ACCESSIBILITY_SERVICE: {
+                    final int id = msg.arg1;
+                    final InputBindResult res = (InputBindResult) msg.obj;
+                    if (DEBUG) {
+                        Log.i(TAG, "handleMessage: MSG_BIND_ACCESSIBILITY " + res.sequence
+                                + "," + res.id);
+                    }
+                    synchronized (mH) {
+                        if (mBindSequence < 0 || mBindSequence != res.sequence) {
+                            Log.w(TAG, "Ignoring onBind: cur seq=" + mBindSequence
+                                    + ", given seq=" + res.sequence);
+                            if (res.channel != null && res.channel != mCurChannel) {
+                                res.channel.dispose();
+                            }
+                            return;
+                        }
+
+                        // Since IMM can start inputting text before a11y sessions are back,
+                        // we send a notification so that the a11y service knows the session is
+                        // registered and update the a11y service with the current cursor positions.
+                        if (res.accessibilitySessions != null) {
+                            InputMethodSessionWrapper wrapper =
+                                    InputMethodSessionWrapper.createOrNull(
+                                            res.accessibilitySessions.get(id));
+                            if (wrapper != null) {
+                                mAccessibilityInputMethodSession.put(id, wrapper);
+                                if (mServedInputConnection != null) {
+                                    wrapper.updateSelection(mInitialSelStart, mInitialSelEnd,
+                                            mCursorSelStart, mCursorSelEnd, mCursorCandStart,
+                                            mCursorCandEnd);
+                                } else {
+                                    // If an a11y service binds before input starts, we should still
+                                    // send a notification because the a11y service doesn't know it
+                                    // binds before or after input starts, it may wonder if it binds
+                                    // after input starts, why it doesn't receive a notification of
+                                    // the current cursor positions.
+                                    wrapper.updateSelection(-1, -1,
+                                            -1, -1, -1,
+                                            -1);
+                                }
+                            }
+                        }
+                        mBindSequence = res.sequence;
+                    }
+                    startInputInner(StartInputReason.BOUND_ACCESSIBILITY_SESSION_TO_IMMS, null,
+                            0, 0, 0);
+                    return;
+                }
+                case MSG_UNBIND_ACCESSIBILITY_SERVICE: {
+                    final int sequence = msg.arg1;
+                    final int id = msg.arg2;
+                    if (DEBUG) {
+                        Log.i(TAG, "handleMessage: MSG_UNBIND_ACCESSIBILITY_SERVICE "
+                                + sequence + " id=" + id);
+                    }
+                    synchronized (mH) {
+                        if (mBindSequence != sequence) {
+                            if (DEBUG) {
+                                Log.i(TAG, "mBindSequence =" + mBindSequence + " sequence ="
+                                        + sequence + " id=" + id);
+                            }
+                            return;
+                        }
+                        clearAccessibilityBindingLocked(id);
                     }
                     return;
                 }
@@ -996,8 +1077,18 @@ public final class InputMethodManager {
         }
 
         @Override
+        public void onBindAccessibilityService(InputBindResult res, int id) {
+            mH.obtainMessage(MSG_BIND_ACCESSIBILITY_SERVICE, id, 0, res).sendToTarget();
+        }
+
+        @Override
         public void onUnbindMethod(int sequence, @UnbindReason int unbindReason) {
             mH.obtainMessage(MSG_UNBIND, sequence, unbindReason).sendToTarget();
+        }
+
+        @Override
+        public void onUnbindAccessibilityService(int sequence, int id) {
+            mH.obtainMessage(MSG_UNBIND_ACCESSIBILITY_SERVICE, sequence, id).sendToTarget();
         }
 
         @Override
@@ -1420,14 +1511,34 @@ public final class InputMethodManager {
     /**
      * Reset all of the state associated with being bound to an input method.
      */
+    @GuardedBy("mH")
     void clearBindingLocked() {
         if (DEBUG) Log.v(TAG, "Clearing binding!");
         clearConnectionLocked();
         setInputChannelLocked(null);
+        // We only reset sequence number for input method, but not accessibility.
         mBindSequence = -1;
         mCurId = null;
         mCurMethod = null; // for @UnsupportedAppUsage
         mCurrentInputMethodSession = null;
+    }
+
+    /**
+     * Reset all of the state associated with being bound to an accessibility service.
+     */
+    @GuardedBy("mH")
+    void clearAccessibilityBindingLocked(int id) {
+        if (DEBUG) Log.v(TAG, "Clearing accessibility binding " + id);
+        mAccessibilityInputMethodSession.remove(id);
+    }
+
+    /**
+     * Reset all of the state associated with being bound to all ccessibility services.
+     */
+    @GuardedBy("mH")
+    void clearAllAccessibilityBindingLocked() {
+        if (DEBUG) Log.v(TAG, "Clearing all accessibility bindings");
+        mAccessibilityInputMethodSession.clear();
     }
 
     void setInputChannelLocked(InputChannel channel) {
@@ -1938,6 +2049,8 @@ public final class InputMethodManager {
             editorInfo.setInitialSurroundingTextInternal(textSnapshot.getSurroundingText());
             mCurrentInputMethodSession.invalidateInput(editorInfo, mServedInputConnection,
                     sessionId);
+            forAccessibilitySessions(wrapper -> wrapper.invalidateInput(editorInfo,
+                    mServedInputConnection, sessionId));
         }
     }
 
@@ -2080,6 +2193,8 @@ public final class InputMethodManager {
             if (ic != null) {
                 mCursorSelStart = tba.initialSelStart;
                 mCursorSelEnd = tba.initialSelEnd;
+                mInitialSelStart = mCursorSelStart;
+                mInitialSelEnd = mCursorSelEnd;
                 mCursorCandStart = -1;
                 mCursorCandEnd = -1;
                 mCursorRect.setEmpty();
@@ -2128,6 +2243,17 @@ public final class InputMethodManager {
                 mBindSequence = res.sequence;
                 mCurMethod = res.method; // for @UnsupportedAppUsage
                 mCurrentInputMethodSession = InputMethodSessionWrapper.createOrNull(res.method);
+                mAccessibilityInputMethodSession.clear();
+                if (res.accessibilitySessions != null) {
+                    for (int i = 0; i < res.accessibilitySessions.size(); i++) {
+                        InputMethodSessionWrapper wrapper = InputMethodSessionWrapper.createOrNull(
+                                res.accessibilitySessions.valueAt(i));
+                        if (wrapper != null) {
+                            mAccessibilityInputMethodSession.append(
+                                    res.accessibilitySessions.keyAt(i), wrapper);
+                        }
+                    }
+                }
                 mCurId = res.id;
             } else if (res.channel != null && res.channel != mCurChannel) {
                 res.channel.dispose();
@@ -2137,8 +2263,10 @@ public final class InputMethodManager {
                     mRestartOnNextWindowFocus = true;
                     break;
             }
-            if (mCurrentInputMethodSession != null && mCompletions != null) {
-                mCurrentInputMethodSession.displayCompletions(mCompletions);
+            if (mCompletions != null) {
+                if (mCurrentInputMethodSession != null) {
+                    mCurrentInputMethodSession.displayCompletions(mCompletions);
+                }
             }
         }
 
@@ -2369,6 +2497,8 @@ public final class InputMethodManager {
                 mCursorCandEnd = candidatesEnd;
                 mCurrentInputMethodSession.updateSelection(
                         oldSelStart, oldSelEnd, selStart, selEnd, candidatesStart, candidatesEnd);
+                forAccessibilitySessions(wrapper -> wrapper.updateSelection(oldSelStart,
+                        oldSelEnd, selStart, selEnd, candidatesStart, candidatesEnd));
             }
         }
     }
@@ -3233,6 +3363,11 @@ public final class InputMethodManager {
         } else {
             p.println("  mCurMethod= null");
         }
+        for (int i = 0; i < mAccessibilityInputMethodSession.size(); i++) {
+            p.println("  mAccessibilityInputMethodSession("
+                    + mAccessibilityInputMethodSession.keyAt(i) + ")="
+                    + mAccessibilityInputMethodSession.valueAt(i));
+        }
         p.println("  mCurRootView=" + mCurRootView);
         p.println("  mServedView=" + getServedViewLocked());
         p.println("  mNextServedView=" + getNextServedViewLocked());
@@ -3375,6 +3510,12 @@ public final class InputMethodManager {
             if (icProto != null) {
                 proto.write(INPUT_CONNECTION_CALL, icProto);
             }
+        }
+    }
+
+    private void forAccessibilitySessions(Consumer<InputMethodSessionWrapper> consumer) {
+        for (int i = 0; i < mAccessibilityInputMethodSession.size(); i++) {
+            consumer.accept(mAccessibilityInputMethodSession.valueAt(i));
         }
     }
 }

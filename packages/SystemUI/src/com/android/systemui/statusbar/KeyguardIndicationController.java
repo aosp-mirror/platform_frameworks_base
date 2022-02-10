@@ -73,6 +73,7 @@ import com.android.settingslib.fuelgauge.BatteryStatus;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.KeyguardIndication;
@@ -132,6 +133,7 @@ public class KeyguardIndicationController {
     private final DevicePolicyManager mDevicePolicyManager;
     private final UserManager mUserManager;
     protected final @Main DelayableExecutor mExecutor;
+    protected final @Background DelayableExecutor mBackgroundExecutor;
     private final LockPatternUtils mLockPatternUtils;
     private final IActivityManager mIActivityManager;
     private final FalsingManager mFalsingManager;
@@ -143,6 +145,7 @@ public class KeyguardIndicationController {
 
     private String mRestingIndication;
     private String mAlignmentIndication;
+    private CharSequence mTrustGrantedIndication;
     private CharSequence mTransientIndication;
     private CharSequence mBiometricMessage;
     protected ColorStateList mInitialTextColorState;
@@ -202,6 +205,7 @@ public class KeyguardIndicationController {
             IBatteryStats iBatteryStats,
             UserManager userManager,
             @Main DelayableExecutor executor,
+            @Background DelayableExecutor bgExecutor,
             FalsingManager falsingManager,
             LockPatternUtils lockPatternUtils,
             ScreenLifecycle screenLifecycle,
@@ -219,6 +223,7 @@ public class KeyguardIndicationController {
         mBatteryInfo = iBatteryStats;
         mUserManager = userManager;
         mExecutor = executor;
+        mBackgroundExecutor = bgExecutor;
         mLockPatternUtils = lockPatternUtils;
         mIActivityManager = iActivityManager;
         mFalsingManager = falsingManager;
@@ -327,15 +332,22 @@ public class KeyguardIndicationController {
 
     private void updateDisclosure() {
         if (mOrganizationOwnedDevice) {
-            final CharSequence organizationName = getOrganizationOwnedDeviceOrganizationName();
-            final CharSequence disclosure = getDisclosureText(organizationName);
-            mRotateTextViewController.updateIndication(
-                    INDICATION_TYPE_DISCLOSURE,
-                    new KeyguardIndication.Builder()
-                            .setMessage(disclosure)
-                            .setTextColor(mInitialTextColorState)
-                            .build(),
-                    /* updateImmediately */ false);
+            mBackgroundExecutor.execute(() -> {
+                final CharSequence organizationName = getOrganizationOwnedDeviceOrganizationName();
+                final CharSequence disclosure = getDisclosureText(organizationName);
+
+                mExecutor.execute(() -> {
+                    if (mKeyguardStateController.isShowing()) {
+                        mRotateTextViewController.updateIndication(
+                              INDICATION_TYPE_DISCLOSURE,
+                              new KeyguardIndication.Builder()
+                                      .setMessage(disclosure)
+                                      .setTextColor(mInitialTextColorState)
+                                      .build(),
+                              /* updateImmediately */ false);
+                    }
+                });
+            });
         } else {
             mRotateTextViewController.hideIndication(INDICATION_TYPE_DISCLOSURE);
         }
@@ -363,26 +375,35 @@ public class KeyguardIndicationController {
     }
 
     private void updateOwnerInfo() {
-        String info = mLockPatternUtils.getDeviceOwnerInfo();
-        if (info == null) {
-            // Use the current user owner information if enabled.
-            final boolean ownerInfoEnabled = mLockPatternUtils.isOwnerInfoEnabled(
-                    KeyguardUpdateMonitor.getCurrentUser());
-            if (ownerInfoEnabled) {
-                info = mLockPatternUtils.getOwnerInfo(KeyguardUpdateMonitor.getCurrentUser());
+        // Check device owner info on a bg thread.
+        // It makes multiple IPCs that could block the thread it's run on.
+        mBackgroundExecutor.execute(() -> {
+            String info = mLockPatternUtils.getDeviceOwnerInfo();
+            if (info == null) {
+                // Use the current user owner information if enabled.
+                final boolean ownerInfoEnabled = mLockPatternUtils.isOwnerInfoEnabled(
+                        KeyguardUpdateMonitor.getCurrentUser());
+                if (ownerInfoEnabled) {
+                    info = mLockPatternUtils.getOwnerInfo(KeyguardUpdateMonitor.getCurrentUser());
+                }
             }
-        }
-        if (!TextUtils.isEmpty(info)) {
-            mRotateTextViewController.updateIndication(
-                    INDICATION_TYPE_OWNER_INFO,
-                    new KeyguardIndication.Builder()
-                            .setMessage(info)
-                            .setTextColor(mInitialTextColorState)
-                            .build(),
-                    false);
-        } else {
-            mRotateTextViewController.hideIndication(INDICATION_TYPE_OWNER_INFO);
-        }
+
+            // Update the UI on the main thread.
+            final String finalInfo = info;
+            mExecutor.execute(() -> {
+                if (!TextUtils.isEmpty(finalInfo) && mKeyguardStateController.isShowing()) {
+                    mRotateTextViewController.updateIndication(
+                            INDICATION_TYPE_OWNER_INFO,
+                            new KeyguardIndication.Builder()
+                                    .setMessage(finalInfo)
+                                    .setTextColor(mInitialTextColorState)
+                                    .build(),
+                            false);
+                } else {
+                    mRotateTextViewController.hideIndication(INDICATION_TYPE_OWNER_INFO);
+                }
+            });
+        });
     }
 
     private void updateBattery(boolean animate) {
@@ -609,7 +630,9 @@ public class KeyguardIndicationController {
      */
     @VisibleForTesting
     String getTrustGrantedIndication() {
-        return mContext.getString(R.string.keyguard_indication_trust_unlocked);
+        return TextUtils.isEmpty(mTrustGrantedIndication)
+                ? mContext.getString(R.string.keyguard_indication_trust_unlocked)
+                : mTrustGrantedIndication.toString();
     }
 
     /**
@@ -909,6 +932,7 @@ public class KeyguardIndicationController {
         pw.println("  mTextView.getText(): " + (
                 mTopIndicationView == null ? null : mTopIndicationView.getText()));
         pw.println("  computePowerIndication(): " + computePowerIndication());
+        pw.println("  trustGrantedIndication: " + getTrustGrantedIndication());
         mRotateTextViewController.dump(fd, pw, args);
     }
 
@@ -1052,6 +1076,22 @@ public class KeyguardIndicationController {
             return ((!updateMonitor.isUnlockingWithBiometricAllowed(true /* isStrongBiometric */)
                     && msgId != FaceManager.FACE_ERROR_LOCKOUT_PERMANENT)
                     || msgId == FaceManager.FACE_ERROR_CANCELED);
+        }
+
+
+        @Override
+        public void onTrustChanged(int userId) {
+            if (KeyguardUpdateMonitor.getCurrentUser() != userId) {
+                return;
+            }
+            updateTrust(userId, getTrustGrantedIndication(), getTrustManagedIndication());
+        }
+
+        @Override
+        public void showTrustGrantedMessage(CharSequence message) {
+            mTrustGrantedIndication = message;
+            updateTrust(KeyguardUpdateMonitor.getCurrentUser(), getTrustGrantedIndication(),
+                    getTrustManagedIndication());
         }
 
         @Override

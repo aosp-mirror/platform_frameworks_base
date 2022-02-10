@@ -23,14 +23,18 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
 
@@ -72,5 +76,15 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
         assertEquals(StatusBarStateEvent.STATUS_BAR_STATE_KEYGUARD.id, ids[0])
         assertEquals(StatusBarStateEvent.STATUS_BAR_STATE_SHADE.id, ids[1])
         assertEquals(StatusBarStateEvent.STATUS_BAR_STATE_SHADE_LOCKED.id, ids[2])
+    }
+
+    @Test
+    fun testSetDozeAmountInternal_onlySetsOnce() {
+        val listener = mock(StatusBarStateController.StateListener::class.java)
+        controller.addCallback(listener)
+
+        controller.setDozeAmount(0.5f, false /* animated */)
+        controller.setDozeAmount(0.5f, false /* animated */)
+        verify(listener).onDozeAmountChanged(eq(0.5f), anyFloat())
     }
 }

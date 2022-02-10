@@ -101,13 +101,11 @@ interface IAccessibilityManager {
 
     boolean isAudioDescriptionByDefaultEnabled();
 
-    // Requires Manifest.permission.SET_SYSTEM_AUDIO_CAPTION
-    // System process only
-    void setSystemAudioCaptioningRequested(boolean isEnabled, int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)")
+    void setSystemAudioCaptioningEnabled(boolean isEnabled, int userId);
 
-    boolean isSystemAudioCaptioningUiRequested(int userId);
+    boolean isSystemAudioCaptioningUiEnabled(int userId);
 
-    // Requires Manifest.permission.SET_SYSTEM_AUDIO_CAPTION
-    // System process only
-    void setSystemAudioCaptioningUiRequested(boolean isEnabled, int userId);
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)")
+    void setSystemAudioCaptioningUiEnabled(boolean isEnabled, int userId);
 }

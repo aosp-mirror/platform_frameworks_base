@@ -4082,6 +4082,16 @@
    -->
     <string name="config_defaultAmbientContextDetectionService" translatable="false"></string>
 
+    <!-- Component name that accepts ACTION_SEND intents for requesting ambient context consent. -->
+    <string translatable="false" name="config_defaultAmbientContextConsentComponent"></string>
+
+    <!-- Intent extra key for the caller's package name while requesting ambient context consent.
+     -->
+    <string translatable="false" name="config_ambientContextPackageNameExtraKey"></string>
+
+    <!-- Intent extra key for the event code int array while requesting ambient context consent. -->
+    <string translatable="false" name="config_ambientContextEventArrayExtraKey"></string>
+
     <!-- The component name for the system-wide captions service.
          This service must be trusted, as it controls part of the UI of the volume bar.
          Example: "com.android.captions/.SystemCaptionsService"

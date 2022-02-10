@@ -30,17 +30,17 @@ static jint android_media_PublicFormatUtils_getHalFormat(JNIEnv* /*env*/, jobjec
     return static_cast<jint>(nativeFormat);
 }
 
-static jlong android_media_PublicFormatUtils_getHalDataspace(JNIEnv* /*env*/, jobject /*thiz*/,
+static jint android_media_PublicFormatUtils_getHalDataspace(JNIEnv* /*env*/, jobject /*thiz*/,
                                                              jint imageFormat) {
     PublicFormat publicFormat = static_cast<PublicFormat>(imageFormat);
     android_dataspace
         nativeDataspace = mapPublicFormatToHalDataspace(publicFormat);
-    return static_cast<jlong>(nativeDataspace);
+    return static_cast<jint>(nativeDataspace);
 }
 
 static jint android_media_PublicFormatUtils_getPublicFormat(JNIEnv* /*env*/, jobject /*thiz*/,
                                                             jint hardwareBufferFormat,
-                                                            jlong dataspace) {
+                                                            jint dataspace) {
     PublicFormat nativeFormat = mapHalFormatDataspaceToPublicFormat(
             hardwareBufferFormat, static_cast<android_dataspace>(dataspace));
     return static_cast<jint>(nativeFormat);
@@ -48,8 +48,8 @@ static jint android_media_PublicFormatUtils_getPublicFormat(JNIEnv* /*env*/, job
 
 static const JNINativeMethod gMethods[] = {
     {"nativeGetHalFormat",    "(I)I", (void*)android_media_PublicFormatUtils_getHalFormat},
-    {"nativeGetHalDataspace", "(I)J", (void*)android_media_PublicFormatUtils_getHalDataspace},
-    {"nativeGetPublicFormat", "(IJ)I",(void*)android_media_PublicFormatUtils_getPublicFormat}
+    {"nativeGetHalDataspace", "(I)I", (void*)android_media_PublicFormatUtils_getHalDataspace},
+    {"nativeGetPublicFormat", "(II)I",(void*)android_media_PublicFormatUtils_getPublicFormat}
 };
 
 int register_android_media_PublicFormatUtils(JNIEnv *env) {

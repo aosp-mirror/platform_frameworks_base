@@ -464,6 +464,7 @@
     <!-- Permissions required for CTS test - TVInputManagerTest -->
     <uses-permission android:name="android.permission.ACCESS_TUNED_INFO" />
     <uses-permission android:name="android.permission.TV_INPUT_HARDWARE" />
+    <uses-permission android:name="android.permission.TIS_EXTENSION_INTERFACE" />
     <uses-permission android:name="com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS" />
     <uses-permission android:name="com.android.providers.tv.permission.WRITE_EPG_DATA"/>
 

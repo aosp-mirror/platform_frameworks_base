@@ -52,13 +52,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
- * This API is not generally intended for third party application developers.
- * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
-  <a href="{@docRoot}reference/androidx/mediarouter/media/package-summary.html">Media Router
+ * This API is not generally intended for third party application developers. Use the
+ * <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+ * <a href="{@docRoot}reference/androidx/mediarouter/media/package-summary.html">Media Router
  * Library</a> for consistent behavior across all devices.
  *
- * Media Router 2 allows applications to control the routing of media channels
- * and streams from the current device to remote speakers and devices.
+ * <p>MediaRouter2 allows applications to control the routing of media channels and streams from
+ * the current device to remote speakers and devices.
  */
 // TODO(b/157873330): Add method names at the beginning of log messages. (e.g. selectRoute)
 //       Not only MediaRouter2, but also to service / manager / provider.
@@ -478,13 +478,8 @@ public final class MediaRouter2 {
             if (mShouldUpdateRoutes) {
                 mShouldUpdateRoutes = false;
 
-                List<MediaRoute2Info> filteredRoutes = new ArrayList<>();
-                for (MediaRoute2Info route : mRoutes.values()) {
-                    if (route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
-                        filteredRoutes.add(route);
-                    }
-                }
-                mFilteredRoutes = Collections.unmodifiableList(filteredRoutes);
+                mFilteredRoutes = Collections.unmodifiableList(
+                        filterRoutes(List.copyOf(mRoutes.values()), mDiscoveryPreference));
             }
         }
         return mFilteredRoutes;
@@ -1087,16 +1082,17 @@ public final class MediaRouter2 {
 
         List<MediaRoute2Info> filteredRoutes = new ArrayList<>();
         for (MediaRoute2Info route : getSortedRoutes(routes, discoveryPreference)) {
-            if (!route.hasAllFeatures(discoveryPreference.getRequiredFeatures())
-                    || !route.hasAnyFeatures(discoveryPreference.getPreferredFeatures())) {
+            if (!route.hasAnyFeatures(discoveryPreference.getPreferredFeatures())) {
                 continue;
             }
             if (!discoveryPreference.getAllowedPackages().isEmpty()
-                    && !discoveryPreference.getAllowedPackages().contains(route.getPackageName())) {
+                    && (route.getPackageName() == null
+                    || !discoveryPreference.getAllowedPackages()
+                            .contains(route.getPackageName()))) {
                 continue;
             }
             if (discoveryPreference.shouldRemoveDuplicates()) {
-                if (Collections.disjoint(deduplicationIdSet, route.getDeduplicationIds())) {
+                if (!Collections.disjoint(deduplicationIdSet, route.getDeduplicationIds())) {
                     continue;
                 }
                 deduplicationIdSet.addAll(route.getDeduplicationIds());
@@ -2087,19 +2083,17 @@ public final class MediaRouter2 {
         }
 
         @Override
-        public void onPreferredFeaturesChanged(@NonNull String packageName,
-                @NonNull List<String> preferredFeatures) {
+        public void onDiscoveryPreferenceChanged(@NonNull String packageName,
+                @NonNull RouteDiscoveryPreference preference) {
             if (!TextUtils.equals(mClientPackageName, packageName)) {
                 return;
             }
 
             synchronized (mLock) {
-                mDiscoveryPreference = new RouteDiscoveryPreference.Builder(
-                        preferredFeatures, true).build();
+                mDiscoveryPreference = preference;
             }
-
             updateAllRoutesFromManager();
-            notifyPreferredFeaturesChanged(preferredFeatures);
+            notifyPreferredFeaturesChanged(preference.getPreferredFeatures());
         }
 
         @Override

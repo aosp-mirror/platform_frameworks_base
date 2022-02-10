@@ -290,11 +290,11 @@ public class NotificationStackScrollLayoutController {
 
         @Override
         public void onThemeChanged() {
-            updateShowEmptyShadeView();
             mView.updateCornerRadius();
             mView.updateBgColor();
             mView.updateDecorViews();
             mView.reinflateViews();
+            updateShowEmptyShadeView();
             updateFooter();
         }
 

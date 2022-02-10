@@ -512,7 +512,7 @@ public final class TransitionInfo implements Parcelable {
         }
 
         /** @return the task info or null if this isn't a task */
-        @NonNull
+        @Nullable
         public ActivityManager.RunningTaskInfo getTaskInfo() {
             return mTaskInfo;
         }

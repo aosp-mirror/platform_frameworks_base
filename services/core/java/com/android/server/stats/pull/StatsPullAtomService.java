@@ -105,6 +105,8 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
+import android.os.BatteryStatsManager;
+import android.os.BatteryUsageStats;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -168,8 +170,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.IProcessStats;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.os.BatterySipper;
-import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BinderCallsStats.ExportedCallStat;
 import com.android.internal.os.KernelAllocationStats;
 import com.android.internal.os.KernelCpuBpfTracking;
@@ -273,7 +273,6 @@ public class StatsPullAtomService extends SystemService {
      */
     private static final long NETSTATS_UID_DEFAULT_BUCKET_DURATION_MS = HOURS.toMillis(2);
 
-    private static final int MAX_BATTERY_STATS_HELPER_FREQUENCY_MS = 1000;
     private static final int CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES = 8;
     private static final int OP_FLAGS_PULLED = OP_FLAG_SELF | OP_FLAG_TRUSTED_PROXIED;
     private static final String COMMON_PERMISSION_PREFIX = "android.permission.";
@@ -366,12 +365,6 @@ public class StatsPullAtomService extends SystemService {
     @GuardedBy("mCpuTimePerThreadFreqLock")
     private KernelCpuThreadReaderDiff mKernelCpuThreadReader;
 
-    private final Object mBatteryStatsHelperLock = new Object();
-    @GuardedBy("mBatteryStatsHelperLock")
-    private BatteryStatsHelper mBatteryStatsHelper = null;
-    @GuardedBy("mBatteryStatsHelperLock")
-    private long mBatteryStatsHelperTimestampMs = -MAX_BATTERY_STATS_HELPER_FREQUENCY_MS;
-
     private StatsPullAtomCallbackImpl mStatsCallbackImpl;
 
     @GuardedBy("mAttributedAppOpsLock")
@@ -433,8 +426,6 @@ public class StatsPullAtomService extends SystemService {
     private final Object mProcessCpuTimeLock = new Object();
     private final Object mCpuTimePerThreadFreqLock = new Object();
     private final Object mDeviceCalculatedPowerUseLock = new Object();
-    private final Object mDeviceCalculatedPowerBlameUidLock = new Object();
-    private final Object mDeviceCalculatedPowerBlameOtherLock = new Object();
     private final Object mDebugElapsedClockLock = new Object();
     private final Object mDebugFailingElapsedClockLock = new Object();
     private final Object mBuildInformationLock = new Object();
@@ -644,14 +635,6 @@ public class StatsPullAtomService extends SystemService {
                     case FrameworkStatsLog.DEVICE_CALCULATED_POWER_USE:
                         synchronized (mDeviceCalculatedPowerUseLock) {
                             return pullDeviceCalculatedPowerUseLocked(atomTag, data);
-                        }
-                    case FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_UID:
-                        synchronized (mDeviceCalculatedPowerBlameUidLock) {
-                            return pullDeviceCalculatedPowerBlameUidLocked(atomTag, data);
-                        }
-                    case FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER:
-                        synchronized (mDeviceCalculatedPowerBlameOtherLock) {
-                            return pullDeviceCalculatedPowerBlameOtherLocked(atomTag, data);
                         }
                     case FrameworkStatsLog.DEBUG_ELAPSED_CLOCK:
                         synchronized (mDebugElapsedClockLock) {
@@ -905,8 +888,6 @@ public class StatsPullAtomService extends SystemService {
         registerProcessCpuTime();
         registerCpuTimePerThreadFreq();
         registerDeviceCalculatedPowerUse();
-        registerDeviceCalculatedPowerBlameUid();
-        registerDeviceCalculatedPowerBlameOther();
         registerDebugElapsedClock();
         registerDebugFailingElapsedClock();
         registerBuildInformation();
@@ -3080,32 +3061,6 @@ public class StatsPullAtomService extends SystemService {
         return StatsManager.PULL_SUCCESS;
     }
 
-    private BatteryStatsHelper getBatteryStatsHelper() {
-        synchronized (mBatteryStatsHelperLock) {
-            if (mBatteryStatsHelper == null) {
-                final long callingToken = Binder.clearCallingIdentity();
-                try {
-                    // clearCallingIdentity required for BatteryStatsHelper.checkWifiOnly().
-                    mBatteryStatsHelper = new BatteryStatsHelper(mContext, false);
-                } finally {
-                    Binder.restoreCallingIdentity(callingToken);
-                }
-                mBatteryStatsHelper.create((Bundle) null);
-            }
-            long currentTime = SystemClock.elapsedRealtime();
-            if (currentTime - mBatteryStatsHelperTimestampMs
-                    >= MAX_BATTERY_STATS_HELPER_FREQUENCY_MS) {
-                // Load BatteryStats and do all the calculations.
-                mBatteryStatsHelper.refreshStats(BatteryStats.STATS_SINCE_CHARGED,
-                        UserHandle.USER_ALL);
-                // Calculations are done so we don't need to save the raw BatteryStats data in RAM.
-                mBatteryStatsHelper.clearStats();
-                mBatteryStatsHelperTimestampMs = currentTime;
-            }
-        }
-        return mBatteryStatsHelper;
-    }
-
     private long milliAmpHrsToNanoAmpSecs(double mAh) {
         return (long) (mAh * MILLI_AMP_HR_TO_NANO_AMP_SECS + 0.5);
     }
@@ -3121,65 +3076,16 @@ public class StatsPullAtomService extends SystemService {
     }
 
     int pullDeviceCalculatedPowerUseLocked(int atomTag, List<StatsEvent> pulledData) {
-        BatteryStatsHelper bsHelper = getBatteryStatsHelper();
-        pulledData.add(FrameworkStatsLog.buildStatsEvent(
-                atomTag, milliAmpHrsToNanoAmpSecs(bsHelper.getComputedPower())));
-        return StatsManager.PULL_SUCCESS;
-    }
-
-    private void registerDeviceCalculatedPowerBlameUid() {
-        int tagId = FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_UID;
-        mStatsManager.setPullAtomCallback(
-                tagId,
-                null, // use default PullAtomMetadata values
-                DIRECT_EXECUTOR,
-                mStatsCallbackImpl
-        );
-    }
-
-    int pullDeviceCalculatedPowerBlameUidLocked(int atomTag, List<StatsEvent> pulledData) {
-        final List<BatterySipper> sippers = getBatteryStatsHelper().getUsageList();
-        if (sippers == null) {
+        final BatteryStatsManager bsm = mContext.getSystemService(BatteryStatsManager.class);
+        try {
+            final BatteryUsageStats stats = bsm.getBatteryUsageStats();
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(
+                    atomTag, milliAmpHrsToNanoAmpSecs(stats.getConsumedPower())));
+            return StatsManager.PULL_SUCCESS;
+        } catch (Exception e) {
+            Log.e(TAG, "Could not obtain battery usage stats", e);
             return StatsManager.PULL_SKIP;
         }
-
-        for (BatterySipper bs : sippers) {
-            if (bs.drainType != bs.drainType.APP) {
-                continue;
-            }
-            pulledData.add(FrameworkStatsLog.buildStatsEvent(
-                    atomTag, bs.uidObj.getUid(), milliAmpHrsToNanoAmpSecs(bs.totalPowerMah)));
-        }
-        return StatsManager.PULL_SUCCESS;
-    }
-
-    private void registerDeviceCalculatedPowerBlameOther() {
-        int tagId = FrameworkStatsLog.DEVICE_CALCULATED_POWER_BLAME_OTHER;
-        mStatsManager.setPullAtomCallback(
-                tagId,
-                null, // use default PullAtomMetadata values
-                DIRECT_EXECUTOR,
-                mStatsCallbackImpl
-        );
-    }
-
-    int pullDeviceCalculatedPowerBlameOtherLocked(int atomTag, List<StatsEvent> pulledData) {
-        final List<BatterySipper> sippers = getBatteryStatsHelper().getUsageList();
-        if (sippers == null) {
-            return StatsManager.PULL_SKIP;
-        }
-
-        for (BatterySipper bs : sippers) {
-            if (bs.drainType == bs.drainType.APP) {
-                continue; // This is a separate atom; see pullDeviceCalculatedPowerBlameUid().
-            }
-            if (bs.drainType == bs.drainType.USER) {
-                continue; // This is not supported. We purposefully calculate over USER_ALL.
-            }
-            pulledData.add(FrameworkStatsLog.buildStatsEvent(
-                    atomTag, bs.drainType.ordinal(), milliAmpHrsToNanoAmpSecs(bs.totalPowerMah)));
-        }
-        return StatsManager.PULL_SUCCESS;
     }
 
     private void registerDebugElapsedClock() {

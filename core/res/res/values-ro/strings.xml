@@ -71,7 +71,6 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Apelare de tip conferință"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Respingere apeluri supărătoare nedorite"</string>
     <string name="CndMmi" msgid="185136449405618437">"Se apelează serviciul de furnizare a numerelor"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"Nu deranjați"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"ID-ul apelantului este restricționat în mod prestabilit. Apelul următor: restricționat"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID-ul apelantului este restricționat în mod prestabilit. Apelul următor: nerestricționat"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID-ul apelantului este nerestricționat în mod prestabilit. Apelul următor: Restricționat."</string>
@@ -181,11 +180,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"Spațiul de stocare de pe ceas este plin! Ștergeți câteva fișiere pentru a elibera spațiu."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Spațiul de stocare de pe dispozitivul Android TV este plin. Ștergeți câteva fișiere pentru a elibera spațiu."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"Stocarea pe telefon este plină. Ștergeți câteva fișiere pentru a elibera spațiu."</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="few">S-au instalat autorități de certificare</item>
-      <item quantity="other">S-au instalat autorități de certificare</item>
-      <item quantity="one">S-a instalat o autoritate de certificare</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{S-a instalat o autoritate de certificare}few{S-au instalat autorități de certificare}other{S-au instalat autorități de certificare}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"De o terță parte necunoscută"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"De administratorul profilului dvs. de serviciu"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"De <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -205,6 +200,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"Serviciu pentru notificări de la senzori"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Serviciul Twilight"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Serviciul de actualizare a orei bazat pe GNSS"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"Serviciul Manager de politici pentru dispozitive"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Serviciu de gestionare a recunoașterii de melodii"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Datele de pe dispozitiv vor fi șterse"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Aplicația de administrare nu poate fi utilizată. Dispozitivul va fi șters.\n\nDacă aveți întrebări, contactați administratorul organizației dvs."</string>
@@ -258,11 +254,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Folosiți această opțiune în majoritatea situațiilor. Astfel, puteți să urmăriți progresul raportului, să introduceți mai multe detalii în privința problemei și să creați capturi de ecran. Pot fi omise unele secțiuni mai puțin folosite pentru care raportarea durează prea mult."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Raport complet"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Folosiți această opțiune pentru a reduce la minimum interferențele cu sistemul când dispozitivul nu răspunde, funcționează prea lent sau când aveți nevoie de toate secțiunile raportului. Nu puteți să introduceți mai multe detalii sau să creați capturi de ecran suplimentare."</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="few">Peste <xliff:g id="NUMBER_1">%d</xliff:g> secunde se va realiza o captură de ecran pentru raportul de eroare.</item>
-      <item quantity="other">Peste <xliff:g id="NUMBER_1">%d</xliff:g> de secunde se va realiza o captură de ecran pentru raportul de eroare.</item>
-      <item quantity="one">Peste <xliff:g id="NUMBER_0">%d</xliff:g> secundă se va realiza o captură de ecran pentru raportul de eroare.</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Peste # secundă se va realiza o captură de ecran pentru raportul de eroare.}few{Peste # secunde se va realiza o captură de ecran pentru raportul de eroare.}other{Peste # de secunde se va realiza o captură de ecran pentru raportul de eroare.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"S-a realizat captura de ecran a raportului de eroare"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Nu s-a realizat captura de ecran a raportului de eroare"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Mod Silențios"</string>
@@ -313,8 +305,14 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"acceseze calendarul"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"trimită și să vadă mesajele SMS"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"Fișiere și media"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"acceseze fotografiile, conținutul media și fișierele de pe dispozitiv"</string>
+    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
+    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Muzică și alt conținut audio"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"să acceseze fișiere audio de pe dispozitiv"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Fotografii și videoclipuri"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"să acceseze fișiere video și imagini de pe dispozitiv"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Microfon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"înregistreze sunet"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Activitate fizică"</string>
@@ -686,6 +684,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Permite unei aplicații să citească statisticile de sincronizare ale unui cont, inclusiv istoricul evenimentelor de sincronizare și volumul datelor sincronizate."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"să citească conținutul spațiului de stocare comun"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Permite aplicației citirea conținutului spațiului de stocare comun."</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"să citească fișiere audio din spațiul de stocare comun"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Permite aplicației să citească fișiere audio din spațiul de stocare comun."</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"să citească fișiere video din spațiul de stocare comun"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Permite aplicației să citească fișiere video din spațiul de stocare comun."</string>
+    <string name="permlab_readMediaImage" msgid="1507059005825769856">"să citească fișiere imagine din spațiul de stocare comun"</string>
+    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Permite aplicației să citească fișiere imagine din spațiul de stocare comun."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"să modifice sau să șteargă conținutul spațiului de stocare comun"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Permite aplicației scrierea conținutul spațiului de stocare comun."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"efectuarea/primirea apelurilor SIP"</string>
@@ -732,8 +736,6 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Permite aplicației să se conecteze la interfața de nivel superior a unui serviciu de mesagerie oferit de operator. Nu ar trebui să fie niciodată necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"se conectează la serviciile operatorului"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Permite aplicației să se conecteze la serviciile operatorului. Nu ar trebui să fie niciodată necesară pentru aplicațiile obișnuite."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"accesează Nu deranja"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Permite aplicației să citească și să scrie configurația Nu deranja."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"porniți folosirea permisiunii de vizualizare"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Permite proprietarului să pornească folosirea permisiunii pentru o aplicație. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"să înceapă să examineze deciziile privind permisiunile"</string>
@@ -1075,11 +1077,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> dorește să activeze funcția Explorați prin atingere. Când această funcție este activată, puteți auzi sau vedea descrieri pentru ceea ce se află sub degetul dvs. sau puteți efectua gesturi pentru a interacționa cu telefonul."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"cu 1 lună în urmă"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Cu mai mult de 1 lună în urmă"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="few">Ultimele <xliff:g id="COUNT_1">%d</xliff:g> zile</item>
-      <item quantity="other">Ultimele <xliff:g id="COUNT_1">%d</xliff:g> de zile</item>
-      <item quantity="one">Ultima <xliff:g id="COUNT_0">%d</xliff:g> zi</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Ultima zi}few{Ultimele # zile}other{Ultimele # de zile}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Luna trecută"</string>
     <string name="older" msgid="1645159827884647400">"Mai vechi"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"pe <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1098,86 +1096,22 @@
     <string name="year" msgid="5182610307741238982">"an"</string>
     <string name="years" msgid="5797714729103773425">"ani"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"acum"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> min</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> h</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> h</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> zile</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> zile</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> zi</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="few"><xliff:g id="COUNT_1">%d</xliff:g> ani</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ani</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> an</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="few">în <xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="other">în <xliff:g id="COUNT_1">%d</xliff:g> min</item>
-      <item quantity="one">în <xliff:g id="COUNT_0">%d</xliff:g> min.</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="few">în <xliff:g id="COUNT_1">%d</xliff:g> h</item>
-      <item quantity="other">în <xliff:g id="COUNT_1">%d</xliff:g> h</item>
-      <item quantity="one">în <xliff:g id="COUNT_0">%d</xliff:g> h</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="few">în <xliff:g id="COUNT_1">%d</xliff:g> zile</item>
-      <item quantity="other">în <xliff:g id="COUNT_1">%d</xliff:g> zile</item>
-      <item quantity="one">în <xliff:g id="COUNT_0">%d</xliff:g> zi</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="few">în <xliff:g id="COUNT_1">%d</xliff:g> ani</item>
-      <item quantity="other">în <xliff:g id="COUNT_1">%d</xliff:g> ani</item>
-      <item quantity="one">în <xliff:g id="COUNT_0">%d</xliff:g> an</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="few">acum <xliff:g id="COUNT_1">%d</xliff:g> minute</item>
-      <item quantity="other">acum <xliff:g id="COUNT_1">%d</xliff:g> de minute</item>
-      <item quantity="one">acum <xliff:g id="COUNT_0">%d</xliff:g> minut</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="few">acum <xliff:g id="COUNT_1">%d</xliff:g> ore</item>
-      <item quantity="other">acum <xliff:g id="COUNT_1">%d</xliff:g> de ore</item>
-      <item quantity="one">acum <xliff:g id="COUNT_0">%d</xliff:g> oră</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="few">acum <xliff:g id="COUNT_1">%d</xliff:g> zile</item>
-      <item quantity="other">acum <xliff:g id="COUNT_1">%d</xliff:g> de zile</item>
-      <item quantity="one">acum <xliff:g id="COUNT_0">%d</xliff:g> zi</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="few">acum <xliff:g id="COUNT_1">%d</xliff:g> ani</item>
-      <item quantity="other">acum <xliff:g id="COUNT_1">%d</xliff:g> de ani</item>
-      <item quantity="one">acum <xliff:g id="COUNT_0">%d</xliff:g> an</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="few">peste <xliff:g id="COUNT_1">%d</xliff:g> minute</item>
-      <item quantity="other">peste <xliff:g id="COUNT_1">%d</xliff:g> de minute</item>
-      <item quantity="one">peste <xliff:g id="COUNT_0">%d</xliff:g> minut</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="few">peste <xliff:g id="COUNT_1">%d</xliff:g> ore</item>
-      <item quantity="other">peste <xliff:g id="COUNT_1">%d</xliff:g> de ore</item>
-      <item quantity="one">peste <xliff:g id="COUNT_0">%d</xliff:g> oră</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="few">peste <xliff:g id="COUNT_1">%d</xliff:g> zile</item>
-      <item quantity="other">peste <xliff:g id="COUNT_1">%d</xliff:g> de zile</item>
-      <item quantity="one">peste <xliff:g id="COUNT_0">%d</xliff:g> zi</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="few">peste <xliff:g id="COUNT_1">%d</xliff:g> ani</item>
-      <item quantity="other">peste <xliff:g id="COUNT_1">%d</xliff:g> de ani</item>
-      <item quantity="one">peste <xliff:g id="COUNT_0">%d</xliff:g> an</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> min."</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g> z"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g> ani"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"în <xliff:g id="COUNT">%d</xliff:g> min."</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"în <xliff:g id="COUNT">%d</xliff:g> ore"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"în <xliff:g id="COUNT">%d</xliff:g> z"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"în <xliff:g id="COUNT">%d</xliff:g> ani"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Acum # minut}few{Acum # minute}other{Acum # de minute}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Acum # oră}few{Acum # ore}other{Acum # de ore}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Acum # zi}few{Acum # zile}other{Acum # de zile}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{Acum # an}few{Acum # ani}other{Acum # de ani}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minut}few{# minute}other{# de minute}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# oră}few{# ore}other{# de ore}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# zi}few{# zile}other{# de zile}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# an}few{# ani}other{# de ani}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Problemă video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"Acest fișier video nu este valid pentru a fi transmis în flux către acest dispozitiv."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"Nu puteți reda acest videoclip"</string>
@@ -1207,10 +1141,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Ștergeți"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Metodă de intrare"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Acțiuni pentru text"</string>
-    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
-    <skip />
-    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
-    <skip />
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Înapoi"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Comutați metoda de introducere a textului"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Spațiul de stocare aproape ocupat"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Este posibil ca unele funcții de sistem să nu funcționeze"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Spațiu de stocare insuficient pentru sistem. Asigurați-vă că aveți 250 MB de spațiu liber și reporniți."</string>
@@ -1431,6 +1363,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Reveniți la setările din fabrică pentru a dezactiva modul Set de testare."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Consola din serie este activată"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Performanța este afectată. Pentru a dezactiva, verificați programul bootloader."</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"MTE experimentală activată"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"Performanța și stabilitatea pot fi afectate. Reporniți pentru a dezactiva. Dacă s-a activat cu arm64.memtag.bootctl, setați înainte la niciuna."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Lichide sau reziduuri în portul USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"Portul USB este dezactivat automat. Atingeți ca să aflați mai multe."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"Portul USB poate fi folosit"</string>
@@ -1567,11 +1501,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Omiteți"</string>
     <string name="no_matches" msgid="6472699895759164599">"Nicio potrivire"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Găsiți pe pagină"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="few"><xliff:g id="INDEX">%d</xliff:g> din <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> din <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">Un rezultat</item>
-    </plurals>
+    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{# potrivire}few{# din {total}}other{# din {total}}} }"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Terminat"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Se șterge spațiul de stocare distribuit..."</string>
     <string name="share" msgid="4157615043345227321">"Distribuiți"</string>
@@ -1701,11 +1631,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Model greșit"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"Parolă greșită"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Cod PIN greșit"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="few">Încercați din nou în <xliff:g id="NUMBER">%d</xliff:g> secunde.</item>
-      <item quantity="other">Încercați din nou în <xliff:g id="NUMBER">%d</xliff:g> de secunde.</item>
-      <item quantity="one">Încercați din nou într-o secundă.</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Desenați modelul"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Introduceți codul PIN al cardului SIM"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Introduceți codul PIN"</string>
@@ -1902,11 +1827,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Creați un cod PIN pentru modificarea restricțiilor"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"Codurile PIN nu se potrivesc. Încercați din nou."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"Codul PIN este prea scurt. Trebuie să aibă cel puțin 4 cifre."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="few">Reîncercați în <xliff:g id="COUNT">%d</xliff:g> secunde</item>
-      <item quantity="other">Reîncercați în <xliff:g id="COUNT">%d</xliff:g> de secunde</item>
-      <item quantity="one">Reîncercați într-o secundă</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Reîncercați mai târziu"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Vizualizare pe ecran complet"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Pentru a ieși, glisați de sus în jos."</string>
@@ -1934,54 +1854,20 @@
     <string name="data_saver_description" msgid="4995164271550590517">"Pentru a contribui la reducerea utilizării de date, Economizorul de date împiedică unele aplicații să trimită sau să primească date în fundal. O aplicație pe care o folosiți poate accesa datele, însă mai rar. Aceasta poate însemna, de exemplu, că imaginile se afișează numai după ce le atingeți."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activați Economizorul de date?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activați"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="few">Timp de %1$d minute (până la <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">Timp de %1$d de minute (până la <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Timp de un minut (până la <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="few">Pentru %1$d min. (până la <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">Pentru %1$d min. (până la <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Pentru 1 min. (până la <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="few">Timp de %1$d ore (până la <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">Timp de %1$d de ore (până la <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Timp de o oră (până la <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="few">Pentru %1$d h (până la <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="other">Pentru %1$d h (până la <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Pentru 1 h (până la <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="few">Timp de %d minute</item>
-      <item quantity="other">Timp de %d de minute</item>
-      <item quantity="one">Timp de un minut</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="few">Pentru %d min.</item>
-      <item quantity="other">Pentru %d min.</item>
-      <item quantity="one">Pentru 1 min.</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="few">Timp de %d ore</item>
-      <item quantity="other">Timp de %d de ore</item>
-      <item quantity="one">Timp de o oră</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="few">Pentru %d h</item>
-      <item quantity="other">Pentru %d h</item>
-      <item quantity="one">Pentru 1 h</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Timp de un minut (până la {formattedTime})}few{Timp de # minute (până la {formattedTime})}other{Timp de # de minute (până la {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Timp de un min. (până la {formattedTime})}few{Timp de # min. (până la {formattedTime})}other{Timp de # min. (până la {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Timp de o oră (până la {formattedTime})}few{Timp de # ore (până la {formattedTime})}other{Timp de # de ore (până la {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Timp de o h (până la {formattedTime})}few{Timp de # h (până la {formattedTime})}other{Timp de # h (până la {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Timp de un minut}few{Timp de # minute}other{Timp de # de minute}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Timp de un min.}few{Timp de # min.}other{Timp de # min.}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Timp de o oră}few{Timp de # ore}other{Timp de # de ore}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Timp de 1 h}few{Timp de # h}other{Timp de # h}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Până <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Până la <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Până la <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (următoarea alarmă)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Până când dezactivați"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Până când dezactivați „Nu deranja”"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Restrângeți"</string>
-    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Nu deranja"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Inactivitate"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Nopțile din zilele lucrătoare"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
@@ -2020,11 +1906,6 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Apel primit"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Apel în desfășurare"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Se filtrează un apel primit"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="few"><xliff:g id="COUNT_1">%1$d</xliff:g> selectate</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> selectate</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> selectat</item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Neclasificate"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Dvs. setați importanța acestor notificări."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Notificarea este importantă având în vedere persoanele implicate."</string>
@@ -2090,11 +1971,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Salvați pentru completare automată"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Conținutul nu poate fi completat automat"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Nicio sugestie de completare automată"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="few"><xliff:g id="COUNT">%1$s</xliff:g> sugestii de completare automată</item>
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> de sugestii de completare automată</item>
-      <item quantity="one">O sugestie de completare automată</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{O sugestie de completare automată}few{# sugestii de completare automată}other{# de sugestii de completare automată}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"Salvați în "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Salvați <xliff:g id="TYPE">%1$s</xliff:g> în "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Salvați <xliff:g id="TYPE_0">%1$s</xliff:g> și <xliff:g id="TYPE_1">%2$s</xliff:g> în "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
@@ -2141,15 +2018,22 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"DEZINSTALAȚI"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"Deschideți oricum"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Aplicație dăunătoare detectată"</string>
+    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
+    <skip />
+    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
+    <skip />
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> vrea să afișeze porțiuni din <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Editați"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Apelurile și notificările vor vibra"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Apelurile și notificările vor avea sunetul dezactivat"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Modificări de sistem"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Nu deranja"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Funcția nouă Nu deranja ascunde notificările"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Atingeți ca să aflați mai multe și să modificați"</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Funcția Nu deranja s-a schimbat"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Atingeți pentru a verifica ce este blocat."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Sistem"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Setări"</string>
@@ -2166,7 +2050,6 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Dezactivați"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Aflați mai multe"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Notificările optimizate au înlocuit Notificările adaptive Android de pe Android 12. Această funcție afișează acțiuni și răspunsuri sugerate și vă organizează notificările.\n\nNotificările optimizate pot accesa conținutul notificărilor, inclusiv informații cu caracter personal, precum mesajele și numele persoanelor de contact. În plus, funcția poate să închidă sau să răspundă la notificări, de exemplu, să răspundă la apeluri telefonice și să gestioneze opțiunea Nu deranja."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificare pentru informații despre modul Rutină"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Bateria se poate descărca înainte de încărcarea obișnuită"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Economisirea bateriei este activată pentru a prelungi durata de funcționare a bateriei"</string>
@@ -2195,11 +2078,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"Prezentare <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Conexiunea Bluetooth va rămâne activată în modul Avion"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Se încarcă"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="few"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> fișiere</item>
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> de fișiere</item>
-      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> fișier</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # fișier}few{{file_name} + # fișiere}other{{file_name} + # de fișiere}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Nu există persoane recomandate pentru permiterea accesului"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista de aplicații"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Permisiunea de înregistrare nu a fost acordată aplicației, dar aceasta poate să înregistreze conținut audio prin intermediul acestui dispozitiv USB."</string>
@@ -2211,10 +2090,22 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Power Dialog"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Ecran de blocare"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Captură de ecran"</string>
+    <!-- no translation found for accessibility_system_action_headset_hook_label (8524691721287425468) -->
+    <skip />
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Comandă rapidă de accesibilitate de pe ecran"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Selector de comenzi rapide de accesibilitate de pe ecran"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Comandă rapidă de accesibilitate"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Închideți fereastra de notificări"</string>
+    <!-- no translation found for accessibility_system_action_dpad_up_label (1029042950229333782) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_down_label (3441918448624921461) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_left_label (6557647179116479152) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_right_label (9180196950365804081) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_center_label (8149791419358224893) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Bară cu legenda pentru <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> a fost adăugat la grupul RESTRICȚIONATE"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2235,8 +2126,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Atingeți pentru a activa"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nicio aplicație pentru lucru"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nicio aplicație personală"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Deschideți în <xliff:g id="APP">%s</xliff:g> în profilul personal?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Deschideți în <xliff:g id="APP">%s</xliff:g> în profilul de serviciu?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Folosiți browserul personal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Folosiți browserul de serviciu"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Codul PIN de deblocare SIM privind rețeaua"</string>
@@ -2366,4 +2259,9 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> poate să vadă și să vă controleze ecranul. Atingeți pentru a examina."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> a fost tradus."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Mesaj tradus din <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> în <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Activitate de fundal"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Activitate de fundal"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> rulează în fundal și consumă bateria. Atingeți pentru a examina."</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> rulează în fundal mult timp. Atingeți pentru a examina."</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Verificați aplicațiile active"</string>
 </resources>

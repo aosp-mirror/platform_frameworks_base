@@ -115,6 +115,8 @@ import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
 import android.view.accessibility.IWindowMagnificationConnection;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputBinding;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.AccessibilityShortcutController;
@@ -128,12 +130,16 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
+import com.android.internal.view.IInputContext;
+import com.android.internal.view.IInputMethodSession;
+import com.android.server.AccessibilityManagerInternal;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.accessibility.magnification.MagnificationController;
 import com.android.server.accessibility.magnification.MagnificationProcessor;
 import com.android.server.accessibility.magnification.MagnificationScaleProvider;
 import com.android.server.accessibility.magnification.WindowMagnificationManager;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
@@ -231,7 +237,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private final MainHandler mMainHandler;
 
-    // Lazily initialized - access through getSystemActionPerfomer()
+    // Lazily initialized - access through getSystemActionPerformer()
     private SystemActionPerformer mSystemActionPerformer;
 
     private InteractionBridge mInteractionBridge;
@@ -273,6 +279,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private Point mTempPoint = new Point();
     private boolean mIsAccessibilityButtonShown;
 
+    private InputBinding mInputBinding;
+    IBinder mStartInputToken;
+    IInputContext mInputContext;
+    EditorInfo mEditorInfo;
+    boolean mRestarting;
+    boolean mInputSessionRequested;
+
     private AccessibilityUserState getCurrentUserStateLocked() {
         return getUserStateLocked(mCurrentUserId);
     }
@@ -298,6 +311,42 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    private static final class LocalServiceImpl extends AccessibilityManagerInternal {
+        @NonNull
+        private final AccessibilityManagerService mService;
+
+        LocalServiceImpl(@NonNull AccessibilityManagerService service) {
+            mService = service;
+        }
+
+        @Override
+        public void setImeSessionEnabled(SparseArray<IInputMethodSession> sessions,
+                boolean enabled) {
+            mService.setImeSessionEnabled(sessions, enabled);
+        }
+
+        @Override
+        public void unbindInput() {
+            mService.unbindInput();
+        }
+
+        @Override
+        public void bindInput(InputBinding binding) {
+            mService.bindInput(binding);
+        }
+
+        @Override
+        public void createImeSession(ArraySet<Integer> ignoreSet) {
+            mService.createImeSession(ignoreSet);
+        }
+
+        @Override
+        public void startInput(IBinder startInputToken, IInputContext inputContext,
+                EditorInfo editorInfo, boolean restarting) {
+            mService.startInput(startInputToken, inputContext, editorInfo, restarting);
+        }
+    }
+
     public static final class Lifecycle extends SystemService {
         private final AccessibilityManagerService mService;
 
@@ -308,6 +357,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         @Override
         public void onStart() {
+            LocalServices.addService(AccessibilityManagerInternal.class,
+                    new LocalServiceImpl(mService));
             publishBinderService(Context.ACCESSIBILITY_SERVICE, mService);
         }
 
@@ -3463,27 +3514,27 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     @RequiresPermission(Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)
-    public void setSystemAudioCaptioningRequested(boolean isEnabled, int userId) {
+    public void setSystemAudioCaptioningEnabled(boolean isEnabled, int userId) {
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.SET_SYSTEM_AUDIO_CAPTION,
-                "setSystemAudioCaptioningRequested");
+                "setSystemAudioCaptioningEnabled");
 
-        mCaptioningManagerImpl.setSystemAudioCaptioningRequested(isEnabled, userId);
+        mCaptioningManagerImpl.setSystemAudioCaptioningEnabled(isEnabled, userId);
     }
 
     @Override
-    public boolean isSystemAudioCaptioningUiRequested(int userId) {
-        return mCaptioningManagerImpl.isSystemAudioCaptioningUiRequested(userId);
+    public boolean isSystemAudioCaptioningUiEnabled(int userId) {
+        return mCaptioningManagerImpl.isSystemAudioCaptioningUiEnabled(userId);
     }
 
     @Override
     @RequiresPermission(Manifest.permission.SET_SYSTEM_AUDIO_CAPTION)
-    public void setSystemAudioCaptioningUiRequested(boolean isEnabled, int userId) {
+    public void setSystemAudioCaptioningUiEnabled(boolean isEnabled, int userId) {
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.SET_SYSTEM_AUDIO_CAPTION,
-                "setSystemAudioCaptioningUiRequested");
+                "setSystemAudioCaptioningUiEnabled");
 
-        mCaptioningManagerImpl.setSystemAudioCaptioningUiRequested(isEnabled, userId);
+        mCaptioningManagerImpl.setSystemAudioCaptioningUiEnabled(isEnabled, userId);
     }
 
     @Override
@@ -4240,6 +4291,45 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         this, displayId));
     }
 
+    @Override
+    public void requestImeLocked(AccessibilityServiceConnection connection) {
+        mMainHandler.sendMessage(obtainMessage(
+                AccessibilityManagerService::createSessionForConnection, this, connection));
+        mMainHandler.sendMessage(obtainMessage(
+                AccessibilityManagerService::bindAndStartInputForConnection, this, connection));
+    }
+
+    @Override
+    public void unbindImeLocked(AccessibilityServiceConnection connection) {
+        mMainHandler.sendMessage(obtainMessage(
+                AccessibilityManagerService::unbindInputForConnection, this, connection));
+    }
+
+    private void createSessionForConnection(AccessibilityServiceConnection connection) {
+        synchronized (mLock) {
+            if (mInputSessionRequested) {
+                connection.createImeSessionLocked();
+            }
+        }
+    }
+
+    private void bindAndStartInputForConnection(AccessibilityServiceConnection connection) {
+        synchronized (mLock) {
+            if (mInputBinding != null) {
+                connection.bindInputLocked(mInputBinding);
+                connection.startInputLocked(mStartInputToken, mInputContext, mEditorInfo,
+                        mRestarting);
+            }
+        }
+    }
+
+    private void unbindInputForConnection(AccessibilityServiceConnection connection) {
+        InputMethodManagerInternal.get().unbindAccessibilityFromCurrentClient(connection.mId);
+        synchronized (mLock) {
+            connection.unbindInputLocked();
+        }
+    }
+
     private void onDoubleTapAndHoldInternal(int displayId) {
         synchronized (mLock) {
             if (mHasInputFilter && mInputFilter != null) {
@@ -4267,5 +4357,101 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     public AccessibilityTraceManager getTraceManager() {
         return mTraceManager;
+    }
+
+    /**
+     * Bind input for accessibility services which request ime capabilities.
+     *
+     * @param binding Information given to an accessibility service about a client connecting to it.
+     */
+    public void bindInput(InputBinding binding) {
+        AccessibilityUserState userState;
+        synchronized (mLock) {
+            // Keep records of these in case new Accessibility Services are enabled.
+            mInputBinding = binding;
+            userState = getCurrentUserStateLocked();
+            for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
+                final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
+                if (service.requestImeApis()) {
+                    service.bindInputLocked(binding);
+                }
+            }
+        }
+    }
+
+    /**
+     * Unbind input for accessibility services which request ime capabilities.
+     */
+    public void unbindInput() {
+        AccessibilityUserState userState;
+        // TODO(b/218182733): Resolve the Imf lock and mLock possible deadlock
+        synchronized (mLock) {
+            userState = getCurrentUserStateLocked();
+            for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
+                final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
+                if (service.requestImeApis()) {
+                    service.unbindInputLocked();
+                }
+            }
+        }
+    }
+
+    /**
+     * Start input for accessibility services which request ime capabilities.
+     */
+    public void startInput(IBinder startInputToken, IInputContext inputContext,
+            EditorInfo editorInfo, boolean restarting) {
+        AccessibilityUserState userState;
+        synchronized (mLock) {
+            // Keep records of these in case new Accessibility Services are enabled.
+            mStartInputToken = startInputToken;
+            mInputContext = inputContext;
+            mEditorInfo = editorInfo;
+            mRestarting = restarting;
+            userState = getCurrentUserStateLocked();
+            for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
+                final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
+                if (service.requestImeApis()) {
+                    service.startInputLocked(startInputToken, inputContext, editorInfo, restarting);
+                }
+            }
+        }
+    }
+
+    /**
+     * Request input sessions from all accessibility services which request ime capabilities and
+     * whose id is not in the ignoreSet
+     */
+    public void createImeSession(ArraySet<Integer> ignoreSet) {
+        AccessibilityUserState userState;
+        synchronized (mLock) {
+            mInputSessionRequested = true;
+            userState = getCurrentUserStateLocked();
+            for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
+                final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
+                if ((!ignoreSet.contains(service.mId)) && service.requestImeApis()) {
+                    service.createImeSessionLocked();
+                }
+            }
+        }
+    }
+
+    /**
+     * Enable or disable the sessions.
+     *
+     * @param sessions Sessions to enable or disable.
+     * @param enabled True if enable the sessions or false if disable the sessions.
+     */
+    public void setImeSessionEnabled(SparseArray<IInputMethodSession> sessions, boolean enabled) {
+        AccessibilityUserState userState;
+        synchronized (mLock) {
+            userState = getCurrentUserStateLocked();
+            for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
+                final AccessibilityServiceConnection service = userState.mBoundServices.get(i);
+                if (sessions.contains(service.mId) && service.requestImeApis()) {
+                    service.setImeSessionEnabledLocked(sessions.get(service.mId), enabled);
+                }
+            }
+        }
     }
 }

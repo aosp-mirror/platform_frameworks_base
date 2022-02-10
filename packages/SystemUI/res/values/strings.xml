@@ -2375,6 +2375,9 @@
         <item quantity="one"><xliff:g id="count" example="1">%s</xliff:g> active app</item>
         <item quantity="other"><xliff:g id="count" example="2">%s</xliff:g> active apps</item>
     </plurals>
+    <!-- Content description for a dot indicator in the running application indicating that there
+    is new information [CHAR LIMIT=NONE] -->
+    <string name="fgs_dot_content_description">New information</string>
     <!-- Title for dialog listing applications currently running [CHAR LIMIT=NONE]-->
     <string name="fgs_manager_dialog_title">Active apps</string>
     <!-- Label of the button to stop an app from running [CHAR LIMIT=12]-->
@@ -2390,4 +2393,13 @@
     <string name="clipboard_edit_source">From <xliff:g id="appName" example="Gmail">%1$s</xliff:g></string>
     <!-- Label for button to dismiss clipboard overlay [CHAR LIMIT=NONE] -->
     <string name="clipboard_dismiss_description">Dismiss copy UI</string>
+    <!-- Label for button to edit text that was copied to the clipboard [CHAR LIMIT=NONE] -->
+    <string name="clipboard_edit_text_description">Edit copied text</string>
+    <!-- Label for button to edit an image that was copied to the clipboard [CHAR LIMIT=NONE] -->
+    <string name="clipboard_edit_image_description">Edit copied image</string>
+    <!-- Label for button to send copied content to a nearby device [CHAR LIMIT=NONE] -->
+    <string name="clipboard_send_nearby_description">Send to nearby device</string>
+
+    <!-- Generic "add" string [CHAR LIMIT=NONE] -->
+    <string name="add">Add</string>
 </resources>

@@ -25,6 +25,7 @@ import android.view.inputmethod.InputMethodInfo;
 
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.view.IInlineSuggestionsRequestCallback;
+import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InlineSuggestionsRequestInfo;
 import com.android.server.LocalServices;
 
@@ -149,6 +150,24 @@ public abstract class InputMethodManagerInternal {
     public abstract void updateImeWindowStatus(boolean disableImeIcon);
 
     /**
+     * Callback when the IInputMethodSession from the accessibility service with the specified
+     * accessibilityConnectionId is created.
+     *
+     * @param accessibilityConnectionId The connection id of the accessibility service.
+     * @param session The session passed back from the accessibility service.
+     */
+    public abstract void onSessionForAccessibilityCreated(int accessibilityConnectionId,
+            IInputMethodSession session);
+
+    /**
+     * Unbind the accessibility service with the specified accessibilityConnectionId from current
+     * client.
+     *
+     * @param accessibilityConnectionId The connection id of the accessibility service.
+     */
+    public abstract void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId);
+
+    /**
      * Fake implementation of {@link InputMethodManagerInternal}.  All the methods do nothing.
      */
     private static final InputMethodManagerInternal NOP =
@@ -210,6 +229,15 @@ public abstract class InputMethodManagerInternal {
 
                 @Override
                 public void updateImeWindowStatus(boolean disableImeIcon) {
+                }
+
+                @Override
+                public void onSessionForAccessibilityCreated(int accessibilityConnectionId,
+                        IInputMethodSession session) {
+                }
+
+                @Override
+                public void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId) {
                 }
             };
 

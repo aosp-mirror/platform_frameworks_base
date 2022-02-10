@@ -41,6 +41,7 @@ import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.UidTraffic;
 import android.os.BatteryStats;
 import android.os.BluetoothBatteryStats;
+import android.os.Parcel;
 import android.os.WakeLockStats;
 import android.os.WorkSource;
 import android.util.SparseArray;
@@ -583,11 +584,42 @@ public class BatteryStatsImplTest {
         mBatteryStatsImpl.noteBluetoothScanStoppedFromSourceLocked(ws, true, 9000, 9000);
         mBatteryStatsImpl.noteBluetoothScanResultsFromSourceLocked(ws, 42, 9000, 9000);
 
-        BluetoothActivityEnergyInfo info = new BluetoothActivityEnergyInfo(1000,
-                BluetoothActivityEnergyInfo.BT_STACK_STATE_STATE_ACTIVE, 9000, 8000, 12000, 0);
-        info.setUidTraffic(ImmutableList.of(
-                new UidTraffic(10042, 3000, 4000),
-                new UidTraffic(10043, 5000, 8000)));
+
+
+        final Parcel uidTrafficParcel1 = Parcel.obtain();
+        final Parcel uidTrafficParcel2 = Parcel.obtain();
+
+        uidTrafficParcel1.writeInt(10042);
+        uidTrafficParcel1.writeLong(3000);
+        uidTrafficParcel1.writeLong(4000);
+        uidTrafficParcel1.setDataPosition(0);
+        uidTrafficParcel2.writeInt(10043);
+        uidTrafficParcel2.writeLong(5000);
+        uidTrafficParcel2.writeLong(8000);
+        uidTrafficParcel2.setDataPosition(0);
+
+        List<UidTraffic> uidTrafficList = ImmutableList.of(
+                UidTraffic.CREATOR.createFromParcel(uidTrafficParcel1),
+                UidTraffic.CREATOR.createFromParcel(uidTrafficParcel2));
+
+        final Parcel btActivityEnergyInfoParcel = Parcel.obtain();
+        btActivityEnergyInfoParcel.writeLong(1000);
+        btActivityEnergyInfoParcel.writeInt(
+                BluetoothActivityEnergyInfo.BT_STACK_STATE_STATE_ACTIVE);
+        btActivityEnergyInfoParcel.writeLong(9000);
+        btActivityEnergyInfoParcel.writeLong(8000);
+        btActivityEnergyInfoParcel.writeLong(12000);
+        btActivityEnergyInfoParcel.writeLong(0);
+        btActivityEnergyInfoParcel.writeTypedList(uidTrafficList);
+        btActivityEnergyInfoParcel.setDataPosition(0);
+
+        BluetoothActivityEnergyInfo info = BluetoothActivityEnergyInfo.CREATOR
+                .createFromParcel(btActivityEnergyInfoParcel);
+
+        uidTrafficParcel1.recycle();
+        uidTrafficParcel2.recycle();
+        btActivityEnergyInfoParcel.recycle();
+
         mBatteryStatsImpl.updateBluetoothStateLocked(info, -1, 1000, 1000);
 
         BluetoothBatteryStats stats =

@@ -28,12 +28,12 @@
     <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"कनेक्ट केलेले असताना या डिव्हाइसवरील अ‍ॅप्लिकेशन अ‍ॅक्सेस करता यावीत यासाठी &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ला &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; चा रिमोट अ‍ॅक्सेस द्या."</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
+    <string name="title_computer" msgid="4693714143506569253">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ला ही माहिती तुमच्या फोनवरून अ‍ॅक्सेस करण्यासाठी अनुमती द्या"</string>
+    <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="profile_name_generic" msgid="6851028682723034988">"डिव्हाइस"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"अनुमती द्या"</string>
     <string name="consent_no" msgid="2640796915611404382">"अनुमती देऊ नका"</string>
-    <!-- no translation found for permission_sync_confirmation_title (667074294393493186) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (8873391306499120778) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"अ‍ॅप परवानग्या तुमच्या वॉचवर ट्रान्सफर करा"</string>
+    <string name="permission_sync_summary" msgid="8873391306499120778">"तुमचे वॉच सेट करणे आणखी सोपे करण्यासाठी, सेटअपदरम्यान तुमच्या वॉचवर इंस्टॉल केलेली ॲप्स ही तुमच्या फोनप्रमाणेच परवानग्या वापरतील.\n\n या परवानग्यांमध्ये तुमच्या वॉचचा मायक्रोफोन आणि स्थानाच्या अ‍ॅक्सेसचा समावेश असू शकतो."</string>
 </resources>

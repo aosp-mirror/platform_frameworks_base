@@ -23,6 +23,7 @@ java_defaults {
             "-Xep:FormatString:ERROR",
             "-Xep:ArrayHashCode:ERROR",
             "-Xep:SelfAssignment:ERROR",
+            "-Xep:ArrayEquals:ERROR",
             // NOTE: only enable to generate local patchfiles
             // "-XepPatchChecks:refaster:frameworks/base/errorprone/refaster/EfficientXml.java.refaster",
             // "-XepPatchLocation:/tmp/refaster/",

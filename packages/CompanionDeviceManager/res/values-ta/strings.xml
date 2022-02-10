@@ -28,12 +28,12 @@
     <string name="summary_app_streaming" product="device" msgid="7614171699434639963">"இணைக்கப்பட்டிருக்கும்போது இந்தச் சாதனத்தில் நிறுவப்பட்டிருக்கும் ஆப்ஸை அணுகுவதற்கான தொலைநிலை அணுகலை &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; சாதனத்திற்கு வழங்க &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="title_automotive_projection" msgid="3296005598978412847"></string>
     <string name="summary_automotive_projection" msgid="8683801274662496164"></string>
+    <string name="title_computer" msgid="4693714143506569253">"உங்கள் மொபைலிலிருந்து இந்தத் தகவலை அணுக &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ஆப்ஸை அனுமதியுங்கள்"</string>
+    <string name="summary_computer" msgid="3798467601598297062"></string>
     <string name="profile_name_generic" msgid="6851028682723034988">"சாதனம்"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
     <string name="consent_yes" msgid="8344487259618762872">"அனுமதி"</string>
     <string name="consent_no" msgid="2640796915611404382">"அனுமதிக்க வேண்டாம்"</string>
-    <!-- no translation found for permission_sync_confirmation_title (667074294393493186) -->
-    <skip />
-    <!-- no translation found for permission_sync_summary (8873391306499120778) -->
-    <skip />
+    <string name="permission_sync_confirmation_title" msgid="667074294393493186">"ஆப்ஸ் அனுமதிகளை உங்கள் வாட்ச்சிற்கு மாற்றுதல்"</string>
+    <string name="permission_sync_summary" msgid="8873391306499120778">"உங்கள் வாட்ச் அமைவை எளிதாக்க, உங்கள் மொபைலில் வழங்கியுள்ள அனுமதிகளையே அமைவின்போது வாட்ச்சில் நிறுவப்பட்ட ஆப்ஸும் பயன்படுத்தும்.\n\n உங்கள் வாட்ச்சிலுள்ள மைக்ரோஃபோன், இருப்பிடம் ஆகியவற்றுக்கான அணுகலும் இந்த அனுமதிகளில் அடங்கக்கூடும்."</string>
 </resources>

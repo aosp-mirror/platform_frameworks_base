@@ -24,8 +24,8 @@ import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.app.ambientcontext.AmbientContextEvent;
 import android.app.ambientcontext.AmbientContextEventRequest;
-import android.app.ambientcontext.AmbientContextEventResponse;
-import android.app.ambientcontext.IAmbientContextEventObserver;
+import android.app.ambientcontext.AmbientContextManager;
+import android.app.ambientcontext.IAmbientContextManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
@@ -76,7 +76,7 @@ public class AmbientContextManagerService extends
 
     @Override
     public void onStart() {
-        publishBinderService(Context.AMBIENT_CONTEXT_SERVICE, new AmbientContextEventObserver());
+        publishBinderService(Context.AMBIENT_CONTEXT_SERVICE, new AmbientContextManagerInternal());
     }
 
     @Override
@@ -128,14 +128,16 @@ public class AmbientContextManagerService extends
      * specified events. Intended for use by shell command for testing.
      * Requires ACCESS_AMBIENT_CONTEXT_EVENT permission.
      */
-    void startAmbientContextEvent(@UserIdInt int userId, AmbientContextEventRequest request,
-            String packageName, RemoteCallback callback) {
+    void startDetection(@UserIdInt int userId, AmbientContextEventRequest request,
+            String packageName, RemoteCallback detectionResultCallback,
+            RemoteCallback statusCallback) {
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
         synchronized (mLock) {
             final AmbientContextManagerPerUserService service = getServiceForUserLocked(userId);
             if (service != null) {
-                service.startDetection(request, packageName, callback);
+                service.startDetection(request, packageName, detectionResultCallback,
+                        statusCallback);
             } else {
                 Slog.i(TAG, "service not available for user_id: " + userId);
             }
@@ -161,6 +163,25 @@ public class AmbientContextManagerService extends
     }
 
     /**
+     * Send request to the remote AmbientContextDetectionService impl to query the status of the
+     * specified events. Intended for use by shell command for testing.
+     * Requires ACCESS_AMBIENT_CONTEXT_EVENT permission.
+     */
+    void queryServiceStatus(@UserIdInt int userId, String packageName,
+            int[] eventTypes, RemoteCallback callback) {
+        mContext.enforceCallingOrSelfPermission(
+                Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
+        synchronized (mLock) {
+            final AmbientContextManagerPerUserService service = getServiceForUserLocked(userId);
+            if (service != null) {
+                service.onQueryServiceStatus(eventTypes, packageName, callback);
+            } else {
+                Slog.i(TAG, "query service not available for user_id: " + userId);
+            }
+        }
+    }
+
+    /**
      * Returns the AmbientContextManagerPerUserService component for this user.
      */
     public ComponentName getComponentName(@UserIdInt int userId) {
@@ -173,31 +194,62 @@ public class AmbientContextManagerService extends
         return null;
     }
 
-    private final class AmbientContextEventObserver extends IAmbientContextEventObserver.Stub {
+    private final class AmbientContextManagerInternal extends IAmbientContextManager.Stub {
         final AmbientContextManagerPerUserService mService = getServiceForUserLocked(
                 UserHandle.getCallingUserId());
 
         @Override
         public void registerObserver(
-                AmbientContextEventRequest request, PendingIntent pendingIntent) {
+                AmbientContextEventRequest request, PendingIntent resultPendingIntent,
+                RemoteCallback statusCallback) {
             Objects.requireNonNull(request);
-            Objects.requireNonNull(pendingIntent);
+            Objects.requireNonNull(resultPendingIntent);
+            Objects.requireNonNull(statusCallback);
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
+            assertCalledByPackageOwner(resultPendingIntent.getCreatorPackage());
             if (!mIsServiceEnabled) {
                 Slog.w(TAG, "Service not available.");
-                mService.sendStatusUpdateIntent(pendingIntent,
-                        AmbientContextEventResponse.STATUS_SERVICE_UNAVAILABLE);
+                mService.sendStatusCallback(statusCallback,
+                        AmbientContextManager.STATUS_SERVICE_UNAVAILABLE);
                 return;
             }
-            mService.onRegisterObserver(request, pendingIntent);
+            mService.onRegisterObserver(request, resultPendingIntent, statusCallback);
         }
 
         @Override
         public void unregisterObserver(String callingPackage) {
             mContext.enforceCallingOrSelfPermission(
                     Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
+            assertCalledByPackageOwner(callingPackage);
             mService.onUnregisterObserver(callingPackage);
+        }
+
+        @Override
+        public void queryServiceStatus(int[] eventTypes, String callingPackage,
+                RemoteCallback statusCallback) {
+            Objects.requireNonNull(eventTypes);
+            Objects.requireNonNull(callingPackage);
+            Objects.requireNonNull(statusCallback);
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.ACCESS_AMBIENT_CONTEXT_EVENT, TAG);
+            assertCalledByPackageOwner(callingPackage);
+            if (!mIsServiceEnabled) {
+                Slog.w(TAG, "Detection service not available.");
+                mService.sendStatusToCallback(statusCallback,
+                        AmbientContextManager.STATUS_SERVICE_UNAVAILABLE);
+                return;
+            }
+            mService.onQueryServiceStatus(eventTypes, callingPackage,
+                    statusCallback);
+        }
+
+        @Override
+        public void startConsentActivity(int[] eventTypes, String callingPackage) {
+            Objects.requireNonNull(eventTypes);
+            Objects.requireNonNull(callingPackage);
+            assertCalledByPackageOwner(callingPackage);
+            mService.onStartConsentActivity(eventTypes, callingPackage);
         }
 
         @Override

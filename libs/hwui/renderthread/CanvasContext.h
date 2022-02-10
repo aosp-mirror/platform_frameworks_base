@@ -279,8 +279,8 @@ private:
         nsecs_t queueDuration;
     };
 
-    // Need at least 4 because we do quad buffer. Add a 5th for good measure.
-    RingBuffer<SwapHistory, 5> mSwapHistory;
+    // Need at least 4 because we do quad buffer. Add a few more for good measure.
+    RingBuffer<SwapHistory, 7> mSwapHistory;
     // Frame numbers start at 1, 0 means uninitialized
     uint64_t mFrameNumber = 0;
     int64_t mDamageId = 0;

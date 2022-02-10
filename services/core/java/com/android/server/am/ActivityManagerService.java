@@ -257,7 +257,6 @@ import android.os.BinderProxy;
 import android.os.BugreportParams;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.ConditionVariable;
 import android.os.Debug;
 import android.os.DropBoxManager;
 import android.os.FactoryTest;
@@ -459,7 +458,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * broadcasts
      */
     private static final boolean ENFORCE_DYNAMIC_RECEIVER_EXPLICIT_EXPORT =
-            SystemProperties.getBoolean("fw.enforce_dynamic_receiver_explicit_export", false);
+            SystemProperties.getBoolean("fw.enforce_dynamic_receiver_explicit_export", true);
 
     static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityManagerService" : TAG_AM;
     static final String TAG_BACKUP = TAG + POSTFIX_BACKUP;
@@ -15551,32 +15550,45 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @throws RemoteException
      */
     public void dumpAllResources(ParcelFileDescriptor fd, PrintWriter pw) throws RemoteException {
-        synchronized (mProcLock) {
-            mProcessList.forEachLruProcessesLOSP(true, app -> {
-                ConditionVariable lock = new ConditionVariable();
-                RemoteCallback
-                        finishCallback = new RemoteCallback(result -> lock.open(), null);
-
-                pw.println(String.format("------ DUMP RESOURCES %s (%s)  ------",
-                        app.processName,
-                        app.info.packageName));
-                pw.flush();
+        final ArrayList<ProcessRecord> processes = new ArrayList<>();
+        synchronized (mPidsSelfLocked) {
+            processes.addAll(mProcessList.getLruProcessesLOSP());
+        }
+        for (int i = 0, size = processes.size(); i < size; i++) {
+            ProcessRecord app = processes.get(i);
+            pw.println(String.format("------ DUMP RESOURCES %s (%s)  ------",
+                    app.processName,
+                    app.info.packageName));
+            pw.flush();
+            try {
+                TransferPipe tp = new TransferPipe();
                 try {
-                    app.getThread().dumpResources(fd.dup(), finishCallback);
-                    lock.block(2000);
-                } catch (Exception e) {
-                    pw.println(String.format(
-                            "------ EXCEPTION DUMPING RESOURCES for %s (%s): %s ------",
-                            app.processName,
-                            app.info.packageName,
-                            e.getMessage()));
-                    pw.flush();
+                    IApplicationThread thread = app.getThread();
+                    if (thread != null) {
+                        app.getThread().dumpResources(tp.getWriteFd(), null);
+                        tp.go(fd.getFileDescriptor(), 2000);
+                        pw.println(String.format("------ END DUMP RESOURCES %s (%s)  ------",
+                                app.processName,
+                                app.info.packageName));
+                        pw.flush();
+                    } else {
+                        pw.println(String.format(
+                                "------ DUMP RESOURCES %s (%s) failed, no thread ------",
+                                app.processName,
+                                app.info.packageName));
+                    }
+                } finally {
+                    tp.kill();
                 }
-                pw.println(String.format("------ END DUMP RESOURCES %s (%s)  ------",
+            } catch (IOException e) {
+                pw.println(String.format(
+                        "------ EXCEPTION DUMPING RESOURCES for %s (%s): %s ------",
                         app.processName,
-                        app.info.packageName));
+                        app.info.packageName,
+                        e.getMessage()));
                 pw.flush();
-            });
+            }
+
         }
     }
 
@@ -15939,13 +15951,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public boolean startAndBindSupplementalProcessService(Intent service,
-                ServiceConnection conn, int userAppUid) throws TransactionTooLargeException {
+        public boolean bindSupplementalProcessService(Intent service, ServiceConnection conn,
+                int userAppUid, String processName, int flags) throws RemoteException {
             if (service == null) {
                 throw new IllegalArgumentException("intent is null");
             }
             if (conn == null) {
                 throw new IllegalArgumentException("connection is null");
+            }
+            if (processName == null) {
+                throw new IllegalArgumentException("processName is null");
             }
             if (service.getComponent() == null) {
                 throw new IllegalArgumentException("service must specify explicit component");
@@ -15955,15 +15970,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             Handler handler = mContext.getMainThreadHandler();
-            int flags = Context.BIND_AUTO_CREATE;
 
             final IServiceConnection sd = mContext.getServiceDispatcher(conn, handler, flags);
             service.prepareToLeaveProcess(mContext);
             return ActivityManagerService.this.bindServiceInstance(
-                        mContext.getIApplicationThread(), mContext.getActivityToken(), service,
-                        service.resolveTypeIfNeeded(mContext.getContentResolver()), sd, flags,
-                        Integer.toString(userAppUid), /*isSupplementalProcessService*/ true,
-                        mContext.getOpPackageName(), UserHandle.getUserId(userAppUid)) != 0;
+                    mContext.getIApplicationThread(), mContext.getActivityToken(), service,
+                    service.resolveTypeIfNeeded(mContext.getContentResolver()), sd, flags,
+                    processName, /*isSupplementalProcessService*/ true, mContext.getOpPackageName(),
+                    UserHandle.getUserId(userAppUid)) != 0;
         }
 
         @Override

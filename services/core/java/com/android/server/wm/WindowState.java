@@ -4910,13 +4910,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (hasSurface) {
                 mWmService.mDestroySurface.add(this);
             }
-            if (mRemoveOnExit) {
-                mWmService.mPendingRemove.add(this);
-                mRemoveOnExit = false;
-            }
         }
         mAnimatingExit = false;
         getDisplayContent().mWallpaperController.hideWallpapers(this);
+    }
+
+    @Override
+    boolean handleCompleteDeferredRemoval() {
+        if (mRemoveOnExit && !isSelfAnimating(0 /* flags */, EXIT_ANIMATING_TYPES)) {
+            mRemoveOnExit = false;
+            removeImmediately();
+        }
+        return super.handleCompleteDeferredRemoval();
     }
 
     boolean clearAnimatingFlags() {

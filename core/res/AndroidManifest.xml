@@ -199,6 +199,8 @@
     <protected-broadcast
         android:name="android.bluetooth.headsetclient.profile.action.LAST_VTAG" />
     <protected-broadcast
+        android:name="android.bluetooth.headsetclient.profile.action.NETWORK_SERVICE_STATE_CHANGED" />
+    <protected-broadcast
         android:name="android.bluetooth.hearingaid.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast
         android:name="android.bluetooth.hearingaid.profile.action.PLAYING_STATE_CHANGED" />
@@ -721,6 +723,7 @@
     <protected-broadcast android:name="android.app.action.DEVICE_POLICY_RESOURCE_UPDATED" />
     <protected-broadcast android:name="android.intent.action.SHOW_FOREGROUND_SERVICE_MANAGER" />
     <protected-broadcast android:name="android.service.autofill.action.DELAYED_FILL" />
+    <protected-broadcast android:name="android.app.action.PROVISIONING_COMPLETED" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
@@ -1895,7 +1898,7 @@
         android:label="@string/permlab_changeWifiState"
         android:protectionLevel="normal" />
 
-    <!-- @SystemApi @hide Allows applications to enable/disable wifi auto join. This permission
+    <!-- Allows applications to enable/disable wifi auto join. This permission
          is used to let OEMs grant their trusted app access to a subset of privileged wifi APIs
          to improve wifi performance.
          <p>Not for use by third-party applications. -->
@@ -1933,7 +1936,7 @@
     <permission android:name="android.permission.RECEIVE_WIFI_CREDENTIAL_CHANGE"
         android:protectionLevel="signature|privileged" />
 
-    <!-- @SystemApi @hide Allows an application to modify any wifi configuration, even if created
+    <!-- Allows an application to modify any wifi configuration, even if created
      by another application. Once reconfigured the original creator cannot make any further
      modifications.
      <p>Not for use by third-party applications. -->
@@ -6349,6 +6352,15 @@
     <permission android:name="android.permission.SET_UNRESTRICTED_KEEP_CLEAR_AREAS"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows TV input apps and TV apps to use TIS extension interfaces for
+         domain-specific features.
+         <p>Protection level: signature|privileged|vendorPrivileged
+         <p>Not for use by third-party applications.
+         @hide
+    -->
+    <permission android:name="android.permission.TIS_EXTENSION_INTERFACE"
+        android:protectionLevel="signature|privileged|vendorPrivileged" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->
@@ -6580,6 +6592,12 @@
                 android:excludeFromRecents="true"
                 android:lockTaskMode="always"
                 android:process=":ui">
+        </activity>
+
+        <activity android:name="com.android.internal.app.BlockedAppStreamingActivity"
+            android:theme="@style/Theme.Dialog.Confirmation"
+            android:excludeFromRecents="true"
+            android:process=":ui">
         </activity>
 
         <activity android:name="com.android.internal.app.LaunchAfterAuthenticationActivity"

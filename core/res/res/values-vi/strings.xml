@@ -70,7 +70,6 @@
     <string name="ThreeWCMmi" msgid="2436550866139999411">"Gọi ba chiều"</string>
     <string name="RuacMmi" msgid="1876047385848991110">"Từ chối các cuộc gọi làm phiền không mong muốn"</string>
     <string name="CndMmi" msgid="185136449405618437">"Gửi số đang gọi"</string>
-    <string name="DndMmi" msgid="8797375819689129800">"Không làm phiền"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"Số gọi đến mặc định thành bị giới hạn. Cuộc gọi tiếp theo: Bị giới hạn"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Số gọi đến mặc định thành bị giới hạn. Cuộc gọi tiếp theo. Không bị giới hạn"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Số gọi đến mặc định thành không bị giới hạn. Cuộc gọi tiếp theo. Bị giới hạn"</string>
@@ -180,10 +179,7 @@
     <string name="low_memory" product="watch" msgid="3479447988234030194">"Bộ nhớ đồng hồ đã đầy. Hãy xóa một số tệp để giải phóng dung lượng."</string>
     <string name="low_memory" product="tv" msgid="6663680413790323318">"Bộ nhớ thiết bị Android TV đã đầy. Hãy xóa một số tệp để giải phóng dung lượng."</string>
     <string name="low_memory" product="default" msgid="2539532364144025569">"Bộ nhớ điện thoại đã đầy. Hãy xóa một số tệp để tạo thêm dung lượng."</string>
-    <plurals name="ssl_ca_cert_warning" formatted="false" msgid="2288194355006173029">
-      <item quantity="other">Đã cài đặt các tổ chức phát hành chứng chỉ</item>
-      <item quantity="one">Đã cài đặt tổ chức phát hành chứng chỉ</item>
-    </plurals>
+    <string name="ssl_ca_cert_warning" msgid="7233573909730048571">"{count,plural, =1{Đã cài đặt tổ chức phát hành chứng chỉ}other{Đã cài đặt các tổ chức phát hành chứng chỉ}}"</string>
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"Bởi một bên thứ ba không xác định"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"Bởi quản trị viên hồ sơ công việc của bạn"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"Bởi <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>"</string>
@@ -203,6 +199,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"Dịch vụ Thông báo của cảm biến"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Dịch vụ Twilight"</string>
     <string name="gnss_time_update_service" msgid="9039489496037616095">"Dịch vụ cập nhật thời gian GNSS"</string>
+    <string name="device_policy_manager_service" msgid="5085762851388850332">"Dịch vụ quản lý chính sách thiết bị"</string>
     <string name="music_recognition_manager_service" msgid="7481956037950276359">"Dịch vụ quản lý tính năng nhận dạng nhạc"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Thiết bị của bạn sẽ bị xóa"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Không thể sử dụng ứng dụng quản trị. Thiết bị của bạn sẽ bị xóa ngay bây giờ.\n\nHãy liên hệ với quản trị viên của tổ chức nếu bạn có thắc mắc."</string>
@@ -256,10 +253,7 @@
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Sử dụng tùy chọn này trong hầu hết các trường hợp. Tùy chọn này cho phép bạn theo dõi tiến trình của báo cáo, nhập thêm thông tin chi tiết về sự cố cũng như chụp ảnh màn hình. Tùy chọn này có thể bỏ qua một số phần ít được sử dụng mà mất nhiều thời gian để báo cáo."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Báo cáo đầy đủ"</string>
     <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Sử dụng tùy chọn này để giảm thiểu ảnh hưởng của hệ thống khi thiết bị của bạn không phản hồi hoặc quá chậm, hay khi bạn cần tất cả các phần báo cáo. Không cho phép bạn nhập thêm thông tin chi tiết hoặc chụp thêm ảnh chụp màn hình."</string>
-    <plurals name="bugreport_countdown" formatted="false" msgid="3906120379260059206">
-      <item quantity="other">Sẽ chụp ảnh màn hình để báo cáo lỗi sau <xliff:g id="NUMBER_1">%d</xliff:g> giây.</item>
-      <item quantity="one">Sẽ chụp ảnh màn hình để báo cáo lỗi sau <xliff:g id="NUMBER_0">%d</xliff:g> giây.</item>
-    </plurals>
+    <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Sẽ chụp ảnh màn hình để báo cáo lỗi sau # giây.}other{Sẽ chụp ảnh màn hình để báo cáo lỗi sau # giây.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Đã chụp được ảnh màn hình báo cáo lỗi"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Không chụp được ảnh màn hình báo cáo lỗi"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Chế độ im lặng"</string>
@@ -310,8 +304,14 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"truy cập lịch của bạn"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Tin nhắn SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"gửi và xem tin nhắn SMS"</string>
-    <string name="permgrouplab_storage" msgid="1938416135375282333">"Tệp và nội dung nghe nhìn"</string>
-    <string name="permgroupdesc_storage" msgid="6351503740613026600">"truy cập ảnh, phương tiện và tệp trên thiết bị của bạn"</string>
+    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
+    <skip />
+    <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Nhạc và âm thanh khác"</string>
+    <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"truy cập vào tệp âm thanh trên thiết bị"</string>
+    <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Ảnh và video"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="173787212014117477">"truy cập vào tệp hình ảnh và video trên thiết bị"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Micrô"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"ghi âm"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Hoạt động thể chất"</string>
@@ -683,6 +683,12 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Cho phép ứng dụng đọc thống kê đồng bộ hóa cho tài khoản, bao gồm lịch sử của các sự kiện đồng bộ hóa và lượng dữ liệu được đồng bộ hóa."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"đọc nội dung của bộ nhớ dùng chung"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Cho phép ứng dụng đọc nội dung của bộ nhớ dùng chung."</string>
+    <string name="permlab_readMediaAudio" msgid="8723513075731763810">"đọc tệp âm thanh trong bộ nhớ dùng chung"</string>
+    <string name="permdesc_readMediaAudio" msgid="5299772574434619399">"Cho phép ứng dụng đọc tệp âm thanh trong bộ nhớ dùng chung."</string>
+    <string name="permlab_readMediaVideo" msgid="7768003311260655007">"đọc tệp video trong bộ nhớ dùng chung"</string>
+    <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"Cho phép ứng dụng đọc tệp video trong bộ nhớ dùng chung."</string>
+    <string name="permlab_readMediaImage" msgid="1507059005825769856">"đọc tệp hình ảnh trong bộ nhớ dùng chung"</string>
+    <string name="permdesc_readMediaImage" msgid="8328052622292457588">"Cho phép ứng dụng đọc tệp hình ảnh trong bộ nhớ dùng chung."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"sửa đổi hoặc xóa nội dung của bộ nhớ dùng chung"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Cho phép ứng dụng ghi nội dung của bộ nhớ dùng chung."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"thực hiện/nhận các cuộc gọi qua SIP"</string>
@@ -729,8 +735,6 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="6316457028173478345">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ nhắn tin của nhà cung cấp dịch vụ. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindCarrierServices" msgid="2395596978626237474">"liên kết với dịch vụ của nhà cung cấp"</string>
     <string name="permdesc_bindCarrierServices" msgid="9185614481967262900">"Cho phép chủ sở hữu liên kết với các dịch vụ của nhà cung cấp. Không bao giờ cần cho các ứng dụng thông thường."</string>
-    <string name="permlab_access_notification_policy" msgid="5524112842876975537">"quyền truy cập chế độ Không làm phiền"</string>
-    <string name="permdesc_access_notification_policy" msgid="8538374112403845013">"Cho phép ứng dụng đọc và ghi cấu hình Không làm phiền."</string>
     <string name="permlab_startViewPermissionUsage" msgid="1504564328641112341">"cấp quyền xem"</string>
     <string name="permdesc_startViewPermissionUsage" msgid="2820325605959586538">"Cho phép chủ sở hữu cấp quyền cho một ứng dụng. Các ứng dụng thông thường sẽ không bao giờ cần quyền này."</string>
     <string name="permlab_startReviewPermissionDecisions" msgid="8690578688476599284">"bắt đầu xem các quyết định cấp quyền"</string>
@@ -1072,10 +1076,7 @@
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> muốn bật Khám phá bằng cách chạm. Khi Khám phá bằng cách chạm được bật, bạn có thể nghe hoặc xem mô tả dưới ngón tay bạn hoặc thực hiện cử chỉ để tương tác với điện thoại."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 tháng trước"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Trước 1 tháng trước"</string>
-    <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ngày qua</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ngày qua</item>
-    </plurals>
+    <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{# ngày qua}other{# ngày qua}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Tháng trước"</string>
     <string name="older" msgid="1645159827884647400">"Cũ hơn"</string>
     <string name="preposition_for_date" msgid="2780767868832729599">"vào <xliff:g id="DATE">%s</xliff:g>"</string>
@@ -1094,70 +1095,22 @@
     <string name="year" msgid="5182610307741238982">"năm"</string>
     <string name="years" msgid="5797714729103773425">"năm"</string>
     <string name="now_string_shortest" msgid="3684914126941650330">"vừa xong"</string>
-    <plurals name="duration_minutes_shortest" formatted="false" msgid="7519574894537185135">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ph</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ph</item>
-    </plurals>
-    <plurals name="duration_hours_shortest" formatted="false" msgid="2838655994500499651">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>h</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>h</item>
-    </plurals>
-    <plurals name="duration_days_shortest" formatted="false" msgid="3686058472983158496">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>ng</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>ng</item>
-    </plurals>
-    <plurals name="duration_years_shortest" formatted="false" msgid="8299112348723640338">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g>n</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g>n</item>
-    </plurals>
-    <plurals name="duration_minutes_shortest_future" formatted="false" msgid="849196137176399440">
-      <item quantity="other">sau <xliff:g id="COUNT_1">%d</xliff:g>ph</item>
-      <item quantity="one">sau <xliff:g id="COUNT_0">%d</xliff:g>ph</item>
-    </plurals>
-    <plurals name="duration_hours_shortest_future" formatted="false" msgid="5386373597343170388">
-      <item quantity="other">sau <xliff:g id="COUNT_1">%d</xliff:g>h</item>
-      <item quantity="one">sau <xliff:g id="COUNT_0">%d</xliff:g>h</item>
-    </plurals>
-    <plurals name="duration_days_shortest_future" formatted="false" msgid="814754627092787227">
-      <item quantity="other">sau <xliff:g id="COUNT_1">%d</xliff:g>ng</item>
-      <item quantity="one">sau <xliff:g id="COUNT_0">%d</xliff:g>ng</item>
-    </plurals>
-    <plurals name="duration_years_shortest_future" formatted="false" msgid="7683731800140202145">
-      <item quantity="other">sau <xliff:g id="COUNT_1">%d</xliff:g>n</item>
-      <item quantity="one">sau <xliff:g id="COUNT_0">%d</xliff:g>n</item>
-    </plurals>
-    <plurals name="duration_minutes_relative" formatted="false" msgid="6569851308583028344">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> phút trước</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> phút trước</item>
-    </plurals>
-    <plurals name="duration_hours_relative" formatted="false" msgid="420434788589102019">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> giờ trước</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> giờ trước</item>
-    </plurals>
-    <plurals name="duration_days_relative" formatted="false" msgid="6056425878237482431">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> ngày trước</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> ngày trước</item>
-    </plurals>
-    <plurals name="duration_years_relative" formatted="false" msgid="2179998228861172159">
-      <item quantity="other"><xliff:g id="COUNT_1">%d</xliff:g> năm trước</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%d</xliff:g> năm trước</item>
-    </plurals>
-    <plurals name="duration_minutes_relative_future" formatted="false" msgid="5759885720917567723">
-      <item quantity="other">sau <xliff:g id="COUNT_1">%d</xliff:g> phút</item>
-      <item quantity="one">sau <xliff:g id="COUNT_0">%d</xliff:g> phút</item>
-    </plurals>
-    <plurals name="duration_hours_relative_future" formatted="false" msgid="8963511608507707959">
-      <item quantity="other">sau <xliff:g id="COUNT_1">%d</xliff:g> giờ</item>
-      <item quantity="one">sau <xliff:g id="COUNT_0">%d</xliff:g> giờ</item>
-    </plurals>
-    <plurals name="duration_days_relative_future" formatted="false" msgid="1964709470979250702">
-      <item quantity="other">sau <xliff:g id="COUNT_1">%d</xliff:g> ngày</item>
-      <item quantity="one">sau <xliff:g id="COUNT_0">%d</xliff:g> ngày</item>
-    </plurals>
-    <plurals name="duration_years_relative_future" formatted="false" msgid="3985129025134896371">
-      <item quantity="other">sau <xliff:g id="COUNT_1">%d</xliff:g> năm</item>
-      <item quantity="one">sau <xliff:g id="COUNT_0">%d</xliff:g> năm</item>
-    </plurals>
+    <string name="duration_minutes_shortest" msgid="5744379079540806690">"<xliff:g id="COUNT">%d</xliff:g> phút"</string>
+    <string name="duration_hours_shortest" msgid="1477752094141971675">"<xliff:g id="COUNT">%d</xliff:g> giờ"</string>
+    <string name="duration_days_shortest" msgid="4083124701676227233">"<xliff:g id="COUNT">%d</xliff:g> ngày"</string>
+    <string name="duration_years_shortest" msgid="483982719231145618">"<xliff:g id="COUNT">%d</xliff:g> năm"</string>
+    <string name="duration_minutes_shortest_future" msgid="5260857299282734759">"<xliff:g id="COUNT">%d</xliff:g> phút nữa"</string>
+    <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> giờ nữa"</string>
+    <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> ngày nữa"</string>
+    <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> năm nữa"</string>
+    <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# phút trước}other{# phút trước}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# giờ trước}other{# giờ trước}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# ngày trước}other{# ngày trước}}"</string>
+    <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{# năm trước}other{# năm trước}}"</string>
+    <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# phút}other{# phút}}"</string>
+    <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# giờ}other{# giờ}}"</string>
+    <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# ngày}other{# ngày}}"</string>
+    <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# năm}other{# năm}}"</string>
     <string name="VideoView_error_title" msgid="5750686717225068016">"Sự cố video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"Video này không hợp lệ để phát trực tuyến đến thiết bị này."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"Không thể phát video này."</string>
@@ -1187,10 +1140,8 @@
     <string name="deleteText" msgid="4200807474529938112">"Xóa"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Phương thức nhập"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Tác vụ văn bản"</string>
-    <!-- no translation found for input_method_nav_back_button_desc (3655838793765691787) -->
-    <skip />
-    <!-- no translation found for input_method_ime_switch_button_desc (2736542240252198501) -->
-    <skip />
+    <string name="input_method_nav_back_button_desc" msgid="3655838793765691787">"Quay lại"</string>
+    <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Chuyển phương thức nhập"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Sắp hết dung lượng lưu trữ"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Một số chức năng hệ thống có thể không hoạt động"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Không đủ bộ nhớ cho hệ thống. Đảm bảo bạn có 250 MB dung lượng trống và khởi động lại."</string>
@@ -1411,6 +1362,8 @@
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Khôi phục cài đặt gốc để tắt Chế độ khai thác kiểm thử."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Đã bật bảng điều khiển cổng nối tiếp"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"Hiệu suất sẽ bị ảnh hưởng. Để tắt, hãy chọn trình tải khởi động."</string>
+    <string name="mte_override_notification_title" msgid="4731115381962792944">"Đã bật MTE thử nghiệm"</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"Hiệu suất và độ ổn định có thể bị ảnh hưởng. Hãy khởi động lại để tắt. Nếu được bật bằng arm64.memtag.bootctl, hãy đặt trước chế độ này thành không có."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"Có chất lỏng hoặc mảnh vỡ trong cổng USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"Cổng USB đã tự động tắt. Nhấn để tìm hiểu thêm."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"Có thể sử dụng cổng USB"</string>
@@ -1547,10 +1500,7 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Bỏ qua"</string>
     <string name="no_matches" msgid="6472699895759164599">"Không có kết quả nào phù hợp"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Tìm kiếm trên trang"</string>
-    <plurals name="matches_found" formatted="false" msgid="1101758718194295554">
-      <item quantity="other"><xliff:g id="INDEX">%d</xliff:g> trong số <xliff:g id="TOTAL">%d</xliff:g></item>
-      <item quantity="one">1 trận đấu</item>
-    </plurals>
+    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{# kết quả phù hợp}other{#/{total}}} }"</string>
     <string name="action_mode_done" msgid="2536182504764803222">"Xong"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Đang xóa bộ nhớ dùng chung…"</string>
     <string name="share" msgid="4157615043345227321">"Chia sẻ"</string>
@@ -1680,10 +1630,6 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Hình mở khóa không chính xác"</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"Mật khẩu sai"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"PIN sai"</string>
-    <plurals name="kg_too_many_failed_attempts_countdown" formatted="false" msgid="236717428673283568">
-      <item quantity="other">Hãy thử lại sau <xliff:g id="NUMBER">%d</xliff:g> giây.</item>
-      <item quantity="one">Hãy thử lại sau 1 giây.</item>
-    </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Vẽ hình của bạn"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Nhập PIN của SIM"</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Nhập PIN"</string>
@@ -1880,10 +1826,6 @@
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Tạo mã PIN để hạn chế sửa đổi"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"Mã PIN không khớp. Hãy thử lại."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"Mã PIN quá ngắn. Phải có ít nhất 4 chữ số."</string>
-    <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
-      <item quantity="other">Hãy thử lại sau <xliff:g id="COUNT">%d</xliff:g> giây</item>
-      <item quantity="one">Hãy thử lại sau 1 giây</item>
-    </plurals>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Hãy thử lại sau"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Xem toàn màn hình"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Để thoát, hãy vuốt từ trên cùng xuống dưới."</string>
@@ -1911,46 +1853,20 @@
     <string name="data_saver_description" msgid="4995164271550590517">"Để giúp giảm mức sử dụng dữ liệu, Trình tiết kiệm dữ liệu sẽ chặn một số ứng dụng gửi hoặc nhận dữ liệu trong nền. Ứng dụng mà bạn hiện sử dụng có thể dùng dữ liệu nhưng tần suất sẽ giảm. Ví dụ: hình ảnh sẽ không hiển thị cho đến khi bạn nhấn vào hình ảnh đó."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Bật Trình tiết kiệm dữ liệu?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Bật"</string>
-    <plurals name="zen_mode_duration_minutes_summary" formatted="false" msgid="2877101784123058273">
-      <item quantity="other">Trong %1$d phút (cho đến <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Trong một phút (cho đến <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_summary_short" formatted="false" msgid="4230730310318858312">
-      <item quantity="other">Trong %1$d phút (cho đến <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Trong 1 phút (cho đến <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="other">Trong %1$d giờ (cho đến <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Trong 1 giờ (cho đến <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
-      <item quantity="other">Trong %1$d giờ (cho đến <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">Trong 1 giờ (cho đến <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes" formatted="false" msgid="1148568456958944998">
-      <item quantity="other">Trong %d phút</item>
-      <item quantity="one">Trong một phút</item>
-    </plurals>
-    <plurals name="zen_mode_duration_minutes_short" formatted="false" msgid="2742377799995454859">
-      <item quantity="other">Trong %d phút</item>
-      <item quantity="one">Trong 1 phút</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours" formatted="false" msgid="525401855645490022">
-      <item quantity="other">Trong %d giờ</item>
-      <item quantity="one">Trong 1 giờ</item>
-    </plurals>
-    <plurals name="zen_mode_duration_hours_short" formatted="false" msgid="7644653189680911640">
-      <item quantity="other">Trong %d giờ</item>
-      <item quantity="one">Trong 1 giờ</item>
-    </plurals>
+    <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Trong 1 phút (cho đến {formattedTime})}other{Trong # phút (cho đến {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{Trong 1 phút (cho đến {formattedTime})}other{Trong # phút (cho đến {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{Trong 1 giờ (cho đến {formattedTime})}other{Trong # giờ (cho đến {formattedTime})}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{Trong 1 giờ (cho đến {formattedTime})}other{Trong # giờ (cho đến {formattedTime})}}"</string>
+    <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{Trong 1 phút}other{Trong # phút}}"</string>
+    <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{Trong 1 phút}other{Trong # phút}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Trong 1 giờ}other{Trong # giờ}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Trong 1 giờ}other{Trong # giờ}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Cho tới <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Cho đến <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Cho tới <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (cảnh báo tiếp theo)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Cho đến khi bạn tắt"</string>
-    <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Cho đến khi bạn tắt Đừng làm phiền"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Thu gọn"</string>
-    <string name="zen_mode_feature_name" msgid="3785547207263754500">"Không làm phiền"</string>
     <string name="zen_mode_downtime_feature_name" msgid="5886005761431427128">"Thời gian ngừng hoạt động"</string>
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Đêm trong tuần"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Cuối tuần"</string>
@@ -1989,10 +1905,6 @@
     <string name="call_notification_incoming_text" msgid="6143109825406638201">"Cuộc gọi đến"</string>
     <string name="call_notification_ongoing_text" msgid="3880832933933020875">"Cuộc gọi đang thực hiện"</string>
     <string name="call_notification_screening_text" msgid="8396931408268940208">"Đang sàng lọc cuộc gọi đến"</string>
-    <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="other">Đã chọn <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="one">Đã chọn <xliff:g id="COUNT_0">%1$d</xliff:g></item>
-    </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Chưa được phân loại"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Bạn đặt tầm quan trọng của các thông báo này."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Thông báo này quan trọng vì những người có liên quan."</string>
@@ -2058,10 +1970,7 @@
     <string name="autofill_save_accessibility_title" msgid="1523225776218450005">"Lưu cho Tự động điền"</string>
     <string name="autofill_error_cannot_autofill" msgid="6528827648643138596">"Không thể tự động điền nội dung"</string>
     <string name="autofill_picker_no_suggestions" msgid="1076022650427481509">"Không có đề xuất tự động điền"</string>
-    <plurals name="autofill_picker_some_suggestions" formatted="false" msgid="6651883186966959978">
-      <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> đề xuất tự động điền</item>
-      <item quantity="one">Một đề xuất tự động điền</item>
-    </plurals>
+    <string name="autofill_picker_some_suggestions" msgid="5560549696296202701">"{count,plural, =1{1 nội dung tự động điền}other{# nội dung tự động điền}}"</string>
     <string name="autofill_save_title" msgid="7719802414283739775">"Lưu vào "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_type" msgid="3002460014579799605">"Lưu <xliff:g id="TYPE">%1$s</xliff:g> vào "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"Lưu <xliff:g id="TYPE_0">%1$s</xliff:g> và <xliff:g id="TYPE_1">%2$s</xliff:g> vào "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
@@ -2108,15 +2017,22 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"GỠ CÀI ĐẶT"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"VẪN MỞ"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Đã phát hiện ứng dụng độc hại"</string>
+    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
+    <skip />
+    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
+    <skip />
+    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
+    <skip />
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> muốn hiển thị các lát của <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Chỉnh sửa"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Cuộc gọi và thông báo sẽ rung"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Cuộc gọi và thông báo sẽ tắt tiếng"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Thay đổi hệ thống"</string>
-    <string name="notification_channel_do_not_disturb" msgid="7832584281883687653">"Không làm phiền"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="2001148984371968620">"Mới: Chế độ Không làm phiền sẽ ẩn thông báo"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="3683314609114134946">"Nhấn để tìm hiểu thêm và thay đổi."</string>
-    <string name="zen_upgrade_notification_title" msgid="8198167698095298717">"Cài đặt Không làm phiền đã thay đổi"</string>
     <string name="zen_upgrade_notification_content" msgid="5228458567180124005">"Nhấn để xem những thông báo bị chặn."</string>
     <string name="notification_app_name_system" msgid="3045196791746735601">"Hệ thống"</string>
     <string name="notification_app_name_settings" msgid="9088548800899952531">"Cài đặt"</string>
@@ -2133,7 +2049,6 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Tắt"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Tìm hiểu thêm"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Thông báo nâng cao đã thay thế Thông báo thích ứng trên Android trong Android 12. Tính năng này hiển thị những thao tác và câu trả lời đề xuất, đồng thời sắp xếp các thông báo của bạn.\n\nThông báo nâng cao có thể đọc mọi nội dung thông báo, bao gồm cả thông tin cá nhân như tên liên hệ và tin nhắn. Tính năng này cũng có thể đóng hoặc phản hồi các thông báo, chẳng hạn như trả lời cuộc gọi điện thoại, đồng thời có thể kiểm soát chế độ Không làm phiền."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Thông báo cung cấp thông tin về chế độ sạc thông thường"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Pin có thể hết trước khi sạc bình thường"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Trình tiết kiệm pin được kích hoạt để kéo dài thời lượng pin"</string>
@@ -2162,10 +2077,7 @@
     <string name="mime_type_presentation_ext" msgid="8761049335564371468">"Bản trình bày <xliff:g id="EXTENSION">%1$s</xliff:g>"</string>
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth sẽ không tắt khi chế độ trên máy bay bật"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Đang tải"</string>
-    <plurals name="file_count" formatted="false" msgid="7063513834724389247">
-      <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> tệp</item>
-      <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> tệp</item>
-    </plurals>
+    <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # tệp}other{{file_name} + # tệp}}"</string>
     <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Không có gợi ý nào về người mà bạn có thể chia sẻ"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Danh sách ứng dụng"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Ứng dụng này chưa được cấp quyền ghi âm nhưng vẫn có thể ghi âm thông qua thiết bị USB này."</string>
@@ -2177,10 +2089,22 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Hộp thoại thao tác với nguồn"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Khóa màn hình"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Chụp ảnh màn hình"</string>
+    <!-- no translation found for accessibility_system_action_headset_hook_label (8524691721287425468) -->
+    <skip />
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Phím tắt hỗ trợ tiếp cận trên màn hình"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Bộ chọn phím tắt hỗ trợ tiếp cận trên màn hình"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Phím tắt hỗ trợ tiếp cận"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Đóng Ngăn thông báo"</string>
+    <!-- no translation found for accessibility_system_action_dpad_up_label (1029042950229333782) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_down_label (3441918448624921461) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_left_label (6557647179116479152) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_right_label (9180196950365804081) -->
+    <skip />
+    <!-- no translation found for accessibility_system_action_dpad_center_label (8149791419358224893) -->
+    <skip />
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Thanh phụ đề của <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Đã đưa <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> vào bộ chứa BỊ HẠN CHẾ"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2201,8 +2125,10 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Nhấn để bật"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Không có ứng dụng công việc"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Không có ứng dụng cá nhân"</string>
-    <string name="miniresolver_open_in_personal" msgid="2937599899213467617">"Mở trên <xliff:g id="APP">%s</xliff:g> trong hồ sơ cá nhân?"</string>
-    <string name="miniresolver_open_in_work" msgid="152208044699347924">"Mở trên <xliff:g id="APP">%s</xliff:g> trong hồ sơ công việc?"</string>
+    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Dùng trình duyệt cá nhân"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Dùng trình duyệt công việc"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Mã PIN mở khóa mạng SIM"</string>
@@ -2332,4 +2258,9 @@
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> có thể xem và điều khiển màn hình của bạn. Nhấn để xem lại."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"Đã dịch <xliff:g id="MESSAGE">%1$s</xliff:g>."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"Đã dịch thông báo từ <xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> sang <xliff:g id="TO_LANGUAGE">%2$s</xliff:g>."</string>
+    <string name="notification_channel_abusive_bg_apps" msgid="6092140213264920355">"Hoạt động trong nền"</string>
+    <string name="notification_title_abusive_bg_apps" msgid="344582472797982073">"Hoạt động trong nền"</string>
+    <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"<xliff:g id="APP">%1$s</xliff:g> đang chạy trong nền và làm tiêu hao pin. Nhấn để xem lại."</string>
+    <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"<xliff:g id="APP">%1$s</xliff:g> đang chạy trong nền trong thời gian dài. Nhấn để xem lại."</string>
+    <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Xem các ứng dụng đang hoạt động"</string>
 </resources>
