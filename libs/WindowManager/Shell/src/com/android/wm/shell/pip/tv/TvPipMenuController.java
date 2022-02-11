@@ -143,6 +143,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
         mSystemWindows.addView(mPipMenuView,
                 getPipMenuLayoutParams(MENU_WINDOW_TITLE, 0 /* width */, 0 /* height */),
                 0, SHELL_ROOT_LAYER_PIP);
+        mPipMenuView.setFocusGrantToken(mSystemWindows.getFocusGrantToken(mPipMenuView));
     }
 
     @Override
