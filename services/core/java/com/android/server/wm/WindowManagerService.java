@@ -3007,6 +3007,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 aspectRatio);
     }
 
+    boolean isValidExpandedPictureInPictureAspectRatio(DisplayContent displayContent,
+            float aspectRatio) {
+        return displayContent.getPinnedTaskController().isValidExpandedPictureInPictureAspectRatio(
+                aspectRatio);
+    }
+
     @Override
     public void notifyKeyguardTrustedChanged() {
         synchronized (mGlobalLock) {

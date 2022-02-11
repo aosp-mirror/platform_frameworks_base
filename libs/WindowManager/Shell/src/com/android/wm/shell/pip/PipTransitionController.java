@@ -187,9 +187,8 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     protected void setBoundsStateForEntry(ComponentName componentName,
             PictureInPictureParams params,
             ActivityInfo activityInfo) {
-        mPipBoundsState.setBoundsStateForEntry(componentName,
-                mPipBoundsAlgorithm.getAspectRatioOrDefault(params),
-                mPipBoundsAlgorithm.getMinimalSize(activityInfo));
+        mPipBoundsState.setBoundsStateForEntry(componentName, activityInfo, params,
+                mPipBoundsAlgorithm);
     }
 
     /**
