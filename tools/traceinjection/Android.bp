@@ -1,0 +1,49 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+java_binary_host {
+    name: "traceinjection",
+    manifest: "manifest.txt",
+    srcs: ["src/**/*.java"],
+    static_libs: [
+        "asm-7.0",
+        "asm-commons-7.0",
+        "asm-tree-7.0",
+        "asm-analysis-7.0",
+        "guava-21.0",
+    ],
+}
+
+java_library_host {
+    name: "TraceInjectionTests-Uninjected",
+    srcs: ["test/**/*.java"],
+    static_libs: [
+        "junit",
+    ],
+}
+
+java_genrule_host {
+    name: "TraceInjectionTests-Injected",
+    srcs: [":TraceInjectionTests-Uninjected"],
+    tools: ["traceinjection"],
+    cmd: "$(location traceinjection) " +
+        "  --annotation \"com/android/traceinjection/Trace\"" +
+        "  --start \"com/android/traceinjection/InjectionTests.traceStart\"" +
+        "  --end \"com/android/traceinjection/InjectionTests.traceEnd\"" +
+        "  -o $(out) " +
+        "  -i $(in)",
+    out: ["TraceInjectionTests-Injected.jar"],
+}
+
+java_test_host {
+    name: "TraceInjectionTests",
+    static_libs: [
+        "TraceInjectionTests-Injected",
+    ],
+}
