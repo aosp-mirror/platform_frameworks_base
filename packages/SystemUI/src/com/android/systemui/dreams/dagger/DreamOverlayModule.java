@@ -29,6 +29,9 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayContainerView;
 import com.android.systemui.dreams.DreamOverlayStatusBarView;
+import com.android.systemui.touch.TouchInsetManager;
+
+import java.util.concurrent.Executor;
 
 import javax.inject.Named;
 
@@ -61,6 +64,21 @@ public abstract class DreamOverlayModule {
     public static ViewGroup providesDreamOverlayContentView(DreamOverlayContainerView view) {
         return Preconditions.checkNotNull(view.findViewById(R.id.dream_overlay_content),
                 "R.id.dream_overlay_content must not be null");
+    }
+
+    /** */
+    @Provides
+    public static TouchInsetManager.TouchInsetSession providesTouchInsetSession(
+            TouchInsetManager manager) {
+        return manager.createSession();
+    }
+
+    /** */
+    @Provides
+    @DreamOverlayComponent.DreamOverlayScope
+    public static TouchInsetManager providesTouchInsetManager(@Main Executor executor,
+            DreamOverlayContainerView view) {
+        return new TouchInsetManager(executor, view);
     }
 
     /** */
