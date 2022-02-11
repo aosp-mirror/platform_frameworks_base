@@ -1146,7 +1146,11 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         final PendingTransaction pt = mPendingTransactions.remove(0);
         pt.startSync();
         // Post this so that the now-playing transition setup isn't interrupted.
-        mService.mH.post(pt::startTransaction);
+        mService.mH.post(() -> {
+            synchronized (mGlobalLock) {
+                pt.startTransaction();
+            }
+        });
     }
 
     @Override

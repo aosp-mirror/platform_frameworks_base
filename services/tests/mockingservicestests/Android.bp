@@ -53,6 +53,7 @@ android_test {
         "service-jobscheduler",
         "service-permission.impl",
         "service-supplementalprocess.impl",
+        "services.companion",
         "services.core",
         "services.devicepolicy",
         "services.net",

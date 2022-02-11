@@ -1331,8 +1331,10 @@ public class StorageManager {
 
     /**
      * Return the list of shared/external storage volumes currently available to
-     * the calling user and the user it shares media with
-     * CDD link : https://source.android.com/compatibility/12/android-12-cdd#95_multi-user_support
+     * the calling user and the user it shares media with. Please refer to
+     * <a href="https://source.android.com/compatibility/12/android-12-cdd#95_multi-user_support">
+     *     multi-user support</a> for more details.
+     *
      * <p>
      * This is similar to {@link StorageManager#getStorageVolumes()} except that the result also
      * includes the volumes belonging to any user it shares media with

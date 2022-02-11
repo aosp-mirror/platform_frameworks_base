@@ -71,24 +71,6 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
             }
         }
 
-    @FlakyTest
-    @Test
-    fun runPresubmitAssertion() {
-        flickerRule.checkPresubmitAssertions()
-    }
-
-    @FlakyTest
-    @Test
-    fun runPostsubmitAssertion() {
-        flickerRule.checkPostsubmitAssertions()
-    }
-
-    @FlakyTest
-    @Test
-    fun runFlakyAssertion() {
-        flickerRule.checkFlakyAssertions()
-    }
-
     /** {@inheritDoc}  */
     @FlakyTest(bugId = 206753786)
     @Test
@@ -205,7 +187,7 @@ class EnterPipTest(testSpec: FlickerTestParameter) : PipTransition(testSpec) {
         fun getParams(): List<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(supportedRotations = listOf(Surface.ROTATION_0),
-                    repetitions = 5)
+                    repetitions = 3)
         }
     }
 }

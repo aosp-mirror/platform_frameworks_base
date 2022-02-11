@@ -17,7 +17,6 @@
 package com.android.systemui.media.taptotransfer.sender
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.view.View
 import com.android.internal.statusbar.IUndoMediaTransferCallback
 import com.android.systemui.R
@@ -31,9 +30,8 @@ import com.android.systemui.media.taptotransfer.common.MediaTttChipState
  * contain additional information that is necessary for only that state.
  */
 sealed class ChipStateSender(
-    appIconDrawable: Drawable,
-    appIconContentDescription: String
-) : MediaTttChipState(appIconDrawable, appIconContentDescription) {
+    appPackageName: String?
+) : MediaTttChipState(appPackageName) {
     /** Returns a fully-formed string with the text that the chip should display. */
     abstract fun getChipTextString(context: Context): String
 
@@ -60,10 +58,9 @@ sealed class ChipStateSender(
  * @property otherDeviceName the name of the other device involved in the transfer.
  */
 class AlmostCloseToStartCast(
-    appIconDrawable: Drawable,
-    appIconContentDescription: String,
+    appPackageName: String?,
     private val otherDeviceName: String,
-) : ChipStateSender(appIconDrawable, appIconContentDescription) {
+) : ChipStateSender(appPackageName) {
     override fun getChipTextString(context: Context): String {
         return context.getString(R.string.media_move_closer_to_start_cast, otherDeviceName)
     }
@@ -77,10 +74,9 @@ class AlmostCloseToStartCast(
  * @property otherDeviceName the name of the other device involved in the transfer.
  */
 class AlmostCloseToEndCast(
-    appIconDrawable: Drawable,
-    appIconContentDescription: String,
+    appPackageName: String?,
     private val otherDeviceName: String,
-) : ChipStateSender(appIconDrawable, appIconContentDescription) {
+) : ChipStateSender(appPackageName) {
     override fun getChipTextString(context: Context): String {
         return context.getString(R.string.media_move_closer_to_end_cast, otherDeviceName)
     }
@@ -93,10 +89,9 @@ class AlmostCloseToEndCast(
  * @property otherDeviceName the name of the other device involved in the transfer.
  */
 class TransferToReceiverTriggered(
-    appIconDrawable: Drawable,
-    appIconContentDescription: String,
+    appPackageName: String?,
     private val otherDeviceName: String
-) : ChipStateSender(appIconDrawable, appIconContentDescription) {
+) : ChipStateSender(appPackageName) {
     override fun getChipTextString(context: Context): String {
         return context.getString(R.string.media_transfer_playing_different_device, otherDeviceName)
     }
@@ -109,9 +104,8 @@ class TransferToReceiverTriggered(
  * sender) has been initiated (but not completed).
  */
 class TransferToThisDeviceTriggered(
-    appIconDrawable: Drawable,
-    appIconContentDescription: String
-) : ChipStateSender(appIconDrawable, appIconContentDescription) {
+    appPackageName: String?,
+) : ChipStateSender(appPackageName) {
     override fun getChipTextString(context: Context): String {
         return context.getString(R.string.media_transfer_playing_this_device)
     }
@@ -127,11 +121,10 @@ class TransferToThisDeviceTriggered(
  *   undo button. The undo button will only be shown if this is non-null.
  */
 class TransferToReceiverSucceeded(
-    appIconDrawable: Drawable,
-    appIconContentDescription: String,
+    appPackageName: String?,
     private val otherDeviceName: String,
     val undoCallback: IUndoMediaTransferCallback? = null
-) : ChipStateSender(appIconDrawable, appIconContentDescription) {
+) : ChipStateSender(appPackageName) {
     override fun getChipTextString(context: Context): String {
         return context.getString(R.string.media_transfer_playing_different_device, otherDeviceName)
     }
@@ -149,10 +142,7 @@ class TransferToReceiverSucceeded(
             // but that may take too long to go through the binder and the user may be confused as
             // to why the UI hasn't changed yet. So, we immediately change the UI here.
             controllerSender.displayChip(
-                TransferToThisDeviceTriggered(
-                    this.appIconDrawable,
-                    this.appIconContentDescription
-                )
+                TransferToThisDeviceTriggered(this.appPackageName)
             )
         }
     }
@@ -166,11 +156,10 @@ class TransferToReceiverSucceeded(
  *   undo button. The undo button will only be shown if this is non-null.
  */
 class TransferToThisDeviceSucceeded(
-    appIconDrawable: Drawable,
-    appIconContentDescription: String,
+    appPackageName: String?,
     private val otherDeviceName: String,
     val undoCallback: IUndoMediaTransferCallback? = null
-) : ChipStateSender(appIconDrawable, appIconContentDescription) {
+) : ChipStateSender(appPackageName) {
     override fun getChipTextString(context: Context): String {
         return context.getString(R.string.media_transfer_playing_this_device)
     }
@@ -189,8 +178,7 @@ class TransferToThisDeviceSucceeded(
             // to why the UI hasn't changed yet. So, we immediately change the UI here.
             controllerSender.displayChip(
                 TransferToReceiverTriggered(
-                    this.appIconDrawable,
-                    this.appIconContentDescription,
+                    this.appPackageName,
                     this.otherDeviceName
                 )
             )
@@ -200,9 +188,8 @@ class TransferToThisDeviceSucceeded(
 
 /** A state representing that a transfer has failed. */
 class TransferFailed(
-    appIconDrawable: Drawable,
-    appIconContentDescription: String
-) : ChipStateSender(appIconDrawable, appIconContentDescription) {
+    appPackageName: String?,
+) : ChipStateSender(appPackageName) {
     override fun getChipTextString(context: Context): String {
         return context.getString(R.string.media_transfer_failed)
     }

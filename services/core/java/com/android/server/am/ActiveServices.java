@@ -2721,8 +2721,8 @@ public final class ActiveServices {
 
     int bindServiceLocked(IApplicationThread caller, IBinder token, Intent service,
             String resolvedType, final IServiceConnection connection, int flags,
-            String instanceName, boolean isSupplementalProcessService, String callingPackage,
-            final int userId)
+            String instanceName, boolean isSupplementalProcessService, int supplementedAppUid,
+            String callingPackage, final int userId)
             throws TransactionTooLargeException {
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "bindService: " + service
                 + " type=" + resolvedType + " conn=" + connection.asBinder()
@@ -2807,8 +2807,8 @@ public final class ActiveServices {
         final boolean allowInstant = (flags & Context.BIND_ALLOW_INSTANT) != 0;
 
         ServiceLookupResult res = retrieveServiceLocked(service, instanceName,
-                isSupplementalProcessService, resolvedType, callingPackage, callingPid, callingUid,
-                userId, true, callerFg, isBindExternal, allowInstant);
+                isSupplementalProcessService, supplementedAppUid, resolvedType, callingPackage,
+                callingPid, callingUid, userId, true, callerFg, isBindExternal, allowInstant);
         if (res == null) {
             return 0;
         }
@@ -3228,13 +3228,14 @@ public final class ActiveServices {
             int callingPid, int callingUid, int userId,
             boolean createIfNeeded, boolean callingFromFg, boolean isBindExternal,
             boolean allowInstant) {
-        return retrieveServiceLocked(service, instanceName, false, resolvedType, callingPackage,
+        return retrieveServiceLocked(service, instanceName, false, 0, resolvedType, callingPackage,
                 callingPid, callingUid, userId, createIfNeeded, callingFromFg, isBindExternal,
                 allowInstant);
     }
 
     private ServiceLookupResult retrieveServiceLocked(Intent service,
-            String instanceName, boolean isSupplementalProcessService, String resolvedType,
+            String instanceName, boolean isSupplementalProcessService, int supplementedAppUid,
+            String resolvedType,
             String callingPackage, int callingPid, int callingUid, int userId,
             boolean createIfNeeded, boolean callingFromFg, boolean isBindExternal,
             boolean allowInstant) {
@@ -3415,7 +3416,7 @@ public final class ActiveServices {
                                                                                   : null;
                     r = new ServiceRecord(mAm, className, name, definingPackageName,
                             definingUid, filter, sInfo, callingFromFg, res,
-                            supplementalProcessName);
+                            supplementalProcessName, supplementedAppUid);
                     res.setService(r);
                     smap.mServicesByInstanceName.put(name, r);
                     smap.mServicesByIntent.put(filter, r);
@@ -4189,8 +4190,16 @@ public final class ActiveServices {
         if (app == null && !permissionsReviewRequired && !packageFrozen) {
             // TODO (chriswailes): Change the Zygote policy flags based on if the launch-for-service
             //  was initiated from a notification tap or not.
-            if ((app = mAm.startProcessLocked(procName, r.appInfo, true, intentFlags,
-                        hostingRecord, ZYGOTE_POLICY_FLAG_EMPTY, false, isolated)) == null) {
+            if (r.supplemental) {
+                final int uid = Process.toSupplementalUid(r.supplementedAppUid);
+                app = mAm.startSupplementalProcessLocked(procName, r.appInfo, true, intentFlags,
+                        hostingRecord, ZYGOTE_POLICY_FLAG_EMPTY, uid);
+                r.isolationHostProc = app;
+            } else {
+                app = mAm.startProcessLocked(procName, r.appInfo, true, intentFlags,
+                        hostingRecord, ZYGOTE_POLICY_FLAG_EMPTY, false, isolated);
+            }
+            if (app == null) {
                 String msg = "Unable to launch app "
                         + r.appInfo.packageName + "/"
                         + r.appInfo.uid + " for service "

@@ -201,6 +201,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                 "Display is changing, check if it should be seamless.");
         boolean checkedDisplayLayout = false;
         boolean hasTask = false;
+        boolean displayExplicitSeamless = false;
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
 
@@ -209,7 +210,6 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
             // This container isn't rotating, so we can ignore it.
             if (change.getEndRotation() == change.getStartRotation()) continue;
-
             if ((change.getFlags() & FLAG_IS_DISPLAY) != 0) {
                 // In the presence of System Alert windows we can not seamlessly rotate.
                 if ((change.getFlags() & FLAG_DISPLAY_HAS_ALERT_WINDOWS) != 0) {
@@ -217,6 +217,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                             "  display has system alert windows, so not seamless.");
                     return false;
                 }
+                displayExplicitSeamless =
+                        change.getRotationAnimation() == ROTATION_ANIMATION_SEAMLESS;
             } else if ((change.getFlags() & FLAG_IS_WALLPAPER) != 0) {
                 if (change.getRotationAnimation() != ROTATION_ANIMATION_SEAMLESS) {
                     ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
@@ -268,8 +270,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             }
         }
 
-        // ROTATION_ANIMATION_SEAMLESS can only be requested by task.
-        if (hasTask) {
+        // ROTATION_ANIMATION_SEAMLESS can only be requested by task or display.
+        if (hasTask || displayExplicitSeamless) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  Rotation IS seamless.");
             return true;
         }

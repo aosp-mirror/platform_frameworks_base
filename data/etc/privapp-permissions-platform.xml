@@ -508,6 +508,8 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_APP_HIBERNATION"/>
         <!-- Permission required for CTS test - ResourceObserverNativeTest -->
         <permission name="android.permission.REGISTER_MEDIA_RESOURCE_OBSERVER" />
+        <!-- Permission required for CTS test - MediaCodecResourceTest -->
+        <permission name="android.permission.MEDIA_RESOURCE_OVERRIDE_PID" />
         <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
         <permission name="android.permission.SCHEDULE_PRIORITIZED_ALARM" />
         <!-- Permission required for CTS test - SystemMediaRouter2Test -->
@@ -545,17 +547,6 @@ applications that come with the platform
         <permission name="android.permission.INTENT_FILTER_VERIFICATION_AGENT"/>
         <permission name="android.permission.DOMAIN_VERIFICATION_AGENT"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
-    </privapp-permissions>
-
-    <privapp-permissions package="com.android.traceur">
-        <!-- Permissions required to receive BUGREPORT_STARTED intent -->
-        <permission name="android.permission.DUMP"/>
-        <!-- Permissions required to start/stop tracing -->
-        <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"/>
-        <!-- Permissions required for quick settings tile -->
-        <permission name="android.permission.STATUS_BAR"/>
-        <!-- Permissions required to query Betterbug -->
-        <permission name="android.permission.QUERY_ALL_PACKAGES"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.tv">

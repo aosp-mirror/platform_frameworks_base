@@ -17,6 +17,7 @@
 package com.android.server.pm.permission;
 
 import static android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY;
+import static android.Manifest.permission.POST_NOTIFICATIONS;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.content.pm.PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT;
@@ -752,11 +753,14 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             flagValues &= ~PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
             flagMask &= ~PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
             flagValues &= ~PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
-            flagValues &= ~PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
             flagValues &= ~FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
             flagValues &= ~FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT;
             flagValues &= ~FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
             flagValues &= ~PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
+            // REVIEW_REQUIRED can only be set by non-system apps for for POST_NOTIFICATIONS
+            if (!POST_NOTIFICATIONS.equals(permName)) {
+                flagValues &= ~PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
+            }
         }
 
         final AndroidPackage pkg = mPackageManagerInt.getPackage(packageName);

@@ -19,6 +19,7 @@ package com.android.systemui.dump
 import android.content.Context
 import android.os.SystemClock
 import android.os.Trace
+import com.android.systemui.CoreStartable
 import com.android.systemui.R
 import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_CRITICAL
 import com.android.systemui.dump.DumpHandler.Companion.PRIORITY_ARG_HIGH
@@ -27,6 +28,7 @@ import com.android.systemui.log.LogBuffer
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import javax.inject.Inject
+import javax.inject.Provider
 
 /**
  * Oversees SystemUI's output during bug reports (and dumpsys in general)
@@ -80,7 +82,8 @@ import javax.inject.Inject
 class DumpHandler @Inject constructor(
     private val context: Context,
     private val dumpManager: DumpManager,
-    private val logBufferEulogizer: LogBufferEulogizer
+    private val logBufferEulogizer: LogBufferEulogizer,
+    private val startables: MutableMap<Class<*>, Provider<CoreStartable>>
 ) {
     /**
      * Dump the diagnostics! Behavior can be controlled via [args].
@@ -173,12 +176,21 @@ class DumpHandler @Inject constructor(
         pw.println("SystemUiServiceComponents configuration:")
         pw.print("vendor component: ")
         pw.println(context.resources.getString(R.string.config_systemUIVendorServiceComponent))
-        dumpServiceList(pw, "global", R.array.config_systemUIServiceComponents)
+        val services: MutableList<String> = startables.keys
+                .map({ cls: Class<*> -> cls.simpleName })
+                .toMutableList()
+
+        services.add(context.resources.getString(R.string.config_systemUIVendorServiceComponent))
+        dumpServiceList(pw, "global", services.toTypedArray())
         dumpServiceList(pw, "per-user", R.array.config_systemUIServiceComponentsPerUser)
     }
 
     private fun dumpServiceList(pw: PrintWriter, type: String, resId: Int) {
-        val services: Array<String>? = context.resources.getStringArray(resId)
+        val services: Array<String> = context.resources.getStringArray(resId)
+        dumpServiceList(pw, type, services)
+    }
+
+    private fun dumpServiceList(pw: PrintWriter, type: String, services: Array<String>?) {
         pw.print(type)
         pw.print(": ")
         if (services == null) {

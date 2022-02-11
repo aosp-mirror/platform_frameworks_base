@@ -453,7 +453,9 @@ public class CommandQueue extends IStatusBar.Stub implements
         /** @see IStatusBar#updateMediaTapToTransferReceiverDisplay */
         default void updateMediaTapToTransferReceiverDisplay(
                 @StatusBarManager.MediaTransferReceiverState int displayState,
-                @NonNull MediaRoute2Info routeInfo) {}
+                @NonNull MediaRoute2Info routeInfo,
+                @Nullable Icon appIcon,
+                @Nullable CharSequence appName) {}
     }
 
     public CommandQueue(Context context) {
@@ -1208,10 +1210,14 @@ public class CommandQueue extends IStatusBar.Stub implements
     @Override
     public void updateMediaTapToTransferReceiverDisplay(
             int displayState,
-            MediaRoute2Info routeInfo) {
+            @NonNull MediaRoute2Info routeInfo,
+            @Nullable Icon appIcon,
+            @Nullable CharSequence appName) {
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = displayState;
         args.arg2 = routeInfo;
+        args.arg3 = appIcon;
+        args.arg4 = appName;
         mHandler.obtainMessage(MSG_MEDIA_TRANSFER_RECEIVER_STATE, args).sendToTarget();
     }
 
@@ -1629,9 +1635,11 @@ public class CommandQueue extends IStatusBar.Stub implements
                     args = (SomeArgs) msg.obj;
                     int receiverDisplayState = (int) args.arg1;
                     MediaRoute2Info receiverRouteInfo = (MediaRoute2Info) args.arg2;
+                    Icon appIcon = (Icon) args.arg3;
+                    appName = (CharSequence) args.arg4;
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).updateMediaTapToTransferReceiverDisplay(
-                                receiverDisplayState, receiverRouteInfo);
+                                receiverDisplayState, receiverRouteInfo, appIcon, appName);
                     }
                     args.recycle();
                     break;

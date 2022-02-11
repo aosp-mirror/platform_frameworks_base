@@ -111,6 +111,14 @@ class WallpaperWindowToken extends WindowToken {
             changed = true;
         }
         if (mTransitionController.isShellTransitionsEnabled()) {
+            // Apply legacy fixed rotation to wallpaper if it is becoming visible
+            if (!mTransitionController.useShellTransitionsRotation() && changed && visible) {
+                final WindowState wallpaperTarget =
+                        mDisplayContent.mWallpaperController.getWallpaperTarget();
+                if (wallpaperTarget != null && wallpaperTarget.mToken.hasFixedRotationTransform()) {
+                    linkFixedRotationTransform(wallpaperTarget.mToken);
+                }
+            }
             return changed;
         }
 

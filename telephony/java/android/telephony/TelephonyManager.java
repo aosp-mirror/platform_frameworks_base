@@ -7118,7 +7118,14 @@ public class TelephonyManager {
      */
     @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
     public boolean iccCloseLogicalChannel(int channel) {
-        return iccCloseLogicalChannel(getSubId(), channel);
+        try {
+            return iccCloseLogicalChannel(getSubId(), channel);
+        } catch (IllegalStateException ex) {
+            Rlog.e(TAG, "iccCloseLogicalChannel IllegalStateException", ex);
+        } catch (IllegalArgumentException ex) {
+            Rlog.e(TAG, "iccCloseLogicalChannel IllegalArgumentException", ex);
+        }
+        return false;
     }
 
     /**

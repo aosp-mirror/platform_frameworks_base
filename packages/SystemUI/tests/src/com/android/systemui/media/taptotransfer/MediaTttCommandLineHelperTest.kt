@@ -203,7 +203,9 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
 
         verify(statusBarManager).updateMediaTapToTransferReceiverDisplay(
             eq(StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER),
-            any()
+            any(),
+            nullable(),
+            nullable()
         )
     }
 
@@ -213,7 +215,9 @@ class MediaTttCommandLineHelperTest : SysuiTestCase() {
 
         verify(statusBarManager).updateMediaTapToTransferReceiverDisplay(
             eq(StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER),
-            any()
+            any(),
+            nullable(),
+            nullable()
         )
     }
 

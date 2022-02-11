@@ -24,6 +24,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.os.Process.SYSTEM_UID;
 import static android.view.View.VISIBLE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
@@ -1531,7 +1532,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
             final Rect primaryBounds = new Rect();
             final Rect secondaryBounds = new Rect();
-            display.getBounds().splitVertically(primaryBounds, secondaryBounds);
+            if (display.getConfiguration().orientation == ORIENTATION_LANDSCAPE) {
+                display.getBounds().splitVertically(primaryBounds, secondaryBounds);
+            } else {
+                display.getBounds().splitHorizontally(primaryBounds, secondaryBounds);
+            }
             mPrimary.setBounds(primaryBounds);
             mSecondary.setBounds(secondaryBounds);
         }

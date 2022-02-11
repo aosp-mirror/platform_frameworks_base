@@ -243,22 +243,34 @@ static int openUinput(const char* readableName, jint vendorId, jint productId, c
             xAbsSetup.code = ABS_MT_POSITION_X;
             xAbsSetup.absinfo.maximum = screenWidth - 1;
             xAbsSetup.absinfo.minimum = 0;
-            ioctl(fd, UI_ABS_SETUP, xAbsSetup);
+            if (ioctl(fd, UI_ABS_SETUP, &xAbsSetup) != 0) {
+                ALOGE("Error creating touchscreen uinput x axis: %s", strerror(errno));
+                return -errno;
+            }
             uinput_abs_setup yAbsSetup;
             yAbsSetup.code = ABS_MT_POSITION_Y;
             yAbsSetup.absinfo.maximum = screenHeight - 1;
             yAbsSetup.absinfo.minimum = 0;
-            ioctl(fd, UI_ABS_SETUP, yAbsSetup);
+            if (ioctl(fd, UI_ABS_SETUP, &yAbsSetup) != 0) {
+                ALOGE("Error creating touchscreen uinput y axis: %s", strerror(errno));
+                return -errno;
+            }
             uinput_abs_setup majorAbsSetup;
             majorAbsSetup.code = ABS_MT_TOUCH_MAJOR;
             majorAbsSetup.absinfo.maximum = screenWidth - 1;
             majorAbsSetup.absinfo.minimum = 0;
-            ioctl(fd, UI_ABS_SETUP, majorAbsSetup);
+            if (ioctl(fd, UI_ABS_SETUP, &majorAbsSetup) != 0) {
+                ALOGE("Error creating touchscreen uinput major axis: %s", strerror(errno));
+                return -errno;
+            }
             uinput_abs_setup pressureAbsSetup;
             pressureAbsSetup.code = ABS_MT_PRESSURE;
             pressureAbsSetup.absinfo.maximum = 255;
             pressureAbsSetup.absinfo.minimum = 0;
-            ioctl(fd, UI_ABS_SETUP, pressureAbsSetup);
+            if (ioctl(fd, UI_ABS_SETUP, &pressureAbsSetup) != 0) {
+                ALOGE("Error creating touchscreen uinput pressure axis: %s", strerror(errno));
+                return -errno;
+            }
         }
         if (ioctl(fd, UI_DEV_SETUP, &setup) != 0) {
             ALOGE("Error creating uinput device: %s", strerror(errno));
@@ -266,6 +278,7 @@ static int openUinput(const char* readableName, jint vendorId, jint productId, c
         }
     } else {
         // UI_DEV_SETUP was not introduced until version 5. Try setting up manually.
+        ALOGI("Falling back to version %d manual setup", version);
         uinput_user_dev fallback;
         memset(&fallback, 0, sizeof(fallback));
         strlcpy(fallback.name, readableName, UINPUT_MAX_NAME_SIZE);

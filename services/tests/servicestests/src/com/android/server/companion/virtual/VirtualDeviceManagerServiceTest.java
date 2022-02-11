@@ -16,6 +16,7 @@
 
 package com.android.server.companion.virtual;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -39,6 +40,7 @@ import android.app.admin.DevicePolicyManager;
 import android.companion.AssociationInfo;
 import android.companion.virtual.IVirtualDeviceActivityListener;
 import android.companion.virtual.VirtualDeviceParams;
+import android.companion.virtual.audio.IAudioSessionCallback;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.Point;
@@ -111,6 +113,8 @@ public class VirtualDeviceManagerServiceTest {
     @Mock
     IThermalService mIThermalServiceMock;
     private PowerManager mPowerManager;
+    @Mock
+    private IAudioSessionCallback mCallback;
 
     @Before
     public void setUp() {
@@ -250,6 +254,12 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
+    public void onAudioSessionStarting_noDisplay_failsSecurityException() {
+        assertThrows(SecurityException.class,
+                () -> mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mCallback));
+    }
+
+    @Test
     public void createVirtualKeyboard_noPermission_failsSecurityException() {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
         doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
@@ -283,6 +293,22 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
+    public void onAudioSessionStarting_noPermission_failsSecurityException() {
+        mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
+        doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
+                eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
+        assertThrows(SecurityException.class,
+                () -> mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mCallback));
+    }
+
+    @Test
+    public void onAudioSessionEnded_noPermission_failsSecurityException() {
+        doCallRealMethod().when(mContext).enforceCallingOrSelfPermission(
+                eq(Manifest.permission.CREATE_VIRTUAL_DEVICE), anyString());
+        assertThrows(SecurityException.class, () -> mDeviceImpl.onAudioSessionEnded());
+    }
+
+    @Test
     public void createVirtualKeyboard_hasDisplay_obtainFileDescriptor() {
         mDeviceImpl.mVirtualDisplayIds.add(DISPLAY_ID);
         mDeviceImpl.createVirtualKeyboard(DISPLAY_ID, DEVICE_NAME, VENDOR_ID, PRODUCT_ID,
@@ -313,6 +339,25 @@ public class VirtualDeviceManagerServiceTest {
                 .that(mInputController.mInputDeviceDescriptors).isNotEmpty();
         verify(mNativeWrapperMock).openUinputTouchscreen(eq(DEVICE_NAME), eq(VENDOR_ID),
                 eq(PRODUCT_ID), anyString(), eq(HEIGHT), eq(WIDTH));
+    }
+
+    @Test
+    public void onAudioSessionStarting_hasVirtualAudioController() {
+        mDeviceImpl.onVirtualDisplayCreatedLocked(DISPLAY_ID);
+
+        mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mCallback);
+
+        assertThat(mDeviceImpl.getVirtualAudioControllerForTesting()).isNotNull();
+    }
+
+    @Test
+    public void onAudioSessionEnded_noVirtualAudioController() {
+        mDeviceImpl.onVirtualDisplayCreatedLocked(DISPLAY_ID);
+        mDeviceImpl.onAudioSessionStarting(DISPLAY_ID, mCallback);
+
+        mDeviceImpl.onAudioSessionEnded();
+
+        assertThat(mDeviceImpl.getVirtualAudioControllerForTesting()).isNull();
     }
 
     @Test

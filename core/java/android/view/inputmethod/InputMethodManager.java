@@ -1764,7 +1764,7 @@ public final class InputMethodManager {
     }
 
     /**
-     * This method is still kept for a while until android.support.v7.widget.SearchView ver. 26.0
+     * This method is still kept for a while until androidx.appcompat.widget.SearchView ver. 26.0
      * is publicly released because previous implementations of that class had relied on this method
      * via reflection.
      *
@@ -1777,7 +1777,7 @@ public final class InputMethodManager {
         synchronized (mH) {
             try {
                 Log.w(TAG, "showSoftInputUnchecked() is a hidden method, which will be"
-                        + " removed soon. If you are using android.support.v7.widget.SearchView,"
+                        + " removed soon. If you are using androidx.appcompat.widget.SearchView,"
                         + " please update to version 26.0 or newer version.");
                 if (mCurRootView == null || mCurRootView.getView() == null) {
                     Log.w(TAG, "No current root view, ignoring showSoftInputUnchecked()");

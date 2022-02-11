@@ -18,15 +18,18 @@ package com.android.systemui.media.dagger;
 
 import android.app.Service;
 import android.content.Context;
+import android.os.Handler;
 import android.view.WindowManager;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.media.MediaDataManager;
+import com.android.systemui.media.MediaFlags;
 import com.android.systemui.media.MediaHierarchyManager;
 import com.android.systemui.media.MediaHost;
 import com.android.systemui.media.MediaHostStatesManager;
 import com.android.systemui.media.dream.dagger.MediaComplicationComponent;
+import com.android.systemui.media.muteawait.MediaMuteAwaitConnectionCli;
 import com.android.systemui.media.nearby.NearbyMediaDevicesService;
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.MediaTttFlags;
@@ -117,12 +120,14 @@ public interface MediaModule {
             MediaTttFlags mediaTttFlags,
             CommandQueue commandQueue,
             Context context,
-            WindowManager windowManager) {
+            WindowManager windowManager,
+            @Main Handler mainHandler) {
         if (!mediaTttFlags.isMediaTttEnabled()) {
             return Optional.empty();
         }
         return Optional.of(
-                new MediaTttChipControllerReceiver(commandQueue, context, windowManager));
+                new MediaTttChipControllerReceiver(
+                        commandQueue, context, windowManager, mainHandler));
     }
 
     /** */
@@ -138,6 +143,20 @@ public interface MediaModule {
         }
         return Optional.of(
                 new MediaTttCommandLineHelper(commandRegistry, context, mainExecutor));
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    static Optional<MediaMuteAwaitConnectionCli> providesMediaMuteAwaitConnectionCli(
+            MediaFlags mediaFlags,
+            CommandRegistry commandRegistry,
+            Context context
+    ) {
+        if (!mediaFlags.areMuteAwaitConnectionsEnabled()) {
+            return Optional.empty();
+        }
+        return Optional.of(new MediaMuteAwaitConnectionCli(commandRegistry, context));
     }
 
     /** Inject into NearbyMediaDevicesService. */

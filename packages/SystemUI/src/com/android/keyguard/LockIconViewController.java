@@ -433,7 +433,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                 public void onDozingChanged(boolean isDozing) {
                     mIsDozing = isDozing;
                     updateBurnInOffsets();
-                    updateIsUdfpsEnrolled();
                     updateVisibility();
                 }
 
@@ -513,7 +512,6 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
                     mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(
                         KeyguardUpdateMonitor.getCurrentUser());
             }
-            updateIsUdfpsEnrolled();
             updateVisibility();
         }
 

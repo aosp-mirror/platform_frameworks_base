@@ -1429,7 +1429,6 @@ public class ActivityOptions extends ComponentOptions {
     /**
      * Gets the style can be used for cold-launching an activity.
      * @see #setSplashScreenStyle(int)
-     * @hide
      */
     public @SplashScreen.SplashScreenStyle int getSplashScreenStyle() {
         return mSplashScreenStyle;

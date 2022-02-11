@@ -72,6 +72,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.PermissionChecker;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
@@ -1839,6 +1840,9 @@ public class AlarmManagerService extends SystemService {
                     if (!isExactAlarmChangeEnabled(a.packageName, UserHandle.getUserId(a.uid))) {
                         return false;
                     }
+                    if (hasUseExactAlarmPermission(a.packageName, a.uid)) {
+                        return false;
+                    }
                     return !isExemptFromExactAlarmPermission(a.uid);
                 };
                 removeAlarmsInternalLocked(whichAlarms, REMOVE_REASON_EXACT_PERMISSION_REVOKED);
@@ -1898,6 +1902,9 @@ public class AlarmManagerService extends SystemService {
                                 final int userId = UserHandle.getUserId(uid);
                                 if (op != AppOpsManager.OP_SCHEDULE_EXACT_ALARM
                                         || !isExactAlarmChangeEnabled(packageName, userId)) {
+                                    return;
+                                }
+                                if (hasUseExactAlarmPermission(packageName, uid)) {
                                     return;
                                 }
 
@@ -2534,6 +2541,8 @@ public class AlarmManagerService extends SystemService {
 
     private static boolean getScheduleExactAlarmState(boolean requested, boolean denyListed,
             int appOpMode) {
+        // This does not account for the state of the USE_EXACT_ALARM permission.
+        // The caller should do that separately.
         if (!requested) {
             return false;
         }
@@ -2543,7 +2552,16 @@ public class AlarmManagerService extends SystemService {
         return appOpMode == AppOpsManager.MODE_ALLOWED;
     }
 
+    boolean hasUseExactAlarmPermission(String packageName, int uid) {
+        return PermissionChecker.checkPermissionForPreflight(getContext(),
+                Manifest.permission.USE_EXACT_ALARM, PermissionChecker.PID_UNKNOWN, uid,
+                packageName) == PermissionChecker.PERMISSION_GRANTED;
+    }
+
     boolean hasScheduleExactAlarmInternal(String packageName, int uid) {
+        if (hasUseExactAlarmPermission(packageName, uid)) {
+            return true;
+        }
         // Not using getScheduleExactAlarmState as this can avoid some calls to AppOpsService.
         // Not using #mLastOpScheduleExactAlarm as it may contain stale values.
         // No locking needed as all internal containers being queried are immutable.
@@ -3759,6 +3777,9 @@ public class AlarmManagerService extends SystemService {
                 if (!isExactAlarmChangeEnabled(changedPackage, userId)) {
                     continue;
                 }
+                if (hasUseExactAlarmPermission(changedPackage, uid)) {
+                    continue;
+                }
                 final int appOpMode;
                 synchronized (mLock) {
                     appOpMode = mLastOpScheduleExactAlarm.get(uid,
@@ -3778,7 +3799,8 @@ public class AlarmManagerService extends SystemService {
                 }
                 if (added) {
                     synchronized (mLock) {
-                        removeExactAlarmsOnPermissionRevokedLocked(uid, changedPackage);
+                        removeExactAlarmsOnPermissionRevokedLocked(uid,
+                                changedPackage, /*killUid = */ true);
                     }
                 } else {
                     sendScheduleExactAlarmPermissionStateChangedBroadcast(changedPackage, userId);
@@ -3794,7 +3816,7 @@ public class AlarmManagerService extends SystemService {
      * This is not expected to get called frequently.
      */
     @GuardedBy("mLock")
-    void removeExactAlarmsOnPermissionRevokedLocked(int uid, String packageName) {
+    void removeExactAlarmsOnPermissionRevokedLocked(int uid, String packageName, boolean killUid) {
         if (isExemptFromExactAlarmPermission(uid)
                 || !isExactAlarmChangeEnabled(packageName, UserHandle.getUserId(uid))) {
             return;
@@ -3805,7 +3827,7 @@ public class AlarmManagerService extends SystemService {
                 && a.windowLength == 0);
         removeAlarmsInternalLocked(whichAlarms, REMOVE_REASON_EXACT_PERMISSION_REVOKED);
 
-        if (mConstants.KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED) {
+        if (killUid && mConstants.KILL_ON_SCHEDULE_EXACT_ALARM_REVOKED) {
             PermissionManagerService.killUid(UserHandle.getAppId(uid), UserHandle.getUserId(uid),
                     "schedule_exact_alarm revoked");
         }
@@ -4617,6 +4639,7 @@ public class AlarmManagerService extends SystemService {
         public static final int EXACT_ALARM_DENY_LIST_PACKAGES_REMOVED = 10;
         public static final int REFRESH_EXACT_ALARM_CANDIDATES = 11;
         public static final int TARE_AFFORDABILITY_CHANGED = 12;
+        public static final int CHECK_EXACT_ALARM_PERMISSION_ON_UPDATE = 13;
 
         AlarmHandler() {
             super(Looper.myLooper());
@@ -4715,10 +4738,11 @@ public class AlarmManagerService extends SystemService {
                     break;
 
                 case REMOVE_EXACT_ALARMS:
-                    final int uid = msg.arg1;
-                    final String packageName = (String) msg.obj;
+                    int uid = msg.arg1;
+                    String packageName = (String) msg.obj;
                     synchronized (mLock) {
-                        removeExactAlarmsOnPermissionRevokedLocked(uid, packageName);
+                        removeExactAlarmsOnPermissionRevokedLocked(uid, packageName, /*killUid = */
+                                true);
                     }
                     break;
                 case EXACT_ALARM_DENY_LIST_PACKAGES_ADDED:
@@ -4729,6 +4753,16 @@ public class AlarmManagerService extends SystemService {
                     break;
                 case REFRESH_EXACT_ALARM_CANDIDATES:
                     refreshExactAlarmCandidates();
+                    break;
+                case CHECK_EXACT_ALARM_PERMISSION_ON_UPDATE:
+                    packageName = (String) msg.obj;
+                    uid = msg.arg1;
+                    if (!hasScheduleExactAlarmInternal(packageName, uid)) {
+                        synchronized (mLock) {
+                            removeExactAlarmsOnPermissionRevokedLocked(uid,
+                                    packageName, /*killUid = */false);
+                        }
+                    }
                     break;
                 default:
                     // nope, just ignore it
@@ -4914,6 +4948,12 @@ public class AlarmManagerService extends SystemService {
                         }
                         break;
                     case Intent.ACTION_PACKAGE_ADDED:
+                        if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                            final String packageUpdated = intent.getData().getSchemeSpecificPart();
+                            mHandler.obtainMessage(
+                                    AlarmHandler.CHECK_EXACT_ALARM_PERMISSION_ON_UPDATE, uid, -1,
+                                    packageUpdated).sendToTarget();
+                        }
                         mHandler.sendEmptyMessage(AlarmHandler.REFRESH_EXACT_ALARM_CANDIDATES);
                         return;
                 }

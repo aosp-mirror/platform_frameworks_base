@@ -106,6 +106,7 @@ import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.media.MediaHierarchyManager;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qrcodescanner.controller.QRCodeScannerController;
@@ -366,6 +367,8 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private KeyguardUnlockAnimationController mKeyguardUnlockAnimationController;
     @Mock
     private NotificationShadeWindowController mNotificationShadeWindowController;
+    @Mock
+    private SysUiState mSysUiState;
     private Optional<SysUIUnfoldComponent> mSysUIUnfoldComponent = Optional.empty();
     private SysuiStatusBarStateController mStatusBarStateController;
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -555,6 +558,7 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mControlsComponent,
                 mInteractionJankMonitor,
                 mQsFrameTranslateController,
+                mSysUiState,
                 mKeyguardUnlockAnimationController);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,

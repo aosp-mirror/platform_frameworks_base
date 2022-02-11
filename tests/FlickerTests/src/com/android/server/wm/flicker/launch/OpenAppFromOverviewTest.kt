@@ -130,7 +130,7 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter)
     override fun appLayerBecomesVisible() = super.appLayerBecomesVisible_warmStart()
 
     /** {@inheritDoc} */
-    @Presubmit
+    @FlakyTest(bugId = 218624176)
     @Test
     override fun appWindowBecomesVisible() = super.appWindowBecomesVisible_warmStart()
 
@@ -149,6 +149,22 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter)
         super.appWindowReplacesLauncherAsTopWindow()
     }
 
+    /** {@inheritDoc} */
+    @Presubmit
+    @Test
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() {
+        assumeFalse(isShellTransitionsEnabled)
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    }
+
+    /** {@inheritDoc} */
+    @FlakyTest(bugId = 218470989)
+    @Test
+    fun visibleWindowsShownMoreThanOneConsecutiveEntry_shellTransit() {
+        assumeTrue(isShellTransitionsEnabled)
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
+    }
+
     companion object {
         /**
          * Creates the test configurations.
@@ -160,7 +176,7 @@ class OpenAppFromOverviewTest(testSpec: FlickerTestParameter)
         @JvmStatic
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
-                .getConfigNonRotationTests(repetitions = 5)
+                .getConfigNonRotationTests(repetitions = 3)
         }
     }
 }

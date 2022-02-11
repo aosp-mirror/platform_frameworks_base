@@ -417,6 +417,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                             break;
                         case Constants.KEY_CONN_CONGESTION_DELAY_FRAC:
                         case Constants.KEY_CONN_PREFETCH_RELAX_FRAC:
+                        case Constants.KEY_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC:
+                        case Constants.KEY_CONN_USE_CELL_SIGNAL_STRENGTH:
+                        case Constants.KEY_CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS:
                             mConstants.updateConnectivityConstantsLocked();
                             break;
                         case Constants.KEY_PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS:
@@ -489,6 +492,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_MIN_EXP_BACKOFF_TIME_MS = "min_exp_backoff_time_ms";
         private static final String KEY_CONN_CONGESTION_DELAY_FRAC = "conn_congestion_delay_frac";
         private static final String KEY_CONN_PREFETCH_RELAX_FRAC = "conn_prefetch_relax_frac";
+        private static final String KEY_CONN_USE_CELL_SIGNAL_STRENGTH =
+                "conn_use_cell_signal_strength";
+        private static final String KEY_CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS =
+                "conn_update_all_jobs_min_interval_ms";
+        private static final String KEY_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC =
+                "conn_low_signal_strength_relax_frac";
         private static final String KEY_PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS =
                 "prefetch_force_batch_relax_threshold_ms";
         private static final String KEY_ENABLE_API_QUOTAS = "enable_api_quotas";
@@ -514,6 +523,9 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final long DEFAULT_MIN_EXP_BACKOFF_TIME_MS = JobInfo.MIN_BACKOFF_MILLIS;
         private static final float DEFAULT_CONN_CONGESTION_DELAY_FRAC = 0.5f;
         private static final float DEFAULT_CONN_PREFETCH_RELAX_FRAC = 0.5f;
+        private static final boolean DEFAULT_CONN_USE_CELL_SIGNAL_STRENGTH = true;
+        private static final long DEFAULT_CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS = MINUTE_IN_MILLIS;
+        private static final float DEFAULT_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC = 0.5f;
         private static final long DEFAULT_PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS = HOUR_IN_MILLIS;
         private static final boolean DEFAULT_ENABLE_API_QUOTAS = true;
         private static final int DEFAULT_API_QUOTA_SCHEDULE_COUNT = 250;
@@ -569,6 +581,23 @@ public class JobSchedulerService extends com.android.server.SystemService
          * we consider matching it against a metered network.
          */
         public float CONN_PREFETCH_RELAX_FRAC = DEFAULT_CONN_PREFETCH_RELAX_FRAC;
+        /**
+         * Whether to use the cell signal strength to determine if a particular job is eligible to
+         * run.
+         */
+        public boolean CONN_USE_CELL_SIGNAL_STRENGTH = DEFAULT_CONN_USE_CELL_SIGNAL_STRENGTH;
+        /**
+         * When throttling updating all tracked jobs, make sure not to update them more frequently
+         * than this value.
+         */
+        public long CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS =
+                DEFAULT_CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS;
+        /**
+         * The fraction of a job's running window that must pass before we consider running it on
+         * low signal strength networks.
+         */
+        public float CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC =
+                DEFAULT_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC;
 
         /**
          * The amount of time within which we would consider the app to be launching relatively soon
@@ -661,6 +690,18 @@ public class JobSchedulerService extends com.android.server.SystemService
             CONN_PREFETCH_RELAX_FRAC = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_CONN_PREFETCH_RELAX_FRAC,
                     DEFAULT_CONN_PREFETCH_RELAX_FRAC);
+            CONN_USE_CELL_SIGNAL_STRENGTH = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_CONN_USE_CELL_SIGNAL_STRENGTH,
+                    DEFAULT_CONN_USE_CELL_SIGNAL_STRENGTH);
+            CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS = DeviceConfig.getLong(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS,
+                    DEFAULT_CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS);
+            CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC = DeviceConfig.getFloat(
+                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
+                    KEY_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC,
+                    DEFAULT_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC);
         }
 
         private void updatePrefetchConstantsLocked() {
@@ -739,6 +780,11 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.print(KEY_MIN_EXP_BACKOFF_TIME_MS, MIN_EXP_BACKOFF_TIME_MS).println();
             pw.print(KEY_CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC).println();
             pw.print(KEY_CONN_PREFETCH_RELAX_FRAC, CONN_PREFETCH_RELAX_FRAC).println();
+            pw.print(KEY_CONN_USE_CELL_SIGNAL_STRENGTH, CONN_USE_CELL_SIGNAL_STRENGTH).println();
+            pw.print(KEY_CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS, CONN_UPDATE_ALL_JOBS_MIN_INTERVAL_MS)
+                    .println();
+            pw.print(KEY_CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC, CONN_LOW_SIGNAL_STRENGTH_RELAX_FRAC)
+                    .println();
             pw.print(KEY_PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS,
                     PREFETCH_FORCE_BATCH_RELAX_THRESHOLD_MS).println();
 

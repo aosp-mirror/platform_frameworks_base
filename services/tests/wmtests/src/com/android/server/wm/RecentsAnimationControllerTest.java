@@ -16,9 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -632,10 +629,11 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testAttachNavBarInSplitScreenMode() {
         setupForShouldAttachNavBarDuringTransition();
-        final ActivityRecord primary = createActivityRecordWithParentTask(mDefaultDisplay,
-                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD);
-        final ActivityRecord secondary = createActivityRecordWithParentTask(mDefaultDisplay,
-                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD);
+        TestSplitOrganizer organizer = new TestSplitOrganizer(mAtm);
+        final ActivityRecord primary = createActivityRecordWithParentTask(
+                organizer.createTaskToPrimary(true));
+        final ActivityRecord secondary = createActivityRecordWithParentTask(
+                organizer.createTaskToSecondary(true));
         final ActivityRecord homeActivity = createHomeActivity();
         homeActivity.setVisibility(true);
         initializeRecentsAnimationController(mController, homeActivity);

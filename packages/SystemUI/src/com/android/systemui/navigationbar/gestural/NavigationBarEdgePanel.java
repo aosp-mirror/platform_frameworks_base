@@ -43,6 +43,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
+import android.window.BackEvent;
 
 import androidx.core.graphics.ColorUtils;
 import androidx.dynamicanimation.animation.DynamicAnimation;
@@ -464,7 +465,8 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
     @Override
     public void onMotionEvent(MotionEvent event) {
         if (mBackAnimation != null) {
-            mBackAnimation.onBackMotion(event);
+            mBackAnimation.onBackMotion(
+                    event, mIsLeftPanel ? BackEvent.EDGE_LEFT : BackEvent.EDGE_RIGHT);
         }
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();

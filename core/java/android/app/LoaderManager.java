@@ -37,7 +37,7 @@ import java.lang.reflect.Modifier;
  * While the LoaderManager API was introduced in
  * {@link android.os.Build.VERSION_CODES#HONEYCOMB}, a version of the API
  * at is also available for use on older platforms through
- * {@link android.support.v4.app.FragmentActivity}.  See the blog post
+ * {@link androidx.fragment.app.FragmentActivity}.  See the blog post
  * <a href="http://android-developers.blogspot.com/2011/03/fragments-for-all.html">
  * Fragments For All</a> for more details.
  *
@@ -56,7 +56,7 @@ import java.lang.reflect.Modifier;
  * </div>
  *
  * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>
- *      {@link android.support.v4.app.LoaderManager}
+ *      {@link androidx.loader.app.LoaderManager}
  */
 @Deprecated
 public abstract class LoaderManager {
@@ -64,7 +64,7 @@ public abstract class LoaderManager {
      * Callback interface for a client to interact with the manager.
      *
      * @deprecated Use the <a href="{@docRoot}tools/extras/support-library.html">
-     *      Support Library</a> {@link android.support.v4.app.LoaderManager.LoaderCallbacks}
+     *      Support Library</a> {@link androidx.loader.app.LoaderManager.LoaderCallbacks}
      */
     @Deprecated
     public interface LoaderCallbacks<D> {

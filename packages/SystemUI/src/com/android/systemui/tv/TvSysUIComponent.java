@@ -34,6 +34,7 @@ import dagger.Subcomponent;
         DependencyProvider.class,
         SystemUIBinder.class,
         SystemUIModule.class,
+        TVSystemUICoreStartableModule.class,
         TvSystemUIModule.class,
         TvSystemUIBinder.class})
 public interface TvSysUIComponent extends SysUIComponent {

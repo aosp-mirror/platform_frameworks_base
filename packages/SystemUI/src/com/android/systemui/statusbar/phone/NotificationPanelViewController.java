@@ -113,7 +113,6 @@ import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.keyguard.dagger.KeyguardUserSwitcherComponent;
 import com.android.systemui.DejankUtils;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.Interpolators;
@@ -804,6 +803,7 @@ public class NotificationPanelViewController extends PanelViewController
             ControlsComponent controlsComponent,
             InteractionJankMonitor interactionJankMonitor,
             QsFrameTranslateController qsFrameTranslateController,
+            SysUiState sysUiState,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController) {
         super(view,
                 falsingManager,
@@ -876,8 +876,7 @@ public class NotificationPanelViewController extends PanelViewController
         mUiExecutor = uiExecutor;
         mSecureSettings = secureSettings;
         mInteractionJankMonitor = interactionJankMonitor;
-        // TODO: inject via dagger instead of Dependency
-        mSysUiState = Dependency.get(SysUiState.class);
+        mSysUiState = sysUiState;
         pulseExpansionHandler.setPulseExpandAbortListener(() -> {
             if (mQs != null) {
                 mQs.animateHeaderSlidingOut();

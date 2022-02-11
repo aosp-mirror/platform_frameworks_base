@@ -120,7 +120,7 @@ class BiometricContextProvider implements BiometricContext {
     @Override
     public OperationContext updateContext(@NonNull OperationContext operationContext,
             boolean isCryptoOperation) {
-        operationContext.isAoD = isAoD();
+        operationContext.isAod = isAod();
         operationContext.isCrypto = isCryptoOperation;
         setFirstSessionId(operationContext);
         return operationContext;
@@ -160,7 +160,7 @@ class BiometricContextProvider implements BiometricContext {
     }
 
     @Override
-    public boolean isAoD() {
+    public boolean isAod() {
         return mIsDozing && mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
     }
 
@@ -177,7 +177,7 @@ class BiometricContextProvider implements BiometricContext {
 
     private void notifySubscribers() {
         mSubscribers.forEach((context, consumer) -> {
-            context.isAoD = isAoD();
+            context.isAod = isAod();
             consumer.accept(context);
         });
     }

@@ -109,6 +109,7 @@ filegroup {
         ":platform-compat-native-aidl",
 
         // AIDL sources from external directories
+        ":android.hardware.graphics.common-V3-java-source",
         ":android.hardware.security.keymint-V1-java-source",
         ":android.hardware.security.secureclock-V1-java-source",
         ":android.hardware.tv.tuner-V1-java-source",
@@ -288,6 +289,7 @@ java_defaults {
             // TODO: remove when moved to the below package
             "frameworks/base/packages/ConnectivityT/framework-t/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
+            "hardware/interfaces/graphics/common/aidl",
         ],
     },
     dxflags: [
@@ -537,6 +539,7 @@ stubs_defaults {
             // TODO: remove when moved to the below package
             "frameworks/base/packages/ConnectivityT/framework-t/aidl-export",
             "packages/modules/Connectivity/framework/aidl-export",
+            "hardware/interfaces/graphics/common/aidl",
         ],
     },
     // These are libs from framework-internal-utils that are required (i.e. being referenced)

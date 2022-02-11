@@ -22,13 +22,14 @@ import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.plugins.NotificationListenerController;
 import com.android.systemui.plugins.NotificationListenerController.NotificationProvider;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.shared.plugins.PluginManager;
 
 import java.util.ArrayList;
+
+import javax.inject.Inject;
 
 /**
  * A version of NotificationListenerService that passes all info to
@@ -40,19 +41,25 @@ public class NotificationListenerWithPlugins extends NotificationListenerService
 
     private ArrayList<NotificationListenerController> mPlugins = new ArrayList<>();
     private boolean mConnected;
+    private PluginManager mPluginManager;
+
+    @Inject
+    public NotificationListenerWithPlugins(PluginManager pluginManager) {
+        super();
+        mPluginManager = pluginManager;
+    }
 
     @Override
     public void registerAsSystemService(Context context, ComponentName componentName,
             int currentUser) throws RemoteException {
         super.registerAsSystemService(context, componentName, currentUser);
-        Dependency.get(PluginManager.class).addPluginListener(this,
-                NotificationListenerController.class);
+        mPluginManager.addPluginListener(this, NotificationListenerController.class);
     }
 
     @Override
     public void unregisterAsSystemService() throws RemoteException {
         super.unregisterAsSystemService();
-        Dependency.get(PluginManager.class).removePluginListener(this);
+        mPluginManager.removePluginListener(this);
     }
 
     @Override

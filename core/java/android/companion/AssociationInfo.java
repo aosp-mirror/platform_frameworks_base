@@ -207,6 +207,18 @@ public final class AssociationInfo implements Parcelable {
         return macAddress.equals(mDeviceMacAddress);
     }
 
+    /**
+     * Utility method to be used by CdmService only.
+     *
+     * @return whether CdmService should bind the companion application that "owns" this association
+     *         when the device is present.
+     *
+     * @hide
+     */
+    public boolean shouldBindWhenPresent() {
+        return mNotifyOnDeviceNearby || mSelfManaged;
+    }
+
     /** @hide */
     public @NonNull String toShortString() {
         final StringBuilder sb = new StringBuilder();
