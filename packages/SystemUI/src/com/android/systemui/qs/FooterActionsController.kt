@@ -24,7 +24,6 @@ import android.provider.Settings.Global.USER_SWITCHER_ENABLED
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
@@ -46,7 +45,6 @@ import com.android.systemui.statusbar.phone.SettingsButton
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.UserInfoController
 import com.android.systemui.statusbar.policy.UserInfoController.OnUserInfoChangedListener
-import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.DualHeightHorizontalLinearLayout
 import com.android.systemui.util.ViewController
 import com.android.systemui.util.settings.GlobalSettings
@@ -71,7 +69,6 @@ internal class FooterActionsController @Inject constructor(
     private val fgsManagerFooterController: QSFgsManagerFooter,
     private val falsingManager: FalsingManager,
     private val metricsLogger: MetricsLogger,
-    private val tunerService: TunerService,
     private val globalActionsDialog: GlobalActionsDialogLite,
     private val uiEventLogger: UiEventLogger,
     @Named(PM_LITE_ENABLED) private val showPMLiteButton: Boolean,
@@ -131,22 +128,7 @@ internal class FooterActionsController @Inject constructor(
                 return@OnClickListener
             }
             metricsLogger.action(MetricsProto.MetricsEvent.ACTION_QS_EXPANDED_SETTINGS_LAUNCH)
-            if (settingsButton.isTunerClick) {
-                activityStarter.postQSRunnableDismissingKeyguard {
-                    if (isTunerEnabled()) {
-                        tunerService.showResetRequest {
-                            // Relaunch settings so that the tuner disappears.
-                            startSettingsActivity()
-                        }
-                    } else {
-                        Toast.makeText(context, R.string.tuner_toast, Toast.LENGTH_LONG).show()
-                        tunerService.isTunerEnabled = true
-                    }
-                    startSettingsActivity()
-                }
-            } else {
-                startSettingsActivity()
-            }
+            startSettingsActivity()
         } else if (v === powerMenuLite) {
             uiEventLogger.log(GlobalActionsDialogLite.GlobalActionsEvent.GA_OPEN_QS)
             globalActionsDialog.showOrHideDialog(false, true, v)
@@ -228,7 +210,7 @@ internal class FooterActionsController @Inject constructor(
     }
 
     private fun updateView() {
-        mView.updateEverything(isTunerEnabled(), multiUserSwitchController.isMultiUserEnabled)
+        mView.updateEverything(multiUserSwitchController.isMultiUserEnabled)
     }
 
     override fun onViewDetached() {
@@ -254,7 +236,7 @@ internal class FooterActionsController @Inject constructor(
     }
 
     fun disable(state2: Int) {
-        mView.disable(state2, isTunerEnabled(), multiUserSwitchController.isMultiUserEnabled)
+        mView.disable(state2, multiUserSwitchController.isMultiUserEnabled)
     }
 
     fun setExpansion(headerExpansionFraction: Float) {
@@ -275,6 +257,4 @@ internal class FooterActionsController @Inject constructor(
     fun setKeyguardShowing(showing: Boolean) {
         setExpansion(lastExpansion)
     }
-
-    private fun isTunerEnabled() = tunerService.isTunerEnabled
 }

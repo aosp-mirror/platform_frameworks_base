@@ -77,16 +77,6 @@
             android:src="@drawable/ic_settings"
             android:tint="?android:attr/textColorPrimary" />
 
-        <com.android.systemui.statusbar.AlphaOptimizedImageView
-            android:id="@+id/tuner_icon"
-            android:layout_width="8dp"
-            android:layout_height="8dp"
-            android:layout_gravity="center_horizontal|bottom"
-            android:layout_marginBottom="@dimen/qs_footer_icon_padding"
-            android:src="@drawable/tuner"
-            android:tint="?android:attr/textColorTertiary"
-            android:visibility="invisible" />
-
     </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
 
 </com.android.systemui.qs.FooterActionsView>
