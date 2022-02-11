@@ -2857,8 +2857,9 @@ public class AudioService extends IAudioService.Stub
         int step;
 
         // skip a2dp absolute volume control request when the device
-        // is not an a2dp device
-        if (!AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)
+        // is neither an a2dp device nor BLE device
+        if ((!AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)
+                && !AudioSystem.DEVICE_OUT_ALL_BLE_SET.contains(device))
                 && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) != 0) {
             return;
         }
@@ -2998,7 +2999,8 @@ public class AudioService extends IAudioService.Stub
             }
 
             if (device == AudioSystem.DEVICE_OUT_BLE_HEADSET
-                    && streamType == getBluetoothContextualVolumeStream()) {
+                    && streamType == getBluetoothContextualVolumeStream()
+                    && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
                 if (DEBUG_VOL) {
                     Log.d(TAG, "adjustSreamVolume postSetLeAudioVolumeIndex index="
                             + newIndex + " stream=" + streamType);
@@ -3599,8 +3601,9 @@ public class AudioService extends IAudioService.Stub
         int oldIndex;
 
         // skip a2dp absolute volume control request when the device
-        // is not an a2dp device
-        if (!AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)
+        // is neither an a2dp device nor BLE device
+        if ((!AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)
+                && !AudioSystem.DEVICE_OUT_ALL_BLE_SET.contains(device))
                 && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) != 0) {
             return;
         }
@@ -3642,7 +3645,8 @@ public class AudioService extends IAudioService.Stub
             }
 
             if (device == AudioSystem.DEVICE_OUT_BLE_HEADSET
-                    && streamType == getBluetoothContextualVolumeStream()) {
+                    && streamType == getBluetoothContextualVolumeStream()
+                    && (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
                 if (DEBUG_VOL) {
                     Log.d(TAG, "adjustSreamVolume postSetLeAudioVolumeIndex index="
                             + index + " stream=" + streamType);
