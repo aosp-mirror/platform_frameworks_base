@@ -151,6 +151,9 @@ public class Dialog implements DialogInterface, Window.Callback,
 
     private final Runnable mDismissAction = this::dismissDialog;
 
+    /** A {@link Runnable} to run instead of dismissing when {@link #dismiss()} is called. */
+    private Runnable mDismissOverride;
+
     /**
      * Creates a dialog window that uses the default dialog theme.
      * <p>
@@ -370,6 +373,11 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     @Override
     public void dismiss() {
+        if (mDismissOverride != null) {
+            mDismissOverride.run();
+            return;
+        }
+
         if (Looper.myLooper() == mHandler.getLooper()) {
             dismissDialog();
         } else {
@@ -1352,6 +1360,21 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     public void setDismissMessage(@Nullable Message msg) {
         mDismissMessage = msg;
+    }
+
+    /**
+     * Set a {@link Runnable} to run when this dialog is dismissed instead of directly dismissing
+     * it. This allows to animate the dialog in its window before dismissing it.
+     *
+     * Note that {@code override} should always end up calling this method with {@code null}
+     * followed by a call to {@link #dismiss() dismiss} to actually dismiss the dialog.
+     *
+     * @see #dismiss()
+     *
+     * @hide
+     */
+    public void setDismissOverride(@Nullable Runnable override) {
+        mDismissOverride = override;
     }
 
     /** @hide */

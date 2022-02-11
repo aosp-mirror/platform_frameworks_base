@@ -57,6 +57,7 @@ import javax.inject.Inject;
  * If a notification was uninflated, this coordinator will filter the notification out from the
  * {@link ShadeListBuilder} until it is inflated.
  */
+// TODO(b/204468557): Move to @CoordinatorScope
 @SysUISingleton
 public class PreparationCoordinator implements Coordinator {
     private static final String TAG = "PreparationCoordinator";

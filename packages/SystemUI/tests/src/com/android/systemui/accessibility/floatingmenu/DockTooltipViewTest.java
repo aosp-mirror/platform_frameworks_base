@@ -21,12 +21,16 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
+import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.WindowMetrics;
 
 import androidx.test.filters.SmallTest;
 
@@ -49,6 +53,9 @@ public class DockTooltipViewTest extends SysuiTestCase {
     @Mock
     private WindowManager mWindowManager;
 
+    @Mock
+    private WindowMetrics mWindowMetrics;
+
     private AccessibilityFloatingMenuView mMenuView;
     private DockTooltipView mDockTooltipView;
     private final Position mPlaceholderPosition = new Position(0.0f, 0.0f);
@@ -62,6 +69,9 @@ public class DockTooltipViewTest extends SysuiTestCase {
         doAnswer(invocation -> wm.getMaximumWindowMetrics()).when(
                 mWindowManager).getMaximumWindowMetrics();
         mContext.addMockSystemService(Context.WINDOW_SERVICE, mWindowManager);
+        when(mWindowManager.getCurrentWindowMetrics()).thenReturn(mWindowMetrics);
+        when(mWindowMetrics.getBounds()).thenReturn(new Rect());
+        when(mWindowMetrics.getWindowInsets()).thenReturn(new WindowInsets.Builder().build());
 
         mMenuView = spy(new AccessibilityFloatingMenuView(mContext, mPlaceholderPosition));
         mDockTooltipView = new DockTooltipView(mContext, mMenuView);

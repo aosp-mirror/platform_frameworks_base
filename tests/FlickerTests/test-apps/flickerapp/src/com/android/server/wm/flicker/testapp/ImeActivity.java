@@ -19,6 +19,7 @@ package com.android.server.wm.flicker.testapp;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.WindowManager;
+import android.widget.Button;
 
 public class ImeActivity extends Activity {
     @Override
@@ -29,5 +30,9 @@ public class ImeActivity extends Activity {
                 .LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         getWindow().setAttributes(p);
         setContentView(R.layout.activity_ime);
+        Button button = findViewById(R.id.finish_activity_btn);
+        button.setOnClickListener(view -> {
+            finish();
+        });
     }
 }

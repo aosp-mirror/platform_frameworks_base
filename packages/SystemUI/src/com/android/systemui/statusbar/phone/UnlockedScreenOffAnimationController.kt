@@ -4,10 +4,10 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
-import android.content.res.Configuration
 import android.database.ContentObserver
 import android.os.Handler
 import android.provider.Settings
+import android.view.Surface
 import android.view.View
 import com.android.systemui.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
@@ -145,22 +145,26 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                 .setDuration(duration.toLong())
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .alpha(1f)
-                .withEndAction {
-                    aodUiAnimationPlaying = false
+                .setListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator?) {
+                        aodUiAnimationPlaying = false
 
-                    // Lock the keyguard if it was waiting for the screen off animation to end.
-                    keyguardViewMediatorLazy.get().maybeHandlePendingLock()
+                        // Lock the keyguard if it was waiting for the screen off animation to end.
+                        keyguardViewMediatorLazy.get().maybeHandlePendingLock()
 
-                    // Tell the StatusBar to become keyguard for real - we waited on that since it
-                    // is slow and would have caused the animation to jank.
-                    statusBar.updateIsKeyguard()
+                        // Tell the StatusBar to become keyguard for real - we waited on that since
+                        // it is slow and would have caused the animation to jank.
+                        statusBar.updateIsKeyguard()
 
-                    // Run the callback given to us by the KeyguardVisibilityHelper.
-                    after.run()
+                        // Run the callback given to us by the KeyguardVisibilityHelper.
+                        after.run()
 
-                    // Done going to sleep, reset this flag.
-                    decidedToAnimateGoingToSleep = null
-                }
+                        // Done going to sleep, reset this flag.
+                        decidedToAnimateGoingToSleep = null
+                        // We need to unset the listener. These are persistent for future animators
+                        keyguardView.animate().setListener(null)
+                    }
+                })
                 .start()
     }
 
@@ -222,7 +226,9 @@ class UnlockedScreenOffAnimationController @Inject constructor(
             return false
         }
 
-        if (!dozeParameters.get().canControlUnlockedScreenOff()) {
+        // If animations are disabled system-wide, don't play this one either.
+        if (Settings.Global.getString(
+                context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE) == "0") {
             return false
         }
 
@@ -239,10 +245,11 @@ class UnlockedScreenOffAnimationController @Inject constructor(
             return false
         }
 
-        // If we're not allowed to rotate the keyguard, then only do the screen off animation if
-        // we're in portrait. Otherwise, AOD will animate in sideways, which looks weird.
+        // If we're not allowed to rotate the keyguard, it can only be displayed in zero-degree
+        // portrait. If we're in another orientation, disable the screen off animation so we don't
+        // animate in the keyguard AOD UI sideways or upside down.
         if (!keyguardStateController.isKeyguardScreenRotationAllowed &&
-                context.resources.configuration.orientation != Configuration.ORIENTATION_PORTRAIT) {
+            context.display.rotation != Surface.ROTATION_0) {
             return false
         }
 

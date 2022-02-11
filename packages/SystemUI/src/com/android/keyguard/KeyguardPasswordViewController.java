@@ -208,8 +208,7 @@ public class KeyguardPasswordViewController
         mView.post(() -> {
             if (mView.isShown()) {
                 mPasswordEntry.requestFocus();
-                mInputMethodManager.showSoftInput(
-                        mPasswordEntry, InputMethodManager.SHOW_IMPLICIT);
+                mPasswordEntry.getWindowInsetsController().show(WindowInsets.Type.ime());
             }
         });
     }

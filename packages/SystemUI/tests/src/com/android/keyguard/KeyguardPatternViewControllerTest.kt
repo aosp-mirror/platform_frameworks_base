@@ -26,6 +26,7 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
+import com.android.systemui.statusbar.policy.DevicePostureController
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -62,6 +63,8 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
     private lateinit var mKeyguardMessageAreaController: KeyguardMessageAreaController
     @Mock
     private lateinit var mLockPatternView: LockPatternView
+    @Mock
+    private lateinit var mPostureController: DevicePostureController
 
     private lateinit var mKeyguardPatternViewController: KeyguardPatternViewController
 
@@ -78,7 +81,7 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
         mKeyguardPatternViewController = KeyguardPatternViewController(mKeyguardPatternView,
         mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
                 mLatencyTracker, mFalsingCollector, mEmergencyButtonController,
-                mKeyguardMessageAreaControllerFactory)
+                mKeyguardMessageAreaControllerFactory, mPostureController)
     }
 
     @Test

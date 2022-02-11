@@ -29,6 +29,7 @@ import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEA
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -176,7 +177,7 @@ public class AccessibilityInputFilterTest {
     }
 
     @Test
-    public void testEventHandler_shouldChangeAfterOnDisplayChanged() {
+    public void testEventHandler_shouldIncreaseAndHaveCorrectOrderAfterOnDisplayAdded() {
         prepareLooper();
 
         // Check if there is only one mEventHandler when there is one default display.
@@ -184,13 +185,51 @@ public class AccessibilityInputFilterTest {
         assertEquals(1, mEventHandler.size());
 
         // Check if it has correct numbers of mEventHandler for corresponding displays.
-        setDisplayCount(4);
-        mA11yInputFilter.onDisplayChanged();
-        assertEquals(4, mEventHandler.size());
+        setDisplayCount(2);
+        mA11yInputFilter.onDisplayAdded(mDisplayList.get(SECOND_DISPLAY));
+        assertEquals(2, mEventHandler.size());
+
+        EventStreamTransformation next = mEventHandler.get(SECOND_DISPLAY);
+        assertNotNull(next);
+
+        // Start from index 1 because KeyboardInterceptor only exists in EventHandler for
+        // DEFAULT_DISPLAY.
+        for (int i = 1; next != null; i++) {
+            assertEquals(next.getClass(), mExpectedEventHandlerTypes[i]);
+            next = next.getNext();
+        }
+    }
+
+    @Test
+    public void testEventHandler_shouldDecreaseAfterOnDisplayRemoved() {
+        prepareLooper();
 
         setDisplayCount(2);
-        mA11yInputFilter.onDisplayChanged();
+        mA11yInputFilter.setUserAndEnabledFeatures(0, mFeatures);
         assertEquals(2, mEventHandler.size());
+
+        // Check if it has correct numbers of mEventHandler for corresponding displays.
+        mA11yInputFilter.onDisplayRemoved(SECOND_DISPLAY);
+        assertEquals(1, mEventHandler.size());
+
+        EventStreamTransformation eventHandler = mEventHandler.get(SECOND_DISPLAY);
+        assertNull(eventHandler);
+    }
+
+    @Test
+    public void testEventHandler_shouldNoChangedInOtherDisplayAfterOnDisplayRemoved() {
+        prepareLooper();
+
+        setDisplayCount(2);
+        mA11yInputFilter.setUserAndEnabledFeatures(0, mFeatures);
+        EventStreamTransformation eventHandlerBeforeDisplayRemoved =
+                mEventHandler.get(DEFAULT_DISPLAY);
+
+        mA11yInputFilter.onDisplayRemoved(SECOND_DISPLAY);
+        EventStreamTransformation eventHandlerAfterDisplayRemoved =
+                mEventHandler.get(DEFAULT_DISPLAY);
+
+        assertEquals(eventHandlerBeforeDisplayRemoved, eventHandlerAfterDisplayRemoved);
     }
 
     @Test
@@ -240,7 +279,7 @@ public class AccessibilityInputFilterTest {
     }
 
     @Test
-    public void testInputEvent_shouldClearEventsForAllEventHandlers() {
+    public void testInputEvent_shouldClearEventsForDisplayEventHandlers() {
         prepareLooper();
 
         mA11yInputFilter.setUserAndEnabledFeatures(0, mFeatures);
@@ -253,10 +292,68 @@ public class AccessibilityInputFilterTest {
         send(downEvent(DEFAULT_DISPLAY, InputDevice.SOURCE_TOUCHSCREEN));
         assertEquals(2, mCaptor1.mEvents.size());
 
-        // InputEvent with different input source should trigger clearEvents() for each
-        // EventStreamTransformation in EventHandler.
+        // InputEvent with different input source to the same display should trigger
+        // clearEvents() for the EventHandler in this display.
         send(downEvent(DEFAULT_DISPLAY, InputDevice.SOURCE_MOUSE));
         assertEquals(1, mCaptor1.mEvents.size());
+    }
+
+    @Test
+    public void testInputEvent_shouldNotClearEventsForOtherDisplayEventHandlers() {
+        prepareLooper();
+
+        setDisplayCount(2);
+        mA11yInputFilter.setUserAndEnabledFeatures(0, mFeatures);
+        assertEquals(2, mEventHandler.size());
+
+        mCaptor1 = new EventCaptor();
+        mCaptor2 = new EventCaptor();
+        mEventHandler.put(DEFAULT_DISPLAY, mCaptor1);
+        mEventHandler.put(SECOND_DISPLAY, mCaptor2);
+
+        // InputEvent with different displayId should be dispatched to corresponding EventHandler.
+        send(downEvent(DEFAULT_DISPLAY, InputDevice.SOURCE_TOUCHSCREEN));
+        send(downEvent(DEFAULT_DISPLAY, InputDevice.SOURCE_TOUCHSCREEN));
+        send(downEvent(SECOND_DISPLAY, InputDevice.SOURCE_TOUCHSCREEN));
+
+        // InputEvent with different input source should not trigger clearEvents() for
+        // the EventHandler in the other display.
+        send(downEvent(SECOND_DISPLAY, InputDevice.SOURCE_MOUSE));
+        assertEquals(2, mCaptor1.mEvents.size());
+    }
+
+    @Test
+    public void testInputEvent_shouldNotClearEventsForOtherDisplayAfterOnDisplayAdded() {
+        prepareLooper();
+
+        mA11yInputFilter.setUserAndEnabledFeatures(0, mFeatures);
+        mCaptor1 = new EventCaptor();
+        mEventHandler.put(DEFAULT_DISPLAY, mCaptor1);
+
+        send(downEvent(DEFAULT_DISPLAY, InputDevice.SOURCE_TOUCHSCREEN));
+        send(downEvent(DEFAULT_DISPLAY, InputDevice.SOURCE_TOUCHSCREEN));
+        assertEquals(2, mCaptor1.mEvents.size());
+
+        setDisplayCount(2);
+        mA11yInputFilter.onDisplayAdded(mDisplayList.get(SECOND_DISPLAY));
+        assertEquals(2, mCaptor1.mEvents.size());
+    }
+
+    @Test
+    public void testInputEvent_shouldNotClearEventsForOtherDisplayAfterOnDisplayRemoved() {
+        prepareLooper();
+
+        setDisplayCount(2);
+        mA11yInputFilter.setUserAndEnabledFeatures(0, mFeatures);
+        mCaptor1 = new EventCaptor();
+        mEventHandler.put(DEFAULT_DISPLAY, mCaptor1);
+
+        send(downEvent(DEFAULT_DISPLAY, InputDevice.SOURCE_TOUCHSCREEN));
+        send(downEvent(DEFAULT_DISPLAY, InputDevice.SOURCE_TOUCHSCREEN));
+        assertEquals(2, mCaptor1.mEvents.size());
+
+        mA11yInputFilter.onDisplayRemoved(SECOND_DISPLAY);
+        assertEquals(2, mCaptor1.mEvents.size());
     }
 
     @Test

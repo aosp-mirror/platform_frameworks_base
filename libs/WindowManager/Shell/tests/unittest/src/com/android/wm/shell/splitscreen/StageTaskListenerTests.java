@@ -21,18 +21,27 @@ import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
+import android.os.SystemProperties;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
+import android.window.WindowContainerTransaction;
 
+import androidx.test.annotation.UiThreadTest;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
@@ -47,31 +56,48 @@ import org.mockito.MockitoAnnotations;
 /**
  * Tests for {@link StageTaskListener}
  * Build/Install/Run:
- *  atest WMShellUnitTests:StageTaskListenerTests
+ * atest WMShellUnitTests:StageTaskListenerTests
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public final class StageTaskListenerTests {
-    @Mock private ShellTaskOrganizer mTaskOrganizer;
-    @Mock private StageTaskListener.StageListenerCallbacks mCallbacks;
-    @Mock private SyncTransactionQueue mSyncQueue;
-    @Captor private ArgumentCaptor<SyncTransactionQueue.TransactionRunnable> mRunnableCaptor;
+public final class StageTaskListenerTests extends ShellTestCase {
+    private static final boolean ENABLE_SHELL_TRANSITIONS =
+            SystemProperties.getBoolean("persist.debug.shell_transit", false);
+
+    @Mock
+    private ShellTaskOrganizer mTaskOrganizer;
+    @Mock
+    private StageTaskListener.StageListenerCallbacks mCallbacks;
+    @Mock
+    private SyncTransactionQueue mSyncQueue;
+    @Mock
+    private IconProvider mIconProvider;
+    @Mock
+    private StageTaskUnfoldController mStageTaskUnfoldController;
+    @Captor
+    private ArgumentCaptor<SyncTransactionQueue.TransactionRunnable> mRunnableCaptor;
     private SurfaceSession mSurfaceSession = new SurfaceSession();
+    private SurfaceControl mSurfaceControl;
     private ActivityManager.RunningTaskInfo mRootTask;
     private StageTaskListener mStageTaskListener;
 
     @Before
+    @UiThreadTest
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mStageTaskListener = new StageTaskListener(
+                mContext,
                 mTaskOrganizer,
                 DEFAULT_DISPLAY,
                 mCallbacks,
                 mSyncQueue,
-                mSurfaceSession);
+                mSurfaceSession,
+                mIconProvider,
+                mStageTaskUnfoldController);
         mRootTask = new TestRunningTaskInfoBuilder().build();
         mRootTask.parentTaskId = INVALID_TASK_ID;
-        mStageTaskListener.onTaskAppeared(mRootTask, new SurfaceControl());
+        mSurfaceControl = new SurfaceControl.Builder(mSurfaceSession).setName("test").build();
+        mStageTaskListener.onTaskAppeared(mRootTask, mSurfaceControl);
     }
 
     @Test
@@ -93,13 +119,37 @@ public final class StageTaskListenerTests {
 
     @Test
     public void testChildTaskAppeared() {
+        // With shell transitions, the transition manages status changes, so skip this test.
+        assumeFalse(ENABLE_SHELL_TRANSITIONS);
         final ActivityManager.RunningTaskInfo childTask =
                 new TestRunningTaskInfoBuilder().setParentTaskId(mRootTask.taskId).build();
 
-        mStageTaskListener.onTaskAppeared(childTask, new SurfaceControl());
+        mStageTaskListener.onTaskAppeared(childTask, mSurfaceControl);
 
         assertThat(mStageTaskListener.mChildrenTaskInfo.contains(childTask.taskId)).isTrue();
         verify(mCallbacks).onStatusChanged(eq(mRootTask.isVisible), eq(true));
+    }
+
+    @Test
+    public void testTaskAppeared_notifiesUnfoldListener() {
+        final ActivityManager.RunningTaskInfo task =
+                new TestRunningTaskInfoBuilder().setParentTaskId(mRootTask.taskId).build();
+
+        mStageTaskListener.onTaskAppeared(task, mSurfaceControl);
+
+        verify(mStageTaskUnfoldController).onTaskAppeared(eq(task), eq(mSurfaceControl));
+    }
+
+    @Test
+    public void testTaskVanished_notifiesUnfoldListener() {
+        final ActivityManager.RunningTaskInfo task =
+                new TestRunningTaskInfoBuilder().setParentTaskId(mRootTask.taskId).build();
+        mStageTaskListener.onTaskAppeared(task, mSurfaceControl);
+        clearInvocations(mStageTaskUnfoldController);
+
+        mStageTaskListener.onTaskVanished(task);
+
+        verify(mStageTaskUnfoldController).onTaskVanished(eq(task));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -110,6 +160,8 @@ public final class StageTaskListenerTests {
 
     @Test
     public void testTaskVanished() {
+        // With shell transitions, the transition manages status changes, so skip this test.
+        assumeFalse(ENABLE_SHELL_TRANSITIONS);
         final ActivityManager.RunningTaskInfo childTask =
                 new TestRunningTaskInfoBuilder().setParentTaskId(mRootTask.taskId).build();
         mStageTaskListener.mRootTaskInfo = mRootTask;
@@ -130,5 +182,19 @@ public final class StageTaskListenerTests {
 
         mStageTaskListener.onTaskInfoChanged(childTask);
         verify(mCallbacks).onNoLongerSupportMultiWindow();
+    }
+
+    @Test
+    public void testEvictAllChildren() {
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        mStageTaskListener.evictAllChildren(wct);
+        assertTrue(wct.isEmpty());
+
+        final ActivityManager.RunningTaskInfo childTask =
+                new TestRunningTaskInfoBuilder().setParentTaskId(mRootTask.taskId).build();
+        mStageTaskListener.onTaskAppeared(childTask, mSurfaceControl);
+
+        mStageTaskListener.evictAllChildren(wct);
+        assertFalse(wct.isEmpty());
     }
 }

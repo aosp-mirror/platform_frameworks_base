@@ -17,7 +17,6 @@
 package com.android.systemui.qs.tiles;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
@@ -110,11 +109,7 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
 
     @Override
     public Intent getLongClickIntent() {
-        Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-        Bundle bundle = new Bundle();
-        bundle.putString(EXTRA_FRAGMENT_ARGS_KEY, COLOR_INVERSION_PREFERENCE_KEY);
-        intent.putExtra(EXTRA_SHOW_FRAGMENT_ARGS_KEY, bundle);
-        return intent;
+        return new Intent(Settings.ACTION_COLOR_INVERSION_SETTINGS);
     }
 
     @Override

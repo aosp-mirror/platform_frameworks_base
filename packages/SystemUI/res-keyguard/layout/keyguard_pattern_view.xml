@@ -27,49 +27,44 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:clipChildren="false"
-    android:clipToPadding="false"
     androidprv:layout_maxWidth="@dimen/keyguard_security_width"
-    androidprv:layout_maxHeight="@dimen/keyguard_security_height"
-    android:gravity="center_horizontal">
+    android:clipChildren="false"
+    android:clipToPadding="false">
 
-    <FrameLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/pattern_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipChildren="false"
-        android:clipToPadding="false">
-
-        <LinearLayout
-            android:id="@+id/pattern_container"
-            android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
+        android:layout_weight="1"
+        android:layoutDirection="ltr">
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/pattern_top_guideline"
             android:layout_width="wrap_content"
-            android:orientation="vertical"
-            android:layout_gravity="center_horizontal|bottom"
-            android:clipChildren="false"
-            android:clipToPadding="false">
+            android:layout_height="wrap_content"
+            androidprv:layout_constraintGuide_percent="0"
+            android:orientation="horizontal" />
 
-            <com.android.internal.widget.LockPatternView
-                android:id="@+id/lockPatternView"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="8dip"
-                android:layout_marginBottom="4dip"
-                android:layout_marginStart="8dip"
-                android:layout_gravity="center_horizontal"
-                android:gravity="center"
-                android:clipChildren="false"
-                android:clipToPadding="false" />
+        <com.android.internal.widget.LockPatternView
+            android:id="@+id/lockPatternView"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            androidprv:layout_constraintTop_toBottomOf="@id/pattern_top_guideline"
+            androidprv:layout_constraintBottom_toBottomOf="parent"
+            androidprv:layout_constraintLeft_toLeftOf="parent"
+            androidprv:layout_constraintRight_toRightOf="parent"
+            androidprv:layout_constraintDimensionRatio="1.0"
+            androidprv:layout_constraintVertical_bias="1.0"
+            />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-          <include layout="@layout/keyguard_eca"
-              android:id="@+id/keyguard_selector_fade_container"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:orientation="vertical"
-              android:layout_gravity="bottom|center_horizontal"
-              android:layout_marginTop="@dimen/keyguard_eca_top_margin"
-              android:gravity="center_horizontal" />
-        </LinearLayout>
-    </FrameLayout>
+    <include layout="@layout/keyguard_eca"
+        android:id="@+id/keyguard_selector_fade_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginTop="@dimen/keyguard_eca_top_margin"
+        android:gravity="center_horizontal" />
 
 </com.android.keyguard.KeyguardPatternView>

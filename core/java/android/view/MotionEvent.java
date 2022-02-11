@@ -1860,7 +1860,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             float x, float y, float pressure, float size, int metaState,
             float xPrecision, float yPrecision, int deviceId, int edgeFlags) {
         return obtain(downTime, eventTime, action, x, y, pressure, size, metaState,
-                xPrecision, yPrecision, deviceId, edgeFlags, InputDevice.SOURCE_UNKNOWN,
+                xPrecision, yPrecision, deviceId, edgeFlags, InputDevice.SOURCE_CLASS_POINTER,
                 DEFAULT_DISPLAY);
     }
 
@@ -4008,6 +4008,22 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         public float orientation;
 
         /**
+         * The movement of x position of a motion event.
+         *
+         * @see MotionEvent#AXIS_RELATIVE_X
+         * @hide
+         */
+        public float relativeX;
+
+        /**
+         * The movement of y position of a motion event.
+         *
+         * @see MotionEvent#AXIS_RELATIVE_Y
+         * @hide
+         */
+        public float relativeY;
+
+        /**
          * Clears the contents of this object.
          * Resets all axes to zero.
          */
@@ -4023,6 +4039,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             toolMajor = 0;
             toolMinor = 0;
             orientation = 0;
+            relativeX = 0;
+            relativeY = 0;
         }
 
         /**
@@ -4053,6 +4071,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             toolMajor = other.toolMajor;
             toolMinor = other.toolMinor;
             orientation = other.orientation;
+            relativeX = other.relativeX;
+            relativeY = other.relativeY;
         }
 
         /**
@@ -4084,6 +4104,10 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                     return toolMinor;
                 case AXIS_ORIENTATION:
                     return orientation;
+                case AXIS_RELATIVE_X:
+                    return relativeX;
+                case AXIS_RELATIVE_Y:
+                    return relativeY;
                 default: {
                     if (axis < 0 || axis > 63) {
                         throw new IllegalArgumentException("Axis out of range.");
@@ -4136,6 +4160,12 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                     break;
                 case AXIS_ORIENTATION:
                     orientation = value;
+                    break;
+                case AXIS_RELATIVE_X:
+                    relativeX = value;
+                    break;
+                case AXIS_RELATIVE_Y:
+                    relativeY = value;
                     break;
                 default: {
                     if (axis < 0 || axis > 63) {

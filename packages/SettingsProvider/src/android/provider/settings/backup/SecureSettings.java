@@ -191,5 +191,6 @@ public class SecureSettings {
         Settings.Secure.LOCATION_TIME_ZONE_DETECTION_ENABLED,
         Settings.Secure.LOCKSCREEN_SHOW_CONTROLS,
         Settings.Secure.LOCKSCREEN_SHOW_WALLET,
+        Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK,
     };
 }

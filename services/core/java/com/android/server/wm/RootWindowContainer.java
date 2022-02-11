@@ -37,10 +37,10 @@ import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
-import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
@@ -48,11 +48,17 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_KEEP_SCREEN_O
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STATES;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
+import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WALLPAPER;
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.policy.PhoneWindowManager.SYSTEM_DIALOG_REASON_ASSIST;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
+import static com.android.server.wm.ActivityRecord.State.FINISHING;
+import static com.android.server.wm.ActivityRecord.State.PAUSED;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.ActivityRecord.State.STOPPED;
+import static com.android.server.wm.ActivityRecord.State.STOPPING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ROOT_TASK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
@@ -67,19 +73,14 @@ import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskSupervisor.dumpHistoryList;
 import static com.android.server.wm.ActivityTaskSupervisor.printThisActivity;
 import static com.android.server.wm.KeyguardController.KEYGUARD_SLEEP_TOKEN_TAG;
+import static com.android.server.wm.RootWindowContainerProto.DEFAULT_MIN_SIZE_RESIZABLE_TASK;
 import static com.android.server.wm.RootWindowContainerProto.IS_HOME_RECENTS_COMPONENT;
 import static com.android.server.wm.RootWindowContainerProto.KEYGUARD_CONTROLLER;
 import static com.android.server.wm.RootWindowContainerProto.WINDOW_CONTAINER;
-import static com.android.server.wm.Task.ActivityState.FINISHING;
-import static com.android.server.wm.Task.ActivityState.PAUSED;
-import static com.android.server.wm.Task.ActivityState.RESUMED;
-import static com.android.server.wm.Task.ActivityState.STOPPED;
-import static com.android.server.wm.Task.ActivityState.STOPPING;
 import static com.android.server.wm.Task.REPARENT_LEAVE_ROOT_TASK_IN_PLACE;
 import static com.android.server.wm.Task.REPARENT_MOVE_ROOT_TASK_TO_FRONT;
-import static com.android.server.wm.Task.TASK_VISIBILITY_INVISIBLE;
+import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_INVISIBLE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -365,8 +366,26 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 return false;
             }
 
+            if (matchingCandidate(task)) {
+                return true;
+            }
+
+            // Looking for the embedded tasks (if any)
+            return !task.isLeafTaskFragment() && task.forAllLeafTaskFragments(
+                    this::matchingCandidate);
+        }
+
+        boolean matchingCandidate(TaskFragment taskFragment) {
+            final Task task = taskFragment.asTask();
+            if (task == null) {
+                return false;
+            }
+
             // Overlays should not be considered as the task's logical top activity.
-            final ActivityRecord r = task.getTopNonFinishingActivity(false /* includeOverlays */);
+            // Activities of the tasks that embedded from this one should not be used.
+            final ActivityRecord r = task.getTopNonFinishingActivity(false /* includeOverlays */,
+                    false /* includingEmbeddedTask */);
+
             if (r == null || r.finishing || r.mUserId != userId
                     || r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
                 ProtoLog.d(WM_DEBUG_TASKS, "Skipping %s: mismatch root %s", task, r);
@@ -486,6 +505,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             mTopFocusedDisplayId = topFocusedDisplayId;
             mWmService.mInputManager.setFocusedDisplay(topFocusedDisplayId);
             mWmService.mPolicy.setTopFocusedDisplay(topFocusedDisplayId);
+            mWmService.mAccessibilityController.setFocusedDisplay(topFocusedDisplayId);
             ProtoLog.d(WM_DEBUG_FOCUS_LIGHT, "New topFocusedDisplayId=%d", topFocusedDisplayId);
         }
         return changed;
@@ -507,6 +527,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mWmService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL,
                 !mWmService.mPerDisplayFocusEnabled /* updateInputWindows */);
         mTaskSupervisor.updateTopResumedActivityIfNeeded();
+    }
+
+    @Override
+    boolean isAttached() {
+        return true;
     }
 
     /**
@@ -817,8 +842,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         // Initialize state of exiting tokens.
-        final int numDisplays = mChildren.size();
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+        for (int displayNdx = 0; displayNdx < mChildren.size(); ++displayNdx) {
             final DisplayContent displayContent = mChildren.get(displayNdx);
             displayContent.setExitingTokensHasVisible(false);
         }
@@ -855,6 +879,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         // Send any pending task-info changes that were queued-up during a layout deferment
         mWmService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+        mWmService.mAtmService.mTaskFragmentOrganizerController.dispatchPendingEvents();
         mWmService.mSyncEngine.onSurfacePlacement();
         mWmService.mAnimator.executeAfterPrepareSurfacesRunnables();
 
@@ -867,10 +892,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             recentsAnimationController.checkAnimationReady(defaultDisplay.mWallpaperController);
         }
 
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+        for (int displayNdx = 0; displayNdx < mChildren.size(); ++displayNdx) {
             final DisplayContent displayContent = mChildren.get(displayNdx);
             if (displayContent.mWallpaperMayChange) {
-                if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "Wallpaper may change!  Adjusting");
+                ProtoLog.v(WM_DEBUG_WALLPAPER, "Wallpaper may change!  Adjusting");
                 displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
                 if (DEBUG_LAYOUT_REPEATS) {
                     surfacePlacer.debugLayoutRepeats("WallpaperMayChange",
@@ -929,12 +954,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         // Time to remove any exiting tokens?
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+        for (int displayNdx = mChildren.size() - 1; displayNdx >= 0; --displayNdx) {
             final DisplayContent displayContent = mChildren.get(displayNdx);
             displayContent.removeExistingTokensIfPossible();
         }
 
-        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+        for (int displayNdx = 0; displayNdx < mChildren.size(); ++displayNdx) {
             final DisplayContent displayContent = mChildren.get(displayNdx);
             if (displayContent.pendingLayoutChanges != 0) {
                 displayContent.setLayoutNeeded();
@@ -1230,6 +1255,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         pw.println(mTopFocusedDisplayId);
     }
 
+    void dumpDefaultMinSizeOfResizableTask(PrintWriter pw) {
+        pw.print("  mDefaultMinSizeOfResizeableTaskDp=");
+        pw.println(mDefaultMinSizeOfResizeableTaskDp);
+    }
+
     void dumpLayoutNeededDisplayIds(PrintWriter pw) {
         if (!isLayoutNeeded()) {
             return;
@@ -1276,7 +1306,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mTaskSupervisor.getKeyguardController().dumpDebug(proto, KEYGUARD_CONTROLLER);
         proto.write(IS_HOME_RECENTS_COMPONENT,
                 mTaskSupervisor.mRecentTasks.isRecentsComponentHomeActivity(mCurrentUser));
-
+        proto.write(DEFAULT_MIN_SIZE_RESIZABLE_TASK, mDefaultMinSizeOfResizeableTaskDp);
         proto.end(token);
     }
 
@@ -1865,7 +1895,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         if (focusedRootTask == null) {
             return null;
         }
-        final ActivityRecord resumedActivity = focusedRootTask.getResumedActivity();
+        final ActivityRecord resumedActivity = focusedRootTask.getTopResumedActivity();
         if (resumedActivity != null && resumedActivity.app != null) {
             return resumedActivity;
         }
@@ -1887,11 +1917,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // foreground.
         WindowProcessController fgApp = getItemFromRootTasks(rootTask -> {
             if (isTopDisplayFocusedRootTask(rootTask)) {
-                final ActivityRecord resumedActivity = rootTask.getResumedActivity();
+                final ActivityRecord resumedActivity = rootTask.getTopResumedActivity();
                 if (resumedActivity != null) {
                     return resumedActivity.app;
-                } else if (rootTask.getPausingActivity() != null) {
-                    return rootTask.getPausingActivity().app;
+                } else if (rootTask.getTopPausingActivity() != null) {
+                    return rootTask.getTopPausingActivity().app;
                 }
             }
             return null;
@@ -1917,7 +1947,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     return;
                 }
 
-                if (rootTask.getVisibility(null /*starting*/) == TASK_VISIBILITY_INVISIBLE) {
+                if (rootTask.getVisibility(null /* starting */)
+                        == TASK_FRAGMENT_VISIBILITY_INVISIBLE) {
                     return;
                 }
 
@@ -1941,7 +1972,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     private boolean startActivityForAttachedApplicationIfNeeded(ActivityRecord r,
             WindowProcessController app, ActivityRecord top) {
-        if (r.finishing || !r.okToShowLocked() || !r.visibleIgnoringKeyguard || r.app != null
+        if (r.finishing || !r.showToCurrentUser() || !r.visibleIgnoringKeyguard || r.app != null
                 || app.mUid != r.info.applicationInfo.uid || !app.mName.equals(r.processName)) {
             return false;
         }
@@ -1974,7 +2005,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      */
     void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
             boolean preserveWindows, boolean notifyClients) {
-        if (mTaskSupervisor.inActivityVisibilityUpdate()) {
+        if (mTaskSupervisor.inActivityVisibilityUpdate()
+                || mTaskSupervisor.isRootVisibilityUpdateDeferred()) {
             // Don't do recursive work.
             return;
         }
@@ -2189,7 +2221,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // display area, so reparent.
                 rootTask.reparent(taskDisplayArea, true /* onTop */);
             }
-            mService.getTransitionController().requestTransitionIfNeeded(TRANSIT_CHANGE, rootTask);
+            rootTask.mTransitionController.requestTransitionIfNeeded(TRANSIT_PIP, rootTask);
 
             // Defer the windowing mode change until after the transition to prevent the activity
             // from doing work and changing the activity visuals while animating
@@ -2394,7 +2426,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 if (displayShouldSleep) {
                     rootTask.goToSleepIfPossible(false /* shuttingDown */);
                 } else {
-                    rootTask.awakeFromSleepingLocked();
+                    rootTask.forAllLeafTasksAndLeafTaskFragments(
+                            taskFragment -> taskFragment.awakeFromSleeping(),
+                            true /* traverseTopToBottom */);
                     if (rootTask.isFocusedRootTaskOnDisplay()
                             && !mTaskSupervisor.getKeyguardController()
                             .isKeyguardOrAodShowing(display.mDisplayId)) {
@@ -2551,7 +2585,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // starts. Instead, we expect home activities to be launched when the system is ready
             // (ActivityManagerService#systemReady).
             if (mService.isBooted() || mService.isBooting()) {
-                startSystemDecorations(display.mDisplayContent);
+                startSystemDecorations(display);
             }
         }
     }
@@ -2660,6 +2694,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             token = new SleepToken(tag, displayId);
             mSleepTokens.put(tokenKey, token);
             display.mAllSleepTokens.add(token);
+            ProtoLog.d(WM_DEBUG_STATES, "Create sleep token: tag=%s, displayId=%d", tag, displayId);
         } else {
             throw new RuntimeException("Create the same sleep token twice: " + token);
         }
@@ -2678,6 +2713,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             return;
         }
 
+        ProtoLog.d(WM_DEBUG_STATES, "Remove sleep token: tag=%s, displayId=%d", token.mTag,
+                token.mDisplayId);
         display.mAllSleepTokens.remove(token);
         if (display.mAllSleepTokens.isEmpty()) {
             mService.updateSleepIfNeededLocked();
@@ -2771,8 +2808,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         if (DEBUG_SWITCH) {
             Slog.v(TAG_SWITCH, "Destroying " + r + " in state " + r.getState()
-                    + " resumed=" + r.getTask().getResumedActivity() + " pausing="
-                    + r.getTask().getPausingActivity() + " for reason "
+                    + " resumed=" + r.getTask().getTopResumedActivity() + " pausing="
+                    + r.getTask().getTopPausingActivity() + " for reason "
                     + mDestroyAllActivitiesReason);
         }
 
@@ -2806,7 +2843,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         Slog.w(TAG, "  Force finishing activity "
                 + r.intent.getComponent().flattenToShortString());
         r.detachFromProcess();
-        r.mDisplayContent.prepareAppTransition(TRANSIT_CLOSE, TRANSIT_FLAG_APP_CRASHED);
         r.mDisplayContent.requestTransitionAndLegacyPrepare(TRANSIT_CLOSE,
                 TRANSIT_FLAG_APP_CRASHED);
         r.destroyIfPossible("handleAppCrashed");
@@ -3359,7 +3395,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (rootTask == null || !rootTask.hasActivity()) {
                 continue;
             }
-            final ActivityRecord resumedActivity = rootTask.getResumedActivity();
+            final ActivityRecord resumedActivity = rootTask.getTopResumedActivity();
             if (resumedActivity == null || !resumedActivity.idle) {
                 ProtoLog.d(WM_DEBUG_STATES, "allResumedActivitiesIdle: rootTask=%d %s "
                         + "not idle", rootTask.getRootTaskId(), resumedActivity);
@@ -3374,7 +3410,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     boolean allResumedActivitiesVisible() {
         boolean[] foundResumed = {false};
         final boolean foundInvisibleResumedActivity = forAllRootTasks(rootTask -> {
-            final ActivityRecord r = rootTask.getResumedActivity();
+            final ActivityRecord r = rootTask.getTopResumedActivity();
             if (r != null) {
                 if (!r.nowVisible) {
                     return true;
@@ -3392,7 +3428,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     boolean allPausedActivitiesComplete() {
         boolean[] pausing = {true};
         final boolean hasActivityNotCompleted = forAllLeafTasks(task -> {
-            final ActivityRecord r = task.getPausingActivity();
+            final ActivityRecord r = task.getTopPausingActivity();
             if (r != null && !r.isState(PAUSED, STOPPED, STOPPING, FINISHING)) {
                 ProtoLog.d(WM_DEBUG_STATES, "allPausedActivitiesComplete: "
                         + "r=%s state=%s", r, r.getState());
@@ -3433,14 +3469,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         task.mTaskId, userId);
             }
         }, true /* traverseTopToBottom */);
-    }
-
-    void cancelInitializingActivities() {
-        forAllRootTasks(task -> {
-            // We don't want to clear starting window for activities that aren't occluded
-            // as we need to display their starting window until they are done initializing.
-            task.forAllOccludedActivities(ActivityRecord::cancelInitializing);
-        });
     }
 
     Task anyTaskForId(int id) {
@@ -3522,11 +3550,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return task;
     }
 
-    ActivityRecord isInAnyTask(IBinder token) {
-        final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-        return (r != null && r.isDescendantOf(this)) ? r : null;
-    }
-
     @VisibleForTesting
     void getRunningTasks(int maxNum, List<ActivityManager.RunningTaskInfo> list,
             int flags, int callingUid, ArraySet<Integer> profileIds) {
@@ -3535,14 +3558,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     void startPowerModeLaunchIfNeeded(boolean forceSend, ActivityRecord targetActivity) {
-        final boolean sendPowerModeLaunch;
-
-        if (forceSend) {
-            sendPowerModeLaunch = true;
-        } else if (targetActivity == null || targetActivity.app == null) {
-            // Set power mode if we don't know what we're launching yet.
-            sendPowerModeLaunch = true;
-        } else {
+        if (!forceSend && targetActivity != null && targetActivity.app != null) {
             // Set power mode when the activity's process is different than the current top resumed
             // activity on all display areas, or if there are no resumed activities in the system.
             boolean[] noResumedActivities = {true};
@@ -3558,15 +3574,32 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                             !resumedActivityProcess.equals(targetActivity.app);
                 }
             });
-            sendPowerModeLaunch = noResumedActivities[0] || allFocusedProcessesDiffer[0];
+            if (!noResumedActivities[0] && !allFocusedProcessesDiffer[0]) {
+                // All focused activities are resumed and the process of the target activity is
+                // the same as them, e.g. delivering new intent to the current top.
+                return;
+            }
         }
 
-        if (sendPowerModeLaunch) {
-            mService.startLaunchPowerMode(
-                    ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
+        int reason = ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY;
+        // If the activity is launching while keyguard is locked (including occluded), the activity
+        // may be visible until its first relayout is done (e.g. apply show-when-lock flag). To
+        // avoid power mode from being cleared before that, add a special reason to consider whether
+        // the unknown visibility is resolved. The case from SystemUI is excluded because it should
+        // rely on keyguard-going-away.
+        if (mService.mKeyguardController.isKeyguardLocked() && targetActivity != null
+                && !targetActivity.isLaunchSourceType(ActivityRecord.LAUNCH_SOURCE_TYPE_SYSTEMUI)) {
+            final ActivityOptions opts = targetActivity.getOptions();
+            if (opts == null || opts.getSourceInfo() == null
+                    || opts.getSourceInfo().type != ActivityOptions.SourceInfo.TYPE_LOCKSCREEN) {
+                reason |= ActivityTaskManagerService.POWER_MODE_REASON_UNKNOWN_VISIBILITY;
+            }
         }
+        mService.startLaunchPowerMode(reason);
     }
 
+    // TODO(b/191434136): handle this properly when we add multi-window support on secondary
+    //  display.
     private void calculateDefaultMinimalSizeOfResizeableTasks() {
         final Resources res = mService.mContext.getResources();
         final float minimalSize = res.getDimension(
@@ -3692,6 +3725,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         public String toString() {
             return "{\"" + mTag + "\", display " + mDisplayId
                     + ", acquire at " + TimeUtils.formatUptime(mAcquireTime) + "}";
+        }
+
+        void writeTagToProto(ProtoOutputStream proto, long fieldId) {
+            proto.write(fieldId, mTag);
         }
     }
 

@@ -79,7 +79,7 @@ message SecureSettingsProto {
         optional SettingProto accessibility_magnification_mode = 34 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto button_targets = 35 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_magnification_capability = 36 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        // Settings for accessibility button mode (navigation bar or floating action menu).
+        // Settings for accessibility button related config
         optional SettingProto accessibility_button_mode = 37 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_floating_menu_size = 38 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_floating_menu_icon_type = 39 [ (android.privacy).dest = DEST_AUTOMATIC ];

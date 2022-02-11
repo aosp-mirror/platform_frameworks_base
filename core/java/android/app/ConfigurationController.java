@@ -17,24 +17,20 @@
 package android.app;
 
 import static android.app.ActivityThread.DEBUG_CONFIGURATION;
+import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.HardwareRenderer;
-import android.inputmethodservice.InputMethodService;
-import android.os.Build;
 import android.os.LocaleList;
 import android.os.Trace;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.Slog;
 import android.view.ContextThemeWrapper;
 import android.view.WindowManagerGlobal;
@@ -158,9 +154,12 @@ class ConfigurationController {
         int configDiff;
         boolean equivalent;
 
+        // Get theme outside of synchronization to avoid nested lock.
+        final Resources.Theme systemTheme = mActivityThread.getSystemContext().getTheme();
+        final ContextImpl systemUiContext = mActivityThread.getSystemUiContextNoCreate();
+        final Resources.Theme systemUiTheme =
+                systemUiContext != null ? systemUiContext.getTheme() : null;
         synchronized (mResourcesManager) {
-            final Resources.Theme systemTheme = mActivityThread.getSystemContext().getTheme();
-            final Resources.Theme systemUiTheme = mActivityThread.getSystemUiContext().getTheme();
             if (mPendingConfiguration != null) {
                 if (!mPendingConfiguration.isOtherSeqNewer(config)) {
                     config = mPendingConfiguration;
@@ -169,12 +168,7 @@ class ConfigurationController {
                 mPendingConfiguration = null;
             }
 
-            final boolean hasIme = mActivityThread.hasImeComponent();
             if (config == null) {
-                // TODO (b/135719017): Temporary log for debugging IME service.
-                if (Build.IS_DEBUGGABLE && hasIme) {
-                    Log.w(TAG, "handleConfigurationChanged for IME app but config is null");
-                }
                 return;
             }
 
@@ -205,12 +199,6 @@ class ConfigurationController {
                 mConfiguration = new Configuration();
             }
             if (!mConfiguration.isOtherSeqNewer(config) && compat == null) {
-                // TODO (b/135719017): Temporary log for debugging IME service.
-                if (Build.IS_DEBUGGABLE && hasIme) {
-                    Log.w(TAG, "handleConfigurationChanged for IME app but config seq is obsolete "
-                            + ", config=" + config
-                            + ", mConfiguration=" + mConfiguration);
-                }
                 return;
             }
 
@@ -222,13 +210,14 @@ class ConfigurationController {
                 systemTheme.rebase();
             }
 
-            if ((systemUiTheme.getChangingConfigurations() & configDiff) != 0) {
+            if (systemUiTheme != null
+                    && (systemUiTheme.getChangingConfigurations() & configDiff) != 0) {
                 systemUiTheme.rebase();
             }
         }
 
         final ArrayList<ComponentCallbacks2> callbacks =
-                mActivityThread.collectComponentCallbacks(false /* includeActivities */);
+                mActivityThread.collectComponentCallbacks(false /* includeUiContexts */);
 
         freeTextLayoutCachesIfNeeded(configDiff);
 
@@ -238,13 +227,6 @@ class ConfigurationController {
                 ComponentCallbacks2 cb = callbacks.get(i);
                 if (!equivalent) {
                     performConfigurationChanged(cb, config);
-                } else {
-                    // TODO (b/135719017): Temporary log for debugging IME service.
-                    if (Build.IS_DEBUGGABLE && cb instanceof InputMethodService) {
-                        Log.w(TAG, "performConfigurationChanged didn't callback to IME "
-                                + ", configDiff=" + configDiff
-                                + ", mConfiguration=" + mConfiguration);
-                    }
                 }
             }
         }
@@ -326,16 +308,4 @@ class ConfigurationController {
         return newConfig;
     }
 
-    /** Ask test layout engine to free its caches if there is a locale change. */
-    static void freeTextLayoutCachesIfNeeded(int configDiff) {
-        if (configDiff != 0) {
-            boolean hasLocaleConfigChange = ((configDiff & ActivityInfo.CONFIG_LOCALE) != 0);
-            if (hasLocaleConfigChange) {
-                Canvas.freeTextLayoutCaches();
-                if (DEBUG_CONFIGURATION) {
-                    Slog.v(TAG, "Cleared TextLayout Caches");
-                }
-            }
-        }
-    }
 }

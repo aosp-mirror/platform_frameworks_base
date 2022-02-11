@@ -19,6 +19,9 @@ package com.android.server.am;
 import static android.Manifest.permission.INTERACT_ACROSS_PROFILES;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.app.ActivityManager.STOP_USER_ON_SWITCH_DEFAULT;
+import static android.app.ActivityManager.STOP_USER_ON_SWITCH_TRUE;
+import static android.app.ActivityManager.StopUserOnSwitch;
 import static android.app.ActivityManager.USER_OP_ERROR_IS_SYSTEM;
 import static android.app.ActivityManager.USER_OP_ERROR_RELATED_USERS_CANNOT_STOP;
 import static android.app.ActivityManager.USER_OP_IS_CURRENT;
@@ -368,6 +371,13 @@ class UserController implements Handler.Callback {
     @GuardedBy("mLock")
     private boolean mInitialized;
 
+    /**
+     * Defines the behavior of whether the background users should be stopped when the foreground
+     * user is switched.
+     */
+    @GuardedBy("mLock")
+    private @StopUserOnSwitch int mStopUserOnSwitch = STOP_USER_ON_SWITCH_DEFAULT;
+
     UserController(ActivityManagerService service) {
         this(new Injector(service));
     }
@@ -408,8 +418,31 @@ class UserController implements Handler.Callback {
         }
     }
 
-    private boolean shouldStopBackgroundUsersOnSwitch() {
-        int property = SystemProperties.getInt("fw.stop_bg_users_on_switch", -1);
+    void setStopUserOnSwitch(@StopUserOnSwitch int value) {
+        if (mInjector.checkCallingPermission(android.Manifest.permission.MANAGE_USERS)
+                == PackageManager.PERMISSION_DENIED && mInjector.checkCallingPermission(
+                android.Manifest.permission.INTERACT_ACROSS_USERS)
+                == PackageManager.PERMISSION_DENIED) {
+            throw new SecurityException(
+                    "You either need MANAGE_USERS or INTERACT_ACROSS_USERS permission to "
+                            + "call setStopUserOnSwitch()");
+        }
+
+        synchronized (mLock) {
+            Slogf.i(TAG, "setStopUserOnSwitch(): %d -> %d", mStopUserOnSwitch, value);
+            mStopUserOnSwitch = value;
+        }
+    }
+
+    private boolean shouldStopUserOnSwitch() {
+        synchronized (mLock) {
+            if (mStopUserOnSwitch != STOP_USER_ON_SWITCH_DEFAULT) {
+                final boolean value = mStopUserOnSwitch == STOP_USER_ON_SWITCH_TRUE;
+                Slogf.i(TAG, "shouldStopUserOnSwitch(): returning overridden value (%b)", value);
+                return value;
+            }
+        }
+        final int property = SystemProperties.getInt("fw.stop_bg_users_on_switch", -1);
         return property == -1 ? mDelayUserDataLocking : property == 1;
     }
 
@@ -1759,7 +1792,8 @@ class UserController implements Handler.Callback {
     private void showUserSwitchDialog(Pair<UserInfo, UserInfo> fromToUserPair) {
         // The dialog will show and then initiate the user switch by calling startUserInForeground
         mInjector.showUserSwitchingDialog(fromToUserPair.first, fromToUserPair.second,
-                getSwitchingFromSystemUserMessage(), getSwitchingToSystemUserMessage());
+                getSwitchingFromSystemUserMessageUnchecked(),
+                getSwitchingToSystemUserMessageUnchecked());
     }
 
     private void dispatchForegroundProfileChanged(@UserIdInt int userId) {
@@ -1799,7 +1833,7 @@ class UserController implements Handler.Callback {
         mUserSwitchObservers.finishBroadcast();
     }
 
-    private void stopBackgroundUsersOnSwitchIfEnforced(@UserIdInt int oldUserId) {
+    private void stopUserOnSwitchIfEnforced(@UserIdInt int oldUserId) {
         // Never stop system user
         if (oldUserId == UserHandle.USER_SYSTEM) {
             return;
@@ -1807,18 +1841,17 @@ class UserController implements Handler.Callback {
         boolean hasRestriction =
                 hasUserRestriction(UserManager.DISALLOW_RUN_IN_BACKGROUND, oldUserId);
         synchronized (mLock) {
-            // If running in background is disabled or mStopBackgroundUsersOnSwitch mode,
-            // stop the user.
-            boolean disallowRunInBg = hasRestriction || shouldStopBackgroundUsersOnSwitch();
+            // If running in background is disabled or mStopUserOnSwitch mode, stop the user.
+            boolean disallowRunInBg = hasRestriction || shouldStopUserOnSwitch();
             if (!disallowRunInBg) {
                 if (DEBUG_MU) {
-                    Slogf.i(TAG, "stopBackgroundUsersIfEnforced() NOT stopping %d and related "
-                            + "users", oldUserId);
+                    Slogf.i(TAG, "stopUserOnSwitchIfEnforced() NOT stopping %d and related users",
+                            oldUserId);
                 }
                 return;
             }
             if (DEBUG_MU) {
-                Slogf.i(TAG, "stopBackgroundUsersIfEnforced() stopping %d and related users",
+                Slogf.i(TAG, "stopUserOnSwitchIfEnforced() stopping %d and related users",
                         oldUserId);
             }
             stopUsersLU(oldUserId, /* force= */ false, /* allowDelayedLocking= */ true,
@@ -1921,7 +1954,7 @@ class UserController implements Handler.Callback {
         mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);
         mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_COMPLETE_MSG, newUserId, 0));
         stopGuestOrEphemeralUserIfBackground(oldUserId);
-        stopBackgroundUsersOnSwitchIfEnforced(oldUserId);
+        stopUserOnSwitchIfEnforced(oldUserId);
     }
 
     private void moveUserToForeground(UserState uss, int oldUserId, int newUserId) {
@@ -2532,15 +2565,37 @@ class UserController implements Handler.Callback {
         }
     }
 
-    private String getSwitchingFromSystemUserMessage() {
+    // Called by AMS, must check permission
+    String getSwitchingFromSystemUserMessage() {
+        checkHasManageUsersPermission("getSwitchingFromSystemUserMessage()");
+
+        return getSwitchingFromSystemUserMessageUnchecked();
+    }
+
+    // Called by AMS, must check permission
+    String getSwitchingToSystemUserMessage() {
+        checkHasManageUsersPermission("getSwitchingToSystemUserMessage()");
+
+        return getSwitchingToSystemUserMessageUnchecked();
+    }
+
+    private String getSwitchingFromSystemUserMessageUnchecked() {
         synchronized (mLock) {
             return mSwitchingFromSystemUserMessage;
         }
     }
 
-    private String getSwitchingToSystemUserMessage() {
+    private String getSwitchingToSystemUserMessageUnchecked() {
         synchronized (mLock) {
             return mSwitchingToSystemUserMessage;
+        }
+    }
+
+    private void checkHasManageUsersPermission(String operation) {
+        if (mInjector.checkCallingPermission(
+                android.Manifest.permission.MANAGE_USERS) == PackageManager.PERMISSION_DENIED) {
+            throw new SecurityException(
+                    "You need MANAGE_USERS permission to call " + operation);
         }
     }
 
@@ -2611,11 +2666,17 @@ class UserController implements Handler.Callback {
             pw.println("  mTargetUserId:" + mTargetUserId);
             pw.println("  mLastActiveUsers:" + mLastActiveUsers);
             pw.println("  mDelayUserDataLocking:" + mDelayUserDataLocking);
-            pw.println("  shouldStopBackgroundUsersOnSwitch:"
-                    + shouldStopBackgroundUsersOnSwitch());
+            pw.println("  shouldStopUserOnSwitch():" + shouldStopUserOnSwitch());
+            pw.println("  mStopUserOnSwitch:" + mStopUserOnSwitch);
             pw.println("  mMaxRunningUsers:" + mMaxRunningUsers);
             pw.println("  mUserSwitchUiEnabled:" + mUserSwitchUiEnabled);
             pw.println("  mInitialized:" + mInitialized);
+            if (mSwitchingFromSystemUserMessage != null) {
+                pw.println("  mSwitchingFromSystemUserMessage: " + mSwitchingFromSystemUserMessage);
+            }
+            if (mSwitchingToSystemUserMessage != null) {
+                pw.println("  mSwitchingToSystemUserMessage: " + mSwitchingToSystemUserMessage);
+            }
         }
     }
 

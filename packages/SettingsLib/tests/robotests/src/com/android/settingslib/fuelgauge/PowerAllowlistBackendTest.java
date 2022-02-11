@@ -151,4 +151,14 @@ public class PowerAllowlistBackendTest {
         assertThat(mPowerAllowlistBackend.isSysAllowlisted(PACKAGE_TWO)).isFalse();
         assertThat(mPowerAllowlistBackend.isAllowlisted(PACKAGE_ONE)).isFalse();
     }
+
+    @Test
+    public void testIsPowerSaveWhitelistExceptIdleApp() throws Exception {
+        doReturn(true).when(mDeviceIdleService)
+                .isPowerSaveWhitelistExceptIdleApp(PACKAGE_ONE);
+
+        mPowerAllowlistBackend.refreshList();
+
+        assertThat(mPowerAllowlistBackend.isAllowlistedExceptIdle(PACKAGE_ONE)).isTrue();
+    }
 }

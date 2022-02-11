@@ -124,7 +124,8 @@ public:
             const std::function<bool(int64_t, int64_t, int64_t)>& callback);
     void setPrepareSurfaceControlForWebviewCallback(const std::function<void()>& callback);
     void setFrameCallback(std::function<void(int64_t)>&& callback);
-    void setFrameCompleteCallback(std::function<void(int64_t)>&& callback);
+    void setFrameCommitCallback(std::function<void(bool)>&& callback);
+    void setFrameCompleteCallback(std::function<void()>&& callback);
 
     void addFrameMetricsObserver(FrameMetricsObserver* observer);
     void removeFrameMetricsObserver(FrameMetricsObserver* observer);

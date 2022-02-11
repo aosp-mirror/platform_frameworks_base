@@ -44,6 +44,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 
 /**
  * Base dialog for media output UI
@@ -52,6 +53,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         MediaOutputController.Callback, Window.Callback {
 
     private static final String TAG = "MediaOutputDialog";
+    private static final String EMPTY_TITLE = " ";
 
     private final Handler mMainThreadHandler = new Handler(Looper.getMainLooper());
     private final RecyclerView.LayoutManager mLayoutManager;
@@ -63,12 +65,13 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     View mDialogView;
     private TextView mHeaderTitle;
     private TextView mHeaderSubtitle;
-    private ImageView mHeaderIcon;
     private RecyclerView mDevicesRecyclerView;
     private LinearLayout mDeviceListLayout;
     private Button mDoneButton;
     private Button mStopButton;
     private int mListMaxHeight;
+
+    protected ImageView mHeaderIcon;
 
     MediaOutputBaseAdapter mAdapter;
 
@@ -81,9 +84,12 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         }
     };
 
-    public MediaOutputBaseDialog(Context context, MediaOutputController mediaOutputController) {
-        super(context, R.style.Theme_SystemUI_Dialog_MediaOutput);
-        mContext = context;
+    public MediaOutputBaseDialog(Context context, MediaOutputController mediaOutputController,
+            SystemUIDialogManager dialogManager) {
+        super(context, dialogManager);
+
+        // Save the context that is wrapped with our theme.
+        mContext = getContext();
         mMediaOutputController = mediaOutputController;
         mLayoutManager = new LinearLayoutManager(mContext);
         mListMaxHeight = context.getResources().getDimensionPixelSize(
@@ -97,15 +103,16 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mDialogView = LayoutInflater.from(mContext).inflate(R.layout.media_output_dialog, null);
         final Window window = getWindow();
         final WindowManager.LayoutParams lp = window.getAttributes();
-        lp.gravity = Gravity.BOTTOM;
+        lp.gravity = Gravity.CENTER;
         // Config insets to make sure the layout is above the navigation bar
         lp.setFitInsetsTypes(statusBars() | navigationBars());
         lp.setFitInsetsSides(WindowInsets.Side.all());
         lp.setFitInsetsIgnoringVisibility(true);
         window.setAttributes(lp);
         window.setContentView(mDialogView);
-        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        window.setWindowAnimations(R.style.Animation_MediaOutputDialog);
+        // Sets window to a blank string to avoid talkback announce app label first when pop up,
+        // which doesn't make sense.
+        window.setTitle(EMPTY_TITLE);
 
         mHeaderTitle = mDialogView.requireViewById(R.id.header_title);
         mHeaderSubtitle = mDialogView.requireViewById(R.id.header_subtitle);
@@ -142,7 +149,6 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         mMediaOutputController.stop();
     }
 
-    @VisibleForTesting
     void refresh() {
         // Update header icon
         final int iconRes = getHeaderIconRes();
@@ -155,12 +161,6 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             mHeaderIcon.setImageIcon(iconCompat.toIcon(mContext));
         } else {
             mHeaderIcon.setVisibility(View.GONE);
-        }
-        if (mHeaderIcon.getVisibility() == View.VISIBLE) {
-            final int size = getHeaderIconSize();
-            final int padding = mContext.getResources().getDimensionPixelSize(
-                    R.dimen.media_output_dialog_header_icon_padding);
-            mHeaderIcon.setLayoutParams(new LinearLayout.LayoutParams(size + padding, size));
         }
         // Update title and subtitle
         mHeaderTitle.setText(getHeaderText());
@@ -175,7 +175,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         }
         if (!mAdapter.isDragging() && !mAdapter.isAnimating()) {
             int currentActivePosition = mAdapter.getCurrentActivePosition();
-            if (currentActivePosition >= 0) {
+            if (currentActivePosition >= 0 && currentActivePosition < mAdapter.getItemCount()) {
                 mAdapter.notifyItemChanged(currentActivePosition);
             } else {
                 mAdapter.notifyDataSetChanged();
@@ -219,14 +219,10 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         dismiss();
     }
 
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (!hasFocus && isShowing()) {
-            dismiss();
-        }
+    void onHeaderIconClick() {
     }
 
-    void onHeaderIconClick() {
+    View getDialogView() {
+        return mDialogView;
     }
 }

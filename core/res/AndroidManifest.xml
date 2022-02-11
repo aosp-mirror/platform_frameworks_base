@@ -4906,6 +4906,18 @@
     <permission android:name="android.permission.WRITE_SETTINGS_HOMEPAGE_DATA"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- An application needs this permission for
+         {@link android.provider.Settings#ACTION_SETTINGS_EMBED_DEEP_LINK_ACTIVITY} to show its
+         {@link android.app.Activity} embedded in Settings app. -->
+    <permission android:name="android.permission.LAUNCH_MULTI_PANE_SETTINGS_DEEP_LINK"
+                android:protectionLevel="signature|preinstalled" />
+
+    <!-- @SystemApi {@link android.app.Activity} should require this permission to ensure that only
+         the settings app can embed it in a multi pane window.
+         @hide -->
+    <permission android:name="android.permission.ALLOW_PLACE_IN_MULTI_PANE_SETTINGS"
+                android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows applications to set a live wallpaper.
          @hide XXX Change to signature once the picker is moved to its
          own apk as Ghod Intended. -->
@@ -5710,6 +5722,10 @@
     <!-- Allows input events to be monitored. Very dangerous!  @hide -->
     <permission android:name="android.permission.MONITOR_INPUT"
                 android:protectionLevel="signature|recents" />
+    <!-- Allows the use of FLAG_SLIPPERY, which permits touch events to slip from the current
+         window to the window where the touch currently is on top of.  @hide -->
+    <permission android:name="android.permission.ALLOW_SLIPPERY_TOUCHES"
+                android:protectionLevel="signature|recents" />
     <!--  Allows the caller to change the associations between input devices and displays.
         Very dangerous! @hide -->
     <permission android:name="android.permission.ASSOCIATE_INPUT_DEVICE_TO_DISPLAY"
@@ -5908,7 +5924,6 @@
                   android:excludeFromRecents="true"
                   android:documentLaunchMode="never"
                   android:relinquishTaskIdentity="true"
-                  android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
                   android:process=":ui"
                   android:visibleToInstantApps="true">
             <intent-filter>

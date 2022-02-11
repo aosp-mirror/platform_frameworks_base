@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -26,7 +27,9 @@ import android.app.Instrumentation;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
+import android.os.IBinder;
 import android.os.SystemClock;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
@@ -42,6 +45,8 @@ import org.junit.runner.RunWith;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Build/Install/Run:
@@ -68,6 +73,12 @@ public final class ServiceRestarterTest {
     private static final int ACTION_WAIT = 4;
     private static final int ACTION_STOPPKG = 8;
     private static final int ACTION_ALL = ACTION_START | ACTION_KILL | ACTION_WAIT | ACTION_STOPPKG;
+
+    private static final String LOCAL_APK_BASE_PATH = "/data/local/tmp/cts/content/";
+    private static final String TEST_PACKAGE3_APK = "SimpleServiceTestApp3.apk";
+    private static final String ACTION_SERVICE_WITH_DEP_PKG =
+            "com.android.servicestests.apps.simpleservicetestapp.ACTION_SERVICE_WITH_DEP_PKG";
+    private static final String EXTRA_TARGET_PACKAGE = "target_package";
 
     private Context mContext;
     private Instrumentation mInstrumentation;
@@ -197,6 +208,83 @@ public final class ServiceRestarterTest {
                     uid3Listener2.waitFor(RunningAppProcessInfo.IMPORTANCE_GONE, WAIT_MS));
         }
         return res;
+    }
+
+    @Test
+    public void testServiceWithDepPkgStopped() throws Exception {
+        final CountDownLatch[] latchHolder = new CountDownLatch[1];
+        final ServiceConnection conn = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                latchHolder[0].countDown();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                latchHolder[0].countDown();
+            }
+        };
+
+        final long timeout = 5_000;
+        final long shortTimeout = 2_000;
+        final Intent intent = new Intent(ACTION_SERVICE_WITH_DEP_PKG);
+        final String testPkg = TEST_PACKAGE2_NAME;
+        final String libPkg = TEST_PACKAGE3_NAME;
+        final String apkPath = LOCAL_APK_BASE_PATH + TEST_PACKAGE3_APK;
+        final ActivityManager am = mContext.getSystemService(ActivityManager.class);
+
+        intent.setComponent(ComponentName.unflattenFromString(testPkg + "/" + TEST_SERVICE_NAME));
+        intent.putExtra(EXTRA_TARGET_PACKAGE, libPkg);
+        try {
+            executeShellCmd("am service-restart-backoff disable " + testPkg);
+
+            latchHolder[0] = new CountDownLatch(1);
+            assertTrue("Unable to bind to test service in " + testPkg,
+                    mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE));
+            assertTrue("Timed out to bind service in " + testPkg,
+                    latchHolder[0].await(timeout, TimeUnit.MILLISECONDS));
+
+            Thread.sleep(shortTimeout);
+            assertTrue(libPkg + " should be a dependency package of " + testPkg,
+                    isPackageDependency(testPkg, libPkg));
+
+            // Force-stop lib package, the test service should be restarted.
+            latchHolder[0] = new CountDownLatch(2);
+            am.forceStopPackage(libPkg);
+            assertTrue("Test service in didn't restart in " + testPkg,
+                    latchHolder[0].await(timeout, TimeUnit.MILLISECONDS));
+
+            Thread.sleep(shortTimeout);
+
+            // Re-install the lib package, the test service should be restarted.
+            latchHolder[0] = new CountDownLatch(2);
+            assertTrue("Unable to install package " + apkPath, installPackage(apkPath));
+            assertTrue("Test service in didn't restart in " + testPkg,
+                    latchHolder[0].await(timeout, TimeUnit.MILLISECONDS));
+
+            Thread.sleep(shortTimeout);
+
+            // Force-stop the service package, the test service should not be restarted.
+            latchHolder[0] = new CountDownLatch(2);
+            am.forceStopPackage(testPkg);
+            assertFalse("Test service should not be restarted in " + testPkg,
+                    latchHolder[0].await(timeout * 2, TimeUnit.MILLISECONDS));
+        } finally {
+            executeShellCmd("am service-restart-backoff enable " + testPkg);
+            mContext.unbindService(conn);
+            am.forceStopPackage(testPkg);
+        }
+    }
+
+    private boolean isPackageDependency(String pkgName, String libPackage) throws Exception {
+        final String output = SystemUtil.runShellCommand("dumpsys activity processes " + pkgName);
+        final Matcher matcher = Pattern.compile("packageDependencies=\\{.*?\\b"
+                + libPackage + "\\b.*?\\}").matcher(output);
+        return matcher.find();
+    }
+
+    private boolean installPackage(String apkPath) throws Exception {
+        return executeShellCmd("pm install -t " + apkPath).equals("Success\n");
     }
 
     private void startServiceAndWait(String pkgName, MyUidImportanceListener uidListener,

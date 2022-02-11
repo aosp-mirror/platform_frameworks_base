@@ -34,6 +34,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 
 import java.io.FileDescriptor;
@@ -100,14 +101,19 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     /**
      */
     @Inject
-    public KeyguardStateControllerImpl(Context context,
-            KeyguardUpdateMonitor keyguardUpdateMonitor, LockPatternUtils lockPatternUtils,
-            SmartspaceTransitionController smartspaceTransitionController) {
+    public KeyguardStateControllerImpl(
+            Context context,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            LockPatternUtils lockPatternUtils,
+            SmartspaceTransitionController smartspaceTransitionController,
+            DumpManager dumpManager) {
         mContext = context;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mKeyguardUpdateMonitor.registerCallback(mKeyguardUpdateMonitorCallback);
         mSmartspaceTransitionController = smartspaceTransitionController;
+
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
 
         update(true /* updateAlways */);
         if (Build.IS_DEBUGGABLE && DEBUG_AUTH_WITH_ADB) {

@@ -328,6 +328,12 @@ public final class TelephonyPermissions {
         return checkPrivilegedReadPermissionOrCarrierPrivilegePermission(
                 context, subId, callingPackage, callingFeatureId, message, false, reportFailure);
     }
+
+    private static void throwSecurityExceptionAsUidDoesNotHaveAccess(String message, int uid) {
+        throw new SecurityException(message + ": The uid " + uid
+                + " does not meet the requirements to access device identifiers.");
+    }
+
     /**
      * Checks whether the app with the given pid/uid can read device identifiers.
      *
@@ -363,9 +369,14 @@ public final class TelephonyPermissions {
 
         LegacyPermissionManager permissionManager = (LegacyPermissionManager)
                 context.getSystemService(Context.LEGACY_PERMISSION_SERVICE);
-        if (permissionManager.checkDeviceIdentifierAccess(callingPackage, message, callingFeatureId,
-                pid, uid) == PackageManager.PERMISSION_GRANTED) {
-            return true;
+        try {
+            if (permissionManager.checkDeviceIdentifierAccess(callingPackage, message,
+                    callingFeatureId,
+                    pid, uid) == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            }
+        } catch (SecurityException se) {
+            throwSecurityExceptionAsUidDoesNotHaveAccess(message, uid);
         }
 
         if (reportFailure) {
@@ -430,8 +441,8 @@ public final class TelephonyPermissions {
                 return false;
             }
         }
-        throw new SecurityException(message + ": The user " + uid
-                + " does not meet the requirements to access device identifiers.");
+        throwSecurityExceptionAsUidDoesNotHaveAccess(message, uid);
+        return true;
     }
 
     /**

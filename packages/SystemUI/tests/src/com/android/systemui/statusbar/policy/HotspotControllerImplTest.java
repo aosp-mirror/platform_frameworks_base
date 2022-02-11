@@ -37,6 +37,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,6 +57,8 @@ import java.util.concurrent.Executor;
 @TestableLooper.RunWithLooper
 public class HotspotControllerImplTest extends SysuiTestCase {
 
+    @Mock
+    private DumpManager mDumpManager;
     @Mock
     private TetheringManager mTetheringManager;
     @Mock
@@ -95,7 +98,7 @@ public class HotspotControllerImplTest extends SysuiTestCase {
 
         Handler handler = new Handler(mLooper.getLooper());
 
-        mController = new HotspotControllerImpl(mContext, handler, handler);
+        mController = new HotspotControllerImpl(mContext, handler, handler, mDumpManager);
         verify(mTetheringManager)
                 .registerTetheringEventCallback(any(), mTetheringCallbackCaptor.capture());
     }

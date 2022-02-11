@@ -20,14 +20,6 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources>
-    <!-- Whether to clip notification contents with a rounded rectangle. Might be expensive on
-         certain GPU's and thus can be turned off with only minimal visual impact. -->
-    <bool name="config_notifications_round_rect_clipping">true</bool>
-
-    <!-- Component to be used as the status bar service.  Must implement the IStatusBar
-     interface.  This name is in the ComponentName flattened format (package/class)  -->
-    <string name="config_statusBarComponent" translatable="false">com.android.systemui.statusbar.phone.StatusBar</string>
-
     <!-- Component to be used as the recents implementation.  Must implement the
      RecentsImplementation interface.  This name is in the ComponentName flattened format
      (package/class)  -->
@@ -45,30 +37,11 @@
         <item>400</item>
     </integer-array>
 
-    <!-- How many icons may be shown at once in the system bar. Includes any
-         slots that may be reused for things like IME control. -->
-    <integer name="config_maxNotificationIcons">5</integer>
-
-    <!-- Show phone (voice) signal strength instead of data in mobile RSSI. -->
-    <bool name="config_showPhoneRSSIForData">false</bool>
-
-    <!-- Show rotation lock toggle in System UI-->
-    <bool name="config_showRotationLock">true</bool>
-
-    <!-- Vibration duration for GlowPadView used in SearchPanelView -->
-    <integer translatable="false" name="config_vibration_duration">0</integer>
-
-    <!-- Vibration duration for GlowPadView used in SearchPanelView -->
-    <integer translatable="false" name="config_search_panel_view_vibration_duration">20</integer>
-
     <!-- Show mic or phone affordance on Keyguard -->
     <bool name="config_keyguardShowLeftAffordance">false</bool>
 
     <!-- Show camera affordance on Keyguard -->
     <bool name="config_keyguardShowCameraAffordance">false</bool>
-
-    <!-- The length of the vibration when the notification pops open. -->
-    <integer name="one_finger_pop_duration_ms">10</integer>
 
     <!-- decay duration (from size_max -> size), in ms -->
     <integer name="navigation_bar_deadzone_hold">333</integer>
@@ -86,7 +59,10 @@
     <bool name="config_navigation_bar_enable_auto_dim_no_visible_wallpaper">true</bool>
 
     <!-- The maximum number of tiles in the QuickQSPanel -->
-    <integer name="quick_qs_panel_max_columns">4</integer>
+    <integer name="quick_qs_panel_max_tiles">4</integer>
+
+    <!-- The maximum number of rows in the QuickQSPanel -->
+    <integer name="quick_qs_panel_max_rows">2</integer>
 
     <!-- The number of columns in the QuickSettings -->
     <integer name="quick_settings_num_columns">2</integer>
@@ -95,7 +71,6 @@
     <integer name="quick_settings_max_rows">4</integer>
 
     <!-- The number of columns that the top level tiles span in the QuickSettings -->
-    <integer name="quick_settings_user_time_settings_tile_span">1</integer>
 
     <!-- The default tiles to display in QuickSettings -->
     <string name="quick_settings_tiles_default" translatable="false">
@@ -125,13 +100,6 @@
         <item>accessibility_display_inversion_enabled:inversion</item>
     </string-array>
 
-    <!-- Whether or not the RSSI tile is capitalized or not. -->
-    <bool name="quick_settings_rssi_tile_capitalization">true</bool>
-
-    <!-- Timeouts for brightness dialog to disappear -->
-    <integer name="quick_settings_brightness_dialog_short_timeout">2000</integer>
-    <integer name="quick_settings_brightness_dialog_long_timeout">4000</integer>
-
     <!-- Show indicator for Wifi on but not connected. -->
     <bool name="config_showWifiIndicatorWhenEnabled">false</bool>
 
@@ -159,11 +127,7 @@
 
     <!-- The maximum count of notifications on Keyguard. The rest will be collapsed in an overflow
      card. -->
-    <integer name="keyguard_max_notification_count">3</integer>
-
-    <!-- Defines the implementation of the velocity tracker to be used for the panel expansion. Can
-         be 'platform' or 'noisy' (i.e. for noisy touch screens). -->
-    <string name="velocity_tracker_impl" translatable="false">platform</string>
+    <integer name="keyguard_max_notification_count">-1</integer>
 
     <!-- Doze: does this device support STATE_DOZE?  -->
     <bool name="doze_display_state_supported">false</bool>
@@ -188,14 +152,20 @@
      low powered state yet. -->
     <bool name="doze_single_tap_uses_prox">true</bool>
 
+    <!-- Doze: whether the single tap sensor uses the proximity sensor in the given posture.
+        See doze_single_tap_uses_prox for usage. -->
+    <integer-array name="doze_single_tap_uses_prox_posture_mapping">
+        <item>1</item> <!-- UNKNOWN -->
+        <item>1</item> <!-- CLOSED -->
+        <item>1</item> <!-- HALF_OPENED -->
+        <item>1</item> <!-- OPENED -->
+    </integer-array>
+
     <!-- Doze: whether the long press sensor uses the proximity sensor.
      If both this parameter and doze_selectively_register_prox are true, registration for the
      sensor will be delayed when the device first enters dozing but the device has not entered its
      low powered state yet. -->
     <bool name="doze_long_press_uses_prox">true</bool>
-
-    <!-- Doze: should notifications be used as a pulse signal? -->
-    <bool name="doze_pulse_on_notifications">true</bool>
 
     <!-- Doze: duration to avoid false pickup gestures triggered by notification vibrations -->
     <integer name="doze_pickup_vibration_threshold">2000</integer>
@@ -208,8 +178,26 @@
          always-on display) -->
     <string name="doze_brightness_sensor_type" translatable="false"></string>
 
+    <!-- Name of a sensor per posture state that provides a low-power estimate of the desired
+         display brightness, suitable to listen to while the device is asleep (e.g. during
+         always-on display) -->
+    <string-array name="doze_brightness_sensor_name_posture_mapping" translatable="false">
+        <!-- UNKNOWN -->
+        <!-- CLOSED -->
+        <!-- HALF_OPENED -->
+        <!-- OPENED -->
+    </string-array>
+
     <!-- Override value to use for proximity sensor.  -->
     <string name="proximity_sensor_type" translatable="false"></string>
+
+    <!-- Sensor type per posture state to use for proximity sensor -->
+    <string-array name="proximity_sensor_posture_mapping" translatable="false">
+        <!-- UNKNOWN -->
+        <!-- CLOSED -->
+        <!-- HALF_OPENED -->
+        <!-- OPENED -->
+    </string-array>
 
     <!-- If using proximity_sensor_type, specifies a threshold value to distinguish near and
          far break points. A sensor value less than this is considered "near". -->
@@ -223,6 +211,15 @@
 
     <!-- Override value to use for proximity sensor as confirmation for proximity_sensor_type. -->
     <string name="proximity_sensor_secondary_type" translatable="false"></string>
+
+    <!-- Sensor type per posture state to use for proximity sensor as a confirmation for
+        proximity_sensor_type. -->
+    <string-array name="proximity_sensor_secondary_posture_mapping" translatable="false">
+        <!-- UNKNOWN -->
+        <!-- CLOSED -->
+        <!-- HALF_OPENED -->
+        <!-- OPENED -->
+    </string-array>
 
     <!-- If using proximity_sensor_secondary_type, specifies a threshold value to distinguish
          near and far break points. A sensor value less than this is considered "near". -->
@@ -272,17 +269,8 @@
     <!-- Doze: whether the double tap sensor reports 2D touch coordinates -->
     <bool name="doze_double_tap_reports_touch_coordinates">false</bool>
 
-    <!-- Hotspot tile: number of days to show after feature is used. -->
-    <integer name="days_to_show_hotspot_tile">30</integer>
-
-    <!-- Color inversion tile: number of days to show after feature is used. -->
-    <integer name="days_to_show_color_inversion_tile">7</integer>
-
     <!-- Number of times to show the strong alarm warning text in the volume dialog -->
     <integer name="zen_mode_alarm_warning_threshold">5</integer>
-
-    <!-- Maximum number of total conditions to display in the zen mode selection panel -->
-    <integer name="zen_mode_max_conditions">5</integer>
 
     <!-- Enable the default volume dialog -->
     <bool name="enable_volume_ui">true</bool>
@@ -292,12 +280,6 @@
 
     <!-- Whether to show operator name in the status bar -->
     <bool name="config_showOperatorNameInStatusBar">false</bool>
-
-    <!-- Duration of the full carrier network change icon animation. -->
-    <integer name="carrier_network_change_anim_time">3000</integer>
-
-    <!-- Duration of the expansion animation in the volume dialog -->
-    <item name="volume_expand_animation_duration" type="integer">300</item>
 
     <!-- Whether to show the full screen user switcher. -->
     <bool name="config_enableFullscreenUserSwitcher">false</bool>
@@ -354,18 +336,11 @@
     <string name="config_navBarLayoutQuickstep" translatable="false">back[1.7WC];home;contextual[1.7WC]</string>
     <string name="config_navBarLayoutHandle" translatable="false">back[70AC];home_handle;ime_switcher[70AC]</string>
 
-    <bool name="quick_settings_show_full_alarm">false</bool>
-
     <!-- Whether to show a warning notification when device's skin temperature is high. -->
     <integer name="config_showTemperatureWarning">0</integer>
 
     <!-- Whether to show a alarm dialog when device's usb port is overheating. -->
     <integer name="config_showUsbPortAlarm">0</integer>
-
-    <!-- Accessibility actions -->
-    <item type="id" name="action_split_task_to_left" />
-    <item type="id" name="action_split_task_to_right" />
-    <item type="id" name="action_split_task_to_top" />
 
     <item type="id" name="action_toggle_overview"/>
 
@@ -445,11 +420,6 @@
     <!-- Notifications are sized to match the width of two (of 4) qs tiles in landscape. -->
     <bool name="config_skinnyNotifsInLandscape">true</bool>
 
-    <!-- If true, enable the advance anti-falsing classifier on the lockscreen. On some devices it
-         does not work well, particularly with noisy touchscreens. Note that disabling it may
-         increase the rate of unintentional unlocks. -->
-    <bool name="config_lockscreenAntiFalsingClassifierEnabled">true</bool>
-
     <!-- Snooze: default notificaiton snooze time. -->
     <integer name="config_notification_snooze_time_default">60</integer>
 
@@ -506,8 +476,6 @@
         <item>com.android.systemui</item>
     </string-array>
 
-    <integer name="ongoing_appops_dialog_max_apps">5</integer>
-
     <!-- Launcher package name for overlaying icons. -->
     <string name="launcher_overlayable_package" translatable="false">com.android.launcher3</string>
 
@@ -526,9 +494,6 @@
 
     <!-- Preferred max refresh rate at keyguard, if supported by the display. -->
     <integer name="config_keyguardMaxRefreshRate">-1</integer>
-
-    <!-- Whether or not to add a "people" notifications section -->
-    <bool name="config_usePeopleFiltering">false</bool>
 
     <!-- Defines system icons to be excluded from the display. That is to say, the icons in the
          status bar that are part of this list are never displayed. Each item in the list must be a
@@ -576,8 +541,6 @@
     <!-- Max number of columns for quick controls area -->
     <integer name="controls_max_columns">2</integer>
 
-    <!-- Max number of columns for power menu -->
-    <integer name="power_menu_max_columns">3</integer>
     <!-- Max number of columns for power menu lite -->
     <integer name="power_menu_lite_max_columns">2</integer>
     <!-- Max number of rows for power menu lite -->
@@ -606,19 +569,11 @@
     <!-- content URL in a notification when ACTION_BATTERY_CHANGED.EXTRA_PRESENT field is false -->
     <string translatable="false" name="config_batteryStateUnknownUrl"></string>
 
-    <!-- Whether wallet view is shown in landscape / seascape orientations -->
-    <bool name="global_actions_show_landscape_wallet_view">false</bool>
-    <!-- Whether global actions should show an informational message about changes in S -->
-    <bool name="global_actions_show_change_info">false</bool>
-
     <!-- Package name of the preferred system app to perform eSOS action -->
     <string name="config_preferredEmergencySosPackage" translatable="false"></string>
 
     <!-- Whether to use the split 2-column notification shade -->
     <bool name="config_use_split_notification_shade">false</bool>
-
-    <!-- Determines whether the shell features all run on another thread. -->
-    <bool name="config_enableShellMainThread">false</bool>
 
     <!-- Default udfps icon. Same path as ic_fingerprint.xml -->
     <string name="config_udfpsIcon" translatable="false">
@@ -670,4 +625,43 @@
          1 - Override the setting to always bypass keyguard
          2 - Override the setting to never bypass keyguard -->
     <integer name="config_face_unlock_bypass_override">0</integer>
+
+    <!-- Flag to activate notification to contents feature -->
+    <bool name="config_notificationToContents">false</bool>
+
+    <!-- Respect drawable/rounded_secondary.xml intrinsic size for multiple radius corner path
+         customization for secondary display-->
+    <bool name="config_roundedCornerMultipleRadiusSecondary">false</bool>
+
+    <!-- Whether the rounded corners are multiple radius for each display in a multi-display device.
+         {@see com.android.internal.R.array#config_displayUniqueIdArray} -->
+    <array name="config_roundedCornerMultipleRadiusArray">
+        <item>@bool/config_roundedCornerMultipleRadius</item>
+        <item>@bool/config_roundedCornerMultipleRadiusSecondary</item>
+    </array>
+
+    <!-- The rounded corner drawable for each display in a multi-display device.
+         {@see com.android.internal.R.array#config_displayUniqueIdArray} -->
+    <array name="config_roundedCornerDrawableArray">
+        <item>@drawable/rounded</item>
+        <item>@drawable/rounded_secondary</item>
+    </array>
+
+    <!-- The top rounded corner drawable for each display in a multi-display device.
+         {@see com.android.internal.R.array#config_displayUniqueIdArray} -->
+    <array name="config_roundedCornerTopDrawableArray">
+        <item>@drawable/rounded_corner_top</item>
+        <item>@drawable/rounded_corner_top_secondary</item>
+    </array>
+
+    <!-- The bottom rounded corner drawable for each display in a multi-display device.
+         {@see com.android.internal.R.array#config_displayUniqueIdArray} -->
+    <array name="config_roundedCornerBottomDrawableArray">
+        <item>@drawable/rounded_corner_bottom</item>
+        <item>@drawable/rounded_corner_bottom_secondary</item>
+    </array>
+
+    <!-- Flag to enable privacy dot views, it shall be true for normal case -->
+    <bool name="config_enablePrivacyDot">true</bool>
+
 </resources>

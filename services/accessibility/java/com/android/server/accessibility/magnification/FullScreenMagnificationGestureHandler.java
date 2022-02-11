@@ -61,6 +61,7 @@ import android.view.ViewConfiguration;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.accessibility.AccessibilityManagerService;
+import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.gestures.GestureUtils;
 
 /**
@@ -142,12 +143,13 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
     public FullScreenMagnificationGestureHandler(@UiContext Context context,
             FullScreenMagnificationController fullScreenMagnificationController,
+            AccessibilityTraceManager trace,
             Callback callback,
             boolean detectTripleTap,
             boolean detectShortcutTrigger,
             @NonNull WindowMagnificationPromptController promptController,
             int displayId) {
-        super(displayId, detectTripleTap, detectShortcutTrigger, callback);
+        super(displayId, detectTripleTap, detectShortcutTrigger, trace, callback);
         if (DEBUG_ALL) {
             Log.i(mLogTag,
                     "FullScreenMagnificationGestureHandler(detectTripleTap = " + detectTripleTap

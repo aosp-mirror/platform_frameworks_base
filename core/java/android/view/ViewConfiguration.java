@@ -433,9 +433,8 @@ public class ViewConfiguration {
         mAmbiguousGestureMultiplier = Math.max(1.0f, multiplierValue.getFloat());
 
         // Size of the screen in bytes, in ARGB_8888 format
-        final WindowManager windowManager = context.getSystemService(WindowManager.class);
-        final Rect maxWindowBounds = windowManager.getMaximumWindowMetrics().getBounds();
-        mMaximumDrawingCacheSize = 4 * maxWindowBounds.width() * maxWindowBounds.height();
+        final Rect maxBounds = config.windowConfiguration.getMaxBounds();
+        mMaximumDrawingCacheSize = 4 * maxBounds.width() * maxBounds.height();
 
         mOverscrollDistance = (int) (sizeAndDensity * OVERSCROLL_DISTANCE + 0.5f);
         mOverflingDistance = (int) (sizeAndDensity * OVERFLING_DISTANCE + 0.5f);

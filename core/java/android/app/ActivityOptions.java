@@ -26,6 +26,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ExitTransitionCoordinator.ActivityExitTransitionCallbacks;
 import android.app.ExitTransitionCoordinator.ExitTransitionCallbacks;
@@ -55,7 +56,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.window.IRemoteTransition;
+import android.window.RemoteTransition;
 import android.window.SplashScreen;
 import android.window.WindowContainerToken;
 
@@ -213,6 +214,14 @@ public class ActivityOptions {
      */
     public static final String KEY_LAUNCH_ROOT_TASK_TOKEN =
             "android.activity.launchRootTaskToken";
+
+    /**
+     * The {@link com.android.server.wm.TaskFragment} token the activity should be launched into.
+     * @see #setLaunchTaskFragmentToken(IBinder)
+     * @hide
+     */
+    public static final String KEY_LAUNCH_TASK_FRAGMENT_TOKEN =
+            "android.activity.launchTaskFragmentToken";
 
     /**
      * The windowing mode the activity should be launched into.
@@ -396,6 +405,7 @@ public class ActivityOptions {
     private int mCallerDisplayId = INVALID_DISPLAY;
     private WindowContainerToken mLaunchTaskDisplayArea;
     private WindowContainerToken mLaunchRootTask;
+    private IBinder mLaunchTaskFragmentToken;
     @WindowConfiguration.WindowingMode
     private int mLaunchWindowingMode = WINDOWING_MODE_UNDEFINED;
     @WindowConfiguration.ActivityType
@@ -417,11 +427,11 @@ public class ActivityOptions {
     private IAppTransitionAnimationSpecsFuture mSpecsFuture;
     private RemoteAnimationAdapter mRemoteAnimationAdapter;
     private IBinder mLaunchCookie;
-    private IRemoteTransition mRemoteTransition;
+    private RemoteTransition mRemoteTransition;
     private boolean mOverrideTaskTransition;
     private String mSplashScreenThemeResName;
     @SplashScreen.SplashScreenStyle
-    private int mSplashScreenStyle;
+    private int mSplashScreenStyle = SplashScreen.SPLASH_SCREEN_STYLE_UNDEFINED;
     private boolean mRemoveWithTaskOrganizer;
     private boolean mLaunchedFromBubble;
     private boolean mTransientLaunch;
@@ -1045,7 +1055,7 @@ public class ActivityOptions {
      */
     @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
     public static ActivityOptions makeRemoteAnimation(RemoteAnimationAdapter remoteAnimationAdapter,
-            IRemoteTransition remoteTransition) {
+            RemoteTransition remoteTransition) {
         final ActivityOptions opts = new ActivityOptions();
         opts.mRemoteAnimationAdapter = remoteAnimationAdapter;
         opts.mAnimationType = ANIM_REMOTE_ANIMATION;
@@ -1055,11 +1065,11 @@ public class ActivityOptions {
 
     /**
      * Create an {@link ActivityOptions} instance that lets the application control the entire
-     * transition using a {@link IRemoteTransition}.
+     * transition using a {@link RemoteTransition}.
      * @hide
      */
     @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
-    public static ActivityOptions makeRemoteTransition(IRemoteTransition remoteTransition) {
+    public static ActivityOptions makeRemoteTransition(RemoteTransition remoteTransition) {
         final ActivityOptions opts = new ActivityOptions();
         opts.mRemoteTransition = remoteTransition;
         return opts;
@@ -1138,6 +1148,7 @@ public class ActivityOptions {
         mCallerDisplayId = opts.getInt(KEY_CALLER_DISPLAY_ID, INVALID_DISPLAY);
         mLaunchTaskDisplayArea = opts.getParcelable(KEY_LAUNCH_TASK_DISPLAY_AREA_TOKEN);
         mLaunchRootTask = opts.getParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN);
+        mLaunchTaskFragmentToken = opts.getBinder(KEY_LAUNCH_TASK_FRAGMENT_TOKEN);
         mLaunchWindowingMode = opts.getInt(KEY_LAUNCH_WINDOWING_MODE, WINDOWING_MODE_UNDEFINED);
         mLaunchActivityType = opts.getInt(KEY_LAUNCH_ACTIVITY_TYPE, ACTIVITY_TYPE_UNDEFINED);
         mLaunchTaskId = opts.getInt(KEY_LAUNCH_TASK_ID, -1);
@@ -1171,8 +1182,7 @@ public class ActivityOptions {
         }
         mRemoteAnimationAdapter = opts.getParcelable(KEY_REMOTE_ANIMATION_ADAPTER);
         mLaunchCookie = opts.getBinder(KEY_LAUNCH_COOKIE);
-        mRemoteTransition = IRemoteTransition.Stub.asInterface(opts.getBinder(
-                KEY_REMOTE_TRANSITION));
+        mRemoteTransition = opts.getParcelable(KEY_REMOTE_TRANSITION);
         mOverrideTaskTransition = opts.getBoolean(KEY_OVERRIDE_TASK_TRANSITION);
         mSplashScreenThemeResName = opts.getString(KEY_SPLASH_SCREEN_THEME);
         mRemoveWithTaskOrganizer = opts.getBoolean(KEY_REMOVE_WITH_TASK_ORGANIZER);
@@ -1338,7 +1348,7 @@ public class ActivityOptions {
     }
 
     /** @hide */
-    public IRemoteTransition getRemoteTransition() {
+    public RemoteTransition getRemoteTransition() {
         return mRemoteTransition;
     }
 
@@ -1473,6 +1483,17 @@ public class ActivityOptions {
     }
 
     /** @hide */
+    public IBinder getLaunchTaskFragmentToken() {
+        return mLaunchTaskFragmentToken;
+    }
+
+    /** @hide */
+    public ActivityOptions setLaunchTaskFragmentToken(IBinder taskFragmentToken) {
+        mLaunchTaskFragmentToken = taskFragmentToken;
+        return this;
+    }
+
+    /** @hide */
     public int getLaunchWindowingMode() {
         return mLaunchWindowingMode;
     }
@@ -1501,7 +1522,8 @@ public class ActivityOptions {
      * Sets the task the activity will be launched in.
      * @hide
      */
-    @TestApi
+    @RequiresPermission(START_TASKS_FROM_RECENTS)
+    @SystemApi
     public void setLaunchTaskId(int taskId) {
         mLaunchTaskId = taskId;
     }
@@ -1509,6 +1531,7 @@ public class ActivityOptions {
     /**
      * @hide
      */
+    @SystemApi
     public int getLaunchTaskId() {
         return mLaunchTaskId;
     }
@@ -1882,6 +1905,9 @@ public class ActivityOptions {
         if (mLaunchRootTask != null) {
             b.putParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN, mLaunchRootTask);
         }
+        if (mLaunchTaskFragmentToken != null) {
+            b.putBinder(KEY_LAUNCH_TASK_FRAGMENT_TOKEN, mLaunchTaskFragmentToken);
+        }
         if (mLaunchWindowingMode != WINDOWING_MODE_UNDEFINED) {
             b.putInt(KEY_LAUNCH_WINDOWING_MODE, mLaunchWindowingMode);
         }
@@ -1941,7 +1967,7 @@ public class ActivityOptions {
             b.putBinder(KEY_LAUNCH_COOKIE, mLaunchCookie);
         }
         if (mRemoteTransition != null) {
-            b.putBinder(KEY_REMOTE_TRANSITION, mRemoteTransition.asBinder());
+            b.putParcelable(KEY_REMOTE_TRANSITION, mRemoteTransition);
         }
         if (mOverrideTaskTransition) {
             b.putBoolean(KEY_OVERRIDE_TASK_TRANSITION, mOverrideTaskTransition);

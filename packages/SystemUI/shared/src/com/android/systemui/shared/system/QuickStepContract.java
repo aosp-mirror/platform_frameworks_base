@@ -57,6 +57,8 @@ public class QuickStepContract {
             "extra_shell_starting_window";
     // See ISmartspaceTransitionController.aidl
     public static final String KEY_EXTRA_SMARTSPACE_TRANSITION_CONTROLLER = "smartspace_transition";
+    // See IRecentTasks.aidl
+    public static final String KEY_EXTRA_RECENT_TASKS = "recent_tasks";
 
     public static final String NAV_BAR_MODE_2BUTTON_OVERLAY =
             WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON_OVERLAY;
@@ -112,6 +114,14 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_IME_SHOWING = 1 << 18;
     // The window magnification is overlapped with system gesture insets at the bottom.
     public static final int SYSUI_STATE_MAGNIFICATION_OVERLAP = 1 << 19;
+    // ImeSwitcher is showing
+    public static final int SYSUI_STATE_IME_SWITCHER_SHOWING = 1 << 20;
+    // Device dozing/AOD state
+    public static final int SYSUI_STATE_DEVICE_DOZING = 1 << 21;
+    // The home feature is disabled (either by SUW/SysUI/device policy)
+    public static final int SYSUI_STATE_BACK_DISABLED = 1 << 22;
+    // The bubble stack is expanded AND the mange menu for bubbles is expanded on top of it.
+    public static final int SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED = 1 << 23;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -133,7 +143,11 @@ public class QuickStepContract {
             SYSUI_STATE_ONE_HANDED_ACTIVE,
             SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY,
             SYSUI_STATE_IME_SHOWING,
-            SYSUI_STATE_MAGNIFICATION_OVERLAP
+            SYSUI_STATE_MAGNIFICATION_OVERLAP,
+            SYSUI_STATE_IME_SWITCHER_SHOWING,
+            SYSUI_STATE_DEVICE_DOZING,
+            SYSUI_STATE_BACK_DISABLED,
+            SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED
     })
     public @interface SystemUiStateFlags {}
 
@@ -162,6 +176,11 @@ public class QuickStepContract {
                 ? "allow_gesture" : "");
         str.add((flags & SYSUI_STATE_IME_SHOWING) != 0 ? "ime_visible" : "");
         str.add((flags & SYSUI_STATE_MAGNIFICATION_OVERLAP) != 0 ? "magnification_overlap" : "");
+        str.add((flags & SYSUI_STATE_IME_SWITCHER_SHOWING) != 0 ? "ime_switcher_showing" : "");
+        str.add((flags & SYSUI_STATE_DEVICE_DOZING) != 0 ? "device_dozing" : "");
+        str.add((flags & SYSUI_STATE_BACK_DISABLED) != 0 ? "back_disabled" : "");
+        str.add((flags & SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED) != 0
+                ? "bubbles_mange_menu_expanded" : "");
         return str.toString();
     }
 
@@ -273,8 +292,8 @@ public class QuickStepContract {
      * These values are expressed in pixels because they should not respect display or font
      * scaling, this means that we don't have to reload them on config changes.
      */
-    public static float getWindowCornerRadius(Resources resources) {
-        return ScreenDecorationsUtils.getWindowCornerRadius(resources);
+    public static float getWindowCornerRadius(Context context) {
+        return ScreenDecorationsUtils.getWindowCornerRadius(context);
     }
 
     /**

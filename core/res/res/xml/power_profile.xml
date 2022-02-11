@@ -27,9 +27,33 @@
        are totally dependent on the platform and can vary
        significantly, so should be measured on the shipping platform
        with a power meter. -->
-  <item name="ambient.on">0.1</item>  <!-- ~100mA -->
-  <item name="screen.on">0.1</item>  <!-- ~100mA -->
-  <item name="screen.full">0.1</item>  <!-- ~100mA -->
+
+  <!-- Display related values. -->
+  <!-- Average battery current draw of display0 while in ambient mode, including backlight.
+       There must be one of these for each display, labeled:
+       ambient.on.display0, ambient.on.display1, etc...
+
+       Each display suffix number should match it's ordinal in its display device config.
+  -->
+  <item name="ambient.on.display0">0.1</item>  <!-- ~100mA -->
+  <!-- Average battery current draw of display0 while on without backlight.
+       There must be one of these for each display, labeled:
+       screen.on.display0, screen.on.display1, etc...
+
+       Each display suffix number should match it's ordinal in its display device config.
+  -->
+  <item name="screen.on.display0">0.1</item>  <!-- ~100mA -->
+  <!-- Average battery current draw of the backlight at full brightness.
+       The full current draw of display N at full brightness should be the sum of screen.on.displayN
+       and screen.full.displayN
+
+       There must be one of these for each display, labeled:
+       screen.full.display0, screen.full.display1, etc...
+
+       Each display suffix number should match it's ordinal in its display device config.
+  -->
+  <item name="screen.full.display0">0.1</item>  <!-- ~100mA -->
+
   <item name="bluetooth.active">0.1</item> <!-- Bluetooth data transfer, ~10mA -->
   <item name="bluetooth.on">0.1</item>  <!-- Bluetooth on & connectable, but not connected, ~0.1mA -->
   <item name="wifi.on">0.1</item>  <!-- ~3mA -->

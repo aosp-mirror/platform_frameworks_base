@@ -133,32 +133,6 @@ public abstract class PowerCalculator {
     }
 
     /**
-     * Returns either the measured energy converted to mAh or a usage-based estimate.
-     */
-    protected static double getMeasuredOrEstimatedPower(@BatteryConsumer.PowerModel int powerModel,
-            long measuredEnergyUC, UsageBasedPowerEstimator powerEstimator, long durationMs) {
-        switch (powerModel) {
-            case BatteryConsumer.POWER_MODEL_MEASURED_ENERGY:
-                return uCtoMah(measuredEnergyUC);
-            case BatteryConsumer.POWER_MODEL_POWER_PROFILE:
-            default:
-                return powerEstimator.calculatePower(durationMs);
-        }
-    }
-
-    /**
-     * Returns either the measured energy converted to mAh or a usage-based estimate.
-     */
-    protected static double getMeasuredOrEstimatedPower(
-            long measuredEnergyUC, UsageBasedPowerEstimator powerEstimator, long durationMs) {
-        if (measuredEnergyUC != BatteryStats.POWER_DATA_UNAVAILABLE) {
-            return uCtoMah(measuredEnergyUC);
-        } else {
-            return powerEstimator.calculatePower(durationMs);
-        }
-    }
-
-    /**
      * Prints formatted amount of power in milli-amp-hours.
      */
     public static void printPowerMah(PrintWriter pw, double powerMah) {

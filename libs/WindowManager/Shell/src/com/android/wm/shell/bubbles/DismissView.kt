@@ -28,37 +28,40 @@ import androidx.dynamicanimation.animation.SpringForce.STIFFNESS_LOW
 import com.android.wm.shell.R
 import com.android.wm.shell.animation.PhysicsAnimator
 import com.android.wm.shell.common.DismissCircleView
+import android.view.WindowInsets
+import android.view.WindowManager
 
 /*
  * View that handles interactions between DismissCircleView and BubbleStackView.
  */
 class DismissView(context: Context) : FrameLayout(context) {
 
-    var circle = DismissCircleView(context).apply {
-        val targetSize: Int = context.resources.getDimensionPixelSize(R.dimen.dismiss_circle_size)
-        val newParams = LayoutParams(targetSize, targetSize)
-        newParams.gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-        setLayoutParams(newParams)
-        setTranslationY(
-            resources.getDimensionPixelSize(R.dimen.floating_dismiss_gradient_height).toFloat())
-    }
-
+    var circle = DismissCircleView(context)
     var isShowing = false
+
     private val animator = PhysicsAnimator.getInstance(circle)
     private val spring = PhysicsAnimator.SpringConfig(STIFFNESS_LOW, DAMPING_RATIO_LOW_BOUNCY)
     private val DISMISS_SCRIM_FADE_MS = 200
+    private var wm: WindowManager =
+            context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     init {
         setLayoutParams(LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             resources.getDimensionPixelSize(R.dimen.floating_dismiss_gradient_height),
             Gravity.BOTTOM))
-        setPadding(0, 0, 0, resources.getDimensionPixelSize(R.dimen.floating_dismiss_bottom_margin))
+        updatePadding()
         setClipToPadding(false)
         setClipChildren(false)
         setVisibility(View.INVISIBLE)
         setBackgroundResource(
             R.drawable.floating_dismiss_gradient_transition)
-        addView(circle)
+
+        val targetSize: Int = resources.getDimensionPixelSize(R.dimen.dismiss_circle_size)
+        addView(circle, LayoutParams(targetSize, targetSize,
+                Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL))
+        // start with circle offscreen so it's animated up
+        circle.setTranslationY(resources.getDimensionPixelSize(
+                R.dimen.floating_dismiss_gradient_height).toFloat())
     }
 
     /**
@@ -91,9 +94,21 @@ class DismissView(context: Context) : FrameLayout(context) {
     }
 
     fun updateResources() {
-        val targetSize: Int = context.resources.getDimensionPixelSize(R.dimen.dismiss_circle_size)
+        updatePadding()
+        layoutParams.height = resources.getDimensionPixelSize(
+                R.dimen.floating_dismiss_gradient_height)
+
+        val targetSize: Int = resources.getDimensionPixelSize(R.dimen.dismiss_circle_size)
         circle.layoutParams.width = targetSize
         circle.layoutParams.height = targetSize
         circle.requestLayout()
+    }
+
+    private fun updatePadding() {
+        val insets: WindowInsets = wm.getCurrentWindowMetrics().getWindowInsets()
+        val navInset = insets.getInsetsIgnoringVisibility(
+                WindowInsets.Type.navigationBars())
+        setPadding(0, 0, 0, navInset.bottom +
+                resources.getDimensionPixelSize(R.dimen.floating_dismiss_bottom_margin))
     }
 }

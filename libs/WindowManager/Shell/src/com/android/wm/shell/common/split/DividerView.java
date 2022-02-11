@@ -19,14 +19,23 @@ package com.android.wm.shell.common.split;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Property;
 import android.view.GestureDetector;
+import android.view.InsetsController;
+import android.view.InsetsSource;
+import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.SurfaceControlViewHost;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
@@ -44,9 +53,13 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     public static final long TOUCH_ANIMATION_DURATION = 150;
     public static final long TOUCH_RELEASE_ANIMATION_DURATION = 200;
 
+    /** The task bar expanded height. Used to determine whether to insets divider bounds or not. */
+    private float mExpandedTaskBarHeight;
+
     private final int mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
 
     private SplitLayout mSplitLayout;
+    private SplitWindowManager mSplitWindowManager;
     private SurfaceControlViewHost mViewHost;
     private DividerHandleView mHandle;
     private View mBackground;
@@ -57,6 +70,44 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     private int mStartPos;
     private GestureDetector mDoubleTapDetector;
     private boolean mInteractive;
+    private boolean mSetTouchRegion = true;
+
+    /**
+     * Tracks divider bar visible bounds in screen-based coordination. Used to calculate with
+     * insets.
+     */
+    private final Rect mDividerBounds = new Rect();
+    private final Rect mTempRect = new Rect();
+    private FrameLayout mDividerBar;
+
+
+    static final Property<DividerView, Integer> DIVIDER_HEIGHT_PROPERTY =
+            new Property<DividerView, Integer>(Integer.class, "height") {
+                @Override
+                public Integer get(DividerView object) {
+                    return object.mDividerBar.getLayoutParams().height;
+                }
+
+                @Override
+                public void set(DividerView object, Integer value) {
+                    ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams)
+                            object.mDividerBar.getLayoutParams();
+                    lp.height = value;
+                    object.mDividerBar.setLayoutParams(lp);
+                }
+            };
+
+    private AnimatorListenerAdapter mAnimatorListener = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            mSetTouchRegion = true;
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+            mSetTouchRegion = true;
+        }
+    };
 
     public DividerView(@NonNull Context context) {
         super(context);
@@ -79,21 +130,66 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     /** Sets up essential dependencies of the divider bar. */
     public void setup(
             SplitLayout layout,
-            SurfaceControlViewHost viewHost) {
+            SplitWindowManager splitWindowManager,
+            SurfaceControlViewHost viewHost,
+            InsetsState insetsState) {
         mSplitLayout = layout;
+        mSplitWindowManager = splitWindowManager;
         mViewHost = viewHost;
+        mDividerBounds.set(layout.getDividerBounds());
+        onInsetsChanged(insetsState, false /* animate */);
+    }
+
+    void onInsetsChanged(InsetsState insetsState, boolean animate) {
+        mTempRect.set(mSplitLayout.getDividerBounds());
+        final InsetsSource taskBarInsetsSource =
+                insetsState.getSource(InsetsState.ITYPE_EXTRA_NAVIGATION_BAR);
+        // Only insets the divider bar with task bar when it's expanded so that the rounded corners
+        // will be drawn against task bar.
+        if (taskBarInsetsSource.getFrame().height() >= mExpandedTaskBarHeight) {
+            mTempRect.inset(taskBarInsetsSource.calculateVisibleInsets(mTempRect));
+        }
+
+        if (!mTempRect.equals(mDividerBounds)) {
+            if (animate) {
+                ObjectAnimator animator = ObjectAnimator.ofInt(this,
+                        DIVIDER_HEIGHT_PROPERTY, mDividerBounds.height(), mTempRect.height());
+                animator.setInterpolator(InsetsController.RESIZE_INTERPOLATOR);
+                animator.setDuration(InsetsController.ANIMATION_DURATION_RESIZE);
+                animator.addListener(mAnimatorListener);
+                animator.start();
+            } else {
+                DIVIDER_HEIGHT_PROPERTY.set(this, mTempRect.height());
+                mSetTouchRegion = true;
+            }
+            mDividerBounds.set(mTempRect);
+        }
     }
 
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        mDividerBar = findViewById(R.id.divider_bar);
         mHandle = findViewById(R.id.docked_divider_handle);
         mBackground = findViewById(R.id.docked_divider_background);
+        mExpandedTaskBarHeight = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.taskbar_frame_height);
         mTouchElevation = getResources().getDimensionPixelSize(
                 R.dimen.docked_stack_divider_lift_elevation);
         mDoubleTapDetector = new GestureDetector(getContext(), new DoubleTapListener());
         mInteractive = true;
         setOnTouchListener(this);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (mSetTouchRegion) {
+            mTempRect.set(mHandle.getLeft(), mHandle.getTop(), mHandle.getRight(),
+                    mHandle.getBottom());
+            mSplitWindowManager.setTouchRegion(mTempRect);
+            mSetTouchRegion = false;
+        }
     }
 
     @Override
@@ -106,10 +202,12 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
             return true;
         }
 
+        // Convert to use screen-based coordinates to prevent lost track of motion events while
+        // moving divider bar and calculating dragging velocity.
+        event.setLocation(event.getRawX(), event.getRawY());
         final int action = event.getAction() & MotionEvent.ACTION_MASK;
         final boolean isLandscape = isLandscape();
-        // Using raw xy to prevent lost track of motion events while moving divider bar.
-        final int touchPos = isLandscape ? (int) event.getRawX() : (int) event.getRawY();
+        final int touchPos = (int) (isLandscape ? event.getX() : event.getY());
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 mVelocityTracker = VelocityTracker.obtain();
@@ -153,16 +251,6 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     private void setTouching() {
         setSlippery(false);
         mHandle.setTouching(true, true);
-        if (isLandscape()) {
-            mBackground.animate().scaleX(1.4f);
-        } else {
-            mBackground.animate().scaleY(1.4f);
-        }
-        mBackground.animate()
-                .setInterpolator(Interpolators.TOUCH_RESPONSE)
-                .setDuration(TOUCH_ANIMATION_DURATION)
-                .translationZ(mTouchElevation)
-                .start();
         // Lift handle as well so it doesn't get behind the background, even though it doesn't
         // cast shadow.
         mHandle.animate()
@@ -175,13 +263,6 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     private void releaseTouching() {
         setSlippery(true);
         mHandle.setTouching(false, true);
-        mBackground.animate()
-                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                .setDuration(TOUCH_RELEASE_ANIMATION_DURATION)
-                .translationZ(0)
-                .scaleX(1f)
-                .scaleY(1f)
-                .start();
         mHandle.animate()
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .setDuration(TOUCH_RELEASE_ANIMATION_DURATION)

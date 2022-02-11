@@ -17,8 +17,8 @@
 package com.android.systemui.tv;
 
 import com.android.systemui.dagger.WMComponent;
-import com.android.systemui.dagger.WMSingleton;
-import com.android.systemui.wmshell.TvWMShellModule;
+import com.android.wm.shell.dagger.WMSingleton;
+import com.android.wm.shell.dagger.TvWMShellModule;
 
 import dagger.Subcomponent;
 

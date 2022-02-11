@@ -175,6 +175,28 @@ import java.util.Objects;
  * <br>These masks are an ORed composite of individual channel masks. For example
  * {@link #CHANNEL_OUT_STEREO} is composed of {@link #CHANNEL_OUT_FRONT_LEFT} and
  * {@link #CHANNEL_OUT_FRONT_RIGHT}.
+ * <p>
+ * The following diagram represents the layout of the output channels, as seen from above
+ * the listener (in the center at the "lis" position, facing the front-center channel).
+ * <pre>
+ *       TFL ----- TFC ----- TFR     T is Top
+ *       |  \       |       /  |
+ *       |   FL --- FC --- FR  |     F is Front
+ *       |   |\     |     /|   |
+ *       |   | BFL-BFC-BFR |   |     BF is Bottom Front
+ *       |   |             |   |
+ *       |   FWL   lis   FWR   |     W is Wide
+ *       |   |             |   |
+ *      TSL  SL    TC     SR  TSR    S is Side
+ *       |   |             |   |
+ *       |   BL --- BC -- BR   |     B is Back
+ *       |  /               \  |
+ *       TBL ----- TBC ----- TBR     C is Center, L/R is Left/Right
+ * </pre>
+ * All "T" (top) channels are above the listener, all "BF" (bottom-front) channels are below the
+ * listener, all others are in the listener's horizontal plane. When used in conjunction, LFE1 and
+ * LFE2 are below the listener, when used alone, LFE plane is undefined.
+ * See the channel definitions for the abbreviations
  *
  * <h5 id="channelIndexMask">Channel index masks</h5>
  * Channel index masks are introduced in API {@link android.os.Build.VERSION_CODES#M}. They allow
@@ -417,43 +439,62 @@ public final class AudioFormat implements Parcelable {
 
     // Output channel mask definitions below are translated to the native values defined in
     //  in /system/media/audio/include/system/audio.h in the JNI code of AudioTrack
+    /** Front left output channel (see FL in channel diagram) */
     public static final int CHANNEL_OUT_FRONT_LEFT = 0x4;
+    /** Front right output channel (see FR in channel diagram) */
     public static final int CHANNEL_OUT_FRONT_RIGHT = 0x8;
+    /** Front center output channel (see FC in channel diagram) */
     public static final int CHANNEL_OUT_FRONT_CENTER = 0x10;
+    /** LFE "low frequency effect" channel
+     * When used in conjunction with {@link #CHANNEL_OUT_LOW_FREQUENCY_2}, it is intended
+     * to contain the left low-frequency effect signal, also referred to as "LFE1"
+     * in ITU-R BS.2159-8 */
     public static final int CHANNEL_OUT_LOW_FREQUENCY = 0x20;
+    /** Back left output channel (see BL in channel diagram) */
     public static final int CHANNEL_OUT_BACK_LEFT = 0x40;
+    /** Back right output channel (see BR in channel diagram) */
     public static final int CHANNEL_OUT_BACK_RIGHT = 0x80;
     public static final int CHANNEL_OUT_FRONT_LEFT_OF_CENTER = 0x100;
     public static final int CHANNEL_OUT_FRONT_RIGHT_OF_CENTER = 0x200;
+    /** Back center output channel (see BC in channel diagram) */
     public static final int CHANNEL_OUT_BACK_CENTER = 0x400;
+    /** Side left output channel (see SL in channel diagram) */
     public static final int CHANNEL_OUT_SIDE_LEFT =         0x800;
+    /** Side right output channel (see SR in channel diagram) */
     public static final int CHANNEL_OUT_SIDE_RIGHT =       0x1000;
-    /** @hide */
+    /** Top center (above listener) output channel (see TC in channel diagram) */
     public static final int CHANNEL_OUT_TOP_CENTER =       0x2000;
-    /** @hide */
+    /** Top front left output channel (see TFL in channel diagram above FL) */
     public static final int CHANNEL_OUT_TOP_FRONT_LEFT =   0x4000;
-    /** @hide */
+    /** Top front center output channel (see TFC in channel diagram above FC) */
     public static final int CHANNEL_OUT_TOP_FRONT_CENTER = 0x8000;
-    /** @hide */
+    /** Top front right output channel (see TFR in channel diagram above FR) */
     public static final int CHANNEL_OUT_TOP_FRONT_RIGHT = 0x10000;
-    /** @hide */
+    /** Top back left output channel (see TBL in channel diagram above BL) */
     public static final int CHANNEL_OUT_TOP_BACK_LEFT =   0x20000;
-    /** @hide */
+    /** Top back center output channel (see TBC in channel diagram above BC) */
     public static final int CHANNEL_OUT_TOP_BACK_CENTER = 0x40000;
-    /** @hide */
+    /** Top back right output channel (see TBR in channel diagram above BR) */
     public static final int CHANNEL_OUT_TOP_BACK_RIGHT =  0x80000;
-    /** @hide */
+    /** Top side left output channel (see TSL in channel diagram above SL) */
     public static final int CHANNEL_OUT_TOP_SIDE_LEFT = 0x100000;
-    /** @hide */
+    /** Top side right output channel (see TSR in channel diagram above SR) */
     public static final int CHANNEL_OUT_TOP_SIDE_RIGHT = 0x200000;
-    /** @hide */
+    /** Bottom front left output channel (see BFL in channel diagram below FL) */
     public static final int CHANNEL_OUT_BOTTOM_FRONT_LEFT = 0x400000;
-    /** @hide */
+    /** Bottom front center output channel (see BFC in channel diagram below FC) */
     public static final int CHANNEL_OUT_BOTTOM_FRONT_CENTER = 0x800000;
-    /** @hide */
+    /** Bottom front right output channel (see BFR in channel diagram below FR) */
     public static final int CHANNEL_OUT_BOTTOM_FRONT_RIGHT = 0x1000000;
-    /** @hide */
+    /** The second LFE channel
+     * When used in conjunction with {@link #CHANNEL_OUT_LOW_FREQUENCY}, it is intended
+     * to contain the right low-frequency effect signal, also referred to as "LFE2"
+     * in ITU-R BS.2159-8 */
     public static final int CHANNEL_OUT_LOW_FREQUENCY_2 = 0x2000000;
+    /** Front wide left output channel (see FWL in channel diagram) */
+    public static final int CHANNEL_OUT_FRONT_WIDE_LEFT = 0x4000000;
+    /** Front wide right output channel (see FWR in channel diagram) */
+    public static final int CHANNEL_OUT_FRONT_WIDE_RIGHT = 0x8000000;
 
     public static final int CHANNEL_OUT_MONO = CHANNEL_OUT_FRONT_LEFT;
     public static final int CHANNEL_OUT_STEREO = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT);
@@ -466,6 +507,7 @@ public final class AudioFormat implements Parcelable {
     public static final int CHANNEL_OUT_SURROUND = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
             CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_BACK_CENTER);
     // aka 5POINT1_BACK
+    /** Output channel mask for 5.1 */
     public static final int CHANNEL_OUT_5POINT1 = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
             CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_LOW_FREQUENCY | CHANNEL_OUT_BACK_LEFT | CHANNEL_OUT_BACK_RIGHT);
     /** @hide */
@@ -477,26 +519,39 @@ public final class AudioFormat implements Parcelable {
     @Deprecated    public static final int CHANNEL_OUT_7POINT1 = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
             CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_LOW_FREQUENCY | CHANNEL_OUT_BACK_LEFT | CHANNEL_OUT_BACK_RIGHT |
             CHANNEL_OUT_FRONT_LEFT_OF_CENTER | CHANNEL_OUT_FRONT_RIGHT_OF_CENTER);
+    /** Output channel mask for 7.1 */
     // matches AUDIO_CHANNEL_OUT_7POINT1
     public static final int CHANNEL_OUT_7POINT1_SURROUND = (
             CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_FRONT_RIGHT |
             CHANNEL_OUT_SIDE_LEFT | CHANNEL_OUT_SIDE_RIGHT |
             CHANNEL_OUT_BACK_LEFT | CHANNEL_OUT_BACK_RIGHT |
             CHANNEL_OUT_LOW_FREQUENCY);
-    /** @hide */
+    /** Output channel mask for 5.1.2
+     *  Same as 5.1 with the addition of left and right top channels */
     public static final int CHANNEL_OUT_5POINT1POINT2 = (CHANNEL_OUT_5POINT1 |
             CHANNEL_OUT_TOP_SIDE_LEFT | CHANNEL_OUT_TOP_SIDE_RIGHT);
-    /** @hide */
+    /** Output channel mask for 5.1.4
+     * Same as 5.1 with the addition of four top channels */
     public static final int CHANNEL_OUT_5POINT1POINT4 = (CHANNEL_OUT_5POINT1 |
             CHANNEL_OUT_TOP_FRONT_LEFT | CHANNEL_OUT_TOP_FRONT_RIGHT |
             CHANNEL_OUT_TOP_BACK_LEFT | CHANNEL_OUT_TOP_BACK_RIGHT);
-    /** @hide */
+    /** Output channel mask for 7.1.2
+     * Same as 7.1 with the addition of left and right top channels*/
     public static final int CHANNEL_OUT_7POINT1POINT2 = (CHANNEL_OUT_7POINT1_SURROUND |
             CHANNEL_OUT_TOP_SIDE_LEFT | CHANNEL_OUT_TOP_SIDE_RIGHT);
-    /** @hide */
+    /** Output channel mask for 7.1.4
+     *  Same as 7.1 with the addition of four top channels */
     public static final int CHANNEL_OUT_7POINT1POINT4 = (CHANNEL_OUT_7POINT1_SURROUND |
             CHANNEL_OUT_TOP_FRONT_LEFT | CHANNEL_OUT_TOP_FRONT_RIGHT |
             CHANNEL_OUT_TOP_BACK_LEFT | CHANNEL_OUT_TOP_BACK_RIGHT);
+    /** Output channel mask for 9.1.4
+     * Same as 7.1.4 with the addition of left and right front wide channels */
+    public static final int CHANNEL_OUT_9POINT1POINT4 = (CHANNEL_OUT_7POINT1POINT4
+            | CHANNEL_OUT_FRONT_WIDE_LEFT | CHANNEL_OUT_FRONT_WIDE_RIGHT);
+    /** Output channel mask for 9.1.6
+     * Same as 9.1.4 with the addition of left and right top side channels */
+    public static final int CHANNEL_OUT_9POINT1POINT6 = (CHANNEL_OUT_9POINT1POINT4
+            | CHANNEL_OUT_TOP_SIDE_LEFT | CHANNEL_OUT_TOP_SIDE_RIGHT);
     /** @hide */
     public static final int CHANNEL_OUT_13POINT_360RA = (
             CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_FRONT_RIGHT |

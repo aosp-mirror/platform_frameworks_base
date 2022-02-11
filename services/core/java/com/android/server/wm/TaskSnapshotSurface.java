@@ -72,6 +72,7 @@ import android.util.Slog;
 import android.view.IWindowSession;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.InsetsVisibilities;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
@@ -166,6 +167,7 @@ class TaskSnapshotSurface implements StartingSurface {
         final ClientWindowFrames tmpFrames = new ClientWindowFrames();
         final Rect taskBounds;
         final InsetsState mTmpInsetsState = new InsetsState();
+        final InsetsVisibilities mRequestedVisibilities = new InsetsVisibilities();
         final InsetsSourceControl[] mTempControls = new InsetsSourceControl[0];
         final MergedConfiguration tmpMergedConfiguration = new MergedConfiguration();
         final TaskDescription taskDescription = new TaskDescription();
@@ -227,7 +229,8 @@ class TaskSnapshotSurface implements StartingSurface {
         int displayId = activity.getDisplayContent().getDisplayId();
         try {
             final int res = session.addToDisplay(window, layoutParams, View.GONE, displayId,
-                    mTmpInsetsState, null /* outInputChannel */, mTmpInsetsState, mTempControls);
+                    mRequestedVisibilities, null /* outInputChannel */, mTmpInsetsState,
+                    mTempControls);
             if (res < 0) {
                 Slog.w(TAG, "Failed to add snapshot starting window res=" + res);
                 return null;

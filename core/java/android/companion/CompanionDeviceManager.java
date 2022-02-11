@@ -108,7 +108,7 @@ public final class CompanionDeviceManager {
     }
 
     private final ICompanionDeviceManager mService;
-    private final Context mContext;
+    private Context mContext;
 
     /** @hide */
     public CompanionDeviceManager(
@@ -541,6 +541,7 @@ public final class CompanionDeviceManager {
                 mCallback = null;
                 mHandler = null;
                 mRequest = null;
+                mContext = null;
             }
         }
 

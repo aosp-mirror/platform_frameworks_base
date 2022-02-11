@@ -25,6 +25,10 @@ import android.view.View;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.ViewState;
+import com.android.systemui.util.DumpUtilsKt;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 public class FooterView extends StackScrollerDecorView {
     private FooterViewButton mDismissButton;
@@ -42,6 +46,19 @@ public class FooterView extends StackScrollerDecorView {
 
     protected View findSecondaryView() {
         return findViewById(R.id.dismiss_text);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        super.dump(fd, pw, args);
+        DumpUtilsKt.withIndenting(pw, ipw -> {
+            ipw.println("visibility: " + DumpUtilsKt.visibilityString(getVisibility()));
+            ipw.println("manageButton showHistory: " + mShowHistory);
+            ipw.println("manageButton visibility: "
+                    + DumpUtilsKt.visibilityString(mDismissButton.getVisibility()));
+            ipw.println("dismissButton visibility: "
+                    + DumpUtilsKt.visibilityString(mDismissButton.getVisibility()));
+        });
     }
 
     @Override

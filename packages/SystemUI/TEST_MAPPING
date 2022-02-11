@@ -22,6 +22,9 @@
         },
         {
             "exclude-annotation": "android.platform.test.annotations.Postsubmit"
+        },
+        {
+            "exclude-annotation": "android.platform.test.scenario.annotation.LargeScreenOnly"
         }
       ]
     },
@@ -82,6 +85,9 @@
         },
         {
             "exclude-annotation": "android.platform.helpers.Staging"
+        },
+        {
+            "exclude-annotation": "android.platform.test.scenario.annotation.LargeScreenOnly"
         }
       ]
     }
@@ -101,21 +107,48 @@
         },
         {
             "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+            "exclude-annotation": "android.platform.test.scenario.annotation.LargeScreenOnly"
         }
       ]
     }
   ],
   "auto-end-to-end-postsubmit": [
     {
-      "name": "AndroidAutoUiTests",
+      "name": "AndroidAutomotiveHomeTests",
       "options" : [
         {
-          "include-filter": "android.test.functional.auto.apps.HomeHelperTest"
-        },
+          "include-filter": "android.platform.tests.HomeTest"
+        }
+      ]
+    },
+    {
+      "name": "AndroidAutomotiveNotificationsTests",
+      "options" : [
         {
-          "include-filter": "android.test.functional.auto.apps.NotificationHelperTest"
+          "include-filter": "android.platform.tests.NotificationTest"
         }
       ]
     }
+  ],
+  "large-screen-postsubmit": [
+      {
+        "name": "PlatformScenarioTests",
+        "options" : [
+          {
+              "include-filter": "android.platform.test.scenario.sysui"
+          },
+          {
+              "include-annotation": "android.platform.test.scenario.annotation.LargeScreenOnly"
+          },
+          {
+              "exclude-annotation": "org.junit.Ignore"
+          },
+          {
+              "exclude-annotation": "androidx.test.filters.FlakyTest"
+          }
+        ]
+      }
   ]
 }

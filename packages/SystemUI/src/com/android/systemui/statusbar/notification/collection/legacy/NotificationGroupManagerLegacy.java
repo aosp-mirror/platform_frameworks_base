@@ -25,6 +25,7 @@ import android.util.Log;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.StatusBarState;
@@ -60,8 +61,12 @@ import dagger.Lazy;
  * 2. Tracking group expansion states
  */
 @SysUISingleton
-public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener, StateListener,
-        GroupMembershipManager, GroupExpansionManager, Dumpable {
+public class NotificationGroupManagerLegacy implements
+        OnHeadsUpChangedListener,
+        StateListener,
+        GroupMembershipManager,
+        GroupExpansionManager,
+        Dumpable {
 
     private static final String TAG = "NotifGroupManager";
     private static final boolean DEBUG = StatusBar.DEBUG;
@@ -87,10 +92,13 @@ public class NotificationGroupManagerLegacy implements OnHeadsUpChangedListener,
     public NotificationGroupManagerLegacy(
             StatusBarStateController statusBarStateController,
             Lazy<PeopleNotificationIdentifier> peopleNotificationIdentifier,
-            Optional<Bubbles> bubblesOptional) {
+            Optional<Bubbles> bubblesOptional,
+            DumpManager dumpManager) {
         statusBarStateController.addCallback(this);
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
         mBubblesOptional = bubblesOptional;
+
+        dumpManager.registerDumpable(this);
     }
 
     /**

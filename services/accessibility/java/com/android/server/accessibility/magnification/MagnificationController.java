@@ -411,8 +411,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         synchronized (mLock) {
             if (mWindowMagnificationMgr == null) {
                 mWindowMagnificationMgr = new WindowMagnificationManager(mContext,
-                        mAms.getCurrentUserIdLocked(),
-                        this);
+                        mAms.getCurrentUserIdLocked(), this, mAms.getTraceManager());
             }
             return mWindowMagnificationMgr;
         }

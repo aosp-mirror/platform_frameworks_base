@@ -14,5 +14,7 @@ do
     fi
 done
 echo "</resources>" >> $OUTPUT_default
+
+echo "  <string name=\"only_v26\">only v26</string>" >> $OUTPUT_v26
 echo "</resources>" >> $OUTPUT_v26
 

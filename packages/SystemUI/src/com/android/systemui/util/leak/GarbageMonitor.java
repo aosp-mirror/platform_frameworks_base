@@ -36,7 +36,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.provider.Settings;
@@ -52,6 +51,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
@@ -60,6 +60,8 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSIconViewImpl;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.util.concurrency.DelayableExecutor;
+import com.android.systemui.util.concurrency.MessageRouter;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -110,18 +112,18 @@ public class GarbageMonitor implements Dumpable {
     private static final int DO_GARBAGE_INSPECTION = 1000;
     private static final int DO_HEAP_TRACK = 3000;
 
-    private static final int GARBAGE_ALLOWANCE = 5;
+    static final int GARBAGE_ALLOWANCE = 5;
 
     private static final String TAG = "GarbageMonitor";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private final Handler mHandler;
+    private final MessageRouter mMessageRouter;
     private final TrackedGarbage mTrackedGarbage;
     private final LeakReporter mLeakReporter;
     private final Context mContext;
-    private final ActivityManager mAm;
+    private final DelayableExecutor mDelayableExecutor;
     private MemoryTile mQSTile;
-    private DumpTruck mDumpTruck;
+    private final DumpTruck mDumpTruck;
 
     private final LongSparseArray<ProcessMemInfo> mData = new LongSparseArray<>();
     private final ArrayList<Long> mPids = new ArrayList<>();
@@ -133,18 +135,24 @@ public class GarbageMonitor implements Dumpable {
     @Inject
     public GarbageMonitor(
             Context context,
-            @Background Looper bgLooper,
+            @Background DelayableExecutor delayableExecutor,
+            @Background MessageRouter messageRouter,
             LeakDetector leakDetector,
-            LeakReporter leakReporter) {
+            LeakReporter leakReporter,
+            DumpManager dumpManager) {
         mContext = context.getApplicationContext();
-        mAm = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
 
-        mHandler = new BackgroundHeapCheckHandler(bgLooper);
+        mDelayableExecutor = delayableExecutor;
+        mMessageRouter = messageRouter;
+        mMessageRouter.subscribeTo(DO_GARBAGE_INSPECTION, this::doGarbageInspection);
+        mMessageRouter.subscribeTo(DO_HEAP_TRACK, this::doHeapTrack);
 
         mTrackedGarbage = leakDetector.getTrackedGarbage();
         mLeakReporter = leakReporter;
 
         mDumpTruck = new DumpTruck(mContext);
+
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
 
         if (ENABLE_AM_HEAP_LIMIT) {
             mHeapLimit = Settings.Global.getInt(context.getContentResolver(),
@@ -158,13 +166,13 @@ public class GarbageMonitor implements Dumpable {
             return;
         }
 
-        mHandler.sendEmptyMessage(DO_GARBAGE_INSPECTION);
+        mMessageRouter.sendMessage(DO_GARBAGE_INSPECTION);
     }
 
     public void startHeapTracking() {
         startTrackingProcess(
                 android.os.Process.myPid(), mContext.getPackageName(), System.currentTimeMillis());
-        mHandler.sendEmptyMessage(DO_HEAP_TRACK);
+        mMessageRouter.sendMessage(DO_HEAP_TRACK);
     }
 
     private boolean gcAndCheckGarbage() {
@@ -586,33 +594,18 @@ public class GarbageMonitor implements Dumpable {
         }
     }
 
-    private class BackgroundHeapCheckHandler extends Handler {
-        BackgroundHeapCheckHandler(Looper onLooper) {
-            super(onLooper);
-            if (Looper.getMainLooper().equals(onLooper)) {
-                throw new RuntimeException(
-                        "BackgroundHeapCheckHandler may not run on the ui thread");
-            }
+    private void doGarbageInspection(int id) {
+        if (gcAndCheckGarbage()) {
+            mDelayableExecutor.executeDelayed(this::reinspectGarbageAfterGc, 100);
         }
 
-        @Override
-        public void handleMessage(Message m) {
-            switch (m.what) {
-                case DO_GARBAGE_INSPECTION:
-                    if (gcAndCheckGarbage()) {
-                        postDelayed(GarbageMonitor.this::reinspectGarbageAfterGc, 100);
-                    }
+        mMessageRouter.cancelMessages(DO_GARBAGE_INSPECTION);
+        mMessageRouter.sendMessageDelayed(DO_GARBAGE_INSPECTION, GARBAGE_INSPECTION_INTERVAL);
+    }
 
-                    removeMessages(DO_GARBAGE_INSPECTION);
-                    sendEmptyMessageDelayed(DO_GARBAGE_INSPECTION, GARBAGE_INSPECTION_INTERVAL);
-                    break;
-
-                case DO_HEAP_TRACK:
-                    update();
-                    removeMessages(DO_HEAP_TRACK);
-                    sendEmptyMessageDelayed(DO_HEAP_TRACK, HEAP_TRACK_INTERVAL);
-                    break;
-            }
-        }
+    private void doHeapTrack(int id) {
+        update();
+        mMessageRouter.cancelMessages(DO_HEAP_TRACK);
+        mMessageRouter.sendMessageDelayed(DO_HEAP_TRACK, HEAP_TRACK_INTERVAL);
     }
 }

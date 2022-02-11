@@ -66,6 +66,13 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer {
         mOnBitmapUpdated = c;
     }
 
+    /**
+     * @hide
+     */
+    public void use(Consumer<Bitmap> c) {
+        mTexture.use(c);
+    }
+
     @Override
     public boolean isWcgContent() {
         return mTexture.isWcgContent();

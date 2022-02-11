@@ -24,7 +24,6 @@ import androidx.annotation.VisibleForTesting
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.dagger.MediaModule.KEYGUARD
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -45,7 +44,6 @@ class KeyguardMediaController @Inject constructor(
     private val bypassController: KeyguardBypassController,
     private val statusBarStateController: SysuiStatusBarStateController,
     private val notifLockscreenUserManager: NotificationLockscreenUserManager,
-    private val featureFlags: FeatureFlags,
     private val context: Context,
     configurationController: ConfigurationController
 ) {
@@ -73,7 +71,7 @@ class KeyguardMediaController @Inject constructor(
     }
 
     private fun updateResources() {
-        useSplitShade = Utils.shouldUseSplitNotificationShade(featureFlags, context.resources)
+        useSplitShade = Utils.shouldUseSplitNotificationShade(context.resources)
     }
 
     @VisibleForTesting

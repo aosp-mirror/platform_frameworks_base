@@ -197,7 +197,7 @@ public class ShellRoot {
                 mAccessibilityWindow = null;
             }
         }
-        if (mDisplayContent.mWmService.mAccessibilityController != null) {
+        if (mDisplayContent.mWmService.mAccessibilityController.hasCallbacks()) {
             mDisplayContent.mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(
                     mDisplayContent.getDisplayId());
         }

@@ -27,8 +27,10 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.android.internal.policy.SystemBarUtils;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
@@ -55,6 +57,8 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
     private ColorStateList mNextMessageColorState = ColorStateList.valueOf(DEFAULT_COLOR);
     private boolean mBouncerVisible;
     private boolean mAltBouncerShowing;
+    private ViewGroup mContainer;
+    private int mTopMargin;
 
     public KeyguardMessageArea(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -62,6 +66,24 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
 
         mHandler = new Handler(Looper.myLooper());
         onThemeChanged();
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        mContainer = getRootView().findViewById(R.id.keyguard_message_area_container);
+    }
+
+    void onConfigChanged() {
+        final int newTopMargin = SystemBarUtils.getStatusBarHeight(getContext());
+        if (mTopMargin == newTopMargin) {
+            return;
+        }
+        mTopMargin = newTopMargin;
+        ViewGroup.MarginLayoutParams lp =
+                (ViewGroup.MarginLayoutParams) mContainer.getLayoutParams();
+        lp.topMargin = mTopMargin;
+        mContainer.setLayoutParams(lp);
     }
 
     @Override
@@ -152,6 +174,10 @@ public class KeyguardMessageArea extends TextView implements SecurityMessageDisp
         if (mNextMessageColorState.getDefaultColor() != DEFAULT_COLOR) {
             colorState = mNextMessageColorState;
             mNextMessageColorState = ColorStateList.valueOf(DEFAULT_COLOR);
+        }
+        if (mAltBouncerShowing) {
+            // alt bouncer has a black scrim, so always show the text in white
+            colorState = ColorStateList.valueOf(Color.WHITE);
         }
         setTextColor(colorState);
     }

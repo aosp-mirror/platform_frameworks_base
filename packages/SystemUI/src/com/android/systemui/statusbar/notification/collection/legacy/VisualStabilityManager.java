@@ -24,6 +24,7 @@ import androidx.collection.ArraySet;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
@@ -71,9 +72,11 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
             NotificationEntryManager notificationEntryManager,
             @Main Handler handler,
             StatusBarStateController statusBarStateController,
-            WakefulnessLifecycle wakefulnessLifecycle) {
+            WakefulnessLifecycle wakefulnessLifecycle,
+            DumpManager dumpManager) {
 
         mHandler = handler;
+        dumpManager.registerDumpable(this);
 
         if (notificationEntryManager != null) {
             notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {

@@ -19,5 +19,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="toast_rotation_locked" msgid="4914046305911646988">"স্ক্ৰীনখন এতিয়া লেণ্ডস্কে\'প স্ক্ৰীনৰ দিশত লক কৰা অৱস্থাত আছে"</string>
+    <string name="toast_rotation_locked" msgid="4914046305911646988">"স্ক্ৰীণখন এতিয়া লেণ্ডস্কেপ স্ক্ৰীণৰ দিশত লক কৰা অৱস্থাত আছে"</string>
 </resources>

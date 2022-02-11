@@ -1167,11 +1167,16 @@ final class UiModeManagerService extends SystemService {
     }
 
     private boolean doesPackageHaveCallingUid(@NonNull String packageName) {
+        int callingUid = mInjector.getCallingUid();
+        int callingUserId = UserHandle.getUserId(callingUid);
+        final long ident = Binder.clearCallingIdentity();
         try {
-            return getContext().getPackageManager().getPackageUid(packageName, 0)
-                    == mInjector.getCallingUid();
+            return getContext().getPackageManager().getPackageUidAsUser(packageName,
+                    callingUserId) == callingUid;
         } catch (PackageManager.NameNotFoundException e) {
             return false;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 

@@ -14,6 +14,9 @@
 
 package com.android.systemui.qs;
 
+import static com.android.systemui.qs.dagger.QSFragmentModule.QQS_FOOTER;
+import static com.android.systemui.qs.dagger.QSFragmentModule.QS_FOOTER;
+
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.util.Log;
@@ -32,7 +35,6 @@ import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.qs.TouchAnimator.Listener;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.tileimpl.HeightOverrideable;
-import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.wm.shell.animation.Interpolators;
@@ -43,6 +45,7 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /** */
 @QSScope
@@ -60,20 +63,25 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     // Fade out faster than fade in to finish before QQS hides.
     private static final long QQS_FADE_OUT_DURATION = 50L;
 
-
+    /**
+     * List of all views that will be reset when clearing animation state
+     * see {@link #clearAnimationState()} }
+     */
     private final ArrayList<View> mAllViews = new ArrayList<>();
     /**
      * List of {@link View}s representing Quick Settings that are being animated from the quick QS
      * position to the normal QS panel. These views will only show once the animation is complete,
      * to prevent overlapping of semi transparent views
      */
-    private final ArrayList<View> mQuickQsViews = new ArrayList<>();
+    private final ArrayList<View> mAnimatedQsViews = new ArrayList<>();
     private final QuickQSPanel mQuickQsPanel;
     private final QSPanelController mQsPanelController;
     private final QuickQSPanelController mQuickQSPanelController;
     private final QuickStatusBarHeader mQuickStatusBarHeader;
     private final QSSecurityFooter mSecurityFooter;
     private final QS mQs;
+    private final View mQSFooterActions;
+    private final View mQQSFooterActions;
 
     private PagedTileLayout mPagedLayout;
 
@@ -88,6 +96,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     // This animates fading of SecurityFooter and media divider
     private TouchAnimator mAllPagesDelayedAnimator;
     private TouchAnimator mBrightnessAnimator;
+    private TouchAnimator mQQSFooterActionsAnimator;
     private HeightExpansionAnimator mQQSTileHeightAnimator;
     private HeightExpansionAnimator mOtherTilesExpandAnimator;
 
@@ -110,12 +119,16 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             QSPanelController qsPanelController,
             QuickQSPanelController quickQSPanelController, QSTileHost qsTileHost,
             QSSecurityFooter securityFooter, @Main Executor executor, TunerService tunerService,
-            QSExpansionPathInterpolator qsExpansionPathInterpolator) {
+            QSExpansionPathInterpolator qsExpansionPathInterpolator,
+            @Named(QS_FOOTER) FooterActionsView qsFooterActionsView,
+            @Named(QQS_FOOTER) FooterActionsView qqsFooterActionsView) {
         mQs = qs;
         mQuickQsPanel = quickPanel;
         mQsPanelController = qsPanelController;
         mQuickQSPanelController = quickQSPanelController;
         mQuickStatusBarHeader = quickStatusBarHeader;
+        mQQSFooterActions = qqsFooterActionsView;
+        mQSFooterActions = qsFooterActionsView;
         mSecurityFooter = securityFooter;
         mHost = qsTileHost;
         mExecutor = executor;
@@ -153,19 +166,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         updateQQSVisibility();
         if (mOnKeyguard) {
             clearAnimationState();
-        }
-    }
-
-    void startAlphaAnimation(boolean show) {
-        if (show == mToShowing) {
-            return;
-        }
-        mToShowing = show;
-        if (show) {
-            CrossFadeHelper.fadeIn(mQs.getView(), QQS_FADE_IN_DURATION, 0 /* delay */);
-        } else {
-            CrossFadeHelper.fadeOut(mQs.getView(), QQS_FADE_OUT_DURATION, 0 /* delay */,
-                    null /* endRunnable */);
         }
     }
 
@@ -262,7 +262,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
         clearAnimationState();
         mAllViews.clear();
-        mQuickQsViews.clear();
+        mAnimatedQsViews.clear();
         mQQSTileHeightAnimator = null;
         mOtherTilesExpandAnimator = null;
 
@@ -316,8 +316,8 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
                     if (mQQSTileHeightAnimator == null) {
                         mQQSTileHeightAnimator = new HeightExpansionAnimator(this,
-                                quickTileView.getHeight(), tileView.getHeight());
-                        qqsTileHeight = quickTileView.getHeight();
+                                quickTileView.getMeasuredHeight(), tileView.getMeasuredHeight());
+                        qqsTileHeight = quickTileView.getMeasuredHeight();
                     }
 
                     mQQSTileHeightAnimator.addView(quickTileView);
@@ -360,7 +360,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
 
                     firstPageBuilder.addFloat(quickTileView.getSecondaryLabel(), "alpha", 0, 1);
 
-                    mQuickQsViews.add(tileView);
+                    mAnimatedQsViews.add(tileView);
                     mAllViews.add(quickTileView);
                     mAllViews.add(quickTileView.getSecondaryLabel());
                 } else if (mFullRows && isIconInAnimatedRow(count)) {
@@ -380,12 +380,13 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                     if (mOtherTilesExpandAnimator == null) {
                         mOtherTilesExpandAnimator =
                                 new HeightExpansionAnimator(
-                                        this, qqsTileHeight, tileView.getHeight());
+                                        this, qqsTileHeight, tileView.getMeasuredHeight());
                     }
                     mOtherTilesExpandAnimator.addView(tileView);
                     tileView.setClipChildren(true);
                     tileView.setClipToPadding(true);
                     firstPageBuilder.addFloat(tileView.getSecondaryLabel(), "alpha", 0, 1);
+                    mAllViews.add(tileView.getSecondaryLabel());
                 }
 
                 mAllViews.add(tileView);
@@ -394,21 +395,8 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         }
 
         if (mAllowFancy) {
-            // Make brightness appear static position and alpha in through second half.
-            View brightness = mQsPanelController.getBrightnessView();
-            if (brightness != null) {
-                firstPageBuilder.addFloat(brightness, "translationY",
-                        brightness.getMeasuredHeight() * 0.5f, 0);
-                mBrightnessAnimator = new TouchAnimator.Builder()
-                        .addFloat(brightness, "alpha", 0, 1)
-                        .addFloat(brightness, "sliderScaleY", 0.3f, 1)
-                        .setInterpolator(Interpolators.ALPHA_IN)
-                        .setStartDelay(0.3f)
-                        .build();
-                mAllViews.add(brightness);
-            } else {
-                mBrightnessAnimator = null;
-            }
+            animateBrightnessSlider(firstPageBuilder);
+
             mFirstPageAnimator = firstPageBuilder
                     .setListener(this)
                     .build();
@@ -416,6 +404,13 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             Builder builder = new Builder()
                     .addFloat(tileLayout, "alpha", 0, 1);
             mFirstPageDelayedAnimator = builder.build();
+
+            if (mQQSFooterActions.getVisibility() != View.GONE) {
+                // only when qqs footer is present (which means split shade mode) it needs to
+                // be animated
+                updateQQSFooterAnimation();
+            }
+
 
             // Fade in the security footer and the divider as we reach the final position
             builder = new Builder().setStartDelay(EXPANDED_TILE_DELAY);
@@ -450,6 +445,53 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         mNonfirstPageDelayedAnimator = new TouchAnimator.Builder()
                 .setStartDelay(.14f)
                 .addFloat(tileLayout, "alpha", 0, 1).build();
+    }
+
+    private void animateBrightnessSlider(Builder firstPageBuilder) {
+        View qsBrightness = mQsPanelController.getBrightnessView();
+        View qqsBrightness = mQuickQSPanelController.getBrightnessView();
+        if (qqsBrightness != null && qqsBrightness.getVisibility() == View.VISIBLE) {
+            // animating in split shade mode
+            mAnimatedQsViews.add(qsBrightness);
+            mAllViews.add(qqsBrightness);
+            int translationY = getRelativeTranslationY(qsBrightness, qqsBrightness);
+            mBrightnessAnimator = new Builder()
+                    // we need to animate qs brightness even if animation will not be visible,
+                    // as we might start from sliderScaleY set to 0.3 if device was in collapsed QS
+                    // portrait orientation before
+                    .addFloat(qsBrightness, "sliderScaleY", 0.3f, 1)
+                    .addFloat(qqsBrightness, "translationY", 0, translationY)
+                    .build();
+        } else if (qsBrightness != null) {
+            firstPageBuilder.addFloat(qsBrightness, "translationY",
+                    qsBrightness.getMeasuredHeight() * 0.5f, 0);
+            mBrightnessAnimator = new Builder()
+                    .addFloat(qsBrightness, "alpha", 0, 1)
+                    .addFloat(qsBrightness, "sliderScaleY", 0.3f, 1)
+                    .setInterpolator(Interpolators.ALPHA_IN)
+                    .setStartDelay(0.3f)
+                    .build();
+            mAllViews.add(qsBrightness);
+        } else {
+            mBrightnessAnimator = null;
+        }
+    }
+
+    private void updateQQSFooterAnimation() {
+        int translationY = getRelativeTranslationY(mQSFooterActions, mQQSFooterActions);
+        mQQSFooterActionsAnimator = new TouchAnimator.Builder()
+                .addFloat(mQQSFooterActions, "translationY", 0, translationY)
+                .build();
+        mAnimatedQsViews.add(mQSFooterActions);
+    }
+
+    private int getRelativeTranslationY(View view1, View view2) {
+        int[] qsPosition = new int[2];
+        int[] qqsPosition = new int[2];
+        View commonView = mQs.getView();
+        getRelativePositionInt(qsPosition, view1, commonView);
+        getRelativePositionInt(qqsPosition, view2, commonView);
+        return (qsPosition[1] - qqsPosition[1]) - mQuickStatusBarHeader.getOffsetTranslation();
     }
 
     private boolean isIconInAnimatedRow(int count) {
@@ -521,6 +563,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             if (mBrightnessAnimator != null) {
                 mBrightnessAnimator.setPosition(position);
             }
+            if (mQQSFooterActionsAnimator != null) {
+                mQQSFooterActionsAnimator.setPosition(position);
+            }
         }
     }
 
@@ -532,9 +577,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     @Override
     public void onAnimationAtEnd() {
         mQuickQsPanel.setVisibility(View.INVISIBLE);
-        final int N = mQuickQsViews.size();
+        final int N = mAnimatedQsViews.size();
         for (int i = 0; i < N; i++) {
-            mQuickQsViews.get(i).setVisibility(View.VISIBLE);
+            mAnimatedQsViews.get(i).setVisibility(View.VISIBLE);
         }
     }
 
@@ -542,9 +587,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     public void onAnimationStarted() {
         updateQQSVisibility();
         if (mOnFirstPage) {
-            final int N = mQuickQsViews.size();
+            final int N = mAnimatedQsViews.size();
             for (int i = 0; i < N; i++) {
-                mQuickQsViews.get(i).setVisibility(View.INVISIBLE);
+                mAnimatedQsViews.get(i).setVisibility(View.INVISIBLE);
             }
         }
     }
@@ -569,9 +614,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         if (mOtherTilesExpandAnimator != null) {
             mOtherTilesExpandAnimator.resetViewsHeights();
         }
-        final int N2 = mQuickQsViews.size();
+        final int N2 = mAnimatedQsViews.size();
         for (int i = 0; i < N2; i++) {
-            mQuickQsViews.get(i).setVisibility(View.VISIBLE);
+            mAnimatedQsViews.get(i).setVisibility(View.VISIBLE);
         }
     }
 
@@ -613,7 +658,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         mTranslateWhileExpanding = shouldTranslate;
     }
 
-    static class HeightExpansionAnimator {
+    private static class HeightExpansionAnimator {
         private final List<View> mViews = new ArrayList<>();
         private final ValueAnimator mAnimator;
         private final TouchAnimator.Listener mListener;
@@ -628,9 +673,10 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 int height = (Integer) valueAnimator.getAnimatedValue();
                 for (int i = 0; i < viewCount; i++) {
                     View v = mViews.get(i);
-                    v.setBottom(v.getTop() + height);
                     if (v instanceof HeightOverrideable) {
                         ((HeightOverrideable) v).setHeightOverride(height);
+                    } else {
+                        v.setBottom(v.getTop() + height);
                     }
                 }
                 if (t == 0f) {
@@ -668,9 +714,10 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             final int viewsCount = mViews.size();
             for (int i = 0; i < viewsCount; i++) {
                 View v = mViews.get(i);
-                v.setBottom(v.getTop() + v.getMeasuredHeight());
                 if (v instanceof HeightOverrideable) {
                     ((HeightOverrideable) v).resetOverride();
+                } else {
+                    v.setBottom(v.getTop() + v.getMeasuredHeight());
                 }
             }
         }

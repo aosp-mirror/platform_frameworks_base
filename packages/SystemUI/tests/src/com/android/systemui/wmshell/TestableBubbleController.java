@@ -32,6 +32,7 @@ import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 
 /**
@@ -54,11 +55,12 @@ public class TestableBubbleController extends BubbleController {
             BubblePositioner positioner,
             DisplayController displayController,
             ShellExecutor shellMainExecutor,
-            Handler shellMainHandler) {
+            Handler shellMainHandler,
+            SyncTransactionQueue syncQueue) {
         super(context, data, Runnable::run, floatingContentCoordinator, dataRepository,
                 statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
                 bubbleLogger, taskStackListener, shellTaskOrganizer, positioner, displayController,
-                shellMainExecutor, shellMainHandler);
+                shellMainExecutor, shellMainHandler, syncQueue);
         setInflateSynchronously(true);
         initialize();
     }

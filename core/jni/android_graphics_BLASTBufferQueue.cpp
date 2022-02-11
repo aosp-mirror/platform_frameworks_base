@@ -67,21 +67,19 @@ private:
     }
 };
 
-static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring jName, jlong surfaceControl,
-                          jlong width, jlong height, jint format) {
-    String8 str8;
-    if (jName) {
-        const jchar* str16 = env->GetStringCritical(jName, nullptr);
-        if (str16) {
-            str8 = String8(reinterpret_cast<const char16_t*>(str16), env->GetStringLength(jName));
-            env->ReleaseStringCritical(jName, str16);
-            str16 = nullptr;
-        }
-    }
-    std::string name = str8.string();
+static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring jName) {
+    ScopedUtfChars name(env, jName);
+    sp<BLASTBufferQueue> queue = new BLASTBufferQueue(name.c_str());
+    queue->incStrong((void*)nativeCreate);
+    return reinterpret_cast<jlong>(queue.get());
+}
+
+static jlong nativeCreateAndUpdate(JNIEnv* env, jclass clazz, jstring jName, jlong surfaceControl,
+                                   jlong width, jlong height, jint format) {
+    ScopedUtfChars name(env, jName);
     sp<BLASTBufferQueue> queue =
-            new BLASTBufferQueue(name, reinterpret_cast<SurfaceControl*>(surfaceControl), width,
-                                 height, format);
+            new BLASTBufferQueue(name.c_str(), reinterpret_cast<SurfaceControl*>(surfaceControl),
+                                 width, height, format);
     queue->incStrong((void*)nativeCreate);
     return reinterpret_cast<jlong>(queue.get());
 }
@@ -112,11 +110,6 @@ static void nativeUpdate(JNIEnv* env, jclass clazz, jlong ptr, jlong surfaceCont
                   transaction);
 }
 
-static void nativeFlushShadowQueue(JNIEnv* env, jclass clazz, jlong ptr) {
-    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
-    queue->flushShadowQueue();
-}
-
 static void nativeMergeWithNextTransaction(JNIEnv*, jclass clazz, jlong ptr, jlong transactionPtr,
                                            jlong framenumber) {
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
@@ -139,19 +132,25 @@ static void nativeSetTransactionCompleteCallback(JNIEnv* env, jclass clazz, jlon
     }
 }
 
+static jlong nativeGetLastAcquiredFrameNum(JNIEnv* env, jclass clazz, jlong ptr) {
+    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
+    return queue->getLastAcquiredFrameNum();
+}
+
 static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
         // clang-format off
-        {"nativeCreate", "(Ljava/lang/String;JJJI)J", (void*)nativeCreate},
+        {"nativeCreate", "(Ljava/lang/String;)J", (void*)nativeCreate},
+        {"nativeCreateAndUpdate", "(Ljava/lang/String;JJJI)J", (void*)nativeCreateAndUpdate},
         {"nativeGetSurface", "(JZ)Landroid/view/Surface;", (void*)nativeGetSurface},
         {"nativeDestroy", "(J)V", (void*)nativeDestroy},
         {"nativeSetNextTransaction", "(JJ)V", (void*)nativeSetNextTransaction},
         {"nativeUpdate", "(JJJJIJ)V", (void*)nativeUpdate},
-        {"nativeFlushShadowQueue", "(J)V", (void*)nativeFlushShadowQueue},
         {"nativeMergeWithNextTransaction", "(JJJ)V", (void*)nativeMergeWithNextTransaction},
         {"nativeSetTransactionCompleteCallback",
                 "(JJLandroid/graphics/BLASTBufferQueue$TransactionCompleteCallback;)V",
-                (void*)nativeSetTransactionCompleteCallback}
+                (void*)nativeSetTransactionCompleteCallback},
+        {"nativeGetLastAcquiredFrameNum", "(J)J", (void*)nativeGetLastAcquiredFrameNum},
         // clang-format on
 };
 

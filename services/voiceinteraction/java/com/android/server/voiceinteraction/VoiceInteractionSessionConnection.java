@@ -56,6 +56,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.IVoiceInteractionSessionService;
+import android.service.voice.VisibleActivityInfo;
 import android.service.voice.VoiceInteractionService;
 import android.service.voice.VoiceInteractionSession;
 import android.util.Slog;
@@ -71,16 +72,20 @@ import com.android.server.am.AssistDataRequester.AssistDataRequesterCallbacks;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.wm.ActivityAssistInfo;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.PrintWriter;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 final class VoiceInteractionSessionConnection implements ServiceConnection,
         AssistDataRequesterCallbacks {
 
     static final String TAG = "VoiceInteractionServiceManager";
+    static final boolean DEBUG = false;
     static final int POWER_BOOST_TIMEOUT_MS = Integer.parseInt(
             System.getProperty("vendor.powerhal.interaction.max", "200"));
     static final int BOOST_TIMEOUT_MS = 300;
@@ -114,6 +119,10 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
     ArrayList<IVoiceInteractionSessionShowCallback> mPendingShowCallbacks = new ArrayList<>();
     private List<ActivityAssistInfo> mPendingHandleAssistWithoutData = new ArrayList<>();
     AssistDataRequester mAssistDataRequester;
+    private boolean mListeningVisibleActivity;
+    private final ScheduledExecutorService mScheduledExecutorService =
+            Executors.newSingleThreadScheduledExecutor();
+    private final List<VisibleActivityInfo> mVisibleActivityInfos = new ArrayList<>();
     private final PowerManagerInternal mPowerManagerInternal;
     private PowerBoostSetter mSetPowerBoostRunnable;
     private final Handler mFgHandler;
@@ -496,6 +505,8 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
     }
 
     public void cancelLocked(boolean finishTask) {
+        mListeningVisibleActivity = false;
+        mVisibleActivityInfos.clear();
         hideLocked();
         mCanceled = true;
         if (mBound) {
@@ -567,6 +578,156 @@ final class VoiceInteractionSessionConnection implements ServiceConnection,
             }
         }
         mPendingShowCallbacks.clear();
+    }
+
+    void startListeningVisibleActivityChangedLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "startListeningVisibleActivityChangedLocked");
+        }
+        mListeningVisibleActivity = true;
+        mVisibleActivityInfos.clear();
+
+        mScheduledExecutorService.execute(() -> {
+            if (DEBUG) {
+                Slog.d(TAG, "call updateVisibleActivitiesLocked from enable listening");
+            }
+            synchronized (mLock) {
+                updateVisibleActivitiesLocked();
+            }
+        });
+    }
+
+    void stopListeningVisibleActivityChangedLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "stopListeningVisibleActivityChangedLocked");
+        }
+        mListeningVisibleActivity = false;
+        mVisibleActivityInfos.clear();
+    }
+
+    void notifyActivityEventChangedLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "notifyActivityEventChangedLocked");
+        }
+        if (!mListeningVisibleActivity) {
+            if (DEBUG) {
+                Slog.d(TAG, "not enable listening visible activity");
+            }
+            return;
+        }
+        mScheduledExecutorService.execute(() -> {
+            if (DEBUG) {
+                Slog.d(TAG, "call updateVisibleActivitiesLocked from activity event");
+            }
+            synchronized (mLock) {
+                updateVisibleActivitiesLocked();
+            }
+        });
+    }
+
+    private List<VisibleActivityInfo> getVisibleActivityInfosLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "getVisibleActivityInfosLocked");
+        }
+        List<ActivityAssistInfo> allVisibleActivities =
+                LocalServices.getService(ActivityTaskManagerInternal.class)
+                        .getTopVisibleActivities();
+        if (DEBUG) {
+            Slog.d(TAG,
+                    "getVisibleActivityInfosLocked: allVisibleActivities=" + allVisibleActivities);
+        }
+        if (allVisibleActivities == null || allVisibleActivities.isEmpty()) {
+            Slog.w(TAG, "no visible activity");
+            return null;
+        }
+        final int count = allVisibleActivities.size();
+        final List<VisibleActivityInfo> visibleActivityInfos = new ArrayList<>(count);
+        for (int i = 0; i < count; i++) {
+            ActivityAssistInfo info = allVisibleActivities.get(i);
+            if (DEBUG) {
+                Slog.d(TAG, " : activityToken=" + info.getActivityToken()
+                        + ", assistToken=" + info.getAssistToken()
+                        + ", taskId=" + info.getTaskId());
+            }
+            visibleActivityInfos.add(
+                    new VisibleActivityInfo(info.getTaskId(), info.getAssistToken()));
+        }
+        return visibleActivityInfos;
+    }
+
+    private void updateVisibleActivitiesLocked() {
+        if (DEBUG) {
+            Slog.d(TAG, "updateVisibleActivitiesLocked");
+        }
+        if (mSession == null) {
+            return;
+        }
+        if (!mShown || !mListeningVisibleActivity || mCanceled) {
+            return;
+        }
+        final List<VisibleActivityInfo> newVisibleActivityInfos = getVisibleActivityInfosLocked();
+
+        if (newVisibleActivityInfos == null || newVisibleActivityInfos.isEmpty()) {
+            updateVisibleActivitiesChangedLocked(mVisibleActivityInfos,
+                    VisibleActivityInfo.TYPE_ACTIVITY_REMOVED);
+            mVisibleActivityInfos.clear();
+            return;
+        }
+        if (mVisibleActivityInfos.isEmpty()) {
+            updateVisibleActivitiesChangedLocked(newVisibleActivityInfos,
+                    VisibleActivityInfo.TYPE_ACTIVITY_ADDED);
+            mVisibleActivityInfos.addAll(newVisibleActivityInfos);
+            return;
+        }
+
+        final List<VisibleActivityInfo> addedActivities = new ArrayList<>();
+        final List<VisibleActivityInfo> removedActivities = new ArrayList<>();
+
+        removedActivities.addAll(mVisibleActivityInfos);
+        for (int i = 0; i < newVisibleActivityInfos.size(); i++) {
+            final VisibleActivityInfo candidateVisibleActivityInfo = newVisibleActivityInfos.get(i);
+            if (!removedActivities.isEmpty() && removedActivities.contains(
+                    candidateVisibleActivityInfo)) {
+                removedActivities.remove(candidateVisibleActivityInfo);
+            } else {
+                addedActivities.add(candidateVisibleActivityInfo);
+            }
+        }
+
+        if (!addedActivities.isEmpty()) {
+            updateVisibleActivitiesChangedLocked(addedActivities,
+                    VisibleActivityInfo.TYPE_ACTIVITY_ADDED);
+        }
+        if (!removedActivities.isEmpty()) {
+            updateVisibleActivitiesChangedLocked(removedActivities,
+                    VisibleActivityInfo.TYPE_ACTIVITY_REMOVED);
+        }
+
+        mVisibleActivityInfos.clear();
+        mVisibleActivityInfos.addAll(newVisibleActivityInfos);
+    }
+
+    private void updateVisibleActivitiesChangedLocked(
+            List<VisibleActivityInfo> visibleActivityInfos, int type) {
+        if (visibleActivityInfos == null || visibleActivityInfos.isEmpty()) {
+            return;
+        }
+        if (mSession == null) {
+            return;
+        }
+        try {
+            for (int i = 0; i < visibleActivityInfos.size(); i++) {
+                mSession.updateVisibleActivityInfo(visibleActivityInfos.get(i), type);
+            }
+        } catch (RemoteException e) {
+            if (DEBUG) {
+                Slog.w(TAG, "updateVisibleActivitiesChangedLocked RemoteException : " + e);
+            }
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "updateVisibleActivitiesChangedLocked type=" + type + ", count="
+                    + visibleActivityInfos.size());
+        }
     }
 
     @Override

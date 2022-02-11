@@ -23,7 +23,6 @@
     android:clickable="true"
     android:paddingTop="28dp"
     android:paddingBottom="16dp"
-    android:paddingStart="@dimen/bubble_expanded_view_padding"
     android:paddingEnd="48dp"
     android:layout_marginEnd="24dp"
     android:orientation="vertical"
@@ -66,27 +65,21 @@
         android:id="@+id/button_layout"
         android:orientation="horizontal" >
 
-        <com.android.wm.shell.common.AlphaOptimizedButton
-            style="@android:style/Widget.Material.Button.Borderless"
-            android:id="@+id/manage"
-            android:layout_gravity="start"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:focusable="true"
-            android:clickable="false"
-            android:text="@string/manage_bubbles_text"
-            android:textColor="@android:color/system_neutral1_900"
+        <include
+            layout="@layout/bubble_manage_button"
             />
 
         <com.android.wm.shell.common.AlphaOptimizedButton
-            style="@android:style/Widget.Material.Button.Borderless"
+            style="@android:style/Widget.DeviceDefault.Button.Borderless"
             android:id="@+id/got_it"
             android:layout_gravity="start"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="@dimen/bubble_manage_button_height"
             android:focusable="true"
             android:text="@string/bubbles_user_education_got_it"
+            android:textSize="@*android:dimen/text_size_body_2_material"
             android:textColor="@android:color/system_neutral1_900"
+            android:background="@drawable/bubble_manage_btn_bg"
             />
     </LinearLayout>
 </LinearLayout>

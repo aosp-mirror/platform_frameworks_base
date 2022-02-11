@@ -43,6 +43,11 @@ import java.util.ArrayList;
  */
 public interface SplashScreen {
     /**
+     * The splash screen style is not defined.
+     * @hide
+     */
+    int SPLASH_SCREEN_STYLE_UNDEFINED = -1;
+    /**
      * Force splash screen to be empty.
      * @hide
      */
@@ -55,6 +60,7 @@ public interface SplashScreen {
 
     /** @hide */
     @IntDef(prefix = { "SPLASH_SCREEN_STYLE_" }, value = {
+            SPLASH_SCREEN_STYLE_UNDEFINED,
             SPLASH_SCREEN_STYLE_EMPTY,
             SPLASH_SCREEN_STYLE_ICON
     })
@@ -92,6 +98,9 @@ public interface SplashScreen {
      * overrides and persists the theme used for the {@link SplashScreen} of this application.
      * <p>
      * To reset to the default theme, set this the themeId to {@link Resources#ID_NULL}.
+     * <p>
+     * <b>Note:</b> The theme name must be stable across versions, otherwise it won't be found
+     * after your application is updated.
      */
     void setSplashScreenTheme(@StyleRes int themeId);
 
@@ -241,7 +250,6 @@ public interface SplashScreen {
 
         public void handOverSplashScreenView(@NonNull IBinder token,
                 @NonNull SplashScreenView splashScreenView) {
-            transferSurface(splashScreenView);
             dispatchOnExitAnimation(token, splashScreenView);
         }
 
@@ -264,10 +272,6 @@ public interface SplashScreen {
                 final SplashScreenImpl impl = findImpl(token);
                 return impl != null && impl.mExitAnimationListener != null;
             }
-        }
-
-        private void transferSurface(@NonNull SplashScreenView splashScreenView) {
-            splashScreenView.transferSurface();
         }
     }
 }

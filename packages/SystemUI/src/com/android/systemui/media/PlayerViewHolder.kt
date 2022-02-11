@@ -43,6 +43,7 @@ class PlayerViewHolder private constructor(itemView: View) {
     val seamless = itemView.requireViewById<ViewGroup>(R.id.media_seamless)
     val seamlessIcon = itemView.requireViewById<ImageView>(R.id.media_seamless_image)
     val seamlessText = itemView.requireViewById<TextView>(R.id.media_seamless_text)
+    val seamlessButton = itemView.requireViewById<View>(R.id.media_seamless_button)
 
     // Seek bar
     val seekBar = itemView.requireViewById<SeekBar>(R.id.media_progress_bar)
@@ -105,6 +106,7 @@ class PlayerViewHolder private constructor(itemView: View) {
          */
         @JvmStatic fun create(inflater: LayoutInflater, parent: ViewGroup): PlayerViewHolder {
             val mediaView = inflater.inflate(R.layout.media_view, parent, false)
+            mediaView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
             // Because this media view (a TransitionLayout) is used to measure and layout the views
             // in various states before being attached to its parent, we can't depend on the default
             // LAYOUT_DIRECTION_INHERIT to correctly resolve the ltr direction.

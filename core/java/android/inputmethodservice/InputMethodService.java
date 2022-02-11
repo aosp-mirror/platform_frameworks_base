@@ -395,7 +395,7 @@ public class InputMethodService extends AbstractInputMethodService {
 
     /**
      * @hide
-     * The IME is visible.
+     * The IME is perceptibly visible to the user.
      */
     public static final int IME_VISIBLE = 0x2;
 
@@ -405,6 +405,15 @@ public class InputMethodService extends AbstractInputMethodService {
      * This flag cannot be combined with {@link #IME_VISIBLE}.
      */
     public static final int IME_INVISIBLE = 0x4;
+
+    /**
+     * @hide
+     * The IME is visible, but not yet perceptible to the user (e.g. fading in)
+     * by {@link android.view.WindowInsetsController}.
+     *
+     * @see InputMethodManager#reportPerceptible
+     */
+    public static final int IME_VISIBLE_IMPERCEPTIBLE = 0x8;
 
     // Min and max values for back disposition.
     private static final int BACK_DISPOSITION_MIN = BACK_DISPOSITION_DEFAULT;
@@ -515,6 +524,7 @@ public class InputMethodService extends AbstractInputMethodService {
     private Handler mHandler;
     private boolean mImeSurfaceScheduledForRemoval;
     private ImsConfigurationTracker mConfigTracker = new ImsConfigurationTracker();
+    private boolean mDestroyed;
 
     /**
      * An opaque {@link Binder} token of window requesting {@link InputMethodImpl#showSoftInput}
@@ -589,17 +599,21 @@ public class InputMethodService extends AbstractInputMethodService {
          */
         @MainThread
         @Override
-        public final void initializeInternal(@NonNull IBinder token, int displayId,
+        public final void initializeInternal(@NonNull IBinder token,
                 IInputMethodPrivilegedOperations privilegedOperations, int configChanges) {
             if (InputMethodPrivilegedOperationsRegistry.isRegistered(token)) {
                 Log.w(TAG, "The token has already registered, ignore this initialization.");
+                return;
+            }
+            if (mDestroyed) {
+                Log.i(TAG, "The InputMethodService has already onDestroyed()."
+                    + "Ignore the initialization.");
                 return;
             }
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.initializeInternal");
             mConfigTracker.onInitialize(configChanges);
             mPrivOps.set(privilegedOperations);
             InputMethodPrivilegedOperationsRegistry.put(token, mPrivOps);
-            updateInputMethodDisplay(displayId);
             attachToken(token);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
@@ -629,25 +643,9 @@ public class InputMethodService extends AbstractInputMethodService {
                 throw new IllegalStateException(
                         "attachToken() must be called at most once. token=" + token);
             }
+            attachToWindowToken(token);
             mToken = token;
             mWindow.setToken(token);
-        }
-
-        /**
-         * {@inheritDoc}
-         * @hide
-         */
-        @MainThread
-        @Override
-        public void updateInputMethodDisplay(int displayId) {
-            if (getDisplayId() == displayId) {
-                return;
-            }
-            // Update display for adding IME window to the right display.
-            // TODO(b/111364446) Need to address context lifecycle issue if need to re-create
-            // for update resources & configuration correctly when show soft input
-            // in non-default display.
-            updateDisplay(displayId);
         }
 
         /**
@@ -807,11 +805,6 @@ public class InputMethodService extends AbstractInputMethodService {
                 return;
             }
 
-            if (Trace.isEnabled()) {
-                Binder.enableTracing();
-            } else {
-                Binder.disableTracing();
-            }
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "IMS.showSoftInput");
             ImeTracing.getInstance().triggerServiceDump(
                     "InputMethodService.InputMethodImpl#showSoftInput", InputMethodService.this,
@@ -1416,6 +1409,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     @Override public void onDestroy() {
+        mDestroyed = true;
         super.onDestroy();
         mRootView.getViewTreeObserver().removeOnComputeInternalInsetsListener(
                 mInsetsComputer);

@@ -28,10 +28,9 @@ import static com.android.systemui.statusbar.notification.collection.listbuilder
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_SORTING;
 import static com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState.STATE_TRANSFORMING;
 
-import static java.util.Objects.requireNonNull;
-
 import android.annotation.MainThread;
 import android.annotation.Nullable;
+import android.os.Trace;
 import android.util.ArrayMap;
 
 import androidx.annotation.NonNull;
@@ -47,6 +46,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeTransformGroupsListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.PipelineState;
 import com.android.systemui.statusbar.notification.collection.listbuilder.ShadeListBuilderLogger;
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Invalidator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter;
@@ -54,6 +54,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifStabilityManager;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.Pluggable;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
+import com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt;
 import com.android.systemui.util.Assert;
 import com.android.systemui.util.time.SystemClock;
 
@@ -80,6 +81,8 @@ public class ShadeListBuilder implements Dumpable {
     private final SystemClock mSystemClock;
     private final ShadeListBuilderLogger mLogger;
     private final NotificationInteractionTracker mInteractionTracker;
+    // used exclusivly by ShadeListBuilder#notifySectionEntriesUpdated
+    private final ArrayList<ListEntry> mTempSectionMembers = new ArrayList<>();
 
     private List<ListEntry> mNotifList = new ArrayList<>();
     private List<ListEntry> mNewNotifList = new ArrayList<>();
@@ -173,6 +176,13 @@ public class ShadeListBuilder implements Dumpable {
         mOnBeforeRenderListListeners.add(listener);
     }
 
+    void addPreRenderInvalidator(Invalidator invalidator) {
+        Assert.isMainThread();
+
+        mPipelineState.requireState(STATE_IDLE);
+        invalidator.setInvalidationListener(this::onPreRenderInvalidated);
+    }
+
     void addPreGroupFilter(NotifFilter filter) {
         Assert.isMainThread();
         mPipelineState.requireState(STATE_IDLE);
@@ -255,6 +265,14 @@ public class ShadeListBuilder implements Dumpable {
                 }
             };
 
+    private void onPreRenderInvalidated(Invalidator invalidator) {
+        Assert.isMainThread();
+
+        mLogger.logPreRenderInvalidated(invalidator.getName(), mPipelineState.getState());
+
+        rebuildListIfBefore(STATE_FINALIZING);
+    }
+
     private void onPreGroupFilterInvalidated(NotifFilter filter) {
         Assert.isMainThread();
 
@@ -315,6 +333,7 @@ public class ShadeListBuilder implements Dumpable {
      * if we detect that behavior, we should crash instantly.
      */
     private void buildList() {
+        Trace.beginSection("ShadeListBuilder.buildList");
         mPipelineState.requireIsBefore(STATE_BUILD_STARTED);
         mPipelineState.setState(STATE_BUILD_STARTED);
 
@@ -344,20 +363,21 @@ public class ShadeListBuilder implements Dumpable {
         mPipelineState.incrementTo(STATE_GROUP_STABILIZING);
         stabilizeGroupingNotifs(mNotifList);
 
-        // Step 5: Sort
-        // Assign each top-level entry a section, then sort the list by section and then within
-        // section by our list of custom comparators
-        dispatchOnBeforeSort(mReadOnlyNotifList);
-        mPipelineState.incrementTo(STATE_SORTING);
-        sortList();
 
-        // Step 6: Filter out entries after pre-group filtering, grouping, promoting and sorting
+        // Step 5: Filter out entries after pre-group filtering, grouping and promoting
         // Now filters can see grouping information to determine whether to filter or not.
         dispatchOnBeforeFinalizeFilter(mReadOnlyNotifList);
         mPipelineState.incrementTo(STATE_FINALIZE_FILTERING);
         filterNotifs(mNotifList, mNewNotifList, mNotifFinalizeFilters);
         applyNewNotifList();
         pruneIncompleteGroups(mNotifList);
+
+        // Step 6: Sort
+        // Assign each top-level entry a section, then sort the list by section and then within
+        // section by our list of custom comparators
+        dispatchOnBeforeSort(mReadOnlyNotifList);
+        mPipelineState.incrementTo(STATE_SORTING);
+        sortListAndNotifySections();
 
         // Step 7: Lock in our group structure and log anything that's changed since the last run
         mPipelineState.incrementTo(STATE_FINALIZING);
@@ -367,9 +387,11 @@ public class ShadeListBuilder implements Dumpable {
 
         // Step 8: Dispatch the new list, first to any listeners and then to the view layer
         dispatchOnBeforeRenderList(mReadOnlyNotifList);
+        Trace.beginSection("ShadeListBuilder.onRenderList");
         if (mOnRenderListListener != null) {
             mOnRenderListListener.onRenderList(mReadOnlyNotifList);
         }
+        Trace.endSection();
 
         // Step 9: We're done!
         mLogger.logEndBuildList(
@@ -381,6 +403,25 @@ public class ShadeListBuilder implements Dumpable {
         }
         mPipelineState.setState(STATE_IDLE);
         mIterationCount++;
+        Trace.endSection();
+    }
+
+    private void notifySectionEntriesUpdated() {
+        Trace.beginSection("ShadeListBuilder.notifySectionEntriesUpdated");
+        NotifSection currentSection = null;
+        mTempSectionMembers.clear();
+        for (int i = 0; i < mNotifList.size(); i++) {
+            ListEntry currentEntry = mNotifList.get(i);
+            if (currentSection != currentEntry.getSection()) {
+                if (currentSection != null) {
+                    currentSection.getSectioner().onEntriesUpdated(mTempSectionMembers);
+                    mTempSectionMembers.clear();
+                }
+                currentSection = currentEntry.getSection();
+            }
+            mTempSectionMembers.add(currentEntry);
+        }
+        Trace.endSection();
     }
 
     /**
@@ -422,6 +463,7 @@ public class ShadeListBuilder implements Dumpable {
             Collection<? extends ListEntry> entries,
             List<ListEntry> out,
             List<NotifFilter> filters) {
+        Trace.beginSection("ShadeListBuilder.filterNotifs");
         final long now = mSystemClock.uptimeMillis();
         for (ListEntry entry : entries)  {
             if (entry instanceof GroupEntry) {
@@ -453,9 +495,11 @@ public class ShadeListBuilder implements Dumpable {
                 }
             }
         }
+        Trace.endSection();
     }
 
     private void groupNotifs(List<ListEntry> entries, List<ListEntry> out) {
+        Trace.beginSection("ShadeListBuilder.groupNotifs");
         for (ListEntry listEntry : entries) {
             // since grouping hasn't happened yet, all notifs are NotificationEntries
             NotificationEntry entry = (NotificationEntry) listEntry;
@@ -511,12 +555,14 @@ public class ShadeListBuilder implements Dumpable {
                 }
             }
         }
+        Trace.endSection();
     }
 
     private void stabilizeGroupingNotifs(List<ListEntry> topLevelList) {
         if (mNotifStabilityManager == null) {
             return;
         }
+        Trace.beginSection("ShadeListBuilder.stabilizeGroupingNotifs");
 
         for (int i = 0; i < topLevelList.size(); i++) {
             final ListEntry tle = topLevelList.get(i);
@@ -542,6 +588,7 @@ public class ShadeListBuilder implements Dumpable {
                 }
             }
         }
+        Trace.endSection();
     }
 
     /**
@@ -574,6 +621,7 @@ public class ShadeListBuilder implements Dumpable {
     }
 
     private void promoteNotifs(List<ListEntry> list) {
+        Trace.beginSection("ShadeListBuilder.promoteNotifs");
         for (int i = 0; i < list.size(); i++) {
             final ListEntry tle = list.get(i);
 
@@ -592,9 +640,11 @@ public class ShadeListBuilder implements Dumpable {
                 });
             }
         }
+        Trace.endSection();
     }
 
     private void pruneIncompleteGroups(List<ListEntry> shadeList) {
+        Trace.beginSection("ShadeListBuilder.pruneIncompleteGroups");
         for (int i = 0; i < shadeList.size(); i++) {
             final ListEntry tle = shadeList.get(i);
 
@@ -649,6 +699,7 @@ public class ShadeListBuilder implements Dumpable {
                 }
             }
         }
+        Trace.endSection();
     }
 
     /**
@@ -714,14 +765,15 @@ public class ShadeListBuilder implements Dumpable {
         }
     }
 
-    private void sortList() {
+    private void sortListAndNotifySections() {
+        Trace.beginSection("ShadeListBuilder.sortListAndNotifySections");
         // Assign sections to top-level elements and sort their children
         for (ListEntry entry : mNotifList) {
             NotifSection section = applySections(entry);
             if (entry instanceof GroupEntry) {
                 GroupEntry parent = (GroupEntry) entry;
                 for (NotificationEntry child : parent.getChildren()) {
-                    child.getAttachState().setSection(section);
+                    setEntrySection(child, section);
                 }
                 parent.sortChildren(sChildComparator);
             }
@@ -729,6 +781,10 @@ public class ShadeListBuilder implements Dumpable {
 
         // Finally, sort all top-level elements
         mNotifList.sort(mTopLevelComparator);
+
+        // notify sections since the list is sorted now
+        notifySectionEntriesUpdated();
+        Trace.endSection();
     }
 
     private void freeEmptyGroups() {
@@ -837,8 +893,8 @@ public class ShadeListBuilder implements Dumpable {
     private final Comparator<ListEntry> mTopLevelComparator = (o1, o2) -> {
 
         int cmp = Integer.compare(
-                requireNonNull(o1.getSection()).getIndex(),
-                requireNonNull(o2.getSection()).getIndex());
+                o1.getSectionIndex(),
+                o2.getSectionIndex());
 
         if (cmp == 0) {
             for (int i = 0; i < mNotifComparators.size(); i++) {
@@ -937,9 +993,16 @@ public class ShadeListBuilder implements Dumpable {
             }
         }
 
-        entry.getAttachState().setSection(finalSection);
-
+        setEntrySection(entry, finalSection);
         return finalSection;
+    }
+
+    private void setEntrySection(ListEntry entry, NotifSection finalSection) {
+        entry.getAttachState().setSection(finalSection);
+        NotificationEntry representativeEntry = entry.getRepresentativeEntry();
+        if (representativeEntry != null && finalSection != null) {
+            representativeEntry.setBucket(finalSection.getBucket());
+        }
     }
 
     @NonNull
@@ -972,27 +1035,35 @@ public class ShadeListBuilder implements Dumpable {
     }
 
     private void dispatchOnBeforeTransformGroups(List<ListEntry> entries) {
+        Trace.beginSection("ShadeListBuilder.dispatchOnBeforeTransformGroups");
         for (int i = 0; i < mOnBeforeTransformGroupsListeners.size(); i++) {
             mOnBeforeTransformGroupsListeners.get(i).onBeforeTransformGroups(entries);
         }
+        Trace.endSection();
     }
 
     private void dispatchOnBeforeSort(List<ListEntry> entries) {
+        Trace.beginSection("ShadeListBuilder.dispatchOnBeforeSort");
         for (int i = 0; i < mOnBeforeSortListeners.size(); i++) {
             mOnBeforeSortListeners.get(i).onBeforeSort(entries);
         }
+        Trace.endSection();
     }
 
     private void dispatchOnBeforeFinalizeFilter(List<ListEntry> entries) {
+        Trace.beginSection("ShadeListBuilder.dispatchOnBeforeFinalizeFilter");
         for (int i = 0; i < mOnBeforeFinalizeFilterListeners.size(); i++) {
             mOnBeforeFinalizeFilterListeners.get(i).onBeforeFinalizeFilter(entries);
         }
+        Trace.endSection();
     }
 
     private void dispatchOnBeforeRenderList(List<ListEntry> entries) {
+        Trace.beginSection("ShadeListBuilder.dispatchOnBeforeRenderList");
         for (int i = 0; i < mOnBeforeRenderListListeners.size(); i++) {
             mOnBeforeRenderListListeners.get(i).onBeforeRenderList(entries);
         }
+        Trace.endSection();
     }
 
     @Override
@@ -1020,13 +1091,13 @@ public class ShadeListBuilder implements Dumpable {
         void onRenderList(@NonNull List<ListEntry> entries);
     }
 
-    private static final NotifSectioner DEFAULT_SECTIONER =
-            new NotifSectioner("UnknownSection") {
-                @Override
-                public boolean isInSection(ListEntry entry) {
-                    return true;
-                }
-            };
+    private static final NotifSectioner DEFAULT_SECTIONER = new NotifSectioner("UnknownSection",
+            NotificationPriorityBucketKt.BUCKET_UNKNOWN) {
+        @Override
+        public boolean isInSection(ListEntry entry) {
+            return true;
+        }
+    };
 
     private static final int MIN_CHILDREN_FOR_GROUP = 2;
 

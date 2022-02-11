@@ -19,6 +19,7 @@ package com.android.server.biometrics.sensors.fingerprint.aidl;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.hardware.biometrics.BiometricOverlayConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.fingerprint.ISession;
@@ -31,7 +32,7 @@ import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.DetectionConsumer;
-import com.android.server.biometrics.sensors.fingerprint.UdfpsHelper;
+import com.android.server.biometrics.sensors.SensorOverlays;
 
 /**
  * Performs fingerprint detection without exposing any matching information (e.g. accept/reject
@@ -42,8 +43,7 @@ class FingerprintDetectClient extends AcquisitionClient<ISession> implements Det
     private static final String TAG = "FingerprintDetectClient";
 
     private final boolean mIsStrongBiometric;
-    @Nullable private final IUdfpsOverlayController mUdfpsOverlayController;
-
+    @NonNull private final SensorOverlays mSensorOverlays;
     @Nullable private ICancellationSignal mCancellationSignal;
 
     FingerprintDetectClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
@@ -57,7 +57,7 @@ class FingerprintDetectClient extends AcquisitionClient<ISession> implements Det
                 BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
         setRequestId(requestId);
         mIsStrongBiometric = isStrongBiometric;
-        mUdfpsOverlayController = udfpsOverlayController;
+        mSensorOverlays = new SensorOverlays(udfpsOverlayController, null /* sideFpsController*/);
     }
 
     @Override
@@ -68,7 +68,8 @@ class FingerprintDetectClient extends AcquisitionClient<ISession> implements Det
 
     @Override
     protected void stopHalOperation() {
-        UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+        mSensorOverlays.hide(getSensorId());
+
         try {
             mCancellationSignal.cancel();
         } catch (RemoteException e) {
@@ -79,14 +80,13 @@ class FingerprintDetectClient extends AcquisitionClient<ISession> implements Det
 
     @Override
     protected void startHalOperation() {
-        UdfpsHelper.showUdfpsOverlay(getSensorId(),
-                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD,
-                mUdfpsOverlayController, this);
+        mSensorOverlays.show(getSensorId(), BiometricOverlayConstants.REASON_AUTH_KEYGUARD, this);
+
         try {
             mCancellationSignal = getFreshDaemon().detectInteraction();
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting finger detect", e);
-            UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+            mSensorOverlays.hide(getSensorId());
             mCallback.onClientFinished(this, false /* success */);
         }
     }

@@ -3337,7 +3337,11 @@ public abstract class Context {
      * Service will call {@link android.app.Service#startForeground(int, android.app.Notification)
      * startForeground(int, android.app.Notification)} once it begins running.  The service is given
      * an amount of time comparable to the ANR interval to do this, otherwise the system
-     * will automatically stop the service and declare the app ANR.
+     * will automatically crash the process, in which case an internal exception
+     * {@code ForegroundServiceDidNotStartInTimeException} is logged on logcat on devices
+     * running SDK Version {@link android.os.Build.VERSION_CODES#S} or later. On older Android
+     * versions, an internal exception {@code RemoteServiceException} is logged instead, with
+     * a corresponding message.
      *
      * <p>Unlike the ordinary {@link #startService(Intent)}, this method can be used
      * at any time, regardless of whether the app hosting the service is in a foreground

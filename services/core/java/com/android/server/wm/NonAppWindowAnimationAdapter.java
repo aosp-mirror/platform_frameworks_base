@@ -27,6 +27,7 @@ import static com.android.server.wm.AnimationAdapterProto.REMOTE;
 import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 
+import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.util.proto.ProtoOutputStream;
@@ -68,23 +69,30 @@ class NonAppWindowAnimationAdapter implements AnimationAdapter {
             long durationHint, long statusBarTransitionDelay,
             ArrayList<NonAppWindowAnimationAdapter> adaptersOut) {
         final ArrayList<RemoteAnimationTarget> targets = new ArrayList<>();
-        if (transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
-                || transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER) {
+        if (shouldStartNonAppWindowAnimationsForKeyguardExit(transit)) {
             startNonAppWindowAnimationsForKeyguardExit(
                     service, durationHint, statusBarTransitionDelay, targets, adaptersOut);
-        } else if (transit == TRANSIT_OLD_TASK_OPEN || transit == TRANSIT_OLD_TASK_TO_FRONT
-                || transit == TRANSIT_OLD_WALLPAPER_CLOSE) {
-            final boolean shouldAttachNavBarToApp =
-                    displayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()
-                            && service.getRecentsAnimationController() == null
-                            && displayContent.getFadeRotationAnimationController() == null;
-            if (shouldAttachNavBarToApp) {
-                startNavigationBarWindowAnimation(
-                        displayContent, durationHint, statusBarTransitionDelay, targets,
-                        adaptersOut);
-            }
+        } else if (shouldAttachNavBarToApp(service, displayContent, transit)) {
+            startNavigationBarWindowAnimation(
+                    displayContent, durationHint, statusBarTransitionDelay, targets,
+                    adaptersOut);
         }
         return targets.toArray(new RemoteAnimationTarget[targets.size()]);
+    }
+
+    static boolean shouldStartNonAppWindowAnimationsForKeyguardExit(
+            @WindowManager.TransitionOldType int transit) {
+        return transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY
+                || transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
+    }
+
+    static boolean shouldAttachNavBarToApp(WindowManagerService service,
+            DisplayContent displayContent, @WindowManager.TransitionOldType int transit) {
+        return (transit == TRANSIT_OLD_TASK_OPEN || transit == TRANSIT_OLD_TASK_TO_FRONT
+                || transit == TRANSIT_OLD_WALLPAPER_CLOSE)
+                && displayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()
+                && service.getRecentsAnimationController() == null
+                && displayContent.getFadeRotationAnimationController() == null;
     }
 
     /**
@@ -138,14 +146,14 @@ class NonAppWindowAnimationAdapter implements AnimationAdapter {
         mTarget = new RemoteAnimationTarget(-1, -1, getLeash(), false,
                 new Rect(), null, mWindowContainer.getPrefixOrderIndex(),
                 mWindowContainer.getLastSurfacePosition(), mWindowContainer.getBounds(), null,
-                mWindowContainer.getWindowConfiguration(), true, null, null, null,
+                mWindowContainer.getWindowConfiguration(), true, null, null, null, false,
                 mWindowContainer.getWindowType());
         return mTarget;
     }
 
     @Override
     public void startAnimation(SurfaceControl animationLeash, SurfaceControl.Transaction t,
-            int type, SurfaceAnimator.OnAnimationFinishedCallback finishCallback) {
+            int type, @NonNull SurfaceAnimator.OnAnimationFinishedCallback finishCallback) {
         ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "startAnimation");
         mCapturedLeash = animationLeash;
         mCapturedLeashFinishCallback = finishCallback;

@@ -46,17 +46,17 @@ message AccessibilityTraceProto {
     /* required: elapsed realtime in nanos since boot of when this entry was logged */
     optional fixed64 elapsed_realtime_nanos = 1;
     optional string calendar_time = 2;
-
-    optional string process_name = 3;
-    optional string thread_id_name = 4;
+    repeated string logging_type = 3;
+    optional string process_name = 4;
+    optional string thread_id_name = 5;
 
     /* where the trace originated */
-    optional string where = 5;
+    optional string where = 6;
 
-    optional string calling_pkg = 6;
-    optional string calling_params = 7;
-    optional string calling_stacks = 8;
+    optional string calling_pkg = 7;
+    optional string calling_params = 8;
+    optional string calling_stacks = 9;
 
-    optional AccessibilityDumpProto accessibility_service = 9;
-    optional com.android.server.wm.WindowManagerServiceDumpProto window_manager_service = 10;
+    optional AccessibilityDumpProto accessibility_service = 10;
+    optional com.android.server.wm.WindowManagerServiceDumpProto window_manager_service = 11;
 }

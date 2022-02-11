@@ -345,8 +345,12 @@ public class TileServices extends IQSService.Stub {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (TileService.ACTION_REQUEST_LISTENING.equals(intent.getAction())) {
-                requestListening(
-                        (ComponentName) intent.getParcelableExtra(Intent.EXTRA_COMPONENT_NAME));
+                try {
+                    ComponentName c = intent.getParcelableExtra(Intent.EXTRA_COMPONENT_NAME);
+                    requestListening(c);
+                } catch (ClassCastException ex) {
+                    Log.e(TAG, "Bad component name", ex);
+                }
             }
         }
     };

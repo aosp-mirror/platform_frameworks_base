@@ -50,6 +50,7 @@ import javax.inject.Inject;
  * This is now integrated in the data-layer via
  * {@link com.android.systemui.statusbar.notification.collection.ShadeListBuilder}.
  */
+// TODO(b/204468557): Move to @CoordinatorScope
 @SysUISingleton
 public class VisualStabilityCoordinator implements Coordinator {
     private final DelayableExecutor mDelayableExecutor;

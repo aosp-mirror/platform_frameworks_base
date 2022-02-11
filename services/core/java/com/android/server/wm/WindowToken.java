@@ -16,9 +16,11 @@
 
 package com.android.server.wm;
 
+import static android.view.ViewRootImpl.INSETS_LAYOUT_GENERALIZATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
@@ -230,6 +232,11 @@ class WindowToken extends WindowContainer<WindowState> {
             ProtoLog.w(WM_DEBUG_WINDOW_MOVEMENT,
                     "removeAllWindowsIfPossible: removing win=%s", win);
             win.removeIfPossible();
+            if (i > mChildren.size()) {
+                // It's possible for removeIfPossible to delete siblings (for example if it is a
+                // starting window, it will perform operations on the ActivityRecord).
+                i = mChildren.size();
+            }
         }
     }
 
@@ -453,9 +460,24 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     Rect getFixedRotationBarContentFrame(int windowType) {
-        return isFixedRotationTransforming()
-                ? mFixedRotationTransformState.mBarContentFrames.get(windowType)
-                : null;
+        if (!isFixedRotationTransforming()) {
+            return null;
+        }
+        if (!INSETS_LAYOUT_GENERALIZATION) {
+            return mFixedRotationTransformState.mBarContentFrames.get(windowType);
+        }
+        final DisplayFrames displayFrames = mFixedRotationTransformState.mDisplayFrames;
+        final Rect tmpRect = new Rect();
+        if (windowType == TYPE_NAVIGATION_BAR) {
+            tmpRect.set(displayFrames.mInsetsState.getSource(InsetsState.ITYPE_NAVIGATION_BAR)
+                    .getFrame());
+        }
+        if (windowType == TYPE_STATUS_BAR) {
+            tmpRect.set(displayFrames.mInsetsState.getSource(InsetsState.ITYPE_STATUS_BAR)
+                    .getFrame());
+        }
+        tmpRect.intersect(displayFrames.mDisplayCutoutSafe);
+        return tmpRect;
     }
 
     InsetsState getFixedRotationTransformInsetsState() {

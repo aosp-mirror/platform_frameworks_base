@@ -184,7 +184,7 @@ class MediaResumeListener @Inject constructor(
         oldKey: String?,
         data: MediaData,
         immediately: Boolean,
-        isSsReactivated: Boolean
+        receivedSmartspaceCardLatency: Int
     ) {
         if (useMediaResumption) {
             // If this had been started from a resume state, disconnect now that it's live
@@ -193,7 +193,7 @@ class MediaResumeListener @Inject constructor(
                 mediaBrowser = null
             }
             // If we don't have a resume action, check if we haven't already
-            if (data.resumeAction == null && !data.hasCheckedForResume && data.isLocalSession) {
+            if (data.resumeAction == null && !data.hasCheckedForResume && data.isLocalSession()) {
                 // TODO also check for a media button receiver intended for restarting (b/154127084)
                 Log.d(TAG, "Checking for service component for " + data.packageName)
                 val pm = context.packageManager

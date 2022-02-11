@@ -151,6 +151,12 @@ public interface BiometricConstants {
     int BIOMETRIC_ERROR_RE_ENROLL = 16;
 
     /**
+     * The privacy setting has been enabled and will block use of the sensor.
+     * @hide
+     */
+    int BIOMETRIC_ERROR_SENSOR_PRIVACY_ENABLED = 18;
+
+    /**
      * This constant is only used by SystemUI. It notifies SystemUI that authentication was paused
      * because the authentication attempt was unsuccessful.
      * @hide

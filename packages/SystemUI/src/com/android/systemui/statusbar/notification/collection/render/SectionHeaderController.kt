@@ -33,7 +33,8 @@ import javax.inject.Inject
 interface SectionHeaderController {
     fun reinflateView(parent: ViewGroup)
     val headerView: SectionHeaderView?
-    fun setOnClearAllClickListener(listener: View.OnClickListener)
+    fun setClearSectionEnabled(enabled: Boolean)
+    fun setOnClearSectionClickListener(listener: View.OnClickListener)
 }
 
 @SectionHeaderScope
@@ -46,6 +47,7 @@ internal class SectionHeaderNodeControllerImpl @Inject constructor(
 ) : NodeController, SectionHeaderController {
 
     private var _view: SectionHeaderView? = null
+    private var clearAllButtonEnabled = false
     private var clearAllClickListener: View.OnClickListener? = null
     private val onHeaderClickListener = View.OnClickListener {
         activityStarter.startActivity(
@@ -76,12 +78,18 @@ internal class SectionHeaderNodeControllerImpl @Inject constructor(
             parent.addView(inflated, oldPos)
         }
         _view = inflated
+        _view?.setClearSectionButtonEnabled(clearAllButtonEnabled)
     }
 
     override val headerView: SectionHeaderView?
         get() = _view
 
-    override fun setOnClearAllClickListener(listener: View.OnClickListener) {
+    override fun setClearSectionEnabled(enabled: Boolean) {
+        clearAllButtonEnabled = enabled
+        _view?.setClearSectionButtonEnabled(enabled)
+    }
+
+    override fun setOnClearSectionClickListener(listener: View.OnClickListener) {
         clearAllClickListener = listener
         _view?.setOnClearAllClickListener(listener)
     }

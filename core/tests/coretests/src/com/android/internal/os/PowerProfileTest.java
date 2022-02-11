@@ -17,6 +17,10 @@
 
 package com.android.internal.os;
 
+import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_AMBIENT;
+import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_SCREEN_FULL;
+import static com.android.internal.os.PowerProfile.POWER_GROUP_DISPLAY_SCREEN_ON;
+
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
@@ -53,7 +57,12 @@ public class PowerProfileTest extends TestCase {
         assertEquals(4, mProfile.getNumSpeedStepsInCpuCluster(1));
         assertEquals(60.0, mProfile.getAveragePowerForCpuCore(1, 3));
         assertEquals(3000.0, mProfile.getBatteryCapacity());
-        assertEquals(0.5, mProfile.getAveragePower(PowerProfile.POWER_AMBIENT_DISPLAY));
+        assertEquals(0.5,
+                mProfile.getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_AMBIENT, 0));
+        assertEquals(100.0,
+                mProfile.getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_SCREEN_ON, 0));
+        assertEquals(800.0,
+                mProfile.getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_SCREEN_FULL, 0));
         assertEquals(100.0, mProfile.getAveragePower(PowerProfile.POWER_AUDIO));
         assertEquals(150.0, mProfile.getAveragePower(PowerProfile.POWER_VIDEO));
     }

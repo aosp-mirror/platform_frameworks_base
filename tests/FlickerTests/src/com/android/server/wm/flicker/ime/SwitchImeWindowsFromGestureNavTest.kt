@@ -18,26 +18,24 @@ package com.android.server.wm.flicker.ime
 
 import android.app.Instrumentation
 import android.platform.test.annotations.Presubmit
+import android.view.Surface
 import android.view.WindowManagerPolicyConstants
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.FlickerBuilderProvider
 import com.android.server.wm.flicker.FlickerParametersRunnerFactory
 import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
-import com.android.server.wm.flicker.annotation.Group2
-import com.android.server.wm.flicker.helpers.ImeAppHelper
+import com.android.server.wm.flicker.annotation.Group4
+import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.navBarWindowIsVisible
 import com.android.server.wm.flicker.startRotation
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
+import com.android.server.wm.flicker.statusBarWindowIsVisible
+import com.android.server.wm.traces.common.FlickerComponentName
 
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -53,11 +51,12 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@Group2
+@Group4
+@Presubmit
 class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestParameter) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val testApp = SimpleAppHelper(instrumentation)
-    private val imeTestApp = ImeAppHelper(instrumentation)
+    private val imeTestApp = ImeAppAutoFocusHelper(instrumentation, testSpec.config.startRotation)
 
     @FlickerBuilderProvider
     fun buildFlicker(): FlickerBuilder {
@@ -66,7 +65,13 @@ class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestParame
                 eachRun {
                     this.setRotation(testSpec.config.startRotation)
                     testApp.launchViaIntent(wmHelper)
+                    wmHelper.waitForFullScreenApp(testApp.component)
+                    wmHelper.waitForAppTransitionIdle()
+
                     imeTestApp.launchViaIntent(wmHelper)
+                    wmHelper.waitForFullScreenApp(testApp.component)
+                    wmHelper.waitForAppTransitionIdle()
+
                     imeTestApp.openIME(device, wmHelper)
                 }
             }
@@ -74,57 +79,87 @@ class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestParame
                 eachRun {
                     device.pressHome()
                     wmHelper.waitForHomeActivityVisible()
-                }
-                test {
-                    imeTestApp.exit(wmHelper)
+                    testApp.exit()
+                    imeTestApp.exit()
                 }
             }
             transitions {
                 // [Step1]: Swipe right from imeTestApp to testApp task
+                createTag(TAG_IME_VISIBLE)
                 val displayBounds = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
-                val displayCenterX = displayBounds.bounds.width() / 2
-                device.swipe(displayCenterX, displayBounds.bounds.height(),
-                        displayBounds.bounds.width(), displayBounds.bounds.height(), 20)
+                device.swipe(0, displayBounds.bounds.height(),
+                        displayBounds.bounds.width(), displayBounds.bounds.height(), 50)
+
                 wmHelper.waitForFullScreenApp(testApp.component)
+                wmHelper.waitForAppTransitionIdle()
+                createTag(TAG_IME_INVISIBLE)
             }
             transitions {
                 // [Step2]: Swipe left to back to imeTestApp task
                 val displayBounds = WindowUtils.getDisplayBounds(testSpec.config.startRotation)
-                val displayCenterX = displayBounds.bounds.width() / 2
                 device.swipe(displayBounds.bounds.width(), displayBounds.bounds.height(),
-                        displayCenterX, displayBounds.bounds.height(), 20)
+                        0, displayBounds.bounds.height(), 50)
                 wmHelper.waitForFullScreenApp(imeTestApp.component)
             }
         }
     }
 
-    @FlakyTest
     @Test
-    fun imeAppWindowIsAlwaysVisible() = testSpec.imeAppWindowIsAlwaysVisible(imeTestApp)
+    fun imeAppWindowVisibility() {
+        testSpec.assertWm {
+            isAppWindowVisible(imeTestApp.component)
+                .then()
+                .isAppWindowVisible(testApp.component)
+                .then()
+                .isAppWindowVisible(imeTestApp.component)
+        }
+    }
 
-    @FlakyTest
     @Test
-    fun imeLayerBecomesVisible() = testSpec.imeLayerBecomesVisible()
+    fun navBarLayerIsVisibleAroundSwitching() {
+        testSpec.assertLayersStart {
+            isVisible(FlickerComponentName.NAV_BAR)
+        }
+        testSpec.assertLayersEnd {
+            isVisible(FlickerComponentName.NAV_BAR)
+        }
+    }
 
-    @FlakyTest
     @Test
-    fun imeLayerBecomesInvisible() = testSpec.imeLayerBecomesInvisible()
+    fun statusBarLayerIsVisibleAroundSwitching() {
+        testSpec.assertLayersStart {
+            isVisible(FlickerComponentName.STATUS_BAR)
+        }
+        testSpec.assertLayersEnd {
+            isVisible(FlickerComponentName.STATUS_BAR)
+        }
+    }
 
-    @Presubmit
     @Test
-    fun navBarWindowIsAlwaysVisible() = testSpec.navBarWindowIsAlwaysVisible()
+    fun imeLayerIsVisibleWhenSwitchingToImeApp() {
+        testSpec.assertLayersStart {
+            isVisible(FlickerComponentName.IME)
+        }
+        testSpec.assertLayersTag(TAG_IME_VISIBLE) {
+            isVisible(FlickerComponentName.IME)
+        }
+        testSpec.assertLayersEnd {
+            isVisible(FlickerComponentName.IME)
+        }
+    }
 
-    @FlakyTest
     @Test
-    fun navBarLayerIsAlwaysVisible() = testSpec.navBarLayerIsAlwaysVisible()
+    fun imeLayerIsInvisibleWhenSwitchingToTestApp() {
+        testSpec.assertLayersTag(TAG_IME_INVISIBLE) {
+            isInvisible(FlickerComponentName.IME)
+        }
+    }
 
-    @Presubmit
     @Test
-    fun statusBarWindowIsAlwaysVisible() = testSpec.statusBarWindowIsAlwaysVisible()
+    fun navBarWindowIsVisible() = testSpec.navBarWindowIsVisible()
 
-    @FlakyTest
     @Test
-    fun statusBarLayerIsAlwaysVisible() = testSpec.statusBarLayerIsAlwaysVisible()
+    fun statusBarWindowIsVisible() = testSpec.statusBarWindowIsVisible()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
@@ -134,10 +169,13 @@ class SwitchImeWindowsFromGestureNavTest(private val testSpec: FlickerTestParame
                     .getConfigNonRotationTests(
                             repetitions = 3,
                             supportedNavigationModes = listOf(
-                                    WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,
                                     WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY
-                            )
+                            ),
+                            supportedRotations = listOf(Surface.ROTATION_0)
                     )
         }
+
+        private const val TAG_IME_VISIBLE = "imeVisible"
+        private const val TAG_IME_INVISIBLE = "imeInVisible"
     }
 }

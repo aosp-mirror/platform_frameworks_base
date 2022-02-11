@@ -22,6 +22,7 @@ import static android.view.View.GONE;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static junit.framework.Assert.assertEquals;
@@ -52,18 +53,16 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.EmptyShadeView;
-import com.android.systemui.statusbar.FeatureFlags;
-import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationShelfController;
-import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager;
+import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.FooterView;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.KeyguardBypassEnabledProvider;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -98,18 +97,14 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationGroupManagerLegacy mGroupExpansionManager;
     @Mock private ExpandHelper mExpandHelper;
     @Mock private EmptyShadeView mEmptyShadeView;
-    @Mock private NotificationRemoteInputManager mRemoteInputManager;
-    @Mock private RemoteInputController mRemoteInputController;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
-    @Mock private KeyguardBypassEnabledProvider mKeyguardBypassEnabledProvider;
     @Mock private KeyguardBypassController mBypassController;
     @Mock private NotificationSectionsManager mNotificationSectionsManager;
     @Mock private NotificationSection mNotificationSection;
-    @Mock private SysuiStatusBarStateController mStatusBarStateController;
     @Mock private NotificationSwipeHelper mNotificationSwipeHelper;
     @Mock private NotificationStackScrollLayoutController mStackScrollLayoutController;
-    @Mock private FeatureFlags mFeatureFlags;
     @Mock private UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
+    @Mock private NotificationShelf mNotificationShelf;
 
     @Before
     @UiThreadTest
@@ -119,39 +114,37 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         Settings.Secure.putIntForUser(mContext.getContentResolver(), NOTIFICATION_HISTORY_ENABLED,
                 1, UserHandle.USER_CURRENT);
 
+
+        // Interact with real instance of AmbientState.
+        mAmbientState = new AmbientState(mContext, mNotificationSectionsManager, mBypassController);
+
         // Inject dependencies before initializing the layout
         mDependency.injectTestDependency(SysuiStatusBarStateController.class, mBarState);
         mDependency.injectMockDependency(ShadeController.class);
+        mDependency.injectTestDependency(
+                NotificationSectionsManager.class, mNotificationSectionsManager);
+        mDependency.injectTestDependency(GroupMembershipManager.class, mGroupMembershipManger);
+        mDependency.injectTestDependency(GroupExpansionManager.class, mGroupExpansionManager);
+        mDependency.injectTestDependency(AmbientState.class, mAmbientState);
+        mDependency.injectTestDependency(NotificationShelf.class, mNotificationShelf);
+        mDependency.injectTestDependency(
+                UnlockedScreenOffAnimationController.class, mUnlockedScreenOffAnimationController);
 
         NotificationShelfController notificationShelfController =
                 mock(NotificationShelfController.class);
-        NotificationShelf notificationShelf = mock(NotificationShelf.class);
-        when(notificationShelfController.getView()).thenReturn(notificationShelf);
+        when(notificationShelfController.getView()).thenReturn(mNotificationShelf);
         when(mNotificationSectionsManager.createSectionsForBuckets()).thenReturn(
                 new NotificationSection[]{
                         mNotificationSection
                 });
-        when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
-
-        // Interact with real instance of AmbientState.
-        mAmbientState = new AmbientState(mContext, mNotificationSectionsManager, mBypassController);
 
         // The actual class under test.  You may need to work with this class directly when
         // testing anonymous class members of mStackScroller, like mMenuEventListener,
         // which refer to members of NotificationStackScrollLayout. The spy
         // holds a copy of the CUT's instances of these KeyguardBypassController, so they still
         // refer to the CUT's member variables, not the spy's member variables.
-        mStackScrollerInternal = new NotificationStackScrollLayout(
-                getContext(),
-                null,
-                mNotificationSectionsManager,
-                mGroupMembershipManger,
-                mGroupExpansionManager,
-                mAmbientState,
-                mFeatureFlags,
-                mUnlockedScreenOffAnimationController);
-        mStackScrollerInternal.initView(getContext(), mKeyguardBypassEnabledProvider,
-                mNotificationSwipeHelper);
+        mStackScrollerInternal = new NotificationStackScrollLayout(getContext(), null);
+        mStackScrollerInternal.initView(getContext(), mNotificationSwipeHelper);
         mStackScroller = spy(mStackScrollerInternal);
         mStackScroller.setShelfController(notificationShelfController);
         mStackScroller.setStatusBar(mBar);
@@ -159,7 +152,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         when(mStackScrollLayoutController.getNoticationRoundessManager())
                 .thenReturn(mNotificationRoundnessManager);
         mStackScroller.setController(mStackScrollLayoutController);
-        mStackScroller.setRemoteInputManager(mRemoteInputManager);
 
         // Stub out functionality that isn't necessary to test.
         doNothing().when(mBar)
@@ -170,7 +162,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                         anyBoolean());
         doNothing().when(mGroupExpansionManager).collapseGroups();
         doNothing().when(mExpandHelper).cancelImmediately();
-        doNothing().when(notificationShelf).setAnimationsEnabled(anyBoolean());
+        doNothing().when(mNotificationShelf).setAnimationsEnabled(anyBoolean());
     }
 
     @Test
@@ -213,41 +205,66 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     @Test
     @UiThreadTest
-    public void testSetExpandedHeight_blockingHelperManagerReceivedCallbacks() {
-        final float[] expectedHeight = {0f};
-        final float[] expectedAppear = {0f};
+    public void testSetExpandedHeight_listenerReceivedCallbacks() {
+        final float expectedHeight = 0f;
 
         mStackScroller.addOnExpandedHeightChangedListener((height, appear) -> {
-            Assert.assertEquals(expectedHeight[0], height, 0);
-            Assert.assertEquals(expectedAppear[0], appear, .1);
+            Assert.assertEquals(expectedHeight, height, 0);
         });
-        expectedHeight[0] = 1f;
-        expectedAppear[0] = 1f;
-        mStackScroller.setExpandedHeight(expectedHeight[0]);
+        mStackScroller.setExpandedHeight(expectedHeight);
+    }
 
-        expectedHeight[0] = 100f;
-        expectedAppear[0] = 0f;
-        mStackScroller.setExpandedHeight(expectedHeight[0]);
+    @Test
+    public void testAppearFractionCalculation() {
+        // appear start position
+        when(mNotificationShelf.getIntrinsicHeight()).thenReturn(100);
+        // because it's the same as shelf height, appear start position equals shelf height
+        mStackScroller.mStatusBarHeight = 100;
+        // appear end position
+        when(mEmptyShadeView.getHeight()).thenReturn(200);
+
+        assertEquals(0f, mStackScroller.calculateAppearFraction(100));
+        assertEquals(1f, mStackScroller.calculateAppearFraction(200));
+        assertEquals(0.5f, mStackScroller.calculateAppearFraction(150));
+    }
+
+    @Test
+    public void testAppearFractionCalculationIsNotNegativeWhenShelfBecomesSmaller() {
+        // this situation might occur if status bar height is defined in pixels while shelf height
+        // in dp and screen density changes - appear start position
+        // (calculated in NSSL#getMinExpansionHeight) that is adjusting for status bar might
+        // increase and become bigger that end position, which should be prevented
+
+        // appear start position
+        when(mNotificationShelf.getIntrinsicHeight()).thenReturn(80);
+        mStackScroller.mStatusBarHeight = 100;
+        // appear end position
+        when(mEmptyShadeView.getHeight()).thenReturn(90);
+
+        assertThat(mStackScroller.calculateAppearFraction(100)).isAtLeast(0);
     }
 
     @Test
     @UiThreadTest
     public void testSetExpandedHeight_withSplitShade_doesntInterpolateStackHeight() {
-        when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(true);
+        mContext.getOrCreateTestableResources()
+                .addOverride(R.bool.config_use_split_notification_shade, /* value= */ true);
         final int[] expectedStackHeight = {0};
 
         mStackScroller.addOnExpandedHeightChangedListener((expandedHeight, appear) -> {
             assertWithMessage("Given shade enabled: %s",
-                    mFeatureFlags.isTwoColumnNotificationShadeEnabled())
+                    true)
                     .that(mStackScroller.getHeight())
                     .isEqualTo(expectedStackHeight[0]);
         });
 
-        when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(false);
+        mContext.getOrCreateTestableResources()
+                .addOverride(R.bool.config_use_split_notification_shade, /* value= */ false);
         expectedStackHeight[0] = 0;
         mStackScroller.setExpandedHeight(100f);
 
-        when(mFeatureFlags.isTwoColumnNotificationShadeEnabled()).thenReturn(true);
+        mContext.getOrCreateTestableResources()
+                .addOverride(R.bool.config_use_split_notification_shade, /* value= */ true);
         expectedStackHeight[0] = 100;
         mStackScroller.setExpandedHeight(100f);
     }
@@ -307,7 +324,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         when(row.canViewBeDismissed()).thenReturn(true);
         when(mStackScroller.getChildCount()).thenReturn(1);
         when(mStackScroller.getChildAt(anyInt())).thenReturn(row);
-        when(mRemoteInputController.isRemoteInputActive()).thenReturn(true);
+        mStackScroller.setIsRemoteInputActive(true);
         when(mStackScrollLayoutController.hasActiveClearableNotifications(ROWS_ALL))
                 .thenReturn(true);
         when(mStackScrollLayoutController.hasActiveNotifications()).thenReturn(true);

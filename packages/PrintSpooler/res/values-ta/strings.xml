@@ -63,7 +63,7 @@
     <string name="printer_info_desc" msgid="7181988788991581654">"இந்தப் பிரிண்டர் பற்றிய கூடுதல் தகவல்"</string>
     <string name="notification_channel_progress" msgid="872788690775721436">"இயக்கத்திலுள்ள அச்சுப் பணிகள்"</string>
     <string name="notification_channel_failure" msgid="9042250774797916414">"தோல்வியடைந்த அச்சுப் பணிகள்"</string>
-    <string name="could_not_create_file" msgid="3425025039427448443">"ஃபைலை உருவாக்க முடியவில்லை"</string>
+    <string name="could_not_create_file" msgid="3425025039427448443">"கோப்பை உருவாக்க முடியவில்லை"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"சில அச்சுப் பொறிகள் முடக்கப்பட்டன"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"பிரிண்டர்களைத் தேடுகிறது"</string>
     <string name="print_no_print_services" msgid="8561247706423327966">"அச்சுப் பொறிகள் இல்லை"</string>
@@ -102,7 +102,7 @@
     <item msgid="4061931020926489228">"உறுவப்படம்"</item>
     <item msgid="3199660090246166812">"நிலத்தோற்றம்"</item>
   </string-array>
-    <string name="print_write_error_message" msgid="5787642615179572543">"ஃபைலில் எழுத முடியவில்லை"</string>
+    <string name="print_write_error_message" msgid="5787642615179572543">"கோப்பில் எழுத முடியவில்லை"</string>
     <string name="print_error_default_message" msgid="8602678405502922346">"செயல்படவில்லை. மீண்டும் முயலவும்."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"மீண்டும் முயலவும்"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"இப்போது பிரிண்டர் இல்லை."</string>

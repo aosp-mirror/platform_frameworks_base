@@ -58,6 +58,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import dagger.Lazy;
@@ -89,7 +90,7 @@ public class PowerUITest extends SysuiTestCase {
     private IThermalEventListener mSkinThermalEventListener;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private CommandQueue mCommandQueue;
-    @Mock private Lazy<StatusBar> mStatusBarLazy;
+    @Mock private Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
     @Mock private StatusBar mStatusBar;
 
     @Before
@@ -98,7 +99,7 @@ public class PowerUITest extends SysuiTestCase {
         mMockWarnings = mDependency.injectMockDependency(WarningsUI.class);
         mEnhancedEstimates = mDependency.injectMockDependency(EnhancedEstimates.class);
 
-        when(mStatusBarLazy.get()).thenReturn(mStatusBar);
+        when(mStatusBarOptionalLazy.get()).thenReturn(Optional.of(mStatusBar));
 
         mContext.addMockSystemService(Context.POWER_SERVICE, mPowerManager);
 
@@ -688,7 +689,8 @@ public class PowerUITest extends SysuiTestCase {
     }
 
     private void createPowerUi() {
-        mPowerUI = new PowerUI(mContext, mBroadcastDispatcher, mCommandQueue, mStatusBarLazy);
+        mPowerUI = new PowerUI(
+                mContext, mBroadcastDispatcher, mCommandQueue, mStatusBarOptionalLazy);
         mPowerUI.mThermalService = mThermalServiceMock;
     }
 

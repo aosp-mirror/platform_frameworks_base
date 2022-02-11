@@ -16,19 +16,24 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 
-import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.collection.coordinator.dagger.CoordinatorScope;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.collection.render.NodeController;
+import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.dagger.AlertingHeader;
 import com.android.systemui.statusbar.notification.dagger.SilentHeader;
+import com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -39,11 +44,13 @@ import javax.inject.Inject;
  *  - whether the notification's app is suspended or hiding its notifications
  *  - whether DND settings are hiding notifications from ambient display or the notification list
  */
-@SysUISingleton
+@CoordinatorScope
 public class RankingCoordinator implements Coordinator {
+    public static final boolean SHOW_ALL_SECTIONS = false;
     private final StatusBarStateController mStatusBarStateController;
     private final HighPriorityProvider mHighPriorityProvider;
-    private final NodeController mSilentHeaderController;
+    private final NodeController mSilentNodeController;
+    private final SectionHeaderController mSilentHeaderController;
     private final NodeController mAlertingHeaderController;
 
     @Inject
@@ -51,10 +58,12 @@ public class RankingCoordinator implements Coordinator {
             StatusBarStateController statusBarStateController,
             HighPriorityProvider highPriorityProvider,
             @AlertingHeader NodeController alertingHeaderController,
-            @SilentHeader NodeController silentHeaderController) {
+            @SilentHeader SectionHeaderController silentHeaderController,
+            @SilentHeader NodeController silentNodeController) {
         mStatusBarStateController = statusBarStateController;
         mHighPriorityProvider = highPriorityProvider;
         mAlertingHeaderController = alertingHeaderController;
+        mSilentNodeController = silentNodeController;
         mSilentHeaderController = silentHeaderController;
     }
 
@@ -74,7 +83,8 @@ public class RankingCoordinator implements Coordinator {
         return mSilentNotifSectioner;
     }
 
-    private final NotifSectioner mAlertingNotifSectioner = new NotifSectioner("Alerting") {
+    private final NotifSectioner mAlertingNotifSectioner = new NotifSectioner("Alerting",
+            NotificationPriorityBucketKt.BUCKET_ALERTING) {
         @Override
         public boolean isInSection(ListEntry entry) {
             return mHighPriorityProvider.isHighPriority(entry);
@@ -83,11 +93,16 @@ public class RankingCoordinator implements Coordinator {
         @Nullable
         @Override
         public NodeController getHeaderNodeController() {
-            return mAlertingHeaderController;
+            // TODO: remove SHOW_ALL_SECTIONS, this redundant method, and mAlertingHeaderController
+            if (SHOW_ALL_SECTIONS) {
+                return mAlertingHeaderController;
+            }
+            return null;
         }
     };
 
-    private final NotifSectioner mSilentNotifSectioner = new NotifSectioner("Silent") {
+    private final NotifSectioner mSilentNotifSectioner = new NotifSectioner("Silent",
+            NotificationPriorityBucketKt.BUCKET_SILENT) {
         @Override
         public boolean isInSection(ListEntry entry) {
             return !mHighPriorityProvider.isHighPriority(entry);
@@ -96,7 +111,19 @@ public class RankingCoordinator implements Coordinator {
         @Nullable
         @Override
         public NodeController getHeaderNodeController() {
-            return mSilentHeaderController;
+            return mSilentNodeController;
+        }
+
+        @Nullable
+        @Override
+        public void onEntriesUpdated(@NonNull List<ListEntry> entries) {
+            for (int i = 0; i < entries.size(); i++) {
+                if (entries.get(i).getRepresentativeEntry().getSbn().isClearable()) {
+                    mSilentHeaderController.setClearSectionEnabled(true);
+                    return;
+                }
+            }
+            mSilentHeaderController.setClearSectionEnabled(false);
         }
     };
 

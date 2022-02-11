@@ -173,8 +173,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      */
     void onKeyguardOccludedChangedLw(boolean occluded);
 
-    /** Applies a keyguard occlusion change if one happened. */
-    int applyKeyguardOcclusionChange();
+    /**
+     * Applies a keyguard occlusion change if one happened.
+     * @param transitionStarted Whether keyguard (un)occlude transition is starting or not.
+     */
+    int applyKeyguardOcclusionChange(boolean transitionStarted);
 
     /**
      * Interface to the Window Manager state associated with a particular
@@ -723,13 +726,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     StartingSurface addSplashScreen(IBinder appToken, int userId, String packageName,
             int theme, CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
             int icon, int logo, int windowFlags, Configuration overrideConfig, int displayId);
-
-    /**
-     * Set or clear a window which can behave as the keyguard.
-     *
-     * @param win The window which can behave as the keyguard.
-     */
-    void setKeyguardCandidateLw(@Nullable WindowState win);
 
     /**
      * Create and return an animation to re-display a window that was force hidden by Keyguard.

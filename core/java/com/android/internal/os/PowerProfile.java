@@ -17,10 +17,12 @@
 package com.android.internal.os;
 
 
+import android.annotation.StringDef;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -30,6 +32,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -39,6 +43,8 @@ import java.util.HashMap;
  * [hidden]
  */
 public class PowerProfile {
+
+    public static final String TAG = "PowerProfile";
 
     /*
      * POWER_CPU_SUSPEND: Power consumption when CPU is in power collapse mode.
@@ -145,12 +151,18 @@ public class PowerProfile {
 
     /**
      * Power consumption when screen is in doze/ambient/always-on mode, including backlight power.
+     *
+     * @deprecated Use {@link #POWER_GROUP_DISPLAY_AMBIENT} instead.
      */
+    @Deprecated
     public static final String POWER_AMBIENT_DISPLAY = "ambient.on";
 
     /**
      * Power consumption when screen is on, not including the backlight power.
+     *
+     * @deprecated Use {@link #POWER_GROUP_DISPLAY_SCREEN_ON} instead.
      */
+    @Deprecated
     @UnsupportedAppUsage
     public static final String POWER_SCREEN_ON = "screen.on";
 
@@ -175,7 +187,10 @@ public class PowerProfile {
     /**
      * Power consumption at full backlight brightness. If the backlight is at
      * 50% brightness, then this should be multiplied by 0.5
+     *
+     * @deprecated Use {@link #POWER_GROUP_DISPLAY_SCREEN_FULL} instead.
      */
+    @Deprecated
     @UnsupportedAppUsage
     public static final String POWER_SCREEN_FULL = "screen.full";
 
@@ -221,6 +236,29 @@ public class PowerProfile {
     public static final String POWER_BATTERY_CAPACITY = "battery.capacity";
 
     /**
+     * Power consumption when a screen is in doze/ambient/always-on mode, including backlight power.
+     */
+    public static final String POWER_GROUP_DISPLAY_AMBIENT = "ambient.on.display";
+
+    /**
+     * Power consumption when a screen is on, not including the backlight power.
+     */
+    public static final String POWER_GROUP_DISPLAY_SCREEN_ON = "screen.on.display";
+
+    /**
+     * Power consumption of a screen at full backlight brightness.
+     */
+    public static final String POWER_GROUP_DISPLAY_SCREEN_FULL = "screen.full.display";
+
+    @StringDef(prefix = { "POWER_GROUP_" }, value = {
+            POWER_GROUP_DISPLAY_AMBIENT,
+            POWER_GROUP_DISPLAY_SCREEN_ON,
+            POWER_GROUP_DISPLAY_SCREEN_FULL,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PowerGroup {}
+
+    /**
      * A map from Power Use Item to its power consumption.
      */
     static final HashMap<String, Double> sPowerItemMap = new HashMap<>();
@@ -255,6 +293,7 @@ public class PowerProfile {
                 readPowerValuesFromXml(context, forTest);
             }
             initCpuClusters();
+            initDisplays();
         }
     }
 
@@ -424,6 +463,58 @@ public class PowerProfile {
         return 0;
     }
 
+    private int mNumDisplays;
+
+    private void initDisplays() {
+        // Figure out how many displays are listed in the power profile.
+        mNumDisplays = 0;
+        while (!Double.isNaN(
+                getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_AMBIENT, mNumDisplays, Double.NaN))
+                || !Double.isNaN(
+                getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_SCREEN_ON, mNumDisplays, Double.NaN))
+                || !Double.isNaN(
+                getAveragePowerForOrdinal(POWER_GROUP_DISPLAY_SCREEN_FULL, mNumDisplays,
+                        Double.NaN))) {
+            mNumDisplays++;
+        }
+
+        // Handle legacy display power constants.
+        final Double deprecatedAmbientDisplay = sPowerItemMap.get(POWER_AMBIENT_DISPLAY);
+        boolean legacy = false;
+        if (deprecatedAmbientDisplay != null && mNumDisplays == 0) {
+            final String key = getOrdinalPowerType(POWER_GROUP_DISPLAY_AMBIENT, 0);
+            Slog.w(TAG, POWER_AMBIENT_DISPLAY + " is deprecated! Use " + key + " instead.");
+            sPowerItemMap.put(key, deprecatedAmbientDisplay);
+            legacy = true;
+        }
+
+        final Double deprecatedScreenOn = sPowerItemMap.get(POWER_SCREEN_ON);
+        if (deprecatedScreenOn != null && mNumDisplays == 0) {
+            final String key = getOrdinalPowerType(POWER_GROUP_DISPLAY_SCREEN_ON, 0);
+            Slog.w(TAG, POWER_SCREEN_ON + " is deprecated! Use " + key + " instead.");
+            sPowerItemMap.put(key, deprecatedScreenOn);
+            legacy = true;
+        }
+
+        final Double deprecatedScreenFull = sPowerItemMap.get(POWER_SCREEN_FULL);
+        if (deprecatedScreenFull != null && mNumDisplays == 0) {
+            final String key = getOrdinalPowerType(POWER_GROUP_DISPLAY_SCREEN_FULL, 0);
+            Slog.w(TAG, POWER_SCREEN_FULL + " is deprecated! Use " + key + " instead.");
+            sPowerItemMap.put(key, deprecatedScreenFull);
+            legacy = true;
+        }
+        if (legacy) {
+            mNumDisplays = 1;
+        }
+    }
+
+    /**
+     * Returns the number built in displays on the device as defined in the power_profile.xml.
+     */
+    public int getNumDisplays() {
+        return mNumDisplays;
+    }
+
     /**
      * Returns the number of memory bandwidth buckets defined in power_profile.xml, or a
      * default value if the subsystem has no recorded value.
@@ -493,6 +584,32 @@ public class PowerProfile {
         } else {
             return 0;
         }
+    }
+
+    /**
+     * Returns the average current in mA consumed by an ordinaled subsystem, or the given
+     * default value if the subsystem has no recorded value.
+     *
+     * @param group        the subsystem {@link PowerGroup}.
+     * @param ordinal      which entity in the {@link PowerGroup}.
+     * @param defaultValue the value to return if the subsystem has no recorded value.
+     * @return the average current in milliAmps.
+     */
+    public double getAveragePowerForOrdinal(@PowerGroup String group, int ordinal,
+            double defaultValue) {
+        final String type = getOrdinalPowerType(group, ordinal);
+        return getAveragePowerOrDefault(type, defaultValue);
+    }
+
+    /**
+     * Returns the average current in mA consumed by an ordinaled subsystem.
+     *
+     * @param group        the subsystem {@link PowerGroup}.
+     * @param ordinal      which entity in the {@link PowerGroup}.
+     * @return the average current in milliAmps.
+     */
+    public double getAveragePowerForOrdinal(@PowerGroup String group, int ordinal) {
+        return getAveragePowerForOrdinal(group, ordinal, 0);
     }
 
     /**
@@ -681,5 +798,10 @@ public class PowerProfile {
                 proto.write(fieldId, d);
             }
         }
+    }
+
+    // Creates the key for an ordinaled power constant from the group and ordinal.
+    private static String getOrdinalPowerType(@PowerGroup String group, int ordinal) {
+        return group + ordinal;
     }
 }

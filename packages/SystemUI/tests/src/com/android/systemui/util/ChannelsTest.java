@@ -22,7 +22,6 @@ import static org.mockito.Mockito.verify;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.provider.Settings;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
 
@@ -66,53 +65,6 @@ public class ChannelsTest extends SysuiTestCase {
         final List<NotificationChannel> list = captor.getValue();
         assertEquals(ALL_CHANNELS.size(), list.size());
         list.forEach((chan) -> assertTrue(ALL_CHANNELS.contains(chan.getId())));
-    }
-
-    @Test
-    public void testChannelSetup_noLegacyScreenshot() {
-        // Assert old channel cleaned up.
-        // TODO: remove that code + this test after P.
-        NotificationChannels.createAll(mContext);
-        ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
-        verify(mMockNotificationManager).deleteNotificationChannel(
-                NotificationChannels.SCREENSHOTS_LEGACY);
-    }
-
-    @Test
-    public void testInheritFromLegacy_keepsUserLockedLegacySettings() {
-        NotificationChannel legacyChannel = new NotificationChannel("id", "oldName",
-                NotificationManager.IMPORTANCE_MIN);
-        legacyChannel.setImportance(NotificationManager.IMPORTANCE_NONE);;
-        legacyChannel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI,
-                legacyChannel.getAudioAttributes());
-        legacyChannel.lockFields(NotificationChannel.USER_LOCKED_IMPORTANCE |
-                NotificationChannel.USER_LOCKED_SOUND);
-        NotificationChannel newChannel =
-                NotificationChannels.createScreenshotChannel("newName", legacyChannel);
-        // NONE importance user locked, so don't use HIGH for new channel.
-        assertEquals(NotificationManager.IMPORTANCE_NONE, newChannel.getImportance());
-        assertEquals(Settings.System.DEFAULT_NOTIFICATION_URI, newChannel.getSound());
-    }
-
-    @Test
-    public void testInheritFromLegacy_dropsUnlockedLegacySettings() {
-        NotificationChannel legacyChannel = new NotificationChannel("id", "oldName",
-                NotificationManager.IMPORTANCE_MIN);
-        NotificationChannel newChannel =
-                NotificationChannels.createScreenshotChannel("newName", legacyChannel);
-        assertEquals(null, newChannel.getSound());
-        assertEquals("newName", newChannel.getName());
-        // MIN importance not user locked, so HIGH wins out.
-        assertEquals(NotificationManager.IMPORTANCE_HIGH, newChannel.getImportance());
-    }
-
-    @Test
-    public void testInheritFromLegacy_noLegacyExists() {
-        NotificationChannel newChannel =
-                NotificationChannels.createScreenshotChannel("newName", null);
-        assertEquals(null, newChannel.getSound());
-        assertEquals("newName", newChannel.getName());
-        assertEquals(NotificationManager.IMPORTANCE_HIGH, newChannel.getImportance());
     }
 
 }

@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.phone.StatusBarWindowCallback;
 import com.android.systemui.util.Assert;
 
 import java.util.Locale;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -139,10 +140,10 @@ public class SystemActions extends SystemUI {
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
 
     private final SystemActionsBroadcastReceiver mReceiver;
-    private final Recents mRecents;
+    private final Optional<Recents> mRecentsOptional;
     private Locale mLocale;
     private final AccessibilityManager mA11yManager;
-    private final Lazy<StatusBar> mStatusBar;
+    private final Lazy<Optional<StatusBar>> mStatusBarOptionalLazy;
     private final NotificationShadeWindowController mNotificationShadeController;
     private final StatusBarWindowCallback mNotificationShadeCallback;
     private boolean mDismissNotificationShadeActionRegistered;
@@ -150,10 +151,10 @@ public class SystemActions extends SystemUI {
     @Inject
     public SystemActions(Context context,
             NotificationShadeWindowController notificationShadeController,
-            Lazy<StatusBar> statusBar,
-            Recents recents) {
+            Lazy<Optional<StatusBar>> statusBarOptionalLazy,
+            Optional<Recents> recentsOptional) {
         super(context);
-        mRecents = recents;
+        mRecentsOptional = recentsOptional;
         mReceiver = new SystemActionsBroadcastReceiver();
         mLocale = mContext.getResources().getConfiguration().getLocales().get(0);
         mA11yManager = (AccessibilityManager) mContext.getSystemService(
@@ -161,9 +162,9 @@ public class SystemActions extends SystemUI {
         mNotificationShadeController = notificationShadeController;
         // Saving in instance variable since to prevent GC since
         // NotificationShadeWindowController.registerCallback() only keeps weak references.
-        mNotificationShadeCallback = (keyguardShowing, keyguardOccluded, bouncerShowing) ->
+        mNotificationShadeCallback = (keyguardShowing, keyguardOccluded, bouncerShowing, mDozing) ->
                 registerOrUnregisterDismissNotificationShadeAction();
-        mStatusBar = statusBar;
+        mStatusBarOptionalLazy = statusBarOptionalLazy;
     }
 
     @Override
@@ -242,8 +243,9 @@ public class SystemActions extends SystemUI {
 
         // Saving state in instance variable since this callback is called quite often to avoid
         // binder calls
-        StatusBar statusBar = mStatusBar.get();
-        if (statusBar.isPanelExpanded() && !statusBar.isKeyguardShowing()) {
+        final Optional<StatusBar> statusBarOptional = mStatusBarOptionalLazy.get();
+        if (statusBarOptional.map(StatusBar::isPanelExpanded).orElse(false)
+                && !statusBarOptional.get().isKeyguardShowing()) {
             if (!mDismissNotificationShadeActionRegistered) {
                 mA11yManager.registerSystemAction(
                         createRemoteAction(
@@ -368,15 +370,16 @@ public class SystemActions extends SystemUI {
     }
 
     private void handleRecents() {
-        mRecents.toggleRecentApps();
+        mRecentsOptional.ifPresent(Recents::toggleRecentApps);
     }
 
     private void handleNotifications() {
-        mStatusBar.get().animateExpandNotificationsPanel();
+        mStatusBarOptionalLazy.get().ifPresent(StatusBar::animateExpandNotificationsPanel);
     }
 
     private void handleQuickSettings() {
-        mStatusBar.get().animateExpandSettingsPanel(null);
+        mStatusBarOptionalLazy.get().ifPresent(
+                statusBar -> statusBar.animateExpandSettingsPanel(null));
     }
 
     private void handlePowerDialog() {
@@ -425,7 +428,9 @@ public class SystemActions extends SystemUI {
     }
 
     private void handleAccessibilityDismissNotificationShade() {
-        mStatusBar.get().animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE, false /* force */);
+        mStatusBarOptionalLazy.get().ifPresent(
+                statusBar -> statusBar.animateCollapsePanels(
+                        CommandQueue.FLAG_EXCLUDE_NONE, false /* force */));
     }
 
     private class SystemActionsBroadcastReceiver extends BroadcastReceiver {

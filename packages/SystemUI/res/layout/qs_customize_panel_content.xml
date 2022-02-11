@@ -19,7 +19,7 @@
     <View
         android:id="@+id/customizer_transparent_view"
         android:layout_width="match_parent"
-        android:layout_height="@*android:dimen/quick_qs_offset_height"
+        android:layout_height="@dimen/qs_header_system_icons_area_height"
         android:background="@android:color/transparent" />
 
     <com.android.keyguard.AlphaOptimizedLinearLayout

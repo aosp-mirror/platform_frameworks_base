@@ -16,6 +16,7 @@
 package com.android.server.notification;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
@@ -124,6 +125,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         profileIds.add(12);
         when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
         when(mNm.isNASMigrationDone(anyInt())).thenReturn(true);
+        when(mNm.canUseManagedServices(any(), anyInt(), any())).thenReturn(true);
     }
 
     @Test
@@ -178,6 +180,92 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testReadXml_upgradeUserSet_preS_VersionThree() throws Exception {
+        String xml = "<enabled_assistants version=\"3\" defaults=\"b/b\">"
+                + "<service_listing approved=\"\" user=\"0\" primary=\"true\""
+                + "user_set=\"true\"/>"
+                + "</enabled_assistants>";
+
+        final TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(xml.toString().getBytes())), null);
+        TriPredicate<String, Integer, String> allowedManagedServicePackages =
+                mNm::canUseManagedServices;
+
+        parser.nextTag();
+        mAssistants.readXml(parser, allowedManagedServicePackages, false, UserHandle.USER_ALL);
+
+        verify(mAssistants, times(0)).upgradeUserSet();
+        assertTrue(isUserSetServicesEmpty(mAssistants, 0));
+        assertTrue(mAssistants.mIsUserChanged.get(0));
+    }
+
+    @Test
+    public void testReadXml_upgradeUserSet_preS_VersionOne() throws Exception {
+        String xml = "<enabled_assistants version=\"1\" defaults=\"b/b\">"
+                + "<service_listing approved=\"\" user=\"0\" primary=\"true\""
+                + "user_set=\"true\"/>"
+                + "</enabled_assistants>";
+
+        final TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(xml.toString().getBytes())), null);
+        TriPredicate<String, Integer, String> allowedManagedServicePackages =
+                mNm::canUseManagedServices;
+
+        parser.nextTag();
+        mAssistants.readXml(parser, allowedManagedServicePackages, false, UserHandle.USER_ALL);
+
+        verify(mAssistants, times(0)).upgradeUserSet();
+        assertTrue(isUserSetServicesEmpty(mAssistants, 0));
+        assertTrue(mAssistants.mIsUserChanged.get(0));
+    }
+
+    @Test
+    public void testReadXml_upgradeUserSet_preS_noUserSet() throws Exception {
+        String xml = "<enabled_assistants version=\"3\" defaults=\"b/b\">"
+                + "<service_listing approved=\"b/b\" user=\"0\" primary=\"true\"/>"
+                + "</enabled_assistants>";
+
+        final TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(xml.toString().getBytes())), null);
+        TriPredicate<String, Integer, String> allowedManagedServicePackages =
+                mNm::canUseManagedServices;
+
+        parser.nextTag();
+        mAssistants.readXml(parser, allowedManagedServicePackages, false, UserHandle.USER_ALL);
+
+        verify(mAssistants, times(1)).upgradeUserSet();
+        assertTrue(isUserSetServicesEmpty(mAssistants, 0));
+        assertFalse(mAssistants.mIsUserChanged.get(0));
+    }
+
+    @Test
+    public void testReadXml_upgradeUserSet_preS_noUserSet_diffDefault() throws Exception {
+        String xml = "<enabled_assistants version=\"3\" defaults=\"a/a\">"
+                + "<service_listing approved=\"b/b\" user=\"0\" primary=\"true\"/>"
+                + "</enabled_assistants>";
+
+        final TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(xml.toString().getBytes())), null);
+        TriPredicate<String, Integer, String> allowedManagedServicePackages =
+                mNm::canUseManagedServices;
+
+        parser.nextTag();
+        mAssistants.readXml(parser, allowedManagedServicePackages, false, UserHandle.USER_ALL);
+
+        verify(mAssistants, times(1)).upgradeUserSet();
+        assertTrue(isUserSetServicesEmpty(mAssistants, 0));
+        assertFalse(mAssistants.mIsUserChanged.get(0));
+        assertEquals(new ArraySet<>(Arrays.asList(new ComponentName("a", "a"))),
+                mAssistants.getDefaultComponents());
+        assertEquals(Arrays.asList(new ComponentName("b", "b")),
+                mAssistants.getAllowedComponents(0));
+    }
+
+    @Test
     public void testReadXml_multiApproved() throws Exception {
         String xml = "<enabled_assistants version=\"4\" defaults=\"b/b\">"
                 + "<service_listing approved=\"a/a:b/b\" user=\"0\" primary=\"true\""
@@ -210,7 +298,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
 
         verify(mNm, never()).setDefaultAssistantForUser(anyInt());
         verify(mAssistants, times(1)).addApprovedList(
-                new ComponentName("b", "b").flattenToString(), 10, true, null);
+                new ComponentName("b", "b").flattenToString(), 10, true, "");
     }
 
     @Test
@@ -379,5 +467,12 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         verify(mNm, times(1)).setNASMigrationDone(eq(mZero.id));
         verify(mNm, times(1)).setDefaultAssistantForUser(eq(mZero.id));
         assertEquals(new ArraySet<>(), mAssistants.getDefaultComponents());
+    }
+
+    // Helper function to hold mApproved lock, avoid GuardedBy lint errors
+    private boolean isUserSetServicesEmpty(NotificationAssistants assistant, int userId) {
+        synchronized (assistant.mApproved) {
+            return assistant.mUserSetServices.get(userId).isEmpty();
+        }
     }
 }

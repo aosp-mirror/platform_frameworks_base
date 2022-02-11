@@ -19,17 +19,18 @@ package com.android.systemui.keyguard;
 import android.os.Trace;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dump.DumpManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 /**
  * Tracks the screen lifecycle.
  */
-@SysUISingleton
+@Singleton
 public class ScreenLifecycle extends Lifecycle<ScreenLifecycle.Observer> implements Dumpable {
 
     public static final int SCREEN_OFF = 0;
@@ -40,7 +41,8 @@ public class ScreenLifecycle extends Lifecycle<ScreenLifecycle.Observer> impleme
     private int mScreenState = SCREEN_OFF;
 
     @Inject
-    public ScreenLifecycle() {
+    public ScreenLifecycle(DumpManager dumpManager) {
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
 
     public int getScreenState() {

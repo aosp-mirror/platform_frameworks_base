@@ -618,6 +618,60 @@ class DomainVerificationPackageTest {
     }
 
     @Test
+    fun migratePackageSelected() {
+        val pkgName = PKG_ONE
+        val pkgBefore = mockPkgSetting(pkgName, UUID_ONE, SIGNATURE_ONE,
+            listOf(DOMAIN_1), listOf(DOMAIN_2))
+        val pkgAfter = mockPkgSetting(pkgName, UUID_TWO, SIGNATURE_TWO,
+            listOf(DOMAIN_1), listOf(DOMAIN_2))
+
+        val map = mutableMapOf<String, PackageSetting>()
+        val service = makeService { map[it] }
+        service.addPackage(pkgBefore)
+
+        // Only insert the package after addPackage call to ensure the service doesn't access
+        // a live package inside the addPackage logic. It should only use the provided input.
+        map[pkgName] = pkgBefore
+
+        assertThat(service.setStatus(UUID_ONE, setOf(DOMAIN_1), STATE_SUCCESS))
+            .isEqualTo(DomainVerificationManager.STATUS_OK)
+
+        assertThat(service.setUserSelection(UUID_ONE, setOf(DOMAIN_2), true, USER_ID))
+            .isEqualTo(DomainVerificationManager.STATUS_OK)
+
+        service.getInfo(pkgName).run {
+            assertThat(identifier).isEqualTo(UUID_ONE)
+            assertThat(hostToStateMap).containsExactlyEntriesIn(mapOf(
+                DOMAIN_1 to STATE_SUCCESS,
+            ))
+        }
+        assertThat(service.getUserState(pkgName).hostToStateMap).containsExactlyEntriesIn(mapOf(
+                DOMAIN_1 to DOMAIN_STATE_VERIFIED,
+                DOMAIN_2 to DOMAIN_STATE_SELECTED,
+        ))
+        assertThat(service.queryValidVerificationPackageNames()).containsExactly(pkgName)
+
+        // Now remove the package because migrateState shouldn't use it either
+        map.remove(pkgName)
+
+        service.migrateState(pkgBefore, pkgAfter)
+
+        map[pkgName] = pkgAfter
+
+        service.getInfo(pkgName).run {
+            assertThat(identifier).isEqualTo(UUID_TWO)
+            assertThat(hostToStateMap).containsExactlyEntriesIn(mapOf(
+                DOMAIN_1 to STATE_SUCCESS,
+            ))
+        }
+        assertThat(service.getUserState(pkgName).hostToStateMap).containsExactlyEntriesIn(mapOf(
+                DOMAIN_1 to DOMAIN_STATE_VERIFIED,
+                DOMAIN_2 to DOMAIN_STATE_SELECTED,
+        ))
+        assertThat(service.queryValidVerificationPackageNames()).containsExactly(pkgName)
+    }
+
+    @Test
     fun backupAndRestore() {
         // This test acts as a proxy for true user restore through PackageManager,
         // as that's much harder to test for real.
@@ -798,7 +852,8 @@ class DomainVerificationPackageTest {
         pkgName: String,
         domainSetId: UUID,
         signature: String,
-        domains: List<String> = listOf(DOMAIN_1, DOMAIN_2),
+        autoVerifyDomains: List<String> = listOf(DOMAIN_1, DOMAIN_2),
+        otherDomains: List<String> = listOf(),
         isSystemApp: Boolean = false
     ) = mockThrowOnUnmocked<PackageSetting> {
         val pkg = mockThrowOnUnmocked<AndroidPackage> {
@@ -806,21 +861,23 @@ class DomainVerificationPackageTest {
             whenever(targetSdkVersion) { Build.VERSION_CODES.S }
             whenever(isEnabled) { true }
 
+            fun baseIntent(domain: String) = ParsedIntentInfo().apply {
+                addAction(Intent.ACTION_VIEW)
+                addCategory(Intent.CATEGORY_BROWSABLE)
+                addCategory(Intent.CATEGORY_DEFAULT)
+                addDataScheme("http")
+                addDataScheme("https")
+                addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
+                addDataAuthority(domain, null)
+            }
+
             val activityList = listOf(
                     ParsedActivity().apply {
-                        domains.forEach {
-                            addIntent(
-                                    ParsedIntentInfo().apply {
-                                        autoVerify = true
-                                        addAction(Intent.ACTION_VIEW)
-                                        addCategory(Intent.CATEGORY_BROWSABLE)
-                                        addCategory(Intent.CATEGORY_DEFAULT)
-                                        addDataScheme("http")
-                                        addDataScheme("https")
-                                        addDataPath("/sub", PatternMatcher.PATTERN_LITERAL)
-                                        addDataAuthority(it, null)
-                                    }
-                            )
+                        autoVerifyDomains.forEach {
+                            addIntent(baseIntent(it).apply { autoVerify = true })
+                        }
+                        otherDomains.forEach {
+                            addIntent(baseIntent(it).apply { autoVerify = false })
                         }
                     },
             )

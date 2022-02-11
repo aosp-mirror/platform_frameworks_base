@@ -117,6 +117,11 @@ public class CompanionDeviceDiscoveryService extends Service {
                     CompanionDeviceDiscoveryService::startDiscovery,
                     CompanionDeviceDiscoveryService.this, request));
         }
+
+        @Override
+        public void onAssociationCreated() {
+            Handler.getMain().post(CompanionDeviceDiscoveryService.this::onAssociationCreated);
+        }
     };
 
     private ScanCallback mBLEScanCallback;
@@ -222,6 +227,11 @@ public class CompanionDeviceDiscoveryService extends Service {
                 SCAN_TIMEOUT);
     }
 
+    @MainThread
+    private void onAssociationCreated() {
+        mActivity.setResultAndFinish();
+    }
+
     private boolean shouldScan(List<? extends DeviceFilter> mediumSpecificFilters) {
         return !isEmpty(mediumSpecificFilters) || isEmpty(mFilters);
     }
@@ -248,12 +258,8 @@ public class CompanionDeviceDiscoveryService extends Service {
         if (!mIsScanning) return;
         mIsScanning = false;
 
-        CompanionDeviceActivity activity = mActivity;
-        if (activity != null) {
-            if (activity.mDeviceListView != null) {
-                activity.mDeviceListView.removeFooterView(activity.mLoadingIndicator);
-            }
-            mActivity = null;
+        if (mActivity != null && mActivity.mDeviceListView != null) {
+            mActivity.mDeviceListView.removeFooterView(mActivity.mLoadingIndicator);
         }
 
         mBluetoothAdapter.cancelDiscovery();
@@ -327,6 +333,7 @@ public class CompanionDeviceDiscoveryService extends Service {
 
     void onCancel() {
         if (DEBUG) Log.i(LOG_TAG, "onCancel()");
+        mActivity = null;
         mServiceCallback.cancel(true);
     }
 

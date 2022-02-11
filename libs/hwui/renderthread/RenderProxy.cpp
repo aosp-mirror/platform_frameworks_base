@@ -326,7 +326,11 @@ void RenderProxy::setFrameCallback(std::function<void(int64_t)>&& callback) {
     mDrawFrameTask.setFrameCallback(std::move(callback));
 }
 
-void RenderProxy::setFrameCompleteCallback(std::function<void(int64_t)>&& callback) {
+void RenderProxy::setFrameCommitCallback(std::function<void(bool)>&& callback) {
+    mDrawFrameTask.setFrameCommitCallback(std::move(callback));
+}
+
+void RenderProxy::setFrameCompleteCallback(std::function<void()>&& callback) {
     mDrawFrameTask.setFrameCompleteCallback(std::move(callback));
 }
 

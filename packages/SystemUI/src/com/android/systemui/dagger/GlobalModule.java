@@ -23,6 +23,8 @@ import android.util.DisplayMetrics;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.systemui.dagger.qualifiers.TestHarness;
+import com.android.systemui.plugins.PluginsModule;
+import com.android.systemui.unfold.UnfoldTransitionModule;
 import com.android.systemui.util.concurrency.GlobalConcurrencyModule;
 
 import javax.inject.Singleton;
@@ -47,7 +49,10 @@ import dagger.Provides;
  */
 @Module(includes = {
         FrameworkServicesModule.class,
-        GlobalConcurrencyModule.class})
+        GlobalConcurrencyModule.class,
+        UnfoldTransitionModule.class,
+        PluginsModule.class,
+})
 public class GlobalModule {
 
     /** */

@@ -156,7 +156,8 @@ public class ObjectPoolTests {
                 .setProcState(procState).setState(bundle).setPersistentState(persistableBundle)
                 .setPendingResults(resultInfoList()).setPendingNewIntents(referrerIntentList())
                 .setIsForward(true).setAssistToken(assistToken)
-                .setShareableActivityToken(shareableActivityToken).build();
+                .setShareableActivityToken(shareableActivityToken)
+                .build();
 
         LaunchActivityItem emptyItem = new LaunchActivityItemBuilder().build();
         LaunchActivityItem item = itemSupplier.get();

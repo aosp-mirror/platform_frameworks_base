@@ -34,6 +34,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.KeyguardManager;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Handler;
@@ -53,17 +54,15 @@ import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
-import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -111,11 +110,11 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private NotificationRemoteInputManager mRemoteInputManager;
     @Mock
-    private RemoteInputController mRemoteInputController;
-    @Mock
     private StatusBar mStatusBar;
     @Mock
     private KeyguardStateController mKeyguardStateController;
+    @Mock
+    private NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     @Mock
     private Handler mHandler;
     @Mock
@@ -136,7 +135,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private OnUserInteractionCallback mOnUserInteractionCallback;
     @Mock
-    private NotificationActivityStarter mNotificationActivityStarter;
+    private StatusBarNotificationActivityStarter mNotificationActivityStarter;
     @Mock
     private ActivityLaunchAnimator mActivityLaunchAnimator;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
@@ -153,8 +152,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
-
         when(mContentIntent.isActivity()).thenReturn(true);
         when(mContentIntent.getCreatorUserHandle()).thenReturn(UserHandle.of(1));
         when(mContentIntent.getIntent()).thenReturn(mContentIntentInner);
@@ -214,7 +211,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                         mock(NotificationLockscreenUserManager.class),
                         mShadeController,
                         mKeyguardStateController,
-                        mock(NotificationInterruptStateProvider.class),
+                        mNotificationInterruptStateProvider,
                         mock(LockPatternUtils.class),
                         mock(StatusBarRemoteInputCallback.class),
                         mActivityIntentHelper,
@@ -369,5 +366,28 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
 
         // Notification should not be cancelled.
         verify(mEntryManager, never()).performRemoveNotification(eq(sbn), any(), anyInt());
+    }
+
+    @Test
+    public void testOnFullScreenIntentWhenDozing_wakeUpDevice() {
+        // GIVEN entry that can has a full screen intent that can show
+        Notification.Builder nb = new Notification.Builder(mContext, "a")
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setFullScreenIntent(mock(PendingIntent.class), true);
+        StatusBarNotification sbn = new StatusBarNotification("pkg", "pkg", 0,
+                "tag" + System.currentTimeMillis(), 0, 0,
+                nb.build(), new UserHandle(0), null, 0);
+        NotificationEntry entry = mock(NotificationEntry.class);
+        when(entry.getImportance()).thenReturn(NotificationManager.IMPORTANCE_HIGH);
+        when(entry.getSbn()).thenReturn(sbn);
+        when(mNotificationInterruptStateProvider.shouldLaunchFullScreenIntentWhenAdded(eq(entry)))
+                .thenReturn(true);
+
+        // WHEN
+        mNotificationActivityStarter.handleFullScreenIntent(entry);
+
+        // THEN display should try wake up for the full screen intent
+        verify(mStatusBar).wakeUpForFullScreenIntent();
     }
 }

@@ -160,6 +160,34 @@ public final class DeviceStateManagerGlobalTest {
         verify(callback).onStateChanged(eq(mService.getBaseState()));
     }
 
+    @Test
+    public void verifyDeviceStateRequestCallbacksCalled() {
+        DeviceStateRequest.Callback callback = mock(TestDeviceStateRequestCallback.class);
+
+        DeviceStateRequest request = DeviceStateRequest.newBuilder(OTHER_DEVICE_STATE).build();
+        mDeviceStateManagerGlobal.requestState(request,
+                ConcurrentUtils.DIRECT_EXECUTOR /* executor */,
+                callback /* callback */);
+
+        verify(callback).onRequestActivated(eq(request));
+        Mockito.reset(callback);
+
+        mDeviceStateManagerGlobal.cancelRequest(request);
+
+        verify(callback).onRequestCanceled(eq(request));
+    }
+
+    public static class TestDeviceStateRequestCallback implements DeviceStateRequest.Callback {
+        @Override
+        public void onRequestActivated(DeviceStateRequest request) { }
+
+        @Override
+        public void onRequestCanceled(DeviceStateRequest request) { }
+
+        @Override
+        public void onRequestSuspended(DeviceStateRequest request) { }
+    }
+
     private static final class TestDeviceStateManagerService extends IDeviceStateManager.Stub {
         public static final class Request {
             public final IBinder token;

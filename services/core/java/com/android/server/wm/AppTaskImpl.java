@@ -35,10 +35,10 @@ import android.os.UserHandle;
  */
 class AppTaskImpl extends IAppTask.Stub {
     private static final String TAG = "AppTaskImpl";
-    private ActivityTaskManagerService mService;
+    private final ActivityTaskManagerService mService;
 
-    private int mTaskId;
-    private int mCallingUid;
+    private final int mTaskId;
+    private final int mCallingUid;
 
     public AppTaskImpl(ActivityTaskManagerService service, int taskId, int callingUid) {
         mService = service;
@@ -113,9 +113,9 @@ class AppTaskImpl extends IAppTask.Stub {
                         return;
                     }
                 }
-                mService.mTaskSupervisor.startActivityFromRecents(callingPid,
-                        callingUid, mTaskId, null);
             }
+            mService.mTaskSupervisor.startActivityFromRecents(callingPid, callingUid, mTaskId,
+                    null /* options */);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }

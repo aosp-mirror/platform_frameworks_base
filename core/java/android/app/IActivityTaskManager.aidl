@@ -330,4 +330,18 @@ interface IActivityTaskManager {
      * When the Picture-in-picture state has changed.
      */
     void onPictureInPictureStateChanged(in PictureInPictureUiState pipState);
+
+    /**
+     * Re-attach navbar to the display during a recents transition.
+     * TODO(188595497): Remove this once navbar attachment is in shell.
+     */
+    void detachNavigationBarFromApp(in IBinder transition);
+
+    /**
+     * Marks a process as a delegate for the currently playing remote transition animation. This
+     * must be called from a process that is already a remote transition player or delegate. Any
+     * marked delegates are cleaned-up automatically at the end of the transition.
+     * @param caller is the IApplicationThread representing the calling process.
+     */
+    void setRunningRemoteTransitionDelegate(in IApplicationThread caller);
 }

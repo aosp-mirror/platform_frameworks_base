@@ -21,6 +21,7 @@ import android.os.Build;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.systemui.Dumpable;
+import com.android.systemui.dump.DumpManager;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -38,12 +39,16 @@ public class LeakDetector implements Dumpable {
     private final TrackedObjects mTrackedObjects;
 
     @VisibleForTesting
-    public LeakDetector(TrackedCollections trackedCollections,
+    public LeakDetector(
+            TrackedCollections trackedCollections,
             TrackedGarbage trackedGarbage,
-            TrackedObjects trackedObjects) {
+            TrackedObjects trackedObjects,
+            DumpManager dumpManager) {
         mTrackedCollections = trackedCollections;
         mTrackedGarbage = trackedGarbage;
         mTrackedObjects = trackedObjects;
+
+        dumpManager.registerDumpable(getClass().getSimpleName(), this);
     }
 
     /**
@@ -130,13 +135,16 @@ public class LeakDetector implements Dumpable {
         pw.println();
     }
 
-    public static LeakDetector create() {
+    public static LeakDetector create(DumpManager dumpManager) {
         if (ENABLED) {
             TrackedCollections collections = new TrackedCollections();
-            return new LeakDetector(collections, new TrackedGarbage(collections),
-                    new TrackedObjects(collections));
+            return new LeakDetector(
+                    collections,
+                    new TrackedGarbage(collections),
+                    new TrackedObjects(collections),
+                    dumpManager);
         } else {
-            return new LeakDetector(null, null, null);
+            return new LeakDetector(null, null, null, dumpManager);
         }
     }
 }

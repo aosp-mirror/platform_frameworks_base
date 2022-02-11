@@ -30,28 +30,28 @@ import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.ActivityRecord.State.DESTROYED;
+import static com.android.server.wm.ActivityRecord.State.DESTROYING;
+import static com.android.server.wm.ActivityRecord.State.FINISHING;
+import static com.android.server.wm.ActivityRecord.State.INITIALIZING;
+import static com.android.server.wm.ActivityRecord.State.PAUSING;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.ActivityRecord.State.STOPPED;
+import static com.android.server.wm.ActivityRecord.State.STOPPING;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
-import static com.android.server.wm.Task.ActivityState.DESTROYED;
-import static com.android.server.wm.Task.ActivityState.DESTROYING;
-import static com.android.server.wm.Task.ActivityState.FINISHING;
-import static com.android.server.wm.Task.ActivityState.PAUSING;
-import static com.android.server.wm.Task.ActivityState.RESUMED;
-import static com.android.server.wm.Task.ActivityState.STOPPED;
-import static com.android.server.wm.Task.ActivityState.STOPPING;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
 import static com.android.server.wm.Task.REPARENT_KEEP_ROOT_TASK_AT_FRONT;
 import static com.android.server.wm.Task.REPARENT_MOVE_ROOT_TASK_TO_FRONT;
-import static com.android.server.wm.Task.TASK_VISIBILITY_INVISIBLE;
-import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE;
-import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
 import static com.android.server.wm.TaskDisplayArea.getRootTaskAbove;
+import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_INVISIBLE;
+import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE;
+import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
@@ -88,9 +88,6 @@ import androidx.test.filters.SmallTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.ArrayList;
-import java.util.function.Consumer;
 
 /**
  * Tests for the root {@link Task} behavior.
@@ -194,7 +191,6 @@ public class RootTaskTests extends WindowTestsBase {
         final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
 
         // Root task removal is deferred if one of its child is animating.
-        doReturn(true).when(rootTask).hasWindowsAlive();
         doReturn(rootTask).when(task).getAnimatingContainer(
                 eq(TRANSITION | CHILDREN), anyInt());
 
@@ -280,11 +276,11 @@ public class RootTaskTests extends WindowTestsBase {
     public void testResumedActivity() {
         final ActivityRecord r = new ActivityBuilder(mAtm).setCreateTask(true).build();
         final Task task = r.getTask();
-        assertNull(task.getResumedActivity());
+        assertNull(task.getTopResumedActivity());
         r.setState(RESUMED, "testResumedActivity");
-        assertEquals(r, task.getResumedActivity());
+        assertEquals(r, task.getTopResumedActivity());
         r.setState(PAUSING, "testResumedActivity");
-        assertNull(task.getResumedActivity());
+        assertNull(task.getTopResumedActivity());
     }
 
     @Test
@@ -295,15 +291,15 @@ public class RootTaskTests extends WindowTestsBase {
         final Task task = r.getTask();
         // Ensure moving task between two root tasks updates resumed activity
         r.setState(RESUMED, "testResumedActivityFromTaskReparenting");
-        assertEquals(r, rootTask.getResumedActivity());
+        assertEquals(r, rootTask.getTopResumedActivity());
 
         final Task destRootTask = new TaskBuilder(mSupervisor).setOnTop(true).build();
         task.reparent(destRootTask, true /* toTop */, REPARENT_KEEP_ROOT_TASK_AT_FRONT,
                 false /* animate */, true /* deferResume*/,
                 "testResumedActivityFromTaskReparenting");
 
-        assertNull(rootTask.getResumedActivity());
-        assertEquals(r, destRootTask.getResumedActivity());
+        assertNull(rootTask.getTopResumedActivity());
+        assertEquals(r, destRootTask.getTopResumedActivity());
     }
 
     @Test
@@ -314,15 +310,15 @@ public class RootTaskTests extends WindowTestsBase {
         final Task task = r.getTask();
         // Ensure moving task between two root tasks updates resumed activity
         r.setState(RESUMED, "testResumedActivityFromActivityReparenting");
-        assertEquals(r, rootTask.getResumedActivity());
+        assertEquals(r, rootTask.getTopResumedActivity());
 
         final Task destRootTask = new TaskBuilder(mSupervisor).setOnTop(true).build();
         task.reparent(destRootTask, true /*toTop*/, REPARENT_MOVE_ROOT_TASK_TO_FRONT,
                 false /* animate */, false /* deferResume*/,
                 "testResumedActivityFromActivityReparenting");
 
-        assertNull(rootTask.getResumedActivity());
-        assertEquals(r, destRootTask.getResumedActivity());
+        assertNull(rootTask.getTopResumedActivity());
+        assertEquals(r, destRootTask.getTopResumedActivity());
     }
 
     @Test
@@ -333,7 +329,7 @@ public class RootTaskTests extends WindowTestsBase {
 
         // Create primary splitscreen root task.
         final Task primarySplitScreen = new TaskBuilder(mAtm.mTaskSupervisor)
-                .setParentTask(organizer.mPrimary)
+                .setParentTaskFragment(organizer.mPrimary)
                 .setOnTop(true)
                 .build();
 
@@ -509,8 +505,8 @@ public class RootTaskTests extends WindowTestsBase {
                 targetActivity);
         final ComponentName alias = new ComponentName(DEFAULT_COMPONENT_PACKAGE_NAME,
                 aliasActivity);
-        final Task parentTask = new TaskBuilder(mAtm.mTaskSupervisor).build();
-        final Task task = new TaskBuilder(mAtm.mTaskSupervisor).setParentTask(parentTask).build();
+        final Task parentTask = new TaskBuilder(mSupervisor).build();
+        final Task task = new TaskBuilder(mSupervisor).setParentTaskFragment(parentTask).build();
         task.origActivity = alias;
         task.realActivity = target;
         new ActivityBuilder(mAtm).setComponent(target).setTask(task).setTargetActivity(
@@ -618,9 +614,9 @@ public class RootTaskTests extends WindowTestsBase {
         doReturn(false).when(splitScreenSecondary2).isTranslucent(any());
         assertFalse(splitScreenSecondary.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenSecondary2.shouldBeVisible(null /* starting */));
-        assertEquals(TASK_VISIBILITY_INVISIBLE,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_INVISIBLE,
                 splitScreenSecondary.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
                 splitScreenSecondary2.getVisibility(null /* starting */));
 
         // First split-screen secondary should be visible behind another translucent split-screen
@@ -628,9 +624,9 @@ public class RootTaskTests extends WindowTestsBase {
         doReturn(true).when(splitScreenSecondary2).isTranslucent(any());
         assertTrue(splitScreenSecondary.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenSecondary2.shouldBeVisible(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 splitScreenSecondary.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
                 splitScreenSecondary2.getVisibility(null /* starting */));
 
         final Task assistantRootTask = createTaskForShouldBeVisibleTest(mDefaultTaskDisplayArea,
@@ -642,13 +638,13 @@ public class RootTaskTests extends WindowTestsBase {
         assertFalse(splitScreenPrimary.shouldBeVisible(null /* starting */));
         assertFalse(splitScreenSecondary.shouldBeVisible(null /* starting */));
         assertFalse(splitScreenSecondary2.shouldBeVisible(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
                 assistantRootTask.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_INVISIBLE,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_INVISIBLE,
                 splitScreenPrimary.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_INVISIBLE,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_INVISIBLE,
                 splitScreenSecondary.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_INVISIBLE,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_INVISIBLE,
                 splitScreenSecondary2.getVisibility(null /* starting */));
 
         // Split-screen root tasks should be visible behind a translucent fullscreen root task.
@@ -657,13 +653,13 @@ public class RootTaskTests extends WindowTestsBase {
         assertTrue(splitScreenPrimary.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenSecondary.shouldBeVisible(null /* starting */));
         assertTrue(splitScreenSecondary2.shouldBeVisible(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
                 assistantRootTask.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 splitScreenPrimary.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 splitScreenSecondary.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 splitScreenSecondary2.getVisibility(null /* starting */));
 
         // Assistant root task shouldn't be visible behind translucent split-screen root task,
@@ -678,25 +674,25 @@ public class RootTaskTests extends WindowTestsBase {
             assertTrue(assistantRootTask.shouldBeVisible(null /* starting */));
             assertFalse(splitScreenPrimary.shouldBeVisible(null /* starting */));
             assertFalse(splitScreenSecondary2.shouldBeVisible(null /* starting */));
-            assertEquals(TASK_VISIBILITY_VISIBLE,
+            assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
                     assistantRootTask.getVisibility(null /* starting */));
-            assertEquals(TASK_VISIBILITY_INVISIBLE,
+            assertEquals(TASK_FRAGMENT_VISIBILITY_INVISIBLE,
                     splitScreenPrimary.getVisibility(null /* starting */));
-            assertEquals(TASK_VISIBILITY_INVISIBLE,
+            assertEquals(TASK_FRAGMENT_VISIBILITY_INVISIBLE,
                     splitScreenSecondary.getVisibility(null /* starting */));
-            assertEquals(TASK_VISIBILITY_INVISIBLE,
+            assertEquals(TASK_FRAGMENT_VISIBILITY_INVISIBLE,
                     splitScreenSecondary2.getVisibility(null /* starting */));
         } else {
             assertFalse(assistantRootTask.shouldBeVisible(null /* starting */));
             assertTrue(splitScreenPrimary.shouldBeVisible(null /* starting */));
             assertTrue(splitScreenSecondary2.shouldBeVisible(null /* starting */));
-            assertEquals(TASK_VISIBILITY_INVISIBLE,
+            assertEquals(TASK_FRAGMENT_VISIBILITY_INVISIBLE,
                     assistantRootTask.getVisibility(null /* starting */));
-            assertEquals(TASK_VISIBILITY_VISIBLE,
+            assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
                     splitScreenPrimary.getVisibility(null /* starting */));
-            assertEquals(TASK_VISIBILITY_INVISIBLE,
+            assertEquals(TASK_FRAGMENT_VISIBILITY_INVISIBLE,
                     splitScreenSecondary.getVisibility(null /* starting */));
-            assertEquals(TASK_VISIBILITY_VISIBLE,
+            assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
                     splitScreenSecondary2.getVisibility(null /* starting */));
         }
     }
@@ -707,45 +703,51 @@ public class RootTaskTests extends WindowTestsBase {
                 WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME, true /* onTop */);
         final Task splitPrimary = createTaskForShouldBeVisibleTest(mDefaultTaskDisplayArea,
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED, true /* onTop */);
+        // Creating as two-level tasks so home task can be reparented to split-secondary root task.
         final Task splitSecondary = createTaskForShouldBeVisibleTest(mDefaultTaskDisplayArea,
-                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_UNDEFINED, true /* onTop */);
+                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_UNDEFINED, true /* onTop */,
+                true /* twoLevelTask */);
 
         doReturn(false).when(homeRootTask).isTranslucent(any());
         doReturn(false).when(splitPrimary).isTranslucent(any());
         doReturn(false).when(splitSecondary).isTranslucent(any());
 
-
         // Re-parent home to split secondary.
         homeRootTask.reparent(splitSecondary, POSITION_TOP);
         // Current tasks should be visible.
-        assertEquals(TASK_VISIBILITY_VISIBLE, splitPrimary.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE, splitSecondary.getVisibility(null /* starting */));
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
+                splitPrimary.getVisibility(null /* starting */));
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
+                splitSecondary.getVisibility(null /* starting */));
         // Home task should still be visible even though it is a child of another visible task.
-        assertEquals(TASK_VISIBILITY_VISIBLE, homeRootTask.getVisibility(null /* starting */));
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
+                homeRootTask.getVisibility(null /* starting */));
 
 
         // Add fullscreen translucent task that partially occludes split tasks
         final Task translucentRootTask = createStandardRootTaskForVisibilityTest(
                 WINDOWING_MODE_FULLSCREEN, true /* translucent */);
         // Fullscreen translucent task should be visible
-        assertEquals(TASK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
                 translucentRootTask.getVisibility(null /* starting */));
         // Split tasks should be visible behind translucent
-        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 splitPrimary.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 splitSecondary.getVisibility(null /* starting */));
         // Home task should be visible behind translucent since its parent is visible behind
         // translucent.
-        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 homeRootTask.getVisibility(null /* starting */));
 
 
         // Hide split-secondary
         splitSecondary.setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, true /* set */);
         // Home split secondary and home task should be invisible.
-        assertEquals(TASK_VISIBILITY_INVISIBLE, splitSecondary.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_INVISIBLE, homeRootTask.getVisibility(null /* starting */));
+        assertEquals(TASK_FRAGMENT_VISIBILITY_INVISIBLE,
+                splitSecondary.getVisibility(null /* starting */));
+        assertEquals(TASK_FRAGMENT_VISIBILITY_INVISIBLE,
+                homeRootTask.getVisibility(null /* starting */));
     }
 
     @Test
@@ -757,9 +759,9 @@ public class RootTaskTests extends WindowTestsBase {
                 createStandardRootTaskForVisibilityTest(WINDOWING_MODE_FULLSCREEN,
                         true /* translucent */);
 
-        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 bottomRootTask.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
                 translucentRootTask.getVisibility(null /* starting */));
     }
 
@@ -775,10 +777,12 @@ public class RootTaskTests extends WindowTestsBase {
                 createStandardRootTaskForVisibilityTest(WINDOWING_MODE_FULLSCREEN,
                         false /* translucent */);
 
-        assertEquals(TASK_VISIBILITY_INVISIBLE, bottomRootTask.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_INVISIBLE,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_INVISIBLE,
+                bottomRootTask.getVisibility(null /* starting */));
+        assertEquals(TASK_FRAGMENT_VISIBILITY_INVISIBLE,
                 translucentRootTask.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE, opaqueRootTask.getVisibility(null /* starting */));
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
+                opaqueRootTask.getVisibility(null /* starting */));
     }
 
     @Test
@@ -793,10 +797,11 @@ public class RootTaskTests extends WindowTestsBase {
                 createStandardRootTaskForVisibilityTest(WINDOWING_MODE_FULLSCREEN,
                         true /* translucent */);
 
-        assertEquals(TASK_VISIBILITY_INVISIBLE, bottomRootTask.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_INVISIBLE,
+                bottomRootTask.getVisibility(null /* starting */));
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 opaqueRootTask.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
                 translucentRootTask.getVisibility(null /* starting */));
     }
 
@@ -809,9 +814,9 @@ public class RootTaskTests extends WindowTestsBase {
                 createStandardRootTaskForVisibilityTest(WINDOWING_MODE_FULLSCREEN,
                         true /* translucent */);
 
-        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 bottomTranslucentRootTask.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
                 translucentRootTask.getVisibility(null /* starting */));
     }
 
@@ -824,9 +829,10 @@ public class RootTaskTests extends WindowTestsBase {
                 createStandardRootTaskForVisibilityTest(WINDOWING_MODE_FULLSCREEN,
                         false /* translucent */);
 
-        assertEquals(TASK_VISIBILITY_INVISIBLE,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_INVISIBLE,
                 bottomTranslucentRootTask.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE, opaqueRootTask.getVisibility(null /* starting */));
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
+                opaqueRootTask.getVisibility(null /* starting */));
     }
 
     @Test
@@ -840,16 +846,17 @@ public class RootTaskTests extends WindowTestsBase {
         final Task pinnedRootTask = createTaskForShouldBeVisibleTest(mDefaultTaskDisplayArea,
                 WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
-        assertEquals(TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT,
                 bottomRootTask.getVisibility(null /* starting */));
-        assertEquals(TASK_VISIBILITY_VISIBLE,
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
                 translucentRootTask.getVisibility(null /* starting */));
         // Add an activity to the pinned root task so it isn't considered empty for visibility
         // check.
         final ActivityRecord pinnedActivity = new ActivityBuilder(mAtm)
                 .setTask(pinnedRootTask)
                 .build();
-        assertEquals(TASK_VISIBILITY_VISIBLE, pinnedRootTask.getVisibility(null /* starting */));
+        assertEquals(TASK_FRAGMENT_VISIBILITY_VISIBLE,
+                pinnedRootTask.getVisibility(null /* starting */));
     }
 
     @Test
@@ -1142,12 +1149,12 @@ public class RootTaskTests extends WindowTestsBase {
         } else if (twoLevelTask) {
             task = new TaskBuilder(mSupervisor)
                     .setTaskDisplayArea(taskDisplayArea)
-                    .setWindowingMode(windowingMode)
                     .setActivityType(activityType)
                     .setOnTop(onTop)
                     .setCreateActivity(true)
                     .setCreateParentTask(true)
                     .build().getRootTask();
+            task.setWindowingMode(windowingMode);
         } else {
             task = new TaskBuilder(mSupervisor)
                     .setTaskDisplayArea(taskDisplayArea)
@@ -1301,9 +1308,9 @@ public class RootTaskTests extends WindowTestsBase {
         final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(task).build();
         topActivity.info.flags |= FLAG_RESUME_WHILE_PAUSING;
 
-        task.startPausingLocked(false /* uiSleeping */, topActivity,
+        task.startPausing(false /* uiSleeping */, topActivity,
                 "test");
-        verify(task).completePauseLocked(anyBoolean(), eq(topActivity));
+        verify(task).completePause(anyBoolean(), eq(topActivity));
     }
 
     @Test
@@ -1494,41 +1501,6 @@ public class RootTaskTests extends WindowTestsBase {
     }
 
     @Test
-    public void testIterateOccludedActivity() {
-        final ArrayList<ActivityRecord> occludedActivities = new ArrayList<>();
-        final Consumer<ActivityRecord> handleOccludedActivity = occludedActivities::add;
-        final Task task = new TaskBuilder(mSupervisor).build();
-        final ActivityRecord bottomActivity = new ActivityBuilder(mAtm).setTask(task).build();
-        final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(task).build();
-        // Top activity occludes bottom activity.
-        doReturn(true).when(task).shouldBeVisible(any());
-        assertTrue(topActivity.shouldBeVisible());
-        assertFalse(bottomActivity.shouldBeVisible());
-
-        task.forAllOccludedActivities(handleOccludedActivity);
-        assertThat(occludedActivities).containsExactly(bottomActivity);
-
-        // Top activity doesn't occlude parent, so the bottom activity is not occluded.
-        doReturn(false).when(topActivity).occludesParent();
-        assertTrue(bottomActivity.shouldBeVisible());
-
-        occludedActivities.clear();
-        task.forAllOccludedActivities(handleOccludedActivity);
-        assertThat(occludedActivities).isEmpty();
-
-        // A finishing activity should not occlude other activities behind.
-        final ActivityRecord finishingActivity = new ActivityBuilder(mAtm).setTask(task).build();
-        finishingActivity.finishing = true;
-        doCallRealMethod().when(finishingActivity).occludesParent();
-        assertTrue(topActivity.shouldBeVisible());
-        assertTrue(bottomActivity.shouldBeVisible());
-
-        occludedActivities.clear();
-        task.forAllOccludedActivities(handleOccludedActivity);
-        assertThat(occludedActivities).isEmpty();
-    }
-
-    @Test
     public void testClearUnknownAppVisibilityBehindFullscreenActivity() {
         final UnknownAppVisibilityController unknownAppVisibilityController =
                 mDefaultTaskDisplayArea.mDisplayContent.mUnknownAppVisibilityController;
@@ -1544,7 +1516,7 @@ public class RootTaskTests extends WindowTestsBase {
             activities[i] = r;
             doReturn(null).when(mAtm).getProcessController(
                     eq(r.processName), eq(r.info.applicationInfo.uid));
-            r.setState(Task.ActivityState.INITIALIZING, "test");
+            r.setState(INITIALIZING, "test");
             // Ensure precondition that the activity is opaque.
             assertTrue(r.occludesParent());
             mSupervisor.startSpecificActivity(r, false /* andResume */,
@@ -1552,14 +1524,13 @@ public class RootTaskTests extends WindowTestsBase {
         }
         mSupervisor.endDeferResume();
 
-        setBooted(mAtm);
         // 2 activities are started while keyguard is locked, so they are waiting to be resolved.
         assertFalse(unknownAppVisibilityController.allResolved());
 
-        // Assume the top activity is going to resume and
-        // {@link RootWindowContainer#cancelInitializingActivities} should clear the unknown
-        // visibility records that are occluded.
-        task.resumeTopActivityUncheckedLocked(null /* prev */, null /* options */);
+        // Any common path that updates activity visibility should clear the unknown visibility
+        // records that are no longer visible according to hierarchy.
+        task.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
+                false /* preserveWindows */);
         // Assume the top activity relayouted, just remove it directly.
         unknownAppVisibilityController.appRemovedOrHidden(activities[1]);
         // All unresolved records should be removed.

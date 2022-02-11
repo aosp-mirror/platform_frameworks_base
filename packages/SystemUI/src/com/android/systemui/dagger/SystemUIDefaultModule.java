@@ -68,6 +68,7 @@ import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyControllerImpl;
 import com.android.systemui.statusbar.policy.SensorPrivacyController;
 import com.android.systemui.statusbar.policy.SensorPrivacyControllerImpl;
+import com.android.systemui.volume.dagger.VolumeModule;
 
 import javax.inject.Named;
 
@@ -82,7 +83,8 @@ import dagger.Provides;
 @Module(includes = {
         MediaModule.class,
         PowerModule.class,
-        QSModule.class
+        QSModule.class,
+        VolumeModule.class
 })
 public abstract class SystemUIDefaultModule {
 
@@ -185,9 +187,13 @@ public abstract class SystemUIDefaultModule {
         return new Recents(context, recentsImplementation, commandQueue);
     }
 
-    @Binds
-    abstract DeviceProvisionedController bindDeviceProvisionedController(
-            DeviceProvisionedControllerImpl deviceProvisionedController);
+    @SysUISingleton
+    @Provides
+    static DeviceProvisionedController bindDeviceProvisionedController(
+            DeviceProvisionedControllerImpl deviceProvisionedController) {
+        deviceProvisionedController.init();
+        return deviceProvisionedController;
+    }
 
     @Binds
     abstract KeyguardViewController bindKeyguardViewController(

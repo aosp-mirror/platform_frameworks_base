@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -53,12 +54,14 @@ import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.FingerprintStateListener;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.WindowManager;
 
@@ -67,6 +70,8 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.util.concurrency.Execution;
+import com.android.systemui.util.concurrency.FakeExecution;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -112,20 +117,27 @@ public class AuthControllerTest extends SysuiTestCase {
     private SidefpsController mSidefpsController;
     @Mock
     private DisplayManager mDisplayManager;
-    @Mock
-    private Handler mHandler;
     @Captor
     ArgumentCaptor<IFingerprintAuthenticatorsRegisteredCallback> mAuthenticatorsRegisteredCaptor;
+    @Captor
+    ArgumentCaptor<FingerprintStateListener> mFingerprintStateCaptor;
 
+    private TestableContext mContextSpy;
+    private Execution mExecution;
+    private TestableLooper mTestableLooper;
+    private Handler mHandler;
     private TestableAuthController mAuthController;
 
     @Before
     public void setup() throws RemoteException {
         MockitoAnnotations.initMocks(this);
 
-        TestableContext context = spy(mContext);
+        mContextSpy = spy(mContext);
+        mExecution = new FakeExecution();
+        mTestableLooper = TestableLooper.get(this);
+        mHandler = new Handler(mTestableLooper.getLooper());
 
-        when(context.getPackageManager()).thenReturn(mPackageManager);
+        when(mContextSpy.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FACE))
                 .thenReturn(true);
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT))
@@ -158,21 +170,78 @@ public class AuthControllerTest extends SysuiTestCase {
         props.add(prop);
         when(mFingerprintManager.getSensorPropertiesInternal()).thenReturn(props);
 
-        mAuthController = new TestableAuthController(context, mCommandQueue,
+        mAuthController = new TestableAuthController(mContextSpy, mExecution, mCommandQueue,
                 mActivityTaskManager, mWindowManager, mFingerprintManager, mFaceManager,
                 () -> mUdfpsController, () -> mSidefpsController);
 
         mAuthController.start();
         verify(mFingerprintManager).addAuthenticatorsRegisteredCallback(
                 mAuthenticatorsRegisteredCaptor.capture());
+
         mAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(props);
+
+        // Ensures that the operations posted on the handler get executed.
+        mTestableLooper.processAllMessages();
     }
 
     // Callback tests
 
     @Test
+    public void testRegistersFingerprintStateListener_afterAllAuthenticatorsAreRegistered()
+            throws RemoteException {
+        // This test is sensitive to prior FingerprintManager interactions.
+        reset(mFingerprintManager);
+
+        // This test requires an uninitialized AuthController.
+        AuthController authController = new TestableAuthController(mContextSpy, mExecution,
+                mCommandQueue, mActivityTaskManager, mWindowManager, mFingerprintManager,
+                mFaceManager, () -> mUdfpsController, () -> mSidefpsController);
+        authController.start();
+
+        verify(mFingerprintManager).addAuthenticatorsRegisteredCallback(
+                mAuthenticatorsRegisteredCaptor.capture());
+        mTestableLooper.processAllMessages();
+
+        verify(mFingerprintManager, never()).registerFingerprintStateListener(any());
+
+        mAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(new ArrayList<>());
+        mTestableLooper.processAllMessages();
+
+        verify(mFingerprintManager).registerFingerprintStateListener(any());
+    }
+
+    @Test
+    public void testDoesNotCrash_afterEnrollmentsChangedForUnknownSensor() throws RemoteException {
+        // This test is sensitive to prior FingerprintManager interactions.
+        reset(mFingerprintManager);
+
+        // This test requires an uninitialized AuthController.
+        AuthController authController = new TestableAuthController(mContextSpy, mExecution,
+                mCommandQueue, mActivityTaskManager, mWindowManager, mFingerprintManager,
+                mFaceManager, () -> mUdfpsController, () -> mSidefpsController);
+        authController.start();
+
+        verify(mFingerprintManager).addAuthenticatorsRegisteredCallback(
+                mAuthenticatorsRegisteredCaptor.capture());
+
+        // Emulates a device with no authenticators (empty list).
+        mAuthenticatorsRegisteredCaptor.getValue().onAllAuthenticatorsRegistered(new ArrayList<>());
+        mTestableLooper.processAllMessages();
+
+        verify(mFingerprintManager).registerFingerprintStateListener(
+                mFingerprintStateCaptor.capture());
+
+        // Enrollments changed for an unknown sensor.
+        mFingerprintStateCaptor.getValue().onEnrollmentsChanged(0 /* userId */,
+                0xbeef /* sensorId */, true /* hasEnrollments */);
+        mTestableLooper.processAllMessages();
+
+        // Nothing should crash.
+    }
+
+    @Test
     public void testSendsReasonUserCanceled_whenDismissedByUserCancel() throws Exception {
-        showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
+        showDialog(new int[]{1} /* sensorIds */, false /* credentialAllowed */);
         mAuthController.onDismissed(AuthDialogCallback.DISMISSED_USER_CANCELED,
                 null /* credentialAttestation */);
         verify(mReceiver).onDialogDismissed(
@@ -497,7 +566,7 @@ public class AuthControllerTest extends SysuiTestCase {
         when(mActivityTaskManager.getTasks(anyInt())).thenReturn(tasks);
 
         mAuthController.mTaskStackListener.onTaskStackChanged();
-        waitForIdleSync();
+        mTestableLooper.processAllMessages();
 
         assertNull(mAuthController.mCurrentDialog);
         assertNull(mAuthController.mReceiver);
@@ -528,7 +597,7 @@ public class AuthControllerTest extends SysuiTestCase {
         showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
         Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         mAuthController.mBroadcastReceiver.onReceive(mContext, intent);
-        waitForIdleSync();
+        mTestableLooper.processAllMessages();
 
         assertNull(mAuthController.mCurrentDialog);
         assertNull(mAuthController.mReceiver);
@@ -598,6 +667,7 @@ public class AuthControllerTest extends SysuiTestCase {
         private PromptInfo mLastBiometricPromptInfo;
 
         TestableAuthController(Context context,
+                Execution execution,
                 CommandQueue commandQueue,
                 ActivityTaskManager activityTaskManager,
                 WindowManager windowManager,
@@ -605,7 +675,7 @@ public class AuthControllerTest extends SysuiTestCase {
                 FaceManager faceManager,
                 Provider<UdfpsController> udfpsControllerFactory,
                 Provider<SidefpsController> sidefpsControllerFactory) {
-            super(context, commandQueue, activityTaskManager, windowManager,
+            super(context, execution, commandQueue, activityTaskManager, windowManager,
                     fingerprintManager, faceManager, udfpsControllerFactory,
                     sidefpsControllerFactory, mDisplayManager, mHandler);
         }

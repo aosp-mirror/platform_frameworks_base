@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="ringtone_default" msgid="798836092118824500">"آهنگ زنگ پیش‌فرض"</string>
     <string name="notification_sound_default" msgid="8133121186242636840">"صدای اعلان پیش‌فرض"</string>
-    <string name="alarm_sound_default" msgid="4787646764557462649">"صدای زنگ ساعت پیش‌فرض"</string>
+    <string name="alarm_sound_default" msgid="4787646764557462649">"صدای زنگ پیش‌فرض"</string>
     <string name="add_ringtone_text" msgid="6642389991738337529">"افزودن آهنگ زنگ"</string>
     <string name="add_alarm_text" msgid="3545497316166999225">"افزودن زنگ"</string>
     <string name="add_notification_text" msgid="4431129543300614788">"افزودن اعلان"</string>

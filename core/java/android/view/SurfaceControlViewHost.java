@@ -292,11 +292,18 @@ public class SurfaceControlViewHost {
      */
     @TestApi
     public void relayout(WindowManager.LayoutParams attrs) {
+        relayout(attrs, SurfaceControl.Transaction::apply);
+    }
+
+    /**
+     * Forces relayout and draw and allows to set a custom callback when it is finished
+     * @hide
+     */
+    public void relayout(WindowManager.LayoutParams attrs,
+            WindowlessWindowManager.ResizeCompleteCallback callback) {
         mViewRoot.setLayoutParams(attrs, false);
         mViewRoot.setReportNextDraw();
-        mWm.setCompletionCallback(mViewRoot.mWindow.asBinder(), (SurfaceControl.Transaction t) -> {
-            t.apply();
-        });
+        mWm.setCompletionCallback(mViewRoot.mWindow.asBinder(), callback);
     }
 
     /**

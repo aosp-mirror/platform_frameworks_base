@@ -95,17 +95,24 @@ public final class TestableDeviceConfig implements StaticMockFixture {
                     String name = invocationOnMock.getArgument(1);
                     String value = invocationOnMock.getArgument(2);
                     mKeyValueMap.put(getKey(namespace, name), value);
-                    for (DeviceConfig.OnPropertiesChangedListener listener :
-                            mOnPropertiesChangedListenerMap.keySet()) {
-                        if (namespace.equals(mOnPropertiesChangedListenerMap.get(listener).first)) {
-                            mOnPropertiesChangedListenerMap.get(listener).second.execute(
-                                    () -> listener.onPropertiesChanged(
-                                            getProperties(namespace, name, value)));
-                        }
-                    }
+                    invokeListeners(namespace, getProperties(namespace, name, value));
                     return true;
                 }
         ).when(() -> DeviceConfig.setProperty(anyString(), anyString(), anyString(), anyBoolean()));
+
+        doAnswer((Answer<Boolean>) invocationOnMock -> {
+                    Properties properties = invocationOnMock.getArgument(0);
+                    String namespace = properties.getNamespace();
+                    Map<String, String> keyValues = new ArrayMap<>();
+                    for (String name : properties.getKeyset()) {
+                        String value = properties.getString(name, /* defaultValue= */ "");
+                        mKeyValueMap.put(getKey(namespace, name), value);
+                        keyValues.put(name.toLowerCase(), value);
+                    }
+                    invokeListeners(namespace, getProperties(namespace, keyValues));
+                    return true;
+                }
+        ).when(() -> DeviceConfig.setProperties(any(Properties.class)));
 
         doAnswer((Answer<String>) invocationOnMock -> {
             String namespace = invocationOnMock.getArgument(0);
@@ -151,6 +158,16 @@ public final class TestableDeviceConfig implements StaticMockFixture {
     private Pair<String, String> getNameSpaceAndName(String key) {
         final String[] values = key.split("/");
         return Pair.create(values[0], values[1]);
+    }
+
+    private void invokeListeners(String namespace, Properties properties) {
+        for (DeviceConfig.OnPropertiesChangedListener listener :
+                mOnPropertiesChangedListenerMap.keySet()) {
+            if (namespace.equals(mOnPropertiesChangedListenerMap.get(listener).first)) {
+                mOnPropertiesChangedListenerMap.get(listener).second.execute(
+                        () -> listener.onPropertiesChanged(properties));
+            }
+        }
     }
 
     private Properties getProperties(String namespace, String name, String value) {

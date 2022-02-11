@@ -27,18 +27,19 @@ public final class BLASTBufferQueue {
     // Note: This field is accessed by native code.
     public long mNativeObject; // BLASTBufferQueue*
 
-    private static native long nativeCreate(String name, long surfaceControl, long width,
+    private static native long nativeCreateAndUpdate(String name, long surfaceControl, long width,
             long height, int format);
+    private static native long nativeCreate(String name);
     private static native void nativeDestroy(long ptr);
     private static native Surface nativeGetSurface(long ptr, boolean includeSurfaceControlHandle);
     private static native void nativeSetNextTransaction(long ptr, long transactionPtr);
     private static native void nativeUpdate(long ptr, long surfaceControl, long width, long height,
             int format, long transactionPtr);
-    private static native void nativeFlushShadowQueue(long ptr);
     private static native void nativeMergeWithNextTransaction(long ptr, long transactionPtr,
                                                               long frameNumber);
     private static native void nativeSetTransactionCompleteCallback(long ptr, long frameNumber,
             TransactionCompleteCallback callback);
+    private static native long nativeGetLastAcquiredFrameNum(long ptr);
 
     /**
      * Callback sent to {@link #setTransactionCompleteCallback(long, TransactionCompleteCallback)}
@@ -54,7 +55,11 @@ public final class BLASTBufferQueue {
     /** Create a new connection with the surface flinger. */
     public BLASTBufferQueue(String name, SurfaceControl sc, int width, int height,
             @PixelFormat.Format int format) {
-        mNativeObject = nativeCreate(name, sc.mNativeObject, width, height, format);
+        mNativeObject = nativeCreateAndUpdate(name, sc.mNativeObject, width, height, format);
+    }
+
+    public BLASTBufferQueue(String name) {
+        mNativeObject = nativeCreate(name);
     }
 
     public void destroy() {
@@ -124,10 +129,6 @@ public final class BLASTBufferQueue {
         }
     }
 
-    public void flushShadowQueue() {
-        nativeFlushShadowQueue(mNativeObject);
-    }
-
     /**
      * Merge the transaction passed in to the next transaction in BlastBufferQueue. The next
      * transaction will be applied or merged when the next frame with specified frame number
@@ -145,4 +146,7 @@ public final class BLASTBufferQueue {
         nativeMergeWithNextTransaction(mNativeObject, nativeTransaction, frameNumber);
     }
 
+    public long getLastAcquiredFrameNum() {
+        return nativeGetLastAcquiredFrameNum(mNativeObject);
+    }
 }

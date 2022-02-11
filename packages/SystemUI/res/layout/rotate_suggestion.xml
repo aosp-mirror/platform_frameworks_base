@@ -14,16 +14,17 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-
-<com.android.systemui.navigationbar.buttons.KeyButtonView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/rotate_suggestion"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_weight="0"
-    android:scaleType="center"
-    android:visibility="invisible"
-    android:contentDescription="@string/accessibility_rotate_button"
-    android:paddingStart="@dimen/navigation_key_padding"
-    android:paddingEnd="@dimen/navigation_key_padding"
-/>
+    >
+    <com.android.systemui.shared.rotation.FloatingRotationButtonView
+        android:id="@+id/rotate_suggestion"
+        android:layout_width="@dimen/floating_rotation_button_diameter"
+        android:layout_height="@dimen/floating_rotation_button_diameter"
+        android:paddingStart="@dimen/navigation_key_padding"
+        android:paddingEnd="@dimen/navigation_key_padding"
+        android:layout_gravity="bottom|left"
+        android:scaleType="center"
+        android:visibility="invisible" />
+</FrameLayout>

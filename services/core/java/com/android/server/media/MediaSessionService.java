@@ -2128,6 +2128,23 @@ public class MediaSessionService extends SystemService implements Monitor {
                 // Enabled notification listener only works within the same user.
                 return false;
             }
+            // Verify whether package name and controller UID.
+            // It will indirectly check whether the caller has obtained the package name and UID
+            // via ControllerInfo or with the valid package name visibility.
+            try {
+                int actualControllerUid = mContext.getPackageManager().getPackageUidAsUser(
+                        controllerPackageName,
+                        UserHandle.getUserId(controllerUid));
+                if (controllerUid != actualControllerUid) {
+                    Log.w(TAG, "Failed to check enabled notification listener. Package name and"
+                            + " UID doesn't match");
+                    return false;
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, "Failed to check enabled notification listener. Package name doesn't"
+                        + " exist");
+                return false;
+            }
 
             if (mNotificationManager.hasEnabledNotificationListener(controllerPackageName,
                     UserHandle.getUserHandleForUid(controllerUid))) {

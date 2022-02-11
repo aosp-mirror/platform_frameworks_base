@@ -32,6 +32,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.shared.system.smartspace.SmartspaceTransitionController;
 
 import org.junit.Before;
@@ -52,12 +53,18 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
     private KeyguardStateController mKeyguardStateController;
     @Mock
     private SmartspaceTransitionController mSmartSpaceTransitionController;
+    @Mock
+    private DumpManager mDumpManager;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mKeyguardStateController = new KeyguardStateControllerImpl(mContext,
-                mKeyguardUpdateMonitor, mLockPatternUtils, mSmartSpaceTransitionController);
+        mKeyguardStateController = new KeyguardStateControllerImpl(
+                mContext,
+                mKeyguardUpdateMonitor,
+                mLockPatternUtils,
+                mSmartSpaceTransitionController,
+                mDumpManager);
     }
 
     @Test

@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.flicker.apppairs
 
-import android.os.SystemClock
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
@@ -25,7 +24,7 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.wm.shell.flicker.appPairsDividerIsInvisible
+import com.android.wm.shell.flicker.appPairsDividerIsInvisibleAtEnd
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.resetMultiWindowConfig
 import com.android.wm.shell.flicker.helpers.MultiWindowHelper.Companion.setSupportsNonResizableMultiWindow
@@ -61,7 +60,7 @@ class AppPairsTestCannotPairNonResizeableApps(
                 // TODO pair apps through normal UX flow
                 executeShellCommand(
                     composePairsCommand(primaryTaskId, nonResizeableTaskId, pair = true))
-                SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
+                nonResizeableApp?.run { wmHelper.waitForFullScreenApp(nonResizeableApp.component) }
             }
         }
 
@@ -85,15 +84,13 @@ class AppPairsTestCannotPairNonResizeableApps(
     @Test
     override fun statusBarLayerRotatesScales() = super.statusBarLayerRotatesScales()
 
-    @FlakyTest
+    @Presubmit
     @Test
-    override fun navBarLayerIsAlwaysVisible() {
-        super.navBarLayerIsAlwaysVisible()
-    }
+    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
 
     @Presubmit
     @Test
-    fun appPairsDividerIsInvisible() = testSpec.appPairsDividerIsInvisible()
+    fun appPairsDividerIsInvisibleAtEnd() = testSpec.appPairsDividerIsInvisibleAtEnd()
 
     @Presubmit
     @Test
@@ -103,8 +100,8 @@ class AppPairsTestCannotPairNonResizeableApps(
             "Non resizeable app not initialized"
         }
         testSpec.assertWmEnd {
-            isVisible(nonResizeableApp.defaultWindowName)
-            isInvisible(primaryApp.defaultWindowName)
+            isAppWindowVisible(nonResizeableApp.component)
+            isAppWindowInvisible(primaryApp.component)
         }
     }
 

@@ -323,11 +323,12 @@ public class BubbleData {
         }
         mPendingBubbles.remove(bubble.getKey()); // No longer pending once we're here
         Bubble prevBubble = getBubbleInStackWithKey(bubble.getKey());
-        suppressFlyout |= !bubble.isVisuallyInterruptive();
+        suppressFlyout |= !bubble.isTextChanged();
 
         if (prevBubble == null) {
             // Create a new bubble
             bubble.setSuppressFlyout(suppressFlyout);
+            bubble.markUpdatedAt(mTimeSource.currentTimeMillis());
             doAdd(bubble);
             trim();
         } else {
@@ -558,6 +559,8 @@ public class BubbleData {
         }
         Bubble bubbleToRemove = mBubbles.get(indexToRemove);
         bubbleToRemove.stopInflation();
+        overflowBubble(reason, bubbleToRemove);
+
         if (mBubbles.size() == 1) {
             if (hasOverflowBubbles() && (mPositioner.showingInTaskbar() || isExpanded())) {
                 // No more active bubbles but we have stuff in the overflow -- select that view
@@ -580,8 +583,6 @@ public class BubbleData {
         if (!isExpanded()) {
             mStateChange.orderChanged |= repackAll();
         }
-
-        overflowBubble(reason, bubbleToRemove);
 
         // Note: If mBubbles.isEmpty(), then mSelectedBubble is now null.
         if (Objects.equals(mSelectedBubble, bubbleToRemove)) {
@@ -699,10 +700,9 @@ public class BubbleData {
         if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "setSelectedBubbleInternal: " + bubble);
         }
-        if (!mShowingOverflow && Objects.equals(bubble, mSelectedBubble)) {
+        if (Objects.equals(bubble, mSelectedBubble)) {
             return;
         }
-        // Otherwise, if we are showing the overflow menu, return to the previously selected bubble.
         boolean isOverflow = bubble != null && BubbleOverflow.KEY.equals(bubble.getKey());
         if (bubble != null
                 && !mBubbles.contains(bubble)
@@ -771,6 +771,10 @@ public class BubbleData {
                 Log.e(TAG, "Attempt to expand stack without selected bubble!");
                 return;
             }
+            if (mSelectedBubble.getKey().equals(mOverflow.getKey()) && !mBubbles.isEmpty()) {
+                // Show previously selected bubble instead of overflow menu when expanding.
+                setSelectedBubbleInternal(mBubbles.get(0));
+            }
             if (mSelectedBubble instanceof Bubble) {
                 ((Bubble) mSelectedBubble).markAsAccessedAt(mTimeSource.currentTimeMillis());
             }
@@ -779,16 +783,6 @@ public class BubbleData {
             // Apply ordering and grouping rules from expanded -> collapsed, then save
             // the result.
             mStateChange.orderChanged |= repackAll();
-            // Save the state which should be returned to when expanded (with no other changes)
-
-            if (mShowingOverflow) {
-                // Show previously selected bubble instead of overflow menu on next expansion.
-                if (!mSelectedBubble.getKey().equals(mOverflow.getKey())) {
-                    setSelectedBubbleInternal(mSelectedBubble);
-                } else {
-                    setSelectedBubbleInternal(mBubbles.get(0));
-                }
-            }
             if (mBubbles.indexOf(mSelectedBubble) > 0) {
                 // Move the selected bubble to the top while collapsed.
                 int index = mBubbles.indexOf(mSelectedBubble);

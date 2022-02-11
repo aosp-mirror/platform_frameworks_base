@@ -41,7 +41,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.WindowStateAnimatorProto.DRAW_STATE;
 import static com.android.server.wm.WindowStateAnimatorProto.SURFACE;
@@ -71,7 +70,6 @@ import java.io.PrintWriter;
  **/
 class WindowStateAnimator {
     static final String TAG = TAG_WITH_CLASS_NAME ? "WindowStateAnimator" : TAG_WM;
-    static final int WINDOW_FREEZE_LAYER = TYPE_LAYER_MULTIPLIER * 200;
     static final int PRESERVED_SURFACE_LAYER = 1;
 
     /**
@@ -82,16 +80,10 @@ class WindowStateAnimator {
     static final int ROOT_TASK_CLIP_AFTER_ANIM = 0;
 
     /**
-     * Mode how the window gets clipped by the root task bounds: The clipping should be applied
-     * before applying the animation transformation, i.e. the root task bounds move with the window.
-     */
-    static final int ROOT_TASK_CLIP_BEFORE_ANIM = 1;
-
-    /**
      * Mode how window gets clipped by the root task bounds during an animation: Don't clip the
      * window by the root task bounds.
      */
-    static final int ROOT_TASK_CLIP_NONE = 2;
+    static final int ROOT_TASK_CLIP_NONE = 1;
 
     // Unchanging local convenience fields.
     final WindowManagerService mService;
@@ -230,7 +222,8 @@ class WindowStateAnimator {
         }
     }
 
-    boolean finishDrawingLocked(SurfaceControl.Transaction postDrawTransaction) {
+    boolean finishDrawingLocked(SurfaceControl.Transaction postDrawTransaction,
+            boolean forceApplyNow) {
         final boolean startingWindow =
                 mWin.mAttrs.type == WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
         if (startingWindow) {
@@ -255,12 +248,12 @@ class WindowStateAnimator {
             // If there is no surface, the last draw was for the previous surface. We don't want to
             // wait until the new surface is shown and instead just apply the transaction right
             // away.
-            if (mLastHidden && mDrawState != NO_SURFACE) {
+            if (mLastHidden && mDrawState != NO_SURFACE && !forceApplyNow) {
                 mPostDrawTransaction.merge(postDrawTransaction);
-                layoutNeeded = true;
             } else {
-                postDrawTransaction.apply();
+                mWin.getSyncTransaction().merge(postDrawTransaction);
             }
+            layoutNeeded = true;
         }
 
         return layoutNeeded;
@@ -684,7 +677,7 @@ class WindowStateAnimator {
             applyAnimationLocked(transit, true);
         }
 
-        if (mService.mAccessibilityController != null) {
+        if (mService.mAccessibilityController.hasCallbacks()) {
             mService.mAccessibilityController.onWindowTransition(mWin, transit);
         }
     }

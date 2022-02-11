@@ -19,11 +19,13 @@ package com.android.keyguard;
 import static android.view.WindowInsets.Type.ime;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -33,6 +35,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.MotionEvent;
 import android.view.WindowInsetsController;
 
 import androidx.test.filters.SmallTest;
@@ -43,6 +46,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
@@ -58,6 +62,7 @@ import org.mockito.junit.MockitoRule;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper()
 public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
+    private static final int VIEW_WIDTH = 1600;
 
     @Rule
     public MockitoRule mRule = MockitoJUnit.rule();
@@ -100,6 +105,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     private EmergencyButtonController mEmergencyButtonController;
     @Mock
     private Resources mResources;
+    @Mock
+    private FalsingCollector mFalsingCollector;
     private Configuration mConfiguration;
 
     private KeyguardSecurityContainerController mKeyguardSecurityContainerController;
@@ -112,7 +119,9 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         mConfiguration.setToDefaults(); // Defaults to ORIENTATION_UNDEFINED.
 
         when(mResources.getConfiguration()).thenReturn(mConfiguration);
+        when(mView.getContext()).thenReturn(mContext);
         when(mView.getResources()).thenReturn(mResources);
+        when(mView.getWidth()).thenReturn(VIEW_WIDTH);
         when(mAdminSecondaryLockScreenControllerFactory.create(any(KeyguardSecurityCallback.class)))
                 .thenReturn(mAdminSecondaryLockScreenController);
         when(mSecurityViewFlipper.getWindowInsetsController()).thenReturn(mWindowInsetsController);
@@ -131,7 +140,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 mView, mAdminSecondaryLockScreenControllerFactory, mLockPatternUtils,
                 mKeyguardUpdateMonitor, mKeyguardSecurityModel, mMetricsLogger, mUiEventLogger,
                 mKeyguardStateController, mKeyguardSecurityViewFlipperController,
-                mConfigurationController)
+                mConfigurationController, mFalsingCollector)
                 .create(mSecurityCallback);
     }
 
@@ -169,18 +178,156 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     public void onResourcesUpdate_callsThroughOnRotationChange() {
         // Rotation is the same, shouldn't cause an update
         mKeyguardSecurityContainerController.updateResources();
-        verify(mView, times(0)).updateLayoutForSecurityMode(any());
+        verify(mView, times(0)).setOneHandedMode(anyBoolean());
 
         // Update rotation. Should trigger update
         mConfiguration.orientation = Configuration.ORIENTATION_LANDSCAPE;
 
         mKeyguardSecurityContainerController.updateResources();
-        verify(mView, times(1)).updateLayoutForSecurityMode(any());
+        verify(mView, times(1)).setOneHandedMode(anyBoolean());
     }
 
     @Test
-    public void updateKeyguardPosition_callsThroughToView() {
+    public void updateKeyguardPosition_callsThroughToViewInOneHandedMode() {
+        when(mView.isOneHandedMode()).thenReturn(true);
+        mKeyguardSecurityContainerController.updateKeyguardPosition(VIEW_WIDTH / 3f);
+        verify(mView).setOneHandedModeLeftAligned(true, false);
+
+        mKeyguardSecurityContainerController.updateKeyguardPosition((VIEW_WIDTH / 3f) * 2);
+        verify(mView).setOneHandedModeLeftAligned(false, false);
+    }
+
+    @Test
+    public void updateKeyguardPosition_ignoredInTwoHandedMode() {
+        when(mView.isOneHandedMode()).thenReturn(false);
         mKeyguardSecurityContainerController.updateKeyguardPosition(1.0f);
-        verify(mView).updateKeyguardPosition(1.0f);
+        verify(mView, never()).setOneHandedModeLeftAligned(anyBoolean(), anyBoolean());
+    }
+
+    private void touchDownLeftSide() {
+        mKeyguardSecurityContainerController.mGlobalTouchListener.onTouchEvent(
+                MotionEvent.obtain(
+                        /* downTime= */0,
+                        /* eventTime= */0,
+                        MotionEvent.ACTION_DOWN,
+                        /* x= */VIEW_WIDTH / 3f,
+                        /* y= */0,
+                        /* metaState= */0));
+    }
+
+    private void touchDownRightSide() {
+        mKeyguardSecurityContainerController.mGlobalTouchListener.onTouchEvent(
+                MotionEvent.obtain(
+                        /* downTime= */0,
+                        /* eventTime= */0,
+                        MotionEvent.ACTION_DOWN,
+                        /* x= */(VIEW_WIDTH / 3f) * 2,
+                        /* y= */0,
+                        /* metaState= */0));
+    }
+
+    @Test
+    public void onInterceptTap_inhibitsFalsingInOneHandedMode() {
+        when(mView.isOneHandedMode()).thenReturn(true);
+        when(mView.isOneHandedModeLeftAligned()).thenReturn(true);
+
+        touchDownLeftSide();
+        verify(mFalsingCollector, never()).avoidGesture();
+
+        // Now on the right.
+        touchDownRightSide();
+        verify(mFalsingCollector).avoidGesture();
+
+        // Move and re-test
+        reset(mFalsingCollector);
+        when(mView.isOneHandedModeLeftAligned()).thenReturn(false);
+
+        // On the right...
+        touchDownRightSide();
+        verify(mFalsingCollector, never()).avoidGesture();
+
+        touchDownLeftSide();
+        verify(mFalsingCollector).avoidGesture();
+    }
+
+    @Test
+    public void showSecurityScreen_oneHandedMode_bothFlagsDisabled_noOneHandedMode() {
+        setUpKeyguardFlags(
+                /* deviceConfigCanUseOneHandedKeyguard= */false,
+                /* sysuiResourceCanUseOneHandedKeyguard= */false);
+
+        when(mKeyguardSecurityViewFlipperController.getSecurityView(
+                eq(SecurityMode.Pattern), any(KeyguardSecurityCallback.class)))
+                .thenReturn((KeyguardInputViewController) mKeyguardPasswordViewController);
+
+        mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Pattern);
+        verify(mView).setOneHandedMode(false);
+    }
+
+    @Test
+    public void showSecurityScreen_oneHandedMode_deviceFlagDisabled_noOneHandedMode() {
+        setUpKeyguardFlags(
+                /* deviceConfigCanUseOneHandedKeyguard= */false,
+                /* sysuiResourceCanUseOneHandedKeyguard= */true);
+
+        when(mKeyguardSecurityViewFlipperController.getSecurityView(
+                eq(SecurityMode.Pattern), any(KeyguardSecurityCallback.class)))
+                .thenReturn((KeyguardInputViewController) mKeyguardPasswordViewController);
+
+        mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Pattern);
+        verify(mView).setOneHandedMode(false);
+    }
+
+    @Test
+    public void showSecurityScreen_oneHandedMode_sysUiFlagDisabled_noOneHandedMode() {
+        setUpKeyguardFlags(
+                /* deviceConfigCanUseOneHandedKeyguard= */true,
+                /* sysuiResourceCanUseOneHandedKeyguard= */false);
+
+        when(mKeyguardSecurityViewFlipperController.getSecurityView(
+                eq(SecurityMode.Pattern), any(KeyguardSecurityCallback.class)))
+                .thenReturn((KeyguardInputViewController) mKeyguardPasswordViewController);
+
+        mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Pattern);
+        verify(mView).setOneHandedMode(false);
+    }
+
+    @Test
+    public void showSecurityScreen_oneHandedMode_bothFlagsEnabled_oneHandedMode() {
+        setUpKeyguardFlags(
+                /* deviceConfigCanUseOneHandedKeyguard= */true,
+                /* sysuiResourceCanUseOneHandedKeyguard= */true);
+
+        when(mKeyguardSecurityViewFlipperController.getSecurityView(
+                eq(SecurityMode.Pattern), any(KeyguardSecurityCallback.class)))
+                .thenReturn((KeyguardInputViewController) mKeyguardPasswordViewController);
+
+        mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Pattern);
+        verify(mView).setOneHandedMode(true);
+    }
+
+    @Test
+    public void showSecurityScreen_twoHandedMode_bothFlagsEnabled_noOneHandedMode() {
+        setUpKeyguardFlags(
+                /* deviceConfigCanUseOneHandedKeyguard= */true,
+                /* sysuiResourceCanUseOneHandedKeyguard= */true);
+
+        when(mKeyguardSecurityViewFlipperController.getSecurityView(
+                eq(SecurityMode.Password), any(KeyguardSecurityCallback.class)))
+                .thenReturn((KeyguardInputViewController) mKeyguardPasswordViewController);
+
+        mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Password);
+        verify(mView).setOneHandedMode(false);
+    }
+
+    private void setUpKeyguardFlags(
+            boolean deviceConfigCanUseOneHandedKeyguard,
+            boolean sysuiResourceCanUseOneHandedKeyguard) {
+        when(mResources.getBoolean(
+                com.android.internal.R.bool.config_enableDynamicKeyguardPositioning))
+                .thenReturn(deviceConfigCanUseOneHandedKeyguard);
+        when(mResources.getBoolean(
+                R.bool.can_use_one_handed_bouncer))
+                .thenReturn(sysuiResourceCanUseOneHandedKeyguard);
     }
 }

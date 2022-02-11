@@ -17,6 +17,7 @@
 package com.android.systemui.accessibility;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
 
 import android.annotation.IntDef;
@@ -49,7 +50,8 @@ public class AccessibilityButtonModeObserver extends
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
             ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR,
-            ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU
+            ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU,
+            ACCESSIBILITY_BUTTON_MODE_GESTURE
     })
     public @interface AccessibilityButtonMode {}
 

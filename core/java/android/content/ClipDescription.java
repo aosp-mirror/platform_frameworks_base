@@ -124,6 +124,16 @@ public class ClipDescription implements Parcelable {
      */
     public static final String EXTRA_ACTIVITY_OPTIONS = "android.intent.extra.ACTIVITY_OPTIONS";
 
+    /**
+     * An instance id used for logging.
+     * <p>
+     * Type: {@link com.android.internal.logging.InstanceId}
+     * </p>
+     * @hide
+     */
+    public static final String EXTRA_LOGGING_INSTANCE_ID =
+            "android.intent.extra.LOGGING_INSTANCE_ID";
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value =

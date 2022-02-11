@@ -18,47 +18,50 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/media_output_dialog"
-    android:layout_width="match_parent"
+    android:layout_width="@dimen/large_dialog_width"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="94dp"
+        android:layout_height="wrap_content"
         android:gravity="start|center_vertical"
-        android:paddingStart="16dp"
+        android:paddingStart="24dp"
         android:orientation="horizontal">
         <ImageView
             android:id="@+id/header_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingEnd="@dimen/media_output_dialog_header_icon_padding"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:importantForAccessibility="no"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
+            android:paddingStart="16dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="24dp"
+            android:paddingEnd="24dp"
             android:orientation="vertical">
             <TextView
                 android:id="@+id/header_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
+                android:gravity="center_vertical"
                 android:maxLines="1"
                 android:textColor="?android:attr/textColorPrimary"
                 android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
                 android:textSize="20sp"/>
-
             <TextView
                 android:id="@+id/header_subtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:gravity="center_vertical"
                 android:ellipsize="end"
                 android:maxLines="1"
+                android:textColor="?android:attr/textColorSecondary"
                 android:fontFamily="roboto-regular"
-                android:textSize="14sp"/>
-
+                android:textSize="16sp"/>
         </LinearLayout>
     </LinearLayout>
 
@@ -71,6 +74,7 @@
         android:id="@+id/device_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:orientation="vertical">
 
         <androidx.recyclerview.widget.RecyclerView
@@ -81,21 +85,20 @@
             android:overScrollMode="never"/>
     </LinearLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider"/>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="@dimen/dialog_side_padding"
+        android:layout_marginEnd="@dimen/dialog_side_padding"
+        android:layout_marginBottom="@dimen/dialog_bottom_padding"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/stop"
-            style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+            style="@style/Widget.Dialog.Button.BorderButton"
             android:layout_width="wrap_content"
-            android:layout_height="64dp"
+            android:layout_height="wrap_content"
             android:text="@string/keyboard_key_media_stop"
             android:visibility="gone"/>
 
@@ -106,10 +109,9 @@
 
         <Button
             android:id="@+id/done"
-            style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
+            style="@style/Widget.Dialog.Button"
             android:layout_width="wrap_content"
-            android:layout_height="64dp"
-            android:layout_marginEnd="0dp"
+            android:layout_height="wrap_content"
             android:text="@string/inline_done_button"/>
     </LinearLayout>
 </LinearLayout>

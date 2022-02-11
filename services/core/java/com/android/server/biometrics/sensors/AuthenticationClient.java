@@ -28,6 +28,7 @@ import android.content.pm.ApplicationInfo;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.BiometricOverlayConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -167,6 +168,10 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         return Utils.isKeyguard(getContext(), getOwnerString());
     }
 
+    private boolean isSettings() {
+        return Utils.isSettings(getContext(), getOwnerString());
+    }
+
     @Override
     protected boolean isCryptoOperation() {
         return mOperationId != 0;
@@ -246,7 +251,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                         "Successful background authentication!");
             }
 
-            mAlreadyDone = true;
+            markAlreadyDone();
 
             if (mTaskStackListener != null) {
                 mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
@@ -322,7 +327,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
             final @LockoutTracker.LockoutMode int lockoutMode =
                     handleFailedAttempt(getTargetUserId());
             if (lockoutMode != LockoutTracker.LOCKOUT_NONE) {
-                mAlreadyDone = true;
+                markAlreadyDone();
             }
 
             final CoexCoordinator coordinator = CoexCoordinator.getInstance();
@@ -357,6 +362,43 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                 }
             });
         }
+    }
+
+    /**
+     * Only call this method on interfaces where lockout does not come from onError, I.E. the
+     * old HIDL implementation.
+     */
+    protected void onLockoutTimed(long durationMillis) {
+        final ClientMonitorCallbackConverter listener = getListener();
+        final CoexCoordinator coordinator = CoexCoordinator.getInstance();
+        coordinator.onAuthenticationError(this, BiometricConstants.BIOMETRIC_ERROR_LOCKOUT,
+                new CoexCoordinator.ErrorCallback() {
+            @Override
+            public void sendHapticFeedback() {
+                if (listener != null && mShouldVibrate) {
+                    vibrateError();
+                }
+            }
+        });
+    }
+
+    /**
+     * Only call this method on interfaces where lockout does not come from onError, I.E. the
+     * old HIDL implementation.
+     */
+    protected void onLockoutPermanent() {
+        final ClientMonitorCallbackConverter listener = getListener();
+        final CoexCoordinator coordinator = CoexCoordinator.getInstance();
+        coordinator.onAuthenticationError(this,
+                BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT,
+                new CoexCoordinator.ErrorCallback() {
+            @Override
+            public void sendHapticFeedback() {
+                if (listener != null && mShouldVibrate) {
+                    vibrateError();
+                }
+            }
+        });
     }
 
     private void sendCancelOnly(@Nullable ClientMonitorCallbackConverter listener) {
@@ -456,5 +498,21 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
     public boolean wasAuthAttempted() {
         return mAuthAttempted;
+    }
+
+    protected int getShowOverlayReason() {
+        if (isKeyguard()) {
+            return BiometricOverlayConstants.REASON_AUTH_KEYGUARD;
+        } else if (isBiometricPrompt()) {
+            // BP reason always takes precedent over settings, since callers from within
+            // settings can always invoke BP.
+            return BiometricOverlayConstants.REASON_AUTH_BP;
+        } else if (isSettings()) {
+            // This is pretty much only for FingerprintManager#authenticate usage from
+            // FingerprintSettings.
+            return BiometricOverlayConstants.REASON_AUTH_SETTINGS;
+        } else {
+            return BiometricOverlayConstants.REASON_AUTH_OTHER;
+        }
     }
 }

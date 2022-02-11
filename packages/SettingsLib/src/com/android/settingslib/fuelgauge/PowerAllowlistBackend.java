@@ -110,6 +110,18 @@ public class PowerAllowlistBackend {
     }
 
     /**
+     * Check if target package is in allow list except idle app
+     */
+    public boolean isAllowlistedExceptIdle(String pkg) {
+        try {
+            return mDeviceIdleService.isPowerSaveWhitelistExceptIdleApp(pkg);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Unable to reach IDeviceIdleController", e);
+            return true;
+        }
+    }
+
+    /**
      *
      * @param pkgs a list of packageName
      * @return true when one of package is in allow list

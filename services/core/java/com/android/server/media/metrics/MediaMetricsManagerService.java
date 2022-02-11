@@ -18,6 +18,7 @@ package com.android.server.media.metrics;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.media.MediaMetrics;
 import android.media.metrics.IMediaMetricsManager;
 import android.media.metrics.NetworkEvent;
 import android.media.metrics.PlaybackErrorEvent;
@@ -64,6 +65,8 @@ public final class MediaMetricsManagerService extends SystemService {
     private static final int LOGGING_LEVEL_EVERYTHING = 0;
     private static final int LOGGING_LEVEL_NO_UID = 1000;
     private static final int LOGGING_LEVEL_BLOCKED = 99999;
+
+    private static final String mMetricsId = MediaMetrics.Name.METRICS_MANAGER;
 
     private static final String FAILED_TO_GET = "failed_to_get";
     private final SecureRandom mSecureRandom;
@@ -199,6 +202,12 @@ public final class MediaMetricsManagerService extends SystemService {
             mSecureRandom.nextBytes(byteId);
             String id = Base64.encodeToString(
                     byteId, Base64.NO_PADDING | Base64.NO_WRAP | Base64.URL_SAFE);
+
+            // Authorize these session ids in the native mediametrics service.
+            new MediaMetrics.Item(mMetricsId)
+                    .set(MediaMetrics.Property.EVENT, "create")
+                    .set(MediaMetrics.Property.LOG_SESSION_ID, id)
+                    .record();
             return id;
         }
 

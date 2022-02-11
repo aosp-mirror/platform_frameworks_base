@@ -21,9 +21,9 @@ package android.hardware.fingerprint;
  */
 oneway interface ISidefpsController {
 
-    // Shows the overlay.
-    void show();
+    // Shows the overlay for the given sensor with a reason from BiometricOverlayConstants.
+    void show(int sensorId, int reason);
 
     // Hides the overlay.
-    void hide();
+    void hide(int sensorId);
 }

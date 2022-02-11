@@ -91,7 +91,7 @@ public class AnalogClockController implements ClockPlugin {
         mResources = res;
         mLayoutInflater = inflater;
         mColorExtractor = colorExtractor;
-        mClockPosition = new SmallClockPosition(res);
+        mClockPosition = new SmallClockPosition(inflater.getContext());
     }
 
     private void createViews() {

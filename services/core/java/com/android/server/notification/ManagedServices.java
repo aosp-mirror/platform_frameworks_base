@@ -114,9 +114,10 @@ abstract public class ManagedServices {
     static final String ATT_VERSION = "version";
     static final String ATT_DEFAULTS = "defaults";
     static final String ATT_USER_SET = "user_set_services";
+    static final String ATT_USER_SET_OLD = "user_set";
     static final String ATT_USER_CHANGED = "user_changed";
 
-    static final int DB_VERSION = 4;
+    static final String DB_VERSION = "4";
 
     static final int APPROVAL_BY_PACKAGE = 0;
     static final int APPROVAL_BY_COMPONENT = 1;
@@ -482,7 +483,7 @@ abstract public class ManagedServices {
     public void writeXml(TypedXmlSerializer out, boolean forBackup, int userId) throws IOException {
         out.startTag(null, getConfig().xmlTag);
 
-        out.attributeInt(null, ATT_VERSION, DB_VERSION);
+        out.attributeInt(null, ATT_VERSION, Integer.parseInt(DB_VERSION));
 
         writeDefaults(out);
 
@@ -615,6 +616,7 @@ abstract public class ManagedServices {
         // read grants
         int type;
         String version = XmlUtils.readStringAttribute(parser, ATT_VERSION);
+        boolean needUpgradeUserset = false;
         readDefaults(parser);
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
             String tag = parser.getName();
@@ -633,13 +635,42 @@ abstract public class ManagedServices {
                     final boolean isPrimary =
                             parser.getAttributeBoolean(null, ATT_IS_PRIMARY, true);
 
+                    // Load three different userSet attributes from xml
+                    // user_changed, not null if version == 4 and is NAS setting
                     final String isUserChanged = XmlUtils.readStringAttribute(parser,
                             ATT_USER_CHANGED);
-                    String userSetComponent = null;
-                    if (isUserChanged == null) {
-                        userSetComponent = XmlUtils.readStringAttribute(parser, ATT_USER_SET);
+                    // user_set, not null if version <= 3
+                    final String isUserChanged_Old = XmlUtils.readStringAttribute(parser,
+                            ATT_USER_SET_OLD);
+                    // user_set_services, not null if version >= 3 and is non-NAS setting
+                    String userSetComponent = XmlUtils.readStringAttribute(parser, ATT_USER_SET);
+
+                    // since the same xml version may have different userSet attributes,
+                    // we need to check both xml version and userSet values to know how to set
+                    // the userSetComponent/mIsUserChanged to the correct value
+                    if (DB_VERSION.equals(version)) {
+                        // version 4, NAS contains user_changed and
+                        // NLS/others contain user_set_services
+                        if (isUserChanged == null) { //NLS
+                            userSetComponent = TextUtils.emptyIfNull(userSetComponent);
+                        } else { //NAS
+                            mIsUserChanged.put(resolvedUserId, Boolean.valueOf(isUserChanged));
+                            userSetComponent = Boolean.valueOf(isUserChanged) ? approved : "";
+                        }
                     } else {
-                        mIsUserChanged.put(resolvedUserId, Boolean.valueOf(isUserChanged));
+                        // version 3 may contain user_set (R) or user_set_services (S)
+                        // version 2 or older contain user_set or nothing
+                        needUpgradeUserset = true;
+                        if (userSetComponent == null) { //contains user_set
+                            if (isUserChanged_Old != null && Boolean.valueOf(isUserChanged_Old)) {
+                                //user_set = true
+                                userSetComponent = approved;
+                                mIsUserChanged.put(resolvedUserId, true);
+                                needUpgradeUserset = false;
+                            } else {
+                                userSetComponent = "";
+                            }
+                        }
                     }
                     readExtraAttributes(tag, parser, resolvedUserId);
                     if (allowedManagedServicePackages == null || allowedManagedServicePackages.test(
@@ -659,7 +690,6 @@ abstract public class ManagedServices {
                 || DB_VERSION_1.equals(version)
                 || DB_VERSION_2.equals(version)
                 || DB_VERSION_3.equals(version);
-        boolean needUpgradeUserset = DB_VERSION_3.equals(version);
         if (isOldVersion) {
             upgradeDefaultsXmlVersion();
         }

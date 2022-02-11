@@ -32,7 +32,8 @@ import android.content.res.Configuration;
 oneway interface IDisplayWindowListener {
 
     /**
-     * Called when a display is added to the WM hierarchy.
+     * Called when a new display is added to the WM hierarchy. The existing display ids are returned
+     * when this listener is registered with WM via {@link #registerDisplayWindowListener}.
      */
     void onDisplayAdded(int displayId);
 

@@ -543,7 +543,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     @RequiresPermission(anyOf = {USE_BIOMETRIC, USE_FINGERPRINT})
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
             int flags, @NonNull AuthenticationCallback callback, @Nullable Handler handler) {
-        authenticate(crypto, cancel, callback, handler, mContext.getUserId());
+        authenticate(crypto, cancel, callback, handler, SENSOR_ID_ANY, mContext.getUserId(), flags);
     }
 
     /**
@@ -553,7 +553,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     @RequiresPermission(anyOf = {USE_BIOMETRIC, USE_FINGERPRINT})
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
             @NonNull AuthenticationCallback callback, Handler handler, int userId) {
-        authenticate(crypto, cancel, callback, handler, SENSOR_ID_ANY, userId);
+        authenticate(crypto, cancel, callback, handler, SENSOR_ID_ANY, userId, 0 /* flags */);
     }
 
     /**
@@ -562,7 +562,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      */
     @RequiresPermission(anyOf = {USE_BIOMETRIC, USE_FINGERPRINT})
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
-            @NonNull AuthenticationCallback callback, Handler handler, int sensorId, int userId) {
+            @NonNull AuthenticationCallback callback, Handler handler, int sensorId, int userId,
+            int flags) {
 
         FrameworkStatsLog.write(FrameworkStatsLog.AUTH_DEPRECATED_API_USED,
                 AUTH_DEPRECATED_APIUSED__DEPRECATED_API__API_FINGERPRINT_MANAGER_AUTHENTICATE,
@@ -578,6 +579,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             return;
         }
 
+        final boolean ignoreEnrollmentState = flags == 0 ? false : true;
+
         if (mService != null) {
             try {
                 useHandler(handler);
@@ -585,7 +588,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 mCryptoObject = crypto;
                 final long operationId = crypto != null ? crypto.getOpId() : 0;
                 final long authId = mService.authenticate(mToken, operationId, sensorId, userId,
-                        mServiceReceiver, mContext.getOpPackageName());
+                        mServiceReceiver, mContext.getOpPackageName(), ignoreEnrollmentState);
                 if (cancel != null) {
                     cancel.setOnCancelListener(new OnAuthenticationCancelListener(authId));
                 }

@@ -16,37 +16,32 @@
 
 package com.android.wm.shell.splitscreen;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.graphics.Rect;
+import android.content.Context;
 import android.view.SurfaceSession;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
+import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
 /**
  * Side stage for split-screen mode. Only tasks that are explicitly pinned to this stage show up
  * here. All other task are launch in the {@link MainStage}.
+ *
  * @see StageCoordinator
  */
 class SideStage extends StageTaskListener {
     private static final String TAG = SideStage.class.getSimpleName();
 
-    SideStage(ShellTaskOrganizer taskOrganizer, int displayId,
+    SideStage(Context context, ShellTaskOrganizer taskOrganizer, int displayId,
             StageListenerCallbacks callbacks, SyncTransactionQueue syncQueue,
-            SurfaceSession surfaceSession) {
-        super(taskOrganizer, displayId, callbacks, syncQueue, surfaceSession);
-    }
-
-    void addTask(ActivityManager.RunningTaskInfo task, Rect rootBounds,
-            WindowContainerTransaction wct) {
-        final WindowContainerToken rootToken = mRootTaskInfo.token;
-        wct.setBounds(rootToken, rootBounds)
-                .reparent(task.token, rootToken, true /* onTop*/)
-                // Moving the root task to top after the child tasks were repareted , or the root
-                // task cannot be visible and focused.
-                .reorder(rootToken, true /* onTop */);
+            SurfaceSession surfaceSession, IconProvider iconProvider,
+            @Nullable StageTaskUnfoldController stageTaskUnfoldController) {
+        super(context, taskOrganizer, displayId, callbacks, syncQueue, surfaceSession, iconProvider,
+                stageTaskUnfoldController);
     }
 
     boolean removeAllTasks(WindowContainerTransaction wct, boolean toTop) {

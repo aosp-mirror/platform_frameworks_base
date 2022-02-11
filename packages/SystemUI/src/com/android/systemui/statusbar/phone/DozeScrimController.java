@@ -21,7 +21,6 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.Dependency;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
@@ -92,10 +91,14 @@ public class DozeScrimController implements StateListener {
     };
 
     @Inject
-    public DozeScrimController(DozeParameters dozeParameters, DozeLog dozeLog) {
+    public DozeScrimController(
+            DozeParameters dozeParameters,
+            DozeLog dozeLog,
+            StatusBarStateController statusBarStateController
+    ) {
         mDozeParameters = dozeParameters;
-        //Never expected to be destroyed
-        Dependency.get(StatusBarStateController.class).addCallback(this);
+        // Never expected to be destroyed
+        statusBarStateController.addCallback(this);
         mDozeLog = dozeLog;
     }
 
@@ -219,6 +222,10 @@ public class DozeScrimController implements StateListener {
 
     @Override
     public void onDozingChanged(boolean isDozing) {
+        if (mDozing != isDozing) {
+            mDozeLog.traceDozingChanged(isDozing);
+        }
+
         setDozing(isDozing);
     }
 }

@@ -20,8 +20,8 @@ import android.annotation.UiContext;
 import android.content.Context;
 
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.annotations.ExternalThread;
-import com.android.wm.shell.common.annotations.ShellMainThread;
 
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -30,12 +30,14 @@ import java.util.function.Consumer;
 public class TaskViewFactoryController {
     private final ShellTaskOrganizer mTaskOrganizer;
     private final ShellExecutor mShellExecutor;
+    private final SyncTransactionQueue mSyncQueue;
     private final TaskViewFactory mImpl = new TaskViewFactoryImpl();
 
     public TaskViewFactoryController(ShellTaskOrganizer taskOrganizer,
-            ShellExecutor shellExecutor) {
+            ShellExecutor shellExecutor, SyncTransactionQueue syncQueue) {
         mTaskOrganizer = taskOrganizer;
         mShellExecutor = shellExecutor;
+        mSyncQueue = syncQueue;
     }
 
     public TaskViewFactory asTaskViewFactory() {
@@ -44,7 +46,7 @@ public class TaskViewFactoryController {
 
     /** Creates an {@link TaskView} */
     public void create(@UiContext Context context, Executor executor, Consumer<TaskView> onCreate) {
-        TaskView taskView = new TaskView(context, mTaskOrganizer);
+        TaskView taskView = new TaskView(context, mTaskOrganizer, mSyncQueue);
         executor.execute(() -> {
             onCreate.accept(taskView);
         });

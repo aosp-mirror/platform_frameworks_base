@@ -25,10 +25,10 @@ import com.android.server.wm.flicker.FlickerTestParameter
 import com.android.server.wm.flicker.FlickerTestParameterFactory
 import com.android.server.wm.flicker.annotation.Group1
 import com.android.server.wm.flicker.dsl.FlickerBuilder
-import com.android.server.wm.flicker.traces.layers.getVisibleBounds
-import com.android.wm.shell.flicker.APP_PAIR_SPLIT_DIVIDER
-import com.android.wm.shell.flicker.appPairsDividerIsInvisible
+import com.android.wm.shell.flicker.APP_PAIR_SPLIT_DIVIDER_COMPONENT
+import com.android.wm.shell.flicker.appPairsDividerIsInvisibleAtEnd
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
+import com.android.wm.shell.flicker.helpers.AppPairsHelper.Companion.waitAppsShown
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,9 +51,11 @@ class AppPairsTestUnpairPrimaryAndSecondaryApps(
         get() = {
             super.transition(this, it)
             setup {
-                executeShellCommand(
-                    composePairsCommand(primaryTaskId, secondaryTaskId, pair = true))
-                SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
+                eachRun {
+                    executeShellCommand(
+                            composePairsCommand(primaryTaskId, secondaryTaskId, pair = true))
+                    waitAppsShown(primaryApp, secondaryApp)
+                }
             }
             transitions {
                 // TODO pair apps through normal UX flow
@@ -73,14 +75,14 @@ class AppPairsTestUnpairPrimaryAndSecondaryApps(
 
     @Presubmit
     @Test
-    fun appPairsDividerIsInvisible() = testSpec.appPairsDividerIsInvisible()
+    fun appPairsDividerIsInvisibleAtEnd() = testSpec.appPairsDividerIsInvisibleAtEnd()
 
     @Presubmit
     @Test
     fun bothAppWindowsInvisible() {
         testSpec.assertWmEnd {
-            isInvisible(primaryApp.defaultWindowName)
-            isInvisible(secondaryApp.defaultWindowName)
+            isAppWindowInvisible(primaryApp.component)
+            isAppWindowInvisible(secondaryApp.component)
         }
     }
 
@@ -88,10 +90,10 @@ class AppPairsTestUnpairPrimaryAndSecondaryApps(
     @Test
     fun appsStartingBounds() {
         testSpec.assertLayersStart {
-            val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
-            visibleRegion(primaryApp.defaultWindowName)
+            val dividerRegion = layer(APP_PAIR_SPLIT_DIVIDER_COMPONENT).visibleRegion.region
+            visibleRegion(primaryApp.component)
                 .coversExactly(appPairsHelper.getPrimaryBounds(dividerRegion))
-            visibleRegion(secondaryApp.defaultWindowName)
+            visibleRegion(secondaryApp.component)
                 .coversExactly(appPairsHelper.getSecondaryBounds(dividerRegion))
         }
     }
@@ -100,16 +102,14 @@ class AppPairsTestUnpairPrimaryAndSecondaryApps(
     @Test
     fun appsEndingBounds() {
         testSpec.assertLayersEnd {
-            notContains(primaryApp.defaultWindowName)
-            notContains(secondaryApp.defaultWindowName)
+            notContains(primaryApp.component)
+            notContains(secondaryApp.component)
         }
     }
 
-    @FlakyTest
+    @Presubmit
     @Test
-    override fun navBarLayerIsAlwaysVisible() {
-        super.navBarLayerIsAlwaysVisible()
-    }
+    override fun navBarLayerIsVisible() = super.navBarLayerIsVisible()
 
     companion object {
         @Parameterized.Parameters(name = "{0}")

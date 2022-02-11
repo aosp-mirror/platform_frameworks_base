@@ -16,30 +16,33 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.ActivityRecord.State.INITIALIZING;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.Task.TAG_VISIBILITY;
 
 import android.annotation.Nullable;
 import android.util.Slog;
 
+import java.util.ArrayList;
+
 /** Helper class to ensure activities are in the right visible state for a container. */
 class EnsureActivitiesVisibleHelper {
-    private final Task mTask;
+    private final TaskFragment mTaskFragment;
     private ActivityRecord mTop;
     private ActivityRecord mStarting;
     private boolean mAboveTop;
     private boolean mContainerShouldBeVisible;
-    private boolean mBehindFullscreenActivity;
+    private boolean mBehindFullyOccludedContainer;
     private int mConfigChanges;
     private boolean mPreserveWindows;
     private boolean mNotifyClients;
 
-    EnsureActivitiesVisibleHelper(Task container) {
-        mTask = container;
+    EnsureActivitiesVisibleHelper(TaskFragment container) {
+        mTaskFragment = container;
     }
 
     /**
-     * Update all attributes except {@link mTask} to use in subsequent calculations.
+     * Update all attributes except {@link mTaskFragment} to use in subsequent calculations.
      *
      * @param starting The activity that is being started
      * @param configChanges Parts of the configuration that changed for this activity for evaluating
@@ -51,12 +54,12 @@ class EnsureActivitiesVisibleHelper {
     void reset(ActivityRecord starting, int configChanges, boolean preserveWindows,
             boolean notifyClients) {
         mStarting = starting;
-        mTop = mTask.topRunningActivity();
+        mTop = mTaskFragment.topRunningActivity();
         // If the top activity is not fullscreen, then we need to make sure any activities under it
         // are now visible.
         mAboveTop = mTop != null;
-        mContainerShouldBeVisible = mTask.shouldBeVisible(mStarting);
-        mBehindFullscreenActivity = !mContainerShouldBeVisible;
+        mContainerShouldBeVisible = mTaskFragment.shouldBeVisible(mStarting);
+        mBehindFullyOccludedContainer = !mContainerShouldBeVisible;
         mConfigChanges = configChanges;
         mPreserveWindows = preserveWindows;
         mNotifyClients = notifyClients;
@@ -85,22 +88,59 @@ class EnsureActivitiesVisibleHelper {
             Slog.v(TAG_VISIBILITY, "ensureActivitiesVisible behind " + mTop
                     + " configChanges=0x" + Integer.toHexString(configChanges));
         }
-        if (mTop != null) {
-            mTask.checkTranslucentActivityWaiting(mTop);
+        if (mTop != null && mTaskFragment.asTask() != null) {
+            // TODO(14709632): Check if this needed to be implemented in TaskFragment.
+            mTaskFragment.asTask().checkTranslucentActivityWaiting(mTop);
         }
 
         // We should not resume activities that being launched behind because these
         // activities are actually behind other fullscreen activities, but still required
         // to be visible (such as performing Recents animation).
         final boolean resumeTopActivity = mTop != null && !mTop.mLaunchTaskBehind
-                && mTask.isTopActivityFocusable()
-                && (starting == null || !starting.isDescendantOf(mTask));
+                && mTaskFragment.isTopActivityFocusable()
+                && (starting == null || !starting.isDescendantOf(mTaskFragment));
 
-        mTask.forAllActivities(a -> {
-            setActivityVisibilityState(a, starting, resumeTopActivity);
-        });
-        if (mTask.mAtmService.getTransitionController().getTransitionPlayer() != null) {
-            mTask.getDisplayContent().mWallpaperController.adjustWallpaperWindows();
+        ArrayList<TaskFragment> adjacentTaskFragments = null;
+        for (int i = mTaskFragment.mChildren.size() - 1; i >= 0; --i) {
+            final WindowContainer child = mTaskFragment.mChildren.get(i);
+            final TaskFragment childTaskFragment = child.asTaskFragment();
+            if (childTaskFragment != null && childTaskFragment.topRunningActivity() != null) {
+                childTaskFragment.updateActivityVisibilities(starting, configChanges,
+                        preserveWindows, notifyClients);
+                mBehindFullyOccludedContainer |=
+                        childTaskFragment.getBounds().equals(mTaskFragment.getBounds());
+                if (mAboveTop && mTop.getTaskFragment() == childTaskFragment) {
+                    mAboveTop = false;
+                }
+
+                if (mBehindFullyOccludedContainer) {
+                    continue;
+                }
+
+                if (adjacentTaskFragments != null && adjacentTaskFragments.contains(
+                        childTaskFragment)) {
+                    if (!childTaskFragment.isTranslucent(starting)
+                            && !childTaskFragment.getAdjacentTaskFragment().isTranslucent(
+                                    starting)) {
+                        // Everything behind two adjacent TaskFragments are occluded.
+                        mBehindFullyOccludedContainer = true;
+                    }
+                    continue;
+                }
+
+                final TaskFragment adjacentTaskFrag = childTaskFragment.getAdjacentTaskFragment();
+                if (adjacentTaskFrag != null) {
+                    if (adjacentTaskFragments == null) {
+                        adjacentTaskFragments = new ArrayList<>();
+                    }
+                    adjacentTaskFragments.add(adjacentTaskFrag);
+                }
+            } else if (child.asActivityRecord() != null) {
+                setActivityVisibilityState(child.asActivityRecord(), starting, resumeTopActivity);
+            }
+        }
+        if (mTaskFragment.mTransitionController.isShellTransitionsEnabled()) {
+            mTaskFragment.getDisplayContent().mWallpaperController.adjustWallpaperWindows();
         }
     }
 
@@ -112,7 +152,7 @@ class EnsureActivitiesVisibleHelper {
         }
         mAboveTop = false;
 
-        r.updateVisibilityIgnoringKeyguard(mBehindFullscreenActivity);
+        r.updateVisibilityIgnoringKeyguard(mBehindFullyOccludedContainer);
         final boolean reallyVisible = r.shouldBeVisibleUnchecked();
 
         // Check whether activity should be visible without Keyguard influence
@@ -122,12 +162,14 @@ class EnsureActivitiesVisibleHelper {
                 if (DEBUG_VISIBILITY) {
                     Slog.v(TAG_VISIBILITY, "Fullscreen: at " + r
                             + " containerVisible=" + mContainerShouldBeVisible
-                            + " behindFullscreen=" + mBehindFullscreenActivity);
+                            + " behindFullyOccluded=" + mBehindFullyOccludedContainer);
                 }
-                mBehindFullscreenActivity = true;
+                mBehindFullyOccludedContainer = true;
             } else {
-                mBehindFullscreenActivity = false;
+                mBehindFullyOccludedContainer = false;
             }
+        } else if (r.isState(INITIALIZING)) {
+            r.cancelInitializing();
         }
 
         if (reallyVisible) {
@@ -173,24 +215,25 @@ class EnsureActivitiesVisibleHelper {
                 Slog.v(TAG_VISIBILITY, "Make invisible? " + r
                         + " finishing=" + r.finishing + " state=" + r.getState()
                         + " containerShouldBeVisible=" + mContainerShouldBeVisible
-                        + " behindFullscreenActivity=" + mBehindFullscreenActivity
+                        + " behindFullyOccludedContainer=" + mBehindFullyOccludedContainer
                         + " mLaunchTaskBehind=" + r.mLaunchTaskBehind);
             }
             r.makeInvisible();
         }
 
-        if (!mBehindFullscreenActivity && mTask.isActivityTypeHome() && r.isRootOfTask()) {
+        if (!mBehindFullyOccludedContainer && mTaskFragment.isActivityTypeHome()
+                && r.isRootOfTask()) {
             if (DEBUG_VISIBILITY) {
-                Slog.v(TAG_VISIBILITY, "Home task: at " + mTask
+                Slog.v(TAG_VISIBILITY, "Home task: at " + mTaskFragment
                         + " containerShouldBeVisible=" + mContainerShouldBeVisible
-                        + " behindFullscreenActivity=" + mBehindFullscreenActivity);
+                        + " behindOccludedParentContainer=" + mBehindFullyOccludedContainer);
             }
             // No other task in the root home task should be visible behind the home activity.
             // Home activities is usually a translucent activity with the wallpaper behind
             // them. However, when they don't have the wallpaper behind them, we want to
             // show activities in the next application root task behind them vs. another
             // task in the root home task like recents.
-            mBehindFullscreenActivity = true;
+            mBehindFullyOccludedContainer = true;
         }
     }
 
@@ -219,7 +262,8 @@ class EnsureActivitiesVisibleHelper {
             r.setVisibility(true);
         }
         if (r != starting) {
-            mTask.mTaskSupervisor.startSpecificActivity(r, andResume, true /* checkConfig */);
+            mTaskFragment.mTaskSupervisor.startSpecificActivity(r, andResume,
+                    true /* checkConfig */);
         }
     }
 }

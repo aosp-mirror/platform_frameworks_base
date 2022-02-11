@@ -19,6 +19,7 @@ package com.android.server.pm.test.verify.domain
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.PackageParser.SigningDetails
 import android.content.pm.PackageUserState
 import android.content.pm.parsing.component.ParsedActivity
 import android.content.pm.parsing.component.ParsedIntentInfo
@@ -27,6 +28,7 @@ import android.content.pm.verify.domain.DomainVerificationState
 import android.os.Build
 import android.os.Process
 import android.util.ArraySet
+import android.util.IndentingPrintWriter
 import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.pm.PackageSetting
@@ -47,6 +49,7 @@ import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.eq
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.verifyNoMoreInteractions
 import java.io.File
 import java.util.UUID
@@ -206,6 +209,14 @@ class DomainVerificationEnforcerTest {
                 service(Type.QUERENT, "getInfo") {
                     getDomainVerificationInfo(it.targetPackageName)
                 },
+                service(Type.QUERENT, "printState") {
+                    printState(mock(IndentingPrintWriter::class.java), null, null)
+                },
+                service(Type.QUERENT, "printStateInternal") {
+                    printState(mock(IndentingPrintWriter::class.java), null, null) {
+                        mockPkgSetting(it, UUID.randomUUID())
+                    }
+                },
                 service(Type.VERIFIER, "setStatus") {
                     setDomainVerificationStatus(
                         it.targetDomainSetId,
@@ -311,6 +322,7 @@ class DomainVerificationEnforcerTest {
                     }
                 )
             }
+            whenever(signingDetails) { SigningDetails.UNKNOWN }
         }
 
         fun mockPkgSetting(packageName: String, domainSetId: UUID) = spyThrowOnUnmocked(
@@ -339,6 +351,7 @@ class DomainVerificationEnforcerTest {
             whenever(readUserState(1)) { PackageUserState() }
             whenever(getInstantApp(anyInt())) { false }
             whenever(isSystem()) { false }
+            whenever(signingDetails) { SigningDetails.UNKNOWN }
         }
     }
 
@@ -385,6 +398,7 @@ class DomainVerificationEnforcerTest {
         val allowUserState = AtomicBoolean(false)
         val allowPreferredApps = AtomicBoolean(false)
         val allowQueryAll = AtomicBoolean(false)
+        val allowDump = AtomicBoolean(false)
         val context: Context = mockThrowOnUnmocked {
             initPermission(
                 allowUserState,
@@ -395,6 +409,7 @@ class DomainVerificationEnforcerTest {
                 android.Manifest.permission.SET_PREFERRED_APPLICATIONS
             )
             initPermission(allowQueryAll, android.Manifest.permission.QUERY_ALL_PACKAGES)
+            initPermission(allowDump, android.Manifest.permission.DUMP)
         }
         val target = params.construct(context)
 
@@ -421,6 +436,10 @@ class DomainVerificationEnforcerTest {
         allowQueryAll.set(true)
 
         assertFails { runMethod(target, NON_VERIFIER_UID) }
+
+        allowDump.set(true)
+
+        runMethod(target, NON_VERIFIER_UID)
     }
 
     private fun approvedVerifier() {
@@ -806,8 +825,12 @@ class DomainVerificationEnforcerTest {
             }
 
             val valueAsInt = value as? Int
-            if (valueAsInt != null && valueAsInt == DomainVerificationManager.STATUS_OK) {
-                throw AssertionError("Expected call to return false, was $value")
+            if (valueAsInt != null) {
+                if (valueAsInt == DomainVerificationManager.STATUS_OK) {
+                    throw AssertionError("Expected call to return false, was $value")
+                }
+            } else {
+                throw AssertionError("Expected call to fail")
             }
         } catch (e: SecurityException) {
         } catch (e: PackageManager.NameNotFoundException) {
@@ -819,7 +842,7 @@ class DomainVerificationEnforcerTest {
         // System/shell only
         INTERNAL,
 
-        // INTERNAL || non-legacy domain verification agent
+        // INTERNAL || non-legacy domain verification agent || DUMP permission
         QUERENT,
 
         // INTERNAL || domain verification agent

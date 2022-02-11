@@ -25,12 +25,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent">
-    <FrameLayout
-        android:id="@+id/big_clock_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" />
-
     <ViewStub
         android:id="@+id/keyguard_qs_user_switch_stub"
         android:layout="@layout/keyguard_qs_user_switch"
@@ -71,18 +65,6 @@
             android:layout_gravity="center"
             android:scaleType="centerCrop"/>
 
-        <!-- Fingerprint -->
-        <!-- AOD dashed fingerprint icon with moving dashes -->
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/lock_udfps_aod_fp"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="@dimen/lock_icon_padding"
-            android:layout_gravity="center"
-            android:scaleType="centerCrop"
-            systemui:lottie_autoPlay="false"
-            systemui:lottie_loop="true"
-            systemui:lottie_rawRes="@raw/udfps_aod_fp"/>
     </com.android.keyguard.LockIconView>
 
     <com.android.systemui.statusbar.phone.NotificationsQuickSettingsContainer
@@ -93,11 +75,17 @@
         android:clipToPadding="false"
         android:clipChildren="false">
 
+        <ViewStub
+            android:id="@+id/qs_header_stub"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+        />
+
         <include
             layout="@layout/keyguard_status_view"
             android:visibility="gone"/>
 
-        <include layout="@layout/dock_info_overlay" />
+        <include layout="@layout/dock_info_overlay"/>
 
         <FrameLayout
             android:id="@+id/qs_frame"
@@ -130,9 +118,6 @@
             systemui:layout_constraintStart_toStartOf="parent"
             systemui:layout_constraintEnd_toEndOf="parent"
         />
-
-        <include layout="@layout/ambient_indication"
-            android:id="@+id/ambient_indication_container" />
 
         <include layout="@layout/photo_preview_overlay" />
 
