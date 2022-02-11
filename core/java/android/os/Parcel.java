@@ -4319,18 +4319,19 @@ public final class Parcel {
     }
 
     /**
-     * This will return a {@link Supplier} for length-prefixed types that deserializes the object
-     * when {@link Supplier#get()} is called, for other types it will return the object itself.
+     * This will return a {@link Function} for length-prefixed types that deserializes the object
+     * when {@link Function#apply} is called with the expected class of the return object (or {@code
+     * null} for no type check), for other types it will return the object itself.
      *
-     * <p>After calling {@link Supplier#get()} the parcel cursor will not change. Note that you
-     * shouldn't recycle the parcel, not at least until all objects have been retrieved. No
+     * <p>After calling {@link Function#apply(Object)} the parcel cursor will not change. Note that
+     * you shouldn't recycle the parcel, not at least until all objects have been retrieved. No
      * synchronization attempts are made.
      *
-     * </p>The supplier returned implements {@link #equals(Object)} and {@link #hashCode()}. Two
-     * suppliers are equal if either of the following is true:
+     * </p>The function returned implements {@link #equals(Object)} and {@link #hashCode()}. Two
+     * function objects are equal if either of the following is true:
      * <ul>
-     *   <li>{@link Supplier#get()} has been called on both and both objects returned are equal.
-     *   <li>{@link Supplier#get()} hasn't been called on either one and everything below is true:
+     *   <li>{@link Function#apply} has been called on both and both objects returned are equal.
+     *   <li>{@link Function#apply} hasn't been called on either one and everything below is true:
      *   <ul>
      *       <li>The {@code loader} parameters used to retrieve each are equal.
      *       <li>They both have the same type.
@@ -4357,7 +4358,7 @@ public final class Parcel {
     }
 
 
-    private static final class LazyValue implements Supplier<Object> {
+    private static final class LazyValue implements Function<Class<?>, Object> {
         /**
          *                      |   4B   |   4B   |
          * mSource = Parcel{... |  type  | length | object | ...}
@@ -4389,7 +4390,7 @@ public final class Parcel {
         }
 
         @Override
-        public Object get() {
+        public Object apply(@Nullable Class<?> clazz) {
             Parcel source = mSource;
             if (source != null) {
                 synchronized (source) {
@@ -4398,7 +4399,7 @@ public final class Parcel {
                         int restore = source.dataPosition();
                         try {
                             source.setDataPosition(mPosition);
-                            mObject = source.readValue(mLoader);
+                            mObject = source.readValue(mLoader, clazz);
                         } finally {
                             source.setDataPosition(restore);
                         }

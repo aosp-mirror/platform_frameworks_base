@@ -31,7 +31,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 /**
  * A mapping from String keys to values of various types. In most cases, you
@@ -252,11 +252,10 @@ public class BaseBundle {
         if (size == 0) {
             return null;
         }
-        Object o = getValueAt(0);
         try {
-            return (String) o;
-        } catch (ClassCastException e) {
-            typeWarning("getPairValue()", o, "String", e);
+            return getValueAt(0, String.class);
+        } catch (ClassCastException | BadParcelableException e) {
+            typeWarning("getPairValue()", /* value */ null, "String", e);
             return null;
         }
     }
@@ -309,7 +308,7 @@ public class BaseBundle {
                 }
                 for (int i = 0, n = mMap.size(); i < n; i++) {
                     // Triggers deserialization of i-th item, if needed
-                    getValueAt(i);
+                    getValueAt(i, /* clazz */ null);
                 }
             }
         }
@@ -324,8 +323,21 @@ public class BaseBundle {
      * @hide
      */
     final Object getValue(String key) {
+        return getValue(key, /* clazz */ null);
+    }
+
+    /**
+     * Returns the value for key {@code key} for expected return type {@param clazz} (or {@code
+     * null} for no type check).
+     *
+     * This call should always be made after {@link #unparcel()} or inside a lock after making sure
+     * {@code mMap} is not null.
+     *
+     * @hide
+     */
+    final <T> T getValue(String key, @Nullable Class<T> clazz) {
         int i = mMap.indexOfKey(key);
-        return (i >= 0) ? getValueAt(i) : null;
+        return (i >= 0) ? getValueAt(i, clazz) : null;
     }
 
     /**
@@ -336,11 +348,12 @@ public class BaseBundle {
      *
      * @hide
      */
-    final Object getValueAt(int i) {
+    @SuppressWarnings("unchecked")
+    final <T> T getValueAt(int i, @Nullable Class<T> clazz) {
         Object object = mMap.valueAt(i);
-        if (object instanceof Supplier<?>) {
+        if (object instanceof Function<?, ?>) {
             try {
-                object = ((Supplier<?>) object).get();
+                object = ((Function<Class<?>, ?>) object).apply(clazz);
             } catch (BadParcelableException e) {
                 if (sShouldDefuse) {
                     Log.w(TAG, "Failed to parse item " + mMap.keyAt(i) + ", returning null.", e);
@@ -351,7 +364,7 @@ public class BaseBundle {
             }
             mMap.setValueAt(i, object);
         }
-        return object;
+        return (clazz != null) ? clazz.cast(object) : (T) object;
     }
 
     private void initializeFromParcelLocked(@NonNull Parcel parcelledData, boolean recycleParcel,
@@ -528,7 +541,7 @@ public class BaseBundle {
         } else {
             // Following semantic above of failing in case we get a serialized value vs a
             // deserialized one, we'll compare the map. If a certain element hasn't been
-            // deserialized yet, it's a Supplier (or more specifically a LazyValue, but let's
+            // deserialized yet, it's a function object (or more specifically a LazyValue, but let's
             // pretend we don't know that here :P), we'll use that element's equality comparison as
             // map naturally does. That will takes care of comparing the payload if needed (see
             // Parcel.readLazyValue() for details).
@@ -982,15 +995,19 @@ public class BaseBundle {
     }
 
     // Log a message if the value was non-null but not of the expected type
-    void typeWarning(String key, Object value, String className,
-            Object defaultValue, ClassCastException e) {
+    void typeWarning(String key, @Nullable Object value, String className,
+            Object defaultValue, RuntimeException e) {
         StringBuilder sb = new StringBuilder();
         sb.append("Key ");
         sb.append(key);
         sb.append(" expected ");
         sb.append(className);
-        sb.append(" but value was a ");
-        sb.append(value.getClass().getName());
+        if (value != null) {
+            sb.append(" but value was a ");
+            sb.append(value.getClass().getName());
+        } else {
+            sb.append(" but value was of a different type ");
+        }
         sb.append(".  The default value ");
         sb.append(defaultValue);
         sb.append(" was returned.");
@@ -998,8 +1015,7 @@ public class BaseBundle {
         Log.w(TAG, "Attempt to cast generated internal exception:", e);
     }
 
-    void typeWarning(String key, Object value, String className,
-            ClassCastException e) {
+    void typeWarning(String key, @Nullable Object value, String className, RuntimeException e) {
         typeWarning(key, value, className, "<null>", e);
     }
 
