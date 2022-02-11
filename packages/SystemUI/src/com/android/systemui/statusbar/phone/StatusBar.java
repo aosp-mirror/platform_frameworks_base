@@ -1110,6 +1110,12 @@ public class StatusBar extends CoreStartable implements
     }
 
     private void onFoldedStateChanged(boolean isFolded, boolean willGoToSleep) {
+        Trace.beginSection("StatusBar#onFoldedStateChanged");
+        onFoldedStateChangedInternal(isFolded, willGoToSleep);
+        Trace.endSection();
+    }
+
+    private void onFoldedStateChangedInternal(boolean isFolded, boolean willGoToSleep) {
         // Folded state changes are followed by a screen off event.
         // By default turning off the screen also closes the shade.
         // We want to make sure that the shade status is kept after
@@ -3672,6 +3678,7 @@ public class StatusBar extends CoreStartable implements
 
         @Override
         public void onScreenTurnedOff() {
+            Trace.beginSection("StatusBar#onScreenTurnedOff");
             mFalsingCollector.onScreenOff();
             mScrimController.onScreenTurnedOff();
             if (mCloseQsBeforeScreenOff) {
@@ -3679,6 +3686,7 @@ public class StatusBar extends CoreStartable implements
                 mCloseQsBeforeScreenOff = false;
             }
             updateIsKeyguard();
+            Trace.endSection();
         }
     };
 

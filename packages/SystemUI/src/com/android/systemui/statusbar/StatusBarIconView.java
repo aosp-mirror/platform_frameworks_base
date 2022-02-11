@@ -37,6 +37,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Parcelable;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
@@ -371,10 +372,13 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         }
         Drawable drawable;
         try {
+            Trace.beginSection("StatusBarIconView#updateDrawable()");
             drawable = getIcon(mIcon);
         } catch (OutOfMemoryError e) {
             Log.w(TAG, "OOM while inflating " + mIcon.icon + " for slot " + mSlot);
             return false;
+        } finally {
+            Trace.endSection();
         }
 
         if (drawable == null) {
