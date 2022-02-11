@@ -1364,6 +1364,7 @@ public class WindowManagerService extends IWindowManager.Stub
         float lightRadius = a.getDimension(R.styleable.Lighting_lightRadius, 0);
         float ambientShadowAlpha = a.getFloat(R.styleable.Lighting_ambientShadowAlpha, 0);
         float spotShadowAlpha = a.getFloat(R.styleable.Lighting_spotShadowAlpha, 0);
+        a.recycle();
         float[] ambientColor = {0.f, 0.f, 0.f, ambientShadowAlpha};
         float[] spotColor = {0.f, 0.f, 0.f, spotShadowAlpha};
         SurfaceControl.setGlobalShadowSettings(ambientColor, spotColor, lightY, lightZ,
