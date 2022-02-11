@@ -1718,17 +1718,18 @@ public final class ProcessList {
             return Zygote.MEMORY_TAG_LEVEL_NONE;
         }
 
-        // Check to see that the compat feature for TBI is enabled.
-        if (mPlatformCompat.isChangeEnabled(NATIVE_HEAP_POINTER_TAGGING, app.info)) {
-            return Zygote.MEMORY_TAG_LEVEL_TBI;
-        }
-
         String defaultLevel = SystemProperties.get("persist.arm64.memtag.app_default");
         if ("sync".equals(defaultLevel)) {
             return Zygote.MEMORY_TAG_LEVEL_SYNC;
         } else if ("async".equals(defaultLevel)) {
             return Zygote.MEMORY_TAG_LEVEL_ASYNC;
         }
+
+        // Check to see that the compat feature for TBI is enabled.
+        if (mPlatformCompat.isChangeEnabled(NATIVE_HEAP_POINTER_TAGGING, app.info)) {
+            return Zygote.MEMORY_TAG_LEVEL_TBI;
+        }
+
         return Zygote.MEMORY_TAG_LEVEL_NONE;
     }
 
