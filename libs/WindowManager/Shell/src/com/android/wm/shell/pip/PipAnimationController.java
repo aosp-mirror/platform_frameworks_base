@@ -620,7 +620,7 @@ public class PipAnimationController {
                     setCurrentValue(bounds);
                     final Rect insets = computeInsets(fraction);
                     final float degree, x, y;
-                    if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+                    if (Transitions.SHELL_TRANSITIONS_ROTATION) {
                         if (rotationDelta == ROTATION_90) {
                             degree = 90 * (1 - fraction);
                             x = fraction * (end.left - start.left)
