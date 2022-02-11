@@ -148,6 +148,8 @@ public final class VirtualDeviceManager {
                         }
                     }
                 };
+        @Nullable
+        private VirtualAudioDevice mVirtualAudioDevice;
 
         private VirtualDevice(
                 IVirtualDeviceManager service,
@@ -255,8 +257,8 @@ public final class VirtualDeviceManager {
         }
 
         /**
-         * Closes the virtual device, stopping and tearing down any virtual displays,
-         * audio policies, and event injection that's currently in progress.
+         * Closes the virtual device, stopping and tearing down any virtual displays, associated
+         * virtual audio device, and event injection that's currently in progress.
          */
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void close() {
@@ -264,6 +266,10 @@ public final class VirtualDeviceManager {
                 mVirtualDevice.close();
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
+            }
+            if (mVirtualAudioDevice != null) {
+                mVirtualAudioDevice.close();
+                mVirtualAudioDevice = null;
             }
         }
 
@@ -351,8 +357,10 @@ public final class VirtualDeviceManager {
          * Creates a VirtualAudioDevice, capable of recording audio emanating from this device,
          * or injecting audio from another device.
          *
-         * <p>Note: This object does not support capturing privileged playback, such as voice call
-         * audio.
+         * <p>Note: One {@link VirtualDevice} can only create one {@link VirtualAudioDevice}, so
+         * calling this method multiple times will return the same instance. When
+         * {@link VirtualDevice#close()} is called, the associated {@link VirtualAudioDevice} will
+         * also be closed automatically.
          *
          * @param display The target virtual display to capture from and inject into.
          * @param executor The {@link Executor} object for the thread on which to execute
@@ -368,7 +376,11 @@ public final class VirtualDeviceManager {
                 @NonNull VirtualDisplay display,
                 @Nullable Executor executor,
                 @Nullable AudioConfigurationChangeCallback callback) {
-            return new VirtualAudioDevice(mContext, mVirtualDevice, display, executor, callback);
+            if (mVirtualAudioDevice == null) {
+                mVirtualAudioDevice = new VirtualAudioDevice(
+                        mContext, mVirtualDevice, display, executor, callback);
+            }
+            return mVirtualAudioDevice;
         }
 
         /**
