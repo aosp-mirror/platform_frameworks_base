@@ -376,6 +376,11 @@ public class StackScrollAlgorithm {
 
         final float stackHeight = ambientState.getStackHeight()  - shelfHeight - scrimPadding;
         final float stackEndHeight = ambientState.getStackEndHeight() - shelfHeight - scrimPadding;
+        if (stackEndHeight == 0f) {
+            // This should not happen, since even when the shade is empty we show EmptyShadeView
+            // but check just in case, so we don't return infinity or NaN.
+            return 0f;
+        }
         return stackHeight / stackEndHeight;
     }
 
