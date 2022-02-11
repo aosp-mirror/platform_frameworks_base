@@ -279,7 +279,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     private KeyphraseMetadata mKeyphraseMetadata;
     private final KeyphraseEnrollmentInfo mKeyphraseEnrollmentInfo;
     private final IVoiceInteractionManagerService mModelManagementService;
-    private final IVoiceInteractionSoundTriggerSession mSoundTriggerSession;
+    private IVoiceInteractionSoundTriggerSession mSoundTriggerSession;
     private final SoundTriggerListener mInternalCallback;
     private final Callback mExternalCallback;
     private final Handler mHandler;
@@ -788,8 +788,7 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
     public AlwaysOnHotwordDetector(String text, Locale locale, Callback callback,
             KeyphraseEnrollmentInfo keyphraseEnrollmentInfo,
             IVoiceInteractionManagerService modelManagementService, int targetSdkVersion,
-            boolean supportHotwordDetectionService, @Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory) {
+            boolean supportHotwordDetectionService) {
         super(modelManagementService, callback,
                 supportHotwordDetectionService ? DETECTOR_TYPE_TRUSTED_HOTWORD_DSP
                         : DETECTOR_TYPE_NORMAL);
@@ -803,6 +802,12 @@ public class AlwaysOnHotwordDetector extends AbstractHotwordDetector {
         mModelManagementService = modelManagementService;
         mTargetSdkVersion = targetSdkVersion;
         mSupportHotwordDetectionService = supportHotwordDetectionService;
+    }
+
+    @Override
+    void initialize(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory) {
+        // TODO: transition to use an API that is not updateState to provide
+        //  onHotwordDetectionServiceInitialized status to external callback
         if (mSupportHotwordDetectionService) {
             updateStateLocked(options, sharedMemory, mInternalCallback,
                     DETECTOR_TYPE_TRUSTED_HOTWORD_DSP);
