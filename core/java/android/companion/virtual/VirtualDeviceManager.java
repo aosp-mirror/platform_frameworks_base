@@ -16,11 +16,10 @@
 
 package android.companion.virtual;
 
-import android.annotation.CallbackExecutor;
-import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.Activity;
@@ -32,7 +31,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Point;
 import android.hardware.display.DisplayManager;
-import android.hardware.display.DisplayManager.VirtualDisplayFlag;
 import android.hardware.display.VirtualDisplay;
 import android.hardware.display.VirtualDisplayConfig;
 import android.hardware.input.VirtualKeyboard;
@@ -48,7 +46,6 @@ import android.os.ResultReceiver;
 import android.util.ArrayMap;
 import android.view.Surface;
 
-import java.util.Objects;
 import java.util.concurrent.Executor;
 
 /**
@@ -213,22 +210,25 @@ public final class VirtualDeviceManager {
          * {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_PUBLIC VIRTUAL_DISPLAY_FLAG_PUBLIC} and
          * {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
          * VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY}.
-         * @param executor The executor on which {@code callback} will be invoked. This is ignored
-         * if {@code callback} is {@code null}.
          * @param callback Callback to call when the state of the {@link VirtualDisplay} changes
+         * @param handler The handler on which the listener should be invoked, or null
+         * if the listener should be invoked on the calling thread's looper.
          * @return The newly created virtual display, or {@code null} if the application could
          * not create the virtual display.
          *
          * @see DisplayManager#createVirtualDisplay
          */
+        // Suppress "ExecutorRegistration" because DisplayManager.createVirtualDisplay takes a
+        // handler
+        @SuppressLint("ExecutorRegistration")
         @Nullable
         public VirtualDisplay createVirtualDisplay(
-                @IntRange(from = 1) int width,
-                @IntRange(from = 1) int height,
-                @IntRange(from = 1) int densityDpi,
+                int width,
+                int height,
+                int densityDpi,
                 @Nullable Surface surface,
-                @VirtualDisplayFlag int flags,
-                @NonNull @CallbackExecutor Executor executor,
+                int flags,
+                @Nullable Handler handler,
                 @Nullable VirtualDisplay.Callback callback) {
             // TODO(b/205343547): Handle display groups properly instead of creating a new display
             //  group for every new virtual display created using this API.
@@ -244,7 +244,7 @@ public final class VirtualDeviceManager {
                             .setFlags(getVirtualDisplayFlags(flags))
                             .build(),
                     callback,
-                    Objects.requireNonNull(executor));
+                    handler);
         }
 
         /**
