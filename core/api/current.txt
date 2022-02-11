@@ -39500,9 +39500,9 @@ package android.speech {
 
   public static final class RecognitionSupport.Builder {
     ctor public RecognitionSupport.Builder();
-    method @NonNull public android.speech.RecognitionSupport.Builder addInstalledLanguages(@NonNull String);
-    method @NonNull public android.speech.RecognitionSupport.Builder addPendingLanguages(@NonNull String);
-    method @NonNull public android.speech.RecognitionSupport.Builder addSupportedLanguages(@NonNull String);
+    method @NonNull public android.speech.RecognitionSupport.Builder addInstalledLanguage(@NonNull String);
+    method @NonNull public android.speech.RecognitionSupport.Builder addPendingLanguage(@NonNull String);
+    method @NonNull public android.speech.RecognitionSupport.Builder addSupportedLanguage(@NonNull String);
     method @NonNull public android.speech.RecognitionSupport build();
     method @NonNull public android.speech.RecognitionSupport.Builder setInstalledLanguages(@NonNull java.util.List<java.lang.String>);
     method @NonNull public android.speech.RecognitionSupport.Builder setPendingLanguages(@NonNull java.util.List<java.lang.String>);
