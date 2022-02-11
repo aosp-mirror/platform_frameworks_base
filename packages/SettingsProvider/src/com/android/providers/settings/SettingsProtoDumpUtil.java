@@ -696,6 +696,14 @@ class SettingsProtoDumpUtil {
                 Settings.Global.MAX_ERROR_BYTES_PREFIX,
                 GlobalSettingsProto.MAX_ERROR_BYTES);
 
+        final long managedDeviceProvisioningToken =
+                p.start(GlobalSettingsProto.MANAGED_DEVICE_PROVISIONING);
+        dumpSetting(s, p,
+                Settings.Global.MANAGED_PROVISIONING_DEFER_PROVISIONING_TO_ROLE_HOLDER,
+                GlobalSettingsProto.ManagedDeviceProvisioning
+                        .MANAGED_PROVISIONING_DEFER_PROVISIONING_TO_ROLE_HOLDER);
+        p.end(managedDeviceProvisioningToken);
+
         final long euiccToken = p.start(GlobalSettingsProto.EUICC);
         dumpSetting(s, p,
                 Settings.Global.EUICC_PROVISIONED,

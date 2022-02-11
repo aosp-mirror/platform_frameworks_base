@@ -594,6 +594,7 @@ public class SettingsBackupTest {
                     Settings.Global.KEY_CHORD_POWER_VOLUME_UP,
                     Settings.Global.CLOCKWORK_HOME_READY,
                     Settings.Global.WATCHDOG_TIMEOUT_MILLIS,
+                    Settings.Global.MANAGED_PROVISIONING_DEFER_PROVISIONING_TO_ROLE_HOLDER,
                     Settings.Global.Wearable.BATTERY_SAVER_MODE,
                     Settings.Global.Wearable.COMBINED_LOCATION_ENABLED,
                     Settings.Global.Wearable.HAS_PAY_TOKENS,
