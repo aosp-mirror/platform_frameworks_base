@@ -4840,15 +4840,16 @@ public class UserManager {
      * @param overrideDevicePolicy when {@code true}, user is removed even if the caller has
      * the {@link #DISALLOW_REMOVE_USER} or {@link #DISALLOW_REMOVE_MANAGED_PROFILE} restriction
      *
-     * @return the result code {@link #REMOVE_RESULT_REMOVED}, {@link #REMOVE_RESULT_DEFERRED},
-     * {@link #REMOVE_RESULT_ALREADY_BEING_REMOVED}, or {@link #REMOVE_RESULT_ERROR}.
+     * @return the {@link RemoveResult} code: {@link #REMOVE_RESULT_REMOVED},
+     * {@link #REMOVE_RESULT_DEFERRED}, {@link #REMOVE_RESULT_ALREADY_BEING_REMOVED}, or
+     * {@link #REMOVE_RESULT_ERROR}.
      *
      * @hide
      */
     @SystemApi
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
-    public int removeUserWhenPossible(@NonNull UserHandle user,
+    public @RemoveResult int removeUserWhenPossible(@NonNull UserHandle user,
             boolean overrideDevicePolicy) {
         try {
             return mService.removeUserWhenPossible(user.getIdentifier(), overrideDevicePolicy);
