@@ -306,10 +306,8 @@
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"pasiekti kalendorių"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"SMS"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"siųsti ir peržiūrėti SMS pranešimus"</string>
-    <!-- no translation found for permgrouplab_storage (9173334109512154196) -->
-    <skip />
-    <!-- no translation found for permgroupdesc_storage (8352226729501080525) -->
-    <skip />
+    <string name="permgrouplab_storage" msgid="9173334109512154196">"Failai ir dokumentai"</string>
+    <string name="permgroupdesc_storage" msgid="8352226729501080525">"pasiekti failus ir dokumentus jūsų įrenginyje"</string>
     <string name="permgrouplab_readMediaAural" msgid="5885210465560755316">"Muzika ir kiti garso įrašai"</string>
     <string name="permgroupdesc_readMediaAural" msgid="1170143315714662822">"pasiekti garso failus įrenginyje"</string>
     <string name="permgrouplab_readMediaVisual" msgid="9137695801926624061">"Nuotraukos ir vaizdo įrašai"</string>
@@ -590,8 +588,9 @@
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Jei norite tęsti, įveskite ekrano užraktą"</string>
     <string name="fingerprint_acquired_partial" msgid="694598777291084823">"Aptiktas dalinis kontrolinis kodas"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nepavyko apdoroti piršto antspaudo. Bandykite dar kartą."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="5236744087471419479">"Nuvalykite jutiklį"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6038375140739678098">"Palaukite šiek tiek ilgiau"</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Nuvalykite kontrolinio kodo jutiklį ir bandykite dar kartą"</string>
+    <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Nuvalykite jutiklį ir bandykite dar kartą"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Tvirtai paspauskite jutiklį"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Per lėtai judinate pirštą. Bandykite dar kartą."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Pabandykite kitą kontrolinį kodą"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Per šviesu"</string>
@@ -599,6 +598,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Kaskart šiek tiek pakeiskite piršto poziciją"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Kontrolinis kodas neatpažintas"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="4709197752023550709">"Tvirtai paspauskite jutiklį"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Piršto antspaudas autentifikuotas"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Veidas autentifikuotas"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Veidas autentifikuotas, paspauskite patvirtinimo mygtuką"</string>
@@ -1502,7 +1503,8 @@
     <string name="skip_button_label" msgid="3566599811326688389">"Praleisti"</string>
     <string name="no_matches" msgid="6472699895759164599">"Nėra atitikčių"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Ieškoti puslapyje"</string>
-    <string name="matches_found" msgid="7912910457231705587">"{count,plural, =1{# atitiktis}one{# iš {total}}few{# iš {total}}many{# iš {total}}other{# iš {total}}} }"</string>
+    <!-- no translation found for matches_found (2296462299979507689) -->
+    <skip />
     <string name="action_mode_done" msgid="2536182504764803222">"Atlikta"</string>
     <string name="progress_erasing" msgid="6891435992721028004">"Ištrinama bendrinama saugykla…"</string>
     <string name="share" msgid="4157615043345227321">"Bendrinti"</string>
@@ -1930,6 +1932,10 @@
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Įjungti"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Programa nepasiekiama."</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Programa „<xliff:g id="APP_NAME">%1$s</xliff:g>“ šiuo metu nepasiekiama."</string>
+    <string name="app_streaming_blocked_title" msgid="6090945835898766139">"„<xliff:g id="ACTIVITY">%1$s</xliff:g>“ nepasiekiama"</string>
+    <string name="app_streaming_blocked_message" product="tv" msgid="4003011766528814377">"Šįkart nepavyksta pasiekti programos iš jūsų „<xliff:g id="DEVICE">%1$s</xliff:g>“. Pabandykite naudoti „Android TV“ įrenginį."</string>
+    <string name="app_streaming_blocked_message" product="tablet" msgid="4242053045964946062">"Šįkart nepavyksta pasiekti programos iš jūsų „<xliff:g id="DEVICE">%1$s</xliff:g>“. Pabandykite naudoti planšetinį kompiuterį."</string>
+    <string name="app_streaming_blocked_message" product="default" msgid="6159168735030739398">"Šįkart nepavyksta pasiekti programos iš jūsų „<xliff:g id="DEVICE">%1$s</xliff:g>“. Pabandykite naudoti telefoną."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Ši programa sukurta naudoti senesnės versijos sistemoje „Android“ ir gali tinkamai neveikti. Pabandykite patikrinti, ar yra naujinių, arba susisiekite su kūrėju."</string>
     <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Tikrinti, ar yra naujinių"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Turite naujų pranešimų"</string>
@@ -2019,16 +2025,11 @@
     <string name="harmful_app_warning_uninstall" msgid="6472912975664191772">"PAŠALINTI"</string>
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"VIS TIEK ATIDARYTI"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Aptikta žalinga programa"</string>
-    <!-- no translation found for log_access_confirmation_title (3143035474800851565) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_allow (143157286283302512) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_deny (7685790957455099845) -->
-    <skip />
-    <!-- no translation found for log_access_confirmation_body (7599059550906238538) -->
-    <skip />
-    <!-- no translation found for log_access_do_not_show_again (1058690599083091552) -->
-    <skip />
+    <string name="log_access_confirmation_title" msgid="3143035474800851565">"Prieigos prie sistemos žurnalų užklausa"</string>
+    <string name="log_access_confirmation_allow" msgid="143157286283302512">"Tik šį kartą"</string>
+    <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Neleisti"</string>
+    <string name="log_access_confirmation_body" msgid="7599059550906238538">"„<xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g>“ prašo leisti pasiekti sistemos žurnalus funkcinio derinimo tikslais. Šiuose žurnaluose gali būti informacijos, kurią įrašė įrenginyje esančios programos ir paslaugos."</string>
+    <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Daugiau neberodyti"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"„<xliff:g id="APP_0">%1$s</xliff:g>“ nori rodyti „<xliff:g id="APP_2">%2$s</xliff:g>“ fragmentus"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Redaguoti"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"Skambučiai ir pranešimai vibruos"</string>
@@ -2091,22 +2092,16 @@
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Maitinimo dialogo langas"</string>
     <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Užrakinimo ekranas"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Ekrano kopija"</string>
-    <!-- no translation found for accessibility_system_action_headset_hook_label (8524691721287425468) -->
-    <skip />
+    <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"Pakabinti virtualiosios realybės įrenginį"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Ekrano pritaikomumo šaukinys"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_chooser_label" msgid="1057878690209817886">"Ekrano pritaikomumo šaukinių parinkiklis"</string>
     <string name="accessibility_system_action_hardware_a11y_shortcut_label" msgid="5764644187715255107">"Pritaikomumo šaukinys"</string>
     <string name="accessibility_system_action_dismiss_notification_shade" msgid="8931637495533770352">"Atsisakyti pranešimų skydelio"</string>
-    <!-- no translation found for accessibility_system_action_dpad_up_label (1029042950229333782) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_dpad_down_label (3441918448624921461) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_dpad_left_label (6557647179116479152) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_dpad_right_label (9180196950365804081) -->
-    <skip />
-    <!-- no translation found for accessibility_system_action_dpad_center_label (8149791419358224893) -->
-    <skip />
+    <string name="accessibility_system_action_dpad_up_label" msgid="1029042950229333782">"Valdymo pultas – aukštyn"</string>
+    <string name="accessibility_system_action_dpad_down_label" msgid="3441918448624921461">"Valdymo pultas – žemyn"</string>
+    <string name="accessibility_system_action_dpad_left_label" msgid="6557647179116479152">"Valdymo pultas – kairėn"</string>
+    <string name="accessibility_system_action_dpad_right_label" msgid="9180196950365804081">"Valdymo pultas – dešinėn"</string>
+    <string name="accessibility_system_action_dpad_center_label" msgid="8149791419358224893">"Valdymo pultas – centras"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Programos „<xliff:g id="APP_NAME">%1$s</xliff:g>“ antraštės juosta."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"„<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>“ įkeltas į grupę APRIBOTA"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
@@ -2127,10 +2122,8 @@
     <string name="resolver_switch_on_work" msgid="463709043650610420">"Paliesti, norint įjungti"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nėra darbo programų"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nėra asmeninių programų"</string>
-    <!-- no translation found for miniresolver_open_in_personal (3874522693661065566) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (4415223793669536559) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Atidaryti „<xliff:g id="APP">%s</xliff:g>“ asmeniniame profilyje?"</string>
+    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Atidaryti „<xliff:g id="APP">%s</xliff:g>“ darbo profilyje?"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Naudoti asmeninę naršyklę"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Naudoti darbo naršyklę"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM tinklo operatoriaus pasirinkimo ribojimo panaikinimo PIN kodas"</string>
@@ -2265,4 +2258,6 @@
     <string name="notification_content_abusive_bg_apps" msgid="5572096708044958249">"„<xliff:g id="APP">%1$s</xliff:g>“ veikia fone ir eikvoja akumuliatoriaus energiją. Palieskite ir peržiūrėkite."</string>
     <string name="notification_content_long_running_fgs" msgid="8878031652441570178">"„<xliff:g id="APP">%1$s</xliff:g>“ ilgą laiką veikia fone. Palieskite ir peržiūrėkite."</string>
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Peržiūrėkite aktyvias programas"</string>
+    <!-- no translation found for vdm_camera_access_denied (6345652513729130490) -->
+    <skip />
 </resources>
