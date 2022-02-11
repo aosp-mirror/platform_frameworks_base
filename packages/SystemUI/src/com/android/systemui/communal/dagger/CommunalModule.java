@@ -20,8 +20,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
 import android.text.TextUtils;
-import android.view.View;
-import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 
@@ -30,9 +28,6 @@ import com.android.systemui.communal.CommunalSource;
 import com.android.systemui.communal.PackageObserver;
 import com.android.systemui.communal.conditions.CommunalSettingCondition;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.idle.AmbientLightModeMonitor;
-import com.android.systemui.idle.LightSensorEventsDebounceAlgorithm;
-import com.android.systemui.idle.dagger.IdleViewComponent;
 import com.android.systemui.util.condition.Condition;
 import com.android.systemui.util.condition.Monitor;
 import com.android.systemui.util.condition.dagger.MonitorComponent;
@@ -46,7 +41,6 @@ import java.util.Set;
 import javax.inject.Named;
 import javax.inject.Provider;
 
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ElementsIntoSet;
@@ -58,19 +52,9 @@ import dagger.multibindings.StringKey;
  */
 @Module(subcomponents = {
         CommunalViewComponent.class,
-        IdleViewComponent.class,
 })
 public interface CommunalModule {
-    String IDLE_VIEW = "idle_view";
     String COMMUNAL_CONDITIONS = "communal_conditions";
-
-    /** */
-    @Provides
-    @Named(IDLE_VIEW)
-    static View provideIdleView(Context context) {
-        FrameLayout view = new FrameLayout(context);
-        return view;
-    }
 
     /** */
     @Provides
@@ -85,15 +69,6 @@ public interface CommunalModule {
         return Optional.of(new PackageObserver(context,
                 ComponentName.unflattenFromString(componentName).getPackageName()));
     }
-
-    /**
-     * Provides LightSensorEventsDebounceAlgorithm as an instance to DebounceAlgorithm interface.
-     * @param algorithm the instance of algorithm that is bound to the interface.
-     * @return the interface that is bound to.
-     */
-    @Binds
-    AmbientLightModeMonitor.DebounceAlgorithm ambientLightDebounceAlgorithm(
-            LightSensorEventsDebounceAlgorithm algorithm);
 
     /**
      * Provides a set of conditions that need to be fulfilled in order for Communal Mode to display.

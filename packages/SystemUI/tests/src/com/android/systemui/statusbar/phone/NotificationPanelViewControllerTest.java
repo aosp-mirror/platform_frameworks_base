@@ -100,8 +100,6 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
-import com.android.systemui.idle.IdleHostViewController;
-import com.android.systemui.idle.dagger.IdleViewComponent;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.media.MediaDataManager;
@@ -265,12 +263,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private KeyguardUserSwitcherComponent mKeyguardUserSwitcherComponent;
     @Mock
     private KeyguardUserSwitcherController mKeyguardUserSwitcherController;
-    @Mock
-    private IdleViewComponent.Factory mIdleViewComponentFactory;
-    @Mock
-    private IdleViewComponent mIdleViewComponent;
-    @Mock
-    private IdleHostViewController mIdleHostViewController;
     @Mock
     private KeyguardStatusViewComponent mKeyguardStatusViewComponent;
     @Mock
@@ -475,10 +467,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 .thenReturn(mCommunalViewComponent);
         when(mCommunalViewComponent.getCommunalHostViewController())
                 .thenReturn(mCommunalHostViewController);
-        when(mIdleViewComponentFactory.build(any()))
-                .thenReturn(mIdleViewComponent);
-        when(mIdleViewComponent.getIdleHostViewController())
-                .thenReturn(mIdleHostViewController);
         when(mLayoutInflater.inflate(eq(R.layout.keyguard_status_view), any(), anyBoolean()))
                 .thenReturn(mKeyguardStatusView);
         when(mLayoutInflater.inflate(eq(R.layout.keyguard_user_switcher), any(), anyBoolean()))
@@ -523,7 +511,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mKeyguardUserSwitcherComponentFactory,
                 mKeyguardStatusBarViewComponentFactory,
                 mCommunalViewComponentFactory,
-                mIdleViewComponentFactory,
                 mLockscreenShadeTransitionController,
                 mGroupManager,
                 mNotificationAreaController,
