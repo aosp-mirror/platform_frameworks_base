@@ -2790,7 +2790,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             @TransitionOldType int transit, boolean isVoiceInteraction,
             @Nullable ArrayList<WindowContainer> sources) {
         final Task task = asTask();
-        if (task != null && !enter && !task.isHomeOrRecentsRootTask()) {
+        if (task != null && !enter && !task.isActivityTypeHomeOrRecents()) {
             final InsetsControlTarget imeTarget = mDisplayContent.getImeTarget(IME_TARGET_LAYERING);
             final boolean isImeLayeringTarget = imeTarget != null && imeTarget.getWindow() != null
                     && imeTarget.getWindow().getTask() == task;

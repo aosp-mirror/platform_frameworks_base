@@ -4083,7 +4083,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             final boolean renewImeSurface = mImeScreenshot == null
                     || mImeScreenshot.getWidth() != mInputMethodWindow.getFrame().width()
                     || mImeScreenshot.getHeight() != mInputMethodWindow.getFrame().height();
-            if (task != null && !task.isHomeOrRecentsRootTask()) {
+            if (task != null && !task.isActivityTypeHomeOrRecents()) {
                 SurfaceControl.ScreenshotHardwareBuffer imeBuffer = renewImeSurface
                         ? mWmService.mTaskSnapshotController.snapshotImeFromAttachedTask(task)
                         : null;
