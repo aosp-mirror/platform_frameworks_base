@@ -500,26 +500,10 @@
     <dimen name="qs_panel_elevation">4dp</dimen>
     <dimen name="qs_panel_padding_bottom">@dimen/new_footer_height</dimen>
     <dimen name="qs_panel_padding_top">48dp</dimen>
-    <dimen name="qs_detail_header_padding">0dp</dimen>
-    <dimen name="qs_detail_image_width">56dp</dimen>
-    <dimen name="qs_detail_image_height">56dp</dimen>
-    <dimen name="qs_detail_image_padding">16dp</dimen>
-    <dimen name="qs_detail_item_height">48dp</dimen>
-    <dimen name="qs_detail_header_text_size">20sp</dimen>
-    <dimen name="qs_detail_button_text_size">14sp</dimen>
-    <dimen name="qs_detail_item_primary_text_size">16sp</dimen>
-    <dimen name="qs_detail_item_secondary_text_size">14sp</dimen>
-    <dimen name="qs_detail_empty_text_size">14sp</dimen>
-    <dimen name="qs_detail_header_margin_top">28dp</dimen>
-    <dimen name="qs_detail_header_text_padding">16dp</dimen>
+
     <dimen name="qs_data_usage_text_size">14sp</dimen>
     <dimen name="qs_data_usage_usage_text_size">36sp</dimen>
-    <dimen name="qs_detail_padding_start">16dp</dimen>
-    <dimen name="qs_detail_items_padding_top">4dp</dimen>
-    <dimen name="qs_detail_item_icon_size">24dp</dimen>
-    <dimen name="qs_detail_item_icon_width">32dp</dimen>
-    <dimen name="qs_detail_item_icon_marginStart">0dp</dimen>
-    <dimen name="qs_detail_item_icon_marginEnd">20dp</dimen>
+
     <dimen name="qs_header_mobile_icon_size">@dimen/status_bar_icon_drawing_size</dimen>
     <dimen name="qs_header_carrier_separator_width">6dp</dimen>
     <dimen name="qs_carrier_margin_width">4dp</dimen>
@@ -533,9 +517,6 @@
     <dimen name="qs_security_footer_background_inset">0dp</dimen>
     <dimen name="qs_security_footer_corner_radius">28dp</dimen>
 
-    <!-- Desired qs icon overlay size. -->
-    <dimen name="qs_detail_icon_overlay_size">24dp</dimen>
-
     <dimen name="segmented_button_spacing">0dp</dimen>
     <dimen name="borderless_button_radius">2dp</dimen>
 
@@ -546,8 +527,6 @@
 
     <!-- Padding between subtitles and the following text in the QSFooter dialog -->
     <dimen name="qs_footer_dialog_subtitle_padding">20dp</dimen>
-
-    <dimen name="qs_detail_margin_top">@*android:dimen/quick_qs_offset_height</dimen>
 
     <!-- Zen mode panel: spacing between two-line condition upper and lower lines -->
     <dimen name="zen_mode_condition_detail_item_interline_spacing">4dp</dimen>

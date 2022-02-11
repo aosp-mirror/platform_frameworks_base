@@ -95,6 +95,10 @@ public class Flags {
 
     /***************************************/
     // 500 - quick settings
+    /**
+     * @deprecated Not needed anymore
+     */
+    @Deprecated
     public static final BooleanFlag NEW_USER_SWITCHER =
             new BooleanFlag(500, true);
 

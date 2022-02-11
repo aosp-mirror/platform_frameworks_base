@@ -39,7 +39,6 @@ import com.android.internal.policy.SystemBarUtils;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
-import com.android.systemui.qs.QSDetail.Callback;
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
@@ -546,10 +545,6 @@ public class QuickStatusBarHeader extends FrameLayout {
 
     public void updateEverything() {
         post(() -> setClickable(!mExpanded));
-    }
-
-    public void setCallback(Callback qsPanelCallback) {
-        mHeaderQsPanel.setCallback(qsPanelCallback);
     }
 
     private void setContentMargins(View view, int marginStart, int marginEnd) {

@@ -51,7 +51,6 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManagerGlobal;
 import android.widget.BaseAdapter;
 
@@ -60,7 +59,6 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
 import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.systemui.Dumpable;
@@ -77,9 +75,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.QSUserSwitcherEvent;
-import com.android.systemui.qs.tiles.UserDetailView;
 import com.android.systemui.qs.user.UserSwitchDialogController.DialogShower;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -96,7 +92,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 
 /**
  * Keeps a list of all users on the device for user switching.
@@ -153,7 +148,6 @@ public class UserSwitcherController implements Dumpable {
     private SparseBooleanArray mForcePictureLoadForUserId = new SparseBooleanArray(2);
     private final UiEventLogger mUiEventLogger;
     private final IActivityManager mActivityManager;
-    public final DetailAdapter mUserDetailAdapter;
     private final Executor mBgExecutor;
     private final boolean mGuestUserAutoCreated;
     private final AtomicBoolean mGuestIsResetting;
@@ -177,7 +171,6 @@ public class UserSwitcherController implements Dumpable {
             FalsingManager falsingManager,
             TelephonyListenerManager telephonyListenerManager,
             IActivityTaskManager activityTaskManager,
-            UserDetailAdapter userDetailAdapter,
             SecureSettings secureSettings,
             @Background Executor bgExecutor,
             InteractionJankMonitor interactionJankMonitor,
@@ -196,7 +189,6 @@ public class UserSwitcherController implements Dumpable {
         mLatencyTracker = latencyTracker;
         mGuestResumeSessionReceiver = new GuestResumeSessionReceiver(
                 this, mUserTracker, mUiEventLogger, secureSettings);
-        mUserDetailAdapter = userDetailAdapter;
         mBgExecutor = bgExecutor;
         if (!UserManager.isGuestUserEphemeral()) {
             mGuestResumeSessionReceiver.register(mBroadcastDispatcher);
@@ -1117,77 +1109,6 @@ public class UserSwitcherController implements Dumpable {
             return sb.toString();
         }
     }
-
-    public static class UserDetailAdapter implements DetailAdapter {
-        private final Intent USER_SETTINGS_INTENT = new Intent(Settings.ACTION_USER_SETTINGS);
-
-        private final Context mContext;
-        private final Provider<UserDetailView.Adapter> mUserDetailViewAdapterProvider;
-
-        @Inject
-        UserDetailAdapter(Context context,
-                Provider<UserDetailView.Adapter> userDetailViewAdapterProvider) {
-            mContext = context;
-            mUserDetailViewAdapterProvider = userDetailViewAdapterProvider;
-        }
-
-        @Override
-        public CharSequence getTitle() {
-            return mContext.getString(R.string.quick_settings_user_title);
-        }
-
-        @Override
-        public View createDetailView(Context context, View convertView, ViewGroup parent) {
-            UserDetailView v;
-            if (!(convertView instanceof UserDetailView)) {
-                v = UserDetailView.inflate(context, parent, false);
-                v.setAdapter(mUserDetailViewAdapterProvider.get());
-            } else {
-                v = (UserDetailView) convertView;
-            }
-            v.refreshAdapter();
-            return v;
-        }
-
-        @Override
-        public Intent getSettingsIntent() {
-            return USER_SETTINGS_INTENT;
-        }
-
-        @Override
-        public int getSettingsText() {
-            return R.string.quick_settings_more_user_settings;
-        }
-
-        @Override
-        public Boolean getToggleState() {
-            return null;
-        }
-
-        @Override
-        public void setToggleState(boolean state) {
-        }
-
-        @Override
-        public int getMetricsCategory() {
-            return MetricsEvent.QS_USERDETAIL;
-        }
-
-        @Override
-        public UiEventLogger.UiEventEnum openDetailEvent() {
-            return QSUserSwitcherEvent.QS_USER_DETAIL_OPEN;
-        }
-
-        @Override
-        public UiEventLogger.UiEventEnum closeDetailEvent() {
-            return QSUserSwitcherEvent.QS_USER_DETAIL_CLOSE;
-        }
-
-        @Override
-        public UiEventLogger.UiEventEnum moreSettingsEvent() {
-            return QSUserSwitcherEvent.QS_USER_MORE_SETTINGS;
-        }
-    };
 
     private final KeyguardStateController.Callback mCallback =
             new KeyguardStateController.Callback() {

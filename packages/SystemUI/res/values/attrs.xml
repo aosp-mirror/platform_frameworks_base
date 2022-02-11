@@ -114,13 +114,6 @@
         <attr name="hybridNotificationTextStyle" format="reference" />
     </declare-styleable>
 
-    <declare-styleable name="AutoSizingList">
-        <!-- Whether AutoSizingList will show only as many items as fit on screen and
-             remove extra items instead of scrolling. -->
-        <attr name="enableAutoSizing" format="boolean" />
-        <attr name="itemHeight" format="dimension" />
-    </declare-styleable>
-
     <declare-styleable name="PluginInflateContainer">
         <attr name="viewType" format="string" />
     </declare-styleable>

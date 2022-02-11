@@ -298,20 +298,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             mQsCustomizerController.hide();
             return;
         }
-        mView.closeDetail();
     }
-
-    /** */
-    public void openDetails(String subPanel) {
-        QSTile tile = getTile(subPanel);
-        // If there's no tile with that name (as defined in QSFactoryImpl or other QSFactory),
-        // QSFactory will not be able to create a tile and getTile will return null
-        if (tile != null) {
-            mView.showDetailAdapter(
-                    true, tile.getDetailAdapter(), new int[]{mView.getWidth() / 2, 0});
-        }
-    }
-
 
     void setListening(boolean listening) {
         mView.setListening(listening);
@@ -429,7 +416,7 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
     }
 
     /** */
-    public static final class TileRecord extends QSPanel.Record {
+    public static final class TileRecord {
         public TileRecord(QSTile tile, com.android.systemui.plugins.qs.QSTileView tileView) {
             this.tile = tile;
             this.tileView = tileView;
