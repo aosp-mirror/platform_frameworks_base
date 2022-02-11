@@ -17122,6 +17122,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             // It's a CopyOnWriteArrayList, so no lock is needed.
             mBindServiceEventListeners.add(listener);
         }
+
+        @Override
+        public void restart() {
+            ActivityManagerService.this.restart();
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, String reason) {

@@ -102,6 +102,9 @@ interface IStatusBarService
     void shutdown();
     void reboot(boolean safeMode);
 
+    /** just restarts android without rebooting device. Used for some feature flags. */
+    void restart();
+
     void addTile(in ComponentName tile);
     void remTile(in ComponentName tile);
     void clickTile(in ComponentName tile);

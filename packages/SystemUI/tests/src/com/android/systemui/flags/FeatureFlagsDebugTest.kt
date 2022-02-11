@@ -18,10 +18,10 @@ package com.android.systemui.flags
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.Resources
 import androidx.test.filters.SmallTest
+import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.mockito.any
@@ -59,6 +59,7 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
     @Mock private lateinit var mSecureSettings: SecureSettings
     @Mock private lateinit var mResources: Resources
     @Mock private lateinit var mDumpManager: DumpManager
+    @Mock private lateinit var mBarService: IStatusBarService
     private val mFlagMap = mutableMapOf<Int, Flag<*>>()
     private lateinit var mBroadcastReceiver: BroadcastReceiver
     private lateinit var mClearCacheAction: Consumer<Int>
@@ -72,7 +73,8 @@ class FeatureFlagsDebugTest : SysuiTestCase() {
             mSecureSettings,
             mResources,
             mDumpManager,
-            { mFlagMap }
+            { mFlagMap },
+            mBarService
         )
         verify(mFlagManager).restartAction = any()
         mBroadcastReceiver = withArgCaptor {

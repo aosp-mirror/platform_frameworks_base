@@ -30,11 +30,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -70,6 +72,7 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
     private final Supplier<Map<Integer, Flag<?>>> mFlagsCollector;
     private final Map<Integer, Boolean> mBooleanFlagCache = new TreeMap<>();
     private final Map<Integer, String> mStringFlagCache = new TreeMap<>();
+    private final IStatusBarService mBarService;
 
     @Inject
     public FeatureFlagsDebug(
@@ -78,7 +81,8 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
             SecureSettings secureSettings,
             @Main Resources resources,
             DumpManager dumpManager,
-            @Nullable Supplier<Map<Integer, Flag<?>>> flagsCollector) {
+            @Nullable Supplier<Map<Integer, Flag<?>>> flagsCollector,
+            IStatusBarService barService) {
         mFlagManager = flagManager;
         mSecureSettings = secureSettings;
         mResources = resources;
@@ -91,6 +95,7 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         context.registerReceiver(mReceiver, filter, null, null,
                 Context.RECEIVER_EXPORTED_UNAUDITED);
         dumpManager.registerDumpable(TAG, this);
+        mBarService = barService;
     }
 
     @Override
@@ -210,6 +215,14 @@ public class FeatureFlagsDebug implements FeatureFlags, Dumpable {
         Log.i(TAG, "Restarting SystemUI");
         // SysUI starts back when up exited. Is there a better way to do this?
         System.exit(0);
+    }
+
+    private void restartAndroid() {
+        Log.i(TAG, "Restarting Android");
+        try {
+            mBarService.restart();
+        } catch (RemoteException e) {
+        }
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
