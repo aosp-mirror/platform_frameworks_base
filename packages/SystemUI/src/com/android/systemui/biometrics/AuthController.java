@@ -136,6 +136,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
     @NonNull private final SparseBooleanArray mUdfpsEnrolledForUser;
     @NonNull private final SensorPrivacyManager mSensorPrivacyManager;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
+    private boolean mAllAuthenticatorsRegistered;
 
     private class BiometricTaskStackListener extends TaskStackListener {
         @Override
@@ -226,6 +227,13 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
         }
     }
 
+    /**
+     * Whether all authentictors have been registered.
+     */
+    public boolean areAllAuthenticatorsRegistered() {
+        return mAllAuthenticatorsRegistered;
+    }
+
     private void handleAllAuthenticatorsRegistered(
             List<FingerprintSensorPropertiesInternal> sensors) {
         mExecution.assertIsMainThread();
@@ -233,6 +241,7 @@ public class AuthController extends CoreStartable implements CommandQueue.Callba
             Log.d(TAG, "handleAllAuthenticatorsRegistered | sensors: " + Arrays.toString(
                     sensors.toArray()));
         }
+        mAllAuthenticatorsRegistered = true;
         mFpProps = sensors;
         List<FingerprintSensorPropertiesInternal> udfpsProps = new ArrayList<>();
         List<FingerprintSensorPropertiesInternal> sidefpsProps = new ArrayList<>();

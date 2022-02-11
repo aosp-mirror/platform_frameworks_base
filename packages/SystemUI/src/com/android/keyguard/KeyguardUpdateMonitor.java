@@ -2027,6 +2027,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         mAuthController.addCallback(new AuthController.Callback() {
             @Override
             public void onAllAuthenticatorsRegistered() {
+                mainExecutor.execute(() -> updateBiometricListeningState(BIOMETRIC_ACTION_UPDATE));
             }
 
             @Override
@@ -2156,6 +2157,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             return;
         }
 
+        // don't start running fingerprint until they're registered
+        if (!mAuthController.areAllAuthenticatorsRegistered()) {
+            return;
+        }
         final boolean shouldListenForFingerprint = shouldListenForFingerprint(isUdfpsSupported());
         final boolean runningOrRestarting = mFingerprintRunningState == BIOMETRIC_STATE_RUNNING
                 || mFingerprintRunningState == BIOMETRIC_STATE_CANCELLING_RESTARTING;
@@ -3523,6 +3528,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             final int strongAuthFlags = mStrongAuthTracker.getStrongAuthForUser(userId);
             BiometricAuthenticated fingerprint = mUserFingerprintAuthenticated.get(userId);
             pw.println("  Fingerprint state (user=" + userId + ")");
+            pw.println("    areAllAuthenticatorsRegistered="
+                    + mAuthController.areAllAuthenticatorsRegistered());
             pw.println("    allowed="
                     + (fingerprint != null
                             && isUnlockingWithBiometricAllowed(fingerprint.mIsStrongBiometric)));

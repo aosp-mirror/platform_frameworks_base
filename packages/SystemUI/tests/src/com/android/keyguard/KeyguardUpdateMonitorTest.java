@@ -243,6 +243,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         verify(mStatusBarStateController).addCallback(mStatusBarStateListenerCaptor.capture());
         mStatusBarStateListener = mStatusBarStateListenerCaptor.getValue();
         mKeyguardUpdateMonitor.registerCallback(mTestCallback);
+
+        mTestableLooper.processAllMessages();
+        when(mAuthController.areAllAuthenticatorsRegistered()).thenReturn(true);
     }
 
     @After
@@ -467,6 +470,18 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
         verify(mFingerprintManager).authenticate(any(), any(), any(), any(), anyInt(), anyInt(),
                         anyInt());
+        verify(mFingerprintManager, never()).detectFingerprint(any(), any(), anyInt());
+    }
+
+    @Test
+    public void test_doesNotTryToAuthenticateFingerprint_whenAuthenticatorsNotRegistered() {
+        when(mAuthController.areAllAuthenticatorsRegistered()).thenReturn(false);
+
+        mKeyguardUpdateMonitor.dispatchStartedGoingToSleep(0 /* why */);
+        mTestableLooper.processAllMessages();
+
+        verify(mFingerprintManager, never()).authenticate(any(), any(), any(), any(), anyInt(),
+                anyInt(), anyInt());
         verify(mFingerprintManager, never()).detectFingerprint(any(), any(), anyInt());
     }
 
