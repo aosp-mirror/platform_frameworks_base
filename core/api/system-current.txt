@@ -1647,6 +1647,7 @@ package android.app.cloudsearch {
     method public int getResultNumber();
     method public int getResultOffset();
     method @NonNull public android.os.Bundle getSearchConstraints();
+    method @NonNull public String getSource();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final String CONSTRAINT_IS_PRESUBMIT_SUGGESTION = "IS_PRESUBMIT_SUGGESTION";
     field public static final String CONSTRAINT_SEARCH_PROVIDER_FILTER = "SEARCH_PROVIDER_FILTER";
