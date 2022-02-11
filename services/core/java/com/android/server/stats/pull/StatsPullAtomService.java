@@ -4491,6 +4491,9 @@ public class StatsPullAtomService extends SystemService {
     }
 
     int pullMediaCapabilitiesStats(int atomTag, List<StatsEvent> pulledData) {
+        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
+            return StatsManager.PULL_SKIP;
+        }
         AudioManager audioManager = mContext.getSystemService(AudioManager.class);
         if (audioManager == null) {
             return StatsManager.PULL_SKIP;
