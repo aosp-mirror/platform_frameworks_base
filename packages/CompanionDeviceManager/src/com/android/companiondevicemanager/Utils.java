@@ -50,14 +50,13 @@ class Utils {
     }
 
     static @NonNull CharSequence getApplicationLabel(
-            @NonNull Context context, @NonNull String packageName) {
+            @NonNull Context context, @NonNull String packageName, int userId)
+            throws PackageManager.NameNotFoundException {
         final PackageManager packageManager = context.getPackageManager();
-        final ApplicationInfo appInfo;
-        try {
-            appInfo = packageManager.getApplicationInfo(packageName, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new RuntimeException(e);
-        }
+
+        final ApplicationInfo appInfo = packageManager.getApplicationInfoAsUser(
+                packageName, PackageManager.ApplicationInfoFlags.of(0), userId);
+
         return packageManager.getApplicationLabel(appInfo);
     }
 
