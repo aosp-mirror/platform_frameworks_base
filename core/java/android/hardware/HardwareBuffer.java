@@ -131,7 +131,8 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     /** Usage: The buffer will be written to by the GPU */
     public static final long USAGE_GPU_COLOR_OUTPUT       = 1 << 9;
     /**
-     * The buffer will be used as a composer HAL overlay layer.
+     * The buffer will be used as a hardware composer overlay layer. That is, it will be displayed
+     * using the system compositor via {@link SurfaceControl}
      *
      * This flag is currently only needed when using
      * {@link android.view.SurfaceControl.Transaction#setBuffer(SurfaceControl, HardwareBuffer)}
