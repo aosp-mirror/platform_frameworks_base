@@ -789,6 +789,73 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testReadXml_oldXml_migration_NoUid() throws Exception {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
+
+        when(mPm.getPackageUidAsUser("something", USER_SYSTEM)).thenReturn(UNKNOWN_UID);
+        String xml = "<ranking version=\"2\">\n"
+                + "<package name=\"something\" show_badge=\"true\">\n"
+                + "<channel id=\"idn\" name=\"name\" importance=\"2\"/>\n"
+                + "</package>\n"
+                + "</ranking>\n";
+        NotificationChannel idn = new NotificationChannel("idn", "name", IMPORTANCE_LOW);
+        idn.setSound(null, new AudioAttributes.Builder()
+                .setUsage(USAGE_NOTIFICATION)
+                .setContentType(CONTENT_TYPE_SONIFICATION)
+                .setFlags(0)
+                .build());
+        idn.setShowBadge(false);
+
+        loadByteArrayXml(xml.getBytes(), true, USER_SYSTEM);
+        verify(mPermissionHelper, never()).setNotificationPermission(any());
+
+        when(mPm.getPackageUidAsUser("something", USER_SYSTEM)).thenReturn(1234);
+        final ApplicationInfo app = new ApplicationInfo();
+        app.targetSdkVersion = Build.VERSION_CODES.N_MR1 + 1;
+        when(mPm.getApplicationInfoAsUser(eq("something"), anyInt(), anyInt())).thenReturn(app);
+
+        mHelper.onPackagesChanged(false, 0, new String[] {"something"}, new int[] {1234});
+
+
+        verify(mPermissionHelper, times(1)).setNotificationPermission(any());
+    }
+
+    @Test
+    public void testReadXml_newXml_noMigration_NoUid() throws Exception {
+        when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
+                mPermissionHelper, mLogger, mAppOpsManager, mStatsEventBuilderFactory);
+
+        when(mPm.getPackageUidAsUser("something", USER_SYSTEM)).thenReturn(UNKNOWN_UID);
+        String xml = "<ranking version=\"3\">\n"
+                + "<package name=\"something\" show_badge=\"true\">\n"
+                + "<channel id=\"idn\" name=\"name\" importance=\"2\"/>\n"
+                + "</package>\n"
+                + "</ranking>\n";
+        NotificationChannel idn = new NotificationChannel("idn", "name", IMPORTANCE_LOW);
+        idn.setSound(null, new AudioAttributes.Builder()
+                .setUsage(USAGE_NOTIFICATION)
+                .setContentType(CONTENT_TYPE_SONIFICATION)
+                .setFlags(0)
+                .build());
+        idn.setShowBadge(false);
+
+        loadByteArrayXml(xml.getBytes(), true, USER_SYSTEM);
+
+        when(mPm.getPackageUidAsUser("something", USER_SYSTEM)).thenReturn(1234);
+        final ApplicationInfo app = new ApplicationInfo();
+        app.targetSdkVersion = Build.VERSION_CODES.N_MR1 + 1;
+        when(mPm.getApplicationInfoAsUser(eq("something"), anyInt(), anyInt())).thenReturn(app);
+
+        mHelper.onPackagesChanged(false, 0, new String[] {"something"}, new int[] {1234});
+
+
+        verify(mPermissionHelper, never()).setNotificationPermission(any());
+    }
+
+    @Test
     public void testChannelXmlForNonBackup_postMigration() throws Exception {
         when(mPermissionHelper.isMigrationEnabled()).thenReturn(true);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper,
