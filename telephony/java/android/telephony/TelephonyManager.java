@@ -12111,12 +12111,15 @@ public class TelephonyManager {
         if (carriers == null || !SubscriptionManager.isValidPhoneId(slotIndex)) {
             return -1;
         }
-        // Execute the method setCarrierRestrictionRules with an empty excluded list and
-        // indicating priority for the allowed list.
+        // Execute the method setCarrierRestrictionRules with an empty excluded list.
+        // If the allowed list is empty, it means that all carriers are allowed (default allowed),
+        // otherwise it means that only specified carriers are allowed (default not allowed).
         CarrierRestrictionRules carrierRestrictionRules = CarrierRestrictionRules.newBuilder()
                 .setAllowedCarriers(carriers)
                 .setDefaultCarrierRestriction(
-                    CarrierRestrictionRules.CARRIER_RESTRICTION_DEFAULT_NOT_ALLOWED)
+                    carriers.isEmpty()
+                        ? CarrierRestrictionRules.CARRIER_RESTRICTION_DEFAULT_ALLOWED
+                        : CarrierRestrictionRules.CARRIER_RESTRICTION_DEFAULT_NOT_ALLOWED)
                 .build();
 
         int result = setCarrierRestrictionRules(carrierRestrictionRules);
