@@ -16,7 +16,8 @@
 
 package com.android.systemui.communal;
 
-import static org.mockito.ArgumentMatchers.anyBoolean;
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
@@ -59,7 +60,8 @@ public class CommunalSettingConditionTest extends SysuiTestCase {
 
         final Condition.Callback callback = mock(Condition.Callback.class);
         mCondition.addCallback(callback);
-        verify(callback).onConditionChanged(mCondition, true);
+        verify(callback).onConditionChanged(mCondition);
+        assertThat(mCondition.isConditionMet()).isTrue();
     }
 
     @Test
@@ -68,7 +70,7 @@ public class CommunalSettingConditionTest extends SysuiTestCase {
 
         final Condition.Callback callback = mock(Condition.Callback.class);
         mCondition.addCallback(callback);
-        verify(callback, never()).onConditionChanged(eq(mCondition), anyBoolean());
+        verify(callback, never()).onConditionChanged(eq(mCondition));
     }
 
     @Test
@@ -80,7 +82,8 @@ public class CommunalSettingConditionTest extends SysuiTestCase {
         clearInvocations(callback);
 
         updateCommunalSetting(true);
-        verify(callback).onConditionChanged(mCondition, true);
+        verify(callback).onConditionChanged(mCondition);
+        assertThat(mCondition.isConditionMet()).isTrue();
     }
 
     @Test
@@ -92,7 +95,8 @@ public class CommunalSettingConditionTest extends SysuiTestCase {
         clearInvocations(callback);
 
         updateCommunalSetting(false);
-        verify(callback).onConditionChanged(mCondition, false);
+        verify(callback).onConditionChanged(mCondition);
+        assertThat(mCondition.isConditionMet()).isFalse();
     }
 
     @Test
@@ -104,7 +108,8 @@ public class CommunalSettingConditionTest extends SysuiTestCase {
         clearInvocations(callback);
 
         updateCommunalSetting(true);
-        verify(callback, never()).onConditionChanged(mCondition, true);
+        verify(callback, never()).onConditionChanged(mCondition);
+        assertThat(mCondition.isConditionMet()).isTrue();
     }
 
     private void updateCommunalSetting(boolean value) {
