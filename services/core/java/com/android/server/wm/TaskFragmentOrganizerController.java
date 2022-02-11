@@ -294,14 +294,28 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
         }
     }
 
-    /** Gets the {@link RemoteAnimationDefinition} set on the given organizer if exists. */
+    /**
+     * Gets the {@link RemoteAnimationDefinition} set on the given organizer if exists. Returns
+     * {@code null} if it doesn't, or if the organizer has activity(ies) embedded in untrusted mode.
+     */
     @Nullable
     public RemoteAnimationDefinition getRemoteAnimationDefinition(
             ITaskFragmentOrganizer organizer) {
         synchronized (mGlobalLock) {
             final TaskFragmentOrganizerState organizerState =
                     mTaskFragmentOrganizerState.get(organizer.asBinder());
-            return organizerState != null ? organizerState.mRemoteAnimationDefinition : null;
+            if (organizerState == null) {
+                return null;
+            }
+            for (TaskFragment tf : organizerState.mOrganizedTaskFragments) {
+                if (!tf.isAllowedToBeEmbeddedInTrustedMode()) {
+                    // Disable client-driven animations for organizer if at least one of the
+                    // embedded task fragments is not embedding in trusted mode.
+                    // TODO(b/197364677): replace with a stub or Shell-driven one instead of skip?
+                    return null;
+                }
+            }
+            return organizerState.mRemoteAnimationDefinition;
         }
     }
 

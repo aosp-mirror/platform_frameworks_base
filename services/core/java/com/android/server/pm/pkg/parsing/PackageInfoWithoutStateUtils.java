@@ -549,6 +549,7 @@ public class PackageInfoWithoutStateUtils {
             ai.metaData = a.getMetaData();
         }
         ai.applicationInfo = applicationInfo;
+        ai.setKnownActivityEmbeddingCerts(a.getKnownActivityEmbeddingCerts());
         return ai;
     }
 

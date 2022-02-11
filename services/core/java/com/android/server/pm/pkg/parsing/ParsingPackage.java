@@ -381,6 +381,12 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setLocaleConfigRes(int localeConfigRes);
 
+    /**
+     * Sets the trusted host certificates of apps that are allowed to embed activities of this
+     * application.
+     */
+    ParsingPackage setKnownActivityEmbeddingCerts(Set<String> knownActivityEmbeddingCerts);
+
     // TODO(b/135203078): This class no longer has access to ParsedPackage, find a replacement
     //  for moving to the next step
     @CallSuper

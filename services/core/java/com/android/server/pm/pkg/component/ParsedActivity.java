@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
 
+import java.util.Set;
+
 /** @hide **/
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public interface ParsedActivity extends ParsedMainComponent {
@@ -58,6 +60,12 @@ public interface ParsedActivity extends ParsedMainComponent {
 
     @Nullable
     String getPermission();
+
+    /**
+     * Gets the trusted host certificates of apps that are allowed to embed this activity.
+     */
+    @NonNull
+    Set<String> getKnownActivityEmbeddingCerts();
 
     int getPersistableMode();
 

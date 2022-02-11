@@ -1048,6 +1048,24 @@
          <p>The default value of this attribute is <code>false</code>. -->
     <attr name="allowEmbedded" format="boolean" />
 
+    <!-- A reference to an array resource containing the signing certificate digests, one of which a
+         client is required to be signed with in order to embed the activity. If the client is not
+         signed with one of the certificates in the set, and the activity does not allow embedding
+         by untrusted hosts via {@link android.R.attr#allowUntrustedActivityEmbedding} flag, the
+         embedding request will fail.
+         <p>The digest should be computed over the DER encoding of the trusted certificate using the
+         SHA-256 digest algorithm.
+         <p>If only a single signer is declared this can also be a string resource, or the digest
+         can be declared inline as the value for this attribute.
+         <p>If the attribute is declared both on the application and the activity level, the value
+         on the activity level takes precedence. -->
+    <attr name="knownActivityEmbeddingCerts" format="reference|string" />
+
+    <!-- Indicate that the activity can be embedded by untrusted hosts. In this case the
+         interactions and visibility of the embedded activity may be limited.
+         <p>The default value of this attribute is <code>false</code>. -->
+    <attr name="allowUntrustedActivityEmbedding" format="boolean" />
+
     <!-- Specifies whether this {@link android.app.Activity} should be shown on
          top of the lock screen whenever the lockscreen is up and this activity has another
          activity behind it with the {@link android.R.attr#showWhenLocked} attribute set. That
@@ -2011,6 +2029,7 @@
              when the application's user data is cleared. The default value is false.
         -->
         <attr name="resetEnabledSettingsOnAppDataCleared" format="boolean" />
+        <attr name="knownActivityEmbeddingCerts" />
     </declare-styleable>
 
     <!-- An attribution is a logical part of an app and is identified by a tag.
@@ -3033,6 +3052,8 @@
         <!-- Indicates whether the activity can be displayed on a remote device which may or
              may not be running Android. -->
         <attr name="canDisplayOnRemoteDevices" format="boolean"/>
+        <attr name="allowUntrustedActivityEmbedding" />
+        <attr name="knownActivityEmbeddingCerts" />
     </declare-styleable>
 
     <!-- The <code>activity-alias</code> tag declares a new
@@ -3073,6 +3094,8 @@
         <attr name="exported" />
         <attr name="parentActivityName" />
         <attr name="attributionTags" />
+        <attr name="allowUntrustedActivityEmbedding" />
+        <attr name="knownActivityEmbeddingCerts" />
     </declare-styleable>
 
     <!-- The <code>meta-data</code> tag is used to attach additional

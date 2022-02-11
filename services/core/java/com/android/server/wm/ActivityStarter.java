@@ -2003,8 +2003,8 @@ class ActivityStarter {
      * @param targetTask the target task for launching activity, which could be different from
      *                   the one who hosting the embedding.
      */
-    private boolean canEmbedActivity(@NonNull TaskFragment taskFragment, ActivityRecord starting,
-            boolean newTask, Task targetTask) {
+    private boolean canEmbedActivity(@NonNull TaskFragment taskFragment,
+            @NonNull ActivityRecord starting, boolean newTask, Task targetTask) {
         final Task hostTask = taskFragment.getTask();
         if (hostTask == null) {
             return false;
@@ -2016,8 +2016,7 @@ class ActivityStarter {
             return true;
         }
 
-        // Not allowed embedding an activity of another app.
-        if (hostUid != starting.getUid()) {
+        if (!taskFragment.isAllowedToEmbedActivity(starting)) {
             return false;
         }
 
