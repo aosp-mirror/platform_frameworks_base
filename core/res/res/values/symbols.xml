@@ -4728,4 +4728,17 @@
   <java-symbol type="string" name="vdm_camera_access_denied" />
 
   <java-symbol type="color" name="camera_privacy_light"/>
+
+  <java-symbol type="bool" name="config_bg_current_drain_monitor_enabled" />
+  <java-symbol type="array" name="config_bg_current_drain_threshold_to_restricted_bucket" />
+  <java-symbol type="array" name="config_bg_current_drain_threshold_to_bg_restricted" />
+  <java-symbol type="integer" name="config_bg_current_drain_window" />
+  <java-symbol type="integer" name="config_bg_current_drain_types_to_restricted_bucket" />
+  <java-symbol type="integer" name="config_bg_current_drain_types_to_bg_restricted" />
+  <java-symbol type="integer" name="config_bg_current_drain_power_components" />
+  <java-symbol type="bool" name="config_bg_current_drain_event_duration_based_threshold_enabled" />
+  <java-symbol type="array" name="config_bg_current_drain_high_threshold_to_restricted_bucket" />
+  <java-symbol type="array" name="config_bg_current_drain_high_threshold_to_bg_restricted" />
+  <java-symbol type="integer" name="config_bg_current_drain_media_playback_min_duration" />
+  <java-symbol type="integer" name="config_bg_current_drain_location_min_duration" />
 </resources>

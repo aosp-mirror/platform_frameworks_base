@@ -5697,4 +5697,75 @@
      -->
     <string-array name="config_dockExtconStateMapping">
     </string-array>
+
+    <!-- Whether or not the monitoring on the apps' background battery drain is enabled -->
+    <bool name="config_bg_current_drain_monitor_enabled">true</bool>
+
+    <!-- The threshold of the background current drain (in percentage) to the restricted
+         standby bucket.
+    -->
+    <array name="config_bg_current_drain_threshold_to_restricted_bucket">
+        <item>2.0</item> <!-- regular device -->
+        <item>4.0</item> <!-- low ram device -->
+    </array>
+
+    <!-- The threshold of the background current drain (in percentage) to the background
+         restricted level.
+    -->
+    <array name="config_bg_current_drain_threshold_to_bg_restricted">
+        <item>4.0</item> <!-- regular device -->
+        <item>8.0</item> <!-- low ram device -->
+    </array>
+
+    <!-- The background current drain monitoring window size. -->
+    <integer name="config_bg_current_drain_window">86400</integer>
+
+    <!-- The types of battery drain we're checking on each app; if the sum of the battery drain
+        exceeds the threshold, it'll be moved to restricted standby bucket. The value must be
+        one of or combination of the definitions in AppBatteryPolicy.
+    -->
+    <integer name="config_bg_current_drain_types_to_restricted_bucket">4</integer>
+
+    <!-- The types of battery drain we're checking on each app; if the sum of the battery drain
+        exceeds the threshold, it'll be moved to background restricted level. The value must be
+        one of or combination of the definitions in AppBatteryPolicy.
+    -->
+    <integer name="config_bg_current_drain_types_to_bg_restricted">12</integer>
+
+    <!-- The power usage components we're monitoring. Must one of the definition in BatteryConsumer.
+    -->
+    <integer name="config_bg_current_drain_power_components">-1</integer>
+
+    <!-- Whether or not enable the different threshold based on the durations of
+         certain event type.
+    -->
+    <bool name="config_bg_current_drain_event_duration_based_threshold_enabled">false</bool>
+
+    <!-- The threshold of the background current drain (in percentage) to the restricted
+         standby bucket for legitimate case with higher background current drain.
+    -->
+    <array name="config_bg_current_drain_high_threshold_to_restricted_bucket">
+        <item>30.0</item> <!-- regular device -->
+        <item>60.0</item> <!-- low ram device -->
+    </array>
+
+    <!-- The threshold of the background current drain (in percentage) to the background
+         restricted level for legitimate case with higher background current drain.
+    -->
+    <array name="config_bg_current_drain_high_threshold_to_bg_restricted">
+        <item>20.0</item> <!-- regular device -->
+        <item>40.0</item> <!-- low ram device -->
+    </array>
+
+    <!-- The threshold of minimal time of hosting a foreground service with type "mediaPlayback"
+         or a media session, over the given window, so it'd subject towards the higher background
+         current drain threshold.
+    -->
+    <integer name="config_bg_current_drain_media_playback_min_duration">1800</integer>
+
+    <!-- The threshold of minimal time of hosting a foreground service with type "location"
+         over the given window, so it'd subject towards the higher background
+         current drain threshold.
+    -->
+    <integer name="config_bg_current_drain_location_min_duration">1800</integer>
 </resources>
