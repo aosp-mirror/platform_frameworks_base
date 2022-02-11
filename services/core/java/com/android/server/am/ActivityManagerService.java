@@ -13389,10 +13389,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
 
-            // TODO (206518114): We need to use the "real" package name which sent the broadcast,
-            // in case the broadcast is sent via PendingIntent.
             if (brOptions.getIdForResponseEvent() > 0) {
-                enforceUsageStatsPermission(callerPackage, realCallingUid, realCallingPid,
+                enforceUsageStatsPermission(callerPackage, callingUid, callingPid,
                         "recordResponseEventWhileInBackground()");
             }
         }

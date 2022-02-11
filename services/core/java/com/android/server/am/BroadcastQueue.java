@@ -1858,8 +1858,6 @@ public final class BroadcastQueue {
     }
 
     private void maybeReportBroadcastDispatchedEventLocked(BroadcastRecord r, int targetUid) {
-        // TODO (206518114): Only allow apps with ACCESS_PACKAGE_USAGE_STATS to set
-        // getIdForResponseEvent.
         // TODO (217251579): Temporarily use temp-allowlist reason to identify
         // push messages and record response events.
         useTemporaryAllowlistReasonAsSignal(r);
