@@ -46,11 +46,21 @@ public class UserIcons {
      * Converts a given drawable to a bitmap.
      */
     public static Bitmap convertToBitmap(Drawable icon) {
+        return convertToBitmapAtSize(icon, icon.getIntrinsicWidth(), icon.getIntrinsicHeight());
+    }
+
+    /**
+     * Converts a given drawable to a bitmap, with width and height equal to the default icon size.
+     */
+    public static Bitmap convertToBitmapAtUserIconSize(Resources res, Drawable icon) {
+        int size = res.getDimensionPixelSize(R.dimen.user_icon_size);
+        return convertToBitmapAtSize(icon, size, size);
+    }
+
+    private static Bitmap convertToBitmapAtSize(Drawable icon, int width, int height) {
         if (icon == null) {
             return null;
         }
-        final int width = icon.getIntrinsicWidth();
-        final int height = icon.getIntrinsicHeight();
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         icon.setBounds(0, 0, width, height);

@@ -16,19 +16,17 @@
 
 package com.android.settingslib.users;
 
-import android.annotation.NonNull;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.ImageView;
 
 import com.android.internal.util.UserIcons;
-import com.android.settingslib.R;
 import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.settingslib.utils.ThreadUtils;
 
@@ -114,24 +112,16 @@ public class EditUserPhotoController {
     private void onDefaultIconSelected(int tintColor) {
         try {
             ThreadUtils.postOnBackgroundThread(() -> {
+                Resources res = mActivity.getResources();
                 Drawable drawable =
-                        UserIcons.getDefaultUserIconInColor(mActivity.getResources(), tintColor);
-                Bitmap bitmap = convertToBitmap(drawable,
-                        (int) mActivity.getResources().getDimension(R.dimen.circle_avatar_size));
+                        UserIcons.getDefaultUserIconInColor(res, tintColor);
+                Bitmap bitmap = UserIcons.convertToBitmapAtUserIconSize(res, drawable);
 
                 ThreadUtils.postOnMainThread(() -> onPhotoProcessed(bitmap));
             }).get();
         } catch (InterruptedException | ExecutionException e) {
             Log.e(TAG, "Error processing default icon", e);
         }
-    }
-
-    private static Bitmap convertToBitmap(@NonNull Drawable icon, int size) {
-        Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        icon.setBounds(0, 0, size, size);
-        icon.draw(canvas);
-        return bitmap;
     }
 
     private void onPhotoCropped(final Uri data) {

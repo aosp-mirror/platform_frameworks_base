@@ -49,8 +49,6 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.os.BuildCompat;
 
-import com.android.settingslib.R;
-
 /**
  * Converts the user avatar icon to a circularly clipped one with an optional badge and frame
  */
@@ -120,8 +118,9 @@ public class UserIconDrawable extends Drawable implements Drawable.Callback {
      * @param context
      * @return size in pixels
      */
-    public static int getSizeForList(Context context) {
-        return (int) context.getResources().getDimension(R.dimen.circle_avatar_size);
+    public static int getDefaultSize(Context context) {
+        return context.getResources()
+                .getDimensionPixelSize(com.android.internal.R.dimen.user_icon_size);
     }
 
     public UserIconDrawable() {
