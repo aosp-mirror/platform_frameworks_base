@@ -48,7 +48,6 @@ android_library {
         "SettingsLibCollapsingToolbarBaseActivity",
         "SettingsLibTwoTargetPreference",
         "SettingsLibSettingsTransition",
-        "SettingsLibActivityEmbedding",
         "SettingsLibButtonPreference",
         "setupdesign",
     ],
