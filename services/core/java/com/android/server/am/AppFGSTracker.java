@@ -16,8 +16,6 @@
 
 package com.android.server.am;
 
-import static android.Manifest.permission.ACCESS_BACKGROUND_LOCATION;
-import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE;
@@ -687,10 +685,6 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
             if (shouldExemptLocationFGS(packageName, uid, now, since)) {
                 return;
             }
-            if (hasBackgroundLocationPermission(packageName, uid)) {
-                // This package has background location permission, ignore it.
-                return;
-            }
             mTracker.mAppRestrictionController.postLongRunningFgsIfNecessary(packageName, uid);
         }
 
@@ -723,19 +717,6 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
             return false;
         }
 
-        boolean hasBackgroundLocationPermission(String packageName, int uid) {
-            if (mInjector.getPermissionManagerServiceInternal().checkPermission(
-                    packageName, ACCESS_BACKGROUND_LOCATION, UserHandle.getUserId(uid))
-                    == PERMISSION_GRANTED) {
-                if (DEBUG_BACKGROUND_FGS_TRACKER) {
-                    Slog.i(TAG, "Ignoring bg-location FGS in " + packageName + "/"
-                            + UserHandle.formatUid(uid));
-                }
-                return true;
-            }
-            return false;
-        }
-
         @Override
         String getExemptionReasonString(String packageName, int uid, @ReasonCode int reason) {
             if (reason != REASON_DENIED) {
@@ -745,8 +726,7 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
             final long window = getFgsLongRunningWindowSize();
             final long since = Math.max(0, now - getFgsLongRunningWindowSize());
             return "{mediaPlayback=" + shouldExemptMediaPlaybackFGS(packageName, uid, now, window)
-                    + ", location=" + shouldExemptLocationFGS(packageName, uid, now, since)
-                    + ", bgLocationPerm=" + hasBackgroundLocationPermission(packageName, uid) + "}";
+                    + ", location=" + shouldExemptLocationFGS(packageName, uid, now, since) + "}";
         }
 
         void onLongRunningFgsGone(String packageName, int uid) {
