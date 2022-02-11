@@ -309,7 +309,12 @@ public class DozeParameters implements
      * delayed for a few seconds. This might be useful to play animations without reducing FPS.
      */
     public boolean shouldDelayDisplayDozeTransition() {
-        return mScreenOffAnimationController.shouldDelayDisplayDozeTransition();
+        return willAnimateFromLockScreenToAod()
+                || mScreenOffAnimationController.shouldDelayDisplayDozeTransition();
+    }
+
+    private boolean willAnimateFromLockScreenToAod() {
+        return getAlwaysOn() && mKeyguardShowing;
     }
 
     /**
