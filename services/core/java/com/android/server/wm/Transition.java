@@ -819,7 +819,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         // the bottom of the screen, so we need to animate it.
         for (int i = 0; i < mTargets.size(); ++i) {
             final Task task = mTargets.get(i).asTask();
-            if (task == null || !task.isHomeOrRecentsRootTask()) continue;
+            if (task == null || !task.isActivityTypeHomeOrRecents()) continue;
             animate = task.isVisibleRequested();
             break;
         }
