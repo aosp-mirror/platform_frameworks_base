@@ -225,6 +225,7 @@ public class AudioService extends IAudioService.Stub
 
     private final AudioSystemAdapter mAudioSystem;
     private final SystemServerAdapter mSystemServer;
+    private final SettingsAdapter mSettings;
 
     /** Debug audio mode */
     protected static final boolean DEBUG_MODE = false;
@@ -875,11 +876,12 @@ public class AudioService extends IAudioService.Stub
     /** @hide */
     public AudioService(Context context) {
         this(context, AudioSystemAdapter.getDefaultAdapter(),
-                SystemServerAdapter.getDefaultAdapter(context));
+                SystemServerAdapter.getDefaultAdapter(context),
+                SettingsAdapter.getDefaultAdapter());
     }
 
     public AudioService(Context context, AudioSystemAdapter audioSystem,
-            SystemServerAdapter systemServer) {
+            SystemServerAdapter systemServer, SettingsAdapter settings) {
         sLifecycleLogger.log(new AudioEventLogger.StringEvent("AudioService()"));
         mContext = context;
         mContentResolver = context.getContentResolver();
@@ -887,6 +889,7 @@ public class AudioService extends IAudioService.Stub
 
         mAudioSystem = audioSystem;
         mSystemServer = systemServer;
+        mSettings = settings;
 
         mPlatformType = AudioSystem.getPlatformType(context);
 
@@ -1023,7 +1026,7 @@ public class AudioService extends IAudioService.Stub
                 new String("AudioService ctor"),
                 0);
 
-        mSafeMediaVolumeState = Settings.Global.getInt(mContentResolver,
+        mSafeMediaVolumeState = mSettings.getGlobalInt(mContentResolver,
                                             Settings.Global.AUDIO_SAFE_VOLUME_STATE,
                                             SAFE_MEDIA_VOLUME_NOT_CONFIGURED);
         // The default safe volume index read here will be replaced by the actual value when
@@ -2008,7 +2011,7 @@ public class AudioService extends IAudioService.Stub
 
     private void readDockAudioSettings(ContentResolver cr)
     {
-        mDockAudioMediaEnabled = Settings.Global.getInt(
+        mDockAudioMediaEnabled = mSettings.getGlobalInt(
                                         cr, Settings.Global.DOCK_AUDIO_MEDIA_ENABLED, 0) == 1;
 
         sendMsg(mAudioHandler,
@@ -2024,7 +2027,7 @@ public class AudioService extends IAudioService.Stub
 
     private void updateMasterMono(ContentResolver cr)
     {
-        final boolean masterMono = System.getIntForUser(
+        final boolean masterMono = mSettings.getSystemIntForUser(
                 cr, System.MASTER_MONO, 0 /* default */, UserHandle.USER_CURRENT) == 1;
         if (DEBUG_VOL) {
             Log.d(TAG, String.format("Master mono %b", masterMono));
@@ -2045,7 +2048,7 @@ public class AudioService extends IAudioService.Stub
 
     private void sendEncodedSurroundMode(ContentResolver cr, String eventSource)
     {
-        final int encodedSurroundMode = Settings.Global.getInt(
+        final int encodedSurroundMode = mSettings.getGlobalInt(
                 cr, Settings.Global.ENCODED_SURROUND_OUTPUT,
                 Settings.Global.ENCODED_SURROUND_OUTPUT_AUTO);
         sendEncodedSurroundMode(encodedSurroundMode, eventSource);
@@ -2161,7 +2164,7 @@ public class AudioService extends IAudioService.Stub
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSettingsLock) {
-                Settings.Global.putString(mContentResolver,
+                mSettings.putGlobalString(mContentResolver,
                         Settings.Global.ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS,
                         TextUtils.join(",", enabledFormats));
             }
@@ -2182,7 +2185,7 @@ public class AudioService extends IAudioService.Stub
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSettingsLock) {
-                Settings.Global.putInt(mContentResolver,
+                mSettings.putGlobalInt(mContentResolver,
                         Settings.Global.ENCODED_SURROUND_OUTPUT,
                         toEncodedSurroundSetting(mode));
             }
@@ -2203,7 +2206,7 @@ public class AudioService extends IAudioService.Stub
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mSettingsLock) {
-                int encodedSurroundSetting = Settings.Global.getInt(mContentResolver,
+                int encodedSurroundSetting = mSettings.getGlobalInt(mContentResolver,
                         Settings.Global.ENCODED_SURROUND_OUTPUT,
                         AudioManager.ENCODED_SURROUND_OUTPUT_AUTO);
                 return toEncodedSurroundOutputMode(encodedSurroundSetting, targetSdkVersion);
@@ -2216,7 +2219,7 @@ public class AudioService extends IAudioService.Stub
     /** @return the formats that are enabled in global settings */
     private HashSet<Integer> getEnabledFormats() {
         HashSet<Integer> formats = new HashSet<>();
-        String enabledFormats = Settings.Global.getString(mContentResolver,
+        String enabledFormats = mSettings.getGlobalString(mContentResolver,
                 Settings.Global.ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS);
         if (enabledFormats != null) {
             try {
@@ -2279,7 +2282,7 @@ public class AudioService extends IAudioService.Stub
             // Manually enable surround formats only when the setting is in manual mode.
             return;
         }
-        String enabledSurroundFormats = Settings.Global.getString(
+        String enabledSurroundFormats = mSettings.getGlobalString(
                 cr, Settings.Global.ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS);
         if (enabledSurroundFormats == null) {
             // Never allow enabledSurroundFormats as a null, which could happen when
@@ -2307,7 +2310,7 @@ public class AudioService extends IAudioService.Stub
         }
         // Set filtered surround formats to settings DB in case
         // there are invalid surround formats in original settings.
-        Settings.Global.putString(mContext.getContentResolver(),
+        mSettings.putGlobalString(mContext.getContentResolver(),
                 Settings.Global.ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS,
                 TextUtils.join(",", formats));
         sendMsg(mAudioHandler, MSG_ENABLE_SURROUND_FORMATS, SENDMSG_QUEUE, 0, 0, formats, 0);
@@ -2335,11 +2338,11 @@ public class AudioService extends IAudioService.Stub
             packageName = mRoleObserver.getAssistantRoleHolder();
         }
         if (TextUtils.isEmpty(packageName)) {
-            String assistantName = Settings.Secure.getStringForUser(
+            String assistantName = mSettings.getSecureStringForUser(
                             mContentResolver,
                             Settings.Secure.VOICE_INTERACTION_SERVICE, UserHandle.USER_CURRENT);
             if (TextUtils.isEmpty(assistantName)) {
-                assistantName = Settings.Secure.getStringForUser(
+                assistantName = mSettings.getSecureStringForUser(
                         mContentResolver,
                         Settings.Secure.ASSISTANT, UserHandle.USER_CURRENT);
             }
@@ -2382,7 +2385,7 @@ public class AudioService extends IAudioService.Stub
         final ContentResolver cr = mContentResolver;
 
         int ringerModeFromSettings =
-                Settings.Global.getInt(
+                mSettings.getGlobalInt(
                         cr, Settings.Global.MODE_RINGER, AudioManager.RINGER_MODE_NORMAL);
         int ringerMode = ringerModeFromSettings;
         // validity check in case the settings are restored from a device with incompatible
@@ -2394,7 +2397,7 @@ public class AudioService extends IAudioService.Stub
             ringerMode = AudioManager.RINGER_MODE_SILENT;
         }
         if (ringerMode != ringerModeFromSettings) {
-            Settings.Global.putInt(cr, Settings.Global.MODE_RINGER, ringerMode);
+            mSettings.putGlobalInt(cr, Settings.Global.MODE_RINGER, ringerMode);
         }
         if (mUseFixedVolume || mIsSingleVolume) {
             ringerMode = AudioManager.RINGER_MODE_NORMAL;
@@ -2426,7 +2429,7 @@ public class AudioService extends IAudioService.Stub
             AudioSystem.setRttEnabled(mRttEnabled);
         }
 
-        mMuteAffectedStreams = System.getIntForUser(cr,
+        mMuteAffectedStreams = mSettings.getSystemIntForUser(cr,
                 System.MUTE_STREAMS_AFFECTED, AudioSystem.DEFAULT_MUTE_STREAMS_AFFECTED,
                 UserHandle.USER_CURRENT);
 
@@ -4479,7 +4482,7 @@ public class AudioService extends IAudioService.Stub
         int silenceRingerSetting = Settings.Secure.VOLUME_HUSH_OFF;
         if (mContext.getResources()
                 .getBoolean(com.android.internal.R.bool.config_volumeHushGestureEnabled)) {
-            silenceRingerSetting = Settings.Secure.getIntForUser(mContentResolver,
+            silenceRingerSetting = mSettings.getSecureIntForUser(mContentResolver,
                     Settings.Secure.VOLUME_HUSH_GESTURE, VOLUME_HUSH_OFF,
                     UserHandle.USER_CURRENT);
         }
@@ -5240,7 +5243,7 @@ public class AudioService extends IAudioService.Stub
      * Settings has an in memory cache, so this is fast.
      */
     private boolean querySoundEffectsEnabled(int user) {
-        return Settings.System.getIntForUser(getContentResolver(),
+        return mSettings.getSystemIntForUser(getContentResolver(),
                 Settings.System.SOUND_EFFECTS_ENABLED, 0, user) != 0;
     }
 
@@ -5325,7 +5328,7 @@ public class AudioService extends IAudioService.Stub
         checkMuteAffectedStreams();
 
         synchronized (mSafeMediaVolumeStateLock) {
-            mMusicActiveMs = MathUtils.constrain(Settings.Secure.getIntForUser(mContentResolver,
+            mMusicActiveMs = MathUtils.constrain(mSettings.getSecureIntForUser(mContentResolver,
                     Settings.Secure.UNSAFE_VOLUME_MUSIC_ACTIVE_MS, 0, UserHandle.USER_CURRENT),
                     0, UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX);
             if (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE) {
@@ -5967,7 +5970,7 @@ public class AudioService extends IAudioService.Stub
     @GuardedBy("mSettingsLock")
     private boolean updateRingerAndZenModeAffectedStreams() {
         boolean updatedZenModeAffectedStreams = updateZenModeAffectedStreams();
-        int ringerModeAffectedStreams = Settings.System.getIntForUser(mContentResolver,
+        int ringerModeAffectedStreams = mSettings.getSystemIntForUser(mContentResolver,
                 Settings.System.MODE_RINGER_STREAMS_AFFECTED,
                 ((1 << AudioSystem.STREAM_RING)|(1 << AudioSystem.STREAM_NOTIFICATION)|
                  (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)),
@@ -5991,7 +5994,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         if (ringerModeAffectedStreams != mRingerModeAffectedStreams) {
-            Settings.System.putIntForUser(mContentResolver,
+            mSettings.putSystemIntForUser(mContentResolver,
                     Settings.System.MODE_RINGER_STREAMS_AFFECTED,
                     ringerModeAffectedStreams,
                     UserHandle.USER_CURRENT);
@@ -6968,7 +6971,7 @@ public class AudioService extends IAudioService.Stub
                         + ", device " + AudioSystem.getOutputDeviceName(device)
                         + " and User=" + ActivityManager.getCurrentUser());
             }
-            boolean success = Settings.System.putIntForUser(mContentResolver,
+            boolean success = mSettings.putSystemIntForUser(mContentResolver,
                     getSettingNameForDevice(device),
                     getIndex(device),
                     UserHandle.USER_CURRENT);
@@ -6994,7 +6997,7 @@ public class AudioService extends IAudioService.Stub
                             ? AudioSystem.DEFAULT_STREAM_VOLUME[mPublicStreamType] : -1;
                     int index;
                     String name = getSettingNameForDevice(device);
-                    index = Settings.System.getIntForUser(
+                    index = mSettings.getSystemIntForUser(
                             mContentResolver, name, defaultIndex, UserHandle.USER_CURRENT);
                     if (index == -1) {
                         continue;
@@ -7243,7 +7246,7 @@ public class AudioService extends IAudioService.Stub
                         index = defaultIndex;
                     } else {
                         String name = getSettingNameForDevice(device);
-                        index = Settings.System.getIntForUser(
+                        index = mSettings.getSystemIntForUser(
                                 mContentResolver, name, defaultIndex, UserHandle.USER_CURRENT);
                     }
                     if (index == -1) {
@@ -7780,7 +7783,7 @@ public class AudioService extends IAudioService.Stub
                 return;
             }
             if (streamState.hasValidSettingsName()) {
-                System.putIntForUser(mContentResolver,
+                mSettings.putSystemIntForUser(mContentResolver,
                         streamState.getSettingNameForDevice(device),
                         (streamState.getIndex(device) + 5)/ 10,
                         UserHandle.USER_CURRENT);
@@ -7791,11 +7794,11 @@ public class AudioService extends IAudioService.Stub
             if (mUseFixedVolume) {
                 return;
             }
-            Settings.Global.putInt(mContentResolver, Settings.Global.MODE_RINGER, ringerMode);
+            mSettings.putGlobalInt(mContentResolver, Settings.Global.MODE_RINGER, ringerMode);
         }
 
         private void onPersistSafeVolumeState(int state) {
-            Settings.Global.putInt(mContentResolver,
+            mSettings.putGlobalInt(mContentResolver,
                     Settings.Global.AUDIO_SAFE_VOLUME_STATE,
                     state);
         }
@@ -7939,7 +7942,7 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_PERSIST_MUSIC_ACTIVE_MS:
                     final int musicActiveMs = msg.arg1;
-                    Settings.Secure.putIntForUser(mContentResolver,
+                    mSettings.putSecureIntForUser(mContentResolver,
                             Settings.Secure.UNSAFE_VOLUME_MUSIC_ACTIVE_MS, musicActiveMs,
                             UserHandle.USER_CURRENT);
                     break;
@@ -8080,12 +8083,12 @@ public class AudioService extends IAudioService.Stub
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.MASTER_BALANCE), false, this);
 
-            mEncodedSurroundMode = Settings.Global.getInt(
+            mEncodedSurroundMode = mSettings.getGlobalInt(
                     mContentResolver, Settings.Global.ENCODED_SURROUND_OUTPUT,
                     Settings.Global.ENCODED_SURROUND_OUTPUT_AUTO);
             mContentResolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.ENCODED_SURROUND_OUTPUT), false, this);
-            mEnabledSurroundFormats = Settings.Global.getString(
+            mEnabledSurroundFormats = mSettings.getGlobalString(
                     mContentResolver, Settings.Global.ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS);
             mContentResolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS), false, this);
@@ -8119,7 +8122,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         private void updateEncodedSurroundOutput() {
-            int newSurroundMode = Settings.Global.getInt(
+            int newSurroundMode = mSettings.getGlobalInt(
                 mContentResolver, Settings.Global.ENCODED_SURROUND_OUTPUT,
                 Settings.Global.ENCODED_SURROUND_OUTPUT_AUTO);
             // Did it change?
@@ -8662,13 +8665,13 @@ public class AudioService extends IAudioService.Stub
     }
 
     void onPersistSpatialAudioEnabled(boolean enabled) {
-        Settings.Secure.putIntForUser(mContentResolver,
+        mSettings.putSecureIntForUser(mContentResolver,
                 Settings.Secure.SPATIAL_AUDIO_ENABLED, enabled ? 1 : 0,
                 UserHandle.USER_CURRENT);
     }
 
     boolean isSpatialAudioEnabled() {
-        return Settings.Secure.getIntForUser(mContentResolver,
+        return mSettings.getSecureIntForUser(mContentResolver,
                 Settings.Secure.SPATIAL_AUDIO_ENABLED, SPATIAL_AUDIO_ENABLED_DEFAULT ? 1 : 0,
                 UserHandle.USER_CURRENT) == 1;
     }
@@ -9793,7 +9796,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         public void loadSettings(ContentResolver cr) {
-            mLongPressTimeout = Settings.Secure.getIntForUser(cr,
+            mLongPressTimeout = mSettings.getSecureIntForUser(cr,
                     Settings.Secure.LONG_PRESS_TIMEOUT, 500, UserHandle.USER_CURRENT);
         }
 
@@ -11417,7 +11420,7 @@ public class AudioService extends IAudioService.Stub
         }
         final long callingIdentity = Binder.clearCallingIdentity();
         try {
-            System.putIntForUser(mContentResolver,
+            mSettings.putSystemIntForUser(mContentResolver,
                     getSettingsNameForDeviceVolumeBehavior(deviceType),
                     deviceVolumeBehavior,
                     UserHandle.USER_CURRENT);
@@ -11428,7 +11431,7 @@ public class AudioService extends IAudioService.Stub
 
     @AudioManager.DeviceVolumeBehaviorState
     private int retrieveStoredDeviceVolumeBehavior(int deviceType) {
-        return System.getIntForUser(mContentResolver,
+        return mSettings.getSystemIntForUser(mContentResolver,
                 getSettingsNameForDeviceVolumeBehavior(deviceType),
                 AudioManager.DEVICE_VOLUME_BEHAVIOR_UNSET,
                 UserHandle.USER_CURRENT);
