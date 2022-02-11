@@ -252,7 +252,6 @@ cc_library_shared {
                 "libandroid_net",
                 "libandroidicu",
                 "libbattery",
-                "libbpf_android",
                 "libnetdutils",
                 "libmemtrack",
                 "libandroidfw",
