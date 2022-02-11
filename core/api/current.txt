@@ -4073,7 +4073,7 @@ package android.app {
     method @Deprecated public void onTabUnselected(android.app.ActionBar.Tab, android.app.FragmentTransaction);
   }
 
-  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.window.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     ctor public Activity();
     method public void addContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public void closeContextMenu();
@@ -4116,7 +4116,7 @@ package android.app {
     method public int getMaxNumPictureInPictureActions();
     method public final android.media.session.MediaController getMediaController();
     method @NonNull public android.view.MenuInflater getMenuInflater();
-    method @NonNull public android.view.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
+    method @NonNull public android.window.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
     method public final android.app.Activity getParent();
     method @Nullable public android.content.Intent getParentActivityIntent();
     method public android.content.SharedPreferences getPreferences(int);
@@ -5002,7 +5002,7 @@ package android.app {
     method public void onDateSet(android.widget.DatePicker, int, int, int);
   }
 
-  public class Dialog implements android.content.DialogInterface android.view.KeyEvent.Callback android.view.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+  public class Dialog implements android.content.DialogInterface android.view.KeyEvent.Callback android.window.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     ctor public Dialog(@NonNull @UiContext android.content.Context);
     ctor public Dialog(@NonNull @UiContext android.content.Context, @StyleRes int);
     ctor protected Dialog(@NonNull @UiContext android.content.Context, boolean, @Nullable android.content.DialogInterface.OnCancelListener);
@@ -5022,7 +5022,7 @@ package android.app {
     method @NonNull @UiContext public final android.content.Context getContext();
     method @Nullable public android.view.View getCurrentFocus();
     method @NonNull public android.view.LayoutInflater getLayoutInflater();
-    method @NonNull public android.view.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
+    method @NonNull public android.window.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
     method @Nullable public final android.app.Activity getOwnerActivity();
     method @Nullable public final android.view.SearchEvent getSearchEvent();
     method public final int getVolumeControlStream();
@@ -49030,21 +49030,6 @@ package android.view {
     field public int toolType;
   }
 
-  public interface OnBackInvokedCallback {
-    method public default void onBackInvoked();
-  }
-
-  public interface OnBackInvokedDispatcher {
-    method public void registerOnBackInvokedCallback(@NonNull android.view.OnBackInvokedCallback, @IntRange(from=0) int);
-    method public void unregisterOnBackInvokedCallback(@NonNull android.view.OnBackInvokedCallback);
-    field public static final int PRIORITY_DEFAULT = 0; // 0x0
-    field public static final int PRIORITY_OVERLAY = 1000000; // 0xf4240
-  }
-
-  public interface OnBackInvokedDispatcherOwner {
-    method @NonNull public android.view.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
-  }
-
   public interface OnReceiveContentListener {
     method @Nullable public android.view.ContentInfo onReceiveContent(@NonNull android.view.View, @NonNull android.view.ContentInfo);
   }
@@ -57905,6 +57890,21 @@ package android.widget.inline {
 }
 
 package android.window {
+
+  public interface OnBackInvokedCallback {
+    method public default void onBackInvoked();
+  }
+
+  public interface OnBackInvokedDispatcher {
+    method public void registerOnBackInvokedCallback(@NonNull android.window.OnBackInvokedCallback, @IntRange(from=0) int);
+    method public void unregisterOnBackInvokedCallback(@NonNull android.window.OnBackInvokedCallback);
+    field public static final int PRIORITY_DEFAULT = 0; // 0x0
+    field public static final int PRIORITY_OVERLAY = 1000000; // 0xf4240
+  }
+
+  public interface OnBackInvokedDispatcherOwner {
+    method @NonNull public android.window.OnBackInvokedDispatcher getOnBackInvokedDispatcher();
+  }
 
   public interface SplashScreen {
     method public void clearOnExitAnimationListener();

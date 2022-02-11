@@ -103,7 +103,7 @@ package android.animation {
 
 package android.app {
 
-  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+  @UiContext public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.window.OnBackInvokedDispatcherOwner android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     method public final boolean addDumpable(@NonNull android.util.Dumpable);
     method public void dumpInternal(@NonNull String, @Nullable java.io.FileDescriptor, @NonNull java.io.PrintWriter, @Nullable String[]);
     method public void onMovedToDisplay(int, android.content.res.Configuration);
@@ -2829,10 +2829,6 @@ package android.view {
     field public static final int FLAG_IS_ACCESSIBILITY_EVENT = 2048; // 0x800
   }
 
-  public interface OnBackInvokedDispatcher {
-    field public static final long DISPATCH_BACK_INVOCATION_AHEAD_OF_TIME = 195946584L; // 0xbade858L
-  }
-
   @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME) @java.lang.annotation.Target({java.lang.annotation.ElementType.METHOD}) public @interface RemotableViewMethod {
     method public abstract String asyncImpl() default "";
   }
@@ -3244,6 +3240,10 @@ package android.window {
     field public static final int FEATURE_VENDOR_FIRST = 10001; // 0x2711
     field public static final int FEATURE_WINDOWED_MAGNIFICATION = 4; // 0x4
     field public static final int FEATURE_WINDOW_TOKENS = 2; // 0x2
+  }
+
+  public interface OnBackInvokedDispatcher {
+    field public static final long DISPATCH_BACK_INVOCATION_AHEAD_OF_TIME = 195946584L; // 0xbade858L
   }
 
   public final class SplashScreenView extends android.widget.FrameLayout {
