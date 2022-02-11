@@ -401,7 +401,12 @@ public class Build {
         /**
          * All known codenames starting from {@link VERSION_CODES.Q}.
          *
-         * <p>This includes in development codenames as well.
+         * <p>This includes in development codenames as well, i.e. if {@link #CODENAME} is not "REL"
+         * then the value of that is present in this set.
+         *
+         * <p>If a particular string is not present in this set, then it is either not a codename
+         * or a codename for a future release. For example, during Android R development, "Tiramisu"
+         * was not a known codename.
          *
          * @hide
          */
