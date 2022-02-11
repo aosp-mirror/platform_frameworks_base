@@ -217,12 +217,6 @@ public class ChooserActivity extends ResolverActivity implements
     private static final int APP_PREDICTION_SHARE_TARGET_QUERY_PACKAGE_LIMIT = 20;
     public static final String APP_PREDICTION_INTENT_FILTER_KEY = "intent_filter";
 
-    private static final String[] QUERY_FILE_INFO_PROJECTION = {
-        OpenableColumns.DISPLAY_NAME,
-        Downloads.Impl.COLUMN_TITLE,
-        DocumentsContract.Document.COLUMN_FLAGS
-    };
-
     private static final String PLURALS_COUNT = "count";
     private static final String PLURALS_FILE_NAME = "file_name";
 
@@ -1480,15 +1474,15 @@ public class ChooserActivity extends ResolverActivity implements
      * and to avoid mocking Android core classes.
      */
     @VisibleForTesting
-    public Cursor queryResolver(ContentResolver resolver, String[] projection, Uri uri) {
-        return resolver.query(uri, projection, null, null, null);
+    public Cursor queryResolver(ContentResolver resolver, Uri uri) {
+        return resolver.query(uri, null, null, null, null);
     }
 
     private FileInfo extractFileInfo(Uri uri, ContentResolver resolver) {
         String fileName = null;
         boolean hasThumbnail = false;
 
-        try (Cursor cursor = queryResolver(resolver, QUERY_FILE_INFO_PROJECTION, uri)) {
+        try (Cursor cursor = queryResolver(resolver, uri)) {
             if (cursor != null && cursor.getCount() > 0) {
                 int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
                 int titleIndex = cursor.getColumnIndex(Downloads.Impl.COLUMN_TITLE);
