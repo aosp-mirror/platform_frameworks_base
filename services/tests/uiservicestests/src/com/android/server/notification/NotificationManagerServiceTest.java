@@ -102,6 +102,7 @@ import static org.mockito.Mockito.when;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
@@ -241,6 +242,7 @@ import java.util.function.Consumer;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
+@SuppressLint("GuardedBy") // It's ok for this test to access guarded methods from the service.
 @RunWithLooper
 public class NotificationManagerServiceTest extends UiServiceTestCase {
     private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
@@ -4003,6 +4005,63 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 PKG, nr.getSbn().getTag(), nr.getSbn().getId(), nr.getSbn().getUserId());
 
         assertFalse(posted.getNotification().isColorized());
+    }
+
+    @Test
+    public void testMediaStyleRemote_hasPermission() throws RemoteException {
+        String deviceName = "device";
+        when(mPackageManager.checkPermission(
+                eq(android.Manifest.permission.MEDIA_CONTENT_CONTROL), any(), anyInt()))
+                .thenReturn(PERMISSION_GRANTED);
+        Notification.MediaStyle style = new Notification.MediaStyle();
+        style.setRemotePlaybackInfo(deviceName, 0, null);
+        Notification.Builder nb = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .setStyle(style);
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
+                "testMediaStyleRemoteHasPermission", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        NotificationRecord posted = mService.findNotificationLocked(
+                PKG, nr.getSbn().getTag(), nr.getSbn().getId(), nr.getSbn().getUserId());
+        Bundle extras = posted.getNotification().extras;
+
+        assertTrue(extras.containsKey(Notification.EXTRA_MEDIA_REMOTE_DEVICE));
+        assertEquals(deviceName, extras.getString(Notification.EXTRA_MEDIA_REMOTE_DEVICE));
+    }
+
+    @Test
+    public void testMediaStyleRemote_noPermission() throws RemoteException {
+        String deviceName = "device";
+        when(mPackageManager.checkPermission(
+                eq(android.Manifest.permission.MEDIA_CONTENT_CONTROL), any(), anyInt()))
+                .thenReturn(PERMISSION_DENIED);
+        Notification.MediaStyle style = new Notification.MediaStyle();
+        style.setRemotePlaybackInfo(deviceName, 0, null);
+        Notification.Builder nb = new Notification.Builder(mContext,
+                mTestNotificationChannel.getId())
+                .setStyle(style);
+
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
+                "testMediaStyleRemoteNoPermission", mUid, 0,
+                nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        NotificationRecord posted = mService.findNotificationLocked(
+                PKG, nr.getSbn().getTag(), nr.getSbn().getId(), nr.getSbn().getUserId());
+
+        assertFalse(posted.getNotification().extras
+                .containsKey(Notification.EXTRA_MEDIA_REMOTE_DEVICE));
     }
 
     @Test

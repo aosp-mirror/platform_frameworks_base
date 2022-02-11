@@ -27,8 +27,6 @@ import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.graphics.drawable.Icon
@@ -129,7 +127,7 @@ class MediaDataManager(
     private val useQsMediaPlayer: Boolean,
     private val systemClock: SystemClock,
     private val tunerService: TunerService,
-    private val mediaFlags: MediaFlags,
+    private val mediaFlags: MediaFlags
 ) : Dumpable, BcSmartspaceDataPlugin.SmartspaceTargetListener {
 
     companion object {
@@ -170,20 +168,9 @@ class MediaDataManager(
 
     /**
      * Check whether this notification is an RCN
-     * TODO(b/204910409) implement new API for explicitly declaring this
      */
     private fun isRemoteCastNotification(sbn: StatusBarNotification): Boolean {
-        val pm = context.packageManager
-        try {
-            val info = pm.getApplicationInfo(sbn.packageName, PackageManager.MATCH_SYSTEM_ONLY)
-            if (info.privateFlags and ApplicationInfo.PRIVATE_FLAG_PRIVILEGED != 0) {
-                val extras = sbn.notification.extras
-                if (extras.containsKey(Notification.EXTRA_SUBSTITUTE_APP_NAME)) {
-                    return true
-                }
-            }
-        } catch (e: PackageManager.NameNotFoundException) { }
-        return false
+        return sbn.notification.extras.containsKey(Notification.EXTRA_MEDIA_REMOTE_DEVICE)
     }
 
     @Inject
@@ -597,6 +584,25 @@ class MediaDataManager(
             artist = HybridGroupManager.resolveText(notif)
         }
 
+        // Device name (used for remote cast notifications)
+        var device: MediaDeviceData? = null
+        if (isRemoteCastNotification(sbn)) {
+            val extras = sbn.notification.extras
+            val deviceName = extras.getCharSequence(Notification.EXTRA_MEDIA_REMOTE_DEVICE, null)
+            val deviceIcon = extras.getInt(Notification.EXTRA_MEDIA_REMOTE_ICON, -1)
+            val deviceIntent = extras.getParcelable(Notification.EXTRA_MEDIA_REMOTE_INTENT)
+                    as PendingIntent?
+            Log.d(TAG, "$key is RCN for $deviceName")
+
+            if (deviceName != null && deviceIcon > -1) {
+                // Name and icon must be present, but intent may be null
+                val enabled = deviceIntent != null && deviceIntent.isActivity
+                val deviceDrawable = Icon.createWithResource(sbn.packageName, deviceIcon)
+                        .loadDrawable(sbn.getPackageContext(context))
+                device = MediaDeviceData(enabled, deviceDrawable, deviceName, deviceIntent)
+            }
+        }
+
         // Control buttons
         // If flag is enabled and controller has a PlaybackState, create actions from session info
         // Otherwise, use the notification actions
@@ -624,7 +630,7 @@ class MediaDataManager(
             val active = mediaEntries[key]?.active ?: true
             onMediaDataLoaded(key, oldKey, MediaData(sbn.normalizedUserId, true, bgColor, app,
                     smallIcon, artist, song, artWorkIcon, actionIcons, actionsToShowCollapsed,
-                    semanticActions, sbn.packageName, token, notif.contentIntent, null,
+                    semanticActions, sbn.packageName, token, notif.contentIntent, device,
                     active, resumeAction = resumeAction, playbackLocation = playbackLocation,
                     notificationKey = key, hasCheckedForResume = hasCheckedForResume,
                     isPlaying = isPlaying, isClearable = sbn.isClearable(),

@@ -164,8 +164,17 @@ data class MediaAction(
 )
 
 /** State of the media device. */
-data class MediaDeviceData(
+data class MediaDeviceData
+@JvmOverloads constructor(
+    /** Whether or not to enable the chip */
     val enabled: Boolean,
+
+    /** Device icon to show in the chip */
     val icon: Drawable?,
-    val name: String?
+
+    /** Device display name */
+    val name: CharSequence?,
+
+    /** Optional intent to override the default output switcher for this control */
+    val intent: PendingIntent? = null
 )

@@ -437,6 +437,24 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         verify(mr2, never()).getRoutingSessionForMediaController(eq(controller))
     }
 
+    @Test
+    fun testRemotePlaybackDeviceOverride() {
+        whenever(route.name).thenReturn(DEVICE_NAME)
+        val deviceData = MediaDeviceData(false, null, REMOTE_DEVICE_NAME, null)
+        val mediaDataWithDevice = mediaData.copy(device = deviceData)
+
+        // GIVEN media data that already has a device set
+        manager.onMediaDataLoaded(KEY, null, mediaDataWithDevice)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+
+        // THEN we keep the device info, and don't register a listener
+        val data = captureDeviceData(KEY)
+        assertThat(data.enabled).isFalse()
+        assertThat(data.name).isEqualTo(REMOTE_DEVICE_NAME)
+        verify(lmm, never()).registerCallback(any())
+    }
+
     fun captureCallback(): LocalMediaManager.DeviceCallback {
         val captor = ArgumentCaptor.forClass(LocalMediaManager.DeviceCallback::class.java)
         verify(lmm).registerCallback(captor.capture())
