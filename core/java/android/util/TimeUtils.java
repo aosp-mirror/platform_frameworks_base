@@ -153,8 +153,8 @@ public class TimeUtils {
      *
      * <p>Time zone database updates should be expected to occur periodically due to
      * political and legal changes that cannot be anticipated in advance.  Therefore,
-     * when computing the UTC time for a future event, applications should be aware that
-     * the results may differ following a time zone database update.  This method allows
+     * when computing the time for a future event, applications should be aware that the
+     * results may differ following a time zone database update.  This method allows
      * applications to detect that a database change has occurred, and to recalculate any
      * cached times accordingly.
      *
