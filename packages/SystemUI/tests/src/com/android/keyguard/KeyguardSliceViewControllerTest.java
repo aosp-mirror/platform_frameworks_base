@@ -32,6 +32,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.tuner.TunerService;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,6 +65,11 @@ public class KeyguardSliceViewControllerTest extends SysuiTestCase {
                 mView, mActivityStarter, mConfigurationController,
                 mTunerService, mDumpManager);
         mController.setupUri(KeyguardSliceProvider.KEYGUARD_SLICE_URI);
+    }
+
+    @After
+    public void tearDown() {
+        mController.onViewDetached();
     }
 
     @Test
