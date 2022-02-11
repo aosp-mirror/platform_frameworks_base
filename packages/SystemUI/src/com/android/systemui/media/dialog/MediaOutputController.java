@@ -171,7 +171,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
     @Override
     public void onDeviceListUpdate(List<MediaDevice> devices) {
         buildMediaDevices(devices);
-        mCallback.onRouteChanged();
+        mCallback.onDeviceListChanged();
     }
 
     @Override
@@ -570,9 +570,14 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback {
         void onMediaStoppedOrPaused();
 
         /**
-         * Override to handle the device updating.
+         * Override to handle the device status or attributes updating.
          */
         void onRouteChanged();
+
+        /**
+         * Override to handle the devices set updating.
+         */
+        void onDeviceListChanged();
 
         /**
          * Override to dismiss dialog.
