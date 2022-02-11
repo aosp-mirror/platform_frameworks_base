@@ -1037,7 +1037,7 @@ public class DisplayPolicy {
                 break;
             case TYPE_NAVIGATION_BAR_PANEL:
                 // Check for permission if the caller is not the recents component.
-                if (!mService.mAtmInternal.isCallerRecents(callingUid)) {
+                if (!mService.mAtmService.isCallerRecents(callingUid)) {
                     mContext.enforcePermission(
                             android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
                             "DisplayPolicy");
@@ -1056,7 +1056,7 @@ public class DisplayPolicy {
 
         if (attrs.providesInsetsTypes != null) {
             // Recents component is allowed to add inset types.
-            if (!mService.mAtmInternal.isCallerRecents(callingUid)) {
+            if (!mService.mAtmService.isCallerRecents(callingUid)) {
                 mContext.enforcePermission(
                         android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
                         "DisplayPolicy");

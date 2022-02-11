@@ -1820,7 +1820,7 @@ class ActivityStarter {
 
         if (!mAvoidMoveToFront && mDoResume) {
             mTargetRootTask.getRootTask().moveToFront("reuseOrNewTask", targetTask);
-            if (!mTargetRootTask.isTopRootTaskInDisplayArea() && mService.mInternal.isDreaming()
+            if (!mTargetRootTask.isTopRootTaskInDisplayArea() && mService.isDreaming()
                     && !dreamStopping) {
                 // Launching underneath dream activity (fullscreen, always-on-top). Run the launch-
                 // -behind transition so the Activity gets created and starts in visible state.
@@ -2099,7 +2099,7 @@ class ActivityStarter {
 
         // At this point we are certain we want the task moved to the front. If we need to dismiss
         // any other always-on-top root tasks, now is the time to do it.
-        if (targetTaskTop.canTurnScreenOn() && mService.mInternal.isDreaming()) {
+        if (targetTaskTop.canTurnScreenOn() && mService.isDreaming()) {
             targetTaskTop.mTaskSupervisor.wakeUp("recycleTask#turnScreenOnFlag");
         }
 
