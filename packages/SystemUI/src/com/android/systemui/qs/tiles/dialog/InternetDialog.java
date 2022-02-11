@@ -65,6 +65,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.wifitrackerlib.WifiEntry;
 
 import java.util.List;
@@ -130,6 +131,7 @@ public class InternetDialog extends SystemUIDialog implements
     private Button mDoneButton;
     private Button mAirplaneModeButton;
     private Drawable mBackgroundOn;
+    private KeyguardStateController mKeyguard;
     @Nullable
     private Drawable mBackgroundOff = null;
     private int mDefaultDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
@@ -159,7 +161,8 @@ public class InternetDialog extends SystemUIDialog implements
     public InternetDialog(Context context, InternetDialogFactory internetDialogFactory,
             InternetDialogController internetDialogController, boolean canConfigMobileData,
             boolean canConfigWifi, boolean aboveStatusBar, UiEventLogger uiEventLogger,
-            @Main Handler handler, @Background Executor executor) {
+            @Main Handler handler, @Background Executor executor,
+            KeyguardStateController keyguardStateController) {
         super(context);
         if (DEBUG) {
             Log.d(TAG, "Init InternetDialog");
@@ -177,6 +180,7 @@ public class InternetDialog extends SystemUIDialog implements
         mWifiManager = mInternetDialogController.getWifiManager();
         mCanConfigMobileData = canConfigMobileData;
         mCanConfigWifi = canConfigWifi;
+        mKeyguard = keyguardStateController;
 
         mUiEventLogger = uiEventLogger;
         mAdapter = new InternetAdapter(mInternetDialogController);
@@ -615,7 +619,7 @@ public class InternetDialog extends SystemUIDialog implements
         mAlertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
         SystemUIDialog.setShowForAllUsers(mAlertDialog, true);
         SystemUIDialog.registerDismissListener(mAlertDialog);
-        SystemUIDialog.setWindowOnTop(mAlertDialog);
+        SystemUIDialog.setWindowOnTop(mAlertDialog, mKeyguard.isShowing());
         mAlertDialog.show();
     }
 

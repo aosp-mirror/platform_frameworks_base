@@ -43,7 +43,6 @@ import androidx.annotation.Nullable;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
-import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 /**
  * Base class for dialogs that should appear over panels and keyguard.
@@ -220,10 +219,13 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         }
     }
 
-    public static void setWindowOnTop(Dialog dialog) {
+    /**
+     * Ensure the window type is set properly to show over all other screens
+     */
+    public static void setWindowOnTop(Dialog dialog, boolean isKeyguardShowing) {
         final Window window = dialog.getWindow();
         window.setType(LayoutParams.TYPE_STATUS_BAR_SUB_PANEL);
-        if (Dependency.get(KeyguardStateController.class).isShowing()) {
+        if (isKeyguardShowing) {
             window.getAttributes().setFitInsetsTypes(
                     window.getAttributes().getFitInsetsTypes() & ~Type.statusBars());
         }

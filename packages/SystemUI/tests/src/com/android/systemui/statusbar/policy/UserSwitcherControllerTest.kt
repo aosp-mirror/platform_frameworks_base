@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.policy
 
 import android.app.IActivityManager
-import android.app.IActivityTaskManager
 import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.DialogInterface
@@ -49,6 +48,7 @@ import com.android.systemui.qs.QSUserSwitcherEvent
 import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView
+import com.android.systemui.statusbar.phone.ShadeController
 import com.android.systemui.telephony.TelephonyListenerManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.settings.SecureSettings
@@ -85,7 +85,6 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var userManager: UserManager
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
-    @Mock private lateinit var activityTaskManager: IActivityTaskManager
     @Mock private lateinit var telephonyListenerManager: TelephonyListenerManager
     @Mock private lateinit var secureSettings: SecureSettings
     @Mock private lateinit var falsingManager: FalsingManager
@@ -96,8 +95,10 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var notificationShadeWindowView: NotificationShadeWindowView
     @Mock private lateinit var threadedRenderer: ThreadedRenderer
     @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
+    @Mock private lateinit var shadeController: ShadeController
     private lateinit var testableLooper: TestableLooper
-    private lateinit var uiBgExecutor: FakeExecutor
+    private lateinit var bgExecutor: FakeExecutor
+    private lateinit var uiExecutor: FakeExecutor
     private lateinit var uiEventLogger: UiEventLoggerFake
     private lateinit var userSwitcherController: UserSwitcherController
     private lateinit var picture: Bitmap
@@ -116,10 +117,11 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
-        uiBgExecutor = FakeExecutor(FakeSystemClock())
+        bgExecutor = FakeExecutor(FakeSystemClock())
+        uiExecutor = FakeExecutor(FakeSystemClock())
         uiEventLogger = UiEventLoggerFake()
 
-        context.orCreateTestableResources.addOverride(
+        mContext.orCreateTestableResources.addOverride(
                 com.android.internal.R.bool.config_guestUserAutoCreated, false)
 
         mContext.addMockSystemService(Context.FACE_SERVICE, mock(FaceManager::class.java))
@@ -141,12 +143,16 @@ class UserSwitcherControllerTest : SysuiTestCase() {
 
         picture = UserIcons.convertToBitmap(context.getDrawable(R.drawable.ic_avatar_user))
 
+        // Create defaults for the current user
+        `when`(userTracker.userId).thenReturn(ownerId)
+        `when`(userTracker.userInfo).thenReturn(ownerInfo)
+
         setupController()
     }
 
     private fun setupController() {
         userSwitcherController = UserSwitcherController(
-                context,
+                mContext,
                 activityManager,
                 userManager,
                 userTracker,
@@ -159,14 +165,14 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 uiEventLogger,
                 falsingManager,
                 telephonyListenerManager,
-                activityTaskManager,
                 secureSettings,
-                uiBgExecutor,
+                bgExecutor,
+                uiExecutor,
                 interactionJankMonitor,
                 latencyTracker,
                 dumpManager,
+                { shadeController },
                 dialogLaunchAnimator)
-        userSwitcherController.mPauseRefreshUsers = true
         userSwitcherController.init(notificationShadeWindowView)
     }
 

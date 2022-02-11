@@ -44,6 +44,7 @@ import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.FalsingManager.LOW_PENALTY
+import com.android.systemui.statusbar.phone.ShadeController
 import com.android.systemui.statusbar.policy.UserSwitcherController
 import com.android.systemui.statusbar.policy.UserSwitcherController.BaseUserAdapter
 import com.android.systemui.statusbar.policy.UserSwitcherController.UserRecord
@@ -63,7 +64,8 @@ class UserSwitcherActivity @Inject constructor(
     private val broadcastDispatcher: BroadcastDispatcher,
     private val layoutInflater: LayoutInflater,
     private val falsingManager: FalsingManager,
-    private val userManager: UserManager
+    private val userManager: UserManager,
+    private val shadeController: ShadeController
 ) : LifecycleActivity() {
 
     private lateinit var parent: ViewGroup
@@ -250,7 +252,9 @@ class UserSwitcherActivity @Inject constructor(
                     dismiss()
                     popupMenu = null
 
-                    this@UserSwitcherActivity.finish()
+                    if (!item.isAddUser) {
+                        this@UserSwitcherActivity.finish()
+                    }
             }
 
             show()

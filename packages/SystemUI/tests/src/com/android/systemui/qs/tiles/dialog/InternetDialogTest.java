@@ -29,6 +29,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.wifitrackerlib.WifiEntry;
@@ -68,6 +69,8 @@ public class InternetDialogTest extends SysuiTestCase {
     private InternetAdapter mInternetAdapter;
     @Mock
     private InternetDialogController mInternetDialogController;
+    @Mock
+    private KeyguardStateController mKeyguard;
 
     private FakeExecutor mBgExecutor = new FakeExecutor(new FakeSystemClock());
     private InternetDialog mInternetDialog;
@@ -100,7 +103,7 @@ public class InternetDialogTest extends SysuiTestCase {
 
         mInternetDialog = new InternetDialog(mContext, mock(InternetDialogFactory.class),
                 mInternetDialogController, true, true, true, mock(UiEventLogger.class), mHandler,
-                mBgExecutor);
+                mBgExecutor, mKeyguard);
         mInternetDialog.mAdapter = mInternetAdapter;
         mInternetDialog.mConnectedWifiEntry = mInternetWifiEntry;
         mInternetDialog.mWifiEntriesCount = mWifiEntries.size();

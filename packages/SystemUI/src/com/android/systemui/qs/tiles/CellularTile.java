@@ -59,6 +59,7 @@ import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.SignalCallback;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import javax.inject.Inject;
 
@@ -68,7 +69,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
 
     private final NetworkController mController;
     private final DataUsageController mDataController;
-
+    private final KeyguardStateController mKeyguard;
     private final CellSignalCallback mSignalCallback = new CellSignalCallback();
 
     @Inject
@@ -81,11 +82,14 @@ public class CellularTile extends QSTileImpl<SignalState> {
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
             QSLogger qsLogger,
-            NetworkController networkController
+            NetworkController networkController,
+            KeyguardStateController keyguardStateController
+
     ) {
         super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mController = networkController;
+        mKeyguard = keyguardStateController;
         mDataController = mController.getMobileDataController();
         mController.observe(getLifecycle(), mSignalCallback);
     }
@@ -145,7 +149,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
         dialog.getWindow().setType(LayoutParams.TYPE_KEYGUARD_DIALOG);
         SystemUIDialog.setShowForAllUsers(dialog, true);
         SystemUIDialog.registerDismissListener(dialog);
-        SystemUIDialog.setWindowOnTop(dialog);
+        SystemUIDialog.setWindowOnTop(dialog, mKeyguard.isShowing());
         dialog.show();
     }
 
