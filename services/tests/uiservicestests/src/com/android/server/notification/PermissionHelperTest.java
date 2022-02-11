@@ -15,6 +15,7 @@
  */
 package com.android.server.notification;
 
+import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
@@ -252,6 +253,39 @@ public class PermissionHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testSetNotificationPermission_pkgPerm_notUserSet_grantedByDefaultPermNotSet()
+            throws Exception {
+        when(mPermManager.getPermissionFlags(anyString(),
+                eq(Manifest.permission.POST_NOTIFICATIONS),
+                anyInt())).thenReturn(FLAG_PERMISSION_GRANTED_BY_DEFAULT);
+        PermissionHelper.PackagePermission pkgPerm = new PermissionHelper.PackagePermission(
+                "pkg", 10, true, false);
+
+        mPermissionHelper.setNotificationPermission(pkgPerm);
+        verify(mPermManager, never()).revokeRuntimePermission(
+                anyString(), anyString(), anyInt(), anyString());
+        verify(mPermManager, never()).updatePermissionFlags(
+                anyString(), anyString(), anyInt(), anyInt(), anyBoolean(), anyInt());
+    }
+
+    @Test
+    public void testSetNotificationPermission_pkgPerm_userSet_grantedByDefaultPermSet()
+            throws Exception {
+        when(mPermManager.getPermissionFlags(anyString(),
+                eq(Manifest.permission.POST_NOTIFICATIONS),
+                anyInt())).thenReturn(FLAG_PERMISSION_GRANTED_BY_DEFAULT);
+        PermissionHelper.PackagePermission pkgPerm = new PermissionHelper.PackagePermission(
+                "pkg", 10, true, true);
+
+        mPermissionHelper.setNotificationPermission(pkgPerm);
+        verify(mPermManager).grantRuntimePermission(
+                "pkg", Manifest.permission.POST_NOTIFICATIONS, 10);
+        verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
+                FLAG_PERMISSION_USER_SET | FLAG_PERMISSION_REVIEW_REQUIRED,
+                FLAG_PERMISSION_USER_SET, true, 10);
+    }
+
+    @Test
     public void testSetNotificationPermission_revokeUserSet() throws Exception {
         mPermissionHelper.setNotificationPermission("pkg", 10, false, true);
 
@@ -278,6 +312,32 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
         verify(mPermManager).revokeRuntimePermission(
                 eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS), eq(10), anyString());
+        verify(mPermManager, never()).updatePermissionFlags(
+                anyString(), anyString(), anyInt(), anyInt(), anyBoolean(), anyInt());
+    }
+
+    @Test
+    public void testSetNotificationPermission_SystemFixedPermNotSet() throws Exception {
+        when(mPermManager.getPermissionFlags(anyString(),
+                eq(Manifest.permission.POST_NOTIFICATIONS),
+                anyInt())).thenReturn(FLAG_PERMISSION_SYSTEM_FIXED);
+
+        mPermissionHelper.setNotificationPermission("pkg", 10, false, true);
+        verify(mPermManager, never()).revokeRuntimePermission(
+                anyString(), anyString(), anyInt(), anyString());
+        verify(mPermManager, never()).updatePermissionFlags(
+                anyString(), anyString(), anyInt(), anyInt(), anyBoolean(), anyInt());
+    }
+
+    @Test
+    public void testSetNotificationPermission_PolicyFixedPermNotSet() throws Exception {
+        when(mPermManager.getPermissionFlags(anyString(),
+                eq(Manifest.permission.POST_NOTIFICATIONS),
+                anyInt())).thenReturn(FLAG_PERMISSION_POLICY_FIXED);
+
+        mPermissionHelper.setNotificationPermission("pkg", 10, false, true);
+        verify(mPermManager, never()).revokeRuntimePermission(
+                anyString(), anyString(), anyInt(), anyString());
         verify(mPermManager, never()).updatePermissionFlags(
                 anyString(), anyString(), anyInt(), anyInt(), anyBoolean(), anyInt());
     }
