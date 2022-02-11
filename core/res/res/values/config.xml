@@ -1307,6 +1307,7 @@
     <!-- Control the behavior when the user double-taps the home button.
             0 - Nothing
             1 - Recent apps view in SystemUI
+            2 - Picture-in-picture menu
          This needs to match the constants in
          policy/src/com/android/internal/policy/impl/PhoneWindowManager.java
     -->

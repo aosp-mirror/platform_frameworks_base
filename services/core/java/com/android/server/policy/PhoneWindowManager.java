@@ -298,6 +298,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // must match: config_doubleTapOnHomeBehavior in config.xml
     static final int DOUBLE_TAP_HOME_NOTHING = 0;
     static final int DOUBLE_TAP_HOME_RECENT_SYSTEM_UI = 1;
+    static final int DOUBLE_TAP_HOME_PIP_MENU = 2;
 
     static final int SHORT_PRESS_WINDOW_NOTHING = 0;
     static final int SHORT_PRESS_WINDOW_PICTURE_IN_PICTURE = 1;
@@ -1743,11 +1744,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
                 // Delay handling home if a double-tap is possible.
                 if (mDoubleTapOnHomeBehavior != DOUBLE_TAP_HOME_NOTHING) {
-                    mHandler.removeCallbacks(mHomeDoubleTapTimeoutRunnable); // just in case
-                    mHomeDoubleTapPending = true;
-                    mHandler.postDelayed(mHomeDoubleTapTimeoutRunnable,
-                            ViewConfiguration.getDoubleTapTimeout());
-                    return -1;
+                    // For the picture-in-picture menu, only add the delay if a pip is there.
+                    if (mDoubleTapOnHomeBehavior != DOUBLE_TAP_HOME_PIP_MENU
+                            || mPictureInPictureVisible) {
+                        mHandler.removeCallbacks(mHomeDoubleTapTimeoutRunnable); // just in case
+                        mHomeDoubleTapPending = true;
+                        mHandler.postDelayed(mHomeDoubleTapTimeoutRunnable,
+                                ViewConfiguration.getDoubleTapTimeout());
+                        return -1;
+                    }
                 }
 
                 // Post to main thread to avoid blocking input pipeline.
@@ -1780,7 +1785,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if (mHomeDoubleTapPending) {
                     mHomeDoubleTapPending = false;
                     mHandler.removeCallbacks(mHomeDoubleTapTimeoutRunnable);
-                    handleDoubleTapOnHome();
+                    mHandler.post(this::handleDoubleTapOnHome);
                 // TODO(multi-display): Remove display id check once we support recents on
                 // multi-display
                 } else if (mDoubleTapOnHomeBehavior == DOUBLE_TAP_HOME_RECENT_SYSTEM_UI
@@ -1798,13 +1803,29 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         private void handleDoubleTapOnHome() {
-            if (mDoubleTapOnHomeBehavior == DOUBLE_TAP_HOME_RECENT_SYSTEM_UI) {
-                mHomeConsumed = true;
-                toggleRecentApps();
+            if (mHomeConsumed) {
+                return;
+            }
+            switch (mDoubleTapOnHomeBehavior) {
+                case DOUBLE_TAP_HOME_RECENT_SYSTEM_UI:
+                    mHomeConsumed = true;
+                    toggleRecentApps();
+                    break;
+                case DOUBLE_TAP_HOME_PIP_MENU:
+                    mHomeConsumed = true;
+                    showPictureInPictureMenuInternal();
+                    break;
+                default:
+                    Log.w(TAG, "No action or undefined behavior for double tap home: "
+                            + mDoubleTapOnHomeBehavior);
+                    break;
             }
         }
 
         private void handleLongPressOnHome(int deviceId, long eventTime) {
+            if (mHomeConsumed) {
+                return;
+            }
             if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_NOTHING) {
                 return;
             }
@@ -2362,8 +2383,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDoubleTapOnHomeBehavior = res.getInteger(
                 com.android.internal.R.integer.config_doubleTapOnHomeBehavior);
         if (mDoubleTapOnHomeBehavior < DOUBLE_TAP_HOME_NOTHING ||
-                mDoubleTapOnHomeBehavior > DOUBLE_TAP_HOME_RECENT_SYSTEM_UI) {
-            mDoubleTapOnHomeBehavior = LONG_PRESS_HOME_NOTHING;
+                mDoubleTapOnHomeBehavior > DOUBLE_TAP_HOME_PIP_MENU) {
+            mDoubleTapOnHomeBehavior = DOUBLE_TAP_HOME_NOTHING;
         }
 
         mShortPressOnWindowBehavior = SHORT_PRESS_WINDOW_NOTHING;
@@ -5741,6 +5762,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return "DOUBLE_TAP_HOME_NOTHING";
             case DOUBLE_TAP_HOME_RECENT_SYSTEM_UI:
                 return "DOUBLE_TAP_HOME_RECENT_SYSTEM_UI";
+            case DOUBLE_TAP_HOME_PIP_MENU:
+                return "DOUBLE_TAP_HOME_PIP_MENU";
             default:
                 return Integer.toString(behavior);
         }
