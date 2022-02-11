@@ -339,6 +339,16 @@ public class GlobalSettingsValidators {
         VALIDATORS.put(
                 Global.Wearable.WEAR_ACTIVITY_AUTO_RESUME_TIMEOUT_MAX_RESET_COUNT,
                 NON_NEGATIVE_INTEGER_VALIDATOR);
+        VALIDATORS.put(
+                Global.Wearable.EARLY_UPDATES_STATUS,
+                new DiscreteValueValidator(
+                        new String[] {
+                                String.valueOf(Global.Wearable.EARLY_UPDATES_STATUS_NOT_STARTED),
+                                String.valueOf(Global.Wearable.EARLY_UPDATES_STATUS_STARTED),
+                                String.valueOf(Global.Wearable.EARLY_UPDATES_STATUS_SUCCESS),
+                                String.valueOf(Global.Wearable.EARLY_UPDATES_STATUS_SKIPPED),
+                                String.valueOf(Global.Wearable.EARLY_UPDATES_STATUS_ABORTED),
+                          }));
     }
 }
 

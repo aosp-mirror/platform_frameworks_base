@@ -17755,6 +17755,37 @@ public final class Settings {
              * @hide
              */
             public static final String CHARGING_SOUNDS_ENABLED = "wear_charging_sounds_enabled";
+
+            /** The status of the early updates process.
+             * @hide
+             */
+            public static final String EARLY_UPDATES_STATUS = "early_updates_status";
+
+            /**
+             * Early updates not started
+             * @hide
+             */
+            public static final int EARLY_UPDATES_STATUS_NOT_STARTED = 0;
+            /**
+             * Early updates started and in progress
+             * @hide
+             */
+            public static final int EARLY_UPDATES_STATUS_STARTED = 1;
+            /**
+             * Early updates completed and was successful
+             * @hide
+             */
+            public static final int EARLY_UPDATES_STATUS_SUCCESS = 2;
+            /**
+             * Early updates skipped
+             * @hide
+             */
+            public static final int EARLY_UPDATES_STATUS_SKIPPED = 3;
+            /**
+             * Early updates aborted due to timeout
+             * @hide
+             */
+            public static final int EARLY_UPDATES_STATUS_ABORTED = 4;
         }
     }
 
