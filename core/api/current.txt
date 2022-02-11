@@ -39604,7 +39604,7 @@ package android.speech {
 
   public class SpeechRecognizer {
     method @MainThread public void cancel();
-    method public void checkRecognitionSupport(@NonNull android.content.Intent, @NonNull android.speech.RecognitionSupportCallback);
+    method public void checkRecognitionSupport(@NonNull android.content.Intent, @NonNull java.util.concurrent.Executor, @NonNull android.speech.RecognitionSupportCallback);
     method @MainThread @NonNull public static android.speech.SpeechRecognizer createOnDeviceSpeechRecognizer(@NonNull android.content.Context);
     method @MainThread public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context);
     method @MainThread public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context, android.content.ComponentName);
