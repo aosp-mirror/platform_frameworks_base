@@ -36,13 +36,16 @@ public final class RecognitionSupport implements Parcelable {
 
     /** Support for this request is ready for use on this device for the returned languages. */
     @NonNull
+    @DataClass.PluralOf("installedLanguage")
     private List<String> mInstalledLanguages = null;
 
     /** Support for this request is scheduled for download for the returned languages. */
+    @DataClass.PluralOf("pendingLanguage")
     @NonNull private List<String> mPendingLanguages = null;
 
     /** These languages are supported but need to be downloaded before use. */
     @NonNull
+    @DataClass.PluralOf("supportedLanguage")
     private List<String> mSupportedLanguages = null;
 
 
@@ -231,10 +234,7 @@ public final class RecognitionSupport implements Parcelable {
 
         /** @see #setInstalledLanguages */
         @DataClass.Generated.Member
-        public @NonNull Builder addInstalledLanguages(@NonNull String value) {
-            // You can refine this method's name by providing item's singular name, e.g.:
-            // @DataClass.PluralOf("item")) mItems = ...
-
+        public @NonNull Builder addInstalledLanguage(@NonNull String value) {
             if (mInstalledLanguages == null) setInstalledLanguages(new java.util.ArrayList<>());
             mInstalledLanguages.add(value);
             return this;
@@ -253,10 +253,7 @@ public final class RecognitionSupport implements Parcelable {
 
         /** @see #setPendingLanguages */
         @DataClass.Generated.Member
-        public @NonNull Builder addPendingLanguages(@NonNull String value) {
-            // You can refine this method's name by providing item's singular name, e.g.:
-            // @DataClass.PluralOf("item")) mItems = ...
-
+        public @NonNull Builder addPendingLanguage(@NonNull String value) {
             if (mPendingLanguages == null) setPendingLanguages(new java.util.ArrayList<>());
             mPendingLanguages.add(value);
             return this;
@@ -275,10 +272,7 @@ public final class RecognitionSupport implements Parcelable {
 
         /** @see #setSupportedLanguages */
         @DataClass.Generated.Member
-        public @NonNull Builder addSupportedLanguages(@NonNull String value) {
-            // You can refine this method's name by providing item's singular name, e.g.:
-            // @DataClass.PluralOf("item")) mItems = ...
-
+        public @NonNull Builder addSupportedLanguage(@NonNull String value) {
             if (mSupportedLanguages == null) setSupportedLanguages(new java.util.ArrayList<>());
             mSupportedLanguages.add(value);
             return this;
@@ -314,10 +308,10 @@ public final class RecognitionSupport implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1639158640137L,
+            time = 1644582623366L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/speech/RecognitionSupport.java",
-            inputSignatures = "private @android.annotation.NonNull java.util.List<java.lang.String> mInstalledLanguages\nprivate @android.annotation.NonNull java.util.List<java.lang.String> mPendingLanguages\nprivate @android.annotation.NonNull java.util.List<java.lang.String> mSupportedLanguages\nclass RecognitionSupport extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
+            inputSignatures = "private @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"installedLanguage\") java.util.List<java.lang.String> mInstalledLanguages\nprivate @com.android.internal.util.DataClass.PluralOf(\"pendingLanguage\") @android.annotation.NonNull java.util.List<java.lang.String> mPendingLanguages\nprivate @android.annotation.NonNull @com.android.internal.util.DataClass.PluralOf(\"supportedLanguage\") java.util.List<java.lang.String> mSupportedLanguages\nclass RecognitionSupport extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false, genBuilder=true, genEqualsHashCode=true, genHiddenConstDefs=true, genParcelable=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 
