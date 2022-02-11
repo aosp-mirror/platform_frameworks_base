@@ -82,7 +82,11 @@ static inline T MakeGlobalRefOrDie(JNIEnv* env, T in) {
 
 static inline int RegisterMethodsOrDie(JNIEnv* env, const char* className,
                                        const JNINativeMethod* gMethods, int numMethods) {
-    int res = jniRegisterNativeMethods(env, className, gMethods, numMethods);
+    std::string fullClassName = std::string(className);
+    std::string classNameString = fullClassName.substr(fullClassName.find_last_of("/"));
+    std::string roboNativeBindingClass =
+            "org/robolectric/nativeruntime" + classNameString + "Natives";
+    int res = jniRegisterNativeMethods(env, roboNativeBindingClass.c_str(), gMethods, numMethods);
     LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
     return res;
 }
