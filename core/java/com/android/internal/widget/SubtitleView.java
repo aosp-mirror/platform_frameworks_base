@@ -115,6 +115,7 @@ public class SubtitleView extends View {
                     break;
             }
         }
+        a.recycle();
 
         // Set up density-dependent properties.
         // TODO: Move these to a default style.
