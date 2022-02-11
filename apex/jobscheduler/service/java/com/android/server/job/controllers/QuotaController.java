@@ -1099,7 +1099,7 @@ public final class QuotaController extends StateController {
         final long maxExecutionTimeRemainingMs =
                 mMaxExecutionTimeMs - stats.executionTimeInMaxPeriodMs;
 
-        if (maxExecutionTimeRemainingMs <= 0) {
+        if (maxExecutionTimeRemainingMs < 0) {
             return 0;
         }
 
@@ -1110,7 +1110,7 @@ public final class QuotaController extends StateController {
                     sessions, startMaxElapsed, maxExecutionTimeRemainingMs);
         }
 
-        if (allowedTimeRemainingMs <= 0) {
+        if (allowedTimeRemainingMs < 0) {
             return 0;
         }
 
