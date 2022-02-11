@@ -104,7 +104,8 @@ class PreAuthInfo {
         final int requestedStrength = Utils.getPublicBiometricStrength(promptInfo);
         final boolean credentialRequested = Utils.isCredentialRequested(promptInfo);
 
-        final boolean credentialAvailable = trustManager.isDeviceSecure(userId);
+        final boolean credentialAvailable = trustManager.isDeviceSecure(userId,
+                context.getAssociatedDisplayId());
 
         // Assuming that biometric authenticators are listed in priority-order, the rest of this
         // function will attempt to find the first authenticator that's as strong or stronger than

@@ -348,6 +348,19 @@ public class VirtualDeviceManagerService extends SystemService {
             }
             return false;
         }
+
+        @Override
+        public boolean isDisplayOwnedByAnyVirtualDevice(int displayId) {
+            synchronized (mVirtualDeviceManagerLock) {
+                int size = mVirtualDevices.size();
+                for (int i = 0; i < size; i++) {
+                    if (mVirtualDevices.valueAt(i).isDisplayOwnedByVirtualDevice(displayId)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 
     private static final class PendingTrampolineMap {
