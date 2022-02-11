@@ -19,13 +19,12 @@ package com.android.systemui.statusbar;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.view.accessibility.AccessibilityEvent;
 
-import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
@@ -43,8 +42,9 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
     protected final ArrayMap<String, AlertEntry> mAlertEntries = new ArrayMap<>();
     protected final HeadsUpManagerLogger mLogger;
 
-    public AlertingNotificationManager(HeadsUpManagerLogger logger) {
+    public AlertingNotificationManager(HeadsUpManagerLogger logger, @Main Handler handler) {
         mLogger = logger;
+        mHandler = handler;
     }
 
     /**
@@ -57,8 +57,7 @@ public abstract class AlertingNotificationManager implements NotificationLifetim
     protected NotificationSafeToRemoveCallback mNotificationLifetimeFinishedCallback;
     protected int mMinimumDisplayTime;
     protected int mAutoDismissNotificationDecay;
-    @VisibleForTesting
-    public Handler mHandler = new Handler(Looper.getMainLooper());
+    private final Handler mHandler;
 
     /**
      * Called when posting a new notification that should alert the user and appear on screen.
