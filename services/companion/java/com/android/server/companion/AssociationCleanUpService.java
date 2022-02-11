@@ -16,7 +16,9 @@
 
 package com.android.server.companion;
 
-import static com.android.server.companion.CompanionDeviceManagerService.LOG_TAG;
+import static com.android.server.companion.CompanionDeviceManagerService.TAG;
+
+import static java.util.concurrent.TimeUnit.DAYS;
 
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
@@ -37,17 +39,16 @@ import com.android.server.LocalServices;
  */
 public class AssociationCleanUpService extends JobService {
     private static final int JOB_ID = AssociationCleanUpService.class.hashCode();
-    private static final long ONE_DAY_INTERVAL = 3 * 24 * 60 * 60 * 1000; // 1 Day
-    private CompanionDeviceManagerServiceInternal mCdmServiceInternal = LocalServices.getService(
-            CompanionDeviceManagerServiceInternal.class);
+    private static final long ONE_DAY_INTERVAL = DAYS.toMillis(1);
 
     @Override
     public boolean onStartJob(final JobParameters params) {
-        Slog.i(LOG_TAG, "Execute the Association CleanUp job");
+        Slog.i(TAG, "Execute the Association CleanUp job");
         // Special policy for APP_STREAMING role that need to revoke associations if the device
         // does not connect for 3 months.
         AsyncTask.execute(() -> {
-            mCdmServiceInternal.associationCleanUp(AssociationRequest.DEVICE_PROFILE_APP_STREAMING);
+            LocalServices.getService(CompanionDeviceManagerServiceInternal.class)
+                    .associationCleanUp(AssociationRequest.DEVICE_PROFILE_APP_STREAMING);
             jobFinished(params, false);
         });
         return true;
@@ -55,7 +56,7 @@ public class AssociationCleanUpService extends JobService {
 
     @Override
     public boolean onStopJob(final JobParameters params) {
-        Slog.i(LOG_TAG, "Association cleanup job stopped; id=" + params.getJobId()
+        Slog.i(TAG, "Association cleanup job stopped; id=" + params.getJobId()
                 + ", reason="
                 + JobParameters.getInternalReasonCodeDescription(
                 params.getInternalStopReasonCode()));
@@ -63,7 +64,7 @@ public class AssociationCleanUpService extends JobService {
     }
 
     static void schedule(Context context) {
-        Slog.i(LOG_TAG, "Scheduling the Association Cleanup job");
+        Slog.i(TAG, "Scheduling the Association Cleanup job");
         final JobScheduler jobScheduler = context.getSystemService(JobScheduler.class);
         final JobInfo job = new JobInfo.Builder(JOB_ID,
                 new ComponentName(context, AssociationCleanUpService.class))

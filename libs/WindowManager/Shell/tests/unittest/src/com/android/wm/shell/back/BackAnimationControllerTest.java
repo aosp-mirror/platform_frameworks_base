@@ -30,6 +30,7 @@ import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
+import android.window.BackEvent;
 import android.window.BackNavigationInfo;
 
 import androidx.test.filters.SmallTest;
@@ -94,7 +95,9 @@ public class BackAnimationControllerTest {
         SurfaceControl screenshotSurface = new SurfaceControl();
         HardwareBuffer hardwareBuffer = mock(HardwareBuffer.class);
         createNavigationInfo(topWindowLeash, screenshotSurface, hardwareBuffer);
-        mController.onMotionEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0));
+        mController.onMotionEvent(
+                MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0),
+                BackEvent.EDGE_LEFT);
         verify(mTransaction).setBuffer(screenshotSurface, hardwareBuffer);
         verify(mTransaction).setVisibility(screenshotSurface, true);
         verify(mTransaction).apply();
@@ -106,8 +109,12 @@ public class BackAnimationControllerTest {
         SurfaceControl screenshotSurface = new SurfaceControl();
         HardwareBuffer hardwareBuffer = mock(HardwareBuffer.class);
         createNavigationInfo(topWindowLeash, screenshotSurface, hardwareBuffer);
-        mController.onMotionEvent(MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0));
-        mController.onMotionEvent(MotionEvent.obtain(10, 0, MotionEvent.ACTION_MOVE, 100, 100, 0));
+        mController.onMotionEvent(
+                MotionEvent.obtain(0, 0, MotionEvent.ACTION_DOWN, 0, 0, 0),
+                BackEvent.EDGE_LEFT);
+        mController.onMotionEvent(
+                MotionEvent.obtain(10, 0, MotionEvent.ACTION_MOVE, 100, 100, 0),
+                BackEvent.EDGE_LEFT);
         verify(mTransaction).setPosition(topWindowLeash, 100, 100);
         verify(mTransaction, atLeastOnce()).apply();
     }

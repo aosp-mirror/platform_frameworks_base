@@ -233,8 +233,8 @@ public class PermissionHelperTest extends UiServiceTestCase {
     public void testSetNotificationPermission_grantReviewRequired() throws Exception {
         mPermissionHelper.setNotificationPermission("pkg", 10, true, false, true);
 
-        verify(mPermManager).grantRuntimePermission(
-                "pkg", Manifest.permission.POST_NOTIFICATIONS, 10);
+        verify(mPermManager).revokeRuntimePermission(
+                "pkg", Manifest.permission.POST_NOTIFICATIONS, 10, "PermissionHelper");
         verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
                 FLAG_PERMISSION_REVIEW_REQUIRED, FLAG_PERMISSION_REVIEW_REQUIRED, true, 10);
     }
@@ -245,8 +245,8 @@ public class PermissionHelperTest extends UiServiceTestCase {
                 "pkg", 10, true, false);
         mPermissionHelper.setNotificationPermission(pkgPerm);
 
-        verify(mPermManager).grantRuntimePermission(
-                "pkg", Manifest.permission.POST_NOTIFICATIONS, 10);
+        verify(mPermManager).revokeRuntimePermission(
+                "pkg", Manifest.permission.POST_NOTIFICATIONS, 10, "PermissionHelper");
         verify(mPermManager).updatePermissionFlags("pkg", Manifest.permission.POST_NOTIFICATIONS,
                 FLAG_PERMISSION_REVIEW_REQUIRED, FLAG_PERMISSION_REVIEW_REQUIRED, true, 10);
     }

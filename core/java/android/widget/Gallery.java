@@ -57,7 +57,7 @@ import com.android.internal.R;
  * @attr ref android.R.styleable#Gallery_gravity
  * 
  * @deprecated This widget is no longer supported. Other horizontally scrolling
- * widgets include {@link HorizontalScrollView} and {@link android.support.v4.view.ViewPager}
+ * widgets include {@link HorizontalScrollView} and {@link androidx.viewpager.widget.ViewPager}
  * from the support library.
  */
 @Deprecated

@@ -17,6 +17,7 @@
 package com.android.server.companion;
 
 import static android.content.Context.BIND_IMPORTANT;
+import static android.os.Process.THREAD_PRIORITY_DEFAULT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -28,10 +29,12 @@ import android.companion.ICompanionDeviceService;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
 import com.android.internal.infra.ServiceConnector;
+import com.android.server.ServiceThread;
 
 /**
  * Manages a connection (binding) to an instance of {@link CompanionDeviceService} running in the
@@ -106,6 +109,19 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
         return ICompanionDeviceService.Stub.asInterface(service);
     }
 
+    /**
+     * Overrides {@link ServiceConnector.Impl#getJobHandler()} to provide an alternative Thread
+     * ("in form of" a {@link Handler}) to process jobs on.
+     * <p>
+     * (By default, {@link ServiceConnector.Impl} process jobs on the
+     * {@link android.os.Looper#getMainLooper() MainThread} which is a shared singleton thread
+     * within system_server and thus tends to get heavily congested)
+     */
+    @Override
+    protected @NonNull Handler getJobHandler() {
+        return getServiceThread().getThreadHandler();
+    }
+
     @Override
     protected long getAutoDisconnectTimeoutMs() {
         // Do NOT auto-disconnect.
@@ -116,4 +132,25 @@ class CompanionDeviceServiceConnector extends ServiceConnector.Impl<ICompanionDe
         return new Intent(CompanionDeviceService.SERVICE_INTERFACE)
                 .setComponent(componentName);
     }
+
+    private static @NonNull ServiceThread getServiceThread() {
+        if (sServiceThread == null) {
+            synchronized (CompanionDeviceManagerService.class) {
+                if (sServiceThread == null) {
+                    sServiceThread = new ServiceThread("companion-device-service-connector",
+                            THREAD_PRIORITY_DEFAULT, /* allowIo */ false);
+                    sServiceThread.start();
+                }
+            }
+        }
+        return sServiceThread;
+    }
+
+    /**
+     * A worker thread for the {@link ServiceConnector} to process jobs on.
+     *
+     * <p>
+     *  Do NOT reference directly, use {@link #getServiceThread()} method instead.
+     */
+    private static volatile @Nullable ServiceThread sServiceThread;
 }

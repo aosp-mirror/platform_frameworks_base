@@ -920,7 +920,7 @@ public class StatusBarManager {
     public void setNavBarModeOverride(@NavBarModeOverride int navBarModeOverride) {
         if (navBarModeOverride != NAV_BAR_MODE_OVERRIDE_NONE
                 && navBarModeOverride != NAV_BAR_MODE_OVERRIDE_KIDS) {
-            throw new UnsupportedOperationException(
+            throw new IllegalArgumentException(
                     "Supplied navBarModeOverride not supported: " + navBarModeOverride);
         }
 
@@ -1012,6 +1012,8 @@ public class StatusBarManager {
      *
      * @param displayState the new state for media tap-to-transfer.
      * @param routeInfo the media route information for the media being transferred.
+     * @param appIcon the icon of the app playing the media.
+     * @param appName the name of the app playing the media.
      *
      * @hide
      */
@@ -1019,11 +1021,13 @@ public class StatusBarManager {
     @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
     public void updateMediaTapToTransferReceiverDisplay(
             @MediaTransferReceiverState int displayState,
-            @NonNull MediaRoute2Info routeInfo) {
+            @NonNull MediaRoute2Info routeInfo,
+            @Nullable Icon appIcon,
+            @Nullable CharSequence appName) {
         Objects.requireNonNull(routeInfo);
         IStatusBarService svc = getService();
         try {
-            svc.updateMediaTapToTransferReceiverDisplay(displayState, routeInfo);
+            svc.updateMediaTapToTransferReceiverDisplay(displayState, routeInfo, appIcon, appName);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

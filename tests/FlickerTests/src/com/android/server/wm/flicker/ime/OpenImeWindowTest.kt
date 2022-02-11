@@ -152,7 +152,7 @@ class OpenImeWindowTest(private val testSpec: FlickerTestParameter) {
         fun getParams(): Collection<FlickerTestParameter> {
             return FlickerTestParameterFactory.getInstance()
                 .getConfigNonRotationTests(
-                    repetitions = 5,
+                    repetitions = 3,
                     supportedRotations = listOf(Surface.ROTATION_0),
                     supportedNavigationModes = listOf(
                         WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY,

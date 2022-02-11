@@ -194,6 +194,7 @@ package android {
     field public static final String UPDATE_DEVICE_STATS = "android.permission.UPDATE_DEVICE_STATS";
     field public static final String UPDATE_PACKAGES_WITHOUT_USER_ACTION = "android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION";
     field public static final String USE_BIOMETRIC = "android.permission.USE_BIOMETRIC";
+    field public static final String USE_EXACT_ALARM = "android.permission.USE_EXACT_ALARM";
     field @Deprecated public static final String USE_FINGERPRINT = "android.permission.USE_FINGERPRINT";
     field public static final String USE_FULL_SCREEN_INTENT = "android.permission.USE_FULL_SCREEN_INTENT";
     field public static final String USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER = "android.permission.USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER";
@@ -1747,6 +1748,7 @@ package android {
     field public static final int windowSplashScreenAnimatedIcon = 16844333; // 0x101062d
     field public static final int windowSplashScreenAnimationDuration = 16844334; // 0x101062e
     field public static final int windowSplashScreenBackground = 16844332; // 0x101062c
+    field public static final int windowSplashScreenBehavior;
     field public static final int windowSplashScreenBrandingImage = 16844335; // 0x101062f
     field public static final int windowSplashScreenIconBackgroundColor = 16844336; // 0x1010630
     field @Deprecated public static final int windowSplashscreenContent = 16844132; // 0x1010564
@@ -3066,6 +3068,7 @@ package android.accessibilityservice {
     method @Nullable public final android.accessibilityservice.InputMethod getInputMethod();
     method @NonNull public final android.accessibilityservice.AccessibilityService.MagnificationController getMagnificationController();
     method public android.view.accessibility.AccessibilityNodeInfo getRootInActiveWindow();
+    method @Nullable public android.view.accessibility.AccessibilityNodeInfo getRootInActiveWindow(int);
     method public final android.accessibilityservice.AccessibilityServiceInfo getServiceInfo();
     method @NonNull public final android.accessibilityservice.AccessibilityService.SoftKeyboardController getSoftKeyboardController();
     method @NonNull public final java.util.List<android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction> getSystemActions();
@@ -4533,6 +4536,7 @@ package android.app {
     method @Nullable public android.graphics.Rect getLaunchBounds();
     method public int getLaunchDisplayId();
     method public boolean getLockTaskMode();
+    method public int getSplashScreenStyle();
     method public boolean isPendingIntentBackgroundActivityLaunchAllowed();
     method public static android.app.ActivityOptions makeBasic();
     method public static android.app.ActivityOptions makeClipRevealAnimation(android.view.View, int, int, int, int);
@@ -18195,6 +18199,7 @@ package android.hardware.camera2.params {
     method public void enableSurfaceSharing();
     method public int getDynamicRangeProfile();
     method public int getMaxSharedSurfaceCount();
+    method public int getMirrorMode();
     method public int getStreamUseCase();
     method @Nullable public android.view.Surface getSurface();
     method public int getSurfaceGroupId();
@@ -18203,11 +18208,16 @@ package android.hardware.camera2.params {
     method public void removeSensorPixelModeUsed(int);
     method public void removeSurface(@NonNull android.view.Surface);
     method public void setDynamicRangeProfile(int);
+    method public void setMirrorMode(int);
     method public void setPhysicalCameraId(@Nullable String);
     method public void setStreamUseCase(int);
     method public void setTimestampBase(int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.camera2.params.OutputConfiguration> CREATOR;
+    field public static final int MIRROR_MODE_AUTO = 0; // 0x0
+    field public static final int MIRROR_MODE_H = 2; // 0x2
+    field public static final int MIRROR_MODE_NONE = 1; // 0x1
+    field public static final int MIRROR_MODE_V = 3; // 0x3
     field public static final int SURFACE_GROUP_ID_NONE = -1; // 0xffffffff
     field public static final int TIMESTAMP_BASE_CHOREOGRAPHER_SYNCED = 4; // 0x4
     field public static final int TIMESTAMP_BASE_DEFAULT = 0; // 0x0
@@ -26469,7 +26479,7 @@ package android.net {
     method @NonNull public android.net.Ikev2VpnProfile.Builder setAuthPsk(@NonNull byte[]);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setAuthUsernamePassword(@NonNull String, @NonNull String, @Nullable java.security.cert.X509Certificate);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setBypassable(boolean);
-    method @NonNull public android.net.Ikev2VpnProfile.Builder setExcludeLocalRoutes(boolean);
+    method @NonNull public android.net.Ikev2VpnProfile.Builder setLocalRoutesExcluded(boolean);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setMaxMtu(int);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setMetered(boolean);
     method @NonNull public android.net.Ikev2VpnProfile.Builder setProxy(@Nullable android.net.ProxyInfo);
@@ -26547,7 +26557,7 @@ package android.net {
   }
 
   public abstract class PlatformVpnProfile {
-    method public final boolean getExcludeLocalRoutes();
+    method public final boolean areLocalRoutesExcluded();
     method public final boolean getRequiresInternetValidation();
     method public final int getType();
     method @NonNull public final String getTypeString();
@@ -26744,6 +26754,23 @@ package android.net {
     method @Deprecated public void startProvisionedVpnProfile();
     method @NonNull public String startProvisionedVpnProfileSession();
     method public void stopProvisionedVpnProfile();
+    field public static final String ACTION_VPN_MANAGER_EVENT = "android.net.action.VPN_MANAGER_EVENT";
+    field public static final String CATEGORY_EVENT_DEACTIVATED_BY_USER = "android.net.category.EVENT_DEACTIVATED_BY_USER";
+    field public static final String CATEGORY_EVENT_IKE_ERROR = "android.net.category.EVENT_IKE_ERROR";
+    field public static final String CATEGORY_EVENT_NETWORK_ERROR = "android.net.category.EVENT_NETWORK_ERROR";
+    field public static final int ERROR_CLASS_NOT_RECOVERABLE = 1; // 0x1
+    field public static final int ERROR_CLASS_RECOVERABLE = 2; // 0x2
+    field public static final int ERROR_CODE_NETWORK_IO = 3; // 0x3
+    field public static final int ERROR_CODE_NETWORK_LOST = 2; // 0x2
+    field public static final int ERROR_CODE_NETWORK_PROTOCOL_TIMEOUT = 1; // 0x1
+    field public static final int ERROR_CODE_NETWORK_UNKNOWN_HOST = 0; // 0x0
+    field public static final String EXTRA_ERROR_CLASS = "android.net.extra.ERROR_CLASS";
+    field public static final String EXTRA_ERROR_CODE = "android.net.extra.ERROR_CODE";
+    field public static final String EXTRA_SESSION_KEY = "android.net.extra.SESSION_KEY";
+    field public static final String EXTRA_TIMESTAMP = "android.net.extra.TIMESTAMP";
+    field public static final String EXTRA_UNDERLYING_LINK_PROPERTIES = "android.net.extra.UNDERLYING_LINK_PROPERTIES";
+    field public static final String EXTRA_UNDERLYING_NETWORK = "android.net.extra.UNDERLYING_NETWORK";
+    field public static final String EXTRA_UNDERLYING_NETWORK_CAPABILITIES = "android.net.extra.UNDERLYING_NETWORK_CAPABILITIES";
   }
 
   public class VpnService extends android.app.Service {
@@ -41338,13 +41365,13 @@ package android.telephony {
     field public static final int IPSEC_ENCRYPTION_ALGORITHM_AES_CBC = 2; // 0x2
     field public static final int IPSEC_ENCRYPTION_ALGORITHM_DES_EDE3_CBC = 1; // 0x1
     field public static final int IPSEC_ENCRYPTION_ALGORITHM_NULL = 0; // 0x0
-    field public static final String KEY_CAPABILITY_CALL_COMPOSER_INT_ARRAY = "ims.key_capability_type_call_composer_int_array";
-    field public static final String KEY_CAPABILITY_TYPE_OPTIONS_UCE_INT_ARRAY = "ims.key_capability_type_options_uce_int_array";
-    field public static final String KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY = "ims.key_capability_type_presence_uce_int_array";
-    field public static final String KEY_CAPABILITY_TYPE_SMS_INT_ARRAY = "ims.key_capability_type_sms_int_array";
-    field public static final String KEY_CAPABILITY_TYPE_UT_INT_ARRAY = "ims.key_capability_type_ut_int_array";
-    field public static final String KEY_CAPABILITY_TYPE_VIDEO_INT_ARRAY = "ims.key_capability_type_video_int_array";
-    field public static final String KEY_CAPABILITY_TYPE_VOICE_INT_ARRAY = "ims.key_capability_type_voice_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_CALL_COMPOSER_INT_ARRAY = "ims.capability_type_call_composer_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_OPTIONS_UCE_INT_ARRAY = "ims.capability_type_options_uce_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY = "ims.capability_type_presence_uce_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_SMS_INT_ARRAY = "ims.capability_type_sms_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_UT_INT_ARRAY = "ims.capability_type_ut_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_VIDEO_INT_ARRAY = "ims.capability_type_video_int_array";
+    field public static final String KEY_CAPABILITY_TYPE_VOICE_INT_ARRAY = "ims.capability_type_voice_int_array";
     field public static final String KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL = "ims.enable_presence_capability_exchange_bool";
     field public static final String KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL = "ims.enable_presence_group_subscribe_bool";
     field public static final String KEY_ENABLE_PRESENCE_PUBLISH_BOOL = "ims.enable_presence_publish_bool";
@@ -51600,6 +51627,7 @@ package android.view.accessibility {
     method @Deprecated public void getBoundsInParent(android.graphics.Rect);
     method public void getBoundsInScreen(android.graphics.Rect);
     method public android.view.accessibility.AccessibilityNodeInfo getChild(int);
+    method @Nullable public android.view.accessibility.AccessibilityNodeInfo getChild(int, int);
     method public int getChildCount();
     method public CharSequence getClassName();
     method public android.view.accessibility.AccessibilityNodeInfo.CollectionInfo getCollectionInfo();
@@ -51619,6 +51647,7 @@ package android.view.accessibility {
     method public CharSequence getPackageName();
     method @Nullable public CharSequence getPaneTitle();
     method public android.view.accessibility.AccessibilityNodeInfo getParent();
+    method @Nullable public android.view.accessibility.AccessibilityNodeInfo getParent(int);
     method public android.view.accessibility.AccessibilityNodeInfo.RangeInfo getRangeInfo();
     method @Nullable public CharSequence getStateDescription();
     method public CharSequence getText();
@@ -51769,8 +51798,15 @@ package android.view.accessibility {
     field public static final int EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_MAX_LENGTH = 20000; // 0x4e20
     field public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX = "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX";
     field public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY = "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_KEY";
+    field public static final int FLAG_PREFETCH_ANCESTORS = 1; // 0x1
+    field public static final int FLAG_PREFETCH_DESCENDANTS_BREADTH_FIRST = 16; // 0x10
+    field public static final int FLAG_PREFETCH_DESCENDANTS_DEPTH_FIRST = 8; // 0x8
+    field public static final int FLAG_PREFETCH_DESCENDANTS_HYBRID = 4; // 0x4
+    field public static final int FLAG_PREFETCH_SIBLINGS = 2; // 0x2
+    field public static final int FLAG_PREFETCH_UNINTERRUPTIBLE = 32; // 0x20
     field public static final int FOCUS_ACCESSIBILITY = 2; // 0x2
     field public static final int FOCUS_INPUT = 1; // 0x1
+    field public static final int MAX_NUMBER_OF_PREFETCHED_NODES = 50; // 0x32
     field public static final int MOVEMENT_GRANULARITY_CHARACTER = 1; // 0x1
     field public static final int MOVEMENT_GRANULARITY_LINE = 4; // 0x4
     field public static final int MOVEMENT_GRANULARITY_PAGE = 16; // 0x10
@@ -51935,6 +51971,7 @@ package android.view.accessibility {
     method public int getScrollX();
     method public int getScrollY();
     method @Nullable public android.view.accessibility.AccessibilityNodeInfo getSource();
+    method @Nullable public android.view.accessibility.AccessibilityNodeInfo getSource(int);
     method @NonNull public java.util.List<java.lang.CharSequence> getText();
     method public int getToIndex();
     method public int getWindowId();
@@ -51992,6 +52029,7 @@ package android.view.accessibility {
     method public android.view.accessibility.AccessibilityWindowInfo getParent();
     method public void getRegionInScreen(@NonNull android.graphics.Region);
     method public android.view.accessibility.AccessibilityNodeInfo getRoot();
+    method @Nullable public android.view.accessibility.AccessibilityNodeInfo getRoot(int);
     method @Nullable public CharSequence getTitle();
     method public int getType();
     method public boolean isAccessibilityFocused();

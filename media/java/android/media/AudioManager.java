@@ -91,6 +91,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * AudioManager provides access to volume and ringer mode control.
@@ -8339,6 +8340,106 @@ public class AudioManager {
                             stub -> stub.register(false));
             mMuteAwaitConnectionListeners = res.first;
             mMuteAwaitConnDispatcherStub = res.second;
+        }
+    }
+
+    /**
+     * Add UID's that can be considered as assistant.
+     *
+     * @param assistantUids UID's of the services that can be considered as assistant.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void addAssistantServicesUids(@NonNull List<Integer> assistantUids) {
+        try {
+            getService().addAssistantServicesUids(assistantUids.stream()
+                    .mapToInt(Integer::intValue).toArray());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Remove UID's that can be considered as assistant.
+     *
+     * @param assistantUids UID'S of the services that should be remove.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void removeAssistantServicesUids(@NonNull List<Integer> assistantUids) {
+        try {
+            getService().removeAssistantServicesUids(assistantUids.stream()
+                    .mapToInt(Integer::intValue).toArray());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the list of assistants UIDs that been added with the
+     * {@link #addAssistantServicesUids(List)} (List)} and not yet removed with
+     * {@link #removeAssistantServicesUids(List)}
+     *
+     * @return list of assistants UID's
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public @NonNull List<Integer> getAssistantServicesUids() {
+        try {
+            int[] uids = getService().getAssistantServicesUids();
+            return Arrays.stream(uids).boxed().collect(Collectors.toList());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets UID's that can be considered as active assistant. Calling the API with a new list will
+     * overwrite previous list. If the list of UIDs is empty then no UID will be considered active.
+     * In this manner calling the API with an empty list will remove all UID's previously set.
+     *
+     * @param assistantUids UID'S of the services that can be considered active assistant. Can be
+     * an empty list, for this no UID will be considered active.
+     *
+     * <p> Note that during audio service crash reset and after boot up the list of active assistant
+     * UID's will be reset to an empty list (i.e. no UID will be considered as an active assistant).
+     * Just after user switch the list of active assistant will also reset to empty.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public void setActiveAssistantServiceUids(@NonNull List<Integer>  assistantUids) {
+        try {
+            getService().setActiveAssistantServiceUids(assistantUids.stream()
+                    .mapToInt(Integer::intValue).toArray());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the list of active assistant UIDs last set with the
+     * {@link #setActiveAssistantServiceUids(List)}
+     *
+     * @return list of active assistants UID's
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+    public @NonNull List<Integer> getActiveAssistantServicesUids() {
+        try {
+            int[] uids = getService().getActiveAssistantServiceUids();
+            return Arrays.stream(uids).boxed().collect(Collectors.toList());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

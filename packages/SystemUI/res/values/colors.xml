@@ -88,6 +88,7 @@
 
     <color name="keyguard_user_switcher_background_gradient_color">#77000000</color>
     <color name="user_switcher_fullscreen_bg">@android:color/system_neutral1_900</color>
+    <color name="user_switcher_fullscreen_popup_item_tint">@*android:color/text_color_primary_device_default_dark</color>
 
     <!-- The color of the navigation bar icons. Need to be in sync with ic_sysbar_* -->
     <color name="navigation_bar_icon_color">#E5FFFFFF</color>

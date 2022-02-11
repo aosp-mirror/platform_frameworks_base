@@ -78,6 +78,7 @@ class MediaTttCommandLineHelper @Inject constructor(
         override fun execute(pw: PrintWriter, args: List<String>) {
             val routeInfo = MediaRoute2Info.Builder("id", args[0])
                     .addFeature("feature")
+                    .setPackageName(TEST_PACKAGE_NAME)
                     .build()
 
             val commandName = args[1]
@@ -137,16 +138,25 @@ class MediaTttCommandLineHelper @Inject constructor(
         override fun execute(pw: PrintWriter, args: List<String>) {
             val statusBarManager = context.getSystemService(Context.STATUS_BAR_SERVICE)
                     as StatusBarManager
+            val routeInfo = MediaRoute2Info.Builder("id", "Test Name")
+                .addFeature("feature")
+                .setPackageName(TEST_PACKAGE_NAME)
+                .build()
+
             when(val commandName = args[0]) {
                 CLOSE_TO_SENDER_STATE ->
                     statusBarManager.updateMediaTapToTransferReceiverDisplay(
                         StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_CLOSE_TO_SENDER,
-                        routeInfo
+                        routeInfo,
+                        null,
+                        null
                     )
                 FAR_FROM_SENDER_STATE ->
                     statusBarManager.updateMediaTapToTransferReceiverDisplay(
                         StatusBarManager.MEDIA_TRANSFER_RECEIVER_STATE_FAR_FROM_SENDER,
-                        routeInfo
+                        routeInfo,
+                        null,
+                        null
                     )
                 else ->
                     pw.println("Invalid command name $commandName")
@@ -170,7 +180,4 @@ const val CLOSE_TO_SENDER_STATE = "CloseToSender"
 @VisibleForTesting
 const val FAR_FROM_SENDER_STATE = "FarFromSender"
 private const val CLI_TAG = "MediaTransferCli"
-
-private val routeInfo = MediaRoute2Info.Builder("id", "Test Name")
-    .addFeature("feature")
-    .build()
+private const val TEST_PACKAGE_NAME = "com.android.systemui"

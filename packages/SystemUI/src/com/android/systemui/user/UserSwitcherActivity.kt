@@ -27,11 +27,10 @@ import android.graphics.drawable.InsetDrawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.os.UserManager
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsets
-import android.view.WindowInsets.Type
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
@@ -71,8 +70,18 @@ class UserSwitcherActivity @Inject constructor(
     private lateinit var broadcastReceiver: BroadcastReceiver
     private var popupMenu: UserSwitcherPopupMenu? = null
     private lateinit var addButton: View
-    private var addUserItem: UserRecord? = null
-    private var addGuestItem: UserRecord? = null
+    private var addUserRecords = mutableListOf<UserRecord>()
+    // When the add users options become available, insert another option to manage users
+    private val manageUserRecord = UserRecord(
+        null /* info */,
+        null /* picture */,
+        false /* isGuest */,
+        false /* isCurrent */,
+        false /* isAddUser */,
+        false /* isRestricted */,
+        false /* isSwitchToEnabled */,
+        false /* isAddSupervisedUser */
+    )
 
     private val adapter = object : BaseUserAdapter(userSwitcherController) {
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -104,7 +113,18 @@ class UserSwitcherActivity @Inject constructor(
             return view
         }
 
+        override fun getName(context: Context, item: UserRecord): String {
+            return if (item == manageUserRecord) {
+                getString(R.string.manage_users)
+            } else {
+                super.getName(context, item)
+            }
+        }
+
         fun findUserIcon(item: UserRecord): Drawable {
+            if (item == manageUserRecord) {
+                return getDrawable(R.drawable.ic_manage_users)
+            }
             if (item.info == null) {
                 return getIconDrawable(this@UserSwitcherActivity, item)
             }
@@ -169,20 +189,11 @@ class UserSwitcherActivity @Inject constructor(
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.user_switcher_fullscreen)
+        window.decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
 
-        parent = requireViewById<ViewGroup>(R.id.user_switcher_root).apply {
-            setOnApplyWindowInsetsListener {
-                v: View, insets: WindowInsets ->
-                    v.apply {
-                        val l = getPaddingLeft()
-                        val t = getPaddingTop()
-                        val r = getPaddingRight()
-                        setPadding(l, t, r, insets.getInsets(Type.systemBars()).bottom)
-                    }
-
-                WindowInsets.CONSUMED
-            }
-        }
+        parent = requireViewById<ViewGroup>(R.id.user_switcher_root)
 
         requireViewById<View>(R.id.cancel).apply {
             setOnClickListener {
@@ -203,15 +214,19 @@ class UserSwitcherActivity @Inject constructor(
 
     private fun showPopupMenu() {
         val items = mutableListOf<UserRecord>()
-        addUserItem?.let { items.add(it) }
-        addGuestItem?.let { items.add(it) }
+        addUserRecords.forEach { items.add(it) }
 
         var popupMenuAdapter = ItemAdapter(
             this,
             R.layout.user_switcher_fullscreen_popup_item,
             layoutInflater,
             { item: UserRecord -> adapter.getName(this@UserSwitcherActivity, item) },
-            { item: UserRecord -> adapter.findUserIcon(item) }
+            { item: UserRecord -> adapter.findUserIcon(item).mutate().apply {
+                setTint(resources.getColor(
+                    R.color.user_switcher_fullscreen_popup_item_tint,
+                    getTheme()
+                ))
+            } }
         )
         popupMenuAdapter.addAll(items)
 
@@ -225,10 +240,17 @@ class UserSwitcherActivity @Inject constructor(
                     }
                     // -1 for the header
                     val item = popupMenuAdapter.getItem(pos - 1)
-                    adapter.onUserListItemClicked(item)
+                    if (item == manageUserRecord) {
+                        val i = Intent().setAction(Settings.ACTION_USER_SETTINGS)
+                        this@UserSwitcherActivity.startActivity(i)
+                    } else {
+                        adapter.onUserListItemClicked(item)
+                    }
 
                     dismiss()
                     popupMenu = null
+
+                    this@UserSwitcherActivity.finish()
             }
 
             show()
@@ -245,14 +267,15 @@ class UserSwitcherActivity @Inject constructor(
             }
         }
         parent.removeViews(start, count)
+        addUserRecords.clear()
 
         val flow = requireViewById<Flow>(R.id.flow)
         for (i in 0 until adapter.getCount()) {
             val item = adapter.getItem(i)
-            if (item.isAddUser) {
-                addUserItem = item
-            } else if (item.isGuest && item.info == null) {
-                addGuestItem = item
+            if (item.isAddUser ||
+                item.isAddSupervisedUser ||
+                item.isGuest && item.info == null) {
+                addUserRecords.add(item)
             } else {
                 val userView = adapter.getView(i, null, parent)
                 userView.setId(View.generateViewId())
@@ -273,7 +296,8 @@ class UserSwitcherActivity @Inject constructor(
             }
         }
 
-        if (addUserItem != null || addGuestItem != null) {
+        if (!addUserRecords.isEmpty()) {
+            addUserRecords.add(manageUserRecord)
             addButton.visibility = View.VISIBLE
         } else {
             addButton.visibility = View.GONE

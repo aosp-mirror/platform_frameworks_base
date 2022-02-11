@@ -4674,7 +4674,7 @@ class StorageManagerService extends IStorageManager.Stub
     private int getMountModeInternal(int uid, String packageName) {
         try {
             // Get some easy cases out of the way first
-            if (Process.isIsolated(uid)) {
+            if (Process.isIsolated(uid) || Process.isSupplemental(uid)) {
                 return StorageManager.MOUNT_MODE_EXTERNAL_NONE;
             }
 

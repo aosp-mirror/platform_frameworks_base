@@ -41,6 +41,7 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.keyguard.dagger.KeyguardBouncerComponent;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -115,7 +116,7 @@ public class KeyguardBouncer {
             BouncerExpansionCallback expansionCallback,
             KeyguardStateController keyguardStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            KeyguardBypassController keyguardBypassController, Handler handler,
+            KeyguardBypassController keyguardBypassController, @Main Handler handler,
             KeyguardSecurityModel keyguardSecurityModel,
             KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory) {
         mContext = context;
@@ -647,7 +648,7 @@ public class KeyguardBouncer {
                 DismissCallbackRegistry dismissCallbackRegistry, FalsingCollector falsingCollector,
                 KeyguardStateController keyguardStateController,
                 KeyguardUpdateMonitor keyguardUpdateMonitor,
-                KeyguardBypassController keyguardBypassController, Handler handler,
+                KeyguardBypassController keyguardBypassController, @Main Handler handler,
                 KeyguardSecurityModel keyguardSecurityModel,
                 KeyguardBouncerComponent.Factory keyguardBouncerComponentFactory) {
             mContext = context;

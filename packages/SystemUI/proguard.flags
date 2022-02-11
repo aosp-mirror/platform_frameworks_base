@@ -1,3 +1,6 @@
+# Preserve line number information for debugging stack traces.
+-keepattributes SourceFile,LineNumberTable
+
 -keep class com.android.systemui.recents.OverviewProxyRecentsImpl
 -keep class com.android.systemui.statusbar.car.CarStatusBar
 -keep class com.android.systemui.statusbar.phone.StatusBar

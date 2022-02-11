@@ -929,6 +929,7 @@ public class Process {
      * @hide
      */
     @SystemApi(client = MODULE_LIBRARIES)
+    @TestApi
     public static final int toSupplementalUid(int uid) {
         return uid + (FIRST_SUPPLEMENTAL_UID - FIRST_APPLICATION_UID);
     }

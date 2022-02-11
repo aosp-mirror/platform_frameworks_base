@@ -26,7 +26,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
-import android.app.ActivityTaskManager;
 import android.app.StatusBarManager;
 import android.content.ClipData;
 import android.content.Context;
@@ -35,7 +34,6 @@ import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.RemoteException;
 import android.view.DragEvent;
 import android.view.SurfaceControl;
 import android.view.WindowInsets;
@@ -51,7 +49,6 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Coordinates the visible drop targets for the current drag.
@@ -166,17 +163,8 @@ public class DragLayout extends LinearLayout {
         boolean alreadyInSplit = mSplitScreenController != null
                 && mSplitScreenController.isSplitScreenVisible();
         if (!alreadyInSplit) {
-            List<ActivityManager.RunningTaskInfo> tasks = null;
-            // Figure out the splashscreen info for the existing task.
-            try {
-                tasks = ActivityTaskManager.getService().getTasks(1,
-                        false /* filterOnlyVisibleRecents */,
-                        false /* keepIntentExtra */);
-            } catch (RemoteException e) {
-                // don't show an icon / will just use the defaults
-            }
-            if (tasks != null && !tasks.isEmpty()) {
-                ActivityManager.RunningTaskInfo taskInfo1 = tasks.get(0);
+            ActivityManager.RunningTaskInfo taskInfo1 = mPolicy.getLatestRunningTask();
+            if (taskInfo1 != null) {
                 Drawable icon1 = mIconProvider.getIcon(taskInfo1.topActivityInfo);
                 int bgColor1 = getResizingBackgroundColor(taskInfo1);
                 mDropZoneView1.setAppInfo(bgColor1, icon1);

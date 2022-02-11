@@ -142,6 +142,7 @@ import com.android.internal.util.function.TriConsumer;
 import com.android.server.AppStateTracker;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
+import com.android.server.am.AppBatteryTracker.ImmutableBatteryUsage;
 import com.android.server.apphibernation.AppHibernationManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.usage.AppStandbyInternal;
@@ -1076,7 +1077,7 @@ public final class AppRestrictionController {
      * @return The to-be-exempted battery usage of the given UID in the given duration; it could
      *         be considered as "exempted" due to various use cases, i.e. media playback.
      */
-    double getUidBatteryExemptedUsageSince(int uid, long since, long now) {
+    ImmutableBatteryUsage getUidBatteryExemptedUsageSince(int uid, long since, long now) {
         return mInjector.getAppBatteryExemptionTracker()
                 .getUidBatteryExemptedUsageSince(uid, since, now);
     }
@@ -1084,7 +1085,7 @@ public final class AppRestrictionController {
     /**
      * @return The total battery usage of the given UID since the system boots.
      */
-    double getUidBatteryUsage(int uid) {
+    @NonNull ImmutableBatteryUsage getUidBatteryUsage(int uid) {
         return mInjector.getUidBatteryUsageProvider().getUidBatteryUsage(uid);
     }
 
@@ -1092,7 +1093,7 @@ public final class AppRestrictionController {
         /**
          * @return The total battery usage of the given UID since the system boots.
          */
-        double getUidBatteryUsage(int uid);
+        @NonNull ImmutableBatteryUsage getUidBatteryUsage(int uid);
     }
 
     void dump(PrintWriter pw, String prefix) {

@@ -159,6 +159,8 @@ public final class WindowManagerGlobal {
             new ArrayList<WindowManager.LayoutParams>();
     private final ArraySet<View> mDyingViews = new ArraySet<View>();
 
+    private final ArrayList<ViewRootImpl> mWindowlessRoots = new ArrayList<ViewRootImpl>();
+
     private Runnable mSystemPropertyUpdater;
 
     private WindowManagerGlobal() {
@@ -387,7 +389,25 @@ public final class WindowManagerGlobal {
                 }
             }
 
-            root = new ViewRootImpl(view.getContext(), display);
+            IWindowSession windowlessSession = null;
+            // If there is a parent set, but we can't find it, it may be coming
+            // from a SurfaceControlViewHost hierarchy.
+            if (wparams.token != null && panelParentView == null) {
+                for (int i = 0; i < mWindowlessRoots.size(); i++) {
+                    ViewRootImpl maybeParent = mWindowlessRoots.get(i);
+                    if (maybeParent.getWindowToken() == wparams.token) {
+                        windowlessSession = maybeParent.getWindowSession();
+                        break;
+                    }
+                }
+            }
+
+            if (windowlessSession == null) {
+                root = new ViewRootImpl(view.getContext(), display);
+            } else {
+                root = new ViewRootImpl(view.getContext(), display,
+                        windowlessSession);
+            }
 
             view.setLayoutParams(wparams);
 
@@ -718,6 +738,20 @@ public final class WindowManagerGlobal {
             return getWindowManagerService().mirrorWallpaperSurface(displayId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    public void addWindowlessRoot(ViewRootImpl impl) {
+        synchronized (mLock) {
+            mWindowlessRoots.add(impl);
+        }
+    }
+
+    /** @hide */
+    public void removeWindowlessRoot(ViewRootImpl impl) {
+        synchronized (mLock) {
+            mWindowlessRoots.remove(impl);
         }
     }
 }

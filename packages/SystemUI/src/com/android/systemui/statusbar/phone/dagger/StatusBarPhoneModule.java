@@ -129,7 +129,7 @@ import dagger.Provides;
 /**
  * Dagger Module providing {@link StatusBar}.
  */
-@Module(includes = {StatusBarPhoneDependenciesModule.class})
+@Module
 public interface StatusBarPhoneModule {
     /**
      * Provides our instance of StatusBar which is considered optional.

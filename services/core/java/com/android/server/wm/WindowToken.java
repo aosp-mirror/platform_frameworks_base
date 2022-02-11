@@ -44,6 +44,7 @@ import android.os.IBinder;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.InsetsState;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager.LayoutParams.WindowType;
 import android.window.WindowContext;
@@ -99,6 +100,7 @@ class WindowToken extends WindowContainer<WindowState> {
     final boolean mOwnerCanManageAppTokens;
 
     private FixedRotationTransformState mFixedRotationTransformState;
+    private SurfaceControl mFixedRotationTransformLeash;
 
     /**
      * When set to {@code true}, this window token is created from {@link WindowContext}
@@ -521,8 +523,14 @@ class WindowToken extends WindowContainer<WindowState> {
         if (state == null) {
             return;
         }
-
-        state.resetTransform();
+        if (!mTransitionController.isShellTransitionsEnabled()) {
+            state.resetTransform();
+        } else {
+            // Remove all the leashes
+            for (int i = state.mAssociatedTokens.size() - 1; i >= 0; --i) {
+                state.mAssociatedTokens.get(i).removeFixedRotationLeash();
+            }
+        }
         // Clear the flag so if the display will be updated to the same orientation, the transform
         // won't take effect.
         state.mIsTransforming = false;
@@ -554,6 +562,43 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     /**
+     * Gets or creates a leash which can be treated as if this window is not-rotated. This is
+     * used to adapt mismatched-rotation surfaces into code that expects all windows to share
+     * the same rotation.
+     */
+    @Nullable
+    SurfaceControl getOrCreateFixedRotationLeash() {
+        if (!mTransitionController.isShellTransitionsEnabled()) return null;
+        final int rotation = getRelativeDisplayRotation();
+        if (rotation == Surface.ROTATION_0) return mFixedRotationTransformLeash;
+        if (mFixedRotationTransformLeash != null) return mFixedRotationTransformLeash;
+
+        final SurfaceControl.Transaction t = getSyncTransaction();
+        final SurfaceControl leash = makeSurface().setContainerLayer()
+                .setParent(getParentSurfaceControl())
+                .setName(getSurfaceControl() + " - rotation-leash")
+                .setHidden(false)
+                .setEffectLayer()
+                .setCallsite("WindowToken.getOrCreateFixedRotationLeash")
+                .build();
+        t.setPosition(leash, mLastSurfacePosition.x, mLastSurfacePosition.y);
+        t.show(leash);
+        t.reparent(getSurfaceControl(), leash);
+        t.setAlpha(getSurfaceControl(), 1.f);
+        mFixedRotationTransformLeash = leash;
+        updateSurfaceRotation(t, rotation, mFixedRotationTransformLeash);
+        return mFixedRotationTransformLeash;
+    }
+
+    void removeFixedRotationLeash() {
+        if (mFixedRotationTransformLeash == null) return;
+        final SurfaceControl.Transaction t = getSyncTransaction();
+        t.reparent(getSurfaceControl(), getParentSurfaceControl());
+        t.remove(mFixedRotationTransformLeash);
+        mFixedRotationTransformLeash = null;
+    }
+
+    /**
      * It is called when the window is using fixed rotation transform, and before display applies
      * the same rotation, the rotation change for display is canceled, e.g. the orientation from
      * sensor is updated to previous direction.
@@ -575,7 +620,7 @@ class WindowToken extends WindowContainer<WindowState> {
     @Override
     void updateSurfacePosition(SurfaceControl.Transaction t) {
         super.updateSurfacePosition(t);
-        if (isFixedRotationTransforming()) {
+        if (!mTransitionController.isShellTransitionsEnabled() && isFixedRotationTransforming()) {
             final ActivityRecord r = asActivityRecord();
             final Task rootTask = r != null ? r.getRootTask() : null;
             // Don't transform the activity in PiP because the PiP task organizer will handle it.
@@ -585,6 +630,20 @@ class WindowToken extends WindowContainer<WindowState> {
                 mFixedRotationTransformState.transform(this);
             }
         }
+    }
+
+    @Override
+    protected void updateSurfaceRotation(SurfaceControl.Transaction t,
+            @Surface.Rotation int deltaRotation, SurfaceControl positionLeash) {
+        final ActivityRecord r = asActivityRecord();
+        if (r != null) {
+            final Task rootTask = r.getRootTask();
+            // Don't transform the activity in PiP because the PiP task organizer will handle it.
+            if (rootTask != null && rootTask.inPinnedWindowingMode()) {
+                return;
+            }
+        }
+        super.updateSurfaceRotation(t, deltaRotation, positionLeash);
     }
 
     @Override

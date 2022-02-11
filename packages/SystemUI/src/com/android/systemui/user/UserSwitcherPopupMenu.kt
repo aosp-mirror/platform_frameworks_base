@@ -42,7 +42,7 @@ class UserSwitcherPopupMenu(
         setBackgroundDrawable(
             res.getDrawable(R.drawable.bouncer_user_switcher_popup_bg, context.getTheme())
         )
-        setModal(true)
+        setModal(false)
         setOverlapAnchor(true)
     }
 

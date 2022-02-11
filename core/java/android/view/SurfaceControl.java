@@ -49,6 +49,7 @@ import android.hardware.HardwareBuffer;
 import android.hardware.display.DeviceProductInfo;
 import android.hardware.display.DisplayedContentSample;
 import android.hardware.display.DisplayedContentSamplingAttributes;
+import android.hardware.graphics.common.DisplayDecorationSupport;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -235,7 +236,8 @@ public final class SurfaceControl implements Parcelable {
             float shadowRadius);
     private static native void nativeSetGlobalShadowSettings(@Size(4) float[] ambientColor,
             @Size(4) float[] spotColor, float lightPosY, float lightPosZ, float lightRadius);
-    private static native boolean nativeGetDisplayDecorationSupport(IBinder displayToken);
+    private static native DisplayDecorationSupport nativeGetDisplayDecorationSupport(
+            IBinder displayToken);
 
     private static native void nativeSetFrameRate(long transactionObj, long nativeObject,
             float frameRate, int compatibility, int changeFrameRateStrategy);
@@ -2694,16 +2696,18 @@ public final class SurfaceControl implements Parcelable {
     }
 
     /**
-     * Returns whether a display supports DISPLAY_DECORATION.
+     * Returns whether/how a display supports DISPLAY_DECORATION.
      *
      * @param displayToken
      *      The token for the display.
      *
-     * @return Whether the display supports DISPLAY_DECORATION.
+     * @return A class describing how the display supports DISPLAY_DECORATION or null if it does
+     * not.
      *
+     * TODO (b/218524164): Move this out of SurfaceControl.
      * @hide
      */
-    public static boolean getDisplayDecorationSupport(IBinder displayToken) {
+    public static DisplayDecorationSupport getDisplayDecorationSupport(IBinder displayToken) {
         return nativeGetDisplayDecorationSupport(displayToken);
     }
 

@@ -2385,6 +2385,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         dc.getDisplayPolicy().removeWindowLw(this);
 
         disposeInputChannel();
+        mOnBackInvokedCallback = null;
 
         mSession.windowRemovedLocked();
         try {
@@ -2438,6 +2439,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         try {
             disposeInputChannel();
+            mOnBackInvokedCallback = null;
 
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                     "Remove %s: mSurfaceController=%s mAnimatingExit=%b mRemoveOnExit=%b "

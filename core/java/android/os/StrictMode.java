@@ -942,7 +942,7 @@ public final class StrictMode {
              * <p>Instead, apps should use {@code content://} Uris so the platform can extend
              * temporary permission for the receiving app to access the resource.
              *
-             * @see android.support.v4.content.FileProvider
+             * @see androidx.core.content.FileProvider
              * @see Intent#FLAG_GRANT_READ_URI_PERMISSION
              */
             public @NonNull Builder detectFileUriExposure() {

@@ -4724,5 +4724,8 @@
   <java-symbol type="bool" name="config_lowPowerStandbyEnabledByDefault" />
   <java-symbol type="integer" name="config_lowPowerStandbyNonInteractiveTimeout" />
 
+  <!-- For VirtualDeviceManager -->
+  <java-symbol type="string" name="vdm_camera_access_denied" />
+
   <java-symbol type="color" name="camera_privacy_light"/>
 </resources>

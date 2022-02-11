@@ -6266,4 +6266,8 @@ ul.</string>
     </string>
     <!-- Action label of notification for user to check background apps. [CHAR LIMIT=NONE]  -->
     <string name="notification_action_check_bg_apps">Check active apps</string>
+
+    <!-- Strings for VirtualDeviceManager -->
+    <!-- Error message indicating the camera cannot be accessed when running on a virtual device. [CHAR LIMIT=NONE] -->
+    <string name="vdm_camera_access_denied">Cannot access camera from this device</string>
 </resources>

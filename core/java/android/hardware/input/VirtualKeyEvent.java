@@ -114,9 +114,56 @@ public final class VirtualKeyEvent implements Parcelable {
         }
 
         /**
-         * Sets the Android key code of the event. The set of allowed characters include digits 0-9,
-         * characters A-Z, and standard punctuation, as well as numpad keys, function keys F1-F12,
-         * and meta keys (caps lock, shift, etc.).
+         * Sets the Android key code of the event. The set of allowed keys include digits
+         *              {@link android.view.KeyEvent#KEYCODE_0} through
+         *              {@link android.view.KeyEvent#KEYCODE_9}, characters
+         *              {@link android.view.KeyEvent#KEYCODE_A} through
+         *              {@link android.view.KeyEvent#KEYCODE_Z}, function keys
+         *              {@link android.view.KeyEvent#KEYCODE_F1} through
+         *              {@link android.view.KeyEvent#KEYCODE_F12}, numpad keys
+         *              {@link android.view.KeyEvent#KEYCODE_NUMPAD_0} through
+         *              {@link android.view.KeyEvent#KEYCODE_NUMPAD_RIGHT_PAREN},
+         *              and these additional keys:
+         *              {@link android.view.KeyEvent#KEYCODE_GRAVE}
+         *              {@link android.view.KeyEvent#KEYCODE_MINUS}
+         *              {@link android.view.KeyEvent#KEYCODE_EQUALS}
+         *              {@link android.view.KeyEvent#KEYCODE_LEFT_BRACKET}
+         *              {@link android.view.KeyEvent#KEYCODE_RIGHT_BRACKET}
+         *              {@link android.view.KeyEvent#KEYCODE_BACKSLASH}
+         *              {@link android.view.KeyEvent#KEYCODE_SEMICOLON}
+         *              {@link android.view.KeyEvent#KEYCODE_APOSTROPHE}
+         *              {@link android.view.KeyEvent#KEYCODE_COMMA}
+         *              {@link android.view.KeyEvent#KEYCODE_PERIOD}
+         *              {@link android.view.KeyEvent#KEYCODE_SLASH}
+         *              {@link android.view.KeyEvent#KEYCODE_ALT_LEFT}
+         *              {@link android.view.KeyEvent#KEYCODE_ALT_RIGHT}
+         *              {@link android.view.KeyEvent#KEYCODE_CTRL_LEFT}
+         *              {@link android.view.KeyEvent#KEYCODE_CTRL_RIGHT}
+         *              {@link android.view.KeyEvent#KEYCODE_SHIFT_LEFT}
+         *              {@link android.view.KeyEvent#KEYCODE_SHIFT_RIGHT}
+         *              {@link android.view.KeyEvent#KEYCODE_META_LEFT}
+         *              {@link android.view.KeyEvent#KEYCODE_META_RIGHT}
+         *              {@link android.view.KeyEvent#KEYCODE_CAPS_LOCK}
+         *              {@link android.view.KeyEvent#KEYCODE_SCROLL_LOCK}
+         *              {@link android.view.KeyEvent#KEYCODE_NUM_LOCK}
+         *              {@link android.view.KeyEvent#KEYCODE_ENTER}
+         *              {@link android.view.KeyEvent#KEYCODE_TAB}
+         *              {@link android.view.KeyEvent#KEYCODE_SPACE}
+         *              {@link android.view.KeyEvent#KEYCODE_DPAD_DOWN}
+         *              {@link android.view.KeyEvent#KEYCODE_DPAD_UP}
+         *              {@link android.view.KeyEvent#KEYCODE_DPAD_LEFT}
+         *              {@link android.view.KeyEvent#KEYCODE_DPAD_RIGHT}
+         *              {@link android.view.KeyEvent#KEYCODE_MOVE_END}
+         *              {@link android.view.KeyEvent#KEYCODE_MOVE_HOME}
+         *              {@link android.view.KeyEvent#KEYCODE_PAGE_DOWN}
+         *              {@link android.view.KeyEvent#KEYCODE_PAGE_UP}
+         *              {@link android.view.KeyEvent#KEYCODE_DEL}
+         *              {@link android.view.KeyEvent#KEYCODE_FORWARD_DEL}
+         *              {@link android.view.KeyEvent#KEYCODE_INSERT}
+         *              {@link android.view.KeyEvent#KEYCODE_ESCAPE}
+         *              {@link android.view.KeyEvent#KEYCODE_BREAK}
+         *              {@link android.view.KeyEvent#KEYCODE_BACK}
+         *              {@link android.view.KeyEvent#KEYCODE_FORWARD}
          *
          * @return this builder, to allow for chaining of calls
          */

@@ -16,14 +16,35 @@
 
 package com.android.systemui.media.taptotransfer.receiver
 
+import android.content.Context
 import android.graphics.drawable.Drawable
 import com.android.systemui.media.taptotransfer.common.MediaTttChipState
 
 /**
  * A class that stores all the information necessary to display the media tap-to-transfer chip on
  * the receiver device.
+ *
+ * @property appIconDrawable a drawable representing the icon of the app playing the media. If
+ *     present, this will be used in [this.getAppIcon] instead of [appPackageName].
+ * @property appName a name for the app playing the media. If present, this will be used in
+ *     [this.getAppName] instead of [appPackageName].
  */
 class ChipStateReceiver(
-    appIconDrawable: Drawable,
-    appIconContentDescription: String
-) : MediaTttChipState(appIconDrawable, appIconContentDescription)
+    appPackageName: String?,
+    private val appIconDrawable: Drawable?,
+    private val appName: CharSequence?
+) : MediaTttChipState(appPackageName) {
+    override fun getAppIcon(context: Context): Drawable? {
+        if (appIconDrawable != null) {
+            return appIconDrawable
+        }
+        return super.getAppIcon(context)
+    }
+
+    override fun getAppName(context: Context): String? {
+        if (appName != null) {
+            return appName.toString()
+        }
+        return super.getAppName(context)
+    }
+}

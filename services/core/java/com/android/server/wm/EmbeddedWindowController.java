@@ -156,6 +156,7 @@ class EmbeddedWindowController {
         final IWindow mClient;
         @Nullable final WindowState mHostWindowState;
         @Nullable final ActivityRecord mHostActivityRecord;
+        final String mName;
         final int mOwnerUid;
         final int mOwnerPid;
         final WindowManagerService mWmService;
@@ -186,7 +187,7 @@ class EmbeddedWindowController {
          */
         EmbeddedWindow(Session session, WindowManagerService service, IWindow clientToken,
                        WindowState hostWindowState, int ownerUid, int ownerPid, int windowType,
-                       int displayId, IBinder focusGrantToken) {
+                       int displayId, IBinder focusGrantToken, String inputHandleName) {
             mSession = session;
             mWmService = service;
             mClient = clientToken;
@@ -198,14 +199,15 @@ class EmbeddedWindowController {
             mWindowType = windowType;
             mDisplayId = displayId;
             mFocusGrantToken = focusGrantToken;
+            final String hostWindowName =
+                    (mHostWindowState != null) ? "-" + mHostWindowState.getWindowTag().toString()
+                            : "";
+            mName = "Embedded{" + inputHandleName + hostWindowName + "}";
         }
 
         @Override
         public String toString() {
-            final String hostWindowName = (mHostWindowState != null)
-                    ? mHostWindowState.getWindowTag().toString() : "Internal";
-            return "EmbeddedWindow{ u" + UserHandle.getUserId(mOwnerUid) + " " + hostWindowName
-                    + "}";
+            return mName;
         }
 
         InputApplicationHandle getApplicationHandle() {

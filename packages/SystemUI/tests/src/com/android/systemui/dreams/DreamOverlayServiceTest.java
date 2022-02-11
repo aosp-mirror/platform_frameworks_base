@@ -31,6 +31,7 @@ import android.testing.AndroidTestingRunner;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 import androidx.test.filters.SmallTest;
@@ -190,5 +191,15 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 Complication.COMPLICATION_TYPE_TIME | Complication.COMPLICATION_TYPE_DATE
                         | Complication.COMPLICATION_TYPE_WEATHER;
         verify(mStateController).setAvailableComplicationTypes(expectedTypes);
+    }
+
+    @Test
+    public void testDestroy() {
+        mService.onDestroy();
+        mMainExecutor.runAllReady();
+
+        verify(mKeyguardUpdateMonitor).removeCallback(any());
+        verify(mLifecycleRegistry).setCurrentState(Lifecycle.State.DESTROYED);
+        verify(mStateController).setOverlayActive(false);
     }
 }

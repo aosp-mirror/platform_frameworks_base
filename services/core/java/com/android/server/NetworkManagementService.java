@@ -21,6 +21,7 @@ import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.Manifest.permission.OBSERVE_NETWORK_POLICY;
 import static android.Manifest.permission.SHUTDOWN;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_DOZABLE;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_LOW_POWER_STANDBY;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_POWERSAVE;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_RESTRICTED;
 import static android.net.ConnectivityManager.FIREWALL_CHAIN_STANDBY;
@@ -30,6 +31,7 @@ import static android.net.INetd.FIREWALL_DENYLIST;
 import static android.net.INetd.FIREWALL_RULE_ALLOW;
 import static android.net.INetd.FIREWALL_RULE_DENY;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_DOZABLE;
+import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_POWERSAVE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_RESTRICTED;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_STANDBY;
@@ -206,6 +208,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
      */
     @GuardedBy("mRulesLock")
     private SparseIntArray mUidFirewallRestrictedRules = new SparseIntArray();
+    /**
+     * Contains the per-UID firewall rules that are used when Low Power Standby is enabled.
+     */
+    @GuardedBy("mRulesLock")
+    private SparseIntArray mUidFirewallLowPowerStandbyRules = new SparseIntArray();
     /** Set of states for the child firewall chains. True if the chain is active. */
     @GuardedBy("mRulesLock")
     final SparseBooleanArray mFirewallChainStates = new SparseBooleanArray();
@@ -506,12 +513,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             syncFirewallChainLocked(FIREWALL_CHAIN_DOZABLE, "dozable ");
             syncFirewallChainLocked(FIREWALL_CHAIN_POWERSAVE, "powersave ");
             syncFirewallChainLocked(FIREWALL_CHAIN_RESTRICTED, "restricted ");
+            syncFirewallChainLocked(FIREWALL_CHAIN_LOW_POWER_STANDBY, "low power standby ");
 
             final int[] chains = {
                     FIREWALL_CHAIN_STANDBY,
                     FIREWALL_CHAIN_DOZABLE,
                     FIREWALL_CHAIN_POWERSAVE,
-                    FIREWALL_CHAIN_RESTRICTED
+                    FIREWALL_CHAIN_RESTRICTED,
+                    FIREWALL_CHAIN_LOW_POWER_STANDBY
             };
 
             for (int chain : chains) {
@@ -1438,6 +1447,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 return FIREWALL_CHAIN_NAME_POWERSAVE;
             case FIREWALL_CHAIN_RESTRICTED:
                 return FIREWALL_CHAIN_NAME_RESTRICTED;
+            case FIREWALL_CHAIN_LOW_POWER_STANDBY:
+                return FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY;
             default:
                 throw new IllegalArgumentException("Bad child chain: " + chain);
         }
@@ -1452,6 +1463,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             case FIREWALL_CHAIN_POWERSAVE:
                 return FIREWALL_ALLOWLIST;
             case FIREWALL_CHAIN_RESTRICTED:
+                return FIREWALL_ALLOWLIST;
+            case FIREWALL_CHAIN_LOW_POWER_STANDBY:
                 return FIREWALL_ALLOWLIST;
             default:
                 return isFirewallEnabled() ? FIREWALL_ALLOWLIST : FIREWALL_DENYLIST;
@@ -1571,6 +1584,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 return mUidFirewallPowerSaveRules;
             case FIREWALL_CHAIN_RESTRICTED:
                 return mUidFirewallRestrictedRules;
+            case FIREWALL_CHAIN_LOW_POWER_STANDBY:
+                return mUidFirewallLowPowerStandbyRules;
             case FIREWALL_CHAIN_NONE:
                 return mUidFirewallRules;
             default:
@@ -1626,6 +1641,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             pw.println(getFirewallChainState(FIREWALL_CHAIN_RESTRICTED));
             dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_RESTRICTED,
                     mUidFirewallRestrictedRules);
+
+            pw.print("UID firewall low power standby chain enabled: ");
+            pw.println(getFirewallChainState(FIREWALL_CHAIN_LOW_POWER_STANDBY));
+            dumpUidFirewallRule(pw, FIREWALL_CHAIN_NAME_LOW_POWER_STANDBY,
+                    mUidFirewallLowPowerStandbyRules);
         }
 
         pw.print("Firewall enabled: "); pw.println(mFirewallEnabled);
@@ -1747,6 +1767,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             if (getFirewallChainState(FIREWALL_CHAIN_RESTRICTED)
                     && mUidFirewallRestrictedRules.get(uid) != FIREWALL_RULE_ALLOW) {
                 if (DBG) Slog.d(TAG, "Uid " + uid + " restricted because of restricted mode");
+                return true;
+            }
+            if (getFirewallChainState(FIREWALL_CHAIN_LOW_POWER_STANDBY)
+                    && mUidFirewallLowPowerStandbyRules.get(uid) != FIREWALL_RULE_ALLOW) {
+                if (DBG) Slog.d(TAG, "Uid " + uid + " restricted because of low power standby");
                 return true;
             }
             if (mUidRejectOnMetered.get(uid)) {

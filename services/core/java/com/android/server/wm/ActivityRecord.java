@@ -811,6 +811,27 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // How long we wait until giving up transfer splash screen.
     private static final int TRANSFER_SPLASH_SCREEN_TIMEOUT = 2000;
 
+    /**
+     * The icon is shown when the launching activity sets the splashScreenStyle to
+     * SPLASH_SCREEN_STYLE_ICON. If the launching activity does not specify any style,
+     * follow the system behavior.
+     *
+     * @see android.R.attr#windowSplashScreenBehavior
+     */
+    private static final int SPLASH_SCREEN_BEHAVIOR_DEFAULT = 0;
+    /**
+     * The icon is shown unless the launching app specified SPLASH_SCREEN_STYLE_EMPTY.
+     *
+     * @see android.R.attr#windowSplashScreenBehavior
+     */
+    private static final int SPLASH_SCREEN_BEHAVIOR_ICON_PREFERRED = 1;
+
+    @IntDef(prefix = {"SPLASH_SCREEN_BEHAVIOR_"}, value = {
+            SPLASH_SCREEN_BEHAVIOR_DEFAULT,
+            SPLASH_SCREEN_BEHAVIOR_ICON_PREFERRED
+    })
+    @interface SplashScreenBehavior { }
+
     // TODO: Have a WindowContainer state for tracking exiting/deferred removal.
     boolean mIsExiting;
     // Force an app transition to be ran in the case the visibility of the app did not change.
@@ -2483,10 +2504,20 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     void removeStartingWindow() {
+        boolean prevEligibleForLetterboxEducation = isEligibleForLetterboxEducation();
+
         if (transferSplashScreenIfNeeded()) {
             return;
         }
         removeStartingWindowAnimation(true /* prepareAnimation */);
+
+        // TODO(b/215316431): Add tests
+        final Task task = getTask();
+        if (prevEligibleForLetterboxEducation != isEligibleForLetterboxEducation()
+                && task != null) {
+            // Trigger TaskInfoChanged to update the letterbox education.
+            task.dispatchTaskInfoChangedIfNeeded(true /* force */);
+        }
     }
 
     void removeStartingWindowAnimation(boolean prepareAnimation) {
@@ -6594,8 +6625,23 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return null;
     }
 
+    private boolean isIconStylePreferred(int theme) {
+        if (theme == 0) {
+            return false;
+        }
+        final AttributeCache.Entry ent = AttributeCache.instance().get(packageName, theme,
+                R.styleable.Window, mWmService.mCurrentUserId);
+        if (ent != null) {
+            if (ent.array.hasValue(R.styleable.Window_windowSplashScreenBehavior)) {
+                return ent.array.getInt(R.styleable.Window_windowSplashScreenBehavior,
+                        SPLASH_SCREEN_BEHAVIOR_DEFAULT)
+                        == SPLASH_SCREEN_BEHAVIOR_ICON_PREFERRED;
+            }
+        }
+        return false;
+    }
     private boolean shouldUseEmptySplashScreen(ActivityRecord sourceRecord, boolean startActivity,
-            ActivityOptions options) {
+            ActivityOptions options, int resolvedTheme) {
         if (sourceRecord == null && !startActivity) {
             // Use empty style if this activity is not top activity. This could happen when adding
             // a splash screen window to the warm start activity which is re-create because top is
@@ -6605,11 +6651,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 return true;
             }
         }
+
+        // setSplashScreenStyle decide in priority of windowSplashScreenBehavior.
         if (options != null) {
             final int optionsStyle = options.getSplashScreenStyle();
             if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_EMPTY) {
                 return true;
-            } else if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_ICON) {
+            } else if (optionsStyle == SplashScreen.SPLASH_SCREEN_STYLE_ICON
+                    || isIconStylePreferred(resolvedTheme)) {
                 return false;
             }
             // Choose the default behavior for Launcher and SystemUI when the SplashScreen style is
@@ -6619,6 +6668,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } else if (mLaunchSourceType == LAUNCH_SOURCE_TYPE_SYSTEMUI) {
                 return true;
             }
+        } else if (isIconStylePreferred(resolvedTheme)) {
+            return false;
         }
         if (sourceRecord == null) {
             sourceRecord = searchCandidateLaunchingActivity();
@@ -6691,12 +6742,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-        mSplashScreenStyleEmpty = shouldUseEmptySplashScreen(
-                sourceRecord, startActivity, startOptions);
-
         final int splashScreenTheme = startActivity ? getSplashscreenTheme(startOptions) : 0;
         final int resolvedTheme = evaluateStartingWindowTheme(prev, packageName, theme,
                 splashScreenTheme);
+
+        mSplashScreenStyleEmpty = shouldUseEmptySplashScreen(sourceRecord, startActivity,
+                startOptions, resolvedTheme);
 
         final boolean activityCreated =
                 mState.ordinal() >= STARTED.ordinal() && mState.ordinal() <= STOPPED.ordinal();
@@ -7660,6 +7711,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *     <li>The activity is eligible for fixed orientation letterbox.
      *     <li>The activity is in fullscreen.
      *     <li>The activity is portrait-only.
+     *     <li>The activity doesn't have a starting window (education should only be displayed
+     *     once the starting window is removed in {@link #removeStartingWindow}).
      * </ul>
      */
     // TODO(b/215316431): Add tests
@@ -7667,7 +7720,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return mWmService.mLetterboxConfiguration.getIsEducationEnabled()
                 && mIsEligibleForFixedOrientationLetterbox
                 && getWindowingMode() == WINDOWING_MODE_FULLSCREEN
-                && getRequestedConfigurationOrientation() == ORIENTATION_PORTRAIT;
+                && getRequestedConfigurationOrientation() == ORIENTATION_PORTRAIT
+                && mStartingWindow == null;
     }
 
     /**

@@ -46,6 +46,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.telephony.TelephonyCallback;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -159,6 +160,7 @@ public class UserSwitcherController implements Dumpable {
     private final AtomicBoolean mGuestCreationScheduled;
     private FalsingManager mFalsingManager;
     private View mView;
+    private String mCreateSupervisedUserPackage;
 
     @Inject
     public UserSwitcherController(Context context,
@@ -255,6 +257,9 @@ public class UserSwitcherController implements Dumpable {
         keyguardStateController.addCallback(mCallback);
         listenForCallState();
 
+        mCreateSupervisedUserPackage = mContext.getString(
+                com.android.internal.R.string.config_supervisedUserCreationPackage);
+
         dumpManager.registerDumpable(getClass().getSimpleName(), this);
 
         refreshUsers(UserHandle.USER_NULL);
@@ -307,14 +312,10 @@ public class UserSwitcherController implements Dumpable {
                 // User 0
                 boolean canSwitchUsers = mUserManager.getUserSwitchability(
                         UserHandle.of(mUserTracker.getUserId())) == SWITCHABILITY_STATUS_OK;
-                UserInfo currentUserInfo = null;
                 UserRecord guestRecord = null;
 
                 for (UserInfo info : infos) {
                     boolean isCurrent = currentId == info.id;
-                    if (isCurrent) {
-                        currentUserInfo = info;
-                    }
                     boolean switchToEnabled = canSwitchUsers || isCurrent;
                     if (info.isEnabled()) {
                         if (info.isGuest()) {
@@ -322,7 +323,8 @@ public class UserSwitcherController implements Dumpable {
                             // the icon shouldn't be enabled even if the user is current
                             guestRecord = new UserRecord(info, null /* picture */,
                                     true /* isGuest */, isCurrent, false /* isAddUser */,
-                                    false /* isRestricted */, canSwitchUsers);
+                                    false /* isRestricted */, canSwitchUsers,
+                                    false /* isAddSupervisedUser */);
                         } else if (info.supportsSwitchToByUser()) {
                             Bitmap picture = bitmaps.get(info.id);
                             if (picture == null) {
@@ -337,26 +339,13 @@ public class UserSwitcherController implements Dumpable {
                             }
                             records.add(new UserRecord(info, picture, false /* isGuest */,
                                     isCurrent, false /* isAddUser */, false /* isRestricted */,
-                                    switchToEnabled));
+                                    switchToEnabled, false /* isAddSupervisedUser */));
                         }
                     }
                 }
                 if (records.size() > 1 || guestRecord != null) {
                     Prefs.putBoolean(mContext, Key.SEEN_MULTI_USER, true);
                 }
-
-                boolean systemCanCreateUsers = !mUserManager.hasBaseUserRestriction(
-                                UserManager.DISALLOW_ADD_USER, UserHandle.SYSTEM);
-                boolean currentUserCanCreateUsers = currentUserInfo != null
-                        && (currentUserInfo.isAdmin()
-                                || currentUserInfo.id == UserHandle.USER_SYSTEM)
-                        && systemCanCreateUsers;
-                boolean anyoneCanCreateUsers = systemCanCreateUsers && addUsersWhenLocked;
-                boolean canCreateGuest = (currentUserCanCreateUsers || anyoneCanCreateUsers)
-                        && guestRecord == null;
-                boolean canCreateUser = (currentUserCanCreateUsers || anyoneCanCreateUsers)
-                        && mUserManager.canAddMoreUsers(UserManager.USER_TYPE_FULL_SECONDARY);
-                boolean createIsRestricted = !addUsersWhenLocked;
 
                 if (guestRecord == null) {
                     if (mGuestUserAutoCreated) {
@@ -368,13 +357,14 @@ public class UserSwitcherController implements Dumpable {
                         guestRecord = new UserRecord(null /* info */, null /* picture */,
                                 true /* isGuest */, false /* isCurrent */,
                                 false /* isAddUser */, false /* isRestricted */,
-                                isSwitchToGuestEnabled);
+                                isSwitchToGuestEnabled, false /* isAddSupervisedUser */);
                         checkIfAddUserDisallowedByAdminOnly(guestRecord);
                         records.add(guestRecord);
-                    } else if (canCreateGuest) {
+                    } else if (canCreateGuest(guestRecord != null)) {
                         guestRecord = new UserRecord(null /* info */, null /* picture */,
                                 true /* isGuest */, false /* isCurrent */,
-                                false /* isAddUser */, createIsRestricted, canSwitchUsers);
+                                false /* isAddUser */, createIsRestricted(), canSwitchUsers,
+                                false /* isAddSupervisedUser */);
                         checkIfAddUserDisallowedByAdminOnly(guestRecord);
                         records.add(guestRecord);
                     }
@@ -382,10 +372,19 @@ public class UserSwitcherController implements Dumpable {
                     records.add(guestRecord);
                 }
 
-                if (canCreateUser) {
+                if (canCreateUser()) {
                     UserRecord addUserRecord = new UserRecord(null /* info */, null /* picture */,
                             false /* isGuest */, false /* isCurrent */, true /* isAddUser */,
-                            createIsRestricted, canSwitchUsers);
+                            createIsRestricted(), canSwitchUsers,
+                            false /* isAddSupervisedUser */);
+                    checkIfAddUserDisallowedByAdminOnly(addUserRecord);
+                    records.add(addUserRecord);
+                }
+
+                if (canCreateSupervisedUser()) {
+                    UserRecord addUserRecord = new UserRecord(null /* info */, null /* picture */,
+                            false /* isGuest */, false /* isCurrent */, false /* isAddUser */,
+                            createIsRestricted(), canSwitchUsers, true /* isAddSupervisedUser */);
                     checkIfAddUserDisallowedByAdminOnly(addUserRecord);
                     records.add(addUserRecord);
                 }
@@ -401,6 +400,40 @@ public class UserSwitcherController implements Dumpable {
                 }
             }
         }.execute((SparseArray) bitmaps);
+    }
+
+    boolean systemCanCreateUsers() {
+        return !mUserManager.hasBaseUserRestriction(
+                UserManager.DISALLOW_ADD_USER, UserHandle.SYSTEM);
+    }
+
+    boolean currentUserCanCreateUsers() {
+        UserInfo currentUser = mUserTracker.getUserInfo();
+        return currentUser != null
+                && (currentUser.isAdmin() || mUserTracker.getUserId() == UserHandle.USER_SYSTEM)
+                && systemCanCreateUsers();
+    }
+
+    boolean anyoneCanCreateUsers() {
+        return systemCanCreateUsers() && mAddUsersFromLockScreen;
+    }
+
+    boolean canCreateGuest(boolean hasExistingGuest) {
+        return (currentUserCanCreateUsers() || anyoneCanCreateUsers())
+                && !hasExistingGuest;
+    }
+
+    boolean canCreateUser() {
+        return (currentUserCanCreateUsers() || anyoneCanCreateUsers())
+                && mUserManager.canAddMoreUsers(UserManager.USER_TYPE_FULL_SECONDARY);
+    }
+
+    boolean createIsRestricted() {
+        return !mAddUsersFromLockScreen;
+    }
+
+    boolean canCreateSupervisedUser() {
+        return !TextUtils.isEmpty(mCreateSupervisedUserPackage) && canCreateUser();
     }
 
     private void pauseRefreshUsers() {
@@ -485,6 +518,9 @@ public class UserSwitcherController implements Dumpable {
         } else if (record.isAddUser) {
             showAddUserDialog(dialogShower);
             return;
+        } else if (record.isAddSupervisedUser) {
+            startSupervisedUserActivity();
+            return;
         } else {
             id = record.info.id;
         }
@@ -559,6 +595,22 @@ public class UserSwitcherController implements Dumpable {
         } else {
             mAddUserDialog.show();
         }
+    }
+
+    private void startSupervisedUserActivity() {
+        final Intent intent = new Intent()
+                .setAction(UserManager.ACTION_CREATE_SUPERVISED_USER)
+                .setPackage(mCreateSupervisedUserPackage)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        // TODO(b/209659998): [to-be-removed] fallback activity for supervised user creation.
+        if (mContext.getPackageManager().resolveActivity(intent, 0) == null) {
+            intent.setPackage(null)
+                    .setClassName("com.android.settings",
+                        "com.android.settings.users.AddSupervisedUserActivity");
+        }
+
+        mContext.startActivity(intent);
     }
 
     private void listenForCallState() {
@@ -941,6 +993,8 @@ public class UserSwitcherController implements Dumpable {
                 }
             } else if (item.isAddUser) {
                 return context.getString(R.string.user_add_user);
+            } else if (item.isAddSupervisedUser) {
+                return context.getString(R.string.add_user_supervised);
             } else {
                 return item.info.name;
             }
@@ -955,9 +1009,11 @@ public class UserSwitcherController implements Dumpable {
         protected static Drawable getIconDrawable(Context context, UserRecord item) {
             int iconRes;
             if (item.isAddUser) {
-                iconRes = R.drawable.ic_add_circle;
+                iconRes = R.drawable.ic_account_circle;
             } else if (item.isGuest) {
-                iconRes = R.drawable.ic_avatar_guest_user;
+                iconRes = R.drawable.ic_account_circle_filled;
+            } else if (item.isAddSupervisedUser) {
+                iconRes = R.drawable.ic_add_supervised_user;
             } else {
                 iconRes = R.drawable.ic_avatar_user;
             }
@@ -1000,6 +1056,7 @@ public class UserSwitcherController implements Dumpable {
         public final boolean isGuest;
         public final boolean isCurrent;
         public final boolean isAddUser;
+        public final boolean isAddSupervisedUser;
         /** If true, the record is only visible to the owner and only when unlocked. */
         public final boolean isRestricted;
         public boolean isDisabledByAdmin;
@@ -1007,7 +1064,8 @@ public class UserSwitcherController implements Dumpable {
         public boolean isSwitchToEnabled;
 
         public UserRecord(UserInfo info, Bitmap picture, boolean isGuest, boolean isCurrent,
-                boolean isAddUser, boolean isRestricted, boolean isSwitchToEnabled) {
+                boolean isAddUser, boolean isRestricted, boolean isSwitchToEnabled,
+                boolean isAddSupervisedUser) {
             this.info = info;
             this.picture = picture;
             this.isGuest = isGuest;
@@ -1015,11 +1073,12 @@ public class UserSwitcherController implements Dumpable {
             this.isAddUser = isAddUser;
             this.isRestricted = isRestricted;
             this.isSwitchToEnabled = isSwitchToEnabled;
+            this.isAddSupervisedUser = isAddSupervisedUser;
         }
 
         public UserRecord copyWithIsCurrent(boolean _isCurrent) {
             return new UserRecord(info, picture, isGuest, _isCurrent, isAddUser, isRestricted,
-                    isSwitchToEnabled);
+                    isSwitchToEnabled, isAddSupervisedUser);
         }
 
         public int resolveId() {
@@ -1043,6 +1102,7 @@ public class UserSwitcherController implements Dumpable {
             }
             if (isGuest) sb.append(" <isGuest>");
             if (isAddUser) sb.append(" <isAddUser>");
+            if (isAddSupervisedUser) sb.append(" <isAddSupervisedUser>");
             if (isCurrent) sb.append(" <isCurrent>");
             if (picture != null) sb.append(" <hasPicture>");
             if (isRestricted) sb.append(" <isRestricted>");

@@ -308,5 +308,7 @@ oneway interface IStatusBar
     /** Notifies System UI about an update to the media tap-to-transfer receiver state. */
     void updateMediaTapToTransferReceiverDisplay(
         int displayState,
-        in MediaRoute2Info routeInfo);
+        in MediaRoute2Info routeInfo,
+        in Icon appIcon,
+        in CharSequence appName);
 }

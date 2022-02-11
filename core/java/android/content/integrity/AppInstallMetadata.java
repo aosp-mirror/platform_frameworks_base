@@ -37,6 +37,8 @@ public final class AppInstallMetadata {
     private final String mPackageName;
     // Raw string encoding for the SHA-256 hash of the certificate of the app.
     private final List<String> mAppCertificates;
+    // Raw string encoding for the SHA-256 hash of the certificate lineage/history of the app.
+    private final List<String> mAppCertificateLineage;
     private final String mInstallerName;
     // Raw string encoding for the SHA-256 hash of the certificate of the installer.
     private final List<String> mInstallerCertificates;
@@ -52,6 +54,7 @@ public final class AppInstallMetadata {
     private AppInstallMetadata(Builder builder) {
         this.mPackageName = builder.mPackageName;
         this.mAppCertificates = builder.mAppCertificates;
+        this.mAppCertificateLineage = builder.mAppCertificateLineage;
         this.mInstallerName = builder.mInstallerName;
         this.mInstallerCertificates = builder.mInstallerCertificates;
         this.mVersionCode = builder.mVersionCode;
@@ -71,6 +74,11 @@ public final class AppInstallMetadata {
     @NonNull
     public List<String> getAppCertificates() {
         return mAppCertificates;
+    }
+
+    @NonNull
+    public List<String> getAppCertificateLineage() {
+        return mAppCertificateLineage;
     }
 
     @NonNull
@@ -126,6 +134,7 @@ public final class AppInstallMetadata {
                     + " %b, StampVerified = %b, StampTrusted = %b, StampCert = %s }",
                 mPackageName,
                 mAppCertificates,
+                mAppCertificateLineage,
                 mInstallerName == null ? "null" : mInstallerName,
                 mInstallerCertificates == null ? "null" : mInstallerCertificates,
                 mVersionCode,
@@ -140,6 +149,7 @@ public final class AppInstallMetadata {
     public static final class Builder {
         private String mPackageName;
         private List<String> mAppCertificates;
+        private List<String> mAppCertificateLineage;
         private String mInstallerName;
         private List<String> mInstallerCertificates;
         private long mVersionCode;
@@ -188,6 +198,20 @@ public final class AppInstallMetadata {
         @NonNull
         public Builder setAppCertificates(@NonNull List<String> appCertificates) {
             this.mAppCertificates = Objects.requireNonNull(appCertificates);
+            return this;
+        }
+
+        /**
+         * Set the list of (old and new) certificates used for signing the app to be installed.
+         *
+         * <p>It is represented as the raw string encoding for the SHA-256 hash of the certificate
+         * lineage/history of the app.
+         *
+         * @see AppInstallMetadata#getAppCertificateLineage()
+         */
+        @NonNull
+        public Builder setAppCertificateLineage(@NonNull List<String> appCertificateLineage) {
+            this.mAppCertificateLineage = Objects.requireNonNull(appCertificateLineage);
             return this;
         }
 
@@ -294,6 +318,7 @@ public final class AppInstallMetadata {
         public AppInstallMetadata build() {
             Objects.requireNonNull(mPackageName);
             Objects.requireNonNull(mAppCertificates);
+            Objects.requireNonNull(mAppCertificateLineage);
             return new AppInstallMetadata(this);
         }
     }

@@ -32,7 +32,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -58,7 +57,6 @@ import android.hardware.face.FaceManager;
 import android.hardware.face.FaceSensorProperties;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintManager;
-import android.media.AudioManager;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.os.Handler;
@@ -73,9 +71,6 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
-
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -92,7 +87,6 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.telephony.TelephonyListenerManager;
-import com.android.systemui.util.RingerModeTracker;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -101,7 +95,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
@@ -160,10 +153,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private TelephonyManager mTelephonyManager;
-    @Mock
-    private RingerModeTracker mRingerModeTracker;
-    @Mock
-    private LiveData<Integer> mRingerModeLiveData;
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
@@ -241,8 +230,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mSpiedContext.addMockSystemService(DevicePolicyManager.class, mDevicePolicyManager);
         mSpiedContext.addMockSystemService(SubscriptionManager.class, mSubscriptionManager);
         mSpiedContext.addMockSystemService(TelephonyManager.class, mTelephonyManager);
-
-        when(mRingerModeTracker.getRingerMode()).thenReturn(mRingerModeLiveData);
 
         mMockitoSession = ExtendedMockito.mockitoSession()
                 .spyStatic(SubscriptionManager.class).startMocking();
@@ -866,29 +853,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void testRingerModeChange() {
-        ArgumentCaptor<Observer<Integer>> captor = ArgumentCaptor.forClass(Observer.class);
-        verify(mRingerModeLiveData).observeForever(captor.capture());
-        Observer<Integer> observer = captor.getValue();
-
-        KeyguardUpdateMonitorCallback callback = mock(KeyguardUpdateMonitorCallback.class);
-
-        mKeyguardUpdateMonitor.registerCallback(callback);
-
-        observer.onChanged(AudioManager.RINGER_MODE_NORMAL);
-        observer.onChanged(AudioManager.RINGER_MODE_SILENT);
-        observer.onChanged(AudioManager.RINGER_MODE_VIBRATE);
-
-        mTestableLooper.processAllMessages();
-
-        InOrder orderVerify = inOrder(callback);
-        orderVerify.verify(callback).onRingerModeChanged(anyInt()); // Initial update on register
-        orderVerify.verify(callback).onRingerModeChanged(AudioManager.RINGER_MODE_NORMAL);
-        orderVerify.verify(callback).onRingerModeChanged(AudioManager.RINGER_MODE_SILENT);
-        orderVerify.verify(callback).onRingerModeChanged(AudioManager.RINGER_MODE_VIBRATE);
-    }
-
-    @Test
     public void testRegisterAuthControllerCallback() {
         assertThat(mKeyguardUpdateMonitor.isUdfpsEnrolled()).isFalse();
 
@@ -1120,7 +1084,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
             super(context,
                     TestableLooper.get(KeyguardUpdateMonitorTest.this).getLooper(),
                     mBroadcastDispatcher, mDumpManager,
-                    mRingerModeTracker, mBackgroundExecutor, mMainExecutor,
+                    mBackgroundExecutor, mMainExecutor,
                     mStatusBarStateController, mLockPatternUtils,
                     mAuthController, mTelephonyListenerManager,
                     mInteractionJankMonitor, mLatencyTracker);

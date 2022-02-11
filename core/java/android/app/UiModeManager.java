@@ -517,7 +517,7 @@ public class UiModeManager {
      * (and potentially an Activity lifecycle event) being applied to all running apps.
      * Developers interested in an app-local implementation of night mode should consider using
      * {@link #setApplicationNightMode(int)} to set and persist the -night qualifier locally or
-     * {@link android.support.v7.app.AppCompatDelegate#setDefaultNightMode(int)} for the
+     * {@link androidx.appcompat.app.AppCompatDelegate#setDefaultNightMode(int)} for the
      * backward compatible implementation.
      *
      * @param mode the night mode to set
@@ -595,7 +595,7 @@ public class UiModeManager {
      * user clears the data for the application, or this application is uninstalled.
      * <p>
      * Developers interested in a non-persistent app-local implementation of night mode should
-     * consider using {@link android.support.v7.app.AppCompatDelegate#setDefaultNightMode(int)}
+     * consider using {@link androidx.appcompat.app.AppCompatDelegate#setDefaultNightMode(int)}
      * to manage the -night qualifier locally.
      *
      * @param mode the night mode to set

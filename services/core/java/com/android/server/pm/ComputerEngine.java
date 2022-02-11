@@ -2134,6 +2134,9 @@ public class ComputerEngine implements Computer {
     private String[] getPackagesForUidInternal(int uid, int callingUid) {
         final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
         final int userId = UserHandle.getUserId(uid);
+        if (Process.isSupplemental(uid)) {
+            uid = getSupplementalProcessUid();
+        }
         final int appId = UserHandle.getAppId(uid);
         return getPackagesForUidInternalBody(callingUid, userId, appId, isCallerInstantApp);
     }
@@ -2369,6 +2372,10 @@ public class ComputerEngine implements Computer {
     }
 
     public final boolean isCallerSameApp(String packageName, int uid) {
+        if (Process.isSupplemental(uid)) {
+            return (packageName != null
+                    && packageName.equals(mService.getSupplementalProcessPackageName()));
+        }
         AndroidPackage pkg = mPackages.get(packageName);
         return pkg != null
                 && UserHandle.getAppId(uid) == pkg.getUid();
@@ -4288,6 +4295,9 @@ public class ComputerEngine implements Computer {
         if (getInstantAppPackageName(callingUid) != null) {
             return null;
         }
+        if (Process.isSupplemental(uid)) {
+            uid = getSupplementalProcessUid();
+        }
         final int callingUserId = UserHandle.getUserId(callingUid);
         final int appId = UserHandle.getAppId(uid);
         final Object obj = mSettings.getSettingBase(appId);
@@ -4320,7 +4330,11 @@ public class ComputerEngine implements Computer {
         final int callingUserId = UserHandle.getUserId(callingUid);
         final String[] names = new String[uids.length];
         for (int i = uids.length - 1; i >= 0; i--) {
-            final int appId = UserHandle.getAppId(uids[i]);
+            int uid = uids[i];
+            if (Process.isSupplemental(uid)) {
+                uid = getSupplementalProcessUid();
+            }
+            final int appId = UserHandle.getAppId(uid);
             final Object obj = mSettings.getSettingBase(appId);
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
@@ -4366,6 +4380,9 @@ public class ComputerEngine implements Computer {
         if (getInstantAppPackageName(callingUid) != null) {
             return 0;
         }
+        if (Process.isSupplemental(uid)) {
+            uid = getSupplementalProcessUid();
+        }
         final int callingUserId = UserHandle.getUserId(callingUid);
         final int appId = UserHandle.getAppId(uid);
         final Object obj = mSettings.getSettingBase(appId);
@@ -4391,6 +4408,9 @@ public class ComputerEngine implements Computer {
         if (getInstantAppPackageName(callingUid) != null) {
             return 0;
         }
+        if (Process.isSupplemental(uid)) {
+            uid = getSupplementalProcessUid();
+        }
         final int callingUserId = UserHandle.getUserId(callingUid);
         final int appId = UserHandle.getAppId(uid);
         final Object obj = mSettings.getSettingBase(appId);
@@ -4414,6 +4434,9 @@ public class ComputerEngine implements Computer {
     public boolean isUidPrivileged(int uid) {
         if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
             return false;
+        }
+        if (Process.isSupplemental(uid)) {
+            uid = getSupplementalProcessUid();
         }
         final int appId = UserHandle.getAppId(uid);
         final Object obj = mSettings.getSettingBase(appId);
@@ -5539,6 +5562,9 @@ public class ComputerEngine implements Computer {
 
     @Override
     public int getUidTargetSdkVersion(int uid) {
+        if (Process.isSupplemental(uid)) {
+            uid = getSupplementalProcessUid();
+        }
         final int appId = UserHandle.getAppId(uid);
         final SettingBase settingBase = mSettings.getSettingBase(appId);
         if (settingBase instanceof SharedUserSetting) {
@@ -5565,6 +5591,9 @@ public class ComputerEngine implements Computer {
     @Nullable
     @Override
     public ArrayMap<String, ProcessInfo> getProcessesForUid(int uid) {
+        if (Process.isSupplemental(uid)) {
+            uid = getSupplementalProcessUid();
+        }
         final int appId = UserHandle.getAppId(uid);
         final SettingBase settingBase = mSettings.getSettingBase(appId);
         if (settingBase instanceof SharedUserSetting) {
@@ -5593,5 +5622,9 @@ public class ComputerEngine implements Computer {
         } else {
             return null;
         }
+    }
+
+    private int getSupplementalProcessUid() {
+        return getPackage(mService.getSupplementalProcessPackageName()).getUid();
     }
 }

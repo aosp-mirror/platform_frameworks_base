@@ -31,6 +31,7 @@ import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_MOD
 import static com.android.internal.app.procstats.ProcessStats.ADJ_MEM_FACTOR_NORMAL;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.AppBatteryTracker.BatteryUsage.BATTERY_USAGE_COUNT;
 import static com.android.server.am.LowMemDetector.ADJ_MEM_FACTOR_NOTHING;
 
 import android.app.ActivityManager;
@@ -3256,12 +3257,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
         if (arg == null) {
-            batteryTracker.mDebugUidPercentages.clear();
+            batteryTracker.clearDebugUidPercentage();
             return 0;
         }
         String[] pairs = arg.split(",");
         int[] uids = new int[pairs.length];
-        double[] values = new double[pairs.length];
+        double[][] values = new double[pairs.length][];
         try {
             for (int i = 0; i < pairs.length; i++) {
                 String[] pair = pairs[i].split("=");
@@ -3270,16 +3271,21 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return -1;
                 }
                 uids[i] = Integer.parseInt(pair[0]);
-                values[i] = Double.parseDouble(pair[1]);
+                final String[] vals = pair[1].split(":");
+                if (vals.length != BATTERY_USAGE_COUNT) {
+                    getErrPrintWriter().println("Malformed input");
+                    return -1;
+                }
+                values[i] = new double[vals.length];
+                for (int j = 0; j < vals.length; j++) {
+                    values[i][j] = Double.parseDouble(vals[j]);
+                }
             }
         } catch (NumberFormatException e) {
             getErrPrintWriter().println("Malformed input");
             return -1;
         }
-        batteryTracker.mDebugUidPercentages.clear();
-        for (int i = 0; i < pairs.length; i++) {
-            batteryTracker.mDebugUidPercentages.put(uids[i], values[i]);
-        }
+        batteryTracker.setDebugUidPercentage(uids, values);
         return 0;
     }
 

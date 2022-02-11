@@ -78,13 +78,14 @@ import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Pools;
+import android.util.RotationUtils;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
-import android.view.InsetsState;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
+import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Builder;
 import android.view.SurfaceControlViewHost;
@@ -197,6 +198,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     private final Point mTmpPos = new Point();
     protected final Point mLastSurfacePosition = new Point();
+    protected @Surface.Rotation int mLastDeltaRotation = Surface.ROTATION_0;
 
     /** Total number of elements in this subtree, including our own hierarchy element. */
     private int mTreeWeight = 1;
@@ -473,6 +475,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         t.remove(mSurfaceControl);
         // Clear the last position so the new SurfaceControl will get correct position
         mLastSurfacePosition.set(0, 0);
+        mLastDeltaRotation = Surface.ROTATION_0;
 
         final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(null)
                 .setContainerLayer()
@@ -644,6 +647,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             getSyncTransaction().remove(mSurfaceControl);
             setSurfaceControl(null);
             mLastSurfacePosition.set(0, 0);
+            mLastDeltaRotation = Surface.ROTATION_0;
             scheduleAnimation();
         }
         if (mOverlayHost != null) {
@@ -3127,12 +3131,43 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
 
         getRelativePosition(mTmpPos);
-        if (mTmpPos.equals(mLastSurfacePosition)) {
+        final int deltaRotation = getRelativeDisplayRotation();
+        if (mTmpPos.equals(mLastSurfacePosition) && deltaRotation == mLastDeltaRotation) {
             return;
         }
 
         t.setPosition(mSurfaceControl, mTmpPos.x, mTmpPos.y);
+        // set first, since we don't want rotation included in this (for now).
         mLastSurfacePosition.set(mTmpPos.x, mTmpPos.y);
+
+        if (mTransitionController.isShellTransitionsEnabled()
+                && !mTransitionController.useShellTransitionsRotation()) {
+            if (deltaRotation != Surface.ROTATION_0) {
+                updateSurfaceRotation(t, deltaRotation, null /* positionLeash */);
+            } else if (deltaRotation != mLastDeltaRotation) {
+                t.setMatrix(mSurfaceControl, 1, 0, 0, 1);
+            }
+        }
+        mLastDeltaRotation = deltaRotation;
+    }
+
+    /**
+     * Updates the surface transform based on a difference in displayed-rotation from its parent.
+     * @param positionLeash If non-null, the rotated position will be set on this surface instead
+     *                      of the window surface. {@see WindowToken#getOrCreateFixedRotationLeash}.
+     */
+    protected void updateSurfaceRotation(Transaction t, @Surface.Rotation int deltaRotation,
+            @Nullable SurfaceControl positionLeash) {
+        // parent must be non-null otherwise deltaRotation would be 0.
+        RotationUtils.rotateSurface(t, mSurfaceControl, deltaRotation);
+        mTmpPos.set(mLastSurfacePosition.x, mLastSurfacePosition.y);
+        final Rect parentBounds = getParent().getBounds();
+        final boolean flipped = (deltaRotation % 2) != 0;
+        RotationUtils.rotatePoint(mTmpPos, deltaRotation,
+                flipped ? parentBounds.height() : parentBounds.width(),
+                flipped ? parentBounds.width() : parentBounds.height());
+        t.setPosition(positionLeash != null ? positionLeash : mSurfaceControl,
+                mTmpPos.x, mTmpPos.y);
     }
 
     @VisibleForTesting
@@ -3168,6 +3203,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             final Rect parentBounds = parent.getBounds();
             outPos.offset(-parentBounds.left, -parentBounds.top);
         }
+    }
+
+    /** @return the difference in displayed-rotation from parent. */
+    @Surface.Rotation
+    int getRelativeDisplayRotation() {
+        final WindowContainer parent = getParent();
+        if (parent == null) return Surface.ROTATION_0;
+        final int rotation = getWindowConfiguration().getDisplayRotation();
+        final int parentRotation = parent.getWindowConfiguration().getDisplayRotation();
+        return RotationUtils.deltaRotation(rotation, parentRotation);
     }
 
     void waitForAllWindowsDrawn() {

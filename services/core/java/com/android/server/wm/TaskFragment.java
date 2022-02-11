@@ -945,6 +945,10 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             // we still want to check if the visibility of other windows have changed (e.g. bringing
             // a fullscreen window forward to cover another freeform activity.)
             if (taskDisplayArea.inMultiWindowMode()) {
+                if (taskDisplayArea.mDisplayContent != null
+                        && taskDisplayArea.mDisplayContent.mFocusedApp != next) {
+                    taskDisplayArea.mDisplayContent.setFocusedApp(next);
+                }
                 taskDisplayArea.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
                         false /* preserveWindows */, true /* notifyClients */);
             }
