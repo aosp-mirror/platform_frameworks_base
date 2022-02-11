@@ -27,7 +27,6 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_GLOBAL_ACTIONS_SHOWING;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -117,7 +116,6 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.scrim.ScrimDrawable;
@@ -125,7 +123,6 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
-import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.telephony.TelephonyListenerManager;
@@ -200,7 +197,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private final TelecomManager mTelecomManager;
     private final MetricsLogger mMetricsLogger;
     private final UiEventLogger mUiEventLogger;
-    private final SysUiState mSysUiState;
 
     // Used for RingerModeTracker
     private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
@@ -241,7 +237,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     protected Handler mMainHandler;
     private int mSmallestScreenWidthDp;
     private final Optional<StatusBar> mStatusBarOptional;
-    private final SystemUIDialogManager mDialogManager;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
 
@@ -347,13 +342,11 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             @Background Executor backgroundExecutor,
             UiEventLogger uiEventLogger,
             RingerModeTracker ringerModeTracker,
-            SysUiState sysUiState,
             @Main Handler handler,
             PackageManager packageManager,
             Optional<StatusBar> statusBarOptional,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            DialogLaunchAnimator dialogLaunchAnimator,
-            SystemUIDialogManager dialogManager) {
+            DialogLaunchAnimator dialogLaunchAnimator) {
         mContext = context;
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
@@ -379,13 +372,11 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mIWindowManager = iWindowManager;
         mBackgroundExecutor = backgroundExecutor;
         mRingerModeTracker = ringerModeTracker;
-        mSysUiState = sysUiState;
         mMainHandler = handler;
         mSmallestScreenWidthDp = resources.getConfiguration().smallestScreenWidthDp;
         mStatusBarOptional = statusBarOptional;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mDialogLaunchAnimator = dialogLaunchAnimator;
-        mDialogManager = dialogManager;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -682,11 +673,10 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
 
         ActionsDialogLite dialog = new ActionsDialogLite(mContext,
                 com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActionsLite,
-                mAdapter, mOverflowAdapter, mSysuiColorExtractor,
-                mStatusBarService, mNotificationShadeWindowController,
-                mSysUiState, this::onRefresh, mKeyguardShowing, mPowerAdapter, mUiEventLogger,
-                mStatusBarOptional, mKeyguardUpdateMonitor, mLockPatternUtils,
-                mDialogManager);
+                mAdapter, mOverflowAdapter, mSysuiColorExtractor, mStatusBarService,
+                mNotificationShadeWindowController, this::onRefresh, mKeyguardShowing,
+                mPowerAdapter, mUiEventLogger, mStatusBarOptional, mKeyguardUpdateMonitor,
+                mLockPatternUtils);
 
         dialog.setOnDismissListener(this);
         dialog.setOnShowListener(this);
@@ -2165,7 +2155,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         private boolean mKeyguardShowing;
         protected float mScrimAlpha;
         protected final NotificationShadeWindowController mNotificationShadeWindowController;
-        protected final SysUiState mSysUiState;
         private ListPopupWindow mOverflowPopup;
         private Dialog mPowerOptionsDialog;
         protected final Runnable mOnRefreshCallback;
@@ -2226,15 +2215,13 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 MyOverflowAdapter overflowAdapter,
                 SysuiColorExtractor sysuiColorExtractor, IStatusBarService statusBarService,
                 NotificationShadeWindowController notificationShadeWindowController,
-                SysUiState sysuiState, Runnable onRefreshCallback, boolean keyguardShowing,
+                Runnable onRefreshCallback, boolean keyguardShowing,
                 MyPowerOptionsAdapter powerAdapter, UiEventLogger uiEventLogger,
-                Optional<StatusBar> statusBarOptional,
-                KeyguardUpdateMonitor keyguardUpdateMonitor, LockPatternUtils lockPatternUtils,
-                SystemUIDialogManager systemUiDialogManager) {
+                Optional<StatusBar> statusBarOptional, KeyguardUpdateMonitor keyguardUpdateMonitor,
+                LockPatternUtils lockPatternUtils) {
             // We set dismissOnDeviceLock to false because we have a custom broadcast receiver to
             // dismiss this dialog when the device is locked.
-            super(context, themeRes, false /* dismissOnDeviceLock */,
-                    systemUiDialogManager);
+            super(context, themeRes, false /* dismissOnDeviceLock */);
             mContext = context;
             mAdapter = adapter;
             mOverflowAdapter = overflowAdapter;
@@ -2242,7 +2229,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             mColorExtractor = sysuiColorExtractor;
             mStatusBarService = statusBarService;
             mNotificationShadeWindowController = notificationShadeWindowController;
-            mSysUiState = sysuiState;
             mOnRefreshCallback = onRefreshCallback;
             mKeyguardShowing = keyguardShowing;
             mUiEventLogger = uiEventLogger;
@@ -2463,8 +2449,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         public void show() {
             super.show();
             mNotificationShadeWindowController.setRequestTopUi(true, TAG);
-            mSysUiState.setFlag(SYSUI_STATE_GLOBAL_ACTIONS_SHOWING, true)
-                    .commitUpdate(mContext.getDisplayId());
 
             // By default this dialog windowAnimationStyle is null, and therefore windowAnimations
             // should be equal to 0 which means we need to animate the dialog in-window. If it's not
@@ -2563,9 +2547,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             dismissPowerOptions();
 
             mNotificationShadeWindowController.setRequestTopUi(false, TAG);
-            mSysUiState.setFlag(SYSUI_STATE_GLOBAL_ACTIONS_SHOWING, false)
-                    .commitUpdate(mContext.getDisplayId());
-
             super.dismiss();
         }
 
