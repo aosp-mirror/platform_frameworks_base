@@ -293,6 +293,7 @@ public class NotificationPermissionMigrationTest extends UiServiceTestCase {
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternal);
         mContext.addMockSystemService(Context.ALARM_SERVICE, mAlarmManager);
+        when(mUm.getProfileIds(0, false)).thenReturn(new int[]{0});
 
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
 
