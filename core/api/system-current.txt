@@ -355,6 +355,7 @@ package android {
     field public static final String WRITE_EMBEDDED_SUBSCRIPTIONS = "android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS";
     field @Deprecated public static final String WRITE_MEDIA_STORAGE = "android.permission.WRITE_MEDIA_STORAGE";
     field public static final String WRITE_OBB = "android.permission.WRITE_OBB";
+    field public static final String WRITE_SECURITY_LOG = "android.permission.WRITE_SECURITY_LOG";
     field public static final String WRITE_SMS = "android.permission.WRITE_SMS";
   }
 
@@ -1305,6 +1306,10 @@ package android.app.admin {
     field public static final int ERROR_SET_DEVICE_OWNER_FAILED = 7; // 0x7
     field public static final int ERROR_STARTING_PROFILE_FAILED = 5; // 0x5
     field public static final int ERROR_UNKNOWN = 0; // 0x0
+  }
+
+  public class SecurityLog {
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURITY_LOG) public static int writeEvent(int, @NonNull java.lang.Object...);
   }
 
   public final class SystemUpdatePolicy implements android.os.Parcelable {

@@ -1717,7 +1717,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                     return false;
                 }
                 setSeparateProfileChallengeEnabledLocked(userId, true, /* unused */ null);
-                notifyPasswordChanged(userId);
+                notifyPasswordChanged(credential, userId);
             }
             if (isCredentialSharedWithParent(userId)) {
                 // Make sure the profile doesn't get locked straight after setting work challenge.
@@ -2510,9 +2510,11 @@ public class LockSettingsService extends ILockSettings.Stub {
      * Call after {@link #setUserPasswordMetrics} so metrics are updated before
      * reporting the password changed.
      */
-    private void notifyPasswordChanged(@UserIdInt int userId) {
+    private void notifyPasswordChanged(LockscreenCredential newCredential, @UserIdInt int userId) {
         mHandler.post(() -> {
-            mInjector.getDevicePolicyManager().reportPasswordChanged(userId);
+            mInjector.getDevicePolicyManager().reportPasswordChanged(
+                    PasswordMetrics.computeForCredential(newCredential),
+                    userId);
             LocalServices.getService(WindowManagerInternal.class).reportPasswordChanged(userId);
         });
     }
@@ -3447,7 +3449,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 // the caller like DPMS), otherwise it can lead to deadlock.
                 mHandler.post(() -> unlockUser(userId, null));
             }
-            notifyPasswordChanged(userId);
+            notifyPasswordChanged(credential, userId);
             notifySeparateProfileChallengeChanged(userId);
         }
         return result;

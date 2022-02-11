@@ -8307,10 +8307,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
-    public void reportPasswordChanged(@UserIdInt int userId) {
+    public void reportPasswordChanged(PasswordMetrics metrics, @UserIdInt int userId) {
         if (mService != null) {
             try {
-                mService.reportPasswordChanged(userId);
+                mService.reportPasswordChanged(metrics, userId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
