@@ -387,16 +387,18 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     }
 
     /**
-     * @return Width of shelf for the given number of icons and overflow dot
+     * @return Width of shelf for the given number of icons
      */
-    public int calculateWidthFor(int numMaxIcons) {
+    public float calculateWidthFor(float numIcons) {
         if (getChildCount() == 0) {
-            return 0;
+            return 0f;
         }
-        return (int) (getActualPaddingStart()
-                + numMaxIcons * mIconSize
-                + mOverflowWidth
-                + getActualPaddingEnd());
+        final float contentWidth = numIcons <= MAX_ICONS_ON_LOCKSCREEN + 1
+                ? numIcons * mIconSize
+                : MAX_ICONS_ON_LOCKSCREEN * mIconSize + (float) mOverflowWidth;
+        return getActualPaddingStart()
+                + contentWidth
+                + getActualPaddingEnd();
     }
 
     /**
