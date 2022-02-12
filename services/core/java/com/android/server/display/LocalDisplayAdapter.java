@@ -182,8 +182,11 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private final long mPhysicalDisplayId;
         private final SparseArray<DisplayModeRecord> mSupportedModes = new SparseArray<>();
         private final ArrayList<Integer> mSupportedColorModes = new ArrayList<>();
+        private final DisplayModeDirector.DesiredDisplayModeSpecs mDisplayModeSpecs =
+                new DisplayModeDirector.DesiredDisplayModeSpecs();
         private final boolean mIsDefaultDisplay;
         private final BacklightAdapter mBacklightAdapter;
+        private final SidekickInternal mSidekickInternal;
 
         private DisplayDeviceInfo mInfo;
         private boolean mHavePendingChanges;
@@ -200,8 +203,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private int mActiveDisplayModeAtStartId = INVALID_MODE_ID;
         private Display.Mode mUserPreferredMode;
         private int mActiveModeId = INVALID_MODE_ID;
-        private DisplayModeDirector.DesiredDisplayModeSpecs mDisplayModeSpecs =
-                new DisplayModeDirector.DesiredDisplayModeSpecs();
         private boolean mDisplayModeSpecsInvalid;
         private int mActiveColorMode;
         private Display.HdrCapabilities mHdrCapabilities;
@@ -210,13 +211,11 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private boolean mAllmRequested;
         private boolean mGameContentTypeRequested;
         private boolean mSidekickActive;
-        private SidekickInternal mSidekickInternal;
         private SurfaceControl.StaticDisplayInfo mStaticDisplayInfo;
         // The supported display modes according to SurfaceFlinger
         private SurfaceControl.DisplayMode[] mSfDisplayModes;
         // The active display mode in SurfaceFlinger
         private SurfaceControl.DisplayMode mActiveSfDisplayMode;
-        private DisplayDeviceConfig mDisplayDeviceConfig;
 
         private DisplayEventReceiver.FrameRateOverride[] mFrameRateOverrides =
                 new DisplayEventReceiver.FrameRateOverride[0];
@@ -233,7 +232,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             mSidekickInternal = LocalServices.getService(SidekickInternal.class);
             mBacklightAdapter = new BacklightAdapter(displayToken, isDefaultDisplay,
                     mSurfaceControlProxy);
-            mDisplayDeviceConfig = null;
             mActiveDisplayModeAtStartId = dynamicInfo.activeDisplayModeId;
         }
 
@@ -459,9 +457,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             final Context context = getOverlayContext();
             mDisplayDeviceConfig = DisplayDeviceConfig.create(context, mPhysicalDisplayId,
                     mIsDefaultDisplay);
-            if (mDisplayDeviceConfig == null) {
-                return;
-            }
 
             // Load brightness HWC quirk
             mBacklightAdapter.setForceSurfaceControl(mDisplayDeviceConfig.hasQuirk(
@@ -1083,8 +1078,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             pw.println("mGameContentTypeRequested=" + mGameContentTypeRequested);
             pw.println("mStaticDisplayInfo=" + mStaticDisplayInfo);
             pw.println("mSfDisplayModes=");
-            for (int i = 0; i < mSfDisplayModes.length; i++) {
-                pw.println("  " + mSfDisplayModes[i]);
+            for (SurfaceControl.DisplayMode sfDisplayMode : mSfDisplayModes) {
+                pw.println("  " + sfDisplayMode);
             }
             pw.println("mActiveSfDisplayMode=" + mActiveSfDisplayMode);
             pw.println("mSupportedModes=");
@@ -1238,6 +1233,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
     }
 
     public static class Injector {
+        // Native callback.
+        @SuppressWarnings("unused")
         private ProxyDisplayEventReceiver mReceiver;
         public void setDisplayEventListenerLocked(Looper looper, DisplayEventListener listener) {
             mReceiver = new ProxyDisplayEventReceiver(looper, listener);

@@ -26,6 +26,8 @@ import static android.view.SurfaceControl.METADATA_WINDOW_TYPE;
 import static android.view.View.SYSTEM_UI_FLAG_VISIBLE;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
@@ -890,8 +892,6 @@ public abstract class WallpaperService extends Service {
          * @param dimAmount Float amount between [0.0, 1.0] to dim the wallpaper.
          */
         private void updateWallpaperDimming(float dimAmount) {
-            mPreviousWallpaperDimAmount = mWallpaperDimAmount;
-
             // Custom dim amount cannot be less than the default dim amount.
             mWallpaperDimAmount = Math.max(mDefaultDimAmount, dimAmount);
             // If dim amount is 0f (additional dimming is removed), then the wallpaper should dim
@@ -909,15 +909,15 @@ public abstract class WallpaperService extends Service {
             SurfaceControl.Transaction surfaceControlTransaction = new SurfaceControl.Transaction();
             // TODO: apply the dimming to preview as well once surface transparency works in
             // preview mode.
-            if (!isPreview() && mShouldDim) {
+            if ((!isPreview() && mShouldDim)
+                    || mPreviousWallpaperDimAmount != mWallpaperDimAmount) {
                 Log.v(TAG, "Setting wallpaper dimming: " + mWallpaperDimAmount);
 
                 // Animate dimming to gradually change the wallpaper alpha from the previous
                 // dim amount to the new amount only if the dim amount changed.
                 ValueAnimator animator = ValueAnimator.ofFloat(
                         mPreviousWallpaperDimAmount, mWallpaperDimAmount);
-                animator.setDuration(mPreviousWallpaperDimAmount == mWallpaperDimAmount
-                        ? 0 : DIMMING_ANIMATION_DURATION_MS);
+                animator.setDuration(DIMMING_ANIMATION_DURATION_MS);
                 animator.addUpdateListener((ValueAnimator va) -> {
                     final float dimValue = (float) va.getAnimatedValue();
                     if (mBbqSurfaceControl != null) {
@@ -925,11 +925,19 @@ public abstract class WallpaperService extends Service {
                                 .setAlpha(mBbqSurfaceControl, 1 - dimValue).apply();
                     }
                 });
+                animator.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        updateSurface(false, false, true);
+                    }
+                });
                 animator.start();
             } else {
                 Log.v(TAG, "Setting wallpaper dimming: " + 0);
                 surfaceControlTransaction.setAlpha(mBbqSurfaceControl, 1.0f).apply();
             }
+
+            mPreviousWallpaperDimAmount = mWallpaperDimAmount;
         }
 
         /**
@@ -1332,6 +1340,7 @@ public abstract class WallpaperService extends Service {
                             resetWindowPages();
                             mSession.finishDrawing(mWindow, null /* postDrawTransaction */);
                             processLocalColors(mPendingXOffset, mPendingXOffsetStep);
+                            notifyColorsChanged();
                         }
                         reposition();
                         reportEngineShown(shouldWaitForEngineShown());

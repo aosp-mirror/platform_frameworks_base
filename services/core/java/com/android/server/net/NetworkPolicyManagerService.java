@@ -46,22 +46,23 @@ import static android.net.ConnectivityManager.BLOCKED_METERED_REASON_USER_RESTRI
 import static android.net.ConnectivityManager.BLOCKED_REASON_APP_STANDBY;
 import static android.net.ConnectivityManager.BLOCKED_REASON_BATTERY_SAVER;
 import static android.net.ConnectivityManager.BLOCKED_REASON_DOZE;
+import static android.net.ConnectivityManager.BLOCKED_REASON_LOW_POWER_STANDBY;
 import static android.net.ConnectivityManager.BLOCKED_REASON_NONE;
 import static android.net.ConnectivityManager.BLOCKED_REASON_RESTRICTED_MODE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_DOZABLE;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_LOW_POWER_STANDBY;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_POWERSAVE;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_RESTRICTED;
+import static android.net.ConnectivityManager.FIREWALL_CHAIN_STANDBY;
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_DISABLED;
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_ENABLED;
 import static android.net.ConnectivityManager.RESTRICT_BACKGROUND_STATUS_WHITELISTED;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
-import static android.net.INetd.FIREWALL_CHAIN_DOZABLE;
-import static android.net.INetd.FIREWALL_CHAIN_POWERSAVE;
-import static android.net.INetd.FIREWALL_CHAIN_RESTRICTED;
-import static android.net.INetd.FIREWALL_CHAIN_STANDBY;
 import static android.net.INetd.FIREWALL_RULE_ALLOW;
 import static android.net.INetd.FIREWALL_RULE_DENY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
-import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
@@ -70,11 +71,13 @@ import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_MASK;
 import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_SYSTEM;
 import static android.net.NetworkPolicyManager.ALLOWED_METERED_REASON_USER_EXEMPTED;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_FOREGROUND;
+import static android.net.NetworkPolicyManager.ALLOWED_REASON_LOW_POWER_STANDBY_ALLOWLIST;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_NONE;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_POWER_SAVE_ALLOWLIST;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_POWER_SAVE_EXCEPT_IDLE_ALLOWLIST;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS;
 import static android.net.NetworkPolicyManager.ALLOWED_REASON_SYSTEM;
+import static android.net.NetworkPolicyManager.ALLOWED_REASON_TOP;
 import static android.net.NetworkPolicyManager.EXTRA_NETWORK_TEMPLATE;
 import static android.net.NetworkPolicyManager.FIREWALL_RULE_DEFAULT;
 import static android.net.NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND;
@@ -88,6 +91,7 @@ import static android.net.NetworkPolicyManager.RULE_REJECT_RESTRICTED_MODE;
 import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.SUBSCRIPTION_OVERRIDE_UNMETERED;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
+import static android.net.NetworkPolicyManager.isProcStateAllowedWhileInLowPowerStandby;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground;
 import static android.net.NetworkPolicyManager.resolveNetworkId;
 import static android.net.NetworkPolicyManager.uidPoliciesToString;
@@ -171,11 +175,9 @@ import android.net.NetworkPolicy;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkPolicyManager.UidState;
 import android.net.NetworkRequest;
-import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkStateSnapshot;
 import android.net.NetworkTemplate;
-import android.net.TelephonyNetworkSpecifier;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
 import android.os.BestClock;
@@ -478,6 +480,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     volatile boolean mRestrictBackgroundChangedInBsm;
     @GuardedBy("mUidRulesFirstLock")
     volatile boolean mRestrictedNetworkingMode;
+    @GuardedBy("mUidRulesFirstLock")
+    volatile boolean mLowPowerStandbyActive;
 
     private final boolean mSuppressDefaultPolicy;
 
@@ -517,6 +521,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     final SparseIntArray mUidFirewallPowerSaveRules = new SparseIntArray();
     @GuardedBy("mUidRulesFirstLock")
     final SparseIntArray mUidFirewallRestrictedModeRules = new SparseIntArray();
+    @GuardedBy("mUidRulesFirstLock")
+    final SparseIntArray mUidFirewallLowPowerStandbyModeRules = new SparseIntArray();
 
     /** Set of states for the child firewall chains. True if the chain is active. */
     @GuardedBy("mUidRulesFirstLock")
@@ -544,6 +550,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @GuardedBy("mUidRulesFirstLock")
     private final SparseBooleanArray mPowerSaveTempWhitelistAppIds = new SparseBooleanArray();
+
+    @GuardedBy("mUidRulesFirstLock")
+    private final SparseBooleanArray mLowPowerStandbyAllowlistUids = new SparseBooleanArray();
 
     /**
      * UIDs that have been allowlisted temporarily to be able to have network access despite being
@@ -1508,7 +1517,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     .setType(TYPE_MOBILE)
                     .setSubscriberId(subscriberId)
                     .setMetered(true)
-                    .setDefaultNetwork(true).build();
+                    .setDefaultNetwork(true)
+                    .setSubId(subId).build();
             if (template.matches(probeIdent)) {
                 return subId;
             }
@@ -1745,7 +1755,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 .setType(TYPE_MOBILE)
                 .setSubscriberId(subscriberId)
                 .setMetered(true)
-                .setDefaultNetwork(true).build();
+                .setDefaultNetwork(true)
+                .setSubId(subId).build();
         for (int i = mNetworkPolicy.size() - 1; i >= 0; i--) {
             final NetworkTemplate template = mNetworkPolicy.keyAt(i);
             if (template.matches(probeIdent)) {
@@ -1977,7 +1988,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                             .setType(TYPE_MOBILE)
                             .setSubscriberId(subscriberId)
                             .setMetered(true)
-                            .setDefaultNetwork(true).build();
+                            .setDefaultNetwork(true)
+                            .setSubId(subId).build();
                     // Template is matched when subscriber id matches.
                     if (template.matches(probeIdent)) {
                         matchingSubIds.add(subId);
@@ -2079,7 +2091,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mNetIdToSubId.clear();
         final ArrayMap<NetworkStateSnapshot, NetworkIdentity> identified = new ArrayMap<>();
         for (final NetworkStateSnapshot snapshot : snapshots) {
-            mNetIdToSubId.put(snapshot.getNetwork().getNetId(), parseSubId(snapshot));
+            final int subId = snapshot.getSubId();
+            mNetIdToSubId.put(snapshot.getNetwork().getNetId(), subId);
 
             // Policies matched by NPMS only match by subscriber ID or by network ID.
             final NetworkIdentity ident = new NetworkIdentity.Builder()
@@ -2284,7 +2297,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 .setType(TYPE_MOBILE)
                 .setSubscriberId(subscriberId)
                 .setMetered(true)
-                .setDefaultNetwork(true).build();
+                .setDefaultNetwork(true)
+                .setSubId(subId).build();
         for (int i = mNetworkPolicy.size() - 1; i >= 0; i--) {
             final NetworkTemplate template = mNetworkPolicy.keyAt(i);
             if (template.matches(probeIdent)) {
@@ -3763,6 +3777,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 fout.print("Restrict power: "); fout.println(mRestrictPower);
                 fout.print("Device idle: "); fout.println(mDeviceIdleMode);
                 fout.print("Restricted networking mode: "); fout.println(mRestrictedNetworkingMode);
+                fout.print("Low Power Standby mode: "); fout.println(mLowPowerStandbyActive);
                 synchronized (mMeteredIfacesLock) {
                     fout.print("Metered ifaces: ");
                     fout.println(mMeteredIfaces);
@@ -3898,6 +3913,18 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     fout.decreaseIndent();
                 }
 
+                size = mLowPowerStandbyAllowlistUids.size();
+                if (size > 0) {
+                    fout.println("Low Power Standby allowlist uids:");
+                    fout.increaseIndent();
+                    for (int i = 0; i < size; i++) {
+                        fout.print("UID=");
+                        fout.print(mLowPowerStandbyAllowlistUids.keyAt(i));
+                        fout.println();
+                    }
+                    fout.decreaseIndent();
+                }
+
                 final SparseBooleanArray knownUids = new SparseBooleanArray();
                 collectKeys(mUidState, knownUids);
                 collectKeys(mUidBlockedState, knownUids);
@@ -3979,6 +4006,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return isProcStateAllowedWhileIdleOrPowerSaveMode(uidState);
     }
 
+    @GuardedBy("mUidRulesFirstLock")
+    private boolean isUidTop(int uid) {
+        final UidState uidState = mUidState.get(uid);
+        return isProcStateAllowedWhileInLowPowerStandby(uidState);
+    }
+
     /**
      * Process state of UID changed; if needed, will trigger
      * {@link #updateRulesForDataUsageRestrictionsUL(int)} and
@@ -3995,8 +4028,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // state changed, push updated rules
                 mUidState.put(uid, newUidState);
                 updateRestrictBackgroundRulesOnUidStatusChangedUL(uid, oldUidState, newUidState);
-                if (isProcStateAllowedWhileIdleOrPowerSaveMode(oldUidState)
-                        != isProcStateAllowedWhileIdleOrPowerSaveMode(newUidState)) {
+                boolean allowedWhileIdleOrPowerSaveModeChanged =
+                        isProcStateAllowedWhileIdleOrPowerSaveMode(oldUidState)
+                                != isProcStateAllowedWhileIdleOrPowerSaveMode(newUidState);
+                if (allowedWhileIdleOrPowerSaveModeChanged) {
                     updateRuleForAppIdleUL(uid);
                     if (mDeviceIdleMode) {
                         updateRuleForDeviceIdleUL(uid);
@@ -4005,6 +4040,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         updateRuleForRestrictPowerUL(uid);
                     }
                     updateRulesForPowerRestrictionsUL(uid);
+                }
+                if (mLowPowerStandbyActive) {
+                    boolean allowedInLpsChanged =
+                            isProcStateAllowedWhileInLowPowerStandby(oldUidState)
+                                    != isProcStateAllowedWhileInLowPowerStandby(newUidState);
+                    if (allowedInLpsChanged) {
+                        if (!allowedWhileIdleOrPowerSaveModeChanged) {
+                            updateRulesForPowerRestrictionsUL(uid);
+                        }
+                        updateRuleForLowPowerStandbyUL(uid);
+                    }
                 }
                 return true;
             }
@@ -4029,6 +4075,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     updateRuleForRestrictPowerUL(uid);
                 }
                 updateRulesForPowerRestrictionsUL(uid);
+                if (mLowPowerStandbyActive) {
+                    updateRuleForLowPowerStandbyUL(uid);
+                }
                 return true;
             }
         }
@@ -4232,6 +4281,50 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    @GuardedBy("mUidRulesFirstLock")
+    void updateRulesForLowPowerStandbyUL() {
+        Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "updateRulesForLowPowerStandbyUL");
+        try {
+            if (mLowPowerStandbyActive) {
+                mUidFirewallLowPowerStandbyModeRules.clear();
+                for (int i = mUidState.size() - 1; i >= 0; i--) {
+                    final int uid = mUidState.keyAt(i);
+                    UidBlockedState uidBlockedState = mUidBlockedState.get(uid);
+                    if (hasInternetPermissionUL(uid) && uidBlockedState != null
+                            && (uidBlockedState.effectiveBlockedReasons
+                                    & BLOCKED_REASON_LOW_POWER_STANDBY) == 0) {
+                        mUidFirewallLowPowerStandbyModeRules.put(mUidBlockedState.keyAt(i),
+                                FIREWALL_RULE_ALLOW);
+                    }
+                }
+                setUidFirewallRulesUL(FIREWALL_CHAIN_LOW_POWER_STANDBY,
+                        mUidFirewallLowPowerStandbyModeRules, CHAIN_TOGGLE_ENABLE);
+            } else {
+                setUidFirewallRulesUL(FIREWALL_CHAIN_LOW_POWER_STANDBY, null, CHAIN_TOGGLE_DISABLE);
+            }
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
+        }
+    }
+
+    @GuardedBy("mUidRulesFirstLock")
+    void updateRuleForLowPowerStandbyUL(int uid) {
+        if (!hasInternetPermissionUL(uid)) {
+            return;
+        }
+
+        final UidBlockedState uidBlockedState = mUidBlockedState.get(uid);
+        if (mUidState.contains(uid) && uidBlockedState != null
+                && (uidBlockedState.effectiveBlockedReasons & BLOCKED_REASON_LOW_POWER_STANDBY)
+                == 0) {
+            mUidFirewallLowPowerStandbyModeRules.put(uid, FIREWALL_RULE_ALLOW);
+            setUidFirewallRule(FIREWALL_CHAIN_LOW_POWER_STANDBY, uid, FIREWALL_RULE_ALLOW);
+        } else {
+            mUidFirewallLowPowerStandbyModeRules.delete(uid);
+            setUidFirewallRule(FIREWALL_CHAIN_LOW_POWER_STANDBY, uid, FIREWALL_RULE_DEFAULT);
+        }
+    }
+
     /**
      * Returns whether a uid is allowlisted from power saving restrictions (eg: Battery Saver, Doze
      * mode, and app idle).
@@ -4259,6 +4352,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private boolean isWhitelistedFromPowerSaveExceptIdleUL(int uid) {
         final int appId = UserHandle.getAppId(uid);
         return mPowerSaveWhitelistExceptIdleAppIds.get(appId);
+    }
+
+    /**
+     * Returns whether a uid is allowlisted from low power standby restrictions.
+     */
+    @GuardedBy("mUidRulesFirstLock")
+    private boolean isAllowlistedFromLowPowerStandbyUL(int uid) {
+        return mLowPowerStandbyAllowlistUids.get(uid);
     }
 
     // NOTE: since both fw_dozable and fw_powersave uses the same map
@@ -4598,6 +4699,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mPowerSaveTempWhitelistAppIds.delete(uid);
         mAppIdleTempWhitelistAppIds.delete(uid);
         mUidFirewallRestrictedModeRules.delete(uid);
+        mUidFirewallLowPowerStandbyModeRules.delete(uid);
         synchronized (mUidStateCallbackInfos) {
             mUidStateCallbackInfos.remove(uid);
         }
@@ -4823,6 +4925,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         final boolean isForeground = isUidForegroundOnRestrictPowerUL(uid);
+        final boolean isTop = isUidTop(uid);
 
         final boolean isWhitelisted = isWhitelistedFromPowerSaveUL(uid, mDeviceIdleMode);
 
@@ -4836,17 +4939,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         int newAllowedReasons = ALLOWED_REASON_NONE;
         newBlockedReasons |= (mRestrictPower ? BLOCKED_REASON_BATTERY_SAVER : 0);
         newBlockedReasons |= (mDeviceIdleMode ? BLOCKED_REASON_DOZE : 0);
+        newBlockedReasons |= (mLowPowerStandbyActive ? BLOCKED_REASON_LOW_POWER_STANDBY : 0);
         newBlockedReasons |= (isUidIdle ? BLOCKED_REASON_APP_STANDBY : 0);
         newBlockedReasons |= (uidBlockedState.blockedReasons & BLOCKED_REASON_RESTRICTED_MODE);
 
         newAllowedReasons |= (isSystem(uid) ? ALLOWED_REASON_SYSTEM : 0);
         newAllowedReasons |= (isForeground ? ALLOWED_REASON_FOREGROUND : 0);
+        newAllowedReasons |= (isTop ? ALLOWED_REASON_TOP : 0);
         newAllowedReasons |= (isWhitelistedFromPowerSaveUL(uid, true)
                 ? ALLOWED_REASON_POWER_SAVE_ALLOWLIST : 0);
         newAllowedReasons |= (isWhitelistedFromPowerSaveExceptIdleUL(uid)
                 ? ALLOWED_REASON_POWER_SAVE_EXCEPT_IDLE_ALLOWLIST : 0);
         newAllowedReasons |= (uidBlockedState.allowedReasons
                 & ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS);
+        newAllowedReasons |= (isAllowlistedFromLowPowerStandbyUL(uid))
+                ? ALLOWED_REASON_LOW_POWER_STANDBY_ALLOWLIST : 0;
 
         uidBlockedState.blockedReasons = (uidBlockedState.blockedReasons
                 & BLOCKED_METERED_REASON_MASK) | newBlockedReasons;
@@ -4868,6 +4975,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     + ", mRestrictPower: " + mRestrictPower
                     + ", mDeviceIdleMode: " + mDeviceIdleMode
                     + ", isForeground=" + isForeground
+                    + ", isTop=" + isTop
                     + ", isWhitelisted=" + isWhitelisted
                     + ", oldUidBlockedState=" + previousUidBlockedState.toString()
                     + ", newUidBlockedState=" + uidBlockedState.toString());
@@ -5398,6 +5506,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 mUidFirewallPowerSaveRules.put(uid, rule);
             } else if (chain == FIREWALL_CHAIN_RESTRICTED) {
                 mUidFirewallRestrictedModeRules.put(uid, rule);
+            } else if (chain == FIREWALL_CHAIN_LOW_POWER_STANDBY) {
+                mUidFirewallLowPowerStandbyModeRules.put(uid, rule);
             }
 
             try {
@@ -5445,6 +5555,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     .setFirewallUidRule(FIREWALL_CHAIN_POWERSAVE, uid, FIREWALL_RULE_DEFAULT);
             mNetworkManager
                     .setFirewallUidRule(FIREWALL_CHAIN_RESTRICTED, uid, FIREWALL_RULE_DEFAULT);
+            mNetworkManager
+                    .setFirewallUidRule(FIREWALL_CHAIN_LOW_POWER_STANDBY, uid,
+                            FIREWALL_RULE_DEFAULT);
             mNetworkManager.setUidOnMeteredNetworkAllowlist(uid, false);
             mNetworkManager.setUidOnMeteredNetworkDenylist(uid, false);
         } catch (IllegalStateException e) {
@@ -5720,6 +5833,67 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             mHandler.obtainMessage(MSG_METERED_RESTRICTED_PACKAGES_CHANGED,
                     userId, 0, packageNames).sendToTarget();
         }
+
+        @Override
+        public void setLowPowerStandbyActive(boolean active) {
+            Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "setLowPowerStandbyActive");
+            try {
+                synchronized (mUidRulesFirstLock) {
+                    if (mLowPowerStandbyActive == active) {
+                        return;
+                    }
+                    mLowPowerStandbyActive = active;
+                    synchronized (mNetworkPoliciesSecondLock) {
+                        if (!mSystemReady) return;
+                    }
+
+                    forEachUid("updateRulesForRestrictPower",
+                            uid -> updateRulesForPowerRestrictionsUL(uid));
+                    updateRulesForLowPowerStandbyUL();
+                }
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
+            }
+        }
+
+        @Override
+        public void setLowPowerStandbyAllowlist(int[] uids) {
+            synchronized (mUidRulesFirstLock) {
+                final SparseBooleanArray changedUids = new SparseBooleanArray();
+                for (int i = 0; i < mLowPowerStandbyAllowlistUids.size(); i++) {
+                    final int oldUid = mLowPowerStandbyAllowlistUids.keyAt(i);
+                    if (!ArrayUtils.contains(uids, oldUid)) {
+                        changedUids.put(oldUid, true);
+                    }
+                }
+
+                for (int i = 0; i < changedUids.size(); i++) {
+                    final int deletedUid = changedUids.keyAt(i);
+                    mLowPowerStandbyAllowlistUids.delete(deletedUid);
+                }
+
+                for (int newUid : uids) {
+                    if (mLowPowerStandbyAllowlistUids.indexOfKey(newUid) < 0) {
+                        changedUids.append(newUid, true);
+                        mLowPowerStandbyAllowlistUids.append(newUid, true);
+                    }
+                }
+
+                if (!mLowPowerStandbyActive) {
+                    return;
+                }
+
+                synchronized (mNetworkPoliciesSecondLock) {
+                    if (!mSystemReady) return;
+                }
+
+                for (int i = 0; i < changedUids.size(); i++) {
+                    final int changedUid = changedUids.keyAt(i);
+                    updateRulesForPowerRestrictionsUL(changedUid);
+                    updateRuleForLowPowerStandbyUL(changedUid);
+                }
+            }
+        }
     }
 
     private void setMeteredRestrictedPackagesInternal(Set<String> packageNames, int userId) {
@@ -5745,17 +5919,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         } catch (NameNotFoundException e) {
             return -1;
         }
-    }
-
-    private int parseSubId(@NonNull NetworkStateSnapshot snapshot) {
-        int subId = INVALID_SUBSCRIPTION_ID;
-        if (snapshot.getNetworkCapabilities().hasTransport(TRANSPORT_CELLULAR)) {
-            NetworkSpecifier spec = snapshot.getNetworkCapabilities().getNetworkSpecifier();
-            if (spec instanceof TelephonyNetworkSpecifier) {
-                subId = ((TelephonyNetworkSpecifier) spec).getSubscriptionId();
-            }
-        }
-        return subId;
     }
 
     @GuardedBy("mNetworkPoliciesSecondLock")
@@ -5888,6 +6051,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 effectiveBlockedReasons &= ~BLOCKED_METERED_REASON_DATA_SAVER;
                 effectiveBlockedReasons &= ~BLOCKED_METERED_REASON_USER_RESTRICTED;
             }
+            if ((allowedReasons & ALLOWED_REASON_TOP) != 0) {
+                effectiveBlockedReasons &= ~BLOCKED_REASON_LOW_POWER_STANDBY;
+            }
             if ((allowedReasons & ALLOWED_REASON_POWER_SAVE_ALLOWLIST) != 0) {
                 effectiveBlockedReasons &= ~BLOCKED_REASON_BATTERY_SAVER;
                 effectiveBlockedReasons &= ~BLOCKED_REASON_DOZE;
@@ -5903,6 +6069,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if ((allowedReasons & ALLOWED_METERED_REASON_USER_EXEMPTED) != 0) {
                 effectiveBlockedReasons &= ~BLOCKED_METERED_REASON_DATA_SAVER;
             }
+            if ((allowedReasons & ALLOWED_REASON_LOW_POWER_STANDBY_ALLOWLIST) != 0) {
+                effectiveBlockedReasons &= ~BLOCKED_REASON_LOW_POWER_STANDBY;
+            }
+
             return effectiveBlockedReasons;
         }
 
@@ -5927,6 +6097,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 BLOCKED_REASON_DOZE,
                 BLOCKED_REASON_APP_STANDBY,
                 BLOCKED_REASON_RESTRICTED_MODE,
+                BLOCKED_REASON_LOW_POWER_STANDBY,
                 BLOCKED_METERED_REASON_DATA_SAVER,
                 BLOCKED_METERED_REASON_USER_RESTRICTED,
                 BLOCKED_METERED_REASON_ADMIN_DISABLED,
@@ -5935,9 +6106,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         private static final int[] ALLOWED_REASONS = {
                 ALLOWED_REASON_SYSTEM,
                 ALLOWED_REASON_FOREGROUND,
+                ALLOWED_REASON_TOP,
                 ALLOWED_REASON_POWER_SAVE_ALLOWLIST,
                 ALLOWED_REASON_POWER_SAVE_EXCEPT_IDLE_ALLOWLIST,
                 ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS,
+                ALLOWED_REASON_LOW_POWER_STANDBY_ALLOWLIST,
                 ALLOWED_METERED_REASON_USER_EXEMPTED,
                 ALLOWED_METERED_REASON_SYSTEM,
                 ALLOWED_METERED_REASON_FOREGROUND,
@@ -5955,6 +6128,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     return "APP_STANDBY";
                 case BLOCKED_REASON_RESTRICTED_MODE:
                     return "RESTRICTED_MODE";
+                case BLOCKED_REASON_LOW_POWER_STANDBY:
+                    return "LOW_POWER_STANDBY";
                 case BLOCKED_METERED_REASON_DATA_SAVER:
                     return "DATA_SAVER";
                 case BLOCKED_METERED_REASON_USER_RESTRICTED:
@@ -5975,12 +6150,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     return "SYSTEM";
                 case ALLOWED_REASON_FOREGROUND:
                     return "FOREGROUND";
+                case ALLOWED_REASON_TOP:
+                    return "TOP";
                 case ALLOWED_REASON_POWER_SAVE_ALLOWLIST:
                     return "POWER_SAVE_ALLOWLIST";
                 case ALLOWED_REASON_POWER_SAVE_EXCEPT_IDLE_ALLOWLIST:
                     return "POWER_SAVE_EXCEPT_IDLE_ALLOWLIST";
                 case ALLOWED_REASON_RESTRICTED_MODE_PERMISSIONS:
                     return "RESTRICTED_MODE_PERMISSIONS";
+                case ALLOWED_REASON_LOW_POWER_STANDBY_ALLOWLIST:
+                    return "LOW_POWER_STANDBY_ALLOWLIST";
                 case ALLOWED_METERED_REASON_USER_EXEMPTED:
                     return "METERED_USER_EXEMPTED";
                 case ALLOWED_METERED_REASON_SYSTEM:
@@ -6047,7 +6226,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             int powerBlockedReasons = BLOCKED_REASON_APP_STANDBY
                     | BLOCKED_REASON_DOZE
-                    | BLOCKED_REASON_BATTERY_SAVER;
+                    | BLOCKED_REASON_BATTERY_SAVER
+                    | BLOCKED_REASON_LOW_POWER_STANDBY;
             if ((effectiveBlockedReasons & powerBlockedReasons) != 0) {
                 uidRule |= RULE_REJECT_ALL;
             } else if ((blockedReasons & powerBlockedReasons) != 0) {

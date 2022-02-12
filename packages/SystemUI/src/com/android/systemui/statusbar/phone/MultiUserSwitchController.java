@@ -29,9 +29,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.qs.FooterActionsView;
-import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.qs.dagger.QSScope;
 import com.android.systemui.qs.user.UserSwitchDialogController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -44,7 +42,6 @@ import javax.inject.Inject;
 public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
     private final UserManager mUserManager;
     private final UserSwitcherController mUserSwitcherController;
-    private final QSDetailDisplayer mQsDetailDisplayer;
     private final FalsingManager mFalsingManager;
     private final UserSwitchDialogController mUserSwitchDialogController;
     private final ActivityStarter mActivityStarter;
@@ -66,17 +63,8 @@ public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
                 mActivityStarter.startActivity(intent, true /* dismissShade */,
                         ActivityLaunchAnimator.Controller.fromView(v, null),
                         true /* showOverlockscreenwhenlocked */);
-            } else if (mFeatureFlags.isEnabled(Flags.NEW_USER_SWITCHER)) {
-                mUserSwitchDialogController.showDialog(v);
             } else {
-                View center = mView.getChildCount() > 0 ? mView.getChildAt(0) : mView;
-
-                int[] tmpInt = new int[2];
-                center.getLocationInWindow(tmpInt);
-                tmpInt[0] += center.getWidth() / 2;
-                tmpInt[1] += center.getHeight() / 2;
-
-                mQsDetailDisplayer.showDetailAdapter(getUserDetailAdapter(), tmpInt[0], tmpInt[1]);
+                mUserSwitchDialogController.showDialog(v);
             }
         }
     };
@@ -85,7 +73,6 @@ public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
     public static class Factory {
         private final UserManager mUserManager;
         private final UserSwitcherController mUserSwitcherController;
-        private final QSDetailDisplayer mQsDetailDisplayer;
         private final FalsingManager mFalsingManager;
         private final UserSwitchDialogController mUserSwitchDialogController;
         private final ActivityStarter mActivityStarter;
@@ -93,12 +80,11 @@ public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
 
         @Inject
         public Factory(UserManager userManager, UserSwitcherController userSwitcherController,
-                QSDetailDisplayer qsDetailDisplayer, FalsingManager falsingManager,
+                FalsingManager falsingManager,
                 UserSwitchDialogController userSwitchDialogController, FeatureFlags featureFlags,
                 ActivityStarter activityStarter) {
             mUserManager = userManager;
             mUserSwitcherController = userSwitcherController;
-            mQsDetailDisplayer = qsDetailDisplayer;
             mFalsingManager = falsingManager;
             mUserSwitchDialogController = userSwitchDialogController;
             mActivityStarter = activityStarter;
@@ -107,20 +93,19 @@ public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
 
         public MultiUserSwitchController create(FooterActionsView view) {
             return new MultiUserSwitchController(view.findViewById(R.id.multi_user_switch),
-                    mUserManager, mUserSwitcherController, mQsDetailDisplayer,
+                    mUserManager, mUserSwitcherController,
                     mFalsingManager, mUserSwitchDialogController, mFeatureFlags,
                     mActivityStarter);
         }
     }
 
     private MultiUserSwitchController(MultiUserSwitch view, UserManager userManager,
-            UserSwitcherController userSwitcherController, QSDetailDisplayer qsDetailDisplayer,
+            UserSwitcherController userSwitcherController,
             FalsingManager falsingManager, UserSwitchDialogController userSwitchDialogController,
             FeatureFlags featureFlags, ActivityStarter activityStarter) {
         super(view);
         mUserManager = userManager;
         mUserSwitcherController = userSwitcherController;
-        mQsDetailDisplayer = qsDetailDisplayer;
         mFalsingManager = falsingManager;
         mUserSwitchDialogController = userSwitchDialogController;
         mFeatureFlags = featureFlags;
@@ -141,10 +126,6 @@ public class MultiUserSwitchController extends ViewController<MultiUserSwitch> {
     @Override
     protected void onViewDetached() {
         mView.setOnClickListener(null);
-    }
-
-    protected DetailAdapter getUserDetailAdapter() {
-        return mUserSwitcherController.mUserDetailAdapter;
     }
 
     private void registerListener() {

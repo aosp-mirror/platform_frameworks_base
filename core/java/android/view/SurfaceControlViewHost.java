@@ -28,9 +28,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.accessibility.IAccessibilityEmbeddedConnection;
 import android.view.InsetsState;
 import android.view.WindowManagerGlobal;
+import android.view.accessibility.IAccessibilityEmbeddedConnection;
 
 import java.util.Objects;
 
@@ -427,5 +427,12 @@ public class SurfaceControlViewHost {
         mViewRoot.die(true /* immediate */);
         WindowManagerGlobal.getInstance().removeWindowlessRoot(mViewRoot);
         mReleased = true;
+    }
+
+    /**
+     * @hide
+     */
+    public IBinder getFocusGrantToken() {
+        return mWm.getFocusGrantToken();
     }
 }

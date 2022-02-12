@@ -56,6 +56,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * Manager communication with the display manager service on behalf of
@@ -585,8 +587,9 @@ public final class DisplayManagerGlobal {
 
     public VirtualDisplay createVirtualDisplay(@NonNull Context context, MediaProjection projection,
             IVirtualDevice virtualDevice, @NonNull VirtualDisplayConfig virtualDisplayConfig,
-            VirtualDisplay.Callback callback, Handler handler, @Nullable Context windowContext) {
-        VirtualDisplayCallback callbackWrapper = new VirtualDisplayCallback(callback, handler);
+            VirtualDisplay.Callback callback, @Nullable Executor executor,
+            @Nullable Context windowContext) {
+        VirtualDisplayCallback callbackWrapper = new VirtualDisplayCallback(callback, executor);
         IMediaProjection projectionToken = projection != null ? projection.getProjection() : null;
         int displayId;
         try {
@@ -1048,61 +1051,36 @@ public final class DisplayManagerGlobal {
     }
 
     private final static class VirtualDisplayCallback extends IVirtualDisplayCallback.Stub {
-        private VirtualDisplayCallbackDelegate mDelegate;
+        @Nullable private final VirtualDisplay.Callback mCallback;
+        @Nullable private final Executor mExecutor;
 
-        public VirtualDisplayCallback(VirtualDisplay.Callback callback, Handler handler) {
-            if (callback != null) {
-                mDelegate = new VirtualDisplayCallbackDelegate(callback, handler);
-            }
+        VirtualDisplayCallback(VirtualDisplay.Callback callback, Executor executor) {
+            mCallback = callback;
+            mExecutor = mCallback != null ? Objects.requireNonNull(executor) : null;
         }
+
+        // These methods are called from the binder thread, but the AIDL is oneway, so it should be
+        // safe to call the callback on arbitrary executors directly without risking blocking
+        // the system.
 
         @Override // Binder call
         public void onPaused() {
-            if (mDelegate != null) {
-                mDelegate.sendEmptyMessage(VirtualDisplayCallbackDelegate.MSG_DISPLAY_PAUSED);
+            if (mCallback != null) {
+                mExecutor.execute(mCallback::onPaused);
             }
         }
 
         @Override // Binder call
         public void onResumed() {
-            if (mDelegate != null) {
-                mDelegate.sendEmptyMessage(VirtualDisplayCallbackDelegate.MSG_DISPLAY_RESUMED);
+            if (mCallback != null) {
+                mExecutor.execute(mCallback::onResumed);
             }
         }
 
         @Override // Binder call
         public void onStopped() {
-            if (mDelegate != null) {
-                mDelegate.sendEmptyMessage(VirtualDisplayCallbackDelegate.MSG_DISPLAY_STOPPED);
-            }
-        }
-    }
-
-    private final static class VirtualDisplayCallbackDelegate extends Handler {
-        public static final int MSG_DISPLAY_PAUSED = 0;
-        public static final int MSG_DISPLAY_RESUMED = 1;
-        public static final int MSG_DISPLAY_STOPPED = 2;
-
-        private final VirtualDisplay.Callback mCallback;
-
-        public VirtualDisplayCallbackDelegate(VirtualDisplay.Callback callback,
-                Handler handler) {
-            super(handler != null ? handler.getLooper() : Looper.myLooper(), null, true /*async*/);
-            mCallback = callback;
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_DISPLAY_PAUSED:
-                    mCallback.onPaused();
-                    break;
-                case MSG_DISPLAY_RESUMED:
-                    mCallback.onResumed();
-                    break;
-                case MSG_DISPLAY_STOPPED:
-                    mCallback.onStopped();
-                    break;
+            if (mCallback != null) {
+                mExecutor.execute(mCallback::onStopped);
             }
         }
     }

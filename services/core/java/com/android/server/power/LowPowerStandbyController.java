@@ -42,6 +42,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
+import com.android.server.net.NetworkPolicyManagerInternal;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -394,7 +395,11 @@ public final class LowPowerStandbyController {
     /** Notify other system components about the updated Low Power Standby active state */
     private void notifyActiveChanged(boolean active) {
         final PowerManagerInternal pmi = LocalServices.getService(PowerManagerInternal.class);
+        final NetworkPolicyManagerInternal npmi = LocalServices.getService(
+                NetworkPolicyManagerInternal.class);
+
         pmi.setLowPowerStandbyActive(active);
+        npmi.setLowPowerStandbyActive(active);
     }
 
     @VisibleForTesting
@@ -580,7 +585,10 @@ public final class LowPowerStandbyController {
 
     private void notifyAllowlistChanged(int[] allowlistUids) {
         final PowerManagerInternal pmi = LocalServices.getService(PowerManagerInternal.class);
+        final NetworkPolicyManagerInternal npmi = LocalServices.getService(
+                NetworkPolicyManagerInternal.class);
         pmi.setLowPowerStandbyAllowlist(allowlistUids);
+        npmi.setLowPowerStandbyAllowlist(allowlistUids);
     }
 
     private final class LocalService extends LowPowerStandbyControllerInternal {

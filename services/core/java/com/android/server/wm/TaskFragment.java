@@ -25,6 +25,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.pm.ActivityInfo.FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING;
 import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -95,6 +96,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -102,6 +104,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -502,6 +505,56 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             return taskFragment != null && taskFragment.isEmbedded();
         }
         return false;
+    }
+
+    /**
+     * Checks if the organized task fragment is allowed to have the specified activity, which is
+     * allowed if an activity allows embedding in untrusted mode, or if the trusted mode can be
+     * enabled.
+     * @see #isAllowedToEmbedActivityInTrustedMode(ActivityRecord)
+     */
+    boolean isAllowedToEmbedActivity(@NonNull ActivityRecord a) {
+        if ((a.info.flags & FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING)
+                == FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING) {
+            return true;
+        }
+
+        return isAllowedToEmbedActivityInTrustedMode(a);
+    }
+
+    /**
+     * Checks if the organized task fragment is allowed to embed activity in fully trusted mode,
+     * which means that all transactions are allowed. This is supported in the following cases:
+     * <li>the activity belongs to the same app as the organizer host;</li>
+     * <li>the activity has declared the organizer host as trusted explicitly via known
+     * certificate.</li>
+     */
+    private boolean isAllowedToEmbedActivityInTrustedMode(@NonNull ActivityRecord a) {
+        if (mTaskFragmentOrganizerUid == a.getUid()) {
+            // Activities from the same UID can be embedded freely by the host.
+            return true;
+        }
+
+        Set<String> knownActivityEmbeddingCerts = a.info.getKnownActivityEmbeddingCerts();
+        if (knownActivityEmbeddingCerts.isEmpty()) {
+            // An application must either declare that it allows untrusted embedding, or specify
+            // a set of app certificates that are allowed to embed it in trusted mode.
+            return false;
+        }
+
+        AndroidPackage hostPackage = mAtmService.getPackageManagerInternalLocked()
+                .getPackage(mTaskFragmentOrganizerUid);
+
+        return hostPackage != null && hostPackage.getSigningDetails().hasAncestorOrSelfWithDigest(
+                knownActivityEmbeddingCerts);
+    }
+
+    /**
+     * Checks if all activities in the task fragment are allowed to be embedded in trusted mode.
+     * @see #isAllowedToEmbedActivityInTrustedMode(ActivityRecord)
+     */
+    boolean isAllowedToBeEmbeddedInTrustedMode() {
+        return forAllActivities(this::isAllowedToEmbedActivityInTrustedMode);
     }
 
     /**

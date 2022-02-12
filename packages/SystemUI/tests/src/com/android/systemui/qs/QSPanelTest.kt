@@ -36,10 +36,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyBoolean
-import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
-import org.mockito.Mockito.never
-import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.mockito.Mockito.`when` as whenever
 
@@ -62,9 +59,6 @@ class QSPanelTest : SysuiTestCase() {
     @Mock
     private lateinit var mQSLogger: QSLogger
     private lateinit var mParentView: ViewGroup
-
-    @Mock
-    private lateinit var mCallback: QSDetail.Callback
 
     @Mock
     private lateinit var mQSTileView: QSTileView
@@ -97,26 +91,7 @@ class QSPanelTest : SysuiTestCase() {
             whenever(mHost.tiles).thenReturn(emptyList())
             whenever(mHost.createTileView(any(), any(), anyBoolean())).thenReturn(mQSTileView)
             mQsPanel.addTile(mDndTileRecord)
-            mQsPanel.setCallback(mCallback)
         }
-    }
-
-    @Test
-    fun testOpenDetailsWithExistingTile_NoException() {
-        mTestableLooper.runWithLooper {
-            mQsPanel.openDetails(dndTile)
-        }
-
-        verify(mCallback).onShowingDetail(any(), anyInt(), anyInt())
-    }
-
-    @Test
-    fun testOpenDetailsWithNullParameter_NoException() {
-        mTestableLooper.runWithLooper {
-            mQsPanel.openDetails(null)
-        }
-
-        verify(mCallback, never()).onShowingDetail(any(), anyInt(), anyInt())
     }
 
     @Test

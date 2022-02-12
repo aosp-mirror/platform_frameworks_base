@@ -300,6 +300,9 @@ package android.app {
 
   public class Notification implements android.os.Parcelable {
     method public boolean shouldShowForegroundImmediately();
+    field public static final String EXTRA_MEDIA_REMOTE_DEVICE = "android.mediaRemoteDevice";
+    field public static final String EXTRA_MEDIA_REMOTE_ICON = "android.mediaRemoteIcon";
+    field public static final String EXTRA_MEDIA_REMOTE_INTENT = "android.mediaRemoteIntent";
   }
 
   public final class NotificationChannel implements android.os.Parcelable {
@@ -483,6 +486,7 @@ package android.app {
 package android.app.admin {
 
   public class DevicePolicyManager {
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public void acknowledgeNewUserDisclaimer();
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void clearOrganizationId();
     method @RequiresPermission(android.Manifest.permission.CLEAR_FREEZE_PERIOD) public void clearSystemUpdatePolicyFreezePeriodRecord();
     method @RequiresPermission(android.Manifest.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS) public long forceNetworkLogs();
@@ -597,6 +601,14 @@ package android.app.blob {
     method @NonNull public String getPackageName();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.blob.LeaseInfo> CREATOR;
+  }
+
+}
+
+package android.app.cloudsearch {
+
+  public static final class SearchRequest.Builder {
+    method @NonNull public android.app.cloudsearch.SearchRequest.Builder setSource(@NonNull String);
   }
 
 }
@@ -1274,6 +1286,10 @@ package android.hardware.soundtrigger {
     method public boolean supportsPhrase(@Nullable String);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.KeyphraseMetadata> CREATOR;
+  }
+
+  public static final class SoundTrigger.KeyphraseRecognitionExtra implements android.os.Parcelable {
+    ctor public SoundTrigger.KeyphraseRecognitionExtra(int, int, int);
   }
 
   public static final class SoundTrigger.ModelParamRange implements android.os.Parcelable {
@@ -2396,6 +2412,19 @@ package android.service.voice {
 
   public class AlwaysOnHotwordDetector implements android.service.voice.HotwordDetector {
     method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public void triggerHardwareRecognitionEventForTest(int, int, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[]);
+  }
+
+  public static final class AlwaysOnHotwordDetector.EventPayload.Builder {
+    ctor public AlwaysOnHotwordDetector.EventPayload.Builder();
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload build();
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setAudioStream(@NonNull android.os.ParcelFileDescriptor);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setCaptureAudioFormat(@NonNull android.media.AudioFormat);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setCaptureAvailable(boolean);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setCaptureSession(int);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setData(@NonNull byte[]);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setDataFormat(int);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setHotwordDetectedResult(@NonNull android.service.voice.HotwordDetectedResult);
+    method @NonNull public android.service.voice.AlwaysOnHotwordDetector.EventPayload.Builder setKeyphraseRecognitionExtras(@NonNull java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
   }
 
   public final class VisibleActivityInfo implements android.os.Parcelable {

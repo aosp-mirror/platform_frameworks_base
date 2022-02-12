@@ -31,6 +31,7 @@ import android.hardware.display.DisplayManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
@@ -215,9 +216,11 @@ public class NavigationBarController implements
     /** @return {@code true} if taskbar is enabled, false otherwise */
     private boolean initializeTaskbarIfNecessary() {
         if (mIsTablet) {
+            Trace.beginSection("NavigationBarController#initializeTaskbarIfNecessary");
             // Remove navigation bar when taskbar is showing
             removeNavigationBar(mContext.getDisplayId());
             mTaskbarDelegate.init(mContext.getDisplayId());
+            Trace.endSection();
         } else {
             mTaskbarDelegate.destroy();
         }

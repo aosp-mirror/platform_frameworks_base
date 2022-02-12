@@ -28,6 +28,7 @@ import android.app.PendingIntent;
 import android.app.RemoteAction;
 import android.content.Context;
 import android.os.Handler;
+import android.os.IBinder;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -69,6 +70,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     private final ImageView mArrowRight;
     private final ImageView mArrowDown;
     private final ImageView mArrowLeft;
+    private IBinder mFocusGrantToken = null;
 
     public TvPipMenuView(@NonNull Context context) {
         this(context, null);
@@ -106,6 +108,10 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
 
     void setListener(@Nullable Listener listener) {
         mListener = listener;
+    }
+
+    void setFocusGrantToken(IBinder token) {
+        mFocusGrantToken = token;
     }
 
     void show(boolean inMoveMode, int gravity) {
@@ -162,7 +168,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
 
         try {
             WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(null /* window */,
-                    getViewRootImpl().getInputToken(), grantFocus);
+                    mFocusGrantToken, grantFocus);
         } catch (Exception e) {
             Log.e(TAG, "Unable to update focus", e);
         }

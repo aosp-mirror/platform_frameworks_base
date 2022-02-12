@@ -74,6 +74,7 @@ private const val SESSION_KEY = "SESSION_KEY"
 private const val SESSION_ARTIST = "SESSION_ARTIST"
 private const val SESSION_TITLE = "SESSION_TITLE"
 private const val USER_ID = 0
+private const val DISABLED_DEVICE_NAME = "DISABLED_DEVICE_NAME"
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -131,7 +132,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     private lateinit var session: MediaSession
     private val device = MediaDeviceData(true, null, DEVICE_NAME)
-    private val disabledDevice = MediaDeviceData(false, null, "Disabled Device")
+    private val disabledDevice = MediaDeviceData(false, null, DISABLED_DEVICE_NAME)
     private lateinit var mediaData: MediaData
     private val clock = FakeSystemClock()
 
@@ -396,13 +397,12 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun bindDisabledDevice() {
         seamless.id = 1
-        val fallbackString = context.getString(R.string.media_seamless_other_device)
         player.attachPlayer(holder, MediaViewController.TYPE.PLAYER)
         val state = mediaData.copy(device = disabledDevice)
         player.bindPlayer(state, PACKAGE)
         assertThat(seamless.isEnabled()).isFalse()
-        assertThat(seamlessText.getText()).isEqualTo(fallbackString)
-        assertThat(seamless.contentDescription).isEqualTo(fallbackString)
+        assertThat(seamlessText.getText()).isEqualTo(DISABLED_DEVICE_NAME)
+        assertThat(seamless.contentDescription).isEqualTo(DISABLED_DEVICE_NAME)
     }
 
     @Test

@@ -895,6 +895,7 @@ public class PackageParserTest {
         assertEquals(a.networkSecurityConfigRes, that.networkSecurityConfigRes);
         assertEquals(a.taskAffinity, that.taskAffinity);
         assertEquals(a.permission, that.permission);
+        assertEquals(a.getKnownActivityEmbeddingCerts(), that.getKnownActivityEmbeddingCerts());
         assertEquals(a.processName, that.processName);
         assertEquals(a.className, that.className);
         assertEquals(a.manageSpaceActivityName, that.manageSpaceActivityName);

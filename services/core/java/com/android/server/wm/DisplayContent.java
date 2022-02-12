@@ -3127,12 +3127,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mDisplayPolicy.switchUser();
     }
 
-    @Override
-    void removeIfPossible() {
-        if (isAnimating(TRANSITION | PARENTS)
+    private boolean shouldDeferRemoval() {
+        return isAnimating(TRANSITION | PARENTS)
                 // isAnimating is a legacy transition query and will be removed, so also add a
                 // check for whether this is in a shell-transition when not using legacy.
-                || mTransitionController.inTransition()) {
+                || mTransitionController.isTransitionOnDisplay(this);
+    }
+
+    @Override
+    void removeIfPossible() {
+        if (shouldDeferRemoval()) {
             mDeferredRemoval = true;
             return;
         }
@@ -3161,6 +3165,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mInputMonitor.onDisplayRemoved();
             mWmService.mDisplayNotificationController.dispatchDisplayRemoved(this);
             mWmService.mAccessibilityController.onDisplayRemoved(mDisplayId);
+            mRootWindowContainer.mTaskSupervisor
+                    .getKeyguardController().onDisplayRemoved(mDisplayId);
         } finally {
             mDisplayReady = false;
         }
@@ -3174,7 +3180,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /** Returns true if a removal action is still being deferred. */
     @Override
     boolean handleCompleteDeferredRemoval() {
-        final boolean stillDeferringRemoval = super.handleCompleteDeferredRemoval();
+        final boolean stillDeferringRemoval =
+                super.handleCompleteDeferredRemoval() || shouldDeferRemoval();
 
         if (!stillDeferringRemoval && mDeferredRemoval) {
             removeImmediately();
@@ -4083,7 +4090,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             final boolean renewImeSurface = mImeScreenshot == null
                     || mImeScreenshot.getWidth() != mInputMethodWindow.getFrame().width()
                     || mImeScreenshot.getHeight() != mInputMethodWindow.getFrame().height();
-            if (task != null && !task.isHomeOrRecentsRootTask()) {
+            if (task != null && !task.isActivityTypeHomeOrRecents()) {
                 SurfaceControl.ScreenshotHardwareBuffer imeBuffer = renewImeSurface
                         ? mWmService.mTaskSnapshotController.snapshotImeFromAttachedTask(task)
                         : null;
@@ -5915,8 +5922,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             forAllRootTasks(t -> {t.removeIfPossible("releaseSelfIfNeeded");});
         } else if (getTopRootTask() == null) {
             removeIfPossible();
-            mRootWindowContainer.mTaskSupervisor
-                    .getKeyguardController().onDisplayRemoved(mDisplayId);
         }
     }
 

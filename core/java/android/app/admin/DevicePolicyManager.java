@@ -3703,8 +3703,9 @@ public class DevicePolicyManager {
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.INTERACT_ACROSS_USERS})
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @UserHandleAware
+    @TestApi
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public void acknowledgeNewUserDisclaimer() {
         if (mService != null) {
             try {
@@ -8306,10 +8307,10 @@ public class DevicePolicyManager {
      * @hide
      */
     @RequiresFeature(PackageManager.FEATURE_SECURE_LOCK_SCREEN)
-    public void reportPasswordChanged(@UserIdInt int userId) {
+    public void reportPasswordChanged(PasswordMetrics metrics, @UserIdInt int userId) {
         if (mService != null) {
             try {
-                mService.reportPasswordChanged(userId);
+                mService.reportPasswordChanged(metrics, userId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -9713,9 +9714,9 @@ public class DevicePolicyManager {
      * service. When zero or more packages have been added, accessibility services that are not in
      * the list and not part of the system can not be enabled by the user.
      * <p>
-     * Calling with a null value for the list disables the restriction so that all services can be
-     * used, calling with an empty list only allows the built-in system services. Any non-system
-     * accessibility service that's currently enabled must be included in the list.
+     * Calling with a {@code null} value for the list disables the restriction so that all services
+     * can be used, calling with an empty list only allows the built-in system services. Any
+     * non-system accessibility service that's currently enabled must be included in the list.
      * <p>
      * System accessibility services are always available to the user and this method can't
      * disable them.
@@ -9741,8 +9742,8 @@ public class DevicePolicyManager {
     /**
      * Returns the list of permitted accessibility services set by this device or profile owner.
      * <p>
-     * An empty list means no accessibility services except system services are allowed. Null means
-     * all accessibility services are allowed.
+     * An empty list means no accessibility services except system services are allowed.
+     * {@code null} means all accessibility services are allowed.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return List of accessiblity service package names.
@@ -9787,7 +9788,7 @@ public class DevicePolicyManager {
      * Returns the list of accessibility services permitted by the device or profiles
      * owners of this user.
      *
-     * <p>Null means all accessibility services are allowed, if a non-null list is returned
+     * <p>{@code null} means all accessibility services are allowed, if a non-null list is returned
      * it will contain the intersection of the permitted lists for any device or profile
      * owners that apply to this user. It will also include any system accessibility services.
      *
@@ -9933,6 +9934,8 @@ public class DevicePolicyManager {
      *
      * @return List of input method package names.
      * @hide
+     *
+     * @see #setPermittedAccessibilityServices(ComponentName, List)
      */
     @SystemApi
     @RequiresPermission(anyOf = {
@@ -9953,29 +9956,30 @@ public class DevicePolicyManager {
     /**
      * Returns the list of input methods permitted.
      *
-     * <p>When this method returns empty list means all input methods are allowed, if a non-empty
-     * list is returned it will contain the intersection of the permitted lists for any device or
-     * profile owners that apply to this user. It will also include any system input methods.
+     * <p>{@code null} means all input methods are allowed, if a non-null list is returned
+     * it will contain the intersection of the permitted lists for any device or profile
+     * owners that apply to this user. It will also include any system input methods.
      *
      * @return List of input method package names.
      * @hide
+     *
+     * @see #setPermittedAccessibilityServices(ComponentName, List)
      */
     @UserHandleAware
     @RequiresPermission(allOf = {
             android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
             android.Manifest.permission.MANAGE_USERS
             }, conditional = true)
-    public @NonNull List<String> getPermittedInputMethods() {
+    public @Nullable List<String> getPermittedInputMethods() {
         throwIfParentInstance("getPermittedInputMethods");
-        List<String> result = null;
         if (mService != null) {
             try {
-                result = mService.getPermittedInputMethodsAsUser(myUserId());
+                return mService.getPermittedInputMethodsAsUser(myUserId());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
         }
-        return result != null ? result : Collections.emptyList();
+        return null;
     }
 
     /**
@@ -10330,6 +10334,7 @@ public class DevicePolicyManager {
             throw re.rethrowFromSystemServer();
         }
     }
+
     /**
      * Gets the user a {@link #logoutUser(ComponentName)} call would switch to,
      * or {@code null} if the current user is not in a session (i.e., if it was not

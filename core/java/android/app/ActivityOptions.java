@@ -1121,7 +1121,7 @@ public class ActivityOptions extends ComponentOptions {
 
         mPackageName = opts.getString(KEY_PACKAGE_NAME);
         try {
-            mUsageTimeReport = opts.getParcelable(KEY_USAGE_TIME_REPORT);
+            mUsageTimeReport = opts.getParcelable(KEY_USAGE_TIME_REPORT, PendingIntent.class);
         } catch (RuntimeException e) {
             Slog.w(TAG, e);
         }

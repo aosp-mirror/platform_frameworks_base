@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright (C) 2019 The Android Open Source Project
+  ~ Copyright (C) 2022 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,10 +14,6 @@
   ~ limitations under the License.
   -->
 
-<Switch
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@android:id/toggle"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:clickable="false"
-    android:textAppearance="@style/TextAppearance.QS.DetailHeader" />
+<dream xmlns:android="http://schemas.android.com/apk/res/android"
+       android:settingsActivity="com.android.server.dreams/.TestDreamSettingsActivity"
+       android:showClockAndComplications="false" />

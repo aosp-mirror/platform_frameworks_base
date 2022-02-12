@@ -37,6 +37,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Parcelable;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
@@ -60,6 +61,7 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.util.drawable.DrawableSize;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class StatusBarIconView extends AnimatedImageView implements StatusIconDisplayable {
@@ -370,10 +372,13 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         }
         Drawable drawable;
         try {
+            Trace.beginSection("StatusBarIconView#updateDrawable()");
             drawable = getIcon(mIcon);
         } catch (OutOfMemoryError e) {
             Log.w(TAG, "OOM while inflating " + mIcon.icon + " for slot " + mSlot);
             return false;
+        } finally {
+            Trace.endSection();
         }
 
         if (drawable == null) {
@@ -961,8 +966,8 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     }
 
     @Override
-    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
-        int areaTint = getTint(area, this, tint);
+    public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
+        int areaTint = getTint(areas, this, tint);
         ColorStateList color = ColorStateList.valueOf(areaTint);
         setImageTintList(color);
         setDecorColor(areaTint);

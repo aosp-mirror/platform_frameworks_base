@@ -54,6 +54,7 @@ class BubbleOverflow(
 
     /** Call before use and again if cleanUpExpandedState was called.  */
     fun initialize(controller: BubbleController) {
+        createExpandedView()
         getExpandedView()?.initialize(controller, controller.stackView, true /* isOverflow */)
     }
 
@@ -123,13 +124,15 @@ class BubbleOverflow(
         overflowBtn?.updateDotVisibility(true /* animate */)
     }
 
+    fun createExpandedView(): BubbleExpandedView? {
+        expandedView = inflater.inflate(R.layout.bubble_expanded_view,
+                null /* root */, false /* attachToRoot */) as BubbleExpandedView
+        expandedView?.applyThemeAttrs()
+        updateResources()
+        return expandedView
+    }
+
     override fun getExpandedView(): BubbleExpandedView? {
-        if (expandedView == null) {
-            expandedView = inflater.inflate(R.layout.bubble_expanded_view,
-                    null /* root */, false /* attachToRoot */) as BubbleExpandedView
-            expandedView?.applyThemeAttrs()
-            updateResources()
-        }
         return expandedView
     }
 

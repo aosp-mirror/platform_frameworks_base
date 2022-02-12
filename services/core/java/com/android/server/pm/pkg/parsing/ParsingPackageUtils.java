@@ -30,6 +30,8 @@ import static android.os.Build.VERSION_CODES.DONUT;
 import static android.os.Build.VERSION_CODES.O;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
+import static com.android.server.pm.pkg.parsing.ParsingUtils.parseKnownActivityEmbeddingCerts;
+
 import android.annotation.AnyRes;
 import android.annotation.CheckResult;
 import android.annotation.IntDef;
@@ -2008,6 +2010,19 @@ public class ParsingPackageUtils {
                 pkg.setRequestForegroundServiceExemption(sa.getBoolean(R.styleable
                                 .AndroidManifestApplication_requestForegroundServiceExemption,
                         false));
+            }
+            final ParseResult<Set<String>> knownActivityEmbeddingCertsResult =
+                    parseKnownActivityEmbeddingCerts(sa, res,
+                            R.styleable.AndroidManifestApplication_knownActivityEmbeddingCerts,
+                            input);
+            if (knownActivityEmbeddingCertsResult.isError()) {
+                return input.error(knownActivityEmbeddingCertsResult);
+            } else {
+                final Set<String> knownActivityEmbeddingCerts = knownActivityEmbeddingCertsResult
+                        .getResult();
+                if (knownActivityEmbeddingCerts != null) {
+                    pkg.setKnownActivityEmbeddingCerts(knownActivityEmbeddingCerts);
+                }
             }
         } finally {
             sa.recycle();

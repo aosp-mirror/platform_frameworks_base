@@ -95,6 +95,10 @@ public class Flags {
 
     /***************************************/
     // 500 - quick settings
+    /**
+     * @deprecated Not needed anymore
+     */
+    @Deprecated
     public static final BooleanFlag NEW_USER_SWITCHER =
             new BooleanFlag(500, true);
 
@@ -143,6 +147,11 @@ public class Flags {
     public static final BooleanFlag MEDIA_SESSION_ACTIONS = new BooleanFlag(901, true);
     public static final BooleanFlag MEDIA_SESSION_LAYOUT = new BooleanFlag(902, false);
     public static final BooleanFlag MEDIA_MUTE_AWAIT = new BooleanFlag(904, true);
+
+    // 1000 - dock
+    public static final BooleanFlag SIMULATE_DOCK_THROUGH_CHARGING =
+            new BooleanFlag(1000, true);
+
 
     // Pay no attention to the reflection behind the curtain.
     // ========================== Curtain ==========================

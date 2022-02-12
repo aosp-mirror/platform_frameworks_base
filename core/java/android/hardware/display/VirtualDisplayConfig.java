@@ -21,6 +21,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.display.DisplayManager.VirtualDisplayFlag;
 import android.media.projection.MediaProjection;
 import android.os.Handler;
 import android.os.IBinder;
@@ -70,6 +71,7 @@ public final class VirtualDisplayConfig implements Parcelable {
      * {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY},
      * or {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR}.
      */
+    @VirtualDisplayFlag
     private int mFlags = 0;
 
     /**
@@ -120,7 +122,7 @@ public final class VirtualDisplayConfig implements Parcelable {
             @IntRange(from = 1) int width,
             @IntRange(from = 1) int height,
             @IntRange(from = 1) int densityDpi,
-            int flags,
+            @VirtualDisplayFlag int flags,
             @Nullable Surface surface,
             @Nullable String uniqueId,
             int displayIdToMirror,
@@ -141,6 +143,8 @@ public final class VirtualDisplayConfig implements Parcelable {
                 IntRange.class, null, mDensityDpi,
                 "from", 1);
         this.mFlags = flags;
+        com.android.internal.util.AnnotationValidations.validate(
+                VirtualDisplayFlag.class, null, mFlags);
         this.mSurface = surface;
         this.mUniqueId = uniqueId;
         this.mDisplayIdToMirror = displayIdToMirror;
@@ -190,7 +194,7 @@ public final class VirtualDisplayConfig implements Parcelable {
      * or {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR}.
      */
     @DataClass.Generated.Member
-    public int getFlags() {
+    public @VirtualDisplayFlag int getFlags() {
         return mFlags;
     }
 
@@ -291,6 +295,8 @@ public final class VirtualDisplayConfig implements Parcelable {
                 IntRange.class, null, mDensityDpi,
                 "from", 1);
         this.mFlags = flags;
+        com.android.internal.util.AnnotationValidations.validate(
+                VirtualDisplayFlag.class, null, mFlags);
         this.mSurface = surface;
         this.mUniqueId = uniqueId;
         this.mDisplayIdToMirror = displayIdToMirror;
@@ -324,7 +330,7 @@ public final class VirtualDisplayConfig implements Parcelable {
         private @IntRange(from = 1) int mWidth;
         private @IntRange(from = 1) int mHeight;
         private @IntRange(from = 1) int mDensityDpi;
-        private int mFlags;
+        private @VirtualDisplayFlag int mFlags;
         private @Nullable Surface mSurface;
         private @Nullable String mUniqueId;
         private int mDisplayIdToMirror;
@@ -419,7 +425,7 @@ public final class VirtualDisplayConfig implements Parcelable {
          * or {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR}.
          */
         @DataClass.Generated.Member
-        public @NonNull Builder setFlags(int value) {
+        public @NonNull Builder setFlags(@VirtualDisplayFlag int value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x10;
             mFlags = value;
@@ -517,10 +523,10 @@ public final class VirtualDisplayConfig implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1620657851981L,
+            time = 1643938791506L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/hardware/display/VirtualDisplayConfig.java",
-            inputSignatures = "private @android.annotation.NonNull java.lang.String mName\nprivate @android.annotation.IntRange int mWidth\nprivate @android.annotation.IntRange int mHeight\nprivate @android.annotation.IntRange int mDensityDpi\nprivate  int mFlags\nprivate @android.annotation.Nullable android.view.Surface mSurface\nprivate @android.annotation.Nullable java.lang.String mUniqueId\nprivate  int mDisplayIdToMirror\nprivate @android.annotation.Nullable android.os.IBinder mWindowTokenClientToMirror\nclass VirtualDisplayConfig extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genParcelable=true, genAidl=true, genBuilder=true)")
+            inputSignatures = "private @android.annotation.NonNull java.lang.String mName\nprivate @android.annotation.IntRange int mWidth\nprivate @android.annotation.IntRange int mHeight\nprivate @android.annotation.IntRange int mDensityDpi\nprivate @android.hardware.display.DisplayManager.VirtualDisplayFlag int mFlags\nprivate @android.annotation.Nullable android.view.Surface mSurface\nprivate @android.annotation.Nullable java.lang.String mUniqueId\nprivate  int mDisplayIdToMirror\nprivate @android.annotation.Nullable android.os.IBinder mWindowTokenClientToMirror\nclass VirtualDisplayConfig extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genParcelable=true, genAidl=true, genBuilder=true)")
     @Deprecated
     private void __metadata() {}
 

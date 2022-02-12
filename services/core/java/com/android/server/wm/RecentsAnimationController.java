@@ -613,7 +613,7 @@ public class RecentsAnimationController implements DeathRecipient {
             final TaskFragment adjacentTask = task.getRootTask().getAdjacentTaskFragment();
             final boolean inSplitScreen = task.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW
                     && adjacentTask != null;
-            if (task.isHomeOrRecentsRootTask()
+            if (task.isActivityTypeHomeOrRecents()
                     // Skip if the task is in split screen and in landscape.
                     || (inSplitScreen && isDisplayLandscape)
                     // Skip if the task is the top task in split screen.

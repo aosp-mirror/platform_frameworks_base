@@ -153,6 +153,10 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
 
     @VisibleForTesting
     void refresh() {
+        refresh(false);
+    }
+
+    void refresh(boolean deviceSetChanged) {
         // Update header icon
         final int iconRes = getHeaderIconRes();
         final IconCompat iconCompat = getHeaderIcon();
@@ -190,7 +194,8 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
         }
         if (!mAdapter.isDragging() && !mAdapter.isAnimating()) {
             int currentActivePosition = mAdapter.getCurrentActivePosition();
-            if (currentActivePosition >= 0 && currentActivePosition < mAdapter.getItemCount()) {
+            if (!deviceSetChanged && currentActivePosition >= 0
+                    && currentActivePosition < mAdapter.getItemCount()) {
                 mAdapter.notifyItemChanged(currentActivePosition);
             } else {
                 mAdapter.notifyDataSetChanged();
@@ -229,6 +234,11 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     @Override
     public void onRouteChanged() {
         mMainThreadHandler.post(() -> refresh());
+    }
+
+    @Override
+    public void onDeviceListChanged() {
+        mMainThreadHandler.post(() -> refresh(true));
     }
 
     @Override

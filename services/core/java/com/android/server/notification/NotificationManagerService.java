@@ -6528,7 +6528,7 @@ public class NotificationManagerService extends SystemService {
 
     @VisibleForTesting
     protected void fixNotification(Notification notification, String pkg, String tag, int id,
-            int userId) throws NameNotFoundException {
+            int userId) throws NameNotFoundException, RemoteException {
         final ApplicationInfo ai = mPackageManagerClient.getApplicationInfoAsUser(
                 pkg, PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
                 (userId == UserHandle.USER_ALL) ? USER_SYSTEM : userId);
@@ -6560,6 +6560,21 @@ public class NotificationManagerService extends SystemService {
             List<Notification.Action> actions = style.getActionsListWithSystemActions();
             notification.actions = new Notification.Action[actions.size()];
             actions.toArray(notification.actions);
+        }
+
+        // Ensure MediaStyle has correct permissions for remote device extras
+        if (notification.isStyle(Notification.MediaStyle.class)) {
+            int hasMediaContentControlPermission = mPackageManager.checkPermission(
+                    android.Manifest.permission.MEDIA_CONTENT_CONTROL, pkg, userId);
+            if (hasMediaContentControlPermission != PERMISSION_GRANTED) {
+                notification.extras.remove(Notification.EXTRA_MEDIA_REMOTE_DEVICE);
+                notification.extras.remove(Notification.EXTRA_MEDIA_REMOTE_ICON);
+                notification.extras.remove(Notification.EXTRA_MEDIA_REMOTE_INTENT);
+                if (DBG) {
+                    Slog.w(TAG, "Package " + pkg + ": Use of setRemotePlayback requires the "
+                            + "MEDIA_CONTENT_CONTROL permission");
+                }
+            }
         }
 
         // Remote views? Are they too big?

@@ -544,6 +544,11 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         return getActivityType() == ACTIVITY_TYPE_RECENTS;
     }
 
+    final boolean isActivityTypeHomeOrRecents() {
+        final int activityType = getActivityType();
+        return activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS;
+    }
+
     public boolean isActivityTypeAssistant() {
         return getActivityType() == ACTIVITY_TYPE_ASSISTANT;
     }

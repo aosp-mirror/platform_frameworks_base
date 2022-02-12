@@ -256,6 +256,17 @@ class TransitionController {
         return false;
     }
 
+    /** @return {@code true} if wc is in a participant subtree */
+    boolean isTransitionOnDisplay(@NonNull DisplayContent dc) {
+        if (mCollectingTransition != null && mCollectingTransition.isOnDisplay(dc)) {
+            return true;
+        }
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            if (mPlayingTransitions.get(i).isOnDisplay(dc)) return true;
+        }
+        return false;
+    }
+
     /**
      * @return {@code true} if {@param ar} is part of a transient-launch activity in an active
      * transition.

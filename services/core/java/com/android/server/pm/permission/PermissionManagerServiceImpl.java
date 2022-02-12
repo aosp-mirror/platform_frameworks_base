@@ -3170,42 +3170,10 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     inheritPermissionStateToNewImplicitPermissionLocked(sourcePerms, newPerm, ps,
                             pkg);
                 }
-            } else if (NOTIFICATION_PERMISSIONS.contains(newPerm)) {
-                //&& (origPs.getPermissionState(newPerm) == null) {
-                // TODO(b/205888750): add back line about origPs once all TODO sections below are
-                //  propagated through droidfood
-                Permission bp = mRegistry.getPermission(newPerm);
-                if (bp == null) {
-                    throw new IllegalStateException("Unknown new permission " + newPerm);
-                }
-                if (!isUserSetOrPregrantedOrFixed(ps.getPermissionFlags(newPerm))) {
-                    updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
-                    int setFlag = ps.isPermissionGranted(newPerm)
-                            ? 0 : FLAG_PERMISSION_REVIEW_REQUIRED;
-                    ps.updatePermissionFlags(bp, FLAG_PERMISSION_REVIEW_REQUIRED, setFlag);
-                    // TODO(b/205888750): remove if/else block once propagated through droidfood
-                    if (ps.isPermissionGranted(newPerm)
-                            && pkg.getTargetSdkVersion() >= Build.VERSION_CODES.M) {
-                        ps.revokePermission(bp);
-                    } else if (!ps.isPermissionGranted(newPerm)
-                            && pkg.getTargetSdkVersion() < Build.VERSION_CODES.M) {
-                        ps.grantPermission(bp);
-                    }
-                } else {
-                    // TODO(b/205888750): remove once propagated through droidfood
-                    ps.updatePermissionFlags(bp, FLAG_PERMISSION_REVOKE_WHEN_REQUESTED
-                            | FLAG_PERMISSION_REVIEW_REQUIRED, 0);
-                }
             }
         }
 
         return updatedUserIds;
-    }
-
-    private boolean isUserSetOrPregrantedOrFixed(int flags) {
-        return (flags & (FLAG_PERMISSION_USER_SET | FLAG_PERMISSION_USER_FIXED
-                | FLAG_PERMISSION_POLICY_FIXED | FLAG_PERMISSION_SYSTEM_FIXED
-                | FLAG_PERMISSION_GRANTED_BY_DEFAULT | FLAG_PERMISSION_GRANTED_BY_ROLE)) != 0;
     }
 
     @NonNull

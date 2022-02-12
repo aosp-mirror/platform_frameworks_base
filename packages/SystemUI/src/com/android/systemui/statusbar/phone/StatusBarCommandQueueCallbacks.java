@@ -235,11 +235,6 @@ public class StatusBarCommandQueueCallbacks implements CommandQueue.Callbacks {
         // Settings are not available in setup
         if (!mDeviceProvisionedController.isCurrentUserSetup()) return;
 
-
-        QSPanelController qsPanelController = mStatusBar.getQSPanelController();
-        if (subPanel != null && qsPanelController != null) {
-            qsPanelController.openDetails(subPanel);
-        }
         mNotificationPanelViewController.expandWithQs();
     }
 

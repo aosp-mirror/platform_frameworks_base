@@ -789,9 +789,10 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
         @Override
         public int getBouncerPromptReason() {
             int currentUser = KeyguardUpdateMonitor.getCurrentUser();
-            boolean trust = mUpdateMonitor.isTrustUsuallyManaged(currentUser);
-            boolean biometrics = mUpdateMonitor.isUnlockingWithBiometricsPossible(currentUser);
-            boolean any = trust || biometrics;
+            boolean trustAgentsEnabled = mUpdateMonitor.isTrustUsuallyManaged(currentUser);
+            boolean biometricsEnrolled =
+                    mUpdateMonitor.isUnlockingWithBiometricsPossible(currentUser);
+            boolean any = trustAgentsEnabled || biometricsEnrolled;
             KeyguardUpdateMonitor.StrongAuthTracker strongAuthTracker =
                     mUpdateMonitor.getStrongAuthTracker();
             int strongAuth = strongAuthTracker.getStrongAuthForUser(currentUser);
@@ -800,9 +801,10 @@ public class KeyguardViewMediator extends CoreStartable implements Dumpable,
                 return KeyguardSecurityView.PROMPT_REASON_RESTART;
             } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_TIMEOUT) != 0) {
                 return KeyguardSecurityView.PROMPT_REASON_TIMEOUT;
-            } else if (any && (strongAuth & STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW) != 0) {
+            } else if ((strongAuth & STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW) != 0) {
                 return KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN;
-            } else if (trust && (strongAuth & SOME_AUTH_REQUIRED_AFTER_USER_REQUEST) != 0) {
+            } else if (trustAgentsEnabled
+                    && (strongAuth & SOME_AUTH_REQUIRED_AFTER_USER_REQUEST) != 0) {
                 return KeyguardSecurityView.PROMPT_REASON_USER_REQUEST;
             } else if (any && ((strongAuth & STRONG_AUTH_REQUIRED_AFTER_LOCKOUT) != 0
                     || mUpdateMonitor.isFingerprintLockedOut())) {

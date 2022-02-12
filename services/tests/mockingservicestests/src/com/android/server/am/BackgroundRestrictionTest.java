@@ -23,6 +23,7 @@ import static android.app.ActivityManager.RESTRICTION_LEVEL_ADAPTIVE_BUCKET;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_BACKGROUND_RESTRICTED;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_EXEMPTED;
 import static android.app.ActivityManager.RESTRICTION_LEVEL_RESTRICTED_BUCKET;
+import static android.app.ActivityManager.isLowRamDeviceStatic;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_SYSTEM;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_USER;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
@@ -46,6 +47,7 @@ import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.android.internal.notification.SystemNotificationChannels.ABUSIVE_BACKGROUND_APPS;
+import static com.android.server.am.AppBatteryTracker.AppBatteryPolicy.getFloatArray;
 import static com.android.server.am.AppBatteryTracker.BatteryUsage.BATTERY_USAGE_INDEX_BACKGROUND;
 import static com.android.server.am.AppBatteryTracker.BatteryUsage.BATTERY_USAGE_INDEX_FOREGROUND;
 import static com.android.server.am.AppBatteryTracker.BatteryUsage.BATTERY_USAGE_INDEX_FOREGROUND_SERVICE;
@@ -108,6 +110,7 @@ import android.util.Pair;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.R;
 import com.android.server.AppStateTracker;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.am.AppBatteryExemptionTracker.AppBatteryExemptionPolicy;
@@ -554,28 +557,34 @@ public final class BackgroundRestrictionTest {
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_MONITOR_ENABLED,
                     DeviceConfig::getBoolean,
-                    AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_MONITOR_ENABLED);
+                    mContext.getResources().getBoolean(
+                            R.bool.config_bg_current_drain_monitor_enabled));
             bgCurrentDrainMonitor.set(true);
 
             bgCurrentDrainWindow = new DeviceConfigSession<>(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_WINDOW,
                     DeviceConfig::getLong,
-                    AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_WINDOW_MS);
+                    (long) mContext.getResources().getInteger(
+                            R.integer.config_bg_current_drain_window));
             bgCurrentDrainWindow.set(windowMs);
 
             bgCurrentDrainRestrictedBucketThreshold = new DeviceConfigSession<>(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_RESTRICTED_BUCKET,
                     DeviceConfig::getFloat,
-                    AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_RESTRICTED_BUCKET_THRESHOLD);
+                    getFloatArray(mContext.getResources().obtainTypedArray(
+                            R.array.config_bg_current_drain_threshold_to_restricted_bucket))[
+                            isLowRamDeviceStatic() ? 1 : 0]);
             bgCurrentDrainRestrictedBucketThreshold.set(restrictBucketThreshold);
 
             bgCurrentDrainBgRestrictedThreshold = new DeviceConfigSession<>(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_BG_RESTRICTED,
                     DeviceConfig::getFloat,
-                    AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_THRESHOLD);
+                    getFloatArray(mContext.getResources().obtainTypedArray(
+                            R.array.config_bg_current_drain_threshold_to_bg_restricted))[
+                            isLowRamDeviceStatic() ? 1 : 0]);
             bgCurrentDrainBgRestrictedThreshold.set(bgRestrictedThreshold);
 
             mCurrentTimeMillis = 10_000L;
@@ -1282,64 +1291,76 @@ public final class BackgroundRestrictionTest {
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_MONITOR_ENABLED,
                     DeviceConfig::getBoolean,
-                    AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_MONITOR_ENABLED);
+                    mContext.getResources().getBoolean(
+                            R.bool.config_bg_current_drain_monitor_enabled));
             bgCurrentDrainMonitor.set(true);
 
             bgCurrentDrainWindow = new DeviceConfigSession<>(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_WINDOW,
                     DeviceConfig::getLong,
-                    AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_WINDOW_MS);
+                    (long) mContext.getResources().getInteger(
+                            R.integer.config_bg_current_drain_window));
             bgCurrentDrainWindow.set(windowMs);
 
             bgCurrentDrainRestrictedBucketThreshold = new DeviceConfigSession<>(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_RESTRICTED_BUCKET,
                     DeviceConfig::getFloat,
-                    AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_RESTRICTED_BUCKET_THRESHOLD);
+                    getFloatArray(mContext.getResources().obtainTypedArray(
+                            R.array.config_bg_current_drain_threshold_to_restricted_bucket))[
+                            isLowRamDeviceStatic() ? 1 : 0]);
             bgCurrentDrainRestrictedBucketThreshold.set(restrictBucketThreshold);
 
             bgCurrentDrainBgRestrictedThreshold = new DeviceConfigSession<>(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_BG_RESTRICTED,
                     DeviceConfig::getFloat,
-                    AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_THRESHOLD);
+                    getFloatArray(mContext.getResources().obtainTypedArray(
+                            R.array.config_bg_current_drain_threshold_to_bg_restricted))[
+                            isLowRamDeviceStatic() ? 1 : 0]);
             bgCurrentDrainBgRestrictedThreshold.set(bgRestrictedThreshold);
 
             bgCurrentDrainRestrictedBucketHighThreshold = new DeviceConfigSession<>(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_TO_RESTRICTED_BUCKET,
                     DeviceConfig::getFloat,
-                    AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_RESTRICTED_BUCKET_HIGH_THRESHOLD);
+                    getFloatArray(mContext.getResources().obtainTypedArray(
+                            R.array.config_bg_current_drain_high_threshold_to_restricted_bucket))[
+                            isLowRamDeviceStatic() ? 1 : 0]);
             bgCurrentDrainRestrictedBucketHighThreshold.set(restrictBucketHighThreshold);
 
             bgCurrentDrainBgRestrictedHighThreshold = new DeviceConfigSession<>(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_TO_BG_RESTRICTED,
                     DeviceConfig::getFloat,
-                    AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_HIGH_THRESHOLD);
+                    getFloatArray(mContext.getResources().obtainTypedArray(
+                            R.array.config_bg_current_drain_high_threshold_to_bg_restricted))[
+                            isLowRamDeviceStatic() ? 1 : 0]);
             bgCurrentDrainBgRestrictedHighThreshold.set(bgRestrictedHighThreshold);
 
             bgMediaPlaybackMinDurationThreshold = new DeviceConfigSession<>(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_MEDIA_PLAYBACK_MIN_DURATION,
                     DeviceConfig::getLong,
-                    AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_MEDIA_PLAYBACK_MIN_DURATION);
+                    (long) mContext.getResources().getInteger(
+                            R.integer.config_bg_current_drain_media_playback_min_duration));
             bgMediaPlaybackMinDurationThreshold.set(bgMediaPlaybackMinDuration);
 
             bgLocationMinDurationThreshold = new DeviceConfigSession<>(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_LOCATION_MIN_DURATION,
                     DeviceConfig::getLong,
-                    AppBatteryPolicy.DEFAULT_BG_CURRENT_DRAIN_LOCATION_MIN_DURATION);
+                    (long) mContext.getResources().getInteger(
+                            R.integer.config_bg_current_drain_location_min_duration));
             bgLocationMinDurationThreshold.set(bgLocationMinDuration);
 
             bgCurrentDrainEventDurationBasedThresholdEnabled = new DeviceConfigSession<>(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     AppBatteryPolicy.KEY_BG_CURRENT_DRAIN_EVENT_DURATION_BASED_THRESHOLD_ENABLED,
                     DeviceConfig::getBoolean,
-                    AppBatteryPolicy
-                            .DEFAULT_BG_CURRENT_DRAIN_EVENT_DURATION_BASED_THRESHOLD_ENABLED);
+                    mContext.getResources().getBoolean(
+                            R.bool.config_bg_current_drain_event_duration_based_threshold_enabled));
             bgCurrentDrainEventDurationBasedThresholdEnabled.set(true);
 
             bgBatteryExemptionEnabled = new DeviceConfigSession<>(
