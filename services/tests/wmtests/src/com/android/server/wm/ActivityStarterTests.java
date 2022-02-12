@@ -39,6 +39,7 @@ import static android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP;
 import static android.content.pm.ActivityInfo.LAUNCH_MULTIPLE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
+import static android.os.Process.SYSTEM_UID;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.clearInvocations;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
@@ -1138,6 +1139,34 @@ public class ActivityStarterTests extends WindowTestsBase {
                 /* intentGrants */null);
 
         assertFalse(taskFragment.hasChild());
+    }
+
+    @Test
+    public void testStartActivityInner_inTaskFragment_allowedForSystemUid() {
+        final ActivityStarter starter = prepareStarter(0, false);
+        final ActivityRecord targetRecord = new ActivityBuilder(mAtm).build();
+        final ActivityRecord sourceRecord = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final TaskFragment taskFragment = new TaskFragment(mAtm, sourceRecord.token,
+                true /* createdByOrganizer */);
+        sourceRecord.getTask().addChild(taskFragment, POSITION_TOP);
+
+        taskFragment.setTaskFragmentOrganizer(mock(TaskFragmentOrganizerToken.class), SYSTEM_UID,
+                "system_uid");
+
+        starter.startActivityInner(
+                /* r */targetRecord,
+                /* sourceRecord */ sourceRecord,
+                /* voiceSession */null,
+                /* voiceInteractor */ null,
+                /* startFlags */ 0,
+                /* doResume */true,
+                /* options */null,
+                /* inTask */null,
+                /* inTaskFragment */ taskFragment,
+                /* restrictedBgActivity */false,
+                /* intentGrants */null);
+
+        assertTrue(taskFragment.hasChild());
     }
 
     @Test
