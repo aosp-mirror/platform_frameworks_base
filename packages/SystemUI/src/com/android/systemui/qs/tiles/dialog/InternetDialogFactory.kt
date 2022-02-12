@@ -24,6 +24,7 @@ import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.util.concurrent.Executor
 import javax.inject.Inject
 
@@ -40,7 +41,8 @@ class InternetDialogFactory @Inject constructor(
     private val internetDialogController: InternetDialogController,
     private val context: Context,
     private val uiEventLogger: UiEventLogger,
-    private val dialogLaunchAnimator: DialogLaunchAnimator
+    private val dialogLaunchAnimator: DialogLaunchAnimator,
+    private val keyguardStateController: KeyguardStateController
 ) {
     companion object {
         var internetDialog: InternetDialog? = null
@@ -61,7 +63,7 @@ class InternetDialogFactory @Inject constructor(
         } else {
             internetDialog = InternetDialog(context, this, internetDialogController,
                     canConfigMobileData, canConfigWifi, aboveStatusBar, uiEventLogger, handler,
-                    executor)
+                    executor, keyguardStateController)
             if (view != null) {
                 dialogLaunchAnimator.showFromView(internetDialog!!, view,
                     animateBackgroundBoundsChange = true)
