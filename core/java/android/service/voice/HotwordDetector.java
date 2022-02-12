@@ -119,6 +119,17 @@ public interface HotwordDetector {
     void updateState(@Nullable PersistableBundle options, @Nullable SharedMemory sharedMemory);
 
     /**
+     * Invalidates this hotword detector so that any future calls to this result
+     * in an {@link IllegalStateException}.
+     *
+     * <p>If there are no other {@link HotwordDetector} instances linked to the
+     * {@link HotwordDetectionService}, the service will be shutdown.
+     */
+    default void destroy() {
+        throw new UnsupportedOperationException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * @hide
      */
     static String detectorTypeToString(int detectorType) {

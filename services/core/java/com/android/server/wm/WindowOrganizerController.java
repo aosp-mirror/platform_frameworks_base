@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.ActivityManager.isStartResultSuccessful;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.window.WindowContainerTransaction.Change.CHANGE_BOUNDS_TRANSACTION;
+import static android.window.WindowContainerTransaction.Change.CHANGE_BOUNDS_TRANSACTION_RECT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CREATE_TASK_FRAGMENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_DELETE_TASK_FRAGMENT;
@@ -1224,9 +1226,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         while (entries.hasNext()) {
             final Map.Entry<IBinder, WindowContainerTransaction.Change> entry = entries.next();
             // Only allow to apply changes to TaskFragment that is created by this organizer.
-            enforceTaskFragmentOrganized(func, WindowContainer.fromBinder(entry.getKey()),
-                    organizer);
+            WindowContainer wc = WindowContainer.fromBinder(entry.getKey());
+            enforceTaskFragmentOrganized(func, wc, organizer);
+            enforceTaskFragmentConfigChangeAllowed(func, wc, entry.getValue(), organizer);
         }
+
+        // TODO(b/197364677): Enforce safety of hierarchy operations in untrusted mode. E.g. one
+        // could first change a trusted TF, and then start/reparent untrusted activity there.
 
         // Hierarchy changes
         final List<WindowContainerTransaction.HierarchyOp> hops = t.getHierarchyOps();
@@ -1292,6 +1298,57 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             String msg = "Permission Denial: " + func + " from pid=" + Binder.getCallingPid()
                     + ", uid=" + Binder.getCallingUid() + " trying to modify window container not"
                     + " belonging to the TaskFragmentOrganizer=" + organizer;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+    }
+
+    /**
+     * Makes sure that SurfaceControl transactions and the ability to set bounds outside of the
+     * parent bounds are not allowed for embedding without full trust between the host and the
+     * target.
+     * TODO(b/197364677): Allow SC transactions when the client-driven animations are protected from
+     * tapjacking.
+     */
+    private void enforceTaskFragmentConfigChangeAllowed(String func, @Nullable WindowContainer wc,
+            WindowContainerTransaction.Change change, ITaskFragmentOrganizer organizer) {
+        if (wc == null) {
+            Slog.e(TAG, "Attempt to operate on task fragment that no longer exists");
+            return;
+        }
+        // Check if TaskFragment is embedded in fully trusted mode
+        if (wc.asTaskFragment().isAllowedToBeEmbeddedInTrustedMode()) {
+            // Fully trusted, no need to check further
+            return;
+        }
+
+        if (change == null) {
+            return;
+        }
+        final int changeMask = change.getChangeMask();
+        if ((changeMask & (CHANGE_BOUNDS_TRANSACTION | CHANGE_BOUNDS_TRANSACTION_RECT)) != 0) {
+            String msg = "Permission Denial: " + func + " from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                    + " trying to apply SurfaceControl changes to TaskFragment in non-trusted "
+                    + "embedding mode, TaskFragmentOrganizer=" + organizer;
+            Slog.w(TAG, msg);
+            throw new SecurityException(msg);
+        }
+        if (change.getWindowSetMask() == 0) {
+            // Nothing else to check.
+            return;
+        }
+        WindowConfiguration requestedWindowConfig = change.getConfiguration().windowConfiguration;
+        WindowContainer wcParent = wc.getParent();
+        if (wcParent == null) {
+            Slog.e(TAG, "Attempt to set bounds on task fragment that has no parent");
+            return;
+        }
+        if (!wcParent.getBounds().contains(requestedWindowConfig.getBounds())) {
+            String msg = "Permission Denial: " + func + " from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                    + " trying to apply bounds outside of parent for non-trusted host,"
+                    + " TaskFragmentOrganizer=" + organizer;
             Slog.w(TAG, msg);
             throw new SecurityException(msg);
         }

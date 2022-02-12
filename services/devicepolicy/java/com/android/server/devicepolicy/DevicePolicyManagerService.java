@@ -7331,7 +7331,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void reportPasswordChanged(@UserIdInt int userId) {
+    public void reportPasswordChanged(PasswordMetrics metrics, @UserIdInt int userId) {
         if (!mHasFeature || !mLockPatternUtils.hasSecureLockScreen()) {
             return;
         }
@@ -7362,6 +7362,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             affectedUserIds.addAll(removeCaApprovalsIfNeeded(userId));
             saveSettingsForUsersLocked(affectedUserIds);
+        }
+        if (mInjector.securityLogIsLoggingEnabled()) {
+            SecurityLog.writeEvent(SecurityLog.TAG_PASSWORD_CHANGED,
+                    /* complexity */ metrics.determineComplexity(), /*user*/ userId);
         }
     }
 

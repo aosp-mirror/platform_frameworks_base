@@ -21,6 +21,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
 import static com.android.server.pm.pkg.component.ComponentParseUtils.flag;
 import static com.android.server.pm.pkg.parsing.ParsingUtils.NOT_SET;
+import static com.android.server.pm.pkg.parsing.ParsingUtils.parseKnownActivityEmbeddingCerts;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -151,7 +152,8 @@ public class ParsedActivityUtils {
                                         | flag(ActivityInfo.FLAG_SHOW_WHEN_LOCKED, R.styleable.AndroidManifestActivity_showWhenLocked, sa)
                                         | flag(ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE, R.styleable.AndroidManifestActivity_supportsPictureInPicture, sa)
                                         | flag(ActivityInfo.FLAG_TURN_SCREEN_ON, R.styleable.AndroidManifestActivity_turnScreenOn, sa)
-                                        | flag(ActivityInfo.FLAG_PREFER_MINIMAL_POST_PROCESSING, R.styleable.AndroidManifestActivity_preferMinimalPostProcessing, sa)));
+                                        | flag(ActivityInfo.FLAG_PREFER_MINIMAL_POST_PROCESSING, R.styleable.AndroidManifestActivity_preferMinimalPostProcessing, sa))
+                                        | flag(ActivityInfo.FLAG_ALLOW_UNTRUSTED_ACTIVITY_EMBEDDING, R.styleable.AndroidManifestActivity_allowUntrustedActivityEmbedding, sa));
 
                 activity.setPrivateFlags(activity.getPrivateFlags() | (flag(ActivityInfo.FLAG_INHERIT_SHOW_WHEN_LOCKED,
                                         R.styleable.AndroidManifestActivity_inheritShowWhenLocked, sa)
@@ -336,6 +338,20 @@ public class ParsedActivityUtils {
             activity.setPermission(permission);
         } else {
             activity.setPermission(permission != null ? permission : pkg.getPermission());
+        }
+
+        final ParseResult<Set<String>> knownActivityEmbeddingCertsResult =
+                parseKnownActivityEmbeddingCerts(array, resources, isAlias
+                        ? R.styleable.AndroidManifestActivityAlias_knownActivityEmbeddingCerts
+                        : R.styleable.AndroidManifestActivity_knownActivityEmbeddingCerts, input);
+        if (knownActivityEmbeddingCertsResult.isError()) {
+            return input.error(knownActivityEmbeddingCertsResult);
+        } else {
+            final Set<String> knownActivityEmbeddingCerts = knownActivityEmbeddingCertsResult
+                    .getResult();
+            if (knownActivityEmbeddingCerts != null) {
+                activity.setKnownActivityEmbeddingCerts(knownActivityEmbeddingCerts);
+            }
         }
 
         final boolean setExported = array.hasValue(exportedAttr);

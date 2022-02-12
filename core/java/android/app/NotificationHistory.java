@@ -610,6 +610,7 @@ public final class NotificationHistory implements Parcelable {
         // Data can be too large for a transact. Write the data as a Blob, which will be written to
         // ashmem if too large.
         dest.writeBlob(data.marshall());
+        data.recycle();
     }
 
     public static final @NonNull Creator<NotificationHistory> CREATOR

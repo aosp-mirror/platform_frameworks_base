@@ -278,6 +278,7 @@ public final class InputMethodInfo implements Parcelable {
                                     .InputMethod_Subtype_subtypeId, 0 /* use Arrays.hashCode */))
                             .setIsAsciiCapable(a.getBoolean(com.android.internal.R.styleable
                                     .InputMethod_Subtype_isAsciiCapable, false)).build();
+                    a.recycle();
                     if (!subtype.isAuxiliary()) {
                         isAuxIme = false;
                     }

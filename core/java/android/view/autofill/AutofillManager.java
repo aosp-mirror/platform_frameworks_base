@@ -3100,11 +3100,51 @@ public final class AutofillManager {
     }
 
     /**
-     * Checks the id of autofill whether supported the fill dialog.
+     * If autofill suggestions for a dialog-style UI are available for {@code view}, shows a dialog
+     * allowing the user to select a suggestion and returns {@code true}.
+     * <p>
+     * The dialog may not be available if the autofill service does not support it, or if the
+     * autofill request has not returned a response yet.
+     * <p>
+     * It is recommended to call this method the first time a user focuses on an autofill-able form,
+     * and to avoid showing the input method if the dialog is shown. If this method returns
+     * {@code false}, you should then instead show the input method (assuming that is how the
+     * view normally handles the focus event). If the user re-focuses on the view, you should not
+     * call this method again so as to not disrupt usage of the input method.
      *
-     * @hide
+     * @param view the view for which to show autofill suggestions. This is typically a view
+     *             receiving a focus event. The autofill suggestions shown will include content for
+     *             related views as well.
+     * @return {@code true} if the autofill dialog is being shown
      */
-    public boolean isShowFillDialog(AutofillId id) {
+    // TODO(b/210926084): Consider whether to include the one-time show logic within this method.
+    public boolean showAutofillDialog(@NonNull View view) {
+        Objects.requireNonNull(view);
+        if (shouldShowAutofillDialog(view.getAutofillId())) {
+            // If the id matches a trigger id, this will trigger the fill dialog.
+            notifyViewEntered(view);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Like {@link #showAutofillDialog(View)} but for virtual views.
+     *
+     * @param virtualId id identifying the virtual child inside the parent view.
+     */
+    // TODO(b/210926084): Consider whether to include the one-time show logic within this method.
+    public boolean showAutofillDialog(@NonNull View view, int virtualId) {
+        Objects.requireNonNull(view);
+        if (shouldShowAutofillDialog(getAutofillId(view, virtualId))) {
+            // If the id matches a trigger id, this will trigger the fill dialog.
+            notifyViewEntered(view, virtualId, /* bounds= */ null, /* flags= */ 0);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean shouldShowAutofillDialog(AutofillId id) {
         if (!hasFillDialogUiFeature() || mFillDialogTriggerIds == null) {
             return false;
         }

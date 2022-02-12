@@ -146,12 +146,10 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.FalsingManager.FalsingTapListener;
-import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.qrcodescanner.controller.QRCodeScannerController;
-import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
@@ -325,7 +323,6 @@ public class NotificationPanelViewController extends PanelViewController
     private final KeyguardUserSwitcherComponent.Factory mKeyguardUserSwitcherComponentFactory;
     private final KeyguardStatusBarViewComponent.Factory mKeyguardStatusBarViewComponentFactory;
     private final IdleViewComponent.Factory mIdleViewComponentFactory;
-    private final QSDetailDisplayer mQSDetailDisplayer;
     private final FragmentService mFragmentService;
     private final ScrimController mScrimController;
     private final PrivacyDotViewController mPrivacyDotViewController;
@@ -773,7 +770,6 @@ public class NotificationPanelViewController extends PanelViewController
             CommunalViewComponent.Factory communalViewComponentFactory,
             IdleViewComponent.Factory idleViewComponentFactory,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
-            QSDetailDisplayer qsDetailDisplayer,
             NotificationGroupManagerLegacy groupManager,
             NotificationIconAreaController notificationIconAreaController,
             AuthController authController,
@@ -848,7 +844,6 @@ public class NotificationPanelViewController extends PanelViewController
         mContentResolver = contentResolver;
         mKeyguardQsUserSwitchComponentFactory = keyguardQsUserSwitchComponentFactory;
         mKeyguardUserSwitcherComponentFactory = keyguardUserSwitcherComponentFactory;
-        mQSDetailDisplayer = qsDetailDisplayer;
         mFragmentService = fragmentService;
         mSettingsChangeObserver = new SettingsChangeObserver(handler);
         mShouldUseSplitNotificationShade =
@@ -1136,7 +1131,6 @@ public class NotificationPanelViewController extends PanelViewController
                     mKeyguardQsUserSwitchComponentFactory.build(userAvatarView);
             mKeyguardQsUserSwitchController =
                     userSwitcherComponent.getKeyguardQsUserSwitchController();
-            mKeyguardQsUserSwitchController.setNotificationPanelViewController(this);
             mKeyguardQsUserSwitchController.init();
             mKeyguardStatusBarViewController.setKeyguardUserSwitcherEnabled(true);
         } else if (keyguardUserSwitcherView != null) {
@@ -1845,18 +1839,6 @@ public class NotificationPanelViewController extends PanelViewController
         } else {
             traceQsJank(true /* startTracing */, false /* wasCancelled */);
             flingSettings(0 /* velocity */, FLING_EXPAND);
-        }
-    }
-
-    public void expandWithQsDetail(DetailAdapter qsDetailAdapter) {
-        traceQsJank(true /* startTracing */, false /* wasCancelled */);
-        flingSettings(0 /* velocity */, FLING_EXPAND);
-        // When expanding with a panel, there's no meaningful touch point to correspond to. Set the
-        // origin to somewhere above the screen. This is used for animations.
-        int x = mQsFrame.getWidth() / 2;
-        mQSDetailDisplayer.showDetailAdapter(qsDetailAdapter, x, -getHeight());
-        if (mAccessibilityManager.isEnabled()) {
-            mView.setAccessibilityPaneTitle(determineAccessibilityPaneTitle());
         }
     }
 

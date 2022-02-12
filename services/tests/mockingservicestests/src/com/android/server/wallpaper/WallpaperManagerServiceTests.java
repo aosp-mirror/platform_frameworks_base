@@ -33,6 +33,7 @@ import static com.android.server.wallpaper.WallpaperManagerService.WALLPAPER_CRO
 
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -443,6 +444,48 @@ public class WallpaperManagerServiceTests {
         mService.setWallpaperDimAmount(dimAmount);
         assertEquals("Getting dim amount should match after setting the dim amount",
                 mService.getWallpaperDimAmount(), dimAmount, 0.0);
+    }
+
+    @Test
+    public void testGetAdjustedWallpaperColorsOnDimming() throws RemoteException {
+        final int testUserId = USER_SYSTEM;
+        mService.switchUser(testUserId, null);
+        mService.setWallpaperComponent(sDefaultWallpaperComponent);
+        WallpaperData wallpaper = mService.getCurrentWallpaperData(FLAG_SYSTEM, testUserId);
+
+        // Mock a wallpaper data with color hints that support dark text and dark theme
+        // but not HINT_FROM_BITMAP
+        wallpaper.primaryColors = new WallpaperColors(Color.valueOf(Color.WHITE), null, null,
+                WallpaperColors.HINT_SUPPORTS_DARK_TEXT | WallpaperColors.HINT_SUPPORTS_DARK_THEME);
+        mService.setWallpaperDimAmount(0.6f);
+        int colorHints = mService.getAdjustedWallpaperColorsOnDimming(wallpaper).getColorHints();
+        // Dimmed wallpaper not extracted from bitmap does not support dark text and dark theme
+        assertNotEquals(WallpaperColors.HINT_SUPPORTS_DARK_TEXT,
+                colorHints & WallpaperColors.HINT_SUPPORTS_DARK_TEXT);
+        assertNotEquals(WallpaperColors.HINT_SUPPORTS_DARK_THEME,
+                colorHints & WallpaperColors.HINT_SUPPORTS_DARK_THEME);
+
+        // Remove dimming
+        mService.setWallpaperDimAmount(0f);
+        colorHints = mService.getAdjustedWallpaperColorsOnDimming(wallpaper).getColorHints();
+        // Undimmed wallpaper not extracted from bitmap does support dark text and dark theme
+        assertEquals(WallpaperColors.HINT_SUPPORTS_DARK_TEXT,
+                colorHints & WallpaperColors.HINT_SUPPORTS_DARK_TEXT);
+        assertEquals(WallpaperColors.HINT_SUPPORTS_DARK_THEME,
+                colorHints & WallpaperColors.HINT_SUPPORTS_DARK_THEME);
+
+        // Mock a wallpaper data with color hints that support dark text and dark theme
+        // and was extracted from bitmap
+        wallpaper.primaryColors = new WallpaperColors(Color.valueOf(Color.WHITE), null, null,
+                WallpaperColors.HINT_SUPPORTS_DARK_TEXT | WallpaperColors.HINT_SUPPORTS_DARK_THEME
+                        | WallpaperColors.HINT_FROM_BITMAP);
+        mService.setWallpaperDimAmount(0.6f);
+        colorHints = mService.getAdjustedWallpaperColorsOnDimming(wallpaper).getColorHints();
+        // Dimmed wallpaper should still support dark text and dark theme
+        assertEquals(WallpaperColors.HINT_SUPPORTS_DARK_TEXT,
+                colorHints & WallpaperColors.HINT_SUPPORTS_DARK_TEXT);
+        assertEquals(WallpaperColors.HINT_SUPPORTS_DARK_THEME,
+                colorHints & WallpaperColors.HINT_SUPPORTS_DARK_THEME);
     }
 
     // Verify that after continue switch user from userId 0 to lastUserId, the wallpaper data for

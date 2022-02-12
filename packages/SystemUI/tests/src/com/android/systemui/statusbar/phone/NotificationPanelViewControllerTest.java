@@ -110,7 +110,6 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qrcodescanner.controller.QRCodeScannerController;
-import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
@@ -272,8 +271,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
     private IdleViewComponent mIdleViewComponent;
     @Mock
     private IdleHostViewController mIdleHostViewController;
-    @Mock
-    private QSDetailDisplayer mQSDetailDisplayer;
     @Mock
     private KeyguardStatusViewComponent mKeyguardStatusViewComponent;
     @Mock
@@ -528,7 +525,6 @@ public class NotificationPanelViewControllerTest extends SysuiTestCase {
                 mCommunalViewComponentFactory,
                 mIdleViewComponentFactory,
                 mLockscreenShadeTransitionController,
-                mQSDetailDisplayer,
                 mGroupManager,
                 mNotificationAreaController,
                 mAuthController,

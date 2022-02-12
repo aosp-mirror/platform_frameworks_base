@@ -38,7 +38,6 @@ import static android.util.TimeUtils.formatTime;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.AppRestrictionController.DEVICE_CONFIG_SUBNAMESPACE_PREFIX;
-import static com.android.server.am.BaseAppStateTracker.ONE_DAY;
 import static com.android.server.am.BaseAppStateTracker.ONE_MINUTE;
 
 import android.annotation.NonNull;
@@ -47,6 +46,8 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager.RestrictionLevel;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.os.BatteryConsumer;
 import android.os.BatteryConsumer.Dimensions;
 import android.os.BatteryStatsInternal;
@@ -64,6 +65,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.TimeUtils;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -1025,76 +1027,66 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
                 DEVICE_CONFIG_SUBNAMESPACE_PREFIX + "current_drain_power_components";
 
         /**
-         * Default value to {@link #mTrackerEnabled}.
-         */
-        static final boolean DEFAULT_BG_CURRENT_DRAIN_MONITOR_ENABLED = true;
-
-        /**
          * Default value to the {@link #INDEX_REGULAR_CURRENT_DRAIN_THRESHOLD} of
          * the {@link #mBgCurrentDrainRestrictedBucketThreshold}.
          */
-        static final float DEFAULT_BG_CURRENT_DRAIN_RESTRICTED_BUCKET_THRESHOLD =
-                isLowRamDeviceStatic() ? 4.0f : 2.0f;
+        final float mDefaultBgCurrentDrainRestrictedBucket;
 
         /**
          * Default value to the {@link #INDEX_REGULAR_CURRENT_DRAIN_THRESHOLD} of
          * the {@link #mBgCurrentDrainBgRestrictedThreshold}.
          */
-        static final float DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_THRESHOLD =
-                isLowRamDeviceStatic() ? 8.0f : 4.0f;
+        final float mDefaultBgCurrentDrainBgRestrictedThreshold;
 
         /**
          * Default value to {@link #mBgCurrentDrainWindowMs}.
          */
-        static final long DEFAULT_BG_CURRENT_DRAIN_WINDOW_MS = ONE_DAY;
+        final long mDefaultBgCurrentDrainWindowMs;
 
         /**
          * Default value to the {@link #INDEX_HIGH_CURRENT_DRAIN_THRESHOLD} of
          * the {@link #mBgCurrentDrainRestrictedBucketThreshold}.
          */
-        static final float DEFAULT_BG_CURRENT_DRAIN_RESTRICTED_BUCKET_HIGH_THRESHOLD =
-                isLowRamDeviceStatic() ? 60.0f : 30.0f;
+        final float mDefaultBgCurrentDrainRestrictedBucketHighThreshold;
 
         /**
          * Default value to the {@link #INDEX_HIGH_CURRENT_DRAIN_THRESHOLD} of
          * the {@link #mBgCurrentDrainBgRestrictedThreshold}.
          */
-        static final float DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_HIGH_THRESHOLD =
-                isLowRamDeviceStatic() ? 60.0f : 30.0f;
+        final float mDefaultBgCurrentDrainBgRestrictedHighThreshold;
 
         /**
          * Default value to {@link #mBgCurrentDrainMediaPlaybackMinDuration}.
          */
-        static final long DEFAULT_BG_CURRENT_DRAIN_MEDIA_PLAYBACK_MIN_DURATION = 30 * ONE_MINUTE;
+        final long mDefaultBgCurrentDrainMediaPlaybackMinDuration;
 
         /**
          * Default value to {@link #mBgCurrentDrainLocationMinDuration}.
          */
-        static final long DEFAULT_BG_CURRENT_DRAIN_LOCATION_MIN_DURATION = 30 * ONE_MINUTE;
+        final long mDefaultBgCurrentDrainLocationMinDuration;
 
         /**
          * Default value to {@link #mBgCurrentDrainEventDurationBasedThresholdEnabled}.
          */
-        static final boolean DEFAULT_BG_CURRENT_DRAIN_EVENT_DURATION_BASED_THRESHOLD_ENABLED =
-                false;
+        final boolean mDefaultBgCurrentDrainEventDurationBasedThresholdEnabled;
 
         /**
          * Default value to {@link #mBgCurrentDrainRestrictedBucketTypes}.
          */
-        static final int DEFAULT_BG_CURRENT_DRAIN_TYPES_TO_RESTRICTED_BUCKET =
-                BATTERY_USAGE_TYPE_BACKGROUND;
+        final int mDefaultCurrentDrainTypesToRestrictedBucket;
 
         /**
          * Default value to {@link #mBgCurrentDrainBgRestrictedTypes}.
          */
-        static final int DEFAULT_BG_CURRENT_DRAIN_TYPES_TO_BG_RESTRICTED =
-                BATTERY_USAGE_TYPE_BACKGROUND | BATTERY_USAGE_TYPE_FOREGROUND_SERVICE;
+        final int mDefaultBgCurrentDrainTypesToBgRestricted;
 
         /**
          * Default value to {@link #mBgCurrentDrainPowerComponents}.
          **/
         @BatteryConsumer.PowerComponent
         static final int DEFAULT_BG_CURRENT_DRAIN_POWER_COMPONENTS = POWER_COMPONENT_ANY;
+
+        final int mDefaultBgCurrentDrainPowerComponent;
 
         /**
          * The index to {@link #mBgCurrentDrainRestrictedBucketThreshold}
@@ -1107,36 +1099,28 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
          * @see #KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_RESTRICTED_BUCKET.
          * @see #KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_TO_RESTRICTED_BUCKET.
          */
-        volatile float[] mBgCurrentDrainRestrictedBucketThreshold = {
-                DEFAULT_BG_CURRENT_DRAIN_RESTRICTED_BUCKET_THRESHOLD,
-                DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_HIGH_THRESHOLD,
-        };
+        volatile float[] mBgCurrentDrainRestrictedBucketThreshold = new float[2];
 
         /**
          * @see #KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_BG_RESTRICTED.
          * @see #KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_TO_BG_RESTRICTED.
          */
-        volatile float[] mBgCurrentDrainBgRestrictedThreshold = {
-                DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_THRESHOLD,
-                DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_HIGH_THRESHOLD,
-        };
+        volatile float[] mBgCurrentDrainBgRestrictedThreshold = new float[2];
 
         /**
          * @see #KEY_BG_CURRENT_DRAIN_WINDOW.
          */
-        volatile long mBgCurrentDrainWindowMs = DEFAULT_BG_CURRENT_DRAIN_WINDOW_MS;
+        volatile long mBgCurrentDrainWindowMs;
 
         /**
          * @see #KEY_BG_CURRENT_DRAIN_MEDIA_PLAYBACK_MIN_DURATION.
          */
-        volatile long mBgCurrentDrainMediaPlaybackMinDuration =
-                DEFAULT_BG_CURRENT_DRAIN_MEDIA_PLAYBACK_MIN_DURATION;
+        volatile long mBgCurrentDrainMediaPlaybackMinDuration;
 
         /**
          * @see #KEY_BG_CURRENT_DRAIN_LOCATION_MIN_DURATION.
          */
-        volatile long mBgCurrentDrainLocationMinDuration =
-                DEFAULT_BG_CURRENT_DRAIN_LOCATION_MIN_DURATION;
+        volatile long mBgCurrentDrainLocationMinDuration;
 
         /**
          * @see #KEY_BG_CURRENT_DRAIN_EVENT_DURATION_BASED_THRESHOLD_ENABLED.
@@ -1183,8 +1167,62 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
 
         AppBatteryPolicy(@NonNull Injector injector, @NonNull AppBatteryTracker tracker) {
             super(injector, tracker, KEY_BG_CURRENT_DRAIN_MONITOR_ENABLED,
-                    DEFAULT_BG_CURRENT_DRAIN_MONITOR_ENABLED);
+                    tracker.mContext.getResources()
+                    .getBoolean(R.bool.config_bg_current_drain_monitor_enabled));
             mLock = tracker.mLock;
+            final Resources resources = tracker.mContext.getResources();
+            float[] val = getFloatArray(resources.obtainTypedArray(
+                    R.array.config_bg_current_drain_threshold_to_restricted_bucket));
+            mDefaultBgCurrentDrainRestrictedBucket =
+                    isLowRamDeviceStatic() ? val[1] : val[0];
+            val = getFloatArray(resources.obtainTypedArray(
+                    R.array.config_bg_current_drain_threshold_to_bg_restricted));
+            mDefaultBgCurrentDrainBgRestrictedThreshold =
+                    isLowRamDeviceStatic() ? val[1] : val[0];
+            mDefaultBgCurrentDrainWindowMs = resources.getInteger(
+                    R.integer.config_bg_current_drain_window);
+            val = getFloatArray(resources.obtainTypedArray(
+                    R.array.config_bg_current_drain_high_threshold_to_restricted_bucket));
+            mDefaultBgCurrentDrainRestrictedBucketHighThreshold =
+                    isLowRamDeviceStatic() ? val[1] : val[0];
+            val = getFloatArray(resources.obtainTypedArray(
+                    R.array.config_bg_current_drain_high_threshold_to_bg_restricted));
+            mDefaultBgCurrentDrainBgRestrictedHighThreshold =
+                    isLowRamDeviceStatic() ? val[1] : val[0];
+            mDefaultBgCurrentDrainMediaPlaybackMinDuration = resources.getInteger(
+                    R.integer.config_bg_current_drain_media_playback_min_duration);
+            mDefaultBgCurrentDrainLocationMinDuration = resources.getInteger(
+                    R.integer.config_bg_current_drain_location_min_duration);
+            mDefaultBgCurrentDrainEventDurationBasedThresholdEnabled = resources.getBoolean(
+                    R.bool.config_bg_current_drain_event_duration_based_threshold_enabled);
+            mDefaultCurrentDrainTypesToRestrictedBucket = resources.getInteger(
+                    R.integer.config_bg_current_drain_types_to_restricted_bucket);
+            mDefaultBgCurrentDrainTypesToBgRestricted = resources.getInteger(
+                    R.integer.config_bg_current_drain_types_to_bg_restricted);
+            mDefaultBgCurrentDrainPowerComponent = resources.getInteger(
+                    R.integer.config_bg_current_drain_power_components);
+            mBgCurrentDrainRestrictedBucketThreshold[0] =
+                    mDefaultBgCurrentDrainRestrictedBucket;
+            mBgCurrentDrainRestrictedBucketThreshold[1] =
+                    mDefaultBgCurrentDrainRestrictedBucketHighThreshold;
+            mBgCurrentDrainBgRestrictedThreshold[0] =
+                    mDefaultBgCurrentDrainBgRestrictedThreshold;
+            mBgCurrentDrainBgRestrictedThreshold[1] =
+                    mDefaultBgCurrentDrainBgRestrictedHighThreshold;
+            mBgCurrentDrainWindowMs = mDefaultBgCurrentDrainWindowMs;
+            mBgCurrentDrainMediaPlaybackMinDuration =
+                    mDefaultBgCurrentDrainMediaPlaybackMinDuration;
+            mBgCurrentDrainLocationMinDuration = mDefaultBgCurrentDrainLocationMinDuration;
+        }
+
+        static float[] getFloatArray(TypedArray array) {
+            int length = array.length();
+            float[] floatArray = new float[length];
+            for (int i = 0; i < length; i++) {
+                floatArray[i] = array.getFloat(i, Float.NaN);
+            }
+            array.recycle();
+            return floatArray;
         }
 
         @Override
@@ -1234,31 +1272,31 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             mBgCurrentDrainRestrictedBucketThreshold[INDEX_REGULAR_CURRENT_DRAIN_THRESHOLD] =
                     DeviceConfig.getFloat(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_RESTRICTED_BUCKET,
-                    DEFAULT_BG_CURRENT_DRAIN_RESTRICTED_BUCKET_THRESHOLD);
+                    mDefaultBgCurrentDrainRestrictedBucket);
             mBgCurrentDrainRestrictedBucketThreshold[INDEX_HIGH_CURRENT_DRAIN_THRESHOLD] =
                     DeviceConfig.getFloat(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_TO_RESTRICTED_BUCKET,
-                    DEFAULT_BG_CURRENT_DRAIN_RESTRICTED_BUCKET_HIGH_THRESHOLD);
+                    mDefaultBgCurrentDrainRestrictedBucketHighThreshold);
             mBgCurrentDrainBgRestrictedThreshold[INDEX_REGULAR_CURRENT_DRAIN_THRESHOLD] =
                     DeviceConfig.getFloat(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_BG_CURRENT_DRAIN_THRESHOLD_TO_BG_RESTRICTED,
-                    DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_THRESHOLD);
+                    mDefaultBgCurrentDrainBgRestrictedThreshold);
             mBgCurrentDrainBgRestrictedThreshold[INDEX_HIGH_CURRENT_DRAIN_THRESHOLD] =
                     DeviceConfig.getFloat(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_BG_CURRENT_DRAIN_HIGH_THRESHOLD_TO_BG_RESTRICTED,
-                    DEFAULT_BG_CURRENT_DRAIN_BG_RESTRICTED_HIGH_THRESHOLD);
+                    mDefaultBgCurrentDrainBgRestrictedHighThreshold);
             mBgCurrentDrainRestrictedBucketTypes =
                     DeviceConfig.getInt(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_BG_CURRENT_DRAIN_TYPES_TO_RESTRICTED_BUCKET,
-                    DEFAULT_BG_CURRENT_DRAIN_TYPES_TO_RESTRICTED_BUCKET);
+                    mDefaultCurrentDrainTypesToRestrictedBucket);
             mBgCurrentDrainBgRestrictedTypes =
                     DeviceConfig.getInt(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_BG_CURRENT_DRAIN_TYPES_TO_BG_RESTRICTED,
-                    DEFAULT_BG_CURRENT_DRAIN_TYPES_TO_BG_RESTRICTED);
+                    mDefaultBgCurrentDrainTypesToBgRestricted);
             mBgCurrentDrainPowerComponents =
                     DeviceConfig.getInt(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_BG_CURRENT_DRAIN_POWER_COMPONENTS,
-                    DEFAULT_BG_CURRENT_DRAIN_POWER_COMPONENTS);
+                    mDefaultBgCurrentDrainPowerComponent);
             if (mBgCurrentDrainPowerComponents == DEFAULT_BG_CURRENT_DRAIN_POWER_COMPONENTS) {
                 mBatteryDimensions = BatteryUsage.BATT_DIMENS;
             } else {
@@ -1273,28 +1311,28 @@ final class AppBatteryTracker extends BaseAppStateTracker<AppBatteryPolicy>
             mBgCurrentDrainWindowMs = DeviceConfig.getLong(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_BG_CURRENT_DRAIN_WINDOW,
-                    DEFAULT_BG_CURRENT_DRAIN_WINDOW_MS);
+                    mDefaultBgCurrentDrainWindowMs);
         }
 
         private void updateCurrentDrainMediaPlaybackMinDuration() {
             mBgCurrentDrainMediaPlaybackMinDuration = DeviceConfig.getLong(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_BG_CURRENT_DRAIN_MEDIA_PLAYBACK_MIN_DURATION,
-                    DEFAULT_BG_CURRENT_DRAIN_MEDIA_PLAYBACK_MIN_DURATION);
+                    mDefaultBgCurrentDrainMediaPlaybackMinDuration);
         }
 
         private void updateCurrentDrainLocationMinDuration() {
             mBgCurrentDrainLocationMinDuration = DeviceConfig.getLong(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_BG_CURRENT_DRAIN_LOCATION_MIN_DURATION,
-                    DEFAULT_BG_CURRENT_DRAIN_LOCATION_MIN_DURATION);
+                    mDefaultBgCurrentDrainLocationMinDuration);
         }
 
         private void updateCurrentDrainEventDurationBasedThresholdEnabled() {
             mBgCurrentDrainEventDurationBasedThresholdEnabled = DeviceConfig.getBoolean(
                     DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                     KEY_BG_CURRENT_DRAIN_EVENT_DURATION_BASED_THRESHOLD_ENABLED,
-                    DEFAULT_BG_CURRENT_DRAIN_EVENT_DURATION_BASED_THRESHOLD_ENABLED);
+                    mDefaultBgCurrentDrainEventDurationBasedThresholdEnabled);
         }
 
         @Override

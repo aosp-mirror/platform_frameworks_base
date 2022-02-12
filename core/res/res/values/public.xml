@@ -3276,6 +3276,8 @@
     <public name="toExtendBottom" />
     <public name="tileService" />
     <public name="windowSplashScreenBehavior" />
+    <public name="allowUntrustedActivityEmbedding" />
+    <public name="knownActivityEmbeddingCerts" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01de0000">

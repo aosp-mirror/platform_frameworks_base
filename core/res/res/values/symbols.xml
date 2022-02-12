@@ -3749,6 +3749,7 @@
   <java-symbol type="bool" name="config_handleVolumeAliasesUsingVolumeGroups" />
   <java-symbol type="dimen" name="config_inCallNotificationVolume" />
   <java-symbol type="string" name="config_inCallNotificationSound" />
+  <java-symbol type="string" name="config_cameraShutterSound" />
   <java-symbol type="integer" name="config_autoGroupAtCount" />
   <java-symbol type="bool" name="config_dozeAlwaysOnDisplayAvailable" />
   <java-symbol type="bool" name="config_dozeAlwaysOnEnabled" />
@@ -3867,6 +3868,11 @@
   <java-symbol type="string" name="harmful_app_warning_open_anyway" />
   <java-symbol type="string" name="harmful_app_warning_title" />
   <java-symbol type="layout" name="harmful_app_warning_dialog" />
+
+  <java-symbol type="string" name="log_access_confirmation_allow" />
+  <java-symbol type="string" name="log_access_confirmation_deny" />
+  <java-symbol type="string" name="log_access_confirmation_title" />
+  <java-symbol type="string" name="log_access_confirmation_body" />
 
   <java-symbol type="string" name="config_defaultAssistantAccessComponent" />
 
@@ -4728,4 +4734,17 @@
   <java-symbol type="string" name="vdm_camera_access_denied" />
 
   <java-symbol type="color" name="camera_privacy_light"/>
+
+  <java-symbol type="bool" name="config_bg_current_drain_monitor_enabled" />
+  <java-symbol type="array" name="config_bg_current_drain_threshold_to_restricted_bucket" />
+  <java-symbol type="array" name="config_bg_current_drain_threshold_to_bg_restricted" />
+  <java-symbol type="integer" name="config_bg_current_drain_window" />
+  <java-symbol type="integer" name="config_bg_current_drain_types_to_restricted_bucket" />
+  <java-symbol type="integer" name="config_bg_current_drain_types_to_bg_restricted" />
+  <java-symbol type="integer" name="config_bg_current_drain_power_components" />
+  <java-symbol type="bool" name="config_bg_current_drain_event_duration_based_threshold_enabled" />
+  <java-symbol type="array" name="config_bg_current_drain_high_threshold_to_restricted_bucket" />
+  <java-symbol type="array" name="config_bg_current_drain_high_threshold_to_bg_restricted" />
+  <java-symbol type="integer" name="config_bg_current_drain_media_playback_min_duration" />
+  <java-symbol type="integer" name="config_bg_current_drain_location_min_duration" />
 </resources>

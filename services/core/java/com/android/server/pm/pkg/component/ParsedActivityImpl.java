@@ -23,6 +23,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 
 import static com.android.server.pm.pkg.parsing.ParsingPackageImpl.sForInternedString;
+import static com.android.server.pm.pkg.parsing.ParsingPackageImpl.sForStringSet;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -33,11 +34,16 @@ import android.content.pm.PackageManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 import com.android.server.pm.pkg.parsing.ParsingUtils;
+
+import java.util.Collections;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * @hide
@@ -63,6 +69,8 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
     @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
     private String permission;
+    @Nullable
+    private Set<String> mKnownActivityEmbeddingCerts;
 
     private int launchMode;
     private int documentLaunchMode;
@@ -113,6 +121,7 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
         this.rotationAnimation = other.rotationAnimation;
         this.colorMode = other.colorMode;
         this.windowLayout = other.windowLayout;
+        this.mKnownActivityEmbeddingCerts = other.mKnownActivityEmbeddingCerts;
     }
 
     /**
@@ -239,6 +248,25 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
         return this;
     }
 
+    @NonNull
+    @Override
+    public Set<String> getKnownActivityEmbeddingCerts() {
+        return mKnownActivityEmbeddingCerts == null ? Collections.emptySet()
+                : mKnownActivityEmbeddingCerts;
+    }
+
+    /**
+     * Sets the trusted host certificates of apps that are allowed to embed this activity.
+     */
+    public void setKnownActivityEmbeddingCerts(@NonNull Set<String> knownActivityEmbeddingCerts) {
+        // Convert the provided digest to upper case for consistent Set membership
+        // checks when verifying the signing certificate digests of requesting apps.
+        this.mKnownActivityEmbeddingCerts = new ArraySet<>();
+        for (String knownCert : knownActivityEmbeddingCerts) {
+            this.mKnownActivityEmbeddingCerts.add(knownCert.toUpperCase(Locale.US));
+        }
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder(128);
         sb.append("Activity{");
@@ -287,6 +315,7 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
         } else {
             dest.writeBoolean(false);
         }
+        sForStringSet.parcel(this.mKnownActivityEmbeddingCerts, dest, flags);
     }
 
     public ParsedActivityImpl() {
@@ -320,6 +349,7 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
         if (in.readBoolean()) {
             windowLayout = new ActivityInfo.WindowLayout(in);
         }
+        this.mKnownActivityEmbeddingCerts = sForStringSet.unparcel(in);
     }
 
     @NonNull
@@ -344,7 +374,7 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
     // CHECKSTYLE:OFF Generated code
     //
     // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/content/pm/parsing/component/ParsedActivityImpl.java
+    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/services/core/java/com/android/server/pm/pkg/component/ParsedActivityImpl.java
     //
     // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
     //   Settings > Editor > Code Style > Formatter Control
@@ -360,6 +390,7 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
             @Nullable String taskAffinity,
             int privateFlags,
             @Nullable String permission,
+            @Nullable Set<String> knownActivityEmbeddingCerts,
             int launchMode,
             int documentLaunchMode,
             int maxRecents,
@@ -383,6 +414,7 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
         this.taskAffinity = taskAffinity;
         this.privateFlags = privateFlags;
         this.permission = permission;
+        this.mKnownActivityEmbeddingCerts = knownActivityEmbeddingCerts;
         this.launchMode = launchMode;
         this.documentLaunchMode = documentLaunchMode;
         this.maxRecents = maxRecents;
@@ -645,10 +677,10 @@ public class ParsedActivityImpl extends ParsedMainComponentImpl implements Parse
     }
 
     @DataClass.Generated(
-            time = 1641431949361L,
+            time = 1644372875433L,
             codegenVersion = "1.0.23",
-            sourceFile = "frameworks/base/core/java/android/content/pm/parsing/component/ParsedActivityImpl.java",
-            inputSignatures = "private  int theme\nprivate  int uiOptions\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String targetActivity\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String parentActivityName\nprivate @android.annotation.Nullable java.lang.String taskAffinity\nprivate  int privateFlags\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String permission\nprivate  int launchMode\nprivate  int documentLaunchMode\nprivate  int maxRecents\nprivate  int configChanges\nprivate  int softInputMode\nprivate  int persistableMode\nprivate  int lockTaskLaunchMode\nprivate  int screenOrientation\nprivate  int resizeMode\nprivate  float maxAspectRatio\nprivate  float minAspectRatio\nprivate  boolean supportsSizeChanges\nprivate @android.annotation.Nullable java.lang.String requestedVrComponent\nprivate  int rotationAnimation\nprivate  int colorMode\nprivate @android.annotation.Nullable android.content.pm.ActivityInfo.WindowLayout windowLayout\npublic static final @android.annotation.NonNull android.os.Parcelable.Creator<android.content.pm.parsing.component.ParsedActivityImpl> CREATOR\nstatic @android.annotation.NonNull android.content.pm.parsing.component.ParsedActivityImpl makeAppDetailsActivity(java.lang.String,java.lang.String,int,java.lang.String,boolean)\nstatic @android.annotation.NonNull android.content.pm.parsing.component.ParsedActivityImpl makeAlias(java.lang.String,android.content.pm.parsing.component.ParsedActivity)\npublic  android.content.pm.parsing.component.ParsedActivityImpl setMaxAspectRatio(int,float)\npublic  android.content.pm.parsing.component.ParsedActivityImpl setMinAspectRatio(int,float)\npublic  android.content.pm.parsing.component.ParsedActivityImpl setTargetActivity(java.lang.String)\npublic  android.content.pm.parsing.component.ParsedActivityImpl setPermission(java.lang.String)\npublic  java.lang.String toString()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass ParsedActivityImpl extends android.content.pm.parsing.component.ParsedMainComponentImpl implements [android.content.pm.parsing.component.ParsedActivity, android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genBuilder=false, genParcelable=false)")
+            sourceFile = "frameworks/base/services/core/java/com/android/server/pm/pkg/component/ParsedActivityImpl.java",
+            inputSignatures = "private  int theme\nprivate  int uiOptions\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String targetActivity\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String parentActivityName\nprivate @android.annotation.Nullable java.lang.String taskAffinity\nprivate  int privateFlags\nprivate @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) java.lang.String permission\nprivate @android.annotation.Nullable java.util.Set<java.lang.String> mKnownActivityEmbeddingCerts\nprivate  int launchMode\nprivate  int documentLaunchMode\nprivate  int maxRecents\nprivate  int configChanges\nprivate  int softInputMode\nprivate  int persistableMode\nprivate  int lockTaskLaunchMode\nprivate  int screenOrientation\nprivate  int resizeMode\nprivate  float maxAspectRatio\nprivate  float minAspectRatio\nprivate  boolean supportsSizeChanges\nprivate @android.annotation.Nullable java.lang.String requestedVrComponent\nprivate  int rotationAnimation\nprivate  int colorMode\nprivate @android.annotation.Nullable android.content.pm.ActivityInfo.WindowLayout windowLayout\npublic static final @android.annotation.NonNull android.os.Parcelable.Creator<com.android.server.pm.pkg.component.ParsedActivityImpl> CREATOR\nstatic @android.annotation.NonNull com.android.server.pm.pkg.component.ParsedActivityImpl makeAppDetailsActivity(java.lang.String,java.lang.String,int,java.lang.String,boolean)\nstatic @android.annotation.NonNull com.android.server.pm.pkg.component.ParsedActivityImpl makeAlias(java.lang.String,com.android.server.pm.pkg.component.ParsedActivity)\npublic  com.android.server.pm.pkg.component.ParsedActivityImpl setMaxAspectRatio(int,float)\npublic  com.android.server.pm.pkg.component.ParsedActivityImpl setMinAspectRatio(int,float)\npublic  com.android.server.pm.pkg.component.ParsedActivityImpl setTargetActivity(java.lang.String)\npublic  com.android.server.pm.pkg.component.ParsedActivityImpl setPermission(java.lang.String)\npublic @android.annotation.NonNull @java.lang.Override java.util.Set<java.lang.String> getKnownActivityEmbeddingCerts()\npublic  void setKnownActivityEmbeddingCerts(java.util.Set<java.lang.String>)\npublic  java.lang.String toString()\npublic @java.lang.Override int describeContents()\npublic @java.lang.Override void writeToParcel(android.os.Parcel,int)\nclass ParsedActivityImpl extends com.android.server.pm.pkg.component.ParsedMainComponentImpl implements [com.android.server.pm.pkg.component.ParsedActivity, android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genBuilder=false, genParcelable=false)")
     @Deprecated
     private void __metadata() {}
 

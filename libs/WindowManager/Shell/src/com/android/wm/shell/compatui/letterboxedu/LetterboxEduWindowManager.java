@@ -103,7 +103,6 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
     protected View createLayout() {
         setSeenLetterboxEducation();
         mLayout = inflateLayout();
-        mLayout.inject(this);
 
         mAnimationController.startEnterAnimation(mLayout, /* endCallback= */
                 this::setDismissOnClickListener);
@@ -145,15 +144,22 @@ public class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
     }
 
     @Override
+    protected void updateSurface() {
+        // We need to relayout because the layout dimensions depend on the task bounds.
+        relayout();
+    }
+
+    @Override
     protected void updateSurfacePosition(Rect taskBounds, Rect stableBounds) {
-        updateSurfacePosition(/* positionX= */ taskBounds.left, /* positionY= */ taskBounds.top);
+        // Nothing to do, since the position of the surface is fixed to the top left corner (0,0)
+        // of the task (parent surface), which is the default position of a surface.
     }
 
     @Override
     protected WindowManager.LayoutParams getWindowLayoutParams() {
         final Rect taskBounds = mTaskConfig.windowConfiguration.getBounds();
-        return getWindowLayoutParams(/* width= */ taskBounds.right - taskBounds.left,
-                /* height= */ taskBounds.bottom - taskBounds.top);
+        return getWindowLayoutParams(/* width= */ taskBounds.width(), /* height= */
+                taskBounds.height());
     }
 
     private boolean getHasSeenLetterboxEducation() {

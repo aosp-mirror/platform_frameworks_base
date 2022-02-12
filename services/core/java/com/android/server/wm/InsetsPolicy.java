@@ -144,15 +144,21 @@ class InsetsPolicy {
                 getStatusControlTarget(focusedWin, false /* fake */);
         final InsetsControlTarget navControlTarget =
                 getNavControlTarget(focusedWin, false /* fake */);
+        final WindowState notificationShade = mPolicy.getNotificationShade();
+        final WindowState topApp = mPolicy.getTopFullscreenOpaqueWindow();
         mStateController.onBarControlTargetChanged(
                 statusControlTarget,
                 statusControlTarget == mDummyControlTarget
                         ? getStatusControlTarget(focusedWin, true /* fake */)
-                        : null,
+                        : statusControlTarget == notificationShade
+                                ? getStatusControlTarget(topApp, true /* fake */)
+                                : null,
                 navControlTarget,
                 navControlTarget == mDummyControlTarget
                         ? getNavControlTarget(focusedWin, true /* fake */)
-                        : null);
+                        : navControlTarget == notificationShade
+                                ? getNavControlTarget(topApp, true /* fake */)
+                                : null);
         mStatusBar.updateVisibility(statusControlTarget, ITYPE_STATUS_BAR);
         mNavBar.updateVisibility(navControlTarget, ITYPE_NAVIGATION_BAR);
     }

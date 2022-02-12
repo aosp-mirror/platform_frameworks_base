@@ -54,8 +54,8 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -86,7 +86,6 @@ class UserSwitcherControllerTest : SysuiTestCase() {
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock private lateinit var activityTaskManager: IActivityTaskManager
-    @Mock private lateinit var userDetailAdapter: UserSwitcherController.UserDetailAdapter
     @Mock private lateinit var telephonyListenerManager: TelephonyListenerManager
     @Mock private lateinit var secureSettings: SecureSettings
     @Mock private lateinit var falsingManager: FalsingManager
@@ -161,7 +160,6 @@ class UserSwitcherControllerTest : SysuiTestCase() {
                 falsingManager,
                 telephonyListenerManager,
                 activityTaskManager,
-                userDetailAdapter,
                 secureSettings,
                 uiBgExecutor,
                 interactionJankMonitor,

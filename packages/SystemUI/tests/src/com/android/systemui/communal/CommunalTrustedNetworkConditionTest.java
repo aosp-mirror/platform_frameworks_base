@@ -16,7 +16,8 @@
 
 package com.android.systemui.communal;
 
-import static org.mockito.ArgumentMatchers.anyBoolean;
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.clearInvocations;
@@ -49,6 +50,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
@@ -89,7 +91,8 @@ public class CommunalTrustedNetworkConditionTest extends SysuiTestCase {
         networkCallback.onCapabilitiesChanged(network, fakeNetworkCapabilities(mTrustedWifi1));
 
         // Verifies that the callback is triggered.
-        verify(callback).onConditionChanged(mCondition, true);
+        verify(callback).onConditionChanged(mCondition);
+        assertThat(mCondition.isConditionMet()).isTrue();
     }
 
     @Test
@@ -110,7 +113,7 @@ public class CommunalTrustedNetworkConditionTest extends SysuiTestCase {
         networkCallback.onCapabilitiesChanged(network, fakeNetworkCapabilities(mTrustedWifi2));
 
         // Verifies that the callback is not triggered.
-        verify(callback, never()).onConditionChanged(eq(mCondition), anyBoolean());
+        verify(callback, never()).onConditionChanged(eq(mCondition));
     }
 
     @Test
@@ -126,11 +129,13 @@ public class CommunalTrustedNetworkConditionTest extends SysuiTestCase {
         networkCallback.onAvailable(network);
         networkCallback.onCapabilitiesChanged(network, fakeNetworkCapabilities(mTrustedWifi1));
 
+        Mockito.clearInvocations(callback);
         // Connected to non-trusted Wi-Fi network.
         networkCallback.onCapabilitiesChanged(network, fakeNetworkCapabilities("random-wifi"));
 
         // Verifies that the callback is triggered.
-        verify(callback).onConditionChanged(mCondition, false);
+        verify(callback).onConditionChanged(mCondition);
+        assertThat(mCondition.isConditionMet()).isFalse();
     }
 
     @Test
@@ -151,7 +156,8 @@ public class CommunalTrustedNetworkConditionTest extends SysuiTestCase {
         networkCallback.onLost(network);
 
         // Verifies that the callback is triggered.
-        verify(callback).onConditionChanged(mCondition, false);
+        verify(callback).onConditionChanged(mCondition);
+        assertThat(mCondition.isConditionMet()).isFalse();
     }
 
     // Captures and returns the network callback, assuming it is registered with the connectivity

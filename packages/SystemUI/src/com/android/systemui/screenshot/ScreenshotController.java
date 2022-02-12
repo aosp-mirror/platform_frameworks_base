@@ -51,7 +51,9 @@ import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
-import android.media.MediaActionSound;
+import android.media.AudioAttributes;
+import android.media.AudioSystem;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -93,6 +95,7 @@ import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.io.File;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -248,7 +251,7 @@ public class ScreenshotController {
     private final WindowManager mWindowManager;
     private final WindowManager.LayoutParams mWindowLayoutParams;
     private final AccessibilityManager mAccessibilityManager;
-    private final MediaActionSound mCameraSound;
+    private final MediaPlayer mCameraSound;
     private final ScrollCaptureClient mScrollCaptureClient;
     private final PhoneWindow mWindow;
     private final DisplayManager mDisplayManager;
@@ -331,8 +334,13 @@ public class ScreenshotController {
         reloadAssets();
 
         // Setup the Camera shutter sound
-        mCameraSound = new MediaActionSound();
-        mCameraSound.load(MediaActionSound.SHUTTER_CLICK);
+        mCameraSound = MediaPlayer.create(mContext,
+                Uri.fromFile(new File(mContext.getResources().getString(
+                        com.android.internal.R.string.config_cameraShutterSound))), null,
+                new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build(), AudioSystem.newAudioSessionId());
 
         mCopyBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -430,7 +438,9 @@ public class ScreenshotController {
     void releaseContext() {
         mContext.unregisterReceiver(mCopyBroadcastReceiver);
         mContext.release();
-        mCameraSound.release();
+        if (mCameraSound != null) {
+            mCameraSound.release();
+        }
         mBgExecutor.shutdownNow();
     }
 
@@ -806,7 +816,9 @@ public class ScreenshotController {
      */
     private void saveScreenshotAndToast(Consumer<Uri> finisher) {
         // Play the shutter sound to notify that we've taken a screenshot
-        mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
+        if (mCameraSound != null) {
+            mCameraSound.start();
+        }
 
         saveScreenshotInWorkerThread(
                 /* onComplete */ finisher,
@@ -840,7 +852,9 @@ public class ScreenshotController {
                 mScreenshotView.createScreenshotDropInAnimation(screenRect, showFlash);
 
         // Play the shutter sound to notify that we've taken a screenshot
-        mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
+        if (mCameraSound != null) {
+            mCameraSound.start();
+        }
 
         if (DEBUG_ANIM) {
             Log.d(TAG, "starting post-screenshot animation");

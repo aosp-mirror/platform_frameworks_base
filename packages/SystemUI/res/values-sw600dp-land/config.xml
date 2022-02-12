@@ -33,4 +33,7 @@
     <!-- Notifications are sized to match the width of two (of 4) qs tiles in landscape. -->
     <bool name="config_skinnyNotifsInLandscape">false</bool>
 
+    <integer name="power_menu_lite_max_columns">3</integer>
+    <integer name="power_menu_lite_max_rows">2</integer>
+
 </resources>

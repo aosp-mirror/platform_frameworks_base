@@ -315,14 +315,14 @@ public class DemoStatusIcons extends StatusIconContainer implements DemoMode, Da
     }
 
     @Override
-    public void onDarkChanged(Rect area, float darkIntensity, int tint) {
-        setColor(DarkIconDispatcher.getTint(area, mStatusIcons, tint));
+    public void onDarkChanged(ArrayList<Rect> areas, float darkIntensity, int tint) {
+        setColor(DarkIconDispatcher.getTint(areas, mStatusIcons, tint));
 
         if (mWifiView != null) {
-            mWifiView.onDarkChanged(area, darkIntensity, tint);
+            mWifiView.onDarkChanged(areas, darkIntensity, tint);
         }
         for (StatusBarMobileView view : mMobileViews) {
-            view.onDarkChanged(area, darkIntensity, tint);
+            view.onDarkChanged(areas, darkIntensity, tint);
         }
     }
 }

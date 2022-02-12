@@ -55,7 +55,7 @@ class RampAnimator<T> {
      * If this is the first time the property is being set or if the rate is 0,
      * the value jumps directly to the target.
      *
-     * @param target The target value.
+     * @param targetLinear The target value.
      * @param rate The convergence rate in units per second, or 0 to set the value immediately.
      * @return True if the target differs from the previous target.
      */

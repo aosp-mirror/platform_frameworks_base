@@ -371,13 +371,6 @@ public class MediaControlPanel {
         // Output switcher chip
         ViewGroup seamlessView = mMediaViewHolder.getSeamless();
         seamlessView.setVisibility(View.VISIBLE);
-        seamlessView.setOnClickListener(
-                v -> {
-                    if (!mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
-                        mMediaOutputDialogFactory.create(data.getPackageName(), true,
-                                mMediaViewHolder.getSeamlessButton());
-                    }
-                });
         ImageView iconView = mMediaViewHolder.getSeamlessIcon();
         TextView deviceName = mMediaViewHolder.getSeamlessText();
         final MediaDeviceData device = data.getDevice();
@@ -387,8 +380,8 @@ public class MediaControlPanel {
         final float seamlessAlpha = seamlessDisabled ? DISABLED_ALPHA : 1.0f;
         mMediaViewHolder.getSeamlessButton().setAlpha(seamlessAlpha);
         seamlessView.setEnabled(!seamlessDisabled);
-        String deviceString = null;
-        if (device != null && device.getEnabled()) {
+        CharSequence deviceString = mContext.getString(R.string.media_seamless_other_device);
+        if (device != null) {
             Drawable icon = device.getIcon();
             if (icon instanceof AdaptiveIcon) {
                 AdaptiveIcon aIcon = (AdaptiveIcon) icon;
@@ -399,13 +392,32 @@ public class MediaControlPanel {
             }
             deviceString = device.getName();
         } else {
-            // Reset to default
-            Log.w(TAG, "Device is null or not enabled: " + device + ", not binding output chip.");
+            // Set to default icon
             iconView.setImageResource(R.drawable.ic_media_home_devices);
-            deviceString =  mContext.getString(R.string.media_seamless_other_device);
         }
         deviceName.setText(deviceString);
         seamlessView.setContentDescription(deviceString);
+        seamlessView.setOnClickListener(
+                v -> {
+                    if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                        return;
+                    }
+                    if (device.getIntent() != null) {
+                        if (device.getIntent().isActivity()) {
+                            mActivityStarter.startActivity(
+                                    device.getIntent().getIntent(), true);
+                        } else {
+                            try {
+                                device.getIntent().send();
+                            } catch (PendingIntent.CanceledException e) {
+                                Log.e(TAG, "Device pending intent was canceled");
+                            }
+                        }
+                    } else {
+                        mMediaOutputDialogFactory.create(data.getPackageName(), true,
+                                mMediaViewHolder.getSeamlessButton());
+                    }
+            });
 
         // Dismiss
         mMediaViewHolder.getDismissText().setAlpha(isDismissible ? 1 : DISABLED_ALPHA);

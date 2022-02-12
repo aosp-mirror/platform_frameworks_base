@@ -18,6 +18,9 @@ package com.android.systemui.keyguard;
 
 import static android.view.WindowManagerPolicyConstants.OFF_BECAUSE_OF_USER;
 
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,6 +46,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardDisplayManager;
+import com.android.keyguard.KeyguardSecurityView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.SysuiTestCase;
@@ -179,6 +183,24 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
 
         // then make sure it comes back
         verify(mStatusBarKeyguardViewManager, atLeast(1)).show(null);
+    }
+
+    @Test
+    public void testBouncerPrompt_deviceLockedByAdmin() {
+        // GIVEN no trust agents enabled and biometrics aren't enrolled
+        when(mUpdateMonitor.isTrustUsuallyManaged(anyInt())).thenReturn(false);
+        when(mUpdateMonitor.isUnlockingWithBiometricsPossible(anyInt())).thenReturn(false);
+
+        // WHEN the strong auth reason is AFTER_DPM_LOCK_NOW
+        KeyguardUpdateMonitor.StrongAuthTracker strongAuthTracker =
+                mock(KeyguardUpdateMonitor.StrongAuthTracker.class);
+        when(mUpdateMonitor.getStrongAuthTracker()).thenReturn(strongAuthTracker);
+        when(strongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(
+                STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW);
+
+        // THEN the bouncer prompt reason should return PROMPT_REASON_DEVICE_ADMIN
+        assertEquals(KeyguardSecurityView.PROMPT_REASON_DEVICE_ADMIN,
+                mViewMediator.mViewMediatorCallback.getBouncerPromptReason());
     }
 
     private void createAndStartViewMediator() {

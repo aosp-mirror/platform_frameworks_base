@@ -41,10 +41,8 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.widget.RemeasuringLinearLayout;
 import com.android.systemui.R;
-import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.settings.brightness.BrightnessSliderController;
-import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -80,7 +78,6 @@ public class QSPanel extends LinearLayout implements Tunable {
     protected boolean mExpanded;
     protected boolean mListening;
 
-    private QSDetail.Callback mCallback;
     protected QSTileHost mHost;
     private final List<OnConfigurationChangedListener> mOnConfigurationChangedListeners =
             new ArrayList<>();
@@ -100,9 +97,6 @@ public class QSPanel extends LinearLayout implements Tunable {
     private int mContentMarginEnd;
     private boolean mUsingHorizontalLayout;
 
-    private Record mDetailRecord;
-
-    private BrightnessMirrorController mBrightnessMirrorController;
     private LinearLayout mHorizontalLinearLayout;
     protected LinearLayout mHorizontalContentContainer;
 
@@ -315,22 +309,10 @@ public class QSPanel extends LinearLayout implements Tunable {
         view.setVisibility(TunerService.parseIntegerSwitch(newValue, true) ? VISIBLE : GONE);
     }
 
-    /** */
-    public void openDetails(QSTile tile) {
-        // If there's no tile with that name (as defined in QSFactoryImpl or other QSFactory),
-        // QSFactory will not be able to create a tile and getTile will return null
-        if (tile != null) {
-            showDetailAdapter(true, tile.getDetailAdapter(), new int[]{getWidth() / 2, 0});
-        }
-    }
 
     @Nullable
     View getBrightnessView() {
         return mBrightnessView;
-    }
-
-    public void setCallback(QSDetail.Callback callback) {
-        mCallback = callback;
     }
 
     /**
@@ -519,25 +501,6 @@ public class QSPanel extends LinearLayout implements Tunable {
         mListening = listening;
     }
 
-    public void showDetailAdapter(boolean show, DetailAdapter adapter, int[] locationInWindow) {
-        int xInWindow = locationInWindow[0];
-        int yInWindow = locationInWindow[1];
-        ((View) getParent()).getLocationInWindow(locationInWindow);
-
-        Record r = new Record();
-        r.detailAdapter = adapter;
-        r.x = xInWindow - locationInWindow[0];
-        r.y = yInWindow - locationInWindow[1];
-
-        locationInWindow[0] = xInWindow;
-        locationInWindow[1] = yInWindow;
-
-        showDetail(show, r);
-    }
-
-    protected void showDetail(boolean show, Record r) {
-        mHandler.obtainMessage(H.SHOW_DETAIL, show ? 1 : 0, 0, r).sendToTarget();
-    }
 
     protected void drawTile(QSPanelControllerBase.TileRecord r, QSTile.State state) {
         r.tileView.onStateChanged(state);
@@ -565,30 +528,6 @@ public class QSPanel extends LinearLayout implements Tunable {
             public void onStateChanged(QSTile.State state) {
                 drawTile(tileRecord, state);
             }
-
-            @Override
-            public void onShowDetail(boolean show) {
-                // Both the collapsed and full QS panels get this callback, this check determines
-                // which one should handle showing the detail.
-                if (shouldShowDetail()) {
-                    QSPanel.this.showDetail(show, tileRecord);
-                }
-            }
-
-            @Override
-            public void onToggleStateChanged(boolean state) {
-                if (mDetailRecord == tileRecord) {
-                    fireToggleStateChanged(state);
-                }
-            }
-
-            @Override
-            public void onScanStateChanged(boolean state) {
-                tileRecord.scanState = state;
-                if (mDetailRecord == tileRecord) {
-                    fireScanStateChanged(tileRecord.scanState);
-                }
-            }
         };
 
         tileRecord.tile.addCallback(callback);
@@ -605,70 +544,8 @@ public class QSPanel extends LinearLayout implements Tunable {
         mTileLayout.removeTile(tileRecord);
     }
 
-    void closeDetail() {
-        showDetail(false, mDetailRecord);
-    }
-
     public int getGridHeight() {
         return getMeasuredHeight();
-    }
-
-    protected void handleShowDetail(Record r, boolean show) {
-        if (r instanceof QSPanelControllerBase.TileRecord) {
-            handleShowDetailTile((QSPanelControllerBase.TileRecord) r, show);
-        } else {
-            int x = 0;
-            int y = 0;
-            if (r != null) {
-                x = r.x;
-                y = r.y;
-            }
-            handleShowDetailImpl(r, show, x, y);
-        }
-    }
-
-    private void handleShowDetailTile(QSPanelControllerBase.TileRecord r, boolean show) {
-        if ((mDetailRecord != null) == show && mDetailRecord == r) return;
-
-        if (show) {
-            r.detailAdapter = r.tile.getDetailAdapter();
-            if (r.detailAdapter == null) return;
-        }
-        r.tile.setDetailListening(show);
-        int x = r.tileView.getLeft() + r.tileView.getWidth() / 2;
-        int y = r.tileView.getDetailY() + mTileLayout.getOffsetTop(r) + getTop();
-        handleShowDetailImpl(r, show, x, y);
-    }
-
-    private void handleShowDetailImpl(Record r, boolean show, int x, int y) {
-        setDetailRecord(show ? r : null);
-        fireShowingDetail(show ? r.detailAdapter : null, x, y);
-    }
-
-    protected void setDetailRecord(Record r) {
-        if (r == mDetailRecord) return;
-        mDetailRecord = r;
-        final boolean scanState = mDetailRecord instanceof QSPanelControllerBase.TileRecord
-                && ((QSPanelControllerBase.TileRecord) mDetailRecord).scanState;
-        fireScanStateChanged(scanState);
-    }
-
-    private void fireShowingDetail(DetailAdapter detail, int x, int y) {
-        if (mCallback != null) {
-            mCallback.onShowingDetail(detail, x, y);
-        }
-    }
-
-    private void fireToggleStateChanged(boolean state) {
-        if (mCallback != null) {
-            mCallback.onToggleStateChanged(state);
-        }
-    }
-
-    private void fireScanStateChanged(boolean state) {
-        if (mCallback != null) {
-            mCallback.onScanStateChanged(state);
-        }
     }
 
     QSTileLayout getTileLayout() {
@@ -774,24 +651,14 @@ public class QSPanel extends LinearLayout implements Tunable {
     }
 
     private class H extends Handler {
-        private static final int SHOW_DETAIL = 1;
-        private static final int SET_TILE_VISIBILITY = 2;
-        private static final int ANNOUNCE_FOR_ACCESSIBILITY = 3;
+        private static final int ANNOUNCE_FOR_ACCESSIBILITY = 1;
 
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what == SHOW_DETAIL) {
-                handleShowDetail((Record) msg.obj, msg.arg1 != 0);
-            } else if (msg.what == ANNOUNCE_FOR_ACCESSIBILITY) {
+            if (msg.what == ANNOUNCE_FOR_ACCESSIBILITY) {
                 announceForAccessibility((CharSequence) msg.obj);
             }
         }
-    }
-
-    protected static class Record {
-        DetailAdapter detailAdapter;
-        int x;
-        int y;
     }
 
     public interface QSTileLayout {

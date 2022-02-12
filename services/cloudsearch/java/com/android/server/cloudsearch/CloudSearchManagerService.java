@@ -58,11 +58,14 @@ public class CloudSearchManagerService extends
 
     private final ActivityTaskManagerInternal mActivityTaskManagerInternal;
 
+    private final Context mContext;
+
     public CloudSearchManagerService(Context context) {
         super(context, new FrameworkResourcesServiceNameResolver(context,
                         R.string.config_defaultCloudSearchService), null,
                 PACKAGE_UPDATE_POLICY_NO_REFRESH | PACKAGE_RESTART_POLICY_NO_REFRESH);
         mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
+        mContext = context;
     }
 
     @Override
@@ -106,6 +109,8 @@ public class CloudSearchManagerService extends
         @Override
         public void search(@NonNull SearchRequest searchRequest,
                 @NonNull ICloudSearchManagerCallback callBack) {
+            searchRequest.setSource(
+                    mContext.getPackageManager().getNameForUid(Binder.getCallingUid()));
             runForUserLocked("search", searchRequest.getRequestId(), (service) ->
                     service.onSearchLocked(searchRequest, callBack));
         }
