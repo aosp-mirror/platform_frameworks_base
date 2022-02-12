@@ -6636,6 +6636,7 @@ package android.app {
     method public android.app.PictureInPictureParams.Builder setActions(java.util.List<android.app.RemoteAction>);
     method public android.app.PictureInPictureParams.Builder setAspectRatio(android.util.Rational);
     method @NonNull public android.app.PictureInPictureParams.Builder setAutoEnterEnabled(boolean);
+    method @NonNull public android.app.PictureInPictureParams.Builder setExpandedAspectRatio(@Nullable android.util.Rational);
     method @NonNull public android.app.PictureInPictureParams.Builder setSeamlessResizeEnabled(boolean);
     method public android.app.PictureInPictureParams.Builder setSourceRectHint(android.graphics.Rect);
   }
@@ -11867,6 +11868,7 @@ package android.content.pm {
     field public static final String FEATURE_DEVICE_ADMIN = "android.software.device_admin";
     field public static final String FEATURE_EMBEDDED = "android.hardware.type.embedded";
     field public static final String FEATURE_ETHERNET = "android.hardware.ethernet";
+    field public static final String FEATURE_EXPANDED_PICTURE_IN_PICTURE = "android.software.expanded_picture_in_picture";
     field public static final String FEATURE_FACE = "android.hardware.biometrics.face";
     field public static final String FEATURE_FAKETOUCH = "android.hardware.faketouch";
     field public static final String FEATURE_FAKETOUCH_MULTITOUCH_DISTINCT = "android.hardware.faketouch.multitouch.distinct";
