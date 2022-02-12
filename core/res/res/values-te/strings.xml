@@ -929,7 +929,7 @@
     <string name="lockscreen_glogin_instructions" msgid="4695162942525531700">"అన్‌లాక్ చేయడానికి, మీ Google ఖాతాతో సైన్ ఇన్ చేయండి."</string>
     <string name="lockscreen_glogin_username_hint" msgid="6916101478673157045">"వినియోగదారు పేరు (ఈమెయిల్‌)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="3031027901286812848">"పాస్‌వర్డ్"</string>
-    <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"సైన్ ఇన్ చేయి"</string>
+    <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"సైన్ ఇన్ చేయండి"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="4369219936865697679">"వినియోగదారు పేరు లేదా పాస్‌వర్డ్ చెల్లదు."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1683405808525090649">"మీ వినియోగదారు పేరు లేదా పాస్‌వర్డ్‌ను మర్చిపోయారా?\n"<b>"google.com/accounts/recovery"</b>"ని సందర్శించండి."</string>
     <string name="lockscreen_glogin_checking_password" msgid="2607271802803381645">"తనిఖీ చేస్తోంది..."</string>
@@ -1668,7 +1668,7 @@
     <string name="kg_login_instructions" msgid="3619844310339066827">"అన్‌లాక్ చేయడానికి, మీ Google ఖాతాతో సైన్ ఇన్ చేయండి."</string>
     <string name="kg_login_username_hint" msgid="1765453775467133251">"వినియోగదారు పేరు (ఈమెయిల్‌)"</string>
     <string name="kg_login_password_hint" msgid="3330530727273164402">"పాస్‌వర్డ్"</string>
-    <string name="kg_login_submit_button" msgid="893611277617096870">"సైన్ ఇన్ చేయి"</string>
+    <string name="kg_login_submit_button" msgid="893611277617096870">"సైన్ ఇన్ చేయండి"</string>
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"చెల్లని వినియోగదారు పేరు లేదా పాస్‌వర్డ్."</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"మీ వినియోగదారు పేరు లేదా పాస్‌వర్డ్‌ను మర్చిపోయారా?\n"<b>"google.com/accounts/recovery"</b>"ని సందర్శించండి."</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"ఖాతాను తనిఖీ చేస్తోంది…"</string>
