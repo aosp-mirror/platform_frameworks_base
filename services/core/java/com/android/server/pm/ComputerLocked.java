@@ -852,4 +852,20 @@ public final class ComputerLocked extends ComputerEngine {
             return super.getPackageOrSharedUser(appId);
         }
     }
+
+    @Nullable
+    @Override
+    public SharedUserApi getSharedUser(int sharedUserAppId) {
+        synchronized (mLock) {
+            return super.getSharedUser(sharedUserAppId);
+        }
+    }
+
+    @NonNull
+    @Override
+    public ArraySet<PackageStateInternal> getSharedUserPackages(int sharedUserAppId) {
+        synchronized (mLock) {
+            return super.getSharedUserPackages(sharedUserAppId);
+        }
+    }
 }

@@ -279,7 +279,7 @@ final class RemovePackageHelper {
                 if (!mPm.mSettings.isDisabledSystemPackageLPr(packageName)) {
                     // If we don't have a disabled system package to reinstall, the package is
                     // really gone and its permission state should be removed.
-                    final SharedUserSetting sus = deletedPs.getSharedUser();
+                    SharedUserSetting sus = mPm.mSettings.getSharedUserSettingLPr(deletedPs);
                     List<AndroidPackage> sharedUserPkgs =
                             sus != null ? sus.getPackages() : Collections.emptyList();
                     mPermissionManager.onPackageUninstalled(packageName, deletedPs.getAppId(),

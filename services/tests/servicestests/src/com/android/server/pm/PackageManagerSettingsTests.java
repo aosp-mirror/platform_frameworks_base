@@ -722,6 +722,7 @@ public class PackageManagerSettingsTests {
         Settings.updatePackageSetting(
                 testPkgSetting01,
                 null /*disabledPkg*/,
+                null /*existingSharedUserSetting*/,
                 null /*sharedUser*/,
                 UPDATED_CODE_PATH /*codePath*/,
                 null /*legacyNativeLibraryPath*/,
@@ -757,6 +758,7 @@ public class PackageManagerSettingsTests {
         Settings.updatePackageSetting(
                 testPkgSetting01,
                 null /*disabledPkg*/,
+                null /*existingSharedUserSetting*/,
                 null /*sharedUser*/,
                 UPDATED_CODE_PATH /*codePath*/,
                 null /*legacyNativeLibraryPath*/,
@@ -792,6 +794,7 @@ public class PackageManagerSettingsTests {
             Settings.updatePackageSetting(
                     testPkgSetting01,
                     null /*disabledPkg*/,
+                    null /*existingSharedUserSetting*/,
                     testUserSetting01 /*sharedUser*/,
                     UPDATED_CODE_PATH /*codePath*/,
                     null /*legacyNativeLibraryPath*/,
@@ -1148,8 +1151,6 @@ public class PackageManagerSettingsTests {
         assertThat(origPkgSetting.getRealName(), is(testPkgSetting.getRealName()));
         assertSame(origPkgSetting.getSecondaryCpuAbi(), testPkgSetting.getSecondaryCpuAbi());
         assertThat(origPkgSetting.getSecondaryCpuAbi(), is(testPkgSetting.getSecondaryCpuAbi()));
-        assertSame(origPkgSetting.getSharedUser(), testPkgSetting.getSharedUser());
-        assertThat(origPkgSetting.getSharedUser(), is(testPkgSetting.getSharedUser()));
         assertSame(origPkgSetting.getSignatures(), testPkgSetting.getSignatures());
         assertThat(origPkgSetting.getSignatures(), is(testPkgSetting.getSignatures()));
         assertThat(origPkgSetting.getLastModifiedTime(), is(testPkgSetting.getLastModifiedTime()));
