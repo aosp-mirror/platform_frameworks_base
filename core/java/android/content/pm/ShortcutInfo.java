@@ -2257,10 +2257,20 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /**
-     * Return true if the shortcut is included in specified surface.
+     * Return true if the shortcut is excluded from specified surface.
      */
-    public boolean isIncludedIn(@Surface int surface) {
-        return (mExcludedSurfaces & surface) == 0;
+    public boolean isExcludedFromSurfaces(@Surface int surface) {
+        return (mExcludedSurfaces & surface) != 0;
+    }
+
+    /**
+     * Returns a bitmask of all surfaces this shortcut is excluded from.
+     *
+     * @see ShortcutInfo.Builder#setExcludedFromSurfaces(int)
+     */
+    @Surface
+    public int getExcludedFromSurfaces() {
+        return mExcludedSurfaces;
     }
 
     /**
@@ -2522,7 +2532,7 @@ public final class ShortcutInfo implements Parcelable {
         if (isLongLived()) {
             sb.append("Liv");
         }
-        if (!isIncludedIn(SURFACE_LAUNCHER)) {
+        if (isExcludedFromSurfaces(SURFACE_LAUNCHER)) {
             sb.append("Hid-L");
         }
         sb.append("]");
