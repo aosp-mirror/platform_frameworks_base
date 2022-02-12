@@ -24377,6 +24377,12 @@ package android.media.effect {
 
 package android.media.metrics {
 
+  public final class BundleSession implements java.lang.AutoCloseable {
+    method public void close();
+    method @NonNull public android.media.metrics.LogSessionId getSessionId();
+    method public void reportBundleMetrics(@NonNull android.os.PersistableBundle);
+  }
+
   public final class EditingSession implements java.lang.AutoCloseable {
     method public void close();
     method @NonNull public android.media.metrics.LogSessionId getSessionId();
@@ -24393,6 +24399,7 @@ package android.media.metrics {
   }
 
   public final class MediaMetricsManager {
+    method @NonNull public android.media.metrics.BundleSession createBundleSession();
     method @NonNull public android.media.metrics.EditingSession createEditingSession();
     method @NonNull public android.media.metrics.PlaybackSession createPlaybackSession();
     method @NonNull public android.media.metrics.RecordingSession createRecordingSession();

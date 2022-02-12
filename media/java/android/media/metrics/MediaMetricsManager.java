@@ -19,6 +19,7 @@ package android.media.metrics;
 import android.annotation.NonNull;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 
 /**
@@ -48,6 +49,17 @@ public final class MediaMetricsManager {
     public void reportPlaybackMetrics(@NonNull String sessionId, PlaybackMetrics metrics) {
         try {
             mService.reportPlaybackMetrics(sessionId, metrics, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+    /**
+     * Reports bundle metrics.
+     * @hide
+     */
+    public void reportBundleMetrics(@NonNull String sessionId, PersistableBundle metrics) {
+        try {
+            mService.reportBundleMetrics(sessionId, metrics, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -138,6 +150,20 @@ public final class MediaMetricsManager {
         try {
             String id = mService.getEditingSessionId(mUserId);
             EditingSession session = new EditingSession(id, this);
+            return session;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Creates a generic bundle session.
+     */
+    @NonNull
+    public BundleSession createBundleSession() {
+        try {
+            String id = mService.getBundleSessionId(mUserId);
+            BundleSession session = new BundleSession(id, this);
             return session;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
