@@ -71,8 +71,6 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     private lateinit var tileLayout: TileLayout
     @Mock
     private lateinit var tileView: QSTileView
-    @Mock
-    private lateinit var quickQsBrightnessController: QuickQSBrightnessController
     @Captor
     private lateinit var captor: ArgumentCaptor<QSPanel.OnConfigurationChangedListener>
 
@@ -100,8 +98,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
                 metricsLogger,
                 uiEventLogger,
                 qsLogger,
-                dumpManager,
-                quickQsBrightnessController
+                dumpManager
         )
 
         controller.init()
@@ -133,16 +130,6 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testBrightnessRefreshedWhenConfigurationChanged() {
-        // times(2) because both controller and base controller are registering their listeners
-        verify(quickQSPanel, times(2)).addOnConfigurationChangedListener(captor.capture())
-
-        captor.allValues.forEach { it.onConfigurationChange(Configuration.EMPTY) }
-
-        verify(quickQsBrightnessController).refreshVisibility(anyBoolean())
-    }
-
-    @Test
     fun testMediaExpansionUpdatedWhenConfigurationChanged() {
         `when`(mediaFlags.useMediaSessionLayout()).thenReturn(true)
 
@@ -171,11 +158,10 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
         metricsLogger: MetricsLogger,
         uiEventLogger: UiEventLoggerFake,
         qsLogger: QSLogger,
-        dumpManager: DumpManager,
-        quickQSBrightnessController: QuickQSBrightnessController
+        dumpManager: DumpManager
     ) : QuickQSPanelController(view, qsTileHost, qsCustomizerController, usingMediaPlayer,
         mediaHost, usingCollapsedLandscapeMedia, mediaFlags, metricsLogger, uiEventLogger, qsLogger,
-        dumpManager, quickQSBrightnessController) {
+        dumpManager) {
 
         private var rotation = RotationUtils.ROTATION_NONE
 
