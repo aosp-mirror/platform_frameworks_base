@@ -145,6 +145,10 @@ public class Monitor implements CallbackController<Monitor.Callback> {
     }
 
     private void addCallbackLocked(@NotNull Callback callback) {
+        if (mCallbacks.contains(callback)) {
+            return;
+        }
+
         if (shouldLog()) Log.d(mTag, "adding callback");
         mCallbacks.add(callback);
 
