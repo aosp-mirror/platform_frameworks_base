@@ -6256,7 +6256,10 @@
                 android:protectionLevel="signature|privileged" />
 
     <!-- Allows an application to read nearby streaming policy. The policy controls
-         whether to allow the device to stream its notifications and apps to nearby devices. -->
+         whether to allow the device to stream its notifications and apps to nearby devices.
+         Applications that are not the device owner will need this permission to call
+         {@link android.app.admin.DevicePolicyManager#getNearbyNotificationStreamingPolicy} or
+         {@link android.app.admin.DevicePolicyManager#getNearbyAppStreamingPolicy}. -->
     <permission android:name="android.permission.READ_NEARBY_STREAMING_POLICY"
         android:protectionLevel="normal" />
 
