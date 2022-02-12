@@ -222,6 +222,16 @@ public final class MediaMetricsManagerService extends SystemService {
         }
 
         @Override
+        public String getTranscodingSessionId(int userId) {
+            return getSessionIdInternal(userId);
+        }
+
+        @Override
+        public String getEditingSessionId(int userId) {
+            return getSessionIdInternal(userId);
+        }
+
+        @Override
         public void reportPlaybackErrorEvent(
                 String sessionId, PlaybackErrorEvent event, int userId) {
             int level = loggingLevel();
