@@ -1141,9 +1141,10 @@ public final class AppRestrictionController {
      * @return The to-be-exempted battery usage of the given UID in the given duration; it could
      *         be considered as "exempted" due to various use cases, i.e. media playback.
      */
-    ImmutableBatteryUsage getUidBatteryExemptedUsageSince(int uid, long since, long now) {
+    ImmutableBatteryUsage getUidBatteryExemptedUsageSince(int uid, long since, long now,
+            int types) {
         return mInjector.getAppBatteryExemptionTracker()
-                .getUidBatteryExemptedUsageSince(uid, since, now);
+                .getUidBatteryExemptedUsageSince(uid, since, now, types);
     }
 
     /**
@@ -1944,6 +1945,7 @@ public final class AppRestrictionController {
         private AppBatteryExemptionTracker mAppBatteryExemptionTracker;
         private AppFGSTracker mAppFGSTracker;
         private AppMediaSessionTracker mAppMediaSessionTracker;
+        private AppPermissionTracker mAppPermissionTracker;
         private TelephonyManager mTelephonyManager;
 
         Injector(Context context) {
@@ -1960,10 +1962,12 @@ public final class AppRestrictionController {
             mAppBatteryExemptionTracker = new AppBatteryExemptionTracker(mContext, controller);
             mAppFGSTracker = new AppFGSTracker(mContext, controller);
             mAppMediaSessionTracker = new AppMediaSessionTracker(mContext, controller);
+            mAppPermissionTracker = new AppPermissionTracker(mContext, controller);
             controller.mAppStateTrackers.add(mAppBatteryTracker);
             controller.mAppStateTrackers.add(mAppBatteryExemptionTracker);
             controller.mAppStateTrackers.add(mAppFGSTracker);
             controller.mAppStateTrackers.add(mAppMediaSessionTracker);
+            controller.mAppStateTrackers.add(mAppPermissionTracker);
             controller.mAppStateTrackers.add(new AppBroadcastEventsTracker(mContext, controller));
             controller.mAppStateTrackers.add(new AppBindServiceEventsTracker(mContext, controller));
         }
@@ -2069,6 +2073,10 @@ public final class AppRestrictionController {
 
         AppBatteryExemptionTracker getAppBatteryExemptionTracker() {
             return mAppBatteryExemptionTracker;
+        }
+
+        AppPermissionTracker getAppPermissionTracker() {
+            return mAppPermissionTracker;
         }
 
         String getPackageName(int pid) {

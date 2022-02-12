@@ -541,7 +541,7 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
                     }
                     if (isActive(i)) {
                         mEvents[i].add(new BaseTimeEvent(now));
-                        notifyListenersOnEventIfNecessary(false, now,
+                        notifyListenersOnStateChangeIfNecessary(false, now,
                                 indexToForegroundServiceType(i));
                     }
                 }
@@ -567,13 +567,13 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
                     }
                     if (!isActive(i)) {
                         mEvents[i].add(new BaseTimeEvent(now));
-                        notifyListenersOnEventIfNecessary(true, now, serviceType);
+                        notifyListenersOnStateChangeIfNecessary(true, now, serviceType);
                     }
                 } else {
                     // Stop this type.
                     if (mEvents[i] != null && isActive(i)) {
                         mEvents[i].add(new BaseTimeEvent(now));
-                        notifyListenersOnEventIfNecessary(false, now, serviceType);
+                        notifyListenersOnStateChangeIfNecessary(false, now, serviceType);
                     }
                 }
                 changes &= ~serviceType;
@@ -582,20 +582,20 @@ final class AppFGSTracker extends BaseAppStateDurationsTracker<AppFGSPolicy, Pac
             mForegroundServiceTypes = serviceTypes;
         }
 
-        private void notifyListenersOnEventIfNecessary(boolean start, long now,
+        private void notifyListenersOnStateChangeIfNecessary(boolean start, long now,
                 @ForegroundServiceType int serviceType) {
-            int eventType;
+            int stateType;
             switch (serviceType) {
                 case FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK:
-                    eventType = BaseAppStateDurationsTracker.EVENT_TYPE_FGS_MEDIA_PLAYBACK;
+                    stateType = BaseAppStateDurationsTracker.STATE_TYPE_FGS_MEDIA_PLAYBACK;
                     break;
                 case FOREGROUND_SERVICE_TYPE_LOCATION:
-                    eventType = BaseAppStateDurationsTracker.EVENT_TYPE_FGS_LOCATION;
+                    stateType = BaseAppStateDurationsTracker.STATE_TYPE_FGS_LOCATION;
                     break;
                 default:
                     return;
             }
-            mTracker.notifyListenersOnEvent(mUid, mPackageName, start, now, eventType);
+            mTracker.notifyListenersOnStateChange(mUid, mPackageName, start, now, stateType);
         }
 
         void setIsLongRunning(boolean isLongRunning) {
