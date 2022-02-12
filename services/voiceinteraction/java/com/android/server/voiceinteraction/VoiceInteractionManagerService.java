@@ -263,6 +263,25 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
+        public String getVoiceInteractorPackageName(IBinder callingVoiceInteractor) {
+            VoiceInteractionManagerServiceImpl impl =
+                    VoiceInteractionManagerService.this.mServiceStub.mImpl;
+            if (impl == null) {
+                return null;
+            }
+            VoiceInteractionSessionConnection session =
+                    impl.mActiveSession;
+            if (session == null) {
+                return null;
+            }
+            IVoiceInteractor voiceInteractor = session.mInteractor;
+            if (voiceInteractor == null || voiceInteractor.asBinder() != callingVoiceInteractor) {
+                return null;
+            }
+            return session.mSessionComponentName.getPackageName();
+        }
+
+        @Override
         public HotwordDetectionServiceIdentity getHotwordDetectionServiceIdentity() {
             // IMPORTANT: This is called when performing permission checks; do not lock!
 

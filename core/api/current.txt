@@ -7048,6 +7048,7 @@ package android.app {
   public final class VoiceInteractor {
     method public android.app.VoiceInteractor.Request getActiveRequest(String);
     method public android.app.VoiceInteractor.Request[] getActiveRequests();
+    method @NonNull public String getPackageName();
     method public boolean isDestroyed();
     method public void notifyDirectActionsChanged();
     method public boolean registerOnDestroyedCallback(@NonNull java.util.concurrent.Executor, @NonNull Runnable);
