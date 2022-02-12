@@ -236,7 +236,6 @@
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"ಪ್ರಕಾಶಮಾನ"</string>
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"ಕಲರ್ ಇನ್‍ವರ್ಶನ್"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"ಬಣ್ಣದ ತಿದ್ದುಪಡಿ"</string>
-    <string name="quick_settings_more_settings" msgid="2878235926753776694">"ಹೆಚ್ಚಿನ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="quick_settings_more_user_settings" msgid="1064187451100861954">"ಬಳಕೆದಾರರ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"ಮುಗಿದಿದೆ"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"ಮುಚ್ಚಿರಿ"</string>
@@ -460,7 +459,6 @@
     <string name="zen_alarm_warning" msgid="7844303238486849503">"ನಿಮ್ಮ ಮುಂದಿನ <xliff:g id="WHEN">%1$s</xliff:g> ಅಲಾರಮ್ ಅನ್ನು ನೀವು ಆಲಿಸುವುದಿಲ್ಲ"</string>
     <string name="alarm_template" msgid="2234991538018805736">"<xliff:g id="WHEN">%1$s</xliff:g> ರಲ್ಲಿ"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"<xliff:g id="WHEN">%1$s</xliff:g> ರಂದು"</string>
-    <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"ತ್ವರಿತ ಸೆಟ್ಟಿಂಗ್‍ಗಳು, <xliff:g id="TITLE">%s</xliff:g>."</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"ಹಾಟ್‌ಸ್ಪಾಟ್"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ಕೆಲಸದ ಪ್ರೊಫೈಲ್"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ಕೆಲವರಿಗೆ ಮೋಜು ಆಗಿದೆ ಎಲ್ಲರಿಗೆ ಇಲ್ಲ"</string>
@@ -639,7 +637,6 @@
     <string name="accessibility_quick_settings_user" msgid="505821942882668619">"<xliff:g id="ID_1">%s</xliff:g> ಅವರಂತೆ ಸೈನ್ ಇನ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"ಬಳಕೆದಾರರನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"ಇಂಟರ್ನೆಟ್ ಇಲ್ಲ"</string>
-    <string name="accessibility_quick_settings_open_details" msgid="4879279912389052142">"ವಿವರಗಳನ್ನು ತೆರೆಯಿರಿ."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಕ್ರಮವನ್ನು ಎಡಿಟ್ ಮಾಡಿ."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"ಪವರ್ ಮೆನು"</string>
@@ -880,13 +877,20 @@
       <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> ಸಕ್ರಿಯ ಆ್ಯಪ್‌ಗಳು</item>
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> ಸಕ್ರಿಯ ಆ್ಯಪ್‌ಗಳು</item>
     </plurals>
+    <!-- no translation found for fgs_dot_content_description (2865071539464777240) -->
+    <skip />
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"ಸಕ್ರಿಯ ಆ್ಯಪ್‌ಗಳು"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"ನಿಲ್ಲಿಸಿ"</string>
-    <!-- no translation found for fgs_manager_app_item_stop_button_stopped_label (6950382004441263922) -->
-    <skip />
+    <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"ನಿಲ್ಲಿಸಿದೆ"</string>
     <string name="clipboard_edit_text_copy" msgid="770856373439969178">"ನಕಲಿಸಿ"</string>
     <string name="clipboard_overlay_text_copied" msgid="1872624400464891363">"ನಕಲಿಸಲಾಗಿದೆ"</string>
-    <!-- no translation found for clipboard_edit_source (9156488177277788029) -->
-    <skip />
+    <string name="clipboard_edit_source" msgid="9156488177277788029">"<xliff:g id="APPNAME">%1$s</xliff:g> ನಿಂದ"</string>
     <string name="clipboard_dismiss_description" msgid="7544573092766945657">"UI ನಕಲನ್ನು ವಜಾಗೊಳಿಸಿ"</string>
+    <string name="clipboard_edit_text_description" msgid="805254383912962103">"ನಕಲಿಸಿದ ಪಠ್ಯವನ್ನು ಎಡಿಟ್ ಮಾಡಿ"</string>
+    <string name="clipboard_edit_image_description" msgid="8904857948976041306">"ನಕಲಿಸಿದ ಚಿತ್ರವನ್ನು ಎಡಿಟ್ ಮಾಡಿ"</string>
+    <string name="clipboard_send_nearby_description" msgid="4629769637846717650">"ಸಮೀಪದಲ್ಲಿರುವ ಸಾಧನಕ್ಕೆ ಕಳುಹಿಸಿ"</string>
+    <!-- no translation found for add (81036585205287996) -->
+    <skip />
+    <!-- no translation found for manage_users (1823875311934643849) -->
+    <skip />
 </resources>
