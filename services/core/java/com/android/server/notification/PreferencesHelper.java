@@ -391,6 +391,7 @@ public class PreferencesHelper implements RankingConfig {
 
                             if (migrateToPermission) {
                                 r.importance = appImportance;
+                                r.migrateToPm = true;
                                 if (r.uid != UNKNOWN_UID) {
                                     // Don't call into permission system until we have a valid uid
                                     PackagePermission pkgPerm = new PackagePermission(
@@ -2575,7 +2576,7 @@ public class PreferencesHelper implements RankingConfig {
                         synchronized (mPackagePreferences) {
                             mPackagePreferences.put(packagePreferencesKey(r.pkg, r.uid), r);
                         }
-                        if (mPermissionHelper.isMigrationEnabled()) {
+                        if (mPermissionHelper.isMigrationEnabled() && r.migrateToPm) {
                             try {
                                 PackagePermission p = new PackagePermission(
                                         r.pkg, UserHandle.getUserId(r.uid),
@@ -2840,6 +2841,8 @@ public class PreferencesHelper implements RankingConfig {
         // note: only valid while hasSentMessage is false and hasSentInvalidMessage is true
         boolean userDemotedMsgApp = false;
         boolean hasSentValidBubble = false;
+
+        boolean migrateToPm = false;
 
         Delegate delegate = null;
         ArrayMap<String, NotificationChannel> channels = new ArrayMap<>();
