@@ -87,6 +87,7 @@ stubs_defaults {
         ":framework-graphics-srcs",
         ":framework-mediaprovider-sources",
         ":framework-nearby-sources",
+        ":framework-ondevicepersonalization-sources",
         ":framework-permission-sources",
         ":framework-permission-s-sources",
         ":framework-scheduling-sources",
