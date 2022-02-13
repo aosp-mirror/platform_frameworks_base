@@ -86,7 +86,7 @@ public final class CallQuality implements Parcelable {
     private int mNumDroppedRtpPackets;
     private long mMinPlayoutDelayMillis;
     private long mMaxPlayoutDelayMillis;
-    private int mNumRtpSidPacketsRx;
+    private int mNumRtpSidPacketsReceived;
     private int mNumRtpDuplicatePackets;
 
     /** @hide **/
@@ -110,7 +110,7 @@ public final class CallQuality implements Parcelable {
         mNumDroppedRtpPackets = in.readInt();
         mMinPlayoutDelayMillis = in.readLong();
         mMaxPlayoutDelayMillis = in.readLong();
-        mNumRtpSidPacketsRx = in.readInt();
+        mNumRtpSidPacketsReceived = in.readInt();
         mNumRtpDuplicatePackets = in.readInt();
     }
 
@@ -352,8 +352,8 @@ public final class CallQuality implements Parcelable {
      * Returns the total number of RTP SID (Silence Insertion Descriptor) packets
      * received by this device for an ongoing call
      */
-    public int getNumRtpSidPacketsRx() {
-        return mNumRtpSidPacketsRx;
+    public int getNumRtpSidPacketsReceived() {
+        return mNumRtpSidPacketsReceived;
     }
 
     /**
@@ -417,7 +417,7 @@ public final class CallQuality implements Parcelable {
                 + " numDroppedRtpPackets=" + mNumDroppedRtpPackets
                 + " minPlayoutDelayMillis=" + mMinPlayoutDelayMillis
                 + " maxPlayoutDelayMillis=" + mMaxPlayoutDelayMillis
-                + " numRtpSidPacketsRx=" + mNumRtpSidPacketsRx
+                + " numRtpSidPacketsReceived=" + mNumRtpSidPacketsReceived
                 + " numRtpDuplicatePackets=" + mNumRtpDuplicatePackets
                 + "}";
     }
@@ -444,7 +444,7 @@ public final class CallQuality implements Parcelable {
                 mNumDroppedRtpPackets,
                 mMinPlayoutDelayMillis,
                 mMaxPlayoutDelayMillis,
-                mNumRtpSidPacketsRx,
+                mNumRtpSidPacketsReceived,
                 mNumRtpDuplicatePackets);
     }
 
@@ -479,7 +479,7 @@ public final class CallQuality implements Parcelable {
                 && mNumDroppedRtpPackets == s.mNumDroppedRtpPackets
                 && mMinPlayoutDelayMillis == s.mMinPlayoutDelayMillis
                 && mMaxPlayoutDelayMillis == s.mMaxPlayoutDelayMillis
-                && mNumRtpSidPacketsRx == s.mNumRtpSidPacketsRx
+                && mNumRtpSidPacketsReceived == s.mNumRtpSidPacketsReceived
                 && mNumRtpDuplicatePackets == s.mNumRtpDuplicatePackets);
     }
 
@@ -513,7 +513,7 @@ public final class CallQuality implements Parcelable {
         dest.writeInt(mNumDroppedRtpPackets);
         dest.writeLong(mMinPlayoutDelayMillis);
         dest.writeLong(mMaxPlayoutDelayMillis);
-        dest.writeInt(mNumRtpSidPacketsRx);
+        dest.writeInt(mNumRtpSidPacketsReceived);
         dest.writeInt(mNumRtpDuplicatePackets);
     }
 
@@ -562,7 +562,7 @@ public final class CallQuality implements Parcelable {
         private int mNumDroppedRtpPackets;
         private long mMinPlayoutDelayMillis;
         private long mMaxPlayoutDelayMillis;
-        private int mNumRtpSidPacketsRx;
+        private int mNumRtpSidPacketsReceived;
         private int mNumRtpDuplicatePackets;
 
         /**
@@ -595,8 +595,11 @@ public final class CallQuality implements Parcelable {
          * @param callDuration the call duration in milliseconds
          * @return The same instance of the builder.
          */
-        public @NonNull Builder setCallDuration(int callDuration) {
-            mCallDuration = callDuration;
+        // Newer builder includes guidelines compliant units; existing method does not.
+        @NonNull
+        @SuppressWarnings("MissingGetterMatchingBuilder")
+        public Builder setCallDurationMillis(int callDurationMillis) {
+            mCallDuration = callDurationMillis;
             return this;
         }
 
@@ -675,8 +678,11 @@ public final class CallQuality implements Parcelable {
          * @param averageRoundTripTime average round trip delay in milliseconds
          * @return The same instance of the builder.
          */
-        public @NonNull Builder setAverageRoundTripTime(int averageRoundTripTime) {
-            mAverageRoundTripTime = averageRoundTripTime;
+        // Newer builder includes guidelines compliant units; existing method does not.
+        @NonNull
+        @SuppressWarnings("MissingGetterMatchingBuilder")
+        public Builder setAverageRoundTripTimeMillis(int averageRoundTripTimeMillis) {
+            mAverageRoundTripTime = averageRoundTripTimeMillis;
             return this;
         }
 
@@ -789,12 +795,12 @@ public final class CallQuality implements Parcelable {
          * Set the total number of RTP SID (Silence Insertion Descriptor)
          * packets received by this device for an ongoing call.
          *
-         * @param numRtpSidPacketsRx the total number of RTP SID packets received
+         * @param numRtpSidPacketsReceived the total number of RTP SID packets received
          * by this device for an ongoing call.
          * @return The same instance of the builder.
          */
-        public @NonNull Builder setNumRtpSidPacketsRx(int numRtpSidPacketsRx) {
-            mNumRtpSidPacketsRx = numRtpSidPacketsRx;
+        public @NonNull Builder setNumRtpSidPacketsReceived(int numRtpSidPacketsReceived) {
+            mNumRtpSidPacketsReceived = numRtpSidPacketsReceived;
             return this;
         }
 
@@ -838,7 +844,7 @@ public final class CallQuality implements Parcelable {
             callQuality.mNumDroppedRtpPackets = mNumDroppedRtpPackets;
             callQuality.mMinPlayoutDelayMillis = mMinPlayoutDelayMillis;
             callQuality.mMaxPlayoutDelayMillis = mMaxPlayoutDelayMillis;
-            callQuality.mNumRtpSidPacketsRx = mNumRtpSidPacketsRx;
+            callQuality.mNumRtpSidPacketsReceived = mNumRtpSidPacketsReceived;
             callQuality.mNumRtpDuplicatePackets = mNumRtpDuplicatePackets;
 
             return callQuality;
