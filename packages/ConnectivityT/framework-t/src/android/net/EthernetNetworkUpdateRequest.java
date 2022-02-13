@@ -17,12 +17,14 @@
 package android.net;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.Objects;
 
 /** @hide */
+@SystemApi
 public final class EthernetNetworkUpdateRequest implements Parcelable {
     @NonNull
     private final StaticIpConfiguration mIpConfig;
@@ -39,7 +41,6 @@ public final class EthernetNetworkUpdateRequest implements Parcelable {
         return new NetworkCapabilities(mNetworkCapabilities);
     }
 
-    /** @hide */
     public EthernetNetworkUpdateRequest(@NonNull final StaticIpConfiguration ipConfig,
             @NonNull final NetworkCapabilities networkCapabilities) {
         Objects.requireNonNull(ipConfig);

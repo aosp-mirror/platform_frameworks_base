@@ -1008,14 +1008,8 @@ public class IpSecService extends IIpSecService.Stub {
      *
      * @param context Binder context for this service
      */
-    private IpSecService(Context context) {
+    public IpSecService(Context context) {
         this(context, new Dependencies());
-    }
-
-    static IpSecService create(Context context)
-            throws InterruptedException {
-        final IpSecService service = new IpSecService(context);
-        return service;
     }
 
     @NonNull
@@ -1051,26 +1045,6 @@ public class IpSecService extends IIpSecService.Stub {
             mNetd = mDeps.getNetdInstance(mContext);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** Called by system server when system is ready. */
-    public void systemReady() {
-        if (isNetdAlive()) {
-            Log.d(TAG, "IpSecService is ready");
-        } else {
-            Log.wtf(TAG, "IpSecService not ready: failed to connect to NetD Native Service!");
-        }
-    }
-
-    synchronized boolean isNetdAlive() {
-        try {
-            if (mNetd == null) {
-                return false;
-            }
-            return mNetd.isAlive();
-        } catch (RemoteException re) {
-            return false;
         }
     }
 
@@ -1896,7 +1870,6 @@ public class IpSecService extends IIpSecService.Stub {
         mContext.enforceCallingOrSelfPermission(DUMP, TAG);
 
         pw.println("IpSecService dump:");
-        pw.println("NetdNativeService Connection: " + (isNetdAlive() ? "alive" : "dead"));
         pw.println();
 
         pw.println("mUserResourceTracker:");

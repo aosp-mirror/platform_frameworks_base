@@ -1573,14 +1573,6 @@ package android.media.tv.tuner {
 
 package android.net {
 
-  public class EthernetManager {
-    method public void setIncludeTestInterfaces(boolean);
-  }
-
-  public final class IpSecManager {
-    field public static final int INVALID_SECURITY_PARAMETER_INDEX = 0; // 0x0
-  }
-
   public class NetworkPolicyManager {
     method public boolean getRestrictBackground();
     method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public boolean isUidNetworkingBlocked(int, boolean);
@@ -2196,8 +2188,8 @@ package android.security {
   }
 
   public class KeyStoreException extends java.lang.Exception {
-    ctor public KeyStoreException(int, String);
     method public int getErrorCode();
+    method public static boolean hasFailureInfoForError(int);
   }
 
 }
@@ -2500,7 +2492,6 @@ package android.telephony {
     method @NonNull public java.util.List<android.telephony.data.ApnSetting> getDevicePolicyOverrideApns(@NonNull android.content.Context);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getLine1AlphaTag();
     method public android.util.Pair<java.lang.Integer,java.lang.Integer> getRadioHalVersion();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getSupportedRadioAccessFamily();
     method public boolean modifyDevicePolicyOverrideApn(@NonNull android.content.Context, int, @NonNull android.telephony.data.ApnSetting);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void refreshUiccProfile();
     method @Deprecated public void setCarrierTestOverride(String, String, String, String, String, String, String);

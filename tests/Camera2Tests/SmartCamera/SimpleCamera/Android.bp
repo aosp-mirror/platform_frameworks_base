@@ -1,4 +1,4 @@
-// Copyright (C) 2015 The Android Open Source Project
+// Copyright (C) 2013 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,27 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// build framework base core benchmarks
-// ============================================================
-
 package {
     // See: http://go/android-license-faq
-    // A large-scale-change added 'default_applicable_licenses' to import
-    // all of the 'license_kinds' from "frameworks_base_license"
-    // to get the below license kinds:
-    //   SPDX-license-identifier-Apache-2.0
-    default_applicable_licenses: ["frameworks_base_license"],
+    default_applicable_licenses: [
+        "frameworks_base_license",
+    ],
 }
 
-java_library {
-    name: "networkStatsFactory-benchmarks",
-    installable: true,
-
-    srcs: ["src/**/*.java"],
-
-    libs: [
-        "caliper-api-target",
-        "services.core",
+android_test {
+    name: "SmartCamera",
+    optimize: {
+        enabled: false,
+    },
+    // comment it out for now since we need use some hidden APIs
+    sdk_version: "current",
+    static_libs: ["android-ex-camera2"],
+    srcs: [
+        "src/**/*.java",
     ],
-
+    jni_libs: ["libsmartcamera_jni"],
 }

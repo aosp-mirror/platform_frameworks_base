@@ -164,6 +164,18 @@ filegroup {
         "com/android/internal/util/IndentingPrintWriter.java",
         "com/android/internal/util/MessageUtils.java",
         "com/android/internal/util/WakeupMessage.java",
+        // TODO: delete as soon as NetworkStatsFactory stops using
+        "com/android/internal/util/ProcFileReader.java",
+    ],
+}
+
+// keep these files in sync with the packages/modules/Connectivity jarjar-rules.txt for
+// the connectivity module.
+filegroup {
+    name: "framework-connectivity-api-shared-srcs",
+    srcs: [
+        "android/util/IndentingPrintWriter.java",
+        "com/android/internal/util/FileRotator.java",
     ],
 }
 
