@@ -158,7 +158,6 @@ filegroup {
     name: "framework-connectivity-tiramisu-sources",
     srcs: [
         ":framework-connectivity-ethernet-sources",
-        ":framework-connectivity-ipsec-sources",
         ":framework-connectivity-netstats-sources",
     ],
     visibility: ["//frameworks/base"],
@@ -167,6 +166,7 @@ filegroup {
 filegroup {
     name: "framework-connectivity-tiramisu-updatable-sources",
     srcs: [
+        ":framework-connectivity-ipsec-sources",
         ":framework-connectivity-nsd-sources",
         ":framework-connectivity-tiramisu-internal-sources",
     ],

@@ -144,23 +144,26 @@ public final class VpnProfile implements Cloneable, Parcelable {
     public final boolean isRestrictedToTestNetworks;             // 24
 
     public final boolean excludeLocalRoutes;                     // 25
+    public final boolean requiresInternetValidation;             // 26
 
     // Helper fields.
     @UnsupportedAppUsage
     public transient boolean saveLogin = false;
 
     public VpnProfile(String key) {
-        this(key, false, false);
+        this(key, false, false, false);
     }
 
     public VpnProfile(String key, boolean isRestrictedToTestNetworks) {
-        this(key, isRestrictedToTestNetworks, false);
+        this(key, isRestrictedToTestNetworks, false, false);
     }
 
-    public VpnProfile(String key, boolean isRestrictedToTestNetworks, boolean excludeLocalRoutes) {
+    public VpnProfile(String key, boolean isRestrictedToTestNetworks, boolean excludeLocalRoutes,
+            boolean requiresInternetValidation) {
         this.key = key;
         this.isRestrictedToTestNetworks = isRestrictedToTestNetworks;
         this.excludeLocalRoutes = excludeLocalRoutes;
+        this.requiresInternetValidation = requiresInternetValidation;
     }
 
     @UnsupportedAppUsage
@@ -191,6 +194,7 @@ public final class VpnProfile implements Cloneable, Parcelable {
         areAuthParamsInline = in.readBoolean();
         isRestrictedToTestNetworks = in.readBoolean();
         excludeLocalRoutes = in.readBoolean();
+        requiresInternetValidation = in.readBoolean();
     }
 
     /**
@@ -239,6 +243,7 @@ public final class VpnProfile implements Cloneable, Parcelable {
         out.writeBoolean(areAuthParamsInline);
         out.writeBoolean(isRestrictedToTestNetworks);
         out.writeBoolean(excludeLocalRoutes);
+        out.writeBoolean(requiresInternetValidation);
     }
 
     /**
@@ -258,9 +263,11 @@ public final class VpnProfile implements Cloneable, Parcelable {
             // 14-19: Standard profile, with option for serverCert, proxy
             // 24: Standard profile with serverCert, proxy and platform-VPN parameters
             // 25: Standard profile with platform-VPN parameters and isRestrictedToTestNetworks
-            // 26: Standard profile with platform-VPN parameters and excludeLocalRoutes
-            if ((values.length < 14 || values.length > 19)
-                    && values.length != 24 && values.length != 25 && values.length != 26) {
+            // 26:                                            ...and excludeLocalRoutes
+            //     (26 can only be found on dogfood devices)
+            // 27:                                            ...and requiresInternetValidation
+            if ((values.length < 14 || (values.length > 19 && values.length < 24)
+                    || values.length > 27)) {
                 return null;
             }
 
@@ -278,8 +285,15 @@ public final class VpnProfile implements Cloneable, Parcelable {
                 excludeLocalRoutes = false;
             }
 
+            final boolean requiresInternetValidation;
+            if (values.length >= 27) {
+                requiresInternetValidation = Boolean.parseBoolean(values[26]);
+            } else {
+                requiresInternetValidation = false;
+            }
+
             VpnProfile profile = new VpnProfile(key, isRestrictedToTestNetworks,
-                    excludeLocalRoutes);
+                    excludeLocalRoutes, requiresInternetValidation);
             profile.name = values[0];
             profile.type = Integer.parseInt(values[1]);
             if (profile.type < 0 || profile.type > TYPE_MAX) {
@@ -390,6 +404,7 @@ public final class VpnProfile implements Cloneable, Parcelable {
         builder.append(VALUE_DELIMITER).append(isRestrictedToTestNetworks);
 
         builder.append(VALUE_DELIMITER).append(excludeLocalRoutes);
+        builder.append(VALUE_DELIMITER).append(requiresInternetValidation);
 
         return builder.toString().getBytes(StandardCharsets.UTF_8);
     }
@@ -471,7 +486,7 @@ public final class VpnProfile implements Cloneable, Parcelable {
             key, type, server, username, password, dnsServers, searchDomains, routes, mppe,
             l2tpSecret, ipsecIdentifier, ipsecSecret, ipsecUserCert, ipsecCaCert, ipsecServerCert,
             proxy, mAllowedAlgorithms, isBypassable, isMetered, maxMtu, areAuthParamsInline,
-            isRestrictedToTestNetworks, excludeLocalRoutes);
+            isRestrictedToTestNetworks, excludeLocalRoutes, requiresInternetValidation);
     }
 
     /** Checks VPN profiles for interior equality. */
@@ -505,11 +520,12 @@ public final class VpnProfile implements Cloneable, Parcelable {
                 && maxMtu == other.maxMtu
                 && areAuthParamsInline == other.areAuthParamsInline
                 && isRestrictedToTestNetworks == other.isRestrictedToTestNetworks
-                && excludeLocalRoutes == other.excludeLocalRoutes;
+                && excludeLocalRoutes == other.excludeLocalRoutes
+                && requiresInternetValidation == other.requiresInternetValidation;
     }
 
     @NonNull
-    public static final Creator<VpnProfile> CREATOR = new Creator<VpnProfile>() {
+    public static final Creator<VpnProfile> CREATOR = new Creator<>() {
         @Override
         public VpnProfile createFromParcel(Parcel in) {
             return new VpnProfile(in);

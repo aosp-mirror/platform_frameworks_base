@@ -12003,59 +12003,57 @@ public class BatteryStatsImpl extends BatteryStats {
             long totalRxPackets = 0;
             long totalTxPackets = 0;
             if (delta != null) {
-                NetworkStats.Entry entry = new NetworkStats.Entry();
-                final int size = delta.size();
-                for (int i = 0; i < size; i++) {
-                    entry = delta.getValues(i, entry);
-                    if (entry.rxPackets == 0 && entry.txPackets == 0) {
+                for (NetworkStats.Entry entry : delta) {
+                    if (entry.getRxPackets() == 0 && entry.getTxPackets() == 0) {
                         continue;
                     }
 
                     if (DEBUG_ENERGY) {
-                        Slog.d(TAG, "Mobile uid " + entry.uid + ": delta rx=" + entry.rxBytes
-                                + " tx=" + entry.txBytes + " rxPackets=" + entry.rxPackets
-                                + " txPackets=" + entry.txPackets);
+                        Slog.d(TAG, "Mobile uid " + entry.getUid() + ": delta rx="
+                                + entry.getRxBytes() + " tx=" + entry.getTxBytes()
+                                + " rxPackets=" + entry.getRxPackets()
+                                + " txPackets=" + entry.getTxPackets());
                     }
 
-                    totalRxPackets += entry.rxPackets;
-                    totalTxPackets += entry.txPackets;
+                    totalRxPackets += entry.getRxPackets();
+                    totalTxPackets += entry.getTxPackets();
 
-                    final Uid u = getUidStatsLocked(mapUid(entry.uid), elapsedRealtimeMs, uptimeMs);
-                    u.noteNetworkActivityLocked(NETWORK_MOBILE_RX_DATA, entry.rxBytes,
-                            entry.rxPackets);
-                    u.noteNetworkActivityLocked(NETWORK_MOBILE_TX_DATA, entry.txBytes,
-                            entry.txPackets);
-                    if (entry.set == NetworkStats.SET_DEFAULT) { // Background transfers
+                    final Uid u = getUidStatsLocked(
+                            mapUid(entry.getUid()), elapsedRealtimeMs, uptimeMs);
+                    u.noteNetworkActivityLocked(NETWORK_MOBILE_RX_DATA, entry.getRxBytes(),
+                            entry.getRxPackets());
+                    u.noteNetworkActivityLocked(NETWORK_MOBILE_TX_DATA, entry.getTxBytes(),
+                            entry.getTxPackets());
+                    if (entry.getSet() == NetworkStats.SET_DEFAULT) { // Background transfers
                         u.noteNetworkActivityLocked(NETWORK_MOBILE_BG_RX_DATA,
-                                entry.rxBytes, entry.rxPackets);
+                                entry.getRxBytes(), entry.getRxPackets());
                         u.noteNetworkActivityLocked(NETWORK_MOBILE_BG_TX_DATA,
-                                entry.txBytes, entry.txPackets);
+                                entry.getTxBytes(), entry.getTxPackets());
                     }
 
                     mNetworkByteActivityCounters[NETWORK_MOBILE_RX_DATA].addCountLocked(
-                            entry.rxBytes);
+                            entry.getRxBytes());
                     mNetworkByteActivityCounters[NETWORK_MOBILE_TX_DATA].addCountLocked(
-                            entry.txBytes);
+                            entry.getTxBytes());
                     mNetworkPacketActivityCounters[NETWORK_MOBILE_RX_DATA].addCountLocked(
-                            entry.rxPackets);
+                            entry.getRxPackets());
                     mNetworkPacketActivityCounters[NETWORK_MOBILE_TX_DATA].addCountLocked(
-                            entry.txPackets);
+                            entry.getTxPackets());
                 }
 
                 // Now distribute proportional blame to the apps that did networking.
                 long totalPackets = totalRxPackets + totalTxPackets;
                 if (totalPackets > 0) {
-                    for (int i = 0; i < size; i++) {
-                        entry = delta.getValues(i, entry);
-                        if (entry.rxPackets == 0 && entry.txPackets == 0) {
+                    for (NetworkStats.Entry entry : delta) {
+                        if (entry.getRxPackets() == 0 && entry.getTxPackets() == 0) {
                             continue;
                         }
 
-                        final Uid u = getUidStatsLocked(mapUid(entry.uid),
+                        final Uid u = getUidStatsLocked(mapUid(entry.getUid()),
                                 elapsedRealtimeMs, uptimeMs);
 
                         // Distribute total radio active time in to this app.
-                        final long appPackets = entry.rxPackets + entry.txPackets;
+                        final long appPackets = entry.getRxPackets() + entry.getTxPackets();
                         final long appRadioTimeUs =
                                 (totalAppRadioTimeUs * appPackets) / totalPackets;
                         u.noteMobileRadioActiveTimeLocked(appRadioTimeUs);
@@ -12076,16 +12074,16 @@ public class BatteryStatsImpl extends BatteryStats {
                         if (deltaInfo != null) {
                             ControllerActivityCounterImpl activityCounter =
                                     u.getOrCreateModemControllerActivityLocked();
-                            if (totalRxPackets > 0 && entry.rxPackets > 0) {
-                                final long rxMs = (entry.rxPackets
+                            if (totalRxPackets > 0 && entry.getRxPackets() > 0) {
+                                final long rxMs = (entry.getRxPackets()
                                     * deltaInfo.getReceiveTimeMillis()) / totalRxPackets;
                                 activityCounter.getRxTimeCounter().addCountLocked(rxMs);
                             }
 
-                            if (totalTxPackets > 0 && entry.txPackets > 0) {
+                            if (totalTxPackets > 0 && entry.getTxPackets() > 0) {
                                 for (int lvl = 0; lvl < ModemActivityInfo.getNumTxPowerLevels();
                                         lvl++) {
-                                    long txMs = entry.txPackets
+                                    long txMs = entry.getTxPackets()
                                             * deltaInfo.getTransmitDurationMillisAtPowerLevel(lvl);
                                     txMs /= totalTxPackets;
                                     activityCounter.getTxTimeCounters()[lvl].addCountLocked(txMs);

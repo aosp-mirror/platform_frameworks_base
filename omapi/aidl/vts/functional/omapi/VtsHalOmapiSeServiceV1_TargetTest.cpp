@@ -32,6 +32,7 @@
 #include <hidl/GtestPrinter.h>
 #include <hidl/ServiceManagement.h>
 #include <utils/String16.h>
+#include "utility/ValidateXml.h"
 
 using namespace std;
 using namespace ::testing;
@@ -176,6 +177,25 @@ class OMAPISEServiceHalTest : public TestWithParam<std::string> {
         return (deviceSupportsFeature(FEATURE_SE_OMAPI_ESE.c_str()));
     }
 
+    std::optional<std::string> getUuidMappingFile() {
+        char value[PROPERTY_VALUE_MAX] = {0};
+        int len = property_get("ro.boot.product.hardware.sku", value, "config");
+        std::string uuidMappingConfigFile = UUID_MAPPING_CONFIG_PREFIX
+                + std::string(value, len)
+                + UUID_MAPPING_CONFIG_EXT;
+        std::string uuidMapConfigPath;
+        // Search in predefined folders
+        for (auto path : UUID_MAPPING_CONFIG_PATHS) {
+            uuidMapConfigPath = path + uuidMappingConfigFile;
+            auto confFile = fopen(uuidMapConfigPath.c_str(), "r");
+            if (confFile) {
+                fclose(confFile);
+                return uuidMapConfigPath;
+            }
+        }
+        return std::optional<std::string>();
+    }
+
     void SetUp() override {
         LOG(INFO) << "get OMAPI service with name:" << GetParam();
         ::ndk::SpAIBinder ks2Binder(AServiceManager_getService(GetParam().c_str()));
@@ -300,6 +320,10 @@ class OMAPISEServiceHalTest : public TestWithParam<std::string> {
 
     std::map<std::string, std::shared_ptr<aidl::android::se::omapi::ISecureElementReader>>
         mVSReaders = {};
+
+    std::string UUID_MAPPING_CONFIG_PREFIX = "hal_uuid_map_";
+    std::string UUID_MAPPING_CONFIG_EXT = ".xml";
+    std::string UUID_MAPPING_CONFIG_PATHS[3] = {"/odm/etc/", "/vendor/etc/", "/etc/"};
 };
 
 /** Tests getReaders API */
@@ -598,6 +622,14 @@ TEST_P(OMAPISEServiceHalTest, TestP2Value) {
             ASSERT_EQ((response[response.size() - 3] & 0xFF), (0x00));
         }
     }
+}
+
+TEST_P(OMAPISEServiceHalTest, TestUuidMappingConfig) {
+    constexpr const char* xsd = "/data/local/tmp/omapi_uuid_map_config.xsd";
+    auto uuidMappingFile = getUuidMappingFile();
+    ASSERT_TRUE(uuidMappingFile.has_value()) << "Unable to determine UUID mapping config file path";
+    LOG(INFO) << "UUID Mapping config file: " << uuidMappingFile.value();
+    EXPECT_VALID_XML(uuidMappingFile->c_str(), xsd);
 }
 
 INSTANTIATE_TEST_SUITE_P(PerInstance, OMAPISEServiceHalTest,

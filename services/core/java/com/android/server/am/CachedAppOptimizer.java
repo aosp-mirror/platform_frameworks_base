@@ -191,7 +191,9 @@ public final class CachedAppOptimizer {
                             } else if (KEY_COMPACT_THROTTLE_1.equals(name)
                                     || KEY_COMPACT_THROTTLE_2.equals(name)
                                     || KEY_COMPACT_THROTTLE_3.equals(name)
-                                    || KEY_COMPACT_THROTTLE_4.equals(name)) {
+                                    || KEY_COMPACT_THROTTLE_4.equals(name)
+                                    || KEY_COMPACT_THROTTLE_5.equals(name)
+                                    || KEY_COMPACT_THROTTLE_6.equals(name)) {
                                 updateCompactionThrottles();
                             } else if (KEY_COMPACT_STATSD_SAMPLE_RATE.equals(name)) {
                                 updateCompactStatsdSampleRate();

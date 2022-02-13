@@ -160,6 +160,26 @@ public class ImsManager {
         return new SipDelegateManager(mContext, subscriptionId, sRcsCache, sTelephonyCache);
     }
 
+
+    /**
+     * Create an instance of {@link ProvisioningManager} for the subscription id specified.
+     * <p>
+     * Provides a ProvisioningManager instance to carrier apps to update carrier provisioning
+     * information, as well as provides a callback so that apps can listen for changes
+     * in MMTEL/RCS provisioning
+     * @param subscriptionId The ID of the subscription that this ProvisioningManager will use.
+     * @throws IllegalArgumentException if the subscription is invalid.
+     * @return a ProvisioningManager instance with the specific subscription ID.
+     */
+    @NonNull
+    public ProvisioningManager getProvisioningManager(int subscriptionId) {
+        if (!SubscriptionManager.isValidSubscriptionId(subscriptionId)) {
+            throw new IllegalArgumentException("Invalid subscription ID: " + subscriptionId);
+        }
+
+        return new ProvisioningManager(subscriptionId);
+    }
+
     private static IImsRcsController getIImsRcsControllerInterface() {
         return IImsRcsController.Stub.asInterface(
                 TelephonyFrameworkInitializer

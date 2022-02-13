@@ -407,20 +407,6 @@ public class ApkSignatureSchemeV2Verifier {
         }
     }
 
-    static byte[] generateApkVerityRootHash(String apkPath)
-            throws IOException, SignatureNotFoundException, DigestException,
-                   NoSuchAlgorithmException {
-        try (RandomAccessFile apk = new RandomAccessFile(apkPath, "r")) {
-            SignatureInfo signatureInfo = findSignature(apk);
-            VerifiedSigner vSigner = verify(apk, false);
-            if (vSigner.verityRootHash == null) {
-                return null;
-            }
-            return VerityBuilder.generateApkVerityRootHash(
-                    apk, ByteBuffer.wrap(vSigner.verityRootHash), signatureInfo);
-        }
-    }
-
     /**
      * Verified APK Signature Scheme v2 signer.
      *

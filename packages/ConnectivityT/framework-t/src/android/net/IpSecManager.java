@@ -61,7 +61,7 @@ import java.util.Objects;
  *     Internet Protocol</a>
  */
 @SystemService(Context.IPSEC_SERVICE)
-public final class IpSecManager {
+public class IpSecManager {
     private static final String TAG = "IpSecManager";
 
     /**

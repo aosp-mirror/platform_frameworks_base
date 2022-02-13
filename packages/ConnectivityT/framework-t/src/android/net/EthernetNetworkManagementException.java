@@ -17,12 +17,14 @@
 package android.net;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.Objects;
 
 /** @hide */
+@SystemApi
 public final class EthernetNetworkManagementException
         extends RuntimeException implements Parcelable {
 

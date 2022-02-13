@@ -18,7 +18,6 @@ package android.net;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -29,9 +28,7 @@ import java.util.Objects;
  * A {@link NetworkSpecifier} used to identify ethernet interfaces.
  *
  * @see EthernetManager
- * @hide
  */
-@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class EthernetNetworkSpecifier extends NetworkSpecifier implements Parcelable {
 
     /**
@@ -61,6 +58,7 @@ public final class EthernetNetworkSpecifier extends NetworkSpecifier implements 
         return mInterfaceName;
     }
 
+    /** @hide */
     @Override
     public boolean canBeSatisfiedBy(@Nullable NetworkSpecifier other) {
         return equals(other);
